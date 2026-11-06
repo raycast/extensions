@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::os::windows::process::CommandExt;
 use std::{
-    collections::{hash_map::DefaultHasher, BTreeMap, HashMap},
+    collections::{hash_map::DefaultHasher, BTreeMap, HashMap, VecDeque},
     fs,
     hash::{Hash, Hasher},
     io::Write,
@@ -275,6 +275,8 @@ struct Timer {
 struct Mix {
     master: f64,
     sounds: BTreeMap<String, Sound>,
+    #[serde(default)]
+    playback_generation: u64,
     #[serde(skip_serializing_if = "Option::is_none")]
     timer: Option<Timer>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -285,6 +287,7 @@ impl Default for Mix {
         Self {
             master: 1.0,
             sounds: BTreeMap::new(),
+            playback_generation: 0,
             timer: None,
             preset: None,
         }
@@ -480,7 +483,9 @@ impl PendingPlayback {
                 PlaybackChange::Resume
             }
             Some("load") => {
-                master = volume(action, "master")?;
+                if !action["master"].is_null() {
+                    master = volume(action, "master")?;
+                }
                 let entries = action["sounds"]
                     .as_array()
                     .filter(|s| !s.is_empty())
@@ -600,6 +605,7 @@ impl Mixer {
         Ok(json!({ "mix": self.mix, "count": count, "cancelled": false }))
     }
     fn pause(&mut self) -> usize {
+        self.mix.playback_generation += 1;
         let count = self.players.len();
         self.players.clear();
         for sound in self.mix.sounds.values_mut() {
@@ -710,18 +716,48 @@ fn reply(root: &Path, id: String, result: Result<Value, String>) -> Result<(), S
     let path = root.join("windows-responses").join(format!("{id}.json"));
     let reply = Reply { id, result, error };
     atomic_write(&path, &reply)?;
-    atomic_write(&root.join("windows-response.json"), &reply)
+    // A reader can block replacement of the legacy mirror after the per-request reply is available.
+    let _ = atomic_write(&root.join("windows-response.json"), &reply);
+    Ok(())
 }
 
-fn cancel_playback(
-    root: &Path,
-    pending: &mut Option<PendingPlayback>,
-    reason: &str,
-) -> Result<(), String> {
-    if let Some(load) = pending.take() {
-        let id = load.id.clone();
-        drop(load);
+#[derive(Default)]
+struct PlaybackQueue {
+    active: Option<PendingPlayback>,
+    waiting: VecDeque<Envelope>,
+}
+
+fn cancel_playback(root: &Path, queue: &mut PlaybackQueue, reason: &str) -> Result<(), String> {
+    if let Some(playback) = queue.active.take() {
+        let id = playback.id.clone();
+        drop(playback);
         reply(root, id, Err(reason.into()))?;
+    }
+    for envelope in queue.waiting.drain(..) {
+        reply(root, envelope.id, Err(reason.into()))?;
+    }
+    Ok(())
+}
+
+fn cancel_sound(root: &Path, queue: &mut PlaybackQueue, id: &str) -> Result<(), String> {
+    let cancelled = "Playback was cancelled by Stop";
+    if let Some(active) = queue.active.as_mut() {
+        if active.sounds.remove(id).is_some() {
+            active.opening.remove(id);
+            active.players.remove(id);
+            if active.sounds.is_empty() {
+                let request_id = active.id.clone();
+                queue.active = None;
+                reply(root, request_id, Err(cancelled.into()))?;
+            }
+        }
+    }
+    for envelope in std::mem::take(&mut queue.waiting) {
+        if envelope.action["type"] == "play" && envelope.action["id"] == id {
+            reply(root, envelope.id, Err(cancelled.into()))?;
+        } else {
+            queue.waiting.push_back(envelope);
+        }
     }
     Ok(())
 }
@@ -729,34 +765,74 @@ fn cancel_playback(
 fn handle_request(
     root: &Path,
     mixer: &mut Mixer,
-    pending: &mut Option<PendingPlayback>,
+    queue: &mut PlaybackQueue,
     envelope: Envelope,
 ) -> Result<(), String> {
-    reconcile_state(root, mixer, pending)?;
-    let kind = envelope.action["type"].as_str();
+    reconcile_state(root, mixer, queue)?;
+    if envelope.deadline <= now() {
+        return reply(
+            root,
+            envelope.id,
+            Err("Mixer request expired. Try again.".into()),
+        );
+    }
+    if matches!(
+        envelope.action["type"].as_str(),
+        Some("play" | "resume" | "load")
+    ) && envelope.action["playbackGeneration"]
+        .as_u64()
+        .is_some_and(|generation| generation != mixer.mix.playback_generation)
+    {
+        return reply(
+            root,
+            envelope.id,
+            Err("Playback was cancelled while sounds were downloading".into()),
+        );
+    }
+    match envelope.action["type"].as_str() {
+        Some("play" | "resume" | "volume" | "master") => {
+            queue.waiting.push_back(envelope);
+            return Ok(());
+        }
+        Some("stop") => {
+            let id = match text(&envelope.action, "id") {
+                Ok(id) => id,
+                Err(message) => return reply(root, envelope.id, Err(message)),
+            };
+            cancel_sound(root, queue, id)?;
+        }
+        Some("load" | "stopAll" | "pause") => {
+            cancel_playback(
+                root,
+                queue,
+                "Playback preparation was cancelled by another command",
+            )?;
+        }
+        _ => {}
+    }
+    apply_request(root, mixer, queue, envelope)
+}
+
+fn apply_request(
+    root: &Path,
+    mixer: &mut Mixer,
+    queue: &mut PlaybackQueue,
+    envelope: Envelope,
+) -> Result<(), String> {
     let result = if envelope.deadline <= now() {
         Err("Mixer request expired. Try again.".into())
-    } else if matches!(kind, Some("load" | "play" | "resume")) {
-        cancel_playback(
-            root,
-            pending,
-            "Playback preparation was replaced by another request",
-        )?;
+    } else if matches!(
+        envelope.action["type"].as_str(),
+        Some("load" | "play" | "resume")
+    ) {
         match PendingPlayback::new(&envelope, mixer) {
-            Ok(load) => {
-                *pending = Some(load);
+            Ok(playback) => {
+                queue.active = Some(playback);
                 return Ok(());
             }
             Err(message) => Err(message),
         }
     } else {
-        if !matches!(kind, Some("get" | "timer" | "cancelTimer")) {
-            cancel_playback(
-                root,
-                pending,
-                "Playback preparation was cancelled by another command",
-            )?;
-        }
         mixer.apply(&envelope.action)
     };
     atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
@@ -766,7 +842,7 @@ fn handle_request(
 fn reconcile_state(
     root: &Path,
     mixer: &mut Mixer,
-    pending: &mut Option<PendingPlayback>,
+    queue: &mut PlaybackQueue,
 ) -> Result<(), String> {
     let checked_at = now();
     let timer_expired = mixer
@@ -780,40 +856,39 @@ fn reconcile_state(
     if timer_expired {
         cancel_playback(
             root,
-            pending,
+            queue,
             "Playback preparation was cancelled by the sleep timer",
         )?;
     }
     Ok(())
 }
 
-fn tick(
-    root: &Path,
-    mixer: &mut Mixer,
-    pending: &mut Option<PendingPlayback>,
-) -> Result<(), String> {
-    reconcile_state(root, mixer, pending)?;
-    if let Some(load) = pending.as_mut() {
+fn tick(root: &Path, mixer: &mut Mixer, queue: &mut PlaybackQueue) -> Result<(), String> {
+    reconcile_state(root, mixer, queue)?;
+    if let Some(load) = queue.active.as_mut() {
         let result = match load.poll() {
             Ok(false) => return Ok(()),
             Ok(true) => {
-                reconcile_state(root, mixer, pending)?;
-                if pending.is_none() {
+                reconcile_state(root, mixer, queue)?;
+                if queue.active.is_none() {
                     return Ok(());
                 }
-                let load = pending.take().ok_or("Missing pending playback")?;
+                let load = queue.active.take().ok_or("Missing pending playback")?;
                 let id = load.id.clone();
                 (id, mixer.commit_playback(load))
             }
             Err(message) => {
-                let load = pending.take().ok_or("Missing pending playback")?;
+                let load = queue.active.take().ok_or("Missing pending playback")?;
                 let id = load.id.clone();
                 drop(load);
                 (id, Err(message))
             }
         };
         atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
-        reply(root, result.0, result.1)?;
+        return reply(root, result.0, result.1);
+    }
+    if let Some(envelope) = queue.waiting.pop_front() {
+        apply_request(root, mixer, queue, envelope)?;
     }
     Ok(())
 }
@@ -848,7 +923,7 @@ pub fn run(support: &str) -> Result<(), String> {
     fs::create_dir_all(root.join("windows-responses")).map_err(error)?;
     let request_file = root.join("windows-request.json");
     let mut last_request = String::new();
-    let mut pending = None;
+    let mut queue = PlaybackQueue::default();
     let mut active_at = Instant::now();
     loop {
         if let Ok(bytes) = fs::read(&request_file) {
@@ -861,20 +936,31 @@ pub fn run(support: &str) -> Result<(), String> {
                             .join(format!("{}.accepted", envelope.id)),
                         &true,
                     )?;
-                    handle_request(&root, &mut mixer, &mut pending, envelope)?;
+                    handle_request(&root, &mut mixer, &mut queue, envelope)?;
                     active_at = Instant::now();
                 }
             }
         }
-        tick(&root, &mut mixer, &mut pending)?;
-        if !mixer.players.is_empty() || mixer.mix.timer.is_some() || pending.is_some() {
+        tick(&root, &mut mixer, &mut queue)?;
+        if !mixer.players.is_empty()
+            || mixer.mix.timer.is_some()
+            || queue.active.is_some()
+            || !queue.waiting.is_empty()
+        {
             active_at = Instant::now();
         }
         if active_at.elapsed() > Duration::from_secs(30) {
             return Ok(());
         }
         unsafe {
-            WaitForSingleObject(event.0, if pending.is_some() { 20 } else { 100 });
+            WaitForSingleObject(
+                event.0,
+                if queue.active.is_some() || !queue.waiting.is_empty() {
+                    20
+                } else {
+                    100
+                },
+            );
         }
     }
 }

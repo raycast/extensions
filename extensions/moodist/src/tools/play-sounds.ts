@@ -1,4 +1,4 @@
-import { findSound, play, stopAll } from "../player";
+import { findSound, getMix, play, stopAll } from "../player";
 
 type Input = {
   /** Comma-separated sound ids to play, e.g. "light-rain, campfire". Use list-sounds to discover ids. */
@@ -15,6 +15,7 @@ export default async function tool(input: Input) {
   const unknown = ids.filter((id) => !findSound(id));
   if (unknown.length) throw new Error(`Unknown sound ids: ${unknown.join(", ")}. Call list-sounds for valid ids.`);
   if (input.replace) await stopAll();
-  for (const id of ids) await play(id, input.volume);
+  const generation = (await getMix()).playbackGeneration ?? 0;
+  for (const id of ids) await play(id, input.volume, generation);
   return { playing: ids.map((id) => findSound(id)?.label ?? id) };
 }

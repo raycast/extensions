@@ -5,7 +5,13 @@ import path from "node:path";
 import { allSounds, BASE_URL, Sound } from "./sounds";
 export type MixSound = { volume: number; pid?: number };
 export type SleepTimer = { endsAt: number; minutes: number; pid?: number };
-export type Mix = { master: number; sounds: Record<string, MixSound>; timer?: SleepTimer; preset?: string };
+export type Mix = {
+  master: number;
+  sounds: Record<string, MixSound>;
+  timer?: SleepTimer;
+  preset?: string;
+  playbackGeneration?: number;
+};
 export type MixInput = { soundId: string; volume: number }[];
 
 const stateFile = path.join(environment.supportPath, "mix.json");
@@ -131,6 +137,7 @@ function parseMix(raw: unknown): Mix {
     mix.timer = { endsAt: timer.endsAt, minutes: timer.minutes, pid: asPid(timer.pid) };
   }
   if (typeof raw.preset === "string") mix.preset = raw.preset;
+  if (typeof raw.playbackGeneration === "number") mix.playbackGeneration = raw.playbackGeneration;
   return mix;
 }
 
@@ -219,6 +226,7 @@ function reconcile(mix: Mix): boolean {
   }
   if (mix.timer && mix.timer.endsAt <= Date.now()) {
     pauseSounds(mix);
+    mix.playbackGeneration = (mix.playbackGeneration ?? 0) + 1;
     delete mix.timer;
     changed = true;
   }
@@ -232,11 +240,15 @@ export function getMix(): Mix {
     return mix;
   });
 }
-function updateMix<T>(update: (mix: Mix) => T): T {
+function updateMix<T>(update: (mix: Mix) => T, playbackGeneration?: number): T {
   return withLock(() => {
     stopLegacyLoops();
     const mix = readMix();
-    reconcile(mix);
+    const reconciled = reconcile(mix);
+    if (playbackGeneration !== undefined && playbackGeneration !== (mix.playbackGeneration ?? 0)) {
+      if (reconciled) writeMix(mix);
+      throw new Error("Playback was cancelled while sounds were downloading");
+    }
     const result = update(mix);
     writeMix(mix);
     return result;
@@ -291,12 +303,12 @@ function start(mix: Mix, id: string, file: string) {
   if (!child.pid) throw new Error(`Could not start ${requireSound(id).label}`);
   entry.pid = child.pid;
 }
-export async function play(id: string, volume?: number) {
+export async function play(id: string, volume?: number, generation = getMix().playbackGeneration ?? 0) {
   const file = await ensureDownloaded(requireSound(id));
   updateMix((mix) => {
     mix.sounds[id] = { ...mix.sounds[id], volume: clampVolume(volume ?? mix.sounds[id]?.volume ?? defaultVolume()) };
     start(mix, id, file);
-  });
+  }, generation);
 }
 export function stop(id: string) {
   updateMix((mix) => {
@@ -307,7 +319,10 @@ export function stop(id: string) {
   });
 }
 export function pause(): number {
-  return updateMix(pauseSounds);
+  return updateMix((mix) => {
+    mix.playbackGeneration = (mix.playbackGeneration ?? 0) + 1;
+    return pauseSounds(mix);
+  });
 }
 export async function resume(): Promise<number> {
   const before = getMix();
@@ -321,7 +336,7 @@ export async function resume(): Promise<number> {
       started++;
     }
     return started;
-  });
+  }, before.playbackGeneration ?? 0);
 }
 
 export type ToggleResult = { action: "paused" | "resumed"; count: number } | { action: "empty" };
@@ -334,6 +349,7 @@ export async function togglePlayback(): Promise<ToggleResult> {
 }
 export function stopAll(): number {
   return updateMix((mix) => {
+    mix.playbackGeneration = (mix.playbackGeneration ?? 0) + 1;
     pauseSounds(mix);
     const count = Object.keys(mix.sounds).length;
     mix.sounds = {};
@@ -363,18 +379,19 @@ export async function setMaster(volume: number) {
     }
   });
 }
-export async function loadMix(sounds: MixInput, master: number, presetId?: string) {
+export async function loadMix(sounds: MixInput, master?: number, presetId?: string) {
   const valid = sounds.filter((s) => findSound(s.soundId));
   if (valid.length === 0) throw new Error("This mix has no playable sounds");
+  const generation = getMix().playbackGeneration ?? 0;
   const files = await downloadAll(valid.map((s) => s.soundId));
   updateMix((mix) => {
     pauseSounds(mix);
-    mix.master = clampVolume(master);
+    if (master !== undefined) mix.master = clampVolume(master);
     mix.sounds = Object.fromEntries(valid.map((s) => [s.soundId, { volume: clampVolume(s.volume) }]));
     if (presetId) mix.preset = presetId;
     else delete mix.preset;
     for (const s of valid) start(mix, s.soundId, files[s.soundId]);
-  });
+  }, generation);
 }
 
 // This separate process must use the same locking, ownership checks, and state format as the command.
@@ -414,6 +431,7 @@ setTimeout(() => withLock(() => {
     delete entry.pid;
   }
   delete mix.timer;
+  mix.playbackGeneration = (mix.playbackGeneration ?? 0) + 1;
   const tmp = file + "." + process.pid + ".tmp";
   fs.writeFileSync(tmp, JSON.stringify(mix));
   fs.renameSync(tmp, file);

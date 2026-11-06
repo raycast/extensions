@@ -22,8 +22,9 @@ export async function getMix(): Promise<Mix> {
   return windows ? (await request({ type: "get" })).mix : mac.getMix();
 }
 
-export async function play(id: string, volume?: number) {
-  if (!windows) return mac.play(id, volume);
+export async function play(id: string, volume?: number, generation?: number) {
+  if (!windows) return mac.play(id, volume, generation);
+  const playbackGeneration = generation ?? (await getMix()).playbackGeneration;
   const file = await download(id);
   await request({
     type: "play",
@@ -31,6 +32,7 @@ export async function play(id: string, volume?: number) {
     file,
     volume: volume === undefined ? undefined : mac.clampVolume(volume),
     defaultVolume: mac.defaultVolume(),
+    playbackGeneration,
   });
 }
 
@@ -47,7 +49,7 @@ export async function resume(): Promise<number> {
   if (!windows) return mac.resume();
   const mix = await getMix();
   await Promise.all(Object.keys(mix.sounds).map(download));
-  return (await request({ type: "resume" })).count;
+  return (await request({ type: "resume", playbackGeneration: mix.playbackGeneration })).count;
 }
 
 export async function togglePlayback(): Promise<ToggleResult> {
@@ -71,10 +73,12 @@ export async function setMaster(volume: number) {
   await request({ type: "master", volume: mac.clampVolume(volume) });
 }
 
-export async function loadMix(sounds: MixInput, master: number, presetId?: string) {
+export async function loadMix(sounds: MixInput, master?: number, presetId?: string) {
   if (!windows) return mac.loadMix(sounds, master, presetId);
   const valid = sounds.filter((sound) => mac.findSound(sound.soundId));
   if (!valid.length) throw new Error("This mix has no playable sounds");
+  const mix = await getMix();
+  const masterVolume = master ?? (mix.playbackGeneration === undefined ? mix.master : undefined);
   const entries = await Promise.all(
     valid.map(async (sound) => ({
       id: sound.soundId,
@@ -82,7 +86,13 @@ export async function loadMix(sounds: MixInput, master: number, presetId?: strin
       volume: mac.clampVolume(sound.volume),
     })),
   );
-  await request({ type: "load", sounds: entries, master: mac.clampVolume(master), preset: presetId });
+  await request({
+    type: "load",
+    sounds: entries,
+    master: masterVolume === undefined ? undefined : mac.clampVolume(masterVolume),
+    preset: presetId,
+    playbackGeneration: mix.playbackGeneration,
+  });
 }
 
 export async function setTimer(minutes: number): Promise<SleepTimer> {

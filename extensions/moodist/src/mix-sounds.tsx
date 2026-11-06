@@ -2,8 +2,10 @@ import { Action, ActionPanel, Color, Grid, Icon, Keyboard, List, showToast, Toas
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import {
+  defaultVolume,
   getMix,
   isCached,
+  loadMix,
   pause,
   percent,
   play,
@@ -64,27 +66,26 @@ export default function Command() {
   const { data: mix, isLoading, revalidate } = usePromise(async () => getMix());
   const { push } = useNavigation();
   const [busy, setBusy] = useState<string>();
-  const busyRef = useRef(false);
+  const pendingActions = useRef(0);
   const [filter, setFilter] = useState("all");
   const [layout, setLayout] = useCachedState<"list" | "grid">("layout", "list");
   const [searchText, setSearchText] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const toggleLayout = () => setLayout((current) => (current === "grid" ? "list" : "grid"));
 
-  async function run(id: string, title: string, fn: () => unknown) {
-    if (busyRef.current) return;
-    busyRef.current = true;
+  async function run(id: string, title: string, fn: () => unknown, interrupt = false) {
+    if (pendingActions.current && !interrupt) return;
+    pendingActions.current++;
     setBusy(id);
-    const toast = await showToast({ style: Toast.Style.Animated, title });
+    const toast = showToast({ style: Toast.Style.Animated, title }).catch(() => undefined);
     try {
       await fn();
-      toast.hide();
+      (await toast)?.hide();
     } catch (e) {
-      toast.hide();
+      (await toast)?.hide();
       await showFailureToast(e, { title: "Moodist" });
     } finally {
-      busyRef.current = false;
-      setBusy(undefined);
+      if (--pendingActions.current === 0) setBusy(undefined);
       revalidate();
     }
   }
@@ -100,6 +101,15 @@ export default function Command() {
   else if (inMix) navigationTitle += ` — ${inMix} paused`;
   if (inMix && master < 1) navigationTitle += ` · Master ${percent(master)}`;
 
+  const stopAllAction = (
+    <Action
+      title="Stop All"
+      icon={Icon.StopFilled}
+      style={Action.Style.Destructive}
+      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+      onAction={() => run("*", "Stopping all", stopAll, true)}
+    />
+  );
   const mixActions = inMix > 0 && (
     <ActionPanel.Section title="Mix">
       {playing > 0 ? (
@@ -143,13 +153,7 @@ export default function Command() {
           )
         }
       />
-      <Action
-        title="Stop All"
-        icon={Icon.StopFilled}
-        style={Action.Style.Destructive}
-        shortcut={Keyboard.Shortcut.Common.RemoveAll}
-        onAction={() => run("*", "Stopping all", stopAll)}
-      />
+      {stopAllAction}
     </ActionPanel.Section>
   );
 
@@ -172,7 +176,7 @@ export default function Command() {
           <Action
             title="Stop"
             icon={Icon.Stop}
-            onAction={() => run(sound.id, `Stopping ${sound.label}`, () => stop(sound.id))}
+            onAction={() => run(sound.id, `Stopping ${sound.label}`, () => stop(sound.id), true)}
           />
         ) : (
           <Action
@@ -185,7 +189,7 @@ export default function Command() {
           <Action
             title="Remove from Mix"
             icon={Icon.Minus}
-            onAction={() => run(sound.id, `Removing ${sound.label}`, () => stop(sound.id))}
+            onAction={() => run(sound.id, `Removing ${sound.label}`, () => stop(sound.id), true)}
           />
         )}
         {entry && (
@@ -225,13 +229,13 @@ export default function Command() {
           icon={Icon.Music}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() =>
-            run(sound.id, `Playing ${sound.label}`, async () => {
-              await stopAll();
-              await play(sound.id, entry?.volume);
-            })
+            run(sound.id, `Playing ${sound.label}`, () =>
+              loadMix([{ soundId: sound.id, volume: entry?.volume ?? defaultVolume() }]),
+            )
           }
         />
         {mixActions}
+        {!inMix && busy && stopAllAction}
         <Action.OpenInBrowser title="Open Moodist Website" url="https://moodist.mvze.net" />
         <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
       </ActionPanel>
@@ -265,6 +269,7 @@ export default function Command() {
   const EmptyView = layout === "grid" ? Grid.EmptyView : List.EmptyView;
   const layoutActions = (
     <ActionPanel>
+      {busy && stopAllAction}
       <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
     </ActionPanel>
   );
