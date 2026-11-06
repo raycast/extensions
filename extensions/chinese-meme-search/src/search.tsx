@@ -119,7 +119,7 @@ function Results({ keyword }: { keyword: string }) {
         }
         description={
           !configured
-            ? "在扩展设置中填写获准使用的 Custom Source JSON，格式见扩展说明"
+            ? "需要自行配置数据源。按 ⌘K 查看接入指引或申请官方 API"
             : error ||
               (keyword.trim()
                 ? "按 Esc 返回 Raycast，换一个关键词搜索"
@@ -131,6 +131,14 @@ function Results({ keyword }: { keyword: string }) {
               title="配置表情包源"
               icon={Icon.Gear}
               onAction={openExtensionPreferences}
+            />
+            <Action.OpenInBrowser
+              title="查看数据源接入指引"
+              url="https://github.com/talkingape/raycast-extensions/blob/ext/chinese-meme-search/extensions/chinese-meme-search/README.md#获取数据源与申请"
+            />
+            <Action.OpenInBrowser
+              title="申请 SOOGIF 官方 API"
+              url="https://open.soogif.com/"
             />
             {navigation}
           </ActionPanel>
