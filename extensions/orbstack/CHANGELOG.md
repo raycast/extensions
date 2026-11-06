@@ -1,6 +1,6 @@
 # OrbStack Changelog
 
-## [Container List] - {PR_MERGE_DATE}
+## [Container List] - 2026-11-06
 
 - **Container Management**: List Docker containers grouped by compose project, start, stop, restart, view logs, inspect, and remove them.
 - **AI Integration**: Ask AI to list your Docker containers.
