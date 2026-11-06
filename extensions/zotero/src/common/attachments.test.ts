@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { resolveAttachmentPath, secondaryAttachments } from "./attachments";
+import { attachmentPath, resolveAttachmentPath, secondaryAttachments } from "./attachments";
 import type { RefData, Attachment } from "./zoteroApi";
 
 const att = (key: string, path: string): Attachment => ({ key, path, title: path, url: "" });
@@ -82,5 +82,36 @@ describe("secondaryAttachments", () => {
   it("returns no secondaries for a cache entry that predates multi-attachment support", () => {
     const legacy: RefData = { id: 7, key: "ITEM0007", library: 1, attachment: att("OLDKEY1", "storage:main.pdf") };
     expect(secondaryAttachments(legacy)).toEqual([]);
+  });
+});
+
+describe("relative linked attachment paths", () => {
+  it("resolves the primary PDF relative to the linked attachment base directory", () => {
+    const item: RefData = { attachment: att("LINK0001", "attachments:papers/文献 one.pdf") };
+    expect(resolveAttachmentPath(item, "/data/zotero.sqlite", "/linked papers")).toBe(
+      "/linked papers/papers/文献 one.pdf",
+    );
+  });
+
+  it("uses the same resolution for secondary PDFs", () => {
+    const primary = att("PRIMARY1", "storage:main.pdf");
+    const secondary = att("SECOND01", "attachments:appendix.pdf");
+    const item: RefData = { attachment: primary, attachments: [primary, secondary] };
+    expect(secondaryAttachments(item).map((a) => attachmentPath(a, "/data/zotero.sqlite", "/linked"))).toEqual([
+      "/linked/appendix.pdf",
+    ]);
+  });
+
+  it("leaves a relative attachment unresolved if no matching base directory is available", () => {
+    expect(attachmentPath(att("LINK0001", "attachments:paper.pdf"), "/data/zotero.sqlite", null)).toBeNull();
+  });
+
+  it("preserves literal percent escapes in filesystem names", () => {
+    expect(attachmentPath(att("LINK0001", "attachments:paper%20one.pdf"), "/data/zotero.sqlite", "/linked")).toBe(
+      "/linked/paper%20one.pdf",
+    );
+    expect(attachmentPath(att("LINK0001", "/linked/paper%20one.pdf"), "/data/zotero.sqlite")).toBe(
+      "/linked/paper%20one.pdf",
+    );
   });
 });
