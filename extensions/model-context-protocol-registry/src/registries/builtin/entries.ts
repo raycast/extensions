@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "social-post-flow",
+    title: "Social Post Flow",
+    description:
+      "Schedule and publish social media posts from your AI assistant to Facebook, X, LinkedIn, Instagram, Threads, Pinterest, TikTok, Bluesky, Mastodon, Telegram, Google Business Profile and VK. Create, schedule, reschedule and delete posts, and see why a post failed. 8 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Requires a Social Post Flow account.",
+    icon: "https://ps.w.org/social-post-flow/assets/icon-256x256.png",
+    homepage: "https://www.socialpostflow.com/documentation/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.socialpostflow.com/mcp"],
+    },
+    remoteUrl: "https://app.socialpostflow.com/mcp",
+  },
+  {
     name: "sofya",
     title: "Sofya",
     description:
