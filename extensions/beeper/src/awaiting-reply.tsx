@@ -11,8 +11,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise, withAccessToken } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { showFailureToast, useForm, usePromise, withAccessToken } from "@raycast/utils";
+import { useState } from "react";
 import { ageDays, readHandled, setHandled } from "./follow-ups/handled";
 import { createBeeperOAuth } from "./api";
 import { followUpClient as client, followUpSettings } from "./follow-ups/client";
@@ -27,51 +27,46 @@ async function openConversation(item: ReplyItem) {
     });
     if (!result.success) throw new Error("Beeper did not open the conversation.");
     await closeMainWindow();
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
+  } catch (error) {
+    await showFailureToast(error, {
       title: "Could Not Open Conversation",
       message: "Check that Beeper is running and the API is connected.",
     });
   }
 }
 function DraftForm({ item }: { item: ReplyItem }) {
-  const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const {
     data: recipient,
     isLoading,
     error: recipientError,
   } = usePromise(async (id: string) => client().retrieveChat(id), [item.message.chatID]);
-  async function submit(values: { text: string }) {
-    if (busy || isLoading || !recipient || recipientError) return;
-    setBusy(true);
-    try {
-      await handoffDraft(client(), item.message.chatID, values.text);
-      await closeMainWindow();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Draft Requested in Beeper",
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Check the local Beeper connection.";
-      setError(message);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Prepare Draft",
-        message,
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { handleSubmit, itemProps, setValidationError } = useForm<{ text: string }>({
+    async onSubmit(values) {
+      if (busy || isLoading || !recipient || recipientError) return;
+      setBusy(true);
+      try {
+        await handoffDraft(client(), item.message.chatID, values.text);
+        await closeMainWindow();
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Draft Requested in Beeper",
+        });
+      } catch (e) {
+        setValidationError("text", e instanceof Error ? e.message : "Check the local Beeper connection.");
+        await showFailureToast(e, { title: "Could Not Prepare Draft" });
+      } finally {
+        setBusy(false);
+      }
+    },
+  });
   return (
     <Form
       navigationTitle={`Draft to ${recipient?.title ?? item.chat.title}`}
       isLoading={busy || isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Prepare Draft in Beeper" icon={Icon.Pencil} onSubmit={submit} />
+          <Action.SubmitForm title="Prepare Draft in Beeper" icon={Icon.Pencil} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -82,13 +77,7 @@ function DraftForm({ item }: { item: ReplyItem }) {
             : `Recipient: ${recipient?.title ?? item.chat.title} · ${recipient ? networkOf(recipient) : networkOf(item.chat)}. This opens an unsent draft in Beeper. Review and send there.`
         }
       />
-      <Form.TextArea
-        id="text"
-        title="Message"
-        placeholder="Write a draft…"
-        error={error}
-        onChange={() => setError(undefined)}
-      />
+      <Form.TextArea title="Message" placeholder="Write a draft…" {...itemProps.text} />
     </Form>
   );
 }
@@ -108,12 +97,7 @@ function ConversationActions({
   return (
     <ActionPanel>
       <Action title="Open Conversation in Beeper" icon={Icon.AppWindow} onAction={() => openConversation(item)} />
-      <Action.Push
-        title="Prepare Draft"
-        icon={Icon.Pencil}
-        shortcut={Keyboard.Shortcut.Common.New}
-        target={<DraftForm item={item} />}
-      />
+      <Action.Push title="Prepare Draft" icon={Icon.Pencil} target={<DraftForm item={item} />} />
       <Action
         title={handled ? "Move Back to Awaiting Reply" : "Mark as Handled"}
         icon={handled ? Icon.ArrowCounterClockwise : Icon.CheckCircle}
@@ -145,12 +129,7 @@ function ConversationActions({
                   icon={Icon.AppWindow}
                   onAction={() => openConversation(item)}
                 />
-                <Action.Push
-                  title="Prepare Draft"
-                  icon={Icon.Pencil}
-                  shortcut={Keyboard.Shortcut.Common.New}
-                  target={<DraftForm item={item} />}
-                />
+                <Action.Push title="Prepare Draft" icon={Icon.Pencil} target={<DraftForm item={item} />} />
               </ActionPanel>
             }
           />
@@ -173,11 +152,9 @@ function Command() {
     { onError: () => undefined },
   );
   const [network, setNetwork] = useState("all");
-  const [handled, setHandledState] = useState<Record<string, string>>({});
+  const { data: handledData, mutate: mutateHandled } = usePromise(readHandled);
+  const handled = handledData ?? {};
   const [showDetail, setShowDetail] = useState(true);
-  useEffect(() => {
-    void readHandled().then(setHandledState);
-  }, []);
   const showingHandled = network === "handled";
   const allItems = data?.items ?? [];
   const items = allItems.filter((i) =>
@@ -185,7 +162,20 @@ function Command() {
   );
   async function toggleHandled(item: ReplyItem) {
     const done = handled[item.chat.id] === item.message.id;
-    setHandledState(await setHandled(item.chat.id, done ? undefined : item.message.id));
+    try {
+      await mutateHandled(setHandled(item.chat.id, done ? undefined : item.message.id), {
+        optimisticUpdate: (current = {}) => {
+          const next = { ...current };
+          if (done) delete next[item.chat.id];
+          else next[item.chat.id] = item.message.id;
+          return next;
+        },
+        shouldRevalidateAfter: false,
+      });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Update Conversation" });
+      return;
+    }
     await showToast({
       style: Toast.Style.Success,
       title: done ? "Moved back to awaiting reply" : "Marked as handled",
@@ -203,7 +193,6 @@ function Command() {
       isLoading={isLoading}
       isShowingDetail={showDetail && items.length > 0}
       searchBarPlaceholder="Filter conversations awaiting a reply…"
-      navigationTitle="Conversations Awaiting Reply"
       searchBarAccessory={
         <List.Dropdown tooltip="Network" value={network} onChange={setNetwork}>
           <List.Dropdown.Item value="all" title="All Networks" icon={Icon.Globe} />
@@ -225,7 +214,12 @@ function Command() {
           description="Check Beeper Settings → Developers and reconnect if authorization expired."
           actions={
             <ActionPanel>
-              <Action title="Try Again" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={revalidate} />
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
             </ActionPanel>
           }
         />
@@ -265,24 +259,29 @@ function Command() {
                         }
                       />
                     }
-                    accessories={[
-                      {
-                        date: {
-                          value: new Date(item.message.timestamp),
-                          color: ageColor,
-                        },
-                      },
-                      ...(item.chat.unreadCount > 0
-                        ? [
+                    // The detail pane hides accessories, so only pass them when it is off.
+                    accessories={
+                      showDetail
+                        ? undefined
+                        : [
                             {
-                              tag: {
-                                value: `${item.chat.unreadCount} unread`,
-                                color: Color.Blue,
+                              date: {
+                                value: new Date(item.message.timestamp),
+                                color: ageColor,
                               },
                             },
+                            ...(item.chat.unreadCount > 0
+                              ? [
+                                  {
+                                    tag: {
+                                      value: `${item.chat.unreadCount} unread`,
+                                      color: Color.Blue,
+                                    },
+                                  },
+                                ]
+                              : []),
                           ]
-                        : []),
-                    ]}
+                    }
                     actions={
                       <ConversationActions
                         item={item}

@@ -13,7 +13,16 @@ export async function readHandled(): Promise<Record<string, string>> {
   }
 }
 
-export async function setHandled(chatID: string, messageID: string | undefined): Promise<Record<string, string>> {
+// Writes are chained so two quick updates cannot read the same old record and drop one.
+let pending: Promise<unknown> = Promise.resolve();
+
+export function setHandled(chatID: string, messageID: string | undefined): Promise<Record<string, string>> {
+  const next = pending.catch(() => undefined).then(() => writeHandled(chatID, messageID));
+  pending = next;
+  return next;
+}
+
+async function writeHandled(chatID: string, messageID: string | undefined): Promise<Record<string, string>> {
   const handled = await readHandled();
   if (messageID) handled[chatID] = messageID;
   else delete handled[chatID];

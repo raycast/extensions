@@ -2,10 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 import { getBeeperDesktop, listChatMessages, retrieveChat, searchChats } from "../api";
 import type { Chat, ReplyClient } from "./core";
 
-export type FollowUpSettings = { lookbackDays?: string; includeMuted?: boolean };
-
 export function followUpSettings(): { days: number; includeMuted: boolean } {
-  const prefs = getPreferenceValues<FollowUpSettings>();
+  // Both Awaiting Reply commands declare the same preferences.
+  const prefs = getPreferenceValues<Preferences.AwaitingReply | Preferences.AwaitingReplyMenuBar>();
   const days = Number(prefs.lookbackDays);
   return { days: [7, 14, 30].includes(days) ? days : 14, includeMuted: prefs.includeMuted === true };
 }
