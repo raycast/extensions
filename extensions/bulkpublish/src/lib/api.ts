@@ -213,6 +213,20 @@ export class PostKeptError extends ApiError {
   }
 }
 
+/**
+ * Thrown when the request to create the post got no clear answer (lost reply, 5xx, unreadable reply).
+ * BulkPublish may have created it (scheduled, queued or as a draft), so sending again could make a copy.
+ */
+export class PostMaybeCreatedError extends ApiError {
+  constructor(cause: unknown) {
+    super(
+      cause instanceof ApiError ? cause.status : 0,
+      "BulkPublish may have created it, but no clear reply came back. Check your posts in BulkPublish before sending it again.",
+    );
+    this.name = "PostMaybeCreatedError";
+  }
+}
+
 /** A clear "no" from BulkPublish: it answered with a 4xx, so the request wasn't carried out. */
 function isRejection(e: unknown): boolean {
   return e instanceof ApiError && e.status >= 400 && e.status < 500;
@@ -221,7 +235,8 @@ function isRejection(e: unknown): boolean {
 /**
  * Upload, create and (for "now") publish.
  * - If an upload or creating the post is clearly rejected, the uploads are removed.
- * - If the reply to creating the post is lost, the uploads are kept, as the post may exist and use them.
+ * - If creating the post gets no clear answer, the uploads are kept (the post may exist and use them)
+ *   and a PostMaybeCreatedError is thrown, so the caller can warn before another create request.
  * - Once publishing has been requested, the post and its uploads are never removed: publishing
  *   may have started, and deleting it would drop its tracking record. A PostKeptError is thrown instead.
  */
@@ -235,12 +250,17 @@ export async function sendPost(r: SendRequest, onStep?: (step: string) => void):
       mediaIds.push(await uploadMedia(f));
     }
     onStep?.(r.mode === "now" ? "Publishing…" : "Saving…");
+    const body = buildPostBody(r.targets, r.content, mediaIds, r.media, r.schedule);
     creating = true;
-    postId = await createPost(buildPostBody(r.targets, r.content, mediaIds, r.media, r.schedule));
+    postId = await createPost(body);
   } catch (e) {
     // No post exists yet, or BulkPublish clearly refused to create it: the uploads aren't used by anything.
-    if (!creating || isRejection(e)) for (const id of mediaIds) await deleteMedia(id).catch(() => undefined);
-    throw e;
+    if (!creating || isRejection(e)) {
+      for (const id of mediaIds) await deleteMedia(id).catch(() => undefined);
+      throw e;
+    }
+    // The create request went out but no clear answer came back: the post may already exist.
+    throw new PostMaybeCreatedError(e);
   }
   if (r.mode === "now") {
     try {

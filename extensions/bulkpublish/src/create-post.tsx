@@ -1,8 +1,12 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Form,
   Icon,
+  launchCommand,
+  LaunchType,
   open,
   openExtensionPreferences,
   popToRoot,
@@ -12,7 +16,15 @@ import {
 import { useForm } from "@raycast/utils";
 import { basename } from "node:path";
 import { useMemo, useRef, useState } from "react";
-import { ApiError, nextQueueSlot, PostKeptError, publishPost, SendMode, sendPost } from "./lib/api";
+import {
+  ApiError,
+  nextQueueSlot,
+  PostKeptError,
+  PostMaybeCreatedError,
+  publishPost,
+  SendMode,
+  sendPost,
+} from "./lib/api";
 import {
   API_KEYS_URL,
   APP_URL,
@@ -73,6 +85,14 @@ export function CreatePostForm({
   const [sending, setSending] = useState(false);
   // Blocks a second submit while one is still running. A ref changes at once, unlike state.
   const submitting = useRef(false);
+  // Set when a create request got no clear answer, so the post may already exist in BulkPublish.
+  // While set, another create request needs the user to confirm they checked first.
+  const [mayExist, setMayExist] = useState(false);
+  const mayExistRef = useRef(false);
+  const markMayExist = (on: boolean) => {
+    mayExistRef.current = on;
+    setMayExist(on);
+  };
 
   const { handleSubmit, itemProps, values, reset } = useForm<Values>({
     initialValues: {
@@ -139,6 +159,21 @@ export function CreatePostForm({
       return;
     }
 
+    if (mayExistRef.current) {
+      const sendAnyway = await confirmAlert({
+        title: "This post may already be in BulkPublish",
+        message:
+          "The last attempt got no clear reply, so BulkPublish may have created it. Sending again could post it twice. Check your posts first.",
+        primaryAction: { title: "Send Again Anyway", style: Alert.ActionStyle.Destructive },
+        dismissAction: { title: "Check My Posts" },
+      });
+      if (!sendAnyway) {
+        await checkPosts();
+        return;
+      }
+      markMayExist(false);
+    }
+
     const toast = await showToast({ style: Toast.Style.Animated, title: "Sending to BulkPublish…" });
     setSending(true);
     try {
@@ -190,6 +225,20 @@ export function CreatePostForm({
           onAction: () => publishAgain(postId),
         };
         reset({ content: "", channelIds: v.channelIds, mode: v.mode, scheduledAt: null, files: [] });
+      } else if (e instanceof PostMaybeCreatedError) {
+        // The post may exist. Keep the input (it may not have been created), but require a check
+        // and an explicit confirmation before another create request.
+        markMayExist(true);
+        toast.title = "Post may already exist";
+        toast.primaryAction = {
+          title: "Check Your Posts",
+          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+          onAction: () => checkPosts(),
+        };
+        toast.secondaryAction = {
+          title: "Open Calendar in BulkPublish",
+          onAction: () => open(`${APP_URL}/calendar`),
+        };
       } else {
         toast.title = "Couldn't send post";
         if (e instanceof ApiError && e.status === 401) {
@@ -198,6 +247,15 @@ export function CreatePostForm({
       }
     } finally {
       setSending(false);
+    }
+  }
+
+  /** Opens Search Posts, which lists what is actually in BulkPublish (newest first). */
+  async function checkPosts() {
+    try {
+      await launchCommand({ name: "search-posts", type: LaunchType.UserInitiated });
+    } catch {
+      await open(`${APP_URL}/calendar`);
     }
   }
 
@@ -260,6 +318,12 @@ export function CreatePostForm({
         </ActionPanel>
       }
     >
+      {mayExist && (
+        <Form.Description
+          title="Check First"
+          text="Your last send got no clear reply, so this post may already be in BulkPublish. Check your posts before sending it again. Submitting will ask you to confirm."
+        />
+      )}
       {error && (
         <Form.Description
           title="Couldn't load channels"
