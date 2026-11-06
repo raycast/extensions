@@ -1,11 +1,34 @@
 import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
-import { Action, ActionPanel, Icon, Keyboard, List, open, showToast, Toast, useNavigation } from "@raycast/api";
+import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.model";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, open, showToast, Toast, useNavigation } from "@raycast/api";
 import tildify from "tildify";
+import * as Path from "path";
 import { XcodeProjectIcon } from "../../shared/xcode-project-icon";
 import { XcodeProjectTypeName } from "../../shared/xcode-project-type-name";
+import { StableTagColor } from "../../shared/stable-tag-color";
 import { XcodeService } from "../../services/xcode.service";
 import { JSX } from "react";
 import { searchRecentProjectsCommandPreferences } from "../../shared/preferences";
+
+/**
+ * Returns the accessories showing the git root directory of the Xcode Project,
+ * or its parent directory if it is not in a git repository
+ * @param project The Xcode Project
+ */
+function XcodeProjectDirectoryAccessories(project: XcodeProject): List.Item.Accessory[] {
+  // A Swift Package is named after its directory, so use the directory containing it
+  const parentDirectoryPath =
+    project.type === XcodeProjectType.swiftPackage ? Path.dirname(project.directoryPath) : project.directoryPath;
+  const directoryName = Path.basename(project.gitRootDirectoryPath ?? parentDirectoryPath);
+  const tooltip = tildify(project.filePath);
+  return [
+    { tag: { value: directoryName, color: StableTagColor(directoryName) }, tooltip: tooltip },
+    {
+      icon: { source: project.gitRootDirectoryPath ? "git-branch.svg" : Icon.Folder, tintColor: Color.SecondaryText },
+      tooltip: tooltip,
+    },
+  ];
+}
 
 /**
  * Xcode Project List Item
@@ -18,11 +41,15 @@ export function XcodeProjectListItem(props: {
 }) {
   const navigation = useNavigation();
   const terminalApp = searchRecentProjectsCommandPreferences.terminalApp;
+  const showDirectoryTag = searchRecentProjectsCommandPreferences.showDirectoryTag;
   return (
     <List.Item
       title={props.project.name}
-      subtitle={tildify(props.project.filePath)}
-      accessories={[{ text: XcodeProjectTypeName(props.project.type) }]}
+      subtitle={showDirectoryTag ? undefined : tildify(props.project.directoryPath)}
+      accessories={[
+        ...(showDirectoryTag ? XcodeProjectDirectoryAccessories(props.project) : []),
+        { text: XcodeProjectTypeName(props.project.type) },
+      ]}
       keywords={props.project.keywords}
       icon={XcodeProjectIcon(props.project.type)}
       actions={

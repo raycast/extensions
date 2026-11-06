@@ -8,6 +8,20 @@ import * as OS from "os";
 import { searchRecentProjectsCommandPreferences } from "../shared/preferences";
 
 /**
+ * A git repository
+ */
+interface GitRepository {
+  /**
+   * The root directory (worktree root)
+   */
+  rootDirectory: string;
+  /**
+   * The common git directory
+   */
+  commonDirectory: string;
+}
+
+/**
  * XcodeProjectService
  */
 export class XcodeProjectService {
@@ -30,8 +44,10 @@ export class XcodeProjectService {
     const excludedXcodeProjectPaths = XcodeProjectService.excludedXcodeProjectPaths();
     // Initialize regular expression
     const regularExpression = /^(.*?)\s+kMDItemLastUsedDate\s+=\s+(.*)$/;
-    // Initialize Xcode project array
-    const xcodeProjects: XcodeProject[] = [];
+    // Initialize Xcode projects by file path
+    const xcodeProjectsByFilePath = new Map<string, XcodeProject>();
+    // Initialize the cache of git repositories by directory
+    const gitRepositoriesCache = new Map<string, GitRepository | undefined>();
     // For each raw line of spotlight query output
     for (const rawLine of spotlightQueryOutput.stdout.trim().split("\n")) {
       // Trim the raw line
@@ -68,19 +84,35 @@ export class XcodeProjectService {
         // Continue with next line
         continue;
       }
+      // Use the project or playground containing the path if it is an embedded workspace
+      path = XcodeProjectService.embeddedWorkspaceContainerPath(path) ?? path;
+      // Check if Xcode project has already been found
+      const existingXcodeProject = xcodeProjectsByFilePath.get(path);
+      if (existingXcodeProject) {
+        // Keep the most recent last used date
+        if (lastUsed && (!existingXcodeProject.lastUsed || lastUsed > existingXcodeProject.lastUsed)) {
+          existingXcodeProject.lastUsed = lastUsed;
+        }
+        // Continue with next line
+        continue;
+      }
       // Decode Xcode project
-      const xcodeProject = XcodeProjectService.decodeXcodeProject(path, lastUsed);
+      const xcodeProject = XcodeProjectService.decodeXcodeProject(path, gitRepositoriesCache, lastUsed);
       // Check if Xcode project could not be decoded from path
       if (!xcodeProject) {
         // Continue with next line
         continue;
       }
-      // Append Xcode project
-      xcodeProjects.push(xcodeProject);
+      // Store Xcode project
+      xcodeProjectsByFilePath.set(path, xcodeProject);
     }
+    // Initialize Xcode project array
+    const xcodeProjects = [...xcodeProjectsByFilePath.values()];
     // Append Xcode projects located in git worktrees, which are typically
     // stored in hidden directories that are not indexed by Spotlight
-    xcodeProjects.push(...XcodeProjectService.gitWorktreeXcodeProjects(xcodeProjects, excludedXcodeProjectPaths));
+    xcodeProjects.push(
+      ...XcodeProjectService.gitWorktreeXcodeProjects(xcodeProjects, excludedXcodeProjectPaths, gitRepositoriesCache)
+    );
     // Sort Xcode projects by lastUsedDate (descending order).
     xcodeProjects.sort((lhs, rhs) => (rhs.lastUsed?.getTime() ?? 0) - (lhs.lastUsed?.getTime() ?? 0));
     // Return xcode projects
@@ -102,14 +134,33 @@ export class XcodeProjectService {
   }
 
   /**
+   * Returns the path of the Xcode Project or Swift Playground containing the given path
+   * if it is an embedded workspace, e.g. "MyPlayground.playground/playground.xcworkspace".
+   * @param path The Xcode Project path
+   */
+  private static embeddedWorkspaceContainerPath(path: string): string | undefined {
+    if (Path.extname(path) !== `.${XcodeProjectType.workspace}`) {
+      return undefined;
+    }
+    const containerPath = Path.dirname(path);
+    return [`.${XcodeProjectType.project}`, `.${XcodeProjectType.swiftPlayground}`].includes(
+      Path.extname(containerPath)
+    )
+      ? containerPath
+      : undefined;
+  }
+
+  /**
    * Returns the Xcode Projects located in other git worktrees of the given Xcode Projects
    * which have not already been found.
    * @param xcodeProjects The Xcode Projects
    * @param excludedXcodeProjectPaths The excluded Xcode Project paths
+   * @param gitRepositoriesCache The cache of git repositories by directory
    */
   private static gitWorktreeXcodeProjects(
     xcodeProjects: XcodeProject[],
-    excludedXcodeProjectPaths: string[]
+    excludedXcodeProjectPaths: string[],
+    gitRepositoriesCache: Map<string, GitRepository | undefined>
   ): XcodeProject[] {
     // Initialize the set of known Xcode Project file paths
     const knownFilePaths = new Set(xcodeProjects.map((xcodeProject) => xcodeProject.filePath));
@@ -119,7 +170,7 @@ export class XcodeProjectService {
     const worktreeXcodeProjects: XcodeProject[] = [];
     for (const xcodeProject of xcodeProjects) {
       // Retrieve the git repository containing the Xcode Project
-      const repository = XcodeProjectService.gitRepository(xcodeProject.directoryPath);
+      const repository = XcodeProjectService.cachedGitRepository(xcodeProject.directoryPath, gitRepositoriesCache);
       if (!repository) {
         continue;
       }
@@ -149,7 +200,7 @@ export class XcodeProjectService {
         if (!lastUsed) {
           continue;
         }
-        const worktreeXcodeProject = XcodeProjectService.decodeXcodeProject(filePath, lastUsed);
+        const worktreeXcodeProject = XcodeProjectService.decodeXcodeProject(filePath, gitRepositoriesCache, lastUsed);
         if (worktreeXcodeProject) {
           worktreeXcodeProjects.push(worktreeXcodeProject);
         }
@@ -159,11 +210,28 @@ export class XcodeProjectService {
   }
 
   /**
+   * Returns the git repository for the given directory, if any, using the cache to avoid repeating the search.
+   * @param directory The directory
+   * @param gitRepositoriesCache The cache of git repositories by directory
+   */
+  private static cachedGitRepository(
+    directory: string,
+    gitRepositoriesCache: Map<string, GitRepository | undefined>
+  ): GitRepository | undefined {
+    if (gitRepositoriesCache.has(directory)) {
+      return gitRepositoriesCache.get(directory);
+    }
+    const repository = XcodeProjectService.gitRepository(directory);
+    gitRepositoriesCache.set(directory, repository);
+    return repository;
+  }
+
+  /**
    * Returns the git repository root directory (worktree root) and common git directory
    * for the given directory, if any.
    * @param directory The directory
    */
-  private static gitRepository(directory: string): { rootDirectory: string; commonDirectory: string } | undefined {
+  private static gitRepository(directory: string): GitRepository | undefined {
     for (let currentDirectory = directory; ; currentDirectory = Path.dirname(currentDirectory)) {
       const gitPath = Path.join(currentDirectory, ".git");
       try {
@@ -285,9 +353,14 @@ export class XcodeProjectService {
   /**
    * Decode XcodeProject from Xcode Project Path
    * @param xcodeProjectPath The Xcode Project Path
+   * @param gitRepositoriesCache The cache of git repositories by directory
    * @param lastUsed The date when the project was last used or opened
    */
-  private static decodeXcodeProject(xcodeProjectPath: string, lastUsed?: Date): XcodeProject | undefined {
+  private static decodeXcodeProject(
+    xcodeProjectPath: string,
+    gitRepositoriesCache: Map<string, GitRepository | undefined>,
+    lastUsed?: Date
+  ): XcodeProject | undefined {
     // Initialize the last path component
     const lastPathComponent = xcodeProjectPath.substring(xcodeProjectPath.lastIndexOf("/") + 1);
     // Initialize the file extension
@@ -324,12 +397,15 @@ export class XcodeProjectService {
     keywords.push(name);
     // Filter out duplicates and empty keywords
     keywords = [...new Set(keywords.filter(Boolean))];
+    // Initialize the directory path
+    const directoryPath = Path.dirname(xcodeProjectPath);
     // Return XcodeProject
     return {
       name: name,
       type: fileExtension,
-      directoryPath: Path.dirname(xcodeProjectPath),
+      directoryPath: directoryPath,
       filePath: xcodeProjectPath,
+      gitRootDirectoryPath: XcodeProjectService.cachedGitRepository(directoryPath, gitRepositoriesCache)?.rootDirectory,
       lastUsed: lastUsed,
       keywords: keywords.reverse(),
     };

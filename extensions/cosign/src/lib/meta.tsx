@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import { Detail, List } from "@raycast/api";
+import { Color, Detail, Icon, Image, List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 
 export type MetaItem =
   | { kind: "label"; title: string; text: string }
   | { kind: "link"; title: string; text: string; target: string }
-  | { kind: "tags"; title: string; tags: string[] }
+  | { kind: "tags"; title: string; tags: string[]; color?: Color.ColorLike }
   | { kind: "separator" };
 
 type MetaNamespace = typeof Detail.Metadata;
@@ -21,7 +22,7 @@ function renderItems(M: MetaNamespace, items: MetaItem[]): ReactNode {
         return (
           <M.TagList key={i} title={item.title}>
             {item.tags.map((tag) => (
-              <M.TagList.Item key={tag} text={tag} />
+              <M.TagList.Item key={tag} text={tag} color={item.color} />
             ))}
           </M.TagList>
         );
@@ -44,3 +45,13 @@ export function listDetailMetadata(items: MetaItem[]): ReactNode {
 }
 
 export const host = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+/** The site's favicon as a rounded icon; the globe while it loads or when there is none. */
+export const favicon = (url: string) => getFavicon(url, { fallback: Icon.Globe, mask: Image.Mask.RoundedRectangle });
+
+/** A person's or company's picture, round, with a generic one when Cosign has none. */
+export const avatar = (url: string | null): Image.ImageLike => ({
+  source: url ?? Icon.Person,
+  mask: Image.Mask.Circle,
+  fallback: Icon.Person,
+});
