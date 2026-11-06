@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "tsx": "^4.20.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/word-client.test.ts",
+    "test:live": "tsx scripts/live-test.ts"
+  },
+  "name": "microsoft-word",
+  "title": "Microsoft Word",
+  "description": "Inspect the active Word document, copy text, control Track Changes, and create a document from text.",
+  "commands": [
+    {
+      "name": "recent-documents",
+      "title": "Recent Word Documents",
+      "description": "Search Word documents you've used in the last 90 days and open, preview or reveal them.",
+      "mode": "view"
+    },
+    {
+      "name": "active-document",
+      "title": "Active Document",
+      "subtitle": "Microsoft Word",
+      "description": "Inspect Word document status, copy text, and control Track Changes.",
+      "mode": "view"
+    },
+    {
+      "name": "new-document",
+      "title": "New Document from Text",
+      "subtitle": "Microsoft Word",
+      "description": "Create an unsaved Word document from clipboard text or typed content.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-track-changes",
+      "title": "Toggle Track Changes",
+      "subtitle": "Microsoft Word",
+      "description": "Toggle Track Changes on the active Word document and read back its state.",
+      "mode": "no-view"
+    }
+  ]
+}
