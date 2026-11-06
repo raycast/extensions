@@ -229,10 +229,10 @@ export async function stopProject(project: string, projectPath: string): Promise
 const shellQuote = (value: string) => `'${value.replaceAll("'", `'\\''`)}'`;
 
 export async function openInTerminal(service: Service): Promise<void> {
-  const bin = tmuxBinary();
+  const tmuxCmd = `${shellQuote(tmuxBinary())} -L ${shellQuote(SOCKET)}`;
   const attach =
-    `${bin} -L ${SOCKET} select-window -t ${shellQuote(service.windowId)} && ` +
-    `${bin} -L ${SOCKET} attach -t ${shellQuote(`=${service.project}`)}`;
+    `${tmuxCmd} select-window -t ${shellQuote(service.windowId)} && ` +
+    `${tmuxCmd} attach -t ${shellQuote(`=${service.project}`)}`;
   await execFileAsync("osascript", ["-e", OPEN_IN_TERMINAL, attach]);
 }
 
