@@ -3222,6 +3222,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
     },
   },
+  {
+    name: "holos33",
+    title: "Holos33 MCP",
+    description:
+      "Search sourced public Holos33 information about its six wellbeing modules, access, privacy, research and contact details through 11 read-only tools. Hosted remote Streamable HTTP server; no sign-in, API key or write actions.",
+    icon: "https://raw.githubusercontent.com/aiagentcycle/holos33-mcp/main/holos33_mcp/static/icon-512.png",
+    homepage: "https://holos33.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.holos33.com/mcp"],
+    },
+    remoteUrl: "https://mcp.holos33.com/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [

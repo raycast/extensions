@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Holos33 MCP Server] - 2026-11-06
+
+- Add Holos33 to the official registry as a hosted Streamable HTTP server with 11 read-only tools and no authentication.
+
 ## [Fix the Mnemoverse README row] - 2026-11-06
 
 - Bring the Mnemoverse row in the README back in line with its registry entry: the hosted remote server with OAuth 2.1 sign-in and no API key, instead of the earlier local-server text.
