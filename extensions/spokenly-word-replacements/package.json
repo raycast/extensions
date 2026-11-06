@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spokenly-word-replacements",
+  "title": "Spokenly Word Replacements",
+  "description": "Search, add, remove, and back up Spokenly word replacements through its official CLI",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "manage-replacements",
+      "title": "Manage Word Replacements",
+      "subtitle": "Spokenly",
+      "description": "Search corrections, copy a JSON backup, add a replacement, or remove a rule",
+      "mode": "view"
+    },
+    {
+      "name": "add-replacement",
+      "title": "Add Word Replacement",
+      "subtitle": "Spokenly",
+      "description": "Add a literal or regular expression correction and verify it was saved",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Spokenly CLI Path",
+      "description": "Optional absolute path to the official Spokenly CLI. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked.",
+      "placeholder": "/usr/local/bin/spokenly"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}
