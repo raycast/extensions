@@ -1,5 +1,15 @@
 # Google Search Changelog
 
+## [Add AI Search Mode] - {PR_MERGE_DATE}
+
+- Add Google AI Search Mode command (`aiSearch`)
+- Add toggle action (`⇧↵`) to switch between regular search and AI search mode
+- Preserve default `⌘↵` shortcut for Copy URL action in regular search
+- Correctly open direct destinations for navigation suggestions in both modes
+- Ensure copied links in AI mode preserve `udm=50`
+- Display context-aware shortcut hints based on active search mode
+- Add comprehensive behavioral test suite
+
 ## [Fix Suggestion Errors] - 2026-10-11
 
 - Fix "Premature close" error toast appearing while typing quickly
