@@ -1,6 +1,6 @@
 # Slowed + Reverb Changelog
 
-## [Windows, Batch Audio, and Raycast AI] - {PR_MERGE_DATE}
+## [Windows, Batch Audio, and Raycast AI] - 2026-11-06
 
 - Added Windows support with a file picker for all four Generate commands.
 - Added batch processing with adjustable speed and reverb, pitch-preserving tempo changes, and conversion to MP3, WAV, or FLAC.
