@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Ecommerce Leads MCP Server] - {PR_MERGE_DATE}
+## [Add Ecommerce Leads MCP Server] - 2026-11-06
 
 - Add Ecommerce Leads to the official registry as a hosted Streamable HTTP server with a direct HTTP connection in Raycast, an `mcp-remote` fallback for other clients, and OAuth 2.1 sign-in for the account tools.
 
