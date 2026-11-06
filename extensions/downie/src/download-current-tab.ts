@@ -1,4 +1,5 @@
-import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { currentTabUrl } from "./browser";
 import { sendLinks } from "./downie";
 import { Postprocessing } from "./urls";
@@ -11,10 +12,6 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     const label = format === "audio" ? "audio" : format === "mp4" ? "MP4" : "video";
     await showHUD(`⬇︎ Sent ${label} from ${browser} to Downie`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't send tab to Downie",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Couldn't send tab to Downie" });
   }
 }

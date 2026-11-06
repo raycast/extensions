@@ -23,16 +23,10 @@ The extension sends the vendor’s `downie://XUOpenURL` requests directly to the
 
 A success message means links were sent to Downie. It does not claim the downloads completed. View progress, login prompts, or failures in Downie. If a batch stops partway through dispatch, the error reports how many links were sent; check Downie before retrying.
 
-## Development
-
-Run `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build`. Tests cover nested query encoding, destination paths, deduplication, input limits, and extraction options.
-
 ## Sources and scope
 
 - [Official Downie automation guide](https://software.charliemonroe.net/help/downie/?article=automation)
 - [Official getting started guide](https://software.charliemonroe.net/help/downie/)
 - [Raycast extension structure](https://developers.raycast.com/information/file-structure)
 
-The current Raycast Store source tree was checked for an existing Downie package; none was present. This package performs supported per-download integration rather than generic app launching.
-
-The installed app’s scripting dictionary advertises `start queue`, but it timed out in live tests on this machine. That command is excluded.
+Downie’s `start queue` scripting command is not used because it does not respond reliably.

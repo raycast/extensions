@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { sendLinks } from "./downie";
 import { parseLinks, Postprocessing } from "./urls";
 
@@ -10,12 +10,11 @@ export function DownloadForm({ clipboard = false }: { clipboard?: boolean }) {
   const [destination, setDestination] = useState<string[]>([]);
   const [extraction, setExtraction] = useState(false);
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    if (clipboard)
-      Clipboard.readText()
-        .then((text) => setText(text ?? ""))
-        .catch((error) => showFailureToast(error));
-  }, [clipboard]);
+  const { isLoading: loadingClipboard } = usePromise(async () => (await Clipboard.readText()) ?? "", [], {
+    execute: clipboard,
+    onData: setText,
+    failureToastOptions: { title: "Couldn't read the clipboard" },
+  });
   async function submit() {
     if (busy) return;
     let links: string[];
@@ -41,7 +40,7 @@ export function DownloadForm({ clipboard = false }: { clipboard?: boolean }) {
   }
   return (
     <Form
-      isLoading={busy}
+      isLoading={busy || loadingClipboard}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={extraction ? "Open Extraction in Downie" : "Send to Downie"} onSubmit={submit} />
