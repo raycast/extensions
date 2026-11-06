@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Embers MCP Server] - {PR_MERGE_DATE}
+## [Add Embers MCP Server] - 2026-11-06
 
 - Add Embers to the official registry: work the warm leads Embers finds in LinkedIn engagement, with today's queue, lead details, opener drafts, status and follow-ups, ICP changes and sending leads to a CRM or outreach tool. Hosted Streamable HTTP server at https://mcp.useembers.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
