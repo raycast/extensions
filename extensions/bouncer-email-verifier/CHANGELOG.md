@@ -1,5 +1,22 @@
 # Bouncer Deliverability Changelog
 
+## [Domain Jump, Signal Guide, and Credits in Root Search] - 2026-10-28
+
+- Check the domain behind any email result with `⌘⇧D` (`Ctrl+Shift+D` on Windows), without retyping it. It is saved to history like any other domain check.
+- Added **What the Signals Mean** to every result: what each status and signal measures, with a link to Bouncer's terminology. It describes the fields; what to do with an address stays your call.
+- Your remaining credit balance now shows next to the command in root search once you have opened it.
+- On first run, the empty view offers a free check of Bouncer's sandbox address, so you can see a full result before spending a credit. The API key preference now says where to create a key.
+- Fixed the credit balance going stale after a check. It is now re-read each time one completes.
+- The balance is now hidden when Bouncer cannot be reached or rejects the key, instead of showing the last figure as if it were current.
+- Without an API key, the command now says so and leads straight to preferences, instead of sending checks that come back rejected. A key Bouncer refuses now offers preferences on every refusal, not only some.
+- Fixed the credit balance never appearing on the empty view. Raycast showed only the first paragraph of the description, and the balance was in the second.
+- Fixed Enter and ⌘K doing nothing on the empty view after a filter or a cleared search hid the selected row. Paste from Clipboard and the other empty-view actions work again.
+- Fixed a slow selection or clipboard read overwriting an address you had already started typing.
+- Greylisted results now show the retry time in your local time instead of a raw timestamp.
+- Checks made through Raycast AI are now saved to history, so you can reopen them in the command without spending another credit.
+- Raycast AI no longer reports a free sandbox check as a spent credit.
+- Raycast AI now reports what Bouncer found without adding its own send or don't-send advice, and no longer calls a domain "working" when Bouncer only found its mail record.
+
 ## [Report What Bouncer Returns, and Fix Four Silent Faults] - 2026-08-05
 
 - Fixed pressing Enter on a newly typed address opening an older saved result instead of checking it. The new address appeared at the top of the list but the selection stayed where it was, and a stale verdict looks identical to a fresh one, so there was nothing to notice.

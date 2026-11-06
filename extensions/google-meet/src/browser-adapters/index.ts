@@ -1,3 +1,4 @@
+import type { Application } from "@raycast/api";
 import { MeetError } from "../errors";
 import type { SupportedBrowsers } from "../utils/scripts";
 import { createArcFamilyAdapter } from "./arc";
@@ -6,7 +7,7 @@ import { createFirefoxFamilyAdapter } from "./firefox";
 import { createSafariAdapter } from "./safari";
 import type { MeetingUrlSource } from "./types";
 
-export function getAdapterForBrowser(browserName: SupportedBrowsers): MeetingUrlSource {
+export function getAdapterForBrowser(browserName: SupportedBrowsers, application: Application): MeetingUrlSource {
   switch (browserName) {
     case "Safari":
       return createSafariAdapter();
@@ -20,6 +21,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers): MeetingUrl
       return createFirefoxFamilyAdapter(browserName);
     case "Google Chrome":
     case "Brave Browser":
+    case "Helium":
     case "Microsoft Edge":
     case "Opera":
     case "Aside":
@@ -27,7 +29,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers): MeetingUrl
     case "Sogou Explorer":
     case "Vivaldi":
     case "Yandex":
-      return createChromiumAdapter(browserName);
+      return createChromiumAdapter(application);
     default: {
       const unsupportedBrowser: never = browserName;
       throw new MeetError("UNSUPPORTED_BROWSER", { message: `"${unsupportedBrowser}" isn't a supported browser.` });

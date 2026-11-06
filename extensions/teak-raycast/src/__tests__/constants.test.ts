@@ -8,9 +8,11 @@ const loadLocalConstants = () =>
 
 describe("raycast local constants", () => {
   test("uses the canonical local app URL in development", async () => {
-    const { TEAK_DEV_APP_URL, TEAK_SETTINGS_URL } = await loadLocalConstants();
+    const { TEAK_API_KEYS_URL, TEAK_DEV_APP_URL } = await loadLocalConstants();
     expect(TEAK_DEV_APP_URL).toBe("http://localhost:3000");
-    expect(TEAK_SETTINGS_URL).toBe("http://localhost:3000/settings");
+    expect(TEAK_API_KEYS_URL).toBe(
+      "http://localhost:3000/settings/integrations",
+    );
   });
 
   test("uses the canonical Convex API URL in development", async () => {

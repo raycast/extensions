@@ -1,153 +1,114 @@
-import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import {
-  EntryResponse,
-  ComponentResponse,
-  ContentType,
-  ContentTypeResponse,
-  ContentTypesResponse,
-  StrapiFile,
-} from "../types";
-import fetch from "node-fetch";
+import { ContentType, ContentTypesResponse, EntriesResponse, Entry, Locale, StrapiFile } from "../types";
+import { apiUrl, authHeaders, parseResponse } from "./api";
+import { searchableFields } from "./utils";
+
+const PAGE_SIZE = 50;
 
 /**
- * Fetches the content types from the Strapi API.
- * @returns An object containing the fetched content types and the state of the fetch request.
+ * Returns the REST route of a content-type, relative to `/api`.
  */
-export const getContentTypes = () => {
-  const { host, apiKey } = getPreferenceValues();
+const contentTypeRoute = (item: Omit<ContentType, "route">) => {
+  // Users & Permissions users are exposed on `/api/users`
+  if (item.uid === "plugin::users-permissions.user") return "/users";
 
-  const res = useFetch<ContentTypesResponse>(`${host}/api/content-type-builder/content-types`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
+  const name = item.schema.kind === "singleType" ? item.schema.singularName : item.schema.pluralName;
+  return item.plugin ? `/${item.plugin}/${name}` : `/${name}`;
+};
 
-  let data: ContentType[] = [];
-
-  if (!res.error) {
-    data =
-      res.data?.data
+/**
+ * Fetches the visible content-types from the Strapi API.
+ */
+export const useContentTypes = () => {
+  return useFetch<ContentTypesResponse, ContentType[], ContentType[]>(apiUrl("/content-type-builder/content-types"), {
+    headers: authHeaders(),
+    parseResponse,
+    mapResult: (result: ContentTypesResponse) => ({
+      data: result.data
         .filter((item) => item.schema.visible)
-        .map((item) => ({
-          ...item,
-          route: item.plugin ? `/${item.plugin}/${item.schema.pluralName}` : `/${item.schema.pluralName}`,
-        })) || [];
-  }
-
-  return { ...res, data };
+        .map((item): ContentType => ({ ...item, route: contentTypeRoute(item) })),
+    }),
+    initialData: [],
+  });
 };
 
+export interface EntryQuery {
+  status?: "draft" | "published";
+  locale?: string;
+  search?: string;
+}
+
 /**
- * Fetches a single content type from the Strapi API.
- * @param uid - The UID of the content type to fetch.
- * @returns The fetched content type.
+ * Fetches the entries of a collection-type page by page.
+ * @param contentType - The content-type to fetch entries for.
+ * @param query - Status, locale and search text to filter on.
  */
-export const getContentType = (uid: string) => {
-  const { host, apiKey } = getPreferenceValues();
+export const useEntries = (contentType: ContentType, { status, locale, search }: EntryQuery) => {
+  const filters = search
+    ? Object.fromEntries(
+        searchableFields(contentType).map((field, index) => [`filters[$or][${index}][${field}][$containsi]`, search]),
+      )
+    : {};
 
-  const res = useFetch<ContentTypeResponse>(`${host}/api/content-type-builder/content-types/${uid}`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
+  return useFetch<EntriesResponse, undefined, Entry[]>(
+    (options) =>
+      apiUrl(contentType.route, {
+        status: contentType.schema.draftAndPublish ? status : undefined,
+        locale: contentType.schema.pluginOptions?.i18n?.localized ? locale : undefined,
+        sort: "updatedAt:desc",
+        "pagination[page]": options.page + 1,
+        "pagination[pageSize]": PAGE_SIZE,
+        ...filters,
+      }),
+    {
+      headers: authHeaders(),
+      parseResponse,
+      mapResult: (result: EntriesResponse) => {
+        if (Array.isArray(result)) return { data: result, hasMore: false };
+        if ("roles" in result) return { data: result.roles, hasMore: false };
 
-  if (!res.error) {
-    return {
-      ...res,
-      data: {
-        ...res.data?.data,
-        route: res.data?.data.plugin
-          ? `/${res.data?.data.plugin}/${res.data?.data.schema.pluralName}`
-          : `/${res.data?.data.schema.pluralName}`,
+        const pagination = result.meta?.pagination;
+        return { data: result.data, hasMore: pagination ? pagination.page < pagination.pageCount : false };
       },
-    };
-  }
-
-  return res;
+      keepPreviousData: true,
+    },
+  );
 };
 
 /**
- * Fetches the entries for a given route from the Strapi API.
- *
- * @param route - The API route to fetch entries from.
- * @returns An object containing the fetched entries and the state of the fetch request.
+ * Fetches the available locales when the i18n plugin is enabled.
+ * @param execute - Whether to fetch the locales.
  */
-export const getEntries = (route: string) => {
-  const { host, apiKey } = getPreferenceValues();
-
-  const res = useFetch<EntryResponse>(`${host}/api${route}?status=draft&pagination[limit]=10000`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
+export const useLocales = (execute: boolean) => {
+  return useFetch<Locale[]>(apiUrl("/i18n/locales"), {
+    headers: authHeaders(),
+    parseResponse,
+    execute,
+    keepPreviousData: true,
+    // Locales are optional, an error here shouldn't interrupt the user
+    onError: () => undefined,
   });
-
-  let data: EntryResponse["data"] = [];
-
-  if (!res.error) {
-    data = res.data?.data || [];
-
-    // User & Permissions exception
-    if (res.data?.roles) data = res.data?.roles;
-  }
-
-  return { ...res, data };
 };
 
 /**
- * Submits a new entry to the Strapi API.
- * @param route - The API route to submit the entry to.
- * @param data - The data to submit.
+ * Fetches the files of the media library page by page.
+ * @param search - Optional text to filter file names on.
  */
-export const createEntry = async (route: string, data: object) => {
-  const { host, apiKey } = getPreferenceValues();
-
-  const res = await fetch(`${host}/api${route}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+export const useFiles = (search?: string) => {
+  return useFetch<StrapiFile[], undefined, StrapiFile[]>(
+    (options) =>
+      apiUrl("/upload/files", {
+        sort: "createdAt:desc",
+        // The upload API ignores `pagination[page]`, but supports offset pagination
+        start: options.page * PAGE_SIZE,
+        limit: PAGE_SIZE,
+        "filters[name][$containsi]": search || undefined,
+      }),
+    {
+      headers: authHeaders(),
+      parseResponse,
+      mapResult: (result: StrapiFile[]) => ({ data: result, hasMore: result.length === PAGE_SIZE }),
+      keepPreviousData: true,
     },
-    body: JSON.stringify(data),
-  });
-
-  const json = await res.json();
-
-  return json;
-};
-
-/**
- * Fetch component from the Strapi API.
- * @param uid - The UID of the component to fetch.
- */
-export const getComponent = (uid: string) => {
-  const { host, apiKey } = getPreferenceValues();
-
-  const res = useFetch<ComponentResponse>(`${host}/api/content-type-builder/components/${uid}`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
-
-  if (!res.error) {
-    return { ...res, data: res.data?.data };
-  }
-
-  return res;
-};
-
-/**
- * Get all files from the Strapi API.
- * @returns An array containing the fetched files and the state of the fetch request.
- */
-export const getFiles = () => {
-  const { host, apiKey } = getPreferenceValues();
-
-  const res = useFetch<StrapiFile[]>(`${host}/api/upload/files`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
-
-  return res;
+  );
 };

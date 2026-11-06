@@ -7,10 +7,12 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 - Manage client and internal projects
 - Mark one project as preferred for faster timer starts
 - Start and stop a single active timer
+- Plan daily goals with optional handwritten subtasks, and start, switch, stop, or complete tasks from Today's Plan
 - Organize related projects into named project groups
 - Keep task descriptions optional and reuse recent descriptions for each project
 - See elapsed time in the menu bar
 - Search, edit, delete, and manually add work logs
+- Edit work-log start and end times to the minute, or correct a running timer's start time
 - Review today, this week, or this month
 - Break totals down by project and project group
 - View Reports charts in Raycast’s light or dark appearance
@@ -22,6 +24,8 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 2. Optionally mark a project as preferred so it is selected first in **Start Work**.
 3. Open **Start Work**, choose a project, check its **Project Group**, and optionally enter a task description.
 4. Open **Menu Bar Timer** once to enable the menu bar item and background refresh.
+
+After a timer starts successfully, Raycast closes and resets to an empty Root Search for the next launch. Open **Start Work** again to view **Tracking Work**, stop the timer, or edit its start time.
 
 You can set global shortcuts for **Start Work** and **Stop Work** in Raycast Settings. Suggested shortcuts:
 
@@ -36,15 +40,74 @@ A **Project Group** is a named collection of related projects, such as Client, I
 
 Create and manage groups in **Projects**. In **Start Work**, the selected project's group appears above the project picker. This is a read-only label that updates when you choose a different project; it does not select or change the project's group.
 
+## Today's Plan
+
+Use **Today's Plan** to choose daily goals, write optional subtasks, and track progress inside Raycast. Parent goals show completion counts and total time. Tasks show completion icons, tracked time, and a Running tag. Goals without subtasks are also trackable.
+
+Selecting a parent goal and pressing **Return** opens its editor; **⌘Return** toggles completion of all its visible children. Select a task with **↑ / ↓**, or **Control+N / Control+P** when Raycast's Emacs navigation bindings are enabled. **Return** starts or stops the selected task; **⌘Return** toggles completion. Starting another task saves the current timer first. Completing the running task stops and saves its time. Completed tasks must be marked incomplete before tracking again. Closing Raycast leaves a running timer active.
+
+Use **New Plan** (**⌘N**) to add a goal, or **Edit Plan** (**⌘E**) on an existing item. The empty view offers New Plan; edit and sort actions are available only when a plan exists. Enter the goal on the first line and each subtask on a following line in the same text area, select a project, and choose **Save Plan** (**⌘Return**). A single line creates a goal without subtasks. There is no fixed limit; about three goals is a useful starting point.
+
+```text
+Finish the contact form
+Choose input fields
+Implement validation
+Connect submission
+```
+
+The Plan dropdown in the editor switches between New Plan and existing goals. Unchanged task lines retain their identity through reordering and insertion; edits to the same number of remaining lines are treated as renames in line order. Work Logs remain saved when a goal is deleted. Stop a running task before removing its line or changing its goal's project. Stop a running goal without subtasks before adding child tasks. The editor rejects stale saves rather than overwriting newer changes.
+
+Open **Sort Subtasks** (**⌘S**) for a goal's children or **Sort Plans** (**⌘⇧S**) for the parent goals. For a standalone goal, **⌘S** opens Sort Plans. In either sorting list, **↑ / ↓** or **Control+N / Control+P** selects an item, and **⌘⌥↑ / ⌘⌥↓** moves it up or down among its siblings. Order saves immediately. **Return** finishes sorting; **Escape** navigates back according to Raycast's Escape setting. A parent sorting row also offers Sort Subtasks. Timers continue during sorting. Standard list rows do not have clickable checkboxes or drag-and-drop sorting; use **⌘Return** or the action panel (**⌘K**) for completion. Action shortcuts appear in Raycast's action panel.
+
+Unfinished plans carry over automatically the first time you open **Today's Plan** each day, and when the view remains open across local midnight. Raycast does not need to run this command in the background: if the view is closed, carryover happens when you next open it. Carryover runs once per local day, using only the most recent earlier date with tasks and skipping empty days such as weekends. Every incomplete parent on that date moves with all its children, including completed steps, preserving identities, completion timestamps, and order. Existing plans for today remain, followed by the carried plans. Fully completed parents stay on the earlier date. If the latest date is fully complete, carryover does not reach back to older dates. Reopening the command does not duplicate plans. Interrupted saves resume safely, including after another date change. Carryover moves plans rather than copying them; recorded work and completion dates remain unchanged in Weekly Review. The manual Import Latest Plan action is no longer needed.
+
+Completed plans automatically appear after unfinished plans, with their subtasks kept together. A plan is complete when all its subtasks are complete, or when a standalone goal is marked complete. Manual order is preserved within each group; marking a plan incomplete restores its place among unfinished plans. Sort Plans continues to show and edit the saved order. This display order also applies when revisiting earlier dates.
+
+The date dropdown still opens earlier plans. To move an individual plan, select it or any of its subtasks on an earlier date and choose **Move Plan to Today** (**⌘⇧T**). An unfinished plan without subtasks can also move. The list switches to today after the move. Today's task times include only work recorded today. Historical logs, reports, and running timers stay intact. Moved-from dates remain available even when empty.
+
+Starting work from Today's Plan starts a regular timer. To use Pomodoro with that task, enable Pomodoro in preferences, then choose **Start Pomodoro** from **Menu Bar Timer** while the task's timer is running.
+
+When a goal has children on multiple dates, each date shows its own children. Editing, sorting, completing, or deleting a day's goal affects those children only; the goal name and project remain shared. To replace all of one day's children with a standalone goal while other dates retain children, delete that day's goal and add a new standalone goal.
+
+Times are split at local midnight, consistent with Reports; totals include work started from other commands. Tracked time refreshes while the view is open, and today's list rolls over to the new day at local midnight.
+
+## Plan Templates
+
+Choose **Save as Template** on any plan to save its goal, subtasks for the selected date, and project under a reusable name. Completed plans can also become templates. Completion state, dates, task IDs, and recorded time are not stored in the template.
+
+Choose **New from Template** (**⌘⇧N**) in Today's Plan, including its empty view. Select a template with **Return**, adjust the goal, subtasks, or project in the preview, then choose **Save Plan**. The form shows the selected plan date. Every addition creates a separate plan and fresh subtask IDs, with no completion state or tracked time. The source plan and template stay unchanged. After adding, the template list stays open so you can add another plan; **Escape** returns to Today's Plan.
+
+The template list offers **New Template** (**⌘N**), **Edit Template** (**⌘E**), and **Delete Template**. Deleting a template leaves previously added plans and their work logs intact. If a template's project has been deactivated or deleted, select an active project before adding the plan. Templates remain local to this Mac.
+
+## Weekly Review
+
+From **Today's Plan**, choose **Open Weekly Review** (**⌘⇧W**) to review the selected date's week in side-by-side columns starting on Monday. This week shows Monday through today, with the columns expanding to fill the available width; earlier weeks show Monday through Sunday. Future days and weeks are not shown. Long task names wrap within their day; scroll down to see all activity. The action is also available when the daily plan is empty. Use **Previous Week** (**⌘←**), **Next Week** (**⌘→**, until this week), or **This Week** (**⌘T**) in Actions to navigate. Each day shows work items with their parent plan, project, tracked time, and completions; empty days show **No Work Recorded**. Work without a description uses the project name, or **Work session** if the project is unavailable.
+
+Work appears on the day it was tracked, split at local midnight, regardless of a task's current planned date. Completions appear on the day they were marked complete, including tasks with no tracked time. A parent with subtasks does not add another completion. Unfinished work, unplanned work, and running timers are included. The view refreshes automatically; **⌘R** refreshes immediately. It is read-only and separate from Reports' time summaries.
+
+Weekly Review uses saved logs and current completion timestamps rather than an immutable history. Reopening a task removes its completion from this view. Renamed tasks use their current names; deleted tasks retain logged descriptions, but their completion history is unavailable.
+
 ## Reports
 
 Reports shows **Today**, **This Week**, or **This Month**, with totals and session counts for the overview, a project group, or an individual project. Today includes only today's time: a new day starts with zero until you track work. Earlier logs remain available in This Week, This Month, and **Work Logs**.
 
-The visual summary includes project mix, the last seven days, and 35-day activity. The daily charts keep their own rolling windows, so they can show earlier activity even when Today is zero. Expand the project list to see more than two projects. The card follows Raycast's light or dark appearance; after changing Raycast's theme while Reports is open, return to the root search and reopen Reports to refresh its appearance.
+The visual summary includes project mix, this week's Monday-to-Sunday bars, and 35-day activity. Weekly bars show weekday and date labels, highlight today's tracked time, and leave future days empty. The week switches on Monday at local midnight. Both charts are independent of the selected summary period, so they can show earlier activity even when Today is zero; 35-day activity keeps its rolling window. Expand the project list to see more than two projects. The card follows Raycast's light or dark appearance; after changing Raycast's theme while Reports is open, return to the root search and reopen Reports to refresh its appearance.
+
+## Editing Work Times
+
+In **Work Logs**, open a log and choose **Edit Work Log** to adjust start and end times in a numeric preview. A trailing ← marks the selected Start or End row without shifting either row when focus changes; times use a fixed-width typeface, current start/end times update immediately, and the sidebar shows project details. **Add Work Log** opens the same preview. Start time is selected initially. Press **↑** to focus Start or **↓** to focus End without saving. Use **← / →** to move the selected time by 1 minute, or **⇧← / ⇧→** for 1 hour. Press **Return** to save from either Start or End; the save action is shown in the bottom-right corner. You can also choose **Adjust End Time** / **Adjust Start Time** in Actions or press **⌘T** to switch. Adjustments are also available in the Actions menu.
+
+For a precise date or minute, choose **Enter Exact Time** from Actions. Enter the start and end dates and 24-hour `HH:mm` times, then choose **Apply to Preview** to return to the numeric preview. Reopening exact input retains the applied times; going back without applying leaves the preview unchanged. Choose **Edit Project and Description** to change those fields in the same way. **Return**, or **Save Work Log** / **Add Work Log** from Actions, writes the record; leaving the preview discards unsaved changes.
+
+Use separate dates for work spanning midnight. End time must be after start time and cannot be later than the current time; logs longer than 24 hours require confirmation. Unchanged timestamps retain their seconds. Relative adjustments retain seconds, except that moving End into the current minute caps any future seconds at the current time; later minutes remain rejected. For other relative adjustments, exactly the requested minutes are added; changing a date or time through exact input sets its seconds to zero. The preview uses Raycast's native text appearance and updates numbers immediately, without a bar or image replacement. For a running timer, elapsed time also refreshes while the editor is open.
+
+If you forgot to start tracking, start the timer normally, reopen **Start Work**, and choose **Edit Start Time** from the Actions menu. The action is also available in reminder windows while the timer is running. Adjust the start using **← / →** or **Enter Exact Time**, then press **Return** to save. A running timer has no end step; you can also choose **Save Start Time** from Actions. Future starts are rejected, and a start at least 24 hours ago requires confirmation. The corrected start appears in the menu bar, Reports, and the log saved when you stop. If the timer stops or another screen changes its start time while you edit, saving is rejected; reopen Start Work to load the current state.
+
+Editing work time leaves Pomodoro's remaining time, current interval, and completed intervals unchanged. **Work Timer Alert** uses the corrected elapsed time: if an undelivered alert is now overdue, it is sent on the next successful reminder check. An already delivered alert does not repeat.
 
 ## Storage and Privacy
 
-Projects, work logs, and the active timer are stored as JSON in Raycast `LocalStorage`.
+Projects, daily goals and subtasks, plan templates, work logs, and the active timer are stored as JSON in Raycast `LocalStorage`.
 
 - Work data never leaves the Mac through this extension.
 - No analytics, network requests, or external services are used.

@@ -1,7 +1,4 @@
-import { Action, ActionPanel, Clipboard, Icon, Image, List, Toast, environment, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, showToast } from "@raycast/api";
 import { diagnosticReport } from "../utils/diagnostics";
 
 export type SignInProblem = "declined" | "expired" | "connection" | "unknown";
@@ -15,20 +12,7 @@ export interface SignInViewProps {
   onCancel: () => void;
 }
 
-// Raycast renders SVG empty-state illustrations at 128px. Embed the existing
-// brand asset with padding for a 96px mark, without changing the Store icon.
-let illustration: Promise<Image.Source> | undefined;
-function getIllustration() {
-  const wrap = (bytes: Buffer) => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><image x="16" y="16" width="96" height="96" href="data:image/png;base64,${bytes.toString("base64")}"/></svg>`;
-    return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-  };
-  illustration ??= Promise.all([
-    readFile(path.join(environment.assetsPath, "extension-icon.png")),
-    readFile(path.join(environment.assetsPath, "extension-icon@dark.png")),
-  ]).then(([light, dark]) => ({ light: wrap(light), dark: wrap(dark) }));
-  return illustration;
-}
+const illustration = { source: { light: "sign-in-illustration.png", dark: "sign-in-illustration@dark.png" } };
 
 const problems = {
   declined: {
@@ -58,18 +42,6 @@ const problems = {
 };
 
 export function GranolaSignInView({ checking, busy, code, url, problem, onSignIn, onCancel }: SignInViewProps) {
-  const [icon, setIcon] = useState<Image.Source>();
-  useEffect(() => {
-    let mounted = true;
-    getIllustration()
-      .then((value) => {
-        if (mounted) setIcon(value);
-      })
-      .catch(() => {});
-    return () => {
-      mounted = false;
-    };
-  }, []);
   const error = problem ? problems[problem] : undefined;
   if (checking) return <List isLoading searchBarPlaceholder="Connecting to Granola…" />;
   return (
@@ -78,7 +50,7 @@ export function GranolaSignInView({ checking, busy, code, url, problem, onSignIn
       searchBarPlaceholder={busy ? "Waiting for browser approval…" : "Connect your Granola account"}
     >
       <List.EmptyView
-        icon={error?.icon ?? (icon ? { source: icon } : Icon.Person)}
+        icon={error?.icon ?? illustration}
         title={error?.title ?? (busy ? (code ? `Confirm ${code}` : "Opening your browser…") : "Sign in to Granola")}
         description={
           error?.description ??

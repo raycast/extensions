@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { baseUrl } from "./constants";
 import { Preferences } from "./interface";
+import { getErrorMessage, getResponseErrorMessage } from "./utils";
 import { FormValidation, useForm } from "@raycast/utils";
 import fetch from "node-fetch";
 
@@ -12,7 +13,7 @@ interface AddHeartbeatFormValues {
 
 export default function AddHeartbeatCommand() {
   const preferences = getPreferenceValues<Preferences>();
-  const { handleSubmit } = useForm<AddHeartbeatFormValues>({
+  const { handleSubmit, itemProps } = useForm<AddHeartbeatFormValues>({
     async onSubmit(values) {
       await showToast({ title: "Creating heartbeat...", style: Toast.Style.Animated });
 
@@ -26,8 +27,7 @@ export default function AddHeartbeatCommand() {
       })
         .then(async (response) => {
           if (!response.ok) {
-            const errorData = await response.json();
-            throw { response: { data: errorData } };
+            throw new Error(await getResponseErrorMessage(response));
           }
 
           await showToast({ title: "Heartbeat created", style: Toast.Style.Success });
@@ -38,9 +38,13 @@ export default function AddHeartbeatCommand() {
           await showToast({
             title: "Heartbeat not created",
             style: Toast.Style.Failure,
-            message: error.response.data.errors,
+            message: getErrorMessage(error),
           });
         });
+    },
+    initialValues: {
+      period: "10800",
+      grace: "300",
     },
     validation: {
       name: FormValidation.Required,
@@ -57,9 +61,9 @@ export default function AddHeartbeatCommand() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" placeholder="Daily database backup" />
-      <Form.TextField id="period" title="Period in seconds" defaultValue="10800" />
-      <Form.TextField id="grace" title="Grace in seconds" defaultValue="300" />
+      <Form.TextField title="Name" placeholder="Daily database backup" {...itemProps.name} />
+      <Form.TextField title="Period in seconds" {...itemProps.period} />
+      <Form.TextField title="Grace in seconds" {...itemProps.grace} />
     </Form>
   );
 }

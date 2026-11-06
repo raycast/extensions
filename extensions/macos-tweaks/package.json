@@ -41,6 +41,47 @@
       "mode": "view"
     },
     {
+      "name": "add-dock-spacer",
+      "title": "Add Dock Spacer",
+      "subtitle": "macOS Tweaks",
+      "description": "Add an empty tile to the Dock to split your apps into groups",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "size",
+          "type": "dropdown",
+          "placeholder": "Size",
+          "required": false,
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Regular",
+              "value": "regular"
+            }
+          ]
+        },
+        {
+          "name": "side",
+          "type": "dropdown",
+          "placeholder": "Side",
+          "required": false,
+          "data": [
+            {
+              "title": "Apps",
+              "value": "apps"
+            },
+            {
+              "title": "Documents",
+              "value": "documents"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "menu-bar",
       "title": "Tweaks Menu Bar",
       "subtitle": "macOS Tweaks",

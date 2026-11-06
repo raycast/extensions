@@ -70,6 +70,8 @@ The **Bookmarks** command lists all saved posts. **Bookmark Folders** lists exis
 
 Raycast shows the resolved recipients and exact message in a confirmation dialog before sending. The AI tool requires explicit numeric recipient IDs and must not be used for unsolicited, bulk, or recurring outreach. Only message recipients who have clearly indicated that they want to hear from you. X may still reject delivery based on a recipient's privacy settings.
 
+Raycast AI can also read your direct messages. `get-dm-conversations` reads one page of up to 100 recent DM events, groups them by conversation, and returns the other participants' profiles, including their avatars. `get-dm-messages` reads one page of a single conversation, by conversation ID or the other person's username. X only returns DM events from roughly the last 30 days, and both reads use the `dm.read` scope the extension already requests.
+
 ## Raycast AI
 
 The extension provides tools to:
@@ -88,6 +90,7 @@ The extension provides tools to:
 - Read mentions, bookmark folders, private 30-day analytics, and the users/posts behind likes, reposts, and quotes
 - Like, unlike, repost, undo a repost, bookmark, remove a bookmark, hide a reply, or unhide it
 - Send a confirmed 1:1 or group DM to explicit numeric user IDs
+- Read one page of recent DM conversations with participant profiles, or one page of messages from a single conversation
 
 Most read tools return at most one page per call and expose continuation tokens instead of fetching more automatically. Personal-history search, personal connection search, and follow verification are exceptions: they paginate internally within explicit limits. Personal-history search fetches up to 100 authored posts per page and searches through X's available user timeline, excluding reposts. X exposes at most the 3,200 most recent posts through that timeline, so this is not guaranteed to cover accounts with more history. Personal connection search inspects up to 10,000 following profiles and searches up to 10,000 followers only when following has no match. Every AI write uses Raycast's native confirmation UI, with destructive styling for post deletion. Engagement and moderation tools operate on one explicitly identified post and are not intended for bulk, scheduled, or autonomous interaction.
 

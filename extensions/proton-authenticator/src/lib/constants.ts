@@ -3,7 +3,9 @@ import { Color } from "@raycast/api";
 export const STORAGE_KEYS = {
   PROTON_EXPORT: "RAYCAST_PROTON_AUTH_DATA",
   IMPORT_MODE: "RAYCAST_PROTON_AUTH_IMPORT_MODE",
+  // single key saved before multi-key support, migrated to ENCRYPTION_KEYS
   ENCRYPTION_KEY: "RAYCAST_PROTON_AUTH_ENCRYPTION_KEY",
+  ENCRYPTION_KEYS: "RAYCAST_PROTON_AUTH_ENCRYPTION_KEYS",
 };
 
 export const STATE_KEYS = {

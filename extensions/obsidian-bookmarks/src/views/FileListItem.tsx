@@ -12,6 +12,7 @@ type Props = {
   showDetail: boolean;
   setShowDetail: Dispatch<SetStateAction<boolean>>;
   onFileUpdated?: (file: File) => void;
+  onFileDeleted?: (file: File) => void;
 };
 export default function FileListItem({ file, files, loading, ...actionProps }: Props): React.JSX.Element {
   const favorite = file.attributes.favorite;

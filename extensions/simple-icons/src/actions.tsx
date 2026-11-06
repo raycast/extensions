@@ -1,5 +1,4 @@
 /* eslint @raycast/prefer-title-case: off */
-import process from "node:process";
 import { useEffect, useState } from "react";
 import { Action, Icon } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
@@ -31,11 +30,9 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
   return destinationPath ? <Action.OpenWith path={destinationPath} /> : null;
 };
 
-export const MakeBadge = ({ icon, version }: ActionProps) =>
-  // [TODO] The Badge extension cannot work properly on Windows yet.
-  process.platform === "darwin" ? (
-    <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
-  ) : null;
+export const MakeBadge = ({ icon, version }: ActionProps) => (
+  <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
+);
 
 export const CopySvg = ({ icon, version }: ActionProps) => {
   return (

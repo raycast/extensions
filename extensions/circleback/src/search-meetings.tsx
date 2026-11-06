@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, captureException } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchJson } from "./utils/api";
 import { showFailureToast, withAccessToken } from "@raycast/utils";
@@ -30,6 +30,7 @@ const SearchMeetings = () => {
         const data = await fetchJson<SearchResponse>(`/api/search?${params.toString()}`);
         if (!canceled) setSearchedMeetings(data.meetings?.result ?? []);
       } catch (error) {
+        captureException(error);
         showFailureToast(error, {
           title: "Something went wrong.",
         });

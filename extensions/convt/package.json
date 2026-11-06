@@ -27,7 +27,7 @@
     {
       "name": "get-targets",
       "title": "Get Conversion Formats",
-      "description": "Find locally available output formats for existing files using Convt."
+      "description": "Identify file types and find supported and suggested output formats using Convt."
     },
     {
       "name": "convert-files",
@@ -65,5 +65,8 @@
     "test": "tsx --test tests/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "ray.dhruv"
+  ]
 }

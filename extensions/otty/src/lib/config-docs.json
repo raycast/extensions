@@ -1,0 +1,1382 @@
+{
+  "source": "https://docs.otty.sh/reference/configuration",
+  "docsVersion": "1.6.2",
+  "settings": {
+    "adjust-cell-height": {
+      "section": "Font",
+      "type": "string",
+      "default": "(none)",
+      "description": "Ghostty-compatible cell-height delta. Npx / bare N add logical points; N% scales by 1 + N/100. Negative compacts; glyphs stay vertically centered. Unset here, the active theme's [token].adjust-cell-height applies; unset in both, macOS/Linux use the font's natural line height and Windows defaults to line height 1.2 (20%), whose tight DWrite metrics otherwise render cramped rows. Set 0 to force the natural height anywhere."
+    },
+    "agent-command": {
+      "section": "Session Restore",
+      "type": "AGENT=COMMAND",
+      "default": "(built-in command)",
+      "description": "Override the executable/wrapper and global arguments Otty uses to launch an agent. Repeat once per agent; Otty appends native resume/fork arguments."
+    },
+    "arrow-box-drawing-join": {
+      "section": "Font",
+      "type": "bool",
+      "default": "true",
+      "description": "Render arrows ← → ↑ ↓ and solid triangles ◀ ▶ ▲ ▼ aligned to the cell centerline when adjacent to a connecting rule (│, ─, ┃, ═, ┼, …) — arrows get a box-aligned stem + chevron, triangles a flat back flush on the rule's edge — so they butt against it instead of leaving a gap. Standalone glyphs in prose / TUIs are unaffected. See Box Drawing."
+    },
+    "auto-hide-tab-bar": {
+      "section": "Sidebar & Layout",
+      "type": "enum",
+      "default": "default",
+      "description": "Auto-hide policy for the inline tab bar (tabs-top/tabs-bottom). Values: always, default, auto. Alias: window-show-tab-bar.",
+      "values": [
+        "always",
+        "default",
+        "auto"
+      ]
+    },
+    "auto-hide-tabs-panel": {
+      "section": "Sidebar & Layout",
+      "type": "enum",
+      "default": "default",
+      "description": "Auto-hide policy for the sidebar tabs panel (sidebar-left). Same values."
+    },
+    "auto-secure-input": {
+      "section": "Secure Input (macOS)",
+      "type": "bool",
+      "default": "true",
+      "description": "Auto-enable macOS Secure Keyboard Entry at password-style prompts."
+    },
+    "auto-theme-dark-mode": {
+      "section": "Theme",
+      "type": "bool",
+      "default": "true",
+      "description": "Follow the OS appearance: theme for light, theme-dark for dark."
+    },
+    "autocomplete-description-language": {
+      "section": "Autocomplete",
+      "type": "enum",
+      "default": "system",
+      "description": "Language for spec descriptions. Values: system, english, chinese.",
+      "values": [
+        "system",
+        "english",
+        "chinese"
+      ]
+    },
+    "autocomplete-history-ignore": {
+      "section": "Autocomplete",
+      "type": "list",
+      "default": "(none)",
+      "description": "Glob patterns for commands never recorded (e.g. ssh *, export *TOKEN*)."
+    },
+    "autocomplete-inline-provider": {
+      "section": "Autocomplete",
+      "type": "enum",
+      "default": "otty",
+      "description": "Windows, PowerShell only: who draws that preview. Values: otty (PSReadLine's own inline prediction is switched off), psreadline (PSReadLine's prediction when it has one, Otty's otherwise). Tab and Esc behave the same over either.",
+      "values": [
+        "otty",
+        "psreadline"
+      ]
+    },
+    "autocomplete-inline-suggestion": {
+      "section": "Autocomplete",
+      "type": "bool",
+      "default": "true",
+      "description": "Show a faded inline preview when one suggestion clearly leads: the only match, a whole command line that leads this folder (run most and run last), or an argument you clearly use most — never merely the first of several."
+    },
+    "autocomplete-on-device-learning": {
+      "section": "Autocomplete",
+      "type": "bool",
+      "default": "true",
+      "description": "Allow on-device learning (history, --help probes, README extraction). Privacy gate; everything stays local."
+    },
+    "autocomplete-shortcut": {
+      "section": "Autocomplete",
+      "type": "enum",
+      "default": "tab",
+      "description": "Key that accepts a suggestion. Values: tab, tab+right-arrow, right-arrow (only → accepts; Tab always goes to your shell's own completion), ctrl+space, disable.",
+      "values": [
+        "tab",
+        "tab+right-arrow",
+        "right-arrow",
+        "ctrl+space",
+        "disable"
+      ]
+    },
+    "autocomplete-show-candidates": {
+      "section": "Autocomplete",
+      "type": "enum",
+      "default": "escape",
+      "description": "Key that reveals the candidate panel. Values: disable, auto, escape, option-escape.",
+      "values": [
+        "disable",
+        "auto",
+        "escape",
+        "option-escape"
+      ]
+    },
+    "autocomplete-skip-secrets": {
+      "section": "Autocomplete",
+      "type": "bool",
+      "default": "false",
+      "description": "Never record a command that looks like it carries a password, token or API key. New commands only — already-stored ones are untouched, and otty learn still keeps one deliberately."
+    },
+    "background": {
+      "section": "Terminal Colors",
+      "type": "color",
+      "default": "#1e1e1e",
+      "description": "Terminal background color (when no theme is set)."
+    },
+    "background-opacity": {
+      "section": "Transparency",
+      "type": "float",
+      "default": "1.0",
+      "description": "Terminal background opacity (0.5 – 1.0). Values below 0.5 are rejected for readability."
+    },
+    "bidi": {
+      "section": "Terminal Identity & VT",
+      "type": "bool",
+      "default": "true",
+      "description": "Reorder each line for Hebrew, Arabic, and mixed RTL text with the Unicode bidirectional algorithm. The grid stays in logical order so copy, paste, and search are unaffected. Turn off if a TUI lays out RTL itself. See BiDi / RTL Text."
+    },
+    "bold-color": {
+      "section": "Terminal Colors",
+      "type": "enum | color",
+      "default": "none",
+      "description": "Bold text color. none, bright (use the bright palette variant), or a #rrggbb hex."
+    },
+    "cli-alias": {
+      "section": "Shell Integration & CLI",
+      "type": "name=cmd",
+      "default": "(none)",
+      "description": "User CLI alias: installs a shell function <name> running otty <command>. Repeatable. Settings-managed."
+    },
+    "cli-allow-overwrite": {
+      "section": "Shell Integration & CLI",
+      "type": "bool",
+      "default": "false",
+      "description": "Let omit-prefix / custom-alias wrappers replace names the user already defined."
+    },
+    "clipboard-paste-bracketed-safe": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "true",
+      "description": "Sanitize bracketed-paste sequences inside pasted content."
+    },
+    "clipboard-paste-protection": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "true",
+      "description": "Warn before pasting potentially dangerous content."
+    },
+    "clipboard-read": {
+      "section": "Clipboard & Selection",
+      "type": "enum",
+      "default": "ask",
+      "description": "OSC 52 clipboard read access. Values: ask, allow, deny.",
+      "values": [
+        "ask",
+        "allow",
+        "deny"
+      ]
+    },
+    "clipboard-trim-trailing-spaces": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "false",
+      "description": "Trim trailing whitespace when copying."
+    },
+    "clipboard-write": {
+      "section": "Clipboard & Selection",
+      "type": "enum",
+      "default": "allow",
+      "description": "OSC 52 clipboard write access. Values: ask, allow, deny.",
+      "values": [
+        "ask",
+        "allow",
+        "deny"
+      ]
+    },
+    "command": {
+      "section": "Shell & Environment",
+      "type": "string",
+      "default": "$SHELL (else /bin/zsh)",
+      "description": "Shell/command to run. Alias: shell."
+    },
+    "confirm-close-pane": {
+      "section": "App Behavior",
+      "type": "enum",
+      "default": "process",
+      "description": "Confirm closing a split pane. Values: always, process, never.",
+      "values": [
+        "always",
+        "process",
+        "never"
+      ]
+    },
+    "confirm-close-tab": {
+      "section": "App Behavior",
+      "type": "enum",
+      "default": "process",
+      "description": "Confirm closing a tab. Values: always, process (only with a running process), never.",
+      "values": [
+        "always",
+        "process",
+        "never"
+      ]
+    },
+    "confirm-close-window": {
+      "section": "App Behavior",
+      "type": "enum",
+      "default": "process",
+      "description": "Confirm closing a window. Values: always, process, multiple_tabs, never.",
+      "values": [
+        "always",
+        "process",
+        "multiple_tabs",
+        "never"
+      ]
+    },
+    "copy-on-select": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "false",
+      "description": "Automatically copy on selection."
+    },
+    "ctrl-c-action": {
+      "section": "Mouse & Input",
+      "type": "enum",
+      "default": "copy-selection",
+      "description": "Windows / Linux. copy-selection copies when there is a selection (Windows Terminal / VS Code) and sends ^C otherwise. shell always sends ^C. Ctrl+C is never put behind a hold — it has to interrupt a runaway process."
+    },
+    "ctrl-hold-threshold-ms": {
+      "section": "Mouse & Input",
+      "type": "integer",
+      "default": "1500",
+      "description": "Windows / Linux. Hold duration (120–5000 ms) before a Ctrl chord goes to the shell when ctrl-shortcuts = hold. The byte is sent as soon as the threshold elapses, not on release."
+    },
+    "ctrl-shortcuts": {
+      "section": "Mouse & Input",
+      "type": "enum",
+      "default": "shell",
+      "description": "Windows / Linux. How a bare Ctrl chord is split between a shortcut and the control byte the shell reads. shell always sends to the shell. hold runs the shortcut on tap and sends the control byte after the hold threshold. left / right bind that Ctrl to shortcuts and the other one to the shell. Unbound chords (Ctrl+A, Ctrl+R, …) always reach the shell."
+    },
+    "cursor-animation": {
+      "section": "Cursor",
+      "type": "enum",
+      "default": "off",
+      "description": "Cursor motion animation. Values: off, smooth.",
+      "values": [
+        "off",
+        "smooth"
+      ]
+    },
+    "cursor-click-to-move": {
+      "section": "Mouse & Input",
+      "type": "bool",
+      "default": "true",
+      "description": "Click on the active prompt line emits arrow keys to move the shell cursor to the click target."
+    },
+    "cursor-color": {
+      "section": "Cursor",
+      "type": "color",
+      "default": "(theme)",
+      "description": "Cursor fill color."
+    },
+    "cursor-opacity": {
+      "section": "Cursor",
+      "type": "float",
+      "default": "1.0",
+      "description": "Cursor opacity (0.0 – 1.0)."
+    },
+    "cursor-style": {
+      "section": "Cursor",
+      "type": "enum",
+      "default": "block",
+      "description": "Cursor shape. Values: block, bar, underline, block_hollow (also block-hollow).",
+      "values": [
+        "block",
+        "bar",
+        "underline",
+        "block_hollow"
+      ]
+    },
+    "cursor-style-blink": {
+      "section": "Cursor",
+      "type": "enum",
+      "default": "default_off",
+      "description": "Cursor blink policy. Values: default_off, default_on, always_off, always_on. default_* set the initial blink but let a program override it (DECSCUSR blink bit / DEC mode 12); always_* pin it and ignore programs. Legacy true/false still parse as always_on/always_off.",
+      "values": [
+        "default_off",
+        "default_on",
+        "always_off",
+        "always_on"
+      ]
+    },
+    "cursor-text": {
+      "section": "Cursor",
+      "type": "color",
+      "default": "(theme)",
+      "description": "Text color under the cursor."
+    },
+    "dedup-repaint-scrollback": {
+      "section": "Scrollback & Session Log",
+      "type": "bool",
+      "default": "true",
+      "description": "Drop stale copies that some full-screen TUIs (e.g. Claude Code's classic renderer) leave in scrollback when they repaint a region taller than the window. Legitimate repeats (a status line after every command) are never removed. See Duplicate scrollback lines."
+    },
+    "default-git-client": {
+      "section": "Links & Open With",
+      "type": "string",
+      "default": "(auto)",
+      "description": "Bundle ID of the preferred git GUI client for \"Open in <App>\". Empty = first installed."
+    },
+    "details-panel-width": {
+      "section": "Details Panel Views",
+      "type": "int",
+      "default": "220",
+      "description": "Panel width in points."
+    },
+    "details-view": {
+      "section": "Details Panel Views",
+      "type": "view",
+      "default": "(the four built-ins)",
+      "description": "One view per line, in tab order. See below."
+    },
+    "dock-icon-animate-progress": {
+      "section": "Dock Icon (macOS)",
+      "type": "bool",
+      "default": "false",
+      "description": "Animate the Dock icon while any session emits OSC 9;4 progress."
+    },
+    "dock-icon-error-badge": {
+      "section": "Dock Icon (macOS)",
+      "type": "bool",
+      "default": "true",
+      "description": "Tint the Dock icon red on a non-zero exit / OSC 9;4;2 error; clicking focuses the next error tab."
+    },
+    "editor-default-to-preview-readonly": {
+      "section": "Editor (File Pane)",
+      "type": "bool",
+      "default": "true",
+      "description": "Open preview-capable formats (.md, .svg, .html…) in read-only preview mode."
+    },
+    "editor-line-wrap": {
+      "section": "Editor (File Pane)",
+      "type": "bool",
+      "default": "true",
+      "description": "Soft-wrap long lines instead of horizontal scrolling."
+    },
+    "editor-scroll-past-end": {
+      "section": "Editor (File Pane)",
+      "type": "bool",
+      "default": "true",
+      "description": "Allow scrolling past the last line (VS Code's scrollBeyondLastLine)."
+    },
+    "editor-show-line-numbers": {
+      "section": "Editor (File Pane)",
+      "type": "bool",
+      "default": "true",
+      "description": "Show the line-number gutter."
+    },
+    "editor-tab-size": {
+      "section": "Editor (File Pane)",
+      "type": "integer",
+      "default": "4",
+      "description": "Visual width of a tab character, in columns."
+    },
+    "editor-visible-whitespace": {
+      "section": "Editor (File Pane)",
+      "type": "bool",
+      "default": "false",
+      "description": "Render whitespace as glyphs."
+    },
+    "enquiry-response": {
+      "section": "Terminal Identity & VT",
+      "type": "string",
+      "default": "(empty)",
+      "description": "Reply string for the ENQ (0x05) control character."
+    },
+    "env": {
+      "section": "Shell & Environment",
+      "type": "KEY=VALUE",
+      "default": "(none)",
+      "description": "Set an environment variable. Repeatable (one env line each)."
+    },
+    "faint-opacity": {
+      "section": "Terminal Colors",
+      "type": "float",
+      "default": "0.5",
+      "description": "Opacity multiplier for faint/dim text (0.0 – 1.0)."
+    },
+    "file-open-with": {
+      "section": "Links & Open With",
+      "type": "enum",
+      "default": "default-app",
+      "description": "Where to open a clicked file path. Values: default-app, otty.",
+      "values": [
+        "default-app",
+        "otty"
+      ]
+    },
+    "focus-follows-mouse": {
+      "section": "Mouse & Input",
+      "type": "bool",
+      "default": "false",
+      "description": "Focus the pane under the mouse without clicking."
+    },
+    "folder-open-with": {
+      "section": "Links & Open With",
+      "type": "enum",
+      "default": "default-app",
+      "description": "Where to open a clicked folder path. Values: default-app, otty.",
+      "values": [
+        "default-app",
+        "otty"
+      ]
+    },
+    "font-blending": {
+      "section": "Font",
+      "type": "enum",
+      "default": "srgb-over",
+      "description": "Glyph alpha compositing. srgb-over blends in the gamma-encoded framebuffer (classic terminal look). macos-like keeps non-linear blending in the OS-native color space (Ghostty's native). linear blends in linear-light space (physically correct, can thin strokes). perceptual boosts alpha for thin strokes so dark text keeps its stem weight. Aliases: font-smooth, font-antialiased."
+    },
+    "font-family": {
+      "section": "Font",
+      "type": "string | list",
+      "default": "JetBrains Mono",
+      "description": "Primary terminal font. Also accepts an inline array — font-family = [\"A\", \"B\"] — where the rest are fallbacks tried in order."
+    },
+    "font-family-bold": {
+      "section": "Font",
+      "type": "string",
+      "default": "(none)",
+      "description": "Override family for bold cells. Empty = reuse font-family and synthesize."
+    },
+    "font-family-bold-italic": {
+      "section": "Font",
+      "type": "string",
+      "default": "(none)",
+      "description": "Override family for bold+italic cells."
+    },
+    "font-family-fallback": {
+      "section": "Font",
+      "type": "list",
+      "default": "(none)",
+      "description": "Extra fallback families tried, in order, before the OS system cascade. Comma-separated."
+    },
+    "font-family-fallback-bold": {
+      "section": "Font",
+      "type": "list",
+      "default": "(none)",
+      "description": "Per-style fallback chain for bold cells."
+    },
+    "font-family-fallback-bold-italic": {
+      "section": "Font",
+      "type": "list",
+      "default": "(none)",
+      "description": "Per-style fallback chain for bold+italic cells."
+    },
+    "font-family-fallback-italic": {
+      "section": "Font",
+      "type": "list",
+      "default": "(none)",
+      "description": "Per-style fallback chain for italic cells."
+    },
+    "font-family-italic": {
+      "section": "Font",
+      "type": "string",
+      "default": "(none)",
+      "description": "Override family for italic cells."
+    },
+    "font-ligatures": {
+      "section": "Font",
+      "type": "enum",
+      "default": "dlig",
+      "description": "OpenType ligature level. off disables programming ligatures, calt enables the standard/contextual set, dlig also enables discretionary ligatures. Alias: ligatures."
+    },
+    "font-ligatures-alphabet": {
+      "section": "Font",
+      "type": "bool",
+      "default": "false",
+      "description": "Also form ligatures inside runs of letters/digits/CJK. Off keeps fi/fl-style letter ligatures from collapsing cells."
+    },
+    "font-size": {
+      "section": "Font",
+      "type": "float",
+      "default": "13.0",
+      "description": "Font size in points."
+    },
+    "font-thicken": {
+      "section": "Font",
+      "type": "bool",
+      "default": "false",
+      "description": "macOS only. Force GUI-style stem darkening regardless of font-blending. Auto-enabled when background-opacity < 1.0. Mirrors Ghostty's font-thicken."
+    },
+    "foreground": {
+      "section": "Terminal Colors",
+      "type": "color",
+      "default": "#d4d4d4",
+      "description": "Default text color (when no theme is set)."
+    },
+    "frecency-auto-record": {
+      "section": "Open Quickly, Frecency & Jump",
+      "type": "bool",
+      "default": "true",
+      "description": "Record every CWD change into the frecency table (powers the Folders tab and otty jump)."
+    },
+    "freeze-inactive-tab": {
+      "section": "Scrollback & Session Log",
+      "type": "bool",
+      "default": "false",
+      "description": "Release inactive tabs' GPU surfaces to save memory; recreate on switch. Off keeps tab switches smooth."
+    },
+    "ipc-allow-send-keys": {
+      "section": "IPC Security",
+      "type": "bool",
+      "default": "false",
+      "description": "Allow the send-keys IPC command."
+    },
+    "ipc-allow-sensitive-sessions": {
+      "section": "IPC Security",
+      "type": "bool",
+      "default": "false",
+      "description": "Allow send-keys/capture on SSH/sudo sessions."
+    },
+    "keybind": {
+      "section": "Keybindings",
+      "type": "trigger=action",
+      "default": "(built-in)",
+      "description": "Bind a key chord to an action. Repeatable. See the Keybindings Reference for triggers and action names."
+    },
+    "kitty-keyboard": {
+      "section": "Terminal Identity & VT",
+      "type": "bool",
+      "default": "true",
+      "description": "Support the Kitty keyboard protocol (disambiguated/extended key reporting)."
+    },
+    "language": {
+      "section": "App Behavior",
+      "type": "enum",
+      "default": "system",
+      "description": "UI language. Values: system, english, chinese.",
+      "values": [
+        "system",
+        "english",
+        "chinese"
+      ]
+    },
+    "link-open-with": {
+      "section": "Links & Open With",
+      "type": "enum",
+      "default": "browser",
+      "description": "Where to open a clicked URL. Values: browser, otty.",
+      "values": [
+        "browser",
+        "otty"
+      ]
+    },
+    "link-previews": {
+      "section": "Links & Open With",
+      "type": "bool",
+      "default": "true",
+      "description": "Show the corner pill with the hovered link's full URL — on Cmd-hover (macOS), on bare hover plus a Ctrl+Click to open hint (Windows). Off hides the pill only; links stay clickable."
+    },
+    "link-scheme-allowlist": {
+      "section": "Links & Open With",
+      "type": "list",
+      "default": "(none)",
+      "description": "Extra schemes to detect when link-schemes = custom (bare names, no ://)."
+    },
+    "link-schemes": {
+      "section": "Links & Open With",
+      "type": "enum",
+      "default": "all",
+      "description": "Which extra URL schemes are auto-detected. all (any scheme://) or custom (only the allowlist). http(s)/file/mailto are always detected."
+    },
+    "live-resize-sigwinch-delay-ms": {
+      "section": "Font",
+      "type": "integer",
+      "default": "50",
+      "description": "Milliseconds the grid must stay stable during a live drag before a single mid-drag SIGWINCH fires. 0 disables the mid-drag signal (drag-end still fires one)."
+    },
+    "login-greeting": {
+      "section": "Terminal Identity & VT",
+      "type": "bool",
+      "default": "false",
+      "description": "Run the login shell as a login shell so the system greeting/MOTD prints."
+    },
+    "macos-option-as-alt": {
+      "section": "Mouse & Input",
+      "type": "enum",
+      "default": "false",
+      "description": "Treat Option as Alt. Values: true, false, left, right.",
+      "values": [
+        "true",
+        "false",
+        "left",
+        "right"
+      ]
+    },
+    "max-fps": {
+      "section": "Window",
+      "type": "integer",
+      "default": "0",
+      "description": "Cap on the terminal's redraw rate. 0 follows the display (120 on ProMotion); 60 halves the CPU a stream of output costs there. macOS."
+    },
+    "minimum-contrast": {
+      "section": "Terminal Colors",
+      "type": "float",
+      "default": "1.0",
+      "description": "Minimum fg/bg contrast ratio (1.0 – 21.0). 1.0 disables adjustment."
+    },
+    "mouse-hide-while-typing": {
+      "section": "Mouse & Input",
+      "type": "bool",
+      "default": "false",
+      "description": "Hide the mouse cursor while typing."
+    },
+    "mouse-reporting": {
+      "section": "Mouse & Input",
+      "type": "bool",
+      "default": "true",
+      "description": "Forward mouse events to the terminal application."
+    },
+    "mouse-scroll-multiplier": {
+      "section": "Mouse & Input",
+      "type": "float | compound",
+      "default": "3.0",
+      "description": "Scroll speed for Otty's own scrollback. A single number sets both; compound form discrete:3.0,precision:1.0. Does not scale the wheel events sent to a program that reads the mouse itself (tmux, vim with mouse=a) — those apps apply their own step per event."
+    },
+    "mouse-shift-to-select": {
+      "section": "Mouse & Input",
+      "type": "bool",
+      "default": "true",
+      "description": "Holding Shift always does local selection even when the app has mouse reporting on."
+    },
+    "new-tab-position": {
+      "section": "App Behavior",
+      "type": "enum",
+      "default": "auto",
+      "description": "Where a new tab opens. Values: end, auto, after-current.",
+      "values": [
+        "end",
+        "auto",
+        "after-current"
+      ]
+    },
+    "notification-foreground": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "enum",
+      "default": "off",
+      "description": "Banner behavior while Otty is foreground. Values: off, always, tab-unfocused.",
+      "values": [
+        "off",
+        "always",
+        "tab-unfocused"
+      ]
+    },
+    "omit-otty-prefix": {
+      "section": "Shell Integration & CLI",
+      "type": "bool",
+      "default": "false",
+      "description": "Install edit/view/watch shell functions so the otty prefix can be dropped. Live-toggleable."
+    },
+    "on-launch": {
+      "section": "App Behavior",
+      "type": "enum",
+      "default": "restore_session",
+      "description": "What happens at launch. Values: new_window, restore_session.",
+      "values": [
+        "new_window",
+        "restore_session"
+      ]
+    },
+    "open-quickly-folders-limit": {
+      "section": "Open Quickly, Frecency & Jump",
+      "type": "integer",
+      "default": "12",
+      "description": "Max frecency-ranked folders surfaced in Open Quickly. Alias: open-quickly-zoxide-limit."
+    },
+    "open-with-app": {
+      "section": "Links & Open With",
+      "type": "Name|bundle",
+      "default": "(none)",
+      "description": "Add an external app to \"Open in\" submenus. Repeatable. Settings-managed."
+    },
+    "open-with-command": {
+      "section": "Links & Open With",
+      "type": "Name|command",
+      "default": "(none)",
+      "description": "Add a TUI command (e.g. yazi, lazygit) to \"Open in\" submenus; it runs in a new tab rooted at the target. {} in the command is replaced by the target path. Repeatable. Settings-managed."
+    },
+    "osc-color-report-format": {
+      "section": "Terminal Identity & VT",
+      "type": "enum",
+      "default": "16-bit",
+      "description": "OSC 4/10/11 color-query response format. Values: none, 8-bit, 16-bit.",
+      "values": [
+        "none",
+        "8-bit",
+        "16-bit"
+      ]
+    },
+    "output-scroll-animation": {
+      "section": "Terminal Scrolling",
+      "type": "enum",
+      "default": "auto",
+      "description": "How the view follows the scroll the terminal does to itself. Values: auto (follow terminal-scroll-smooth), off, smooth.",
+      "values": [
+        "auto",
+        "off",
+        "smooth"
+      ]
+    },
+    "palette": {
+      "section": "Terminal Colors",
+      "type": "N=COLOR",
+      "default": "(none)",
+      "description": "Alternative per-index syntax: palette = 1=#ff5555."
+    },
+    "palette-0 .. palette-15": {
+      "section": "Terminal Colors",
+      "type": "color",
+      "default": "(Dracula-based)",
+      "description": "ANSI palette. 0–7 normal, 8–15 bright."
+    },
+    "privilege-badge-activity": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Show an activity badge for background output."
+    },
+    "privilege-badge-agent-awaiting-input": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Badge when an agent awaits input."
+    },
+    "privilege-badge-agent-processing": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Badge while an agent is processing."
+    },
+    "privilege-badge-agent-task-complete": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Badge when an agent finishes a task."
+    },
+    "privilege-badge-exit-status": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Show an exit-status badge on the tab."
+    },
+    "privilege-caffeinate-agent-processing": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "false",
+      "description": "Keep the Mac awake while an agent is processing."
+    },
+    "privilege-clipboard-shell": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Let the shell drive clipboard (OSC 52) operations."
+    },
+    "privilege-mouse-shell": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Let the shell control mouse reporting."
+    },
+    "privilege-notification-on-error": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Notify when a command errors."
+    },
+    "privilege-notification-on-finish": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "false",
+      "description": "Notify when a long command finishes."
+    },
+    "privilege-notification-on-watch-finish": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Notify when a watched command finishes."
+    },
+    "privilege-notification-shell": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Let shell-integration commands post notifications."
+    },
+    "privilege-notify-agent-awaiting-input": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "System notification when an agent awaits approval/input."
+    },
+    "privilege-notify-agent-task-complete": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "System notification when an agent finishes a task."
+    },
+    "privilege-resume-agent-session": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Offer to resume agent sessions on restore."
+    },
+    "privilege-sound-on-error": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "false",
+      "description": "Play a sound on a non-zero command exit."
+    },
+    "privilege-sound-shell": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Let shell-integration commands trigger sounds."
+    },
+    "privilege-title-shell": {
+      "section": "Notifications, Sounds & Badges",
+      "type": "bool",
+      "default": "true",
+      "description": "Let the shell set the window/tab title."
+    },
+    "progress-bar-commands": {
+      "section": "Shell Integration & CLI",
+      "type": "list",
+      "default": "(built-in set)",
+      "description": "Command prefixes the shell integration auto-emits OSC 9;4 progress for (curl, git push, npm install, …). Matched as whitespace-delimited prefixes."
+    },
+    "quick-access": {
+      "section": "App Behavior",
+      "type": "list",
+      "default": "—",
+      "description": "Pinned entries for the + menu, the tray menu and the Jump List, one per line: quick-access = 'kind=\"folder\" value=\"C:\\dev\\otty\" label=\"otty\"'. kind is folder, recipe, ssh or profile; value is the path, recipe id, ssh host or profile id."
+    },
+    "quick-terminal-cwd": {
+      "section": "Quick Terminal",
+      "type": "enum",
+      "default": "current-pane",
+      "description": "Working directory for the quick terminal. Values: last-used, current-pane.",
+      "values": [
+        "last-used",
+        "current-pane"
+      ]
+    },
+    "quick-terminal-persist-session": {
+      "section": "Quick Terminal",
+      "type": "bool",
+      "default": "false",
+      "description": "Keep the quick-terminal session alive between toggles."
+    },
+    "quit-after-last-window-closed": {
+      "section": "App Behavior",
+      "type": "bool",
+      "default": "false",
+      "description": "Quit Otty when the last window closes."
+    },
+    "recipe-replay-file": {
+      "section": "Recipes",
+      "type": "enum",
+      "default": "manually",
+      "description": "Command replay for external .ottyrecipe files. Same values."
+    },
+    "recipe-replay-saved": {
+      "section": "Recipes",
+      "type": "enum",
+      "default": "ask_once",
+      "description": "Command replay for internally-saved recipes. Values: auto, ask_once, manually.",
+      "values": [
+        "auto",
+        "ask_once",
+        "manually"
+      ]
+    },
+    "right-click-action": {
+      "section": "Mouse & Input",
+      "type": "enum",
+      "default": "context-menu",
+      "description": "What right-click does. Values: context-menu, copy, paste, copy-or-paste, ignore.",
+      "values": [
+        "context-menu",
+        "copy",
+        "paste",
+        "copy-or-paste",
+        "ignore"
+      ]
+    },
+    "scroll-to-bottom": {
+      "section": "Mouse & Input",
+      "type": "flags",
+      "default": "keystroke,no-output",
+      "description": "When to auto-scroll to bottom. Comma-separated: keystroke/no-keystroke, output/no-output."
+    },
+    "scrollback-limit": {
+      "section": "Scrollback & Session Log",
+      "type": "integer",
+      "default": "(none)",
+      "description": "Alternative byte-budget form (divided by 80 to derive lines). Mirrors Ghostty."
+    },
+    "scrollback-lines": {
+      "section": "Scrollback & Session Log",
+      "type": "integer",
+      "default": "10000",
+      "description": "Maximum scrollback lines retained per pane."
+    },
+    "secure-input-indication": {
+      "section": "Secure Input (macOS)",
+      "type": "bool",
+      "default": "true",
+      "description": "Show the title-bar pill while Secure Keyboard Entry is active."
+    },
+    "selection-background": {
+      "section": "Terminal Colors",
+      "type": "color",
+      "default": "(none)",
+      "description": "Selection background. Accepts 8-digit #rrggbbaa for a translucent selection. Unset uses the default foreground."
+    },
+    "selection-backspace-deletes": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "true",
+      "description": "Backspace deletes a selection on the prompt line instead of one character at the cursor."
+    },
+    "selection-clear-on-copy": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "true",
+      "description": "Clear the selection after an explicit copy (does not apply to copy-on-select)."
+    },
+    "selection-clear-on-typing": {
+      "section": "Clipboard & Selection",
+      "type": "bool",
+      "default": "true",
+      "description": "Clear the active selection when typing."
+    },
+    "selection-foreground": {
+      "section": "Terminal Colors",
+      "type": "color | auto",
+      "default": "(none)",
+      "description": "Text color in selections. Unset keeps the fg↔bg swap default; auto keeps each cell's original foreground."
+    },
+    "session-log-mode": {
+      "section": "Scrollback & Session Log",
+      "type": "enum",
+      "default": "redacted",
+      "description": "Session log capture. plain stores raw output; redacted masks detected secrets with equal-width asterisks."
+    },
+    "session-log-size-mb": {
+      "section": "Scrollback & Session Log",
+      "type": "integer",
+      "default": "5",
+      "description": "Max per-session log size (MB) used for recover & the scrollback pager."
+    },
+    "session-restore-banner": {
+      "section": "Session Restore",
+      "type": "bool",
+      "default": "true",
+      "description": "Show \"Closed at\" / \"Restored at\" banners on restore."
+    },
+    "session-restore-multiplayer": {
+      "section": "Session Restore",
+      "type": "bool",
+      "default": "true",
+      "description": "Reattach multiplexer sessions (currently tmux) on restore."
+    },
+    "session-restore-process-allowlist": {
+      "section": "Session Restore",
+      "type": "list",
+      "default": "(none)",
+      "description": "Command prefixes eligible for relaunch when session-restore-processes = whitelist. Matched as whitespace-delimited prefixes."
+    },
+    "session-restore-processes": {
+      "section": "Session Restore",
+      "type": "enum",
+      "default": "none",
+      "description": "Which still-running pane commands to relaunch. Values: none, whitelist, all.",
+      "values": [
+        "none",
+        "whitelist",
+        "all"
+      ]
+    },
+    "shell-integration": {
+      "section": "Shell Integration & CLI",
+      "type": "bool",
+      "default": "true",
+      "description": "Install the managed shell-rc block (OSC 133 marks, CWD reporting, edit/view/jump wrappers, custom aliases)."
+    },
+    "shift-arrow-select": {
+      "section": "Mouse & Input",
+      "type": "bool",
+      "default": "true",
+      "description": "Enable Shift+Arrow text selection."
+    },
+    "show-tray-icon": {
+      "section": "App Behavior",
+      "type": "bool",
+      "default": "true",
+      "description": "Windows only. Show the notification-area (tray) icon. Forced on while stay-in-tray is set."
+    },
+    "sidebar-visible": {
+      "section": "Sidebar & Layout",
+      "type": "bool",
+      "default": "true",
+      "description": "Show the sidebar on startup."
+    },
+    "sidebar-width": {
+      "section": "Sidebar & Layout",
+      "type": "integer",
+      "default": "240 (220 on macOS)",
+      "description": "Sidebar width in pixels. Also written back when you drag the sidebar's right edge."
+    },
+    "split-working-directory": {
+      "section": "Shell & Environment",
+      "type": "enum | path",
+      "default": "inherit",
+      "description": "Directory for a new split."
+    },
+    "ssh-integration": {
+      "section": "Shell Integration & CLI",
+      "type": "bool",
+      "default": "true",
+      "description": "Forward Otty's shell integration over SSH to remote hosts."
+    },
+    "stay-in-tray": {
+      "section": "App Behavior",
+      "type": "bool",
+      "default": "false",
+      "description": "Windows only. Keep Otty running after the last window closes, reachable from the tray icon."
+    },
+    "strip-cjk-wrap-pad": {
+      "section": "Font",
+      "type": "bool",
+      "default": "false",
+      "description": "Hide the stray reverse-video cell some line editors (zsh) leave when a wide CJK character wraps. Off renders it verbatim, same as tmux / Ghostty / Terminal.app. See Wrapped CJK lines."
+    },
+    "tab-icon-placement": {
+      "section": "Tab Appearance",
+      "type": "enum",
+      "default": "combined",
+      "description": "Where a tab's icon sits. combined: it shares the badge slot, and a status badge takes over while one is active. separate: icon on the left, badges on the right, shell name hidden, and the window title carries the icon too."
+    },
+    "tab-rule": {
+      "section": "Tab Appearance",
+      "type": "rule",
+      "default": "(none)",
+      "description": "One ordered rule per line, highest priority first. See below."
+    },
+    "tab-working-directory": {
+      "section": "Shell & Environment",
+      "type": "enum | path",
+      "default": "inherit",
+      "description": "Directory for a new tab (inherits the active pane's CWD)."
+    },
+    "term": {
+      "section": "Shell & Environment",
+      "type": "string",
+      "default": "auto",
+      "description": "Value of $TERM. auto picks the best-supported value for Otty."
+    },
+    "terminal-scroll-past-end": {
+      "section": "Terminal Scrolling",
+      "type": "enum",
+      "default": "disabled",
+      "description": "Scroll past the last line in the terminal. Values: disabled, last-line-with-content, last-line-in-middle, cursor-line. Always off on the alternate screen.",
+      "values": [
+        "disabled",
+        "last-line-with-content",
+        "last-line-in-middle",
+        "cursor-line"
+      ]
+    },
+    "terminal-scroll-past-end-sticky": {
+      "section": "Terminal Scrolling",
+      "type": "bool",
+      "default": "false",
+      "description": "Keep the past-end offset sticky instead of draining it as new output arrives."
+    },
+    "terminal-scroll-past-first-line": {
+      "section": "Terminal Scrolling",
+      "type": "enum",
+      "default": "disabled",
+      "description": "Scroll past the first scrollback line. Values: disabled, same-as-last-line, first-line-with-content, first-line-in-middle.",
+      "values": [
+        "disabled",
+        "same-as-last-line",
+        "first-line-with-content",
+        "first-line-in-middle"
+      ]
+    },
+    "terminal-scroll-smooth": {
+      "section": "Terminal Scrolling",
+      "type": "bool",
+      "default": "true",
+      "description": "Pixel-granular scrollback navigation; snaps to the nearest row on idle."
+    },
+    "terminal-scrollbar-hide-on-auto-scroll": {
+      "section": "Terminal Scrolling",
+      "type": "bool",
+      "default": "false",
+      "description": "Show the scrollbar only while the viewport is parked away from the live output; keep it hidden while the view just follows program output."
+    },
+    "text-blink": {
+      "section": "Font",
+      "type": "bool",
+      "default": "false",
+      "description": "Animate SGR-blink (SGR 5/6) cells. Off renders them steady (accessibility). Alias: font-blink."
+    },
+    "text-bold": {
+      "section": "Font",
+      "type": "enum",
+      "default": "auto",
+      "description": "How bold cells resolve when no bold face exists. Values: off, auto, primary-only, synthetic. Alias: font-bold.",
+      "values": [
+        "off",
+        "auto",
+        "primary-only",
+        "synthetic"
+      ]
+    },
+    "text-italic": {
+      "section": "Font",
+      "type": "enum",
+      "default": "auto",
+      "description": "How italic cells resolve when no italic face exists. Values: off, auto, primary-only, synthetic. Alias: font-italic.",
+      "values": [
+        "off",
+        "auto",
+        "primary-only",
+        "synthetic"
+      ]
+    },
+    "text-underline": {
+      "section": "Font",
+      "type": "bool",
+      "default": "true",
+      "description": "Render SGR-underline cells' underline decoration. Alias: font-underline."
+    },
+    "theme": {
+      "section": "Theme",
+      "type": "string",
+      "default": "Paper",
+      "description": "Active theme (light slot). Overrides foreground, background, and palette. See Built-in Themes."
+    },
+    "theme-dark": {
+      "section": "Theme",
+      "type": "string",
+      "default": "Nord",
+      "description": "Theme used when the OS is in dark mode and auto-theme-dark-mode is on."
+    },
+    "title-from-osc": {
+      "section": "Tab Appearance",
+      "type": "bool",
+      "default": "true",
+      "description": "Let programs rename the tab and window with OSC 0/1/2. Turn off to pin every tab to what the rules below resolve."
+    },
+    "title-report": {
+      "section": "Terminal Identity & VT",
+      "type": "bool",
+      "default": "false",
+      "description": "Allow apps to query the window title (XTWINOPS). Off by default (security)."
+    },
+    "ui-accent": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Accent color (defaults to blue)."
+    },
+    "ui-active": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Active/pressed highlight."
+    },
+    "ui-border-subtle": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Subtle/secondary border."
+    },
+    "ui-font-family": {
+      "section": "UI Font",
+      "type": "string",
+      "default": "(system)",
+      "description": "Font family for UI chrome text."
+    },
+    "ui-font-size": {
+      "section": "UI Font",
+      "type": "float",
+      "default": "13.0",
+      "description": "Font size for UI chrome text in points."
+    },
+    "ui-hover": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Hover highlight."
+    },
+    "ui-panel-background": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Chrome frame behind the terminal grid. (Not the app's main background — that's background.)"
+    },
+    "ui-panel-border": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Panel border. Accepts 8-digit #rrggbbaa for a translucent border."
+    },
+    "ui-panel-surface": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Surface/card background."
+    },
+    "ui-text-primary": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Primary UI text."
+    },
+    "ui-text-secondary": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Secondary UI text."
+    },
+    "ui-text-tertiary": {
+      "section": "UI Chrome Colors",
+      "type": "color",
+      "default": "(auto)",
+      "description": "Tertiary/muted UI text."
+    },
+    "unfocused-split-opacity": {
+      "section": "Transparency",
+      "type": "float",
+      "default": "0.6",
+      "description": "Opacity of split panes that don't have focus (0.0 – 1.0). 1.0 keeps every pane fully visible — no dimming. Applies live; no window reopen needed."
+    },
+    "vt-kam-allowed": {
+      "section": "Terminal Identity & VT",
+      "type": "bool",
+      "default": "true",
+      "description": "Allow the KAM (keyboard action mode) escape sequence."
+    },
+    "vt-keypad-app-allowed": {
+      "section": "Terminal Identity & VT",
+      "type": "bool",
+      "default": "true",
+      "description": "Allow application keypad mode (DECKPAM, ESC =). When off, the keypad always sends literal digits."
+    },
+    "widen-ambiguous": {
+      "section": "Terminal Identity & VT",
+      "type": "list",
+      "default": "(empty)",
+      "description": "Unicode blocks whose East-Asian-Ambiguous codepoints render width-2. Empty by default so widths match your shell's wcwidth (ambiguous = 1 cell on macOS/Linux in every locale); only opt in if you run a CJK font whose programs also treat the range as wide, otherwise the cursor desyncs. Values: enclosed-alphanumerics, number-forms, math-operators, misc-technical, misc-symbols, dingbats, arrows, geometric-shapes.",
+      "values": [
+        "enclosed-alphanumerics",
+        "number-forms",
+        "math-operators",
+        "misc-technical",
+        "misc-symbols",
+        "dingbats",
+        "arrows",
+        "geometric-shapes"
+      ]
+    },
+    "window-cols": {
+      "section": "Window",
+      "type": "integer",
+      "default": "80",
+      "description": "Initial columns (grid mode)."
+    },
+    "window-height-px": {
+      "section": "Window",
+      "type": "integer",
+      "default": "600",
+      "description": "Initial window height in pixels (frame mode)."
+    },
+    "window-hide-dirty-indicator": {
+      "section": "App Behavior",
+      "type": "bool",
+      "default": "false",
+      "description": "macOS only. Never show the unsaved/running dot on the window close button (traffic light)."
+    },
+    "window-layout": {
+      "section": "Sidebar & Layout",
+      "type": "enum",
+      "default": "sidebar-left",
+      "description": "Tab placement. Values: sidebar-left, tabs-top, tabs-bottom.",
+      "values": [
+        "sidebar-left",
+        "tabs-top",
+        "tabs-bottom"
+      ]
+    },
+    "window-opacity": {
+      "section": "Transparency",
+      "type": "float",
+      "default": "1.0",
+      "description": "Window-level opacity (0.5 – 1.0)."
+    },
+    "window-rows": {
+      "section": "Window",
+      "type": "integer",
+      "default": "24",
+      "description": "Initial rows (grid mode)."
+    },
+    "window-size": {
+      "section": "Window",
+      "type": "enum",
+      "default": "remember",
+      "description": "How initial window size is decided. remember restores the last size, frame uses pixel dimensions, grid uses cell counts."
+    },
+    "window-width-px": {
+      "section": "Window",
+      "type": "integer",
+      "default": "1000",
+      "description": "Initial window width in pixels (frame mode)."
+    },
+    "window-working-directory": {
+      "section": "Shell & Environment",
+      "type": "enum | path",
+      "default": "profile",
+      "description": "Directory for a brand-new window's first pane. profile (Windows only; elsewhere same as home) uses the launch profile's cwd (empty → home)."
+    },
+    "windows-text-rendering": {
+      "section": "Font",
+      "type": "enum",
+      "default": "natural",
+      "description": "Windows only. DirectWrite rasterization. natural (default) is grayscale AA with grid-fitting; natural-symmetric is slightly softer; gdi is GDI-style hinting; cleartype is subpixel ClearType; aliased has no antialiasing. Ignored on other platforms."
+    },
+    "working-directory": {
+      "section": "Shell & Environment",
+      "type": "enum | path",
+      "default": "inherit",
+      "description": "Initial directory. inherit, home, or an absolute path (~/ allowed)."
+    },
+    "zoxide-enabled": {
+      "section": "Open Quickly, Frecency & Jump",
+      "type": "bool",
+      "default": "true",
+      "description": "Sync removals to the external zoxide binary when present."
+    },
+    "zoxide-local-path": {
+      "section": "Open Quickly, Frecency & Jump",
+      "type": "string",
+      "default": "(auto)",
+      "description": "Explicit path to the zoxide binary. Empty = auto-detect. Settings-hidden."
+    }
+  }
+}

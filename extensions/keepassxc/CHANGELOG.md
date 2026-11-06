@@ -1,5 +1,37 @@
 # KeePassXC Extension Changelog
 
+## [1.12.0] - 2026-10-30
+
+### Added
+
+- Support for the KeePassXC search syntax to restrict the search to a field: `user:` (`u:`), `title:` (`t:`), `url:` and `group:` (`g:`), with `-` or `!` to exclude, `+` for an exact match, `*` for a regular expression, `*` and `?` wildcards, `|` for OR, and quotes for values with spaces (e.g. `g:"Shared Drive"`).
+- Icon on the "Unlock" action when unlocking the database.
+
+### Changed
+
+- Search now applies to all fields (title, username, URL and folder) instead of the title only. Each word of the search must match one of them, in any order (e.g. "gh admin").
+
+### Fixed
+
+- Entries missing from the results, or listed after unrelated ones, when the search matched the middle or the end of a long title (e.g. "Forti" for "Client ACME - Firewall Fortigate").
+- Abbreviations (e.g. "gh" for GitHub) no longer matching since 1.11.0. Typos are still tolerated (e.g. "guthub").
+
+## [1.11.0] - 2026-10-23
+
+### Added
+
+- Fuzzy search on entry titles.
+- Filter entries by username with `u:<name>` anywhere in the search bar.
+- Show or hide the password when unlocking the database.
+
+### Changed
+
+- Favicons are displayed by default.
+
+### Fixed
+
+- Error about locale "C" not being UTF-8 when running `keepassxc-cli`.
+
 ## [1.10.0] - 2026-03-30
 
 ### Added

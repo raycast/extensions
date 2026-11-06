@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import {
   extractImageIdFromUrl,
   type ImageCacheEntry,
-} from "@mcdays/cloudflare-images-core";
+} from "./cloudflare-core.js";
 
 const CACHE_KEY_PREFIX = "image-cache:";
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days

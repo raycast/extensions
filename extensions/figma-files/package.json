@@ -7,7 +7,8 @@
   "author": "michaelschultz",
   "contributors": [
     "pernielsentikaer",
-    "GLaDO8"
+    "GLaDO8",
+    "igorabramkin"
   ],
   "version": "1.6.2",
   "license": "MIT",
@@ -22,7 +23,7 @@
       "type": "password",
       "required": false,
       "title": "Personal Access Token",
-      "description": "[Deprecated] You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+      "description": "Optional. Needed to see files in nested folders: create a token with the folders:read, file_content:read and file_metadata:read scopes. Without one, you sign in through the browser and only top-level folders are listed."
     },
     {
       "name": "TEAM_ID",

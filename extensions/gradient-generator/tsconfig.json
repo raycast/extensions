@@ -1,20 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 20",
-  "include": ["src/**/*"],
+  "display": "Raycast Node 26",
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["es2020", "dom"],
-    "module": "commonjs",
-    "target": "es2020",
-    "strict": false,
+    "lib": ["ES2022"],
+    "module": "Node16",
+    "target": "ES2022",
+    "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
-    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "moduleResolution": "Node16",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false
+    "noImplicitAny": true
   }
 }

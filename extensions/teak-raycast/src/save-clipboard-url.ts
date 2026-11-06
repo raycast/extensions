@@ -3,6 +3,9 @@ import {
   ensureCredentialsForNoViewCommand,
   extractFirstHttpUrl,
   saveCardWithFeedback,
+  saveFilesWithFeedback,
+  toLocalPath,
+  uploadRejection,
 } from "./lib/capture";
 
 export default async function SaveClipboardCommand() {
@@ -10,7 +13,23 @@ export default async function SaveClipboardCommand() {
     return;
   }
 
-  const clipboardText = (await Clipboard.readText())?.trim() ?? "";
+  const clipboard = await Clipboard.read();
+  const copiedFile = clipboard.file ? toLocalPath(clipboard.file) : null;
+  if (copiedFile) {
+    const rejection = uploadRejection(copiedFile);
+    if (rejection) {
+      await showToast({
+        message: rejection,
+        style: Toast.Style.Failure,
+        title: "Couldn't save the copied file",
+      });
+      return;
+    }
+    await saveFilesWithFeedback([copiedFile], "raycast_clipboard");
+    return;
+  }
+
+  const clipboardText = clipboard.text.trim();
 
   if (!clipboardText) {
     await showToast({

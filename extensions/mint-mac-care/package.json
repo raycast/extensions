@@ -1,30 +1,31 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mint-mac-care",
-  "title": "Mint",
-  "description": "Clean up your Mac with Mint: see what fills the disk, get space back without deleting anything, clear caches, organize folders, free memory and uninstall apps",
+  "title": "Mint - Mac Storage Cleanup for You and Your Agents",
+  "description": "Optimize and clean up Mac storage for you and your AI agents: caches, Xcode builds, duplicate files and the gigabytes Codex, Claude Code and Cursor keep",
   "icon": "extension-icon.png",
   "author": "dzg-studio",
   "categories": [
-    "Productivity",
-    "System"
+    "System",
+    "Developer Tools",
+    "Productivity"
   ],
   "platforms": [
     "macOS"
   ],
   "keywords": [
     "mac cleaner",
-    "cleaner",
-    "disk space",
-    "free space",
-    "storage",
-    "junk",
-    "cache",
+    "mac cleanup",
+    "storage cleaner",
+    "storage optimizer",
+    "disk cleanup",
+    "deep clean",
+    "free up space",
+    "ai agent cleanup",
+    "claude code",
+    "cursor",
     "duplicates",
-    "memory",
-    "uninstaller",
-    "codex",
-    "claude"
+    "automatic cleanup"
   ],
   "license": "MIT",
   "commands": [
@@ -32,55 +33,61 @@
       "name": "mint-status",
       "title": "View Mac Status",
       "subtitle": "Mint",
-      "description": "Disk, memory and your organized folders on one screen, like Mint's menu bar",
+      "description": "Disk space, memory and organized folders at a glance, with their Auto Care, like Mint's menu bar",
       "mode": "view",
       "keywords": [
-        "disk",
-        "storage",
-        "space",
+        "disk usage",
+        "storage usage",
+        "disk space",
         "free space",
         "memory",
         "ram",
         "system status",
-        "overview"
+        "overview",
+        "monitor",
+        "auto care",
+        "dashboard"
       ]
     },
     {
       "name": "mint-optimize",
       "title": "Optimize Storage",
       "subtitle": "Mint",
-      "description": "Identical copies share their storage. Nothing is deleted and every file stays where it is",
+      "description": "Get space back without deleting anything: identical copies share their storage, by source like Codex, Claude Code, Cursor and your files",
       "mode": "view",
       "keywords": [
+        "optimizer",
+        "optimization",
         "duplicates",
-        "copies",
-        "clone",
-        "space",
+        "duplicate files",
         "dedupe",
-        "apfs",
+        "apfs clone",
+        "lossless",
         "codex",
-        "claude",
-        "ai agents"
+        "claude code",
+        "cursor",
+        "ai agents",
+        "agent storage"
       ]
     },
     {
       "name": "mint-scan",
       "title": "Free Disk",
       "subtitle": "Mint",
-      "description": "Mint's groups with what is in each: optimize copies, clean what apps make again, choose from your own files",
+      "description": "Free disk space: share identical copies, clean the caches, logs and build output apps make again, and choose from your own files",
       "mode": "view",
       "keywords": [
-        "clean",
         "cleaner",
-        "mac cleaner",
-        "cache",
+        "cleanup",
+        "clean up",
         "junk",
-        "space",
-        "disk space",
-        "free up space",
+        "cache",
+        "disk cleanup",
+        "xcode",
+        "derived data",
         "node_modules",
-        "logs",
-        "purge",
+        "build cache",
+        "temporary files",
         "system data"
       ]
     },
@@ -88,7 +95,7 @@
       "name": "mint-organize",
       "title": "Organize a Folder",
       "subtitle": "Mint",
-      "description": "How many files each folder has to sort and where they go, then organize it in one step",
+      "description": "How many loose files each folder has to sort and where they go, then tidy it in one step",
       "mode": "view",
       "keywords": [
         "desktop",
@@ -97,14 +104,17 @@
         "sort",
         "organize files",
         "declutter",
-        "clean desktop"
+        "clean desktop",
+        "file organizer",
+        "folder organizer",
+        "sort files"
       ]
     },
     {
       "name": "mint-memory",
       "title": "Free Memory",
       "subtitle": "Mint",
-      "description": "Quit every idle app in one step, or choose the apps to quit",
+      "description": "Quit idle apps to free RAM in one step, or choose which apps to quit",
       "mode": "view",
       "keywords": [
         "ram",
@@ -112,7 +122,10 @@
         "free ram",
         "quit apps",
         "idle apps",
-        "memory cleaner"
+        "memory cleaner",
+        "ram cleaner",
+        "memory usage",
+        "memory pressure"
       ]
     },
     {
@@ -126,7 +139,10 @@
         "delete app",
         "leftovers",
         "uninstaller",
-        "remove app"
+        "remove app",
+        "app cleaner",
+        "app remover",
+        "leftover files"
       ]
     },
     {
@@ -138,7 +154,8 @@
       "keywords": [
         "restore",
         "revert",
-        "put back"
+        "put back",
+        "history"
       ]
     },
     {
@@ -152,7 +169,10 @@
         "what grew",
         "storage history",
         "space used",
-        "system data"
+        "system data",
+        "disk usage",
+        "storage usage",
+        "what is using space"
       ]
     }
   ],

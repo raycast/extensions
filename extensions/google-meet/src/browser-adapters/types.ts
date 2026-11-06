@@ -24,6 +24,8 @@ export interface MeetingUrlSource {
    */
   describeTimeout?(): Promise<MeetError | undefined>;
 
+  openCreationUrl?(url: string): Promise<void>;
+
   /**
    * True for adapters (Firefox family) that read the URL by copying the
    * address bar to the system clipboard. Callers use this to decide whether

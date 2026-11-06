@@ -1,0 +1,38 @@
+{
+  "prev": [
+    {
+      "firstLine": "Le direct",
+      "secondLine": "Écoutez une programmation qui explore le passé, le présent et le futur du hip-hop. Des Last Poets à Little Simz, de Nujabes à Alpha Wann, plongez dans toute la richesse du rap mondial.",
+      "thirdLine": "Hip-Hop",
+      "songUuid": null,
+      "cover": "5c52d959-7ea2-4c9e-b298-5aab893a9b86",
+      "startTime": null,
+      "endTime": null
+    }
+  ],
+  "now": {
+    "firstLine": "Big shots",
+    "firstLineSongUuid": "0eba39e9-891c-4fc0-9af1-8cdfdff12192",
+    "secondLine": "Eyedea & Abilities",
+    "secondLineSongUuid": "0eba39e9-891c-4fc0-9af1-8cdfdff12192",
+    "thirdLine": "Hip-Hop",
+    "songUuid": "0eba39e9-891c-4fc0-9af1-8cdfdff12192",
+    "cover": "03f1c09f-cfba-4abd-bf95-fe06b0ac79cb",
+    "startTime": 1792675059,
+    "endTime": 1792675279
+  },
+  "next": [
+    {
+      "firstLine": "Denial (feat. Pretty Bulli & Illa Ghee)",
+      "firstLineSongUuid": "f50aa121-b178-43c4-9e91-661e8ba14007",
+      "secondLine": "Queen Herawin",
+      "secondLineSongUuid": "f50aa121-b178-43c4-9e91-661e8ba14007",
+      "thirdLine": "Hip-Hop",
+      "songUuid": "f50aa121-b178-43c4-9e91-661e8ba14007",
+      "cover": "68e9a6e7-0db9-4ddc-8369-2fb8d85f5396",
+      "startTime": 1792675279,
+      "endTime": 1792675538
+    }
+  ],
+  "delayToRefresh": 220000
+}

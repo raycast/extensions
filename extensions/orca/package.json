@@ -68,6 +68,24 @@
       ]
     },
     {
+      "name": "groupBy",
+      "title": "Group List By",
+      "description": "How List All Agents groups its rows. Agents waiting for input and agents that finished unseen always lead the list; below them it goes by project, or by state: working, finished, other terminals.",
+      "type": "dropdown",
+      "required": false,
+      "default": "project",
+      "data": [
+        {
+          "title": "Project",
+          "value": "project"
+        },
+        {
+          "title": "Status",
+          "value": "status"
+        }
+      ]
+    },
+    {
       "name": "agentFilter",
       "title": "Agent Types",
       "description": "Which panes count as agents, in List All Agents and in the root search subtitle alike.",

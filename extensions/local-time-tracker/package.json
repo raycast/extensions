@@ -14,6 +14,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "today-plan",
+      "title": "Today's Plan",
+      "subtitle": "Plan tasks and track work",
+      "description": "Plan daily goals and subtasks in a single text field and track time against tasks",
+      "mode": "view"
+    },
+    {
       "name": "start-work",
       "title": "Start Work",
       "subtitle": "Start a project timer",

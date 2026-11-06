@@ -33,7 +33,6 @@ export function CostAnalysis() {
   const { topModels: models, isLoading: modelsLoading, error: modelsError } = useSessionUsage();
 
   const isLoading = totalLoading || dailyLoading || modelsLoading;
-  const error = totalError || dailyError || modelsError;
 
   const costBreakdown = useMemo(() => (models ? calculateCostBreakdown(models) : { breakdown: [] }), [models]);
   const tokenBreakdown = useMemo(() => (models ? calculateTokenBreakdown(models) : { breakdown: [] }), [models]);
@@ -48,16 +47,20 @@ export function CostAnalysis() {
     [monthlyCost],
   );
 
-  const accessories: List.Item.Accessory[] = error
-    ? STANDARD_ACCESSORIES.ERROR
-    : totalUsage === undefined
-      ? STANDARD_ACCESSORIES.LOADING
-      : !totalUsage
-        ? STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(totalUsage.totalCost), icon: Icon.Coins }];
+  const accessories: List.Item.Accessory[] =
+    totalError && !totalUsage
+      ? STANDARD_ACCESSORIES.ERROR
+      : totalUsage === undefined
+        ? totalLoading
+          ? STANDARD_ACCESSORIES.LOADING
+          : STANDARD_ACCESSORIES.NO_DATA
+        : !totalUsage
+          ? STANDARD_ACCESSORIES.NO_DATA
+          : [{ text: formatCost(totalUsage.totalCost), icon: Icon.Coins }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
-      error,
+      error: !totalUsage ? totalError : undefined,
+      isLoading: totalLoading,
       noDataMessage: !totalUsage ? "No cost data available" : undefined,
       noDataSubMessage: !totalUsage ? `Cost analysis will appear ${MESSAGES.AFTER_USAGE}` : undefined,
     });
@@ -72,6 +75,7 @@ export function CostAnalysis() {
 
     return (
       <List.Item.Detail.Metadata>
+        {totalError && <List.Item.Detail.Metadata.Label title="Refresh Error" text={totalError.message} />}
         <List.Item.Detail.Metadata.Label
           title="Cost Overview"
           text={formatCost(totalUsage.totalCost)}
@@ -82,9 +86,10 @@ export function CostAnalysis() {
         <List.Item.Detail.Metadata.Label title="Daily vs Total" />
         <List.Item.Detail.Metadata.Label
           title="Today's Cost"
-          text={dailyUsage ? formatCost(dailyUsage.totalCost) : formatCost(0)}
+          text={dailyUsage ? formatCost(dailyUsage.totalCost) : dailyLoading ? "Loading…" : "No data"}
         />
-        <List.Item.Detail.Metadata.Label title="Today's % of Total" text={dailyCostPercentage} />
+        {dailyUsage && <List.Item.Detail.Metadata.Label title="Today's % of Total" text={dailyCostPercentage} />}
+        {dailyError && <List.Item.Detail.Metadata.Label title="Daily Usage Error" text={dailyError.message} />}
         <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(totalUsage.totalCost)} />
         <List.Item.Detail.Metadata.Separator />
 
@@ -109,6 +114,15 @@ export function CostAnalysis() {
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost by Model" />
+        {modelsError && <List.Item.Detail.Metadata.Label title="Model Usage Error" text={modelsError.message} />}
+        {models.length === 0 && (
+          <List.Item.Detail.Metadata.Label
+            title="Status"
+            text={
+              modelsLoading ? "Loading model details…" : modelsError ? "Model details unavailable" : "No model data"
+            }
+          />
+        )}
         {costBreakdown.breakdown.slice(0, MAX_COST_MODELS_DISPLAY).map((model, index) => (
           <List.Item.Detail.Metadata.Label
             key={`cost-${model.model || "unknown"}-${index}`}

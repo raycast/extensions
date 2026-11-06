@@ -1,4 +1,3 @@
-import { parse } from "node-html-parser";
 import { fetchResource } from "./loaders";
 
 export interface Zone {
@@ -7,21 +6,19 @@ export interface Zone {
   state: string;
 }
 
+interface ApiZone {
+  jakimCode: string;
+  negeri: string;
+  daerah: string;
+}
+
 export async function extractZones(): Promise<Zone[] | undefined> {
-  const url = "https://www.e-solat.gov.my/index.php?siteId=24&pageId=24#";
   return fetchResource({
-    url,
+    url: "https://api.waktusolat.app/zones",
     errorTitle: "Unable to load prayer zones",
     parseResponse: async (response) => {
-      const dom = parse(await response.text());
-      const zoneOptions = dom.querySelector("select#inputZone")?.querySelectorAll(":scope > optgroup > option") ?? [];
-
-      const zones = zoneOptions
-        .map((z) => ({
-          id: z.getAttribute("value") || "",
-          name: z.textContent.trim(),
-          state: z.closest("optgroup")?.getAttribute("label") || "",
-        }))
+      const zones = ((await response.json()) as ApiZone[])
+        .map((z) => ({ id: z.jakimCode, name: z.daerah, state: z.negeri }))
         .filter(({ id, name }) => !!id && !!name);
 
       if (zones.length === 0) {

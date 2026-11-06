@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Contributors] - 2026-10-15
+
+- Added smrehan to the contributors, for the Next Reminder command, the calendar-style menu bar and multi-list selection.
+
 ## [Next Reminder and Menu Bar Lists] - 2026-10-12
 
 - Add a Next Reminder command that keeps your next timed reminder and its countdown in its root search subtitle. Add it to Favorites to see it when Raycast opens. Choose how far ahead it looks and how long a past-due reminder stays.

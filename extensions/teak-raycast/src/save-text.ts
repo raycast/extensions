@@ -1,6 +1,7 @@
 import { type LaunchProps, showToast, Toast } from "@raycast/api";
 import {
   ensureCredentialsForNoViewCommand,
+  parseCaptureExtras,
   saveCardWithFeedback,
 } from "./lib/capture";
 
@@ -26,9 +27,12 @@ export default async function SaveTextCommand(
 
   await saveCardWithFeedback(
     {
-      cardType: "text",
       content,
       source: fallbackText ? "raycast_fallback" : "raycast_save_text",
+      ...parseCaptureExtras({
+        notes: props.arguments?.note,
+        tags: props.arguments?.tags,
+      }),
     },
     {
       loadingTitle: "Saving to Teak...",

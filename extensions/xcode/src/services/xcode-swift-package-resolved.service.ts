@@ -5,6 +5,13 @@ import { XcodeSwiftPackageResolvedEntry } from "../models/swift-package-resolved
 import { execAsync } from "../shared/exec-async";
 
 /**
+ * A raw Package.resolved pin (supports version 1 and version 2+ formats)
+ */
+type RawPackageResolvedPin = ({ identity: string; location: string } | { package: string; repositoryURL: string }) & {
+  state?: { branch?: string; revision?: string; version?: string };
+};
+
+/**
  * XcodeSwiftPackageResolvedService
  */
 export class XcodeSwiftPackageResolvedService {
@@ -20,7 +27,8 @@ export class XcodeSwiftPackageResolvedService {
     // Retrieve the contents of the package resolved and parse it as JSON
     const packageResolved = JSON.parse(await readFileAsync(packageResolvedPath, "utf-8"));
     // Initialize the package resolved pins
-    const packageResolvedPins = packageResolved.pins ?? packageResolved.object?.pins;
+    const packageResolvedPins: RawPackageResolvedPin[] | undefined =
+      packageResolved.pins ?? packageResolved.object?.pins;
     // Check if no package resolved pins are available
     if (!packageResolvedPins) {
       // Throw error
@@ -29,10 +37,10 @@ export class XcodeSwiftPackageResolvedService {
     // Return Xcode Swift Package Resolved
     return {
       path: packageResolvedPath,
-      entries: (packageResolvedPins as any[]).map((packageResolvedPin: any) => {
+      entries: packageResolvedPins.map((packageResolvedPin) => {
         return {
-          name: packageResolvedPin.identity ?? packageResolvedPin.package,
-          location: packageResolvedPin.location ?? packageResolvedPin.repositoryURL,
+          name: "identity" in packageResolvedPin ? packageResolvedPin.identity : packageResolvedPin.package,
+          location: "location" in packageResolvedPin ? packageResolvedPin.location : packageResolvedPin.repositoryURL,
           branch: packageResolvedPin.state?.branch,
           revision: packageResolvedPin.state?.revision,
           version: packageResolvedPin.state?.version,

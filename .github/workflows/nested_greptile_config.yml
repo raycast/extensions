@@ -1,0 +1,28 @@
+name: "Nested Greptile Config"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "extensions/**/.greptile/**"
+      - "extensions/**/greptile.json"
+    branches: [main, master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Fail on nested Greptile config
+        run: |
+          nested_files=$(gh api --paginate \
+            "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+            --jq '.[] | select(.status != "removed") | .filename
+              | select(test("^extensions/.+/(\\.greptile/.+|greptile\\.json)$"))')
+
+          if [[ -n "$nested_files" ]]; then
+            echo "::error::Extensions can't include their own Greptile config:"
+            echo "$nested_files"
+            exit 1
+          fi
