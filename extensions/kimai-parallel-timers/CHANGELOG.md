@@ -1,6 +1,6 @@
 # Kimai Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-06
 
 - Track multiple timers without stopping existing entries.
 - Start, resume, edit, and stop entries from Raycast and the menu bar.
