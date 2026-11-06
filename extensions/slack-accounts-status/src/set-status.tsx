@@ -12,6 +12,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import {
   clearStatusPreset,
   customPreset,
@@ -25,7 +26,6 @@ import {
 import ManageWorkspaces from "./manage-workspaces";
 import StatusForm from "./status-form";
 import { deletePreset, readAccounts, readPresets } from "./state";
-import { useStoredData } from "./use-stored-data";
 
 async function loadData() {
   const [accounts, presets] = await Promise.all([readAccounts(), readPresets()]);
@@ -33,7 +33,7 @@ async function loadData() {
 }
 
 export default function SetStatus() {
-  const { data, error, loading, reload } = useStoredData(loadData);
+  const { data, error, isLoading, revalidate } = usePromise(loadData);
   const accounts = data?.accounts ?? [];
   const commonActions = (
     <>
@@ -41,12 +41,12 @@ export default function SetStatus() {
         title="Manage Workspaces"
         icon={Icon.PersonCircle}
         target={<ManageWorkspaces navigationTitle="Manage Slack Workspaces" />}
-        onPop={reload}
+        onPop={revalidate}
       />
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        onAction={reload}
+        onAction={revalidate}
         shortcut={Keyboard.Shortcut.Common.Refresh}
       />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -62,7 +62,7 @@ export default function SetStatus() {
       return;
     try {
       await deletePreset(preset.id);
-      await reload();
+      revalidate();
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Could Not Delete Preset", message: errorMessage(error) });
     }
@@ -101,8 +101,8 @@ export default function SetStatus() {
             <Action.Push
               title="Review Status"
               icon={Icon.Pencil}
-              target={<StatusForm accounts={accounts} initial={preset} onPresetSaved={reload} />}
-              onPop={reload}
+              target={<StatusForm accounts={accounts} initial={preset} onPresetSaved={revalidate} />}
+              onPop={revalidate}
             />
             {commonActions}
             {saved && "text" in preset && (
@@ -121,13 +121,13 @@ export default function SetStatus() {
   if (error)
     return (
       <Detail
-        markdown={`# Could Not Load Status Settings\n\n${error}`}
+        markdown={`# Could Not Load Status Settings\n\n${errorMessage(error)}`}
         actions={<ActionPanel>{commonActions}</ActionPanel>}
       />
     );
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search status presets…">
-      {accounts.length === 0 && (
+    <List isLoading={isLoading} searchBarPlaceholder="Search status presets…">
+      {!isLoading && accounts.length === 0 && (
         <List.EmptyView
           title="Connect Your Workspaces First"
           description="Open Manage Workspaces to authorize each Slack account. Then apply a status to all or selected workspaces."

@@ -11,14 +11,14 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { connectAccount, disconnectAccount } from "./accounts";
 import { Account, errorMessage } from "./domain";
 import { readAccounts } from "./state";
-import { useStoredData } from "./use-stored-data";
 
 export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?: string } = {}) {
-  const { data: accounts = [], error, loading, reload } = useStoredData(readAccounts);
+  const { data: accounts = [], error, isLoading, revalidate } = usePromise(readAccounts);
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   async function connect(expected?: Account) {
@@ -35,7 +35,7 @@ export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?
       toast.title = "Could Not Connect Workspace";
       toast.message = errorMessage(error);
     } finally {
-      await reload();
+      revalidate();
       inFlight.current = false;
       setBusy(false);
     }
@@ -60,7 +60,7 @@ export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Could Not Disconnect", message: errorMessage(error) });
     } finally {
-      await reload();
+      revalidate();
       inFlight.current = false;
       setBusy(false);
     }
@@ -71,7 +71,7 @@ export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?
       <Action
         title="Refresh Workspaces"
         icon={Icon.ArrowClockwise}
-        onAction={reload}
+        onAction={revalidate}
         shortcut={Keyboard.Shortcut.Common.Refresh}
       />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -81,17 +81,17 @@ export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?
   if (error)
     return (
       <Detail
-        markdown={`# Could Not Load Workspaces\n\n${error}`}
+        markdown={`# Could Not Load Workspaces\n\n${errorMessage(error)}`}
         actions={<ActionPanel>{commonActions}</ActionPanel>}
       />
     );
   return (
     <List
-      isLoading={loading || busy}
+      isLoading={isLoading || busy}
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search connected workspaces…"
     >
-      {accounts.length === 0 && (
+      {!isLoading && accounts.length === 0 && (
         <List.EmptyView
           title="Connect Your Slack Workspaces"
           description="Authorize each workspace once. You can connect a workspace even when it is not open in Slack."

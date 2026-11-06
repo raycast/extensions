@@ -117,7 +117,7 @@ export default function StatusForm({
 }: {
   accounts: Account[];
   initial: Preset | PresencePreset;
-  onPresetSaved: () => Promise<void>;
+  onPresetSaved: () => void;
 }) {
   const { push } = useNavigation();
   const isClear = initial === clearStatusPreset;
@@ -165,7 +165,7 @@ export default function StatusForm({
         if (duration === "until")
           throw new Error("Use a relative duration when saving a preset, such as 60 minutes or Today.");
         await savePreset(preset);
-        await onPresetSaved();
+        onPresetSaved();
         await showToast({ style: Toast.Style.Success, title: "Preset Saved", message: preset.name });
       } else {
         const targets = accounts.filter((account) => selected.includes(account.id));
