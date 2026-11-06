@@ -41,13 +41,16 @@ async function fetchCursorJson<T>(
   return { data: data as T, error: null };
 }
 
-export function resolveCursorCredential(manualCookieHeader?: string): CursorCredential | null {
+export function resolveCursorCredential(
+  manualCookieHeader?: string,
+  appToken?: string | null,
+): CursorCredential | null {
   const manualCookie = normalizeCookieHeader(manualCookieHeader);
   if (manualCookie) {
     return { cookieHeader: manualCookie, source: "manual cookie", requestUsageUserIdFallback: null };
   }
 
-  const appSession = resolveCursorAppAuthSession();
+  const appSession = resolveCursorAppAuthSession({ accessToken: appToken });
   return appSession
     ? { cookieHeader: appSession.cookieHeader, source: "Cursor", requestUsageUserIdFallback: appSession.userId }
     : null;
@@ -63,13 +66,14 @@ export function getCursorNotConfiguredMessage(appToken: string | null): string {
 export async function fetchCursorUsage(
   manualCookieHeader?: string,
 ): Promise<{ usage: CursorUsage | null; error: CursorError | null }> {
-  const credential = resolveCursorCredential(manualCookieHeader);
+  const appToken = normalizeCookieHeader(manualCookieHeader) ? null : readCursorAppAccessToken();
+  const credential = resolveCursorCredential(manualCookieHeader, appToken);
   if (!credential) {
     return {
       usage: null,
       error: {
         type: "not_configured",
-        message: getCursorNotConfiguredMessage(readCursorAppAccessToken()),
+        message: getCursorNotConfiguredMessage(appToken),
       },
     };
   }

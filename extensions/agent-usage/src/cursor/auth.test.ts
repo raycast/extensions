@@ -144,7 +144,7 @@ test("Cursor prefers the active Windows database token over a stale or different
   }
 });
 
-test("Cursor falls back to auth.json when the Windows state database token is expired or the database is invalid", async () => {
+test("Cursor falls back to auth.json when the Windows database token is expired, unsupported or invalid", async () => {
   const { resolveCursorAppAuthSession } = await import("./auth.ts");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "cursor-db-fallback-"));
   const dbPath = path.join(dir, "state.vscdb");
@@ -153,13 +153,22 @@ test("Cursor falls back to auth.json when the Windows state database token is ex
   const fileToken = makeJwt({ sub: "auth0|file_user", exp: now / 1000 + 3600 });
   const database = new DatabaseSync(dbPath);
   database.exec("CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value TEXT)");
-  database
-    .prepare("INSERT INTO ItemTable VALUES (?, ?)")
-    .run("cursorAuth/accessToken", makeJwt({ sub: "auth0|expired_user", exp: now / 1000 - 3600 }));
-  database.close();
   fs.writeFileSync(authFilePath, JSON.stringify({ accessToken: fileToken }));
   try {
-    assert.equal(resolveCursorAppAuthSession({ dbPath, authFilePath, platform: "win32", now })?.userId, "file_user");
+    try {
+      for (const token of [
+        makeJwt({ sub: "auth0|expired_user", exp: now / 1000 - 3600 }),
+        "YWJjOjEyMzp4eXo6dG9rZW4=",
+      ]) {
+        database.prepare("INSERT OR REPLACE INTO ItemTable VALUES (?, ?)").run("cursorAuth/accessToken", token);
+        assert.equal(
+          resolveCursorAppAuthSession({ dbPath, authFilePath, platform: "win32", now })?.userId,
+          "file_user",
+        );
+      }
+    } finally {
+      database.close();
+    }
     fs.writeFileSync(dbPath, "invalid database");
     assert.equal(resolveCursorAppAuthSession({ dbPath, authFilePath, platform: "win32", now })?.userId, "file_user");
   } finally {

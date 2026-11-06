@@ -22,6 +22,7 @@ interface ResolveCursorAppAuthOptions {
   authFilePath?: string;
   platform?: NodeJS.Platform;
   now?: number;
+  accessToken?: string | null;
 }
 
 function trimToNull(value: string | undefined): string | null {
@@ -111,11 +112,11 @@ export function readCursorAppAccessToken(
     try {
       const auth: unknown = JSON.parse(fs.readFileSync(authFilePath, "utf-8"));
       if (!auth || typeof auth !== "object" || !("accessToken" in auth) || typeof auth.accessToken !== "string") {
-        return null;
+        return databaseToken;
       }
-      return trimToNull(auth.accessToken);
+      return trimToNull(auth.accessToken) ?? databaseToken;
     } catch {
-      return null;
+      return databaseToken;
     }
   }
 
@@ -150,7 +151,10 @@ function readCursorStateDbAccessToken(dbPath: string, platform: NodeJS.Platform)
 }
 
 export function resolveCursorAppAuthSession(options: ResolveCursorAppAuthOptions = {}): CursorAppAuthSession | null {
-  const accessToken = readCursorAppAccessToken(options.dbPath, options.authFilePath, options.platform, options.now);
+  const accessToken =
+    options.accessToken === undefined
+      ? readCursorAppAccessToken(options.dbPath, options.authFilePath, options.platform, options.now)
+      : options.accessToken;
   if (!accessToken) {
     return null;
   }
