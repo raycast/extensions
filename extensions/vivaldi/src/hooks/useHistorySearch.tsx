@@ -4,8 +4,10 @@ import { HistoryEntry, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components";
 
+const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
+
 const whereClauses = (tableTitle: string, terms: string[]) => {
-  return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
+  return terms.map((t) => `${tableTitle}.title LIKE '%${escapeLike(t)}%' ESCAPE '\\'`).join(" AND ");
 };
 
 const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>

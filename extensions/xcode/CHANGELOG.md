@@ -1,5 +1,11 @@
 # Xcode Changelog
 
+## [Easier Project Identification] - 2026-11-04
+
+- Remove the project file name from the path shown in Search Recent Projects.
+- Add a preference to show a colored directory tag instead of the path, with the full path as a tooltip. The tag shows the git root directory, or the parent directory for projects outside git, next to an icon for the directory type. This makes it easier to tell git worktrees apart.
+- Show workspaces embedded in a project or playground as that project or playground, instead of as a separate entry named "project" or "playground".
+
 ## [Improve Xcode project discovery] - 2026-10-29
 
 - Include Xcode projects in hidden git worktrees

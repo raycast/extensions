@@ -1,5 +1,45 @@
 # Model Context Protocol Registry Changelog
 
+## [Add WolfSMS MCP Server] - 2026-11-04
+
+- Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Sofya MCP Server] - 2026-11-04
+
+- Add Sofya to the official registry: web search with full page content, page fetch as clean Markdown (PDFs and Office documents included), extraction with a prompt, and deep research with a cited report. 6 tools. Hosted Streamable HTTP server at https://mcp.sofya.co/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Update Zip-Codes.com MCP Server] - 2026-11-03
+
+- Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
+
+## [Add Cactal MCP Server] - 2026-11-03
+
+- Add Cactal to the official registry: build, publish and run websites from your AI agent, with pages, CMS content, forms, images and custom domains. Hosted Streamable HTTP server at https://api.cactal.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Deacon MCP Server] - 2026-11-03
+
+- Add Deacon to the official registry. Your customers tell Deacon's support chat what broke, and your coding agent reads it and fixes the code. Hosted Streamable HTTP server at https://heydeacon.com/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add HandlePilot MCP Server] - 2026-11-03
+
+- Add HandlePilot to the official registry: Instagram competitor research, reel breakdowns, content plans and editable carousels and scripts. Hosted Streamable HTTP server at https://app.handlepilot.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-03
+
+- Update Multi Mail and Multi Calendar in the official registry: Multi Mail names other IMAP mailboxes, and Multi Calendar iCloud, Fastmail and other CalDAV calendars.
+
+## [Add MakeViral MCP Server] - 2026-11-03
+
+- Add MakeViral to the official registry: find the newest viral AI video trend templates on TikTok and Instagram Reels and make them from your photos, or make any AI image or video from a prompt. 14 tools. Hosted Streamable HTTP server at https://www.makeviral.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add World Monitor MCP Server] - 2026-11-03
+
+- Add World Monitor to the official registry: real-time global intelligence on conflict, markets, energy, trade, shipping and cyber, with about 100 read-only tools. Hosted Streamable HTTP server at https://worldmonitor.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add BatchData MCP Server] - 2026-11-03
+
+- Add BatchData to the official registry: U.S. real estate property, ownership and contact data for AI agents (property lookup, comparables, property search, skip tracing, phone and address checks, investor buy boxes). 21 tools. Hosted Streamable HTTP server at https://mcp.batchdata.com with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a BatchData API token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A BatchData account is required.
+
 ## [Add SlickTrip MCP Server] - 2026-11-01
 
 - Add SlickTrip to the official registry: live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Hosted Streamable HTTP server at https://mcp.slicktrip.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

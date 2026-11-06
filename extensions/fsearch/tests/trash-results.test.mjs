@@ -22,7 +22,7 @@ async function harness(t, command, data, launchArguments = {}) {
     Dropdown: Object.assign(host("List.Dropdown"), { Item: host("List.Dropdown.Item") }),
   });
   const Action = host("Action");
-  for (const name of ["Open", "ShowInFinder", "OpenWith", "ToggleQuickLook", "CopyToClipboard", "Trash"]) {
+  for (const name of ["Open", "ShowInFinder", "OpenWith", "ToggleQuickLook", "CopyToClipboard", "Paste", "Trash"]) {
     Action[name] = host(`Action.${name}`);
   }
   const api = {
@@ -33,7 +33,9 @@ async function harness(t, command, data, launchArguments = {}) {
     Keyboard: { Shortcut: { Common: { Remove: { modifiers: ["ctrl"], key: "x" } } } },
     getPreferenceValues: () => ({}),
   };
-  let response = { data: { tookMicros: 500, ...data }, isLoading: false, indexing: false };
+  const revalidate = t.mock.fn();
+  let response = { data: { tookMicros: 500, ...data }, isLoading: false, revalidate };
+  const usePromise = t.mock.fn(() => response);
   const cache = new Map();
   function load(path) {
     if (cache.has(path)) return cache.get(path).exports;
@@ -49,8 +51,7 @@ async function harness(t, command, data, launchArguments = {}) {
     }).outputText;
     function localRequire(id) {
       if (id === "@raycast/api") return api;
-      if (id === "@raycast/utils") return { useCachedState: (_, initial) => React.useState(initial) };
-      if (id.endsWith("/use-fsearch")) return { useFSearch: () => response };
+      if (id === "@raycast/utils") return { useCachedState: (_, initial) => React.useState(initial), usePromise };
       if (id.endsWith("/file-detail")) return { FileDetail: host("FileDetail") };
       if (id.endsWith("/status-view")) return { StatusView: host("StatusView") };
       if (!id.startsWith(".")) return require(id);
@@ -68,6 +69,8 @@ async function harness(t, command, data, launchArguments = {}) {
   });
   t.after(() => act(() => renderer.unmount()));
   return {
+    revalidate,
+    searchArgs: () => usePromise.mock.calls.at(-1).arguments[1],
     list: () => renderer.root.findByType("List").props,
     items: () => renderer.root.findAllByType("List.Item"),
     sections: () => renderer.root.findAllByType("List.Section"),
@@ -104,6 +107,98 @@ const matches = (path) => ({
     { line: 1, text: "report one" },
     { line: 2, text: "report two" },
   ],
+});
+
+test("content search shows indexing, retries with matches visible, and stops when ready", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const h = await harness(t, "search-contents", { files: [], complete: true, indexing: true });
+  assert.match(h.empty()[0].props.title, /Indexing/i);
+  assert.equal(h.list().isLoading, true);
+  assert.equal(h.list().navigationTitle, undefined);
+  t.mock.timers.tick(1000);
+  assert.equal(h.revalidate.mock.callCount(), 1);
+
+  const files = [matches("/tmp/report.txt")];
+  await h.updateResults({ files, complete: true, indexing: true });
+  assert.ok(h.items().some((item) => item.props.id === "/tmp/report.txt:1"));
+  assert.match(h.sections()[0].props.title, /Indexing/);
+  assert.equal(h.list().navigationTitle, undefined);
+  t.mock.timers.tick(1000);
+  assert.equal(h.revalidate.mock.callCount(), 2);
+
+  await h.updateResults({ files, complete: true, indexing: false });
+  assert.equal(h.list().isLoading, false);
+  assert.doesNotMatch(h.sections()[0].props.title, /Indexing/);
+  assert.equal(h.list().navigationTitle, undefined);
+  t.mock.timers.tick(3000);
+  assert.equal(h.revalidate.mock.callCount(), 2);
+});
+
+test("content search shows the folder in its results and empty states without overriding the root title", async (t) => {
+  const files = [matches("/tmp/My Project/src/report.txt"), matches("/tmp/My Project/keep.txt")];
+  const h = await harness(
+    t,
+    "search-contents",
+    { files, complete: true, indexing: true },
+    { text: "report", folder: "/tmp/My Project" },
+  );
+  assert.equal(h.list().navigationTitle, undefined);
+  assert.match(h.sections()[0].props.title, /In \/tmp\/My Project/);
+  assert.match(h.sections()[0].props.title, /Indexing/);
+  assert.match(h.sections()[0].props.title, /500 µs/);
+  assert.equal(h.sections()[0].props.subtitle, "/tmp/My Project/src");
+  assert.equal(h.sections()[1].props.title, "keep.txt");
+
+  await h.updateResults({ files, complete: true, indexing: false });
+  assert.equal(h.list().navigationTitle, undefined);
+  assert.match(h.sections()[0].props.title, /In \/tmp\/My Project/);
+  assert.doesNotMatch(h.sections()[0].props.title, /Indexing/);
+
+  await h.updateResults({ files: [], complete: true, indexing: true });
+  assert.equal(h.list().navigationTitle, undefined);
+  assert.match(h.empty()[0].props.title, /Indexing/);
+  assert.match(h.empty()[0].props.description, /In \/tmp\/My Project/);
+
+  await h.updateResults({ files: [], complete: true, indexing: false });
+  assert.equal(h.empty()[0].props.title, "No Matches");
+  assert.match(h.empty()[0].props.description, /In \/tmp\/My Project/);
+  await h.changeQuery("");
+  assert.equal(h.empty()[0].props.title, "Search Inside Your Files");
+  assert.match(h.empty()[0].props.description, /In \/tmp\/My Project/);
+});
+
+test("clearing an indexing content search cancels its pending retry", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const h = await harness(t, "search-contents", { files: [], complete: true, indexing: true });
+  await h.changeQuery("");
+  assert.equal(h.list().isLoading, false);
+  t.mock.timers.tick(1000);
+  assert.equal(h.revalidate.mock.callCount(), 0);
+});
+
+test("a leading separator keeps filter-shaped words in the content pattern", async (t) => {
+  const h = await harness(t, "search-contents", { files: [], complete: true }, { text: "-- ext:pdf" });
+  assert.deepEqual(h.searchArgs(), ["ext:pdf", "", "literal"]);
+  await h.changeQuery("in:~/docs ext:md -- ext:pdf  !in:docs");
+  assert.deepEqual(h.searchArgs(), ["ext:pdf  !in:docs", "in:~/docs ext:md", "literal"]);
+  await h.changeQuery("git  diff -- src ext:ts");
+  assert.deepEqual(h.searchArgs(), ["git  diff -- src", "ext:ts", "literal"]);
+  await h.changeQuery("--");
+  assert.deepEqual(h.searchArgs(), ["--", "", "literal"]);
+});
+
+test("file, folder, and content results paste the selected path as text or a shell argument", async (t) => {
+  const path = "/tmp/It's a $report";
+  const folder = "/tmp/Reports";
+  const files = await harness(t, "search-files", { hits: [hit(path), hit(folder, "dir")] });
+  const contents = await harness(t, "search-contents", { files: [matches(path)], complete: true });
+  for (const item of [...files.items(), ...contents.items()]) {
+    const [plain, quoted] = item.findAllByType("Action.Paste");
+    const isFolder = item.props.id === folder;
+    assert.equal(plain.props.title, "Paste Path to App");
+    assert.equal(plain.props.content, isFolder ? folder : path);
+    assert.equal(quoted.props.content, isFolder ? "'/tmp/Reports'" : "'/tmp/It'\\''s a $report'");
+  }
 });
 
 test("a successful trash immediately removes the file and updates the result count", async (t) => {

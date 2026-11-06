@@ -82,6 +82,15 @@ test("filename filters retain paths with spaces and return cloneable metadata", 
   });
 });
 
+test("a content query in filename search directs the caller to Search File Contents", async () => {
+  const h = harness({ ok: true, files: [], complete: true, took_us: 5 });
+  await assert.rejects(h.searchFiles({ query: "grep:FSearch" }), {
+    name: "FSearchError",
+    reason: "query",
+    message: /Search File Contents/,
+  });
+});
+
 test("folder and application searches retain the command's kind mappings", async () => {
   const h = harness({ ok: true, hits: [], took_us: 0 });
   await h.searchFiles({ kind: "folder" });

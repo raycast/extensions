@@ -164,7 +164,7 @@
     {
       "name": "siteUrl",
       "title": "Jira Site URL",
-      "description": "Your Jira site URL (e.g foo.atlassian.net)",
+      "description": "Your Jira site URL (e.g. foo.atlassian.net). Selects the site for OAuth and is required for API token authentication.",
       "type": "textfield",
       "required": false,
       "placeholder": "foo.atlassian.com"
