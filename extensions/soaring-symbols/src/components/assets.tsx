@@ -1,14 +1,9 @@
 import { Action, ActionPanel, Clipboard, Grid, Icon, Color, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { AirlineMeta } from "soaring-symbols";
+import type { Airline } from "soaring-symbols";
+import { getAssetTiles } from "../utils/airlines";
 import { getSVGContent } from "../utils/fetch";
-
-const assetTypes = {
-  logo: ["logo", "logo-mono"],
-  icon: ["icon", "icon-mono"],
-  tail: ["tail", "tail-mono"],
-};
 
 const slugToName = (slug: string): string => {
   return slug
@@ -27,83 +22,73 @@ const getDownloadsDir = (): string => {
   return path.join(home, "Downloads");
 };
 
-export default function AirlineAssets(airline: AirlineMeta) {
-  const assets = Object.entries(assetTypes)
-    .map(([category, variants]) => {
-      const colors = airline?.branding?.colors?.[category as keyof typeof assetTypes];
-      if (!Array.isArray(colors)) return [];
-      const single = Array.isArray(colors) && colors.length === 1;
+export default function AirlineAssets(airline: Airline) {
+  const assets = getAssetTiles(airline).map(({ variant, url: source, mono }) => {
+    const tintColor = mono ? Color.PrimaryText : undefined;
 
-      return variants.map((variant) => {
-        const monochrome = single && variant.endsWith("-mono");
-        const tintColor = monochrome ? Color.PrimaryText : undefined;
-        const source = `https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/assets/${airline.slug}/${single ? category : variant}.svg`;
+    return (
+      <Grid.Item
+        key={variant}
+        content={{ source, tintColor }}
+        title={slugToName(variant)}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section title="SVG Actions">
+              <Action
+                title="Copy SVG"
+                icon={Icon.CopyClipboard}
+                onAction={async () => {
+                  try {
+                    const svg = await getSVGContent(source);
+                    await Clipboard.copy(svg);
+                    await showToast({ style: Toast.Style.Success, title: "SVG copied to clipboard" });
+                  } catch (err) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to copy SVG",
+                      message: (err as Error)?.message ?? "Unknown error",
+                    });
+                  }
+                }}
+              />
+              <Action
+                title="Download SVG…"
+                icon={Icon.Download}
+                onAction={async () => {
+                  try {
+                    const svg = await getSVGContent(source);
+                    const defaultFilename = `${airline.slug}-${variant}.svg`;
 
-        return (
-          <Grid.Item
-            key={variant}
-            content={{ source, tintColor }}
-            title={slugToName(variant)}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="SVG Actions">
-                  <Action
-                    title="Copy SVG"
-                    icon={Icon.CopyClipboard}
-                    onAction={async () => {
-                      try {
-                        const svg = await getSVGContent(source, monochrome);
-                        await Clipboard.copy(svg);
-                        await showToast({ style: Toast.Style.Success, title: "SVG copied to clipboard" });
-                      } catch (err) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to copy SVG",
-                          message: (err as Error)?.message ?? "Unknown error",
-                        });
-                      }
-                    }}
-                  />
-                  <Action
-                    title="Download SVG…"
-                    icon={Icon.Download}
-                    onAction={async () => {
-                      try {
-                        const svg = await getSVGContent(source, monochrome);
-                        const defaultFilename = `${airline.slug}-${variant}.svg`;
+                    const downloadsDir = getDownloadsDir();
+                    const filePath = path.join(downloadsDir, defaultFilename);
 
-                        const downloadsDir = getDownloadsDir();
-                        const filePath = path.join(downloadsDir, defaultFilename);
+                    // Validate basic SVG structure before writing
+                    if (!isProbablySvg(svg)) {
+                      await showToast({ style: Toast.Style.Failure, title: "Invalid SVG content" });
+                      return;
+                    }
 
-                        // Validate basic SVG structure before writing
-                        if (!isProbablySvg(svg)) {
-                          await showToast({ style: Toast.Style.Failure, title: "Invalid SVG content" });
-                          return;
-                        }
-
-                        fs.writeFileSync(filePath, svg, { encoding: "utf-8" });
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "SVG downloaded",
-                          message: filePath,
-                        });
-                      } catch (err) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to save SVG",
-                          message: (err as Error)?.message ?? "Unknown error",
-                        });
-                      }
-                    }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        );
-      });
-    })
-    .flat();
+                    fs.writeFileSync(filePath, svg, { encoding: "utf-8" });
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "SVG downloaded",
+                      message: filePath,
+                    });
+                  } catch (err) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to save SVG",
+                      message: (err as Error)?.message ?? "Unknown error",
+                    });
+                  }
+                }}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  });
 
   return (
     <Grid
