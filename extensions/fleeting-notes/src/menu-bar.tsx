@@ -1,4 +1,5 @@
-import { Clipboard, Icon, LaunchType, MenuBarExtra, Toast, environment, launchCommand, showToast } from "@raycast/api";
+import { Clipboard, Icon, LaunchType, MenuBarExtra, environment, launchCommand } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { ScratchpadStore } from "./lib/storage";
 
@@ -15,14 +16,20 @@ export default function ScratchpadMenuBar() {
       <MenuBarExtra.Item
         title="Open Scratchpad"
         icon={Icon.Pencil}
-        onAction={() => launchCommand({ name: "scratchpad", type: LaunchType.UserInitiated })}
+        onAction={async () => {
+          try {
+            await launchCommand({ name: "scratchpad", type: LaunchType.UserInitiated });
+          } catch (error) {
+            await showFailureToast(error, { title: "Could Not Open Scratchpad" });
+          }
+        }}
       />
       <MenuBarExtra.Item
         title={pad.error ?? (pad.text ? "Copy Scratchpad" : "Scratchpad Is Empty")}
         icon={Icon.Clipboard}
         onAction={async () => {
           if (pad.error) {
-            await showToast({ style: Toast.Style.Failure, title: pad.error });
+            await showFailureToast(pad.error, { title: "Could Not Copy Scratchpad" });
           } else if (pad.text) {
             await Clipboard.copy(pad.text);
           }

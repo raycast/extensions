@@ -14,6 +14,7 @@ import {
   showToast,
   Keyboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { ScratchpadState, ScratchpadStore, appendText } from "./lib/storage";
 
@@ -56,7 +57,7 @@ function Editor({ store, initial }: { store: ScratchpadStore; initial: Scratchpa
   const latestText = useRef(initial.current.text);
   const [saveError, setSaveError] = useState<string>();
   const textArea = useRef<Form.TextArea>(null);
-  const { markdown } = getPreferenceValues<{ markdown: boolean }>();
+  const { markdown } = getPreferenceValues<Preferences.Scratchpad>();
 
   function accept(next: ScratchpadState) {
     saved.current = next;
@@ -78,12 +79,7 @@ function Editor({ store, initial }: { store: ScratchpadStore; initial: Scratchpa
 
   async function close() {
     if (save(latestText.current)) await closeMainWindow();
-    else
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Text has not been saved",
-        message: "Copy it before closing.",
-      });
+    else await showFailureToast("Copy it before closing.", { title: "Text has not been saved" });
   }
 
   async function startNew() {
@@ -93,7 +89,10 @@ function Editor({ store, initial }: { store: ScratchpadStore; initial: Scratchpa
       message: state.previous
         ? "Your current pad will become the previous pad, replacing the older previous pad. Copy anything you want to keep first."
         : "Your current pad will be kept as the previous pad. You can restore it from the Action menu.",
-      primaryAction: { title: "Start New", style: Alert.ActionStyle.Default },
+      primaryAction: {
+        title: "Start New",
+        style: state.previous ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
+      },
     });
     if (!confirmed || !save(latestText.current)) return;
     try {
@@ -130,23 +129,17 @@ function Editor({ store, initial }: { store: ScratchpadStore; initial: Scratchpa
       save(appendText(latestText.current, clipboard));
       textArea.current?.focus();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Read Clipboard", message: errorMessage(error) });
+      await showFailureToast(error, { title: "Could Not Read Clipboard" });
     }
   }
 
   return (
     <Form
-      navigationTitle="Fleeting Notes"
       enableDrafts={false}
       actions={
         <ActionPanel>
-          <Action
-            title="Save and Close"
-            icon={Icon.Checkmark}
-            onAction={close}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-          />
-          <Action.CopyToClipboard title="Copy Scratchpad" content={text} shortcut={Keyboard.Shortcut.Common.Copy} />
+          <Action title="Save and Close" icon={Icon.Checkmark} onAction={close} />
+          <Action.CopyToClipboard title="Copy Scratchpad" content={text} />
           <Action
             title="Append Clipboard"
             icon={Icon.Clipboard}
@@ -157,6 +150,7 @@ function Editor({ store, initial }: { store: ScratchpadStore; initial: Scratchpa
             <Action
               title="Start New Scratchpad"
               icon={Icon.Plus}
+              style={state.previous ? Action.Style.Destructive : Action.Style.Regular}
               onAction={startNew}
               shortcut={Keyboard.Shortcut.Common.New}
             />

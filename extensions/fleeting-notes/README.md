@@ -20,13 +20,13 @@ The editor is Raycast's standard TextArea, not a separate floating window. It su
 | Action | Shortcut | Behavior |
 | --- | --- | --- |
 | Save and Close | ⌘↩ | Finishes saving and closes Raycast. |
-| Copy Scratchpad | ⇧⌘C | Copies the entire current text. |
+| Copy Scratchpad | ⇧⌘↩ | Copies the entire current text. |
 | Append Clipboard | ⇧⌘V | Adds clipboard text after the current text. Regular ⌘V still pastes at the cursor. |
 | Start New Scratchpad | ⌘N | Confirms, keeps the current pad as the previous pad, and clears the editor. |
 | Swap with Previous Scratchpad | ⇧⌘P | Restores the previous pad while preserving the current pad in that slot. |
 | Show Storage Folder | Action menu | Reveals local data for manual backup. |
 
-Only one previous pad is retained. Starting another new pad replaces that older previous pad after a confirmation. This is a temporary workspace, not a notebook archive. Copy anything you want to keep elsewhere.
+Only one previous pad is retained. Starting another new pad permanently replaces that older previous pad after a destructive confirmation. This is a temporary workspace, not a notebook archive. Copy anything you want to keep elsewhere.
 
 ## Saving and privacy
 
@@ -38,20 +38,9 @@ The current pad is limited to 1 MB of UTF-8 text to keep per-keystroke writes re
 
 ## Existing options and scope
 
-Raycast already offers [Raycast Notes](https://manual.raycast.com/notes), including a floating window, multiple notes, and a menu-bar toggle. The Store's [Quick Notes source](https://github.com/raycast/extensions/tree/main/extensions/quick-notes) implements a fuller note manager with titles, tags, import/export, and folder synchronization. Both were inspected before this package was built.
+Raycast already offers [Raycast Notes](https://manual.raycast.com/notes), including a floating window, multiple notes, and a menu-bar toggle. The Store's [Quick Notes source](https://github.com/raycast/extensions/tree/main/extensions/quick-notes) implements a fuller note manager with titles, tags, import/export, and folder synchronization.
 
-Fleeting Notes implements Daniel's narrower requested workflow: a title-free, instantly focused, single local pad inside the command window with per-change persistence and one recoverable previous pad. It is an original implementation, not a clone or integration with the separate Fleeting Notes app.
-
-## Development
-
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run dev
-```
+Fleeting Notes is narrower: a title-free, instantly focused, single local pad inside the command window with per-change persistence and one recoverable previous pad. It is an original implementation, not a clone or integration with the separate Fleeting Notes app.
 
 ## Official API references
 
