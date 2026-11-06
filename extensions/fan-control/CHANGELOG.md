@@ -1,6 +1,6 @@
 # Fan Control Changelog
 
-## [Toggle Fan Speed and % of Max] - {PR_MERGE_DATE}
+## [Toggle Fan Speed and % of Max] - 2026-11-06
 
 - New **Toggle Fan Speed** command: switches all fans between macOS control and full speed (or the quiet profile, set in the command preferences)
 - Control Fans shows actual and target speed as % of each fan's maximum RPM next to the RPM
