@@ -8,7 +8,7 @@ import {
   callInputBooleanToggleService,
   callInputBooleanTurnOffService,
   callInputBooleanTurnOnService,
-  isEditableInputBoolean,
+  isInputBoolean,
 } from "./utils";
 
 function InputBooleanToggleMenubarItem(props: { state: State }) {
@@ -19,7 +19,7 @@ function InputBooleanToggleMenubarItem(props: { state: State }) {
 
 function InputBooleanTurnOnMenubarItem(props: { state: State }) {
   const s = props.state;
-  if (!isEditableInputBoolean(s) || s.state !== "off") {
+  if (!isInputBoolean(s) || s.state !== "off") {
     return null;
   }
   return <MenuBarExtra.Item title="Turn On" icon="power-on.svg" onAction={() => callInputBooleanTurnOnService(s)} />;
@@ -27,7 +27,7 @@ function InputBooleanTurnOnMenubarItem(props: { state: State }) {
 
 function InputBooleanTurnOffMenubarItem(props: { state: State }) {
   const s = props.state;
-  if (!isEditableInputBoolean(s) || s.state !== "on") {
+  if (!isInputBoolean(s) || s.state !== "on") {
     return null;
   }
   return <MenuBarExtra.Item title="Turn Off" icon="power-off.svg" onAction={() => callInputBooleanTurnOffService(s)} />;
