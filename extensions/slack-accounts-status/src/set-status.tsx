@@ -37,7 +37,12 @@ export default function SetStatus() {
   const accounts = data?.accounts ?? [];
   const commonActions = (
     <>
-      <Action.Push title="Manage Workspaces" icon={Icon.PersonCircle} target={<ManageWorkspaces />} onPop={reload} />
+      <Action.Push
+        title="Manage Workspaces"
+        icon={Icon.PersonCircle}
+        target={<ManageWorkspaces navigationTitle="Manage Slack Workspaces" />}
+        onPop={reload}
+      />
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
@@ -121,7 +126,7 @@ export default function SetStatus() {
       />
     );
   return (
-    <List isLoading={loading} navigationTitle="Set Slack Status" searchBarPlaceholder="Search status presets…">
+    <List isLoading={loading} searchBarPlaceholder="Search status presets…">
       {accounts.length === 0 && (
         <List.EmptyView
           title="Connect Your Workspaces First"

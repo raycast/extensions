@@ -17,7 +17,7 @@ import { Account, errorMessage } from "./domain";
 import { readAccounts } from "./state";
 import { useStoredData } from "./use-stored-data";
 
-export default function ManageWorkspaces() {
+export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?: string } = {}) {
   const { data: accounts = [], error, loading, reload } = useStoredData(readAccounts);
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
@@ -88,7 +88,7 @@ export default function ManageWorkspaces() {
   return (
     <List
       isLoading={loading || busy}
-      navigationTitle="Manage Slack Workspaces"
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search connected workspaces…"
     >
       {accounts.length === 0 && (
