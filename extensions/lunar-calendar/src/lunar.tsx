@@ -214,7 +214,7 @@ export default function Command() {
         isCurrentMonth: false,
         solar,
         dateStr,
-        lunarText: getLunarText(solar, holidays[dateStr]),
+        lunarText: getLunarText(solar),
         holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
         isToday: dateStr === todayStr,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -232,7 +232,7 @@ export default function Command() {
         isCurrentMonth: true,
         solar,
         dateStr,
-        lunarText: getLunarText(solar, holidays[dateStr]),
+        lunarText: getLunarText(solar),
         holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
         isToday: dateStr === todayStr,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -254,7 +254,7 @@ export default function Command() {
           isCurrentMonth: false,
           solar,
           dateStr,
-          lunarText: getLunarText(solar, holidays[dateStr]),
+          lunarText: getLunarText(solar),
           holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
           isToday: dateStr === todayStr,
           isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -339,12 +339,8 @@ function getHolidayStatus(solar: Solar, holidayItem?: HolidayItem): { isHoliday?
   return { isHoliday: false, isWork: false };
 }
 
-// 获取农历或节日文本
-function getLunarText(solar: Solar, holidayItem?: HolidayItem): string {
-  if (holidayItem && holidayItem.holiday && holidayItem.name) {
-    return holidayItem.name;
-  }
-
+// 获取农历或节日文本（完全基于农历库与传统节日，不再受 API 文本覆盖）
+function getLunarText(solar: Solar): string {
   const mainSolarFestivals = [
     "元旦",
     "妇女节",
