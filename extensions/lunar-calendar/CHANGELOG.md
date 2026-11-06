@@ -1,6 +1,6 @@
 # Chinese Lunar Calendar Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-06
 - Fix dark mode colors not updating correctly
 
 ## [Changed] - 2026-11-06
