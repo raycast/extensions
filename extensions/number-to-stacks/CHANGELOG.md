@@ -1,6 +1,6 @@
 # Number to Stacks Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Convert item counts into Minecraft stacks and leftover items.
 - Convert whole, fractional, and mixed stack quantities back to items without rounding.
