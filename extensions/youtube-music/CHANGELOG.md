@@ -1,6 +1,6 @@
 # YouTube Music Changelog
 
-## [Search and Play] - {PR_MERGE_DATE}
+## [Search and Play] - 2026-11-06
 
 - Added: `Play Music` command — search YouTube Music from Raycast and start the chosen track in the selected browser.
 - Added: `Play Next` and `Add to Queue` actions, using the app's own search page and row menu. The tab returns to where it was afterwards and playback is not interrupted.
