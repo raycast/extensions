@@ -1,6 +1,6 @@
 # Telegram Changelog
 
-## [Fix Distributed Client Initialization] - {PR_MERGE_DATE}
+## [Fix Distributed Client Initialization] - 2026-11-06
 
 - Fix session type errors that prevent QR sign-in and other commands from loading in the distributed extension
 
