@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Fix the Mnemoverse README row] - {PR_MERGE_DATE}
+## [Fix the Mnemoverse README row] - 2026-11-06
 
 - Bring the Mnemoverse row in the README back in line with its registry entry: the hosted remote server with OAuth 2.1 sign-in and no API key, instead of the earlier local-server text.
 
