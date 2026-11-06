@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.rayext
+
+# Internal development documents (not for publication)
+PI-BRIEF.md
+REVIEW-REQUIREMENTS.md
+STORE-HANDOFF.md
+AGENTS.md
