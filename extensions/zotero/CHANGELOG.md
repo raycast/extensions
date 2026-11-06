@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Custom CSL Styles and Note Output] - {PR_MERGE_DATE}
+## [Custom CSL Styles and Note Output] - 2026-11-06
 
 - Added an optional custom CSL file source and an explicit Note output option for note-based styles. Existing installations continue to use the selected installed style and bibliography output.
 - Custom styles can use bundled Simplified Chinese and Japanese locale data for dates and terms, while retaining their own locale overrides.
