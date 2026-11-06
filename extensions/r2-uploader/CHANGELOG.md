@@ -1,5 +1,11 @@
 # R2 Uploader Changelog
 
+## [Batch Uploads and Search Improvements] - 2026-11-06
+
+- Support batch Finder uploads, streamed uploads, and checked public links.
+- Protect original files during image conversion and prevent temporary cleanup errors from interrupting batch uploads.
+- Keep files on all pages searchable and refresh extension screenshots.
+
 ## [Fix Crash on Launch] - 2026-11-03
 
 - Upgrade `@raycast/api` to 2.10.1 so the build no longer generates broken `@smithy/core` subpath exports, fixing the `Package subpath './transport' is not defined by "exports"` error when running the extension
