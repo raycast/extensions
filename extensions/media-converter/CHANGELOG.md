@@ -2,7 +2,7 @@
 
 ## [Bug Fix] - {PR_MERGE_DATE}
 
-- Fixed "Input link parameters do not match" crash when merging video files that have different resolutions. The re-encode path now scales all inputs to the first video's dimensions before concatenating them.
+- Fixed "Input link parameters do not match" crash when merging video files that have different resolutions. The re-encode path now fits all inputs to the first video's dimensions before concatenating them, letterboxing clips with a different aspect ratio (including rotated portrait videos) instead of stretching them.
 
 ## Video Editing Controls - 2026-09-24
 

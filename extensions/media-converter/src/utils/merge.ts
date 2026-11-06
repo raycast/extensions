@@ -79,7 +79,9 @@ export function parseStreamInfo(stderr: string): StreamInfo {
   // have their encoded dimensions as landscape (e.g. 1920x1080) while FFmpeg
   // processes them in portrait orientation (1080x1920).  Swap W/H so the scale
   // filter targets the correct display dimensions.
-  const dispMatrixMatch = stderr.match(/displaymatrix: rotation of\s*(-?\d+(?:\.\d+)?)\s*degrees/);
+  // FFmpeg 7+ prints "Display Matrix: rotation of 90.00 degrees", older
+  // versions "displaymatrix: rotation of -90.00 degrees".
+  const dispMatrixMatch = stderr.match(/display\s?matrix: rotation of\s*(-?\d+(?:\.\d+)?)\s*degrees/i);
   const rotateTagMatch = stderr.match(/rotate\s*:\s*(-?\d+)/);
   const rawDeg = dispMatrixMatch ? Number(dispMatrixMatch[1]) : rotateTagMatch ? Number(rotateTagMatch[1]) : 0;
   const normDeg = ((rawDeg % 360) + 360) % 360;
@@ -160,7 +162,11 @@ export function buildReencodeConcatGraph(
   const concatParts: string[] = [];
   for (let i = 0; i < inputCount; i++) {
     if (needsScale && targetW != null && targetH != null) {
-      scaleFilters.push(`[${i}:v:0]scale=${targetW}:${targetH},setsar=1[sv${i}]`);
+      // Fit inside the target and pad the rest, so a portrait clip next to a
+      // landscape one is letterboxed instead of stretched.
+      scaleFilters.push(
+        `[${i}:v:0]scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2,setsar=1[sv${i}]`,
+      );
     }
     const vPad = needsScale ? `[sv${i}]` : `[${i}:v:0]`;
     concatParts.push(includeAudio ? `${vPad}[${i}:a:0]` : vPad);

@@ -233,9 +233,38 @@ describe("buildReencodeConcatGraph", () => {
 
     assert.equal(
       graph.filter,
-      "[0:v:0]scale=1280:704,setsar=1[sv0];[1:v:0]scale=1280:704,setsar=1[sv1];[sv0][0:a:0][sv1][1:a:0]concat=n=2:v=1:a=1[v][a]",
+      "[0:v:0]scale=1280:704:force_original_aspect_ratio=decrease,pad=1280:704:(ow-iw)/2:(oh-ih)/2,setsar=1[sv0];[1:v:0]scale=1280:704:force_original_aspect_ratio=decrease,pad=1280:704:(ow-iw)/2:(oh-ih)/2,setsar=1[sv1];[sv0][0:a:0][sv1][1:a:0]concat=n=2:v=1:a=1[v][a]",
     );
     assert.deepEqual(graph.mapArgs, ["-map", "[v]", "-map", "[a]"]);
+  });
+
+  it("scales mismatched inputs when probed from real FFmpeg output", () => {
+    // Captured from `ffmpeg -hide_banner -i` (FFmpeg 9.0) for a 1280x704 clip
+    // tagged bt709, a 1280x720 clip, and a 1280x720 clip with 90 degree display rotation.
+    const probes = [
+      `  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709/unknown/unknown, progressive), 1280x704 [SAR 1:1 DAR 20:11], 159 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 70 kb/s (default)`,
+      `  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709/unknown/unknown, progressive), 1280x720 [SAR 1:1 DAR 16:9], 160 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 70 kb/s (default)`,
+      `  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1280x720 [SAR 1:1 DAR 16:9], 163 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+    Side data:
+      Display Matrix: rotation of 90.00 degrees
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 70 kb/s (default)`,
+    ].map(parseStreamInfo);
+
+    assert.deepEqual(
+      probes.map((p) => [p.videoWidth, p.videoHeight]),
+      [
+        [1280, 704],
+        [1280, 720],
+        [720, 1280],
+      ],
+    );
+    const graph = buildReencodeConcatGraph(3, "video", probes);
+    assert.equal(
+      graph.filter,
+      "[0:v:0]scale=1280:704:force_original_aspect_ratio=decrease,pad=1280:704:(ow-iw)/2:(oh-ih)/2,setsar=1[sv0];[1:v:0]scale=1280:704:force_original_aspect_ratio=decrease,pad=1280:704:(ow-iw)/2:(oh-ih)/2,setsar=1[sv1];[2:v:0]scale=1280:704:force_original_aspect_ratio=decrease,pad=1280:704:(ow-iw)/2:(oh-ih)/2,setsar=1[sv2];[sv0][0:a:0][sv1][1:a:0][sv2][2:a:0]concat=n=3:v=1:a=1[v][a]",
+    );
   });
 
   it("does not insert scale filters when video inputs share the same dimensions", () => {
