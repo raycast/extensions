@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slack-accounts-status",
+  "title": "Slack Accounts Status",
+  "description": "Set custom statuses, presence, and notification pauses across multiple Slack workspaces.",
+  "icon": "slack-accounts-status.png",
+  "author": "diego_nava",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-status",
+      "title": "Set Slack Status",
+      "description": "Apply a custom status or preset to all or selected Slack workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "manage-workspaces",
+      "title": "Manage Slack Workspaces",
+      "description": "Connect and disconnect Slack workspace accounts",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.11.0",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "format": "prettier --write src tests vitest.config.mts package.json README.md help.md slack-app-manifest.json CHANGELOG.md",
+    "format:check": "prettier --check src tests vitest.config.mts package.json README.md help.md slack-app-manifest.json CHANGELOG.md"
+  },
+  "preferences": [
+    {
+      "name": "slackClientId",
+      "title": "Slack App Client ID",
+      "description": "Use the included Slack app or enter the Client ID of your own PKCE-enabled Slack app.",
+      "type": "textfield",
+      "required": false,
+      "default": "12513164833716.12503241805347"
+    }
+  ]
+}
