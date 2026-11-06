@@ -41,6 +41,21 @@ interface CachedHolidayWrapper {
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+// 全局请求去重锁，避免同一年份在并发时重复下载
+const inFlightRequests: { [year: number]: Promise<HolidayMap> } = {};
+
+// 辅助函数：按年份清理并替换节假日数据，防止官方修改/删除假期时残留旧徽标
+function updateYearHolidays(prev: HolidayMap, targetYear: number, newMap: HolidayMap): HolidayMap {
+  const next = { ...prev };
+  const prefix = `${targetYear}-`;
+  for (const key of Object.keys(next)) {
+    if (key.startsWith(prefix)) {
+      delete next[key];
+    }
+  }
+  return { ...next, ...newMap };
+}
+
 export default function Command() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [holidays, setHolidays] = useState<HolidayMap>({});
@@ -52,145 +67,155 @@ export default function Command() {
   useEffect(() => {
     let isMounted = true;
 
-    // 通用获取指定年份数据的异步函数
-    async function fetchYearHolidays(targetYear: number, isPreload = false) {
-      const cacheKey = `holidays_${targetYear}`;
-      const attemptKey = `last_attempt_${targetYear}`;
-      const prefix = isPreload ? `[Lunar Preload ${targetYear}]` : `[Lunar Load ${targetYear}]`;
+    // 通用获取指定年份数据的异步函数（含去重锁）
+    async function fetchYearHolidays(targetYear: number, isPreload = false): Promise<HolidayMap> {
+      if (inFlightRequests[targetYear]) {
+        return inFlightRequests[targetYear];
+      }
 
-      console.log(`${prefix} ----------------------------------------`);
-      console.log(`${prefix} Starting to load target year: ${targetYear}`);
+      inFlightRequests[targetYear] = (async () => {
+        const cacheKey = `holidays_${targetYear}`;
+        const attemptKey = `last_attempt_${targetYear}`;
+        const prefix = isPreload ? `[Lunar Preload ${targetYear}]` : `[Lunar Load ${targetYear}]`;
 
-      const [cachedString, lastAttemptString] = await Promise.all([
-        LocalStorage.getItem<string>(cacheKey),
-        LocalStorage.getItem<string>(attemptKey),
-      ]);
+        console.log(`${prefix} ----------------------------------------`);
+        console.log(`${prefix} Starting to load target year: ${targetYear}`);
 
-      let cachedWrapper: CachedHolidayWrapper | null = null;
-      if (cachedString) {
-        try {
-          cachedWrapper = JSON.parse(cachedString);
-          console.log(`${prefix} Cache hit, items count: ${Object.keys(cachedWrapper!.holidays || {}).length}`);
-        } catch (e) {
-          console.error(`${prefix} Failed to parse local cache`, e);
+        const [cachedString, lastAttemptString] = await Promise.all([
+          LocalStorage.getItem<string>(cacheKey),
+          LocalStorage.getItem<string>(attemptKey),
+        ]);
+
+        let cachedWrapper: CachedHolidayWrapper | null = null;
+        if (cachedString) {
+          try {
+            cachedWrapper = JSON.parse(cachedString);
+            console.log(`${prefix} Cache hit, items count: ${Object.keys(cachedWrapper!.holidays || {}).length}`);
+          } catch (e) {
+            console.error(`${prefix} Failed to parse local cache`, e);
+          }
+        } else {
+          console.log(`${prefix} Cache miss (no local cache found)`);
         }
-      } else {
-        console.log(`${prefix} Cache miss (no local cache found)`);
-      }
 
-      // 如果是当前正在看的年份，且有缓存，先渲染保证秒开
-      if (!isPreload && cachedWrapper && cachedWrapper.holidays && isMounted) {
-        console.log(`${prefix} Rendering UI using local cache`);
-        setHolidays((prev) => ({ ...prev, ...cachedWrapper!.holidays }));
-      }
+        // 如果有缓存，先渲染保证秒开（按年份清理旧状态合并）
+        if (cachedWrapper && cachedWrapper.holidays && isMounted) {
+          console.log(`${prefix} Rendering UI using local cache`);
+          setHolidays((prev) => updateYearHolidays(prev, targetYear, cachedWrapper!.holidays));
+        }
 
-      const realNow = new Date();
-      const realCurrentYear = realNow.getFullYear();
-      const realCurrentMonth = realNow.getMonth() + 1;
+        const realNow = new Date();
+        const realCurrentYear = realNow.getFullYear();
+        const realCurrentMonth = realNow.getMonth() + 1;
 
-      // 判定是否需要发起网络请求：
-      // 1. 如果没有缓存，或者缓存里的数据是空的
-      // 2. 如果是未来年份或年底预热期，且距离上次探测超过 24 小时，允许每天探测 1 次
-      const hasEmptyCache =
-        !cachedWrapper || !cachedWrapper.holidays || Object.keys(cachedWrapper.holidays).length === 0;
-      const isFutureOrPreloadYear =
-        targetYear > realCurrentYear || (targetYear === realCurrentYear && realCurrentMonth >= 11);
+        // 判定是否需要发起网络请求：
+        // 1. 如果没有缓存，或者缓存里的数据是空的
+        // 2. 如果是未来年份或年底预热期，且距离上次探测超过 24 小时，允许每天探测 1 次
+        const hasEmptyCache =
+          !cachedWrapper || !cachedWrapper.holidays || Object.keys(cachedWrapper.holidays).length === 0;
+        const isFutureOrPreloadYear =
+          targetYear > realCurrentYear || (targetYear === realCurrentYear && realCurrentMonth >= 11);
 
-      const now = Date.now();
-      const lastAttemptTime = lastAttemptString ? parseInt(lastAttemptString, 10) : 0;
-      const attemptAge = now - lastAttemptTime;
+        const now = Date.now();
+        const lastAttemptTime = lastAttemptString ? parseInt(lastAttemptString, 10) : 0;
+        const attemptAge = now - lastAttemptTime;
 
-      // 核心修复逻辑：
-      // 对于未来年份或年底预热期，即使有旧缓存，也允许每 24 小时自动刷新一次以获取最新官方调整
-      const needsFetch = hasEmptyCache || (isFutureOrPreloadYear && attemptAge > ONE_DAY_MS);
+        // 核心修复逻辑：
+        // 对于未来年份或年底预热期，即使有旧缓存，也允许每 24 小时自动刷新一次以获取最新官方调整
+        const needsFetch = hasEmptyCache || (isFutureOrPreloadYear && attemptAge > ONE_DAY_MS);
 
-      console.log(`${prefix} Status Check -> Real Year: ${realCurrentYear}, Real Month: ${realCurrentMonth}`);
-      console.log(`${prefix} Status Check -> Has Empty Cache (hasEmptyCache): ${hasEmptyCache}`);
-      console.log(
-        `${prefix} Status Check -> Is Future Or Preload Year (isFutureOrPreloadYear): ${isFutureOrPreloadYear}`
-      );
-      console.log(`${prefix} Status Check -> Last attempt age (hours): ${(attemptAge / (1000 * 60 * 60)).toFixed(2)}`);
-      console.log(`${prefix} Status Check -> Needs Fetch (needsFetch): ${needsFetch}`);
+        console.log(`${prefix} Status Check -> Real Year: ${realCurrentYear}, Real Month: ${realCurrentMonth}`);
+        console.log(`${prefix} Status Check -> Has Empty Cache (hasEmptyCache): ${hasEmptyCache}`);
+        console.log(
+          `${prefix} Status Check -> Is Future Or Preload Year (isFutureOrPreloadYear): ${isFutureOrPreloadYear}`
+        );
+        console.log(
+          `${prefix} Status Check -> Last attempt age (hours): ${(attemptAge / (1000 * 60 * 60)).toFixed(2)}`
+        );
+        console.log(`${prefix} Status Check -> Needs Fetch (needsFetch): ${needsFetch}`);
 
-      if (!needsFetch) {
-        console.log(`${prefix} Conclusion: Valid cache exists or within 24h retry limit, skipping network request.`);
-        return cachedWrapper ? cachedWrapper.holidays : {};
-      }
-
-      console.log(
-        `${prefix} Conclusion: Fetching from API -> https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`
-      );
-
-      // 记录本次尝试请求的时间戳（无论成功与否，24小时内不再频繁重试）
-      await LocalStorage.setItem(attemptKey, now.toString());
-
-      try {
-        const response = await fetch(`https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`);
-        if (!response.ok) {
-          console.log(`${prefix} Holiday data not published yet (HTTP ${response.status}), skip this time.`);
+        if (!needsFetch) {
+          console.log(`${prefix} Conclusion: Valid cache exists or within 24h retry limit, skipping network request.`);
           return cachedWrapper ? cachedWrapper.holidays : {};
         }
-        const json = (await response.json()) as {
-          year?: number;
-          days?: HolidayCNItem[];
-        };
 
-        console.log(`${prefix} API Response year: ${json.year}, days count: ${json.days?.length ?? 0}`);
+        console.log(
+          `${prefix} Conclusion: Fetching from API -> https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`
+        );
 
-        // 严格校验：必须 days 为数组且确实有内容
-        if (Array.isArray(json.days) && json.days.length > 0) {
-          const normalized: HolidayMap = {};
-          for (const item of json.days) {
-            if (!item.date) continue;
-            normalized[item.date] = {
-              holiday: item.isOffDay,
-              name: item.name,
-              date: item.date,
-            };
+        // 记录本次尝试请求的时间戳（无论成功与否，24小时内不再频繁重试）
+        await LocalStorage.setItem(attemptKey, now.toString());
+
+        try {
+          const response = await fetch(`https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`);
+          if (!response.ok) {
+            console.log(`${prefix} Holiday data not published yet (HTTP ${response.status}), skip this time.`);
+            return cachedWrapper ? cachedWrapper.holidays : {};
           }
-
-          console.log(`${prefix} API request success, valid holiday items count: ${Object.keys(normalized).length}`);
-
-          // 写入带最新时间戳的有效缓存
-          const newWrapper: CachedHolidayWrapper = {
-            timestamp: Date.now(),
-            holidays: normalized,
+          const json = (await response.json()) as {
+            year?: number;
+            days?: HolidayCNItem[];
           };
-          await LocalStorage.setItem(cacheKey, JSON.stringify(newWrapper));
-          console.log(`${prefix} New data successfully written to LocalStorage cache`);
 
-          // 如果是当前正在看的年份，更新状态
-          if (!isPreload && isMounted) {
-            setHolidays((prev) => ({ ...prev, ...normalized }));
+          console.log(`${prefix} API Response year: ${json.year}, days count: ${json.days?.length ?? 0}`);
+
+          // 严格校验：必须 days 为数组且确实有内容
+          if (Array.isArray(json.days) && json.days.length > 0) {
+            const normalized: HolidayMap = {};
+            for (const item of json.days) {
+              if (!item.date) continue;
+              normalized[item.date] = {
+                holiday: item.isOffDay,
+                name: item.name,
+                date: item.date,
+              };
+            }
+
+            console.log(`${prefix} API request success, valid holiday items count: ${Object.keys(normalized).length}`);
+
+            // 写入带最新时间戳的有效缓存
+            const newWrapper: CachedHolidayWrapper = {
+              timestamp: Date.now(),
+              holidays: normalized,
+            };
+            await LocalStorage.setItem(cacheKey, JSON.stringify(newWrapper));
+            console.log(`${prefix} New data successfully written to LocalStorage cache`);
+
+            // 更新状态（按年份精准清理旧条目并替换）
+            if (isMounted) {
+              setHolidays((prev) => updateYearHolidays(prev, targetYear, normalized));
+            }
+            return normalized;
+          } else {
+            console.log(`${prefix} Official holiday data not yet published or empty.`);
           }
-          return normalized;
-        } else {
-          console.log(`${prefix} Official holiday data not yet published or empty.`);
+        } catch (error) {
+          console.error(`${prefix} Network error fetching holiday data:`, error);
         }
-      } catch (error) {
-        console.error(`${prefix} Network error fetching holiday data:`, error);
+        return cachedWrapper ? cachedWrapper.holidays : {};
+      })();
+
+      try {
+        return await inFlightRequests[targetYear];
+      } finally {
+        delete inFlightRequests[targetYear];
       }
-      return cachedWrapper ? cachedWrapper.holidays : {};
     }
 
-    // A. 加载当前选中的年份数据，同时根据月份自动顺带加载相邻年份（解决跨月显示问题）
+    // A. 加载当前选中的年份数据，同时根据月份并发独立加载相邻年份（解决跨月显示与等待串行慢的问题）
     async function loadAllRequiredYears() {
-      const currentHolidays = await fetchYearHolidays(year, false);
+      const promises: Promise<HolidayMap>[] = [fetchYearHolidays(year, false)];
 
-      // 如果当前是 1 月，顺便把前一年的数据拉取合并（防止月初跨上个月时丢失）
+      // 如果当前是 1 月，并发把前一年的数据拉取合并
       if (month === 1) {
-        const prevHolidays = await fetchYearHolidays(year - 1, true);
-        if (isMounted) {
-          setHolidays((prev) => ({ ...prev, ...prevHolidays, ...currentHolidays }));
-        }
+        promises.push(fetchYearHolidays(year - 1, true));
       }
-      // 如果当前是 12 月，顺便把后一年的数据拉取合并（防止月末跨下个月时丢失，如元旦）
+      // 如果当前是 12 月，并发把后一年的数据拉取合并
       else if (month === 12) {
-        const nextHolidays = await fetchYearHolidays(year + 1, true);
-        if (isMounted) {
-          setHolidays((prev) => ({ ...prev, ...currentHolidays, ...nextHolidays }));
-        }
+        promises.push(fetchYearHolidays(year + 1, true));
       }
+
+      await Promise.all(promises);
     }
 
     loadAllRequiredYears();
