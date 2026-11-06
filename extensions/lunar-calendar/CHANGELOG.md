@@ -1,6 +1,6 @@
 # Chinese Lunar Calendar Changelog
 
-## [Changed] - {PR_MERGE_DATE}
+## [Changed] - 2026-11-06
 - Updated the national holiday API provider to improve accuracy and response reliability.
 
 ## [Fix] - 2026-10-13
