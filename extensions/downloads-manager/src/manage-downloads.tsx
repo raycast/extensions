@@ -198,7 +198,12 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
       if (!signal.aborted) {
         if (offset === 0) {
           setDownloads(newDownloads);
-          setSelectedItemId(newDownloads[0]?.path ?? null);
+          // A restarted scan keeps the selection, e.g. a file that was just renamed
+          setSelectedItemId((current) =>
+            current && newDownloads.some((download) => download.path === current)
+              ? current
+              : (newDownloads[0]?.path ?? null),
+          );
         } else {
           setDownloads((prev: Download[]) => [...prev, ...newDownloads]);
         }
