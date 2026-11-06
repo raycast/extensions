@@ -1,5 +1,9 @@
 # Raccoon Changelog
 
+## [Docs] - 2026-11-04
+
+- Add a link to the issue tracker in the README.
+
 ## [Initial Version] - 2026-09-26
 
 - Emptying the trash empties every mounted volume's, because Finder is what
