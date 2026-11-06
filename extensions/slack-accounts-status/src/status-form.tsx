@@ -72,6 +72,7 @@ function Results({
         const markdown = [
           `# ${result.account.teamName}`,
           `Account: ${result.account.userName}`,
+          `**Changes applied:** ${succeeded}/${result.changes.length}`,
           profile &&
             `**Requested status:** ${status.replace(/[\\`*_[\]<>]/g, "\\$&").replace(/\s+/g, " ") || "Clear status"}`,
           ...result.changes.map(
@@ -94,7 +95,6 @@ function Results({
               source: allApplied ? Icon.CheckCircle : Icon.ExclamationMark,
               tintColor: allApplied ? Color.Green : Color.Orange,
             }}
-            accessories={[{ text: `${succeeded}/${result.changes.length} applied` }]}
             detail={<List.Item.Detail markdown={markdown} />}
             actions={
               <ActionPanel>
