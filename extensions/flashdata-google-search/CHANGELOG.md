@@ -1,6 +1,6 @@
 # FlashData Google Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Search Google using your own FlashData API key and Credits.
 - Browse sources and snippets with country, language, result count, and page controls.
