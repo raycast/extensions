@@ -95,11 +95,10 @@
       "preferences": [
         {
           "name": "cliPath",
-          "type": "textfield",
+          "type": "file",
           "required": false,
           "title": "Spokenly CLI Path",
-          "description": "Optional absolute path to the official Spokenly CLI. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked.",
-          "placeholder": "/usr/local/bin/spokenly"
+          "description": "Optional: choose the official Spokenly CLI executable. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked."
         }
       ]
     },
@@ -111,11 +110,10 @@
       "preferences": [
         {
           "name": "cliPath",
-          "type": "textfield",
+          "type": "file",
           "required": false,
           "title": "Spokenly CLI Path",
-          "description": "Optional absolute path to the official Spokenly CLI. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked.",
-          "placeholder": "/usr/local/bin/spokenly"
+          "description": "Optional: choose the official Spokenly CLI executable. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked."
         }
       ]
     }

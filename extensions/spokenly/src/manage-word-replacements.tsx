@@ -63,7 +63,12 @@ export default function Command() {
       <Action.Push
         title="Add Replacement"
         icon={Icon.Plus}
-        target={<AddForm onSaved={refresh} />}
+        target={
+          <AddForm
+            onSaved={refresh}
+            navigationTitle="Add Spokenly Replacement"
+          />
+        }
       />
       <Action.CopyToClipboard
         title="Copy JSON Backup"

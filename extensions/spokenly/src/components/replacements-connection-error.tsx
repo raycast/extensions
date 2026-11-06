@@ -3,7 +3,7 @@ import {
   ActionPanel,
   Detail,
   Icon,
-  openExtensionPreferences,
+  openCommandPreferences,
 } from "@raycast/api";
 import { CLI_DOCS } from "../lib/word-replacements";
 
@@ -16,8 +16,7 @@ export function ConnectionError({
 }) {
   return (
     <Detail
-      navigationTitle="Connect Spokenly CLI"
-      markdown={`# Spokenly CLI needs attention\n\n${message.replace(/[\\`*_<>]/g, "\\$&")}\n\n1. Update Spokenly to a version with the official CLI.\n2. In Spokenly, open **Settings → Install CLI**.\n3. Keep Spokenly running and choose **Retry Connection**.\n\nIf you use a different CLI location, set its absolute path in this extension’s preferences. Your replacements are read from Spokenly when the connection succeeds.`}
+      markdown={`# Spokenly CLI needs attention\n\n${message.replace(/[\\`*_<>]/g, "\\$&")}\n\n1. Update Spokenly to a version with the official CLI.\n2. In Spokenly, open **Settings → Install CLI**.\n3. Keep Spokenly running and choose **Retry Connection**.\n\nIf you use a different CLI location, choose it in this command’s preferences. Your replacements are read from Spokenly when the connection succeeds.`}
       actions={
         <ActionPanel>
           <Action
@@ -27,9 +26,9 @@ export function ConnectionError({
           />
           <Action.OpenInBrowser title="Read CLI Setup Guide" url={CLI_DOCS} />
           <Action
-            title="Extension Preferences"
+            title="Command Preferences"
             icon={Icon.Gear}
-            onAction={openExtensionPreferences}
+            onAction={openCommandPreferences}
           />
         </ActionPanel>
       }

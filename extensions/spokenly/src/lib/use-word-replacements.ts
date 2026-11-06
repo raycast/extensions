@@ -1,34 +1,33 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { findCLI, Replacement, SpokenlyCLI } from "./word-replacements";
+import { usePromise } from "@raycast/utils";
+import { findCLI, SpokenlyCLI } from "./word-replacements";
+
+async function connect(cliPath?: string) {
+  const client = new SpokenlyCLI(await findCLI(cliPath));
+  return { client, rules: await client.list() };
+}
 
 export function useSpokenly() {
-  const { cliPath } = getPreferenceValues<{ cliPath?: string }>();
-  const [client, setClient] = useState<SpokenlyCLI>();
-  const [rules, setRules] = useState<Replacement[]>([]);
-  const [error, setError] = useState<string>();
-  const [isLoading, setLoading] = useState(true);
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const cli = new SpokenlyCLI(await findCLI(cliPath));
-      setRules(await cli.list());
-      setClient(cli);
-      setError(undefined);
-    } catch (failure) {
-      setClient(undefined);
-      setRules([]);
-      setError(
-        failure instanceof Error
-          ? failure.message
-          : "Could not connect to Spokenly.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [cliPath]);
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-  return { client, rules, error, isLoading, refresh };
+  // Both commands declare the same cliPath preference.
+  const { cliPath } = getPreferenceValues<
+    Preferences.ManageWordReplacements | Preferences.AddWordReplacement
+  >();
+  const { data, error, isLoading, revalidate } = usePromise(
+    connect,
+    [cliPath],
+    {
+      onError: () => undefined,
+    },
+  );
+  return {
+    client: data?.client,
+    rules: data?.rules ?? [],
+    error: error
+      ? error.message || "Could not connect to Spokenly."
+      : undefined,
+    isLoading,
+    refresh: async () => {
+      await revalidate();
+    },
+  };
 }
