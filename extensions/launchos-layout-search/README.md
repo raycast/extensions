@@ -5,8 +5,7 @@ Find apps using the custom names, aliases, folders, and pages in your LaunchOS l
 ## Setup
 
 1. Install and open [LaunchOS](https://launchosapp.com/) once to populate its layout.
-2. Install this development package with `npm install` and `npm run dev`.
-3. Run **Search LaunchOS Layout** in Raycast.
+2. Run **Search LaunchOS Layout** in Raycast.
 
 The standard database is `~/Library/Application Support/LaunchOS/LaunchOS.sqlite`. An optional preference allows a different local database location.
 

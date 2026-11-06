@@ -26,6 +26,7 @@
     {
       "name": "databasePath",
       "type": "textfield",
+      "placeholder": "/path/to/LaunchOS.sqlite",
       "title": "LaunchOS Layout Database",
       "description": "Optional path to LaunchOS.sqlite. Leave blank to use LaunchOS’s standard local database.",
       "required": false

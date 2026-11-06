@@ -7,15 +7,15 @@ import {
   List,
   getPreferenceValues,
   open,
-  showToast,
-  Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useSQL } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import {
+  databasePathProblem,
   DEFAULT_DATABASE,
   LayoutApp,
-  readLayout,
+  parseLayout,
+  READ_QUERY,
   verifyAppPath,
 } from "./layout";
 
@@ -24,26 +24,40 @@ async function openApp(app: LayoutApp) {
     await verifyAppPath(app.path);
     await open(app.path);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could Not Open App",
-      message:
-        error instanceof Error ? error.message : "Try refreshing the layout.",
-    });
+    await showFailureToast(error, { title: "Could Not Open App" });
   }
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<{
-    databasePath?: string;
-    includeHidden?: boolean;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
   const database = preferences.databasePath?.trim() || DEFAULT_DATABASE;
-  const { data, isLoading, error, revalidate } = usePromise(
-    readLayout,
-    [database, preferences.includeHidden === true],
-    { onError: () => undefined },
-  );
+  const pathProblem = databasePathProblem(database);
+  const {
+    data: rows,
+    isLoading,
+    error: sqlError,
+    permissionView,
+    revalidate,
+  } = useSQL<Record<string, unknown>>(database, READ_QUERY, {
+    execute: !pathProblem,
+    permissionPriming: "This is required to read your LaunchOS layout.",
+    onError: () => undefined,
+  });
+  const { data, parseError } = useMemo(() => {
+    if (!rows) return {};
+    try {
+      return { data: parseLayout(rows, preferences.includeHidden === true) };
+    } catch (failure) {
+      return { parseError: failure as Error };
+    }
+  }, [rows, preferences.includeHidden]);
+  const error = pathProblem
+    ? new Error(pathProblem)
+    : sqlError
+      ? new Error(
+          "Could not read this LaunchOS layout. Its database may be busy or use a newer format. Refresh after LaunchOS finishes loading.",
+        )
+      : parseError;
   const [group, setGroup] = useState("all");
   const apps = data?.apps || [];
   const groups = [...new Set(apps.map((app) => app.group))].sort((a, b) =>
@@ -57,10 +71,10 @@ export default function Command() {
       onAction={revalidate}
     />
   );
+  if (permissionView) return permissionView;
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="LaunchOS Layout"
       searchBarPlaceholder="Search names and custom aliases…"
       searchBarAccessory={
         <List.Dropdown
@@ -70,7 +84,11 @@ export default function Command() {
         >
           <List.Dropdown.Item title="All Folders and Pages" value="all" />
           {groups.map((value) => (
-            <List.Dropdown.Item key={value} title={value} value={value} />
+            <List.Dropdown.Item
+              key={value}
+              title={value}
+              value={`group:${value}`}
+            />
           ))}
         </List.Dropdown>
       }
@@ -88,7 +106,7 @@ export default function Command() {
         />
       ) : (
         apps
-          .filter((app) => group === "all" || app.group === group)
+          .filter((app) => group === "all" || `group:${app.group}` === group)
           .map((app) => (
             <List.Item
               key={app.id}

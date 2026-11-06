@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { statSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { isAbsolute, join } from "node:path";
@@ -13,7 +14,7 @@ export const DEFAULT_DATABASE = join(
   "LaunchOS",
   "LaunchOS.sqlite",
 );
-const READ_QUERY = `SELECT a.Z_PK AS id,a.ZNAME AS name,a.ZALIAS AS alias,a.ZURL AS url,
+export const READ_QUERY = `SELECT a.Z_PK AS id,a.ZNAME AS name,a.ZALIAS AS alias,a.ZURL AS url,
   a.ZBUNDLEID AS bundleId,a.ZHIDDEN AS hidden,g.ZNAME AS groupName,
   g.ZISFOLDER AS isFolder,g.ZPAGE AS pageNumber
   FROM ZAPPENTITY a LEFT JOIN ZGROUPENTITY g ON a.ZGROUP=g.Z_PK
@@ -49,8 +50,11 @@ export function appPathFromUrl(raw: unknown): string | undefined {
   }
 }
 
-export function parseLayout(raw: string, includeHidden = false): Layout {
-  const rows: unknown = JSON.parse(raw || "[]");
+export function parseLayout(
+  raw: string | unknown[],
+  includeHidden = false,
+): Layout {
+  const rows: unknown = typeof raw === "string" ? JSON.parse(raw || "[]") : raw;
   if (!Array.isArray(rows))
     throw new Error("LaunchOS returned an unrecognized layout format.");
   const apps: LayoutApp[] = [];
@@ -98,6 +102,18 @@ export function parseLayout(raw: string, includeHidden = false): Layout {
     });
   }
   return { apps, skipped, truncated: rows.length > 5000 };
+}
+
+/** Returns a user-facing problem with the database path, or undefined when it can be read. */
+export function databasePathProblem(databasePath: string): string | undefined {
+  if (!isAbsolute(databasePath) || /[\0\r\n]/.test(databasePath))
+    return "Choose an absolute local path to LaunchOS.sqlite.";
+  try {
+    if (statSync(databasePath).isFile()) return undefined;
+  } catch {
+    // Reported below.
+  }
+  return "LaunchOS’s layout database was not found. Open LaunchOS once, or select its database in extension preferences.";
 }
 
 export async function readLayout(
