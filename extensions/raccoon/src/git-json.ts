@@ -31,6 +31,15 @@ export type RepoLevel = "unpushed" | "detached" | "uncommitted" | "loose";
 /** Tools such as nvm keep a hidden checkout on a tag: detached is how they work. */
 const detachedMatters = (repo: GitRepo) => repo.detached_head && !repo.name.startsWith(".");
 
+/** git lists a detached HEAD as a branch with no upstream, so one of those is not a finding. */
+const isIdleToolCheckout = (repo: GitRepo) =>
+	repo.detached_head &&
+	!detachedMatters(repo) &&
+	repo.unpushed === 0 &&
+	repo.uncommitted === 0 &&
+	repo.stashed === 0 &&
+	repo.no_upstream <= 1;
+
 export function repoLevel(repo: GitRepo): RepoLevel {
 	if (repo.unpushed > 0) return "unpushed";
 	if (detachedMatters(repo)) return "detached";
@@ -76,22 +85,24 @@ function number(value: unknown): number {
 
 export function parseGit(stdout: string): GitReport {
 	const raw = expectObject(stdout, "git");
+	const reported: GitRepo[] = Array.isArray(raw.repos)
+		? raw.repos.map((entry) => {
+				const r = (entry ?? {}) as Record<string, unknown>;
+				return {
+					name: typeof r.name === "string" ? r.name : "",
+					path: typeof r.path === "string" ? r.path : "",
+					uncommitted: number(r.uncommitted),
+					unpushed: number(r.unpushed),
+					stashed: number(r.stashed),
+					detached_head: r.detached_head === true,
+					no_upstream: number(r.no_upstream),
+				};
+			})
+		: [];
+	const repos = reported.filter((repo) => !isIdleToolCheckout(repo));
 	return {
 		repos_total: number(raw.repos_total),
-		repos_with_issues: number(raw.repos_with_issues),
-		repos: Array.isArray(raw.repos)
-			? raw.repos.map((entry) => {
-					const r = (entry ?? {}) as Record<string, unknown>;
-					return {
-						name: typeof r.name === "string" ? r.name : "",
-						path: typeof r.path === "string" ? r.path : "",
-						uncommitted: number(r.uncommitted),
-						unpushed: number(r.unpushed),
-						stashed: number(r.stashed),
-						detached_head: r.detached_head === true,
-						no_upstream: number(r.no_upstream),
-					};
-				})
-			: [],
+		repos_with_issues: Math.max(0, number(raw.repos_with_issues) - (reported.length - repos.length)),
+		repos,
 	};
 }

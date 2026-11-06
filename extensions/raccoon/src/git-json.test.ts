@@ -78,3 +78,36 @@ test("a detached HEAD in a tool's hidden checkout is how the tool works", () => 
 	assert.equal(repoLevel({ ...nvm, name: "app" }), "detached");
 	assert.equal(repoLevel({ ...nvm, unpushed: 2 }), "unpushed");
 });
+
+test("a tool's hidden checkout with nothing else outstanding is not reported", () => {
+	const repo = (name: string, extra = {}) => ({
+		name,
+		path: `/Users/x/${name}`,
+		uncommitted: 0,
+		unpushed: 0,
+		stashed: 0,
+		detached_head: true,
+		// What rcc really sends: git lists the detached HEAD as a branch with no upstream.
+		no_upstream: 1,
+		...extra,
+	});
+	const parsed = parseGit(
+		JSON.stringify({
+			repos_total: 6,
+			repos_with_issues: 5,
+			repos: [
+				repo(".nvm"),
+				repo(".oh-my-zsh", { no_upstream: 0 }),
+				repo(".dirty", { uncommitted: 3 }),
+				repo(".branches", { no_upstream: 2 }),
+				repo("app"),
+			],
+		}),
+	);
+	assert.deepEqual(
+		parsed.repos.map((r) => r.name),
+		[".dirty", ".branches", "app"],
+	);
+	assert.equal(parsed.repos_with_issues, 3);
+	assert.equal(parsed.repos_total, 6);
+});
