@@ -61,23 +61,3 @@ Expired access tokens refresh when you apply a status. Slack's PKCE refresh toke
 If connecting or disconnecting fails, retry that action in **Manage Slack Workspaces**. Pending accounts remain visible there but cannot receive status updates.
 
 Disconnecting removes local credentials and metadata. It leaves your Slack status unchanged and does not revoke the Slack app grant. Revoke the app through Slack's app settings if needed. Disconnect each account before changing Slack app configuration.
-
-## 5. Develop and prepare for the Store
-
-Use Node.js 24 LTS (or Node.js 22.22.2 or later on the 22.x line), npm 7 or later, and a current Raycast version. From this extension directory:
-
-```sh
-npm install
-npm run dev
-```
-
-Check the implementation:
-
-```sh
-npm test
-npm run format:check
-npm run lint
-npm run build
-```
-
-Automated tests use simulated Slack responses. Before submitting a release, verify that a fresh Raycast install on macOS can connect two Slack workspaces and apply a preset to both. Use fictional workspace data in Store screenshots. [Raycast Store preparation guide](https://developers.raycast.com/basics/prepare-an-extension-for-store).
