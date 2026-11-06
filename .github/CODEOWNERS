@@ -318,6 +318,7 @@
 /extensions/brawlstars                                              @MaximeGuiliani
 /extensions/brew                                                    @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare @ashokbaruaakas @MillerApps @pernielsentikaer @jfkisafk @vpukhanov @j3lte @alexander-cato @ViGeng @ridemountainpig @chrismessina @clins1994 @alexibuild @dibas-np
 /extensions/brew-services                                           @erics118
+/extensions/bricks-builder                                          @matejmohar
 /extensions/brightness-control                                      @CaliCastle @pavzagor @fisaogullari @0xdhrv @muhammadrizo-y
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
 /extensions/browser-ai                                              @aeither
@@ -459,7 +460,7 @@
 /extensions/clipboard-editor                                        @pomdtr
 /extensions/clipboard-formatter                                     @joshtemple
 /extensions/clipboard-sequential-paste                              @Joren-Thijs
-/extensions/clipboard-type                                          @krish-199 @ITninja04 @yamork779
+/extensions/clipboard-type                                          @krish-199 @ITninja04 @yamork779 @andriygm
 /extensions/clipboard-utilities                                     @noidwasavailable
 /extensions/clipmate                                                @shvmmshr
 /extensions/clipmenu                                                @Envl
@@ -988,6 +989,7 @@
 /extensions/fizzy                                                   @xmok
 /extensions/flameshot                                               @muhammadrizo-y
 /extensions/flashcards                                              @Paulito12209
+/extensions/flashdata-google-search                                 @rocosen
 /extensions/flashspace                                              @krmbzds
 /extensions/flaticon                                                @kudrykv
 /extensions/fleeting                                                @0xdhrv
@@ -1688,6 +1690,7 @@
 /extensions/mailwip                                                 @xmok
 /extensions/make-dot-com                                            @iknowdjz
 /extensions/make-with-notion-2024                                   @AlexIsMaking
+/extensions/makedeck                                                @Lorenzo-Se
 /extensions/mamp-utility                                            @SuoweiHu
 /extensions/man-pages                                               @SKaplanOfficial
 /extensions/mandarin-chinese-dictionary                             @CofCat456
@@ -1781,6 +1784,7 @@
 /extensions/microsoft-teams                                         @svenwiegand @mSarheed @0xdhrv
 /extensions/microsoft-teams-calling                                 @svenwiegand @leec-666
 /extensions/microsoft-tenant-id                                     @Rediwed
+/extensions/mictape                                                 @t4kamuna
 /extensions/midas                                                   @sunosuporno
 /extensions/midjourney                                              @CarterMcAlister
 /extensions/migadu                                                  @xmok @LBBO
@@ -2261,6 +2265,7 @@
 /extensions/podcast-downloader                                      @LagaV
 /extensions/podcasts                                                @ron-myers
 /extensions/podcasts-now                                            @cloudy9101
+/extensions/pods-control                                            @raulgg
 /extensions/pokedex                                                 @anhthang @miguel-felix1 @ridemountainpig
 /extensions/pokemon-tcg-pocket-binder                               @Azyzraissi
 /extensions/polar                                                   @emilwidlund @xmok
@@ -2272,6 +2277,7 @@
 /extensions/pomo                                                    @claudfuen
 /extensions/pomodoro                                                @KELiON @pernielsentikaer @brodelp @susonthapa @mikikiv @MartinGonzalez @Nathanjms @cchalop1 @haydencbarnes @j3lte @LitoMore @ridemountainpig @mepearso @alastairsounds @dangkhoipro @cblokkeel
 /extensions/pomodoro-md                                             @yukitomo
+/extensions/pond                                                    @0xdhrv @0xdhrv
 /extensions/popcorn                                                 @martipops
 /extensions/popicons                                                @lucaschultz
 /extensions/porkbun                                                 @xmok @djpowers
@@ -3316,6 +3322,7 @@
 /extensions/vocabuilder                                             @lavrovpy
 /extensions/vocabula-lat                                            @silencesys
 /extensions/vocabulary-builder                                      @stefankosticc
+/extensions/vogels-motionmount                                      @vigosan
 /extensions/voice-to-text-windows                                   @aylikostin
 /extensions/voiceink                                                @metrovoc @pasqualesalza
 /extensions/voicemeeter-raycast                                     @gustavoGazevedo
