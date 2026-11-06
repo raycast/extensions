@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Video Dept. AI MCP Server] - {PR_MERGE_DATE}
+## [Add Video Dept. AI MCP Server] - 2026-11-06
 
 - Add Video Dept. AI to the official registry: plan a corporate or event video with VIDEO DEPT., a Fort Lauderdale studio: see posted prices, draft a script, send a brief and your brand guidelines, and book a free call with Nikita. Hosted Streamable HTTP server at https://agents.videodepartment.org/mcp, no sign-in.
 
