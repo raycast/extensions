@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pond",
   "title": "Pond",
-  "description": "Search, save, and organize your local Pond library from Raycast.",
+  "description": "Search, save, and organize your local library. Requires the Pond desktop app to be installed and running.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "contributors": [

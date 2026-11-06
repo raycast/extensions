@@ -176,7 +176,8 @@ export function SavesList({ filter: pinned, navigationTitle, searchText: initial
   }
 
   const placeholder = meaning || (byMeaning && scope) ? "Search by meaning…" : "Search saves…";
-  const failed = saves.error && !data.length ? toError(saves.error) : null;
+  const error = saves.error ?? (filter.kind === "view" ? views.error : undefined);
+  const failed = error && !data.length ? toError(error) : null;
 
   return (
     <List
