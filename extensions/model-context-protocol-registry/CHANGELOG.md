@@ -2,8 +2,8 @@
 
 ## [Add Folklore MCP] - {PR_MERGE_DATE}
 
-- Add Folklore MCP 1.7.0 with direct HTTP in Raycast and a local proxy fallback for other clients.
-- Describe the eleven tools, public-data scope and qualified professional review requirement.
+- Add Folklore MCP 2.0.0 with direct HTTP in Raycast and a local proxy fallback for other clients.
+- Describe the eleven public tools, eighteen optional API-key tools and qualified professional review requirement.
 
 ## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
