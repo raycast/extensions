@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Agent Outbox MCP Server] - {PR_MERGE_DATE}
+## [Add Agent Outbox MCP Server] - 2026-11-06
 
 - Add Agent Outbox to the official registry: your AI assistant posts to your Telegram private chat, groups and channels through a bot. Hosted Streamable HTTP server at https://outbox.roxinbox.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
