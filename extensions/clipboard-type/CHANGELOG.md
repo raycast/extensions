@@ -1,6 +1,6 @@
 # Clipboard Type Changelog
 
-## [Privacy, Speed, and Reliability Improvements] - {PR_MERGE_DATE}
+## [Privacy, Speed, and Reliability Improvements] - 2026-11-06
 
 - The progress toast no longer shows a preview of the clipboard contents.
 - Fixed Windows-style line endings (`\r\n`) being typed as two newlines.
