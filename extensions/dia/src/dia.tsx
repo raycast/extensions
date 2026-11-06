@@ -19,6 +19,7 @@ export type HistoryItem = {
   url: string;
   title?: string;
   lastVisitedAt: string;
+  lastVisitTime: number;
   profile?: string;
   profileId?: string;
 };
@@ -141,7 +142,8 @@ function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) 
     SELECT id,
           url,
           title,
-          datetime(last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') AS lastVisitedAt
+          datetime(last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') AS lastVisitedAt,
+          last_visit_time AS lastVisitTime
     FROM urls
     ${whereClause ? `WHERE ${whereClause}` : ""}
     GROUP BY url
@@ -188,12 +190,10 @@ async function queryAllProfileHistory(
   const newestByUrl = new Map<string, HistoryItem>();
   for (const row of perProfile.flat()) {
     const existing = newestByUrl.get(row.url);
-    if (!existing || row.lastVisitedAt > existing.lastVisitedAt) newestByUrl.set(row.url, row);
+    if (!existing || row.lastVisitTime > existing.lastVisitTime) newestByUrl.set(row.url, row);
   }
 
-  return [...newestByUrl.values()]
-    .sort((a, b) => (a.lastVisitedAt < b.lastVisitedAt ? 1 : a.lastVisitedAt > b.lastVisitedAt ? -1 : 0))
-    .slice(0, effectiveLimit);
+  return [...newestByUrl.values()].sort((a, b) => b.lastVisitTime - a.lastVisitTime).slice(0, effectiveLimit);
 }
 
 export const FULL_DISK_ACCESS_MESSAGE =
@@ -406,37 +406,41 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
           try
             set wId to id of w
             repeat with pIdx from 1 to count of profiles of w
-              set pName to my escape_value(name of profile pIdx of w)
-              set allTabs to properties of every tab of profile pIdx of w
-              set tabsCount to count of allTabs
-              repeat with i from 1 to tabsCount
               try
-                set _tab to item i of allTabs
-                set _title to ""
-                try
-                  set _title to my escape_value(get title of _tab)
-                end try
-                if _title is "" then
+                set pName to my escape_value(name of profile pIdx of w)
+                set allTabs to properties of every tab of profile pIdx of w
+                set tabsCount to count of allTabs
+                repeat with i from 1 to tabsCount
                   try
-                    set _title to my escape_value(get name of _tab)
-                  end try
-                end if
-                set _url to ""
-                try
-                  set _url to my escape_value(get URL of _tab)
-                end try
-                set _id to get id of _tab
-                set _isPinned to get isPinned of _tab
-                set _isFocused to get isFocused of _tab
+                    set _tab to item i of allTabs
+                    set _title to ""
+                    try
+                      set _title to my escape_value(get title of _tab)
+                    end try
+                    if _title is "" then
+                      try
+                        set _title to my escape_value(get name of _tab)
+                      end try
+                    end if
+                    set _url to ""
+                    try
+                      set _url to my escape_value(get URL of _tab)
+                    end try
+                    set _id to get id of _tab
+                    set _isPinned to get isPinned of _tab
+                    set _isFocused to get isFocused of _tab
 
-                if _output is not "" then
-                  set _output to (_output & ",")
-                end if
-                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"profile\\": \\"" & pName & "\\", \\"profileIndex\\": " & pIdx & ", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+                    if _output is not "" then
+                      set _output to (_output & ",")
+                    end if
+                    set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"profile\\": \\"" & pName & "\\", \\"profileIndex\\": " & pIdx & ", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+                  on error
+                    (* skip this tab, avoid dangling comma *)
+                  end try
+                end repeat
               on error
-                (* skip this tab, avoid dangling comma *)
+                (* skip this profile so later profiles in the window still load *)
               end try
-              end repeat
             end repeat
           on error errMsg number errNum
             (* swallow error for this window so we still return tabs from other windows *)
