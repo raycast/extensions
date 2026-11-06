@@ -9,9 +9,10 @@ interface TabListItemProps {
   searchText?: string;
   onTabAction?: () => void;
   mutateTabs?: MutatePromise<Tab[] | undefined>;
+  showProfile?: boolean;
 }
 
-export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabListItemProps) {
+export function TabListItem({ tab, searchText, onTabAction, mutateTabs, showProfile }: TabListItemProps) {
   const { defaultTabAction } = getPreferenceValues<Preferences.Search>();
   const searchEngine = searchText ? getSearchEngine() : undefined;
 
@@ -55,7 +56,7 @@ export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabLis
       icon={tab.url ? getFavicon(tab.url, { mask: Image.Mask.Circle }) : Icon.Globe}
       title={tab.title}
       subtitle={tab.url ? { value: getSubtitle(tab.url), tooltip: tab.url } : undefined}
-      accessories={getAccessories(tab)}
+      accessories={getAccessories(tab, showProfile)}
       actions={
         <ActionPanel>
           {primaryAction}
@@ -84,7 +85,14 @@ export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabLis
                     // roll back and refetch only if the browser rejects the close.
                     await mutateTabs(closeTab(tab), {
                       optimisticUpdate: (data) =>
-                        data?.filter((t) => !(t.windowId === tab.windowId && t.tabId === tab.tabId)),
+                        data?.filter(
+                          (t) =>
+                            !(
+                              t.windowId === tab.windowId &&
+                              t.profileIndex === tab.profileIndex &&
+                              t.tabId === tab.tabId
+                            ),
+                        ),
                       rollbackOnError: true,
                       shouldRevalidateAfter: false,
                     });

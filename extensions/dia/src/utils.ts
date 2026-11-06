@@ -40,8 +40,15 @@ export function getSubtitle(url: string) {
   }
 }
 
-export function getAccessories(tab: Tab) {
+export function hasMultipleProfiles(tabs: Tab[] | undefined) {
+  return new Set(tabs?.map((tab) => tab.profile)).size > 1;
+}
+
+export function getAccessories(tab: Tab, showProfile = false) {
   const accessories: List.Item.Accessory[] = [];
+  if (showProfile) {
+    accessories.push({ tag: tab.profile });
+  }
   if (tab.isFocused) {
     accessories.push({ icon: { source: Icon.Dot, tintColor: Color.Blue }, tooltip: "Focused tab" });
   }

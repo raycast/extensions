@@ -10,7 +10,7 @@ import withVersionCheck from "./components/VersionCheck";
 import { useSearchHistory, useTabs, useBookmarks } from "./dia";
 import { useGoogleSuggestions } from "./google";
 import { getSearchEngine, getSearchUrl } from "./search-engines";
-import { filterHistory, filterTabs, isLikelyURL } from "./utils";
+import { filterHistory, filterTabs, hasMultipleProfiles, isLikelyURL } from "./utils";
 
 type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | "suggestions";
 
@@ -60,6 +60,7 @@ function Command() {
   const filteredTabs = useMemo(() => filterTabs(tabs, searchText), [tabs, searchText]);
   const filteredHistory = useMemo(() => filterHistory(history, tabs), [history, tabs]);
 
+  const showProfile = hasMultipleProfiles(tabs);
   const shouldShow = (section: ViewMode) => viewMode === "all" || viewMode === section;
   const detectedURL = searchText && isLikelyURL(searchText) ? searchText.trim() : null;
 
@@ -105,6 +106,7 @@ function Command() {
                 searchText={searchText}
                 onTabAction={revalidateTabs}
                 mutateTabs={mutateTabs}
+                showProfile={showProfile}
               />
             ))}
         </List.Section>
@@ -121,6 +123,7 @@ function Command() {
                 searchText={searchText}
                 onTabAction={revalidateTabs}
                 mutateTabs={mutateTabs}
+                showProfile={showProfile}
               />
             ))}
         </List.Section>
@@ -148,7 +151,7 @@ function Command() {
         <List.Section title="History">
           {filteredHistory?.map((item) => (
             <HistoryListItem
-              key={`history-${item.id}`}
+              key={`history-${item.profileId ?? ""}-${item.id}`}
               item={item}
               searchText={searchText}
               onHistoryAction={revalidateTabs}

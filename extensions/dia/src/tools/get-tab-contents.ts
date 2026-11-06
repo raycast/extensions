@@ -45,7 +45,7 @@ type PageText = { title: string; url: string; readyState: string; length: number
 export default async function tool(input: Input) {
   const maxLength = Math.min(Math.max(Math.floor(input.maxLength ?? DEFAULT_MAX_LENGTH), 1), MAX_LENGTH_CAP);
   const tab = await findTab(input);
-  const tabSpecifier = `tab id "${escapeAppleScriptString(tab.tabId)}" of window id "${escapeAppleScriptString(tab.windowId)}"`;
+  const tabSpecifier = `tab id "${escapeAppleScriptString(tab.tabId)}" of profile ${tab.profileIndex} of window id "${escapeAppleScriptString(tab.windowId)}"`;
 
   const stillLoading = await waitUntilLoaded(tabSpecifier).catch((error) => {
     throw toReadError(error, tab.title);

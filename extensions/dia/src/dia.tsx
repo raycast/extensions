@@ -1,4 +1,5 @@
-import { executeSQL, runAppleScript, showFailureToast, useCachedPromise, usePromise, useSQL } from "@raycast/utils";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { executeSQL, runAppleScript, useCachedPromise, usePromise } from "@raycast/utils";
 import { resolve } from "path";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
@@ -18,10 +19,14 @@ export type HistoryItem = {
   url: string;
   title?: string;
   lastVisitedAt: string;
+  profile?: string;
+  profileId?: string;
 };
 
 export type Tab = {
   windowId: string;
+  profile: string;
+  profileIndex: number;
   tabId: string;
   title: string;
   url?: string;
@@ -36,30 +41,43 @@ export type Bookmark = {
   path: string; // Breadcrumb as single string (e.g., "Bookmarks Bar › Work")
 };
 
-function getActiveProfilePath() {
-  const localStatePath = resolve(homedir(), "Library/Application Support/Dia/User Data/Local State");
+const USER_DATA_PATH = resolve(homedir(), "Library/Application Support/Dia/User Data");
+
+export type Profile = {
+  id: string;
+  name: string;
+  path: string;
+};
+
+export function getProfiles(): Profile[] {
+  let ids: string[] = [];
+  let names: Record<string, { name: string }> = {};
 
   try {
-    const fileContent = readFileSync(localStatePath, "utf-8");
-    const localState: LocalState = JSON.parse(fileContent);
-
-    // Get the last used profile
-    const lastUsedProfile = localState.profile.last_used || "Default";
-
-    return resolve(homedir(), `Library/Application Support/Dia/User Data/${lastUsedProfile}`);
+    const localState: LocalState = JSON.parse(readFileSync(resolve(USER_DATA_PATH, "Local State"), "utf-8"));
+    names = localState.profile.info_cache ?? {};
+    ids = Object.keys(names);
+    if (ids.length === 0) ids = [localState.profile.last_used || "Default"];
   } catch (error) {
     console.error("Error reading Local State:", error);
-    // Fallback to Default profile
-    return resolve(homedir(), "Library/Application Support/Dia/User Data/Default");
+    ids = ["Default"];
   }
+
+  return ids
+    .filter((id) => existsSync(resolve(USER_DATA_PATH, id)))
+    .map((id) => ({ id, name: names[id]?.name || id, path: resolve(USER_DATA_PATH, id) }));
 }
 
-function getHistoryPath() {
-  return resolve(getActiveProfilePath(), "History");
+export function getHistoryPaths(profiles: Profile[] = getProfiles()) {
+  return profiles
+    .map((profile) => ({ profile, path: resolve(profile.path, "History") }))
+    .filter(({ path }) => existsSync(path));
 }
 
-export function getBookmarksPath() {
-  return resolve(getActiveProfilePath(), "Bookmarks");
+export function getBookmarksPaths(profiles: Profile[] = getProfiles()) {
+  return profiles
+    .map((profile) => ({ profile, path: resolve(profile.path, "Bookmarks") }))
+    .filter(({ path }) => existsSync(path));
 }
 
 async function searchBookmarks(searchText: string): Promise<Bookmark[]> {
@@ -132,43 +150,89 @@ function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) 
   `;
 }
 
-export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
-  const historyPath = getHistoryPath();
-  // getHistoryQuery now handles escaping internally
-  const historyQuery = getHistoryQuery(searchText, options?.limit);
-
-  const dbExists = existsSync(historyPath);
-  // const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
-  const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
-    permissionPriming: "This extension needs access to read your Dia browser history.",
-    execute: dbExists,
-  });
-
-  if (!dbExists) {
-    const error = new Error("The database does not exist");
-    showFailureToast(error);
-    return { isLoading: false, error, data: [], permissionView: null, revalidate: () => {} };
-  }
-  return result;
+function isPermissionError(error: unknown) {
+  return error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message));
 }
 
-export const FULL_DISK_ACCESS_MESSAGE =
-  "Raycast needs Full Disk Access to read Dia's data. Enable Raycast in System Settings → Privacy & Security → Full Disk Access, then try again.";
-
-/** Async variant of useSearchHistory for AI tools, where hooks are unavailable. */
-export async function searchHistory(searchText?: string, limit?: number): Promise<HistoryItem[]> {
-  const historyPath = getHistoryPath();
-  if (!existsSync(historyPath)) {
+async function queryAllProfileHistory(
+  searchText: string | undefined,
+  limit: number | undefined,
+  minSearchLength: number,
+) {
+  const sources = getHistoryPaths();
+  if (sources.length === 0) {
     // Without Full Disk Access the file can look missing rather than unreadable, so mention both causes
     throw new Error(
       `Dia's history database was not found. Make sure Dia has been opened at least once. ${FULL_DISK_ACCESS_MESSAGE}`,
     );
   }
 
+  const effectiveLimit = limit ?? 100;
+  const query = getHistoryQuery(searchText, effectiveLimit, minSearchLength);
+  const settled = await Promise.allSettled(
+    sources.map(async ({ profile, path }) => {
+      const rows = await executeSQL<HistoryItem>(path, query);
+      return rows.map((row) => ({
+        ...row,
+        profile: sources.length > 1 ? profile.name : undefined,
+        profileId: profile.id,
+      }));
+    }),
+  );
+  const failures = settled.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+  if (failures.length === settled.length) {
+    throw failures.find((f) => isPermissionError(f.reason))?.reason ?? failures[0].reason;
+  }
+  const perProfile = settled.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
+
+  const newestByUrl = new Map<string, HistoryItem>();
+  for (const row of perProfile.flat()) {
+    const existing = newestByUrl.get(row.url);
+    if (!existing || row.lastVisitedAt > existing.lastVisitedAt) newestByUrl.set(row.url, row);
+  }
+
+  return [...newestByUrl.values()]
+    .sort((a, b) => (a.lastVisitedAt < b.lastVisitedAt ? 1 : a.lastVisitedAt > b.lastVisitedAt ? -1 : 0))
+    .slice(0, effectiveLimit);
+}
+
+export const FULL_DISK_ACCESS_MESSAGE =
+  "Raycast needs Full Disk Access to read Dia's data. Enable Raycast in System Settings → Privacy & Security → Full Disk Access, then try again.";
+
+export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
+  const result = useCachedPromise(
+    async (text: string | undefined, limit: number | undefined) => queryAllProfileHistory(text, limit, 2),
+    [searchText, options.limit],
+    { keepPreviousData: true },
+  );
+
+  const permissionView = isPermissionError(result.error) ? (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="Raycast needs access to your Dia history"
+        description={FULL_DISK_ACCESS_MESSAGE}
+        actions={
+          <ActionPanel>
+            <Action.Open
+              title="Open System Settings"
+              target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  ) : null;
+
+  return { ...result, permissionView, error: permissionView ? undefined : result.error };
+}
+
+/** Async variant of useSearchHistory for AI tools, where hooks are unavailable. */
+export async function searchHistory(searchText?: string, limit?: number): Promise<HistoryItem[]> {
   try {
-    return await executeSQL<HistoryItem>(historyPath, getHistoryQuery(searchText, limit, 1));
+    return await queryAllProfileHistory(searchText, limit, 1);
   } catch (error) {
-    if (error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message))) {
+    if (isPermissionError(error)) {
       throw new Error(FULL_DISK_ACCESS_MESSAGE);
     }
     throw error;
@@ -259,19 +323,27 @@ async function getTabsJXA(): Promise<{ tabs: Tab[]; windowCount: number }> {
         const w = wins[i];
         try {
           const wId = String(w.id());
-          const wTabs = w.tabs();
-          for (let j = 0; j < wTabs.length; j++) {
-            const t = wTabs[j];
-            let url = "";
-            try { url = t.url() || ""; } catch(e) {}
-            tabs.push({
-              windowId: wId,
-              tabId: String(t.id()),
-              title: t.name() || t.title() || "",
-              url: url,
-              isPinned: !!t.isPinned(),
-              isFocused: !!t.isFocused(),
-            });
+          const profiles = w.profiles();
+          for (let p = 0; p < profiles.length; p++) {
+            try {
+              const profileName = String(profiles[p].name());
+              const pTabs = profiles[p].tabs();
+              for (let j = 0; j < pTabs.length; j++) {
+                const t = pTabs[j];
+                let url = "";
+                try { url = t.url() || ""; } catch(e) {}
+                tabs.push({
+                  windowId: wId,
+                  profile: profileName,
+                  profileIndex: p + 1,
+                  tabId: String(t.id()),
+                  title: t.name() || t.title() || "",
+                  url: url,
+                  isPinned: !!t.isPinned(),
+                  isFocused: !!t.isFocused(),
+                });
+              }
+            } catch(e) {}
           }
         } catch(e) {}
       }
@@ -287,6 +359,8 @@ async function getTabsJXA(): Promise<{ tabs: Tab[]; windowCount: number }> {
   const parsed = JSON.parse(result) as {
     tabs: Array<{
       windowId: string;
+      profile: string;
+      profileIndex: number;
       tabId: string;
       title: string;
       url: string;
@@ -331,9 +405,11 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
         repeat with w in every window
           try
             set wId to id of w
-            set allTabs to properties of every tab of w
-            set tabsCount to count of allTabs
-            repeat with i from 1 to tabsCount
+            repeat with pIdx from 1 to count of profiles of w
+              set pName to my escape_value(name of profile pIdx of w)
+              set allTabs to properties of every tab of profile pIdx of w
+              set tabsCount to count of allTabs
+              repeat with i from 1 to tabsCount
               try
                 set _tab to item i of allTabs
                 set _title to ""
@@ -356,10 +432,11 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
                 if _output is not "" then
                   set _output to (_output & ",")
                 end if
-                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"profile\\": \\"" & pName & "\\", \\"profileIndex\\": " & pIdx & ", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
               on error
                 (* skip this tab, avoid dangling comma *)
               end try
+              end repeat
             end repeat
           on error errMsg number errNum
             (* swallow error for this window so we still return tabs from other windows *)
@@ -383,6 +460,8 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
 
   const parsed = JSON.parse(sanitized) as Array<{
     windowId: string;
+    profile: string;
+    profileIndex: number;
     tabId: string;
     title: string;
     url: string;
@@ -425,7 +504,7 @@ export async function focusTab(tab: Tab) {
         const wins = dia.windows();
         for (let i = 0; i < wins.length; i++) {
           if (String(wins[i].id()) === '${tab.windowId.replace(/'/g, "\\'")}') {
-            const tabs = wins[i].tabs();
+            const tabs = wins[i].profiles[${tab.profileIndex - 1}].tabs();
             for (let j = 0; j < tabs.length; j++) {
               if (String(tabs[j].id()) === '${tab.tabId.replace(/'/g, "\\'")}') {
                 tabs[j].focus();
@@ -451,7 +530,7 @@ export async function focusTab(tab: Tab) {
         activate
         repeat with w in every window
           if id of w is "${escapedWindowId}" then
-            repeat with t in every tab of w
+            repeat with t in every tab of profile ${tab.profileIndex} of w
               if id of t is "${escapedTabId}" then
                 focus t
                 exit repeat
@@ -486,7 +565,7 @@ export async function closeTab(tab: Tab) {
         const wins = dia.windows();
         for (let i = 0; i < wins.length; i++) {
           if (String(wins[i].id()) === '${tab.windowId.replace(/'/g, "\\'")}') {
-            const tabs = wins[i].tabs();
+            const tabs = wins[i].profiles[${tab.profileIndex - 1}].tabs();
             for (let j = 0; j < tabs.length; j++) {
               if (String(tabs[j].id()) === '${tab.tabId.replace(/'/g, "\\'")}') {
                 tabs[j].close();
@@ -510,7 +589,7 @@ export async function closeTab(tab: Tab) {
         tell application "Dia"
           repeat with w in every window
             if id of w is "${escapedWindowId}" then
-              repeat with t in every tab of w
+              repeat with t in every tab of profile ${tab.profileIndex} of w
                 if id of t is "${escapedTabId}" then
                   close t
                   set _result to "ok"
