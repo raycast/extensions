@@ -51,13 +51,18 @@ export async function distribution(assets: string): Promise<Distribution> {
   if (value.mode !== "bundled" && value.mode !== "companion")
     throw new Error("Invalid installation package.");
   // Store setup opens this link in the browser. It never fetches executable code.
-  if (
-    value.mode === "companion" &&
-    !/^https:\/\/github\.com\/nikusti\/semantic-search\/releases\/tag\/v\d+\.\d+\.\d+$/.test(
-      value.installer_url || "",
-    )
-  ) {
-    throw new Error("Invalid engine installer link.");
+  if (value.mode === "companion") {
+    const link = value.installer_url || "";
+    const releasePage =
+      /^https:\/\/github\.com\/nikusti\/semantic-search\/releases\/tag\/v\d+\.\d+\.\d+$/.test(
+        link,
+      );
+    const installer =
+      /^https:\/\/github\.com\/nikusti\/semantic-search\/releases\/download\/v(\d+\.\d+\.\d+)\/semantic-search-engine-v\1-unsigned\.zip$/.test(
+        link,
+      );
+    if (!releasePage && !installer)
+      throw new Error("Invalid engine installer link.");
   }
   return value;
 }
@@ -177,21 +182,86 @@ async function prepareStartupCache(
   await writeFile(marker, "1", { mode: 0o600 });
 }
 async function prepareModelStartup(path: string, options: Options) {
-  options.progress?.("Checking installed model startup…");
-  // Usually a quick marker check. A new bridge or OS build warms downloaded
-  // Core ML text functions before the service becomes interactive, offline.
-  await execute(
-    join(path, "python/bin/python3.12"),
-    [
-      "-I",
-      "-B",
-      "-m",
-      "tinysearch.coreml_assets",
-      "--storage",
-      options.storage,
-    ],
-    { timeout: 660_000 },
+  options.progress?.("Checking local model startup…");
+  const executable = join(path, "python/bin/python3.12");
+  const args = [
+    "-I",
+    "-B",
+    "-m",
+    "tinysearch.coreml_assets",
+    "--storage",
+    options.storage,
+  ];
+  let startup: { needed: boolean; waiting: boolean };
+  try {
+    // Readiness is advisory: preparation rechecks under the engine's process lock.
+    const { stdout } = await execute(executable, [...args, "--status"], {
+      timeout: 15_000,
+      maxBuffer: 64 * 1024,
+    });
+    const value = JSON.parse(stdout);
+    if (
+      !value ||
+      typeof value.needed !== "boolean" ||
+      typeof value.waiting !== "boolean" ||
+      !Array.isArray(value.models) ||
+      value.models.some((model: unknown) => {
+        if (!model || typeof model !== "object") return true;
+        const row = model as Record<string, unknown>;
+        return (
+          typeof row.id !== "string" ||
+          !row.id ||
+          row.group !== "text" ||
+          typeof row.needed !== "boolean" ||
+          typeof row.waiting !== "boolean"
+        );
+      })
+    )
+      throw new Error("Invalid Core ML startup status.");
+    const models = value.models as { needed: boolean; waiting: boolean }[];
+    if (
+      value.needed !== models.some((model) => model.needed) ||
+      value.waiting !== models.some((model) => model.waiting)
+    )
+      throw new Error("Inconsistent Core ML startup status.");
+    startup = value;
+  } catch (error) {
+    throw new Error(
+      "Could not check Core ML startup readiness. Reinstall the matching engine and try again.",
+      { cause: error },
+    );
+  }
+  if (!startup.needed && !startup.waiting) return;
+  options.progress?.(
+    startup.waiting
+      ? "Core ML preparation is already running. Waiting for it to finish — this can take several minutes…"
+      : "Preparing Core ML after a macOS or engine update. This can take several minutes…",
   );
+  try {
+    await execute(executable, args, { timeout: 660_000 });
+  } catch (error) {
+    const details = error as {
+      killed?: boolean;
+      signal?: string;
+      code?: string;
+      message?: string;
+      stderr?: string;
+    };
+    const timedOut =
+      details.killed ||
+      details.signal === "SIGTERM" ||
+      details.code === "ETIMEDOUT" ||
+      /timed?\s*out|TimeoutExpired/i.test(
+        `${details.message || ""}\n${details.stderr || ""}`,
+      );
+    throw new Error(
+      timedOut
+        ? "Core ML preparation did not finish in time. Wait a few minutes, then reopen Search. Your models and indexes are preserved."
+        : "Core ML startup preparation failed. Reopen Search to retry; if it continues, reinstall the engine. Your models and indexes are preserved.",
+      { cause: error },
+    );
+  }
+  options.progress?.("Local models are ready…");
 }
 export async function installRuntime(
   options: Options,

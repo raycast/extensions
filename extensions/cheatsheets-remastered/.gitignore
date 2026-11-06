@@ -19,3 +19,5 @@ dist/
 *.log
 .env
 .raycast/
+
+.test-dist/

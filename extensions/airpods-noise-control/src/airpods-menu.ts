@@ -1,7 +1,7 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { Prefs } from "./type";
 import { updateCommandMetadata } from "@raycast/api";
-import { isSequoiaOrLater } from "./utils";
+import { isMacOS27OrLater, isSequoiaOrLater } from "./utils";
 
 export async function execAirPodsMenu(
   { airpodsIndex, airpodsType, soundLoc, optionOne, optionTwo }: Prefs,
@@ -71,24 +71,41 @@ tell application "System Events"
 		try
 			set output to "🔴 No Change"
 
-			-- Find and click the Sound menu bar item
-			set soundMenu to missing value
-			set menuBarItems to menu bar items of menu bar 1
+			if ${isMacOS27OrLater()} then
+				tell application process "MenuBarAgent" of application "System Events"
+					set soundMenu to missing value
+					set statusItems to entire contents
+					repeat with menuItem in statusItems
+						try
+							if value of attribute "AXIdentifier" of menuItem is "com.apple.menuextra.sound" then
+								set soundMenu to menuItem
+								exit repeat
+							end if
+						end try
+					end repeat
+					if soundMenu is missing value then return "sound-menu-not-found"
+					click soundMenu
+				end tell
+			else
+				-- Find and click the Sound menu bar item
+				set soundMenu to missing value
+				set menuBarItems to menu bar items of menu bar 1
 
-			repeat with menuItem in menuBarItems
-				try
-					if description of menuItem is "${soundLoc}" then
-						set soundMenu to menuItem
-						exit repeat
-					end if
-				end try
-			end repeat
+				repeat with menuItem in menuBarItems
+					try
+						if description of menuItem is "${soundLoc}" then
+							set soundMenu to menuItem
+							exit repeat
+						end if
+					end try
+				end repeat
 
-			if soundMenu is missing value then
-				return "sound-menu-not-found"
+				if soundMenu is missing value then
+					return "sound-menu-not-found"
+				end if
+
+				click soundMenu
 			end if
-
-			click soundMenu
 			delay 0.15
 
 			-- Get entire contents of the first window and find scroll areas

@@ -1,13 +1,16 @@
+import { failToast, onErrorToast, showError } from "@chrismessina/raycast-kit";
 import { useState } from "react";
-import { Action, ActionPanel, Clipboard, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { fetchFunding, fetchJobs, fetchOrganization, fetchPerson } from "../lib/api";
-import { day, money } from "../lib/format";
-import { detailMetadata, host, listDetailMetadata, type MetaItem } from "../lib/meta";
+import { fetchConversations, fetchFunding, fetchJobs, fetchOrganization, fetchPerson } from "../lib/api";
+import { clipboardText } from "../lib/errors";
+import { day, money, monthDay, year } from "../lib/format";
+import { absolute, nomineeIdFromPath, nomineeUrl, xProfile } from "../lib/inbox";
+import { detailMetadata, favicon, host, listDetailMetadata, type MetaItem } from "../lib/meta";
 import type { FundingRound, Job, OrganizationDetail, PersonDetail } from "../lib/types";
 import { ErrorEmptyView } from "./error-view";
 import { FavoriteAction } from "./favorite";
-import { InvestmentsView } from "./investments";
+import { humanize, InvestmentsView } from "./investments";
 import { useDescriptionOnly, ViewSection } from "./view-actions";
 
 // ---------------------------------------------------------------------------------------------
@@ -22,35 +25,45 @@ export interface Content {
 const dates = (start: string | null, end: string | null) =>
   start || end ? ` (${[start, end].filter(Boolean).join(" – ")})` : "";
 
+/** Cosign's display name, falling back to the X handle for someone who isn't on Cosign. */
+export const personName = (p: PersonDetail) => p.displayName || p.name || xProfile(p.handle).label;
+
+/** The person's page: on Cosign when they're on it, else their X profile. Never the raw server `profileUrl`. */
+const cosignUrl = (p: PersonDetail) => (p.nomineeId ? nomineeUrl(p.nomineeId) : xProfile(p.handle).url);
+
 export function personContent(p: PersonDetail): Content {
-  const md = [`# ${p.name}`];
+  const featured = p.featured ?? [];
+  const experiences = p.experiences ?? [];
+  const education = p.education ?? [];
+  const md = [`# ${personName(p)}`];
   if (p.headline) md.push(`*${p.headline}*`);
-  if (p.bio) md.push(p.bio);
-  if (p.featured.length) {
+  // Cosign writes a bio to follow the name ("leads ecosystem at…"), so a lowercase start gets the name in front.
+  if (p.bio) md.push(/^\p{Ll}/u.test(p.bio) ? `${personName(p)} ${p.bio}` : p.bio);
+  if (featured.length) {
     md.push(
       "## Featured",
-      p.featured
-        .map((f) => `- [${f.title}](${f.canonicalUrl})${f.description ? ` — ${f.description}` : ""}`)
+      featured
+        .map((f) => `- [${f.title}](${f.canonicalUrl ?? f.sourceUrl})${f.description ? ` — ${f.description}` : ""}`)
         .join("\n"),
     );
   }
-  if (p.experiences.length) {
+  if (experiences.length) {
     md.push(
       "## Experience",
-      p.experiences
+      experiences
         .map(
           (e) =>
-            `- **${e.position ?? "Role"}** · ${e.organizationName ?? "—"}${dates(e.startDate, e.endDate)}${
+            `- **${e.position ?? e.title}** · ${e.organizationName}${dates(e.startDate, e.endDate)}${
               e.description ? `\n  ${e.description}` : ""
             }`,
         )
         .join("\n"),
     );
   }
-  if (p.education.length) {
+  if (education.length) {
     md.push(
       "## Education",
-      p.education.map((e) => `- ${[e.school, e.degree, e.graduationYear].filter(Boolean).join(" · ")}`).join("\n"),
+      education.map((e) => `- ${[e.school, e.degree, e.graduationYear].filter(Boolean).join(" · ")}`).join("\n"),
     );
   }
   if (p.cosignedBy.length) {
@@ -61,12 +74,13 @@ export function personContent(p: PersonDetail): Content {
   }
 
   const meta: MetaItem[] = [];
-  if (p.headline) meta.push({ kind: "label", title: "Headline", text: p.headline });
   if (p.city) meta.push({ kind: "label", title: "City", text: p.city });
   meta.push({ kind: "label", title: "Cosigned by", text: String(p.cosignedByCount) });
   meta.push({ kind: "label", title: "Cosigned", text: String(p.cosignedCount) });
   meta.push({ kind: "separator" });
-  meta.push({ kind: "link", title: "Cosign", text: p.handle ? `@${p.handle}` : "Profile", target: p.profileUrl });
+  if (p.nomineeId) meta.push({ kind: "link", title: "Cosign", text: "Profile", target: nomineeUrl(p.nomineeId) });
+  const x = xProfile(p.handle);
+  meta.push({ kind: "link", title: "X", text: x.label, target: x.url });
   if (p.websiteUrl) meta.push({ kind: "link", title: "Website", text: host(p.websiteUrl), target: p.websiteUrl });
   if (p.linkedinUrl) meta.push({ kind: "link", title: "LinkedIn", text: "LinkedIn", target: p.linkedinUrl });
   return { markdown: md.join("\n\n"), meta };
@@ -100,26 +114,61 @@ export function organizationContent(o: OrganizationDetail): Content {
 // Actions: every entity listed on an entity is one keypress away
 // ---------------------------------------------------------------------------------------------
 
+/** Opens the existing Cosign thread with this person, or their profile when there is none. Cosign exposes no compose URL. */
+function MessageAction({ nomineeId }: { nomineeId: string }) {
+  const { data } = useCachedPromise(fetchConversations, []);
+  return (
+    <Action
+      title="Message on Cosign"
+      icon={Icon.Envelope}
+      onAction={async () => {
+        try {
+          // Look up on press when the cached list hasn't arrived, so a slow load can't send someone to the profile by mistake.
+          const threads = data ?? (await fetchConversations());
+          const thread = threads.find((c) => nomineeIdFromPath(c.counterpart.profileUrl) === nomineeId);
+          await open(thread ? absolute(thread.url) : nomineeUrl(nomineeId));
+        } catch (error) {
+          await showError(error, { title: "Couldn’t open the conversation" });
+        }
+      }}
+    />
+  );
+}
+
 export function PersonActions({ person: p, full = false }: { person: PersonDetail; full?: boolean }) {
   const seen = new Set<string>();
-  const companies = p.experiences.filter((e) => {
+  const companies = (p.experiences ?? []).filter((e) => {
     if (!e.organizationId || seen.has(e.organizationId)) return false;
     seen.add(e.organizationId);
     return true;
   });
-  const withHandle = (list: PersonDetail["cosignedBy"]) => list.filter((c) => c.handle);
+  // A person can cosign the same profile more than once; list each once.
+  const key = (c: PersonDetail["cosignedBy"][number]) => c.nomineeId ?? c.handle;
+  const withHandle = (list: PersonDetail["cosignedBy"]) =>
+    list.filter((c, i) => c.handle && list.findIndex((o) => key(o) === key(c)) === i);
+  const name = personName(p);
+  const url = cosignUrl(p);
 
   return (
     <>
       <ActionPanel.Section>
         {!full ? (
-          <Action.Push title="Show Full Profile" icon={Icon.Person} target={<PersonView nomineeId={p.nomineeId} />} />
+          <Action.Push
+            title="Show Full Profile"
+            icon={Icon.Person}
+            target={<PersonView {...(p.nomineeId ? { nomineeId: p.nomineeId } : { handle: p.handle })} />}
+          />
         ) : null}
-        <Action.OpenInBrowser url={p.profileUrl} />
-        {p.websiteUrl ? <Action.OpenInBrowser title="Open Website" url={p.websiteUrl} /> : null}
-        {p.linkedinUrl ? <Action.OpenInBrowser title="Open LinkedIn" url={p.linkedinUrl} /> : null}
-        <Action.CopyToClipboard title="Copy Profile URL" content={p.profileUrl} />
-        <FavoriteAction kind="people" id={p.nomineeId} name={p.name} />
+        <Action.OpenInBrowser url={url} />
+        {p.websiteUrl ? (
+          <Action.OpenInBrowser title="Open Website" url={p.websiteUrl} icon={favicon(p.websiteUrl)} />
+        ) : null}
+        {p.linkedinUrl ? (
+          <Action.OpenInBrowser title="Open LinkedIn" url={p.linkedinUrl} icon={favicon(p.linkedinUrl)} />
+        ) : null}
+        <Action.CopyToClipboard title="Copy Profile URL" content={url} />
+        {p.nomineeId ? <MessageAction nomineeId={p.nomineeId} /> : null}
+        {p.nomineeId ? <FavoriteAction kind="people" id={p.nomineeId} name={name} /> : null}
       </ActionPanel.Section>
       <ActionPanel.Section title="Explore">
         {companies.length ? (
@@ -136,22 +185,24 @@ export function PersonActions({ person: p, full = false }: { person: PersonDetai
         {withHandle(p.cosignedBy).length ? (
           <ActionPanel.Submenu title="Cosigned by" icon={Icon.TwoPeople}>
             {withHandle(p.cosignedBy).map((c) => (
-              <Action.Push key={c.nomineeId} title={c.name} target={<PersonView handle={c.handle!} />} />
+              <Action.Push key={key(c)} title={c.name} target={<PersonView handle={c.handle!} />} />
             ))}
           </ActionPanel.Submenu>
         ) : null}
         {withHandle(p.cosigned).length ? (
           <ActionPanel.Submenu title="Cosigned" icon={Icon.TwoPeople}>
             {withHandle(p.cosigned).map((c) => (
-              <Action.Push key={c.nomineeId} title={c.name} target={<PersonView handle={c.handle!} />} />
+              <Action.Push key={key(c)} title={c.name} target={<PersonView handle={c.handle!} />} />
             ))}
           </ActionPanel.Submenu>
         ) : null}
-        <Action.Push
-          title="Investments"
-          icon={Icon.Coins}
-          target={<InvestmentsView query={{ investorNomineeId: p.nomineeId }} name={p.name} />}
-        />
+        {p.nomineeId ? (
+          <Action.Push
+            title="Investments"
+            icon={Icon.Coins}
+            target={<InvestmentsView query={{ investorNomineeId: p.nomineeId }} name={name} />}
+          />
+        ) : null}
       </ActionPanel.Section>
     </>
   );
@@ -210,11 +261,7 @@ export function OrganizationActions({ org: o, full = false }: { org: Organizatio
           icon={Icon.LineChart}
           target={<InvestmentsView query={{ investorOrganizationId: o.organizationId }} name={o.name} />}
         />
-        <Action.Push
-          title="Open Roles"
-          icon={Icon.PersonLines}
-          target={<JobsView companyId={o.organizationId} name={o.name} />}
-        />
+        <Action.Push title="Open Roles" icon={Icon.PersonLines} target={<JobsView name={o.name} />} />
       </ActionPanel.Section>
     </>
   );
@@ -224,45 +271,69 @@ export function OrganizationActions({ org: o, full = false }: { org: Organizatio
 // Pushed full-screen views
 // ---------------------------------------------------------------------------------------------
 
+/** What a profile view shows when its load failed and there is nothing cached: a message, Retry and Copy Error. */
+function failedProfile(error: Error | undefined, retry: () => void) {
+  if (!error) return { markdown: "", actions: undefined };
+  return {
+    markdown: "Couldn’t load this profile.",
+    actions: (
+      <ActionPanel>
+        <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />
+        <Action
+          title="Copy Error"
+          icon={Icon.CopyClipboard}
+          onAction={() => Clipboard.copy(clipboardText("Couldn’t load this profile", error))}
+        />
+      </ActionPanel>
+    ),
+  };
+}
+
 export function PersonView(props: { nomineeId?: string; handle?: string }) {
-  const { data, isLoading } = useCachedPromise(fetchPerson, [props], {
-    failureToastOptions: { title: "Couldn't load profile" },
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchPerson, [props], {
+    onError: onErrorToast({ title: "Couldn't load profile" }),
   });
   const content = data ? personContent(data) : undefined;
+  const failed = failedProfile(error, revalidate);
   return (
     <Detail
-      navigationTitle={data?.name ?? "Person"}
+      navigationTitle={data ? personName(data) : "Person"}
       isLoading={isLoading}
-      markdown={content?.markdown ?? ""}
+      markdown={content?.markdown ?? failed.markdown}
       metadata={content ? detailMetadata(content.meta) : undefined}
       actions={
         data ? (
           <ActionPanel>
             <PersonActions person={data} full />
           </ActionPanel>
-        ) : undefined
+        ) : (
+          failed.actions
+        )
       }
     />
   );
 }
 
 export function OrganizationView({ organizationId }: { organizationId: string }) {
-  const { data, isLoading } = useCachedPromise(fetchOrganization, [organizationId], {
-    failureToastOptions: { title: "Couldn't load profile" },
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchOrganization, [organizationId], {
+    onError: onErrorToast({ title: "Couldn't load profile" }),
   });
   const content = data ? organizationContent(data) : undefined;
+  const failed = failedProfile(error, revalidate);
   return (
     <Detail
       navigationTitle={data?.name ?? "Company"}
       isLoading={isLoading}
-      markdown={content?.markdown ?? ""}
+      markdown={content?.markdown ?? failed.markdown}
       metadata={content ? detailMetadata(content.meta) : undefined}
       actions={
         data ? (
           <ActionPanel>
             <OrganizationActions org={data} full />
           </ActionPanel>
-        ) : undefined
+        ) : (
+          failed.actions
+        )
       }
     />
   );
@@ -272,10 +343,13 @@ export function OrganizationView({ organizationId }: { organizationId: string })
 // Funding history
 // ---------------------------------------------------------------------------------------------
 
+/** Cosign's label for the round, else its stage ("series_a" -> "Series a"). */
+const roundTitle = (r: FundingRound) => r.stageLabel ?? humanize(r.stage);
+
 function roundContent(r: FundingRound): Content {
   const amount = money(r.amount);
   const valuation = money(r.valuation);
-  const md = [`# ${r.stageLabel}`];
+  const md = [`# ${roundTitle(r)}`];
   md.push(
     [amount ? `**${amount}** raised` : null, valuation ? `at **${valuation}** ${r.valuation?.basis}-money` : null]
       .filter(Boolean)
@@ -301,7 +375,7 @@ function roundContent(r: FundingRound): Content {
 
 export function FundingView({ organizationId, name }: { organizationId: string; name: string }) {
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchFunding, [organizationId], {
-    failureToastOptions: { title: "Couldn't load funding" },
+    onError: onErrorToast({ title: "Couldn't load funding" }),
   });
   const [showDetail, setShowDetail] = useCachedState("show-detail-funding", true);
   const { descriptionOnly, toggleDescriptionOnly } = useDescriptionOnly();
@@ -310,75 +384,122 @@ export function FundingView({ organizationId, name }: { organizationId: string; 
       isLoading={isLoading}
       isShowingDetail={showDetail}
       searchBarPlaceholder="Filter funding rounds"
-      navigationTitle={`${name} — Funding`}
+      // The title carries the incomplete notice because the filter bar can hide the notice row.
+      navigationTitle={`${name} — Funding${data?.nextCursor ? " (incomplete)" : ""}`}
     >
-      {data?.rounds.map((r) => {
-        const content = roundContent(r);
-        return (
-          <List.Item
-            key={r.roundId}
-            title={r.stageLabel}
-            subtitle={money(r.amount)}
-            accessories={[{ text: day(r.announcedAt) }]}
-            detail={
-              <List.Item.Detail
-                markdown={content.markdown}
-                metadata={descriptionOnly ? undefined : listDetailMetadata(content.meta)}
+      {roundsByYear(data?.rounds ?? []).map(([label, rounds]) => (
+        <List.Section key={label} title={label}>
+          {rounds.map(round)}
+        </List.Section>
+      ))}
+      {data?.nextCursor ? (
+        <List.Item
+          key="incomplete"
+          title="Some older rounds aren’t shown"
+          subtitle="See the company on Cosign for its full history"
+          icon={Icon.Warning}
+          actions={
+            <ActionPanel>
+              <ViewSection
+                descriptionOnly={descriptionOnly}
+                onToggleDescription={toggleDescriptionOnly}
+                sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
               />
-            }
-            actions={
-              <ActionPanel>
-                {r.firms.length ? (
-                  <ActionPanel.Submenu title="Investors" icon={Icon.Building}>
-                    {r.firms.map((f) => (
-                      <Action.Push
-                        key={f.organizationId}
-                        title={f.lead ? `${f.name} (lead)` : f.name}
-                        target={<OrganizationView organizationId={f.organizationId} />}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
-                ) : null}
-                {r.participants.length ? (
-                  <ActionPanel.Submenu title="People" icon={Icon.Person}>
-                    {r.participants.map((p) => (
-                      <Action.Push key={p.nomineeId} title={p.name} target={<PersonView nomineeId={p.nomineeId} />} />
-                    ))}
-                  </ActionPanel.Submenu>
-                ) : null}
-                {r.sourceUrls.length ? (
-                  <ActionPanel.Submenu title="Sources" icon={Icon.Link}>
-                    {r.sourceUrls.map((u) => (
-                      <Action.OpenInBrowser key={u} title={host(u)} url={u} />
-                    ))}
-                  </ActionPanel.Submenu>
-                ) : null}
-                <ViewSection
-                  descriptionOnly={descriptionOnly}
-                  onToggleDescription={toggleDescriptionOnly}
-                  sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {error && !data ? <ErrorEmptyView title="Couldn't load funding" error={error} retry={revalidate} /> : null}
-      {data && !data.rounds.length ? <List.EmptyView title="No recorded funding" description={data.coverage} /> : null}
+      {data && !data.rounds.length && !data.nextCursor ? (
+        <List.EmptyView title="No recorded funding" description={data.coverage} />
+      ) : null}
     </List>
   );
+
+  function round(r: FundingRound) {
+    const content = roundContent(r);
+    return (
+      <List.Item
+        key={r.roundId}
+        title={roundTitle(r)}
+        subtitle={money(r.amount)}
+        // The year is the section header; with the sidebar hidden there is room for the full date.
+        accessories={[{ text: showDetail ? monthDay(r.announcedAt) : day(r.announcedAt) }]}
+        detail={
+          <List.Item.Detail
+            markdown={content.markdown}
+            metadata={descriptionOnly ? undefined : listDetailMetadata(content.meta)}
+          />
+        }
+        actions={
+          <ActionPanel>
+            {r.firms.length ? (
+              <ActionPanel.Submenu title="Investors" icon={Icon.Building}>
+                {r.firms.map((f) => (
+                  <Action.Push
+                    key={f.organizationId}
+                    title={f.lead ? `${f.name} (lead)` : f.name}
+                    target={<OrganizationView organizationId={f.organizationId} />}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            ) : null}
+            {r.participants.some((p) => p.nomineeId || p.investorOrganizationId) ? (
+              <ActionPanel.Submenu title="People" icon={Icon.Person}>
+                {r.participants.map((p, i) =>
+                  p.nomineeId ? (
+                    <Action.Push key={i} title={p.name} target={<PersonView nomineeId={p.nomineeId} />} />
+                  ) : p.investorOrganizationId ? (
+                    <Action.Push
+                      key={i}
+                      title={p.name}
+                      target={<OrganizationView organizationId={p.investorOrganizationId} />}
+                    />
+                  ) : null,
+                )}
+              </ActionPanel.Submenu>
+            ) : null}
+            {r.sourceUrls.length ? (
+              <ActionPanel.Submenu title="Sources" icon={Icon.Link}>
+                {r.sourceUrls.map((u) => (
+                  <Action.OpenInBrowser key={u} title={host(u)} url={u} icon={favicon(u)} />
+                ))}
+              </ActionPanel.Submenu>
+            ) : null}
+            <ViewSection
+              descriptionOnly={descriptionOnly}
+              onToggleDescription={toggleDescriptionOnly}
+              sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+}
+
+/** One section per announcement year, newest first, keeping Cosign's order within a year. Undated rounds go last. */
+function roundsByYear(rounds: FundingRound[]): [string, FundingRound[]][] {
+  const groups = new Map<number, FundingRound[]>();
+  for (const r of rounds) {
+    const y = year(r.announcedAt) ?? -Infinity;
+    groups.set(y, [...(groups.get(y) ?? []), r]);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => b - a)
+    .map(([y, list]) => [y === -Infinity ? "Date Unknown" : String(y), list]);
 }
 
 // ---------------------------------------------------------------------------------------------
 // Open roles
 // ---------------------------------------------------------------------------------------------
 
-function jobContent(j: Job): Content {
+function jobContent(j: Job, teamColor?: Color): Content {
   const md = [`# ${j.title}`];
   if (j.description)
     md.push(j.description + (j.descriptionTruncated ? "\n\n*…truncated — open the job for the full text.*" : ""));
   const meta: MetaItem[] = [];
-  if (j.team) meta.push({ kind: "label", title: "Team", text: j.team });
+  if (j.team) meta.push({ kind: "tags", title: "Team", tags: [j.team], color: teamColor });
   if (j.location)
     meta.push({ kind: "label", title: "Location", text: j.remote ? `${j.location} · Remote` : j.location });
   if (j.compensation) meta.push({ kind: "label", title: "Compensation", text: j.compensation });
@@ -388,33 +509,56 @@ function jobContent(j: Job): Content {
   return { markdown: md.join("\n\n"), meta };
 }
 
-export function JobsView({ companyId, name }: { companyId: string; name: string }) {
-  const { data, isLoading, error, revalidate } = useCachedPromise(fetchJobs, [companyId], {
-    failureToastOptions: { title: "Couldn't load open roles" },
+const TEAM_COLORS = [Color.Blue, Color.Orange, Color.Green, Color.Magenta, Color.Yellow, Color.Red, Color.Purple];
+
+/**
+ * Colors go to teams in the order they first appear among the loaded roles, so the first seven teams never share a
+ * color and Load More (which only appends roles) never recolors a team already on screen.
+ */
+function teamColors(jobs: Job[]): Map<string, Color> {
+  const colors = new Map<string, Color>();
+  for (const j of jobs)
+    if (j.team && !colors.has(j.team)) colors.set(j.team, TEAM_COLORS[colors.size % TEAM_COLORS.length]);
+  return colors;
+}
+
+const ALL_TEAMS = "__all__";
+const NO_TEAM = "__none__";
+
+/** Cosign's job search has no company-id filter; it resolves the employer from its name. */
+export function JobsView({ name }: { name: string }) {
+  const [team, setTeam] = useState(ALL_TEAMS);
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchJobs, [name], {
+    onError: onErrorToast({ title: "Couldn't load open roles" }),
   });
   const [showDetail, setShowDetail] = useCachedState("show-detail-jobs", true);
   const { descriptionOnly, toggleDescriptionOnly } = useDescriptionOnly();
-  // Pages after the first. Explicit only: search_jobs shares a 3/min, 20/hour, 60/day AI budget.
+  // Pages after the first. Explicit only: each one spends a call from Cosign's semantic search budget.
   const [more, setMore] = useState<{ jobs: Job[]; nextCursor: string | null } | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const jobs = data ? [...data.jobs, ...(more?.jobs ?? [])] : [];
   const nextCursor = more ? more.nextCursor : (data?.nextCursor ?? null);
+  // The dropdown lists the teams among the roles loaded so far; it grows with Load More.
+  const colors = teamColors(jobs);
+  const teams = [...colors.keys()].sort((a, b) => a.localeCompare(b));
+  const shown = jobs.filter((j) => (team === ALL_TEAMS ? true : team === NO_TEAM ? !j.team : j.team === team));
+  // One section per team, so the team needs no accessory (a tag is too wide beside the sidebar). Roles with no team last.
+  const sections: [string, Job[]][] = [
+    ...teams.map((t): [string, Job[]] => [t, shown.filter((j) => j.team === t)]),
+    ["No Team", shown.filter((j) => !j.team)],
+  ].filter(([, roles]) => roles.length > 0) as [string, Job[]][];
 
   async function loadMore() {
     if (!nextCursor || isLoadingMore) return;
     setIsLoadingMore(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Loading more roles…" });
     try {
-      const page = await fetchJobs(companyId, nextCursor);
+      const page = await fetchJobs(name, nextCursor);
       setMore({ jobs: [...(more?.jobs ?? []), ...page.jobs], nextCursor: page.nextCursor });
       toast.style = Toast.Style.Success;
       toast.title = `Loaded ${page.jobs.length} more ${page.jobs.length === 1 ? "role" : "roles"}`;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't load more roles";
-      toast.message = message;
-      toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+      failToast(toast, error, { title: "Couldn't load more roles" });
     } finally {
       setIsLoadingMore(false);
     }
@@ -429,37 +573,62 @@ export function JobsView({ companyId, name }: { companyId: string; name: string 
       isLoading={isLoading || isLoadingMore}
       isShowingDetail={showDetail}
       searchBarPlaceholder="Filter open roles"
-      navigationTitle={data ? `${name} — Open Roles (${data.totalMatches}) — showing ${jobs.length}` : name}
-    >
-      {jobs.map((j) => {
-        const content = jobContent(j);
-        return (
-          <List.Item
-            key={j.postingId}
-            title={j.title}
-            subtitle={j.team ?? undefined}
-            detail={
-              <List.Item.Detail
-                markdown={content.markdown}
-                metadata={descriptionOnly ? undefined : listDetailMetadata(content.meta)}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser title="Open Job on Cosign" url={j.url} />
-                {j.applyUrl ? <Action.OpenInBrowser title="Apply" url={j.applyUrl} /> : null}
-                <Action.CopyToClipboard title="Copy Job URL" content={j.url} />
-                {loadMoreAction}
-                <ViewSection
-                  descriptionOnly={descriptionOnly}
-                  onToggleDescription={toggleDescriptionOnly}
-                  sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
+      navigationTitle={
+        data
+          ? `${name} — Open Roles${data.totalMatches != null ? ` (${data.totalMatches})` : ""} — showing ${jobs.length}`
+          : name
+      }
+      searchBarAccessory={
+        teams.length ? (
+          <List.Dropdown tooltip="Filter by Team" value={team} onChange={setTeam}>
+            <List.Dropdown.Item title="All Teams" value={ALL_TEAMS} />
+            <List.Dropdown.Section>
+              {teams.map((t) => (
+                <List.Dropdown.Item
+                  key={t}
+                  title={t}
+                  value={t}
+                  icon={{ source: Icon.CircleFilled, tintColor: colors.get(t) }}
                 />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+              ))}
+            </List.Dropdown.Section>
+            {jobs.some((j) => !j.team) ? <List.Dropdown.Item title="No Team" value={NO_TEAM} /> : null}
+          </List.Dropdown>
+        ) : undefined
+      }
+    >
+      {sections.map(([title, roles]) => (
+        <List.Section key={title} title={title}>
+          {roles.map((j) => {
+            const content = jobContent(j, j.team ? colors.get(j.team) : undefined);
+            return (
+              <List.Item
+                key={j.postingId}
+                title={j.title}
+                detail={
+                  <List.Item.Detail
+                    markdown={content.markdown}
+                    metadata={descriptionOnly ? undefined : listDetailMetadata(content.meta)}
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser title="Open Job on Cosign" url={j.url} />
+                    {j.applyUrl ? <Action.OpenInBrowser title="Apply" url={j.applyUrl} /> : null}
+                    <Action.CopyToClipboard title="Copy Job URL" content={j.url} />
+                    {loadMoreAction}
+                    <ViewSection
+                      descriptionOnly={descriptionOnly}
+                      onToggleDescription={toggleDescriptionOnly}
+                      sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      ))}
       {nextCursor ? (
         <List.Item
           key="load-more"
@@ -479,6 +648,9 @@ export function JobsView({ companyId, name }: { companyId: string; name: string 
       ) : null}
       {error && !data ? <ErrorEmptyView title="Couldn't load open roles" error={error} retry={revalidate} /> : null}
       {data && !data.jobs.length ? <List.EmptyView title="No open roles" /> : null}
+      {data && data.jobs.length > 0 && !shown.length && !nextCursor ? (
+        <List.EmptyView title="No roles on this team" description="Choose All Teams to see every role." />
+      ) : null}
     </List>
   );
 }

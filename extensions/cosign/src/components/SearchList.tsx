@@ -1,16 +1,6 @@
+import { failToast, onErrorToast } from "@chrismessina/raycast-kit";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  confirmAlert,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { callTool } from "../lib/cosign-mcp";
 import type { FavoriteKind } from "../lib/favorites";
@@ -46,8 +36,9 @@ export default function SearchList<Result, Detail>(props: {
   /** Key under which this command keeps its recent searches. */
   recentsKey: string;
   placeholder: string;
-  reason: string;
   emptyDescription: string;
+  /** The command's optional argument: when set, the command opens already searching for it. */
+  initialQuery?: string;
   /** Extra tool arguments for a query (defaults to `{ query }`). */
   args?: (query: string, cursor: string | null) => Record<string, unknown>;
   /** Pull the next-page cursor out of the tool response. Enables an explicit "Load More" row. */
@@ -63,7 +54,7 @@ export default function SearchList<Result, Detail>(props: {
   content: (detail: Detail) => Content;
   actions: (detail: Detail) => ReactNode;
 }) {
-  const { tool, noun, favoriteKind, recentsKey, placeholder, reason, emptyDescription, toItem } = props;
+  const { tool, noun, favoriteKind, recentsKey, placeholder, emptyDescription, toItem } = props;
   const { fetchDetail, content, actions } = props;
   const [text, setText] = useState("");
   const [items, setItems] = useState<SearchItem[]>([]);
@@ -82,6 +73,16 @@ export default function SearchList<Result, Detail>(props: {
   // Each new search supersedes the last; a slower, older response must not overwrite the newer one.
   const generation = useRef(0);
 
+  // A query typed as the command's argument runs once, on open, exactly as if it had been typed and Enter pressed.
+  const ranInitial = useRef(false);
+  useEffect(() => {
+    const initial = props.initialQuery?.trim();
+    if (initial && !ranInitial.current) {
+      ranInitial.current = true;
+      search(initial);
+    }
+  }, []);
+
   // Arrowing through rows must not fire one lookup per row.
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(selected), 250);
@@ -96,7 +97,7 @@ export default function SearchList<Result, Detail>(props: {
     isLoading: isLoadingDetail,
     error: detailError,
   } = useCachedPromise(fetchDetail, [debounced ?? ""], {
-    failureToastOptions: { title: "Couldn't load profile" },
+    onError: onErrorToast({ title: "Couldn't load profile" }),
     execute: !!debounced && items.some((i) => i.id === debounced),
   });
 
@@ -109,10 +110,7 @@ export default function SearchList<Result, Detail>(props: {
       title: after ? "Loading more results…" : "Searching Cosign…",
     });
     try {
-      const raw = await callTool<never>(tool, {
-        ...(props.args?.(q, after) ?? { query: q }),
-        reason_for_call: reason,
-      });
+      const raw = await callTool<never>(tool, props.args?.(q, after) ?? { query: q });
       if (mine !== generation.current) return;
       const results = (props.results ? props.results(raw) : (raw as Result[])).map(toItem);
       const nextTotal = props.total?.(raw) ?? null;
@@ -142,11 +140,7 @@ export default function SearchList<Result, Detail>(props: {
           : `${shown} ${label}`;
     } catch (error) {
       if (mine !== generation.current) return;
-      toast.style = Toast.Style.Failure;
-      const message = error instanceof Error ? error.message : String(error);
-      toast.title = "Cosign search failed";
-      toast.message = message;
-      toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+      failToast(toast, error, { title: "Cosign search failed" });
     } finally {
       if (mine === generation.current) setIsSearching(false);
     }

@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "synthetic-php",
+    "title": "Synthetic PHP briefing",
+    "group": "attention",
+    "statusType": "patch",
+    "cves": ["CVE-2026-10001", "CVE-2026-10002"],
+    "tags": ["PHP", "Runtime"],
+    "lastChecked": "2026-11-02",
+    "description": "Synthetic fixture. Two issues have different applicability.",
+    "why": "Exploitation of the follow-up is not established.",
+    "whatHappened": ["The first issue affects the runtime.", "Do not extend evidence for the first CVE to the second."],
+    "whoShouldInvestigate": "Teams using the affected runtime should review each advisory.",
+    "whatToDo": "Consult each vendor advisory separately.",
+    "steps": ["Inventory running versions.", "Review vendor fixes and backports."],
+    "assessmentPrompt": "Synthetic source prompt.\n\n1. Assess each CVE separately.\n   Preserve indentation.\n2. Report unknowns.\n\nUnicode: café 安全 🔐\n",
+    "chronology": [
+      {
+        "date": "2026-10-30",
+        "text": "A separate follow-up was added.",
+        "links": [{ "label": "Vendor update", "href": "https://example.com/update?utm_source=test" }]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Vendor advisories",
+        "description": "Read applicability per CVE.",
+        "links": [
+          { "label": "First advisory", "href": "https://example.com/first" },
+          { "title": "Follow-up advisory", "url": "https://example.com/second" },
+          { "title": "Unsafe link", "url": "javascript:alert(1)" }
+        ]
+      }
+    ],
+    "waf": { "description": "A compensating control does not establish patch status." },
+    "serviceStatus": "No impact established within the source's stated scope.",
+    "unrecognizedOptional": { "future": true }
+  },
+  {
+    "slug": "synthetic-no-cve",
+    "title": "Synthetic certificate incident",
+    "group": "reference",
+    "statusType": "review-settings",
+    "cves": [],
+    "tags": [{ "id": "tls", "name": "TLS" }],
+    "lastChecked": "unknown",
+    "description": "No CVE is listed."
+  },
+  { "slug": "synthetic-unknown", "title": "Synthetic future category", "group": "future", "tags": ["New technology"] }
+]

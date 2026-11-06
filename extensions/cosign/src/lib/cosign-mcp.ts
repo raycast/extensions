@@ -1,5 +1,5 @@
 import { logger } from "@chrismessina/raycast-logger";
-import { LocalStorage, OAuth } from "@raycast/api";
+import { environment, LaunchType, LocalStorage, OAuth } from "@raycast/api";
 
 const ISSUER = "https://api.cosign.co";
 const MCP_URL = `${ISSUER}/mcp`;
@@ -9,6 +9,24 @@ const CLIENT_KEY = "cosign.oauth-client";
 const TOKEN_SCOPE_KEY = "cosign.token-scope";
 
 const log = logger.child("[Cosign]");
+
+/** Node's "fetch failed" hides the real reason in `cause`; say what happened in plain words. */
+function networkMessage(error: unknown): string {
+  const cause = (error as { cause?: { code?: string; message?: string } }).cause;
+  switch (cause?.code) {
+    case "UND_ERR_CONNECT_TIMEOUT":
+    case "ETIMEDOUT":
+      return "Couldn't reach Cosign: the connection timed out. Check your internet connection and try again.";
+    case "ENOTFOUND":
+    case "EAI_AGAIN":
+      return "Couldn't find Cosign. Check your internet connection and try again.";
+    case "ECONNREFUSED":
+    case "ECONNRESET":
+      return "Cosign closed the connection. Try again in a moment.";
+    default:
+      return `Couldn't reach Cosign${cause?.message ? ` (${cause.message})` : ""}. Check your internet connection and try again.`;
+  }
+}
 
 /** fetch with a verbose-only request/response trace. Logs method, URL, a short label, status and timing — never headers or bodies. */
 async function tracedFetch(url: string, init: RequestInit, label: string): Promise<Response> {
@@ -23,7 +41,7 @@ async function tracedFetch(url: string, init: RequestInit, label: string): Promi
     return res;
   } catch (error) {
     log.error(`✗ ${method} ${url} (${label}) ${Date.now() - started}ms`, error);
-    throw error;
+    throw new Error(networkMessage(error), { cause: error });
   }
 }
 
@@ -32,7 +50,8 @@ const oauth = new OAuth.PKCEClient({
   providerName: "Cosign",
   providerIcon: "extension-icon.png",
   providerId: "cosign",
-  description: "Connect your Cosign account. Write access is used only to keep your favorites in private Cosign lists.",
+  description:
+    "Connect your Cosign account. Write access keeps your favorites in private Cosign lists and lets you accept or archive connection requests.",
 });
 
 interface StoredClient {
@@ -86,7 +105,13 @@ async function tokenRequest(params: Record<string, string>): Promise<OAuth.Token
   return (await res.json()) as OAuth.TokenResponse;
 }
 
+/** A background refresh (menu bar) must never open a browser sign-in nobody asked for. */
+export const SIGN_IN_REQUIRED = "Sign in to Cosign by opening any Cosign command.";
+
+const inBackground = () => environment.launchType === LaunchType.Background;
+
 async function authorize(): Promise<string> {
+  if (inBackground()) throw new Error(SIGN_IN_REQUIRED);
   // The Web redirect URI is only known from an authorization request, but the client ID must be
   // registered against it. Build a throwaway request to learn the URI, then the real one.
   const probe = await oauth.authorizationRequest({
@@ -134,6 +159,7 @@ async function refresh(refreshToken: string): Promise<string | undefined> {
 async function getAccessToken(): Promise<string> {
   const stored = await oauth.getTokens();
   if (stored && (await LocalStorage.getItem<string>(TOKEN_SCOPE_KEY)) !== SCOPE) {
+    if (inBackground()) throw new Error(SIGN_IN_REQUIRED); // keep the stored tokens for the foreground sign-in
     await oauth.removeTokens();
     return authorize();
   }
@@ -154,6 +180,7 @@ async function rpc<T>(
   token: string,
   body: object,
   sessionId?: string,
+  protocolVersion?: string,
 ): Promise<{ data?: JsonRpcResponse<T>; sessionId?: string; status: number; retryAfter?: string | null }> {
   const { method, params } = body as {
     method: string;
@@ -161,7 +188,7 @@ async function rpc<T>(
   };
   // key=value, not JSON: the logger masks the values of `...Id` keys in JSON, which hides exactly what a trace needs.
   const traceArgs = Object.entries(params?.arguments ?? {})
-    .filter(([k]) => k !== "reason_for_call" && k !== "llm_model")
+    .filter(([k]) => k !== "client_type")
     .map(([k, v]) => `${k}=${typeof v === "string" && /^\S+$/.test(v) ? v : JSON.stringify(v)}`)
     .join(" ");
   const res = await tracedFetch(
@@ -173,6 +200,8 @@ async function rpc<T>(
         accept: "application/json, text/event-stream",
         authorization: `Bearer ${token}`,
         ...(sessionId ? { "mcp-session-id": sessionId } : {}),
+        // Required on every request after initialize, set to the version the server negotiated.
+        ...(protocolVersion ? { "mcp-protocol-version": protocolVersion } : {}),
       },
       body: JSON.stringify(body),
     },
@@ -199,6 +228,7 @@ async function rpc<T>(
 interface Session {
   token: string;
   sessionId?: string;
+  protocolVersion: string;
 }
 
 const INIT = {
@@ -214,16 +244,18 @@ const INIT = {
 
 async function openSession(): Promise<Session> {
   let token = await getAccessToken();
-  let init = await rpc(token, INIT);
+  let init = await rpc<{ protocolVersion?: string }>(token, INIT);
   if (init.status === 401) {
+    if (inBackground()) throw new Error(SIGN_IN_REQUIRED);
     await oauth.removeTokens();
     token = await authorize();
-    init = await rpc(token, INIT);
+    init = await rpc<{ protocolVersion?: string }>(token, INIT);
   }
   if (init.status === 429) throw new Error(`Cosign rate limit reached. Retry after ${init.retryAfter ?? "a moment"}.`);
   if (init.status !== 200) throw new Error(`Cosign MCP initialize failed (${init.status}).`);
-  await rpc(token, { jsonrpc: "2.0", method: "notifications/initialized" }, init.sessionId);
-  return { token, sessionId: init.sessionId };
+  const protocolVersion = init.data?.result?.protocolVersion ?? INIT.params.protocolVersion;
+  await rpc(token, { jsonrpc: "2.0", method: "notifications/initialized" }, init.sessionId, protocolVersion);
+  return { token, sessionId: init.sessionId, protocolVersion };
 }
 
 // One initialized session per command process, so a detail fetch costs one round trip, not three.
@@ -237,15 +269,42 @@ function getSession(): Promise<Session> {
   return session;
 }
 
-type ToolResult = { isError?: boolean; content: { type: string; text?: string }[] };
+interface ToolError {
+  message?: string;
+  retryAfter?: number;
+}
+
+type ToolResult = {
+  isError?: boolean;
+  content: { type: string; text?: string }[];
+  /** Every v2 tool answers with `{ schemaVersion, data }` or `{ schemaVersion, error }`. */
+  structuredContent?: { schemaVersion?: string; data?: unknown; error?: ToolError };
+};
+
+const toolError = (error: ToolError | undefined, text: string): Error => {
+  const message = error?.message || text || "Cosign tool call failed.";
+  return serverFault(error?.retryAfter ? `${message} Retry in ${Math.ceil(error.retryAfter)} seconds.` : message);
+};
+
+/**
+ * "MCP error -32602: Output validation error…" means Cosign rejected its own answer before sending it. Nothing the
+ * person can act on, so the toast says so in one line; the raw text rides along as `cause`, which the kit's Copy
+ * Error puts on the clipboard for a bug report.
+ */
+const serverFault = (message: string): Error =>
+  /output validation error/i.test(message)
+    ? new Error("Cosign didn't provide a valid response.", { cause: message })
+    : new Error(message);
 
 export async function callTool<T>(name: string, args: Record<string, unknown>, retried = false): Promise<T> {
   const used = getSession();
-  const { token, sessionId } = await used;
+  const { token, sessionId, protocolVersion } = await used;
   const call = await rpc<ToolResult>(
     token,
-    { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name, arguments: { llm_model: "unknown", ...args } } },
+    // client_type "app" tells Cosign this is not an LLM, so no model name or reason for the call is needed.
+    { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name, arguments: { client_type: "app", ...args } } },
     sessionId,
+    protocolVersion,
   );
   if (call.status === 429) throw new Error(`Cosign rate limit reached. Retry after ${call.retryAfter ?? "a moment"}.`);
   if ((call.status === 401 || call.status === 404) && !retried) {
@@ -256,11 +315,13 @@ export async function callTool<T>(name: string, args: Record<string, unknown>, r
   }
   // Any other HTTP failure (including a retry that failed again) must not read as an empty success.
   if (call.status >= 400) throw new Error(`Cosign request failed (HTTP ${call.status}).`);
-  if (call.data?.error) throw new Error(call.data.error.message);
+  if (call.data?.error) throw serverFault(call.data.error.message);
   const result = call.data?.result;
-  const text = result?.content.find((c) => c.type === "text")?.text ?? "";
-  if (result?.isError) throw new Error(text || "Cosign tool call failed.");
-  // Write tools such as add_list_item answer with a literal null or nothing at all.
+  const text = result?.content?.find((c) => c.type === "text")?.text ?? "";
+  const structured = result?.structuredContent;
+  if (result?.isError || structured?.error) throw toolError(structured?.error, text);
+  if (structured?.schemaVersion) return (structured.data ?? null) as T;
+  // Write tools answer with a literal null or nothing at all.
   return (text ? JSON.parse(text) : null) as T;
 }
 
