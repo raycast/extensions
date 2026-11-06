@@ -123,7 +123,17 @@ export default function ServiceStatus() {
 
       <List.Section title={`Resolved in the Last ${PAST_INCIDENT_DAYS} Days`}>
         {/* The section title says "resolved" and the accessory says when: no subtitle, so the name fits. */}
-        {pastIncidents.map((incident) => incidentItem(incident))}
+        {!history.data && history.error ? (
+          // Without this row a failed history request reads as "nothing was resolved".
+          <List.Item
+            title="Unable to Load Past Incidents"
+            subtitle={history.error.message}
+            icon={Icon.WifiDisabled}
+            actions={<ActionPanel>{commonActions}</ActionPanel>}
+          />
+        ) : (
+          pastIncidents.map((incident) => incidentItem(incident))
+        )}
       </List.Section>
 
       {data &&

@@ -5,6 +5,7 @@ import type {
   IncidentHistory,
   IncidentImpact,
   IncidentStatus,
+  IncidentUpdate,
   ScheduledMaintenance,
   StatusComponent,
   StatusSummary,
@@ -26,27 +27,96 @@ async function readStatusJson(response: Response): Promise<Record<string, unknow
   return body as Record<string, unknown>;
 }
 
-const list = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
+type Raw = Record<string, unknown>;
+const isRecord = (value: unknown): value is Raw => typeof value === "object" && value !== null;
+const isString = (value: unknown): value is string => typeof value === "string";
+const stringOr = <T>(value: unknown, fallback: T): string | T => (isString(value) ? value : fallback);
 
-/** Checks the parts every view relies on, so a captive portal or an API change fails as an error, not a crash. */
+/** The entries `toEntry` accepts: a malformed entry in the feed is dropped instead of crashing a render. */
+function entries<T>(value: unknown, toEntry: (raw: Raw) => T | undefined): T[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((raw) => {
+    const entry = isRecord(raw) ? toEntry(raw) : undefined;
+    return entry ? [entry] : [];
+  });
+}
+
+function toComponent(raw: Raw): StatusComponent | undefined {
+  if (!isString(raw.id) || !isString(raw.name) || !isString(raw.status)) return undefined;
+  return {
+    id: raw.id,
+    name: raw.name,
+    status: raw.status as ComponentStatus,
+    description: stringOr(raw.description, null),
+    position: typeof raw.position === "number" ? raw.position : 0,
+    group: raw.group === true,
+    group_id: stringOr(raw.group_id, null),
+    only_show_if_degraded: raw.only_show_if_degraded === true,
+    components: Array.isArray(raw.components) ? raw.components.filter(isString) : undefined,
+  };
+}
+
+function toUpdate(raw: Raw): IncidentUpdate | undefined {
+  if (!isString(raw.status)) return undefined;
+  return {
+    status: raw.status as IncidentStatus,
+    body: stringOr(raw.body, ""),
+    display_at: stringOr(raw.display_at, ""),
+  };
+}
+
+function toIncident(raw: Raw): Incident | undefined {
+  if (!isString(raw.id) || !isString(raw.name) || !isString(raw.status)) return undefined;
+  const createdAt = stringOr(raw.created_at, "");
+  const incident: Incident = {
+    id: raw.id,
+    name: raw.name,
+    status: raw.status as IncidentStatus,
+    impact: stringOr(raw.impact, "none") as IncidentImpact,
+    shortlink: stringOr(raw.shortlink, ""),
+    created_at: createdAt,
+    started_at: stringOr(raw.started_at, undefined),
+    updated_at: stringOr(raw.updated_at, createdAt),
+    resolved_at: stringOr(raw.resolved_at, null),
+    incident_updates: entries(raw.incident_updates, toUpdate),
+    components: entries(raw.components, toComponent),
+  };
+  // The history mixes maintenance windows in with incidents; keep their window so isMaintenance sees them.
+  return isString(raw.scheduled_for)
+    ? ({
+        ...incident,
+        scheduled_for: raw.scheduled_for,
+        scheduled_until: stringOr(raw.scheduled_until, ""),
+      } as Incident)
+    : incident;
+}
+
+function toMaintenance(raw: Raw): ScheduledMaintenance | undefined {
+  const incident = toIncident(raw);
+  return incident && isMaintenance(incident) ? incident : undefined;
+}
+
+/**
+ * Checks every field the views read, so a captive portal, an API change or one malformed entry fails as an
+ * error row (or drops that entry), never as a crash that takes the deployments menu down with it.
+ */
 export async function parseStatusSummary(response: Response): Promise<StatusSummary> {
   const body = await readStatusJson(response);
-  const status = body.status as StatusSummary["status"] | undefined;
-  const page = body.page as StatusSummary["page"] | undefined;
-  if (!status?.description || !page) {
+  const status = isRecord(body.status) ? body.status : undefined;
+  if (!status || !isString(status.description)) {
     throw new Error("Vercel status page returned an unexpected response");
   }
   return {
-    page,
-    status,
-    components: list(body.components),
-    incidents: list(body.incidents),
-    scheduled_maintenances: list(body.scheduled_maintenances),
+    page: { updated_at: stringOr(isRecord(body.page) ? body.page.updated_at : undefined, "") },
+    status: { indicator: stringOr(status.indicator, "none") as IncidentImpact, description: status.description },
+    components: entries(body.components, toComponent),
+    incidents: entries(body.incidents, toIncident),
+    scheduled_maintenances: entries(body.scheduled_maintenances, toMaintenance),
   };
 }
 
 export async function parseIncidentHistory(response: Response): Promise<IncidentHistory> {
-  return { incidents: list((await readStatusJson(response)).incidents) };
+  return { incidents: entries((await readStatusJson(response)).incidents, toIncident) };
 }
 
 export async function fetchStatusSummary(): Promise<StatusSummary> {
