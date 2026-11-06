@@ -1,6 +1,6 @@
 # Whenever Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Search your Whenever workflows, with pinned workflows first and each workflow's status.
 - See what a workflow runs on, the apps it uses, and how its last run went.
