@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { createDeeplink } from "@raycast/utils";
+import { createDeeplink, showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { verifiedClient } from "./lib/actions";
 import { getRoutines, removeRoutine, saveRoutine } from "./lib/routine-store";
@@ -27,7 +27,7 @@ import { KEY_LABELS, RoutineRunner, stepIcon, stepLabel } from "./components/rou
 type Changed = () => Promise<void> | void;
 type Template = "gaming" | "movie";
 
-export default function RokuRoutines() {
+export default function RokuRoutines({ navigationTitle }: { navigationTitle?: string } = {}) {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [devices, setDevices] = useState<RokuDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,16 +69,12 @@ export default function RokuRoutines() {
       await reload();
       await showToast({ style: Toast.Style.Success, title: "Routine removed" });
     } catch (cause) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't remove routine",
-        message: describeRokuError(cause),
-      });
+      await showFailureToast(describeRokuError(cause), { title: "Couldn't remove routine" });
     }
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Roku Routines" searchBarPlaceholder="Search routines…">
+    <List isLoading={isLoading} navigationTitle={navigationTitle} searchBarPlaceholder="Search routines…">
       <List.Section title="Create a Routine">
         <List.Item
           title="Build a Custom Routine"
@@ -89,7 +85,7 @@ export default function RokuRoutines() {
               <Action.Push
                 title="Create Routine"
                 icon={Icon.Plus}
-                target={<RoutineEditor devices={devices} onChanged={reload} />}
+                target={<NewRoutine devices={devices} onChanged={reload} />}
               />
             </ActionPanel>
           }
@@ -103,7 +99,7 @@ export default function RokuRoutines() {
               <Action.Push
                 title="Create Gaming Routine"
                 icon={Icon.GameController}
-                target={<RoutineEditor devices={devices} template="gaming" onChanged={reload} />}
+                target={<NewRoutine devices={devices} template="gaming" onChanged={reload} />}
               />
             </ActionPanel>
           }
@@ -117,7 +113,7 @@ export default function RokuRoutines() {
               <Action.Push
                 title="Create Movie Night Routine"
                 icon={Icon.FilmStrip}
-                target={<RoutineEditor devices={devices} template="movie" onChanged={reload} />}
+                target={<NewRoutine devices={devices} template="movie" onChanged={reload} />}
               />
             </ActionPanel>
           }
@@ -192,28 +188,61 @@ export default function RokuRoutines() {
   );
 }
 
-export function RoutineEditor({
-  initial,
+/** Creating a routine starts with its details; "Choose Steps" pushes the editor so Back returns here. */
+export function NewRoutine({
   devices,
   template,
   onChanged,
 }: {
-  initial?: Routine;
   devices: RokuDevice[];
   template?: Template;
   onChanged?: Changed;
 }) {
   const { push } = useNavigation();
-  const [draft, setDraft] = useState<Routine>(
-    () =>
-      initial ?? {
-        id: randomUUID(),
-        name: template === "gaming" ? "Gaming" : template === "movie" ? "Movie Night" : "",
-        deviceId: "",
-        steps: template ? [{ type: "wake" }] : [],
-      },
+  const [draft] = useState<Routine>(() => ({
+    id: randomUUID(),
+    name: template === "gaming" ? "Gaming" : template === "movie" ? "Movie Night" : "",
+    deviceId: "",
+    steps: template ? [{ type: "wake" }] : [],
+  }));
+  return (
+    <RoutineDetailsForm
+      devices={devices}
+      initial={draft}
+      stayOpen
+      onSave={async (values) => {
+        push(
+          <RoutineEditor
+            initial={{ ...draft, ...values }}
+            isNew
+            devices={devices}
+            template={template}
+            onChanged={onChanged}
+          />,
+        );
+        return true;
+      }}
+    />
   );
-  const [savedVersion, setSavedVersion] = useState(initial ? JSON.stringify(initial) : "");
+}
+
+export function RoutineEditor({
+  initial,
+  isNew = false,
+  devices,
+  template,
+  onChanged,
+}: {
+  initial: Routine;
+  /** True while the routine has never been saved. */
+  isNew?: boolean;
+  devices: RokuDevice[];
+  template?: Template;
+  onChanged?: Changed;
+}) {
+  const { push } = useNavigation();
+  const [draft, setDraft] = useState<Routine>(initial);
+  const [savedVersion, setSavedVersion] = useState(isNew ? "" : JSON.stringify(initial));
   const [isSaving, setIsSaving] = useState(false);
   const [selection, setSelection] = useState<string>();
   const device = devices.find((tv) => tv.id === draft.deviceId);
@@ -276,11 +305,7 @@ export function RoutineEditor({
       await onChanged?.();
       await showToast({ style: Toast.Style.Success, title: "Routine saved", message: normalized.name });
     } catch (cause) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't save routine",
-        message: describeRokuError(cause),
-      });
+      await showFailureToast(describeRokuError(cause), { title: "Couldn't save routine" });
     } finally {
       setIsSaving(false);
     }
@@ -290,16 +315,31 @@ export function RoutineEditor({
     try {
       push(<RoutineRunner routine={checked()} deviceName={device?.name} />);
     } catch (cause) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Routine needs a change",
-        message: describeRokuError(cause),
-      });
+      await showFailureToast(describeRokuError(cause), { title: "Routine needs a change" });
     }
   }
 
-  if (!draft.deviceId || !draft.name)
-    return <RoutineDetailsForm devices={devices} initial={draft} onSave={details} stayOpen />;
+  // On the overview row Run and Edit take the first two slots, so the
+  // advertised ⌘N and ⌘S shortcuts on Add Step and Save Routine stay visible.
+  const overviewTools = (
+    <ActionPanel.Section title="Routine">
+      <Action title="Run Routine" icon={Icon.Play} onAction={run} />
+      <Action.Push
+        title="Edit Name and TV"
+        icon={Icon.Pencil}
+        target={<RoutineDetailsForm devices={devices} initial={draft} onSave={details} />}
+      />
+      {device && draft.steps.length < 20 ? (
+        <Action.Push
+          title="Add Step"
+          icon={Icon.Plus}
+          target={<RoutineStepForm device={device} onSave={add} />}
+          shortcut={Keyboard.Shortcut.Common.New}
+        />
+      ) : null}
+      <Action title="Save Routine" icon={Icon.Checkmark} onAction={save} shortcut={Keyboard.Shortcut.Common.Save} />
+    </ActionPanel.Section>
+  );
   const tools = (
     <ActionPanel.Section title="Routine">
       {device && draft.steps.length < 20 ? (
@@ -353,7 +393,7 @@ export function RoutineEditor({
               }
             />
           }
-          actions={<ActionPanel>{tools}</ActionPanel>}
+          actions={<ActionPanel>{overviewTools}</ActionPanel>}
         />
         {needsTemplateTarget && device ? (
           <List.Item

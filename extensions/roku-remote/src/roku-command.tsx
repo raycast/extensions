@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { executeInstruction, prepareInstruction } from "./lib/automation";
 import type { PreparedInstruction } from "./lib/automation";
@@ -33,8 +34,16 @@ export default function RokuCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Preview Instruction" icon={Icon.Eye} onSubmit={preview} />
-          <Action.Push title="Edit Room and App Aliases" icon={Icon.Gear} target={<InstructionsSettings />} />
-          <Action.Push title="Manage Routines" icon={Icon.List} target={<RokuRoutines />} />
+          <Action.Push
+            title="Edit Room and App Aliases"
+            icon={Icon.Gear}
+            target={<InstructionsSettings navigationTitle="Roku Instruction Settings" />}
+          />
+          <Action.Push
+            title="Manage Routines"
+            icon={Icon.List}
+            target={<RokuRoutines navigationTitle="Roku Routines" />}
+          />
         </ActionPanel>
       }
     >
@@ -95,7 +104,7 @@ function InstructionPreview({ prepared, preview }: { prepared: PreparedInstructi
         );
     } catch (error) {
       if (mounted.current) setResult(`**Nothing further ran.**\n\n${describeRokuError(error)}`);
-      await showToast({ style: Toast.Style.Failure, title: "Instruction stopped", message: describeRokuError(error) });
+      await showFailureToast(describeRokuError(error), { title: "Instruction stopped" });
     } finally {
       controller.current = undefined;
       if (mounted.current) {

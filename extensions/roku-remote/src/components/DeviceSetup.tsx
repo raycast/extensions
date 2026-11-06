@@ -27,7 +27,7 @@ export function DeviceDropdown({
 
 export function DeviceSetup({ devices, isLoading, error, choose, reload }: SetupProps) {
   return (
-    <List isLoading={isLoading} navigationTitle="Choose a Roku TV" searchBarPlaceholder="Search saved TVs…">
+    <List isLoading={isLoading} searchBarPlaceholder="Search saved TVs…">
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
         title={error ? "Couldn't load saved TVs" : "Add your Roku TV"}
@@ -37,7 +37,7 @@ export function DeviceSetup({ devices, isLoading, error, choose, reload }: Setup
             <Action.Push
               title="Discover TVs"
               icon={Icon.MagnifyingGlass}
-              target={<ManageDevices discoverOnOpen onChanged={reload} />}
+              target={<ManageDevices discoverOnOpen onChanged={reload} navigationTitle="Manage Roku TVs" />}
             />
             <Action.Push
               title="Add TV by IP Address"
@@ -60,7 +60,11 @@ export function DeviceSetup({ devices, isLoading, error, choose, reload }: Setup
               actions={
                 <ActionPanel>
                   <Action title="Use This TV" icon={Icon.Checkmark} onAction={() => choose(device.id)} />
-                  <Action.Push title="Manage TVs" icon={Icon.Gear} target={<ManageDevices onChanged={reload} />} />
+                  <Action.Push
+                    title="Manage TVs"
+                    icon={Icon.Gear}
+                    target={<ManageDevices onChanged={reload} navigationTitle="Manage Roku TVs" />}
+                  />
                 </ActionPanel>
               }
             />

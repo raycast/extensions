@@ -28,11 +28,14 @@ export function AppsForDevice({
   devices,
   selectedId,
   choose,
+  navigationTitle,
 }: {
   device: RokuDevice;
   devices?: RokuDevice[];
   selectedId?: string;
   choose?: (id: string) => Promise<void>;
+  /** Only set when pushed; the command root keeps Raycast's title. */
+  navigationTitle?: string;
 }) {
   const [apps, setApps] = useState<RokuApp[]>([]);
   const [activeApp, setActiveApp] = useState<RokuApp>();
@@ -164,7 +167,7 @@ export function AppsForDevice({
       fit={Grid.Fit.Fill}
       inset={Grid.Inset.Zero}
       isLoading={isLoading}
-      navigationTitle={`${device.name} · Apps & Inputs`}
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search apps and TV inputs…"
       searchBarAccessory={
         devices && choose ? (

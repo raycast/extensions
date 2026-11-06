@@ -1,4 +1,5 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getSelectedDevice } from "./lib/storage";
 import { restorePrevious } from "./lib/automation";
 import { describeRokuError } from "./lib/roku";
@@ -10,10 +11,6 @@ export default async function Command() {
     const result = await restorePrevious(device);
     await showHUD(`${device.name}: ${result.message}`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't restore previous activity",
-      message: describeRokuError(error),
-    });
+    await showFailureToast(describeRokuError(error), { title: "Couldn't restore previous activity" });
   }
 }

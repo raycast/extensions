@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, useNavigation, Alert, confirmAlert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "./lib/preferences";
 import { getSavedDevices } from "./lib/storage";
@@ -11,7 +12,10 @@ type Changed = () => void | Promise<void>;
 const SUPPORTED =
   "Local instructions support commands such as ‘open YouTube in the kitchen’, ‘switch Living Room to PS5’, ‘lower volume three steps’, and ‘run gaming mode’. Join commands with ‘then’ or ‘and’; each clause uses its named TV or the selected default. Use ‘toggle mute’ or ‘play/pause’ for controls whose current state cannot be verified. All steps are previewed before they run. These settings are saved aliases and protection rules; arbitrary prose is not executed.";
 
-export default function InstructionsSettings({ onChanged }: { onChanged?: Changed } = {}) {
+export default function InstructionsSettings({
+  onChanged,
+  navigationTitle,
+}: { onChanged?: Changed; navigationTitle?: string } = {}) {
   const [devices, setDevices] = useState<RokuDevice[]>([]);
   const [settings, setSettings] = useState<InstructionSettings>(EMPTY_INSTRUCTION_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -44,7 +48,7 @@ export default function InstructionsSettings({ onChanged }: { onChanged?: Change
     />
   );
   return (
-    <List isLoading={loading} navigationTitle="Roku Instruction Settings">
+    <List isLoading={loading} navigationTitle={navigationTitle} searchBarPlaceholder="Search instruction settings…">
       <List.Section title="Supported Instructions">
         <List.Item
           title="How Local Instructions Work"
@@ -54,6 +58,7 @@ export default function InstructionsSettings({ onChanged }: { onChanged?: Change
             <ActionPanel>
               <Action.Push
                 title="Read Supported Instructions"
+                icon={Icon.Info}
                 target={
                   <Form navigationTitle="Supported Roku Instructions">
                     <Form.Description text={SUPPORTED} />
@@ -71,7 +76,7 @@ export default function InstructionsSettings({ onChanged }: { onChanged?: Change
             icon={Icon.Warning}
             actions={
               <ActionPanel>
-                <Action title="Try Again" onAction={reload} />
+                <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={reload} />
               </ActionPanel>
             }
           />
@@ -94,6 +99,7 @@ export default function InstructionsSettings({ onChanged }: { onChanged?: Change
               <ActionPanel>
                 <Action.Push
                   title="Edit Names and Protection"
+                  icon={Icon.Pencil}
                   target={<RoomSettingsForm device={device} settings={settings} onChanged={changed} />}
                 />
                 {add}
@@ -120,6 +126,12 @@ export default function InstructionsSettings({ onChanged }: { onChanged?: Change
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={async () => {
+                    const confirmed = await confirmAlert({
+                      title: "Remove Alias?",
+                      message: `“${alias.alias}” will no longer work in instructions.`,
+                      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                    });
+                    if (!confirmed) return;
                     try {
                       const current = await getInstructionSettings();
                       current.targetAliases = current.targetAliases.filter(
@@ -133,11 +145,7 @@ export default function InstructionsSettings({ onChanged }: { onChanged?: Change
                       await saveInstructionSettings(current);
                       await changed();
                     } catch (cause) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Couldn't Remove Alias",
-                        message: describeRokuError(cause),
-                      });
+                      await showFailureToast(describeRokuError(cause), { title: "Couldn't Remove Alias" });
                     }
                   }}
                 />
@@ -185,11 +193,7 @@ function RoomSettingsForm({
       await onChanged();
       pop();
     } catch (cause) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't Save TV Instructions",
-        message: describeRokuError(cause),
-      });
+      await showFailureToast(describeRokuError(cause), { title: "Couldn't Save TV Instructions" });
     } finally {
       setLoading(false);
     }
@@ -279,7 +283,7 @@ function TargetAliasForm({ devices, onChanged }: { devices: RokuDevice[]; onChan
       await onChanged();
       pop();
     } catch (cause) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't Save Alias", message: describeRokuError(cause) });
+      await showFailureToast(describeRokuError(cause), { title: "Couldn't Save Alias" });
     } finally {
       setSaving(false);
     }

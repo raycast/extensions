@@ -1,4 +1,5 @@
-import { LaunchType, launchCommand, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchType, launchCommand, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { createClient } from "./preferences";
 import { checkRokuCancellation, describeRokuError, RokuClient, RokuError, wakeDevice } from "./roku";
 import { getSelectedDevice } from "./storage";
@@ -223,11 +224,7 @@ export async function runQuickKey(key: string, label: string): Promise<void> {
     const device = await getSelectedDevice();
     if (!device) {
       await launchCommand({ name: "manage-devices", type: LaunchType.UserInitiated });
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Choose a Roku first",
-        message: "Select a default TV in Manage Roku TVs.",
-      });
+      await showFailureToast("Select a default TV in Manage Roku TVs.", { title: "Choose a Roku first" });
       return;
     }
     if (key === "PowerOn") {
@@ -238,6 +235,6 @@ export async function runQuickKey(key: string, label: string): Promise<void> {
       await showHUD(`${label} sent to ${device.name}`);
     }
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Roku command failed", message: describeRokuError(error) });
+    await showFailureToast(describeRokuError(error), { title: "Roku command failed" });
   }
 }

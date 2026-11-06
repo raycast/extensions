@@ -56,10 +56,18 @@ export function useNowPlaying(device: RokuDevice | undefined, intervalMs = 4000)
   useEffect(() => {
     if (!device) return;
     setState({ isLoading: true });
-    void refresh();
-    const timer = setInterval(() => void refresh(), intervalMs);
+    // Wait for each refresh to finish before scheduling the next one, so a slow
+    // or unreachable TV reports its error instead of being superseded forever.
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = async () => {
+      await refresh();
+      if (!stopped) timer = setTimeout(() => void poll(), intervalMs);
+    };
+    void poll();
     return () => {
-      clearInterval(timer);
+      stopped = true;
+      if (timer) clearTimeout(timer);
       generation.current += 1;
     };
   }, [refresh, intervalMs]);

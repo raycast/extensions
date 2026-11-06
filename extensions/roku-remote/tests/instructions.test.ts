@@ -138,9 +138,18 @@ test("each unqualified clause uses the selected default, with a clear preview", 
 
 test("restore plans, power syntax and toggle previews state their actual actions", () => {
   assert.equal(parseInstruction("go back to what was open", context()).steps[0].kind, "restore");
-  for (const text of ["turn on kitchen", "turn kitchen on", "power off kitchen"]) {
+  for (const text of [
+    "turn on kitchen",
+    "turn kitchen on",
+    "power off kitchen",
+    "turn on in kitchen",
+    "turn on in the kitchen",
+    "turn off on kitchen",
+    "power on for kitchen",
+  ]) {
     assert.equal(parseInstruction(text, context()).steps[0].deviceId, "kitchen");
   }
+  assert.equal(parseInstruction("turn off on Living Room", context()).steps[0].deviceId, "living");
   assert.match(parseInstruction("play/pause", context()).preview[0], /toggle play\/pause/);
   assert.match(parseInstruction("toggle mute", context()).preview[0], /toggle mute/);
 });

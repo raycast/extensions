@@ -17,10 +17,13 @@ export function TypeTextForDevice({
   device,
   devices,
   choose,
+  navigationTitle,
 }: {
   device: RokuDevice;
   devices?: RokuDevice[];
   choose?: (id: string) => Promise<void>;
+  /** Only set when pushed; the command root keeps Raycast's title. */
+  navigationTitle?: string;
 }) {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +57,7 @@ export function TypeTextForDevice({
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={`${device.name} · Type Text`}
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Send Text to TV" icon={Icon.Keyboard} onSubmit={submit} />

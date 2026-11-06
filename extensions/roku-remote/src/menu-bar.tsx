@@ -1,4 +1,5 @@
 import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, showHUD } from "@raycast/api";
+import { openCommand } from "./lib/launch";
 import { useEffect, useState } from "react";
 import { launchOnDevice, sendKey, turnOn } from "./lib/actions";
 import { loadIcons } from "./lib/icons";
@@ -76,11 +77,7 @@ export default function RokuMenuBar() {
   if (!device) {
     return (
       <MenuBarExtra icon={icon} isLoading={isLoading} tooltip="Roku Remote">
-        <MenuBarExtra.Item
-          title="Add a Roku TV…"
-          icon={Icon.Plus}
-          onAction={() => launchCommand({ name: "manage-devices", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item title="Add a Roku TV…" icon={Icon.Plus} onAction={() => openCommand("manage-devices")} />
       </MenuBarExtra>
     );
   }
@@ -98,7 +95,7 @@ export default function RokuMenuBar() {
         <MenuBarExtra.Item
           title={status || "Connected"}
           icon={app && state.icons[app.id] ? { source: state.icons[app.id] } : Icon.Monitor}
-          onAction={() => launchCommand({ name: "roku-remote", type: LaunchType.UserInitiated })}
+          onAction={() => openCommand("roku-remote")}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
@@ -185,15 +182,11 @@ export default function RokuMenuBar() {
         ) : null}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Open Remote…"
-          icon={Icon.Mouse}
-          onAction={() => launchCommand({ name: "roku-remote", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item title="Open Remote…" icon={Icon.Mouse} onAction={() => openCommand("roku-remote")} />
         <MenuBarExtra.Item
           title="Search Movies & Shows…"
           icon={Icon.MagnifyingGlass}
-          onAction={() => launchCommand({ name: "search-roku", type: LaunchType.UserInitiated })}
+          onAction={() => openCommand("search-roku")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

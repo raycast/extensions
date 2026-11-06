@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { searchOnDevice } from "./lib/actions";
 import { describeRokuError } from "./lib/roku";
@@ -20,16 +21,23 @@ export default function SearchRokuCommand(props: LaunchProps<{ arguments: Argume
     searchOnDevice(device, query)
       .then(() => showHUD(`Searching “${query}” on ${device.name}`))
       .then(() => closeMainWindow())
-      .catch((cause) =>
-        showToast({ style: Toast.Style.Failure, title: "Search failed", message: describeRokuError(cause) }),
-      );
+      .catch((cause) => showFailureToast(describeRokuError(cause), { title: "Search failed" }));
   }, [query, saved.device?.id]);
 
   if (!saved.device) return <DeviceSetup {...saved} />;
   return <SearchRokuForm device={saved.device} initialKeyword={query} />;
 }
 
-export function SearchRokuForm({ device, initialKeyword }: { device: RokuDevice; initialKeyword?: string }) {
+export function SearchRokuForm({
+  device,
+  initialKeyword,
+  navigationTitle,
+}: {
+  device: RokuDevice;
+  initialKeyword?: string;
+  /** Only set when pushed; the command root keeps Raycast's title. */
+  navigationTitle?: string;
+}) {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +65,7 @@ export function SearchRokuForm({ device, initialKeyword }: { device: RokuDevice;
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={`${device.name} · Search`}
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Search on TV" icon={Icon.MagnifyingGlass} onSubmit={submit} />

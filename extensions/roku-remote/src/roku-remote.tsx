@@ -11,6 +11,7 @@ import {
   launchCommand,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { launchOnDevice, sendKey, sendKeyRepeated, turnOn, typeOnDevice } from "./lib/actions";
 import { restorePrevious } from "./lib/automation";
@@ -211,6 +212,10 @@ function RemoteForDevice({
   const [mode, setMode] = useState<Mode>("remote");
   const [searchText, setSearchText] = useState("");
   const typed = useRef("");
+  // Text edits are sent in order. A failed edit ends the session and drops queued
+  // edits, because later diffs would be based on text the TV never received.
+  const textQueue = useRef<Promise<void>>(Promise.resolve());
+  const textSession = useRef(0);
   const [lastSent, setLastSent] = useState<string>();
   const [apps, setApps] = useState<RokuApp[]>([]);
   const [icons, setIcons] = useState<Record<string, string>>({});
@@ -241,7 +246,7 @@ function RemoteForDevice({
   }, [device.id, device.host]);
 
   const fail = useCallback(async (title: string, cause: unknown) => {
-    await showToast({ style: Toast.Style.Failure, title, message: describeRokuError(cause) });
+    await showFailureToast(describeRokuError(cause), { title });
   }, []);
 
   /** Keys are queued in order and acknowledged in the UI, without a toast per press. */
@@ -280,11 +285,25 @@ function RemoteForDevice({
     setSearchText(text);
     if (!backspaces && !added) return;
     setLastSent(added ? `Typed “${added}”` : `Deleted ${backspaces}`);
-    typeOnDevice(target, { backspaces, text: added }).catch((cause) => fail("Couldn't type on TV", cause));
+    const session = textSession.current;
+    textQueue.current = textQueue.current.then(async () => {
+      if (session !== textSession.current) return;
+      try {
+        await typeOnDevice(target, { backspaces, text: added });
+      } catch (cause) {
+        if (session !== textSession.current) return;
+        textSession.current += 1;
+        typed.current = "";
+        setSearchText("");
+        setLastSent(undefined);
+        await fail("Couldn't type on TV. Text mode was reset; check the TV's text field before typing again", cause);
+      }
+    });
   }
 
   function switchMode(next: Mode) {
     setMode(next);
+    textSession.current += 1;
     typed.current = "";
     setSearchText("");
     setLastSent(next === "text" ? "Text mode: typing goes to the TV" : "Remote mode");
@@ -436,19 +455,19 @@ function RemoteForDevice({
         title="Apps and TV Inputs"
         icon={Icon.AppWindowGrid3x3}
         shortcut={Keyboard.Shortcut.Common.Open}
-        target={<AppsForDevice device={target} />}
+        target={<AppsForDevice device={target} navigationTitle={`${target.name} · Apps & Inputs`} />}
       />
       <Action.Push
         title="Search Movies & Shows"
         icon={Icon.MagnifyingGlass}
         shortcut={{ modifiers: ["cmd"], key: "f" }}
-        target={<SearchRokuForm device={target} />}
+        target={<SearchRokuForm device={target} navigationTitle={`${target.name} · Search`} />}
       />
       <Action.Push
         title="Send a Block of Text"
         icon={Icon.Text}
         shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-        target={<TypeTextForDevice device={target} />}
+        target={<TypeTextForDevice device={target} navigationTitle={`${target.name} · Type Text`} />}
       />
       <Action title="Restore Previous App or Input" icon={Icon.Undo} onAction={restore} />
       <Action
@@ -457,11 +476,23 @@ function RemoteForDevice({
         shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={() => void now.refresh()}
       />
-      <Action.Push title="Roku Routines" icon={Icon.List} target={<RokuRoutines />} />
-      <Action.Push title="TV Dashboard" icon={Icon.Desktop} target={<TVDashboard />} />
+      <Action.Push title="Roku Routines" icon={Icon.List} target={<RokuRoutines navigationTitle="Roku Routines" />} />
+      <Action.Push
+        title="TV Dashboard"
+        icon={Icon.Desktop}
+        target={<TVDashboard navigationTitle="Roku TV Dashboard" />}
+      />
       <Action title="Roku Instructions" icon={Icon.TextInput} onAction={openInstructions} />
-      <Action.Push title="Edit Room and App Aliases" icon={Icon.Gear} target={<InstructionsSettings />} />
-      <Action.Push title="Manage TVs" icon={Icon.Gear} target={<ManageDevices onChanged={reloadDevices} />} />
+      <Action.Push
+        title="Edit Room and App Aliases"
+        icon={Icon.Gear}
+        target={<InstructionsSettings navigationTitle="Roku Instruction Settings" />}
+      />
+      <Action.Push
+        title="Manage TVs"
+        icon={Icon.Gear}
+        target={<ManageDevices onChanged={reloadDevices} navigationTitle="Manage Roku TVs" />}
+      />
       <Action.Push
         title="Connection Help"
         icon={Icon.QuestionMarkCircle}
@@ -511,7 +542,6 @@ function RemoteForDevice({
       searchText={searchText}
       onSearchTextChange={onSearchTextChange}
       isLoading={now.isLoading}
-      navigationTitle={`${device.name} · ${mode === "text" ? "Text Mode" : "Remote"}`}
       searchBarPlaceholder={
         mode === "text"
           ? "Type here — it appears on your TV as you type…"
@@ -662,7 +692,7 @@ function RemoteForDevice({
               <Action.Push
                 title="Search Movies & Shows"
                 icon={Icon.MagnifyingGlass}
-                target={<SearchRokuForm device={target} />}
+                target={<SearchRokuForm device={target} navigationTitle={`${target.name} · Search`} />}
               />
               {tools}
             </ActionPanel>
@@ -677,7 +707,7 @@ function RemoteForDevice({
               <Action.Push
                 title="All Apps and Inputs"
                 icon={Icon.AppWindowGrid3x3}
-                target={<AppsForDevice device={target} />}
+                target={<AppsForDevice device={target} navigationTitle={`${target.name} · Apps & Inputs`} />}
               />
               {tools}
             </ActionPanel>

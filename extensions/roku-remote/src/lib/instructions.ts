@@ -232,7 +232,8 @@ function parseClause(raw: string, context: InstructionContext): InstructionStep 
   let forcedApp: string | undefined;
   const switchTarget = command.match(/^switch\s+(.+?)\s+to\s+(.+)$/i);
   const powerTarget =
-    command.match(/^(?:turn|power)\s+(on|off)\s+(.+)$/i) ??
+    // An optional "on/in/for (the)" before the TV name matches other instructions' room suffix.
+    command.match(/^(?:turn|power)\s+(on|off)\s+(?:(?:on|in|for)\s+)?(?:the\s+)?(.+)$/i) ??
     command
       .match(/^(?:turn|power)\s+(.+?)\s+(on|off)$/i)
       ?.map((value, index, all) => (index === 1 ? all[2] : index === 2 ? all[1] : value));

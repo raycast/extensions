@@ -146,7 +146,12 @@ export function RoutineRunner({ routine: initialRoutine, deviceName }: { routine
           : "Starting routine…";
 
   return (
-    <List isLoading={isRunning} navigationTitle={`${routine.name} · ${deviceName ?? "Roku TV"}`} isShowingDetail>
+    <List
+      isLoading={isRunning}
+      navigationTitle={`${routine.name} · ${deviceName ?? "Roku TV"}`}
+      isShowingDetail
+      searchBarPlaceholder="Search steps…"
+    >
       <List.Section title={summary} subtitle={`${completed} of ${routine.steps.length} steps completed`}>
         <List.Item
           id="result"
@@ -193,15 +198,12 @@ export function RoutineRunner({ routine: initialRoutine, deviceName }: { routine
               key={index}
               id={`step-${index}`}
               title={`${index + 1}. ${stepLabel(step)}`}
-              icon={stepIcon(step)}
-              accessories={[
-                {
-                  tag: {
-                    value: status,
-                    color: failed ? Color.Red : done ? Color.Green : running ? Color.Blue : Color.SecondaryText,
-                  },
-                },
-              ]}
+              // The detail pane hides accessories, so the status is in the subtitle and icon tint.
+              subtitle={status}
+              icon={{
+                source: stepIcon(step),
+                tintColor: failed ? Color.Red : done ? Color.Green : running ? Color.Blue : Color.SecondaryText,
+              }}
               detail={<List.Item.Detail markdown={failed ? result?.error : `${stepLabel(step)}\n\n${status}`} />}
               actions={actions}
             />

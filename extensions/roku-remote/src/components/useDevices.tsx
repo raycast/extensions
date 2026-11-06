@@ -1,4 +1,5 @@
-import { showToast, Toast } from "@raycast/api";
+import {} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSavedDevices, getSelectedDevice, selectDevice } from "../lib/storage";
 import { describeRokuError } from "../lib/roku";
@@ -58,7 +59,7 @@ export function useDevices() {
       } catch (cause) {
         if (!mounted.current || selectionWrite.current !== write) return;
         await reload();
-        await showToast({ style: Toast.Style.Failure, title: "Couldn't select TV", message: describeRokuError(cause) });
+        await showFailureToast(describeRokuError(cause), { title: "Couldn't select TV" });
       } finally {
         if (current === generation.current) setIsLoading(false);
       }

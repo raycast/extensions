@@ -1,9 +1,10 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { executeRoutine } from "./lib/automation";
 import { getRoutines } from "./lib/routine-store";
 import { describeRokuError } from "./lib/roku";
 
-export default async function Command({ arguments: args }: { arguments: { routineId: string } }) {
+export default async function Command({ arguments: args }: LaunchProps<{ arguments: Arguments.RunRokuRoutine }>) {
   const controller = new AbortController();
   try {
     const routine = (await getRoutines()).find((item) => item.id === args.routineId);
@@ -24,6 +25,6 @@ export default async function Command({ arguments: args }: { arguments: { routin
     toast.message = result.error ?? `${result.completedSteps} of ${result.totalSteps} steps completed`;
     if (result.status === "completed") await showHUD(`${routine.name} completed`);
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Routine stopped", message: describeRokuError(error) });
+    await showFailureToast(describeRokuError(error), { title: "Routine stopped" });
   }
 }

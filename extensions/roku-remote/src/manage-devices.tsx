@@ -1,4 +1,18 @@
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+  Keyboard,
+  Alert,
+  confirmAlert,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { discoverRokus } from "./lib/discovery";
 import { createClient, requestTimeoutMs } from "./lib/preferences";
@@ -9,9 +23,9 @@ import { ConnectionHelp } from "./components/ConnectionHelp";
 import { useDevices } from "./components/useDevices";
 
 type Changed = () => void | Promise<void>;
-type ManageProps = { onChanged?: Changed; discoverOnOpen?: boolean };
+type ManageProps = { onChanged?: Changed; discoverOnOpen?: boolean; navigationTitle?: string };
 
-export default function ManageDevices({ onChanged, discoverOnOpen = false }: ManageProps) {
+export default function ManageDevices({ onChanged, discoverOnOpen = false, navigationTitle }: ManageProps) {
   const saved = useDevices();
   const [found, setFound] = useState<RokuDevice[]>([]);
   const [isScanning, setIsScanning] = useState(false);
@@ -89,7 +103,7 @@ export default function ManageDevices({ onChanged, discoverOnOpen = false }: Man
       await changed();
       await showToast({ style: Toast.Style.Success, title: "TV saved", message: device.name });
     } catch (cause) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't save TV", message: describeRokuError(cause) });
+      await showFailureToast(describeRokuError(cause), { title: "Couldn't save TV" });
     }
   }
 
@@ -138,7 +152,7 @@ export default function ManageDevices({ onChanged, discoverOnOpen = false }: Man
   return (
     <List
       isLoading={saved.isLoading || isScanning}
-      navigationTitle="Manage Roku TVs"
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search saved or discovered TVs…"
     >
       <List.EmptyView
@@ -194,6 +208,12 @@ export default function ManageDevices({ onChanged, discoverOnOpen = false }: Man
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        title: "Remove Saved TV?",
+                        message: `${device.name} will be removed from Raycast. The TV itself is not changed.`,
+                        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                      });
+                      if (!confirmed) return;
                       try {
                         await removeDevice(device.id);
                         await changed();
@@ -203,11 +223,7 @@ export default function ManageDevices({ onChanged, discoverOnOpen = false }: Man
                           message: device.name,
                         });
                       } catch (cause) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Couldn't remove TV",
-                          message: describeRokuError(cause),
-                        });
+                        await showFailureToast(describeRokuError(cause), { title: "Couldn't remove TV" });
                       }
                     }}
                   />
@@ -344,7 +360,7 @@ function RenameDeviceForm({ device, onChanged }: { device: RokuDevice; onChanged
       await showToast({ style: Toast.Style.Success, title: "TV renamed", message: name });
       pop();
     } catch (cause) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't rename TV", message: describeRokuError(cause) });
+      await showFailureToast(describeRokuError(cause), { title: "Couldn't rename TV" });
     } finally {
       setIsLoading(false);
     }
@@ -362,6 +378,7 @@ function RenameDeviceForm({ device, onChanged }: { device: RokuDevice; onChanged
       <Form.TextField
         id="name"
         title="Name"
+        placeholder="Living Room"
         defaultValue={device.name}
         error={error}
         onChange={() => setError(undefined)}
