@@ -5,7 +5,8 @@
  *   { findings: [ { formula, version, tag, repo_url, vulnerabilities: [...], patched: [...] } ],
  *     skipped_formulae: [ ... ], unscanned_formulae: { name: reason }, outdated_without_sbom: [ ... ] }
  *
- * `formula` is the SHORT name; `skipped_formulae` are full names.
+ * `formula`, `skipped_formulae` and `outdated_without_sbom` are full names
+ * (`vulns/scanner.rb`); `unscanned_formulae` keys are short names.
  * `unscanned_formulae` (Homebrew 7.0.10+) names installed formulae brew didn't
  * scan at all, because their tap isn't trusted or brew couldn't load them.
  * `outdated_without_sbom` names installed formulae older than the current one
@@ -53,6 +54,14 @@ export interface VulnResults {
   skipped: string[];
   unscanned: UnscannedFormula[];
   outdatedWithoutSbom: string[];
+}
+
+/** `VulnResults` as Raycast may have cached it, from before the coverage fields existed. */
+export type CachedVulnResults = Omit<VulnResults, "unscanned" | "outdatedWithoutSbom"> &
+  Partial<Pick<VulnResults, "unscanned" | "outdatedWithoutSbom">>;
+
+export function withCoverageDefaults(cached: CachedVulnResults): VulnResults {
+  return { ...cached, unscanned: cached.unscanned ?? [], outdatedWithoutSbom: cached.outdatedWithoutSbom ?? [] };
 }
 
 export const SEVERITY_RANK: Record<VulnSeverity, number> = {

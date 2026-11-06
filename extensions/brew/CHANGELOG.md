@@ -3,7 +3,7 @@
 ## [Show unscanned formulae in Show Vulnerabilities] - {PR_MERGE_DATE}
 
 - Fixed: Show Vulnerabilities lists the formulae `brew vulns` didn't scan, such as ones from untrusted taps, and why
-- Fixed: Show Vulnerabilities no longer says "No known vulnerabilities" when brew checked some formulae against a newer version than the one installed
+- Fixed: Show Vulnerabilities lists the formulae brew checked against a newer version than the one installed, instead of saying "No known vulnerabilities"
 
 ## [Adopt Apps reads brew.env] - 2026-11-06
 

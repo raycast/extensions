@@ -9,7 +9,15 @@
 
 import { useMemo, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchVulns, VulnResults, isBrewLockError, brewLogger, showBrewFailureToast } from "../utils";
+import {
+  brewFetchVulns,
+  VulnResults,
+  isBrewLockError,
+  brewLogger,
+  showBrewFailureToast,
+  withCoverageDefaults,
+  type CachedVulnResults,
+} from "../utils";
 
 export function useBrewVulns() {
   // `useCachedPromise` populates this with the controller for the in-flight
@@ -36,15 +44,8 @@ export function useBrewVulns() {
     },
   });
 
-  // Results cached by an older version of the extension have no `unscanned` or `outdatedWithoutSbom`.
-  const data = useMemo(
-    () =>
-      result.data && {
-        ...result.data,
-        unscanned: result.data.unscanned ?? [],
-        outdatedWithoutSbom: result.data.outdatedWithoutSbom ?? [],
-      },
-    [result.data],
-  );
+  // Raycast's cache can hold results from before the coverage fields existed.
+  const cached: CachedVulnResults | undefined = result.data;
+  const data = useMemo(() => cached && withCoverageDefaults(cached), [cached]);
   return { ...result, data };
 }

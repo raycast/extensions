@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from "vitest";
 import { ParseError } from "../errors";
-import { parseBrewVulns, escapeMarkdown, osvLink, osvUrl, SEVERITY_RANK } from "./vulns";
+import { parseBrewVulns, escapeMarkdown, osvLink, osvUrl, SEVERITY_RANK, withCoverageDefaults } from "./vulns";
 
 const FIXTURE = JSON.stringify({
   findings: [
@@ -362,5 +362,26 @@ describe("osvLink", () => {
   it("falls back to escaped plain text for an id that is not URL-safe", () => {
     expect(osvLink("CVE-1 ](javascript:alert(1))")).toBe("CVE-1 \\]\\(javascript:alert\\(1\\)\\)");
     expect(osvLink("")).toBe("");
+  });
+});
+
+describe("withCoverageDefaults", () => {
+  it("fills the coverage lists missing from results cached by an older version", () => {
+    expect(withCoverageDefaults({ findings: [], skipped: ["lame"] })).toEqual({
+      findings: [],
+      skipped: ["lame"],
+      unscanned: [],
+      outdatedWithoutSbom: [],
+    });
+  });
+
+  it("keeps coverage lists that are present", () => {
+    const unscanned = [{ formula: "stripe", reason: "untrusted_tap" }];
+    expect(withCoverageDefaults({ findings: [], skipped: [], unscanned, outdatedWithoutSbom: ["openssl@3"] })).toEqual({
+      findings: [],
+      skipped: [],
+      unscanned,
+      outdatedWithoutSbom: ["openssl@3"],
+    });
   });
 });
