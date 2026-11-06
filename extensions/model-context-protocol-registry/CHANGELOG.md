@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Holos33 MCP Server] - {PR_MERGE_DATE}
+## [Add Holos33 MCP Server] - 2026-11-06
 
 - Add Holos33 to the official registry as a hosted Streamable HTTP server with 11 read-only tools and no authentication.
 
