@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Gumlet MCP Server] - {PR_MERGE_DATE}
+
+- Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 through `mcp-remote`. Live calls need a Gumlet API key as a GUMLET_API_KEY header. Listing tools works without a key.
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
