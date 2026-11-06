@@ -1,6 +1,6 @@
 # OpenCode Sessions Changelog
 
-## [Support OpenCode v2 sessions] - {PR_MERGE_DATE}
+## [Support OpenCode v2 sessions] - 2026-11-06
 
 - Sessions from OpenCode v2 (stored in the `session_v2` table) are now listed alongside v1 sessions
 - Deleting a session works correctly whether it lives in `session` or `session_v2`
