@@ -5,7 +5,6 @@
 import querystring from "querystring";
 import { TranslateOption, TranslateResponse } from "./types";
 import { isSupported, getISOCode } from "./languages";
-import { tokenGenerator } from "./tokenGenerator";
 
 /**
  * @function translate
@@ -38,9 +37,6 @@ export async function translate(text: string, options?: TranslateOption): Promis
     options.from = getISOCode(options.from);
     options.to = getISOCode(options.to);
 
-    // Generate Google Translate token for the text to be translated.
-    let token: any = await tokenGenerator(text);
-
     // URL & query string required by Google Translate.
     let baseUrl = "https://translate.google.com/translate_a/single";
     let data: any = {
@@ -55,8 +51,7 @@ export async function translate(text: string, options?: TranslateOption): Promis
         ssel: 0,
         tsel: 0,
         kc: 7,
-        q: text,
-        [token.name]: token.value
+        q: text
     };
 
     // Append query string to the request URL.

@@ -17,7 +17,3 @@ export const getFlagEmoji = (isoCode?: string) => {
 
   return isoCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
-
-export const normalizeFill = (svg: string): string => {
-  return svg.replace(/\sfill="#[0-9a-fA-F]{3,8}"/g, ' fill="currentColor"');
-};

@@ -5,6 +5,7 @@ import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert,
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
 import Service, { CustomCheatsheet } from "./service";
+import { ImportMarkdownFile } from "./import-markdown-file";
 
 export default function ManageCustomCheatsheets() {
   const [customSheets, setCustomSheets] = useState<CustomCheatsheet[]>([]);
@@ -81,6 +82,11 @@ export default function ManageCustomCheatsheets() {
             shortcut={Keyboard.Shortcut.Common.New}
             onAction={() => push(<CreateCustomCheatsheet onCreated={loadCustomSheets} />)}
           />
+          <Action.Push
+            title="Import Markdown File"
+            icon={Icon.Document}
+            target={<ImportMarkdownFile onImported={loadCustomSheets} />}
+          />
         </ActionPanel>
       }
     >
@@ -91,7 +97,9 @@ export default function ManageCustomCheatsheets() {
           title={loadError ? "Storage Unavailable" : "No custom cheatsheets found"}
           description={
             loadError ||
-            (searchText ? `No cheatsheets match "${searchText}"` : "Create your first custom cheatsheet to get started")
+            (searchText
+              ? `No cheatsheets match "${searchText}"`
+              : "Create a custom cheatsheet or import a Markdown file")
           }
           actions={
             <ActionPanel>
@@ -100,6 +108,11 @@ export default function ManageCustomCheatsheets() {
                 title="Create New"
                 icon={Icon.Plus}
                 onAction={() => push(<CreateCustomCheatsheet onCreated={loadCustomSheets} />)}
+              />
+              <Action.Push
+                title="Import Markdown File"
+                icon={Icon.Document}
+                target={<ImportMarkdownFile onImported={loadCustomSheets} />}
               />
             </ActionPanel>
           }
@@ -129,6 +142,11 @@ export default function ManageCustomCheatsheets() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Actions">
+                  <Action.Push
+                    title="Import Markdown File"
+                    icon={Icon.Document}
+                    target={<ImportMarkdownFile onImported={loadCustomSheets} />}
+                  />
                   <Action
                     title="Add to Favorites"
                     icon={Icon.Star}
