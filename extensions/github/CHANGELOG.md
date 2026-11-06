@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Windows Action Shortcuts] - {PR_MERGE_DATE}
+## [Windows Action Shortcuts] - 2026-11-06
 
 - Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
 
