@@ -71,14 +71,6 @@
       ]
     },
     {
-      "title": "Profile Data Folder",
-      "name": "dataPathOverride",
-      "type": "textfield",
-      "required": false,
-      "description": "Optional. Overrides the browser's user data folder (the one containing \"Local State\"), relative to your home folder or absolute. Leave empty to use the default for the selected browser.",
-      "placeholder": "Library/Application Support/BraveSoftware/Brave-Origin"
-    },
-    {
       "title": "Search Engine URL",
       "name": "newTabURL",
       "default": "https://google.com/search?q=%query%",

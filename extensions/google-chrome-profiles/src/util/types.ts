@@ -1,5 +1,4 @@
 import { getPreferenceValues, PopToRootType, showHUD } from "@raycast/api";
-import { homedir } from "os";
 
 export type GoogleChromeLocalState = {
   profile: {
@@ -148,19 +147,10 @@ export const BROWSERS: Record<string, BrowserConfig> = {
   },
 };
 
-// Strip a leading "~/" or the absolute home prefix so the override joins onto homedir() like the built-ins.
-export function normalizeDataPath(value: string, home: string): string {
-  const trimmed = value.trim().replace(/\/+$/, "");
-  if (trimmed.startsWith("~/")) return trimmed.slice(2);
-  if (trimmed.startsWith(`${home}/`)) return trimmed.slice(home.length + 1);
-  return trimmed;
-}
 
 export function getSelectedBrowser(): BrowserConfig {
-  const { browser, dataPathOverride } = getPreferenceValues<ExtensionPreferences>();
-  const config = BROWSERS[browser] ?? BROWSERS["chrome"];
-  const override = dataPathOverride?.trim();
-  return override ? { ...config, dataPath: normalizeDataPath(override, homedir()) } : config;
+  const { browser } = getPreferenceValues<ExtensionPreferences>();
+  return BROWSERS[browser] ?? BROWSERS["chrome"];
 }
 
 // Raycast otherwise reopens on the pushed profile view after its window closes.

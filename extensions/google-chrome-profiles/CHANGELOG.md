@@ -3,7 +3,6 @@
 ## [Brave and Brave Origin] - {PR_MERGE_DATE}
 
 - Add Brave Browser and Brave Origin (standalone, `com.brave.Browser.origin`) to the Browser preference.
-- Add an optional "Profile Data Folder" preference to override the browser's user data folder when it is not at the default location.
 
 ## [Hide Profiles] - 2026-10-24
 
