@@ -14,7 +14,7 @@ export type Group = ConversationItem & {
   groupName: string;
 };
 
-function getConversationTeamId(conversation: SlackConversation): string {
+export function getConversationTeamId(conversation: SlackConversation): string {
   return conversation.internal_team_ids?.[0] ?? conversation.shared_team_ids?.[0] ?? conversation.context_team_id ?? "";
 }
 

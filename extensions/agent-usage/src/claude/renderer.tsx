@@ -44,7 +44,9 @@ export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeEr
   if (account) text += `\nAccount: ${account}`;
   if (organization) text += `\nOrganization: ${organization}`;
   text += `\nPlan: ${u.plan}`;
-  text += formatWindow("5h Limit", u.fiveHour.percentageRemaining, u.fiveHour.resetsIn, mode);
+  if (u.fiveHour) {
+    text += formatWindow("5h Limit", u.fiveHour.percentageRemaining, u.fiveHour.resetsIn, mode);
+  }
 
   if (u.sevenDay) {
     text += formatWindow("Weekly Limit", u.sevenDay.percentageRemaining, u.sevenDay.resetsIn, mode);
@@ -78,15 +80,19 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
       <List.Item.Detail.Metadata.Label title="Plan" text={u.plan} />
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label
-        title="5h Limit"
-        text={`${generateAsciiBar(toDisplayPercent(u.fiveHour.percentageRemaining, mode))} ${formatPercentDisplay(u.fiveHour.percentageRemaining, mode)}`}
-      />
-      {u.fiveHour.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={u.fiveHour.resetsIn} />}
+      {u.fiveHour && (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="5h Limit"
+            text={`${generateAsciiBar(toDisplayPercent(u.fiveHour.percentageRemaining, mode))} ${formatPercentDisplay(u.fiveHour.percentageRemaining, mode)}`}
+          />
+          {u.fiveHour.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={u.fiveHour.resetsIn} />}
+        </>
+      )}
 
       {u.sevenDay && (
         <>
-          <List.Item.Detail.Metadata.Separator />
+          {u.fiveHour && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title="Weekly Limit"
             text={`${generateAsciiBar(toDisplayPercent(u.sevenDay.percentageRemaining, mode))} ${formatPercentDisplay(u.sevenDay.percentageRemaining, mode)}`}
@@ -151,7 +157,9 @@ export function getClaudeAccessory(
   const mode = getPercentageDisplayMode();
   const { account } = accountLines(usage);
   const tooltipParts = account ? [account] : [];
-  tooltipParts.push(`5h Limit: ${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`);
+  if (usage.fiveHour) {
+    tooltipParts.push(`5h Limit: ${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`);
+  }
   if (usage.sevenDay) {
     tooltipParts.push(`Weekly Limit: ${toDisplayPercent(usage.sevenDay.percentageRemaining, mode)}%`);
   }
@@ -164,9 +172,10 @@ export function getClaudeAccessory(
     );
   }
 
+  const primaryWindow = usage.fiveHour ?? usage.sevenDay;
   return {
-    icon: generatePieIcon(usage.fiveHour.percentageRemaining),
-    text: `${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`,
+    icon: primaryWindow ? generatePieIcon(primaryWindow.percentageRemaining) : undefined,
+    text: primaryWindow ? `${toDisplayPercent(primaryWindow.percentageRemaining, mode)}%` : "No rate limits reported",
     tooltip: tooltipParts.join("\n"),
   };
 }

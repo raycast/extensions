@@ -1,8 +1,20 @@
 # @ Profile
 
+<div align="center">
+  <a href="https://github.com/chrismessina">
+    <img src="https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social" alt="Follow @chrismessina">
+  </a>
+  <a href="https://github.com/chrismessina/raycast-at-profile/stargazers">
+    <img src="https://img.shields.io/github/stars/chrismessina/raycast-at-profile?style=social" alt="Stars">
+  </a>
+  <a href="https://www.raycast.com/chrismessina/at-profile">
+    <img src="https://img.shields.io/badge/Raycast-Store-red.svg" alt="@ Profile on Raycast store.">
+  </a>
+</div>
+
 Quickly visit social profiles. Access a history of the profiles you visit and add your favorite social apps.
 
-![@ Profile Extension](metadata/at-profile-1.png)
+![@ Profile Extension](media/at-profile-1.png)
 
 ## Features
 

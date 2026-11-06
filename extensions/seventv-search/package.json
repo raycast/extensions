@@ -5,7 +5,7 @@
   "title": "7TV Emotes Search",
   "description": "Search, preview, copy, and paste emotes from 7TV, BetterTTV, and FrankerFaceZ.",
   "icon": "icon.png",
-  "author": "Paranjayy",
+  "author": "nakama",
   "categories": [
     "Media"
   ],
@@ -100,7 +100,9 @@
     "Windows"
   ],
   "contributors": [
-    "Kan-A-Pesh",
-    "nakama"
+    "Kan-A-Pesh"
+  ],
+  "pastContributors": [
+    "Paranjayy"
   ]
 }

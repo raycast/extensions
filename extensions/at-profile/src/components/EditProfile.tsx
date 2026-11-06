@@ -1,41 +1,37 @@
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { useState } from "react";
-import { updateUsageHistoryItem } from "../helpers/apps";
-import { showError, showSuccess, withErrorHandling } from "../utils/errors";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { renameHistoryProfile } from "../helpers/history";
+import { cleanProfile } from "../helpers/url";
 
 interface EditProfileFormProps {
   originalProfile: string;
   app: string;
   appName: string;
-  onUpdate: () => void;
 }
 
-export function EditProfileForm({ originalProfile, app, appName, onUpdate }: EditProfileFormProps) {
+export function EditProfileForm({ originalProfile, app, appName }: EditProfileFormProps) {
+  const { pop } = useNavigation();
   const [profile, setProfile] = useState(originalProfile);
 
   const handleSubmit = async () => {
-    if (!profile.trim()) {
-      await showError("Profile cannot be empty", "Error");
+    const newProfile = cleanProfile(profile);
+    if (!newProfile) {
+      await showError("Enter a profile name.", { title: "Profile Can't Be Empty" });
+      return;
+    }
+    if (newProfile === originalProfile) {
+      pop();
       return;
     }
 
-    const cleanProfile = profile.trim();
-    if (cleanProfile === originalProfile) {
-      await popToRoot();
-      return;
+    try {
+      await renameHistoryProfile(originalProfile, app, newProfile);
+      await showToast({ style: Toast.Style.Success, title: "Profile Updated", message: `@${newProfile}` });
+      pop();
+    } catch (error) {
+      await showError(error, { title: "Couldn't Update Profile" });
     }
-
-    await withErrorHandling(
-      async () => {
-        await updateUsageHistoryItem(originalProfile, app, cleanProfile);
-        await showSuccess("Updated", `Profile updated to @${cleanProfile}`);
-        onUpdate();
-        await popToRoot();
-      },
-      "updating profile",
-      true,
-      "Error",
-    )();
   };
 
   return (
@@ -43,7 +39,7 @@ export function EditProfileForm({ originalProfile, app, appName, onUpdate }: Edi
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Profile" onSubmit={handleSubmit} />
-          <Action title="Cancel" onAction={() => popToRoot()} />
+          <Action title="Cancel" onAction={pop} />
         </ActionPanel>
       }
     >

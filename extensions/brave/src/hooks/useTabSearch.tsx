@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { getOpenTabs } from "../actions";
 import { SearchResult, Tab } from "../interfaces";
@@ -22,20 +23,20 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
       );
     }
     setData(tabs);
-  }, [query]);
+  }, [query, useOriginalFavicon]);
 
   useEffect(() => {
     getTabs()
       .then(() => setIsLoading(false))
       .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+        if (getErrorMessage(e).includes(NOT_INSTALLED_MESSAGE)) {
           setErrorView(<NotInstalledError />);
         } else {
-          setErrorView(<UnknownError />);
+          setErrorView(<UnknownError error={e} />);
         }
         setIsLoading(false);
       });
-  }, [query]);
+  }, [getTabs]);
 
   return { data, isLoading, errorView, revalidate: getTabs, profile: { name: "", id: "" } };
 }

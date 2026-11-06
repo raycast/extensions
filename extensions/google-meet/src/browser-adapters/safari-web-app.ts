@@ -2,13 +2,9 @@ import type { Application } from "@raycast/api";
 import { isMeetError, MeetError } from "../errors";
 import { CANDIDATE_DELIMITER, runAppleScriptSafe } from "../utils/apple-script";
 import { extractMeetingUrlsFromText } from "../utils/meeting-url";
-import { getWindowTitlesScript } from "../utils/scripts";
+import { BUNDLE_ID_PATTERN, getWindowTitlesScript } from "../utils/scripts";
 import { sleep } from "../services/meeting-url-poller";
 import type { MeetingUrlSource } from "./types";
-
-// Bundle identifiers are interpolated into AppleScript, so anything outside
-// the characters a real identifier can contain is rejected up front.
-const BUNDLE_ID_PATTERN = /^[A-Za-z0-9.-]+$/;
 
 // The windows already open must be read before the new meeting is created,
 // so a failed first read is retried briefly instead of being treated as "none".

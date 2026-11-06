@@ -33,7 +33,7 @@ export interface FillRequest {
   values: string[];
   /** Press Return after the last value. */
   submit?: boolean;
-  /** Value to leave in the clipboard afterwards, such as a 2FA code. Otherwise the previous clipboard is restored. */
+  /** Value to leave in the clipboard afterwards, such as a TOTP code. Otherwise the previous clipboard is restored. */
   getClipboardValue?: () => Promise<string | undefined>;
   /** HUD shown when a value is left in the clipboard. */
   clipboardValueHud?: string;
@@ -84,7 +84,7 @@ export async function runFill(
       if (clipboardValueHud) await driver.showHud(clipboardValueHud);
     } else {
       await driver.restoreClipboard(previousClipboard);
-      // The value was expected, e.g. the item has a 2FA code: say why the clipboard doesn't hold it.
+      // The value was expected, e.g. the item has a TOTP code: say why the clipboard doesn't hold it.
       if (getClipboardValue && clipboardValueFailureHud) await driver.showHud(clipboardValueFailureHud);
     }
   } catch (error: unknown) {

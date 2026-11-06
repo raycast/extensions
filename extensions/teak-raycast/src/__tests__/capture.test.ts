@@ -131,7 +131,7 @@ describe("saveCardWithFeedback", () => {
       { content: "https://example.com/post", url: "https://example.com/post" },
       { loadingTitle: "Saving clipboard..." },
     );
-    expect(result.resaved).toBe(true);
+    expect(result?.resaved).toBe(true);
     expect(toasts.at(-1)).toMatchObject({
       message: "Moved back from Archive",
       title: "Already saved",

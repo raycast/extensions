@@ -1,0 +1,133 @@
+{
+  "ownerName": "Calendar",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/calendar/keyboard-shortcuts-ical002/mac",
+  "shortcuts": [
+    {
+      "id": "next-period",
+      "commandName": "Go to Next Day Week Month or Year",
+      "modifiers": ["command"],
+      "key": "Right",
+      "scope": "app"
+    },
+    {
+      "id": "previous-period",
+      "commandName": "Go to Previous Day Week Month or Year",
+      "modifiers": ["command"],
+      "key": "Left",
+      "scope": "app"
+    },
+    {
+      "id": "today",
+      "commandName": "Go to Today",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "go-to-date",
+      "commandName": "Go to Specific Date",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "day-view",
+      "commandName": "Switch to Day View",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "week-view",
+      "commandName": "Switch to Week View",
+      "modifiers": ["command"],
+      "key": "2",
+      "scope": "app"
+    },
+    {
+      "id": "month-view",
+      "commandName": "Switch to Month View",
+      "modifiers": ["command"],
+      "key": "3",
+      "scope": "app"
+    },
+    {
+      "id": "year-view",
+      "commandName": "Switch to Year View",
+      "modifiers": ["command"],
+      "key": "4",
+      "scope": "app"
+    },
+    {
+      "id": "full-screen",
+      "commandName": "Switch to Full Screen",
+      "modifiers": ["control", "command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "increase-text-size",
+      "commandName": "Make Text Bigger",
+      "modifiers": ["command"],
+      "key": "+",
+      "scope": "app"
+    },
+    {
+      "id": "decrease-text-size",
+      "commandName": "Make Text Smaller",
+      "modifiers": ["command"],
+      "key": "-",
+      "scope": "app"
+    },
+    {
+      "id": "refresh-calendars",
+      "commandName": "Refresh All Calendars",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "new-calendar-group",
+      "commandName": "Add New Calendar Group",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-subscribed-calendar",
+      "commandName": "Add New Subscribed Calendar",
+      "modifiers": ["command", "option"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "new-event",
+      "commandName": "Add New Event",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "edit-event",
+      "commandName": "Edit Selected Event",
+      "modifiers": ["command"],
+      "key": "E",
+      "scope": "app"
+    },
+    {
+      "id": "search-events",
+      "commandName": "Search for Events",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "show-info",
+      "commandName": "Show Information for Calendar or Event",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "app"
+    }
+  ]
+}

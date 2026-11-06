@@ -72,7 +72,7 @@
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.19.1",
-    "better-sqlite3-multiple-ciphers": "^11.9.1",
+    "better-sqlite3-multiple-ciphers": "12.11.1",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.28.6",

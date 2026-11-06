@@ -5,7 +5,7 @@ import { showFailureToast, showSuccessToast } from "../utils";
 import { RecognitionOutcome } from "./types";
 
 type CallbackOptions = Parameters<typeof callbackLaunchCommand>[0];
-type ResultAction = "copy" | "paste" | "both";
+export type ResultAction = "copy" | "paste" | "both" | "paste-restore";
 
 export async function handleRecognitionOutcome(
   outcome: RecognitionOutcome,
@@ -13,6 +13,7 @@ export async function handleRecognitionOutcome(
     callbackOptions?: CallbackOptions;
     subject?: string;
     noResultTitle?: string;
+    successTitle?: string;
     action?: ResultAction;
   } = {},
 ): Promise<void> {
@@ -58,10 +59,26 @@ export async function handleRecognitionOutcome(
   if (action === "copy") {
     try {
       await Clipboard.copy(outcome.text);
-      await showSuccessToast("Copied text to clipboard");
+      await showSuccessToast(
+        options.successTitle ?? "Copied text to clipboard",
+      );
     } catch (error) {
       await showFailureToast(error, {
         title: "Failed to copy recognized text",
+      });
+    }
+    return;
+  }
+
+  if (action === "paste-restore") {
+    try {
+      // Loaded lazily so Windows never touches the Swift bridge.
+      const { pasteTextAndRestoreClipboard } = await import("./macos");
+      await pasteTextAndRestoreClipboard(outcome.text);
+      await showSuccessToast("Pasted recognized text");
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Failed to paste recognized text",
       });
     }
     return;

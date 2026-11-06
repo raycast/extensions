@@ -16,7 +16,7 @@ import * as path from "node:path";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
 import { readPendingStarts } from "./pendingStore";
-import { RecentProject, STORAGE_KEY } from "./recents";
+import { RecentProject, STORAGE_KEY, recordRunning } from "./recents";
 import {
   byRecency,
   canonicalCwd,
@@ -207,15 +207,20 @@ async function launchRecent(recent: RecentProject): Promise<void> {
   });
 }
 
+// One empty list for the whole module. A `= []` default in the destructure
+// below made a new array on every render while storage was still loading,
+// which changed every memo keyed on it each time.
+const NO_RECENTS: RecentProject[] = [];
+
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.Menubar>();
   const [servers, setServers] = useState<DevServer[]>(
     () => readSnapshot() ?? [],
   );
   const [isLoading, setIsLoading] = useState(true);
-  const { value: recents = [] } = useLocalStorage<RecentProject[]>(
+  const { value: recents = NO_RECENTS } = useLocalStorage<RecentProject[]>(
     STORAGE_KEY,
-    [],
+    NO_RECENTS,
   );
 
   // Raycast unloads a menu bar command shortly after its menu closes, and
@@ -258,6 +263,10 @@ export default function Command() {
     setServers(next);
     writeSnapshot(next);
     await updateCommandMetadata({ subtitle: metadataSubtitle(next.length) });
+    // This refresh also runs in the background every minute, which makes the
+    // menu bar the one surface that sees projects started from a terminal
+    // while the dashboard is closed. Best-effort, like every recents write.
+    await recordRunning(next).catch(() => {});
     return next;
   }, []);
 
@@ -314,7 +323,9 @@ export default function Command() {
     [recents, runningCwds],
   );
 
-  const { data: sortedRecents, visitItem } = useFrecencySorting(
+  // Start-click history, kept whichever order is chosen below, so switching
+  // to "Most started" later ranks by real history instead of starting cold.
+  const { data: byFrequency, visitItem } = useFrecencySorting(
     startableRecents,
     {
       namespace: "project-starts",
@@ -323,12 +334,20 @@ export default function Command() {
     },
   );
 
-  // The six rows the Start section will actually render; the subtitle rule
-  // below judges ambiguity against these, not the full recents list — a
-  // twin that fell off the end of the list can't confuse anyone.
+  // The six rows the Start section will actually render, in the order the
+  // user picked. "recent" (the default) is the projects that ran most
+  // recently, newest first: it surfaces what you were just working on,
+  // including a project started from a terminal. "frequent" ranks by how
+  // often and how lately each was started from this menu, which keeps
+  // regulars pinned but lets a project that only ever runs from a terminal
+  // fall off the end; that is why it is not the default. The subtitle rule
+  // below judges ambiguity against these rows, not the full recents list, so
+  // a twin that fell off the end of the list can't confuse anyone.
+  const startOrder = prefs.startOrder ?? "recent";
   const visibleRecents = useMemo(
-    () => sortedRecents.slice(0, 6),
-    [sortedRecents],
+    () =>
+      (startOrder === "frequent" ? byFrequency : startableRecents).slice(0, 6),
+    [startOrder, byFrequency, startableRecents],
   );
   // Subtitle per Start row, set only when the project name alone is
   // ambiguous. Same-named rows are usually worktrees of one repo, so the
@@ -440,7 +459,10 @@ export default function Command() {
                         // until the next interval. The HUD is still truthful
                         // at this moment: a SIGKILL that the syscall accepted
                         // cannot be refused, only briefly outlived.
-                        const killed = killServer(server.pid);
+                        const killed = killServer(
+                          server.pid,
+                          server.workerPids,
+                        );
                         await showHUD(`Killed ${server.projectName}`);
                         await killed;
                         // Refresh before the reap so the menu bar count drops
@@ -513,7 +535,9 @@ export default function Command() {
                       // for the ordering lesson — and refresh runs before the
                       // reap so the count drops promptly.
                       const killed = Promise.allSettled(
-                        projectServers.map((server) => killServer(server.pid)),
+                        projectServers.map((server) =>
+                          killServer(server.pid, server.workerPids),
+                        ),
                       );
                       await showHUD(
                         projectServers.length === 2

@@ -1,61 +1,42 @@
+import { showError } from "@chrismessina/raycast-kit";
 import { open, showHUD } from "@raycast/api";
-import { withErrorHandling } from "../utils/errors";
-import { getAllApps, getAllAppsUnfiltered, addToUsageHistory } from "./apps";
-import { getAppByValue } from "./custom-app-utils";
-import { sanitizeUrl } from "../utils/url-sanitize";
 import { App } from "../types";
+import { findApp } from "./apps";
+import { recordProfileOpen } from "./history";
+import { buildProfileUrl, cleanProfile } from "./url";
 
 /**
- * Opens a profile on a social app
- * @param profile - The profile username/handle
- * @param appValue - The app identifier (e.g., "twitter", "instagram")
- * @param bypassAppSettings - Whether to bypass app visibility settings
- * @param showHudMessage - Whether to show success HUD message
+ * Open a profile on an app and record it in History
+ * @throws when the app doesn't exist or the profile is empty
  */
-async function openProfileCore(
-  profile: string,
-  appValue: string,
-  bypassAppSettings = false,
-  showHudMessage = true,
-): Promise<void> {
-  // Get apps based on bypass setting
-  const apps = bypassAppSettings ? await getAllAppsUnfiltered() : await getAllApps();
-
-  // Find the app
-  let app = apps.find((a: App) => a.value === appValue);
-
-  // If not found in regular apps, try custom apps
+export async function openProfile(profile: string, appValue: string): Promise<{ app: App; profile: string }> {
+  const app = await findApp(appValue);
   if (!app) {
-    const customApp = await getAppByValue(appValue);
-    app = customApp || undefined;
+    throw new Error(`App "${appValue}" not found`);
   }
+  const clean = cleanProfile(profile);
+  await open(buildProfileUrl(app.urlTemplate, clean));
 
-  if (!app) {
-    throw new Error(`App '${appValue}' not found or is disabled`);
-  }
+  await recordOpenBestEffort(clean, app);
+  return { app, profile: clean };
+}
 
-  // Clean the profile input
-  const cleanProfile = profile.replace(/^@/, "").trim();
-  if (!cleanProfile) {
-    throw new Error("Please enter a valid profile");
-  }
-
-  // Build the URL
-  const url = app.urlTemplate.replace(/{profile}/g, encodeURIComponent(cleanProfile));
-
-  // Sanitize the URL to ensure safe protocols
-  const sanitizedUrl = sanitizeUrl(url);
-
-  // Open the sanitized URL
-  await open(sanitizedUrl);
-
-  // Add to usage history
-  await addToUsageHistory(cleanProfile, appValue, app.name);
-
-  // Show success message
-  if (showHudMessage) {
-    await showHUD(`Opened ${cleanProfile} on ${app.name}`);
+async function recordOpenBestEffort(profile: string, app: App) {
+  try {
+    await recordProfileOpen(profile, app.value, app.name);
+  } catch (error) {
+    console.error("Couldn't record the open in History:", error);
   }
 }
 
-export const openProfile = withErrorHandling(openProfileCore, "opening profile", true, "Failed to open profile");
+/**
+ * openProfile for commands: a HUD on success, a failure toast with Copy Error otherwise
+ */
+export async function openProfileWithFeedback(profile: string, appValue: string): Promise<void> {
+  try {
+    const result = await openProfile(profile, appValue);
+    await showHUD(`Opened @${result.profile} on ${result.app.name}`);
+  } catch (error) {
+    await showError(error, { title: "Couldn't Open Profile" });
+  }
+}

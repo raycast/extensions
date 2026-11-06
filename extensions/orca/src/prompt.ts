@@ -161,21 +161,26 @@ export function worktreeCreateArgs(spec: PromptSpec): string[] {
 }
 
 /**
- * A fresh pane in the existing checkout. Orca has no flag to seed a prompt here,
- * so the caller follows up with terminalSendArgs once the handle is known.
+ * A fresh agent in the existing checkout, prompt included. Typing the prompt
+ * into a pane that was just created raced the agent's start: a slow shell
+ * profile left the text in the shell, or the Enter fell into the agent's
+ * startup. Orca waits for the agent before submitting.
  */
-export function terminalCreateArgs(spec: PromptSpec): string[] {
+export function agentLaunchArgs(spec: PromptSpec): string[] {
   return [
-    "terminal",
-    "create",
+    "agent",
+    "launch",
+    "--agent",
+    spec.agent,
     "--worktree",
     `path:${spec.worktreePath}`,
-    "--command",
-    spec.agent,
+    "--prompt",
+    spec.prompt,
     "--json",
   ];
 }
 
+/** For an agent that is already running, so it is ready to take the prompt. */
 export function terminalSendArgs(handle: string, prompt: string): string[] {
   return [
     "terminal",
@@ -266,12 +271,18 @@ export async function runPrompt(
     return created?.agentTerminalHandle ?? created?.startupTerminal?.handle;
   }
 
-  const handle =
-    (await runningPane(spec, orcaPath, exec)) ??
-    (await createPane(spec, orcaPath, exec));
+  const running = await runningPane(spec, orcaPath, exec);
+  if (running) {
+    await call(orcaPath, terminalSendArgs(running, spec.prompt), exec);
+    return running;
+  }
 
-  await call(orcaPath, terminalSendArgs(handle, spec.prompt), exec);
-  return handle;
+  const launched = await call<{ outcome?: { handle?: string } }>(
+    orcaPath,
+    agentLaunchArgs(spec),
+    exec,
+  );
+  return launched?.outcome?.handle;
 }
 
 /**
@@ -291,21 +302,6 @@ async function runningPane(
     exec,
   );
   return lastAgentIn(live?.terminals ?? [], spec.worktreePath);
-}
-
-async function createPane(
-  spec: PromptSpec,
-  orcaPath: string,
-  exec: Exec,
-): Promise<string> {
-  const terminal = await call<{
-    terminal?: { handle?: string };
-    handle?: string;
-  }>(orcaPath, terminalCreateArgs(spec), exec);
-  const handle = terminal?.terminal?.handle ?? terminal?.handle;
-  if (!handle)
-    throw new Error("Orca created no terminal to send the prompt to");
-  return handle;
 }
 
 /** Where the text appended at launch comes from. */

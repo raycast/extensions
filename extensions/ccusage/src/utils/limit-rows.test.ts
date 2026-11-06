@@ -219,4 +219,11 @@ describe("getLimitRows", () => {
   it("returns nothing for null", () => {
     expect(getLimitRows(null)).toEqual([]);
   });
+
+  it.each<{ name: string; data: UsageLimitData; keys: string[] }>([
+    { name: "five_hour", data: { ...baseData, five_hour: null }, keys: ["seven_day"] },
+    { name: "seven_day", data: { ...baseData, seven_day: null }, keys: ["five_hour"] },
+  ])("omits the $name total when the plan has none", ({ data, keys }) => {
+    expect(getLimitRows(data).map((row) => row.key)).toEqual(keys);
+  });
 });

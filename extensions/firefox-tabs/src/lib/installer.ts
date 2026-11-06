@@ -1,20 +1,10 @@
-import { createHash } from "crypto";
-import {
-  chmodSync,
-  copyFileSync,
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  mkdtempSync,
-  renameSync,
-  rmSync,
-  symlinkSync,
-  unlinkSync,
-  writeFileSync,
-} from "fs";
+import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync } from "fs";
 import { homedir, tmpdir } from "os";
 import { join } from "path";
 import { environment } from "@raycast/api";
+import { type HostPin, describeDownloadError, verifyPinnedFile } from "./host-version";
+import { ensureSymlink, replaceSymlink } from "./node-symlink";
+import PINNED_HOST from "./native-host-pin.json";
 
 // -- Constants --
 
@@ -22,7 +12,7 @@ const REPO = "toshi38/raycast-firefox";
 const GITHUB_API = `https://api.github.com/repos/${REPO}/releases`;
 const INSTALL_DIR = join(homedir(), ".raycast-firefox", "bin");
 const SYMLINK_PATH = join(homedir(), ".raycast-firefox", "node");
-const REQUIRED_ASSETS = ["host.bundle.js", "run.sh", "SHA256SUMS.txt"];
+const REQUIRED_ASSETS = ["host.bundle.js", "run.sh"];
 const NATIVE_HOST_TAG_PREFIX = "native-host@";
 
 // -- Public types --
@@ -36,18 +26,11 @@ export interface InstallResult {
 // -- Internal helpers --
 
 /**
- * Fetch the latest native-host release from GitHub.
- *
- * We use the /releases endpoint (not /releases/latest) because /releases/latest
- * returns the single most recent release across ALL tags. If the latest release
- * is an extension@ release, it won't have native-host assets. Instead, we fetch
- * the releases list and find the first one tagged with "native-host@".
+ * Fetch the asset URLs of the pinned native-host release from GitHub.
  */
-async function getLatestNativeHostRelease(): Promise<{
-  version: string;
-  assets: Map<string, string>;
-}> {
-  const res = await fetch(`${GITHUB_API}?per_page=100`, {
+async function getPinnedRelease(pin: HostPin): Promise<Map<string, string>> {
+  const tag = `${NATIVE_HOST_TAG_PREFIX}${pin.version}`;
+  const res = await fetch(`${GITHUB_API}/tags/${encodeURIComponent(tag)}`, {
     headers: {
       Accept: "application/vnd.github.v3+json",
       "User-Agent": "raycast-firefox-setup",
@@ -58,28 +41,15 @@ async function getLatestNativeHostRelease(): Promise<{
   if (res.status === 403) {
     throw new Error("GitHub rate limit reached. Please try again in a few minutes.");
   }
+  if (res.status === 404) {
+    throw new Error(`Native host release ${tag} not found. Please check https://github.com/${REPO}/releases`);
+  }
   if (!res.ok) {
-    throw new Error(`Failed to check for updates (HTTP ${res.status})`);
+    throw new Error(`Failed to look up the native host release (HTTP ${res.status})`);
   }
 
-  const releases = (await res.json()) as Array<{
-    tag_name: string;
-    assets: Array<{ name: string; browser_download_url: string }>;
-  }>;
-
-  // Find the first release whose tag starts with "native-host@"
-  const release = releases.find((r) => r.tag_name.startsWith(NATIVE_HOST_TAG_PREFIX));
-  if (!release) {
-    throw new Error("No native host release found. Please check https://github.com/toshi38/raycast-firefox/releases");
-  }
-
-  const version = release.tag_name.slice(NATIVE_HOST_TAG_PREFIX.length);
-  const assets = new Map<string, string>();
-  for (const asset of release.assets) {
-    assets.set(asset.name, asset.browser_download_url);
-  }
-
-  return { version, assets };
+  const release = (await res.json()) as { assets: Array<{ name: string; browser_download_url: string }> };
+  return new Map(release.assets.map((asset) => [asset.name, asset.browser_download_url]));
 }
 
 /**
@@ -94,41 +64,6 @@ async function downloadAsset(url: string): Promise<Buffer> {
     throw new Error(`Download failed (HTTP ${res.status})`);
   }
   return Buffer.from(await res.arrayBuffer());
-}
-
-/** Compute SHA256 hex digest of a buffer. */
-function sha256(buffer: Buffer): string {
-  return createHash("sha256").update(buffer).digest("hex");
-}
-
-/**
- * Parse SHA256SUMS.txt content into a Map of filename -> hash.
- * Format: "<hash>  <filename>" (double-space separator from `shasum -a 256`).
- */
-function parseSha256Sums(content: string): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const line of content.trim().split("\n")) {
-    const match = line.match(/^([a-f0-9]{64})\s{1,2}(.+)$/);
-    if (match) {
-      map.set(match[2].trim(), match[1]);
-    }
-  }
-  return map;
-}
-
-/**
- * Verify a downloaded file's SHA256 checksum against the expected value.
- * Throws with a clear message on mismatch or missing entry.
- */
-function verifyChecksum(buffer: Buffer, filename: string, checksums: Map<string, string>): void {
-  const expected = checksums.get(filename);
-  if (!expected) {
-    throw new Error(`No checksum found for ${filename} in SHA256SUMS.txt. The release may be malformed.`);
-  }
-  const actual = sha256(buffer);
-  if (actual !== expected) {
-    throw new Error(`Checksum mismatch for ${filename}. The download may be corrupted. Please try again.`);
-  }
 }
 
 /**
@@ -179,79 +114,77 @@ function atomicInstall(
  * system Node in dev). Always recreated to handle Raycast Node.js updates.
  */
 function createNodeSymlink(): void {
-  // Ensure parent directory exists
-  mkdirSync(join(homedir(), ".raycast-firefox"), { recursive: true });
+  replaceSymlink(process.execPath, SYMLINK_PATH);
+}
 
-  // Remove existing symlink if present
-  if (existsSync(SYMLINK_PATH)) {
-    try {
-      const stat = lstatSync(SYMLINK_PATH);
-      if (stat.isSymbolicLink() || stat.isFile()) {
-        unlinkSync(SYMLINK_PATH);
-      }
-    } catch {
-      // If lstat fails, try removing anyway
-      try {
-        unlinkSync(SYMLINK_PATH);
-      } catch {
-        // Ignore — symlinkSync below will fail if there's a real problem
-      }
-    }
-  }
-
-  symlinkSync(process.execPath, SYMLINK_PATH);
+/**
+ * Point ~/.raycast-firefox/node at the Node.js running this extension if it
+ * points anywhere else, e.g. after Raycast moved its bundled runtime. Returns
+ * whether the link changed.
+ */
+export function refreshNodeSymlink(): boolean {
+  return ensureSymlink(process.execPath, SYMLINK_PATH);
 }
 
 // -- Public API --
 
 /**
- * Download, verify, and install the native host from GitHub Releases.
+ * Download, verify, and install the pinned native host release from GitHub
+ * Releases.
  *
  * The onProgress callback is called with step messages so the caller can
  * update a toast or progress indicator.
  *
  * Flow:
- * 1. Fetch latest native-host release info from GitHub API
- * 2. Download host.bundle.js, run.sh, and SHA256SUMS.txt in parallel
- * 3. Verify SHA256 checksums of host.bundle.js and run.sh
- * 4. Install files atomically (temp dir -> final dir, version.txt last)
- * 5. Create Node.js symlink at ~/.raycast-firefox/node
+ * 1. Look up the pinned native-host release on GitHub
+ * 2. Download host.bundle.js and run.sh in parallel
+ * 3. Verify both against the SHA-256 hashes pinned in native-host-pin.json
+ * 4. Create Node.js symlink at ~/.raycast-firefox/node
+ * 5. Install files atomically (temp dir -> final dir, version.txt last)
  */
-export async function installNativeHost(onProgress: (message: string) => void): Promise<InstallResult> {
+export async function installNativeHost(
+  onProgress: (message: string) => void,
+  pin: HostPin = PINNED_HOST
+): Promise<InstallResult> {
   // Step 1: Fetch release info
   onProgress("Downloading native host...");
 
-  let releaseInfo: { version: string; assets: Map<string, string> };
+  let assets: Map<string, string>;
   try {
-    releaseInfo = await getLatestNativeHostRelease();
+    assets = await getPinnedRelease(pin);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("fetch failed")) {
-      throw new Error("Check your internet connection and try again.");
-    }
-    throw error;
+    throw new Error(describeDownloadError(error));
   }
 
   // Validate required assets exist in the release
-  const missingAssets = REQUIRED_ASSETS.filter((name) => !releaseInfo.assets.has(name));
+  const missingAssets = REQUIRED_ASSETS.filter((name) => !assets.has(name));
   if (missingAssets.length > 0) {
     throw new Error(`Release is missing required files: ${missingAssets.join(", ")}. Please report this issue.`);
   }
 
-  // Step 2: Download all three assets in parallel
-  const [hostBundleBuf, runShBuf, sha256SumsBuf] = await Promise.all([
-    downloadAsset(releaseInfo.assets.get("host.bundle.js")!),
-    downloadAsset(releaseInfo.assets.get("run.sh")!),
-    downloadAsset(releaseInfo.assets.get("SHA256SUMS.txt")!),
-  ]);
+  // Step 2: Download both assets in parallel
+  let hostBundleBuf: Buffer;
+  let runShBuf: Buffer;
+  try {
+    [hostBundleBuf, runShBuf] = await Promise.all([
+      downloadAsset(assets.get("host.bundle.js")!),
+      downloadAsset(assets.get("run.sh")!),
+    ]);
+  } catch (error) {
+    throw new Error(describeDownloadError(error));
+  }
 
   // Step 3: Verify checksums
   onProgress("Verifying checksum...");
 
-  const checksums = parseSha256Sums(sha256SumsBuf.toString("utf-8"));
-  verifyChecksum(hostBundleBuf, "host.bundle.js", checksums);
-  verifyChecksum(runShBuf, "run.sh", checksums);
+  verifyPinnedFile(hostBundleBuf, "host.bundle.js", pin);
+  verifyPinnedFile(runShBuf, "run.sh", pin);
 
-  // Step 4: Atomic install
+  // Step 4: Create the Node.js symlink before installing the files, so
+  // version.txt (written last) only appears once every step has succeeded.
+  createNodeSymlink();
+
+  // Step 5: Atomic install
   onProgress("Installing files...");
 
   // Use environment.supportPath for temp dir when available, fall back to OS temp
@@ -265,7 +198,7 @@ export async function installNativeHost(onProgress: (message: string) => void): 
         { name: "host.bundle.js", buffer: hostBundleBuf },
         { name: "run.sh", buffer: runShBuf, executable: true },
       ],
-      releaseInfo.version
+      pin.version
     );
   } finally {
     // Clean up temp dir
@@ -276,11 +209,8 @@ export async function installNativeHost(onProgress: (message: string) => void): 
     }
   }
 
-  // Step 5: Create Node.js symlink
-  createNodeSymlink();
-
   return {
-    version: releaseInfo.version,
+    version: pin.version,
     installDir: INSTALL_DIR,
     symlinkPath: SYMLINK_PATH,
   };

@@ -14,7 +14,6 @@ import {
   Application,
   captureException,
   Clipboard,
-  FileSystemItem,
   getSelectedFinderItems,
   PopToRootType,
   showHUD,
@@ -28,28 +27,18 @@ import {
   copyWhenUnSupported,
   multiPathSeparator,
   showCopyTip,
+  showHudEmoji,
   showLastCopy,
   showTabTitle,
 } from "../types/preferences";
 import parseUrl from "parse-url";
+import { formatHomePath, formatPathHUD } from "./path-format";
+import { getSelectedPickerPaths } from "./picker-selection";
 import * as os from "node:os";
 import { arcBundleId, firefoxBrowsers, vsCodeBundleIds } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
-};
-
-const copyFinderCurWindowPath = async () => {
-  const finderPath = await getFocusFinderPath();
-  return { hud: "📂 " + finderPath, path: finderPath };
-};
-
-const copyFinerFilesPath = async (fileSystemItems: FileSystemItem[]) => {
-  const filePaths = fileSystemItems.map((item) => item.path);
-  return {
-    hud: (filePaths.length > 1 ? "📑 " : "📄 ") + filePaths[0],
-    path: filePaths.join(multiPathSeparator),
-  };
 };
 
 const qSpaceUrlToPath = (url: string) => {
@@ -82,41 +71,43 @@ export const copyQSpacePath = async () => {
     return "";
   }
 
-  let path = paths.join(multiPathSeparator);
-  let hud = (paths.length > 1 ? "📑 " : "📂 ") + paths[0];
-
-  if (useTildeForHome) {
-    path = path.replace(os.homedir(), "~");
-    hud = hud.replace(os.homedir(), "~");
-  }
-
+  const formatted = paths.map((path) => formatHomePath(path, useTildeForHome, os.homedir()));
+  const path = formatted.join(multiPathSeparator);
   await Clipboard.copy(path);
-  await showSuccessHUD(hud);
-  await customUpdateCommandMetadata(path.replace(os.homedir(), "~"));
+  await showSuccessHUD(formatPathHUD(formatted, "📂", showHudEmoji !== false));
+  await customUpdateCommandMetadata(
+    paths.map((path) => formatHomePath(path, true, os.homedir())).join(multiPathSeparator),
+  );
   return path;
 };
 
 export const copyFinderPath = async () => {
-  const { useTildeForHome } = await getPreferenceValues();
-  // get finder path
+  const { useTildeForHome } = getPreferenceValues();
   try {
-    const fileSystemItems = await getSelectedFinderItems();
-    let copyPathResult;
-    if (fileSystemItems.length === 0) {
-      copyPathResult = await copyFinderCurWindowPath();
-    } else {
-      copyPathResult = await copyFinerFilesPath(fileSystemItems);
-    }
-    if (useTildeForHome) {
-      copyPathResult.path = copyPathResult.path.replace(os.homedir(), "~");
-      copyPathResult.hud = copyPathResult.hud.replace(os.homedir(), "~");
-    }
-    await Clipboard.copy(copyPathResult.path);
-    await showSuccessHUD(copyPathResult.hud);
-    await customUpdateCommandMetadata(copyPathResult.path.replace(os.homedir(), "~"));
+    const items = await getSelectedFinderItems();
+    const paths = items.length ? items.map((item) => item.path) : [await getFocusFinderPath()];
+    const formatted = paths.map((path) => formatHomePath(path, useTildeForHome, os.homedir()));
+    const content = formatted.join(multiPathSeparator);
+    await Clipboard.copy(content);
+    await showSuccessHUD(formatPathHUD(formatted, items.length ? "📄" : "📂", showHudEmoji !== false));
+    await customUpdateCommandMetadata(
+      paths.map((path) => formatHomePath(path, true, os.homedir())).join(multiPathSeparator),
+    );
   } catch (e) {
     console.error(String(e));
   }
+};
+
+export const copySelectedPickerPath = async (app: Application) => {
+  const paths = await getSelectedPickerPaths(app);
+  if (paths.length === 0) return false;
+  const { useTildeForHome } = getPreferenceValues();
+  const formatted = paths.map((path) => formatHomePath(path, useTildeForHome, os.homedir()));
+  const content = formatted.join(multiPathSeparator);
+  await Clipboard.copy(content);
+  await showSuccessHUD(formatPathHUD(formatted, "📄", showHudEmoji !== false));
+  await customUpdateCommandMetadata(content);
+  return true;
 };
 
 export const copyWindowPath = async (app: Application) => {
@@ -130,7 +121,7 @@ export const copyWindowPath = async (app: Application) => {
   }
   if (!isEmpty(path)) {
     await Clipboard.copy(path);
-    await showSuccessHUD("📂 " + path);
+    await showSuccessHUD(formatPathHUD([path], "📂", showHudEmoji !== false));
     await customUpdateCommandMetadata(path);
   }
   return path;
@@ -185,7 +176,7 @@ export const copyUnSupportedAppContent = async (app: Application) => {
   }
   if (shouldCopy) {
     await Clipboard.copy(copyContent);
-    await showSuccessHUD(hudIcon + copyContent);
+    await showSuccessHUD((showHudEmoji !== false ? hudIcon : "") + copyContent);
     await customUpdateCommandMetadata(copyContent);
   } else {
     await showFailureHUD({ title: "Nothing to Copy", style: Toast.Style.Failure });
@@ -222,7 +213,7 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
       if (shouldCopy) {
         await Clipboard.copy(copyContent);
       }
-      await showSuccessHUD("🔗 " + copyContent);
+      await showSuccessHUD((showHudEmoji !== false ? "🔗 " : "") + copyContent);
       await customUpdateCommandMetadata(new URL(url).hostname);
       return url;
     } catch (e) {

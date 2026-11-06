@@ -1,4 +1,5 @@
 import * as dns from "dns";
+import { isIP } from "node:net";
 import * as tls from "tls";
 import { promisify } from "util";
 import { DNSData, DNSRecordKind } from "../types";
@@ -149,12 +150,13 @@ export interface CertificateInfo {
 }
 
 export async function getTLSCertificateInfo(hostname: string, port = LIMITS.TLS_PORT): Promise<CertificateInfo | null> {
+  const host = hostname.replace(/^\[|\]$/g, "");
   return new Promise((resolve, reject) => {
     const socket = tls.connect(
       {
-        host: hostname,
+        host,
         port,
-        servername: hostname,
+        servername: isIP(host) ? undefined : host,
         rejectUnauthorized: false,
       },
       () => {

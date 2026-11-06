@@ -336,7 +336,8 @@
     "verify-runner": "node -e \"const f=require('fs'),p=require('path'),c=require('crypto');const a=p.join('assets','raycast-downloader-runner.js'),b=p.join('node_modules','@chrismessina','raycast-downloader','dist','runner.bundle.js');const h=x=>{if(!f.existsSync(x))throw new Error('Missing '+x+' \\u2014 run npm install, then npm run copy-runner.');return c.createHash('sha256').update(f.readFileSync(x)).digest('hex')};const A=h(a),B=h(b);if(A!==B){console.error('Runner asset is STALE \\u2014 it does not match the installed package.\\\\n  asset : '+A+'\\\\n  bundle: '+B+'\\\\nRun: npm run copy-runner');process.exit(1)}console.log('runner asset matches the installed bundle ('+A.slice(0,12)+')')\""
   },
   "contributors": [
-    "chrismessina"
+    "chrismessina",
+    "alexi.build"
   ],
   "platforms": [
     "macOS"

@@ -1,9 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { logOperationalEvent } from "../logger";
+import { logOperationalError, logOperationalEvent } from "../logger";
 
 describe("logOperationalEvent", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("does not log Ondine source-bearing errors or snippets", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    logOperationalError("failed", new Error("secret source"), {
+      renderer: "ondine",
+      message: "secret source",
+      reason: "secret source",
+      snippet: "secret source",
+    });
+    expect(consoleError.mock.calls[0][1]).toEqual({ renderer: "ondine", failureClass: "ondine-render-failed" });
+    expect(JSON.stringify(consoleError.mock.calls)).not.toContain("secret source");
   });
 
   it("drops Mermaid payload fields from logged metadata", () => {

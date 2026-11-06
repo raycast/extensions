@@ -14,6 +14,7 @@ import {
   getPreferenceValues,
   getSelectedFinderItems,
   launchCommand,
+  Keyboard,
 } from "@raycast/api";
 import {
   showFailureToast,
@@ -33,11 +34,13 @@ import {
   removeRecent,
 } from "./recents";
 import {
+  canonicalCwd,
   directoryExists,
   fetchServers,
   findProjectRoot,
   isShopifyAppRoot,
   isShopifyThemeRoot,
+  missingDependencies,
 } from "./servers";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
@@ -266,6 +269,8 @@ async function chooseFolderAndStart(options: {
 interface RowProps {
   recent: RecentProject;
   framework?: string;
+  // No node_modules: starting will offer to install first.
+  needsInstall: boolean;
   terminalApp: Application;
   editorApp?: Application;
   autoOpen: boolean;
@@ -275,6 +280,7 @@ interface RowProps {
 function RecentRow({
   recent,
   framework,
+  needsInstall,
   terminalApp,
   editorApp,
   autoOpen,
@@ -302,6 +308,17 @@ function RecentRow({
   }
 
   const accessories: List.Item.Accessory[] = [
+    // Said here, before the start, so a project whose node_modules was
+    // cleaned away is not a surprise: starting it asks to install first.
+    ...(needsInstall
+      ? [
+          {
+            tag: { value: "Not installed", color: Color.Orange },
+            tooltip:
+              "No node_modules folder. Starting will offer to install dependencies first.",
+          },
+        ]
+      : []),
     {
       text: formatLastSeen(recent.lastSeen),
       tooltip: `Last seen ${new Date(recent.lastSeen).toLocaleString()}`,
@@ -346,7 +363,7 @@ function RecentRow({
                 icon={Icon.Code}
                 target={recent.cwd}
                 application={editorApp}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
               />
             )}
             <Action.Open
@@ -487,7 +504,10 @@ function PickerView({
 
   const runningByCwd = useMemo(() => {
     const m = new Map<string, DevServer>();
-    for (const s of running) m.set(s.cwd, s);
+    // Canonical on both sides: recents are stored canonical, and a server's
+    // cwd is whatever lsof reported, so a symlinked path would otherwise keep
+    // a running project in the list of things to start.
+    for (const s of running) m.set(canonicalCwd(s.cwd), s);
     return m;
   }, [running]);
 
@@ -514,6 +534,19 @@ function PickerView({
     { keepPreviousData: true, initialData: {} },
   );
 
+  // Which recents have no installed dependencies. Off the render path for the
+  // same reason as the framework tags: it reads each package.json.
+  const { data: needsInstallList } = useCachedPromise(
+    async (cwds: string[]): Promise<string[]> =>
+      cwds.filter((cwd) => missingDependencies(cwd) !== null),
+    [recentCwds],
+    { keepPreviousData: true, initialData: [] },
+  );
+  const needsInstall = useMemo(
+    () => new Set(needsInstallList),
+    [needsInstallList],
+  );
+
   // Hide entries that are currently running (the dashboard owns them) or
   // whose folder no longer exists on disk. We keep them in storage so a
   // remounted external drive or stopped server reappears.
@@ -528,7 +561,9 @@ function PickerView({
   // favors no flash over shaving microseconds.
   const visible = useMemo(() => {
     return (recents ?? [])
-      .filter((r) => !runningByCwd.has(r.cwd) && directoryExists(r.cwd))
+      .filter(
+        (r) => !runningByCwd.has(canonicalCwd(r.cwd)) && directoryExists(r.cwd),
+      )
       .sort((a, b) => b.lastSeen - a.lastSeen);
   }, [recents, runningByCwd]);
 
@@ -584,6 +619,7 @@ function PickerView({
               key={r.cwd}
               recent={r}
               framework={frameworkByCwd[r.cwd]}
+              needsInstall={needsInstall.has(r.cwd)}
               terminalApp={terminalApp}
               editorApp={editorApp}
               autoOpen={autoOpen}

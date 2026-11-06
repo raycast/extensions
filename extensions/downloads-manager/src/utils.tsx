@@ -13,24 +13,11 @@ import {
   trash,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import {
-  accessSync,
-  closeSync,
-  constants,
-  existsSync,
-  mkdtempSync,
-  openSync,
-  opendirSync,
-  readdirSync,
-  readFileSync,
-  readSync,
-  rmSync,
-  statSync,
-} from "fs";
+import { accessSync, closeSync, constants, existsSync, openSync, opendirSync, readSync, statSync } from "fs";
 import { rm } from "fs/promises";
 import { join } from "path";
 import { execFile, execSync } from "child_process";
-import { homedir, tmpdir } from "os";
+import { homedir } from "os";
 import { ComponentType } from "react";
 import untildify from "untildify";
 
@@ -577,83 +564,6 @@ export function getTextFilePreview(filePath: string): string {
       closeSync(descriptor);
     }
   }
-}
-
-const PREVIEW_THUMBNAIL_SIZE = 512;
-
-export function getQuickLookPreviewDataUrl(filePath: string): Promise<string | null> {
-  return new Promise((resolve) => {
-    if (process.platform !== "darwin") {
-      resolve(null);
-      return;
-    }
-
-    const TIMEOUT_MS = 1000;
-
-    let tempDir: string | null = null;
-    let resolved = false;
-
-    const resolveOnce = (value: string | null) => {
-      if (!resolved) {
-        resolved = true;
-        resolve(value);
-      }
-    };
-
-    const cleanup = () => {
-      if (tempDir) {
-        try {
-          rmSync(tempDir, { recursive: true });
-        } catch {
-          // ignore cleanup errors
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      console.warn(`Quick Look preview timed out for '${filePath}'`);
-      cleanup();
-      resolveOnce(null);
-    }, TIMEOUT_MS);
-
-    try {
-      tempDir = mkdtempSync(join(tmpdir(), "raycast-ql-preview-"));
-      execFile(
-        "qlmanage",
-        ["-t", "-s", String(PREVIEW_THUMBNAIL_SIZE), "-o", tempDir, filePath],
-        (error, _stdout, stderr) => {
-          try {
-            if (error || stderr) {
-              resolveOnce(null);
-              return;
-            }
-
-            const files = readdirSync(tempDir!);
-            const png = files.find((f) => f.endsWith(".png"));
-
-            if (!png) {
-              resolveOnce(null);
-              return;
-            }
-
-            const buffer = readFileSync(join(tempDir!, png));
-            resolveOnce(`data:image/png;base64,${buffer.toString("base64")}`);
-          } catch (err) {
-            console.warn(`Error generating Quick Look preview for '${filePath}':`, err);
-            resolveOnce(null);
-          } finally {
-            clearTimeout(timeoutId);
-            cleanup();
-          }
-        },
-      );
-    } catch (err) {
-      console.warn(`Error starting Quick Look for '${filePath}':`, err);
-      clearTimeout(timeoutId);
-      cleanup();
-      resolveOnce(null);
-    }
-  });
 }
 
 export function formatFileSize(bytes: number): string {

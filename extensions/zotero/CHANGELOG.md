@@ -1,9 +1,14 @@
 # Zotero Changelog
 
-## [Custom CSL Styles and Note Output] - 2026-11-06
+## [Custom CSL Styles and Note Output] - {PR_MERGE_DATE}
 
 - Added an optional custom CSL file source and an explicit Note output option for note-based styles. Existing installations continue to use the selected installed style and bibliography output.
 - Custom styles can use bundled Simplified Chinese and Japanese locale data for dates and terms, while retaining their own locale overrides.
+
+## [Resolve Relative Linked PDFs] - 2026-11-06
+
+- Resolve `attachments:` paths using the linked attachment base directory of the matching Zotero profile, for both primary and secondary PDFs
+- Leave relative links unresolved when no unambiguous matching profile is available, instead of opening a path from another data directory
 
 ## [Fix Reference Export] - 2026-10-24
 
