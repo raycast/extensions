@@ -1,6 +1,6 @@
 # cmarks Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Search Markdown Files: search every file in your cmarks workspaces and open it in cmarks.
 - Open Recent File: reopen files you read recently.
