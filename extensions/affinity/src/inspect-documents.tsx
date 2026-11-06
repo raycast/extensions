@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, List, Keyboard } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 import { inspectDocuments } from "./lib/mcp";
-import { DocumentInfo, escapeMarkdown, Inspection } from "./lib/inspector";
+import { DocumentInfo, escapeMarkdown } from "./lib/inspector";
 
 function Layers({ document }: { document: DocumentInfo }) {
   return (
@@ -34,29 +35,17 @@ function Layers({ document }: { document: DocumentInfo }) {
 }
 
 export default function InspectDocuments() {
-  const [data, setData] = useState<Inspection>();
-  const [error, setError] = useState<string>();
-  const [loading, setLoading] = useState(true);
-  const [revision, setRevision] = useState(0);
-  const refresh = () => setRevision((value) => value + 1);
-  useEffect(() => {
-    const controller = new AbortController();
-    setLoading(true);
-    setData(undefined);
-    setError(undefined);
-    void inspectDocuments(controller.signal)
-      .then((result) => {
-        if (!controller.signal.aborted) setData(result);
-      })
-      .catch((cause: unknown) => {
-        if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : String(cause));
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [revision]);
-
+  const abortable = useRef<AbortController>(null);
+  const {
+    data,
+    error: failure,
+    isLoading: loading,
+    revalidate: refresh,
+  } = usePromise(() => inspectDocuments(abortable.current?.signal ?? new AbortController().signal), [], {
+    abortable,
+    onError: () => undefined,
+  });
+  const error = failure?.message;
   if (error) {
     return (
       <Detail

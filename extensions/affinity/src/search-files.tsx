@@ -19,46 +19,75 @@ const KIND: Record<string, string> = {
 type AffinityFile = { path: string; name: string; folder: string; kind: string; modified: Date };
 
 // Spotlight query by file extension. No shell is involved.
-async function findFiles(): Promise<AffinityFile[]> {
+const LIMIT = 500;
+
+async function findFiles(): Promise<{ files: AffinityFile[]; truncated: boolean; total: number }> {
   const query = EXTENSIONS.map((ext) => `kMDItemFSName == "*.${ext}"c`).join(" || ");
-  const { stdout } = await run("/usr/bin/mdfind", [query], { maxBuffer: 8_000_000, timeout: 15_000 });
+  const { stdout } = await run("/usr/bin/mdfind", ["-0", query], { maxBuffer: 8_000_000, timeout: 15_000 });
+  const paths = stdout.split("\0").filter((path) => path && !path.includes("/.Trash/"));
   const files = await Promise.all(
-    stdout
-      .split("\n")
-      .filter((line) => line && !line.includes("/.Trash/"))
-      .slice(0, 500)
-      .map(async (path) => {
-        try {
-          const info = await stat(path);
-          const ext = extname(path).slice(1).toLowerCase();
-          return {
-            path,
-            name: basename(path),
-            folder: dirname(path),
-            kind: KIND[ext] ?? "Affinity",
-            modified: info.mtime,
-          };
-        } catch {
-          return undefined;
-        }
-      }),
+    paths.slice(0, LIMIT).map(async (path) => {
+      try {
+        const info = await stat(path);
+        const ext = extname(path).slice(1).toLowerCase();
+        return {
+          path,
+          name: basename(path),
+          folder: dirname(path),
+          kind: KIND[ext] ?? "Affinity",
+          modified: info.mtime,
+        };
+      } catch {
+        return undefined;
+      }
+    }),
   );
-  return files
-    .filter((file): file is AffinityFile => Boolean(file))
-    .sort((a, b) => b.modified.getTime() - a.modified.getTime());
+  return {
+    files: files
+      .filter((file): file is AffinityFile => Boolean(file))
+      .sort((a, b) => b.modified.getTime() - a.modified.getTime()),
+    truncated: paths.length > LIMIT,
+    total: paths.length,
+  };
 }
 
 export default function SearchFiles() {
-  const { data = [], isLoading, revalidate } = usePromise(findFiles);
+  const { data, error, isLoading, revalidate } = usePromise(findFiles);
   const home = homedir();
+  const refresh = (
+    <Action
+      title="Refresh"
+      icon={Icon.ArrowClockwise}
+      onAction={revalidate}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+    />
+  );
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Affinity files…">
-      <List.EmptyView
-        icon={Icon.Document}
-        title="No Affinity files found"
-        description="Spotlight has no .af, .afdesign, .afphoto or .afpub files indexed."
-      />
-      {data.map((file) => (
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't search Spotlight"
+          description={error.message}
+          actions={<ActionPanel>{refresh}</ActionPanel>}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Document}
+          title="No Affinity files found"
+          description="Spotlight has no .af, .afdesign, .afphoto or .afpub files indexed."
+          actions={<ActionPanel>{refresh}</ActionPanel>}
+        />
+      )}
+      {data?.truncated ? (
+        <List.Item
+          icon={Icon.Info}
+          title={`Showing ${LIMIT} of ${data.total} Spotlight matches`}
+          subtitle="Other files are not searched here; open them from Finder or Affinity"
+          actions={<ActionPanel>{refresh}</ActionPanel>}
+        />
+      ) : null}
+      {data?.files.map((file) => (
         <List.Item
           key={file.path}
           title={file.name.replace(/\.[^.]+$/, "")}
@@ -80,12 +109,7 @@ export default function SearchFiles() {
                 content={file.path}
                 shortcut={Keyboard.Shortcut.Common.CopyPath}
               />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={revalidate}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-              />
+              {refresh}
             </ActionPanel>
           }
         />

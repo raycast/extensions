@@ -22,17 +22,6 @@ Layer lists include the document’s spread and group nodes. To keep large files
 
 Affinity’s scripting SDK is in beta.
 
-## Development
-
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run dev
-```
-
 ## Sources
 
 - [Affinity’s official automation announcement](https://www.affinity.studio/blog/affinity-automation-scripting-claude)
