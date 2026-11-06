@@ -1,6 +1,10 @@
 export interface LaunchConfig {
   name: string;
-  windows: { tabs: { title?: string; color?: string; layout: PaneConfig }[] }[];
+  windows: {
+    /** Explicit true/false always creates a fresh window/tab; omitted preserves existing behavior. */
+    open_in_new_window?: boolean;
+    tabs: { title?: string; color?: string; layout: PaneConfig }[];
+  }[];
 }
 
 export interface PaneConfig {
@@ -33,6 +37,7 @@ export interface WorkspaceLayout {
   description?: string;
   windowTitle?: string;
   openInNewWindow?: boolean;
+  reuseExisting?: boolean;
   tabs: LayoutTab[];
 }
 

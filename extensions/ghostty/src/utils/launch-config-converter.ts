@@ -40,7 +40,8 @@ export function launchConfigToWorkspaceLayouts(
         id: `${config.name}-window-${windowIndex}`,
         title: config.name,
         windowTitle: getDirectoryName(directory),
-        openInNewWindow: windowIndex > 0,
+        openInNewWindow: window.open_in_new_window ?? windowIndex > 0,
+        reuseExisting: window.open_in_new_window === undefined,
         tabs,
       },
     };

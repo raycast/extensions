@@ -1,5 +1,11 @@
 # Ghostty Changelog
 
+## [Configure launch window behavior] - {PR_MERGE_DATE}
+
+- Add `windows[].open_in_new_window` to launch configurations: explicitly create a fresh window or fresh tabs, including when a matching session exists.
+- Preserve existing session reuse and window defaults when the option is omitted.
+- Support the same option when launching a configuration from the Git repository list, and validate boolean values.
+
 ## [Fix new window opening on the wrong workspace] - 2026-09-10
 
 - Fixed "New Window" activating an existing window before creating the new one, which caused window managers (OmniWM, yabai, aerospace, etc.) to switch to the workspace of the existing window. The new window now opens on the current workspace.

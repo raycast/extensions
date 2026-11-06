@@ -11,7 +11,8 @@
     "degouville",
     "mathisfoxius",
     "joaogf.dev",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "zhouyuwei"
   ],
   "platforms": [
     "macOS"
@@ -194,6 +195,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "test": "tsc -p tsconfig.tests.json && node --test tests/*.test.cjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
