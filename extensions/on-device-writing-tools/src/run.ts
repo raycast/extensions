@@ -43,11 +43,15 @@ export async function transform(instructions: string, { keepLanguage = true } = 
 
   // The model takes seconds: paste only if the user is still on the same app and selection.
   const after = await selectionTarget().catch(() => undefined);
-  if (after && after.bundleId === before.bundleId && after.text === before.text) {
-    await Clipboard.paste(result);
-    await showHUD("Done");
-  } else {
-    await Clipboard.copy(result);
-    await showHUD("Selection changed. Result copied to clipboard");
+  try {
+    if (after && after.bundleId === before.bundleId && after.text === before.text) {
+      await Clipboard.paste(result);
+      await showHUD("Done");
+    } else {
+      await Clipboard.copy(result);
+      await showHUD("Selection changed. Result copied to clipboard");
+    }
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not deliver result" });
   }
 }
