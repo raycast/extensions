@@ -1,4 +1,5 @@
-import { MenuBarExtra, Icon, open, openCommandPreferences } from "@raycast/api";
+import { MenuBarExtra, Icon, LaunchType, launchCommand, open, openCommandPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { Image } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { useDailyUsage } from "./hooks/useDailyUsage";
@@ -57,6 +58,11 @@ const MOCK_LIMITS_DATA = {
     },
   ],
 };
+
+const openUsage = () =>
+  launchCommand({ name: "ccusage", type: LaunchType.UserInitiated }).catch((error) =>
+    showFailureToast(error, { title: "Could Not Open Claude Usage Limits" }),
+  );
 
 export default function MenuBarccusage() {
   const [, forceRender] = useState(0);
@@ -260,9 +266,7 @@ export default function MenuBarccusage() {
                   subtitle="Open for details"
                   tooltip={limitsError.message}
                   icon={Icon.ExclamationMark}
-                  onAction={() =>
-                    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                  }
+                  onAction={openUsage}
                 />
               )}
               {effectiveLimitsData && (
@@ -304,9 +308,7 @@ export default function MenuBarccusage() {
                     : undefined
                 }
                 icon={Icon.Calendar}
-                onAction={() =>
-                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                }
+                onAction={openUsage}
               />
             </MenuBarExtra.Section>
           )}
@@ -321,9 +323,7 @@ export default function MenuBarccusage() {
                     : undefined
                 }
                 icon={Icon.Calendar}
-                onAction={() =>
-                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                }
+                onAction={openUsage}
               />
             </MenuBarExtra.Section>
           )}
@@ -333,9 +333,7 @@ export default function MenuBarccusage() {
               <MenuBarExtra.Item
                 title={formatUsageTitle(monthlyLoading, monthlyUsage, "No usage data available")}
                 icon={Icon.BarChart}
-                onAction={() =>
-                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                }
+                onAction={openUsage}
               />
             </MenuBarExtra.Section>
           )}
@@ -345,9 +343,7 @@ export default function MenuBarccusage() {
               <MenuBarExtra.Item
                 title={formatUsageTitle(totalLoading, totalUsage, "No usage data available")}
                 icon={Icon.Coins}
-                onAction={() =>
-                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                }
+                onAction={openUsage}
               />
             </MenuBarExtra.Section>
           )}
@@ -372,9 +368,7 @@ export default function MenuBarccusage() {
                   .filter(Boolean)
                   .join(" · ")}
                 icon={Icon.Gauge}
-                onAction={() =>
-                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                }
+                onAction={openUsage}
               />
             </MenuBarExtra.Section>
           )}
@@ -393,9 +387,7 @@ export default function MenuBarccusage() {
                   workingTime.yesterdayMs > 0 ? `vs yesterday: ${formatDuration(workingTime.yesterdayMs)}` : undefined
                 }
                 icon={Icon.Clock}
-                onAction={() =>
-                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
-                }
+                onAction={openUsage}
               />
             </MenuBarExtra.Section>
           )}

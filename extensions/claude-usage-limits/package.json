@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-usage-limits",
   "title": "Claude Usage Limits",
-  "description": "See Claude Code and Codex usage limits, reset times and cost at a glance. Reads from the free Brim app, so it never uses up your Anthropic rate limit.",
+  "description": "See Claude Code usage limits, reset times and cost at a glance. Reads from the free Brim app, so it never uses up your Anthropic rate limit.",
   "categories": [
     "Developer Tools"
   ],
@@ -79,7 +79,6 @@
         "ccusage",
         "claude",
         "claude code",
-        "codex",
         "usage",
         "limits",
         "rate limit",
@@ -449,7 +448,7 @@
     "instructions": "Analyze Claude Code usage statistics and costs. All cost values are in USD ($). When displaying costs, include the $ symbol. You can convert USD amounts to other currencies when requested (JPY, EUR, etc.).",
     "evals": [
       {
-        "input": "@ccusage What's my total cost?",
+        "input": "@claude-usage-limits What's my total cost?",
         "mocks": {
           "get-total-usage": {
             "totalCost": 2.45,
@@ -477,7 +476,7 @@
         ]
       },
       {
-        "input": "@ccusage Show me today's usage",
+        "input": "@claude-usage-limits Show me today's usage",
         "mocks": {
           "get-daily-usage": {
             "cost": 0.65,
@@ -494,7 +493,7 @@
         ]
       },
       {
-        "input": "@ccusage Show me this month's breakdown",
+        "input": "@claude-usage-limits Show me this month's breakdown",
         "mocks": {
           "get-monthly-usage": {
             "month": "2024-01",
@@ -522,7 +521,7 @@
         ]
       },
       {
-        "input": "@ccusage Show me my recent sessions",
+        "input": "@claude-usage-limits Show me my recent sessions",
         "mocks": {
           "get-session-usage": {
             "sessions": [
@@ -548,7 +547,7 @@
         ]
       },
       {
-        "input": "@ccusage Which model costs me the most?",
+        "input": "@claude-usage-limits Which model costs me the most?",
         "mocks": {
           "get-total-usage": {
             "totalCost": 2.45,
@@ -583,7 +582,7 @@
         ]
       },
       {
-        "input": "@ccusage Convert my total cost to yen",
+        "input": "@claude-usage-limits Convert my total cost to yen",
         "mocks": {
           "get-total-usage": {
             "totalCost": 2.45,

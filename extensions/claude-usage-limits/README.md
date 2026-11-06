@@ -2,7 +2,7 @@
 
 See your Claude Code limits, reset times, tokens and cost in Raycast. Type `cc` to open it.
 
-Usage Limits comes first. It shows your 5-hour, 7-day and per-model limits as bars, with a tick for an even pace and an estimate of where you'll end up.
+Usage Limits comes first. It shows your 5-hour, 7-day and per-model limits with an estimate of where you'll end up.
 
 ## Setup
 
