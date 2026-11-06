@@ -1,10 +1,18 @@
-import { Color, Icon, MenuBarExtra, getPreferenceValues, open, openExtensionPreferences, showHUD } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { controlAndVerify, readOrControl } from "./lib/player";
+import { Color, Icon, MenuBarExtra, getPreferenceValues, openExtensionPreferences, showHUD } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { controlAndVerify, openBrainFm, readOrControl } from "./lib/player";
 import { explicitPlaybackAction, PlaybackAction } from "./lib/player-script";
 
+async function openPlayer() {
+  try {
+    await openBrainFm();
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't open Brain.fm" });
+  }
+}
+
 export default function BrainFmMenuBar() {
-  const { showTitle } = getPreferenceValues<{ showTitle?: boolean }>();
+  const { showTitle } = getPreferenceValues<Preferences.MenuBar>();
   const { data, isLoading, error, revalidate } = usePromise(() => readOrControl("status"));
 
   const playing = data?.state === "playing";
@@ -31,7 +39,7 @@ export default function BrainFmMenuBar() {
       {error ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item title="Brain.fm player not found" icon={Icon.Warning} />
-          <MenuBarExtra.Item title="Open Brain.fm" icon={Icon.Globe} onAction={() => open("https://my.brain.fm/")} />
+          <MenuBarExtra.Item title="Open Brain.fm" icon={Icon.Globe} onAction={openPlayer} />
           <MenuBarExtra.Item title="Choose Browser…" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </MenuBarExtra.Section>
       ) : data ? (
@@ -41,7 +49,7 @@ export default function BrainFmMenuBar() {
               title={data.title || "Brain.fm"}
               subtitle={[data.state, data.timer].filter(Boolean).join(" · ")}
               icon={Icon.Music}
-              onAction={() => open("https://my.brain.fm/")}
+              onAction={openPlayer}
             />
           </MenuBarExtra.Section>
           {data.state === "playing" || data.state === "paused" ? (

@@ -37,17 +37,6 @@ This is an unofficial UI integration. Brain.fm's player must be signed in, have 
 
 Track controls may report that verification is unavailable when Brain.fm selects a different variant with the same visible title. Verification stays pinned to the original browser and player tab; closing that tab cannot make another tab count as a successful result.
 
-## Development
-
-```sh
-npm install
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run dev
-```
-
 ## Sources
 
 - [Brain.fm web player](https://my.brain.fm/)

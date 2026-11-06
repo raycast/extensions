@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brain-fm",
   "title": "Brain.fm",
-  "description": "Control the Brain.fm web player and see the current track, timer, and browser media session.",
+  "description": "Control your signed-in Brain.fm player in a supported browser and see the current track, timer, and media session.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "license": "MIT",

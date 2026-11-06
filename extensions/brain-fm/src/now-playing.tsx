@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { controlAndVerify, readOrControl } from "./lib/player";
+import { controlAndVerify, openBrainFm, readOrControl } from "./lib/player";
 import { explicitPlaybackAction, PlaybackAction } from "./lib/player-script";
 
 const escape = (text: string) => text.replace(/[\\`*_{}[\]()#+.!<>|]/g, "\\$&");
@@ -49,14 +49,7 @@ export default function Command() {
                 icon={data.state === "playing" ? Icon.Pause : Icon.Play}
                 onAction={() => control(explicitPlaybackAction(data.state))}
               />
-              {data.canSkip ? (
-                <Action
-                  title="Skip Track"
-                  icon={Icon.Forward}
-                  shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-                  onAction={() => control("skip")}
-                />
-              ) : null}
+              {data.canSkip ? <Action title="Skip Track" icon={Icon.Forward} onAction={() => control("skip")} /> : null}
               {data.canPrevious ? (
                 <Action
                   title="Previous Track"
@@ -74,7 +67,13 @@ export default function Command() {
               shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={revalidate}
             />
-            <Action.OpenInBrowser title="Open Brain.fm" url="https://my.brain.fm/" />
+            <Action
+              title="Open Brain.fm"
+              icon={Icon.Globe}
+              onAction={() =>
+                openBrainFm().catch((error) => showFailureToast(error, { title: "Couldn't open Brain.fm" }))
+              }
+            />
             <Action title="Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel.Section>
         </ActionPanel>

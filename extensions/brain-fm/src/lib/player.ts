@@ -1,6 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import {
+  BROWSERS,
   buildBrowserScript,
   BrowserPlayerSnapshot,
   isSupportedBrowser,
@@ -12,9 +13,14 @@ import { buildPlayerScript, PlaybackAction, PlayerSnapshot } from "./player-scri
 import { controlWithReader } from "./verify-control";
 
 export function selectedBrowser(): SupportedBrowser {
-  const { browser } = getPreferenceValues<{ browser: string }>();
+  const { browser } = getPreferenceValues<Preferences>();
   if (!isSupportedBrowser(browser)) throw new Error("Choose your Brain.fm browser in extension preferences.");
   return browser;
+}
+
+/** Opens Brain.fm in the browser the extension controls, not the default browser. */
+export async function openBrainFm(): Promise<void> {
+  await open("https://my.brain.fm/", BROWSERS[selectedBrowser()].bundleId);
 }
 
 function friendlyBrowserError(error: unknown): Error {
