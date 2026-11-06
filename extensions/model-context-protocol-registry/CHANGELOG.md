@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agent Outbox MCP Server] - 2026-11-06
+
+- Add Agent Outbox to the official registry: your AI assistant posts to your Telegram private chat, groups and channels through a bot. Hosted Streamable HTTP server at https://outbox.roxinbox.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Video Dept. AI MCP Server] - 2026-11-06
 
 - Add Video Dept. AI to the official registry: plan a corporate or event video with VIDEO DEPT., a Fort Lauderdale studio: see posted prices, draft a script, send a brief and your brand guidelines, and book a free call with Nikita. Hosted Streamable HTTP server at https://agents.videodepartment.org/mcp, no sign-in.
