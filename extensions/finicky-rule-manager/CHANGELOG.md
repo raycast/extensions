@@ -1,6 +1,6 @@
 # Finicky Rule Manager Changelog
 
-## [Browser Detection and Reassign Browser] - {PR_MERGE_DATE}
+## [Browser Detection and Reassign Browser] - 2026-11-06
 
 - Detect every installed app that can open web links (Dia, Helium, Zen, beta and nightly builds, and more) instead of a fixed list
 - Keep a rule's browser selected when editing, even if that browser isn't detected, instead of silently switching to the first one
