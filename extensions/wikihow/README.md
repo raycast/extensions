@@ -13,7 +13,7 @@ This is an unofficial extension by **itsdanielsultan**. Search uses the supporte
 ## Setup
 
 1. Obtain a personal **Web Search API key** from the [Brave Search API dashboard](https://api-dashboard.search.brave.com/).
-2. Run **wikiHow → Search Articles** and choose **Set API Key**.
+2. Run **wikiHow → Search Articles** and choose **Add API Key**.
 3. Save the key in **Brave Search API Key** in extension preferences.
 4. Enter a topic such as `tie a tie`.
 
@@ -35,24 +35,9 @@ Searches are debounced. The extension requests up to 20 results per page, remove
 
 - Your query and API key are sent to `api.search.brave.com` over HTTPS; the key is sent in a header.
 - The API key is a Raycast password preference and is never included in article URLs or copied by an action.
-- Search results are held in memory for the current command. There is no persistent result cache, search history, article scraping, or AI tool.
+- Search results are cached locally by Raycast so repeat searches appear instantly. Up to 25 articles you open or preview are saved locally as **Recently Viewed** (title, link and search excerpt). Remove one with **Remove from Recent** or all with **Clear Recent Articles**. There is no article scraping or AI tool.
 - Opening an article is an explicit user action that uses the normal browser. Images and full article content are not fetched by the extension.
-- wikiHow’s [robots policy](https://www.wikihow.com/robots.txt) and the failed direct search endpoint were reviewed before choosing this supported search-provider route. Full article previews would require a supported licensed source from wikiHow.
-
-## Development
-
-Requires Node.js 22.22.2 or later and an installed Raycast app for live UI verification.
-
-```sh
-npm install
-npm run test
-npm run build
-npm run typecheck
-npm run lint
-npm run dev
-```
-
-`npm run test:live` checks the official endpoint’s response without credentials. The authenticated test is skipped unless `BRAVE_SEARCH_API_KEY` is set in the process environment. It does not print or save live excerpts or the key.
+- Results come from Brave Search rather than wikiHow directly, which respects wikiHow’s [robots policy](https://www.wikihow.com/robots.txt). Full article previews would require a supported licensed source from wikiHow.
 
 ## Sources
 
@@ -62,7 +47,6 @@ npm run dev
 - [Raycast Detail API](https://developers.raycast.com/api-reference/user-interface/detail)
 - [Existing Wikipedia extension source used as interaction reference](https://github.com/raycast/extensions/tree/main/extensions/wikipedia)
 
-The Raycast extension tree was inspected on October 10, 2026: 3,402 extension directories, no existing wikiHow-named package. The Wikipedia package covers Wikipedia’s API and is a useful search/preview reference; this package serves wikiHow discovery through a different supported integration.
 
 ## License
 

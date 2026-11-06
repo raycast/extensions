@@ -49,6 +49,7 @@
       "name": "braveApiKey",
       "type": "password",
       "title": "Brave Search API Key",
+      "placeholder": "Enter Your Brave Search API Key",
       "description": "A personal key for the Brave Web Search API. Create one at api-dashboard.search.brave.com. Search requests use your API allowance.",
       "required": false
     }
@@ -63,7 +64,8 @@
     "test:live": "vitest run tests/live-check.test.ts"
   },
   "dependencies": {
-    "@raycast/api": "^2.7.3"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

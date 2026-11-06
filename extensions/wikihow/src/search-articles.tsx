@@ -1,6 +1,8 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Detail,
   Icon,
   Keyboard,
@@ -9,8 +11,8 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
 } from "@raycast/api";
-import { LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useLocalStorage } from "@raycast/utils";
+import { useState } from "react";
 import { useArticleSearch } from "./hooks/use-article-search";
 import { articleMarkdown, WikiHowArticle } from "./lib/wikihow";
 
@@ -21,36 +23,33 @@ function siteSearchUrl(query: string): string {
   return `https://www.wikihow.com/wikiHowTo?search=${encodeURIComponent(query.trim())}`;
 }
 
-async function readRecent(): Promise<WikiHowArticle[]> {
-  try {
-    const raw = await LocalStorage.getItem<string>(RECENT_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as WikiHowArticle[]).filter((a) => a && a.url && a.title) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function rememberArticle(article: WikiHowArticle): Promise<void> {
-  const recent = (await readRecent()).filter((item) => item.url !== article.url);
-  await LocalStorage.setItem(RECENT_KEY, JSON.stringify([article, ...recent].slice(0, MAX_RECENT)));
+function isArticle(value: unknown): value is WikiHowArticle {
+  const article = value as WikiHowArticle | undefined;
+  return Boolean(article && article.url && article.title);
 }
 
 function useRecent() {
-  const [recent, setRecent] = useState<WikiHowArticle[]>([]);
-  const reload = () => void readRecent().then(setRecent);
-  useEffect(reload, []);
+  const { value, setValue, removeValue } = useLocalStorage<WikiHowArticle[]>(RECENT_KEY, []);
+  const recent = Array.isArray(value) ? value.filter(isArticle) : [];
   return {
     recent,
-    remember: (article: WikiHowArticle) => void rememberArticle(article).then(reload),
+    remember: (article: WikiHowArticle) =>
+      void setValue([article, ...recent.filter((item) => item.url !== article.url)].slice(0, MAX_RECENT)),
     forget: async (article: WikiHowArticle) => {
-      const next = (await readRecent()).filter((item) => item.url !== article.url);
-      await LocalStorage.setItem(RECENT_KEY, JSON.stringify(next));
-      reload();
+      const confirmed = await confirmAlert({
+        title: "Remove from Recent?",
+        message: `“${article.title}” will be removed from Recently Viewed.`,
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+      });
+      if (confirmed) await setValue(recent.filter((item) => item.url !== article.url));
     },
     clear: async () => {
-      await LocalStorage.removeItem(RECENT_KEY);
-      reload();
+      const confirmed = await confirmAlert({
+        title: "Clear Recent Articles?",
+        message: "All Recently Viewed articles will be removed. This cannot be undone.",
+        primaryAction: { title: "Clear", style: Alert.ActionStyle.Destructive },
+      });
+      if (confirmed) await removeValue();
     },
   };
 }
@@ -59,11 +58,7 @@ function ArticleActions({ article }: { article: WikiHowArticle }) {
   return (
     <ActionPanel>
       <Action.OpenInBrowser title="Open on WikiHow" url={article.url} />
-      <Action.CopyToClipboard
-        title="Copy Article Link"
-        content={article.url}
-        shortcut={Keyboard.Shortcut.Common.Copy}
-      />
+      <Action.CopyToClipboard title="Copy Article Link" content={article.url} />
     </ActionPanel>
   );
 }
@@ -87,12 +82,12 @@ export function Setup() {
         "## Set up search",
         "1. Create a personal **Web Search API key** in the [Brave API dashboard](https://api-dashboard.search.brave.com/).",
         "2. Add it to **Brave Search API Key** in this extension’s preferences.",
-        "Your searches use your Brave API allowance. Your query and API key are sent to Brave. Results stay in memory while this command is open.",
+        "Your searches use your Brave API allowance. Your query and API key are sent to Brave.",
         "This is an unofficial wikiHow extension. Previews contain search excerpts; they are not full articles.",
       ].join("\n\n")}
       actions={
         <ActionPanel>
-          <Action title="Set API Key" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          <Action title="Add API Key" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.OpenInBrowser title="Open Brave API Dashboard" url="https://api-dashboard.search.brave.com/" />
         </ActionPanel>
       }
@@ -215,7 +210,6 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
 
   return (
     <List
-      navigationTitle="Search wikiHow Articles"
       searchBarPlaceholder="How to…"
       searchText={query}
       filtering={false}
