@@ -65,16 +65,21 @@ export function QueryForm({ query, draft }: Props) {
       },
     },
     async onSubmit(values) {
-      await saveQuery(
-        {
-          name: values.name.trim(),
-          query: values.query,
-          environmentId: values.environmentId || undefined,
-          icon: values.icon,
-          iconColor: values.iconColor,
-        },
-        query?.id,
-      );
+      try {
+        await saveQuery(
+          {
+            name: values.name.trim(),
+            query: values.query,
+            environmentId: values.environmentId || undefined,
+            icon: values.icon,
+            iconColor: values.iconColor,
+          },
+          query?.id,
+        );
+      } catch (error) {
+        await showFailureToast(error, { title: query ? "Could not update query" : "Could not create query" });
+        return false;
+      }
       await showToast({ style: Toast.Style.Success, title: query ? "Query updated" : "Query created" });
       pop();
     },

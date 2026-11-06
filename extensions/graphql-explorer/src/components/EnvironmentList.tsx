@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { testConnection } from "../lib/connection";
 import { clearSchemaCache } from "../lib/schema";
 import { Shortcuts } from "../lib/shortcuts";
@@ -20,12 +21,22 @@ export function EnvironmentList() {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    await deleteEnvironment(env.id);
+    try {
+      await deleteEnvironment(env.id);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not delete environment" });
+      return;
+    }
     await showToast({ style: Toast.Style.Success, title: "Environment deleted" });
   }
 
   async function handleClearSchema(env: GraphQLEnvironment) {
-    await clearSchemaCache(env);
+    try {
+      await clearSchemaCache(env);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not clear schema cache" });
+      return;
+    }
     await showToast({
       style: Toast.Style.Success,
       title: "Schema cache cleared",

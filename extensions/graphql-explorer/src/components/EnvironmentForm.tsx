@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { testConnection } from "../lib/connection";
@@ -97,10 +97,18 @@ export function EnvironmentForm({ environment, draft, onSaved }: Props) {
         await showToast({ style: Toast.Style.Failure, title: "Fix the highlighted headers" });
         return false;
       }
-      const saved = await saveEnvironment(
-        { name: values.name.trim(), url: values.url.trim(), headers: rowsToHeaders(rows) },
-        environment?.id,
-      );
+      let saved: GraphQLEnvironment;
+      try {
+        saved = await saveEnvironment(
+          { name: values.name.trim(), url: values.url.trim(), headers: rowsToHeaders(rows) },
+          environment?.id,
+        );
+      } catch (error) {
+        await showFailureToast(error, {
+          title: environment ? "Could not update environment" : "Could not create environment",
+        });
+        return false;
+      }
       await showToast({
         style: Toast.Style.Success,
         title: environment ? "Environment updated" : "Environment created",

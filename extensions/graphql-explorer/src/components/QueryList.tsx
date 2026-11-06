@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFrecencySorting } from "@raycast/utils";
+import { showFailureToast, useCachedState, useFrecencySorting } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { analyzeDocument, DocumentInfo, operationLabel, OperationType } from "../lib/document";
 import { faIcon } from "../lib/icons";
@@ -53,7 +53,13 @@ export function QueryList() {
   }
 
   async function handleDuplicate(query: SavedQuery) {
-    const copy = await duplicateQuery(query.id);
+    let copy: SavedQuery | undefined;
+    try {
+      copy = await duplicateQuery(query.id);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not duplicate query" });
+      return;
+    }
     if (copy) await showToast({ style: Toast.Style.Success, title: "Query duplicated", message: copy.name });
   }
 
@@ -65,7 +71,12 @@ export function QueryList() {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    await deleteQuery(query.id);
+    try {
+      await deleteQuery(query.id);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not delete query" });
+      return;
+    }
     await showToast({ style: Toast.Style.Success, title: "Query deleted" });
   }
 

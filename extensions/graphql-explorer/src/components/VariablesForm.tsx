@@ -1,15 +1,17 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 import { analyzeDocument, operationLabel } from "../lib/document";
 import { clearSchemaCache, loadSchema } from "../lib/schema";
 import { Shortcuts } from "../lib/shortcuts";
 import { getSavedVariables, setSavedVariables, useStore } from "../lib/store";
-import { RawVariableValues } from "../lib/types";
+import { RawValue, RawVariableValues } from "../lib/types";
 import {
+  allowsEmptyString,
   buildVariables,
   convertRawValue,
   initialRawValue,
+  isCompatible,
   NOT_SET,
   prettyJson,
   usesCheckbox,
@@ -21,16 +23,6 @@ import { ResultView } from "./ResultView";
 interface Props {
   queryId: string;
   environmentId: string;
-}
-
-/** Whether a raw value can be shown by the field that `spec` renders (kinds may change once the schema loads). */
-function isCompatible(spec: VariableSpec, value: string | boolean | undefined): boolean {
-  if (value === undefined) return false;
-  if (usesCheckbox(spec)) return typeof value === "boolean";
-  if (typeof value !== "string") return false;
-  if (spec.kind === "enum") return (value === NOT_SET && !spec.nonNull) || Boolean(spec.enumValues?.includes(value));
-  if (spec.kind === "boolean") return [NOT_SET, "true", "false"].includes(value);
-  return true;
 }
 
 function fieldInfo(spec: VariableSpec): string {
@@ -65,6 +57,8 @@ export function VariablesForm({ queryId, environmentId }: Props) {
   const operation = operations.find((item) => item.name === operationName) ?? operations[0];
   const specs = useMemo(() => operation?.variables ?? [], [operation]);
   const ready = schemaResult !== undefined && saved !== undefined;
+  // The effect below has given every variable a value, so all fields are shown and hold the remembered inputs.
+  const initialized = ready && specs.every((spec) => values[spec.name] !== undefined);
 
   // Fill in values for fields that are new or whose kind changed (e.g. after the schema was loaded).
   useEffect(() => {
@@ -82,7 +76,7 @@ export function VariablesForm({ queryId, environmentId }: Props) {
     });
   }, [ready, specs, saved]);
 
-  function updateValue(spec: VariableSpec, value: string | boolean) {
+  function updateValue(spec: VariableSpec, value: RawValue) {
     setValues((previous) => ({ ...previous, [spec.name]: value }));
     // Validate JSON while typing; for other fields only clear an error once it is fixed.
     const empty = typeof value === "string" && value.trim() === "";
@@ -101,6 +95,11 @@ export function VariablesForm({ queryId, environmentId }: Props) {
 
   async function handleRun() {
     if (!query || !env || !operation) return;
+    if (!initialized) {
+      // Running now would skip the remembered values, and saving would replace them with an empty set.
+      await showToast({ style: Toast.Style.Failure, title: "Variables are still loading" });
+      return;
+    }
     const result = buildVariables(specs, values);
     setErrors(result.errors);
     const invalid = Object.keys(result.errors);
@@ -111,7 +110,12 @@ export function VariablesForm({ queryId, environmentId }: Props) {
       });
       return;
     }
-    await setSavedVariables(query.id, { ...saved, ...values });
+    try {
+      await setSavedVariables(query.id, { ...saved, ...values });
+    } catch (error) {
+      // Remembering the values is a convenience: report the failure, but still run the query.
+      await showFailureToast(error, { title: "Could not save variable values" });
+    }
     push(
       <ResultView
         title={query.name}
@@ -144,7 +148,12 @@ export function VariablesForm({ queryId, environmentId }: Props) {
 
   async function handleReloadSchema() {
     if (!env) return;
-    await clearSchemaCache(env);
+    try {
+      await clearSchemaCache(env);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not reload schema" });
+      return;
+    }
     refetchSchema();
   }
 
@@ -240,9 +249,9 @@ export function VariablesForm({ queryId, environmentId }: Props) {
 
 interface FieldProps {
   spec: VariableSpec;
-  value: string | boolean;
+  value: RawValue;
   error?: string;
-  onChange: (value: string | boolean) => void;
+  onChange: (value: RawValue) => void;
 }
 
 function VariableField({ spec, value, error, onChange }: FieldProps): ReactElement {
@@ -273,6 +282,30 @@ function VariableField({ spec, value, error, onChange }: FieldProps): ReactEleme
         value={String(value)}
         onChange={onChange}
       />
+    );
+  }
+
+  if (allowsEmptyString(spec)) {
+    const required = spec.nonNull && !spec.hasDefault;
+    return (
+      <>
+        <Form.TextField
+          {...common}
+          placeholder={spec.type}
+          value={typeof value === "string" ? value : ""}
+          // Clearing the field goes back to "not set": "" is only sent when the checkbox below asks for it.
+          onChange={(text) => onChange(text === "" && value !== "" ? null : text)}
+        />
+        {(value === null || value === "") && (
+          <Form.Checkbox
+            id={`empty:${spec.name}`}
+            label="Send as empty string"
+            info={`Checked: $${spec.name} is sent as "". Unchecked: ${required ? "it is reported as missing" : "it is omitted"}.`}
+            value={value === ""}
+            onChange={(checked) => onChange(checked ? "" : null)}
+          />
+        )}
+      </>
     );
   }
 

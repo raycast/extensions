@@ -28,5 +28,11 @@ export interface SavedQuery {
   updatedAt: number;
 }
 
+/**
+ * A value as entered in the variables form. Text fields use `null` for "not set", because `""` is a value they can
+ * send; other fields use `NOT_SET` (`""`).
+ */
+export type RawValue = string | boolean | null;
+
 /** Raw values typed in the variables form, keyed by variable name. */
-export type RawVariableValues = Record<string, string | boolean>;
+export type RawVariableValues = Record<string, RawValue>;

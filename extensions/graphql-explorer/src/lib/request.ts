@@ -55,6 +55,49 @@ export function isValidHttpUrl(value: string): boolean {
   }
 }
 
+// Redirects -------------------------------------------------------------------------------------------------------
+
+const MAX_REDIRECTS = 20;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+/** Headers describing the body, dropped with it when a redirect turns the POST into a GET. */
+const BODY_HEADERS = new Set(["content-encoding", "content-language", "content-location", "content-type"]);
+
+/**
+ * POSTs with redirects followed only within the endpoint's origin. `fetch` would replay every configured header to
+ * wherever the server points (it strips `Authorization`, but not custom ones such as `X-API-Key`), so a cross-origin
+ * redirect fails instead and names the destination.
+ */
+async function postFollowingSameOrigin(
+  url: string,
+  headers: Record<string, string>,
+  body: string,
+  signal: AbortSignal,
+): Promise<Response> {
+  let target = new URL(url);
+  let init: RequestInit = { method: "POST", headers, body, signal, redirect: "manual" };
+  for (let redirects = 0; ; redirects++) {
+    const response = await fetch(target, init);
+    const location = response.headers.get("location");
+    if (!REDIRECT_STATUSES.has(response.status) || location === null) return response;
+    await response.body?.cancel();
+
+    const next = new URL(location, target);
+    if (next.origin !== target.origin) {
+      throw new Error(
+        `Endpoint redirects to another origin (${next.href}); not followed so your headers are not sent there. ` +
+          "Update the environment URL if the endpoint moved.",
+      );
+    }
+    if (redirects === MAX_REDIRECTS) throw new Error(`Too many redirects (more than ${MAX_REDIRECTS})`);
+    // Same as fetch: 301, 302 and 303 turn the POST into a GET without a body.
+    if (response.status <= 303 && init.method === "POST") {
+      const remaining = Object.entries(headers).filter(([name]) => !BODY_HEADERS.has(name.toLowerCase()));
+      init = { ...init, method: "GET", body: undefined, headers: Object.fromEntries(remaining) };
+    }
+    target = next;
+  }
+}
+
 // Execution -------------------------------------------------------------------------------------------------------
 
 /** Node's fetch hides the real reason in `cause`, which may be an AggregateError with an empty message. */
@@ -89,12 +132,7 @@ export async function executeGraphQL(
   const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
 
   try {
-    const response = await fetch(env.url, {
-      method: "POST",
-      headers: buildHeaders(env),
-      body: JSON.stringify(body),
-      signal,
-    });
+    const response = await postFollowingSameOrigin(env.url, buildHeaders(env), JSON.stringify(body), signal);
     const rawBody = await response.text();
     const durationMs = Math.round(performance.now() - started);
     let json: unknown;

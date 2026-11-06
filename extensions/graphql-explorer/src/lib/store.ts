@@ -72,14 +72,29 @@ export function useStore(): StoreState {
   return snapshot;
 }
 
+/*
+ * Changes are written to LocalStorage first and published to the views only once the write succeeded, so a failed
+ * save never shows up as done. Mutations therefore run one at a time: each starts from the state the previous one
+ * published, and quick successive edits cannot overwrite each other.
+ */
+let mutationQueue: Promise<unknown> = Promise.resolve();
+
+function serialized<A extends unknown[], T>(mutation: (...args: A) => Promise<T>): (...args: A) => Promise<T> {
+  return (...args) => {
+    const result = mutationQueue.then(() => mutation(...args));
+    mutationQueue = result.catch(() => undefined);
+    return result;
+  };
+}
+
 async function persistEnvironments(environments: GraphQLEnvironment[]) {
-  setState({ environments });
   await LocalStorage.setItem(ENVIRONMENTS_KEY, JSON.stringify(environments));
+  setState({ environments });
 }
 
 async function persistQueries(queries: SavedQuery[]) {
-  setState({ queries });
   await LocalStorage.setItem(QUERIES_KEY, JSON.stringify(queries));
+  setState({ queries });
 }
 
 const byName = <T extends { name: string }>(a: T, b: T) => a.name.localeCompare(b.name);
@@ -88,7 +103,7 @@ const byName = <T extends { name: string }>(a: T, b: T) => a.name.localeCompare(
 
 export type EnvironmentInput = Pick<GraphQLEnvironment, "name" | "url" | "headers">;
 
-export async function saveEnvironment(input: EnvironmentInput, id?: string): Promise<GraphQLEnvironment> {
+export const saveEnvironment = serialized(async (input: EnvironmentInput, id?: string): Promise<GraphQLEnvironment> => {
   await ensureLoaded();
   const now = Date.now();
   const existing = id ? state.environments.find((env) => env.id === id) : undefined;
@@ -103,9 +118,9 @@ export async function saveEnvironment(input: EnvironmentInput, id?: string): Pro
   const created: GraphQLEnvironment = { id: randomUUID(), ...input, createdAt: now, updatedAt: now };
   await persistEnvironments([...state.environments, created].sort(byName));
   return created;
-}
+});
 
-export async function deleteEnvironment(id: string): Promise<void> {
+export const deleteEnvironment = serialized(async (id: string): Promise<void> => {
   await ensureLoaded();
   const env = state.environments.find((item) => item.id === id);
   await persistEnvironments(state.environments.filter((item) => item.id !== id));
@@ -116,13 +131,13 @@ export async function deleteEnvironment(id: string): Promise<void> {
     );
   }
   if (env) await clearSchemaCache(env);
-}
+});
 
 // Queries --------------------------------------------------------------------------------------------------------
 
 export type QueryInput = Pick<SavedQuery, "name" | "query" | "environmentId" | "icon" | "iconColor">;
 
-export async function saveQuery(input: QueryInput, id?: string): Promise<SavedQuery> {
+export const saveQuery = serialized(async (input: QueryInput, id?: string): Promise<SavedQuery> => {
   await ensureLoaded();
   const now = Date.now();
   const existing = id ? state.queries.find((query) => query.id === id) : undefined;
@@ -134,8 +149,9 @@ export async function saveQuery(input: QueryInput, id?: string): Promise<SavedQu
   const created: SavedQuery = { id: randomUUID(), ...input, createdAt: now, updatedAt: now };
   await persistQueries([...state.queries, created].sort(byName));
   return created;
-}
+});
 
+/** Not serialized itself: it queues through `saveQuery`, which would otherwise wait behind it forever. */
 export async function duplicateQuery(id: string): Promise<SavedQuery | undefined> {
   await ensureLoaded();
   const source = state.queries.find((query) => query.id === id);
@@ -146,11 +162,11 @@ export async function duplicateQuery(id: string): Promise<SavedQuery | undefined
   return copy;
 }
 
-export async function deleteQuery(id: string): Promise<void> {
+export const deleteQuery = serialized(async (id: string): Promise<void> => {
   await ensureLoaded();
   await persistQueries(state.queries.filter((query) => query.id !== id));
   await LocalStorage.removeItem(VARIABLES_KEY_PREFIX + id);
-}
+});
 
 // Last used variable values --------------------------------------------------------------------------------------
 
