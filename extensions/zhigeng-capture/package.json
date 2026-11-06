@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zhigeng-capture",
+  "title": "Zhigeng Capture",
+  "description": "Quickly capture notes and todos as raw drafts into your Obsidian vault",
+  "icon": "extension-icon.png",
+  "author": "yinlong_dai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-vm-modules node_modules/.bin/vitest run",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/vitest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "Save note or todo to Obsidian",
+      "description": "Capture a note or todo as a raw draft into your Obsidian vault",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "textfield",
+      "title": "Vault Path",
+      "description": "Absolute path to your Obsidian vault root directory",
+      "placeholder": "/path/to/your/Obsidian/vault",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.19.17",
+    "@types/react-test-renderer": "^19.0.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "react-test-renderer": "^19.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.0"
+  }
+}
