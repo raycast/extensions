@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sequenzy",
+    title: "Sequenzy",
+    description:
+      "Email marketing for SaaS and ecommerce: manage subscribers, lists, tags and segments, build campaigns, sequences and templates, send transactional email, run A/B tests and read delivery stats in your Sequenzy account. About 420 tools, each annotated read-only or destructive. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Sequenzy API key as a Bearer token. Free plan with 2,500 emails a month.",
+    icon: "https://www.sequenzy.com/logo.png",
+    homepage: "https://docs.sequenzy.com/concepts/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.sequenzy.com/v1/mcp"],
+    },
+    remoteUrl: "https://api.sequenzy.com/v1/mcp",
+  },
+  {
     name: "postel",
     title: "Postel",
     description:
