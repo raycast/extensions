@@ -1,6 +1,6 @@
 # Roon Discord Presence Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Menu bar command with current track and service controls
 - Status view with cover, connections, zones and service controls
