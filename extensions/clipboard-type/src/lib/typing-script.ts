@@ -76,6 +76,11 @@ export function startTyping(payload: TypingPayload, onProgress?: (remaining: num
 
     child.stderr.on("data", (chunk: Buffer) => stderrLines.push(chunk.toString()));
 
+    // If osascript exits before reading the whole payload, the write fails with EPIPE on stdin, not on the child.
+    // Without a listener that error would crash the command, so record it and report it from the close handler.
+    let stdinError: Error | undefined;
+    child.stdin.on("error", (error) => (stdinError = error));
+
     child.on("error", reject);
     child.on("close", (exitCode) => {
       clearTimeout(forceStopTimer);
@@ -85,10 +90,10 @@ export function startTyping(payload: TypingPayload, onProgress?: (remaining: num
       missingPermission ??= detectMissingPermission(errorOutput);
       if (missingPermission) {
         reject(new PermissionError(missingPermission));
-      } else if (exitCode === 0 || stopReason) {
+      } else if ((exitCode === 0 && !stdinError) || stopReason) {
         resolve({ stopReason, remaining });
       } else {
-        reject(new Error(errorOutput.trim() || `osascript exited with code ${exitCode}`));
+        reject(new Error(errorOutput.trim() || stdinError?.message || `osascript exited with code ${exitCode}`));
       }
     });
 

@@ -70,13 +70,16 @@ function postKey(keyCode, keyDown, withShift) {
   $.CGEventPost($.kCGHIDEventTap, event);
 }
 
+// Returns false if a stop was requested while Shift was held, in which case the character isn't typed.
 function pressKey(keyCode, withShift) {
-  if (withShift) {
-    postKey(payload.shiftKeyCode, true, true);
-    sleep(payload.keyHold);
-  }
-
   try {
+    if (withShift) {
+      postKey(payload.shiftKeyCode, true, true);
+      sleep(payload.keyHold);
+      // The Shift wait can notice an app switch; don't send the character into whatever app is now in front.
+      if (stopReason) return false;
+    }
+
     postKey(keyCode, true, withShift);
     sleep(payload.keyHold);
     postKey(keyCode, false, withShift);
@@ -88,6 +91,7 @@ function pressKey(keyCode, withShift) {
   }
 
   sleep(payload.keyHold);
+  return true;
 }
 
 function typeText(text) {
@@ -116,8 +120,8 @@ function typeKeystrokes() {
       const keystroke = keystrokes[index];
       if ("text" in keystroke) {
         typeText(keystroke.text);
-      } else {
-        pressKey(keystroke.keyCode, keystroke.shift);
+      } else if (!pressKey(keystroke.keyCode, keystroke.shift)) {
+        break;
       }
       sendMessage("progress", keystrokes.length - index - 1);
       pauseBetweenKeys();
