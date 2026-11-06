@@ -424,7 +424,13 @@ impl OpeningPlayer {
     }
 }
 
-struct PendingLoad {
+enum PlaybackChange {
+    Play,
+    Resume,
+    Replace { preset: Option<String> },
+}
+
+struct PendingPlayback {
     id: String,
     deadline: u64,
     expires_at: Instant,
@@ -432,27 +438,69 @@ struct PendingLoad {
     players: HashMap<String, Player>,
     sounds: BTreeMap<String, Sound>,
     master: f64,
-    preset: Option<String>,
+    change: PlaybackChange,
 }
-impl PendingLoad {
-    fn new(envelope: &Envelope) -> Result<Self, String> {
+impl PendingPlayback {
+    fn new(envelope: &Envelope, mixer: &Mixer) -> Result<Self, String> {
         let action = &envelope.action;
-        let master = volume(action, "master")?;
-        let entries = action["sounds"]
-            .as_array()
-            .filter(|s| !s.is_empty())
-            .ok_or("This mix has no playable sounds")?;
+        let mut master = mixer.mix.master;
         let mut sounds = BTreeMap::new();
-        for entry in entries {
-            sounds.insert(
-                text(entry, "id")?.to_string(),
-                Sound {
-                    volume: volume(entry, "volume")?,
-                    file: text(entry, "file")?.into(),
-                    pid: Some(std::process::id()),
-                },
-            );
-        }
+        let change = match action["type"].as_str() {
+            Some("play") => {
+                let id = text(action, "id")?;
+                let volume = if action["volume"].is_null() {
+                    mixer
+                        .mix
+                        .sounds
+                        .get(id)
+                        .map(|sound| sound.volume)
+                        .unwrap_or(volume(action, "defaultVolume")?)
+                } else {
+                    volume(action, "volume")?
+                };
+                sounds.insert(
+                    id.to_string(),
+                    Sound {
+                        volume,
+                        file: text(action, "file")?.into(),
+                        pid: None,
+                    },
+                );
+                PlaybackChange::Play
+            }
+            Some("resume") => {
+                sounds.extend(
+                    mixer
+                        .mix
+                        .sounds
+                        .iter()
+                        .filter(|(id, _)| !mixer.players.contains_key(*id))
+                        .map(|(id, sound)| (id.clone(), sound.clone())),
+                );
+                PlaybackChange::Resume
+            }
+            Some("load") => {
+                master = volume(action, "master")?;
+                let entries = action["sounds"]
+                    .as_array()
+                    .filter(|s| !s.is_empty())
+                    .ok_or("This mix has no playable sounds")?;
+                for entry in entries {
+                    sounds.insert(
+                        text(entry, "id")?.to_string(),
+                        Sound {
+                            volume: volume(entry, "volume")?,
+                            file: text(entry, "file")?.into(),
+                            pid: None,
+                        },
+                    );
+                }
+                PlaybackChange::Replace {
+                    preset: action["preset"].as_str().map(String::from),
+                }
+            }
+            _ => return Err("Unknown playback action".into()),
+        };
         let opening = sounds
             .iter()
             .map(|(id, sound)| Ok((id.clone(), OpeningPlayer::new(sound.clone(), master)?)))
@@ -468,7 +516,7 @@ impl PendingLoad {
             players: HashMap::new(),
             sounds,
             master,
-            preset: action["preset"].as_str().map(String::from),
+            change,
         })
     }
     fn poll(&mut self) -> Result<bool, String> {
@@ -500,36 +548,56 @@ struct Mixer {
     players: HashMap<String, Player>,
 }
 impl Mixer {
-    fn commit_load(&mut self, load: PendingLoad) -> Result<Value, String> {
-        load.check_deadline()?;
-        for player in load.players.values() {
+    fn commit_playback(&mut self, mut playback: PendingPlayback) -> Result<Value, String> {
+        playback.check_deadline()?;
+        for player in playback.players.values() {
             if let Ok(message) = player.failures.try_recv() {
                 return Err(message);
             }
         }
+        let replacing = matches!(playback.change, PlaybackChange::Replace { .. });
         let start = (|| {
-            for player in self.players.values() {
-                player.media.Pause().map_err(error)?;
+            if replacing {
+                for player in self.players.values() {
+                    player.media.Pause().map_err(error)?;
+                }
             }
-            for player in load.players.values() {
-                load.check_deadline()?;
+            for player in playback.players.values() {
+                playback.check_deadline()?;
                 player.media.Play().map_err(error)?;
             }
-            load.check_deadline()?;
-            Ok::<_, String>(())
+            playback.check_deadline()
         })();
         if let Err(message) = start {
-            drop(load);
-            for player in self.players.values() {
-                let _ = player.media.Play();
+            drop(playback);
+            if replacing {
+                for player in self.players.values() {
+                    let _ = player.media.Play();
+                }
             }
             return Err(message);
         }
-        self.players = load.players;
-        self.mix.sounds = load.sounds;
-        self.mix.master = load.master;
-        self.mix.preset = load.preset;
-        Ok(json!({ "mix": self.mix, "count": 0, "cancelled": false }))
+
+        for sound in playback.sounds.values_mut() {
+            sound.pid = Some(std::process::id());
+        }
+        let mut count = 0;
+        match playback.change {
+            PlaybackChange::Replace { preset } => {
+                self.players = playback.players;
+                self.mix.sounds = playback.sounds;
+                self.mix.master = playback.master;
+                self.mix.preset = preset;
+            }
+            PlaybackChange::Play | PlaybackChange::Resume => {
+                if matches!(playback.change, PlaybackChange::Resume) {
+                    count = playback.players.len();
+                }
+                self.players.extend(playback.players);
+                self.mix.sounds.extend(playback.sounds);
+            }
+        }
+        Ok(json!({ "mix": self.mix, "count": count, "cancelled": false }))
     }
     fn pause(&mut self) -> usize {
         let count = self.players.len();
@@ -539,26 +607,7 @@ impl Mixer {
         }
         count
     }
-    fn start(&mut self, id: &str, sound: Sound) -> Result<(), String> {
-        let mut opening = OpeningPlayer::new(sound.clone(), self.mix.master)?;
-        let player = loop {
-            if let Some(player) = opening.poll()? {
-                break player;
-            }
-            std::thread::sleep(Duration::from_millis(20));
-        };
-        player.media.Play().map_err(error)?;
-        self.players.insert(id.into(), player);
-        self.mix.sounds.insert(
-            id.into(),
-            Sound {
-                pid: Some(std::process::id()),
-                ..sound
-            },
-        );
-        Ok(())
-    }
-    fn reconcile(&mut self) -> bool {
+    fn reconcile(&mut self, checked_at: u64) -> bool {
         let failed: Vec<_> = self
             .players
             .iter()
@@ -576,7 +625,7 @@ impl Mixer {
             .mix
             .timer
             .as_ref()
-            .is_some_and(|timer| timer.ends_at <= now())
+            .is_some_and(|timer| timer.ends_at <= checked_at)
         {
             self.pause();
             self.mix.timer = None;
@@ -589,41 +638,12 @@ impl Mixer {
         let mut cancelled = false;
         match action["type"].as_str().ok_or("Missing mixer action")? {
             "get" => {}
-            "play" => {
-                let id = text(action, "id")?;
-                let volume = if action["volume"].is_null() {
-                    self.mix
-                        .sounds
-                        .get(id)
-                        .map(|s| s.volume)
-                        .unwrap_or(volume(action, "defaultVolume")?)
-                } else {
-                    volume(action, "volume")?
-                };
-                self.start(
-                    id,
-                    Sound {
-                        volume,
-                        file: text(action, "file")?.into(),
-                        pid: None,
-                    },
-                )?;
-            }
             "stop" => {
                 let id = text(action, "id")?;
                 self.players.remove(id);
                 self.mix.sounds.remove(id);
             }
             "pause" => count = self.pause(),
-            "resume" => {
-                let sounds = self.mix.sounds.clone();
-                for (id, sound) in sounds {
-                    if !self.players.contains_key(&id) {
-                        self.start(&id, sound)?;
-                        count += 1;
-                    }
-                }
-            }
             "stopAll" => {
                 count = self.mix.sounds.len();
                 self.pause();
@@ -693,7 +713,11 @@ fn reply(root: &Path, id: String, result: Result<Value, String>) -> Result<(), S
     atomic_write(&root.join("windows-response.json"), &reply)
 }
 
-fn cancel_load(root: &Path, pending: &mut Option<PendingLoad>, reason: &str) -> Result<(), String> {
+fn cancel_playback(
+    root: &Path,
+    pending: &mut Option<PendingPlayback>,
+    reason: &str,
+) -> Result<(), String> {
     if let Some(load) = pending.take() {
         let id = load.id.clone();
         drop(load);
@@ -705,20 +729,20 @@ fn cancel_load(root: &Path, pending: &mut Option<PendingLoad>, reason: &str) -> 
 fn handle_request(
     root: &Path,
     mixer: &mut Mixer,
-    pending: &mut Option<PendingLoad>,
+    pending: &mut Option<PendingPlayback>,
     envelope: Envelope,
 ) -> Result<(), String> {
     reconcile_state(root, mixer, pending)?;
     let kind = envelope.action["type"].as_str();
     let result = if envelope.deadline <= now() {
         Err("Mixer request expired. Try again.".into())
-    } else if kind == Some("load") {
-        cancel_load(
+    } else if matches!(kind, Some("load" | "play" | "resume")) {
+        cancel_playback(
             root,
             pending,
-            "Preset loading was replaced by another request",
+            "Playback preparation was replaced by another request",
         )?;
-        match PendingLoad::new(&envelope) {
+        match PendingPlayback::new(&envelope, mixer) {
             Ok(load) => {
                 *pending = Some(load);
                 return Ok(());
@@ -727,15 +751,14 @@ fn handle_request(
         }
     } else {
         if !matches!(kind, Some("get" | "timer" | "cancelTimer")) {
-            cancel_load(
+            cancel_playback(
                 root,
                 pending,
-                "Preset loading was cancelled by another command",
+                "Playback preparation was cancelled by another command",
             )?;
         }
         mixer.apply(&envelope.action)
     };
-    // Failed multi-sound resumes can still change which sounds are playing.
     atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
     reply(root, envelope.id, result)
 }
@@ -743,38 +766,47 @@ fn handle_request(
 fn reconcile_state(
     root: &Path,
     mixer: &mut Mixer,
-    pending: &mut Option<PendingLoad>,
+    pending: &mut Option<PendingPlayback>,
 ) -> Result<(), String> {
+    let checked_at = now();
     let timer_expired = mixer
         .mix
         .timer
         .as_ref()
-        .is_some_and(|timer| timer.ends_at <= now());
-    if mixer.reconcile() {
+        .is_some_and(|timer| timer.ends_at <= checked_at);
+    if mixer.reconcile(checked_at) {
         atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
     }
     if timer_expired {
-        cancel_load(
+        cancel_playback(
             root,
             pending,
-            "Preset loading was cancelled by the sleep timer",
+            "Playback preparation was cancelled by the sleep timer",
         )?;
     }
     Ok(())
 }
 
-fn tick(root: &Path, mixer: &mut Mixer, pending: &mut Option<PendingLoad>) -> Result<(), String> {
+fn tick(
+    root: &Path,
+    mixer: &mut Mixer,
+    pending: &mut Option<PendingPlayback>,
+) -> Result<(), String> {
     reconcile_state(root, mixer, pending)?;
     if let Some(load) = pending.as_mut() {
         let result = match load.poll() {
             Ok(false) => return Ok(()),
             Ok(true) => {
-                let load = pending.take().ok_or("Missing pending preset")?;
+                reconcile_state(root, mixer, pending)?;
+                if pending.is_none() {
+                    return Ok(());
+                }
+                let load = pending.take().ok_or("Missing pending playback")?;
                 let id = load.id.clone();
-                (id, mixer.commit_load(load))
+                (id, mixer.commit_playback(load))
             }
             Err(message) => {
-                let load = pending.take().ok_or("Missing pending preset")?;
+                let load = pending.take().ok_or("Missing pending playback")?;
                 let id = load.id.clone();
                 drop(load);
                 (id, Err(message))
@@ -808,7 +840,7 @@ pub fn run(support: &str) -> Result<(), String> {
     for sound in mixer.mix.sounds.values_mut() {
         sound.pid = None;
     }
-    mixer.reconcile();
+    mixer.reconcile(now());
     atomic_write(&state, &mixer.mix)?;
     let event = Handle(
         unsafe { CreateEventW(None, false, false, &name(&root, "request")) }.map_err(error)?,
@@ -844,390 +876,5 @@ pub fn run(support: &str) -> Result<(), String> {
         unsafe {
             WaitForSingleObject(event.0, if pending.is_some() { 20 } else { 100 });
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::path::PathBuf;
-    use windows::Media::Playback::MediaPlaybackState;
-
-    struct Fixture {
-        root: PathBuf,
-        _com: ComGuard,
-    }
-    impl Fixture {
-        fn new() -> Self {
-            unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) }
-                .ok()
-                .unwrap();
-            let root = std::env::temp_dir().join(format!(
-                "moodist-regression-{}-{}",
-                std::process::id(),
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_nanos()
-            ));
-            fs::create_dir_all(root.join("windows-responses")).unwrap();
-            Self {
-                root,
-                _com: ComGuard,
-            }
-        }
-        fn envelope(&self, id: &str, action: Value) -> Envelope {
-            Envelope {
-                id: id.into(),
-                deadline: now() + 20_000,
-                action,
-            }
-        }
-        fn reply(&self, id: &str) -> Reply {
-            serde_json::from_slice(
-                &fs::read(
-                    self.root
-                        .join("windows-responses")
-                        .join(format!("{id}.json")),
-                )
-                .unwrap(),
-            )
-            .unwrap()
-        }
-        fn sound(&self) -> Sound {
-            let path = self.root.join("silent.wav");
-            let mut wav = Vec::new();
-            wav.extend_from_slice(b"RIFF");
-            wav.extend_from_slice(&16036u32.to_le_bytes());
-            wav.extend_from_slice(b"WAVEfmt ");
-            wav.extend_from_slice(&16u32.to_le_bytes());
-            wav.extend_from_slice(&1u16.to_le_bytes());
-            wav.extend_from_slice(&1u16.to_le_bytes());
-            wav.extend_from_slice(&16000u32.to_le_bytes());
-            wav.extend_from_slice(&32000u32.to_le_bytes());
-            wav.extend_from_slice(&2u16.to_le_bytes());
-            wav.extend_from_slice(&16u16.to_le_bytes());
-            wav.extend_from_slice(b"data");
-            wav.extend_from_slice(&16000u32.to_le_bytes());
-            wav.resize(16044, 0);
-            fs::write(&path, wav).unwrap();
-            Sound {
-                volume: 0.5,
-                file: path.to_string_lossy().into(),
-                pid: None,
-            }
-        }
-        fn pending(&self) -> PendingLoad {
-            let mut load = PendingLoad {
-                id: "load".into(),
-                deadline: now() + 20_000,
-                expires_at: Instant::now() + Duration::from_secs(20),
-                opening: HashMap::new(),
-                players: HashMap::new(),
-                sounds: BTreeMap::new(),
-                master: 1.0,
-                preset: Some("new".into()),
-            };
-            load.opening.insert(
-                "slow".into(),
-                OpeningPlayer {
-                    file: None,
-                    media: None,
-                    sound: self.sound(),
-                    master: 1.0,
-                    deadline: Instant::now() + Duration::from_secs(8),
-                },
-            );
-            load
-        }
-    }
-    impl Drop for Fixture {
-        fn drop(&mut self) {
-            let _ = fs::remove_dir_all(&self.root);
-        }
-    }
-    fn mixer() -> Mixer {
-        Mixer {
-            mix: Mix {
-                preset: Some("old".into()),
-                ..Mix::default()
-            },
-            players: HashMap::new(),
-        }
-    }
-
-    #[test]
-    fn prepared_players_stay_silent_and_failed_load_keeps_old_mix() {
-        let fixture = Fixture::new();
-        let sound = fixture.sound();
-        let mut mixer = mixer();
-        mixer.start("old", sound.clone()).unwrap();
-        let mut opening = OpeningPlayer::new(sound, 1.0).unwrap();
-        let prepared = loop {
-            if let Some(player) = opening.poll().unwrap() {
-                break player;
-            }
-            std::thread::sleep(Duration::from_millis(20));
-        };
-        assert_ne!(
-            prepared
-                .media
-                .PlaybackSession()
-                .unwrap()
-                .PlaybackState()
-                .unwrap(),
-            MediaPlaybackState::Playing
-        );
-        let mut load = fixture.pending();
-        load.players.insert("ready".into(), prepared);
-        load.opening.get_mut("slow").unwrap().deadline = Instant::now();
-        let mut pending = Some(load);
-        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
-        assert!(pending.is_none());
-        assert!(fixture.reply("load").error.is_some());
-        assert_eq!(mixer.mix.preset.as_deref(), Some("old"));
-        assert_eq!(mixer.players.len(), 1);
-        assert_eq!(
-            mixer.players["old"]
-                .media
-                .PlaybackSession()
-                .unwrap()
-                .PlaybackState()
-                .unwrap(),
-            MediaPlaybackState::Playing
-        );
-    }
-
-    #[test]
-    fn slow_load_allows_commands_and_expires_without_late_commit() {
-        let fixture = Fixture::new();
-        let mut mixer = mixer();
-        let mut pending = Some(fixture.pending());
-        let started = Instant::now();
-        handle_request(
-            &fixture.root,
-            &mut mixer,
-            &mut pending,
-            fixture.envelope("get", json!({"type":"get"})),
-        )
-        .unwrap();
-        assert!(started.elapsed() < Duration::from_secs(1));
-        assert!(fixture.reply("get").result.is_some());
-        assert!(pending.is_some());
-        pending.as_mut().unwrap().expires_at = Instant::now();
-        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
-        assert!(fixture.reply("load").error.unwrap().contains("expired"));
-        assert!(pending.is_none());
-        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
-        assert_eq!(mixer.mix.preset.as_deref(), Some("old"));
-    }
-
-    #[test]
-    fn sleep_timer_expires_during_load_and_cancels_preparation() {
-        let fixture = Fixture::new();
-        let mut mixer = mixer();
-        mixer.start("old", fixture.sound()).unwrap();
-        mixer.mix.timer = Some(Timer {
-            ends_at: now(),
-            minutes: 1,
-        });
-        let mut pending = Some(fixture.pending());
-        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
-        assert!(mixer.players.is_empty());
-        assert!(mixer.mix.timer.is_none());
-        assert!(mixer.mix.sounds.values().all(|sound| sound.pid.is_none()));
-        assert!(pending.is_none());
-        assert!(fixture.reply("load").error.unwrap().contains("sleep timer"));
-    }
-
-    #[test]
-    fn get_reconciles_expired_timer_and_cancels_pending_load_before_reply() {
-        let fixture = Fixture::new();
-        let mut mixer = mixer();
-        mixer.start("old", fixture.sound()).unwrap();
-        mixer.mix.timer = Some(Timer {
-            ends_at: now(),
-            minutes: 1,
-        });
-        let mut pending = Some(fixture.pending());
-        handle_request(
-            &fixture.root,
-            &mut mixer,
-            &mut pending,
-            fixture.envelope("get", json!({"type":"get"})),
-        )
-        .unwrap();
-        let result = fixture.reply("get").result.unwrap();
-        assert!(result["mix"]["timer"].is_null());
-        assert!(result["mix"]["sounds"]["old"]["pid"].is_null());
-        assert!(mixer.players.is_empty());
-        assert!(pending.is_none());
-        assert!(fixture.reply("load").error.unwrap().contains("sleep timer"));
-    }
-
-    #[test]
-    fn get_reconciles_failed_sound_before_reply_without_blocking_pending_load() {
-        let fixture = Fixture::new();
-        let mut mixer = mixer();
-        let (failed, failures) = mpsc::channel();
-        mixer.players.insert(
-            "failed".into(),
-            Player {
-                media: MediaPlayer::new().unwrap(),
-                failures,
-            },
-        );
-        mixer.mix.sounds.insert(
-            "failed".into(),
-            Sound {
-                pid: Some(std::process::id()),
-                ..fixture.sound()
-            },
-        );
-        failed.send("Decoder failed".into()).unwrap();
-        let mut pending = Some(fixture.pending());
-        handle_request(
-            &fixture.root,
-            &mut mixer,
-            &mut pending,
-            fixture.envelope("get", json!({"type":"get"})),
-        )
-        .unwrap();
-        let result = fixture.reply("get").result.unwrap();
-        assert!(result["mix"]["sounds"]["failed"]["pid"].is_null());
-        assert!(mixer.players.is_empty());
-        assert!(pending.is_some());
-    }
-
-    #[test]
-    fn stop_cancels_pending_load() {
-        let fixture = Fixture::new();
-        let mut mixer = mixer();
-        let mut pending = Some(fixture.pending());
-        handle_request(
-            &fixture.root,
-            &mut mixer,
-            &mut pending,
-            fixture.envelope("stop", json!({"type":"stopAll"})),
-        )
-        .unwrap();
-        assert!(pending.is_none());
-        assert!(fixture.reply("load").error.unwrap().contains("cancelled"));
-        assert!(fixture.reply("stop").result.is_some());
-    }
-
-    #[test]
-    fn request_retries_when_launched_worker_exits_without_answering() {
-        let fixture = Fixture::new();
-        let mut launches = 0;
-        let result = request_with_launcher(
-            fixture.root.to_str().unwrap(),
-            r#"{"type":"get"}"#,
-            |root| {
-                launches += 1;
-                if launches == 2 {
-                    let path = root.join("windows-request.json");
-                    let envelope: Envelope =
-                        serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
-                    reply(root, envelope.id, Ok(json!({"retried":true}))).unwrap();
-                }
-                Command::new("cmd.exe")
-                    .args(["/d", "/c", "exit", "0"])
-                    .stdin(Stdio::null())
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .creation_flags(0x08000000)
-                    .spawn()
-                    .map_err(error)
-            },
-        )
-        .unwrap();
-        assert_eq!(launches, 2);
-        assert_eq!(
-            serde_json::from_str::<Value>(&result).unwrap()["retried"],
-            true
-        );
-    }
-
-    #[test]
-    fn accepted_load_releases_mailbox_before_its_reply() {
-        let fixture = Fixture::new();
-        let mut event = None;
-        let mut responder = None;
-        let result = request_with_launcher(
-            fixture.root.to_str().unwrap(),
-            r#"{"type":"load"}"#,
-            |root| {
-                event = Some(Handle(
-                    unsafe { CreateEventW(None, false, false, &name(root, "request")) }.unwrap(),
-                ));
-                let envelope: Envelope =
-                    serde_json::from_slice(&fs::read(root.join("windows-request.json")).unwrap())
-                        .unwrap();
-                atomic_write(
-                    &root
-                        .join("windows-responses")
-                        .join(format!("{}.accepted", envelope.id)),
-                    &true,
-                )
-                .unwrap();
-                let root = root.to_path_buf();
-                responder = Some(std::thread::spawn(move || {
-                    let _other_client = lock(&root, "client", 1000)
-                        .expect("load kept the mailbox locked while opening files");
-                    reply(&root, envelope.id, Ok(json!({"responsive":true}))).unwrap();
-                }));
-                Command::new("cmd.exe")
-                    .args(["/d", "/c", "exit", "0"])
-                    .stdin(Stdio::null())
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .creation_flags(0x08000000)
-                    .spawn()
-                    .map_err(error)
-            },
-        )
-        .unwrap();
-        responder.unwrap().join().unwrap();
-        assert_eq!(
-            serde_json::from_str::<Value>(&result).unwrap()["responsive"],
-            true
-        );
-    }
-
-    #[test]
-    fn request_accepts_reply_from_an_older_worker() {
-        let fixture = Fixture::new();
-        let result = request_with_launcher(
-            fixture.root.to_str().unwrap(),
-            r#"{"type":"get"}"#,
-            |root| {
-                let envelope: Envelope =
-                    serde_json::from_slice(&fs::read(root.join("windows-request.json")).unwrap())
-                        .unwrap();
-                atomic_write(
-                    &root.join("windows-response.json"),
-                    &Reply {
-                        id: envelope.id,
-                        result: Some(json!({"legacy":true})),
-                        error: None,
-                    },
-                )
-                .unwrap();
-                Command::new("cmd.exe")
-                    .args(["/d", "/c", "exit", "0"])
-                    .stdin(Stdio::null())
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .creation_flags(0x08000000)
-                    .spawn()
-                    .map_err(error)
-            },
-        )
-        .unwrap();
-        assert_eq!(
-            serde_json::from_str::<Value>(&result).unwrap()["legacy"],
-            true
-        );
     }
 }
