@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 import { findFFmpegPath } from "./ffmpeg";
-import { getAvailableEncoders, missingEncoderError, pickAvifEncoder } from "./encoders";
+import { buildAvifArgs, getAvailableEncoders, missingEncoderError, pickAvifEncoder } from "./encoders";
 import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
 import { parseTimeString, toFfmpegTime } from "./time";
@@ -332,16 +332,7 @@ export async function convertMedia<T extends AllOutputExtension>(
               if (!avifEncoder) {
                 throw missingEncoderError("AVIF", "libaom-av1 or libsvtav1");
               }
-              // libaom-av1 and libsvtav1 both take a CRF from 0 (best/lossless) to 63 (worst)
-              ffmpegArgs.push(
-                "-c:v",
-                avifEncoder,
-                "-crf",
-                String(Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)),
-              );
-              if (avifEncoder === "libaom-av1") {
-                ffmpegArgs.push("-still-picture", "1");
-              }
+              ffmpegArgs.push(...buildAvifArgs(avifEncoder, Number(imageQuality[".avif"])));
               break;
             }
           }

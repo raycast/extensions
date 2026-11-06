@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseEncoderList, pickAvifEncoder } from "../../src/utils/encoders";
+import { buildAvifArgs, parseEncoderList, pickAvifEncoder } from "../../src/utils/encoders";
 
 // Trimmed from `ffmpeg -hide_banner -encoders` of Homebrew's ffmpeg 9.0.2,
 // which has no libwebp or libaom-av1.
@@ -42,5 +42,17 @@ describe("pickAvifEncoder", () => {
 
   it("returns null when no AV1 encoder is available", () => {
     assert.equal(pickAvifEncoder(new Set(["libx264"])), null);
+  });
+});
+
+describe("buildAvifArgs", () => {
+  it("passes -still-picture to libaom-av1 only", () => {
+    assert.deepEqual(buildAvifArgs("libaom-av1", 80), ["-c:v", "libaom-av1", "-crf", "13", "-still-picture", "1"]);
+    assert.deepEqual(buildAvifArgs("libsvtav1", 80), ["-c:v", "libsvtav1", "-crf", "13"]);
+  });
+
+  it("maps quality 100 to CRF 0 and quality 0 to CRF 63", () => {
+    assert.deepEqual(buildAvifArgs("libsvtav1", 100).slice(2), ["-crf", "0"]);
+    assert.deepEqual(buildAvifArgs("libsvtav1", 0).slice(2), ["-crf", "63"]);
   });
 });

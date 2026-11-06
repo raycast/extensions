@@ -43,6 +43,15 @@ export function pickAvifEncoder(encoders: Set<string> | null): "libaom-av1" | "l
   return null;
 }
 
+/** The encoder arguments for an AVIF image at the given quality (0 to 100). */
+export function buildAvifArgs(encoder: "libaom-av1" | "libsvtav1", quality: number): string[] {
+  // libaom-av1 and libsvtav1 both take a CRF from 0 (best/lossless) to 63 (worst)
+  const args = ["-c:v", encoder, "-crf", String(Math.round(63 - (quality / 100) * 63))];
+  // libsvtav1 rejects -still-picture
+  if (encoder === "libaom-av1") args.push("-still-picture", "1");
+  return args;
+}
+
 export function missingEncoderError(format: string, encoder: string): Error {
   return new Error(
     `This FFmpeg build can't write ${format} because it has no ${encoder} encoder. ` +
