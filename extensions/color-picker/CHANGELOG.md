@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Close Raycast Preference and Windows Shortcuts] - {PR_MERGE_DATE}
+## [Close Raycast Preference and Windows Shortcuts] - 2026-11-06
 
 - Add `Close Raycast before picking color` preference
 - Add Windows keyboard shortcuts
