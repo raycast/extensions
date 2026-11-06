@@ -251,3 +251,27 @@ test("Move Current Tab destinations skip the source and hidden profiles", () => 
   );
   assert.deepEqual(profiles.moveDestinations([profile, other], "Default", ["Profile 1"]), []);
 });
+
+test("Brave Origin is a selectable browser and the data folder can be overridden", () => {
+  const load = (prefs) =>
+    loadModule("src/util/types.ts", {
+      "@raycast/api": { getPreferenceValues: () => prefs, PopToRootType: {}, showHUD: async () => {} },
+      os: { homedir: () => "/Users/dan" },
+    });
+  const origin = load({ browser: "brave-origin" }).getSelectedBrowser();
+  assert.equal(origin.appName, "Brave Origin");
+  assert.equal(origin.appPath, "/Applications/Brave Origin.app");
+  assert.equal(origin.dataPath, "Library/Application Support/BraveSoftware/Brave-Origin");
+
+  for (const value of [
+    "~/Library/Application Support/BraveSoftware/Custom/",
+    "/Users/dan/Library/Application Support/BraveSoftware/Custom",
+    "  Library/Application Support/BraveSoftware/Custom  ",
+  ]) {
+    const overridden = load({ browser: "brave-origin", dataPathOverride: value }).getSelectedBrowser();
+    assert.equal(overridden.dataPath, "Library/Application Support/BraveSoftware/Custom", value);
+    assert.equal(overridden.appName, "Brave Origin");
+  }
+  assert.equal(load({ browser: "brave-origin", dataPathOverride: "   " }).getSelectedBrowser().dataPath, origin.dataPath);
+  assert.equal(load({ browser: "nonsense" }).getSelectedBrowser().appName, "Google Chrome");
+});

@@ -13,7 +13,8 @@
     "smpeotn",
     "radek_cabaj",
     "0xdhrv",
-    "masamallow"
+    "masamallow",
+    "danlane"
   ],
   "license": "MIT",
   "commands": [
@@ -58,8 +59,24 @@
         {
           "title": "Google Chrome Canary",
           "value": "chrome-canary"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
+        },
+        {
+          "title": "Brave Origin",
+          "value": "brave-origin"
         }
       ]
+    },
+    {
+      "title": "Profile Data Folder",
+      "name": "dataPathOverride",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional. Overrides the browser's user data folder (the one containing \"Local State\"), relative to your home folder or absolute. Leave empty to use the default for the selected browser.",
+      "placeholder": "Library/Application Support/BraveSoftware/Brave-Origin"
     },
     {
       "title": "Search Engine URL",

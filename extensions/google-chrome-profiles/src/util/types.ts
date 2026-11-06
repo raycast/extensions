@@ -1,4 +1,5 @@
 import { getPreferenceValues, PopToRootType, showHUD } from "@raycast/api";
+import { homedir } from "os";
 
 export type GoogleChromeLocalState = {
   profile: {
@@ -133,11 +134,33 @@ export const BROWSERS: Record<string, BrowserConfig> = {
     dataPath: "Library/Application Support/Google/Chrome Canary",
     appPath: "/Applications/Google Chrome Canary.app",
   },
+  brave: {
+    appName: "Brave Browser",
+    dataPath: "Library/Application Support/BraveSoftware/Brave-Browser",
+    appPath: "/Applications/Brave Browser.app",
+  },
+  // Standalone Brave Origin (com.brave.Browser.origin), not the Origin
+  // upgrade applied to a regular Brave install, which keeps Brave's paths.
+  "brave-origin": {
+    appName: "Brave Origin",
+    dataPath: "Library/Application Support/BraveSoftware/Brave-Origin",
+    appPath: "/Applications/Brave Origin.app",
+  },
 };
 
+// Strip a leading "~/" or the absolute home prefix so the override joins onto homedir() like the built-ins.
+export function normalizeDataPath(value: string, home: string): string {
+  const trimmed = value.trim().replace(/\/+$/, "");
+  if (trimmed.startsWith("~/")) return trimmed.slice(2);
+  if (trimmed.startsWith(`${home}/`)) return trimmed.slice(home.length + 1);
+  return trimmed;
+}
+
 export function getSelectedBrowser(): BrowserConfig {
-  const { browser } = getPreferenceValues<ExtensionPreferences>();
-  return BROWSERS[browser] ?? BROWSERS["chrome"];
+  const { browser, dataPathOverride } = getPreferenceValues<ExtensionPreferences>();
+  const config = BROWSERS[browser] ?? BROWSERS["chrome"];
+  const override = dataPathOverride?.trim();
+  return override ? { ...config, dataPath: normalizeDataPath(override, homedir()) } : config;
 }
 
 // Raycast otherwise reopens on the pushed profile view after its window closes.
