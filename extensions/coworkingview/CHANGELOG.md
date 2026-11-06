@@ -2,6 +2,5 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Search Coworking Spaces and Coworking Market Rates commands.
-- Change the workspace type, including Any Type, when a search has no matches.
-- Show day-pass and meeting-room medians when a city has no monthly prices.
+- Search Coworking Spaces: browse spaces by city, filter by workspace type and open each space's prices, address and amenities.
+- Coworking Market Rates: median monthly prices per workspace type, plus day pass and meeting room medians, from the CoworkingView Price Index.
