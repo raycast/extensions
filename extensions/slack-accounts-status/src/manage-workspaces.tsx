@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { connectAccount, disconnectAccount } from "./accounts";
 import { Account, errorMessage } from "./domain";
@@ -58,7 +58,7 @@ export default function ManageWorkspaces({ navigationTitle }: { navigationTitle?
       await disconnectAccount(account.id);
       await showToast({ style: Toast.Style.Success, title: "Workspace Disconnected" });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Disconnect", message: errorMessage(error) });
+      await showFailureToast(errorMessage(error), { title: "Could Not Disconnect" });
     } finally {
       revalidate();
       inFlight.current = false;

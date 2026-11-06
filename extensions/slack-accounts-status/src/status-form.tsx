@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { randomUUID } from "node:crypto";
 import { applyToAccounts } from "./accounts";
@@ -52,7 +53,7 @@ function Results({
         current.map((result) => retried.find((item) => item.account.id === result.account.id) ?? result),
       );
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Retry Changes", message: errorMessage(error) });
+      await showFailureToast(errorMessage(error), { title: "Could Not Retry Changes" });
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -182,10 +183,8 @@ export default function StatusForm({
         push(<Results accounts={targets} request={request} initialResults={results} />);
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(errorMessage(error), {
         title: saveOnly ? "Could Not Save Preset" : "Could Not Apply Status",
-        message: errorMessage(error),
       });
     } finally {
       inFlight.current = false;

@@ -9,10 +9,8 @@ import {
   Keyboard,
   List,
   openExtensionPreferences,
-  showToast,
-  Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   clearStatusPreset,
   customPreset,
@@ -64,7 +62,7 @@ export default function SetStatus() {
       await deletePreset(preset.id);
       revalidate();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Delete Preset", message: errorMessage(error) });
+      await showFailureToast(errorMessage(error), { title: "Could Not Delete Preset" });
     }
   }
   function item(preset: Preset | PresencePreset, saved = false) {
