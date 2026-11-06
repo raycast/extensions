@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add pdf-table-pull-lite, doc2md-lite and link-check-lite MCP Servers] - 2026-11-06
+
+- Add three free community servers by Tidy Byte Tools, all local stdio servers from PyPI through `uvx` with no API key: pdf-table-pull-lite (tables from text PDFs as CSV), doc2md-lite (text PDFs and HTML to Markdown) and link-check-lite (status codes, broken links and redirect chains).
+
 ## [Add Ecommerce Leads MCP Server] - 2026-11-06
 
 - Add Ecommerce Leads to the official registry as a hosted Streamable HTTP server with a direct HTTP connection in Raycast, an `mcp-remote` fallback for other clients, and OAuth 2.1 sign-in for the account tools.

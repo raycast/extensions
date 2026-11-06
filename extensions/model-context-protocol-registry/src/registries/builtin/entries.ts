@@ -3446,6 +3446,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "doc2md-lite",
+    title: "doc2md-lite",
+    description:
+      "Turn a local text PDF or saved web page (.html) into clean Markdown, with tables kept as real Markdown tables. One tool, convert_to_markdown, which returns the Markdown or saves it to a file. Local stdio server `doc2md-lite` (MIT) from PyPI through `uvx`; free, no API key, and your files stay on your computer. Scanned PDFs need OCR first.",
+    icon: Icon.Document,
+    homepage: "https://github.com/tidybytetools/doc2md-lite",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "doc2md-lite", "doc2md-lite-mcp"],
+    },
+  },
+  {
     name: "engine-dj",
     title: "Engine DJ",
     description:
@@ -3557,6 +3569,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         LIGHTDASH_API_KEY: "YOUR_API_KEY_HERE",
         LIGHTDASH_API_URL: "https://<your base url>",
       },
+    },
+  },
+  {
+    name: "link-check-lite",
+    title: "link-check-lite",
+    description:
+      "Check a list of web links: which ones work, which are broken, and where redirects end up. One tool, check_links, for up to 200 links, returning the status code, final URL, redirect chain and error for each. Local stdio server `link-check-lite` (MIT) from PyPI through `uvx`; free and no API key. It only visits the links you give it.",
+    icon: Icon.Link,
+    homepage: "https://github.com/tidybytetools/link-check-lite",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "link-check-lite", "link-check-lite-mcp"],
     },
   },
   {
@@ -3689,6 +3713,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "pdf-table-pull-lite",
+    title: "pdf-table-pull-lite",
+    description:
+      "Pull the tables out of a local text PDF as CSV. One tool, extract_pdf_tables, with page selection and a choice of table-finding strategy; it returns the tables and can save CSV files. Local stdio server `pdf-table-pull-lite` (MIT) from PyPI through `uvx`; free, no API key, and your PDFs stay on your computer. Scanned PDFs need OCR first.",
+    icon: Icon.AppWindowGrid3x3,
+    homepage: "https://github.com/tidybytetools/pdf-table-pull-lite",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "pdf-table-pull-lite", "pdf-table-pull-lite-mcp"],
     },
   },
   {
