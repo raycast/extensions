@@ -50,15 +50,7 @@ test("invalid dates are rejected instead of silently normalized", () => {
 });
 
 test("invalid syntax and timestamps outside Date range", () => {
-  for (const input of [
-    "",
-    "hello",
-    "1.5",
-    "1e9",
-    "2024/01/01",
-    "8640000000000001",
-    "9007199254740993",
-  ]) {
+  for (const input of ["", "hello", "1.5", "1e9", "2024/01/01", "8640000000000001", "9007199254740993"]) {
     assert.ok("error" in parseTime(input), input);
   }
 });
@@ -92,4 +84,25 @@ test("all output representations come from the same instant", () => {
   assert.equal(values.length, 4);
   assert.equal(values[1].value, "2024-02-29T00:00:00.123Z");
   assert.equal(Number(values[3].value) - Number(values[2].value) * 1000, 123);
+});
+
+test("negative and expanded years preserve their sign in local output", () => {
+  for (const [year, prefix] of [
+    [-1, "-000001"],
+    [0, "0000"],
+    [99, "0099"],
+    [10000, "+010000"],
+  ]) {
+    const date = new Date(0);
+    date.setFullYear(year, 0, 2);
+    date.setHours(12, 34, 56, 789);
+    assert.equal(formatLocalDate(date), `${prefix}-01-02 12:34:56.789`);
+    assert.equal(parsed(formatLocalDate(date)).getTime(), date.getTime());
+  }
+});
+
+test("expanded ISO dates validate the year sign", () => {
+  assert.equal(parsed("-000001-01-01T00:00:00Z").getUTCFullYear(), -1);
+  assert.equal(parsed("+010000-01-01T00:00:00Z").getUTCFullYear(), 10000);
+  assert.ok("error" in parseTime("-000000-01-01T00:00:00Z"));
 });

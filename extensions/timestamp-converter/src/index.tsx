@@ -37,11 +37,7 @@ export default function Command() {
       onSearchTextChange={setInput}
       searchBarPlaceholder="输入时间戳或日期，如 2026-11-06 14:30:00"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="输入时间戳的单位"
-          value={unit}
-          onChange={(value) => setUnit(value as TimestampUnit)}
-        >
+        <List.Dropdown tooltip="输入时间戳的单位" value={unit} onChange={(value) => setUnit(value as TimestampUnit)}>
           <List.Dropdown.Item title="自动识别秒 / 毫秒" value="auto" />
           <List.Dropdown.Item title="时间戳按秒解析" value="seconds" />
           <List.Dropdown.Item title="时间戳按毫秒解析" value="milliseconds" />
@@ -49,10 +45,7 @@ export default function Command() {
       }
     >
       {result && (
-        <List.Section
-          title="转换结果"
-          subtitle={"date" in result ? `按${result.source}解析` : "请检查输入"}
-        >
+        <List.Section title="转换结果" subtitle={"date" in result ? `按${result.source}解析` : "请检查输入"}>
           {"date" in result ? (
             <TimeRows date={result.date} prefix="result" />
           ) : (

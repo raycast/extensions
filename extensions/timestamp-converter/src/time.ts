@@ -5,7 +5,9 @@ export type ParseResult = { date: Date; source: string } | { error: string };
 const pad = (value: number, width = 2) => String(value).padStart(width, "0");
 
 export function formatLocalDate(date: Date): string {
-  return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
+  const year = date.getFullYear();
+  const formattedYear = year >= 0 && year <= 9999 ? pad(year, 4) : `${year < 0 ? "-" : "+"}${pad(Math.abs(year), 6)}`;
+  return `${formattedYear}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
 }
 
 export function getTimeValues(date: Date) {
@@ -22,11 +24,7 @@ export function parseTime(input: string, unit: TimestampUnit = "auto"): ParseRes
   if (/^[+-]?\d+$/.test(text)) {
     // Digit count is intentionally explicit: older millisecond timestamps can be ambiguous.
     const resolvedUnit =
-      unit === "auto"
-        ? text.replace(/^[+-]?0*/, "").length <= 10
-          ? "seconds"
-          : "milliseconds"
-        : unit;
+      unit === "auto" ? (text.replace(/^[+-]?0*/, "").length <= 10 ? "seconds" : "milliseconds") : unit;
     const number = Number(text);
     const milliseconds = resolvedUnit === "seconds" ? number * 1000 : number;
     const date = new Date(milliseconds);
@@ -38,7 +36,7 @@ export function parseTime(input: string, unit: TimestampUnit = "auto"): ParseRes
 
   // Parse explicitly instead of relying on platform-dependent Date.parse behavior.
   const match =
-    /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(
+    /^([+-]\d{6}|\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(
       text,
     );
   if (!match) {
@@ -47,15 +45,8 @@ export function parseTime(input: string, unit: TimestampUnit = "auto"): ParseRes
     };
   }
   const [, y, mo, d, h = "0", mi = "0", s = "0", ms = "0", zone] = match;
-  const [year, month, day, hour, minute, second, millisecond] = [
-    y,
-    mo,
-    d,
-    h,
-    mi,
-    s,
-    ms.padEnd(3, "0"),
-  ].map(Number);
+  if (y === "-000000") return { error: "年份无效，请使用 0000 表示公元 0 年。" };
+  const [year, month, day, hour, minute, second, millisecond] = [y, mo, d, h, mi, s, ms.padEnd(3, "0")].map(Number);
   const calendar = new Date(0);
   calendar.setUTCFullYear(year, month - 1, day);
   calendar.setUTCHours(hour, minute, second, millisecond);

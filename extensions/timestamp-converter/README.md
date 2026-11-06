@@ -13,6 +13,8 @@ Open **Convert Timestamp** in Raycast (also searchable as **时间戳转换**).
 
 No accounts, network access, API keys, or external tools are required to use this extension.
 
+![Current time in Windows Raycast](media/current-time.png)
+
 ## Supported input
 
 | Input                       | Interpretation                             |
@@ -25,13 +27,9 @@ No accounts, network access, API keys, or external tools are required to use thi
 | `2026-11-06T14:30:00+08:00` | Date with an explicit UTC offset           |
 | `2026-11-06T06:30:00Z`      | UTC date                                   |
 
-Automatic mode ignores the sign and leading zeros: up to 10 digits means seconds; longer values mean milliseconds. Select the unit explicitly for older millisecond timestamps or far-future second timestamps. Negative timestamps and zero are supported. Seconds output rounds down; milliseconds output retains the full precision.
+Automatic mode ignores the sign and leading zeros: up to 10 digits means seconds; longer values mean milliseconds. Select the unit explicitly for older millisecond timestamps or far-future second timestamps. Negative timestamps and zero are supported. Years outside 0000–9999 use a sign and six digits, such as `-000001` or `+010000`. Seconds output rounds down; milliseconds output retains the full precision.
 
 Dates without an offset use the computer's local time zone, which is shown above the live clock. Invalid dates and nonexistent local times during daylight-saving transitions are rejected. When a local time occurs twice during a daylight-saving rollback, JavaScript Date chooses the earlier occurrence; use an explicit offset to disambiguate.
-
-## Development
-
-From this extension directory, run `npm install`, then `npm run dev`. Run `npm run build`, `npm run store:check`, and `npm test` before submission. Use native Windows Node.js for Windows Raycast.
 
 ---
 
@@ -41,14 +39,7 @@ From this extension directory, run `npm install`, then `npm run dev`. Run `npm r
 
 ## 使用
 
-从源码开发时，在本扩展目录运行：
-
-```sh
-npm install
-npm run dev
-```
-
-Windows 请使用原生 Windows Node.js 和 PowerShell。在 Raycast 中搜索 **Convert Timestamp**、**时间戳转换** 或 **timestamp**。
+在 Raycast 中搜索 **Convert Timestamp**、**时间戳转换** 或 **timestamp**。
 
 - 搜索框留空时，显示当前本地日期、UTC 日期、秒时间戳和毫秒时间戳，每秒刷新一次。
 - 输入时间戳或日期字符串，即时显示四种转换结果；当前时间继续刷新。
@@ -70,7 +61,3 @@ Windows 请使用原生 Windows Node.js 和 PowerShell。在 Raycast 中搜索 *
 时间戳仅接受整数，支持负数和 0。自动模式忽略符号和前导零，最多 10 位按秒、更多位按毫秒；早期毫秒时间戳或远期秒时间戳请手动选择单位。秒输出向下取整，毫秒输出保留完整精度。
 
 无时区的日期使用运行电脑的本地时区，界面会显示时区名称。严格检查无效日期，不将 2 月 30 日自动调整到 3 月。夏令时跳转中不存在的本地时间会提示错误；回拨时重复的本地时间按 JavaScript Date 规则选择较早的一次，可输入显式偏移消除歧义。
-
-## 验证
-
-`npm test` 运行转换逻辑测试；`npm run build` 检查分发构建，`npm run store:check` 执行官方商店检查。实际 Raycast 界面、定时刷新及剪贴板行为需在 Windows / macOS 客户端验证。

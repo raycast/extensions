@@ -6,4 +6,5 @@
 - Show local time, UTC, seconds, and milliseconds together, with a live clock refreshing every second.
 - Copy any displayed value and select timestamp units explicitly when needed.
 - Validate calendar dates, explicit time zone offsets, and nonexistent daylight-saving times.
+- Format and parse negative and expanded years with an explicit sign and six digits.
 - Support Windows and macOS with a Simplified Chinese command interface.
