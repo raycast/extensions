@@ -14,6 +14,7 @@ import {
   CourseworkFailure,
   dueDate,
   Status,
+  statusUnavailableCourses,
   submissionStatus,
 } from "../lib/api";
 
@@ -75,17 +76,19 @@ function groupOf(item: Assignment, status: Status, now: Date): Group {
     return "done";
   const due = dueDate(item);
   if (!due) return "none";
-  const day = 86_400_000;
-  const today = startOfDay(now);
+  // Calendar dates rather than fixed 24-hour steps, so DST days group correctly.
+  const daysFromToday = (days: number) =>
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() + days).getTime();
   const dueDay = startOfDay(due);
   if (due.getTime() < now.getTime()) return "overdue";
-  if (dueDay === today) return "today";
-  if (dueDay === today + day) return "tomorrow";
-  if (dueDay < today + 7 * day) return "week";
+  if (dueDay === daysFromToday(0)) return "today";
+  if (dueDay === daysFromToday(1)) return "tomorrow";
+  if (dueDay < daysFromToday(7)) return "week";
   return "later";
 }
 
 function relative(due: Date, now: Date): string {
+  // Rounding absorbs the 23/25-hour days around daylight-saving changes.
   const days = Math.round((startOfDay(due) - startOfDay(now)) / 86_400_000);
   const time = due.toLocaleTimeString(undefined, {
     hour: "numeric",
@@ -110,11 +113,13 @@ export function AssignmentList({
   items: Assignment[];
   failures?: CourseworkFailure[];
   isLoading: boolean;
-  refresh: () => Promise<void>;
+  refresh: () => void;
   errorView?: React.ReactNode;
   title?: string;
 }) {
   const [filter, setFilter] = useState("active");
+  const [showDetail, setShowDetail] = useState(true);
+  const statusUnavailable = statusUnavailableCourses(items);
   const now = new Date();
   const hasStatus = items.some((item) => item.submission?.kind === "mine");
 
@@ -190,7 +195,7 @@ export function AssignmentList({
         subtitle={item.courseName}
         keywords={[item.courseName, item.workType ?? "", badge?.label ?? ""]}
         icon={badge?.icon ?? Icon.Document}
-        accessories={accessories}
+        accessories={showDetail ? undefined : accessories}
         detail={
           <List.Item.Detail
             markdown={`## ${item.title}\n\n${item.description || "_No description provided._"}`}
@@ -273,6 +278,15 @@ export function AssignmentList({
               title="Copy Assignment Title"
               content={item.title}
             />
+            <Action
+              title={showDetail ? "Hide Details" : "Show Details"}
+              icon={Icon.Sidebar}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
+              onAction={() => setShowDetail((value) => !value)}
+            />
             {refreshAction}
           </ActionPanel>
         }
@@ -282,9 +296,9 @@ export function AssignmentList({
 
   return (
     <List
-      navigationTitle={title ?? "Coursework"}
+      navigationTitle={title}
       isLoading={isLoading}
-      isShowingDetail
+      isShowingDetail={showDetail}
       searchBarPlaceholder="Search assignments or courses…"
       searchBarAccessory={
         <List.Dropdown tooltip="Show" value={filter} onChange={setFilter}>
@@ -314,6 +328,19 @@ export function AssignmentList({
           }
           actions={<ActionPanel>{refreshAction}</ActionPanel>}
         />
+      )}
+      {statusUnavailable.length > 0 && (
+        <List.Section title="Submission Status Unavailable">
+          <List.Item
+            title="Turned-in status could not be loaded"
+            subtitle={statusUnavailable.join(", ")}
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            detail={
+              <List.Item.Detail markdown="Google Classroom did not return submission status for these courses, so their coursework is shown without Turned In, Missing or grade information. Refresh to try again." />
+            }
+            actions={<ActionPanel>{refreshAction}</ActionPanel>}
+          />
+        </List.Section>
       )}
       {failures.length > 0 && (
         <List.Section title="Some Courses Could Not Be Loaded">

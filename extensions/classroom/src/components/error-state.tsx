@@ -1,9 +1,8 @@
+import { launch } from "../lib/launch";
 import {
   Action,
   ActionPanel,
   Icon,
-  launchCommand,
-  LaunchType,
   List,
   openExtensionPreferences,
 } from "@raycast/api";
@@ -13,7 +12,7 @@ export function ErrorState({
   refresh,
 }: {
   message: string;
-  refresh: () => Promise<void>;
+  refresh: () => void;
 }) {
   return (
     <List.EmptyView
@@ -30,9 +29,7 @@ export function ErrorState({
           <Action
             title="Connect Google Classroom"
             icon={Icon.Person}
-            onAction={() =>
-              launchCommand({ name: "connect", type: LaunchType.UserInitiated })
-            }
+            onAction={() => launch("connect")}
           />
           <Action
             title="Extension Preferences"

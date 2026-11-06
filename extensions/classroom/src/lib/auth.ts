@@ -1,7 +1,6 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 
-const preferences = () =>
-  getPreferenceValues<{ clientId?: string; role: string }>();
+const preferences = () => getPreferenceValues<Preferences>();
 export const scopesForRole = (role: string) =>
   [
     "https://www.googleapis.com/auth/classroom.courses.readonly",

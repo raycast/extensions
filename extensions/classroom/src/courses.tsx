@@ -4,16 +4,22 @@ import { AssignmentList } from "./components/assignment-list";
 import { ErrorState } from "./components/error-state";
 import { ClassroomApi, classroomLink, Course } from "./lib/api";
 import { accessToken, isStudent } from "./lib/auth";
-import { useLoad } from "./lib/use-load";
+import { usePromise } from "@raycast/utils";
 
 function CourseWork({ course }: { course: Course }) {
-  const { data, error, isLoading, refresh } = useLoad(
-    async () =>
+  const {
+    data,
+    error,
+    isLoading,
+    revalidate: refresh,
+  } = usePromise(
+    async (course: Course) =>
       new ClassroomApi(await accessToken()).courseworkWithStatus(
         course,
         isStudent(),
       ),
-    course.id,
+    [course],
+    { onError: () => undefined },
   );
   return (
     <AssignmentList
@@ -22,7 +28,9 @@ function CourseWork({ course }: { course: Course }) {
       isLoading={isLoading}
       refresh={refresh}
       errorView={
-        error ? <ErrorState message={error} refresh={refresh} /> : undefined
+        error ? (
+          <ErrorState message={error.message} refresh={refresh} />
+        ) : undefined
       }
     />
   );
@@ -30,9 +38,16 @@ function CourseWork({ course }: { course: Course }) {
 
 export default function Courses() {
   const [state, setState] = useState("ACTIVE");
-  const { data, error, isLoading, refresh } = useLoad(
-    async () => new ClassroomApi(await accessToken()).courses(state),
-    state,
+  const {
+    data,
+    error,
+    isLoading,
+    revalidate: refresh,
+  } = usePromise(
+    async (state: string) =>
+      new ClassroomApi(await accessToken()).courses(state),
+    [state],
+    { onError: () => undefined },
   );
   return (
     <List
@@ -47,7 +62,7 @@ export default function Courses() {
       }
     >
       {error ? (
-        <ErrorState message={error} refresh={refresh} />
+        <ErrorState message={error.message} refresh={refresh} />
       ) : (
         <List.EmptyView
           title="No Courses"

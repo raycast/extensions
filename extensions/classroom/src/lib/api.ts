@@ -64,12 +64,33 @@ export type SubmissionSummary =
 export type Assignment = Coursework & {
   courseName: string;
   submission?: SubmissionSummary;
+  /** True when submission status could not be loaded for this course. */
+  statusUnavailable?: boolean;
 };
 
 export type Status =
   "done" | "graded" | "missing" | "late" | "todo" | "unknown";
 
 /** A simple status for a student's own submission. */
+/** Courses whose submission status could not be loaded. */
+export function statusUnavailableCourses(items: Assignment[]): string[] {
+  return [
+    ...new Set(
+      items
+        .filter((item) => item.statusUnavailable)
+        .map((item) => item.courseName),
+    ),
+  ];
+}
+
+/** Open work whose due date has passed: missing, or overdue when status is unknown. */
+export function isPastDue(item: Assignment, now = Date.now()): boolean {
+  const status = submissionStatus(item, now);
+  if (status === "missing") return true;
+  const due = dueDate(item)?.getTime();
+  return status === "unknown" && due !== undefined && due < now;
+}
+
 export function submissionStatus(item: Assignment, now = Date.now()): Status {
   const sub = item.submission;
   if (!sub || sub.kind !== "mine") return "unknown";
@@ -269,7 +290,10 @@ export class ClassroomApi {
     );
   }
 
-  /** Coursework plus submission status; submission failures never hide coursework. */
+  /**
+   * Coursework plus submission status. Submission failures never hide
+   * coursework; affected items are marked `statusUnavailable` instead.
+   */
   async courseworkWithStatus(
     course: Course,
     mine: boolean,
@@ -278,7 +302,8 @@ export class ClassroomApi {
       this.coursework(course),
       this.submissions(course, mine).catch(() => undefined),
     ]);
-    if (!submissions) return items;
+    if (!submissions)
+      return items.map((item) => ({ ...item, statusUnavailable: true }));
     const byWork = summarize(submissions, mine);
     return items.map((item) => ({ ...item, submission: byWork.get(item.id) }));
   }

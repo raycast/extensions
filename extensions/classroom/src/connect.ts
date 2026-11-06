@@ -1,4 +1,5 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ClassroomApi } from "./lib/api";
 import { reconnect } from "./lib/auth";
 
@@ -10,10 +11,8 @@ export default async function Connect() {
       `Google Classroom connected · ${courses.length} active courses · coursework permission granted`,
     );
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Could not connect Google Classroom",
-      message: error instanceof Error ? error.message : "Sign-in failed.",
     });
   }
 }

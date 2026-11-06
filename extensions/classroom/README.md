@@ -11,7 +11,7 @@ Search your courses, read coursework descriptions, and browse due dates without 
 ## Commands
 
 - **Search Courses:** Search active or archived courses. Press Return to browse a course's published coursework.
-- **Browse Assignments:** Search published coursework across your active courses, with upcoming, past due date, and no due date filters.
+- **Browse Assignments:** Search published coursework across your active courses, with To Do, Missing (or Overdue when submission status is unavailable), Turned In, and Everything filters.
 - **Connect Google Classroom:** Sign in through Google, confirm both required read-only permissions, and verify course access. This command waits for the OAuth callback rather than starting sign-in inside a short-lived view. Its course count does not prove that a known coursework item has been loaded; open a course or Browse Assignments to check that separately.
 
 Coursework includes assignments and questions. Due dates do not indicate whether work has been submitted. This extension does not create courses, submit assignments, or change grades.
@@ -31,19 +31,6 @@ Connect always opens fresh consent, while keeping the previous stored connection
 Google's external **Testing** mode expires refresh tokens after seven days for these Classroom scopes. Reconnect when the testing grant expires; successful short-term testing does not prove a production connection. See [Google's refresh token guidance](https://developers.google.com/identity/protocols/oauth2#expiration).
 
 An external OAuth application using these scopes must complete Google's applicable verification requirements before public distribution. A user-supplied OAuth client makes the current package suitable for development and institution-approved installations; a public release still needs a stable approved client and a successful live test.
-
-## Develop
-
-```sh
-npm ci
-npm test
-npm run lint
-npm run typecheck
-npm run build
-npm run dev
-```
-
-All API resource requests are GET requests. The extension does not read browser cookies, reuse unrelated Google connector tokens, or persist course data. Errors deliberately omit raw provider response bodies. Assignment loading follows every page and limits concurrent course requests to four; courses that deny access appear as explicit warnings rather than disappearing silently.
 
 ## Documentation
 

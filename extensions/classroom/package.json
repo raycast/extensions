@@ -43,6 +43,7 @@
     {
       "name": "clientId",
       "type": "textfield",
+      "placeholder": "Your Google OAuth Client ID",
       "title": "Google OAuth Client ID",
       "description": "Your Google Cloud iOS OAuth client ID with bundle ID com.raycast. Enable the Classroom API first. See README.",
       "required": false
@@ -67,7 +68,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11"
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
