@@ -18,7 +18,8 @@ const HEADLINE: Record<BackupHealth, string> = {
 	// on a Mac holding two dozen hourly local snapshots — which are backups,
 	// and are why a disk does not empty. The row below tells the other half.
 	never: "No backup to an external disk",
-	disconnected: "Backup disk not connected",
+	// A guess: rcc cannot tell an unmounted disk from one that has no finished backup.
+	disconnected: "Last backup unknown. Is the disk connected?",
 	fresh: "Backed up",
 	late: "Backup is a few days old",
 	overdue: "Backup is more than a week old",
@@ -55,17 +56,11 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 					}}
 					title={HEADLINE[state]}
 					subtitle={b.last_backup.date || undefined}
-					accessories={[
-						{
-							tag: {
-								value:
-									state === "disconnected"
-										? "last backup unknown"
-										: humanAge(b.last_backup.hours_ago),
-								color: TINT[state],
-							},
-						},
-					]}
+					accessories={
+						state === "disconnected"
+							? []
+							: [{ tag: { value: humanAge(b.last_backup.hours_ago), color: TINT[state] } }]
+					}
 					actions={row}
 				/>
 			</List.Section>
@@ -143,7 +138,7 @@ export default function Command() {
 		<RccList
 			command="backup"
 			parse={parseBackup}
-			navigationTitle={(b) => (b ? `Time Machine: ${HEADLINE[health(b)].toLowerCase()}` : "Time Machine")}
+			navigationTitle={(b) => (b ? `Time Machine: ${HEADLINE[health(b)]}` : "Time Machine")}
 			searchBarPlaceholder="Search backup details"
 			emptyIcon={Icon.HardDrive}
 			emptyTitle="No Time Machine information"
