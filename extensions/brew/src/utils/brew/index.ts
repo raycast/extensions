@@ -119,7 +119,7 @@ export type {
   InstalledApplication,
   VersionRelationship,
 } from "./adopt";
-export { loadAdoptIndex, loadCasksByToken, rebuildCaskIndex } from "./fetch";
+export { brewFetchCaskAppdir, loadAdoptIndex, loadCasksByToken, rebuildCaskIndex } from "./fetch";
 export type { CaskLinkVerb } from "./link";
 
 // Install preview (`brew install --dry-run`)

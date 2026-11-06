@@ -1,5 +1,11 @@
 # Changelog
 
+## [Find Issues by Exact Key] - 2026-11-06
+
+- Find issues outside the selected project or custom JQL filter by entering their full key in the Issue dropdown.
+- Keep exact matches first and search loaded issues by key or title, ignoring case and accents.
+- Prevent stale lookup results and failed searches from logging time against the wrong issue.
+
 ## [Restore Jira Cloud Search and Manage Worklogs] - 2026-10-08
 
 - Restore Jira Cloud issue search using the enhanced JQL endpoint and cursor pagination, while retaining Jira Server support.
