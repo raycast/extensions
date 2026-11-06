@@ -8,7 +8,6 @@
 - Correctly open direct destinations for navigation suggestions in both modes
 - Ensure copied links in AI mode preserve `udm=50`
 - Display context-aware shortcut hints based on active search mode
-- Add comprehensive behavioral test suite
 
 ## [Fix Suggestion Errors] - 2026-10-11
 

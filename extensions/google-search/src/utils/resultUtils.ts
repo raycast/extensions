@@ -1,4 +1,4 @@
-import { Icon, Keyboard } from "@raycast/api";
+import { closeMainWindow, Icon, Keyboard, open } from "@raycast/api";
 import { SearchMode, SearchResult } from "./types";
 
 export function getSearchUrl(query: string): string {
@@ -22,8 +22,70 @@ export function normalizeNavigationUrl(rawUrl: string): string | null {
   if (!rawUrl || typeof rawUrl !== "string") {
     return null;
   }
-  const urlToTest = rawUrl.startsWith("http://") || rawUrl.startsWith("https://") ? rawUrl : `https://${rawUrl}`;
-  return isSafeUrl(urlToTest) ? urlToTest : null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  // Detect explicit URI schemes case-insensitively (RFC 3986)
+  const schemeMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+  if (schemeMatch) {
+    const scheme = schemeMatch[1].toLowerCase();
+    // Reject every non-HTTP(S) explicit scheme (e.g. file:, javascript:, data:, ftp:)
+    if (scheme !== "http" && scheme !== "https") {
+      return null;
+    }
+    // Must be followed by "://"
+    if (!/^https?:\/\//i.test(trimmed)) {
+      return null;
+    }
+    try {
+      const parsed = new URL(trimmed);
+      if ((parsed.protocol === "http:" || parsed.protocol === "https:") && parsed.hostname) {
+        return trimmed;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
+
+  // Scheme-less destination (e.g. "github.com", "raycast.com/pricing")
+  const urlWithHttps = `https://${trimmed}`;
+  try {
+    const parsed = new URL(urlWithHttps);
+    if (parsed.protocol === "https:" && parsed.hostname && !parsed.hostname.startsWith(".")) {
+      return urlWithHttps;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+export async function executeNormalSearch(
+  item: SearchResult,
+  addHistory: (item: SearchResult) => Promise<void>,
+  openBrowser: (url: string) => Promise<void> = open,
+  closeWindow: () => Promise<void> = closeMainWindow,
+) {
+  const normalUrl = getItemNormalUrl(item);
+  await addHistory({ ...item, url: normalUrl });
+  await openBrowser(normalUrl);
+  await closeWindow();
+}
+
+export async function executeAiSearch(
+  item: SearchResult,
+  addHistory: (item: SearchResult) => Promise<void>,
+  openBrowser: (url: string) => Promise<void> = open,
+  closeWindow: () => Promise<void> = closeMainWindow,
+) {
+  const aiUrl = getItemAiUrl(item);
+  await addHistory({ ...item, url: getItemNormalUrl(item) });
+  await openBrowser(aiUrl);
+  await closeWindow();
 }
 
 export function getItemNormalUrl(item: SearchResult): string {

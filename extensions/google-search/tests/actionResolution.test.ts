@@ -1,6 +1,26 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { GoogleSearchList } from "../src/GoogleSearchList";
 import { getSearchModeActions } from "../src/utils/resultUtils";
 import { SearchResult } from "../src/utils/types";
+
+vi.mock("../src/utils/useSearch", () => ({
+  useSearch: vi.fn((query = "") => ({
+    isLoading: false,
+    results: [
+      {
+        id: "item-1",
+        query: query || "vitest mocking",
+        description: `Search Google for '${query || "vitest mocking"}'`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(query || "vitest mocking")}`,
+      },
+    ],
+    search: vi.fn(),
+    searchText: query,
+    addHistory: vi.fn(),
+    deleteAllHistory: vi.fn(),
+    deleteHistoryItem: vi.fn(),
+  })),
+}));
 
 describe("actionResolution - Search Mode Action Panels and Shortcuts", () => {
   const sampleSearchItem: SearchResult = {
@@ -105,6 +125,77 @@ describe("actionResolution - Search Mode Action Panels and Shortcuts", () => {
       // Destination URL must NOT be https://www.google.com/search?q=vitest.dev&udm=50
       expect(actions.primaryAction.url).toBe("https://vitest.dev");
       expect(actions.copyUrlAction.content).toBe("https://vitest.dev");
+    });
+  });
+
+  describe("Rendered GoogleSearchList Actions (Greptile Finding 2)", () => {
+    type AnyElement = { props: Record<string, any> };
+
+    it("renders real actions for regular search mode", () => {
+      const element = GoogleSearchList({
+        initialMode: "default",
+        initialQuery: "vitest mocking",
+      }) as unknown as AnyElement;
+      expect(element).toBeDefined();
+
+      const items = element.props.children.props.children;
+      expect(items.length).toBeGreaterThan(0);
+
+      const firstItem = items[0];
+      expect(firstItem.props.title).toBe("vitest mocking");
+      expect(firstItem.props.accessories).toEqual([{ icon: "stars", tooltip: "Search in AI Mode (⇧↵)" }]);
+
+      const [resultSection] = firstItem.props.actions.props.children;
+      const [primaryAction, copyUrlAction, alternateAction, copySuggestionAction, setTextAction] =
+        resultSection.props.children;
+
+      expect(primaryAction.props.title).toBe("Open in Browser");
+      expect(primaryAction.props.icon).toEqual({ source: "arrow-right" });
+
+      expect(copyUrlAction.props.title).toBe("Copy URL to Clipboard");
+      expect(copyUrlAction.props.content).toBe("https://www.google.com/search?q=vitest%20mocking");
+      expect(copyUrlAction.props.shortcut).toEqual({
+        macOS: { modifiers: ["cmd"], key: "return" },
+        Windows: { modifiers: ["ctrl"], key: "return" },
+      });
+
+      expect(alternateAction.props.title).toBe("Search in AI Mode");
+      expect(alternateAction.props.icon).toEqual({ source: "stars" });
+      expect(alternateAction.props.shortcut).toEqual({ modifiers: ["shift"], key: "return" });
+
+      expect(copySuggestionAction.props.title).toBe("Copy Suggestion to Clipboard");
+      expect(copySuggestionAction.props.content).toBe("vitest mocking");
+
+      expect(setTextAction.props.title).toBe("Set as Search Text");
+      expect(setTextAction.props.shortcut).toEqual({ modifiers: ["shift"], key: "tab" });
+    });
+
+    it("renders real actions for AI search mode with udm=50", () => {
+      const element = GoogleSearchList({
+        initialMode: "ai",
+        initialQuery: "quantum computing",
+      }) as unknown as AnyElement;
+      expect(element).toBeDefined();
+
+      const items = element.props.children.props.children;
+      expect(items.length).toBeGreaterThan(0);
+
+      const firstItem = items[0];
+      expect(firstItem.props.accessories).toEqual([{ icon: "arrow-right", tooltip: "Open in Browser (⇧↵)" }]);
+
+      const [resultSection] = firstItem.props.actions.props.children;
+      const [primaryAction, copyUrlAction, alternateAction] = resultSection.props.children;
+
+      expect(primaryAction.props.title).toBe("Search in AI Mode");
+      expect(primaryAction.props.icon).toEqual({ source: "stars" });
+
+      expect(copyUrlAction.props.title).toBe("Copy URL to Clipboard");
+      expect(copyUrlAction.props.content).toBe("https://www.google.com/search?q=quantum%20computing&udm=50");
+      expect(copyUrlAction.props.content).toContain("&udm=50");
+
+      expect(alternateAction.props.title).toBe("Open in Browser");
+      expect(alternateAction.props.icon).toEqual({ source: "arrow-right" });
+      expect(alternateAction.props.shortcut).toEqual({ modifiers: ["shift"], key: "return" });
     });
   });
 });

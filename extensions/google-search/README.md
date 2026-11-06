@@ -9,7 +9,7 @@ Google search with autosuggestions is an extension for [Raycast](https://www.ray
 - Toggle between regular search and AI mode via `Shift+Enter`
 - Retain `⌘+Enter` shortcut for copying URL to clipboard
 - Search selected text directly
-- Search history management (with deduplication and destructive confirmation)
+- Search history management (with deduplication)
 - Optional query arguments and fallback-command support
 - Clipboard fallback when no text is selected
 

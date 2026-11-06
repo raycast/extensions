@@ -7,6 +7,7 @@ import {
   getItemUrl,
   getSearchUrl,
   isSafeUrl,
+  normalizeNavigationUrl,
 } from "../src/utils/resultUtils";
 import { SearchResult } from "../src/utils/types";
 
@@ -46,6 +47,38 @@ describe("resultUtils - URL generation and validation", () => {
     expect(isSafeUrl("file:///etc/passwd")).toBe(false);
     expect(isSafeUrl("ftp://ftp.example.com")).toBe(false);
     expect(isSafeUrl("not-a-url")).toBe(false);
+  });
+
+  describe("normalizeNavigationUrl (Greptile Finding 1)", () => {
+    it("preserves valid lowercase HTTP and HTTPS URLs", () => {
+      expect(normalizeNavigationUrl("https://github.com")).toBe("https://github.com");
+      expect(normalizeNavigationUrl("http://example.com/path")).toBe("http://example.com/path");
+    });
+
+    it("preserves uppercase and mixed-case HTTP and HTTPS URLs without corrupting host", () => {
+      expect(normalizeNavigationUrl("HTTPS://github.com")).toBe("HTTPS://github.com");
+      expect(normalizeNavigationUrl("hTtP://example.com/sub")).toBe("hTtP://example.com/sub");
+    });
+
+    it("prepends https:// to scheme-less valid hostnames", () => {
+      expect(normalizeNavigationUrl("github.com")).toBe("https://github.com");
+      expect(normalizeNavigationUrl("raycast.com/pricing?ref=app")).toBe("https://raycast.com/pricing?ref=app");
+    });
+
+    it("rejects dangerous or non-HTTP schemes without prepending https://", () => {
+      expect(normalizeNavigationUrl("file:///etc/passwd")).toBeNull();
+      expect(normalizeNavigationUrl("javascript:alert(1)")).toBeNull();
+      expect(normalizeNavigationUrl("data:text/html,<h1>exploit</h1>")).toBeNull();
+      expect(normalizeNavigationUrl("ftp://ftp.example.com")).toBeNull();
+      expect(normalizeNavigationUrl("blob:https://example.com/uuid")).toBeNull();
+    });
+
+    it("rejects empty, whitespace, and malformed inputs", () => {
+      expect(normalizeNavigationUrl("")).toBeNull();
+      expect(normalizeNavigationUrl("   ")).toBeNull();
+      expect(normalizeNavigationUrl("http:example.com")).toBeNull();
+      expect(normalizeNavigationUrl("http://")).toBeNull();
+    });
   });
 
   describe("getItemNormalUrl", () => {

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List, open } from "@raycast/api";
-import { getIcon, getItemAiUrl, getItemNormalUrl } from "./utils/resultUtils";
+import { executeAiSearch, executeNormalSearch, getIcon, getSearchModeActions } from "./utils/resultUtils";
 import { SearchMode, SearchResult } from "./utils/types";
 import { useSearch } from "./utils/useSearch";
 
@@ -14,17 +14,11 @@ export function GoogleSearchList({ initialMode = "default", initialQuery = "" }:
     useSearch(initialQuery);
 
   const handleOpenNormal = async (item: SearchResult) => {
-    const normalUrl = getItemNormalUrl(item);
-    await addHistory({ ...item, url: normalUrl });
-    await open(normalUrl);
-    await closeMainWindow();
+    await executeNormalSearch(item, addHistory, open, closeMainWindow);
   };
 
   const handleOpenAi = async (item: SearchResult) => {
-    const aiUrl = getItemAiUrl(item);
-    await addHistory({ ...item, url: getItemNormalUrl(item) });
-    await open(aiUrl);
-    await closeMainWindow();
+    await executeAiSearch(item, addHistory, open, closeMainWindow);
   };
 
   return (
@@ -36,9 +30,7 @@ export function GoogleSearchList({ initialMode = "default", initialQuery = "" }:
     >
       <List.Section title="Results" subtitle={results.length + ""}>
         {results.map((item) => {
-          const normalUrl = getItemNormalUrl(item);
-          const aiUrl = getItemAiUrl(item);
-          const copyUrl = isAiMode ? aiUrl : normalUrl;
+          const actions = getSearchModeActions(initialMode, item);
 
           return (
             <List.Item
@@ -46,66 +38,46 @@ export function GoogleSearchList({ initialMode = "default", initialQuery = "" }:
               title={item.query}
               subtitle={item.description}
               icon={getIcon(item)}
-              accessories={[
-                isAiMode
-                  ? { icon: Icon.ArrowRight, tooltip: "Open in Browser (⇧↵)" }
-                  : { icon: Icon.Stars, tooltip: "Search in AI Mode (⇧↵)" },
-              ]}
+              accessories={[actions.accessory]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Result">
-                    {isAiMode ? (
-                      <Action
-                        title="Search in AI Mode"
-                        onAction={() => handleOpenAi(item)}
-                        icon={{ source: Icon.Stars }}
-                      />
-                    ) : (
-                      <Action
-                        title="Open in Browser"
-                        onAction={() => handleOpenNormal(item)}
-                        icon={{ source: Icon.ArrowRight }}
-                      />
-                    )}
-
-                    <Action.CopyToClipboard
-                      title="Copy URL to Clipboard"
-                      content={copyUrl}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "return" },
-                        Windows: { modifiers: ["ctrl"], key: "return" },
-                      }}
+                    <Action
+                      title={actions.primaryAction.title}
+                      onAction={() =>
+                        actions.primaryAction.id === "open-ai" ? handleOpenAi(item) : handleOpenNormal(item)
+                      }
+                      icon={{ source: actions.primaryAction.icon ?? Icon.ArrowRight }}
                     />
 
-                    {isAiMode ? (
-                      <Action
-                        title="Open in Browser"
-                        onAction={() => handleOpenNormal(item)}
-                        icon={{ source: Icon.ArrowRight }}
-                        shortcut={{ modifiers: ["shift"], key: "return" }}
-                      />
-                    ) : (
-                      <Action
-                        title="Search in AI Mode"
-                        onAction={() => handleOpenAi(item)}
-                        icon={{ source: Icon.Stars }}
-                        shortcut={{ modifiers: ["shift"], key: "return" }}
-                      />
-                    )}
-
                     <Action.CopyToClipboard
-                      title="Copy Suggestion to Clipboard"
-                      content={item.query}
-                      shortcut={Keyboard.Shortcut.Common.Copy}
+                      title={actions.copyUrlAction.title}
+                      content={actions.copyUrlAction.content ?? ""}
+                      shortcut={actions.copyUrlAction.shortcut}
                     />
 
                     <Action
-                      title="Set as Search Text"
+                      title={actions.alternateSearchAction.title}
+                      onAction={() =>
+                        actions.alternateSearchAction.id === "open-ai" ? handleOpenAi(item) : handleOpenNormal(item)
+                      }
+                      icon={{ source: actions.alternateSearchAction.icon ?? Icon.Stars }}
+                      shortcut={actions.alternateSearchAction.shortcut}
+                    />
+
+                    <Action.CopyToClipboard
+                      title={actions.copySuggestionAction.title}
+                      content={actions.copySuggestionAction.content ?? ""}
+                      shortcut={actions.copySuggestionAction.shortcut}
+                    />
+
+                    <Action
+                      title={actions.setSearchTextAction.title}
                       onAction={() => {
                         search(item.query);
                       }}
-                      icon={{ source: Icon.MagnifyingGlass }}
-                      shortcut={{ modifiers: ["shift"], key: "tab" }}
+                      icon={{ source: actions.setSearchTextAction.icon ?? Icon.MagnifyingGlass }}
+                      shortcut={actions.setSearchTextAction.shortcut}
                     />
                   </ActionPanel.Section>
 
