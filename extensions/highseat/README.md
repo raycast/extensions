@@ -1,6 +1,6 @@
 # Highseat
 
-See your [Highseat](https://highseat.com) website analytics in Raycast, and ask Raycast AI about them.
+See your [Highseat](https://highseat.com) website analytics in Raycast, and ask Raycast AI about them. You need a Highseat account.
 
 ## Commands
 

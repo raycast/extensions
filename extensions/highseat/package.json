@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "highseat",
   "title": "Highseat",
-  "description": "See your website analytics and manage notes, goals, funnels and reports from Raycast.",
+  "description": "See your website analytics and manage notes, goals, funnels and reports from Raycast. Requires a Highseat account.",
   "icon": "icon.png",
   "author": "piotrkulpinski",
   "owner": "highseat",
@@ -12,6 +12,9 @@
     "Web"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "view-sites",
@@ -68,7 +71,7 @@
     {
       "name": "list-site-overviews",
       "title": "List Site Overviews",
-      "description": "Every site the credential reaches, oldest first, with its visitors over the last 24 hours, the 24 hours before and the last 5 minutes. One call instead of one per site."
+      "description": "Every site the credential reaches, oldest first, with its visitors over the last 24 hours, the 24 hours before and the last 5 minutes. One call instead of one per site. It answers no other period."
     },
     {
       "name": "list-sites",
@@ -182,7 +185,418 @@
     }
   ],
   "ai": {
-    "instructions": "Highseat reports a website's traffic: visitors, pages, sources, devices, locations, campaigns, events, goals, funnels and revenue. A connection with write access can also change a site's notes, goals, funnels, saved reports and settings.\n\n- Start with list-sites: it lists the sites this connection reaches. Every site tool takes `site`, the domain as registered or the site id.\n- To compare sites, call list-site-overviews once rather than get-stats per site.\n- get-stats answers every report on the dashboard: overview, trend, pages, sources, devices, locations, campaigns, events, goals and revenue. Its `report` parameter picks one.\n- `period` takes day, week, month or year (positioned by `date`), a window ending now such as 24h, 7d or 3mo, all, or custom with `from` and `to` (YYYY-MM-DD). It defaults to 7d. Days are in the site's timezone, which each answer's `meta` states with the resolved range.\n- `filter` is a list, each entry written dimension[.key]:operator:value, and every filter has to match. Discover a value before filtering on it: get-filter-values lists the values a dimension takes, and get-catalog lists the site's pages and events. Never guess one.\n- A list answers `nextCursor`, null on the last page. Pass it back as `cursor` for the next page. `limit` sets the page size.\n- After installing the tracker on a site, call get-install-status to check that events arrive.\n- RATE_LIMITED and TOO_MANY_CONCURRENT_REQUESTS say when to retry. QUERY_TIMEOUT asks for a shorter range.\n\nReading the numbers:\n- Money is an integer in minor units of `meta.currency`: 14307 is 143.07.\n- An empty `name` is a real row: direct traffic in the sources and attribution reports, and an unrecognised browser, system or place in the devices and locations reports.\n- `meta.range` is the resolved period, `from` inclusive and `to` exclusive. `meta.compare` is the comparison range, when one was asked for.\n\nChanging things:\n- Read before you write: call list-goals before save-goal, and the same for notes, funnels and reports. To change a row, pass its `id`. Without `id` a save tool creates a row. save-site takes `site` in place of `id`.\n- A save with `id` changes only the fields it sends, and a list sent replaces the whole list.\n- A 409 failure such as GOAL_EXISTS names the existing row's id. Pass it as `id` to update that row instead of creating another.\n- get-funnel-preview checks a funnel's steps before you save them.\n- A FORBIDDEN failure on a save or delete means this connection is read only. Tell the person to run Disconnect Highseat from the View Sites command and connect again with Read and write.\n- Repeating an identical save that creates a row is safe: within 24 hours it answers the first row and writes nothing.\n- A delete cannot be undone. Call one only when the person asked for it."
+    "instructions": "Highseat reports a website's traffic: visitors, pages, sources, devices, locations, campaigns, events, goals, funnels and revenue. A connection with write access can also change a site's notes, goals, funnels, saved reports and settings.\n\n- Start with list-sites: it lists the sites this connection reaches. Every site tool takes `site`, the domain as registered or the site id.\n- To compare sites over the last 24 hours, call list-site-overviews once rather than get-stats per site. For any other period, or for one site, call get-stats.\n- get-stats answers every report on the dashboard: overview, trend, pages, sources, devices, locations, campaigns, events, goals and revenue. Its `report` parameter picks one.\n- `period` takes day, week, month or year (positioned by `date`), a window ending now such as 24h, 7d or 3mo, all, or custom with `from` and `to` (YYYY-MM-DD). It defaults to 7d. Days are in the site's timezone, which each answer's `meta` states with the resolved range.\n- `filter` is a list, each entry written dimension[.key]:operator:value, and every filter has to match. Discover a value before filtering on it: get-filter-values lists the values a dimension takes, and get-catalog lists the site's pages and events. Never guess one.\n- A list answers `nextCursor`, null on the last page. Pass it back as `cursor` for the next page. `limit` sets the page size.\n- After installing the tracker on a site, call get-install-status to check that events arrive.\n- RATE_LIMITED and TOO_MANY_CONCURRENT_REQUESTS say when to retry. QUERY_TIMEOUT asks for a shorter range.\n\nReading the numbers:\n- Money is an integer in minor units of `meta.currency`: 14307 is 143.07.\n- An empty `name` is a real row: direct traffic in the sources and attribution reports, and an unrecognised browser, system or place in the devices and locations reports.\n- `meta.range` is the resolved period, `from` inclusive and `to` exclusive. `meta.compare` is the comparison range, when one was asked for.\n\nChanging things:\n- Read before you write: call list-goals before save-goal, and the same for notes, funnels and reports. To change a row, pass its `id`. Without `id` a save tool creates a row. save-site takes `site` in place of `id`.\n- A save with `id` changes only the fields it sends, and a list sent replaces the whole list.\n- A 409 failure such as GOAL_EXISTS names the existing row's id. Pass it as `id` to update that row instead of creating another.\n- get-funnel-preview checks a funnel's steps before you save them.\n- A FORBIDDEN failure on a save or delete means this connection is read only. Tell the person to run Disconnect Highseat from the View Sites command and connect again with Read and write.\n- Repeating an identical save that creates a row is safe: within 24 hours it answers the first row and writes nothing.\n- A delete cannot be undone. Call one only when the person asked for it.",
+    "evals": [
+      {
+        "input": "@highseat compare all my sites",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              },
+              {
+                "id": "site_2",
+                "name": "Acme",
+                "domain": "acme.dev",
+                "timezone": "Europe/Warsaw",
+                "visitors": 300,
+                "previousVisitors": 450,
+                "online": 2
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-site-overviews"
+          },
+          {
+            "not": {
+              "callsTool": "get-stats"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat how many visitors did example.com get in the last 7 days?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-stats": {
+            "data": {
+              "visitors": 8421,
+              "pageviews": 21034,
+              "sessions": 9310,
+              "bounceRate": 41.2,
+              "avgDuration": 83
+            },
+            "meta": {
+              "timezone": "Europe/Warsaw",
+              "currency": "USD"
+            }
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-stats",
+              "arguments": {
+                "site": "example.com",
+                "report": "overview"
+              }
+            }
+          },
+          {
+            "includes": "8"
+          }
+        ]
+      },
+      {
+        "input": "@highseat what are the top pages on example.com this month?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-stats": {
+            "data": [
+              {
+                "path": "/",
+                "visitors": 5120
+              },
+              {
+                "path": "/pricing",
+                "visitors": 1830
+              }
+            ],
+            "nextCursor": null,
+            "meta": {
+              "timezone": "Europe/Warsaw",
+              "currency": "USD"
+            }
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-stats",
+              "arguments": {
+                "site": "example.com",
+                "report": "pages"
+              }
+            }
+          },
+          {
+            "includes": "/pricing"
+          }
+        ]
+      },
+      {
+        "input": "@highseat add a note to example.com on 2026-11-06: Launched the new pricing page",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "save-note": {
+            "data": {
+              "id": "note_1",
+              "date": "2026-11-06",
+              "text": "Launched the new pricing page"
+            }
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-note",
+              "arguments": {
+                "date": "2026-11-06",
+                "text": {
+                  "includes": "pricing"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat create a goal on example.com for visits to /pricing",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-goals": {
+            "data": [],
+            "nextCursor": null
+          },
+          "save-goal": {
+            "data": {
+              "id": "goal_1",
+              "name": "Pricing",
+              "type": "page",
+              "match": "/pricing"
+            }
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-goal",
+              "arguments": {
+                "site": "example.com",
+                "type": "page",
+                "match": "/pricing"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat delete the note about the old launch on example.com",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-notes": {
+            "data": [
+              {
+                "id": "note_9",
+                "date": "2026-10-01",
+                "text": "Old launch"
+              },
+              {
+                "id": "note_8",
+                "date": "2026-09-15",
+                "text": "New blog"
+              }
+            ],
+            "nextCursor": null
+          },
+          "delete-note": {
+            "deleted": "note_9"
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "site": "example.com",
+                "id": "note_9"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat what notes does example.com have?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-notes": {
+            "data": [
+              {
+                "id": "note_9",
+                "date": "2026-10-01",
+                "text": "Old launch"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-notes"
+          },
+          {
+            "not": {
+              "callsTool": "delete-note"
+            }
+          }
+        ],
+        "usedAsExample": false
+      }
+    ]
   },
   "dependencies": {
     "@raycast/api": "^2.11.1",

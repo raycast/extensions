@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, updateCommandMetadata } from "@raycast/api"
 import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils"
+import type { ApiResult } from "highseat/api"
 import { useEffect, useState } from "react"
 import { RefreshAction, SitesEmptyView } from "./components/load-state"
 import { PeriodDropdown } from "./components/period-dropdown"
@@ -10,24 +11,17 @@ import { api, APP_URL, disconnect, highseat } from "./lib/highseat"
 import { getChangeColor, getOverviewFigures } from "./lib/overview"
 import { DEFAULT_PERIOD, getCompare, getPeriodTitle } from "./lib/periods"
 
+type Overview = ApiResult<"/sites/{site}/overview">
+
 interface SiteDetailProps {
   site: Site
   period: string
-  isSelected: boolean
+  data?: Overview
+  error?: Error
+  isLoading: boolean
 }
 
-/** Every row keeps its cached figures on screen, and only the selected row calls the API. */
-function SiteDetail({ site, period, isSelected }: SiteDetailProps) {
-  const { data, isLoading, error } = useCachedPromise(
-    (siteId: string, range: string) =>
-      api.get("/sites/{site}/overview", {
-        path: { site: siteId },
-        query: { period: range, compare: getCompare(range) },
-      }),
-    [site.id, period],
-    { execute: isSelected, keepPreviousData: isSelected },
-  )
-
+function SiteDetail({ site, period, data, error, isLoading }: SiteDetailProps) {
   return (
     <List.Item.Detail
       isLoading={isLoading}
@@ -61,7 +55,18 @@ interface SiteItemProps {
   onRefresh: () => void
 }
 
+/** Every row keeps its cached figures on screen, and only the selected row calls the API. */
 function SiteItem({ site, period, isSelected, onRefresh }: SiteItemProps) {
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    (siteId: string, range: string) =>
+      api.get("/sites/{site}/overview", {
+        path: { site: siteId },
+        query: { period: range, compare: getCompare(range) },
+      }),
+    [site.id, period],
+    { execute: isSelected, keepPreviousData: isSelected },
+  )
+
   return (
     <List.Item
       id={site.id}
@@ -69,17 +74,22 @@ function SiteItem({ site, period, isSelected, onRefresh }: SiteItemProps) {
       title={site.name}
       keywords={[site.domain]}
       accessories={[{ text: formatCount(site.visitors), tooltip: "Visitors in the last 24 hours" }]}
-      detail={<SiteDetail site={site} period={period} isSelected={isSelected} />}
+      detail={<SiteDetail site={site} period={period} data={data} error={error} isLoading={isLoading} />}
       actions={
         <ActionPanel>
-          <Action.Push title="View Stats" icon={Icon.BarChart} target={<SiteStats site={site} />} />
+          <Action.Push title="View Stats" icon={Icon.BarChart} target={<SiteStats site={site} title={site.name} />} />
           <Action.OpenInBrowser
             title="Open Dashboard"
             url={`${APP_URL}/${site.domain}`}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action.CopyToClipboard title="Copy Domain" content={site.domain} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <RefreshAction onRefresh={onRefresh} />
+          <RefreshAction
+            onRefresh={() => {
+              onRefresh()
+              revalidate()
+            }}
+          />
           <Action
             title="Disconnect Highseat"
             icon={Icon.Logout}

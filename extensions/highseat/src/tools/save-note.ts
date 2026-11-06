@@ -1,4 +1,5 @@
 import { withAccessToken } from "@raycast/utils"
+import { confirmSave } from "../lib/confirmation"
 import { highseat, request } from "../lib/highseat"
 
 type Input = {
@@ -16,3 +17,5 @@ export default withAccessToken(highseat)(async ({ site, id, ...body }: Input) =>
   if (id) return request("patch", "/sites/{site}/notes/{id}", { path: { site, id }, body })
   return request("post", "/sites/{site}/notes", { path: { site }, body })
 })
+
+export const confirmation = confirmSave<Input>("note")

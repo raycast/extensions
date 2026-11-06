@@ -40,7 +40,7 @@ interface SwitchSiteActionProps {
 
 export function SwitchSiteAction({ sites, onSelect }: SwitchSiteActionProps) {
   return (
-    <ActionPanel.Submenu title="Switch Site" icon={Icon.Switch} shortcut={Keyboard.Shortcut.Common.Save}>
+    <ActionPanel.Submenu title="Switch Site" icon={Icon.Switch} shortcut={Keyboard.Shortcut.Common.Duplicate}>
       {sites.map(site => (
         <Action key={site.id} icon={getSiteIcon(site)} title={site.name} onAction={() => onSelect(site.id)} />
       ))}

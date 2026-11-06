@@ -1,11 +1,14 @@
-import { Cache, environment, Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api"
-import { useCachedPromise, useCachedState } from "@raycast/utils"
+import { environment, Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api"
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils"
 import { findSelectedSite, getSiteIcon, SiteOverview } from "./components/site-picker"
 import { formatCount } from "./lib/format"
-import { api, APP_URL, isConnected } from "./lib/highseat"
+import { api, APP_URL, cache, isConnected, LIVE_SITES_KEY } from "./lib/highseat"
 
-const SITES_KEY = "live-overviews"
-const cache = new Cache()
+async function fetchOverviews(siteId: string | undefined) {
+  const { data: sites } = await api.get("/sites/overview")
+  cache.set(LIVE_SITES_KEY, JSON.stringify(sites))
+  return { connected: true as const, sites, site: findSelectedSite(sites, siteId) }
+}
 
 /**
  * A menu bar command also runs in the background, so it never starts a sign-in on its own. Without
@@ -15,19 +18,20 @@ async function fetchLive(siteId: string | undefined) {
   if (!(await isConnected())) return { connected: false as const }
 
   // Opening the menu reads every site in one call. A background refresh reads only the menu bar's site.
-  const cached = cache.get(SITES_KEY)
-  if (environment.launchType !== LaunchType.Background || !cached) {
-    const { data: sites } = await api.get("/sites/overview")
-    cache.set(SITES_KEY, JSON.stringify(sites))
-    return { connected: true as const, sites, site: findSelectedSite(sites, siteId) }
-  }
+  const cached = cache.get(LIVE_SITES_KEY)
+  if (environment.launchType !== LaunchType.Background || !cached) return fetchOverviews(siteId)
 
   const sites: SiteOverview[] = JSON.parse(cached)
   const site = findSelectedSite(sites, siteId)
-  if (!site) return { connected: true as const, sites }
+  if (!site) return fetchOverviews(siteId)
 
-  const realtime = await api.get("/sites/{site}/realtime", { path: { site: site.id } })
-  return { connected: true as const, sites, site: { ...site, online: realtime.data.visitors } }
+  try {
+    const realtime = await api.get("/sites/{site}/realtime", { path: { site: site.id } })
+    return { connected: true as const, sites, site: { ...site, online: realtime.data.visitors } }
+  } catch {
+    // The cached site may be gone from the connection, so the list is read again.
+    return fetchOverviews(siteId)
+  }
 }
 
 export default function LiveVisitors() {
@@ -39,7 +43,13 @@ export default function LiveVisitors() {
       <MenuBarExtra icon={Icon.BarChart} isLoading={isLoading} tooltip="Highseat">
         <MenuBarExtra.Item
           title="Connect Highseat"
-          onAction={() => launchCommand({ name: "view-sites", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "view-sites", type: LaunchType.UserInitiated })
+            } catch (error) {
+              await showFailureToast(error, { title: "Could not open View Sites" })
+            }
+          }}
         />
       </MenuBarExtra>
     )

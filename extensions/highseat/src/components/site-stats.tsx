@@ -13,6 +13,8 @@ const ROWS_PER_SECTION = 5
 
 interface SiteStatsProps {
   site: Site
+  /** Set on a pushed view only, because a command's root view shows the command's own title. */
+  title?: string
   sites?: Site[]
   onSwitchSite?: (siteId: string) => void
 }
@@ -52,7 +54,7 @@ async function fetchStats(site: string, period: string) {
   return { overview, pages: pages.data, sources: sources.data, countries: countries.data }
 }
 
-export function SiteStats({ site, sites = [], onSwitchSite }: SiteStatsProps) {
+export function SiteStats({ site, title, sites = [], onSwitchSite }: SiteStatsProps) {
   const [period, setPeriod] = useCachedState("period", DEFAULT_PERIOD)
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchStats, [site.id, period], {
     keepPreviousData: true,
@@ -73,7 +75,7 @@ export function SiteStats({ site, sites = [], onSwitchSite }: SiteStatsProps) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={site.name}
+      navigationTitle={title}
       searchBarPlaceholder={`Filter ${site.domain}`}
       searchBarAccessory={<PeriodDropdown value={period} onChange={setPeriod} />}
     >

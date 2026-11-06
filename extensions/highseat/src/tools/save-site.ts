@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api"
 import { withAccessToken } from "@raycast/utils"
+import { getChangeInfo } from "../lib/confirmation"
 import { highseat, request } from "../lib/highseat"
 
 type Input = {
@@ -34,5 +35,5 @@ export default withAccessToken(highseat)(async ({ site, ...body }: Input) => {
 
 export const confirmation: Tool.Confirmation<Input> = async ({ site, ...changes }) => ({
   message: site ? `Change the settings of ${site}?` : `Add the site ${changes.domain}?`,
-  info: Object.entries(changes).map(([name, value]) => ({ name, value: JSON.stringify(value) })),
+  info: getChangeInfo(changes),
 })

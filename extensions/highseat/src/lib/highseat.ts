@@ -1,4 +1,4 @@
-import { OAuth } from "@raycast/api"
+import { Cache, OAuth } from "@raycast/api"
 import { OAuthService } from "@raycast/utils"
 import { createApi } from "highseat/api"
 import { createHash } from "node:crypto"
@@ -8,6 +8,10 @@ type Call = (path: string, options: object) => Promise<unknown>
 type FetchInput = Parameters<typeof fetch>[0]
 
 export const APP_URL = "https://app.highseat.com"
+
+/** Where Live Visitors keeps the site list its background refreshes read. */
+export const LIVE_SITES_KEY = "live-overviews"
+export const cache = new Cache()
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -86,4 +90,5 @@ export async function isConnected() {
 /** Forgets the connection, so the next call opens the picker again. */
 export async function disconnect() {
   await client.removeTokens()
+  cache.remove(LIVE_SITES_KEY)
 }

@@ -1,4 +1,5 @@
 import { withAccessToken } from "@raycast/utils"
+import { confirmSave } from "../lib/confirmation"
 import { highseat, request } from "../lib/highseat"
 
 type Input = {
@@ -55,9 +56,16 @@ type Input = {
   position?: number
 }
 
-/** Raycast's tool inputs cannot be null, so "none" clears a field the API stores as null. */
+/** The fields the API stores as null. Raycast's tool inputs cannot be null, so "none" clears them. */
+const NULLABLE_FIELDS = ["dimension", "propertyKey", "period", "granularity"]
+
 function clearNone(fields: object) {
-  return Object.fromEntries(Object.entries(fields).map(([name, value]) => [name, value === "none" ? null : value]))
+  return Object.fromEntries(
+    Object.entries(fields).map(([name, value]) => [
+      name,
+      NULLABLE_FIELDS.includes(name) && value === "none" ? null : value,
+    ]),
+  )
 }
 
 export default withAccessToken(highseat)(async ({ site, id, ...fields }: Input) => {
@@ -65,3 +73,5 @@ export default withAccessToken(highseat)(async ({ site, id, ...fields }: Input) 
   if (id) return request("patch", "/sites/{site}/reports/{id}", { path: { site, id }, body })
   return request("post", "/sites/{site}/reports", { path: { site }, body })
 })
+
+export const confirmation = confirmSave<Input>("report")
