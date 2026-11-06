@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Resolve Relative Linked PDFs] - {PR_MERGE_DATE}
+## [Resolve Relative Linked PDFs] - 2026-11-06
 
 - Resolve `attachments:` paths using the linked attachment base directory of the matching Zotero profile, for both primary and secondary PDFs
 - Leave relative links unresolved when no unambiguous matching profile is available, instead of opening a path from another data directory
