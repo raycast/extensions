@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bulkpublish",
+  "title": "BulkPublish",
+  "description": "Write, schedule and publish social media posts to all your BulkPublish channels, and keep an eye on your queue, without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "azeemkafridi",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "bulkpublish",
+    "social media",
+    "scheduler",
+    "schedule post",
+    "publish",
+    "instagram",
+    "linkedin",
+    "x",
+    "threads",
+    "bluesky",
+    "tiktok",
+    "facebook"
+  ],
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "subtitle": "BulkPublish",
+      "description": "Write a post and publish it now, add it to your queue, schedule it or save it as a draft.",
+      "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "subtitle": "BulkPublish",
+      "description": "Browse and search your recent posts, see where each one was published, and retry or publish them.",
+      "mode": "view"
+    },
+    {
+      "name": "view-queue",
+      "title": "View Queue",
+      "subtitle": "BulkPublish",
+      "description": "See what is scheduled to go out next, day by day, and your next free queue slot.",
+      "mode": "view"
+    },
+    {
+      "name": "list-channels",
+      "title": "List Channels",
+      "subtitle": "BulkPublish",
+      "description": "See your connected social accounts and which ones need attention.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your BulkPublish API key. Create one at app.bulkpublish.com/developer. It starts with bp_.",
+      "type": "password",
+      "required": true,
+      "placeholder": "bp_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.0.0",
+    "prettier": "^3.9.10",
+    "react": "19.3.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --no-warnings --test --experimental-strip-types src/lib/core.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
