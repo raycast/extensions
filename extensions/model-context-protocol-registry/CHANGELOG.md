@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Arca Life Sciences MCP Server] - {PR_MERGE_DATE}
+
+- Add Arca Life Sciences to the official registry: free search of PubMed literature (with citation counts), FDA drug and device records, ClinicalTrials.gov, VAERS and EU/PMDA device vigilance, with a source URL on every result. 4 read-only tools. Hosted Streamable HTTP server at https://app.arca.inc/api/public/mcp with no authentication, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Kilobat CLI MCP Server] - 2026-11-06
 
 - Add Kilobat CLI to the official registry for local macOS network diagnostics. Requires a separately installed CLI and macOS 14+; some tools change settings or need permissions or the companion desktop app.

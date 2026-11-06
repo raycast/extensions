@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "arca-life-sciences",
+    title: "Arca Life Sciences",
+    description:
+      "Free search of public life-sciences records: ranked PubMed literature with OpenAlex citation counts and open-access filters, FDA drug and device records (labels, approvals, warning letters, Form 483s, 510(k)/PMA, MAUDE), ClinicalTrials.gov, VAERS, CDC data and EU/PMDA device vigilance. Every result cites its source URL. 4 tools, read-only. Hosted Streamable HTTP server; no account or API key.",
+    icon: "https://www.arca.inc/apple-icon.png",
+    homepage: "https://www.arca.inc/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.arca.inc/api/public/mcp"],
+    },
+    remoteUrl: "https://app.arca.inc/api/public/mcp",
+  },
+  {
     name: "video-dept-ai",
     title: "Video Dept. AI",
     description:
