@@ -57,6 +57,7 @@
       "title": "Slack App Client ID",
       "description": "Use the included Slack app or enter the Client ID of your own PKCE-enabled Slack app.",
       "type": "textfield",
+      "placeholder": "123456789.123456789",
       "required": false,
       "default": "12513164833716.12503241805347"
     }
