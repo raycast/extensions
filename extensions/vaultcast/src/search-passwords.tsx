@@ -719,7 +719,10 @@ export default function SearchPasswords() {
   const extensionSessionState = getExtensionSessionState();
 
   function canAutoBootstrapExtensionSession(adapter: PasswordManagerAdapter, status: AdapterStatus): boolean {
+    // Until hydration finishes the local state always reads "empty"; bootstrapping then would bump the
+    // session epoch and make hydrateCredentialVault drop the helper snapshot for every other manager.
     return Boolean(
+      !isLoadingVault &&
       status.ok &&
       isExtensionSessionEnabled() &&
       adapter.authenticate &&
