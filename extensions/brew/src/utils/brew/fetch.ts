@@ -347,7 +347,7 @@ export async function brewFetchOutdated(
  * JSON on stdout is a success. Only an exit with nothing on stdout (an unknown
  * formula, a broken brew) is a real failure, and then brew's own `ExecError`
  * is rethrown so its stderr reaches the failure toast. Warnings brew emits
- * alongside a good scan (untrusted tap, missing SBOM) are logged, not surfaced.
+ * alongside a good scan (untrusted tap, missing SBOM) are logged.
  */
 export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults> {
   brewLogger.log("Scanning for vulnerabilities");
@@ -360,6 +360,8 @@ export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults>
     brewLogger.log("Vulnerability scan complete", {
       findingsCount: results.findings.length,
       skippedCount: results.skipped.length,
+      unscannedCount: results.unscanned.length,
+      outdatedWithoutSbomCount: results.outdatedWithoutSbom.length,
     });
     return results;
   };

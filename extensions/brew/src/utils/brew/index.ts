@@ -178,8 +178,15 @@ export { getBrewMajorVersion, invalidateBrewMajorVersion } from "./brew-version"
 export { confirmAndRun } from "./confirmAndRun";
 
 // Vulnerabilities (`brew vulns`)
-export { osvUrl, osvLink, escapeMarkdown } from "./vulns";
-export type { VulnSeverity, Vulnerability, VulnFinding, VulnResults } from "./vulns";
+export { osvUrl, osvLink, escapeMarkdown, withCoverageDefaults } from "./vulns";
+export type {
+  VulnSeverity,
+  Vulnerability,
+  VulnFinding,
+  VulnResults,
+  UnscannedFormula,
+  CachedVulnResults,
+} from "./vulns";
 
 // Helpers
 export {
