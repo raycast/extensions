@@ -1,4 +1,3 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
@@ -77,29 +76,9 @@ async function resolveGitBranch(directoryPath: string): Promise<string | null> {
 
     const branch = stdout.trim();
     return branch || null;
-  } catch (error) {
-    // Only show error if it's not the common "not a git repository" error, not the "ambiguous argument 'HEAD'" error,
-    // and not a missing git binary
-    if (
-      error instanceof Error &&
-      !error.message.includes("not a git repository") &&
-      !error.message.includes("ambiguous argument 'HEAD'") &&
-      !error.message.includes("ENOENT")
-    ) {
-      const message = error instanceof Error ? error.message : String(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Git Error",
-        message,
-        primaryAction: {
-          title: "Copy Error",
-          onAction: () => {
-            Clipboard.copy(message);
-            showHUD("Copied to clipboard");
-          },
-        },
-      });
-    }
+  } catch {
+    // The branch is only a decoration, so any failure (deleted or unreachable
+    // folder, broken worktree link, unborn HEAD, missing git binary) just hides it.
     return null;
   }
 }
