@@ -3275,6 +3275,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
     remoteUrl: "https://mcp.holos33.com/mcp",
   },
+  {
+    name: "ecommerce-leads",
+    title: "Ecommerce Leads",
+    description:
+      "Ecommerce store data by domain: estimated revenue, marketing budget, traffic, Google and Meta ad spend, ad counts, a Conversion Rate Score, buying signals and social links. lookupStore works without an account. Sign in to search 600,000+ stores, reveal decision-maker contacts (spends paid account credits after confirmation), and manage signal sets, watchlists and CSV exports. Hosted remote Streamable HTTP server at https://getecommerceleads.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/matosdfm/ecommerce-leads-mcp/main/assets/logo.png",
+    homepage: "https://getecommerceleads.com/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://getecommerceleads.com/api/mcp"],
+    },
+    remoteUrl: "https://getecommerceleads.com/api/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
