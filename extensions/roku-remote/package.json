@@ -204,6 +204,309 @@
     }
   ],
   "ai": {
-    "instructions": "Use roku-status to find saved TVs and routines before controlling anything. Then call roku-preview with the supported instruction and exact saved deviceId. Each preview must target one TV only; use separate previews for different TVs. Show the returned resolved actions and TV, then call roku-instruction with exactly the returned previewId for Raycast confirmation and execution. Never invent, substitute or reuse preview IDs. A preview expires after ten minutes and is consumed before execution, even if execution fails. If it expires or current settings change, create and show a new preview rather than retrying the old ID. All core commands and routines are free and work without AI. Preserve the user's explicit room targeting. Never invent an explicit room to bypass a device that requires explicit naming. Do not guess device IDs, app IDs, current mute state, or current playback state. State-specific mute, unmute, play, and pause are unsupported; only explicit toggles are supported. Use the exact configured routine name when requested. For a command that omits the room, use only the configured default TV when allowed; never pick the first TV. Each clause without a target uses the default independently. Completed commands do not prove physical effects unless the result explicitly confirms state. Do not promise arbitrary movie search, content playback, or subscriptions. Do not change aliases or protection settings. Never retry toggle commands automatically."
+    "instructions": "Use roku-status to find saved TVs and routines before controlling anything. Then call roku-preview with the supported instruction and exact saved deviceId. Each preview must target one TV only; use separate previews for different TVs. Show the returned resolved actions and TV, then call roku-instruction with exactly the returned previewId for Raycast confirmation and execution. Never invent, substitute or reuse preview IDs. A preview expires after ten minutes and is consumed before execution, even if execution fails. If it expires or current settings change, create and show a new preview rather than retrying the old ID. All core commands and routines are free and work without AI. Preserve the user's explicit room targeting. Never invent an explicit room to bypass a device that requires explicit naming. Do not guess device IDs, app IDs, current mute state, or current playback state. State-specific mute, unmute, play, and pause are unsupported; only explicit toggles are supported. Use the exact configured routine name when requested. For a command that omits the room, use only the configured default TV when allowed; never pick the first TV. Each clause without a target uses the default independently. Completed commands do not prove physical effects unless the result explicitly confirms state. Do not promise arbitrary movie search, content playback, or subscriptions. Do not change aliases or protection settings. Never retry toggle commands automatically.",
+    "evals": [
+      {
+        "input": "@roku-remote open YouTube on the bedroom TV",
+        "mocks": {
+          "roku-status": {
+            "defaultDeviceId": "living",
+            "devices": [
+              {
+                "id": "living",
+                "name": "Living Room",
+                "reachable": true,
+                "activeApp": {
+                  "id": "12",
+                  "name": "Netflix"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              },
+              {
+                "id": "bedroom",
+                "name": "Bedroom",
+                "reachable": true,
+                "activeApp": {
+                  "id": "home",
+                  "name": "Home"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              }
+            ],
+            "routines": [
+              {
+                "id": "r1",
+                "name": "Movie Night",
+                "deviceId": "living",
+                "steps": [
+                  {
+                    "type": "wake"
+                  },
+                  {
+                    "type": "launch",
+                    "appId": "12"
+                  }
+                ]
+              }
+            ],
+            "settings": {
+              "roomAliases": {},
+              "targetAliases": [],
+              "protectedDeviceIds": [
+                "bedroom"
+              ]
+            }
+          },
+          "roku-preview": {
+            "previewId": "preview-1",
+            "deviceId": "bedroom",
+            "preview": [
+              "Bedroom: open YouTube"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z"
+          },
+          "roku-instruction": {
+            "status": "completed",
+            "completedSteps": 1,
+            "totalSteps": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "roku-status"
+          },
+          {
+            "callsTool": {
+              "name": "roku-preview",
+              "arguments": {
+                "deviceId": "bedroom"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "roku-instruction",
+              "arguments": {
+                "previewId": "preview-1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@roku-remote run Movie Night",
+        "mocks": {
+          "roku-status": {
+            "defaultDeviceId": "living",
+            "devices": [
+              {
+                "id": "living",
+                "name": "Living Room",
+                "reachable": true,
+                "activeApp": {
+                  "id": "12",
+                  "name": "Netflix"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              },
+              {
+                "id": "bedroom",
+                "name": "Bedroom",
+                "reachable": true,
+                "activeApp": {
+                  "id": "home",
+                  "name": "Home"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              }
+            ],
+            "routines": [
+              {
+                "id": "r1",
+                "name": "Movie Night",
+                "deviceId": "living",
+                "steps": [
+                  {
+                    "type": "wake"
+                  },
+                  {
+                    "type": "launch",
+                    "appId": "12"
+                  }
+                ]
+              }
+            ],
+            "settings": {
+              "roomAliases": {},
+              "targetAliases": [],
+              "protectedDeviceIds": [
+                "bedroom"
+              ]
+            }
+          },
+          "roku-preview": {
+            "previewId": "preview-2",
+            "deviceId": "living",
+            "preview": [
+              "Living Room: run routine Movie Night"
+            ],
+            "expiresAt": "2030-01-01T00:00:00.000Z"
+          },
+          "roku-instruction": {
+            "status": "completed",
+            "completedSteps": 2,
+            "totalSteps": 2
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "roku-status"
+          },
+          {
+            "callsTool": {
+              "name": "roku-preview",
+              "arguments": {
+                "deviceId": "living"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "roku-instruction",
+              "arguments": {
+                "previewId": "preview-2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@roku-remote what's playing on my TVs?",
+        "mocks": {
+          "roku-status": {
+            "defaultDeviceId": "living",
+            "devices": [
+              {
+                "id": "living",
+                "name": "Living Room",
+                "reachable": true,
+                "activeApp": {
+                  "id": "12",
+                  "name": "Netflix"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              },
+              {
+                "id": "bedroom",
+                "name": "Bedroom",
+                "reachable": true,
+                "activeApp": {
+                  "id": "home",
+                  "name": "Home"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              }
+            ],
+            "routines": [
+              {
+                "id": "r1",
+                "name": "Movie Night",
+                "deviceId": "living",
+                "steps": [
+                  {
+                    "type": "wake"
+                  },
+                  {
+                    "type": "launch",
+                    "appId": "12"
+                  }
+                ]
+              }
+            ],
+            "settings": {
+              "roomAliases": {},
+              "targetAliases": [],
+              "protectedDeviceIds": [
+                "bedroom"
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "roku-status"
+          },
+          {
+            "meetsCriteria": "Says the Living Room TV is on Netflix and does not call roku-preview or roku-instruction"
+          }
+        ]
+      },
+      {
+        "input": "@roku-remote unmute the living room TV",
+        "mocks": {
+          "roku-status": {
+            "defaultDeviceId": "living",
+            "devices": [
+              {
+                "id": "living",
+                "name": "Living Room",
+                "reachable": true,
+                "activeApp": {
+                  "id": "12",
+                  "name": "Netflix"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              },
+              {
+                "id": "bedroom",
+                "name": "Bedroom",
+                "reachable": true,
+                "activeApp": {
+                  "id": "home",
+                  "name": "Home"
+                },
+                "powerMode": "PowerOn",
+                "controlMode": "enabled"
+              }
+            ],
+            "routines": [
+              {
+                "id": "r1",
+                "name": "Movie Night",
+                "deviceId": "living",
+                "steps": [
+                  {
+                    "type": "wake"
+                  },
+                  {
+                    "type": "launch",
+                    "appId": "12"
+                  }
+                ]
+              }
+            ],
+            "settings": {
+              "roomAliases": {},
+              "targetAliases": [],
+              "protectedDeviceIds": [
+                "bedroom"
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Explains that unmute is not supported because the current mute state cannot be verified, offers 'toggle mute' instead, and does not call roku-instruction"
+          }
+        ]
+      }
+    ]
   }
 }

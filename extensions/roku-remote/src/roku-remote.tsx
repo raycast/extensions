@@ -509,7 +509,8 @@ function RemoteForDevice({
         title={control.title}
         icon={control.icon}
         keywords={control.keys}
-        accessories={[{ text: control.keys.map((k) => (k === " " ? "Space" : k.toUpperCase())).join(" · ") }]}
+        // The detail pane hides accessories, so key hints go in the subtitle.
+        subtitle={control.keys.map((k) => (k === " " ? "Space" : k.toUpperCase())).join(" · ")}
         detail={detail}
         actions={
           <ActionPanel>
@@ -614,7 +615,7 @@ function RemoteForDevice({
               icon={
                 icons[app.id] ? { source: icons[app.id] } : app.id.startsWith("tvinput.") ? Icon.Plug : Icon.AppWindow
               }
-              accessories={now.app?.id === app.id ? [{ tag: { value: "On", color: Color.Green } }] : undefined}
+              subtitle={now.app?.id === app.id ? "On Now" : undefined}
               detail={detail}
               actions={
                 <ActionPanel>

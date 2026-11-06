@@ -1,78 +1,53 @@
-import {} from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useCallback, useRef } from "react";
 import { getSavedDevices, getSelectedDevice, selectDevice } from "../lib/storage";
 import { describeRokuError } from "../lib/roku";
-import type { RokuDevice } from "../lib/types";
 
 export function useDevices() {
-  const [devices, setDevices] = useState<RokuDevice[]>([]);
-  const [selectedId, setSelectedId] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const generation = useRef(0);
+  // Selection writes are chained so they land in order, and a refresh started
+  // during a selection reads the resulting default.
   const selectionWrite = useRef<Promise<void>>(Promise.resolve());
-  const mounted = useRef(false);
+  const { data, isLoading, error, revalidate, mutate } = usePromise(
+    async () => {
+      await selectionWrite.current.catch(() => undefined);
+      const [devices, selected] = await Promise.all([getSavedDevices(), getSelectedDevice()]);
+      return { devices, selectedId: selected?.id };
+    },
+    [],
+    { onError: () => undefined },
+  );
 
   const reload = useCallback(async () => {
-    const current = ++generation.current;
-    setIsLoading(true);
-    try {
-      // A refresh requested during a selection must read the resulting default.
-      await selectionWrite.current.catch(() => undefined);
-      if (current !== generation.current) return;
-      const [saved, selected] = await Promise.all([getSavedDevices(), getSelectedDevice()]);
-      if (current !== generation.current) return;
-      setDevices(saved);
-      setSelectedId(selected?.id);
-      setError(undefined);
-    } catch (cause) {
-      if (current === generation.current) setError(describeRokuError(cause));
-    } finally {
-      if (current === generation.current) setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    mounted.current = true;
-    void reload();
-    return () => {
-      mounted.current = false;
-      generation.current += 1;
-    };
-  }, [reload]);
+    await revalidate();
+  }, [revalidate]);
 
   const choose = useCallback(
     async (id: string) => {
       if (!id) return;
-      const current = ++generation.current;
-      // Stop rendering controls for the old target while the new choice saves.
-      setSelectedId(undefined);
-      setIsLoading(true);
       const write = selectionWrite.current.catch(() => undefined).then(() => selectDevice(id));
       selectionWrite.current = write;
       try {
-        await write;
-        if (current !== generation.current) return;
-        setSelectedId(id);
-        setError(undefined);
+        // Show the new target right away; mutate rolls back if the write fails.
+        await mutate(write, {
+          optimisticUpdate: (current) => ({ devices: current?.devices ?? [], selectedId: id }),
+          shouldRevalidateAfter: false,
+        });
       } catch (cause) {
-        if (!mounted.current || selectionWrite.current !== write) return;
-        await reload();
+        if (selectionWrite.current !== write) return;
         await showFailureToast(describeRokuError(cause), { title: "Couldn't select TV" });
-      } finally {
-        if (current === generation.current) setIsLoading(false);
       }
     },
-    [reload],
+    [mutate],
   );
 
+  const devices = data?.devices ?? [];
+  const selectedId = data?.selectedId;
   return {
     devices,
     selectedId,
     device: devices.find((device) => device.id === selectedId),
     isLoading,
-    error,
+    error: error ? describeRokuError(error) : undefined,
     reload,
     choose,
   };

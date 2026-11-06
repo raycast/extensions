@@ -142,18 +142,18 @@ export default function TVDashboard({ navigationTitle }: { navigationTitle?: str
             <List.Item
               key={device.id}
               title={device.name}
-              subtitle={status.activeApp?.name}
+              // The detail pane hides accessories, so reachability is in the subtitle and icon tint.
+              subtitle={[
+                status.reachable ? status.activeApp?.name || "Reachable" : "Unreachable",
+                restricted ? "Limited control" : undefined,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
               keywords={[device.host, device.model ?? ""]}
-              icon={Icon.Desktop}
-              accessories={[
-                {
-                  tag: {
-                    value: status.reachable ? "Reachable" : "Unreachable",
-                    color: status.reachable ? Color.Green : Color.SecondaryText,
-                  },
-                },
-                ...(restricted ? [{ tag: { value: "Limited control", color: Color.Orange } }] : []),
-              ]}
+              icon={{
+                source: Icon.Desktop,
+                tintColor: !status.reachable ? Color.SecondaryText : restricted ? Color.Orange : Color.Green,
+              }}
               detail={
                 <List.Item.Detail
                   markdown={
