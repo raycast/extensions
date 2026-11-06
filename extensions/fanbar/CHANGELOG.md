@@ -1,6 +1,6 @@
 # FanBar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Switch Preset: built-in and custom presets, run with or without holding.
 - Fan Status: mode, fan speeds and ranges, temperatures, restore time.
