@@ -125,4 +125,51 @@ describe("createNote", () => {
     expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("replacement");
     expect(open).toHaveBeenCalledTimes(1);
   });
+
+  it.each([
+    ["...", "Note names can't start with a dot. Obsidian hides those files."],
+    ["Folder/Task", "Note names can't contain / or \\. Use the Path field for folders."],
+  ])("rejects the note name %s without writing", async (name, message) => {
+    const before = fs.readdirSync(tempVault.vault.path, { recursive: true });
+
+    const saved = await createNote(tempVault.vault, { name, path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(fs.readdirSync(tempVault.vault.path, { recursive: true })).toEqual(before);
+    expect(open).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({ title: "Couldn't create note", message, style: "FAILURE" });
+  });
+
+  it("rejects an empty name when the default name is empty", async () => {
+    const saved = await createNote(tempVault.vault, { name: "", path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't create note",
+      message: "Enter a note name.",
+      style: "FAILURE",
+    });
+  });
+
+  it("rejects a path outside the vault without writing", async () => {
+    const outside = path.join(path.dirname(tempVault.vault.path), "outside");
+
+    const saved = await createNote(tempVault.vault, { name: "Task", path: "../outside", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(fs.existsSync(outside)).toBe(false);
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't create note",
+      message: "The path must stay inside the vault.",
+      style: "FAILURE",
+    });
+  });
+
+  it("drops a trailing .md from the note name", async () => {
+    const saved = await createNote(tempVault.vault, { name: "Task.md", path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(true);
+    expect(fs.readFileSync(path.join(tempVault.vault.path, "Task.md"), "utf-8")).toBe("body");
+    expect(fs.existsSync(path.join(tempVault.vault.path, "Task.md.md"))).toBe(false);
+  });
 });

@@ -2,7 +2,7 @@ import { confirmAlert, getPreferenceValues, Icon } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 import { NoteFormPreferences } from "../utils/preferences";
-import { directoryCreationErrorToast, fileWriteErrorToast } from "../components/Toasts";
+import { directoryCreationErrorToast, fileWriteErrorToast, invalidNoteNameToast } from "../components/Toasts";
 import { ObsidianUtils, ObsidianVault, Vault } from "../obsidian";
 import { applyTemplates } from "./templating/templating.service";
 import { openUrl } from "../utils/open";
@@ -24,6 +24,13 @@ export async function createNote(vault: ObsidianVault, params: CreateNoteParams)
   content = ObsidianUtils.createProperties(params.tags) + content;
   content = await applyTemplates(content);
   name = await applyTemplates(name);
+  name = name.replace(/\.md$/i, "");
+
+  const invalidReason = getInvalidNoteReason(vault.path, params.path, name);
+  if (invalidReason) {
+    invalidNoteNameToast(invalidReason);
+    return false;
+  }
 
   const saved = await createNoteWithConfirmation(vault.path, content, name, params.path);
 
@@ -36,6 +43,23 @@ export async function createNote(vault: ObsidianVault, params: CreateNoteParams)
     }
   }
   return saved;
+}
+
+function getInvalidNoteReason(vaultPath: string, notePath: string, name: string): string | undefined {
+  if (name.trim() == "") {
+    return "Enter a note name.";
+  }
+  if (name.startsWith(".")) {
+    return "Note names can't start with a dot. Obsidian hides those files.";
+  }
+  if (name.includes("/") || name.includes("\\")) {
+    return "Note names can't contain / or \\. Use the Path field for folders.";
+  }
+  const relative = path.relative(vaultPath, path.join(vaultPath, notePath));
+  if (relative === ".." || relative.startsWith(".." + path.sep) || path.isAbsolute(relative)) {
+    return "The path must stay inside the vault.";
+  }
+  return undefined;
 }
 
 async function createNoteWithConfirmation(
