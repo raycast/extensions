@@ -74,7 +74,11 @@ export function PostSearch({ channelId, channelName }: { channelId?: number; cha
               description={search ? "Try different words or another filter." : "Create your first post to see it here."}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Create Post" icon={Icon.Plus} target={<CreatePostForm />} />
+                  <Action.Push
+                    title="Create Post"
+                    icon={Icon.Plus}
+                    target={<CreatePostForm navigationTitle="Create Post" />}
+                  />
                 </ActionPanel>
               }
             />

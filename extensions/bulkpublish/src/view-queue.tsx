@@ -48,7 +48,11 @@ export default function Command() {
                 }
                 actions={
                   <ActionPanel>
-                    <Action.Push title="Create Post" icon={Icon.Plus} target={<CreatePostForm />} />
+                    <Action.Push
+                      title="Create Post"
+                      icon={Icon.Plus}
+                      target={<CreatePostForm navigationTitle="Create Post" />}
+                    />
                     <Action.OpenInBrowser title="Open Calendar" icon={Icon.Calendar} url={`${APP_URL}/calendar`} />
                     <Action
                       title="Refresh"
@@ -83,7 +87,11 @@ export default function Command() {
               description="Create a post and add it to your queue."
               actions={
                 <ActionPanel>
-                  <Action.Push title="Create Post" icon={Icon.Plus} target={<CreatePostForm />} />
+                  <Action.Push
+                    title="Create Post"
+                    icon={Icon.Plus}
+                    target={<CreatePostForm navigationTitle="Create Post" />}
+                  />
                 </ActionPanel>
               }
             />

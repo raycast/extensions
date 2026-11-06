@@ -51,7 +51,13 @@ async function request(method: string, path: string, body?: unknown): Promise<un
   } catch {
     throw new ApiError(0, "Couldn't reach BulkPublish. Check your connection and try again.");
   }
-  const text = await res.text();
+  let text: string;
+  try {
+    text = await res.text();
+  } catch {
+    // The connection dropped after BulkPublish started replying, so the request may have gone through.
+    throw new ApiError(0, "The connection to BulkPublish dropped before it finished replying.");
+  }
   let data: unknown = null;
   try {
     data = text ? JSON.parse(text) : null;
@@ -187,26 +193,62 @@ export interface SendRequest {
 }
 
 /**
- * Upload, create and (for "now") publish. If something fails part way through a
- * "publish now", the draft and uploads are removed so nothing half-made is left behind.
+ * Thrown when the post was created but publishing it failed or its result is unknown.
+ * The post and its media are kept, so the caller can check or retry that same post.
+ */
+export class PostKeptError extends ApiError {
+  constructor(
+    public postId: number,
+    /** True when BulkPublish may already be publishing (no clear answer came back). */
+    public uncertain: boolean,
+    cause: ApiError,
+  ) {
+    super(
+      cause.status,
+      uncertain
+        ? "BulkPublish may already be publishing it, but no reply came back. Check the post before trying again."
+        : `${cause.message} The post was kept in BulkPublish.`,
+    );
+    this.name = "PostKeptError";
+  }
+}
+
+/** A clear "no" from BulkPublish: it answered with a 4xx, so the request wasn't carried out. */
+function isRejection(e: unknown): boolean {
+  return e instanceof ApiError && e.status >= 400 && e.status < 500;
+}
+
+/**
+ * Upload, create and (for "now") publish.
+ * - If an upload or creating the post is clearly rejected, the uploads are removed.
+ * - If the reply to creating the post is lost, the uploads are kept, as the post may exist and use them.
+ * - Once publishing has been requested, the post and its uploads are never removed: publishing
+ *   may have started, and deleting it would drop its tracking record. A PostKeptError is thrown instead.
  */
 export async function sendPost(r: SendRequest, onStep?: (step: string) => void): Promise<number> {
   const mediaIds: number[] = [];
-  let postId: number | null = null;
+  let creating = false;
+  let postId: number;
   try {
     for (const [i, f] of r.files.entries()) {
       onStep?.(r.files.length > 1 ? `Uploading ${i + 1} of ${r.files.length}…` : "Uploading media…");
       mediaIds.push(await uploadMedia(f));
     }
     onStep?.(r.mode === "now" ? "Publishing…" : "Saving…");
+    creating = true;
     postId = await createPost(buildPostBody(r.targets, r.content, mediaIds, r.media, r.schedule));
-    if (r.mode === "now") await publishPost(postId);
-    return postId;
   } catch (e) {
-    if (r.mode === "now" || postId === null) {
-      if (postId !== null) await deletePost(postId).catch(() => undefined);
-      for (const id of mediaIds) await deleteMedia(id).catch(() => undefined);
-    }
+    // No post exists yet, or BulkPublish clearly refused to create it: the uploads aren't used by anything.
+    if (!creating || isRejection(e)) for (const id of mediaIds) await deleteMedia(id).catch(() => undefined);
     throw e;
   }
+  if (r.mode === "now") {
+    try {
+      await publishPost(postId);
+    } catch (e) {
+      const err = e instanceof ApiError ? e : new ApiError(0, (e as Error).message);
+      throw new PostKeptError(postId, !isRejection(err), err);
+    }
+  }
+  return postId;
 }

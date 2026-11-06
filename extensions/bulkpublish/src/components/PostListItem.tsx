@@ -20,8 +20,9 @@ export function PostListItem({ post, channelNames, showingDetail, onToggleDetail
   const platforms = [...new Set(post.destinations.map((d) => d.platform))];
   const title = firstLine(post.content) || (post.media.length ? "(Media only)" : "(No text)");
 
+  // No accessories while the detail pane is open. The status is shown in the detail metadata.
   const accessories: List.Item.Accessory[] = showingDetail
-    ? [{ icon: { source: look.icon, tintColor: look.color }, tooltip: look.label }]
+    ? []
     : [
         ...platforms.slice(0, 4).map((p) => ({ icon: platformIcon(p), tooltip: platformLabel(p) })),
         ...(platforms.length > 4 ? [{ text: `+${platforms.length - 4}` }] : []),
@@ -144,12 +145,8 @@ function PostActions({
     <ActionPanel>
       <ActionPanel.Section>
         <Action.OpenInBrowser title="Open in BulkPublish" url={postEditUrl(post.id)} />
-        <Action
-          title="Toggle Details"
-          icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
-          onAction={onToggleDetail}
-        />
+        {/* Second action: Raycast gives it ⌘↵, so it takes no custom shortcut. */}
+        <Action title="Toggle Details" icon={Icon.Sidebar} onAction={onToggleDetail} />
         {live.length === 1 && (
           <Action.OpenInBrowser
             title={`Open on ${platformLabel(live[0].platform)}`}
@@ -216,7 +213,7 @@ function PostActions({
           <Action.CopyToClipboard
             title="Copy Published Links"
             content={live.map((d) => d.url).join("\n")}
-            shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
           />
         )}
         <Action.OpenInBrowser title="Open Calendar" icon={Icon.Calendar} url={`${APP_URL}/calendar`} />

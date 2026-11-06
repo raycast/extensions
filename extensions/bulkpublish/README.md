@@ -25,7 +25,7 @@ Your key is kept in Raycast's preferences for this extension and is only sent to
 - Networks that need media (TikTok and YouTube need a video; Instagram, Pinterest and Snapchat need an image or video) are skipped with a note when you post text only. Everything else still goes out.
 - X and Mastodon count every link as 23 characters, and the counter does too.
 - If your team uses approvals, posts that need sign-off show as **Awaiting Approval** in Search Posts.
-- `⌘ D` toggles a detail pane with the full text, media and per-channel status in Search Posts and View Queue.
+- `⌘ ↵` toggles a detail pane with the full text, media and per-channel status in Search Posts and View Queue.
 
 ## Links
 

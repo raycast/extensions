@@ -64,15 +64,15 @@ function ChannelItem({ channel: c, onRefresh }: { channel: Channel; onRefresh: (
             <Action.Push
               title="Create Post on Channel"
               icon={Icon.Plus}
-              target={<CreatePostForm initialChannelIds={[c.id]} />}
+              target={<CreatePostForm initialChannelIds={[c.id]} navigationTitle={`Post to ${c.name}`} />}
             />
           ) : (
             <Action.OpenInBrowser title="Reconnect in BulkPublish" icon={Icon.Link} url={`${APP_URL}/channels`} />
           )}
+          {/* Second action: Raycast gives it ⌘↵, so it takes no custom shortcut. */}
           <Action.Push
             title="Show Posts"
             icon={Icon.List}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
             target={<PostSearch channelId={c.id} channelName={c.name} />}
           />
           <Action.OpenInBrowser
