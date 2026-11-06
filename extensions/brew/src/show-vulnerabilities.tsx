@@ -26,6 +26,7 @@ import {
   SEVERITY_COLOR,
   UPDATE_AVAILABLE_ICON,
   UP_TO_DATE_ICON,
+  WARNING_ICON,
   vulnerableIcon,
 } from "./components/palette";
 import {
@@ -37,6 +38,7 @@ import {
   osvUrl,
   HOMEBREW_7,
   type OutdatedFormula,
+  type UnscannedFormula,
   type VulnFinding,
 } from "./utils";
 
@@ -64,15 +66,18 @@ function VulnerabilitiesContent() {
 
   const findings = data?.findings ?? [];
   const skipped = data?.skipped.length ?? 0;
+  const unscanned = data?.unscanned ?? [];
+  const stale = data?.outdatedWithoutSbom ?? [];
+  const coverage = coverageNotes(skipped, stale.length);
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={findings.length > 0 && showDetail}
-      searchBarPlaceholder="Search vulnerable formulae…"
+      isShowingDetail={(findings.length > 0 || unscanned.length > 0) && showDetail}
+      searchBarPlaceholder="Search formulae…"
     >
       {/* Failed scan, with nothing cached to show instead */}
-      {error && !isLoading && findings.length === 0 && (
+      {error && !isLoading && findings.length === 0 && unscanned.length === 0 && (
         <List.EmptyView
           icon={ERROR_ICON}
           title={isBrewLockError(error) ? "Brew Is Busy" : "Failed to Check for Vulnerabilities"}
@@ -98,11 +103,15 @@ function VulnerabilitiesContent() {
         />
       )}
 
-      {!isLoading && !error && data && findings.length === 0 && (
+      {!isLoading && !error && data && findings.length === 0 && unscanned.length === 0 && (
         <List.EmptyView
-          icon={UP_TO_DATE_ICON}
-          title="No known vulnerabilities"
-          description={skipped > 0 ? `${formatCount(skipped, "formula", "formulae")} skipped` : undefined}
+          icon={stale.length > 0 ? WARNING_ICON : UP_TO_DATE_ICON}
+          title={stale.length > 0 ? "Results may be out of date" : "No known vulnerabilities"}
+          description={
+            [coverage.join(" · "), stale.length > 0 ? `Upgrade ${stale.join(", ")} for accurate results.` : ""]
+              .filter(Boolean)
+              .join(". ") || undefined
+          }
           actions={
             <ActionPanel>
               <RefreshAction onRefresh={revalidate} />
@@ -112,10 +121,7 @@ function VulnerabilitiesContent() {
       )}
 
       {findings.length > 0 && (
-        <List.Section
-          title="Vulnerable Formulae"
-          subtitle={skipped > 0 ? `${findings.length} · ${skipped} skipped` : String(findings.length)}
-        >
+        <List.Section title="Vulnerable Formulae" subtitle={[String(findings.length), ...coverage].join(" · ")}>
           {findings.map((finding) => (
             <VulnItem
               key={`${finding.formula}@${finding.version}`}
@@ -131,7 +137,64 @@ function VulnerabilitiesContent() {
           ))}
         </List.Section>
       )}
+
+      {unscanned.length > 0 && (
+        <List.Section
+          title="Not Scanned"
+          subtitle={[String(unscanned.length), ...(findings.length === 0 ? coverage : [])].join(" · ")}
+        >
+          {unscanned.map((item) => (
+            <UnscannedItem
+              key={item.formula}
+              item={item}
+              onRefresh={revalidate}
+              onToggleSidebar={() => setShowDetail((show) => !show)}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
+  );
+}
+
+function coverageNotes(skipped: number, stale: number): string[] {
+  return [
+    ...(skipped > 0 ? [`${skipped} skipped`] : []),
+    ...(stale > 0 ? [`${stale} checked against a newer version`] : []),
+  ];
+}
+
+const UNSCANNED_REASONS: Record<string, { label: string; why: string }> = {
+  untrusted_tap: {
+    label: "Untrusted tap",
+    why: "Its tap isn't trusted. Run `brew trust` on the formula or tap to scan it.",
+  },
+  resolution_error: {
+    label: "Couldn't load",
+    why: "brew couldn't load it. Run `brew info --installed` to see which installed formulae brew can load.",
+  },
+};
+
+function UnscannedItem(props: { item: UnscannedFormula; onRefresh: () => void; onToggleSidebar: () => void }) {
+  const { formula, reason } = props.item;
+  const { label, why } = (Object.hasOwn(UNSCANNED_REASONS, reason) && UNSCANNED_REASONS[reason]) || {
+    label: reason || "Unknown reason",
+    why: reason ? `brew gave the reason "${escapeMarkdown(reason)}".` : "brew didn't say why.",
+  };
+  return (
+    <List.Item
+      id={`unscanned:${formula}`}
+      title={formula}
+      subtitle={label}
+      icon={WARNING_ICON}
+      detail={<List.Item.Detail markdown={`**${escapeMarkdown(formula)}** wasn't scanned. ${why}`} />}
+      actions={
+        <ActionPanel>
+          <RefreshAction onRefresh={props.onRefresh} />
+          <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />
+        </ActionPanel>
+      }
+    />
   );
 }
 

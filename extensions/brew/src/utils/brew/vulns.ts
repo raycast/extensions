@@ -3,9 +3,14 @@
  *
  * Shape, from `Library/Homebrew/vulns/output.rb`:
  *   { findings: [ { formula, version, tag, repo_url, vulnerabilities: [...], patched: [...] } ],
- *     skipped_formulae: [ ... ] }
+ *     skipped_formulae: [ ... ], unscanned_formulae: { name: reason }, outdated_without_sbom: [ ... ] }
  *
- * `formula` is the SHORT name; `skipped_formulae` are full names. A finding
+ * `formula` is the SHORT name; `skipped_formulae` are full names.
+ * `unscanned_formulae` (Homebrew 7.0.10+) names installed formulae brew didn't
+ * scan at all, because their tap isn't trusted or brew couldn't load them.
+ * `outdated_without_sbom` names installed formulae older than the current one
+ * with no install-time SBOM, so brew checked the current version instead and
+ * warns that their results aren't accurate. A finding
  * with no open advisory is dropped here — brew still serializes it when every
  * advisory was closed by a Homebrew patch, but it is not something to report.
  *
@@ -38,9 +43,16 @@ export interface VulnFinding {
   severity: VulnSeverity;
 }
 
+export interface UnscannedFormula {
+  formula: string;
+  reason: "untrusted_tap" | "resolution_error" | (string & {});
+}
+
 export interface VulnResults {
   findings: VulnFinding[];
   skipped: string[];
+  unscanned: UnscannedFormula[];
+  outdatedWithoutSbom: string[];
 }
 
 export const SEVERITY_RANK: Record<VulnSeverity, number> = {
@@ -89,6 +101,13 @@ function str(raw: unknown): string {
   return typeof raw === "string" ? raw : "";
 }
 
+function unscannedIn(raw: unknown): UnscannedFormula[] {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+  return Object.entries(raw)
+    .map(([formula, reason]) => ({ formula, reason: str(reason) }))
+    .sort((a, b) => a.formula.localeCompare(b.formula));
+}
+
 function stringsIn(raw: unknown): string[] {
   return Array.isArray(raw) ? raw.filter((v): v is string => typeof v === "string") : [];
 }
@@ -116,7 +135,12 @@ export function parseBrewVulns(json: string): VulnResults {
     throw new ParseError("Unexpected brew vulns output", { cause: err as Error });
   }
 
-  const { findings, skipped_formulae } = (root ?? {}) as { findings?: unknown; skipped_formulae?: unknown };
+  const { findings, skipped_formulae, unscanned_formulae, outdated_without_sbom } = (root ?? {}) as {
+    findings?: unknown;
+    skipped_formulae?: unknown;
+    unscanned_formulae?: unknown;
+    outdated_without_sbom?: unknown;
+  };
   if (!Array.isArray(findings)) {
     throw new ParseError("Unexpected brew vulns output");
   }
@@ -144,5 +168,10 @@ export function parseBrewVulns(json: string): VulnResults {
       a.formula.localeCompare(b.formula),
   );
 
-  return { findings: parsed, skipped: stringsIn(skipped_formulae) };
+  return {
+    findings: parsed,
+    skipped: stringsIn(skipped_formulae),
+    unscanned: unscannedIn(unscanned_formulae),
+    outdatedWithoutSbom: stringsIn(outdated_without_sbom),
+  };
 }

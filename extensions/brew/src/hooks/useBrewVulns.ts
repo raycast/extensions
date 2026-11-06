@@ -7,7 +7,7 @@
  * the child process instead of leaving it running.
  */
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { brewFetchVulns, VulnResults, isBrewLockError, brewLogger, showBrewFailureToast } from "../utils";
 
@@ -36,5 +36,15 @@ export function useBrewVulns() {
     },
   });
 
-  return result;
+  // Results cached by an older version of the extension have no `unscanned` or `outdatedWithoutSbom`.
+  const data = useMemo(
+    () =>
+      result.data && {
+        ...result.data,
+        unscanned: result.data.unscanned ?? [],
+        outdatedWithoutSbom: result.data.outdatedWithoutSbom ?? [],
+      },
+    [result.data],
+  );
+  return { ...result, data };
 }

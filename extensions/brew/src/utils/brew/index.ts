@@ -179,7 +179,7 @@ export { confirmAndRun } from "./confirmAndRun";
 
 // Vulnerabilities (`brew vulns`)
 export { osvUrl, osvLink, escapeMarkdown } from "./vulns";
-export type { VulnSeverity, Vulnerability, VulnFinding, VulnResults } from "./vulns";
+export type { VulnSeverity, Vulnerability, VulnFinding, VulnResults, UnscannedFormula } from "./vulns";
 
 // Helpers
 export {
