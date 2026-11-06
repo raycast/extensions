@@ -1,6 +1,6 @@
 # Media Converter Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-11-06
 
 - Fixed "Input link parameters do not match" crash when merging video files that have different resolutions. The re-encode path now fits all inputs to the first video's dimensions before concatenating them, letterboxing clips with a different aspect ratio (including rotated portrait videos) instead of stretching them.
 
