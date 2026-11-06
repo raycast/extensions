@@ -203,8 +203,8 @@ export default function NotificationActions({ notification, userId, mutateList }
           content={notification.subject.title}
           title={`Copy ${getNotificationTypeTitle(notification)} Title`}
           shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "," },
-            Windows: { modifiers: ["ctrl", "shift"], key: "," },
+            macOS: { modifiers: ["ctrl", "shift"], key: "," },
+            Windows: { modifiers: ["alt", "shift"], key: "," },
           }}
         />
       </ActionPanel.Section>
