@@ -311,16 +311,18 @@ export default function Command() {
     return cells;
   }, [year, month, holidays]);
 
+  // 每次渲染都读取当前外观（light / dark），使用 appearance 而非旧字段 theme
+  const appearance = environment.appearance;
+
   const markdown = useMemo(() => {
-    // 动态传入当前系统的主题模式（light 或 dark）
-    const isDark = environment.theme === "dark";
+    const isDark = appearance === "dark";
     const fullCalendarSvg = generateFullCalendarSvg(calendarData, isDark);
 
     // Markdown 标题格式改为中文：xxxx 年 x 月
     const titleText = `${year} 年 ${month} 月`;
 
     return `# ${titleText}\n\n![Calendar](${fullCalendarSvg})`;
-  }, [year, month, calendarData, environment.theme]);
+  }, [year, month, calendarData, appearance]);
 
   // 使用准确的相对月份加减，规避构造函数越界偏差
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
