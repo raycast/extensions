@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "on-device-writing-tools",
+  "title": "On-Device Writing Tools",
+  "description": "Proofread, rewrite and reformat selected text with the on-device Apple Intelligence model.",
+  "icon": "icon.png",
+  "author": "paracino",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "proofread",
+      "title": "Proofread",
+      "description": "Fix spelling and grammar of the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "rewrite",
+      "title": "Rewrite",
+      "description": "Rewrite the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-friendly",
+      "title": "Make Friendly",
+      "description": "Friendlier tone for the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-professional",
+      "title": "Make Professional",
+      "description": "Professional tone for the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-concise",
+      "title": "Make Concise",
+      "description": "Shorten the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Replace the selected text with a summary",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-key-points",
+      "title": "Create Key Points",
+      "description": "Replace the selected text with key points",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-list",
+      "title": "Make List",
+      "description": "Turn the selected text into a list",
+      "mode": "no-view"
+    },
+    {
+      "name": "make-table",
+      "title": "Make Table",
+      "description": "Turn the selected text into a table",
+      "mode": "no-view"
+    },
+    {
+      "name": "custom",
+      "title": "Edit with Instruction",
+      "description": "Apply a custom instruction to the selected text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instruction",
+          "type": "text",
+          "placeholder": "e.g. translate to English",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
