@@ -311,9 +311,20 @@ export const getCardById = (
     parseRaycastCard(await client.cards.get(requireCardId(cardId))),
   );
 
+/**
+ * A card update with the palette edits Teak's API takes. The pinned teak-sdk
+ * predates `addColors` and `removeColors` but sends its input as the request
+ * body, so they reach the API; this widening can go once the pin publishes
+ * them.
+ */
+export type CardUpdate = UpdateCardInput & {
+  addColors?: string[];
+  removeColors?: string[];
+};
+
 export const updateCard = (
   cardId: string,
-  input: UpdateCardInput,
+  input: CardUpdate,
   auth: AuthMode,
 ): Promise<RaycastCard> =>
   withClient(auth, async (client) =>

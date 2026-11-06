@@ -214,6 +214,7 @@ export const savedToastText = (
   };
 };
 
+/** Saves behind a toast; null when it failed, which the toast already says. */
 export const saveCardWithFeedback = async (
   input: CreateCardInput,
   options: {
@@ -258,6 +259,7 @@ export const saveCardWithFeedback = async (
     toast.style = Toast.Style.Failure;
     toast.title = "Save failed";
     toast.message = failureMessage(error);
-    throw error;
+    // Rethrowing would let Raycast replace this toast with its own error.
+    return null;
   }
 };

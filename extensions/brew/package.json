@@ -23,7 +23,8 @@
     "ridemountainpig",
     "chrismessina",
     "clins1994",
-    "alexi.build"
+    "alexi.build",
+    "beru"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -216,6 +217,14 @@
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    },
+    {
+      "name": "runInTerminalByDefault",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Install and uninstall in the terminal application",
+      "description": "When enabled, brew install and uninstall run in the terminal application. ⌘I still installs inside Raycast."
     },
     {
       "name": "greedyUpgrades",

@@ -16,6 +16,12 @@ import {
   updateCard,
 } from "../lib/api";
 import { hiddenAfterTaggingMessage, newlyHiddenTag } from "../lib/hiddenTags";
+import {
+  explainPaletteEdit,
+  MAX_PALETTE_COLORS,
+  paletteHexes,
+  parsePaletteHexList,
+} from "../lib/paletteColors";
 
 interface EditCardFormProps {
   card: RaycastCard;
@@ -23,7 +29,9 @@ interface EditCardFormProps {
 }
 
 interface EditCardFormValues {
+  addColors?: string;
   aiTags: string[];
+  colors?: string[];
   content?: string;
   notes: string;
   tags: string;
@@ -34,8 +42,11 @@ const EDITABLE_CONTENT_TYPES = new Set(["text", "quote"]);
 export function EditCardForm({ card, onCardUpdated }: EditCardFormProps) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [colorsError, setColorsError] = useState<string | undefined>();
 
   const canEditContent = EDITABLE_CONTENT_TYPES.has(card.type);
+  const isPalette = card.type === "palette" && !card.isDeleted;
+  const currentHexes = useMemo(() => paletteHexes(card.colors), [card.colors]);
   const initialValues = useMemo<EditCardFormValues>(
     () => ({
       aiTags: card.aiTags,
@@ -49,6 +60,25 @@ export function EditCardForm({ card, onCardUpdated }: EditCardFormProps) {
   const handleSubmit = async (values: EditCardFormValues) => {
     if (isSubmitting) {
       return;
+    }
+
+    const added = parsePaletteHexList(values.addColors);
+    const removeColors = isPalette
+      ? currentHexes.filter((hex) => !(values.colors ?? []).includes(hex))
+      : [];
+    const addColors = added.hexes.filter(
+      (hex) => !currentHexes.includes(hex) || removeColors.includes(hex),
+    );
+    if (isPalette) {
+      const problem = explainPaletteEdit(currentHexes, {
+        add: addColors,
+        invalid: added.invalid,
+        remove: removeColors,
+      });
+      setColorsError(problem ?? undefined);
+      if (problem) {
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -71,6 +101,8 @@ export function EditCardForm({ card, onCardUpdated }: EditCardFormProps) {
           content,
           notes: values.notes.trim() ? values.notes.trim() : null,
           removeAiTags: removeAiTags.length > 0 ? removeAiTags : undefined,
+          removeColors: removeColors.length > 0 ? removeColors : undefined,
+          addColors: addColors.length > 0 ? addColors : undefined,
           tags: parseTags(values.tags) ?? [],
         },
         "interactive",
@@ -114,6 +146,33 @@ export function EditCardForm({ card, onCardUpdated }: EditCardFormProps) {
           enableMarkdown={card.type === "text"}
           id="content"
           title={card.type === "quote" ? "Quote" : "Content"}
+        />
+      ) : null}
+      {isPalette ? (
+        <Form.TagPicker
+          defaultValue={currentHexes}
+          id="colors"
+          info="Remove a color to take it out of the palette."
+          title="Colors"
+        >
+          {currentHexes.map((hex) => (
+            <Form.TagPicker.Item
+              icon={{ source: Icon.CircleFilled, tintColor: hex }}
+              key={hex}
+              title={hex}
+              value={hex}
+            />
+          ))}
+        </Form.TagPicker>
+      ) : null}
+      {isPalette ? (
+        <Form.TextField
+          error={colorsError}
+          id="addColors"
+          info={`Hex codes, separated by commas. A palette holds up to ${MAX_PALETTE_COLORS} colors.`}
+          onChange={() => setColorsError(undefined)}
+          placeholder="#FF5500, 2A9D8F"
+          title="Add Colors"
         />
       ) : null}
       <Form.TextArea

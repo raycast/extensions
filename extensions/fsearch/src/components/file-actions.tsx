@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { dirname } from "node:path";
 import type { ReactNode } from "react";
-import { fileName, tildify } from "../lib/format";
+import { fileName, quoteShellPath, tildify } from "../lib/format";
 
 interface Props {
   path: string;
@@ -57,6 +57,8 @@ export function FileActions({
           />
         )}
         <Action.CopyToClipboard title="Copy Path" content={path} shortcut={Keyboard.Shortcut.Common.CopyPath} />
+        <Action.Paste title="Paste Path to App" content={path} shortcut={{ modifiers: ["cmd", "shift"], key: "v" }} />
+        <Action.Paste title="Paste Shell-Quoted Path" content={quoteShellPath(path)} />
         <Action.CopyToClipboard
           title="Copy Name"
           content={fileName(path)}
