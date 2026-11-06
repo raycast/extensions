@@ -147,7 +147,6 @@ export const calculateModelAggregates = (models: ModelUsage[]) => {
   return {
     totalTokens: models.reduce((sum, model) => sum + model.totalTokens, 0),
     totalCost: models.reduce((sum, model) => sum + model.totalCost, 0),
-    totalSessions: models.reduce((sum, model) => sum + model.sessionCount, 0),
   };
 };
 

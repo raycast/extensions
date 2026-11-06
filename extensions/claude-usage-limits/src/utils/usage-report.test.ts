@@ -73,7 +73,7 @@ it("publishes summaries while sessions are still pending and deduplicates both r
   await expect(first).resolves.toEqual(summary);
   expect(historyFinished).toBe(false);
   complete(1, sessions);
-  await expect(history).resolves.toEqual({ recentSessions: [], topModels: [] });
+  await expect(history).resolves.toEqual({ sessionCount: 0, recentSessions: [], topModels: [] });
 });
 
 it("publishes sessions without waiting for summaries", async () => {
@@ -84,7 +84,7 @@ it("publishes sessions without waiting for summaries", async () => {
     summaryFinished = true;
   });
   complete(1, sessions);
-  await expect(history).resolves.toEqual({ recentSessions: [], topModels: [] });
+  await expect(history).resolves.toEqual({ sessionCount: 0, recentSessions: [], topModels: [] });
   expect(summaryFinished).toBe(false);
   complete(0, summary);
   await summaryPending;
@@ -157,6 +157,7 @@ it("keeps the cached session result small without losing historical model totals
   complete(0, { session: rows, totals });
   const cached = await pending;
   expect(Buffer.byteLength(JSON.stringify(cached))).toBeLessThan(32 * 1024);
+  expect(cached.sessionCount).toBe(rows.length);
   expect(cached.recentSessions).toHaveLength(5);
   expect(cached.recentSessions[0].sessionId).toBe(rows.at(-1)?.period);
   expect(cached.topModels).toEqual([
@@ -193,7 +194,7 @@ it("reuses fresh persistent reports across command launches", async () => {
   const reopened = await import("./usage-report");
   const newExec = (await import("child_process")).execFile;
   await expect(reopened.getSummaryReport()).resolves.toEqual(summary);
-  await expect(reopened.getSessionReport()).resolves.toEqual({ recentSessions: [], topModels: [] });
+  await expect(reopened.getSessionReport()).resolves.toEqual({ sessionCount: 0, recentSessions: [], topModels: [] });
   expect(newExec).not.toHaveBeenCalled();
 });
 
@@ -225,7 +226,7 @@ it("forces a refresh on request and preserves cached data after a failure", asyn
   const refresh = getSessionReport(true);
   exec.mock.calls[1][3](new Error("offline") as never, "", "");
   await expect(refresh).rejects.toThrow();
-  await expect(getSessionReport()).resolves.toEqual({ recentSessions: [], topModels: [] });
+  await expect(getSessionReport()).resolves.toEqual({ sessionCount: 0, recentSessions: [], topModels: [] });
   expect(exec).toHaveBeenCalledTimes(2);
 });
 

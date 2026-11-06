@@ -19,12 +19,12 @@ const externalLinks: ExternalLink[] = [
 ];
 
 export function ModelBreakdown() {
-  const { topModels: models, isLoading, error } = useSessionUsage();
+  const { topModels: models, sessionCount, isLoading, error } = useSessionUsage();
 
   const topModelsList = useMemo(() => (models ? getTopModels(models, 5) : []), [models]);
 
-  const { totalTokens, totalCost, totalSessions } = useMemo(
-    () => (models ? calculateModelAggregates(models) : { totalTokens: 0, totalCost: 0, totalSessions: 0 }),
+  const { totalTokens, totalCost } = useMemo(
+    () => (models ? calculateModelAggregates(models) : { totalTokens: 0, totalCost: 0 }),
     [models],
   );
 
@@ -54,7 +54,7 @@ export function ModelBreakdown() {
         {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
         <List.Item.Detail.Metadata.Label title="Total Tokens" text={formatTokens(totalTokens)} />
         <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(totalCost)} />
-        <List.Item.Detail.Metadata.Label title="Total Sessions" text={totalSessions.toString()} />
+        <List.Item.Detail.Metadata.Label title="Total Sessions" text={sessionCount.toString()} />
         <List.Item.Detail.Metadata.Separator />
 
         {mostEfficientModel && (

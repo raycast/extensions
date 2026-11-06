@@ -125,6 +125,7 @@ export type SummaryUsageReport = z.infer<typeof SummaryUsageReportSchema>;
 // Cache the displayed rows, with model totals calculated from the full history.
 // Full session histories can exceed Raycast's 10 MB default cache capacity.
 export const SessionUsageReportSchema = z.object({
+  sessionCount: z.number(),
   recentSessions: z.array(SessionResponseSchema),
   topModels: z.array(ModelUsageSchema),
 });

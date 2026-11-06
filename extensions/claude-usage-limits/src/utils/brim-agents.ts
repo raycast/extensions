@@ -62,6 +62,14 @@ export const moveAgent = (ids: string[], id: string, delta: -1 | 1): string[] =>
   return next;
 };
 
+/** Raycast's metadata has no bold style, so headings use Unicode's bold sans-serif letters and digits. */
+export const boldText = (text: string): string =>
+  text.replace(/[A-Za-z0-9]/g, (char) => {
+    const code = char.charCodeAt(0);
+    if (code <= 57) return String.fromCodePoint(0x1d7ec + code - 48);
+    return String.fromCodePoint(code <= 90 ? 0x1d5d4 + code - 65 : 0x1d5ee + code - 97);
+  });
+
 export const fetchBrimAgents = async (): Promise<BrimAgent[]> => {
   for (const path of HELPER_PATHS) {
     const { code, stdout } = await runHelper(path, []);

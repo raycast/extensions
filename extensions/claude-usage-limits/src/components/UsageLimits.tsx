@@ -2,7 +2,7 @@ import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { getProgressIcon, useCachedPromise, useCachedState } from "@raycast/utils";
 import { Fragment, ReactNode, useEffect } from "react";
 import { getReportRefreshInterval } from "../utils/usage-report";
-import { applyAgentOrder, fetchBrimAgents, moveAgent } from "../utils/brim-agents";
+import { applyAgentOrder, boldText, fetchBrimAgents, moveAgent } from "../utils/brim-agents";
 import { calculateEstimatedUsage, formatResetTime } from "../utils/usage-limits-formatter";
 import { ErrorMetadata } from "./ErrorMetadata";
 
@@ -31,10 +31,11 @@ export function UsageLimits() {
     }
     return (
       <List.Item.Detail.Metadata>
-        {agents.map((agent) => (
+        {agents.map((agent, index) => (
           <Fragment key={agent.id}>
+            {index > 0 ? <List.Item.Detail.Metadata.Label title=" " /> : null}
             <List.Item.Detail.Metadata.Label
-              title={agent.name}
+              title={boldText(agent.name)}
               text={agent.stale ? "May Be Stale" : (agent.plan ?? undefined)}
             />
             {agent.limits.map((limit) => {

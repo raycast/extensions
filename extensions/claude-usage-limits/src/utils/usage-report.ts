@@ -174,6 +174,7 @@ async function loadSessionReport(): Promise<SessionUsageReport> {
   // Aggregate before trimming. Older sessions still contribute to every model's
   // cost, token count, and session count; the views cap what they display.
   return {
+    sessionCount: parsed.data.sessions.length,
     recentSessions: getRecentSessions(parsed.data.sessions, 5),
     topModels: calculateModelUsage(parsed.data.sessions),
   };

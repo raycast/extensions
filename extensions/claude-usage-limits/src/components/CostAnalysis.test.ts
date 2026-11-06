@@ -48,7 +48,14 @@ beforeEach(() => {
   });
   jest
     .mocked(useSessionUsage)
-    .mockReturnValue({ recentSessions: [], topModels: [], isLoading: true, error: undefined, revalidate: jest.fn() });
+    .mockReturnValue({
+      sessionCount: 0,
+      recentSessions: [],
+      topModels: [],
+      isLoading: true,
+      error: undefined,
+      revalidate: jest.fn(),
+    });
 });
 
 function labels(node: unknown): Array<{ title: string; text?: string }> {
@@ -74,6 +81,7 @@ it("shows completed totals while model and daily details are still loading", () 
 
 it("keeps completed totals visible if the independent model request fails", () => {
   jest.mocked(useSessionUsage).mockReturnValue({
+    sessionCount: 0,
     recentSessions: [],
     topModels: [],
     isLoading: false,

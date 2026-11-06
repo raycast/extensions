@@ -1,4 +1,4 @@
-import { applyAgentOrder, moveAgent, parseBrimAgents } from "./brim-agents";
+import { applyAgentOrder, boldText, moveAgent, parseBrimAgents } from "./brim-agents";
 
 const output = JSON.stringify({
   providers: {
@@ -17,6 +17,10 @@ describe("brim agents", () => {
   it("applies the saved order and leaves new agents at the end", () => {
     const agents = parseBrimAgents(output);
     expect(applyAgentOrder(agents, ["codex@2"]).map((a) => a.id)).toEqual(["codex@2", "claude@1"]);
+  });
+
+  it("bolds letters and digits only", () => {
+    expect(boldText("Az9 · a@b")).toBe("𝗔𝘇𝟵 · 𝗮@𝗯");
   });
 
   it("moves an agent and stops at the ends", () => {
