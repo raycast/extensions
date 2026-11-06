@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Good Nature Vibe Catalog MCP Server] - 2026-11-04
+
+- Add Good Nature Vibe Catalog to the official registry as a hosted Streamable HTTP server with six read-only catalog and public-knowledge tools and no authentication.
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

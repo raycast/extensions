@@ -3183,6 +3183,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
     },
   },
+  {
+    name: "gnv-catalog",
+    title: "Good Nature Vibe Catalog MCP",
+    description:
+      "Search the public Good Nature Vibe product catalog and shop knowledge through six read-only tools. Hosted remote Streamable HTTP server; no sign-in, carts, orders, payments, checkout or write actions.",
+    icon: "https://raw.githubusercontent.com/aiagentcycle/gnv-catalog-mcp/main/src/static/icon-192.png",
+    homepage: "https://goodnaturevibe.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://catalog-mcp.goodnaturevibe.com/mcp"],
+    },
+    remoteUrl: "https://catalog-mcp.goodnaturevibe.com/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
