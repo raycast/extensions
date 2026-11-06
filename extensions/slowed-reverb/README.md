@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/extension_icon.png" alt="Slowed + Reverb icon" width="100"/>
+  <img src="./media/extension_icon.png" alt="Slowed + Reverb icon" width="100"/>
   <h3>Slowed + Reverb</h3>
   <p>Slow down, speed up, and add reverb to local audio</p>
 </div>

@@ -126,13 +126,20 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         <Form.TextField
           id="speed"
           title="Speed Multiplier"
+          placeholder="0.8"
           value={speed}
           onChange={setSpeed}
           info="Use 0.5 to 2. A value of 0.8 means 80% of the original speed."
         />
       )}
       {reverb && (
-        <Form.TextField id="reverb" title="Reverb Amount" defaultValue="50" info="Use a percentage from 0 to 100." />
+        <Form.TextField
+          id="reverb"
+          title="Reverb Amount"
+          placeholder="50"
+          defaultValue="50"
+          info="Use a percentage from 0 to 100."
+        />
       )}
       <Form.Dropdown id="format" title="Output Format" defaultValue={getDefaultFormat()}>
         {formats.map((format) => (
