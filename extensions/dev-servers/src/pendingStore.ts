@@ -1,12 +1,33 @@
 import { LocalStorage } from "@raycast/api";
+import { EPHEMERAL_PORT_MIN } from "./servers";
+import { DevServer } from "./types";
 
 const PENDING_KEY = "pending-starts";
+
+// How long a spawned server gets to bind a port before the watchdog calls it
+// failed. Also spelled into the undiagnosed failed-row title, so the number
+// the user reads always matches the wait they actually got.
+export const SPAWN_TIMEOUT_MS = 15000;
+
+// The same watchdog for a start that installs dependencies first. A cold
+// install of a large project on a slow connection runs to minutes, and a
+// failed install ends the process early anyway, so the long window costs
+// nothing when things go wrong and keeps a slow install from being called a
+// failure while it is still downloading.
+export const INSTALL_TIMEOUT_MS = 5 * 60 * 1000;
 
 // Spawn failures worth naming on a failed row. Both read as "the extension
 // broke" while the real cause, and the fix, sit outside the extension
 // entirely, so the generic "check the startup log" wastes the user's time on a
 // question we can already answer.
-export type SpawnFailure = "port-conflict" | "portless-proxy-down";
+//
+// "command-not-found" names the missing command (see PendingStart.detail);
+// "install-failed" is an install the start ran first that did not finish.
+export type SpawnFailure =
+  | "port-conflict"
+  | "portless-proxy-down"
+  | "command-not-found"
+  | "install-failed";
 
 // A start the dashboard has fired but not yet seen bind a port, keyed by cwd
 // in `pendingStarts`. It renders as a synthetic list row (see PendingItem)
@@ -36,9 +57,13 @@ export type PendingStart = {
   status: "starting" | "failed";
   // Set when failed and diagnosable, else null.
   reason: SpawnFailure | null;
+  // What the reason is about, when it is about something nameable: the
+  // command a "command-not-found" failure could not find.
+  detail?: string;
   // What the row says while it waits, and how long a failure claims it gave
-  // the server (the spawn watchdog allows 15s, restart's own poll ~10s).
-  kind: "start" | "restart";
+  // the server (the spawn watchdog allows 15s, restart's own poll ~10s, an
+  // install-then-start several minutes).
+  kind: "start" | "restart" | "install";
   // Every pid listed for this cwd when the row was made, plus the pid a
   // restart is replacing. The row resolves only when some *other* server
   // appears for the cwd.
@@ -66,7 +91,9 @@ function isPendingStart(value: unknown): value is PendingStart {
     typeof entry.logStart === "number" &&
     typeof entry.deadline === "number" &&
     (entry.status === "starting" || entry.status === "failed") &&
-    (entry.kind === "start" || entry.kind === "restart") &&
+    (entry.kind === "start" ||
+      entry.kind === "restart" ||
+      entry.kind === "install") &&
     Array.isArray(entry.ignorePids)
   );
 }
@@ -97,4 +124,32 @@ export async function writePendingStarts(
   pending: Map<string, PendingStart>,
 ): Promise<void> {
   await LocalStorage.setItem(PENDING_KEY, JSON.stringify([...pending]));
+}
+
+// The one question every part of the pending-row machinery asks: has the
+// server this row was waiting for arrived? In the dashboard, visibility, state cleanup, the
+// selection handoff, the success watcher, the watchdog and the restart poll
+// all route through here, so they can never disagree about whether a row has
+// resolved. The menu bar asks it too, to retire entries nobody is watching.
+//
+// Two conditions, and both are about not mistaking something else for the
+// arrival:
+//
+//   1. A deliberate port. An OS-assigned one is plumbing, the same call
+//      suppressHelperRows makes, and while a start is in flight its mid-start
+//      rule keeps those rows out of the fetch entirely. A workerd helper
+//      resolving the row would therefore retire the spinner in favour of a row
+//      the list is not even drawing, and the failure would never be diagnosed.
+//   2. A pid the row was not already looking at, per `ignorePids`.
+export function resolvingServer(
+  cwd: string,
+  entry: Pick<PendingStart, "ignorePids">,
+  servers: DevServer[],
+): DevServer | undefined {
+  return servers.find(
+    (s) =>
+      s.cwd === cwd &&
+      parseInt(s.port, 10) < EPHEMERAL_PORT_MIN &&
+      !entry.ignorePids.includes(s.pid),
+  );
 }
