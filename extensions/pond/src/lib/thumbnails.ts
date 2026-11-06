@@ -46,6 +46,7 @@ async function readCache(size: ApiThumbnailSize): Promise<Map<string, CachedThum
     }),
   );
   files.sort((a, b) => b.modified - a.modified);
+  // Prune only at initialization, before open views can retain paths to these files.
   await Promise.all(files.slice(LIMITS[size]).map((file) => rm(file.path, { force: true })));
   return new Map(files.slice(0, LIMITS[size]).map((file) => [file.name.replace(/\.[^.]+$/, ""), file]));
 }
@@ -80,12 +81,6 @@ async function loadThumbnail(save: Keyed, size: ApiThumbnailSize): Promise<strin
   await writeFile(path, thumbnail.bytes);
   cache.set(key, { path, modified: Date.now() });
   if (existing && existing.path !== path) await rm(existing.path, { force: true });
-
-  if (cache.size > LIMITS[size]) {
-    const oldest = [...cache].sort(([, a], [, b]) => a.modified - b.modified).slice(0, cache.size - LIMITS[size]);
-    for (const [key] of oldest) cache.delete(key);
-    await Promise.all(oldest.map(([, file]) => rm(file.path, { force: true })));
-  }
   return path;
 }
 
