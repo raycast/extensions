@@ -460,7 +460,7 @@
 /extensions/clipboard-editor                                        @pomdtr
 /extensions/clipboard-formatter                                     @joshtemple
 /extensions/clipboard-sequential-paste                              @Joren-Thijs
-/extensions/clipboard-type                                          @krish-199 @ITninja04 @yamork779
+/extensions/clipboard-type                                          @krish-199 @ITninja04 @yamork779 @andriygm
 /extensions/clipboard-utilities                                     @noidwasavailable
 /extensions/clipmate                                                @shvmmshr
 /extensions/clipmenu                                                @Envl
@@ -1784,6 +1784,7 @@
 /extensions/microsoft-teams                                         @svenwiegand @mSarheed @0xdhrv
 /extensions/microsoft-teams-calling                                 @svenwiegand @leec-666
 /extensions/microsoft-tenant-id                                     @Rediwed
+/extensions/mictape                                                 @t4kamuna
 /extensions/midas                                                   @sunosuporno
 /extensions/midjourney                                              @CarterMcAlister
 /extensions/migadu                                                  @xmok @LBBO
