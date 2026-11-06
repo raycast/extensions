@@ -46,16 +46,14 @@ beforeEach(() => {
     error: undefined,
     revalidate: jest.fn(),
   });
-  jest
-    .mocked(useSessionUsage)
-    .mockReturnValue({
-      sessionCount: 0,
-      recentSessions: [],
-      topModels: [],
-      isLoading: true,
-      error: undefined,
-      revalidate: jest.fn(),
-    });
+  jest.mocked(useSessionUsage).mockReturnValue({
+    sessionCount: 0,
+    recentSessions: [],
+    topModels: [],
+    isLoading: true,
+    error: undefined,
+    revalidate: jest.fn(),
+  });
 });
 
 function labels(node: unknown): Array<{ title: string; text?: string }> {
