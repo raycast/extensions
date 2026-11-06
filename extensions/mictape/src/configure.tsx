@@ -154,7 +154,7 @@ export default function Command() {
   ) : null;
 
   return (
-    <List isLoading={isLoading} navigationTitle="Recording Settings">
+    <List isLoading={isLoading}>
       {config && (
         <List.Section title="File Name">
           <List.Item

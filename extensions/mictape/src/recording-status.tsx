@@ -26,7 +26,13 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Start Recording…"
           icon={Icon.Microphone}
-          onAction={() => launchCommand({ name: "start-recording", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "start-recording", type: LaunchType.UserInitiated });
+            } catch (e) {
+              await showError("Could not open Start Recording", e);
+            }
+          }}
         />
       </MenuBarExtra>
     );
