@@ -10,6 +10,4 @@ export type RegistryEntry = {
   configuration: MCPServerConfig;
   /** Direct HTTP endpoint for Raycast; configuration remains the fallback for other clients. */
   remoteUrl?: string;
-  /** HTTP headers for the direct Raycast connection, such as an API key placeholder. */
-  headers?: Record<string, string>;
 };

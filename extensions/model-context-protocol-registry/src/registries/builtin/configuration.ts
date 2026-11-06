@@ -6,12 +6,7 @@ export function getRaycastServer(entry: RegistryEntry): Action.InstallMCPServer.
 
   if (entry.remoteUrl) {
     // The Raycast API calls its remote HTTP transport "sse", including Streamable HTTP.
-    return {
-      ...server,
-      transport: "sse",
-      url: entry.remoteUrl,
-      ...(entry.headers ? { headers: entry.headers } : {}),
-    };
+    return { ...server, transport: "sse", url: entry.remoteUrl };
   }
 
   return { ...server, transport: "stdio", ...entry.configuration };
@@ -21,10 +16,7 @@ export function getSetupMarkdown(entry: RegistryEntry): string {
   const localSetup = getLocalSetupMarkdown(entry.configuration.command);
 
   if (entry.remoteUrl) {
-    const raycastAuth = entry.headers
-      ? "Replace placeholder values in the HTTP headers, including any API key."
-      : "Complete sign-in when prompted.";
-    return `## Raycast\n\nRaycast connects directly to this server. ${raycastAuth} Node.js is not required in Raycast.\n\n## Other clients\n\nClaude, Cursor, and Windsurf use the local proxy command shown in the details.\n\n${localSetup}`;
+    return `## Raycast\n\nRaycast connects directly to this server. Complete sign-in when prompted. Node.js is not required in Raycast.\n\n## Other clients\n\nClaude, Cursor, and Windsurf use the local proxy command shown in the details.\n\n${localSetup}`;
   }
 
   return localSetup;

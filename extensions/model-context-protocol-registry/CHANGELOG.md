@@ -2,7 +2,7 @@
 
 ## [Add Gumlet MCP Server] - 2026-11-06
 
-- Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast (GUMLET_API_KEY header) and an `mcp-remote` fallback for other clients. Listing tools works without a key.
+- Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 through `mcp-remote`. Live calls need a Gumlet API key as a GUMLET_API_KEY header. Listing tools works without a key.
 
 ## [Add WolfSMS MCP Server] - 2026-11-04
 

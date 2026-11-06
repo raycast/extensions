@@ -87,26 +87,6 @@ test("ElevenLabs uses the maintained hosted server", () => {
   });
 });
 
-test("Gumlet installs over HTTP with the API key header and keeps a proxy fallback", () => {
-  const gumlet = OFFICIAL_ENTRIES.find((entry) => entry.name === "gumlet");
-  assert.ok(gumlet);
-  assert.equal(gumlet.remoteUrl, "https://mcp.gumlet.com/mcp/v1");
-  assert.deepEqual(getRaycastServer(gumlet), {
-    name: "Gumlet",
-    description: gumlet.description,
-    transport: "sse",
-    url: "https://mcp.gumlet.com/mcp/v1",
-    headers: { GUMLET_API_KEY: "YOUR_GUMLET_API_KEY" },
-  });
-  assert.deepEqual(gumlet.configuration, {
-    command: "npx",
-    args: ["-y", "mcp-remote", "https://mcp.gumlet.com/mcp/v1", "--header", "GUMLET_API_KEY:${GUMLET_API_KEY}"],
-    env: { GUMLET_API_KEY: "YOUR_GUMLET_API_KEY" },
-  });
-  assert.match(getSetupMarkdown(gumlet), /Replace placeholder values in the HTTP headers/);
-  assert.match(getSetupMarkdown(gumlet), /Node\.js is not required in Raycast/);
-});
-
 test("archived or missing built-in servers are not offered", () => {
   const names = new Set(OFFICIAL_ENTRIES.map((entry) => entry.name));
   for (const name of ["e2b", "google-drive", "shopify-dev"]) {

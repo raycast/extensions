@@ -922,7 +922,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "gumlet",
     title: "Gumlet",
     description:
-      "Manage a Gumlet account from your AI agent: video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted remote Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Live calls need a Gumlet API key as a GUMLET_API_KEY header (Dashboard → Developer → API keys). Replace YOUR_GUMLET_API_KEY. Listing tools works without a key.",
+      "Manage a Gumlet account from your AI agent: video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted remote Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 through `mcp-remote`. Live calls need a Gumlet API key as a GUMLET_API_KEY header (Dashboard → Developer → API keys). Replace YOUR_GUMLET_API_KEY in the environment. Listing tools works without a key.",
     icon: "https://assets.gumlet.io/assets/round-logo.png",
     homepage: "https://docs.gumlet.com/reference/mcp",
     configuration: {
@@ -931,10 +931,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         GUMLET_API_KEY: "YOUR_GUMLET_API_KEY",
       },
-    },
-    remoteUrl: "https://mcp.gumlet.com/mcp/v1",
-    headers: {
-      GUMLET_API_KEY: "YOUR_GUMLET_API_KEY",
     },
   },
   {
