@@ -1,5 +1,10 @@
 # mymind Changelog
 
+## [Dependency Updates] - {PR_MERGE_DATE}
+
+- Updated to `@raycast/api` 2.11 and `@raycast/utils` 2.3
+- Updated `zod` to v4, TypeScript to v6, and ESLint to v10 with a flat config
+
 ## [Context-Aware Saves] - 2026-08-12
 
 - Added an opt-in `Context Detection` preference, off by default. With it disabled the command behaves exactly as before — clipboard first, then Finder — and the browser is never queried, so macOS never asks for Automation permission
