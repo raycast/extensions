@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
+import { homedir, userInfo } from "node:os";
 import { setTimeout as sleep } from "node:timers/promises";
 import { promisify } from "node:util";
 
@@ -9,9 +10,18 @@ const execFileAsync = promisify(execFile);
 // MAKEDECK_SOCKET is for tests only.
 export const SOCKET = process.env.MAKEDECK_SOCKET || "makedeck";
 
-// Raycast runs extensions without Homebrew on PATH (affects tmux and e.g. docker in dev-stop).
-const EXTRA_PATH = ["/opt/homebrew/bin", "/usr/local/bin"];
-const TMUX_CANDIDATES = EXTRA_PATH.map((dir) => `${dir}/tmux`);
+// Raycast runs extensions without Homebrew, MacPorts or Nix on PATH (affects tmux and e.g.
+// docker in dev-stop).
+const EXTRA_PATH = [
+  "/opt/homebrew/bin",
+  "/usr/local/bin",
+  "/opt/local/bin",
+  `${homedir()}/.nix-profile/bin`,
+  `/etc/profiles/per-user/${userInfo().username}/bin`,
+  "/run/current-system/sw/bin",
+  "/nix/var/nix/profiles/default/bin",
+];
+const SEARCH_PATH = [...EXTRA_PATH, ...(process.env.PATH ?? "").split(":").filter(Boolean)];
 
 // Optional Makefile target that "Stop Project" runs after the processes are gone,
 // e.g. for Docker containers started with "up -d".
@@ -100,7 +110,7 @@ export function isMissingTarget(stderr: string, target: string): boolean {
 export class TmuxMissingError extends Error {}
 
 function tmuxBinary(): string {
-  const bin = TMUX_CANDIDATES.find((path) => existsSync(path));
+  const bin = SEARCH_PATH.map((dir) => `${dir}/tmux`).find((path) => existsSync(path));
   if (!bin) throw new TmuxMissingError("tmux not found. Install it with: brew install tmux");
   return bin;
 }
@@ -201,7 +211,7 @@ export async function stopProject(project: string, projectPath: string): Promise
 
   // For isMissingTarget: LC_ALL=C keeps the message unlocalized, and without an inherited
   // MAKELEVEL the top-level make reports as "make:".
-  const env: NodeJS.ProcessEnv = { ...process.env, PATH: [...EXTRA_PATH, process.env.PATH].join(":"), LC_ALL: "C" };
+  const env: NodeJS.ProcessEnv = { ...process.env, PATH: SEARCH_PATH.join(":"), LC_ALL: "C" };
   delete env.MAKELEVEL;
   try {
     await execFileAsync("make", [STOP_TARGET], {
