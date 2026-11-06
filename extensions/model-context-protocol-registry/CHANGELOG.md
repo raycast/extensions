@@ -3,6 +3,11 @@
 ## [Add Ecommerce Leads MCP Server] - {PR_MERGE_DATE}
 
 - Add Ecommerce Leads to the official registry as a hosted Streamable HTTP server with a direct HTTP connection in Raycast, an `mcp-remote` fallback for other clients, and OAuth 2.1 sign-in for the account tools.
+
+## [Add Postel MCP Server] - 2026-11-06
+
+- Add Postel to the official registry: search posts that went viral in your niche, write your version in your own voice, and save, schedule or publish posts to X, LinkedIn, Bluesky and Mastodon. 17 tools. Hosted Streamable HTTP server at https://www.postel.app/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add deAPI MCP Server] - 2026-11-06
 
 - Add deAPI to the official registry: image, video, audio and transcription tools on open-source models, each with a matching price tool, plus balance, model list and job status. 39 tools. Hosted Streamable HTTP server at https://mcp.deapi.ai/mcp through `mcp-remote`, with the deAPI API key sent as an `Authorization: Bearer` header.
