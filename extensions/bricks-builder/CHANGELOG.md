@@ -1,6 +1,6 @@
 # Bricks Builder Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Open in Bricks: search pages, posts and Bricks templates on your sites and open them in the builder, or create new ones.
 - Edit Current Page in Bricks: switch the browser tab between the live page and the builder.
