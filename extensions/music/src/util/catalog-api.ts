@@ -201,6 +201,17 @@ export const searchCatalog = (term: string): TE.TaskEither<Error, CatalogSearchR
     };
   }, E.toError);
 
+/** Resolve metadata from Apple's catalog rather than trusting tool-supplied titles/URLs. */
+export const getCatalogSong = (songId: string): TE.TaskEither<Error, CatalogSong> =>
+  TE.tryCatch(async () => {
+    if (!/^\d+$/.test(songId)) throw new Error("Invalid catalog song ID.");
+    const storefront = await getStorefront();
+    const json = await cachedGet<{ data?: SongData[] }>(`/v1/catalog/${storefront}/songs/${songId}`);
+    const song = json.data?.[0];
+    if (!song || song.id !== songId) throw new Error("Song not found in this storefront.");
+    return parseSong(song);
+  }, E.toError);
+
 export interface CatalogAlbumDetail {
   album: CatalogAlbum;
   tracks: CatalogSong[];

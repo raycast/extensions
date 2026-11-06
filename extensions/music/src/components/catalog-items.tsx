@@ -7,7 +7,7 @@ import * as TE from "fp-ts/TaskEither";
 import { SignOutAction } from "../util/apple-music-auth";
 import { artworkUrl, getCatalogAlbum } from "../util/catalog-api";
 import { CatalogAlbum, CatalogSong } from "../util/models";
-import { AddToLibraryAction, OpenInMusicAction } from "./catalog-actions";
+import { AddToLibraryAction, OpenInMusicAction, PlayCatalogSongAction } from "./catalog-actions";
 
 const LIST_ART = 160;
 
@@ -31,6 +31,7 @@ export function CatalogSongItem({ song, showAlbum = true }: { song: CatalogSong;
       accessories={accessories}
       actions={
         <ActionPanel>
+          {song.playable && song.url && <PlayCatalogSongAction song={song} />}
           <OpenInMusicAction url={song.url} />
           {song.playable && <AddToLibraryAction kind="songs" id={song.id} title={song.title} />}
           {song.url && <CopyLinkAction url={song.url} />}

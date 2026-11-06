@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "test": "node --test tests/*.test.cjs",
+    "build:native": "node native/build.cjs",
     "publish": "npx @raycast/api@latest publish",
     "build": "ray build -e dist",
     "dev": "ray develop",
@@ -397,7 +398,7 @@
       "name": "search-apple-music",
       "title": "Search Apple Music",
       "subtitle": "Apple Music",
-      "description": "Search the Apple Music catalog for songs and albums, and add them to your library.",
+      "description": "Search the Apple Music catalog, play songs in Music, or add songs and albums to your library.",
       "disabledByDefault": true,
       "mode": "view",
       "keywords": [
@@ -446,6 +447,16 @@
     }
   ],
   "tools": [
+    {
+      "name": "search-catalog",
+      "title": "Search Apple Music Catalog",
+      "description": "Search songs and albums in the Apple Music catalog, including music outside the library. Requires Apple Music sign-in."
+    },
+    {
+      "name": "play-catalog-song",
+      "title": "Play Catalog Song",
+      "description": "Play an exact catalog song through the native Music player without opening its window or adding it to the library. Requires macOS Music permission. Preserves volume and shuffle; reports success only after verifying the track and playback progress."
+    },
     {
       "name": "get-volume",
       "title": "Get Volume",
@@ -554,6 +565,153 @@
   ],
   "ai": {
     "evals": [
+      {
+        "input": "@music Play Northern Lights by Example Ensemble from the Apple Music catalog, not my library.",
+        "usedAsExample": false,
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-catalog",
+              "arguments": {
+                "query": {
+                  "and": [
+                    {
+                      "matches": "[Nn]orthern [Ll]ights"
+                    },
+                    {
+                      "matches": "[Ee]xample [Ee]nsemble"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "play-catalog-song",
+              "arguments": {
+                "songId": "9000000002"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-library-tracks": {
+            "_tag": "Right",
+            "right": []
+          },
+          "search-catalog": {
+            "songs": [
+              {
+                "id": "9000000001",
+                "title": "Southern Lights",
+                "artist": "Example Ensemble",
+                "album": "Example Album",
+                "durationMs": 240000,
+                "artwork": null,
+                "url": "https://music.apple.com/us/album/example-album/9000000000?i=9000000001",
+                "contentRating": null,
+                "playable": true
+              },
+              {
+                "id": "9000000002",
+                "title": "Northern Lights",
+                "artist": "Example Ensemble",
+                "album": "Example Album",
+                "durationMs": 240000,
+                "artwork": null,
+                "url": "https://music.apple.com/us/album/example-album/9000000000?i=9000000002",
+                "contentRating": null,
+                "playable": true
+              }
+            ],
+            "albums": []
+          },
+          "play-catalog-song": {
+            "playing": true,
+            "songId": "9000000002",
+            "title": "Northern Lights",
+            "artist": "Example Ensemble"
+          }
+        }
+      },
+      {
+        "input": "@music Search the Apple Music catalog for Northern Lights by Example Ensemble and show the results. Do not start playback.",
+        "usedAsExample": false,
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-catalog",
+              "arguments": {
+                "query": {
+                  "includes": "Northern Lights"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "play-catalog-song"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "play"
+            }
+          }
+        ],
+        "mocks": {
+          "search-catalog": {
+            "songs": [
+              {
+                "id": "9000000002",
+                "title": "Northern Lights",
+                "artist": "Example Ensemble",
+                "album": "Example Album",
+                "durationMs": 240000,
+                "artwork": null,
+                "url": "https://music.apple.com/us/album/example-album/9000000000?i=9000000002",
+                "contentRating": null,
+                "playable": true
+              }
+            ],
+            "albums": []
+          },
+          "get-library-tracks": {
+            "_tag": "Right",
+            "right": []
+          }
+        }
+      },
+      {
+        "input": "@music Play Northern Lights by Example Ensemble from the Apple Music catalog. It is not in my library. If the catalog has no match, just tell me; do not play something else.",
+        "usedAsExample": false,
+        "expected": [
+          {
+            "callsTool": "search-catalog"
+          },
+          {
+            "not": {
+              "callsTool": "play-catalog-song"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "play"
+            }
+          }
+        ],
+        "mocks": {
+          "search-catalog": {
+            "songs": [],
+            "albums": []
+          },
+          "get-library-tracks": {
+            "_tag": "Right",
+            "right": []
+          }
+        }
+      },
       {
         "expected": [
           {

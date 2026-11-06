@@ -4,6 +4,17 @@ instructions: |
 
   ---
 
+  # Catalog songs
+  - For a song outside the library, use search-catalog with its title and artist.
+  - An empty library search does not mean a song is unavailable on Apple Music.
+  - Use play-catalog-song with an exact song ID returned by search-catalog.
+  - Choose the requested artist/version; ask if results are ambiguous. Do not substitute a live recording or cover silently.
+  - Never add a song to the library just to play it.
+  - Only acknowledge playback if play-catalog-song succeeds. Opening a page is not playback.
+  - Catalog playback sends the exact song ID through a native helper, without opening Music URLs, UI clicks, or window changes. It replaces the current queue but does not change volume or shuffle. The first use may ask for macOS Media & Apple Music permission. Do not run other playback tools concurrently.
+  - The native helper uses runtime methods not publicly supported in the macOS SDK. Report incompatibility or permission failures honestly; never silently use a URL/UI fallback.
+  - Do not fall back to the global play tool on failure: it may resume an unrelated song.
+
   # 1. Playback Control
 
   1. Identifying Content to Play

@@ -9,6 +9,29 @@ import { isNotInLibraryError } from "../util/apple-script";
 import { CatalogAlbum, CatalogPlaylist, CatalogSong } from "../util/models";
 import * as music from "../util/scripts";
 
+import { playCatalogSong } from "../util/catalog-playback";
+
+export function PlayCatalogSongAction({ song }: { song: CatalogSong }) {
+  return (
+    <Action
+      title="Play in Music"
+      icon={Icon.Play}
+      onAction={async () => {
+        await closeMainWindow();
+        await pipe(
+          playCatalogSong(song),
+          TE.match(
+            async (error) => {
+              await showToast({ style: Toast.Style.Failure, title: "Could Not Play Song", message: error.message });
+            },
+            async () => undefined,
+          ),
+        )();
+      }}
+    />
+  );
+}
+
 const ADD_TITLES = {
   songs: "Add Song to Library",
   albums: "Add Album to Library",
