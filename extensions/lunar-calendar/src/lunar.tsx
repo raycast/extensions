@@ -291,11 +291,8 @@ export default function Command() {
     const isDark = environment.theme === "dark";
     const fullCalendarSvg = generateFullCalendarSvg(calendarData, isDark);
 
-    // Markdown 标题格式
-    const monthName = new Date(year, month - 1).toLocaleString("en-US", {
-      month: "long",
-    });
-    const titleText = `${monthName} ${year}`;
+    // Markdown 标题格式改为中文：xxxx 年 x 月
+    const titleText = `${year} 年 ${month} 月`;
 
     return `# ${titleText}\n\n![Calendar](${fullCalendarSvg})`;
   }, [year, month, calendarData, environment.theme]);
