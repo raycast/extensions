@@ -1,6 +1,6 @@
 # Changelog
 
-## [Find Issues by Exact Key] - {PR_MERGE_DATE}
+## [Find Issues by Exact Key] - 2026-11-06
 
 - Find issues outside the selected project or custom JQL filter by entering their full key in the Issue dropdown.
 - Keep exact matches first and search loaded issues by key or title, ignoring case and accents.
