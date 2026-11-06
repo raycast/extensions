@@ -44,8 +44,12 @@ echo 'HOMEBREW_CASK_OPTS=--appdir=~/Applications' >> ~/.homebrew/brew.env
 ```
 
 If your shell sets `XDG_CONFIG_HOME`, Terminal's `brew` reads `$XDG_CONFIG_HOME/homebrew/brew.env`
-instead. To use one file for both, move your options to `$(brew --prefix)/etc/homebrew/brew.env`,
-after creating its folder with `mkdir -p "$(brew --prefix)/etc/homebrew"`.
+instead. Raycast doesn't get `XDG_CONFIG_HOME` from your shell, so the extension's `brew` still reads
+`~/.homebrew/brew.env`. To use one file for both, move your options to
+`$(brew --prefix)/etc/homebrew/brew.env`, after creating its folder with
+`mkdir -p "$(brew --prefix)/etc/homebrew"`.
+
+Adopt Apps looks for apps in your cask install folder, `/Applications` and `~/Applications`.
 
 ## Performance
 

@@ -359,7 +359,7 @@ export function conflictingInstalledCasks(
 /// Probing the installed bundle
 
 /**
- * The directory Homebrew will adopt INTO when this extension runs it.
+ * The folder brew installs casks into when this extension runs it.
  *
  * `brew` is spawned with Raycast's own environment (`execBrewEnv` copies
  * `process.env`), not the user's shell, so its `--appdir` is whatever
@@ -367,17 +367,12 @@ export function conflictingInstalledCasks(
  * when that is unset, as it usually is. This ignores `brew.env` files, so the
  * scan uses it only when `brewFetchCaskAppdir` can't ask brew.
  *
- * It has to be exactly that one directory. `brew install --adopt` targets
- * `<appdir>/<Name>.app` and nothing else, so an app matched anywhere else is
- * evidence about the wrong file: if a user has `~/Applications/Foo.app` and
- * appdir is `/Applications`, adoption either installs a fresh copy beside it
- * (nothing at the target to adopt) or, worse, adopts a different
- * `/Applications/Foo.app` that the preview never looked at.
- *
- * It is also the guard against system apps. macOS ships `Recents.app` INSIDE
- * `Finder.app` and `Console.app` under `/System/Applications/Utilities`; both
- * name-match a cask, and `recents` is not `auto_updates`, so without this the
- * list offered an SIP-protected Apple binary labeled as verified.
+ * The scan accepts only apps directly inside this folder, `/Applications` or
+ * `~/Applications`. That is the guard against system apps. macOS ships
+ * `Recents.app` INSIDE `Finder.app` and `Console.app` under
+ * `/System/Applications/Utilities`; both name-match a cask, and `recents` is
+ * not `auto_updates`, so without this the list offered an SIP-protected Apple
+ * binary labeled as verified.
  *
  * Known false negative, accepted: four `box-tools` apps target
  * `~/Library/Application Support/Box/Box Edit/` explicitly. Honoring per-cask
@@ -453,7 +448,7 @@ function expandPath(value: string): string {
   return path.resolve(value);
 }
 
-/** Whether an app sits exactly where Homebrew would adopt it. */
+/** Whether an app sits directly inside `appdir`. */
 export function isAdoptableLocation(appPath: string, appdir: string = caskAppdir()): boolean {
   return path.dirname(path.resolve(appPath)) === appdir;
 }
@@ -623,7 +618,7 @@ export interface AdoptScanInput {
   ignoredBundleIds: ReadonlySet<string>;
   /** Loads full cask records for the handful of matched tokens. */
   loadCasks: (tokens: string[]) => Promise<Cask[]>;
-  /** Where brew will adopt into; defaults to `caskAppdir()`. Injectable for tests. */
+  /** Where brew installs casks; defaults to `caskAppdir()`. Injectable for tests. */
   appdir?: string;
 }
 
@@ -641,7 +636,11 @@ export interface AdoptScanInput {
  */
 export async function scanForAdoptableApps(input: AdoptScanInput): Promise<AdoptableApp[]> {
   const { apps, index, installedCasks, ignoredBundleIds, loadCasks } = input;
-  const appdir = input.appdir ?? caskAppdir();
+  // Terminal's brew may read a `brew.env` under `XDG_CONFIG_HOME` that
+  // Raycast's brew never sees, so the scan checks the usual folders too. The
+  // adopt command passes the app's folder as `--appdir`, and brew keeps it for
+  // the cask's later upgrades.
+  const appdirs = new Set([input.appdir ?? caskAppdir(), "/Applications", path.join(os.homedir(), "Applications")]);
 
   // Name → tokens, inverted from the index once rather than per app.
   const byBundleName = new Map<string, string[]>();
@@ -665,7 +664,9 @@ export async function scanForAdoptableApps(input: AdoptScanInput): Promise<Adopt
   const matched: { app: InstalledApplication; bundleName: string; tokens: string[] }[] = [];
   for (const app of apps) {
     // Cheapest first: a path test before any name lookup or disk read.
-    if (!isAdoptableLocation(app.path, appdir)) continue;
+    if (![...appdirs].some((appdir) => isAdoptableLocation(app.path, appdir))) continue;
+    // Safari's Add to Dock puts web apps in ~/Applications, named after the site.
+    if (app.bundleId?.startsWith("com.apple.Safari.WebApp.")) continue;
     const bundleName = path.basename(app.path);
     if (managedBundleNames.has(bundleName)) continue;
     const tokens = byBundleName.get(bundleName);
