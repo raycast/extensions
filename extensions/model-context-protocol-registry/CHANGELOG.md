@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kilobat CLI MCP Server] - 2026-11-06
+
+- Add Kilobat CLI to the official registry for local macOS network diagnostics. Requires a separately installed CLI and macOS 14+; some tools change settings or need permissions or the companion desktop app.
+
 ## [Add Holos33 MCP Server] - 2026-11-06
 
 - Add Holos33 to the official registry as a hosted Streamable HTTP server with 11 read-only tools and no authentication.
