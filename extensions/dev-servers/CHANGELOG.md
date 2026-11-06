@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Start projects at login] - {PR_MERGE_DATE}
+## [Start projects at login] - 2026-11-06
 
 - **Pick projects to start when your Mac starts.** Choose **Start at Login** (`⌘⇧L`) on a project in the dashboard or the Start picker, and after the next restart its dev server starts on its own, installing dependencies first if they are missing. The menu bar item does the starting on its first refresh after a restart, so it needs to be enabled. A project already running, or whose folder is gone, is skipped.
 - **One place to see what starts at login.** **Start Dev Server** has a **Start at Login** section below the recent projects, listing every such project, whether it is running, and an action to start it now or turn it off. Rows for these projects in the dashboard and the recents carry a power icon.
