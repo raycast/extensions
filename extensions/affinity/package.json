@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "name": "affinity",
+  "title": "Affinity",
+  "description": "Find your Affinity files and inspect open documents and layers through Affinity’s local MCP server.",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Affinity Files",
+      "subtitle": "Affinity",
+      "description": "Find Affinity Designer, Photo and Publisher files on your Mac and open, preview or reveal them.",
+      "mode": "view"
+    },
+    {
+      "name": "inspect-documents",
+      "title": "Inspect Documents",
+      "subtitle": "Affinity",
+      "description": "Search open documents and inspect size, DPI, page count, selection, and layer names without changing them.",
+      "mode": "view"
+    }
+  ]
+}
