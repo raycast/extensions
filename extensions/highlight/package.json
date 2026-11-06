@@ -2,11 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "highlight",
   "title": "Highlight AI",
-  "description": "Open Highlight's native search and start new chats or task capture using its documented Mac controls.",
+  "description": "Open Highlight's native search and start new chats or task capture using its documented Mac controls. Requires Highlight AI's Highlight.app to be installed and signed in.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "license": "MIT",
-  "version": "0.1.0",
   "categories": [
     "Productivity"
   ],
@@ -28,11 +27,13 @@
       "type": "textfield",
       "required": false,
       "default": "/Applications/Highlight.app",
+      "placeholder": "/Applications/Highlight.app",
       "description": "Path to Highlight AI's Highlight.app. Highlights and Black Highlighter are different apps."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.3"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

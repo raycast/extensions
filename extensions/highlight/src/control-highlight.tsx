@@ -12,6 +12,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -67,11 +68,7 @@ async function sendControl(appPath: string, control: Control) {
                   !error.message.startsWith("Command failed:")
                 ? error.message
                 : "Highlight's control failed. Confirm its panel is open and macOS automation access is allowed.";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Highlight control unavailable",
-      message,
-    });
+    await showFailureToast(message, { title: "Highlight control unavailable" });
   }
 }
 
@@ -81,21 +78,28 @@ async function openLink(appPath: string, url: string) {
     await open(url, appPath);
     await closeMainWindow({ popToRootType: PopToRootType.Suspended });
   } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't open Highlight",
-      message: "Check that Highlight AI is installed and signed in.",
-    });
+    await showFailureToast(
+      "Check that Highlight AI is installed and signed in.",
+      {
+        title: "Couldn't open Highlight",
+      },
+    );
   }
+}
+
+function controlIcon(id: Control) {
+  return id === "search"
+    ? Icon.MagnifyingGlass
+    : id === "new-chat"
+      ? Icon.Message
+      : Icon.PlusCircle;
 }
 
 export default function Command() {
   let appPath = "";
   let error = "";
   try {
-    appPath = validateAppPath(
-      getPreferenceValues<{ appPath?: string }>().appPath ?? "",
-    );
+    appPath = validateAppPath(getPreferenceValues<Preferences>().appPath ?? "");
   } catch (failure) {
     error = String(failure);
   }
@@ -115,24 +119,20 @@ export default function Command() {
             key={control.id}
             title={control.title}
             subtitle={control.subtitle}
-            icon={
-              control.id === "search"
-                ? Icon.MagnifyingGlass
-                : control.id === "new-chat"
-                  ? Icon.Message
-                  : Icon.PlusCircle
-            }
+            icon={controlIcon(control.id)}
             accessories={[{ text: control.shortcut }]}
             actions={
               <ActionPanel>
                 {installed && (
                   <Action
                     title={control.title}
+                    icon={controlIcon(control.id)}
                     onAction={() => sendControl(appPath, control.id)}
                   />
                 )}
                 <Action.OpenInBrowser
                   title="Highlight Setup Instructions"
+                  icon={Icon.QuestionMarkCircle}
                   url="https://help.highlightai.com/articles/3717913325-how-to-download-and-install-highlight"
                 />
                 <Action
@@ -142,6 +142,7 @@ export default function Command() {
                 />
                 <Action.OpenInBrowser
                   title="Documented Hotkeys"
+                  icon={Icon.Keyboard}
                   url="https://help.highlightai.com/articles/8511467594-keyboard-shortcuts"
                 />
               </ActionPanel>
