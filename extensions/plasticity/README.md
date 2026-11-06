@@ -22,17 +22,6 @@ Triangle and vertex counts describe the bridge’s tessellation of solids and sh
 
 The bridge is a vendor-published integration protocol originally built for Blender. The parser and real local WebSocket client have automated fixture coverage. Live all-object and visible-object inventories passed against Plasticity 25.3.8. The extension sends direct list requests supported by both the original and current official bridge clients. Models larger than 64 MB of bridge data or 100,000 objects are rejected with a clear error.
 
-## Development
-
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run dev
-```
-
 ## Sources
 
 - [Plasticity’s official site and license features](https://www.plasticity.xyz/)

@@ -57,6 +57,7 @@
       "type": "textfield",
       "required": false,
       "default": "8980",
+      "placeholder": "8980",
       "title": "Bridge Port",
       "description": "Local Plasticity Blender bridge port. Default is 8980."
     }

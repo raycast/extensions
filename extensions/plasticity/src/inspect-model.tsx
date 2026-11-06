@@ -1,38 +1,27 @@
 import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues, Keyboard } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { inspectModel, ModelInventory, validatePort } from "./lib/bridge";
+import { usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
+import { inspectModel, validatePort } from "./lib/bridge";
 
 function escapeMarkdown(text: string): string {
   return text.replace(/[\\`*_{}[\]()<>#+.!|~-]/g, "\\$&");
 }
 
 export default function InspectModel() {
-  const { bridgePort } = getPreferenceValues<{ bridgePort: string }>();
+  const { bridgePort } = getPreferenceValues<Preferences>();
   const [scope, setScope] = useState<"all" | "visible">("all");
-  const [revision, setRevision] = useState(0);
-  const [data, setData] = useState<ModelInventory>();
-  const [error, setError] = useState<string>();
-  const [loading, setLoading] = useState(true);
-  const refresh = () => setRevision((value) => value + 1);
-  useEffect(() => {
-    const controller = new AbortController();
-    setLoading(true);
-    setData(undefined);
-    setError(undefined);
-    const load = async () => {
-      try {
-        const result = await inspectModel(validatePort(bridgePort), scope, controller.signal);
-        if (!controller.signal.aborted) setData(result);
-      } catch (cause) {
-        if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : String(cause));
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
-    void load();
-    return () => controller.abort();
-  }, [bridgePort, scope, revision]);
-
+  const abortable = useRef<AbortController>(null);
+  const {
+    data,
+    error: failure,
+    isLoading: loading,
+    revalidate: refresh,
+  } = usePromise(
+    (port: string, scope: "all" | "visible") => inspectModel(validatePort(port), scope, abortable.current?.signal),
+    [bridgePort, scope],
+    { abortable, onError: () => undefined },
+  );
+  const error = failure?.message;
   if (error) {
     return (
       <Detail
@@ -55,7 +44,6 @@ export default function InspectModel() {
     <List
       isLoading={loading}
       isShowingDetail
-      navigationTitle={data?.filename || "Plasticity Model Objects"}
       searchBarPlaceholder="Search object names or types"
       searchBarAccessory={
         <List.Dropdown tooltip="Object Scope" onChange={(value) => setScope(value as "all" | "visible")}>
@@ -74,7 +62,7 @@ export default function InspectModel() {
         }
       />
       <List.Section
-        title={`${data?.objects.length ?? 0} objects`}
+        title={`${data?.filename ? `${data.filename} · ` : ""}${data?.objects.length ?? 0} objects`}
         subtitle={data ? `Model version ${data.version}` : undefined}
       >
         {data?.objects.map((object) => (
