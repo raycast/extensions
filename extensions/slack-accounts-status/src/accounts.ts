@@ -16,7 +16,7 @@ function oauthClient(providerId: string, workspaceName?: string) {
 }
 
 export async function connectAccount(expected?: Account): Promise<Account> {
-  const clientId = getPreferenceValues<{ slackClientId?: string }>().slackClientId?.trim();
+  const clientId = getPreferenceValues<Preferences>().slackClientId?.trim();
   if (!clientId || !/^\d+\.\d+$/.test(clientId))
     throw new Error("Enter your Slack app's Client ID in extension preferences (for example, 123.456).");
   const providerId = `slack-${randomUUID()}`;
