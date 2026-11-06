@@ -1,5 +1,5 @@
 # BoltAI Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Ask BoltAI, Run AI Workflow, New Chat and Search Prompts commands.
