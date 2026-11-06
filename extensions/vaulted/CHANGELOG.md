@@ -1,6 +1,6 @@
 # Vaulted Raycast Changelog
 
-## [Passphrase Link Compatibility] - {PR_MERGE_DATE}
+## [Passphrase Link Compatibility] - 2026-11-06
 
 - Passphrase-protected links created on vaulted.fyi now open in View Secret, and passphrase links created in Raycast now open on vaulted.fyi. Updates `@vaulted/crypto` to 1.1.0, which derives the passphrase key with 600,000 PBKDF2 iterations.
 - Passphrase links created by earlier versions of the extension (100,000 iterations) still open.
