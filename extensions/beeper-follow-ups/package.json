@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beeper-follow-ups",
+  "title": "Beeper Follow-Ups",
+  "description": "Review direct conversations whose latest visible message came from someone else and prepare a draft in Beeper.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "awaiting-reply",
+      "title": "Review Conversations Awaiting Reply",
+      "subtitle": "Beeper Follow-ups",
+      "description": "Find direct conversations with a latest incoming message, read context, and hand off a draft to Beeper.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Awaiting Reply Count",
+      "description": "Show how many conversations are waiting for your reply in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "title": "Local Beeper API URL",
+      "description": "Loopback URL from Beeper Settings > Developers. Remote servers are not supported.",
+      "default": "http://localhost:23373",
+      "required": false
+    },
+    {
+      "name": "lookbackDays",
+      "type": "dropdown",
+      "title": "Conversation Activity Window",
+      "description": "Scan direct conversations in the primary inbox active within this period.",
+      "default": "14",
+      "required": false,
+      "data": [
+        {
+          "title": "7 days",
+          "value": "7"
+        },
+        {
+          "title": "14 days",
+          "value": "14"
+        },
+        {
+          "title": "30 days",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "name": "includeMuted",
+      "type": "checkbox",
+      "title": "Muted Conversations",
+      "description": "Include muted conversations in the reply queue.",
+      "label": "Include muted direct conversations",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@beeper/desktop-api": "6.0.0",
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "tsx": "^4.21.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/core.test.ts tests/sdk-client.test.ts",
+    "test:live": "tsx --test tests/live.test.ts"
+  }
+}
