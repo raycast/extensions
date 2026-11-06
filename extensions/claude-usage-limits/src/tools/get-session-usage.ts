@@ -1,5 +1,5 @@
 import { SessionUsageCommandResponseSchema } from "../types/usage-types";
-import { getCustomNpxPath } from "../preferences";
+import { ccusageCommand } from "../utils/ccusage-command";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
@@ -38,11 +38,10 @@ export default async function getSessionUsage(input?: Input): Promise<{
   }>;
   sessionCount: number;
 }> {
-  const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
   // Build arguments with optional parameters
-  const args = ["ccusage@latest", "session", "--json"];
+  const args = ["session", "--json"];
 
   if (input?.since) {
     validateDateFormat(input.since, "Since");
@@ -62,7 +61,8 @@ export default async function getSessionUsage(input?: Input): Promise<{
     args.push("--breakdown");
   }
 
-  const { stdout } = await execAsync(npxCommand, args, execOptions);
+  const [command, commandArgs] = ccusageCommand(args);
+  const { stdout } = await execAsync(command, commandArgs, execOptions);
 
   if (!stdout) {
     throw new Error("No output received from ccusage session command");

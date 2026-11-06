@@ -104,7 +104,7 @@ export default function MenuBarccusage() {
     (sections.monthlyUsage && monthlyLoading) ||
     (sections.totalUsage && totalLoading);
 
-  if (isLoading) {
+  if (isLoading && !(sections.rateLimits && limitsData)) {
     return <MenuBarExtra icon={{ source: Icon.Clock }} tooltip="Loading Claude usage..." isLoading={true} />;
   }
 
@@ -219,6 +219,37 @@ export default function MenuBarccusage() {
         dailyLoading || weeklyLoading || monthlyLoading || totalLoading || limitsLoading || workingTime.isLoading
       }
     >
+      {sections.rateLimits && (
+        <MenuBarExtra.Section title={rateLimitsSectionTitle}>
+          {limitsError && !limitsData && (
+            <MenuBarExtra.Item
+              title="Unable to fetch limits"
+              subtitle="Open for details"
+              tooltip={limitsError.message}
+              icon={Icon.ExclamationMark}
+              onAction={openUsage}
+            />
+          )}
+          {effectiveLimitsData && (
+            <>
+              {limitRows.map((row) => (
+                <MenuBarExtra.Item
+                  key={row.key}
+                  title={limitTitle(row.label, row.utilization)}
+                  subtitle={limitInfo(row.utilization, row.resets_at)}
+                  icon={limitIcon(row.utilization)}
+                  onAction={revalidate}
+                />
+              ))}
+              <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </>
+          )}
+          {!limitsData && !limitsError && limitsLoading && (
+            <MenuBarExtra.Item title="Loading limits..." icon={Icon.Clock} />
+          )}
+        </MenuBarExtra.Section>
+      )}
+
       {hasError && (
         <MenuBarExtra.Section title="Error">
           <MenuBarExtra.Item
@@ -244,37 +275,6 @@ export default function MenuBarccusage() {
 
       {!hasError && (
         <>
-          {sections.rateLimits && (
-            <MenuBarExtra.Section title={rateLimitsSectionTitle}>
-              {limitsError && !limitsData && (
-                <MenuBarExtra.Item
-                  title="Unable to fetch limits"
-                  subtitle="Open for details"
-                  tooltip={limitsError.message}
-                  icon={Icon.ExclamationMark}
-                  onAction={openUsage}
-                />
-              )}
-              {effectiveLimitsData && (
-                <>
-                  {limitRows.map((row) => (
-                    <MenuBarExtra.Item
-                      key={row.key}
-                      title={limitTitle(row.label, row.utilization)}
-                      subtitle={limitInfo(row.utilization, row.resets_at)}
-                      icon={limitIcon(row.utilization)}
-                      onAction={revalidate}
-                    />
-                  ))}
-                  <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
-                </>
-              )}
-              {!limitsData && !limitsError && limitsLoading && (
-                <MenuBarExtra.Item title="Loading limits..." icon={Icon.Clock} />
-              )}
-            </MenuBarExtra.Section>
-          )}
-
           {sections.todayUsage && (
             <MenuBarExtra.Section title="Today's Usage">
               <MenuBarExtra.Item
@@ -356,9 +356,11 @@ export default function MenuBarccusage() {
                 title={
                   workingTime.isLoading
                     ? "Loading..."
-                    : workingTime.todayMs > 0
-                      ? formatDuration(workingTime.todayMs)
-                      : "No activity today"
+                    : workingTime.error
+                      ? `Unable to load working time: ${workingTime.error.message}`
+                      : workingTime.todayMs > 0
+                        ? formatDuration(workingTime.todayMs)
+                        : "No activity today"
                 }
                 subtitle={
                   workingTime.yesterdayMs > 0 ? `vs yesterday: ${formatDuration(workingTime.yesterdayMs)}` : undefined

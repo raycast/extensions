@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
-import { calculateMonthlyProjection } from "./usage-calculator";
+import type { SessionData } from "../types/usage-types";
+import { calculateModelUsage, calculateMonthlyProjection } from "./usage-calculator";
 
 describe("calculateMonthlyProjection", () => {
   beforeEach(() => {
@@ -34,5 +35,31 @@ describe("calculateMonthlyProjection", () => {
 
     expect(result.dailyAverage).toBeCloseTo(5);
     expect(result.projectedMonthlyCost).toBeCloseTo(155);
+  });
+});
+
+describe("calculateModelUsage", () => {
+  it("credits each model in a session with its own usage", () => {
+    const breakdown = (modelName: string, cost: number) => ({
+      modelName,
+      inputTokens: 10,
+      outputTokens: 20,
+      cacheCreationTokens: 0,
+      cacheReadTokens: 0,
+      cost,
+    });
+    const session = {
+      modelBreakdowns: [breakdown("sonnet", 1), breakdown("opus", 5)],
+      modelsUsed: ["sonnet", "opus"],
+      inputTokens: 20,
+      outputTokens: 40,
+      totalTokens: 60,
+      totalCost: 6,
+    } as unknown as SessionData;
+    const usage = calculateModelUsage([session]);
+    expect(usage.map((model) => [model.model, model.totalCost, model.sessionCount]).sort()).toEqual([
+      ["opus", 5, 1],
+      ["sonnet", 1, 1],
+    ]);
   });
 });

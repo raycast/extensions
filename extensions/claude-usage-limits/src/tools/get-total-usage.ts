@@ -1,5 +1,5 @@
 import { TotalUsageResponseSchema } from "../types/usage-types";
-import { getCustomNpxPath } from "../preferences";
+import { ccusageCommand } from "../utils/ccusage-command";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
@@ -7,7 +7,7 @@ import { describeParseFailure } from "../utils/parse-diagnostics";
 import { captureCcusageVersion } from "../utils/ccusage-version";
 
 /**
- * Get comprehensive Claude Code usage statistics including totals, sessions, and model breakdowns
+ * Get comprehensive Claude Code usage statistics including totals and model breakdowns
  * @returns Complete usage statistics with model-wise breakdown
  * @throws Error when ccusage CLI is not available or returns invalid data
  */
@@ -18,7 +18,6 @@ export default async function getTotalUsage(): Promise<{
   outputTokens: number;
   cacheCreationTokens: number;
   cacheReadTokens: number;
-  sessions: number;
   modelBreakdowns: Array<{
     modelName: string;
     inputTokens: number;
@@ -27,10 +26,10 @@ export default async function getTotalUsage(): Promise<{
     totalCost: number;
   }>;
 }> {
-  const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
-  const { stdout } = await execAsync(npxCommand, ["ccusage@latest", "--json"], execOptions);
+  const [command, commandArgs] = ccusageCommand(["--json"]);
+  const { stdout } = await execAsync(command, commandArgs, execOptions);
 
   if (!stdout) {
     throw new Error("No output received from ccusage command");
@@ -83,7 +82,6 @@ export default async function getTotalUsage(): Promise<{
     outputTokens: data.totals.outputTokens,
     cacheCreationTokens: data.totals.cacheCreationTokens,
     cacheReadTokens: data.totals.cacheReadTokens,
-    sessions: data.daily.length,
     modelBreakdowns: Array.from(modelBreakdowns.values()),
   };
 }

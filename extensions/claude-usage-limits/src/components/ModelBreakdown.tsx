@@ -11,7 +11,6 @@ import { groupModelsByTier } from "../utils/model-utils";
 import { useSessionUsage } from "../hooks/useSessionUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { StandardActions, type ExternalLink } from "./common/StandardActions";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { MESSAGES } from "../utils/messages";
 
 const externalLinks: ExternalLink[] = [
@@ -22,7 +21,7 @@ const externalLinks: ExternalLink[] = [
 export function ModelBreakdown() {
   const { topModels: models, isLoading, error } = useSessionUsage();
 
-  const topModelsList = useMemo(() => (models ? getTopModels(models, 10) : []), [models]);
+  const topModelsList = useMemo(() => (models ? getTopModels(models, 5) : []), [models]);
 
   const { totalTokens, totalCost, totalSessions } = useMemo(
     () => (models ? calculateModelAggregates(models) : { totalTokens: 0, totalCost: 0, totalSessions: 0 }),
@@ -33,14 +32,6 @@ export function ModelBreakdown() {
 
   const modelsByTier = useMemo(() => (models ? groupModelsByTier(models) : {}), [models]);
 
-  const accessories: List.Item.Accessory[] =
-    error && models.length === 0
-      ? STANDARD_ACCESSORIES.ERROR
-      : models.length === 0 && isLoading
-        ? STANDARD_ACCESSORIES.LOADING
-        : !models || models.length === 0
-          ? [{ text: "No models" }]
-          : [{ text: `${models.length} models` }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error: models.length === 0 ? error : undefined,
@@ -122,7 +113,6 @@ export function ModelBreakdown() {
       id="model-breakdown"
       title="Models"
       icon={Icon.BarChart}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}
     />

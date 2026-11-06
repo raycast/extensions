@@ -11,7 +11,6 @@ import {
 import { useMonthlyUsage } from "../hooks/useMonthlyUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { StandardActions, type ExternalLink } from "./common/StandardActions";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 
 const externalLinks: ExternalLink[] = [
   { title: "View ccusage Repository", url: "https://github.com/ryoppippi/ccusage", icon: Icon.Code },
@@ -28,15 +27,6 @@ export function MonthlyUsage() {
     () => (monthlyUsage ? getCostPerMTok(monthlyUsage.totalCost, monthlyUsage.totalTokens) : "$0.00"),
     [monthlyUsage?.totalCost, monthlyUsage?.totalTokens],
   );
-
-  const accessories: List.Item.Accessory[] =
-    error && !monthlyUsage
-      ? STANDARD_ACCESSORIES.ERROR
-      : monthlyUsage === undefined
-        ? isLoading
-          ? STANDARD_ACCESSORIES.LOADING
-          : STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(monthlyUsage.totalCost) }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (!monthlyUsage) {
@@ -91,7 +81,6 @@ export function MonthlyUsage() {
       id="month"
       title="This Month"
       icon={Icon.Calendar}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}
     />

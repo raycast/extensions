@@ -388,7 +388,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Usage Display Mode",
-      "description": "Whether rate-limit percentages (menu bar title, progress bars, and the command's Usage Limits accessory) show consumed usage or remaining capacity",
+      "description": "Whether percentages in the menu bar title and progress bars show consumed usage or remaining capacity",
       "default": "consumed",
       "data": [
         {
@@ -427,7 +427,7 @@
     {
       "name": "get-total-usage",
       "title": "Get Total Usage",
-      "description": "Get comprehensive Claude Code usage statistics including totals, sessions, and model breakdowns"
+      "description": "Get comprehensive Claude Code usage statistics including totals and model breakdowns"
     },
     {
       "name": "get-monthly-usage",
@@ -458,7 +458,6 @@
             "outputTokens": 8000,
             "cacheCreationTokens": 500,
             "cacheReadTokens": 1200,
-            "sessions": 12,
             "modelBreakdowns": [
               {
                 "modelName": "claude-3-5-sonnet-20241022",
@@ -557,7 +556,6 @@
             "outputTokens": 8000,
             "cacheCreationTokens": 500,
             "cacheReadTokens": 1200,
-            "sessions": 12,
             "modelBreakdowns": [
               {
                 "modelName": "claude-3-5-sonnet-20241022",
@@ -592,7 +590,6 @@
             "outputTokens": 8000,
             "cacheCreationTokens": 500,
             "cacheReadTokens": 1200,
-            "sessions": 12,
             "modelBreakdowns": []
           }
         },
@@ -627,7 +624,6 @@
   "dependencies": {
     "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.3.3",
-    "ccusage": "^0.6.2",
     "date-fns": "^4.1.0",
     "es-toolkit": "^1.39.3",
     "semver": "^7.6.3",

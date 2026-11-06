@@ -6,21 +6,19 @@ import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 import { describeExecFailure, describeParseFailure } from "../utils/parse-diagnostics";
 import { getCcusageVersionSync } from "../utils/ccusage-version";
+import { ccusageCommand } from "../utils/ccusage-command";
 import { preferences } from "../preferences";
 
 const cache = new Cache();
 const CACHE_KEY = "ccusage-blocks";
 
 export const useCCUsageBlocksCli = () => {
-  const useDirectCommand = preferences.useDirectCcusageCommand;
-
   const [initialData] = useState<BlocksCommandResponse | undefined>(() => {
     const cached = cache.get(CACHE_KEY);
     return cached ? (JSON.parse(cached) as BlocksCommandResponse) : undefined;
   });
 
-  const command = useDirectCommand ? "ccusage" : "npx";
-  const args = useDirectCommand ? ["blocks", "--json"] : ["ccusage@latest", "blocks", "--json"];
+  const [command, args] = ccusageCommand(["blocks", "--json"]);
 
   const result = useExec(command, args, {
     ...getExecOptions(),

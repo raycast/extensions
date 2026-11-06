@@ -11,7 +11,6 @@ import { getCurrentLocalDate } from "../utils/date-formatter";
 import { useDailyUsage } from "../hooks/useDailyUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { StandardActions, type ExternalLink } from "./common/StandardActions";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 
 import { ReactNode, useMemo } from "react";
 
@@ -31,15 +30,6 @@ export function DailyUsage() {
     () => (dailyUsage ? getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens) : "$0.00"),
     [dailyUsage?.totalCost, dailyUsage?.totalTokens],
   );
-
-  const accessories: List.Item.Accessory[] =
-    error && !dailyUsage
-      ? STANDARD_ACCESSORIES.ERROR
-      : dailyUsage === undefined
-        ? isLoading
-          ? STANDARD_ACCESSORIES.LOADING
-          : STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(dailyUsage.totalCost) }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (!dailyUsage) {
@@ -101,7 +91,6 @@ export function DailyUsage() {
       id="today"
       title="Today"
       icon={Icon.Sun}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}
     />

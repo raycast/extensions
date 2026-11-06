@@ -1,6 +1,6 @@
 import { getPreferenceValues, updateCommandMetadata } from "@raycast/api";
 import { DailyUsageCommandResponseSchema, MonthlyUsageCommandResponseSchema } from "./types/usage-types";
-import { getCustomNpxPath, preferences } from "./preferences";
+import { ccusageCommand } from "./utils/ccusage-command";
 import { execAsync } from "./utils/exec-async";
 import { getExecOptions } from "./utils/exec-options";
 import { stringToJSON } from "./utils/string-to-json-schema";
@@ -18,14 +18,9 @@ const DAILY_PLACEHOLDERS = [
 const MONTHLY_PLACEHOLDERS = ["{monthlyCost}", "{monthlyTokens}", "{monthlyRatio}"] as const;
 const LIMIT_PLACEHOLDERS = ["{usageLimit}"] as const;
 
-const buildCommand = (subcommand: string): { command: string; args: string[] } => {
-  const useDirectCommand = preferences.useDirectCcusageCommand;
-  const npxCommand = getCustomNpxPath() ?? "npx";
-
-  if (useDirectCommand) {
-    return { command: "ccusage", args: [subcommand, "--json"] };
-  }
-  return { command: npxCommand, args: ["ccusage@latest", subcommand, "--json"] };
+const buildCommand = (subcommand: string) => {
+  const [command, args] = ccusageCommand([subcommand, "--json"]);
+  return { command, args };
 };
 
 const fetchDailyData = async () => {
@@ -39,7 +34,7 @@ const fetchDailyData = async () => {
     if (!result.success) return null;
 
     const today = getCurrentLocalDate();
-    const entry = result.data.daily.find((e) => e.date === today) ?? result.data.daily[result.data.daily.length - 1];
+    const entry = result.data.daily.find((e) => e.date === today);
 
     return entry
       ? {
@@ -65,8 +60,7 @@ const fetchMonthlyData = async () => {
     if (!result.success) return null;
 
     const currentMonth = getCurrentLocalMonth();
-    const entry =
-      result.data.monthly.find((e) => e.month === currentMonth) ?? result.data.monthly[result.data.monthly.length - 1];
+    const entry = result.data.monthly.find((e) => e.month === currentMonth);
 
     return entry
       ? {

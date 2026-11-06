@@ -12,7 +12,6 @@ import { useDailyUsage } from "../hooks/useDailyUsage";
 import { useSessionUsage } from "../hooks/useSessionUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { StandardActions, type ExternalLink } from "./common/StandardActions";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { MESSAGES } from "../utils/messages";
 
 const externalLinks: ExternalLink[] = [
@@ -47,16 +46,6 @@ export function CostAnalysis() {
     [monthlyCost],
   );
 
-  const accessories: List.Item.Accessory[] =
-    totalError && !totalUsage
-      ? STANDARD_ACCESSORIES.ERROR
-      : totalUsage === undefined
-        ? totalLoading
-          ? STANDARD_ACCESSORIES.LOADING
-          : STANDARD_ACCESSORIES.NO_DATA
-        : !totalUsage
-          ? STANDARD_ACCESSORIES.NO_DATA
-          : [{ text: formatCost(totalUsage.totalCost) }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error: !totalUsage ? totalError : undefined,
@@ -142,7 +131,6 @@ export function CostAnalysis() {
       id="cost-analysis"
       title="Costs"
       icon={Icon.Coins}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}
     />

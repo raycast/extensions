@@ -10,7 +10,6 @@ import {
 import { useSessionUsage } from "../hooks/useSessionUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { StandardActions } from "./common/StandardActions";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { MESSAGES } from "../utils/messages";
 
 const MAX_SESSIONS_DISPLAY = 5;
@@ -28,14 +27,6 @@ export function SessionUsage() {
     [sessions],
   );
 
-  const accessories: List.Item.Accessory[] =
-    error && sessions.length === 0
-      ? STANDARD_ACCESSORIES.ERROR
-      : sessions.length === 0 && isLoading
-        ? STANDARD_ACCESSORIES.LOADING
-        : !sessions || sessions.length === 0
-          ? [{ text: "No sessions" }]
-          : [{ text: `${sessions.length} sessions` }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error: sessions.length === 0 ? error : undefined,
@@ -85,7 +76,6 @@ export function SessionUsage() {
       id="sessions"
       title="Sessions"
       icon={Icon.List}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions />}
     />

@@ -24,18 +24,39 @@ export const calculateAverageSessionTokens = (sessions: SessionData[]): number =
 };
 
 export const calculateModelUsage = (sessions: SessionData[]): ModelUsage[] => {
-  const sessionsByModel = groupBy(
-    sessions,
-    (session) => session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown",
+  const entries = sessions.flatMap((session, sessionIndex) =>
+    session.modelBreakdowns?.length
+      ? session.modelBreakdowns.map((breakdown) => ({
+          sessionIndex,
+          model: breakdown.modelName,
+          inputTokens: breakdown.inputTokens || 0,
+          outputTokens: breakdown.outputTokens || 0,
+          totalTokens:
+            (breakdown.inputTokens || 0) +
+            (breakdown.outputTokens || 0) +
+            (breakdown.cacheCreationTokens || 0) +
+            (breakdown.cacheReadTokens || 0),
+          cost: breakdown.cost || 0,
+        }))
+      : [
+          {
+            sessionIndex,
+            model: session.modelsUsed?.[0] || "unknown",
+            inputTokens: session.inputTokens || 0,
+            outputTokens: session.outputTokens || 0,
+            totalTokens: session.totalTokens || 0,
+            cost: session.totalCost || 0,
+          },
+        ],
   );
 
-  const modelUsages = Object.entries(sessionsByModel).map(([model, modelSessions]) => ({
+  const modelUsages = Object.entries(groupBy(entries, (entry) => entry.model)).map(([model, modelEntries]) => ({
     model,
-    inputTokens: sumBy(modelSessions, (session) => session.inputTokens || 0),
-    outputTokens: sumBy(modelSessions, (session) => session.outputTokens || 0),
-    totalTokens: sumBy(modelSessions, (session) => session.totalTokens || 0),
-    totalCost: sumBy(modelSessions, (session) => session.totalCost || 0),
-    sessionCount: modelSessions.length,
+    inputTokens: sumBy(modelEntries, (entry) => entry.inputTokens),
+    outputTokens: sumBy(modelEntries, (entry) => entry.outputTokens),
+    totalTokens: sumBy(modelEntries, (entry) => entry.totalTokens),
+    totalCost: sumBy(modelEntries, (entry) => entry.cost),
+    sessionCount: new Set(modelEntries.map((entry) => entry.sessionIndex)).size,
   }));
 
   return orderBy(modelUsages, ["totalTokens"], ["desc"]);
@@ -63,22 +84,9 @@ export const calculateEfficiencyMetrics = (
   const averageInputOutputRatio = totalInputTokens > 0 ? totalOutputTokens / totalInputTokens : 0;
   const averageCostPerOutput = totalOutputTokens > 0 ? totalCost / totalOutputTokens : 0;
 
-  const sessionsByModel = groupBy(
-    sessions,
-    (session) => session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown",
-  );
-
-  const modelEfficiencies = Object.entries(sessionsByModel)
-    .map(([model, modelSessions]) => {
-      const totalModelCost = sumBy(modelSessions, (s) => s.totalCost);
-      const totalModelOutput = sumBy(modelSessions, (s) => s.outputTokens);
-
-      return {
-        model,
-        efficiency: totalModelOutput > 0 ? totalModelCost / totalModelOutput : Infinity,
-      };
-    })
-    .filter(({ efficiency }) => efficiency !== Infinity);
+  const modelEfficiencies = calculateModelUsage(sessions)
+    .filter((model) => model.outputTokens > 0)
+    .map((model) => ({ model: model.model, efficiency: model.totalCost / model.outputTokens }));
 
   const mostEfficientModel =
     modelEfficiencies.length > 0 ? minBy(modelEfficiencies, ({ efficiency }) => efficiency)?.model || null : null;

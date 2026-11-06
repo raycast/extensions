@@ -1,7 +1,8 @@
 import { execFile } from "child_process";
 import { Cache } from "@raycast/api";
 import { z } from "zod";
-import { getCustomNpxPath, getUsageCommandConfiguration, preferences } from "../preferences";
+import { getUsageCommandConfiguration, preferences } from "../preferences";
+import { ccusageCommand } from "./ccusage-command";
 import {
   SummaryUsageReport,
   SummaryUsageReportSchema,
@@ -13,7 +14,7 @@ import { getExecOptions } from "./exec-options";
 import { describeExecFailure, describeParseFailure } from "./parse-diagnostics";
 import { getCcusageVersionSync } from "./ccusage-version";
 import { stringToJSON } from "./string-to-json-schema";
-import { calculateModelUsage, getRecentSessions, getTopModels } from "./usage-calculator";
+import { calculateModelUsage, getRecentSessions } from "./usage-calculator";
 import { SummarySection } from "./command-sections";
 
 export const REPORT_CACHE_NAMESPACE = "ccusage-reports-v1";
@@ -51,9 +52,7 @@ export function getReportRefreshDelay(kind: ReportKind): number {
 }
 
 function runReport(args: string[]): Promise<unknown> {
-  const direct = preferences.useDirectCcusageCommand;
-  const command = direct ? "ccusage" : (getCustomNpxPath() ?? "npx");
-  const commandArgs = direct ? args : ["--yes", "ccusage@latest", ...args];
+  const [command, commandArgs] = ccusageCommand(args);
 
   return new Promise((resolve, reject) => {
     execFile(
@@ -173,10 +172,10 @@ async function loadSessionReport(): Promise<SessionUsageReport> {
   }
 
   // Aggregate before trimming. Older sessions still contribute to every model's
-  // cost, token count, and session count; the views display only five recent rows.
+  // cost, token count, and session count; the views cap what they display.
   return {
     recentSessions: getRecentSessions(parsed.data.sessions, 5),
-    topModels: getTopModels(calculateModelUsage(parsed.data.sessions), 5),
+    topModels: calculateModelUsage(parsed.data.sessions),
   };
 }
 

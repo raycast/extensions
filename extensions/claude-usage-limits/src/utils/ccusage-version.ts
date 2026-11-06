@@ -1,6 +1,6 @@
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
-import { getCustomNpxPath, preferences } from "../preferences";
+import { ccusageCommand } from "./ccusage-command";
 
 // The extension runs `ccusage@latest`, so the CLI version varies per machine and
 // is the single most useful fact for diagnosing schema-mismatch reports. ccusage
@@ -10,15 +10,10 @@ import { getCustomNpxPath, preferences } from "../preferences";
 let cachedVersion: string | undefined;
 let captureStarted = false;
 
-const versionCommand = (): [string, string[]] =>
-  preferences.useDirectCcusageCommand
-    ? ["ccusage", ["--version"]]
-    : [getCustomNpxPath() ?? "npx", ["ccusage@latest", "--version"]];
-
 export const captureCcusageVersion = async (): Promise<string | undefined> => {
   captureStarted = true;
   try {
-    const [command, args] = versionCommand();
+    const [command, args] = ccusageCommand(["--version"]);
     const { stdout } = await execAsync(command, args, getExecOptions());
     const version = stdout.toString().trim();
     if (version) cachedVersion = version;

@@ -35,6 +35,7 @@ export default function CCUsage() {
 
   return (
     <List
+      searchBarPlaceholder="Search Usage Sections"
       isLoading={summary.isLoading || sessions.isLoading || limits.isLoading}
       selectedItemId={configuration.selectedItemId}
       isShowingDetail={configuration.sections.length > 0}

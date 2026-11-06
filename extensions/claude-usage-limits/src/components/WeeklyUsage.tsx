@@ -11,7 +11,6 @@ import {
 import { useWeeklyUsage } from "../hooks/useWeeklyUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { StandardActions, type ExternalLink } from "./common/StandardActions";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 
 const externalLinks: ExternalLink[] = [
   { title: "View ccusage Repository", url: "https://github.com/ryoppippi/ccusage", icon: Icon.Code },
@@ -28,15 +27,6 @@ export function WeeklyUsage() {
     () => (weeklyUsage ? getCostPerMTok(weeklyUsage.totalCost, weeklyUsage.totalTokens) : "$0.00"),
     [weeklyUsage?.totalCost, weeklyUsage?.totalTokens],
   );
-
-  const accessories: List.Item.Accessory[] =
-    error && !weeklyUsage
-      ? STANDARD_ACCESSORIES.ERROR
-      : weeklyUsage === undefined
-        ? isLoading
-          ? STANDARD_ACCESSORIES.LOADING
-          : STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(weeklyUsage.totalCost) }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (!weeklyUsage) {
@@ -91,7 +81,6 @@ export function WeeklyUsage() {
       id="week"
       title="This Week"
       icon={Icon.Calendar}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}
     />

@@ -1,6 +1,6 @@
+import { format, subDays } from "date-fns";
 import { useCCUsageWeeklyCli } from "./useCCUsageWeeklyCli";
 import { WeeklyUsageData } from "../types/usage-types";
-import { getCurrentWeekStart } from "../utils/date-formatter";
 
 export const useWeeklyUsage = (): {
   data: WeeklyUsageData | undefined;
@@ -12,7 +12,9 @@ export const useWeeklyUsage = (): {
   const { data: rawData, isLoading, error, revalidate } = useCCUsageWeeklyCli();
 
   const weeks = rawData?.weekly ?? [];
-  const data = weeks.find((entry) => entry.week === getCurrentWeekStart()) ?? weeks.at(-1);
+  // ccusage picks the first day of its weeks, so match by range rather than one start date.
+  const weekAgo = format(subDays(new Date(), 7), "yyyy-MM-dd");
+  const data = weeks.find((entry) => entry.week > weekAgo);
   const previousWeekData = data ? weeks.filter((entry) => entry.week < data.week).at(-1) : undefined;
 
   return { data, previousWeekData, isLoading, error, revalidate };

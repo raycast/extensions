@@ -1,27 +1,22 @@
 import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { getProgressIcon, useCachedPromise, useCachedState } from "@raycast/utils";
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, useEffect } from "react";
+import { getReportRefreshInterval } from "../utils/usage-report";
 import { applyAgentOrder, fetchBrimAgents, moveAgent } from "../utils/brim-agents";
 import { calculateEstimatedUsage, formatResetTime } from "../utils/usage-limits-formatter";
 import { ErrorMetadata } from "./ErrorMetadata";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 
 const levelColor = (percent: number) => (percent >= 90 ? Color.Red : percent >= 70 ? Color.Orange : Color.Green);
 
 export function UsageLimits() {
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchBrimAgents);
+  useEffect(() => {
+    const id = setInterval(revalidate, getReportRefreshInterval());
+    return () => clearInterval(id);
+  }, [revalidate]);
   const [order, setOrder] = useCachedState<string[]>("agent-order", []);
   const agents = applyAgentOrder(data ?? [], order);
   const ids = agents.map((agent) => agent.id);
-
-  const accessories: List.Item.Accessory[] =
-    error && !data
-      ? STANDARD_ACCESSORIES.ERROR
-      : !data
-        ? STANDARD_ACCESSORIES.LOADING
-        : agents.length === 0
-          ? STANDARD_ACCESSORIES.NO_DATA
-          : [{ text: `${agents.length} ${agents.length === 1 ? "Agent" : "Agents"}` }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (agents.length === 0) {
@@ -78,7 +73,6 @@ export function UsageLimits() {
       id="usage-limits"
       title="Usage Limits"
       icon={Icon.Gauge}
-      accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={
         <ActionPanel>

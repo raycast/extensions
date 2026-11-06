@@ -1,5 +1,5 @@
 import { DailyUsageCommandResponseSchema } from "../types/usage-types";
-import { getCustomNpxPath } from "../preferences";
+import { ccusageCommand } from "../utils/ccusage-command";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
@@ -32,11 +32,10 @@ export default async function getDailyUsage(input?: Input): Promise<{
   totalTokens: number;
   date: string;
 }> {
-  const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
   // Build arguments with optional parameters
-  const args = ["ccusage@latest", "daily", "--json"];
+  const args = ["daily", "--json"];
 
   if (input?.since) {
     validateDateFormat(input.since, "Since");
@@ -56,7 +55,8 @@ export default async function getDailyUsage(input?: Input): Promise<{
     args.push("--breakdown");
   }
 
-  const { stdout } = await execAsync(npxCommand, args, execOptions);
+  const [command, commandArgs] = ccusageCommand(args);
+  const { stdout } = await execAsync(command, commandArgs, execOptions);
 
   if (!stdout) {
     throw new Error("No output received from ccusage daily command");
