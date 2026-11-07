@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Search Tabs Across Spaces] - {PR_MERGE_DATE}
+## [Search Tabs Across Spaces] - 2026-11-07
 
 - Search Tabs now lists tabs from every Dia space, not only the space active in each window.
 - With more than one space, tabs are grouped by space in Dia's order. Each section shows the space's tab count and which space is active, and every tab shows its space in the space's Dia color, as a name or a dot (new "Space Label" preference, default name).
