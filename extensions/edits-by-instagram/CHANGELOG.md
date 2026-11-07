@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-11-07
 
 - Search, open, duplicate, rename, favorite, and pin Edits projects through the native local MCP server.
 - Add secure connection setup, status checks, and capability inspection.
