@@ -1,12 +1,12 @@
 <div align="center">
-    <img src="./assets/extension-icon.png" alt="Edits" width="100"/>
+    <img src="./media/extension-icon.png" alt="Edits" width="100"/>
     <h3>Edits</h3>
     <p>Browse and organize Instagram Edits projects from Raycast</p>
 </div>
 
 Edits is a Raycast extension that lets you browse, open, duplicate, rename, favorite, and pin Instagram Edits projects from Raycast or **Ask Edits**, using Edits' native local MCP server.
 
-**Initial implementation, validated with Edits 454.0.0 on Apple silicon.** This is an independent extension, not affiliated with Meta or Instagram. Text overlay replacement is supported through Raycast AI. Other video editing, media import, export, and publishing are not implemented in this release. See [live integration findings](docs/integration-validation.md) for the tested scope and blockers.
+**Initial implementation, validated with Edits 454.0.0 on Apple silicon.** This is an independent extension, not affiliated with Meta or Instagram. Text overlay replacement is supported through Raycast AI. Other video editing, media import, export, and publishing are not implemented in this release.
 
 ## Setup
 
@@ -75,25 +75,3 @@ When you use Raycast AI, project metadata and inspected text overlays returned b
 All MCP traffic goes to the configured loopback origin. Tokens, raw transport errors, and endpoint secrets are not logged. The extension does not inspect Instagram sessions, upload media, modify Edits' internal database, or use a separate backend. Metadata is held in memory for the current command. The capability viewer redacts connection secrets reflected in server metadata.
 
 Do not share automation credentials. Anyone holding a token can control Edits while its server is enabled. Disable automation in Edits when you no longer want local clients to connect.
-
-## Development
-
-```sh
-npm ci
-npm test
-npx ray evals
-npx tsc --noEmit
-npm run lint
-npm run build
-npm run dev
-```
-
-AI behavior evals use synthetic project data and mocked tool results; they never mutate real projects.
-
-Tests use an ephemeral loopback MCP fixture; they require neither Edits nor a real token. They cover authentication, redirect/origin confinement, pagination, schema drift, response validation, correct project targeting, read-back verification, and lost mutation responses.
-
-The checked-in schema subset was captured from the live Edits server and is intentionally strict. An app update that changes an operation disables it until its contract is inspected and validated again. Do not turn unfamiliar tools into commands based on their names alone.
-
-See [the PRD](docs/PRD.md) for future phases and [validation notes](docs/integration-validation.md) for the evidence supporting this implementation.
-
-References: [Raycast application APIs](https://developers.raycast.com/api-reference/utilities), [Raycast preferences](https://developers.raycast.com/api-reference/preferences), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk).

@@ -5,6 +5,7 @@ import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { ConnectionError, type ConnectionConfig } from "./config";
 import { withEditsClient } from "./connection";
+import { withProjectClient } from "./project-session";
 import { collectPages } from "./discovery";
 import verifiedSchemas from "./verified-schemas.json";
 import editorSchemas from "./verified-editor-schemas.json";
@@ -142,7 +143,7 @@ export async function runProjectAction(
   if (action === "renameProject" && !newName?.trim()) {
     throw new ConnectionError("Name required", "Enter a project name.");
   }
-  return withEditsClient(config, async (client, signal) => {
+  return withProjectClient(config, async (client, signal) => {
     const before = parseProjects(await callVerifiedTool(client, "projects", {}, signal));
     const project = before.projects.find((candidate) => candidate.id === selected.id);
     if (!project) throw new ConnectionError("Project no longer available", "Refresh and select the project again.");

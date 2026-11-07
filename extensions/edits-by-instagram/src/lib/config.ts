@@ -1,8 +1,3 @@
-export interface ConnectionPreferences {
-  endpoint?: string;
-  token?: string;
-}
-
 export class ConnectionError extends Error {
   constructor(
     public readonly title: string,
@@ -17,7 +12,7 @@ export interface ConnectionConfig {
   token: string;
 }
 
-export function parseConnectionConfig(preferences: ConnectionPreferences): ConnectionConfig {
+export function parseConnectionConfig(preferences: Preferences): ConnectionConfig {
   if (!preferences.endpoint?.trim()) {
     throw new ConnectionError("Endpoint missing", "Copy the local endpoint from Edits into extension preferences.");
   }

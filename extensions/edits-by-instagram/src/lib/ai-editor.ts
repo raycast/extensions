@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { ConnectionError, type ConnectionConfig } from "./config";
-import { withEditsClient } from "./connection";
+import { withProjectClient } from "./project-session";
 import { callVerifiedTool, parseProjects } from "./projects";
 
 const textElement = z.object({
@@ -30,7 +30,7 @@ async function readText(client: Client, signal: AbortSignal, elementId: string) 
 
 /** Opens the exact project; only text and timing metadata leave the local application. */
 export async function aiListProjectText(config: ConnectionConfig, projectId: string) {
-  return withEditsClient(config, async (client, signal) => {
+  return withProjectClient(config, async (client, signal) => {
     const project = await openExact(client, signal, projectId);
     const texts: z.infer<typeof textElement>[] = [];
     const seen = new Set<string>();
@@ -65,7 +65,7 @@ export type EditProjectTextInput = {
 };
 export async function aiEditProjectText(config: ConnectionConfig, input: EditProjectTextInput) {
   if (!input.text.trim() || input.text.length > 10000) fail("Provide between 1 and 10000 characters of text");
-  return withEditsClient(
+  return withProjectClient(
     config,
     async (client, signal) => {
       const project = await openExact(client, signal, input.projectId);
@@ -94,7 +94,6 @@ export async function aiEditProjectText(config: ConnectionConfig, input: EditPro
         verifiedAfterReopen: true,
       };
     },
-    undefined,
     60_000,
   );
 }

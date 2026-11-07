@@ -1,4 +1,5 @@
-import { getApplications, open, showToast, Toast, type Application } from "@raycast/api";
+import { getApplications, open, type Application } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export const DOWNLOAD_URL = "https://edits.instagram.com/desktop/";
 
@@ -12,8 +13,7 @@ export async function openEdits(application: Application): Promise<void> {
   try {
     await open(application.path);
   } catch {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error("Could not open Edits"), {
       title: "Could not open Edits",
       message: "Check that Edits is still installed and try opening it from Applications.",
     });

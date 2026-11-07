@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import { resolve } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { test } from "node:test";
@@ -18,6 +22,9 @@ async function fixture(
       loseEditResponse: boolean;
       loseSavedText: boolean;
       changedSchema: boolean;
+      activeProject: string;
+      savedProjects: string[];
+      pauseRead?: () => Promise<void>;
     };
   }) => Promise<void>,
 ) {
@@ -29,6 +36,9 @@ async function fixture(
     loseEditResponse: false,
     loseSavedText: false,
     changedSchema: false,
+    activeProject: "",
+    savedProjects: [] as string[],
+    pauseRead: undefined as (() => Promise<void>) | undefined,
   };
   const server = createServer(async (req, res) => {
     if (req.method !== "POST") {
@@ -77,9 +87,15 @@ async function fixture(
     let data: unknown;
     switch (name) {
       case "projects":
-        data = { projects: [{ id: "demo", name: "Demo" }] };
+        data = {
+          projects: [
+            { id: "demo", name: "Demo" },
+            { id: "other", name: "Other" },
+          ],
+        };
         break;
       case "openProject":
+        state.activeProject = args.id;
         data = { id: state.wrongOpen ? "original" : args.id };
         break;
       case "elements":
@@ -89,6 +105,7 @@ async function fixture(
             : { elements: [element], total: 2 };
         break;
       case "getElement":
+        if (calls.filter((call) => call === "getElement").length === 2) await state.pauseRead?.();
         data = element;
         break;
       case "editText":
@@ -100,11 +117,12 @@ async function fixture(
         data = { text: state.text };
         break;
       case "saveProject":
-        data = { saved: true, projectId: state.wrongSave ? "original" : "demo" };
+        state.savedProjects.push(state.activeProject);
+        data = { saved: true, projectId: state.wrongSave ? "original" : state.activeProject };
         break;
       case "closeProject":
         if (state.loseSavedText) state.text = "WEEKEND\nVIBES";
-        data = { closedProjectId: "demo" };
+        data = { closedProjectId: state.activeProject };
         break;
       default:
         throw new Error(name);
@@ -177,4 +195,72 @@ test("successful save response alone does not prove persistence", () =>
   fixture(async ({ config, state }) => {
     state.loseSavedText = true;
     await assert.rejects(aiEditProjectText(config, edit));
+  }));
+
+for (const contender of ["list", "open-process"] as const) {
+  test(`text edit excludes concurrent ${contender} through save and reopen`, () =>
+    fixture(async ({ config, state, calls }) => {
+      const reachedRead = Promise.withResolvers<void>();
+      const resumeRead = Promise.withResolvers<void>();
+      state.pauseRead = async () => {
+        reachedRead.resolve();
+        await resumeRead.promise;
+      };
+      const editing = aiEditProjectText(config, edit);
+      await reachedRead.promise;
+      let competing: Promise<unknown>;
+      let child: ReturnType<typeof spawn> | undefined;
+      if (contender === "list") {
+        competing = aiListProjectText(config, "other");
+      } else {
+        child = spawn(
+          process.execPath,
+          [
+            "--require",
+            "tsx/cjs",
+            "-e",
+            `
+          const { runProjectAction } = require(${JSON.stringify(resolve("src/lib/projects.ts"))});
+          process.stdout.write("ready");
+          runProjectAction({ endpoint: new URL(${JSON.stringify(config.endpoint.href)}), token: "test" },
+            "openProject", { id: "other", name: "Other" })
+            .then(() => process.exit(0), (error) => { console.error(error); process.exit(1); });
+        `,
+          ],
+          { stdio: ["ignore", "pipe", "pipe"] },
+        );
+        let errors = "";
+        child.stderr!.on("data", (chunk) => {
+          errors += chunk;
+        });
+        competing = once(child, "exit").then(([code]) => assert.equal(code, 0, errors));
+        await once(child.stdout!, "data");
+      }
+      try {
+        // Give the competing workflow time to attempt the shared lock while the read is held.
+        await delay(350);
+        assert.equal(state.activeProject, "demo");
+        assert.equal(calls.filter((call) => call === "openProject").length, 1);
+      } finally {
+        resumeRead.resolve();
+      }
+      try {
+        const result = await editing;
+        assert.equal(result.verifiedAfterReopen, true);
+        await competing;
+        assert.deepEqual(state.savedProjects, ["demo"]);
+        assert.equal(state.activeProject, "other");
+        assert.equal(calls.filter((call) => call === "openProject").length, 3);
+      } finally {
+        child?.kill();
+      }
+    }));
+}
+
+test("failed editor workflow releases the lock for the next project", () =>
+  fixture(async ({ config, state }) => {
+    await assert.rejects(aiEditProjectText(config, { ...edit, expectedText: "stale" }));
+    const result = await aiListProjectText(config, "other");
+    assert.equal(result.project.id, "other");
+    assert.equal(state.activeProject, "other");
   }));

@@ -6,10 +6,10 @@ import {
   List,
   getPreferenceValues,
   openExtensionPreferences,
-  type Application,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { DOWNLOAD_URL, findEdits, openEdits } from "../lib/application";
 import { ConnectionError, parseConnectionConfig, redactConnectionSecrets, safeConnectionError } from "../lib/config";
 import { discoverCapabilities, type CapabilitySnapshot } from "../lib/discovery";
@@ -35,57 +35,54 @@ function SchemaDetail({ value }: { value: unknown }) {
 }
 
 export function ConnectionView({ inspect = false, autoConnect = true }: { inspect?: boolean; autoConnect?: boolean }) {
-  const [application, setApplication] = useState<Application>();
-  const [snapshot, setSnapshot] = useState<CapabilitySnapshot>();
-  const [error, setError] = useState<ConnectionError>();
-  const [loading, setLoading] = useState(true);
+  const [connect, setConnect] = useState(autoConnect);
   const controller = useRef<AbortController | null>(null);
-
-  async function refresh(connect = true) {
-    controller.current?.abort();
-    const current = new AbortController();
-    controller.current = current;
-    setLoading(true);
-    setSnapshot(undefined);
-    setError(undefined);
-    try {
-      const app = await findEdits();
-      if (current.signal.aborted) return;
-      setApplication(app);
-      if (!app) throw new ConnectionError("Edits is not installed", "Download Edits for Mac and complete its setup.");
-      const config = parseConnectionConfig(getPreferenceValues());
-      if (connect) {
-        const result = await discoverCapabilities(config, current.signal);
-        // Redact strings before serialization too, including credentials containing JSON escapes.
-        const safe = JSON.parse(
-          redactConnectionSecrets(
-            JSON.stringify(result, (_key, value) =>
-              typeof value === "string" ? redactConnectionSecrets(value, config) : value,
+  const {
+    data,
+    isLoading: loading,
+    revalidate,
+  } = usePromise(
+    async (shouldConnect: boolean) => {
+      const signal = controller.current?.signal;
+      let application;
+      try {
+        application = await findEdits();
+        if (!application)
+          throw new ConnectionError("Edits is not installed", "Download Edits for Mac and complete its setup.");
+        const config = parseConnectionConfig(getPreferenceValues<Preferences>());
+        let snapshot: CapabilitySnapshot | undefined;
+        if (shouldConnect) {
+          const result = await discoverCapabilities(config, signal);
+          // Redact strings before serialization too, including credentials containing JSON escapes.
+          snapshot = JSON.parse(
+            redactConnectionSecrets(
+              JSON.stringify(result, (_key, value) =>
+                typeof value === "string" ? redactConnectionSecrets(value, config) : value,
+              ),
+              config,
             ),
-            config,
-          ),
-        ) as CapabilitySnapshot;
-        if (!current.signal.aborted) setSnapshot(safe);
+          ) as CapabilitySnapshot;
+        }
+        return { application, snapshot, error: undefined };
+      } catch (failure) {
+        return { application, snapshot: undefined, error: safeConnectionError(failure) };
       }
-    } catch (failure) {
-      if (!current.signal.aborted) setError(safeConnectionError(failure));
-    } finally {
-      if (!current.signal.aborted) setLoading(false);
-    }
+    },
+    [connect],
+    { abortable: controller },
+  );
+  const application = data?.application;
+  const snapshot = loading ? undefined : data?.snapshot;
+  const error = loading ? undefined : data?.error;
+
+  function refresh() {
+    if (!connect) setConnect(true);
+    else void revalidate();
   }
-  useEffect(() => {
-    void refresh(autoConnect);
-    return () => controller.current?.abort();
-  }, []);
 
   const actions = (
     <ActionPanel>
-      <Action
-        title="Check Connection"
-        icon={Icon.ArrowClockwise}
-        onAction={() => refresh()}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-      />
+      <Action title="Check Connection" icon={Icon.ArrowClockwise} onAction={() => refresh()} />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       {application ? (
         <Action title="Open Edits" icon={Icon.AppWindow} onAction={() => openEdits(application)} />
@@ -132,13 +129,13 @@ export function ConnectionView({ inspect = false, autoConnect = true }: { inspec
               actions={
                 <ActionPanel>
                   <Action.Push title="Inspect Schema" icon={Icon.Code} target={<SchemaDetail value={value} />} />
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                   <Action
                     title="Refresh Capabilities"
                     icon={Icon.ArrowClockwise}
                     onAction={() => refresh()}
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
-                  <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
                 </ActionPanel>
               }
             />
