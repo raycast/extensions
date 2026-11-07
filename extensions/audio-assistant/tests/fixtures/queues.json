@@ -1,0 +1,22 @@
+[
+  {
+    "queue_id": "whole-home",
+    "active": true,
+    "display_name": "Whole Home",
+    "available": true,
+    "items": 2,
+    "shuffle_enabled": false,
+    "repeat_mode": "all",
+    "current_index": 0
+  },
+  {
+    "queue_id": "kitchen",
+    "active": false,
+    "display_name": "Kitchen",
+    "available": true,
+    "items": 0,
+    "shuffle_enabled": false,
+    "repeat_mode": "off",
+    "current_index": null
+  }
+]
