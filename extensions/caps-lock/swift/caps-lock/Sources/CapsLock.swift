@@ -61,14 +61,8 @@ private func acquireLock() throws -> Int32 {
   }
 }
 
-// Change the real modifier lock without synthesizing key presses or changing mappings.
-@raycast func toggleCapsLock() throws -> Bool {
-  let watchdog = startWatchdog()
-  defer { watchdog.cancel() }
-
-  let descriptor = try acquireLock()
-  defer { close(descriptor) }
-
+/// Opens the HID system service, runs `body` with the connection, and closes it.
+private func withKeyboard<T>(_ body: (io_connect_t) throws -> T) throws -> T {
   let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching(kIOHIDSystemClass))
   guard service != IO_OBJECT_NULL else {
     throw failure("macOS keyboard service is unavailable")
@@ -80,13 +74,20 @@ private func acquireLock() throws -> Int32 {
     throw failure(String(format: "Cannot open macOS keyboard service: 0x%x", opened))
   }
   defer { IOServiceClose(connection) }
+  return try body(connection)
+}
 
+private func readState(_ connection: io_connect_t) throws -> Bool {
   var state = false
   let read = IOHIDGetModifierLockState(connection, Int32(kIOHIDCapsLockState), &state)
   guard read == KERN_SUCCESS else {
     throw failure(String(format: "Cannot read Caps Lock: 0x%x", read))
   }
-  let target = !state
+  return state
+}
+
+private func writeState(_ connection: io_connect_t, _ target: Bool) throws -> Bool {
+  var state = !target
   var result = IOHIDSetModifierLockState(connection, Int32(kIOHIDCapsLockState), target)
   if result == KERN_SUCCESS {
     result = IOHIDGetModifierLockState(connection, Int32(kIOHIDCapsLockState), &state)
@@ -95,4 +96,33 @@ private func acquireLock() throws -> Int32 {
     throw failure(String(format: "macOS did not confirm the requested Caps Lock state (0x%x)", result))
   }
   return state
+}
+
+/// Runs a locked, watchdog-protected keyboard operation.
+private func guarded<T>(_ body: (io_connect_t) throws -> T) throws -> T {
+  let watchdog = startWatchdog()
+  defer { watchdog.cancel() }
+  let descriptor = try acquireLock()
+  defer { close(descriptor) }
+  return try withKeyboard(body)
+}
+
+// Change the real modifier lock without synthesizing key presses or changing mappings.
+@raycast func toggleCapsLock() throws -> Bool {
+  try guarded { connection in try writeState(connection, !(try readState(connection))) }
+}
+
+/// Force Caps Lock on or off; returns the confirmed state.
+@raycast func setCapsLock(on: Bool) throws -> Bool {
+  try guarded { connection in
+    if try readState(connection) == on { return on }
+    return try writeState(connection, on)
+  }
+}
+
+/// Read the current Caps Lock state without changing it.
+@raycast func getCapsLock() throws -> Bool {
+  let watchdog = startWatchdog()
+  defer { watchdog.cancel() }
+  return try withKeyboard(readState)
 }

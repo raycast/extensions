@@ -3,7 +3,7 @@
   "name": "caps-lock",
   "title": "Caps Lock",
   "description": "Toggle Caps Lock even when your Caps Lock key is remapped to Hyper, Escape, Control, or another key.",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "itsdanielsultan",
   "platforms": [
     "macOS"
@@ -25,10 +25,41 @@
       "title": "Toggle Caps Lock",
       "description": "Turn Caps Lock on or off without pressing the physical Caps Lock key.",
       "mode": "no-view"
+    },
+    {
+      "name": "caps-lock-on",
+      "title": "Turn Caps Lock On",
+      "description": "Turn Caps Lock on (does nothing if it is already on).",
+      "mode": "no-view"
+    },
+    {
+      "name": "caps-lock-off",
+      "title": "Turn Caps Lock Off",
+      "description": "Turn Caps Lock off (does nothing if it is already off).",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Caps Lock Indicator",
+      "description": "Show whether Caps Lock is on in the menu bar, with a one-click toggle.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "hideWhenOff",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Visibility",
+          "label": "Only show while Caps Lock is on",
+          "description": "Hide the menu bar icon whenever Caps Lock is off."
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.3"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
