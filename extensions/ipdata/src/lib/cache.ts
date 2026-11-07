@@ -1,5 +1,7 @@
 // One-hour cache for lookups (two minutes for the user's own addresses) on top of Raycast's
-// Cache, plus the most recent free-tier rate-limit headers.
+// Cache, plus the most recent free-tier rate-limit headers. Not withCache: Refresh must bypass and
+// overwrite a single entry (withCache can only clear its whole namespace), and a failed lookup is a
+// resolved result that must not be cached (withCache stores every resolved value).
 import { Cache, environment } from "@raycast/api";
 import { lookup, myIp, LookupResult, MyIpResult, RateInfo, Settings } from "./ipdata";
 import { settingsKey } from "./settings";

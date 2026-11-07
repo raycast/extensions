@@ -1,6 +1,6 @@
 // Vector road map drawn as SVG from ipdata's own tile archive (the same tiles ipdata.co renders
-// its hero map from): https://ipdata-tiles.jonathan9391.workers.dev/tiles/roads-20260928/{z}/{x}/{y}.mvt
-import { Cache } from "@raycast/api";
+// its hero map from), served at TILES_BASE/{z}/{x}/{y}.mvt.
+import { withCache } from "@raycast/utils";
 import { gunzipSync } from "node:zlib";
 import { PbfReader } from "pbf";
 import { VectorTile } from "@mapbox/vector-tile";
@@ -65,8 +65,6 @@ export interface MapLayers {
   failed: number;
 }
 
-const cache = new Cache({ namespace: "ipdata-maps" });
-
 export function project(lon: number, lat: number, zoom: number): [number, number] {
   const n = 256 * 2 ** zoom;
   const r = (lat * Math.PI) / 180;
@@ -101,18 +99,36 @@ async function fetchTileNow(x: number, y: number): Promise<Uint8Array | null> {
 
 type Pt = { x: number; y: number };
 
-export async function mapLayers(spec: MapSpec): Promise<MapLayers> {
-  const key = `map:${spec.lat.toFixed(3)},${spec.lon.toFixed(3)}:${spec.width}x${spec.height}@${spec.zoom}`;
-  const hit = cache.get(key);
-  if (hit) {
-    try {
-      const entry = JSON.parse(hit) as { t: number; layers: MapLayers };
-      if (Date.now() - entry.t < MAP_TTL_MS) return entry.layers;
-    } catch {
-      /* corrupt entry */
-    }
+// A map with some failed tiles is still drawn, but it must not be cached: the cached builder rejects
+// with it (withCache never stores a rejection) and mapLayers hands it back.
+class PartialMap extends Error {
+  layers: MapLayers;
+  constructor(layers: MapLayers) {
+    super("Some map tiles could not be loaded");
+    this.layers = layers;
   }
+}
 
+// Complete maps are kept for a week, keyed by the spec.
+const completeLayers = withCache(
+  async (spec: MapSpec): Promise<MapLayers> => {
+    const layers = await buildLayers(spec);
+    if (layers.failed > 0) throw new PartialMap(layers);
+    return layers;
+  },
+  { maxAge: MAP_TTL_MS },
+);
+
+export async function mapLayers(spec: MapSpec): Promise<MapLayers> {
+  try {
+    return await completeLayers(spec);
+  } catch (e) {
+    if (e instanceof PartialMap) return e.layers;
+    throw e;
+  }
+}
+
+async function buildLayers(spec: MapSpec): Promise<MapLayers> {
   const [cx, cy] = project(spec.lon, spec.lat, spec.zoom);
   const ox = cx - spec.width / 2;
   const oy = cy - spec.height / 2;
@@ -243,8 +259,7 @@ export async function mapLayers(spec: MapSpec): Promise<MapLayers> {
     tiles: tiles.length,
     failed,
   };
-  // Only a complete map is cached; a map with no tiles at all is an error, shown as unavailable.
+  // A map whose every tile failed is an error, shown as unavailable.
   if (tiles.length && failed === tiles.length) throw new Error("Map tiles could not be loaded");
-  if (failed === 0) cache.set(key, JSON.stringify({ t: Date.now(), layers }));
   return layers;
 }
