@@ -1,5 +1,9 @@
 # NixPkgs Search Changelog
 
+## [Custom Branches] - {PR_MERGE_DATE}
+
+- Add an Additional Branches preference to list more NixOS releases (for example a new release) in the branch selector
+
 ## [Update] - 2026-07-30
 
 - Show the evaluation system (`package_system`) alongside the indexed version to clarify which system the version applies to

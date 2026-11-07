@@ -54,6 +54,15 @@
           "value": "100"
         }
       ]
+    },
+    {
+      "name": "additionalBranches",
+      "description": "Comma-separated NixOS release numbers to add to the branch selector, in the same form as the built-in ones (for example 26.11). Only branches indexed on search.nixos.org return results.",
+      "type": "textfield",
+      "required": false,
+      "title": "Additional Branches",
+      "placeholder": "26.11",
+      "default": ""
     }
   ],
   "dependencies": {
