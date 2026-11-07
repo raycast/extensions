@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, popToRoot } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { activateTab, ChromeTab, listTabs } from "./lib/chrome";
@@ -37,14 +37,7 @@ export default function Command() {
     }
   }
 
-  const retryAction = (
-    <Action
-      title="Retry"
-      icon={Icon.ArrowClockwise}
-      shortcut={Keyboard.Shortcut.Common.Refresh}
-      onAction={revalidate}
-    />
-  );
+  const retryAction = <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />;
   const skippedTitle = "Some Tabs Could Not Be Loaded";
   const skippedDetail = `${skippedWindowCount} ${skippedWindowCount === 1 ? "window" : "windows"} changed while loading`;
 
@@ -70,7 +63,7 @@ export default function Command() {
       {/* 警告を選択できる行にすると Enter がタブ切り替えではなく Retry になるので、Section の見出しに出す */}
       <List.Section
         title={skippedWindowCount > 0 ? skippedTitle : undefined}
-        subtitle={skippedWindowCount > 0 ? `${skippedDetail} · ⌘R to retry` : undefined}
+        subtitle={skippedWindowCount > 0 ? `${skippedDetail} · ⌘↵ to retry` : undefined}
       >
         {visible.map((tab) => (
           <List.Item
