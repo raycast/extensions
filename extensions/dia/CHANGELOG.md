@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Search Extensions Command] - {PR_MERGE_DATE}
+## [Search Extensions Command] - 2026-11-07
 
 - Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.
 - Open Extension switches the front window to the extension's profile and picks the extension from Dia's Extensions menu, which opens it like its toolbar button. Requires Accessibility access for Raycast.
