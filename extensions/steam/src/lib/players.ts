@@ -11,7 +11,14 @@ export type PlayerHistory = {
   months: PlayerMonth[];
 };
 
-export type TopGame = { rank: number; appid: number; players?: number; peak?: number; lastWeekRank?: number };
+export type TopGame = {
+  chart: "now" | "weekly";
+  rank: number;
+  appid: number;
+  players?: number;
+  peak?: number;
+  lastWeekRank?: number;
+};
 
 export type PlayerRange = "48h" | "1w" | "1m" | "max";
 
@@ -50,24 +57,31 @@ async function chartsRanks<T>(method: string) {
 }
 
 export async function getTopGames(kind: "now" | "weekly"): Promise<TopGame[]> {
-  const now = await chartsRanks<ChartRank>("GetGamesByConcurrentPlayers");
   if (kind === "now") {
+    const now = await chartsRanks<ChartRank>("GetGamesByConcurrentPlayers");
     return now.map((game) => ({
+      chart: "now",
       rank: game.rank,
       appid: game.appid,
       players: game.concurrent_in_game,
       peak: game.peak_in_game,
     }));
   }
-  // The weekly list has no live counts, so borrow them from the live list where the game is in both
+  // The weekly list has no live counts, so borrow them from the live list where the game is in both.
+  // Live counts are optional here, so a failed live list still shows the weekly ranking.
+  const [weekly, now] = await Promise.all([
+    chartsRanks<WeeklyRank>("GetMostPlayedGames"),
+    chartsRanks<ChartRank>("GetGamesByConcurrentPlayers").catch(() => [] as ChartRank[]),
+  ]);
   const live = new Map(now.map((game) => [game.appid, game.concurrent_in_game]));
-  const weekly = await chartsRanks<WeeklyRank>("GetMostPlayedGames");
   return weekly.map((game) => ({
+    chart: "weekly",
     rank: game.rank,
     appid: game.appid,
     players: live.get(game.appid),
     peak: game.peak_in_game,
-    lastWeekRank: game.last_week_rank,
+    // 0 or below means Steam has no rank for last week
+    lastWeekRank: game.last_week_rank && game.last_week_rank > 0 ? game.last_week_rank : undefined,
   }));
 }
 

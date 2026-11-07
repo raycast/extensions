@@ -10,7 +10,8 @@ import { compactPlayers, formatPlayers, getTopGames, TopGame } from "./lib/playe
 type Kind = "now" | "weekly";
 
 function movement(game: TopGame): List.Item.Accessory | undefined {
-  if (!game.lastWeekRank) return { tag: { value: "New", color: Color.Blue }, tooltip: "Not in last week's top 100" };
+  if (!game.lastWeekRank || game.lastWeekRank <= 0)
+    return { tag: { value: "New", color: Color.Blue }, tooltip: "Not in last week's top 100" };
   const moved = game.lastWeekRank - game.rank;
   if (moved === 0) return { text: { value: "–", color: Color.SecondaryText }, tooltip: "Same rank as last week" };
   return moved > 0
@@ -47,7 +48,8 @@ export default function Command() {
         const details = cachedDetails(game.appid);
         const name = details?.data.name ?? `App ${game.appid}`;
         const accessories: List.Item.Accessory[] = [];
-        if (kind === "weekly") {
+        // Read the chart from the row, since old rows stay on screen while a new chart loads
+        if (game.chart === "weekly") {
           const moved = movement(game);
           if (moved) accessories.push(moved);
         }
@@ -62,7 +64,7 @@ export default function Command() {
           accessories.push({
             text: compactPlayers(game.peak),
             icon: Icon.ArrowUp,
-            tooltip: `${formatPlayers(game.peak)} peak today`,
+            tooltip: `${formatPlayers(game.peak)} peak ${game.chart === "weekly" ? "this week" : "today"}`,
           });
         }
         return (

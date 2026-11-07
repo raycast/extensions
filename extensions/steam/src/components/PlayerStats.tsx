@@ -145,18 +145,20 @@ export const PlayerStats = ({ appid, name }: { appid: number; name?: string }) =
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Range">
-            {RANGES.map((value, index) => (
-              <Action
-                key={value}
-                icon={value === range ? Icon.CheckCircle : Icon.Circle}
-                title={`Show ${RANGE_TITLES[value]}`}
-                shortcut={{
-                  macOS: { modifiers: ["cmd"], key: String(index + 1) as Keyboard.KeyEquivalent },
-                  Windows: { modifiers: ["ctrl"], key: String(index + 1) as Keyboard.KeyEquivalent },
-                }}
-                onAction={() => setRange(value)}
-              />
-            ))}
+            {RANGES.map((value, index) =>
+              value === range ? null : (
+                <Action
+                  key={value}
+                  icon={Icon.Calendar}
+                  title={`Show ${RANGE_TITLES[value]}`}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: String(index + 1) as Keyboard.KeyEquivalent },
+                    Windows: { modifiers: ["ctrl"], key: String(index + 1) as Keyboard.KeyEquivalent },
+                  }}
+                  onAction={() => setRange(value)}
+                />
+              ),
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action

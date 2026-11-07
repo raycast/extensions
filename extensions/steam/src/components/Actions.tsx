@@ -58,7 +58,7 @@ export const DefaultActions = () => {
       />
       <Action
         icon={Icon.List}
-        title="View Most Played Games"
+        title="View My Most Played Games"
         onAction={() => replaceWith(<MyGames initialSort="playtime" navigationTitle="My Games" />)}
       />
       <Action
