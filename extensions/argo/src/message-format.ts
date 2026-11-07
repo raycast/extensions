@@ -1,52 +1,114 @@
+import MarkdownIt from "markdown-it";
 import { safeMarkdown } from "./core.js";
 import { literal } from "./interaction-format.js";
 
-function prose(line: string): string {
-  // Table alignment is a safe alphabet; keep colons without enabling URL schemes.
-  if (/^[\t |:-]+$/.test(line)) return line;
-  // Only pipe escapes survive. Other backslashes must not revive link/HTML syntax.
-  return safeMarkdown(line).replace(/(?:&#92;)+\|/g, (escaped) => escaped.replaceAll("&#92;", "\\"));
+// Keep table rows as source text: table parsers discard cells beyond the header width.
+// Raycast renders the sanitized pipe syntax. Reference definitions must remain visible.
+const parser = new MarkdownIt("commonmark", { html: false, linkify: false }).disable("reference");
+
+function prose(text: string): string {
+  return text
+    .split("\n")
+    .map((line) =>
+      /^[\t |:-]+$/.test(line)
+        ? line
+        : safeMarkdown(line).replace(/(?:&#92;)+\|/g, (escaped) => escaped.replaceAll("&#92;", "\\")),
+    )
+    .join("\n");
 }
 
-function columns(prefix: string): number {
-  return [...prefix].reduce((column, char) => column + (char === "\t" ? 4 - (column % 4) : 1), 0);
-}
-
-/** Readable Agent Markdown, with external links, images and HTML kept inert. */
+/** Emit safe Markdown from parsed blocks, so code never passes through prose escaping. */
 export function messageMarkdown(text: string): string {
-  const lines = text.split("\n");
-  const output: string[] = [];
-  // ponytail: track only the outer list; leave list-contained block parsing to the renderer.
-  let listIndent = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
-    const indent = columns(/^[ \t]*/.exec(line)![0]);
-    if (line.trim() && indent < listIndent) listIndent = 0;
-    if (!listIndent) {
-      const item = /^( {0,3}(?:[-+*]|\d{1,9}[.)]))([ \t]+|$)/.exec(line);
-      if (item && !/^(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,})$/.test(line.trim())) {
-        const markerWidth = item[1]!.length;
-        const padding = columns(item[0]) - markerWidth;
-        listIndent = markerWidth + (padding >= 1 && padding <= 4 ? padding : 1);
+  const tokens = parser.parse(text, {});
+  // markdown-it stops consuming blocks at its nesting ceiling. Show the complete original
+  // literally rather than silently lose content or recurse without a bound.
+  if (tokens.some((token) => token.nesting === 1 && token.level >= parser.options.maxNesting - 1)) {
+    return literal(text);
+  }
+  let index = 0;
+  function blocks(until?: string): string {
+    const output: string[] = [];
+    let adjacentSetextEnd: number | undefined;
+    while (index < tokens.length) {
+      const token = tokens[index++]!;
+      if (token.type === until) break;
+      switch (token.type) {
+        case "inline":
+          output.push(prose(token.content));
+          break;
+        case "paragraph_open": {
+          const content = blocks("paragraph_close");
+          // A one-column pipe table can parse as setext + paragraph. Preserve their
+          // adjacency so the table-aware display still sees its body rows.
+          if (adjacentSetextEnd !== undefined && token.map?.[0] === adjacentSetextEnd) {
+            output[output.length - 1] += "\n" + content;
+          } else {
+            output.push(content);
+          }
+          adjacentSetextEnd = undefined;
+          break;
+        }
+        case "heading_open": {
+          const content = blocks("heading_close");
+          const setext = token.markup === "=" || token.markup === "-";
+          // Preserve setext syntax and adjacency, including table-shaped sequences.
+          const heading = setext
+            ? `${content}\n${token.markup.repeat(3)}`
+            : `${"#".repeat(Number(token.tag.slice(1)))} ${content.replace(/#+$/, (hashes) => "&#35;".repeat(hashes.length))}`;
+          if (adjacentSetextEnd !== undefined && token.map?.[0] === adjacentSetextEnd) {
+            output[output.length - 1] += "\n" + heading;
+          } else {
+            output.push(heading);
+          }
+          adjacentSetextEnd = setext ? token.map?.[1] : undefined;
+          break;
+        }
+        case "fence":
+        case "code_block":
+          // The parser removes container indentation, not code indentation. Re-fence the body
+          // before the enclosing list/quote prefixes are applied to every generated line.
+          output.push(literal(token.content.replace(/\n$/, "")));
+          break;
+        case "blockquote_open":
+          output.push(
+            blocks("blockquote_close")
+              .split("\n")
+              .map((line) => `> ${line}`)
+              .join("\n"),
+          );
+          break;
+        case "bullet_list_open":
+        case "ordered_list_open": {
+          const ordered = token.type === "ordered_list_open";
+          const items: string[] = [];
+          while (
+            index < tokens.length &&
+            tokens[index]!.type !== (ordered ? "ordered_list_close" : "bullet_list_close")
+          ) {
+            const item = tokens[index++]!;
+            if (item.type !== "list_item_open") continue;
+            const marker = ordered ? `${item.info || token.attrGet("start") || 1}${token.markup} ` : `${token.markup} `;
+            const content = blocks("list_item_close");
+            const lines = content.split("\n");
+            // Put children on their own line so a break or nested empty list cannot
+            // combine with this marker into a top-level thematic break.
+            items.push(
+              marker.trimEnd() +
+                (content ? "\n" + lines.map((line) => " ".repeat(marker.length) + line).join("\n") : ""),
+            );
+          }
+          index++;
+          output.push(items.join("\n\n"));
+          break;
+        }
+        case "hr":
+          output.push("---");
+          break;
+        default:
+          if (token.content) output.push(literal(token.content));
       }
     }
-    const opening = /^ {0,3}(`{3,}|~{3,})([^\r]*)(?:\r)?$/.exec(line);
-    if (opening && (opening[1]![0] === "~" || !opening[2]!.includes("`"))) {
-      const marker = opening[1]!;
-      const closing = new RegExp(`^ {0,3}${marker[0]}{${marker.length},}[ \\t]*\\r?$`);
-      let end = i + 1;
-      while (end < lines.length && !closing.test(lines[end]!)) end++;
-      // Re-fence the exact body, including incomplete fences and embedded markers.
-      output.push(`\n${literal(lines.slice(i + 1, end).join("\n"))}\n`);
-      i = end;
-    } else if (!listIndent && /^(?: {4}|\t)/.test(line) && (i === 0 || /^\s*$/.test(lines[i - 1]!))) {
-      let end = i + 1;
-      while (end < lines.length && /^(?: {4}|\t|\s*$)/.test(lines[end]!)) end++;
-      output.push(`\n${literal(lines.slice(i, end).join("\n"))}\n`);
-      i = end - 1;
-    } else {
-      output.push(prose(line));
-    }
+    return output.join("\n\n");
   }
-  return output.join("\n");
+  return blocks();
 }

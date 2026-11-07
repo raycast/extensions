@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Parse Markdown block structure before escaping prose so list-contained code retains literal URLs and punctuation. Preserve nested lists, quoted code, table source cells and original copy text, with complete literal fallback for excessive nesting.
+
 - Replace native message metadata panels with compact status icons and hover details. Keep failure and uncertainty labels visible, with exact timestamps and diagnostics available in Message Details. Preserve blank-separated nested Markdown lists instead of rendering them as standalone code.
 
 - Render conversation replies as safe Markdown with tables and unchanged code blocks, while keeping original terminal and approval screens literal. Document optional personal command hotkeys.

@@ -79,6 +79,7 @@
   },
   "dependencies": {
     "@raycast/api": "^2.10.1",
+    "markdown-it": "^15.0.3",
     "react": "^19.0.0",
     "zod": "^4.6.7"
   },
