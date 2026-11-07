@@ -89,7 +89,7 @@ function Detail({ clip, app }: { clip: Clip; app?: Application }) {
 
 // A fence longer than any backtick run in the clip, so the clip can't close it early.
 function fenced(text: string) {
-  const longest = Math.max(2, ...(text.match(/`+/g) ?? []).map((run) => run.length));
+  const longest = (text.match(/`+/g) ?? []).reduce((max, run) => Math.max(max, run.length), 2);
   const fence = "`".repeat(longest + 1);
   return `${fence}\n${text}\n${fence}`;
 }

@@ -6,8 +6,9 @@ export function searchSQL(query: string) {
     .filter(Boolean)
     .map((w) => ` AND text LIKE '%${w.replace(/[\\%_]/g, "\\$&").replace(/'/g, "''")}%' ESCAPE '\\'`);
   // copied_on is only worth showing when another device copied it, and peers lists the other devices.
+  // Image clips (kind 2) are left out until the extension can paste them.
   return `SELECT id, kind, text, source_app, created_at, pinned,
             CASE WHEN copied_by IN (SELECT id FROM peers) THEN copied_on END AS device
-          FROM clips WHERE deleted = 0${words.join("")}
+          FROM clips WHERE deleted = 0 AND kind != 2${words.join("")}
           ORDER BY pinned DESC, created_at DESC LIMIT 200`;
 }
