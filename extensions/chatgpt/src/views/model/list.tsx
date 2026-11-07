@@ -1,5 +1,6 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { Model } from "../../type";
+import { reasoningEffortLabel } from "../../utils/reasoning-effort";
 
 export const ModelListView = ({
   title,
@@ -42,6 +43,7 @@ export const ModelListItem = ({
 
 const ModelDetailView = (props: { model: Model; markdown?: string | null | undefined }) => {
   const { model, markdown } = props;
+  const globalReasoningEffort = getPreferenceValues<{ reasoningEffort?: string }>().reasoningEffort;
   const icons = [Icon.StackedBars1, Icon.StackedBars2, Icon.StackedBars3, Icon.StackedBars4];
   const t = Number.parseFloat((model.temperature ?? "0").toString());
 
@@ -60,7 +62,7 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
           />
           <List.Item.Detail.Metadata.Label
             title="Reasoning"
-            text={model.enableReasoningEffortChange ? model.reasoningEffort : "disabled"}
+            text={reasoningEffortLabel(model, globalReasoningEffort)}
           />
           <List.Item.Detail.Metadata.Label title="Vision capabilities" text={model.vision ? "Enable" : "Disable"} />
           <List.Item.Detail.Metadata.Separator />

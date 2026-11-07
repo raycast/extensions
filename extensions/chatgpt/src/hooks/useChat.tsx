@@ -4,6 +4,7 @@ import say from "say";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Model } from "../type";
 import { buildUserMessage, chatTransformer } from "../utils";
+import { resolveReasoningEffort } from "../utils/reasoning-effort";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
@@ -48,6 +49,11 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     return getPreferenceValues<{
       useStream: boolean;
     }>().useStream;
+  });
+  const [globalReasoningEffort] = useState<string | undefined>(() => {
+    return getPreferenceValues<{
+      reasoningEffort?: string;
+    }>().reasoningEffort;
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -107,8 +113,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       headers: { ...headers.apiKey },
       signal: abortSignal,
     };
-    const selectedReasoningEffort =
-      model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
+    const selectedReasoningEffort = resolveReasoningEffort(model, globalReasoningEffort);
 
     const createCompletion = (includeReasoningEffort: boolean, includeTemperature: boolean) =>
       chatGPT.chat.completions.create(

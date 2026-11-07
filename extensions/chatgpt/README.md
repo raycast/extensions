@@ -72,8 +72,14 @@ Manage chat presets and AI commands together in **Models**. Select a preset and 
 **AI Commands** is available for quick execution and command management. The standalone **Create AI Command** entry has been removed; use the action menu in **Models** to create commands. Existing commands are preserved. Shortcuts or deep links to the removed entry need to be replaced with **Models**.
 
 GPT-5 model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.
-You can also enable per-model reasoning control in the model form and set the `Effort` (`none`, `low`, `medium`, `high`).
-By default, reasoning effort override is disabled. When it is enabled and set to anything except `none`, the extension sends `reasoning_effort` in Chat Completions requests.
+
+### Reasoning effort
+
+Set the default reasoning effort for chat requests with the `Reasoning Effort` preference in `Raycast Settings > Extensions > ChatGPT` (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`). `none` is the default and omits `reasoning_effort`, so providers and models that do not support it keep working as before.
+
+Each model can override the global setting in the model form. Enable `Override global reasoning effort` and choose an `Effort`; when the override is disabled, the model follows the global setting. An AI command inherits its base model's reasoning settings, or keeps using the global setting when neither the command nor its base overrides them.
+
+The extension sends `reasoning_effort` in Chat Completions requests whenever the effective effort is not `none`. The setting applies to chat requests (Ask, AI Commands and conversations); the image commands keep their previous behavior and never send `reasoning_effort`.
 
 ### Custom Models
 
@@ -97,25 +103,26 @@ This extension requires a valid `Secret Key` as your API Key from [OpenAI](https
 
 All preferences properties list that can be customize through `Raycast Settings > Extensions > ChatGPT`
 
-| Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
-| ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal OpenAI API key                                                                                     |
-| `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
-| `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
-| `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
-| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
-| `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
-| `isAutoTTS`              | Text-to-Speech         | `boolean`                           | `false`  | `false` | Enable auto text-to-speech everytime you get a generated answer                                                  |
-| `useApiEndpoint`         | Use API Endpoint       | `boolean`                           | `false`  | `false` | Change the OpenAI's default API endpoint to custom endpoint                                                      |
-| `apiEndpoint`            | API Endpoint           | `string`                            | `false`  | `empty` | Custom API endpoint                                                                                              |
-| `useProxy`               | Use Proxy              | `boolean`                           | `false`  | `false` | Each question request will be passed through the proxy                                                           |
-| `proxyProtocol`          | Proxy Protocol         | `http`, `https`, `socks4`, `socks5` | `false`  | `http`  | Proxy protocol option                                                                                            |
-| `proxyHost`              | Proxy Host             | `string`                            | `false`  | `empty` | Proxy host value                                                                                                 |
-| `proxyUsername`          | Proxy Username         | `string`                            | `false`  | `empty` | Proxy username value                                                                                             |
-| `proxyPassword`          | Proxy Password         | `string`                            | `false`  | `empty` | Proxy password value                                                                                             |
-| `useAzure`               | Use Azure OpenAI       | `boolean`                           | `true`   | `false` | Use Azure OPENAI rather than OPENAI                                                                              |
-| `azureEndpoint`          | Azure Endpoint         | `string`                            | `false`  | `empty` | Azure OpenAI resource endpoint                                                                                   |
-| `azureDeploymentName`    | Azure Deployment       | `string`                            | `false`  | `empty` | Azure OpenAI resource deployment                                                                                 |
+| Properties               | Label                  | Value                                               | Required | Default | Description                                                                                                      |
+| ------------------------ | ---------------------- | --------------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| `apiKey`                 | API Key                | `string`                                            | `true`   | `empty` | Your personal OpenAI API key                                                                                     |
+| `useStream`              | Stream Completion      | `boolean`                                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
+| `reasoningEffort`        | Reasoning Effort       | `none`, `minimal`, `low`, `medium`, `high`, `xhigh` | `false`  | `none`  | Default reasoning effort for chat models that do not override it                                                 |
+| `isAutoSaveConversation` | Auto-save Conversation | `boolean`                                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
+| `isHistoryPaused`        | Pause History          | `boolean`                                           | `false`  | `false` | Pause the history of the conversation                                                                            |
+| `isAutoLoadText`         | Auto-load              | `boolean`                                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
+| `isAutoFullInput`        | Use Full Text Input    | `boolean`                                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
+| `isAutoTTS`              | Text-to-Speech         | `boolean`                                           | `false`  | `false` | Enable auto text-to-speech everytime you get a generated answer                                                  |
+| `useApiEndpoint`         | Use API Endpoint       | `boolean`                                           | `false`  | `false` | Change the OpenAI's default API endpoint to custom endpoint                                                      |
+| `apiEndpoint`            | API Endpoint           | `string`                                            | `false`  | `empty` | Custom API endpoint                                                                                              |
+| `useProxy`               | Use Proxy              | `boolean`                                           | `false`  | `false` | Each question request will be passed through the proxy                                                           |
+| `proxyProtocol`          | Proxy Protocol         | `http`, `https`, `socks4`, `socks5`                 | `false`  | `http`  | Proxy protocol option                                                                                            |
+| `proxyHost`              | Proxy Host             | `string`                                            | `false`  | `empty` | Proxy host value                                                                                                 |
+| `proxyUsername`          | Proxy Username         | `string`                                            | `false`  | `empty` | Proxy username value                                                                                             |
+| `proxyPassword`          | Proxy Password         | `string`                                            | `false`  | `empty` | Proxy password value                                                                                             |
+| `useAzure`               | Use Azure OpenAI       | `boolean`                                           | `true`   | `false` | Use Azure OPENAI rather than OPENAI                                                                              |
+| `azureEndpoint`          | Azure Endpoint         | `string`                                            | `false`  | `empty` | Azure OpenAI resource endpoint                                                                                   |
+| `azureDeploymentName`    | Azure Deployment       | `string`                                            | `false`  | `empty` | Azure OpenAI resource deployment                                                                                 |
 
 ### How to use Azure OpenAI
 
