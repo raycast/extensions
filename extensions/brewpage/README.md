@@ -18,9 +18,3 @@ Owner tokens and private management links are stored only in Raycast's encrypted
 If owner storage fails after publishing, the reader link stays available with a warning. Keep the command open and choose **Retry Saving Owner Access** to retry only the private storage write. Pending credentials remain in memory until saved or the command closes; they are never written to a plaintext fallback, and retrying storage does not upload again.
 
 The MIT license covers this native client. BrewPage is a separately hosted service; this client does not make the hosting backend open source or guarantee permanent storage. Service policies: [Privacy](https://brewpage.app/privacy) and [Terms](https://brewpage.app/terms).
-
-## Development
-
-Use Node.js 24.19.0 and `npm ci`. Run `npm test`, `npm run typecheck`, `npm run build`, and `npm run lint`. Tests use a real HTTP server bound to `127.0.0.1`; no test writes to BrewPage. The publisher takes an explicit transport; production constructs it only with Node `fetch`, and fixture origins are restricted to loopback HTTP.
-
-The `maksim_kochetkov` author handle passes the official SDK lookup and full lint. Native Raycast execution, rendered UI, storage behavior and screenshots remain untested; the Store review determines admission. Local protocol and storage-retry fixtures do not establish native runtime acceptance.

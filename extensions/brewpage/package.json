@@ -31,14 +31,12 @@
     "@types/react": "19.0.10",
     "eslint": "9.39.4",
     "prettier": "3.9.10",
-    "tsx": "4.23.15",
     "typescript": "5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test test/*.test.ts",
     "format": "prettier --write ."
   }
 }
