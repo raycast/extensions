@@ -1,4 +1,12 @@
-import { environment, getPreferenceValues, launchCommand, LaunchType, OAuth, popToRoot } from "@raycast/api";
+import {
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  OAuth,
+  popToRoot,
+} from "@raycast/api";
 import { setTimeout as delay } from "node:timers/promises";
 
 export type AuthorizationErrorDetails = {
@@ -23,16 +31,38 @@ export const client = createClient();
 
 // Authorization
 
-function getClientId(): string {
-  const clientId = getPreferenceValues().clientId?.trim();
+const clientIdKey = "google-client-id";
+const clientIdPattern = /^[\w-]+\.apps\.googleusercontent\.com$/;
+
+export function isValidClientId(value: string): boolean {
+  return clientIdPattern.test(value.trim());
+}
+
+export function hasPreferenceClientId(): boolean {
+  return !!getPreferenceValues().clientId?.trim();
+}
+
+export async function saveClientId(value: string): Promise<void> {
+  await LocalStorage.setItem(clientIdKey, value.trim());
+  await client.removeTokens();
+}
+
+async function getClientId(): Promise<string> {
+  const clientId =
+    getPreferenceValues().clientId?.trim() || ((await LocalStorage.getItem<string>(clientIdKey)) ?? "").trim();
   if (!clientId) {
-    throw new OAuthConfigurationError("Add your Google OAuth Client ID in the extension preferences.");
+    throw new OAuthConfigurationError("Add a Google OAuth Client ID to connect your account.");
+  }
+  if (!isValidClientId(clientId)) {
+    throw new OAuthConfigurationError(
+      "The saved Client ID is not valid. It should end in `.apps.googleusercontent.com` and is not an API key or client secret.",
+    );
   }
   return clientId;
 }
 
 export async function authorize(): Promise<boolean> {
-  const clientId = getClientId();
+  const clientId = await getClientId();
   const authClient = createClient();
   const tokenSet = await authClient.getTokens();
   if (tokenSet?.accessToken) {
@@ -130,6 +160,11 @@ async function oauthResponseError(response: Response): Promise<Error> {
   let message = response.statusText;
   try {
     const details = JSON.parse(body) as { error?: string; error_description?: string };
+    if (details.error === "invalid_client" || details.error === "unauthorized_client") {
+      return new OAuthConfigurationError(
+        "Google rejected the Client ID. Check that it belongs to an iOS OAuth client with Bundle ID `com.raycast`.",
+      );
+    }
     message = details.error_description ?? details.error ?? message;
   } catch {
     // Keep the HTTP status when the provider does not return JSON.

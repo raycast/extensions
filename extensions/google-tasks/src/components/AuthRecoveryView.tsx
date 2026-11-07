@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { AuthorizationErrorDetails } from "../api/oauth";
+import SetupGuide from "./SetupGuide";
 
 export default function AuthRecoveryView(props: {
   title: string;
@@ -7,34 +8,23 @@ export default function AuthRecoveryView(props: {
   onRetry: () => void;
   onReconnect: () => void;
 }) {
-  const instructions = props.error.needsPreferences
-    ? "Open Extension Preferences, add your Google OAuth Client ID, then choose Retry."
-    : "Choose Retry to try again, or reconnect your Google account if the saved sign-in has expired.";
+  if (props.error.needsPreferences) {
+    return <SetupGuide title={props.title} message={props.error.message} onRetry={props.onRetry} />;
+  }
 
   return (
     <Detail
       navigationTitle={props.title}
-      markdown={`## Connect Google Tasks\n\n${props.error.message}\n\n${instructions}`}
+      markdown={`## Connect Google Tasks\n\n${props.error.message}\n\nChoose Retry to try again, or reconnect your Google account if the saved sign-in has expired.`}
       actions={
         <ActionPanel>
-          {props.error.needsPreferences ? (
-            <Action
-              title="Open Extension Preferences"
-              icon={Icon.Gear}
-              onAction={() => void openExtensionPreferences()}
-            />
-          ) : null}
           <Action title="Retry" icon={Icon.ArrowClockwise} onAction={props.onRetry} />
-          {!props.error.needsPreferences ? (
-            <>
-              <Action title="Reconnect Google Account" icon={Icon.PersonCircle} onAction={props.onReconnect} />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={() => void openExtensionPreferences()}
-              />
-            </>
-          ) : null}
+          <Action title="Reconnect Google Account" icon={Icon.PersonCircle} onAction={props.onReconnect} />
+          <Action
+            title="Open Extension Preferences"
+            icon={Icon.Gear}
+            onAction={() => void openExtensionPreferences()}
+          />
         </ActionPanel>
       }
     />
