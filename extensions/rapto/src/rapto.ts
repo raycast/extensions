@@ -56,8 +56,15 @@ end try`,
 async function send(code: string, parameter?: string | number): Promise<string> {
   const id = await runningBundleID();
   const argument =
-    parameter === undefined ? "" : typeof parameter === "number" ? ` ${parameter}` : ` ${JSON.stringify(parameter)}`;
-  return runAppleScript(`tell application id "${id}" to «event ${code}»${argument}`);
+    parameter === undefined
+      ? ""
+      : typeof parameter === "number"
+        ? " ((item 2 of argv) as integer)"
+        : " (item 2 of argv)";
+  const script = `on run argv
+  tell application id (item 1 of argv) to return «event ${code}»${argument}
+end run`;
+  return runAppleScript(script, parameter === undefined ? [id] : [id, String(parameter)]);
 }
 
 export async function listWindows(): Promise<RaptoWindow[]> {

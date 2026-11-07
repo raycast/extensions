@@ -85,7 +85,6 @@ export default function ApplyLayout() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={isDragSnap ? "Drag to Snap Layout" : "Apply Layout"}
       searchBarPlaceholder={
         isDragSnap ? `Layout for ⌥ while dragging${where}` : `Arrange this desktop's windows${where}`
       }

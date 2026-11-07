@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { DOWNLOAD_URL, launchRapto, RaptoNotRunningError } from "./rapto";
 
 /** Shown instead of the list when Rapto can't be reached. */
@@ -18,8 +19,8 @@ export function RaptoErrorView({ error, onRetry }: { error: Error; onRetry: () =
                 try {
                   await launchRapto();
                   onRetry();
-                } catch {
-                  await showToast({ style: Toast.Style.Failure, title: "Rapto is not installed" });
+                } catch (error) {
+                  await showFailureToast(error, { title: "Rapto is not installed" });
                 }
               }}
             />
