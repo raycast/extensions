@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedState, useForm } from "@raycast/utils";
+import { useState } from "react";
 import { BROWSER_EXTENSION_URL, fetchPage, readTab } from "./link";
 import { TaskForm } from "./task-form";
 
@@ -8,6 +9,7 @@ import { TaskForm } from "./task-form";
 export default function Command() {
   const { push } = useNavigation();
   const [parse, setParse] = useCachedState("add-link-parse", false);
+  const [isLoading, setIsLoading] = useState(false);
   const { handleSubmit, itemProps } = useForm<{ url: string }>({
     validation: {
       url: (v) => {
@@ -18,6 +20,7 @@ export default function Command() {
     async onSubmit({ url }) {
       if (!parse) return push(<TaskForm link={{ url, title: url, description: "" }} />);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Reading page" });
+      setIsLoading(true);
       try {
         const page = (await readTab(url)) ?? (await fetchPage(url));
         await toast.hide();
@@ -27,12 +30,15 @@ export default function Command() {
         toast.title = "Could not read page";
         toast.message = error instanceof Error ? error.message : String(error);
         push(<TaskForm link={{ url, title: url, description: "" }} />);
+      } finally {
+        setIsLoading(false);
       }
     },
   });
 
   return (
     <Form
+      isLoading={isLoading}
       searchBarAccessory={
         parse ? <Form.LinkAccessory target={BROWSER_EXTENSION_URL} text="Get Raycast Companion" /> : undefined
       }

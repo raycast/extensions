@@ -117,6 +117,20 @@ export default function Command() {
                 icon={Icon.Pencil}
                 target={<TaskForm task={t} onSaved={tasks.revalidate} />}
               />
+              <Action
+                title={t.completed ? "Mark as Not Done" : "Complete Task"}
+                icon={t.completed ? Icon.Circle : Icon.CheckCircle}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() =>
+                  run(
+                    t.completed ? "Marked not done" : "Completed",
+                    t.completed ? "uncomplete_task" : "complete_task",
+                    {
+                      task_id: t.task_id,
+                    },
+                  )
+                }
+              />
               {primary && (
                 <Action.Open
                   title={primary.title}
@@ -136,20 +150,6 @@ export default function Command() {
                   ))}
                 </ActionPanel.Submenu>
               )}
-              <Action
-                title={t.completed ? "Mark as Not Done" : "Complete Task"}
-                icon={t.completed ? Icon.Circle : Icon.CheckCircle}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-                onAction={() =>
-                  run(
-                    t.completed ? "Marked not done" : "Completed",
-                    t.completed ? "uncomplete_task" : "complete_task",
-                    {
-                      task_id: t.task_id,
-                    },
-                  )
-                }
-              />
               <Action
                 title={t.starred ? "Unstar" : "Star"}
                 icon={Icon.Star}

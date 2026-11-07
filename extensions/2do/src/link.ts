@@ -1,19 +1,12 @@
 import { BrowserExtension, environment } from "@raycast/api";
+import { decode as decodeEntities } from "html-entities";
 
 export type PageInfo = { title: string; description: string };
 
 export const BROWSER_EXTENSION_URL = "https://www.raycast.com/browser-extension";
 
-const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
-
 function decode(s: string) {
-  return s
-    .replace(/&(#x[\da-f]+|#\d+|\w+);/gi, (m, e: string) => {
-      if (e[0] !== "#") return ENTITIES[e.toLowerCase()] ?? m;
-      return String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10));
-    })
-    .replace(/\s+/g, " ")
-    .trim();
+  return decodeEntities(s).replace(/\s+/g, " ").trim();
 }
 
 // Title from <title>, then og:title. Description from the meta tags pages set for search results

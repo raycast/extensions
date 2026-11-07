@@ -49,7 +49,8 @@
   },
   "dependencies": {
     "@raycast/api": "2.7.3",
-    "@raycast/utils": "2.3.2"
+    "@raycast/utils": "2.3.2",
+    "html-entities": "2.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
