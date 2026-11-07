@@ -21,7 +21,7 @@ const SORTS: { value: LibrarySort; title: string; empty: string }[] = [
 
 const byName = (a: GameDataSimple, b: GameDataSimple) => a.name.localeCompare(b.name);
 
-export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
+export const MyGames = ({ initialSort, navigationTitle }: { initialSort?: LibrarySort; navigationTitle?: string }) => {
   // Read at the first render, where the dropdown's own storeValue arrives later and flashes another order
   const [storedSort, setStoredSort] = useCachedState<LibrarySort>("my-games-sort", "name");
   const [pickedSort, setPickedSort] = useState(initialSort);
@@ -71,6 +71,8 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
     return games[0] ? `${sort}:${games[0].appid}` : undefined;
   }, [sort, hasGames]);
 
+  const shownPins = pinnedGames.map((game) => game.appid);
+
   const sortTitle = SORTS.find((option) => option.value === sort)?.title;
 
   const detailFor = (game: GameDataSimple) => {
@@ -82,7 +84,7 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
   if (!isLoggedIn) return <WebApiKeyNotice />;
   return (
     <List
-      navigationTitle="My Games"
+      navigationTitle={navigationTitle}
       isLoading={isLoading}
       searchBarPlaceholder="Search your games..."
       // Ids carry the sort, so switching views drops the old selection and starts at the top
@@ -118,7 +120,7 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
               game={game}
               detail={detailFor(game)}
               owned={ownership.get(game.appid)}
-              pinActions={<PinActions appid={game.appid} pinned={pinned} setPinned={setPinned} />}
+              pinActions={<PinActions appid={game.appid} pinned={pinned} shown={shownPins} setPinned={setPinned} />}
             />
           ))}
         </List.Section>
@@ -131,7 +133,7 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
             game={game}
             detail={detailFor(game)}
             owned={ownership.get(game.appid)}
-            pinActions={<PinActions appid={game.appid} pinned={pinned} setPinned={setPinned} />}
+            pinActions={<PinActions appid={game.appid} pinned={pinned} shown={shownPins} setPinned={setPinned} />}
           />
         ))}
       </List.Section>

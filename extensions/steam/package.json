@@ -1512,7 +1512,7 @@
       "type": "checkbox",
       "title": "Return Key",
       "label": "Launch games with Return",
-      "description": "Return launches the game and ⌘Return opens its details. Turn off for the opposite. Applies to games you own.",
+      "description": "Return launches the game and ⌘Return opens its details. Turn off for the opposite. Applies to My Games and the Recently Added and Recently Played lists.",
       "default": false,
       "required": false
     },

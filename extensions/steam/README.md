@@ -24,7 +24,7 @@ Both are optional, set in the extension preferences. A future version will requi
 - HowLongToBeat, YouTube, and SteamDB links
 - SteamGridDB images and ProtonDB scores (needs their Raycast extensions)
 - Launch or install games in Steam
-- Launch your games with ⌘Return (or Return, in preferences)
+- Launch games from My Games with ⌘Return (or Return, in preferences)
 - Hide software, DLC, videos, or hardware
 
 ## FAQ

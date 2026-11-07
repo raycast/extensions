@@ -170,15 +170,19 @@ export function rangeStats(history: PlayerHistory, range: PlayerRange) {
 
 export function changeVsLastWeek(points: PlayerPoint[], current?: number) {
   if (!points.length) return undefined;
+  const now = Date.now();
+  const target = now - 7 * DAY;
+  // Without a live count, the newest point stands in for today only if it is recent
   const [lastMs, lastPlayers] = points[points.length - 1];
-  const target = lastMs - 7 * DAY;
+  const today = current ?? (now - lastMs <= DAY ? lastPlayers : undefined);
+  if (today === undefined) return undefined;
   let closest: PlayerPoint | undefined;
   for (const point of points) {
     if (!closest || Math.abs(point[0] - target) < Math.abs(closest[0] - target)) closest = point;
   }
   // No point within a day of a week ago means the data is too sparse to compare
   if (!closest || Math.abs(closest[0] - target) > DAY || closest[1] <= 0) return undefined;
-  return ((current ?? lastPlayers) / closest[1] - 1) * 100;
+  return (today / closest[1] - 1) * 100;
 }
 
 export function peakMonth(history: PlayerHistory) {

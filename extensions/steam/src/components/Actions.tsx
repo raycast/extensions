@@ -51,21 +51,25 @@ export const DefaultActions = () => {
   };
   return (
     <ActionPanel.Section title="Common Commands">
-      <Action title="View My Games" icon={Icon.List} onAction={() => replaceWith(<MyGames />)} />
+      <Action
+        title="View My Games"
+        icon={Icon.List}
+        onAction={() => replaceWith(<MyGames navigationTitle="My Games" />)}
+      />
       <Action
         icon={Icon.List}
         title="View Most Played Games"
-        onAction={() => replaceWith(<MyGames initialSort="playtime" />)}
+        onAction={() => replaceWith(<MyGames initialSort="playtime" navigationTitle="My Games" />)}
       />
       <Action
         icon={Icon.List}
         title="View Recently Played Games"
-        onAction={() => replaceWith(<MyGames initialSort="last-played" />)}
+        onAction={() => replaceWith(<MyGames initialSort="last-played" navigationTitle="My Games" />)}
       />
       <Action
         icon={Icon.List}
         title="View Recently Added Games"
-        onAction={() => replaceWith(<MyGames initialSort="added" />)}
+        onAction={() => replaceWith(<MyGames initialSort="added" navigationTitle="My Games" />)}
       />
       {hasAccount ? (
         <Action icon={Icon.PersonCircle} title="View Steam Profile" onAction={() => replaceWith(<MyProfile />)} />
@@ -104,7 +108,10 @@ export const LaunchActions = ({ name = "", appid = 0, showPlayerCount = true, sh
         <Action.Push
           icon={Icon.TwoPeople}
           title="View Player Count"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "p" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+          }}
           target={<PlayerStats appid={appid} name={name} />}
         />
       ) : null}

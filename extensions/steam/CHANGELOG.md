@@ -9,7 +9,7 @@
 - Add a My Games command
 - Pin games in My Games with the Pin Game action. Pinned games show in a Pinned section at the top
 - Reorder pinned games with Move Up in Pinned and Move Down in Pinned
-- Launch a game you own with ⌘Return, or switch Return and ⌘Return in preferences
+- Launch games from My Games with ⌘Return, or switch Return and ⌘Return in preferences
 
 ## [Local Search, Recommendations, and New AI Tools] - 2026-10-01
 
