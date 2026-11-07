@@ -1,5 +1,11 @@
 # Links Folder Changelog
 
+## [Copy URL and Open in Browser] - {PR_MERGE_DATE}
+
+- Copy URL (⌘C) copies a link's URL to the clipboard.
+- Open in Active Browser (⌘↩) opens a link in the browser that was active behind Raycast (default browser if none).
+- Open in Browser (⌘⌥↩) opens a link in the default browser, even if the link has a custom app.
+
 ## [Delete Folder, Keep Contents] - 2026-10-19
 
 - Delete Folder, Keep Contents (⌃⇧D): remove a folder and move its items up to the folder's level.
