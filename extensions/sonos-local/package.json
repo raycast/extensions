@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sonos-local",
+  "title": "Sonos Local",
+  "description": "Control Sonos speakers on your local network over UPnP, with no cloud account and no login.",
+  "icon": "icon.png",
+  "author": "blacktakeover",
+  "license": "MIT",
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "sonos",
+      "title": "Control Sonos",
+      "description": "Browse rooms and groups with the current track and control playback",
+      "mode": "view"
+    },
+    {
+      "name": "group",
+      "title": "Group Speakers",
+      "description": "Add speakers to the active group or remove them",
+      "mode": "view"
+    },
+    {
+      "name": "rename",
+      "title": "Rename Room",
+      "description": "Rename a Sonos room",
+      "mode": "view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Play or Pause",
+      "description": "Play or pause the active group",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Raise Volume",
+      "description": "Raise the volume of the active group",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Lower Volume",
+      "description": "Lower the volume of the active group",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Speaker IP",
+      "description": "IP address of any speaker. Leave empty to discover speakers automatically.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "192.168.1.20"
+    },
+    {
+      "name": "defaultRoom",
+      "title": "Default Room",
+      "description": "Room the quick commands control when nothing is playing.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Living Room"
+    },
+    {
+      "name": "volumeStep",
+      "title": "Volume Step",
+      "description": "How much Raise Volume and Lower Volume change the volume.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "react": "^19.0.0",
+    "typescript": "^5.4.5",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "keywords": [
+    "sonos",
+    "speaker",
+    "music",
+    "volume",
+    "upnp"
+  ]
+}
