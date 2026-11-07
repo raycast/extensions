@@ -1,0 +1,98 @@
+import { List, Icon, Color } from "@raycast/api";
+import {
+  formatTokens,
+  formatCost,
+  formatCostDelta,
+  formatTokenDelta,
+  getTokenEfficiency,
+  getCostPerMTok,
+} from "../utils/data-formatter";
+import { getCurrentLocalDate } from "../utils/date-formatter";
+import { useDailyUsage } from "../hooks/useDailyUsage";
+import { ErrorMetadata } from "./ErrorMetadata";
+import { StandardActions, type ExternalLink } from "./common/StandardActions";
+
+import { ReactNode, useMemo } from "react";
+
+const externalLinks: ExternalLink[] = [
+  { title: "View ccusage Repository", url: "https://github.com/ryoppippi/ccusage", icon: Icon.Code },
+];
+
+export function DailyUsage() {
+  const { data: dailyUsage, previousDayData, isLoading, error } = useDailyUsage();
+  const currentDate = getCurrentLocalDate();
+
+  const efficiency = useMemo(
+    () => (dailyUsage ? getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens) : "0.00"),
+    [dailyUsage?.inputTokens, dailyUsage?.outputTokens],
+  );
+  const costPerMTok = useMemo(
+    () => (dailyUsage ? getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens) : "$0.00"),
+    [dailyUsage?.totalCost, dailyUsage?.totalTokens],
+  );
+
+  const renderDetailMetadata = (): ReactNode => {
+    if (!dailyUsage) {
+      return (
+        <ErrorMetadata
+          error={error}
+          isLoading={isLoading}
+          noDataMessage={!dailyUsage ? "No usage recorded for today" : undefined}
+          noDataSubMessage={!dailyUsage ? `Date: ${currentDate || "Loading..."}` : undefined}
+        />
+      );
+    }
+
+    return (
+      <List.Item.Detail.Metadata>
+        {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
+        <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} />
+        {dailyUsage.metadata?.agents && dailyUsage.metadata.agents.length > 1 && (
+          <List.Item.Detail.Metadata.Label title="Agents" text={dailyUsage.metadata.agents.join(", ")} />
+        )}
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label title="Input Tokens" text={formatTokens(dailyUsage.inputTokens)} />
+        <List.Item.Detail.Metadata.Label title="Output Tokens" text={formatTokens(dailyUsage.outputTokens)} />
+        <List.Item.Detail.Metadata.Label title="Total Tokens" text={formatTokens(dailyUsage.totalTokens)} />
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(dailyUsage.totalCost)} />
+        <List.Item.Detail.Metadata.Label title="Cost per MTok" text={costPerMTok} />
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label title="Output/Input Ratio" text={efficiency} />
+
+        {previousDayData && dailyUsage && (
+          <>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label title="Compared With" text={previousDayData.date} />
+            <List.Item.Detail.Metadata.Label
+              title="Cost Change"
+              text={formatCostDelta(dailyUsage.totalCost, previousDayData.totalCost)}
+              icon={
+                dailyUsage.totalCost === previousDayData.totalCost
+                  ? undefined
+                  : {
+                      source: dailyUsage.totalCost > previousDayData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
+                      tintColor: dailyUsage.totalCost > previousDayData.totalCost ? Color.Red : Color.Green,
+                    }
+              }
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Token Change"
+              text={formatTokenDelta(dailyUsage.totalTokens, previousDayData.totalTokens)}
+            />
+          </>
+        )}
+      </List.Item.Detail.Metadata>
+    );
+  };
+
+  return (
+    <List.Item
+      id="today"
+      title="Today"
+      icon={Icon.Sun}
+      detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
+      actions={<StandardActions externalLinks={externalLinks} />}
+    />
+  );
+}
