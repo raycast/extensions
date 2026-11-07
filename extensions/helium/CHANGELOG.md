@@ -1,6 +1,6 @@
 # Helium Changelog
 
-## [Tab Switching and Action Improvements] - {PR_MERGE_DATE}
+## [Tab Switching and Action Improvements] - 2026-11-07
 
 - **Action panels**: Group Search Tabs actions into sections, update the Open in New Tab and Create Quicklink icons, and use Raycast's standard Open shortcut for Open in New Tab in Search Tabs
 - **Search Tabs**: Show full tab titles and URLs in tooltips
