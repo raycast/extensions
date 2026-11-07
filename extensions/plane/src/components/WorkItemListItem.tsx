@@ -1,46 +1,90 @@
-import { IssueSearchItem } from "@makeplane/plane-node-sdk";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { getWorkItemUrlWithIdentifier } from "../helpers/work-items";
-import WorkItemDetail from "./WorkItemDetail";
+import { PriorityEnum } from "@makeplane/plane-node-sdk";
+import { Color, Icon, List } from "@raycast/api";
+import { ReactNode } from "react";
+import { format } from "date-fns";
+import { WorkItemSummary } from "../api/types";
+import { priorityToIcon } from "../helpers/icons";
+import { formatWorkItemIdentifier } from "../helpers/identifiers";
+import { capitalizeString } from "../helpers/strings";
+import { fromPlaneDate } from "../helpers/dates";
+import { isOverdue, localDateString } from "../helpers/work-item-counts";
+import WorkItemActions, { WorkItemMutator } from "./actions/WorkItemActions";
 
 type WorkItemListItemProps = {
-  workItem: IssueSearchItem;
-  mutateWorkItemList: () => void;
+  workItem: WorkItemSummary;
+  mutate?: WorkItemMutator;
+  mutateWorkItemList?: () => void;
+  currentUserId?: string;
+  /** Show the project name as subtitle (cross-project lists). */
+  showProject?: boolean;
+  detail?: ReactNode;
+  extraActions?: ReactNode;
 };
 
-export default function WorkItemListItem({ workItem, mutateWorkItemList }: WorkItemListItemProps) {
-  const keywords: string[] = [workItem.name, workItem.sequenceId?.toString() || ""];
+export default function WorkItemListItem({
+  workItem,
+  mutate,
+  mutateWorkItemList,
+  currentUserId,
+  showProject,
+  detail,
+  extraActions,
+}: WorkItemListItemProps) {
+  const identifier = formatWorkItemIdentifier(workItem.projectIdentifier, workItem.sequenceId);
+  const accessories: List.Item.Accessory[] = [];
 
-  const workItemIdentifier = `${workItem.projectIdentifier}-${workItem.sequenceId}`;
-
-  const accesories = [
-    {
-      text: workItemIdentifier,
-      icon: Icon.BullsEye,
-    },
-  ];
+  if (!detail) {
+    if (workItem.priority && workItem.priority !== PriorityEnum.None) {
+      accessories.push({
+        icon: priorityToIcon(workItem.priority),
+        tooltip: `Priority: ${capitalizeString(workItem.priority)}`,
+      });
+    }
+    if (workItem.assigneeIds && workItem.assigneeIds.length > 0) {
+      const assignedToMe = !!currentUserId && workItem.assigneeIds.includes(currentUserId);
+      accessories.push({
+        icon: assignedToMe ? Icon.PersonCircle : Icon.Person,
+        text: workItem.assigneeIds.length > 1 ? String(workItem.assigneeIds.length) : undefined,
+        tooltip: assignedToMe ? "Assigned to you" : `${workItem.assigneeIds.length} assignee(s)`,
+      });
+    }
+    // `fromPlaneDate` keeps the stored calendar day; `new Date("YYYY-MM-DD")` is the day before west of UTC.
+    const due = fromPlaneDate(workItem.targetDate);
+    if (due) {
+      // Calendar days, as in the count: a work item due today isn't overdue until tomorrow.
+      const overdue = isOverdue(workItem, localDateString());
+      accessories.push({
+        icon: { source: Icon.Calendar, tintColor: overdue ? Color.Red : undefined },
+        text: format(due, "MMM d"),
+        tooltip: `Due ${format(due, "dd MMM yyyy")}${overdue ? " (overdue)" : ""}`,
+      });
+    }
+    if (workItem.state) {
+      accessories.push({ tag: { value: workItem.state.name, color: workItem.state.color } });
+    }
+  }
 
   return (
     <List.Item
+      icon={
+        workItem.state
+          ? { source: Icon.Circle, tintColor: workItem.state.color, tooltip: workItem.state.name }
+          : { source: Icon.BullsEye, tooltip: identifier }
+      }
       title={workItem.name}
-      accessories={accesories}
-      keywords={keywords}
+      subtitle={showProject && workItem.projectName ? `${identifier} · ${workItem.projectName}` : identifier}
+      keywords={[identifier, String(workItem.sequenceId), workItem.projectIdentifier, workItem.projectName ?? ""]}
+      accessories={accessories}
+      detail={detail}
       actions={
-        <ActionPanel title={workItemIdentifier}>
-          <Action.Push
-            icon={Icon.BullsEye}
-            title="Open Work Item"
-            target={
-              <WorkItemDetail
-                slug={workItem.workspaceSlug}
-                projectId={workItem.projectId}
-                workItemId={workItem.id}
-                mutateWorkItemList={mutateWorkItemList}
-              />
-            }
-          />
-          <Action.OpenInBrowser url={getWorkItemUrlWithIdentifier(workItem.workspaceSlug, workItemIdentifier)} />
-        </ActionPanel>
+        <WorkItemActions
+          workItem={workItem}
+          mutate={mutate}
+          onChanged={mutateWorkItemList}
+          mutateWorkItemList={mutateWorkItemList}
+          currentUserId={currentUserId}
+          extraActions={extraActions}
+        />
       }
     />
   );
