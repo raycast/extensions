@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "folklore",
+    title: "Folklore Clinical Variant Interpretation MCP",
+    description:
+      "Folklore MCP 2.0.0 provides ACMG/AMP germline variant classification, gene profiles, ClinGen gene-disease associations and scientific literature through 11 public tools without an API key. Clients configured with a Folklore Bearer API key can access 18 additional tools at the same endpoint for case analysis, approved source files and report retrieval. Public variant classification accepts GRCh38 nuclear germline SNVs and simple indels under 50 bp. Results require qualified professional review. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://folklore.helena.bio/images/logos/folklore.png",
+    homepage: "https://folklore.helena.bio/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.helena.bio/folklore/v1/mcp"],
+    },
+    remoteUrl: "https://api.helena.bio/folklore/v1/mcp",
+  },
+  {
     name: "postel",
     title: "Postel",
     description:
