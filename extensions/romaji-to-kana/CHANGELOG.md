@@ -1,4 +1,4 @@
-# Kana Retype Changelog
+# Romaji to Kana Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "kana-retype",
-  "title": "Kana Retype",
+  "name": "romaji-to-kana",
+  "title": "Romaji to Kana",
   "type": "module",
   "description": "Retype selected romaji text in Japanese Kana input mode with a single keystroke",
   "icon": "extension-icon.png",
