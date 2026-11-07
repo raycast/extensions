@@ -1,4 +1,4 @@
-# Kana Retype
+# Romaji to Kana
 
 A Raycast extension to retype accidentally typed romaji text into Japanese Kana without deleting it.
 
