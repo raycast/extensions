@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Enhanced Search Ghostty Tabs] - {PR_MERGE_DATE}
+## [Enhanced Search Ghostty Tabs] - 2026-11-07
 
 - Search now lists every surface (split panes included), not just tabs
 - Match by running foreground process (resolved from the surface pid), tty, tab name and working directory
