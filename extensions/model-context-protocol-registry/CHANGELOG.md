@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Rinhelp MCP Server] - 2026-11-07
+
+- Add Rinhelp to the official registry: a help desk for small teams and AI agents. Reply to and triage conversations, search knowledge, write help center articles, manage saved replies, and find Shopify orders and Stripe customers; refunds and anything that can't be undone wait for a teammate's approval. About 80 tools. Hosted Streamable HTTP server at https://mcp.rinhelp.com/mcp with a Rinhelp API key as a Bearer header, through `mcp-remote`.
+
 ## [Add Folklore MCP] - 2026-11-07
 
 - Add Folklore MCP 2.0.0 with direct HTTP in Raycast and a local proxy fallback for other clients.

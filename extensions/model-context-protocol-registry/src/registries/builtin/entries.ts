@@ -1940,6 +1940,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "rinhelp",
+    title: "Rinhelp",
+    description:
+      "Help desk for small teams and AI agents. Acts as the teammate who connected it, with their role: reply to, note, assign, triage, close and reopen conversations, search knowledge, write and publish help center articles, manage saved replies, and find Shopify orders and Stripe customers. Refunds, cancellations and anything that moves money or can't be undone wait for a teammate's approval. About 80 tools. Hosted remote Streamable HTTP server through `mcp-remote`; Rinhelp API key as an `Authorization: Bearer` header (Settings -> AI agents -> API keys). Free plan for up to 3 teammates. Replace YOUR_RINHELP_API_KEY in RINHELP_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://rinhelp.com/rinhelp-app-icon-512.png",
+    homepage: "https://docs.rinhelp.com/articles/98a0def1-a07d-4c34-9f19-4d168626b40c-connect-your-ai-agent",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rinhelp.com/mcp", "--header", "Authorization:${RINHELP_AUTH_HEADER}"],
+      env: {
+        RINHELP_AUTH_HEADER: "Bearer YOUR_RINHELP_API_KEY",
+      },
+    },
+  },
+  {
     name: "Rube",
     title: "Rube - by Composio",
     description:
