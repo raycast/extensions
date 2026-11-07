@@ -1,10 +1,11 @@
 import { Alert, Clipboard, confirmAlert, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Fragment, useEffect, useState } from "react";
 import { SKILLS, SKILL_BY_ID } from "./engine/data";
 import { stopTask } from "./engine/engine";
 import { formatBundle, formatDuration } from "./engine/format";
 import { dismissHint, nextHint } from "./engine/hints";
-import { exportSave, importSave } from "./engine/migrate";
+import { exportSave, importClipboardSave } from "./engine/migrate";
 import { replaceState, resetState, takeSaveNotice, update } from "./engine/storage";
 import { topItems } from "./engine/away";
 import { Report } from "./engine/types";
@@ -21,10 +22,8 @@ export default function Command() {
   useEffect(() => {
     takeSaveNotice().then((notice) => {
       if (notice)
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(`${notice}. A copy was kept and a new game started.`, {
           title: "Your save could not be read",
-          message: `${notice}. A copy was kept and a new game started.`,
         });
     });
   }, []);
@@ -99,9 +98,9 @@ export default function Command() {
   }
 
   async function importFromClipboard() {
-    const { state: imported, error } = importSave((await Clipboard.readText()) ?? "");
+    const { state: imported, error } = importClipboardSave((await Clipboard.readText()) ?? "");
     if (!imported) {
-      await showToast({ style: Toast.Style.Failure, title: error ?? "Import failed" });
+      await showFailureToast(error ?? "Import failed", { title: "Import failed" });
       return;
     }
     const ok = await confirmAlert({

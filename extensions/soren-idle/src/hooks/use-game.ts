@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { FRAME_MS } from "../art";
 import { SKILL_BY_ID } from "../engine/data";
@@ -52,11 +53,9 @@ export function showReport(report: Report) {
             ? "Contact"
             : report.completed;
   if (!title) return;
-  showToast({
-    style: report.stoppedReason ? Toast.Style.Failure : Toast.Style.Success,
-    title,
-    message: lines.join(" · ") || undefined,
-  });
+  const message = lines.join(" · ") || undefined;
+  if (report.stoppedReason) showFailureToast(message ?? title, { title });
+  else showToast({ style: Toast.Style.Success, title, message });
 }
 
 /**
@@ -83,7 +82,7 @@ export function useGame(onTick?: (info: TickInfo) => void | Promise<void>): Game
       result = change(s);
       return result.state;
     });
-    if (result?.error) await showToast({ style: Toast.Style.Failure, title: result.error });
+    if (result?.error) await showFailureToast(result.error, { title: result.error });
     else if (result && success) await showToast({ style: Toast.Style.Success, title: success(result) });
   }
 

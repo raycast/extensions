@@ -68,7 +68,7 @@ function shapeProblem(state: GameState): string | undefined {
   return undefined;
 }
 
-/** Parses save text from the clipboard. Never throws; failures come back as an error message. */
+/** Parses save text. Never throws; failures come back as an error message. */
 export function importSave(text: string): { state?: GameState; error?: string } {
   let raw: unknown;
   try {
@@ -85,10 +85,20 @@ export function importSave(text: string): { state?: GameState; error?: string } 
     if (state.activeTask && !TASK_BY_ID[state.activeTask]) state.activeTask = null;
     const problem = shapeProblem(state);
     if (problem) return { error: `The save is damaged (${problem})` };
-    // Play a minute of it, so a save that would fail on every update is turned away now rather than
-    // after it has replaced a working one.
-    advance(state, state.lastTick + 60_000);
     return { state };
+  } catch {
+    return { error: "The save is damaged and cannot be played" };
+  }
+}
+
+/** Parses a save from the clipboard. Also plays a minute of it, so a save that would fail on every update is
+ * turned away now rather than after it has replaced a working one. */
+export function importClipboardSave(text: string): { state?: GameState; error?: string } {
+  const result = importSave(text);
+  if (!result.state) return result;
+  try {
+    advance(result.state, result.state.lastTick + 60_000);
+    return result;
   } catch {
     return { error: "The save is damaged and cannot be played" };
   }

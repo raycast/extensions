@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { awayLines, recordAway } from "./engine/away";
 import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
@@ -75,7 +75,13 @@ export default function Command() {
             <MenuBarExtra.Item
               title="Open Soren Idle"
               icon={Icon.Rocket}
-              onAction={() => launchCommand({ name: "play", type: LaunchType.UserInitiated })}
+              onAction={async () => {
+                try {
+                  await launchCommand({ name: "play", type: LaunchType.UserInitiated });
+                } catch (error) {
+                  await showFailureToast(error, { title: "Could not open Soren Idle" });
+                }
+              }}
             />
             {task && (
               <MenuBarExtra.Item

@@ -1,6 +1,6 @@
 import { MAX_LEVEL } from "./data";
 
-/** The Melvor / RuneScape curve: level 99 is 13,034,431 XP, and half of that is level 92. */
+/** The RuneScape-style XP curve: level 99 is 13,034,431 XP, and half of that is level 92. */
 const XP_TABLE: number[] = [0, 0];
 for (let level = 2, points = 0; level <= MAX_LEVEL; level++) {
   const i = level - 1;
