@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-deck",
+  "title": "Jira Deck",
+  "description": "Browse the Jira boards you pick, with or without sprints, plus your issues and backlog, in a keyboard-first split view.",
+  "icon": "jira-icon.png",
+  "author": "gibranbadrul",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "board",
+      "title": "Board",
+      "subtitle": "Jira Deck",
+      "description": "See what your board is working on: the running sprint, the next sprint and backlog, or open issues on boards without sprints.",
+      "mode": "view"
+    },
+    {
+      "name": "my-issues",
+      "title": "My Issues",
+      "subtitle": "Jira Deck",
+      "description": "See the open issues assigned to you.",
+      "mode": "view"
+    },
+    {
+      "name": "backlog",
+      "title": "Backlog",
+      "subtitle": "Jira Deck",
+      "description": "See the issues in a board's backlog.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-boards",
+      "title": "Manage Boards",
+      "subtitle": "Jira Deck",
+      "description": "Pin the boards you want to see and set the default.",
+      "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "subtitle": "Jira Deck",
+      "description": "Create a Jira issue without leaving Raycast. Type the summary right in root search.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "summary",
+          "placeholder": "Summary",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "title": "Jira Site",
+      "description": "Your Jira Cloud site, like your-team.atlassian.net.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "your-team.atlassian.net"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "The email you sign in to Jira with.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Create one at id.atlassian.com/manage-profile/security/api-tokens. It's stored by Raycast and only sent to your Jira site.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
