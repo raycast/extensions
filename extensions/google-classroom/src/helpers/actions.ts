@@ -1,4 +1,4 @@
-import { Clipboard, Toast, open, showInFinder, showToast } from "@raycast/api";
+import { Clipboard, Toast, getFrontmostApplication, open, showInFinder, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Course, StreamItem } from "../api/classroom";
 import { DownloadResult, downloadAttachments as download } from "./files";
@@ -63,6 +63,12 @@ export async function downloadAttachments(item: StreamItem, course: Course, opti
   }
 }
 
+async function isRaycastFrontmost() {
+  const app = await getFrontmostApplication();
+  // Also matches the beta and internal builds
+  return app.bundleId?.startsWith("com.raycast.macos") ?? app.name === "Raycast";
+}
+
 // Raycast has no API to attach files to AI Chat, so the attachments and the details are pasted into it
 export async function sendToAIChat(item: StreamItem, course: Course, topic?: string) {
   const controller = new AbortController();
@@ -89,10 +95,17 @@ export async function sendToAIChat(item: StreamItem, course: Course, topic?: str
     // Pasting a file in the chat attaches it, once its window had the time to get focused.
     // The details are pasted as well since the deeplink's `fallbackText` doesn't survive attaching a file.
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    // `paste` goes to whatever is in front: if the user switched to another app, it must not get their coursework
+    const paste = async (content: string | Clipboard.Content) => {
+      if (!(await isRaycastFrontmost())) {
+        throw new Error("AI Chat wasn't in front, so nothing more was pasted");
+      }
+      await Clipboard.paste(content);
+    };
     for (const path of result.paths) {
-      await Clipboard.paste({ file: path });
+      await paste({ file: path });
     }
-    await Clipboard.paste(`${getItemDetails(item, course, topic)}\n\n`);
+    await paste(`${getItemDetails(item, course, topic)}\n\n`);
 
     const problems = getProblems(result);
     if (problems) {
