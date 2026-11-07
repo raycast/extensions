@@ -2,9 +2,7 @@
 
 A Raycast extension to retype accidentally typed romaji text into Japanese Kana without deleting it.
 
-```
-Select "konnnitiha" -> Trigger shortcut -> "こんにちは" (unconfirmed, ready to convert to Kanji with Space)
-```
+![Type nihongo, select it, and press a hotkey to retype it as 日本語, then press Return to confirm](media/romaji-to-kana-demo.gif)
 
 ## Requirements & Prerequisites
 
@@ -19,8 +17,8 @@ Select "konnnitiha" -> Trigger shortcut -> "こんにちは" (unconfirmed, ready
 
 ## How to Use
 
-1. Select text you accidentally typed in English/Alphanumeric mode (e.g., `arigatougozaimasu`).
-2. Run the `Retype Selection as Kana` command (assigning a global hotkey like `⌥⇧K` is recommended).
+1. Select text you accidentally typed in English/Alphanumeric mode (e.g., `nihongo`).
+2. Run the `Retype Selection as Kana` command (assigning a global hotkey is recommended; the demo uses `⌃⇧K`).
 3. The selected text is replaced in Japanese Kana mode, remaining unconfirmed so you can hit Space to convert into Kanji or Return to confirm.
 
 ## How It Works
@@ -40,13 +38,3 @@ Select "konnnitiha" -> Trigger shortcut -> "こんにちは" (unconfirmed, ready
 
 - Only ASCII characters without whitespace are supported for retyping (to avoid triggering IME conversion or focus changes).
 - Terminal emulators that do not overwrite selection on typing are not supported.
-
----
-
-## 使い方（日本語）
-
-英数モードのまま打ってしまったローマ字を、消さずに かなモードで打ち直す拡張機能です。
-
-1. 英数モードで打った文字列（例: `konnnitiha`）を選択する
-2. `Retype Selection as Kana`（ホットキー推奨）を実行する
-3. かなモードで同じキーが打ち直され、未確定の状態で残ります（スペースキーですぐ漢字変換できます）
