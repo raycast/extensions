@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kilobat",
+  "title": "Kilobat",
+  "description": "See which apps use the network, check Wi-Fi and latency, find why a site won't load, test speed and keep your Mac awake. Uses the free Kilobat CLI.",
+  "icon": "kilobat.png",
+  "author": "seifip",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "network",
+    "wifi",
+    "bandwidth",
+    "traffic",
+    "speed test",
+    "dns",
+    "caffeinate",
+    "awake"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "network-apps",
+      "title": "Network Apps",
+      "subtitle": "Kilobat",
+      "description": "Live download and upload speed per app, updated every two seconds.",
+      "mode": "view"
+    },
+    {
+      "name": "network-status",
+      "title": "Network Status",
+      "subtitle": "Kilobat",
+      "description": "Wi-Fi signal, internet latency and loss, VPN, metered network and power at a glance.",
+      "mode": "view"
+    },
+    {
+      "name": "why",
+      "title": "Why Can't I Reach",
+      "subtitle": "Kilobat",
+      "description": "Checks a site or host layer by layer and names the one that fails: network, proxy, DNS, rules, connection or server.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "host",
+          "placeholder": "github.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "speed-test",
+      "title": "Speed Test",
+      "subtitle": "Kilobat",
+      "description": "Download, upload, latency under load, and whether calls and streaming will hold up.",
+      "mode": "view"
+    },
+    {
+      "name": "keep-awake",
+      "title": "Keep Awake",
+      "subtitle": "Kilobat",
+      "description": "Keep the Mac awake for a while, until downloads finish or while an app is in front, with the same choices as Kilobat's teacup.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-network-status",
+      "title": "Get Network Status",
+      "description": "Returns the Mac's current network: Wi-Fi name, signal and band, internet latency and packet loss, VPN, whether the network is metered or in Low Data Mode, keep-awake state, battery and heat."
+    },
+    {
+      "name": "get-network-apps",
+      "title": "Get Network Apps",
+      "description": "Returns the apps and processes using the network right now, with download and upload speed and bytes moved this session, busiest first."
+    },
+    {
+      "name": "check-host",
+      "title": "Check Host",
+      "description": "Checks why a URL or host can or can't be reached from this Mac. Returns a verdict and each layer's result: network, interface, proxy, DNS, Kilobat rules, IPv4, IPv6 and server."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Kilobat CLI Path",
+      "description": "Leave empty to find kilobat in Homebrew's bin folders.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/kilobat"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nPublish to the Raycast Store with npm run publish, not npm publish.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "instructions": "Kilobat reads this Mac's live network state through the local kilobat CLI. Prefer check-host for any question about a site, API or host failing; get-network-status for Wi-Fi, latency, VPN or metered questions; get-network-apps for what is using bandwidth. Bytes are decimal (1 MB = 1,000,000 bytes). Say what you measured and avoid guessing about causes the results don't show."
+  }
+}
