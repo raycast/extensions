@@ -151,7 +151,7 @@ function CopyStory(props: { item: Story }) {
 }
 
 function ItemToStory(item: StoryItem, feed: Feed, lastViewed: number) {
-  const pubDate = getStoryPubDate(item);
+  const pubDate = getStoryPubDate(item, feed.timeZone);
   const date = pubDate ? Date.parse(pubDate) || 0 : 0;
   return {
     guid: getStoryGuid(item, feed.url),

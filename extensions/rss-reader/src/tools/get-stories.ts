@@ -51,7 +51,7 @@ export default async function (input: Input = {}) {
           guid,
           title: item.title || "No title",
           link: item.link,
-          pubDate: getStoryPubDate(item),
+          pubDate: getStoryPubDate(item, feed.timeZone),
           content: item.content || item.contentSnippet,
           feedTitle: feed.title,
           feedUrl: feed.url,

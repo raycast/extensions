@@ -1,8 +1,9 @@
 # RSS Reader Changelog
 
-## [Mikan Publish Dates] - {PR_MERGE_DATE}
+## [Non-Standard Publish Dates] - {PR_MERGE_DATE}
 
-- Read publish dates from Mikan Project feeds, which nest them in a torrent element without a timezone
+- Read publish dates that feeds nest in non-standard elements, such as Mikan Project's torrent element
+- Set a time zone per feed for dates that don't include one
 
 ## [Read State Fixes] - 2026-10-20
 
