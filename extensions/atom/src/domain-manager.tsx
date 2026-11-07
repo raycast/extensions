@@ -1,19 +1,9 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { AtomDNSRecord, AtomDomain, AtomError, AtomSuccess, Pagination } from "./types";
+import { API_HEADERS, API_URL, parseAtomResponse } from "./atom";
 
-const {api_token} = getPreferenceValues<Preferences>();
-const API_URL = "https://www.atom.com/api/registrar/v1";
-const API_HEADERS = {
-    Authorization: `Bearer ${api_token}`
-}
-const parseAtomResponse = async <T,>(response: Response) => {
-    const result = await response.json() as AtomError | AtomSuccess<T>;
-    if (!result.success) throw new Error(result.message);
-    return result;
-}
-
-export default function ManageDomains() {
+export default function DomainManager() {
     const {isLoading, data: domains, pagination} = useFetch((options) => `${API_URL}/domains?` + new URLSearchParams({
         page: String(options.page + 1),
         size: "20"
@@ -50,11 +40,6 @@ function ManageDNS({domainName}:{domainName: string}) {
     const {isLoading, data: records} = useFetch(`${API_URL}/domains/${domainName}/records`, {
         headers: API_HEADERS,
         parseResponse: parseAtomResponse<AtomDNSRecord[]>,
-        mapResult(result) {
-            return {
-                data: result.data
-            }
-        },
         initialData: []
     })
     

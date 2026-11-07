@@ -25,8 +25,14 @@
   ],
   "commands": [
     {
-      "name": "manage-domains",
-      "title": "Manage Domains",
+      "name": "contact-profiles",
+      "title": "Contact Profiles",
+      "description": "Manage saved contact info for quick access",
+      "mode": "view"
+    },
+    {
+      "name": "domain-manager",
+      "title": "Domain Manager",
       "description": "",
       "mode": "view"
     }

@@ -1,3 +1,36 @@
+export type AtomContact = {
+     "handle": string
+      "type": "registrant_user" | "contact_handle",
+      "label": string | null,
+      "name": string
+      "email": string
+      "phone": string
+      "fax": string|null,
+      "organization":string| null,
+      "address": string[]
+      "city": string
+      "state": string | null
+      "zip": string
+      "country": string
+      "disclosed_fields": string[],
+      "verified": boolean
+}
+export type AtomContactCreate = {
+    "label": string,
+    first_name:string
+    last_name:string
+    "organization":string,
+    "email": string
+    "phone": string
+    "address_1": string
+    "address_2": string
+    "country": string
+    "city": string
+    "state": string
+    "zip": string
+    "disclosed_fields": string[],
+}
+
 export type AtomDomain = {
     domain_name: string
     status: string
@@ -41,5 +74,6 @@ export type AtomSuccess<T> = {
 export type AtomError = {
   success: false,
   error: string
-  message: string
+  message: string,
+  violations?: Array<{field: string,  message: string}>
 }
