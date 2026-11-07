@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "graphql-explorer",
+  "title": "GraphQL Explorer",
+  "description": "Explore GraphQL endpoints: save queries per environment and run them with variables",
+  "icon": "extension-icon.png",
+  "author": "guidone",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guidone/raycast-graphql-explorer.git"
+  },
+  "homepage": "https://github.com/guidone/raycast-graphql-explorer#readme",
+  "bugs": {
+    "url": "https://github.com/guidone/raycast-graphql-explorer/issues"
+  },
+  "commands": [
+    {
+      "name": "queries",
+      "title": "Search GraphQL Queries",
+      "subtitle": "GraphQL Explorer",
+      "description": "Browse, create, edit and run saved GraphQL queries and mutations",
+      "mode": "view",
+      "keywords": [
+        "graphql",
+        "gql",
+        "query",
+        "mutation",
+        "api"
+      ]
+    },
+    {
+      "name": "environments",
+      "title": "Manage GraphQL Environments",
+      "subtitle": "GraphQL Explorer",
+      "description": "Add, edit and delete GraphQL endpoints and the headers sent to them",
+      "mode": "view",
+      "keywords": [
+        "graphql",
+        "endpoint",
+        "headers",
+        "token"
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@fortawesome/free-brands-svg-icons": "^7.3.1",
+    "@fortawesome/free-regular-svg-icons": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.2.7",
+    "graphql": "^17.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
