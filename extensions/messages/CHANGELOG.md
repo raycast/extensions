@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Fix Paste Latest OTP Code] - {PR_MERGE_DATE}
+## [Fix Paste Latest OTP Code] - 2026-11-07
 
 - Recognize codes followed by punctuation and prefer them over card endings, reference numbers, and phone numbers.
 - Skip numbers that are too long and keep looking for a recent code.
