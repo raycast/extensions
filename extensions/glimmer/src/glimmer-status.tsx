@@ -23,6 +23,14 @@ export default function GlimmerStatus() {
     }
   }
 
+  async function setup() {
+    try {
+      await launchCommand({ name: "stream-app", type: LaunchType.UserInitiated });
+    } catch {
+      await showHUD("Couldn’t open Glimmer setup. Try Stream App in Raycast.");
+    }
+  }
+
   return (
     <MenuBarExtra
       icon={live ? Icon.Play : Icon.Desktop}
@@ -34,12 +42,7 @@ export default function GlimmerStatus() {
         {error ? (
           <>
             <MenuBarExtra.Item title={errorMessage(error)} />
-            {error instanceof MissingCLIError ? (
-              <MenuBarExtra.Item
-                title="Set up Glimmer…"
-                onAction={() => launchCommand({ name: "stream-app", type: LaunchType.UserInitiated })}
-              />
-            ) : null}
+            {error instanceof MissingCLIError ? <MenuBarExtra.Item title="Set up Glimmer…" onAction={setup} /> : null}
           </>
         ) : live && data ? (
           <>

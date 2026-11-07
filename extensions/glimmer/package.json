@@ -59,7 +59,6 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "publish": "ray publish"
   },
   "engines": {

@@ -42,6 +42,8 @@ PC and app lists use Raycast’s `useCachedPromise`. Once the PC list finishes, 
 
 ## Troubleshooting
 
+App names beginning with a hyphen cannot be passed safely to Glimmer’s command. Use the Open Glimmer action to stream these apps.
+
 Allow Raycast local network access when macOS asks; its Glimmer commands need to reach your PCs. If access was initially denied, enable Raycast in System Settings › Privacy & Security › Local Network, then restart Raycast and refresh the app list.
 
 If the command is missing, the list commands show a setup view with the download link and a copyable Homebrew command. **Stop Streaming** uses the URL fallback described above; the menu bar offers **Set up Glimmer…**.
@@ -59,22 +61,6 @@ If the command is missing, the list commands show a setup view with the download
 Malformed JSON or an unsupported JSON version produces an error instead of an empty app list or an idle status. Unknown fields are ignored; documented nullable details remain unknown. A status error is never shown as “Not streaming”. Stop requires exit 0 with `{"result":"stopped","stopped":true,"version":1}` or exit 5 with `{"result":"noActiveStream","stopped":false,"version":1}`. A mismatched exit code or JSON shape is an error. Stop exits 1 and 2 report errors on stderr without JSON; the extension shows safe error copy rather than raw stderr.
 
 The extension calls only Glimmer’s local command and URL automation surfaces. It makes no network requests of its own and implements no streaming, discovery, pairing, or Wake on LAN protocol. CLI arguments are passed directly without a shell. Glimmer manages pairing credentials and stream settings. Raycast caches PC names and app lists locally.
-
-## Development
-
-Source, tests, and contribution instructions are maintained in
-[Se7enbrc/raycast-glimmer](https://github.com/Se7enbrc/raycast-glimmer).
-
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-npm run build -- --environment dist --non-interactive --output dist
-```
-
-The tests use local fixtures and mocked Raycast/process boundaries. They do not
-launch Glimmer, contact a PC, or change pairing data.
 
 ## License
 

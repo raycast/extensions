@@ -85,6 +85,10 @@ export async function wakePC(pc: PC): Promise<void> {
 }
 
 export async function streamPC(pc: PC, app?: string): Promise<void> {
+  // Argument arrays avoid a shell, but option-shaped names still change CLI parsing.
+  if (app?.trimStart().startsWith("-")) {
+    throw new Error("This app’s name looks like a command option. Open Glimmer to stream it.");
+  }
   // No --force: an occupied session must be resolved in Glimmer.
   await run(["stream", pc.id, ...(app === undefined ? [] : [app])], pc.name);
 }
