@@ -1,0 +1,198 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amp",
+  "title": "Amp",
+  "description": "Start, search, steer, and watch Amp threads, talk to Puck, and open orb portals. Requires the Amp CLI and a signed-in Amp account.",
+  "icon": "amp-icon.png",
+  "author": "pc-style",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "new-thread",
+      "title": "New Thread",
+      "subtitle": "Amp",
+      "description": "Compose a new Amp thread with a project, mode, and orb size.",
+      "mode": "view"
+    },
+    {
+      "name": "start-thread",
+      "title": "Start Thread",
+      "subtitle": "Amp",
+      "description": "Fire off an orb thread in your default project straight from the root search.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "project",
+          "placeholder": "Project (namespace/name)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-threads",
+      "title": "Search Threads",
+      "subtitle": "Amp",
+      "description": "Search your threads with Amp's query syntax (repo:, author:, after:, pr:, \u2026).",
+      "mode": "view"
+    },
+    {
+      "name": "thread-activity",
+      "title": "Thread Activity",
+      "subtitle": "Amp",
+      "description": "Menu bar inbox of threads that finished since you last looked.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "currently-running",
+      "title": "Currently Running",
+      "subtitle": "Amp",
+      "description": "Menu bar count of agents working right now.",
+      "mode": "menu-bar",
+      "interval": "30s"
+    },
+    {
+      "name": "ask-puck",
+      "title": "Ask Puck",
+      "subtitle": "Amp",
+      "description": "Chat with Puck, your Amp assistant, in Raycast.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Ask Puck\u2026",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "call-puck",
+      "title": "Call Puck",
+      "subtitle": "Amp",
+      "description": "Start a voice call with Puck via the Amp Mac app's Call Puck shortcut.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Amp",
+      "description": "Browse your Amp projects and start threads in them.",
+      "mode": "view"
+    },
+    {
+      "name": "open-portal",
+      "title": "Open Portal",
+      "subtitle": "Amp",
+      "description": "Open a portal of one of your running orbs, found in their transcripts.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ampPath",
+      "title": "Amp CLI Path",
+      "description": "Path to the amp binary. Leave empty to look in ~/.amp/bin, ~/.local/bin, Homebrew, and /usr/local/bin.",
+      "type": "textfield",
+      "placeholder": "~/.amp/bin/amp",
+      "required": false
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Optional. Only needed when the CLI is not signed in. Create one at ampcode.com/settings/security.",
+      "type": "password",
+      "placeholder": "Amp access token",
+      "required": false
+    },
+    {
+      "name": "defaultProject",
+      "title": "Default Project",
+      "description": "Project for Start Thread when none is given, as namespace/name.",
+      "type": "textfield",
+      "placeholder": "namespace/name",
+      "required": false
+    },
+    {
+      "name": "defaultMode",
+      "title": "Default Mode",
+      "description": "Agent mode for new threads.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        },
+        {
+          "title": "Ultra",
+          "value": "ultra"
+        },
+        {
+          "title": "Claude Code",
+          "value": "claude-code"
+        }
+      ]
+    },
+    {
+      "name": "openIn",
+      "title": "Open Threads In",
+      "description": "Where thread links open.",
+      "type": "dropdown",
+      "required": false,
+      "default": "browser",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Amp for Mac",
+          "value": "app"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
