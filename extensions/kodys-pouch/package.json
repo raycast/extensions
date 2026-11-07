@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kodys-pouch",
+  "title": "Kody's Pouch",
+  "description": "Your Kody Skills and Tools, one command away.",
+  "icon": "koala-pouch.png",
+  "author": "cameron_pak",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "kodys-pouch",
+      "title": "Kody's Pouch",
+      "description": "Browse Kody Skills and Tools and paste a Mention.",
+      "mode": "view",
+      "keywords": [
+        "kody",
+        "pouch",
+        "skill",
+        "tool"
+      ],
+      "hotkey": {
+        "modifiers": [
+          "opt"
+        ],
+        "key": "k"
+      }
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Kody username.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "pouchWebhookUrl",
+      "title": "Pouch Webhook URL",
+      "description": "Credential URL for the Discovery Package pouch webhook.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "discoveryKodyId",
+      "title": "Discovery Package Kody ID",
+      "description": "The Discovery Package Kody ID. Defaults to raycast-kodys-pouch.",
+      "type": "textfield",
+      "required": false,
+      "default": "raycast-kodys-pouch"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "better-result": "^3.0.1",
+    "fuse.js": "^7.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --import ./test/register-raycast-stubs.mjs --test src/*.test.ts"
+  }
+}
