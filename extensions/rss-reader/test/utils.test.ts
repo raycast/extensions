@@ -37,11 +37,11 @@ test("keeps a torrent date that already has an offset", async () => {
   assert.equal(date, "2026-01-01T12:00:00Z");
 });
 
-test("adds no offset to torrent dates from other namespaces", async () => {
+test("ignores torrent elements from other namespaces", async () => {
   const [date] = await parseDates(
     `<item><title>A</title>${torrent("2026-01-01T12:00:00", "https://example.com/torrent")}</item>`,
   );
-  assert.equal(date, "2026-01-01T12:00:00");
+  assert.equal(date, undefined);
 });
 
 test("returns undefined when an item has no date", async () => {

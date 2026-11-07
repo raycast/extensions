@@ -1,37 +1,63 @@
 import { createHash } from "crypto";
 import Parser from "rss-parser";
 
-/** Mikan Project nests each item's date in `<torrent xmlns="https://mikanani.me/0.1/"><pubDate>`. */
-type TorrentFields = {
-  torrent?: { $?: { xmlns?: string }; pubDate?: string[] };
+/** A parsed XML element: attributes under `$`, child elements as arrays. */
+type XmlElement = { $?: Record<string, string> } & Record<string, unknown>;
+
+/** A feed that keeps an item's date in an element rss-parser does not read. */
+type ItemDateSource = {
+  /** Item child element to parse, passed to rss-parser's `customFields`. */
+  field: string;
+  /** Returns the date string, or undefined when the element is not this feed's. */
+  read: (element: XmlElement) => string | undefined;
 };
 
-export type StoryItem = Parser.Item & TorrentFields;
-
-const MIKAN_TORRENT_NAMESPACE = "https://mikanani.me/0.1/";
-// Mikan writes China Standard Time without an offset, e.g. `2026-11-06T11:08:00`.
-const MIKAN_UTC_OFFSET = "+08:00";
 const ISO_WITHOUT_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/;
 
-export const storyParser = new Parser<Record<string, unknown>, TorrentFields>({
-  customFields: { item: ["torrent"] },
+function childText(element: XmlElement, name: string) {
+  const value = element[name];
+  const first = Array.isArray(value) ? value[0] : value;
+  return typeof first === "string" ? first.trim() || undefined : undefined;
+}
+
+/** Gives an ISO date without an offset the feed's own offset; other dates pass through. */
+function withDefaultOffset(date: string | undefined, offset: string) {
+  return date && ISO_WITHOUT_OFFSET.test(date) ? date + offset : date;
+}
+
+/** Add an entry here for each feed whose dates sit outside the standard item fields. */
+const ITEM_DATE_SOURCES: ItemDateSource[] = [
+  {
+    // Mikan Project: `<torrent xmlns="https://mikanani.me/0.1/"><pubDate>`, China Standard Time with no offset.
+    field: "torrent",
+    read: (torrent) =>
+      torrent.$?.xmlns === "https://mikanani.me/0.1/"
+        ? withDefaultOffset(childText(torrent, "pubDate"), "+08:00")
+        : undefined,
+  },
+];
+
+export type StoryItem = Parser.Item & Record<string, unknown>;
+
+export const storyParser = new Parser<Record<string, unknown>, Record<string, unknown>>({
+  customFields: { item: ITEM_DATE_SOURCES.map(({ field }) => field) },
 });
 
 /**
- * Returns the item's publish date, falling back to Mikan's torrent `pubDate` when the item has none.
+ * Returns the item's publish date, falling back to `ITEM_DATE_SOURCES` when the item has none.
  */
 export function getStoryPubDate(item: StoryItem): string | undefined {
   if (item.pubDate) {
     return item.pubDate;
   }
-  const torrentDate = item.torrent?.pubDate?.[0]?.trim();
-  if (!torrentDate) {
-    return undefined;
+  for (const { field, read } of ITEM_DATE_SOURCES) {
+    const element = item[field];
+    const date = element && typeof element === "object" ? read(element as XmlElement) : undefined;
+    if (date) {
+      return date;
+    }
   }
-  if (item.torrent?.$?.xmlns === MIKAN_TORRENT_NAMESPACE && ISO_WITHOUT_OFFSET.test(torrentDate)) {
-    return torrentDate + MIKAN_UTC_OFFSET;
-  }
-  return torrentDate;
+  return undefined;
 }
 
 /**
