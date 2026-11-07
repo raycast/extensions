@@ -1,0 +1,9 @@
+{
+  "source": "654fd6c211066a7594c891ff544c11bfa177857dd2ba30c1e8104bda94418abd",
+  "compiler": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+  "deploymentTarget": "macOS 13.0",
+  "binaries": {
+    "display-control-arm64": "d7bef8d194e203a6a574c7f63a15c643ecae4f4aa6db01d0645e289bfde42d68",
+    "display-control-x86_64": "ec899a57371859ddf27d5b76534ebbe5f5f41d5a227f2bb7efcbe3f3305f1aee"
+  }
+}
