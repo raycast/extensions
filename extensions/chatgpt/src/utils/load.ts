@@ -12,7 +12,7 @@ type ImageMeta = {
   width: number;
 };
 
-export type LoadFrom = { data: Buffer; type: ImageMeta };
+export type LoadFrom = { data: Buffer; type: ImageMeta; path: string };
 
 const execFileAsync = util.promisify(execFile);
 
@@ -34,7 +34,7 @@ export const loadFromFinder = async (): Promise<LoadFrom | undefined> => {
   const data = await fs.readFile(image);
   const type = await getType(data, image);
 
-  return { data, type };
+  return { data, type, path: image };
 };
 
 export const loadFromClipboard = async () => {
@@ -52,7 +52,7 @@ export const loadFromClipboard = async () => {
   const data = await fs.readFile(image);
   const type = await getType(data, image);
 
-  return { data, type };
+  return { data, type, path: image };
 };
 
 const getSelectedImages = async (): Promise<string[]> => {
