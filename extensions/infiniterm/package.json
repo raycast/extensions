@@ -91,8 +91,8 @@
       "required": false,
       "title": "ift Path",
       "description": "Path to the ift binary. Raycast has a minimal PATH, so use an absolute path.",
-      "default": "/opt/homebrew/bin/ift",
-      "placeholder": "/opt/homebrew/bin/ift"
+      "default": "/Applications/infiniterm.app/Contents/MacOS/ift",
+      "placeholder": "/Applications/infiniterm.app/Contents/MacOS/ift"
     }
   ],
   "dependencies": {
@@ -112,7 +112,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "node --test src/lib/parse.test.ts src/lib/saved.test.ts"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

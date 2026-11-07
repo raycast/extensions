@@ -14,8 +14,7 @@ function SendForm({ card }: { card: Card }) {
             title="Send"
             icon={Icon.Terminal}
             onSubmit={async (values: { text: string; enter: boolean }) => {
-              pop();
-              await sendToCard(card, values.text, values.enter);
+              if (await sendToCard(card, values.text, values.enter)) pop();
             }}
           />
         </ActionPanel>

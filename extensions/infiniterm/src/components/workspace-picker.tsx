@@ -4,9 +4,9 @@ import { listWorkspaces, openFolders } from "../lib/ift.ts";
 import { readLastWorkspace, writeLastWorkspace } from "../lib/last-workspace.ts";
 import { prioritize } from "../lib/parse.ts";
 
-async function open(dirs: string[], workspace?: string, name?: string) {
+async function open(dirs: string[], workspace?: string, name?: string): Promise<boolean> {
   if (workspace && workspace !== "new") writeLastWorkspace(workspace);
-  await openFolders(dirs, workspace, name);
+  return openFolders(dirs, workspace, name);
 }
 
 function NewWorkspaceForm({ dirs }: { dirs: string[] }) {
@@ -18,8 +18,7 @@ function NewWorkspaceForm({ dirs }: { dirs: string[] }) {
           <Action.SubmitForm
             title="Open in New Workspace"
             onSubmit={async (values: { name: string }) => {
-              pop();
-              await open(dirs, "new", values.name);
+              if (await open(dirs, "new", values.name)) pop();
             }}
           />
         </ActionPanel>
@@ -31,16 +30,19 @@ function NewWorkspaceForm({ dirs }: { dirs: string[] }) {
 }
 
 // `title` names what is being opened ("Open <title> in"), `loading` covers a caller still finding the folders.
+// `pushed` is for a screen pushed onto the stack: only those get a navigation title, a root view shows its command title.
 export function WorkspacePicker({
   dirs,
   title,
   loading = false,
   dirsError,
+  pushed = false,
 }: {
   dirs: string[];
   title: string;
   loading?: boolean;
   dirsError?: Error;
+  pushed?: boolean;
 }) {
   // Fails when the app is not running or predates `ift workspaces`; the list then offers the current workspace only.
   const {
@@ -53,7 +55,7 @@ export function WorkspacePicker({
   const ready = dirs.length > 0;
 
   return (
-    <List isLoading={loading || wsLoading} navigationTitle={`Open ${title}`}>
+    <List isLoading={loading || wsLoading} navigationTitle={pushed ? `Open ${title}` : undefined}>
       {!ready && !loading && (
         <List.EmptyView
           icon={Icon.ExclamationMark}

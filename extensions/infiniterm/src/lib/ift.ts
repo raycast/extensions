@@ -8,13 +8,30 @@ const run = promisify(execFile);
 // `ift terminal` may start the app first and waits up to 30s for it.
 const LAUNCH_TIMEOUT_MS = 40_000;
 
+// The ift inside the app bundle: present for any standard install, unlike a symlink made by `ift install`.
+const DEFAULT_IFT_PATH = "/Applications/infiniterm.app/Contents/MacOS/ift";
+
 function iftPath(): string {
   const { iftPath } = getPreferenceValues<Preferences>();
-  return iftPath?.trim() || "/opt/homebrew/bin/ift";
+  return iftPath?.trim() || DEFAULT_IFT_PATH;
+}
+
+// Errors that mean the executable itself cannot be started, as opposed to ift exiting with a failure.
+const SPAWN_ERRORS = new Set(["ENOENT", "EACCES", "ENOTDIR", "EISDIR", "EPERM"]);
+
+function spawnFailure(e: unknown): boolean {
+  const code = (e as { code?: unknown }).code;
+  return typeof code === "string" && SPAWN_ERRORS.has(code);
 }
 
 // ift prints "ift: <reason>" on stderr; show that, not Node's "Command failed" wrapper.
+// A missing or inaccessible binary has no stderr, so point at the preference instead.
 function reason(e: unknown): Error {
+  if (spawnFailure(e)) {
+    const err = new Error(`Cannot run ift at ${iftPath()}. Check the ift Path preference.`);
+    (err as NodeJS.ErrnoException).code = (e as NodeJS.ErrnoException).code;
+    return err;
+  }
   const stderr = (e as { stderr?: string }).stderr?.trim();
   return new Error(stderr || (e instanceof Error ? e.message : String(e)));
 }
@@ -32,7 +49,9 @@ async function ift(args: string[], timeout = 10_000): Promise<string> {
 async function supportsVerb(verb: string): Promise<boolean> {
   try {
     return new RegExp(`^\\s*ift ${verb}\\b`, "m").test(await ift(["--help"]));
-  } catch {
+  } catch (e) {
+    // A binary that cannot start says nothing about verbs; report it instead of "no such verb".
+    if (spawnFailure(e)) throw e;
     return false;
   }
 }
@@ -73,22 +92,30 @@ async function ensureRunning(): Promise<void> {
 // when the work is done; on failure the toast turns red and the window stays open.
 // `activate` brings infiniterm in front afterwards: the verbs that open a card do not, so with Finder in front
 // the new card would appear behind it and nothing would seem to happen. Bare `ift` focuses the running app.
-async function perform(hud: string, failTitle: string, action: () => Promise<void>, activate = false): Promise<void> {
+// Resolves to whether the action succeeded, so a form can stay open on failure.
+async function perform(
+  hud: string,
+  failTitle: string,
+  action: () => Promise<void>,
+  activate = false,
+): Promise<boolean> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Opening in infiniterm…" });
   try {
     await action();
     if (activate) await ift([]);
     await showHUD(hud);
+    return true;
   } catch (e) {
     console.error(`[infiniterm] ${failTitle}:`, e);
     toast.style = Toast.Style.Failure;
     toast.title = failTitle;
     toast.message = e instanceof Error ? e.message : String(e);
+    return false;
   }
 }
 
-export async function openFolders(dirs: string[], workspace?: string, name?: string): Promise<void> {
-  await perform(
+export async function openFolders(dirs: string[], workspace?: string, name?: string): Promise<boolean> {
+  return perform(
     dirs.length === 1 ? "Opened in infiniterm" : `Opened ${dirs.length} folders in infiniterm`,
     "Could not open in infiniterm",
     async () => {
@@ -120,8 +147,8 @@ export async function listCards(): Promise<Card[]> {
 
 // Types into a card's shell without moving the focus. The card is its id, which does not change
 // the way a card number can.
-export async function sendToCard(card: Card, text: string, enter: boolean): Promise<void> {
-  await perform(`Sent to card #${card.number}`, "Could not send to card", async () => {
+export async function sendToCard(card: Card, text: string, enter: boolean): Promise<boolean> {
+  return perform(`Sent to card #${card.number}`, "Could not send to card", async () => {
     await ift(["send", card.id, text, ...(enter ? ["--enter"] : [])]);
   });
 }

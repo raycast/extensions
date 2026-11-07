@@ -11,7 +11,11 @@ import { cardDirs, expandHome } from "./lib/parse.ts";
 type Values = { dir: string; custom: string };
 
 function isDirectory(path: string): boolean {
-  return existsSync(path) && statSync(path).isDirectory();
+  try {
+    return existsSync(path) && statSync(path).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 // The typed path wins over the dropdown. A bad path is reported here, before a workspace is asked for.
@@ -32,6 +36,8 @@ export default function Command() {
   const { data: cards = [] } = useCachedPromise(() => listCards().catch(() => []));
 
   const common = [home, join(home, "Desktop"), join(home, "Documents"), join(home, "Downloads")].filter(isDirectory);
+  // A Finder folder that is also a standard place is listed under Finder only.
+  const places = common.filter((d) => !finder.includes(d));
   const seen = new Set([...common, ...finder]);
   const open = cardDirs(cards, home).filter((d) => !seen.has(d) && isDirectory(d));
   const label = (d: string) => (d === home ? "~" : d.startsWith(home + "/") ? "~" + d.slice(home.length) : d);
@@ -45,7 +51,7 @@ export default function Command() {
             icon={Icon.ArrowRight}
             onSubmit={async (values: Values) => {
               const dir = await chosenDir(values);
-              if (dir) push(<WorkspacePicker dirs={[dir]} title={basename(dir) || dir} />);
+              if (dir) push(<WorkspacePicker dirs={[dir]} title={basename(dir) || dir} pushed />);
             }}
           />
           <Action.SubmitForm
@@ -69,7 +75,7 @@ export default function Command() {
           </Form.Dropdown.Section>
         )}
         <Form.Dropdown.Section title="Places">
-          {common.map((d) => (
+          {places.map((d) => (
             <Form.Dropdown.Item key={d} value={d} title={label(d)} icon={Icon.Folder} />
           ))}
         </Form.Dropdown.Section>
