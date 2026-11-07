@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List, popToRoot } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { activateTab, ChromeTab, listTabs } from "./lib/chrome";
@@ -12,14 +12,11 @@ function hostname(url: string) {
 }
 
 export default function Command() {
-  const {
-    data: tabs = [],
-    isLoading,
-    error,
-    revalidate,
-  } = useCachedPromise(listTabs, [], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(listTabs, [], {
     failureToastOptions: { title: "Failed to load tabs" },
   });
+  const tabs = data?.tabs ?? [];
+  const skippedWindowCount = data?.skippedWindowCount ?? 0;
   const [query, setQuery] = useState("");
 
   // Filter by matching title and url across space-separated query words
@@ -55,6 +52,18 @@ export default function Command() {
         />
       ) : !isLoading ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title={tabs.length === 0 ? "No open tabs" : "No matching tabs"} />
+      ) : null}
+      {skippedWindowCount > 0 ? (
+        <List.Item
+          title="Some Tabs Could Not Be Loaded"
+          subtitle={`${skippedWindowCount} ${skippedWindowCount === 1 ? "window" : "windows"} changed while loading`}
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : null}
       {visible.map((tab) => (
         <List.Item

@@ -8,14 +8,21 @@ export type ChromeTab = {
   windowNumber: number;
 };
 
+export type TabList = {
+  tabs: ChromeTab[];
+  /** 読み取り中にタブが変わり続けて、結果に含められなかったウィンドウの数 */
+  skippedWindowCount: number;
+};
+
 // タイトルにどんな文字が入っていても崩れないよう、JXA で書いて JSON で受け取る。
 // タブごとに問い合わせると数百タブで遅いので、ウィンドウ単位でまとめて取得する。
 // 取得中にタブの移動や閉じる操作があっても ID とタイトル/URL の対応がずれないよう、前後で ID の一貫性を検証する
 const LIST_TABS = `
 function run() {
   const chrome = Application("Google Chrome");
-  if (!chrome.running()) return "[]";
+  if (!chrome.running()) return JSON.stringify({ tabs: [], skippedWindowCount: 0 });
   const results = [];
+  let skippedWindowCount = 0;
   const windows = chrome.windows();
   for (let index = 0; index < windows.length; index++) {
     const window = windows[index];
@@ -43,9 +50,11 @@ function run() {
     }
     if (windowTabs) {
       results.push(...windowTabs);
+    } else {
+      skippedWindowCount++;
     }
   }
-  return JSON.stringify(results);
+  return JSON.stringify({ tabs: results, skippedWindowCount: skippedWindowCount });
 }
 `;
 
@@ -66,7 +75,7 @@ function run(argv) {
 }
 `;
 
-export async function listTabs(): Promise<ChromeTab[]> {
+export async function listTabs(): Promise<TabList> {
   return JSON.parse(await runAppleScript(LIST_TABS, { language: "JavaScript" }));
 }
 
