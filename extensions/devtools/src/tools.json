@@ -1,0 +1,288 @@
+[
+  {
+    "id": "json-viewer",
+    "name": "JSON Viewer",
+    "category": "Development Tools",
+    "keywords": ["json", "format", "pretty", "minify", "validate", "jsonpath", "query"]
+  },
+  {
+    "id": "code-playground",
+    "name": "Code Playground",
+    "category": "Development Tools",
+    "keywords": ["javascript", "js", "html", "css", "run", "editor"]
+  },
+  {
+    "id": "regex-generator",
+    "name": "Regex Generator",
+    "category": "Development Tools",
+    "keywords": ["regex", "regexp", "pattern", "match"]
+  },
+  {
+    "id": "json-typescript",
+    "name": "JSON to Code",
+    "category": "Development Tools",
+    "keywords": [
+      "typescript",
+      "ts",
+      "interface",
+      "types",
+      "go",
+      "golang",
+      "struct",
+      "rust",
+      "serde",
+      "python",
+      "dataclass",
+      "pydantic",
+      "swift",
+      "codable",
+      "kotlin",
+      "json schema",
+      "codegen",
+      "model"
+    ]
+  },
+  {
+    "id": "certificate-decoder",
+    "name": "X.509 Certificate Decoder",
+    "category": "Development Tools",
+    "keywords": ["x509", "certificate", "pem", "der", "ssl", "tls", "csr", "fingerprint", "chain", "san"]
+  },
+  {
+    "id": "html-preview",
+    "name": "HTML Preview",
+    "category": "Development Tools",
+    "keywords": ["html", "preview", "render", "live", "sandbox", "iframe", "responsive", "viewport"]
+  },
+  {
+    "id": "code-formatter",
+    "name": "Code Formatter",
+    "category": "Development Tools",
+    "keywords": ["beautify", "prettify", "minify", "html", "css", "js", "xml", "sql"]
+  },
+  {
+    "id": "hash-generator",
+    "name": "Hash Generator",
+    "category": "Generators",
+    "keywords": ["md5", "sha", "sha1", "sha256", "sha512", "hmac", "checksum", "keccak"]
+  },
+  {
+    "id": "uuid-generator",
+    "name": "UUID Generator",
+    "category": "Generators",
+    "keywords": ["uuid", "guid", "ulid", "v4", "v7"]
+  },
+  {
+    "id": "password-generator",
+    "name": "Password Generator",
+    "category": "Generators",
+    "keywords": ["password", "passphrase", "secure"]
+  },
+  {
+    "id": "lorem-generator",
+    "name": "Lorem Ipsum",
+    "category": "Generators",
+    "keywords": ["lorem", "placeholder", "dummy text"]
+  },
+  {
+    "id": "qr-generator",
+    "name": "QR Generator",
+    "category": "Generators",
+    "keywords": ["qr", "qrcode", "barcode"]
+  },
+  {
+    "id": "bcrypt-generator",
+    "name": "Bcrypt Generator",
+    "category": "Generators",
+    "keywords": ["bcrypt", "hash", "password"]
+  },
+  {
+    "id": "random-string",
+    "name": "Random String",
+    "category": "Generators",
+    "keywords": ["nanoid", "nano id", "token", "random", "id"]
+  },
+  {
+    "id": "base64",
+    "name": "Base64",
+    "category": "Converters",
+    "keywords": ["b64", "encode", "decode", "data uri"]
+  },
+  {
+    "id": "case-converter",
+    "name": "Case Converter",
+    "category": "Converters",
+    "keywords": ["camelcase", "snake_case", "kebab", "pascal", "upper", "lower"]
+  },
+  {
+    "id": "number-base",
+    "name": "Number Base",
+    "category": "Converters",
+    "keywords": ["binary", "hex", "octal", "decimal", "radix"]
+  },
+  {
+    "id": "markdown",
+    "name": "Markdown",
+    "category": "Converters",
+    "keywords": ["md", "preview", "html"]
+  },
+  {
+    "id": "url-encoder",
+    "name": "URL Encoder",
+    "category": "Converters",
+    "keywords": ["url", "uri", "percent", "encode", "decode", "query string"]
+  },
+  {
+    "id": "csv-json",
+    "name": "CSV to JSON",
+    "category": "Converters",
+    "keywords": ["csv", "tsv", "spreadsheet"]
+  },
+  {
+    "id": "yaml-json",
+    "name": "YAML to JSON",
+    "category": "Converters",
+    "keywords": ["yaml", "yml"]
+  },
+  {
+    "id": "escape-tools",
+    "name": "Escape Tools",
+    "category": "Converters",
+    "keywords": ["escape", "unescape", "html entities", "backslash", "unicode", "hex"]
+  },
+  {
+    "id": "html-to-jsx",
+    "name": "HTML to JSX",
+    "category": "Converters",
+    "keywords": ["jsx", "react", "html", "convert", "classname", "component", "tsx", "markup"]
+  },
+  {
+    "id": "svg-to-css",
+    "name": "SVG to CSS",
+    "category": "Converters",
+    "keywords": ["svg", "css", "data uri", "base64", "background-image", "mask", "icon", "encode"]
+  },
+  {
+    "id": "curl-to-code",
+    "name": "cURL to Code",
+    "category": "Converters",
+    "keywords": ["curl", "fetch", "python requests", "go", "php", "reqwest", "httpie", "http request"]
+  },
+  {
+    "id": "timestamp",
+    "name": "Timestamp",
+    "category": "Time & Date",
+    "keywords": ["unix", "epoch", "date", "time"]
+  },
+  {
+    "id": "date-difference",
+    "name": "Date Difference",
+    "category": "Time & Date",
+    "keywords": ["days", "between", "duration"]
+  },
+  {
+    "id": "cron-calculator",
+    "name": "Cron Calculator",
+    "category": "Time & Date",
+    "keywords": ["cron", "crontab", "schedule"]
+  },
+  {
+    "id": "color-palette",
+    "name": "Color Palette",
+    "category": "Media",
+    "keywords": ["color", "colour", "hex", "rgb", "hsl", "contrast", "wcag"]
+  },
+  {
+    "id": "image-converter",
+    "name": "Image Converter",
+    "category": "Media",
+    "keywords": ["image", "png", "jpg", "webp", "compress", "resize"]
+  },
+  {
+    "id": "qr-reader",
+    "name": "QR Reader",
+    "category": "Media",
+    "keywords": ["qr", "scan", "decode", "read"]
+  },
+  {
+    "id": "text-compare",
+    "name": "Text Compare",
+    "category": "Text Tools",
+    "keywords": ["diff", "compare", "difference"]
+  },
+  {
+    "id": "jwt-decoder",
+    "name": "JWT Decoder",
+    "category": "Text Tools",
+    "keywords": ["jwt", "token", "bearer", "decode", "verify"]
+  },
+  {
+    "id": "api-formatter",
+    "name": "API Formatter",
+    "category": "Text Tools",
+    "keywords": ["api", "rest", "graphql", "response"]
+  },
+  {
+    "id": "string-inspector",
+    "name": "String Inspector",
+    "category": "Text Tools",
+    "keywords": ["count", "characters", "words", "bytes", "unicode", "invisible", "zero width"]
+  },
+  {
+    "id": "line-tools",
+    "name": "Line Tools",
+    "category": "Text Tools",
+    "keywords": ["sort", "dedupe", "unique", "lines", "shuffle", "reverse"]
+  },
+  {
+    "id": "unit-converter",
+    "name": "Unit Converter",
+    "category": "Utilities",
+    "keywords": ["units", "length", "weight", "temperature", "currency"]
+  },
+  {
+    "id": "image-metadata",
+    "name": "Image Metadata Cleaner",
+    "category": "AI Tools",
+    "keywords": [
+      "exif",
+      "metadata",
+      "remove metadata",
+      "gps",
+      "c2pa",
+      "content credentials",
+      "ai generated",
+      "stable diffusion prompt",
+      "privacy",
+      "strip exif"
+    ]
+  },
+  {
+    "id": "secret-redactor",
+    "name": "Secret & PII Redactor",
+    "category": "AI Tools",
+    "keywords": ["redact", "secrets", "api key", "token", "password", "pii", "mask", "sanitize", "chatgpt", "privacy"]
+  },
+  {
+    "id": "token-counter",
+    "name": "Token Counter",
+    "category": "AI Tools",
+    "keywords": ["tokens", "tokenizer", "gpt", "openai", "o200k", "llm", "prompt", "cost", "context window", "claude"]
+  },
+  {
+    "id": "ai-text-cleaner",
+    "name": "AI Text Cleaner",
+    "category": "AI Tools",
+    "keywords": [
+      "clean text",
+      "invisible characters",
+      "zero width",
+      "smart quotes",
+      "em dash",
+      "citations",
+      "markdown",
+      "chatgpt",
+      "normalize"
+    ]
+  }
+]
