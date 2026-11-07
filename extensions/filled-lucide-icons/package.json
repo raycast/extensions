@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "filled-lucide-icons",
+  "title": "Filled Lucide Icons",
+  "description": "Search the filled Lucide icon set and copy icons as SVG, names or components",
+  "icon": "extension-icon.png",
+  "author": "tom4958t90",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "Filled Lucide",
+      "description": "Browse and search all filled Lucide and Lucide Lab icons",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "description": "The action that runs when you press Return on an icon",
+          "default": "copy-svg",
+          "data": [
+            {
+              "title": "Copy SVG",
+              "value": "copy-svg"
+            },
+            {
+              "title": "Paste SVG",
+              "value": "paste-svg"
+            },
+            {
+              "title": "Copy Name",
+              "value": "copy-name"
+            },
+            {
+              "title": "Copy Component",
+              "value": "copy-component"
+            },
+            {
+              "title": "Copy Import",
+              "value": "copy-import"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open-in-browser"
+            }
+          ]
+        },
+        {
+          "name": "framework",
+          "type": "dropdown",
+          "required": false,
+          "title": "Framework",
+          "description": "The package used for Copy Import",
+          "default": "react",
+          "data": [
+            {
+              "title": "React",
+              "value": "react"
+            },
+            {
+              "title": "React Native",
+              "value": "react-native"
+            },
+            {
+              "title": "Preact",
+              "value": "preact"
+            },
+            {
+              "title": "Solid",
+              "value": "solid"
+            },
+            {
+              "title": "Vue",
+              "value": "vue"
+            },
+            {
+              "title": "Svelte",
+              "value": "svelte"
+            },
+            {
+              "title": "Astro",
+              "value": "astro"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.9",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
