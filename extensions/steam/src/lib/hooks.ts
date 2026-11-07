@@ -52,3 +52,9 @@ export const useKeyRejected = () => {
   }, [key]);
   return rejected;
 };
+
+// Scoped to the account, so pins don't carry over to another Steam ID
+export const usePinnedGames = () => {
+  const steamid = getPreferenceValues<Preferences>().steamid?.trim();
+  return useCachedState<number[]>(`pinned-games_${steamid}`, []);
+};
