@@ -1,5 +1,14 @@
 # Emoji Changelog
 
+## [Improve Recents and Search] - {PR_MERGE_DATE}
+
+- Keep 25 unique recent emojis and move reused emojis to the front after every copy or paste.
+- Preserve existing recent history automatically and show recents above the full catalog.
+- Rank searches across official names, shortcodes, keywords, and curated everyday aliases, with conservative typo correction.
+- Keep all matching results available and support exact punctuation-only emoticon keywords such as `:)`.
+- Bundle catalogs and shortcodes for offline use; display recents without waiting for the full catalog.
+- Await recent-history saves and report clipboard, catalog, and storage failures.
+
 ## [Update] - 2024-06-25
 
 - Updates the default Unicode version to Unicode 15.1.
