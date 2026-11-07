@@ -1,7 +1,9 @@
 import { LocalStorage } from "@raycast/api";
-import { parse as parseYAML } from "yaml";
 
 import type { LaunchConfig, PaneConfig } from "./types";
+import { parseLaunchConfig } from "./launch-config-parser";
+
+export { parseLaunchConfig } from "./launch-config-parser";
 
 export interface StoredLaunchConfig {
   key: string;
@@ -34,20 +36,6 @@ export async function loadStoredLaunchConfigs(options?: {
   }
 
   return configs.sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export function parseLaunchConfig(yaml: string): LaunchConfig {
-  const config = parseYAML(yaml) as LaunchConfig;
-
-  if (!config?.name) {
-    throw new Error("YAML must include a 'name' field");
-  }
-
-  if (!Array.isArray(config.windows)) {
-    throw new Error("YAML must include a 'windows' array");
-  }
-
-  return config;
 }
 
 export function validateLaunchConfigYaml(value?: string): string | undefined {

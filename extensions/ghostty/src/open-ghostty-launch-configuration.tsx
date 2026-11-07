@@ -223,5 +223,10 @@ async function removeItem(key: string) {
 }
 
 function LaunchConfigDescription() {
-  return <Form.Description title="Tip" text="The YAML configuration must start with a 'name' field." />;
+  return (
+    <Form.Description
+      title="Tip"
+      text="Start with a 'name' field. Set open_in_new_window on a windows item: true always opens a new window; false opens a new tab. Omit it to keep the default behavior."
+    />
+  );
 }

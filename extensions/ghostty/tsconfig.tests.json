@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": ".test-build",
+    "types": ["node"]
+  },
+  "include": [
+    "src/utils/launch-config-parser.ts",
+    "src/utils/launch-config-converter.ts",
+    "src/utils/workspace-script.ts"
+  ]
+}

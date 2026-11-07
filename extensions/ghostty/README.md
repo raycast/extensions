@@ -13,7 +13,8 @@ Create a YAML launch configuration and paste it into the `Open Ghostty Launch Co
 ### YAML Reference
 
 - `name` required display name shown in Raycast
-- `windows` required list of Ghostty windows; each additional item opens in a new Ghostty window
+- `windows` required list of tab groups; without an explicit opening mode, additional items request new windows
+- `windows[].open_in_new_window` optional boolean: `true` always creates a new window, `false` creates fresh tabs in the front window (or a new window if none exists). Both explicit values bypass matching existing sessions. Omit it to preserve the default behavior: focus a matching session, otherwise use the front window for the first item and create windows for later items.
 - `windows[].tabs` required list of tabs inside that window
 - `windows[].tabs[].title` optional tab title; if omitted, the extension uses the tab directory name
 - `windows[].tabs[].layout` required root pane for the tab
@@ -31,6 +32,22 @@ Create a YAML launch configuration and paste it into the `Open Ghostty Launch Co
 - Nested `panes` let you build more complex layouts
 
 ### Simple Example
+
+To start Codex in a **new window on every launch**, including when a matching session already exists:
+
+```yaml
+name: Codex New Window
+windows:
+  - open_in_new_window: true
+    tabs:
+      - title: Codex
+        layout:
+          cwd: "~"
+          commands:
+            - exec: codex
+```
+
+Change `true` to `false` to create a fresh tab in the front window instead. The option applies to the whole `windows` item: all its tabs are placed together. Use unquoted YAML booleans. This also works with **Open Workspace from Git Repos**; that command still overrides `cwd` with the selected repository.
 
 ```yaml
 name: Example Launch Configuration
