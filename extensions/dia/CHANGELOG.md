@@ -1,5 +1,12 @@
 # Dia Changelog
 
+## [Search Extensions Command] - 2026-11-07
+
+- Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.
+- Open Extension switches the front window to the extension's profile and picks the extension from Dia's Extensions menu, which opens it like its toolbar button. Requires Accessibility access for Raycast.
+- When the Extensions menu has no item for the extension, its popup (or, without one, its settings page) opens in a new tab instead.
+- Added actions to open an extension's popup or settings page in a new tab and to copy its ID, and a profile filter (⌘P) that marks the active profile. Built-in extensions are hidden unless enabled in the command preferences.
+
 ## [Search Tabs Across Spaces] - 2026-11-07
 
 - Search Tabs now lists tabs from every Dia space, not only the space active in each window.

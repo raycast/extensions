@@ -118,6 +118,24 @@
       "mode": "view"
     },
     {
+      "name": "search-extensions",
+      "title": "Search Extensions",
+      "subtitle": "Dia",
+      "description": "Search the browser extensions installed in each Dia profile and open them",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showBuiltInExtensions",
+          "type": "checkbox",
+          "title": "Built-in Extensions",
+          "label": "Show built-in extensions",
+          "description": "Include extensions bundled with Dia, such as the PDF viewer.",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
       "name": "new-window",
       "title": "New Window",
       "subtitle": "Dia",
