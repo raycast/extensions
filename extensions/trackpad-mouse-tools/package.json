@@ -1,0 +1,403 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trackpad-mouse-tools",
+  "title": "Trackpad & Mouse Tools",
+  "description": "Change trackpad and mouse settings without opening System Settings. Switch secondary click between two fingers and a corner with one hotkey, set mouse and trackpad speed, toggle tap to click, natural scrolling and three finger drag, adjust gestures, and left, right or middle click or hold a mouse button from a hotkey.",
+  "icon": "icon.png",
+  "author": "jnbp",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "keywords": [
+    "trackpad",
+    "touchpad",
+    "mouse",
+    "magic mouse",
+    "right click",
+    "secondary click",
+    "gestures",
+    "tap to click",
+    "scrolling",
+    "mouse speed",
+    "middle click",
+    "hold mouse button"
+  ],
+  "commands": [
+    {
+      "name": "toggle-right-click",
+      "title": "Toggle Secondary Click",
+      "description": "Switches secondary click between two fingers and the corner chosen in the preferences.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "toggleCorner",
+          "title": "Corner",
+          "description": "Which corner the toggle switches to when leaving two finger click.",
+          "type": "dropdown",
+          "required": false,
+          "default": "bottom-right",
+          "data": [
+            {
+              "title": "Bottom Right",
+              "value": "bottom-right"
+            },
+            {
+              "title": "Bottom Left",
+              "value": "bottom-left"
+            }
+          ]
+        }
+      ],
+      "icon": "icon.png"
+    },
+    {
+      "name": "right-click-two-finger",
+      "title": "Secondary Click with Two Fingers",
+      "description": "Sets secondary click to click or tap with two fingers.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "right-click-bottom-right",
+      "title": "Secondary Click in Bottom Right Corner",
+      "description": "Sets secondary click to the bottom right corner.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "right-click-bottom-left",
+      "title": "Secondary Click in Bottom Left Corner",
+      "description": "Sets secondary click to the bottom left corner.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "toggle-tap-to-click",
+      "title": "Toggle Tap to Click",
+      "description": "Turns tap to click on or off.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "toggle-natural-scrolling",
+      "title": "Toggle Natural Scrolling",
+      "description": "Turns natural scrolling on or off.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "toggle-three-finger-drag",
+      "title": "Toggle Three Finger Drag",
+      "description": "Turns three finger drag on or off. Three finger swipes move to four fingers while it is on, like in macOS.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "set-mouse-speed",
+      "title": "Set Mouse Speed",
+      "description": "Sets mouse tracking speed to a level from 1 (slowest) to 10 (fastest).",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "speed",
+          "type": "dropdown",
+          "placeholder": "Speed (1–10)",
+          "required": true,
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            },
+            {
+              "title": "9",
+              "value": "9"
+            },
+            {
+              "title": "10",
+              "value": "10"
+            }
+          ]
+        }
+      ],
+      "icon": "icon.png"
+    },
+    {
+      "name": "set-trackpad-speed",
+      "title": "Set Trackpad Speed",
+      "description": "Sets trackpad tracking speed to a level from 1 (slowest) to 10 (fastest).",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "speed",
+          "type": "dropdown",
+          "placeholder": "Speed (1–10)",
+          "required": true,
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            },
+            {
+              "title": "9",
+              "value": "9"
+            },
+            {
+              "title": "10",
+              "value": "10"
+            }
+          ]
+        }
+      ],
+      "icon": "icon.png"
+    },
+    {
+      "name": "increase-mouse-speed",
+      "title": "Increase Mouse Speed",
+      "description": "Moves mouse tracking speed one step faster.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "decrease-mouse-speed",
+      "title": "Decrease Mouse Speed",
+      "description": "Moves mouse tracking speed one step slower.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "left-click",
+      "title": "Left Click",
+      "description": "Left clicks at the pointer position. Give it a hotkey to click without pressing the trackpad.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "right-click",
+      "title": "Right Click",
+      "description": "Right clicks at the pointer position, independent of your secondary click setting.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "middle-click",
+      "title": "Middle Click",
+      "description": "Middle clicks at the pointer position. Give it a hotkey to open links in a new tab, close tabs or paste the selection without a middle mouse button.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "hold-left-click",
+      "title": "Hold Left Button",
+      "description": "Presses the left button and keeps it down until you run the command again, click, or a few seconds pass (set in the command preferences), for dragging with the trackpad.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "release",
+          "title": "Release",
+          "description": "When the held button is let go. Running the command again always releases it right away.",
+          "type": "dropdown",
+          "required": false,
+          "default": "click",
+          "data": [
+            {
+              "title": "When I Run the Command Again",
+              "value": "toggle"
+            },
+            {
+              "title": "After the Next Click",
+              "value": "click"
+            },
+            {
+              "title": "After a Few Seconds",
+              "value": "timer"
+            }
+          ]
+        },
+        {
+          "name": "seconds",
+          "title": "Seconds",
+          "description": "How long the button stays down when Release is set to After a Few Seconds.",
+          "type": "textfield",
+          "required": false,
+          "default": "5",
+          "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "hold-right-click",
+      "title": "Hold Right Button",
+      "description": "Presses the right button and keeps it down until you run the command again, click, or a few seconds pass (set in the command preferences).",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "release",
+          "title": "Release",
+          "description": "When the held button is let go. Running the command again always releases it right away.",
+          "type": "dropdown",
+          "required": false,
+          "default": "click",
+          "data": [
+            {
+              "title": "When I Run the Command Again",
+              "value": "toggle"
+            },
+            {
+              "title": "After the Next Click",
+              "value": "click"
+            },
+            {
+              "title": "After a Few Seconds",
+              "value": "timer"
+            }
+          ]
+        },
+        {
+          "name": "seconds",
+          "title": "Seconds",
+          "description": "How long the button stays down when Release is set to After a Few Seconds.",
+          "type": "textfield",
+          "required": false,
+          "default": "5",
+          "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "hold-middle-click",
+      "title": "Hold Middle Button",
+      "description": "Presses the middle button and keeps it down until you run the command again, click, or a few seconds pass (set in the command preferences), e.g. to orbit in 3D apps.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "release",
+          "title": "Release",
+          "description": "When the held button is let go. Running the command again always releases it right away.",
+          "type": "dropdown",
+          "required": false,
+          "default": "click",
+          "data": [
+            {
+              "title": "When I Run the Command Again",
+              "value": "toggle"
+            },
+            {
+              "title": "After the Next Click",
+              "value": "click"
+            },
+            {
+              "title": "After a Few Seconds",
+              "value": "timer"
+            }
+          ]
+        },
+        {
+          "name": "seconds",
+          "title": "Seconds",
+          "description": "How long the button stays down when Release is set to After a Few Seconds.",
+          "type": "textfield",
+          "required": false,
+          "default": "5",
+          "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "release-mouse-buttons",
+      "title": "Release Mouse Buttons",
+      "description": "Releases every mouse button held by this extension.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "settings",
+      "title": "Trackpad & Mouse Settings",
+      "description": "Browse and change every trackpad and mouse setting: secondary click, tap to click, look up, click pressure, tracking and scrolling speed, double-click speed, pointer acceleration, zoom and swipe gestures, and dragging style.",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
