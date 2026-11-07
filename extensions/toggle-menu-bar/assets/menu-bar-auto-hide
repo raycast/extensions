@@ -1,0 +1,170 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# The native helper serializes mutations with an exclusive flock(2) across
+# read, target choice, and pulse. Status reads take a shared lock so they
+# cannot observe an intermediate pulse mode.
+
+normalize_mode() {
+  case "${1:-}" in
+    always | desktop-only | fullscreen-only | never)
+      printf '%s\n' "$1"
+      ;;
+    *)
+      printf 'Unknown mode: %s\n' "${1:-<empty>}" >&2
+      return 2
+      ;;
+  esac
+}
+
+mode_label() {
+  case "$1" in
+    always) printf 'Always\n' ;;
+    desktop-only) printf 'On Desktop Only\n' ;;
+    fullscreen-only) printf 'In Full Screen Only\n' ;;
+    never) printf 'Never\n' ;;
+    *) return 2 ;;
+  esac
+}
+
+mode_option() {
+  case "$1" in
+    always) printf '0\n' ;;
+    desktop-only) printf '1\n' ;;
+    fullscreen-only) printf '2\n' ;;
+    never) printf '3\n' ;;
+    *) return 2 ;;
+  esac
+}
+
+mode_from_option() {
+  case "$1" in
+    0) printf 'always\n' ;;
+    1) printf 'desktop-only\n' ;;
+    2) printf 'fullscreen-only\n' ;;
+    3) printf 'never\n' ;;
+    *) return 2 ;;
+  esac
+}
+
+apply_preferences() {
+  local helper_dir
+  local native_helper
+
+  helper_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  native_helper="$helper_dir/menu-bar-auto-hide-native"
+
+  if [[ ! -x "$native_helper" ]]; then
+    printf 'Native menu bar helper is missing or not executable.\n' >&2
+    return 1
+  fi
+
+  "$native_helper" "$@"
+}
+
+print_applied_mode() {
+  local result="$1"
+  local applied_option
+  local applied_mode
+
+  case "$result" in
+    option=0 | option=1 | option=2 | option=3)
+      applied_option=${result#option=}
+      ;;
+    *)
+      printf 'Native menu bar helper returned an invalid result.\n' >&2
+      return 1
+      ;;
+  esac
+
+  applied_mode=$(mode_from_option "$applied_option")
+
+  printf 'Menu bar auto-hide: %s\n' "$(mode_label "$applied_mode")"
+}
+
+set_mode() {
+  local mode
+  local option
+  local result
+
+  mode=$(normalize_mode "$1")
+  option=$(mode_option "$mode")
+
+  if ! result=$(apply_preferences set "$option"); then
+    return 1
+  fi
+
+  if [[ "${result#option=}" != "$option" ]]; then
+    printf 'macOS did not retain the requested menu bar mode.\n' >&2
+    return 1
+  fi
+
+  print_applied_mode "$result"
+}
+
+toggle_modes() {
+  local first_mode
+  local second_mode
+  local first_option
+  local second_option
+  local result
+
+  first_mode=$(normalize_mode "$1")
+  second_mode=$(normalize_mode "$2")
+  first_option=$(mode_option "$first_mode")
+  second_option=$(mode_option "$second_mode")
+
+  # A single native call: the helper reads the current mode, chooses the
+  # target, and pulses while holding its lock, so no transient value can
+  # leak into another invocation's choice.
+  if ! result=$(apply_preferences toggle "$first_option" "$second_option"); then
+    return 1
+  fi
+
+  print_applied_mode "$result"
+}
+
+usage() {
+  printf '%s\n' \
+    'Usage:' \
+    '  menu-bar-auto-hide status' \
+    '  menu-bar-auto-hide set MODE' \
+    '  menu-bar-auto-hide toggle MODE_A MODE_B' \
+    '' \
+    'Modes: always, desktop-only, fullscreen-only, never'
+}
+
+command_name="${1:-}"
+
+case "$command_name" in
+  status)
+    if [[ $# -ne 1 ]]; then
+      usage >&2
+      exit 2
+    fi
+    result=$(apply_preferences status)
+    print_applied_mode "$result"
+    ;;
+  set)
+    if [[ $# -ne 2 ]]; then
+      usage >&2
+      exit 2
+    fi
+    set_mode "$2"
+    ;;
+  toggle)
+    if [[ $# -ne 3 ]]; then
+      usage >&2
+      exit 2
+    fi
+    toggle_modes "$2" "$3"
+    ;;
+  help | -h | --help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
