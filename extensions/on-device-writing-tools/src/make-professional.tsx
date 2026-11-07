@@ -1,3 +1,4 @@
 import { transform } from "./run";
 
-export default () => transform("Rewrite the text in a polished, professional tone, keeping the same meaning.");
+// Apple Writing Tools prompt (macOS 15.1 GenerativeModels assets).
+export default () => transform("Make this text more professional.");

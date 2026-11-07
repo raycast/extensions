@@ -1,4 +1,4 @@
 import { transform } from "./run";
 
-export default () =>
-  transform("Rewrite the text to read more clearly and naturally, keeping the same meaning and tone.");
+// Apple Writing Tools prompt (macOS 15.1 GenerativeModels assets).
+export default () => transform("Rewrite this text.");

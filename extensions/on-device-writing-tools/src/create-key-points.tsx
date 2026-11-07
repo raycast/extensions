@@ -1,3 +1,4 @@
 import { transform } from "./run";
 
-export default () => transform('Extract the key points of the text as a short bulleted list using "- " bullets.');
+// Apple Writing Tools prompt (macOS 15.1 GenerativeModels assets).
+export default () => transform("Make the given text into keypoints.");

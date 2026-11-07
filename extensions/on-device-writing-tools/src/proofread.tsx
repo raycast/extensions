@@ -1,6 +1,4 @@
 import { transform } from "./run";
 
-export default () =>
-  transform(
-    "Proofread the text: fix spelling, grammar and punctuation. Do not change wording, meaning or tone beyond what is needed.",
-  );
+// Apple Writing Tools prompt (macOS 15.1 GenerativeModels assets).
+export default () => transform("Proofread this text:");
