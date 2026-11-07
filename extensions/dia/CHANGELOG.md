@@ -1,5 +1,11 @@
 # Dia Changelog
 
+## [All Profiles] - {PR_MERGE_DATE}
+
+- Tab, history and bookmark search (commands and AI tools) now include every Dia profile instead of only the active one.
+- With more than one profile, tabs and history results show the profile name, and bookmarks are grouped under a folder per profile.
+- Focusing, closing and reading a tab now works for tabs in any profile.
+
 ## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
 
 - Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
