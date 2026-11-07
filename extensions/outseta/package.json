@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "outseta",
+  "title": "Outseta",
+  "description": "Look up people and accounts, and triage support cases in your Outseta account.",
+  "icon": "extension-icon.png",
+  "author": "antonio_manzanares",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "subtitle": "Outseta",
+      "description": "Search people in your Outseta CRM.",
+      "mode": "view"
+    },
+    {
+      "name": "search-accounts",
+      "title": "Search Accounts",
+      "subtitle": "Outseta",
+      "description": "Search accounts and see their plan and subscription status.",
+      "mode": "view"
+    },
+    {
+      "name": "support-cases",
+      "title": "Support Cases",
+      "subtitle": "Outseta",
+      "description": "Browse and reply to support cases.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "subdomain",
+      "title": "Subdomain",
+      "description": "The part before .outseta.com in your admin URL. Use \"demo\" to try the extension with sample data.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "your-company"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Settings → Integrations → API Keys in Outseta.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "secretKey",
+      "title": "Secret Key",
+      "description": "Shown once when the API key is created.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "agentName",
+      "title": "Agent Name",
+      "description": "Your name as customers see it on support replies. Leave empty to sign replies with your company name.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Jane Doe"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
