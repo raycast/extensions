@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qwen-ai",
+  "title": "Qwen AI",
+  "description": "Chat with Alibaba's Qwen (Tongyi Qianwen) AI models via DashScope API. Supports streaming responses, chat history persistence, and any OpenAI-compatible endpoint.",
+  "icon": "extension-icon.png",
+  "author": "long_tian",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "qwenai",
+      "title": "Qwen Chat",
+      "description": "Start a conversation with Qwen AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "阿里云百炼 (DashScope) 的 API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseUrl",
+      "title": "Base URL",
+      "description": "OpenAI 兼容接口地址，留空则使用 DashScope 默认地址",
+      "type": "textfield",
+      "required": false,
+      "default": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "模型名称，如 qwen-plus、qwen-turbo、qwen-max",
+      "type": "textfield",
+      "required": false,
+      "default": "qwen-plus"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.2.7",
+    "openai": "^7.44.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
