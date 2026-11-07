@@ -1,6 +1,6 @@
 # Ableton Project Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-07
 
 - Search, sort, group, and pin your Ableton Live projects, with Detail and Overview views and Stage / Genre filters
 - View the Live Sets in each project with key, BPM, and time signature read from the `.als` file; rename, duplicate, or move them to Trash
