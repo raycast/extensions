@@ -375,7 +375,8 @@ export function extractOTP(text: string): string | null {
 }
 
 export function selectOTP(text: string): string | null {
-  const codeLabel = /\b(?:code|passcode|otp|pin|verification|one[- ]time)(?:\s+is)?[\s:=#-]*$/i;
+  const codeLabel =
+    /\b(?:code|passcode|otp|pin|verification|one[- ]time)(?:\s+for\s+(?:(?:your|the|this)\s+)?account)?(?:\s+is)?[\s:=#-]*$/i;
   const codeLabelAfter =
     /^\s+(?:is\s+)?(?:your|the)\s+(?:(?:one[- ]time|verification|security)\s+)*(?:code|passcode|otp|pin)\b/i;
   const useLabel = /\b(?:use|enter|is)[\s:=#-]*$/i;
@@ -386,7 +387,9 @@ export function selectOTP(text: string): string | null {
   let bestScore = -1;
 
   // Match connected digit groups as a unit so a phone number cannot supply a partial code.
-  for (const match of text.matchAll(/\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+)\d+)*\b/g)) {
+  // A separate number followed by a time unit can be the code's expiry.
+  const numberGroups = /\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+(?!\d+[\s-]+(?:seconds?|minutes?|hours?|days?)\b))\d+)*\b/gi;
+  for (const match of text.matchAll(numberGroups)) {
     const [number] = match;
     if (!/^(?:\d{4,10}|\d{3,}-\d{3,})$/.test(number)) continue;
 
@@ -395,9 +398,10 @@ export function selectOTP(text: string): string | null {
 
     const before = text.slice(0, match.index);
     const after = text.slice(match.index + number.length);
-    if (before.endsWith("+") || otherNumberLabel.test(before)) continue;
+    const hasCodeLabel = codeLabel.test(before);
+    if (before.endsWith("+") || (!hasCodeLabel && otherNumberLabel.test(before))) continue;
 
-    const score = codeLabel.test(before) || codeLabelAfter.test(after) ? 2 : useLabel.test(before) ? 1 : 0;
+    const score = hasCodeLabel || codeLabelAfter.test(after) ? 2 : useLabel.test(before) ? 1 : 0;
     // A 3-4 split is also a local phone number, so require a code hint.
     if (score === 0 && /^\d{3}-\d{4}$/.test(number)) continue;
 
