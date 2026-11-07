@@ -1,0 +1,18 @@
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-fixture","provider":"Fixture","model":"deepseek/deepseek-v4.1-flash-1017","object":"chat.completion.chunk","created":1,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"SECRET REASONING","reasoning_details":[{"type":"reasoning.text","text":"SECRET REASONING"}]},"finish_reason":null}]}
+
+data: {"id":"gen-fixture","provider":"Fixture","model":"deepseek/deepseek-v4.1-flash-1017","object":"chat.completion.chunk","created":1,"choices":[{"index":0,"delta":{"role":"assistant","content":"<thi"},"finish_reason":null}]}
+
+data: {"id":"gen-fixture","provider":"Fixture","model":"deepseek/deepseek-v4.1-flash-1017","object":"chat.completion.chunk","created":1,"choices":[{"index":0,"delta":{"role":"assistant","content":"nk>inner</thi"},"finish_reason":null}]}
+
+data: {"id":"gen-fixture","provider":"Fixture","model":"deepseek/deepseek-v4.1-flash-1017","object":"chat.completion.chunk","created":1,"choices":[{"index":0,"delta":{"role":"assistant","content":"nk>\n\nVisible"},"finish_reason":null}]}
+
+data: {"id":"gen-fixture","provider":"Fixture","model":"deepseek/deepseek-v4.1-flash-1017","object":"chat.completion.chunk","created":1,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":"stop"}]}
+
+data: {"id":"gen-fixture","provider":"Fixture","model":"deepseek/deepseek-v4.1-flash-1017","object":"chat.completion.chunk","created":1,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20,"total_tokens":30}}
+
+data: [DONE]
+

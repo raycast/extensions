@@ -1,0 +1,8 @@
+{
+  "object": "list",
+  "data": [
+    { "id": "gpt-6.1-terra", "object": "model", "created": 1, "owned_by": "openai", "shutdown_date": null },
+    { "id": "gpt-5.5-pro", "object": "model", "created": 1, "owned_by": "openai", "shutdown_date": null },
+    { "id": "text-embedding-3-small", "object": "model", "created": 1, "owned_by": "openai", "shutdown_date": null }
+  ]
+}

@@ -1,0 +1,12 @@
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[{"index":0,"delta":{"content":" world"},"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[{"index":0,"delta":{},"finish_reason":"length"}],"usage":null}
+
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":7,"total_tokens":19}}
+
+data: [DONE]
+

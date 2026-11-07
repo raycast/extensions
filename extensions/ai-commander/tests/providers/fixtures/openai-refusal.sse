@@ -1,0 +1,6 @@
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[{"index":0,"delta":{"role":"assistant","refusal":"I can't help with that."},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-fixture","object":"chat.completion.chunk","created":1,"model":"gpt-6.1-terra","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

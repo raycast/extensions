@@ -1,0 +1,4 @@
+data: {"id":"gen-fixture","object":"chat.completion.chunk","created":1,"model":"deepseek/deepseek-v4.1-flash-1017","choices":[{"index":0,"delta":{"content":"Partial"},"finish_reason":null}]}
+
+data: {"id":"gen-fixture","object":"chat.completion.chunk","created":1,"model":"deepseek/deepseek-v4.1-flash-1017","provider":"Fixture","error":{"code":429,"message":"Rate limit exceeded","metadata":{"error_type":"rate_limit_exceeded"}},"choices":[{"index":0,"delta":{"content":""},"finish_reason":"error"}]}
+
