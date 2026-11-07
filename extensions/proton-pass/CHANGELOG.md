@@ -17,6 +17,7 @@
 - Browse Items has a Sort vaults by preference for its vault list and vault menu: by name, the default, by item count or by the vaults you open most, instead of pass-cli's order. The menu at the top right of the vault list, or Sort by (⌘⇧S), changes the order until the window closes. Get TOTP Code's vault menu lists vaults by name
 - List Vaults opens Browse Items on the vault list instead of showing its own copy of it, so that Browse Items' preferences apply there too. Its hotkeys and aliases still work
 - TOTP's symbol is a progress circle instead of a clock, which looked like loading: in the item list, where it follows the current period too, with the same colors, on the Copy and Paste TOTP Code actions, and in the details. In the details, rows without a value no longer show an icon next to their dash
+- In the details, Website, Note, Vault, Type and Last Modified are in gray, with their icons, so that the credentials above them stand out: Raycast no longer draws the line that set them apart
 - Generate Password's preferences say which type they apply to, with "Random:" or "Passphrase:" in their titles, since Raycast can't gray out the other type's. Passphrases have their own Include Numbers setting, on by default, instead of sharing Numbers with random passwords
 
 ## [Browse Items] - 2026-11-01

@@ -43,7 +43,12 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
   }
 }
 
-function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike) {
+/** The details about the item are grayed, so that the credentials stand out without a title or separator. */
+function dimmed(text: ReturnType<typeof labelText>): { value: string; color: Color } {
+  return { value: typeof text === "string" ? text : text.value, color: Color.SecondaryText };
+}
+
+function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike, isDimmed = false) {
   if (row.value.kind === "websites") {
     return (
       <Metadata.TagList key={row.id} title={row.title}>
@@ -51,13 +56,22 @@ function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike) {
           <Metadata.TagList.Item
             key={`${website.url}-${index}`}
             text={website.label}
+            color={isDimmed ? Color.SecondaryText : undefined}
             onAction={() => open(website.url)}
           />
         ))}
       </Metadata.TagList>
     );
   }
-  return <Metadata.Label key={row.id} title={row.title} text={labelText(row.value)} icon={icon} />;
+  const text = labelText(row.value);
+  return (
+    <Metadata.Label
+      key={row.id}
+      title={row.title}
+      text={isDimmed ? dimmed(text) : text}
+      icon={isDimmed && typeof icon === "string" ? { source: icon, tintColor: Color.SecondaryText } : icon}
+    />
+  );
 }
 
 /** The rows of an item, shared by the details panel and the item view. */
@@ -79,9 +93,9 @@ export function renderItemMetadata(Metadata: Metadata, item: Item, rows: PanelRo
   };
   return (
     <Metadata>
-      {rows.fields.map((row) => renderRow(Metadata, row, iconOf(row)))}
+      {rows.credentials.map((row) => renderRow(Metadata, row, iconOf(row)))}
       <Metadata.Separator />
-      {rows.metadata.map((row) => renderRow(Metadata, row, iconOf(row)))}
+      {rows.details.map((row) => renderRow(Metadata, row, iconOf(row), true))}
       {rows.customFields.length > 0 && <Metadata.Separator />}
       {rows.customFields.map((row) => renderRow(Metadata, row))}
       {error && (
