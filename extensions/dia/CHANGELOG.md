@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Update Icon] - {PR_MERGE_DATE}
+## [Update Icon] - 2026-11-07
 
 - Updated the extension icon to match the current Dia app icon, with a dark mode variant.
 
