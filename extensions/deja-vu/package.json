@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deja-vu",
+  "title": "Deja-Vu",
+  "description": "Search and resume sessions across Claude Code, Codex, Cursor, OpenCode, Gemini CLI and 38 more coding agents using the local deja CLI.",
+  "icon": "command-icon.png",
+  "author": "vshulcz",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Sessions",
+      "description": "Full-text search across every coding agent session on this Mac.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-sessions",
+      "title": "Recent Sessions",
+      "description": "Browse the 100 most recent coding agent sessions across all harnesses.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dejaPath",
+      "type": "file",
+      "required": false,
+      "title": "deja Binary Path",
+      "description": "Optional path to the deja binary if not in /opt/homebrew/bin, /usr/local/bin, ~/.local/bin or ~/go/bin."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
