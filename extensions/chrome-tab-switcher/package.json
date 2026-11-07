@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "chrome-tab-search",
-  "title": "Chrome Tab Search",
+  "name": "chrome-tab-switcher",
+  "title": "Chrome Tab Switcher",
   "type": "module",
   "description": "Search and switch tabs across all Google Chrome windows with ease",
   "icon": "extension-icon.png",

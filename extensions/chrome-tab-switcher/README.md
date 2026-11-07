@@ -1,4 +1,4 @@
-# Chrome Tab Search
+# Chrome Tab Switcher
 
 A fast Raycast extension to search and switch Google Chrome tabs across all open windows.
 

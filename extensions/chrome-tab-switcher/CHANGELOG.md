@@ -1,4 +1,4 @@
-# Chrome Tab Search Changelog
+# Chrome Tab Switcher Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
