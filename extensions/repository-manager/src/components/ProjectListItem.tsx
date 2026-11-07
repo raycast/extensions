@@ -1,5 +1,6 @@
+import { projectShortcut, revealProjectTitle } from '../platform'
 import React, { useMemo, useCallback } from 'react'
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, useNavigation } from '@raycast/api'
+import { Keyboard, Action, ActionPanel, Color, Icon, List, getPreferenceValues, useNavigation } from '@raycast/api'
 import { Project } from '../project'
 import StartDevelopment from './StartDevelopment'
 import { OpenInEditor, OpenInTerminal, OpenUrl } from './Open'
@@ -168,7 +169,7 @@ const ProjectListItem = React.memo(({ project, directories, availableTags, onFav
                             title="Copy Path"
                             content={project.fullPath}
                             icon={Icon.Clipboard}
-                            shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                            shortcut={Keyboard.Shortcut.Common.Copy}
                         />
                         <AddToFavorites
                             project={project}
@@ -182,7 +183,7 @@ const ProjectListItem = React.memo(({ project, directories, availableTags, onFav
                         <Action
                             title="Repo Statistics"
                             icon={Icon.BarChart}
-                            shortcut={{ modifiers: ['cmd'], key: 's' }}
+                            shortcut={projectShortcut('s')}
                             onAction={handleRepoStatistics}
                         />
                         <GenerateAIRepoBriefAction project={project} />
@@ -195,21 +196,21 @@ const ProjectListItem = React.memo(({ project, directories, availableTags, onFav
                         <Action.Push
                             title="Details"
                             icon={Icon.Info}
-                            shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                            shortcut={projectShortcut('i')}
                             target={<ProjectDetail project={project} />}
                         />
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Extra Actions">
                         <Git project={project} />
                         <Action.ShowInFinder
-                            title="Show in Finder"
+                            title={revealProjectTitle}
                             path={project.fullPath}
-                            shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                            shortcut={projectShortcut('f')}
                         />
                         <Action.OpenWith
                             title="Open With"
                             path={project.fullPath}
-                            shortcut={{ modifiers: ['cmd', 'opt'], key: 'o' }}
+                            shortcut={projectShortcut('o', ['opt'])}
                         />
                         <Cache />
                     </ActionPanel.Section>
