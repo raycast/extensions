@@ -1,5 +1,11 @@
 # Zen Changelog
 
+## [Fix New Tab Search and Windows History] - 2026-11-06
+
+- Fixed **New Tab** searches on Windows: a query with several words no longer opens a separate tab for each word, and searching with the **Browser Default** search engine no longer fails with a PowerShell error.
+- Fixed searches with a chosen search engine cutting the query off at `&` or `#`, or turning `+` into a space: the query is now URL-encoded.
+- Fixed opening a history entry on Windows when its URL contains `$`: the URL is now passed to PowerShell as a literal, so it can no longer be expanded or run as PowerShell code.
+
 ## [Fix] - 2026-09-19
 
 - Fixed the **New Tab** command always searching with Google regardless of Zen's configured default search engine. Added a **Browser Default** search engine preference (now the default): queries are handed to Zen itself, which resolves them with its own default search engine.
