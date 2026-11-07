@@ -59,7 +59,8 @@ function errorMarkdown(ip: string, err: LookupError): string {
   } else if (err.kind === "key" || (err.kind === "quota" && err.source === "key")) {
     lines.push("", "Check the API key and endpoint in the extension preferences (⌘⇧K).");
   } else if (err.kind === "network") {
-    lines.push("", "Check your connection and press ⌘R to try again.");
+    // A failed lookup has no map, so Refresh is the second action, on ⌘↵ (see RecordActions).
+    lines.push("", "Check your connection and press ⌘↵ to try again.");
   }
   return lines.join("\n");
 }
@@ -428,7 +429,8 @@ export function RecordActions({
     <ActionPanel>
       <ActionPanel.Section>
         <Action.CopyToClipboard title="Copy Address" content={ip} />
-        {/* The second action gets ⌘↵ from Raycast, so it has no shortcut of its own. */}
+        {/* The second action gets ⌘↵ from Raycast, which hides any shortcut of its own, so it has none.
+            Without a map (errors, reserved addresses) Refresh takes this slot; with one it sits below on ⌘R. */}
         {apple ? (
           <Action.Open title="Open in Maps" target={apple} icon={Icon.Map} />
         ) : onRefresh ? (

@@ -119,10 +119,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           icon={Icon.XMarkCircle}
           title={`Could not resolve ${target.host}`}
           description={resolved.error.message}
+          actions={<RetryActions onRetry={resolved.revalidate} />}
         />
       ) : null}
       {target.kind === "host" && !resolved.isLoading && resolved.data?.host === target.host && !rows.length ? (
-        <List.EmptyView icon={Icon.XMarkCircle} title={`${target.host} has no addresses`} />
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title={`${target.host} has no addresses`}
+          actions={<RetryActions onRetry={resolved.revalidate} />}
+        />
       ) : null}
       {target.kind === "empty" && !mine.isLoading && !mine.data?.ok ? (
         <List.EmptyView
@@ -133,6 +138,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
               ? `Your own addresses could not be detected: ${mine.data.message}`
               : "Type an IPv4 or IPv6 address, or a hostname such as example.com."
           }
+          actions={<RetryActions onRetry={refreshMine} />}
         />
       ) : null}
       {rows.length ? (
@@ -184,5 +190,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
         </List.Section>
       ) : null}
     </List>
+  );
+}
+
+// The only action of a failed search, on ↵: resolve the hostname or detect the own addresses again.
+function RetryActions({ onRetry }: { onRetry: () => void }) {
+  return (
+    <ActionPanel>
+      <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
+    </ActionPanel>
   );
 }
