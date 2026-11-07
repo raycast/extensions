@@ -2978,6 +2978,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "jobspipe",
+    title: "JobsPipe",
+    description:
+      "Search live, normalized job postings from 30+ ATS feeds and job boards by title, skill, country, remote, seniority and recency. Also lists sources and pricing plans. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or an API key.",
+    icon: "https://jobspipe.dev/brand/app-icon/app-icon-gradient.svg",
+    homepage: "https://docs.jobspipe.dev/ai-agents/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobspipe.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.jobspipe.dev/mcp",
+  },
+  {
     name: "jobyap",
     title: "JobYap",
     description:
