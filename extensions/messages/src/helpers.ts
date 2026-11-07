@@ -77,56 +77,36 @@ export async function sendMessage({
   }
   const wasMessagesRunning = await isMessagesAppRunning();
 
-  // Escape backslashes first, then double-quotes, to safely embed in AppleScript strings.
-  const escapeForAppleScript = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const safeText = escapeForAppleScript(text);
-
-  const scripts = chat_guid
-    ? [
-        `
-    tell application "Messages"
-      try
-        set targetChat to first chat whose id is "${escapeForAppleScript(chat_guid)}"
-        send "${safeText}" to targetChat
-        return "Success"
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
-    `,
-      ]
+  const recipient = chat_guid || group_name || address;
+  const lookups = chat_guid
+    ? ["set targetRecipient to first chat whose id is recipientId"]
     : group_name
-      ? [
-          `
-    tell application "Messages"
-      try
-        set targetChat to chat "${escapeForAppleScript(group_name)}"
-        send "${safeText}" to targetChat
-        return "Success"
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
-    `,
-        ]
+      ? ["set targetRecipient to chat recipientId"]
       : (service_name === "auto" ? (["iMessage", "SMS"] as const) : [service_name]).map(
           (service) => `
-    tell application "Messages"
-      try
-        set targetService to (service 1 whose service type = ${service})
-        set targetBuddy to participant "${escapeForAppleScript(address)}" of targetService
-        send "${safeText}" to targetBuddy
-        return "Success"
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
+        set targetService to (service 1 whose service type = ${service === "iMessage" ? "iMessage" : "SMS"})
+        set targetRecipient to participant recipientId of targetService
     `,
         );
 
   let result = "Error: Could not find a Messages service for this recipient.";
-  for (const script of scripts) {
-    result = await runAppleScript(script);
+  for (const lookup of lookups) {
+    result = await runAppleScript(
+      `
+    on run {recipientId, messageText}
+      tell application "Messages"
+        try
+          ${lookup}
+          send messageText to targetRecipient
+          return "Success"
+        on error errMsg
+          return "Error: " & errMsg
+        end try
+      end tell
+    end run
+    `,
+      [recipient, text],
+    );
     if (result === "Success") break;
   }
 

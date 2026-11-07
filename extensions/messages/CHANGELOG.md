@@ -1,5 +1,11 @@
 # Messages Changelog
 
+## [Fix Send Message] - {PR_MERGE_DATE}
+
+- Keep saved contacts searchable when their recent chats are missing contact names.
+- Keep the recipient selected when opening Send Message from a quicklink.
+- Pass message text to Messages intact, including emoji, quotation marks, and line breaks.
+
 ## [AI Message History and Activity] - 2026-08-31
 
 - Add stable cursor pagination, date and unread filters, attachment metadata, and plain-text fallback to AI message search

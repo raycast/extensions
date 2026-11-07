@@ -18,6 +18,7 @@ export type RecipientBase = MessagesTarget & {
 
 export type RecentRecipient = RecipientBase & {
   kind: "recent";
+  contactId?: string;
 };
 
 export type ContactRecipient = RecipientBase & {
@@ -34,7 +35,7 @@ function normalizeIdentifier(value: unknown): string | undefined {
   if (trimmed.includes("@")) return `email:${trimmed.toLowerCase()}`;
   const digits = trimmed.replace(/\D/g, "");
   if (digits.length < 7) return;
-  return `phone:${digits.length > 9 ? digits.slice(-9) : digits}`;
+  return `phone:${digits}`;
 }
 
 function contactIdentifiers(contact: Contact): string[] {
@@ -71,6 +72,7 @@ function recentRecipient(chat: Chat): RecentRecipient {
   const recipient = {
     kind: "recent" as const,
     id: chat.guid,
+    contactId: chat.contactId,
     chat_guid: chat.guid,
     chat_identifier: chat.chat_identifier,
     service_name: chat.service_name,
@@ -121,36 +123,30 @@ export function buildRecipientSections(
 ): RecipientSections {
   // There's no way to send a message to a group chat that doesn't have any names, so we filter them out.
   const recents = chats.filter((chat) => !chat.is_group || Boolean(chat.group_name)).map(recentRecipient);
-  const directChats = chats.filter((chat) => !chat.is_group);
-  const seenContactIds = new Set(
-    directChats.map(({ contactId }) => contactId).filter((id): id is string => Boolean(id)),
-  );
-  const seenIdentifiers = new Set(
-    directChats
-      .map(({ chat_identifier }) => normalizeIdentifier(chat_identifier))
-      .filter((identifier): identifier is string => Boolean(identifier)),
-  );
+  const seenContactIds = new Set(recents.map(({ contactId }) => contactId));
+  const seenDestinations = new Set<string>();
   const contactRecipients: ContactRecipient[] = [];
 
   for (const contact of [...contacts].sort(compareContacts)) {
     const destination = primaryMessageableIdentifier(contact);
-    if (!destination) continue;
+    const identifier = normalizeIdentifier(destination);
+    // A recent without a resolved contact must not hide a saved name.
+    if (!destination || !identifier || seenContactIds.has(contact.id) || seenDestinations.has(identifier)) continue;
 
-    const hasSeenContact = seenContactIds.has(contact.id);
     seenContactIds.add(contact.id);
-    const identifiers = contactIdentifiers(contact)
-      .map(normalizeIdentifier)
-      .filter((identifier): identifier is string => Boolean(identifier));
-    const hasSeenIdentifier = identifiers.some((identifier) => seenIdentifiers.has(identifier));
-
-    // Claim every ID and address before deciding so duplicate rows collapse transitively.
-    identifiers.forEach((identifier) => seenIdentifiers.add(identifier));
-    if (hasSeenContact || hasSeenIdentifier) continue;
-
+    seenDestinations.add(identifier);
     contactRecipients.push(contactRecipient(contact, destination, loadContactPhotos));
   }
 
   return { recents, contacts: contactRecipients };
+}
+
+export function findMessageRecipient(recipients: readonly Recipient[], id: string): Recipient | undefined {
+  const exact = recipients.find((recipient) => recipient.id === id);
+  if (exact || !id.startsWith(CONTACT_RECIPIENT_PREFIX)) return exact;
+
+  const contactId = id.slice(CONTACT_RECIPIENT_PREFIX.length);
+  return recipients.find((recipient) => recipient.kind === "recent" && recipient.contactId === contactId);
 }
 
 export function recipientTitle(recipient: Recipient): string {
