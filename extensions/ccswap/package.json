@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ccswap",
+  "title": "CCSwap",
+  "description": "See Claude Code and Codex account usage and switch accounts with the ccswap CLI",
+  "icon": "icon.png",
+  "author": "errhythm",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "ccswapPath",
+      "title": "ccswap Path",
+      "description": "The ccswap binary. Leave empty to look in ~/.local/bin, /opt/homebrew/bin and /usr/local/bin.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-accounts",
+      "title": "Show Accounts",
+      "subtitle": "ccswap",
+      "description": "List Claude Code and Codex accounts with their usage, and switch between them",
+      "keywords": ["claude", "codex", "account", "usage", "quota", "rate limit"],
+      "mode": "view"
+    },
+    {
+      "name": "switch-best",
+      "title": "Switch to Best Account",
+      "subtitle": "ccswap",
+      "description": "Switch Claude Code to the account with the most quota left",
+      "keywords": ["claude", "account", "quota", "rate limit"],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test --experimental-strip-types src/ccswap.test.ts",
+    "prepublishOnly": "echo \"\\n\\nUse \\`npm run publish\\` to publish to the Raycast Store.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
