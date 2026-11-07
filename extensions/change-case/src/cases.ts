@@ -55,32 +55,47 @@ export const aliases: Record<CaseType, string[]> = {
   "Constant Case": ["macro"],
 };
 
-// cases that must not be pre-lowercased, as they depend on the original casing
-const CASES_SKIP_PRELOWERCASE: Set<string> = new Set([
-  "Swap Case", // pre-lowercasing would make output all-uppercase
-  "Alternating Case", // alternates per character from original positions
-  "Random Case", // no point in pre-lowercasing, as output is random anyway
-  "Lower First", // only first letter should be changed
-  "Upper First", // only first letter should be changed
-]);
+const READABLE_CASES = new Set(["Capital Case", "Title Case", "Sentence Case"]);
 
-function preLowercaseText(input: string, preserveCase: boolean) {
-  if (!preserveCase) {
-    return input.toLowerCase();
-  }
-  return input;
+function getExceptions(value: string) {
+  const entries = value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  const spellings = new Map(entries.map((entry) => [entry.toLowerCase(), entry]));
+  if (spellings.size === 0) return;
+
+  const pattern = [...spellings.keys()]
+    .sort((a, b) => b.length - a.length)
+    .map((entry) => entry.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|");
+  const wordCharacter = "[\\p{L}\\p{M}\\p{N}_]";
+  return {
+    spellings,
+    pattern: new RegExp(`(?<!${wordCharacter})(?:${pattern})(?!${wordCharacter})`, "giu"),
+  };
 }
 
 export function convert(input: string, c: string) {
   const preferences = getPreferenceValues<Preferences>();
-  const preserveCase = preferences.preserveCase || CASES_SKIP_PRELOWERCASE.has(c);
-
-  const modified = functions[c](preLowercaseText(input, preserveCase), {
+  const options = {
     prefixCharacters: preferences.prefixCharacters,
     suffixCharacters: preferences.suffixCharacters,
-  });
+  };
+  if (!READABLE_CASES.has(c)) return functions[c](input, options);
 
-  return modified;
+  const exceptions = getExceptions(preferences.exceptions);
+  if (!preferences.preserveReadableCase) {
+    input = input.toLowerCase();
+  } else if (exceptions && c === "Capital Case") {
+    // Keep change-case from splitting exception words like iPhone.
+    input = input.replace(exceptions.pattern, (match) => match.toLowerCase());
+  }
+
+  const modified = functions[c](input, options);
+  return exceptions
+    ? modified.replace(exceptions.pattern, (match) => exceptions.spellings.get(match.toLowerCase()) ?? match)
+    : modified;
 }
 
 export function modifyCasesWrapper(input: string, c: string) {
