@@ -1,0 +1,248 @@
+instructions: |
+  These tools use the local Eagle application. Eagle 4.0 Build 21 or later must be running.
+  Before EVERY import-item or update-item write, call get-library even if find-items already returned a libraryId. Use its exact library ID and existing folder IDs.
+  find-items has three mutually exclusive modes: itemId alone; full-text query alone; or structured filters without query.
+  Never combine a query with nonempty tags/folderIds, rating, sourceUrl or extension filters.
+  When looking up a supplied Eagle item ID, use find-items itemId alone rather than query. Updates read the item internally before confirmation and execution.
+  Valid read examples are find-items({itemId: "EXAMPLE0000001"}), find-items({query: "material"}), or find-items({sourceUrl: "https://example.com/material.png"}).
+  Resolve folders by their full paths. Ask when a destination or item is ambiguous.
+  Before EVERY new import, call find-items to check for duplicates even when the user supplies an exact local path.
+  Search by sourceUrl ALONE when known, otherwise by a descriptive name query ALONE. Do not restrict duplicate checks to the destination folder. Read the result before deciding to import.
+  Import a single local file or a public direct asset URL. An HTML webpage is a sourceUrl, not an assetUrl.
+  If only an HTML webpage is supplied, ask for a local file or direct asset URL; do not call import-item to capture the page.
+  Webpage refusals must request a local file or direct asset URL and must not suggest another webpage or screenshot support.
+  Supply restrained tags or notes only when they serve the user's request. These tools do not inspect or classify images.
+  A rating must be an explicit user-supplied integer from 0 to 5. Never invent a rating.
+  update-item preserves omitted metadata and adds tags/folders without removing current memberships.
+  Writes use Raycast's native confirmation. Review the library, resolved folders and intended fields.
+  Report success only for imported, already-imported or updated results. A pending or uncertain result is not success.
+  For pending/uncertain imports, retain the returned item ID and repeat the same import input to reconcile it.
+  A provisional item awaiting Eagle's duplicate decision is not saved. Ask the user to resolve the Eagle alert, then reconcile the same ID. Cancel or Use Existing may remove it; inspect existing items before any further capture.
+  Never change the source URL/path to bypass a pending attempt or import a second copy.
+  For uncertain updates, read the item in the intended library before attempting another update.
+  Return Eagle item links from the tool result. Do not create folders, delete assets or switch libraries.
+
+evals:
+  - input: "@eagle Show my current library and the full paths of its folders."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders:
+          - { id: F1, name: References, path: References }
+          - { id: F2, name: Materials, path: References/Materials }
+    expected:
+      - callsTool: get-library
+      - includes: References/Materials
+  - input: "@eagle Find material studies in my library."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders: [{ id: F2, name: Materials, path: References/Materials }]
+      find-items:
+        libraryId: fixture-library
+        libraryName: Sample Library
+        items:
+          - id: EXAMPLE0000001
+            name: Material Study
+            extension: png
+            sourceUrl: https://example.com/materials
+            notes: Sample reference
+            tags: [material]
+            folders: [{ id: F2, path: References/Materials }]
+            rating: 0
+            link: eagle://item/EXAMPLE0000001
+        total: 1
+        offset: 0
+        limit: 50
+    expected:
+      - callsTool: find-items
+      - includes: eagle://item/EXAMPLE0000001
+  - input: "@eagle Rate Eagle item ID EXAMPLE0000001 five stars."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders: []
+      find-items:
+        libraryId: fixture-library
+        items:
+          [
+            {
+              id: EXAMPLE0000001,
+              name: Material Study,
+              rating: 0,
+              tags: [],
+              folders: [],
+              link: "eagle://item/EXAMPLE0000001",
+            },
+          ]
+        total: 1
+        offset: 0
+        limit: 1
+      update-item:
+        status: updated
+        libraryId: fixture-library
+        item: { id: EXAMPLE0000001, name: Material Study, rating: 5, link: "eagle://item/EXAMPLE0000001" }
+    expected:
+      - callsTool: get-library
+      - callsTool:
+          name: update-item
+          arguments: { libraryId: fixture-library, itemId: EXAMPLE0000001, rating: 5 }
+    usedAsExample: false
+  - input: "@eagle Import https://example.com/material.png as Material Study into References/Materials."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders: [{ id: F2, name: Materials, path: References/Materials }]
+      find-items:
+        libraryId: fixture-library
+        items: []
+        total: 0
+        offset: 0
+        limit: 50
+      import-item:
+        status: pending
+        libraryId: fixture-library
+        itemId: SAMPLE2
+        link: eagle://item/SAMPLE2
+        message: Eagle accepted the request; waiting for a saved library item and its original file.
+        verificationError: The item is not yet in the saved library. Resolve any Eagle duplicate alert, then reconcile this same ID.
+        nextStep: Resolve the duplicate alert, then repeat the same input to reconcile this ID. Cancel or Use Existing may remove it; inspect existing items before any further capture. Do not import another copy.
+    expected:
+      - callsTool: get-library
+      - callsTool: find-items
+      - callsTool:
+          name: import-item
+          arguments:
+            {
+              libraryId: fixture-library,
+              assetUrl: "https://example.com/material.png",
+              name: Material Study,
+              folderIds.0: F2,
+            }
+      - matches: "pending|waiting|not.{0,30}verified"
+      - includes: duplicate
+      - not: { includes: "successfully imported" }
+    usedAsExample: false
+  - input: '@eagle Import "/Users/example/Downloads/Material Study.png" as Material Study into References/Materials.'
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders: [{ id: F2, name: Materials, path: References/Materials }]
+      find-items: { libraryId: fixture-library, items: [], total: 0, offset: 0, limit: 50 }
+      import-item:
+        status: imported
+        libraryId: fixture-library
+        item:
+          {
+            id: SAMPLE3,
+            name: Material Study,
+            folders: [{ id: F2, path: References/Materials }],
+            link: "eagle://item/SAMPLE3",
+          }
+        original: { size: 1234, localSourceMatches: true }
+    expected:
+      - callsTool: get-library
+      - callsTool: find-items
+      - callsTool:
+          name: import-item
+          arguments:
+            libraryId: fixture-library
+            path: /Users/example/Downloads/Material Study.png
+            name: Material Study
+            folderIds.0: F2
+    usedAsExample: false
+  - input: "@eagle For Eagle item ID EXAMPLE0000001, add References/Materials and the tag material while preserving its existing folders, tags and rating."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders:
+          - { id: F1, name: References, path: References }
+          - { id: F2, name: Materials, path: References/Materials }
+      find-items:
+        libraryId: fixture-library
+        items:
+          [
+            {
+              id: EXAMPLE0000001,
+              name: Material Study,
+              rating: 4,
+              tags: [reference],
+              folders: [{ id: F1, path: References }],
+              link: "eagle://item/EXAMPLE0000001",
+            },
+          ]
+        total: 1
+        offset: 0
+        limit: 1
+      update-item:
+        status: updated
+        libraryId: fixture-library
+        item:
+          id: EXAMPLE0000001
+          name: Material Study
+          rating: 4
+          tags: [reference, material]
+          folders: [{ id: F1, path: References }, { id: F2, path: References/Materials }]
+          link: eagle://item/EXAMPLE0000001
+    expected:
+      - callsTool: get-library
+      - callsTool:
+          name: update-item
+          arguments:
+            libraryId: fixture-library
+            itemId: EXAMPLE0000001
+            tagsToAdd.0: material
+            folderIdsToAdd.0: F2
+    usedAsExample: false
+  - input: "@eagle Save this webpage as an image: https://example.com/gallery."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders: []
+      find-items: { libraryId: fixture-library, items: [], total: 0, offset: 0, limit: 50 }
+    expected:
+      - not: { callsTool: import-item }
+      - matches: "direct.{0,50}(asset|image|file)|local file"
+    usedAsExample: false
+  - input: "@eagle Show details for Eagle item ID EXAMPLE0000001."
+    mocks:
+      get-library:
+        id: fixture-library
+        name: Sample Library
+        path: /Users/example/Pictures/Sample.library
+        folders: [{ id: F1, name: References, path: References }]
+      find-items:
+        libraryId: fixture-library
+        libraryName: Sample Library
+        items:
+          - id: EXAMPLE0000001
+            name: Material Study
+            extension: png
+            notes: Sample reference
+            tags: [reference]
+            rating: 4
+            folders: [{ id: F1, path: References }]
+            link: eagle://item/EXAMPLE0000001
+        total: 1
+        offset: 0
+        limit: 1
+    expected:
+      - callsTool:
+          name: find-items
+          arguments: { itemId: EXAMPLE0000001 }
+      - includes: eagle://item/EXAMPLE0000001
+    usedAsExample: false
