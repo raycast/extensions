@@ -3901,4 +3901,17 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.flowra.dev/mcp"],
     },
   },
+  {
+    name: "termalin",
+    title: "Termalin",
+    description:
+      "SSH, SFTP, databases and monitoring for your own Linux servers: run commands and background jobs, read and write files, query databases, read metrics, alerts and pending security updates on the servers you connected, without handing an SSH key to the agent. 23 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Termalin API key as a Bearer token. Needs a Termalin account with at least one server enrolled through its Connector.",
+    icon: "https://raw.githubusercontent.com/termalinapp/termalin-plugin/main/assets/logo-400.png",
+    homepage: "https://termal.in/mcp/?utm_source=raycast&utm_medium=listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://termal.in/mcp"],
+    },
+    remoteUrl: "https://termal.in/mcp",
+  },
 ];
