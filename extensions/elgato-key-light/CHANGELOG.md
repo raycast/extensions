@@ -1,5 +1,10 @@
 # Elgato Key Light Changelog
 
+## [Fix discovery across network interfaces] - {PR_MERGE_DATE}
+
+- Discover lights on every connected IPv4 interface, including Wi-Fi when Ethernet is preferred
+- Close discovery sockets on both success and failure
+
 ## [Target Light Selection and Better Discovery] - 2026-07-09
 
 New Features
