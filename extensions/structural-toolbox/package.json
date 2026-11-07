@@ -1,0 +1,121 @@
+{
+  "name": "structural-toolbox",
+  "title": "Structural Toolbox",
+  "description": "Section and material libraries, stress and torsion calculators, buckling factors, and linear 2D beam, frame and truss analysis.",
+  "icon": "icon.png",
+  "author": "lk1224_p",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "structures",
+      "title": "Structures",
+      "description": "Quick beam, section, stress, torsion and buckling-factor calculations with equations and visualizations.",
+      "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Library",
+      "description": "Browse materials and sections in one place.",
+      "mode": "view"
+    },
+    {
+      "name": "guide",
+      "title": "Guide",
+      "description": "Examples, units, modelling assumptions and library editing.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "libraryDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Custom CSV Library Folder (Optional)",
+      "description": "One folder can contain multiple materials and sections CSVs. Leave blank for the automatic personal folder; Library → CSV Files shows the active path and loaded files."
+    },
+    {
+      "name": "defaultMaterial",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Material",
+      "default": "C24",
+      "description": "Material ID used as a visible suggestion, such as C24, GL24h or Steel-S355."
+    },
+    {
+      "name": "precision",
+      "type": "dropdown",
+      "required": false,
+      "title": "Result Precision",
+      "default": "3",
+      "description": "Decimal places used in calculation results.",
+      "data": [
+        {
+          "title": "2 decimals",
+          "value": "2"
+        },
+        {
+          "title": "3 decimals",
+          "value": "3"
+        },
+        {
+          "title": "4 decimals",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "diagramTextSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Diagram Text Size",
+      "default": "readable",
+      "description": "Readable diagram labels, reactions, stress values and equations. Larger sizes use more vertical space.",
+      "data": [
+        {
+          "title": "Compact (readable)",
+          "value": "compact"
+        },
+        {
+          "title": "Readable (default)",
+          "value": "readable"
+        },
+        {
+          "title": "Extra large",
+          "value": "large"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@resvg/resvg-wasm": "^2.6.2",
+    "mathjax-full": "^3.2.2",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12"
+  }
+}
