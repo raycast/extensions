@@ -1,5 +1,11 @@
 # Messages Changelog
 
+## [Fix Send Message] - 2026-11-07
+
+- Keep saved contacts searchable when their recent chats are missing contact names.
+- Keep the recipient selected when opening Send Message from a quicklink.
+- Pass message text to Messages intact, including emoji, quotation marks, and line breaks.
+
 ## [Fix Paste Latest OTP Code] - 2026-11-07
 
 - Recognize codes followed by punctuation and prefer them over card endings, reference numbers, and phone numbers.
