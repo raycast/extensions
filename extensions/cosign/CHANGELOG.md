@@ -1,5 +1,15 @@
 # Cosign Changelog
 
+## [Sign Out and Profile Photos] - {PR_MERGE_DATE}
+
+- New command: Sign Out
+- Full profiles show the person's photo
+- Company logos show in My Favorites
+- Connection requests in the menu bar show the first part of a long tagline, or the person's current role if they have no tagline
+- Opening a profile no longer reads your inbox; Message on Cosign looks up the conversation when you press it
+- Archiving a request no longer re-reads your conversations
+- A failed favorites change no longer forgets your favorites lists unless they were deleted
+
 ## [Inbox] - 2026-11-05
 
 - Read your Cosign conversations, and accept or archive connection requests

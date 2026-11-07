@@ -1,16 +1,11 @@
 import { LocalStorage } from "@raycast/api";
 import { callTool } from "./cosign-mcp";
+import { organizationImage } from "./inbox";
 
-/**
- * Favorites live in two private Cosign lists, so they show up in the Cosign web app too.
- * People entries are keyed by nomineeId. Company entries are keyed by organizationId, but a list
- * wraps each company in a nominee, and removal needs that wrapper's id.
- */
 export type FavoriteKind = "people" | "organizations";
 
 export interface Favorite {
   kind: FavoriteKind;
-  /** nomineeId for people, organizationId for companies. */
   id: string;
   /** Id that edit_list_entries removes by (the list entry's nominee). */
   entryId: string;
@@ -56,11 +51,13 @@ async function readIds(): Promise<ListIds> {
   return raw ? (JSON.parse(raw) as ListIds) : {};
 }
 
-const forgetIds = () => LocalStorage.removeItem(LISTS_KEY);
+const writeIds = (ids: ListIds) => LocalStorage.setItem(LISTS_KEY, JSON.stringify(ids));
+
+/** Signing out drops the cached list ids, since the next account has its own lists. */
+export const forgetListIds = () => LocalStorage.removeItem(LISTS_KEY);
 
 const creating: Partial<Record<FavoriteKind, Promise<string | undefined>>> = {};
 
-/** Find the favorites list for a kind, creating it (private) only if the account has none. */
 function listId(kind: FavoriteKind, create: boolean): Promise<string | undefined> {
   if (!create) return findList(kind, false);
   // Two first-use stars in a row must share one creation, not make two lists.
@@ -82,15 +79,27 @@ async function findList(kind: FavoriteKind, create: boolean): Promise<string | u
     });
     found = made.listId;
   }
-  if (found) await LocalStorage.setItem(LISTS_KEY, JSON.stringify({ ...ids, [kind]: found }));
+  if (found) await writeIds({ ...ids, [kind]: found });
   return found;
 }
 
-/** Drop one kind's cached list id, keeping the other kind's. */
 async function forgetId(kind: FavoriteKind) {
   const ids = await readIds();
   delete ids[kind];
-  await LocalStorage.setItem(LISTS_KEY, JSON.stringify(ids));
+  await writeIds(ids);
+}
+
+/**
+ * A failed read or write keeps the cached id unless its list is really gone (deleted on the web). A rate limit, a timeout or going offline says
+ * nothing about the list, and forgetting the id then costs a `find_lists` call on the next load.
+ */
+async function forgetIdIfGone(kind: FavoriteKind) {
+  const id = (await readIds())[kind];
+  if (!id) return;
+  const list = await callTool<ListDetail | null>("read_list", {
+    request: { action: "entries", args: { listId: id } },
+  }).catch(() => undefined);
+  if (list === null) await forgetId(kind);
 }
 
 async function readList(kind: FavoriteKind, retried = false): Promise<Favorite[]> {
@@ -114,7 +123,7 @@ async function readList(kind: FavoriteKind, retried = false): Promise<Favorite[]
         id: entityId,
         entryId: m.nominee.nomineeId,
         name: m.nominee.displayName,
-        imageUrl: m.nominee.imageUrl,
+        imageUrl: kind === "organizations" ? organizationImage(entityId) : m.nominee.imageUrl,
         subtitle: kind === "organizations" ? (m.card?.tagline ?? null) : (m.nominee.displayHandle ?? null),
       },
     ];
@@ -137,19 +146,18 @@ async function readFavorites(): Promise<Favorites> {
     const [people, organizations] = await Promise.all([readList("people"), readList("organizations")]);
     return { people, organizations };
   } catch (error) {
-    // A cached list id can go stale if the list was deleted on the web.
-    await forgetIds();
+    await Promise.all([forgetIdIfGone("people"), forgetIdIfGone("organizations")]);
     throw error;
   }
 }
 
-/** Run a write; a failure may mean the cached list id is stale, so forget it. Drop any read that began before the write. */
-async function write(work: () => Promise<void>): Promise<void> {
+/** Drop any read that began before the write, so it can't show the old state. */
+async function write(kind: FavoriteKind, work: () => Promise<void>): Promise<void> {
   inflight = undefined;
   try {
     await work();
   } catch (error) {
-    await forgetIds();
+    await forgetIdIfGone(kind);
     throw error;
   } finally {
     inflight = undefined;
@@ -157,7 +165,7 @@ async function write(work: () => Promise<void>): Promise<void> {
 }
 
 export const addFavorite = (kind: FavoriteKind, id: string) =>
-  write(async () => {
+  write(kind, async () => {
     const list = await listId(kind, true);
     if (!list) throw new Error("Couldn't find or create the favorites list.");
     await callTool("edit_list_entries", {
@@ -169,7 +177,7 @@ export const addFavorite = (kind: FavoriteKind, id: string) =>
   });
 
 export const removeFavorite = (favorite: Favorite) =>
-  write(async () => {
+  write(favorite.kind, async () => {
     const list = await listId(favorite.kind, false);
     if (!list) return;
     await callTool("edit_list_entries", {
