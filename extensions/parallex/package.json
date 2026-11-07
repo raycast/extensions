@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parallex",
+  "title": "Parallex",
+  "description": "Open your Parallex instances and workspaces, and make a second copy of any app, from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "mandipadk",
+  "categories": ["Applications", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-instance",
+      "title": "Open Instance",
+      "subtitle": "Parallex",
+      "description": "Open, or bring forward, one of your Parallex instances.",
+      "mode": "view"
+    },
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "subtitle": "Parallex",
+      "description": "Open every instance in one of your Parallex workspaces.",
+      "mode": "view"
+    },
+    {
+      "name": "new-instance",
+      "title": "New Instance",
+      "subtitle": "Parallex",
+      "description": "Make a second copy of an app: opens Parallex with the app picked.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
