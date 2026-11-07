@@ -386,19 +386,18 @@ export function selectOTP(text: string): string | null {
   let bestCode: string | null = null;
   let bestScore = -1;
 
-  // Match connected digit groups as a unit so a phone number cannot supply a partial code.
-  // A separate number followed by a time unit can be the code's expiry.
-  const numberGroups = /\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+(?!\d+[\s-]+(?:seconds?|minutes?|hours?|days?)\b))\d+)*\b/gi;
-  for (const match of text.matchAll(numberGroups)) {
-    const [number] = match;
+  // Keep phone number groups together unless the text explicitly labels the first group as a code.
+  for (const match of text.matchAll(/\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+)\d+)*\b/g)) {
+    const [group] = match;
+    const before = text.slice(0, match.index);
+    const hasCodeLabel = codeLabel.test(before);
+    const number = hasCodeLabel ? group.split(/[ \t]/, 1)[0] : group;
     if (!/^(?:\d{4,10}|\d{3,}-\d{3,})$/.test(number)) continue;
 
     const code = number.replace("-", "");
     if (code.length > 10) continue;
 
-    const before = text.slice(0, match.index);
     const after = text.slice(match.index + number.length);
-    const hasCodeLabel = codeLabel.test(before);
     if (before.endsWith("+") || (!hasCodeLabel && otherNumberLabel.test(before))) continue;
 
     const score = hasCodeLabel || codeLabelAfter.test(after) ? 2 : useLabel.test(before) ? 1 : 0;

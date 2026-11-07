@@ -23,6 +23,8 @@ const cases = [
   ["Use 482913. Questions? Call 1-800-950-5114.", "482913"],
   ["Your code is 123-456", "123456"],
   ["Your code is 123456 10 minutes remaining", "123456"],
+  ["Your code is 123456 10 min left", "123456"],
+  ["Your code is 123-456 01:59 remaining", "123456"],
   ["Your verification code for your account is 123456.", "123456"],
   ["Your account is 123456.", null],
   ["Questions? Call 1 800 950 5114.", null],
