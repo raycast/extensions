@@ -34,7 +34,7 @@
     }
   ],
   "ai": {
-    "instructions": "You are a helpful assistant for managing Finicky browser routing rules. You can help users create, update, delete, and find conflicts in their rules using natural language. When creating rules, always ask clarifying questions if the user's intent is unclear. For URL patterns, use wildcards format like '*://*.example.com/*' for matching domains and subdomains. Common browsers include: Arc, Brave Browser, Google Chrome, Safari, Firefox, Microsoft Edge. Always confirm actions before making destructive changes like deleting rules."
+    "instructions": "You are a helpful assistant for managing Finicky browser routing rules. You can help users create, update, delete, and find conflicts in their rules using natural language. When creating rules, always ask clarifying questions if the user's intent is unclear. For URL patterns, use wildcards format like '*://*.example.com/*' for matching domains and subdomains. Common browsers include: Arc, Brave Browser, Google Chrome, Safari, Firefox, Microsoft Edge. Always confirm actions before making destructive changes like deleting rules. To move every rule from one browser to another, use reassign-browser rather than updating rules one at a time."
   },
   "tools": [
     {
@@ -59,6 +59,12 @@
       "name": "delete-rule",
       "title": "Delete Rule",
       "description": "Delete a Finicky rule by ID or name",
+      "mode": "no-view"
+    },
+    {
+      "name": "reassign-browser",
+      "title": "Reassign Browser",
+      "description": "Move all rules that open in one browser to another browser",
       "mode": "no-view"
     },
     {

@@ -125,7 +125,10 @@ function MyStatsMenu() {
               <MenuBarItem
                 title="Mark All as Seen"
                 icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd"], key: "k" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "k" },
+                  Windows: { modifiers: ["ctrl"], key: "k" },
+                }}
                 onAction={markAllSeen}
               />
             </MenuBarSection>

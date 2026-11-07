@@ -16,7 +16,8 @@
     "YourMCGeek",
     "dhaydl",
     "hugodemenez",
-    "danieltsam"
+    "danieltsam",
+    "ray.dhruv"
   ],
   "categories": [
     "Productivity",
@@ -62,7 +63,7 @@
           "name": "showPreview",
           "label": "Show Preview",
           "title": "Show Preview",
-          "description": "Show the preview of the downloaded file or folder",
+          "description": "Show text file contents in the detail pane. Use Quick Look to preview other files.",
           "required": false,
           "default": true
         },
@@ -386,6 +387,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^24.10.2",
+    "esbuild": "0.25.12",
     "eslint": "^9.39.2",
     "prettier": "^3.8.1",
     "react": "^19.2.1"
@@ -395,7 +397,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test:quicklook": "esbuild src/quicklook.ts --bundle --platform=node --format=cjs --outfile=.test-build/quicklook.cjs --log-level=error && node scripts/test-quicklook.mjs",
+    "test": "node scripts/test-previews.mjs",
     "publish": "ray publish"
   },
   "platforms": [

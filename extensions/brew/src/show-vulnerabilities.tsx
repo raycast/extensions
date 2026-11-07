@@ -11,7 +11,7 @@
  */
 
 import React, { useMemo } from "react";
-import { Action, ActionPanel, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { HomebrewGate } from "./components/requiresHomebrew";
@@ -26,6 +26,7 @@ import {
   SEVERITY_COLOR,
   UPDATE_AVAILABLE_ICON,
   UP_TO_DATE_ICON,
+  WARNING_ICON,
   vulnerableIcon,
 } from "./components/palette";
 import {
@@ -37,6 +38,7 @@ import {
   osvUrl,
   HOMEBREW_7,
   type OutdatedFormula,
+  type UnscannedFormula,
   type VulnFinding,
 } from "./utils";
 
@@ -64,15 +66,24 @@ function VulnerabilitiesContent() {
 
   const findings = data?.findings ?? [];
   const skipped = data?.skipped.length ?? 0;
+  const unscanned = data?.unscanned ?? [];
+  const stale = data?.outdatedWithoutSbom ?? [];
+  const hasRows = findings.length > 0 || unscanned.length > 0 || stale.length > 0;
+  const staleSet = new Set(stale);
+  const findingNames = new Set(findings.map((finding) => finding.formula));
+  const staleOnly = stale.filter((formula) => !findingNames.has(formula));
+  const firstSection: Section = findings.length > 0 ? "vulnerable" : unscanned.length > 0 ? "unscanned" : "stale";
+  const skippedNote = (section: Section) => (skipped > 0 && section === firstSection ? ` · ${skipped} skipped` : "");
+  const toggleSidebar = () => setShowDetail((show) => !show);
+  const refreshAll = () => {
+    revalidate();
+    outdated.revalidate();
+  };
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail={findings.length > 0 && showDetail}
-      searchBarPlaceholder="Search vulnerable formulae…"
-    >
+    <List isLoading={isLoading} isShowingDetail={hasRows && showDetail} searchBarPlaceholder="Search formulae…">
       {/* Failed scan, with nothing cached to show instead */}
-      {error && !isLoading && findings.length === 0 && (
+      {error && !isLoading && !hasRows && (
         <List.EmptyView
           icon={ERROR_ICON}
           title={isBrewLockError(error) ? "Brew Is Busy" : "Failed to Check for Vulnerabilities"}
@@ -83,7 +94,7 @@ function VulnerabilitiesContent() {
           }
           actions={
             <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refreshAll} />
             </ActionPanel>
           }
         />
@@ -98,35 +109,55 @@ function VulnerabilitiesContent() {
         />
       )}
 
-      {!isLoading && !error && data && findings.length === 0 && (
+      {!isLoading && !error && data && !hasRows && (
         <List.EmptyView
           icon={UP_TO_DATE_ICON}
           title="No known vulnerabilities"
           description={skipped > 0 ? `${formatCount(skipped, "formula", "formulae")} skipped` : undefined}
           actions={
             <ActionPanel>
-              <RefreshAction onRefresh={revalidate} />
+              <RefreshAction onRefresh={refreshAll} />
             </ActionPanel>
           }
         />
       )}
 
       {findings.length > 0 && (
-        <List.Section
-          title="Vulnerable Formulae"
-          subtitle={skipped > 0 ? `${findings.length} · ${skipped} skipped` : String(findings.length)}
-        >
+        <List.Section title="Vulnerable Formulae" subtitle={`${findings.length}${skippedNote("vulnerable")}`}>
           {findings.map((finding) => (
             <VulnItem
               key={`${finding.formula}@${finding.version}`}
               finding={finding}
               outdated={outdatedByName.get(finding.formula)}
-              onRefresh={() => {
-                revalidate();
-                outdated.revalidate();
-              }}
-              onToggleSidebar={() => setShowDetail((show) => !show)}
+              stale={staleSet.has(finding.formula)}
+              onRefresh={refreshAll}
+              onToggleSidebar={toggleSidebar}
               showDetail={showDetail}
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {unscanned.length > 0 && (
+        <List.Section title="Not Scanned" subtitle={`${unscanned.length}${skippedNote("unscanned")}`}>
+          {unscanned.map((item) => (
+            <UnscannedItem key={item.formula} item={item} onRefresh={refreshAll} onToggleSidebar={toggleSidebar} />
+          ))}
+        </List.Section>
+      )}
+
+      {staleOnly.length > 0 && (
+        <List.Section title="Results May Be Out of Date" subtitle={`${staleOnly.length}${skippedNote("stale")}`}>
+          {staleOnly.map((formula) => (
+            <CoverageItem
+              key={formula}
+              id={`stale:${formula}`}
+              formula={formula}
+              icon={WARNING_ICON}
+              label="Checked a newer version"
+              markdown={staleMarkdown(formula)}
+              onRefresh={refreshAll}
+              onToggleSidebar={toggleSidebar}
             />
           ))}
         </List.Section>
@@ -135,19 +166,93 @@ function VulnerabilitiesContent() {
   );
 }
 
+type Section = "vulnerable" | "unscanned" | "stale";
+
+const UNSCANNED_REASONS = {
+  untrusted_tap: {
+    icon: WARNING_ICON,
+    label: "Untrusted tap",
+    why: "Its tap isn't trusted. Use Trust Tap in Manage Taps, or run `brew trust <user>/<tap>`, then refresh.",
+  },
+  resolution_error: {
+    icon: ERROR_ICON,
+    label: "Won't load",
+    why: "brew couldn't load it. Run `brew info --installed` to see which installed formulae brew can load.",
+  },
+} satisfies Record<string, { icon: Image.ImageLike; label: string; why: string }>;
+
+function isKnownReason(reason: string): reason is keyof typeof UNSCANNED_REASONS {
+  return Object.hasOwn(UNSCANNED_REASONS, reason);
+}
+
+function UnscannedItem(props: { item: UnscannedFormula; onRefresh: () => void; onToggleSidebar: () => void }) {
+  const { formula, reason } = props.item;
+  const { icon, label, why } = isKnownReason(reason)
+    ? UNSCANNED_REASONS[reason]
+    : {
+        icon: WARNING_ICON,
+        label: reason || "Unknown reason",
+        why: reason ? `brew gave the reason "${escapeMarkdown(reason)}".` : "brew didn't say why.",
+      };
+  return (
+    <CoverageItem
+      id={`unscanned:${formula}`}
+      formula={formula}
+      icon={icon}
+      label={label}
+      markdown={`**${escapeMarkdown(formula)}** wasn't scanned. ${why}`}
+      onRefresh={props.onRefresh}
+      onToggleSidebar={props.onToggleSidebar}
+    />
+  );
+}
+
+function CoverageItem(props: {
+  id: string;
+  formula: string;
+  icon: Image.ImageLike;
+  label: string;
+  markdown: string;
+  onRefresh: () => void;
+  onToggleSidebar: () => void;
+}) {
+  return (
+    <List.Item
+      id={props.id}
+      title={props.formula}
+      subtitle={props.label}
+      keywords={[props.label]}
+      icon={props.icon}
+      detail={<List.Item.Detail markdown={props.markdown} />}
+      actions={
+        <ActionPanel>
+          <RefreshAction onRefresh={props.onRefresh} />
+          <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 function VulnItem(props: {
   finding: VulnFinding;
   outdated: OutdatedFormula | undefined;
+  stale: boolean;
   onRefresh: () => void;
   onToggleSidebar: () => void;
   /** The sidebar is open, so there is no room for accessories. */
   showDetail: boolean;
 }) {
-  const { finding, outdated, showDetail } = props;
+  const { finding, outdated, stale, showDetail } = props;
   const advisories = formatCount(finding.open.length, "advisory", "advisories");
   // With the sidebar open the accessories truncate mid-word ("8 a…"), so they
   // are dropped and the severity-tinted shield carries the whole row summary.
-  const summary = [finding.severity, advisories, ...(outdated ? ["upgrade available"] : [])].join(" \u00b7 ");
+  const summary = [
+    finding.severity,
+    advisories,
+    ...(outdated ? ["upgrade available"] : []),
+    ...(stale ? [STALE_NOTE] : []),
+  ].join(" \u00b7 ");
 
   return (
     <List.Item
@@ -164,9 +269,15 @@ function VulnItem(props: {
               { tag: { value: finding.severity, color: SEVERITY_COLOR[finding.severity] } },
               { text: advisories },
               ...(outdated ? [{ icon: UPDATE_AVAILABLE_ICON, tooltip: "Upgrade available" }] : []),
+              ...(stale ? [{ icon: WARNING_ICON, tooltip: STALE_NOTE }] : []),
             ]
       }
-      detail={<List.Item.Detail markdown={findingMarkdown(finding)} metadata={<ListMetadata rows={rows(finding)} />} />}
+      detail={
+        <List.Item.Detail
+          markdown={findingMarkdown(finding, { stale })}
+          metadata={<ListMetadata rows={rows(finding)} />}
+        />
+      }
       actions={
         <VulnActions
           finding={finding}
@@ -176,7 +287,7 @@ function VulnItem(props: {
             <Action.Push
               title="Show Details"
               icon={Icon.Document}
-              target={<VulnDetail finding={finding} outdated={outdated} onRefresh={props.onRefresh} />}
+              target={<VulnDetail finding={finding} outdated={outdated} stale={stale} onRefresh={props.onRefresh} />}
             />
           }
           extra={
@@ -195,12 +306,17 @@ function VulnItem(props: {
  * The sidebar has room for a summary, not for three advisories. This is the
  * same markdown and the same metadata rows with the whole window to use.
  */
-function VulnDetail(props: { finding: VulnFinding; outdated: OutdatedFormula | undefined; onRefresh: () => void }) {
+function VulnDetail(props: {
+  finding: VulnFinding;
+  outdated: OutdatedFormula | undefined;
+  stale: boolean;
+  onRefresh: () => void;
+}) {
   const { finding } = props;
   return (
     <Detail
       navigationTitle={`${finding.formula} ${finding.version}`}
-      markdown={findingMarkdown(finding)}
+      markdown={findingMarkdown(finding, { stale: props.stale })}
       metadata={<DetailMetadata rows={rows(finding)} />}
       actions={<VulnActions finding={finding} outdated={props.outdated} onRefresh={props.onRefresh} />}
     />
@@ -260,9 +376,16 @@ function VulnActions(props: {
   );
 }
 
-function findingMarkdown(finding: VulnFinding): string {
+const STALE_NOTE = "brew checked a newer version than the one installed";
+
+function staleMarkdown(formula: string): string {
+  return `brew checked a newer version of **${escapeMarkdown(formula)}** than the one installed. Upgrade it for accurate results.`;
+}
+
+function findingMarkdown(finding: VulnFinding, { stale }: { stale: boolean }): string {
   const blocks = [
     `## ${escapeMarkdown(finding.formula)} ${escapeMarkdown(finding.version)}`,
+    ...(stale ? [`> ${staleMarkdown(finding.formula)}`] : []),
     ...finding.open.map((vuln) =>
       [
         `### ${osvLink(vuln.id)} · ${vuln.severity}`,

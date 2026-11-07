@@ -1,0 +1,10 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.swift-module-cache/
+*.log
+.DS_Store
+
+native/.raycast-swift-build/
+assets/compiled_raycast_swift/
+native/.build/

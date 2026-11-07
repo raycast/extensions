@@ -5,53 +5,19 @@ import {
   Clipboard,
   getPreferenceValues,
   openExtensionPreferences,
-  PreferenceValues,
   LaunchProps,
   LocalStorage,
   updateCommandMetadata,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execFileSync } from "child_process";
-import fs from "fs";
 import path from "path";
-import { AVIFENC_DEFAULT_PATH, CWEBP_DEFAULT_PATH } from "./utils/constants";
+import { rm, stat } from "fs/promises";
 import { isSupportedImageFormat, isWebpConvertibleImageFormat } from "./utils/mime-types";
-import { convertToAvif, convertToWebp } from "./utils/convert";
+import { convertToAvif, convertToWebp, resolveAvifencPath, resolveCwebpPath } from "./utils/convert";
 import { uploadToR2 } from "./utils/uploadToR2";
-import { generateFileName } from "./utils/generate-fileName";
+import { getPublicBaseUrl } from "./utils/r2-url";
 
-async function resolveCwebpPath(cwebpPath: string): Promise<string | undefined> {
-  try {
-    execFileSync(cwebpPath, ["-version"]);
-    return cwebpPath;
-  } catch {
-    try {
-      execFileSync("cwebp", ["-version"]);
-      return "cwebp";
-    } catch {
-      return undefined;
-    }
-  }
-}
-
-async function isAvifencAvailable(avifencPath: string): Promise<boolean> {
-  try {
-    execFileSync(avifencPath, ["--version"]);
-    return true;
-  } catch (error) {
-    await showFailureToast(error, { title: "execFileSync avifencPath" });
-
-    try {
-      execFileSync("avifenc", ["--version"]);
-      return true;
-    } catch (error) {
-      await showFailureToast(error, { title: "execFileSync avifenc" });
-      return false;
-    }
-  }
-}
-
-function isPreferencesConfigured(preferences: PreferenceValues): boolean {
+function isPreferencesConfigured(preferences: Preferences): boolean {
   return Boolean(
     preferences.r2BucketName && preferences.r2AccessKeyId && preferences.r2SecretAccessKey && preferences.r2AccountId,
   );
@@ -60,8 +26,6 @@ function isPreferencesConfigured(preferences: PreferenceValues): boolean {
 const STICKY_FOLDER_KEY = "uploadFolder";
 const RESET_FOLDER_TOKENS = new Set(["/", "root"]);
 
-// Resolves the upload folder for this run and keeps the command subtitle / sticky
-// LocalStorage value in sync, so a forgotten folder is always visible before the next upload.
 async function resolveUploadFolder(folderArgument: string | undefined): Promise<string | undefined> {
   const typedFolder = folderArgument?.trim();
 
@@ -82,14 +46,13 @@ async function resolveUploadFolder(folderArgument: string | undefined): Promise<
 }
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.R2Uploader }>) {
+  let toastUploading: Toast | undefined;
   try {
-    const preferences = getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences>();
 
     if (!isPreferencesConfigured(preferences)) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast("Configure your R2 credentials in extension preferences", {
         title: "R2 configuration required",
-        message: "Please configure your R2 credentials in extension preferences",
         primaryAction: {
           title: "Open Preferences",
           onAction: () => {
@@ -100,17 +63,12 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       return;
     }
 
-    if (!preferences.customDomain) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "R2 public domain required",
-        message: "Please configure your R2 Public Domain in extension preferences",
-        primaryAction: {
-          title: "Open Preferences",
-          onAction: () => {
-            openExtensionPreferences();
-          },
-        },
+    try {
+      getPublicBaseUrl(preferences.customDomain);
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Public Base URL required",
+        primaryAction: { title: "Open Preferences", onAction: openExtensionPreferences },
       });
       return;
     }
@@ -119,106 +77,112 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     try {
       selectedItems = await getSelectedFinderItems();
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast("Select files in Finder, then try again", {
         title: "Finder is not active",
-        message: "Please select a file in Finder (making it the frontmost app), then try again",
       });
       return;
     }
 
     if (!selectedItems || selectedItems.length === 0) {
-      await showToast({ style: Toast.Style.Failure, title: "No file selected" });
+      await showFailureToast("Select one or more files in Finder", { title: "No files selected" });
       return;
     }
 
-    const inputFilePath = selectedItems[0].path;
+    const { convertToAvif: shouldConvertToAvif, convertToWebp: shouldConvertToWebp, linkFormat } = preferences;
+    const conversion = shouldConvertToAvif
+      ? {
+          name: "AVIF",
+          supports: isSupportedImageFormat,
+          resolveEncoder: () => resolveAvifencPath(preferences.avifencPath),
+          encode: convertToAvif,
+          quality: preferences.avifQuality,
+          install: "brew install libavif",
+        }
+      : shouldConvertToWebp
+        ? {
+            name: "WebP",
+            supports: isWebpConvertibleImageFormat,
+            resolveEncoder: () => resolveCwebpPath(preferences.cwebpPath),
+            encode: convertToWebp,
+            quality: preferences.webpQuality,
+            install: "brew install webp",
+          }
+        : undefined;
+    const needsConversion = conversion && selectedItems.some((item) => conversion.supports(item.path));
+    if (needsConversion && shouldConvertToAvif && shouldConvertToWebp) {
+      await showFailureToast("Enable only one image conversion format in extension preferences.", {
+        title: "Choose AVIF or WebP",
+        primaryAction: { title: "Open Preferences", onAction: openExtensionPreferences },
+      });
+      return;
+    }
+
     const uploadFolder = await resolveUploadFolder(props.arguments.folder);
-
-    const {
-      fileNameFormat,
-      convertToAvif: shouldConvertToAvif,
-      avifencPath: avifencPathPreference,
-      convertToWebp: shouldConvertToWebp,
-      cwebpPath: cwebpPathPreference,
-      linkFormat,
-    } = preferences;
-
-    let customFileName: string | undefined;
-
-    const toastUploading = await showToast({
+    toastUploading = await showToast({
       style: Toast.Style.Animated,
       title: "Uploading to Cloudflare R2...",
     });
 
-    let newFilePath = inputFilePath;
-    let temporaryFilePath: string | undefined;
+    const encoderPath = needsConversion ? await conversion?.resolveEncoder() : null;
+    const configuredQuality = parseInt(conversion?.quality || "80", 10);
+    const quality = Math.max(0, Math.min(100, isNaN(configuredQuality) ? 80 : configuredQuality));
+    const links: string[] = [];
+    const failures: string[] = [];
+    let originalUploads = 0;
 
-    if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif && shouldConvertToWebp) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Choose one image conversion format",
-        message: "AVIF and WebP conversion cannot be enabled at the same time",
-      });
-      return;
-    } else if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif) {
-      const avifencPath = avifencPathPreference || AVIFENC_DEFAULT_PATH;
-      if (!(await isAvifencAvailable(avifencPath))) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "AVIF conversion tool not found",
-          message: "Please install libavif using 'brew install libavif' or check the path in extension preferences",
-        });
-      } else {
-        try {
-          const avifQuality = preferences.avifQuality ? parseInt(preferences.avifQuality, 10) : 80;
-          const quality = Math.max(0, Math.min(100, isNaN(avifQuality) ? 80 : avifQuality));
-
-          newFilePath = await convertToAvif(inputFilePath, avifencPath, quality);
-        } catch (conversionError) {
-          await showFailureToast(conversionError, { title: "Conversion failed" });
-          newFilePath = inputFilePath;
+    for (const [index, item] of selectedItems.entries()) {
+      const inputFilePath = item.path;
+      let uploadPath = inputFilePath;
+      let usedOriginal = false;
+      toastUploading.message = `${index + 1} of ${selectedItems.length} · ${path.basename(inputFilePath)}`;
+      try {
+        if (conversion?.supports(inputFilePath)) {
+          if (!(await stat(inputFilePath)).isFile()) {
+            throw new Error("Folders cannot be uploaded. Select files in Finder.");
+          }
+          if (!encoderPath) {
+            usedOriginal = true;
+            toastUploading.message = `${conversion.name} encoder not found. Uploading originals. Run ${conversion.install}.`;
+          } else {
+            try {
+              uploadPath = await conversion.encode(inputFilePath, encoderPath, quality);
+            } catch {
+              usedOriginal = true;
+              toastUploading.message = `${conversion.name} conversion failed. Uploading the original file.`;
+            }
+          }
         }
-      }
-    } else if (isWebpConvertibleImageFormat(inputFilePath) && shouldConvertToWebp) {
-      const cwebpPath = await resolveCwebpPath(cwebpPathPreference || CWEBP_DEFAULT_PATH);
-      if (!cwebpPath) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "WebP conversion tool not found",
-          message: "Please install WebP using 'brew install webp' or check the path in extension preferences",
-        });
-      } else {
-        try {
-          const webpQuality = preferences.webpQuality ? parseInt(preferences.webpQuality, 10) : 80;
-          const quality = Math.max(0, Math.min(100, isNaN(webpQuality) ? 80 : webpQuality));
 
-          newFilePath = await convertToWebp(inputFilePath, cwebpPath, quality);
-          temporaryFilePath = newFilePath;
-        } catch {
-          newFilePath = inputFilePath;
+        const uploadedLinks = await uploadToR2(uploadPath, uploadFolder);
+        links.push(uploadedLinks[linkFormat === "markdown" || linkFormat === "html" ? linkFormat : "url"]);
+        if (usedOriginal) originalUploads++;
+      } catch (error) {
+        failures.push(`${path.basename(inputFilePath)}: ${error instanceof Error ? error.message : String(error)}`);
+      } finally {
+        if (uploadPath !== inputFilePath) {
+          await rm(path.dirname(uploadPath), { recursive: true, force: true }).catch(() => {
+            console.warn("Could not remove a temporary conversion folder");
+          });
         }
       }
     }
 
-    if (fileNameFormat) {
-      customFileName = await generateFileName(newFilePath, fileNameFormat);
-    }
-
-    try {
-      const { url, markdown, html, key } = await uploadToR2(newFilePath, customFileName, uploadFolder);
-
-      const textToCopy = linkFormat === "markdown" ? markdown : linkFormat === "html" ? html : url;
-      await Clipboard.copy(textToCopy);
-      toastUploading.style = Toast.Style.Success;
-      toastUploading.title = "Upload completed!";
-      toastUploading.message = `Copied to clipboard · ${key}`;
-    } finally {
-      if (temporaryFilePath) {
-        await fs.promises.rm(path.dirname(temporaryFilePath), { recursive: true, force: true });
-      }
-    }
+    if (links.length > 0) await Clipboard.copy(links.join("\n"));
+    const fallbackMessage =
+      originalUploads > 0 && conversion
+        ? ` · ${originalUploads} uploaded as original after ${conversion.name} conversion failed or was unavailable`
+        : "";
+    toastUploading.style = failures.length ? Toast.Style.Failure : Toast.Style.Success;
+    toastUploading.title = failures.length
+      ? `${links.length} uploaded, ${failures.length} failed`
+      : originalUploads > 0
+        ? "Upload completed using originals"
+        : "Upload completed";
+    toastUploading.message = failures.length
+      ? `${failures.join("; ")}${fallbackMessage}`
+      : `${links.length} link${links.length === 1 ? "" : "s"} copied to clipboard${fallbackMessage}`;
   } catch (error) {
+    await toastUploading?.hide();
     await showFailureToast(error, { title: "Error uploading to R2" });
   }
 }

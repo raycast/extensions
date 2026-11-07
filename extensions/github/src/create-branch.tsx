@@ -6,6 +6,7 @@ import {
   Color,
   Form,
   Image,
+  Keyboard,
   open,
   showToast,
   Toast,
@@ -66,12 +67,12 @@ export function BranchForm({ draftValues }: BranchFormProps) {
         if (branchName) {
           toast.primaryAction = {
             title: "Copy Branch Name",
-            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: () => branchName && Clipboard.copy(branchName),
           };
           toast.secondaryAction = {
             title: "Open in Browser",
-            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             onAction: async () => await open(`${values.repoUrl}/tree/${branchName}`),
           };
         }
