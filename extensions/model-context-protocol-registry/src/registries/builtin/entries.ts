@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "schematik",
+    title: "Schematik",
+    description:
+      "Search electronics parts and step-by-step hardware build guides for Arduino, ESP32 and Raspberry Pi Pico. Find a part with its price and pinout, or a full guide with parts, wiring, steps and firmware. Hosted remote Streamable HTTP server; read-only, no sign-in.",
+    icon: "https://www.schematik.io/favicon-192x192.png",
+    homepage: "https://github.com/schematik-engineering/schematik-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.schematik.io/mcp"],
+    },
+    remoteUrl: "https://www.schematik.io/mcp",
+  },
+  {
     name: "postel",
     title: "Postel",
     description:
