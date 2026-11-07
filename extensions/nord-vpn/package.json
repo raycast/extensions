@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nord-vpn",
+  "title": "NordVPN Controls",
+  "description": "Control NordVPN connections, check VPN status, and choose a country or city.",
+  "icon": "extension-icon.png",
+  "author": "cratos_balboa",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "NordVPN",
+      "description": "Disconnect from NordVPN and verify the adapter and public IP",
+      "mode": "no-view"
+    },
+    {
+      "name": "connect-to-country",
+      "title": "Connect to Country",
+      "subtitle": "NordVPN",
+      "description": "Connect to a NordVPN country server and verify the public location",
+      "mode": "view"
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect",
+      "subtitle": "NordVPN",
+      "description": "Connect to NordVPN and verify the adapter and public IP",
+      "mode": "no-view"
+    },
+    {
+      "name": "nord-vpn",
+      "title": "Status",
+      "subtitle": "NordVPN",
+      "description": "Show NordLynx adapter state and public IP location",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "nordVpnExecutablePath",
+      "title": "NordVPN executable path",
+      "description": "Path to the NordVPN Windows CLI executable.",
+      "type": "textfield",
+      "required": true,
+      "default": "C:\\Program Files\\NordVPN\\NordVPN.exe"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.5.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
