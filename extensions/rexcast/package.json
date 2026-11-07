@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rexcast",
+  "title": "Rexcast",
+  "description": "See and control your Rex terminal sessions from Raycast: activity in the menu bar, peek at any session and send text to it.",
+  "icon": "extension-icon.png",
+  "author": "carlos_arze",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "rexPath",
+      "title": "Rex CLI Path",
+      "description": "Leave empty to use the rex binary installed with the Rex app.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "sessions",
+      "title": "Manage Sessions",
+      "subtitle": "Rex",
+      "description": "List, show, rename and close Rex sessions, and inspect their tabs and panes.",
+      "mode": "view"
+    },
+    {
+      "name": "new-session",
+      "title": "New Session",
+      "subtitle": "Rex",
+      "description": "Create a Rex session and show it in the app.",
+      "mode": "view"
+    },
+    {
+      "name": "run-command",
+      "title": "Run Command",
+      "subtitle": "Rex",
+      "description": "Run a command in a new tab of a Rex session.",
+      "mode": "view"
+    },
+    {
+      "name": "open-rex",
+      "title": "Open Rex",
+      "description": "Bring the Rex app to the front.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Session Activity",
+      "subtitle": "Rex",
+      "description": "Show which Rex sessions are active or finished, without opening Rex.",
+      "mode": "menu-bar",
+      "interval": "15s",
+      "preferences": [
+        {
+          "name": "notifications",
+          "type": "checkbox",
+          "required": false,
+          "title": "Notifications",
+          "label": "Show Notifications",
+          "description": "Show a message when a session needs your input, finishes or fails. Off by default because the message closes the Raycast window if it is open. The menu bar item updates either way.",
+          "default": false
+        },
+        {
+          "name": "noticeDuration",
+          "type": "dropdown",
+          "required": false,
+          "title": "Notification Length",
+          "description": "How long the message stays up. A longer message keeps closing the Raycast window while it is shown.",
+          "default": "6",
+          "data": [
+            {
+              "title": "Brief (2 seconds)",
+              "value": "2"
+            },
+            {
+              "title": "Normal (6 seconds)",
+              "value": "6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "show-menu-bar",
+      "title": "Show Menu Bar Item",
+      "subtitle": "Rex",
+      "description": "Show the Rex activity item in the menu bar again after removing it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "peek",
+      "title": "Peek at Session",
+      "subtitle": "Rex",
+      "description": "Look at the screen of a Rex session without opening Rex.",
+      "mode": "view"
+    },
+    {
+      "name": "open-folder",
+      "title": "Open Finder Folder in Rex",
+      "description": "Create a Rex session in the folder selected in Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-text",
+      "title": "Send Text to Session",
+      "subtitle": "Rex",
+      "description": "Type text or the clipboard into a Rex session without focusing Rex.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.0",
+    "react": "19.0.0",
+    "typescript": "^5.8.2",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
