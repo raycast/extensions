@@ -1,0 +1,20 @@
+[
+  {
+    "agent": "pi",
+    "id": "sess-pi-1",
+    "cwd": "/Users/me/Workspaces/demo",
+    "title": "Inspect the CLI output",
+    "start": "2026-09-29T00:00:00Z",
+    "last": "2026-09-29T01:00:00Z",
+    "models": [
+      { "model": "deepseek/deepseek-flash", "input": 10, "output": 2, "cache_read": 0, "cache_write": 0, "cost": 0.01, "priced": true }
+    ],
+    "input": 1000,
+    "output": 20,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": 0.01,
+    "unpriced": 0,
+    "resume": "cd /Users/me/Workspaces/demo && pi --resume sess-pi-1"
+  }
+]

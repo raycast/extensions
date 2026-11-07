@@ -1,0 +1,73 @@
+[
+  {
+    "agent": "codex",
+    "user": "ada@example.com · Team",
+    "plan": "team",
+    "active": true,
+    "on": true,
+    "windows": [
+      {
+        "name": "5 hours",
+        "used": 2,
+        "remaining": 98,
+        "resetsAt": "2026-10-07T02:52:28+08:00"
+      },
+      {
+        "name": "7 days",
+        "used": 11,
+        "remaining": 89,
+        "resetsAt": "2026-10-10T21:54:29+08:00"
+      }
+    ],
+    "readAt": "2026-10-06T21:52:59.601103+08:00",
+    "resets": {
+      "count": 2,
+      "until": "2026-10-22T20:45:36.116738Z",
+      "each": [
+        {
+          "until": "2026-10-22T20:45:36.116738Z"
+        },
+        {
+          "until": "2026-10-29T19:16:34.471659Z"
+        }
+      ]
+    }
+  },
+  {
+    "agent": "grok",
+    "user": "grace@example.com",
+    "active": true,
+    "on": true,
+    "windows": [
+      {
+        "name": "7 days",
+        "used": 1,
+        "remaining": 99,
+        "resetsAt": "2026-10-09T01:43:44.099304Z"
+      }
+    ]
+  },
+  {
+    "agent": "gemini",
+    "user": "grace@example.com",
+    "active": true,
+    "on": true,
+    "windows": [],
+    "error": "This client is no longer supported for Gemini Code Assist for individuals. To continue using Gemini, please migrate to the Antigravity suite of products: https://antigravity.google — Google serves Gemini CLI's sign-in only to Gemini Code Assist Standard and Enterprise, which bill a Google Cloud project: name it with `magpie accounts project gemini grace@example.com \u003cproject-id\u003e`. A personal Google account is served to Antigravity instead: add it under Antigravity in magpie"
+  },
+  {
+    "agent": "grok-plugin",
+    "user": "grace@example.com",
+    "active": true,
+    "on": true,
+    "windows": [
+      {
+        "name": "7 days",
+        "used": 1,
+        "remaining": 99,
+        "resetsAt": "2026-10-09T01:43:44.099Z"
+      }
+    ],
+    "readAt": "2026-10-06T21:52:58.665505+08:00"
+  }
+]

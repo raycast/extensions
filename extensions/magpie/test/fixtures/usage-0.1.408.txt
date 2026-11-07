@@ -1,0 +1,15 @@
+50M tokens last 7 days · 1879 calls · ≈$1.17+
+  in 50M  out 521K  cache read 386M  cache write 0  reasoning 154K  · 212 errors
+
+  agents
+  Codex     90% 45M     1390 calls no price
+  Pi         9% 4.6M    76 calls   ≈$1.11+
+
+  models
+  autolink/gpt-6-sol        88% 44M     1303 calls no price
+  autolink/claude-opus-5-5   9% 4.4M    49 calls   no price
+
+  sessions · top 10 of 18
+  Pi  sess-pi-1         9% 4.4M    47 calls   no price
+  OpenCode  ses_example  0% 44.6K   1 call     no price
+  /Users/me/.config/magpie/usage.jsonl
