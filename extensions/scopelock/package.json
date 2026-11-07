@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scopelock",
+  "title": "ScopeLock - Scope Creep & Change Orders",
+  "description": "Audit scope creep, calculate unbilled engineering exposure, and generate professional change orders.",
+  "icon": "icon.png",
+  "author": "ahirwardhanmanti83-bit",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "audit-scope-exposure",
+      "title": "Calculate Scope Creep Exposure",
+      "subtitle": "ScopeLock",
+      "description": "Calculate unbilled feature drift and generate audit report",
+      "mode": "view"
+    },
+    {
+      "name": "generate-change-order",
+      "title": "Generate Change Order Notice",
+      "subtitle": "ScopeLock",
+      "description": "Generate engineering change order notices for scope expansion",
+      "mode": "view"
+    },
+    {
+      "name": "copy-scope-notice",
+      "title": "Quick Copy Scope Notice",
+      "subtitle": "ScopeLock",
+      "description": "Copy standard non-waiver engineering scope defense clause",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.1",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.1",
+    "react": "19.0.0",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
