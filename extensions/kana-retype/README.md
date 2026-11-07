@@ -28,17 +28,17 @@ Select "konnnitiha" -> Trigger shortcut -> "こんにちは" (unconfirmed, ready
 - Reads the selected text using Raycast's `getSelectedText()`.
 - Sends the "Kana" key (key code 104) via System Events to switch the input mode to Japanese Kana.
 - Retypes the original keys using `keystroke`. The first keystroke overwrites the selected text.
-- Spaces, Returns, and Tabs are preserved accordingly.
 
 | Scenario | Behavior |
 | --- | --- |
 | No text selected | Shows HUD: "Please select text" |
-| Contains non-typable characters (full-width, kana, kanji) | Shows HUD warning without sending keystrokes |
-| Permission missing | Shows HUD prompting to grant Accessibility / Automation permissions |
+| Contains whitespace (space, tab, newline) | Shows HUD warning (whitespace triggers IME conversion or focus changes) |
+| Contains non-ASCII characters (full-width, kana, kanji) | Shows HUD warning without sending keystrokes |
+| Permission missing | Shows HUD prompting to check System Settings permissions |
 
 ## Limitations
 
-- Only ASCII characters and symbols are supported for retyping.
+- Only ASCII characters without whitespace are supported for retyping (to avoid triggering IME conversion or focus changes).
 - Terminal emulators that do not overwrite selection on typing are not supported.
 
 ---
