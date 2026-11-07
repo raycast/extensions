@@ -5,6 +5,9 @@
   "description": "Let's find you something to do!",
   "icon": "logo.png",
   "author": "BossElijah",
+  "contributors": [
+    "afshany"
+  ],
   "categories": [
     "Fun",
     "Productivity"
