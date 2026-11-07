@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Fix Search With Quotes and Wildcards] - {PR_MERGE_DATE}
+## [Fix Search With Quotes and Wildcards] - 2026-11-07
 
 - Fixed history and bookmark search failing with an SQL error when the search text contains an apostrophe, and `%` and `_` in the search text now match literally.
 
