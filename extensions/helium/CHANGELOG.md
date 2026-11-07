@@ -4,6 +4,7 @@
 
 - **Action panels**: Group Search Tabs actions into sections, update the Open in New Tab and Create Quicklink icons, and use Raycast's standard Open shortcut for Open in New Tab in Search Tabs
 - **Search Tabs**: Show full tab titles and URLs in tooltips
+- **Search Bookmarks**: Remove the Open New Tab action as it's not related to bookmarks
 - **Windows tab switching**: Recognize Chromium's audio-playing, muted-audio, and picture-in-picture accessibility labels so matching tabs can be selected without pausing playback
 
 ## [Windows Tab Control Improvements] - 2026-11-03
