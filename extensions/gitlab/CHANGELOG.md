@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Pinned projects and groups] - {PR_MERGE_DATE}
+## [Pinned projects and groups] - 2026-11-07
 
 - Pin projects in `Search Projects` with the `Pin Project` action; pinned projects are shown in a "Pinned" section at the top of the list
 - Add a "Pinned" scope to `Search Projects` that lists only pinned projects
