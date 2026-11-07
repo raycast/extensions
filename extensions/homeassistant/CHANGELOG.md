@@ -1,5 +1,11 @@
 # Home Assistant Changelog
 
+## [Fix camera grid freeze and refresh] - {PR_MERGE_DATE}
+
+- Fix Raycast freezing when opening the Cameras command by passing snapshot file paths instead of base64 data URIs to the grid
+- Fix camera snapshots not refreshing by writing each snapshot to a new file and cleaning up old ones
+- Show the live camera stream on the camera detail page, falling back to the latest snapshot
+
 ## [AC Menu] - 2026-10-13
 
 - Add a menu bar command for cooling-capable climate entities with power, temperature, mode, fan, swing, and preset controls, plus a command to toggle menu visibility
