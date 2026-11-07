@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Folklore MCP] - {PR_MERGE_DATE}
+## [Add Folklore MCP] - 2026-11-07
 
 - Add Folklore MCP 2.0.0 with direct HTTP in Raycast and a local proxy fallback for other clients.
 - Describe the eleven public tools, eighteen optional API-key tools and qualified professional review requirement.
