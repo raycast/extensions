@@ -60,8 +60,8 @@ and many more
 
 The extension supports two authentication methods. Which one it uses depends on which credential you fill in, with the Personal Access Token taking precedence when both are set:
 
-1. **Personal Access Token**, used whenever the `API Token` preference is set. Simple, ideal for `gitlab.com` and instances without rotation.
-2. **OAuth (PKCE)**, used whenever the `API Token` preference is empty. Recommended for enterprise instances that revoke or rotate Personal Access Tokens. Tokens are stored encrypted by Raycast and refreshed automatically. The browser flow runs only on first use and when the refresh token is revoked.
+1. **Personal Access Token**, used whenever the `API Token` preference is set, or, on macOS, read from the Keychain when `Keychain Service Name` is set (see [below](#reading-the-token-from-the-macos-keychain)). Simple, ideal for `gitlab.com` and instances without rotation.
+2. **OAuth (PKCE)**, used whenever both `API Token` and `Keychain Service Name` are empty. Recommended for enterprise instances that revoke or rotate Personal Access Tokens. Tokens are stored encrypted by Raycast and refreshed automatically. The browser flow runs only on first use and when the refresh token is revoked.
 
 Leaving both empty configures neither method, and commands report that no `API Token` or `OAuth Application ID` is set.
 
@@ -108,6 +108,17 @@ Once you have authorized, Raycast adds a logout option to the extension preferen
 - Set the token from the previous step into the `API Token` field
 
 Now you should be able to manage your GitLab instance with Raycast 🚀.
+
+#### Reading the token from the macOS Keychain
+
+On macOS, instead of pasting the token into Raycast, you can keep it in the login Keychain and share it with other tools. This option is not available on Windows; use the `API Token` field there.
+
+```sh
+# Prompts for the token; -U updates an existing item
+security add-generic-password -U -a "$USER" -s gitlab-token -w
+```
+
+Leave `API Token` empty and set `Keychain Service Name` to `gitlab-token`. The token is read once per command run. Items created with `security` are readable by it without a prompt; for items created elsewhere macOS asks once—choose **Always Allow**. If the item is missing, commands report `Keychain item "<name>" not found` instead of starting OAuth. To find the service name of an existing item, run `security find-generic-password -l "<Name in Keychain Access>" | grep svce`.
 
 > **Tip**: If your instance auto-revokes Personal Access Tokens (e.g. nightly), use OAuth instead. The Application ID is permanent; access tokens are minted from a long-lived refresh token, so you re-authorize only when the refresh token itself is revoked.
 

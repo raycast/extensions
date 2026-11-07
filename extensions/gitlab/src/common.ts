@@ -7,12 +7,22 @@ import os from "os";
 import path from "path";
 import { Credential, getHttpAgent, GitLab } from "./gitlabapi";
 import { authorize, refreshToken } from "./oauth";
-import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference } from "./utils";
+import {
+  getInstance,
+  getKeychainToken,
+  getPersonalAccessToken,
+  getPreferences,
+  parseCommaSeparatedPreference,
+} from "./utils";
 
 let gitlabClient: GitLab | undefined;
 
+// Precedence: `API Token` preference, then the Keychain item named by
+// `keychainService`, then OAuth. A configured but unreadable Keychain item
+// throws instead of silently diverting into the OAuth flow.
 export async function resolveCredential(): Promise<Credential> {
-  const token = getPersonalAccessToken();
+  const keychainService = getPreferences().keychainService?.trim();
+  const token = getPersonalAccessToken() ?? (keychainService ? await getKeychainToken(keychainService) : undefined);
   return token === undefined ? { authType: "oauth", token: await authorize() } : { authType: "pat", token };
 }
 
