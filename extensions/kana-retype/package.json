@@ -18,7 +18,6 @@
     {
       "name": "retype-as-kana",
       "title": "Retype Selection as Kana",
-      "subtitle": "Kana Retype",
       "description": "Switches to Japanese Kana mode and retypes the selected text, leaving it unconfirmed",
       "mode": "no-view"
     }

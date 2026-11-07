@@ -1,37 +1,48 @@
 import { closeMainWindow, getSelectedText, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { buildRetypeScript, findUntypableChars } from "./lib/keys";
-
-async function readSelection(): Promise<string> {
-  try {
-    return await getSelectedText();
-  } catch {
-    // 選択が無いと getSelectedText は例外を投げる
-    return "";
-  }
-}
+import { checkWhitespace, findUntypableChars, RETYPE_SCRIPT } from "./lib/keys";
 
 export default async function Command() {
   await closeMainWindow();
 
-  const text = await readSelection();
-  if (text === "") {
-    await showHUD("文字列を選択してください");
+  let text = "";
+  try {
+    text = await getSelectedText();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/accessibility|permission|denied|authorized|not permitted/i.test(message)) {
+      await showHUD("Accessibility permission required. Please check System Settings.");
+    } else {
+      await showHUD("Please select text");
+    }
+    return;
+  }
+
+  if (!text || text.length === 0) {
+    await showHUD("Please select text");
+    return;
+  }
+
+  const { hasNewlinesOrTabs, hasSpaces } = checkWhitespace(text);
+  if (hasNewlinesOrTabs) {
+    await showHUD("Text contains newlines or tabs, which are not supported");
+    return;
+  }
+  if (hasSpaces) {
+    await showHUD("Text contains spaces, which triggers IME conversion");
     return;
   }
 
   const untypable = findUntypableChars(text);
   if (untypable.length > 0) {
-    await showHUD(`英数字と記号以外の文字が含まれています: ${untypable.slice(0, 5).join(" ")}`);
+    await showHUD(`Text contains non-ASCII characters: ${untypable.slice(0, 5).join(" ")}`);
     return;
   }
 
   try {
-    await runAppleScript(buildRetypeScript(text));
+    await runAppleScript(RETYPE_SCRIPT, [text]);
   } catch (error) {
     console.error(error);
-    await showHUD(
-      "キーを送れませんでした。Raycast のアクセシビリティ権限と System Events の操作許可を確認してください",
-    );
+    await showHUD("Failed to send keys. Please check Accessibility and System Events permissions.");
   }
 }
