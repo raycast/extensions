@@ -2,7 +2,7 @@ import { executeSQL, runAppleScript, showFailureToast, useCachedPromise, useProm
 import { resolve } from "path";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
 import { getBookmarksTree, type BookmarkDirectory } from "./bookmarks";
 
@@ -246,8 +246,9 @@ export async function getTabs(options: TabsOptions = {}): Promise<Tab[]> {
   }
 }
 
-function runJXA(script: string, timeout: number): string {
-  return execSync(`osascript -l JavaScript -e '${script.replace(/'/g, "'\\''")}'`, {
+/** Runs JXA; `args` reach the script's `run(argv)` function, so data never becomes script source. */
+function runJXA(script: string, timeout: number, args: string[] = []): string {
+  return execFileSync("osascript", ["-l", "JavaScript", "-e", script, ...args], {
     timeout,
     encoding: "utf-8",
   }).trim();
@@ -423,6 +424,43 @@ async function getTabsBulkAppleScript({ allSpaces = false }: TabsOptions): Promi
   return normalizeTabs(parsed);
 }
 
+export type Spaces = {
+  /** Space names in Dia's sidebar order, including spaces without tabs. */
+  names: string[];
+  /** Space shown in each window, by window ID. */
+  activeByWindow: Record<string, string>;
+};
+
+/** Reads Dia's spaces from the front window, plus the space each window shows. */
+export async function getSpaces(): Promise<Spaces> {
+  // Unit (31) and record (30) separators keep names intact without escaping
+  const result = await runAppleScript(`
+    set _us to character id 31
+    set _rs to character id 30
+    set _names to ""
+    set _active to ""
+    tell application "Dia"
+      if (count of windows) is 0 then return ""
+      repeat with p in every profile of window 1
+        set _names to _names & (name of p) & _us
+      end repeat
+      repeat with w in every window
+        try
+          set _active to _active & (id of w) & _us & (name of active profile of w) & _rs
+        end try
+      end repeat
+    end tell
+    return _names & _rs & _active
+  `);
+  const [namesPart = "", ...activeParts] = result.split("\x1e");
+  const activeByWindow: Record<string, string> = {};
+  for (const record of activeParts) {
+    const [windowId, name] = record.split("\x1f");
+    if (windowId && name) activeByWindow[windowId] = name;
+  }
+  return { names: namesPart.split("\x1f").filter(Boolean), activeByWindow };
+}
+
 /** Returns the focused tab, preferring the frontmost window when several windows report one. */
 export async function getFocusedTab(): Promise<Tab | undefined> {
   const focusedTabs = (await getTabs()).filter((tab) => tab.isFocused);
@@ -448,13 +486,14 @@ export function useBookmarks(searchText?: string) {
  * Each window is searched in its active space (`tabs`) and then in every space (`profiles`), so tabs
  * from inactive spaces are found too. `onFound` is JXA run with `dia`, `w`, `t`, and `p`
  * (the space holding the tab, or null when the tab is in the window's active space), and must return a string.
+ * Run it with `findTabArgs(tab)`.
  */
-function findTabJXA(tab: Tab, onFound: string) {
+function findTabJXA(onFound: string) {
   return `
-    (() => {
+    function run(argv) {
       const dia = Application("Dia");
-      const windowId = ${JSON.stringify(tab.windowId)};
-      const tabId = ${JSON.stringify(tab.tabId)};
+      const windowId = argv[0];
+      const tabId = argv[1];
       const wins = dia.windows();
       const ordered = [];
       for (let i = 0; i < wins.length; i++) {
@@ -475,20 +514,29 @@ function findTabJXA(tab: Tab, onFound: string) {
         }
       }
       return "not_found";
-    })()
+    }
   `;
 }
 
-/** AppleScript counterpart of findTabJXA. `onFound` runs inside `tell application "Dia"` with `w`, `t`, and `p` set. */
-function findTabAppleScript(tab: Tab, onFound: string) {
-  const escapedWindowId = escapeAppleScriptString(tab.windowId);
-  const escapedTabId = escapeAppleScriptString(tab.tabId);
+/** Window and tab IDs passed to findTabJXA and findTabAppleScript scripts. */
+function findTabArgs(tab: Tab) {
+  return [tab.windowId, tab.tabId];
+}
+
+/**
+ * AppleScript counterpart of findTabJXA. `onFound` runs inside `tell application "Dia"` with `w`, `t`, and `p` set.
+ * Run it with `findTabArgs(tab)`.
+ */
+function findTabAppleScript(onFound: string) {
   return `
+  on run argv
+    set _windowId to item 1 of argv
+    set _tabId to item 2 of argv
     set _result to "not_found"
     tell application "Dia"
       set _windows to {}
       repeat with w in every window
-        if id of w is "${escapedWindowId}" then
+        if id of w is _windowId then
           set beginning of _windows to contents of w
         else
           set end of _windows to contents of w
@@ -496,7 +544,7 @@ function findTabAppleScript(tab: Tab, onFound: string) {
       end repeat
       repeat with w in _windows
         repeat with t in every tab of w
-          if id of t is "${escapedTabId}" then
+          if id of t is _tabId then
             set p to missing value
             ${onFound}
             return _result
@@ -506,7 +554,7 @@ function findTabAppleScript(tab: Tab, onFound: string) {
       repeat with w in _windows
         repeat with p in every profile of w
           repeat with t in every tab of p
-            if id of t is "${escapedTabId}" then
+            if id of t is _tabId then
               ${onFound}
               return _result
             end if
@@ -515,6 +563,7 @@ function findTabAppleScript(tab: Tab, onFound: string) {
       end repeat
     end tell
     return _result
+  end run
   `;
 }
 
@@ -529,7 +578,6 @@ export async function focusTab(tab: Tab) {
   try {
     result = runJXA(
       findTabJXA(
-        tab,
         `
         dia.activate();
         if (p) {
@@ -542,18 +590,19 @@ export async function focusTab(tab: Tab) {
         `,
       ),
       3000,
+      findTabArgs(tab),
     );
   } catch {
     // JXA unavailable — fall back to AppleScript
     result = (
       await runAppleScript(
         findTabAppleScript(
-          tab,
           `activate
             if p is not missing value then focus p
             focus t
             set _result to "ok"`,
         ),
+        findTabArgs(tab),
       )
     ).trim();
   }
@@ -568,21 +617,26 @@ export async function focusTab(tab: Tab) {
  * Falls back to the front window when the window is gone.
  */
 export async function focusSpace(spaceName: string, windowId: string) {
-  const escapedSpace = escapeAppleScriptString(spaceName);
-  const escapedWindowId = escapeAppleScriptString(windowId);
-  await runAppleScript(`
-    tell application "Dia"
-      set _window to window 1
-      repeat with w in every window
-        if id of w is "${escapedWindowId}" then
-          set _window to contents of w
-          exit repeat
-        end if
-      end repeat
-      activate
-      focus profile "${escapedSpace}" of _window
-    end tell
-  `);
+  await runAppleScript(
+    `
+    on run argv
+      set _spaceName to item 1 of argv
+      set _windowId to item 2 of argv
+      tell application "Dia"
+        set _window to window 1
+        repeat with w in every window
+          if id of w is _windowId then
+            set _window to contents of w
+            exit repeat
+          end if
+        end repeat
+        activate
+        focus profile _spaceName of _window
+      end tell
+    end run
+  `,
+    [spaceName, windowId],
+  );
 }
 
 /** Thrown when a tab's window/tab IDs no longer match a live tab in Dia (stale cache or already closed). */
@@ -597,16 +651,16 @@ export async function closeTab(tab: Tab) {
   let result: string;
   try {
     // No activate: closing a tab leaves Dia in the background
-    result = runJXA(findTabJXA(tab, `t.close(); return "ok";`), 3000);
+    result = runJXA(findTabJXA(`t.close(); return "ok";`), 3000, findTabArgs(tab));
   } catch {
     // JXA unavailable — fall back to AppleScript, which reports its own outcome
     result = (
       await runAppleScript(
         findTabAppleScript(
-          tab,
           `close t
             set _result to "ok"`,
         ),
+        findTabArgs(tab),
       )
     ).trim();
   }
