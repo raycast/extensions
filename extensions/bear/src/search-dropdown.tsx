@@ -1,15 +1,16 @@
-import { List, Toast, showToast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useBearDb } from "./hooks";
+import { BearDb } from "./bear-db";
 
 type Tag = string;
 type TagsDropdownProps = {
+  db?: BearDb;
   onTagChange: (tag: Tag | null) => void;
 };
 
 const TagsDropdown = (props: TagsDropdownProps) => {
   const { onTagChange } = props;
-  const [db, error] = useBearDb();
+  const { db } = props;
   const [tags, setTags] = useState<Tag[]>([]);
 
   useEffect(() => {
@@ -18,9 +19,6 @@ const TagsDropdown = (props: TagsDropdownProps) => {
     }
   }, [db]);
 
-  if (error) {
-    showToast(Toast.Style.Failure, "Something went wrong", error.message);
-  }
   return (
     <List.Dropdown
       tooltip="Select a tag"
