@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [fal.ai](https://fal.ai/mcp) | Generate and edit images, video, audio and 3D with fal. Discover models, inspect schemas and prices, and follow queued jobs. Hosted Streamable HTTP server with browser OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Requires a fal account; generation consumes account credits. |
 | [Postel](https://www.postel.app/postel-mcp-server?utm_source=raycast&utm_medium=listing&utm_campaign=agent-distribution) | Find posts that went viral in your niche, write your version in your own voice, and save, schedule or publish it to X, LinkedIn, Bluesky and Mastodon. Viral post research works without an account. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Postel API key. |
 | [Video Dept. AI](https://videodepartment.org/ai-assistant) | Plan a corporate or event video with VIDEO DEPT., a Fort Lauderdale studio: see posted prices, draft a script, send a brief and your brand guidelines, and book a free call with Nikita. |
 | [Sofya](https://sofya.co/docs) | Web search, page fetch, extraction and deep research for AI agents. Search results come with full page content, fetch returns clean Markdown (PDFs and Office documents included), and research returns a cited report. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration, or a Sofya API key. |
