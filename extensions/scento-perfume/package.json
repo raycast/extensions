@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scento-perfume",
+  "title": "Scento Perfume",
+  "description": "Look up perfume notes, scent families and similar fragrances from Scento's perfume database.",
+  "icon": "icon.png",
+  "author": "scento",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "perfume",
+    "fragrance",
+    "cologne",
+    "scent",
+    "notes"
+  ],
+  "commands": [
+    {
+      "name": "search-perfumes",
+      "title": "Search Perfumes",
+      "subtitle": "Scento",
+      "description": "Search 1,600+ designer and niche perfumes by name, house, note or mood, then read their notes and scent family.",
+      "mode": "view"
+    },
+    {
+      "name": "similar-perfumes",
+      "title": "Find Similar Perfumes",
+      "subtitle": "Scento",
+      "description": "Pick a perfume and see the fragrances that share its structure, with what they have in common and how they differ.",
+      "mode": "view"
+    },
+    {
+      "name": "fragrance-families",
+      "title": "Browse Fragrance Families",
+      "subtitle": "Scento",
+      "description": "Explore Scento's fragrance families, each with its definition and signature perfumes.",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Scento",
+      "description": "Look up a perfume note or raw material and see what it smells like and where it is showcased.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "publish": "npm exec --yes --package=@raycast/api@latest -- ray publish"
+  }
+}
