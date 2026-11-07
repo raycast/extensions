@@ -29,23 +29,28 @@ function run() {
     const windowNumber = index + 1;
     let windowTabs = null;
     for (let attempt = 0; attempt < 3; attempt++) {
-      const initialIds = window.tabs.id().map(String);
-      const titles = window.tabs.title();
-      const urls = window.tabs.url();
-      const verifyIds = window.tabs.id().map(String);
-      if (
-        initialIds.length === titles.length &&
-        initialIds.length === urls.length &&
-        initialIds.length === verifyIds.length &&
-        initialIds.every((id, i) => id === verifyIds[i])
-      ) {
-        windowTabs = initialIds.map((id, i) => ({
-          id: id,
-          title: titles[i],
-          url: urls[i],
-          windowNumber: windowNumber,
-        }));
-        break;
+      // 読み取り中にウィンドウが閉じられてもエラーになるので、他のウィンドウの結果は残す
+      try {
+        const initialIds = window.tabs.id().map(String);
+        const titles = window.tabs.title();
+        const urls = window.tabs.url();
+        const verifyIds = window.tabs.id().map(String);
+        if (
+          initialIds.length === titles.length &&
+          initialIds.length === urls.length &&
+          initialIds.length === verifyIds.length &&
+          initialIds.every((id, i) => id === verifyIds[i])
+        ) {
+          windowTabs = initialIds.map((id, i) => ({
+            id: id,
+            title: titles[i],
+            url: urls[i],
+            windowNumber: windowNumber,
+          }));
+          break;
+        }
+      } catch (error) {
+        continue;
       }
     }
     if (windowTabs) {

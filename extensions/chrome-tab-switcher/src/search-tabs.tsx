@@ -53,8 +53,8 @@ export default function Command() {
       ) : !isLoading && skippedWindowCount > 0 ? (
         <List.EmptyView
           icon={Icon.Warning}
-          title={skippedTitle}
-          description={skippedDetail}
+          title={tabs.length === 0 ? skippedTitle : "No matching tabs"}
+          description={tabs.length === 0 ? skippedDetail : `${skippedDetail}. The tab may be in one of them.`}
           actions={<ActionPanel>{retryAction}</ActionPanel>}
         />
       ) : !isLoading ? (
