@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, Color, Icon, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List, popToRoot } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { activateTab, ChromeTab, listTabs } from "./lib/chrome";
@@ -37,6 +37,17 @@ export default function Command() {
     }
   }
 
+  const retryAction = (
+    <Action
+      title="Retry"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={revalidate}
+    />
+  );
+  const skippedTitle = "Some Tabs Could Not Be Loaded";
+  const skippedDetail = `${skippedWindowCount} ${skippedWindowCount === 1 ? "window" : "windows"} changed while loading`;
+
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setQuery} searchBarPlaceholder="Search tabs...">
       {!isLoading && error && tabs.length === 0 ? (
@@ -44,41 +55,39 @@ export default function Command() {
           icon={Icon.Warning}
           title="Failed to Load Tabs"
           description={error.message || "Please check Raycast automation permissions for Google Chrome."}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{retryAction}</ActionPanel>}
+        />
+      ) : !isLoading && skippedWindowCount > 0 ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title={skippedTitle}
+          description={skippedDetail}
+          actions={<ActionPanel>{retryAction}</ActionPanel>}
         />
       ) : !isLoading ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title={tabs.length === 0 ? "No open tabs" : "No matching tabs"} />
       ) : null}
-      {skippedWindowCount > 0 ? (
-        <List.Item
-          title="Some Tabs Could Not Be Loaded"
-          subtitle={`${skippedWindowCount} ${skippedWindowCount === 1 ? "window" : "windows"} changed while loading`}
-          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-            </ActionPanel>
-          }
-        />
-      ) : null}
-      {visible.map((tab) => (
-        <List.Item
-          key={tab.id}
-          title={tab.title || tab.url}
-          subtitle={hostname(tab.url)}
-          icon={getFavicon(tab.url, { fallback: Icon.Globe })}
-          accessories={[{ text: `Window ${tab.windowNumber}` }]}
-          actions={
-            <ActionPanel>
-              <Action title="Switch to Tab" icon={Icon.Switch} onAction={() => onSwitch(tab)} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {/* 警告を選択できる行にすると Enter がタブ切り替えではなく Retry になるので、Section の見出しに出す */}
+      <List.Section
+        title={skippedWindowCount > 0 ? skippedTitle : undefined}
+        subtitle={skippedWindowCount > 0 ? `${skippedDetail} · ⌘R to retry` : undefined}
+      >
+        {visible.map((tab) => (
+          <List.Item
+            key={tab.id}
+            title={tab.title || tab.url}
+            subtitle={hostname(tab.url)}
+            icon={getFavicon(tab.url, { fallback: Icon.Globe })}
+            accessories={[{ text: `Window ${tab.windowNumber}` }]}
+            actions={
+              <ActionPanel>
+                <Action title="Switch to Tab" icon={Icon.Switch} onAction={() => onSwitch(tab)} />
+                {retryAction}
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
