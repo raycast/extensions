@@ -1,13 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Settings } from "./ipdata";
 
-interface Prefs {
-  apiKey?: string;
-  endpoint?: string;
-}
-
 export function getSettings(): Settings {
-  const p = getPreferenceValues<Prefs>();
+  const p = getPreferenceValues<Preferences>();
   return { apiKey: (p.apiKey ?? "").trim(), endpoint: p.endpoint === "eu" ? "eu" : "global" };
 }
 

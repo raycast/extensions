@@ -61,7 +61,8 @@ export function extract(text: string | null | undefined): string | null {
   const direct = clean(text);
   if (direct) return direct;
   for (const tok of String(text).split(/[\s,;()<>"'`|=]+/)) {
-    if (tok.length < 7 || tok.length > 80) continue;
+    // IPv4 needs at least 7 characters; IPv6 can be as short as "::1".
+    if (tok.length > 80 || (tok.length < 7 && !tok.includes(":"))) continue;
     const got = clean(tok);
     if (got) return got;
     // "ip:1.2.3.4", "src=1.2.3.4" and similar prefixes
@@ -74,6 +75,29 @@ export function extract(text: string | null | undefined): string | null {
     }
   }
   return null;
+}
+
+// The eight 16-bit groups of an IPv6 address (expanded, with any dotted IPv4 tail converted), or null.
+export function v6Groups(s: string): number[] | null {
+  let t = s.toLowerCase();
+  const tail: number[] = [];
+  const v4 = t.match(/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (v4) {
+    const o = v4.slice(1).map(Number);
+    if (o.some((n) => n > 255)) return null;
+    tail.push((o[0] << 8) | o[1], (o[2] << 8) | o[3]);
+    t = t.slice(0, -v4[0].length);
+    if (t.endsWith(":") && !t.endsWith("::")) t = t.slice(0, -1);
+  }
+  const halves = t.split("::");
+  if (halves.length > 2) return null;
+  const parse = (part: string) => (part ? part.split(":").map((h) => parseInt(h, 16)) : []);
+  const head = parse(halves[0]);
+  const rest = halves.length === 2 ? parse(halves[1]) : [];
+  const fill = 8 - head.length - rest.length - tail.length;
+  if (halves.length === 1 ? fill !== 0 : fill < 1) return null;
+  const groups = [...head, ...Array(halves.length === 2 ? fill : 0).fill(0), ...rest, ...tail];
+  return groups.length === 8 && groups.every((x) => Number.isInteger(x) && x >= 0 && x <= 0xffff) ? groups : null;
 }
 
 // Human label for addresses that are not routable on the public internet, else null.
@@ -98,15 +122,21 @@ export function reservedLabel(s: string): string | null {
     return null;
   }
   if (v === 6) {
-    const l = s.toLowerCase();
-    const mapped = l.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
-    if (mapped) return reservedLabel(mapped[1]);
-    if (l === "::") return "Unspecified address";
-    if (l === "::1") return "Loopback address";
-    if (/^f[cd][0-9a-f]{0,2}:/.test(l)) return "Unique local address (fc00::/7)";
-    if (/^fe[89ab][0-9a-f]?:/.test(l)) return "Link-local address (fe80::/10)";
-    if (/^ff[0-9a-f]{0,2}:/.test(l)) return "Multicast address";
-    if (/^2001:db8:/.test(l)) return "Documentation address (2001:db8::/32)";
+    const g = v6Groups(s);
+    if (!g) return "Not an IP address";
+    const zeros = (n: number) => g.slice(0, n).every((x) => x === 0);
+    // IPv4-mapped (::ffff:0:0/96), in dotted or hex form: judge the embedded IPv4 address.
+    if (zeros(5) && g[5] === 0xffff) return reservedLabel(`${g[6] >> 8}.${g[6] & 255}.${g[7] >> 8}.${g[7] & 255}`);
+    if (zeros(8)) return "Unspecified address";
+    if (zeros(7) && g[7] === 1) return "Loopback address";
+    if (zeros(6)) return "Reserved address (IPv4-compatible, ::/96)";
+    if (g[0] === 0x0100 && g[1] === 0 && g[2] === 0 && g[3] === 0) return "Discard-only address (100::/64)";
+    if ((g[0] & 0xfe00) === 0xfc00) return "Unique local address (fc00::/7)";
+    if ((g[0] & 0xffc0) === 0xfe80) return "Link-local address (fe80::/10)";
+    if ((g[0] & 0xffc0) === 0xfec0) return "Site-local address (fec0::/10)";
+    if ((g[0] & 0xff00) === 0xff00) return "Multicast address";
+    if (g[0] === 0x2001 && g[1] === 0x0db8) return "Documentation address (2001:db8::/32)";
+    if (g[0] === 0x3fff && (g[1] & 0xf000) === 0) return "Documentation address (3fff::/20)";
     return null;
   }
   return "Not an IP address";

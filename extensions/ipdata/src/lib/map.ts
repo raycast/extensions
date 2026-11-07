@@ -128,8 +128,6 @@ export async function mapLayers(spec: MapSpec): Promise<MapLayers> {
   const green: string[] = [];
   let failed = 0;
   const margin = 12;
-  const inside = (p: [number, number]) =>
-    p[0] >= -margin && p[0] <= spec.width + margin && p[1] >= -margin && p[1] <= spec.height + margin;
 
   await Promise.all(
     tiles.map(async ([tx, ty]) => {
@@ -148,20 +146,28 @@ export async function mapLayers(spec: MapSpec): Promise<MapLayers> {
           tx * tilePx + (p.x / extent) * tilePx - ox,
           ty * tilePx + (p.y / extent) * tilePx - oy,
         ];
-      // A line or ring as path data, simplified to ~0.6 px and dropped when fully outside the view.
+      // A line or ring as path data, simplified to ~0.6 px. It is dropped only when its bounding box misses
+      // the view: a road crossing the view, or a park covering it, may have no vertex inside.
       const pathOf = (pts: Pt[], extent: number, close: boolean): string | null => {
         const conv = toPx(extent);
         let d = "";
         let last: [number, number] | null = null;
-        let anyInside = false;
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
         for (const p of pts) {
           const q = conv(p);
-          if (inside(q)) anyInside = true;
+          minX = Math.min(minX, q[0]);
+          maxX = Math.max(maxX, q[0]);
+          minY = Math.min(minY, q[1]);
+          maxY = Math.max(maxY, q[1]);
           if (last && Math.abs(q[0] - last[0]) < 0.6 && Math.abs(q[1] - last[1]) < 0.6) continue;
           d += (last ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1);
           last = q;
         }
-        if (!anyInside || !last) return null;
+        const misses = maxX < -margin || minX > spec.width + margin || maxY < -margin || minY > spec.height + margin;
+        if (misses || !last) return null;
         return close ? d + "Z" : d;
       };
 
@@ -237,6 +243,8 @@ export async function mapLayers(spec: MapSpec): Promise<MapLayers> {
     tiles: tiles.length,
     failed,
   };
-  if (tiles.length && failed < tiles.length) cache.set(key, JSON.stringify({ t: Date.now(), layers }));
+  // Only a complete map is cached; a map with no tiles at all is an error, shown as unavailable.
+  if (tiles.length && failed === tiles.length) throw new Error("Map tiles could not be loaded");
+  if (failed === 0) cache.set(key, JSON.stringify({ t: Date.now(), layers }));
   return layers;
 }

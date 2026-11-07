@@ -52,7 +52,6 @@ export interface TimeZoneInfo {
   abbr: string | null;
   offset: string | null;
   is_dst: boolean | null;
-  local_time: string | null;
 }
 export interface Currency {
   name?: string;
@@ -146,6 +145,10 @@ export interface MyIpOk {
   ok: true;
   v4: LookupOk | null;
   v6: LookupOk | null;
+  // With an API key: the keyed lookup's error for an address that was detected but could not be
+  // looked up with the key (rejected key, quota, network). The address is still reported.
+  v4KeyError?: LookupError;
+  v6KeyError?: LookupError;
   rate: RateInfo | null;
 }
 export interface MyIpError {
@@ -206,7 +209,7 @@ function errorFor(status: number, json: RawRecord | null): { kind: ErrorKind; me
   return { kind: "network", message: msg || `ipdata returned HTTP ${status}` };
 }
 
-// Fetch one record and normalise it. `keyed` says which error wording and source apply.
+// Fetch one record and normalize it. `keyed` says which error wording and source apply.
 async function fetchRecord(url: string, keyed: boolean, timeoutMs?: number): Promise<LookupResult> {
   const source: Source = keyed ? "key" : "free";
   const host = new URL(url).host;
@@ -265,24 +268,32 @@ export async function myIp(settings: Settings): Promise<MyIpResult> {
   const [v4free, v6free] = await Promise.all([fetchRecord(SELF_V4, false, 6000), fetchRecord(SELF_V6, false, 6000)]);
   let v4: LookupOk | null = v4free.ok ? v4free : null;
   let v6: LookupOk | null = v6free.ok ? v6free : null;
+  let v4KeyError: LookupError | undefined;
+  let v6KeyError: LookupError | undefined;
   if (keyed) {
     // With a key, fetch the full record for each address that exists.
     const [k4, k6] = await Promise.all([
       v4 ? lookup(v4.model.ip, settings) : null,
       v6 ? lookup(v6.model.ip, settings) : null,
     ]);
-    if (k4 && k4.ok) v4 = k4;
-    if (k6 && k6.ok) v6 = k6;
+    if (k4) {
+      if (k4.ok) v4 = k4;
+      else v4KeyError = k4;
+    }
+    if (k6) {
+      if (k6.ok) v6 = k6;
+      else v6KeyError = k6;
+    }
   }
   if (!v4 && !v6) {
     const err = v4free.ok ? null : v4free;
     return { ok: false, kind: err?.kind ?? "network", message: err?.message ?? "Could not detect your IP address" };
   }
   const rate = (v4free.ok ? v4free.rate : v4free.rate) ?? (v6free.ok ? v6free.rate : v6free.rate) ?? null;
-  return { ok: true, v4, v6, rate };
+  return { ok: true, v4, v6, v4KeyError, v6KeyError, rate };
 }
 
-// ---- normalisation -------------------------------------------------------
+// ---- normalization -------------------------------------------------------
 let displayNames: Intl.DisplayNames | null = null;
 export function countryName(code: string | null): string | null {
   if (!code) return null;
@@ -347,7 +358,6 @@ export function normalize(raw: RawRecord, source: Source): IpRecord {
         abbr: str(rawTz?.abbr),
         offset: str(rawTz?.offset),
         is_dst: bool(rawTz?.is_dst),
-        local_time: localTime(tzName) ?? str(rawTz?.current_time),
       }
     : null;
   const rawCompany = obj(raw.company);

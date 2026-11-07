@@ -275,9 +275,3 @@ export function flagIcon(m: IpRecord | null | undefined): Image.ImageLike {
   if (asset) return { source: asset, fallback: m?.emoji || Icon.Globe };
   return m?.emoji || Icon.Globe;
 }
-
-// Markdown image of the flag for the hero, sized in points; empty when there is no flag.
-export function flagMarkdown(m: IpRecord, size = 44): string {
-  const asset = flagAsset(m.country_code);
-  return asset ? `![${m.country_name ?? "Flag"}](${asset}?raycast-width=${size}&raycast-height=${size})` : "";
-}

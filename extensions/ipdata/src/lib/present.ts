@@ -1,7 +1,8 @@
 // Presentation helpers shared by the commands, ported from the Chrome extension's render.js:
 // operator / owner derivation, threat chips, verdicts and small formatters.
 import { Color } from "@raycast/api";
-import { IpRecord, RateInfo, Threat } from "./ipdata";
+import { trustBand } from "./analysis";
+import { IpRecord, localTime, RateInfo, Threat } from "./ipdata";
 
 const TYPE_LABEL: Record<string, string> = {
   isp: "ISP",
@@ -35,10 +36,15 @@ const FLAGS: ThreatFlag[] = [
 export const activeFlags = (threat: Threat | null | undefined): ThreatFlag[] =>
   FLAGS.filter((f) => !!threat && threat[f.key] === true);
 
-export const riskLabel = (score: number): string =>
-  score >= 60 ? "Low risk" : score >= 40 ? "Moderate risk" : "High risk";
-export const riskColor = (score: number): Color => (score >= 60 ? Color.Green : score >= 40 ? Color.Orange : Color.Red);
-export const severityColor = (s: Severity): Color => (s === "bad" ? Color.Red : Color.Orange);
+// One set of thresholds everywhere (Analysis, Scores, menu bar): above 80 low, above 50 moderate.
+export const riskLabel = (score: number): string => {
+  const band = trustBand(score) ?? "high risk";
+  return band[0].toUpperCase() + band.slice(1);
+};
+export const riskColor = (score: number): Color => {
+  const band = trustBand(score);
+  return band === "low risk" ? Color.Green : band === "moderate risk" ? Color.Orange : Color.Red;
+};
 
 // One-phrase verdict, following the rules ipdata.co uses for its badges.
 export function verdict(threat: Threat): string {
@@ -94,7 +100,7 @@ export interface Owner {
   fromCompany: boolean;
 }
 // The company record is the owner; without one (free tier, or a registry placeholder such as
-// "Provider Lir") the operator's organisation stands in, with its domain and route.
+// "Provider Lir") the operator's organization stands in, with its domain and route.
 export function ownerOf(m: IpRecord): Owner {
   const c = m.company;
   if (c && !placeholderCompany(c.name)) {
@@ -188,16 +194,8 @@ export function carrierText(m: IpRecord): string | null {
   return m.carrier.name + (m.carrier.mcc ? ` (MCC ${m.carrier.mcc}, MNC ${m.carrier.mnc ?? "?"})` : "");
 }
 
+// The address's local time now (computed when shown, never cached) and its time zone.
 export function localTimeText(m: IpRecord): string | null {
   if (!m.time_zone) return null;
-  return [m.time_zone.local_time, m.time_zone.name].filter(Boolean).join(" · ") || null;
-}
-
-export function scoresText(threat: Threat | null): string | null {
-  const s = threat?.scores;
-  if (!s) return null;
-  const parts = (["vpn_score", "proxy_score", "threat_score"] as const)
-    .filter((k) => typeof s[k] === "number")
-    .map((k) => `${k.replace("_score", "").replace(/^\w/, (ch) => ch.toUpperCase())} ${s[k]}`);
-  return parts.join(" · ") || null;
+  return [localTime(m.time_zone.name), m.time_zone.name].filter(Boolean).join(" · ") || null;
 }

@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Fragment, useState } from "react";
 import { LookupDetail, RecordActions, SectionItems } from "./components/record";
 import { cachedMyIp } from "./lib/cache";
 import { flagIcon } from "./lib/flags";
-import { LookupOk } from "./lib/ipdata";
+import { LookupError, LookupOk } from "./lib/ipdata";
+import { LookupState } from "./lib/hooks";
 import { getSettings, settingsKey } from "./lib/settings";
 
 export default function Command() {
@@ -51,6 +52,7 @@ export default function Command() {
           <FamilyItem
             label="IPv4"
             record={v4}
+            keyError={data.v4KeyError}
             hasKey={hasKey}
             both={both}
             onRefresh={refresh}
@@ -59,6 +61,7 @@ export default function Command() {
           <FamilyItem
             label="IPv6"
             record={v6}
+            keyError={data.v6KeyError}
             hasKey={hasKey}
             both={both}
             onRefresh={refresh}
@@ -73,6 +76,7 @@ export default function Command() {
 function FamilyItem({
   label,
   record,
+  keyError,
   hasKey,
   both,
   onRefresh,
@@ -80,6 +84,7 @@ function FamilyItem({
 }: {
   label: "IPv4" | "IPv6";
   record: LookupOk | null;
+  keyError?: LookupError;
   hasKey: boolean;
   both: string;
   onRefresh: () => void;
@@ -105,12 +110,7 @@ function FamilyItem({
         }
         actions={
           <ActionPanel>
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              onAction={onRefresh}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-            />
+            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
             {both ? <Action.CopyToClipboard title="Copy Address" content={both} /> : null}
           </ActionPanel>
         }
@@ -118,16 +118,18 @@ function FamilyItem({
     );
   }
   const ip = record.model.ip;
+  // A failed keyed lookup is shown as that error, with the detected address still listed.
+  const state: LookupState = keyError ? { status: "error", result: keyError } : { status: "ok", result: record };
   return (
     <Fragment>
       <List.Item
         id={label}
         title={ip}
-        icon={flagIcon(record.model)}
+        icon={keyError ? Icon.Warning : flagIcon(record.model)}
         accessories={[{ text: label }]}
-        detail={<LookupDetail ip={ip} state={{ status: "ok", result: record }} />}
+        detail={<LookupDetail ip={ip} state={state} />}
         actions={
-          <RecordActions ip={ip} state={{ status: "ok", result: record }} hasKey={hasKey} onRefresh={onRefresh}>
+          <RecordActions ip={ip} state={state} hasKey={hasKey} onRefresh={onRefresh}>
             {both.includes("\n") ? (
               <ActionPanel.Section>
                 <Action.CopyToClipboard
@@ -140,15 +142,7 @@ function FamilyItem({
           </RecordActions>
         }
       />
-      {expanded ? (
-        <SectionItems
-          parentId={label}
-          ip={ip}
-          state={{ status: "ok", result: record }}
-          hasKey={hasKey}
-          onRefresh={onRefresh}
-        />
-      ) : null}
+      {expanded ? <SectionItems parentId={label} ip={ip} state={state} hasKey={hasKey} onRefresh={onRefresh} /> : null}
     </Fragment>
   );
 }

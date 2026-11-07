@@ -1,79 +1,84 @@
 import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Fragment, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { LookupDetail, RecordActions, SectionItems, stateIcon } from "./components/record";
 import { cachedMyIp } from "./lib/cache";
 import { resolveHost } from "./lib/dns";
 import { useDebounce, useLookup, LookupState } from "./lib/hooks";
 import { parseTarget, version } from "./lib/ip";
-import { LookupOk } from "./lib/ipdata";
+import { LookupError, LookupOk } from "./lib/ipdata";
 import { getSettings, settingsKey } from "./lib/settings";
 
 interface Row {
   ip: string;
   version: 4 | 6 | 0;
-  // Own addresses arrive with their record already fetched.
+  // Own addresses arrive with their record already fetched, or with the keyed lookup's error.
   preset?: LookupOk;
+  presetError?: LookupError;
 }
 
-export default function Command(
-  props: LaunchProps<{ arguments: { address?: string }; launchContext: { tab?: string } }>,
-) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.LookupIp }>) {
   const settings = getSettings();
   const hasKey = !!settings.apiKey;
-  const initial = (props.arguments?.address ?? props.fallbackText ?? "").trim();
+  const initial = (props.arguments?.address || props.fallbackText || "").trim();
   const [searchText, setSearchText] = useState(initial);
   const query = useDebounce(searchText, 400);
   const target = useMemo(() => parseTarget(query), [query]);
 
-  // A hostname resolves to one or more addresses; each becomes a row.
+  // A hostname resolves to one or more addresses; each becomes a row. While a new hostname resolves,
+  // the previous rows stay under their own hostname.
   const host = target.kind === "host" ? target.host : null;
   const resolved = useCachedPromise((tag: string, h: string) => resolveHost(h), ["dns", host ?? ""], {
     execute: !!host,
-    keepPreviousData: false,
+    keepPreviousData: true,
     onError: () => undefined, // shown in the empty view instead of a toast
   });
 
-  // With nothing typed, the list shows this machine's own addresses.
+  // With nothing typed, the list shows this machine's own addresses; Refresh bypasses their cache.
+  const [mineNonce, setMineNonce] = useState(0);
   const mine = useCachedPromise(
-    (tag: string, key: string) => {
+    (tag: string, key: string, force: number) => {
       void tag;
       void key;
-      return cachedMyIp(settings);
+      return cachedMyIp(settings, force > 0);
     },
-    ["myip", settingsKey(settings)],
+    ["myip", settingsKey(settings), mineNonce],
     { execute: target.kind === "empty", keepPreviousData: true },
   );
+  const refreshMine = () => setMineNonce((n) => n + 1);
 
   const rows: Row[] = useMemo(() => {
     if (target.kind === "ip") return [{ ip: target.ip, version: version(target.ip) }];
-    if (target.kind === "host") return (resolved.data ?? []).map((r) => ({ ip: r.address, version: r.family }));
+    if (target.kind === "host") {
+      if (resolved.error) return [];
+      return (resolved.data?.addresses ?? []).map((r) => ({ ip: r.address, version: r.family }));
+    }
     if (target.kind === "empty" && mine.data?.ok) {
       const out: Row[] = [];
-      if (mine.data.v4) out.push({ ip: mine.data.v4.model.ip, version: 4, preset: mine.data.v4 });
-      if (mine.data.v6) out.push({ ip: mine.data.v6.model.ip, version: 6, preset: mine.data.v6 });
+      const { v4, v6, v4KeyError, v6KeyError } = mine.data;
+      if (v4) out.push({ ip: v4.model.ip, version: 4, preset: v4, presetError: v4KeyError });
+      if (v6) out.push({ ip: v6.model.ip, version: 6, preset: v6, presetError: v6KeyError });
       return out;
     }
     return [];
-  }, [target, resolved.data, mine.data]);
+  }, [target, resolved.data, resolved.error, mine.data]);
 
-  // Only the selected row is looked up, so a hostname with many addresses costs one request.
-  // Ids are the address, or "<address>#<section>" for the section rows under it.
+  // Ids are the address, or "<address>#<tab>" for the tab rows under it. Raycast owns the selection,
+  // except that a new set of rows (a new query) selects its first address once.
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [forcedId, setForcedId] = useState<string | undefined>(undefined);
+  const rowsKey = rows.map((r) => r.ip).join(",");
+  useEffect(() => {
+    setForcedId(rowsKey ? rowsKey.split(",")[0] : undefined);
+  }, [rowsKey]);
+  const onSelect = (id: string | null) => {
+    setSelectedId(id);
+    setForcedId(undefined);
+  };
   const selectedIp = (selectedId ?? "").split("#")[0];
   const selected = rows.find((r) => r.ip === selectedIp) ?? rows[0] ?? null;
-  // A deeplink can open a tab: the first selection Raycast reports for the address is redirected
-  // to "<address>#<tab>" once, so Raycast's own initial selection cannot override it.
-  const wantedTab = props.launchContext?.tab;
-  const tabApplied = useRef(false);
-  const onSelect = (id: string | null) => {
-    if (wantedTab && !tabApplied.current && id && !id.includes("#")) {
-      tabApplied.current = true;
-      setSelectedId(`${id}#${wantedTab}`);
-      return;
-    }
-    setSelectedId(id);
-  };
+
+  // Only the selected row is looked up, so a hostname with many addresses costs one request.
   const lookup = useLookup(selected && !selected.preset ? selected.ip : null, settings);
 
   const isLoading =
@@ -83,7 +88,7 @@ export default function Command(
     target.kind === "ip"
       ? "Lookup"
       : target.kind === "host"
-        ? target.host
+        ? (resolved.data?.host ?? target.host)
         : target.kind === "empty"
           ? "Your connection"
           : undefined;
@@ -99,7 +104,7 @@ export default function Command(
       throttle
       isShowingDetail={rows.length > 0}
       searchBarPlaceholder="IP address or hostname…"
-      selectedItemId={selectedId ?? undefined}
+      selectedItemId={forcedId}
       onSelectionChange={onSelect}
     >
       {target.kind === "invalid" ? (
@@ -116,7 +121,7 @@ export default function Command(
           description={resolved.error.message}
         />
       ) : null}
-      {target.kind === "host" && !resolved.isLoading && resolved.data && resolved.data.length === 0 ? (
+      {target.kind === "host" && !resolved.isLoading && resolved.data?.host === target.host && !rows.length ? (
         <List.EmptyView icon={Icon.XMarkCircle} title={`${target.host} has no addresses`} />
       ) : null}
       {target.kind === "empty" && !mine.isLoading && !mine.data?.ok ? (
@@ -135,10 +140,13 @@ export default function Command(
           {rows.map((row) => {
             const isSelected = selected?.ip === row.ip;
             const state: LookupState | null = row.preset
-              ? { status: "ok", result: row.preset }
+              ? row.presetError
+                ? { status: "error", result: row.presetError }
+                : { status: "ok", result: row.preset }
               : isSelected
                 ? lookup.state
                 : null;
+            const onRefresh = row.preset ? refreshMine : lookup.refresh;
             return (
               <Fragment key={row.ip}>
                 <List.Item
@@ -154,12 +162,7 @@ export default function Command(
                     )
                   }
                   actions={
-                    <RecordActions
-                      ip={row.ip}
-                      state={state}
-                      hasKey={hasKey}
-                      onRefresh={row.preset ? mine.revalidate : lookup.refresh}
-                    >
+                    <RecordActions ip={row.ip} state={state} hasKey={hasKey} onRefresh={onRefresh}>
                       {rows.length > 1 ? (
                         <ActionPanel.Section>
                           <Action.CopyToClipboard
@@ -173,13 +176,7 @@ export default function Command(
                   }
                 />
                 {isSelected ? (
-                  <SectionItems
-                    parentId={row.ip}
-                    ip={row.ip}
-                    state={state}
-                    hasKey={hasKey}
-                    onRefresh={row.preset ? mine.revalidate : lookup.refresh}
-                  />
+                  <SectionItems parentId={row.ip} ip={row.ip} state={state} hasKey={hasKey} onRefresh={onRefresh} />
                 ) : null}
               </Fragment>
             );

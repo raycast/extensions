@@ -21,7 +21,7 @@ export type LookupState =
   | { status: "error"; result: LookupError };
 
 // Looks `ip` up (cached for an hour) and exposes the result as a view state. Reserved
-// addresses are recognised locally and never sent anywhere.
+// addresses are recognized locally and never sent anywhere.
 export function useLookup(ip: string | null, settings: Settings) {
   const [nonce, setNonce] = useState(0);
   const reserved = ip ? reservedLabel(ip) : null;

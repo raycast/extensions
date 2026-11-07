@@ -9,7 +9,7 @@ import {
   launchCommand,
   showHUD,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { cachedMyIp } from "./lib/cache";
 import { flagIcon } from "./lib/flags";
@@ -33,6 +33,8 @@ export default function Command() {
   );
   const v4 = data?.ok ? data.v4 : null;
   const v6 = data?.ok ? data.v6 : null;
+  // With an API key, a failed keyed lookup is reported rather than hidden behind the free record.
+  const keyError = data?.ok ? (data.v4KeyError ?? data.v6KeyError) : undefined;
   const primary = v4 ?? v6;
   const m = primary?.model ?? null;
 
@@ -45,19 +47,33 @@ export default function Command() {
         <AddressItem label="IPv4" record={v4} />
         <AddressItem label="IPv6" record={v6} />
       </MenuBarExtra.Section>
+      {keyError ? (
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title="API key lookup failed"
+            subtitle={keyError.message}
+            icon={Icon.Warning}
+            onAction={() => openExtensionPreferences()}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
       {m ? <RecordItems m={m} /> : null}
       <MenuBarExtra.Section>
         {m ? (
           <MenuBarExtra.Item
             title="Look Up in Raycast"
             icon={Icon.MagnifyingGlass}
-            onAction={() =>
-              launchCommand({
-                name: "lookup-ip",
-                type: LaunchType.UserInitiated,
-                arguments: { address: m.ip },
-              })
-            }
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "lookup-ip",
+                  type: LaunchType.UserInitiated,
+                  arguments: { address: m.ip },
+                });
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not open Look Up IP" });
+              }
+            }}
           />
         ) : null}
         {m ? (

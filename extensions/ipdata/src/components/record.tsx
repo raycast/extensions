@@ -13,13 +13,12 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { Fragment, ReactNode } from "react";
-import { getSettings } from "../lib/settings";
 import { cardMarkdown, hasStreetLevel, jsonSvg, MAP_ZOOM, mapSvg, PANE_MAP_H, PANE_MAP_W } from "../lib/card";
 import { mapLayers } from "../lib/map";
 import { flagIcon } from "../lib/flags";
 import { LookupState } from "../lib/hooks";
 import { analyze } from "../lib/analysis";
-import { IpRecord, LookupError, LookupOk, RawRecord } from "../lib/ipdata";
+import { IpRecord, localTime, LookupError, LookupOk, RawRecord } from "../lib/ipdata";
 import * as P from "../lib/present";
 
 const M = List.Item.Detail.Metadata;
@@ -100,6 +99,8 @@ function LocationMetadata({ m }: { m: IpRecord }) {
     : null;
   const country = [m.country_name, m.country_code].filter(Boolean).join(" · ");
   const continent = m.continent ?? null;
+  // Computed when shown, so a cached record never shows a stale clock.
+  const now = tz ? localTime(tz.name) : null;
   return (
     <M>
       {separated([
@@ -112,7 +113,7 @@ function LocationMetadata({ m }: { m: IpRecord }) {
         m.is_eu != null ? <M.Label key="eu" title="EU Member" text={m.is_eu ? "yes" : "no"} /> : null,
         coords && maps ? <M.Link key="coords" title="Coordinates" target={maps} text={coords} /> : null,
         tzLine ? <M.Label key="tz" title="Time Zone" text={tzLine} /> : null,
-        tz?.local_time ? <M.Label key="time" title="Local Time" text={tz.local_time} /> : null,
+        now ? <M.Label key="time" title="Local Time" text={now} /> : null,
         tz && tz.is_dst != null ? <M.Label key="dst" title="Daylight Saving" text={tz.is_dst ? "yes" : "no"} /> : null,
         P.currencyText(m) ? <M.Label key="currency" title="Currency" text={P.currencyText(m) ?? ""} /> : null,
         P.languagesText(m) ? <M.Label key="languages" title="Languages" text={P.languagesText(m) ?? ""} /> : null,
@@ -302,7 +303,7 @@ function OwnerMetadata({ m }: { m: IpRecord }) {
         owner.network ? <M.Label key="network" title="Network" text={owner.network} /> : null,
         owner.type ? <M.Label key="type" title="Type" text={owner.type} /> : null,
         !owner.fromCompany
-          ? hintRow("note", "Note", "Operator organisation shown; the company record needs an API key")
+          ? hintRow("note", "Note", "Operator organization shown; the company record needs an API key")
           : null,
       ])}
     </M>
@@ -350,13 +351,10 @@ function LocationDetail({ result }: { result: LookupOk }) {
     [m.latitude, m.longitude, hasStreetLevel(m)],
     { onError: () => undefined },
   );
-  const svg = mapSvg(result, {
+  const svg = mapSvg(m, {
     appearance: environment.appearance,
-    hasKey: !!getSettings().apiKey,
     map: map ?? null,
     mapStatus: !hasStreetLevel(m) ? "country" : isLoading ? "loading" : map ? "ready" : "unavailable",
-    chip: false,
-    footer: false,
   });
   const note = result.degraded ? "\n\n> Daily city-level quota used; showing country-level data until it resets." : "";
   return (
@@ -413,14 +411,12 @@ export function RecordActions({
   state,
   hasKey,
   onRefresh,
-  primary,
   children,
 }: {
   ip: string;
   state: LookupState | null;
   hasKey: boolean;
   onRefresh?: () => void;
-  primary?: ReactNode;
   children?: ReactNode;
 }) {
   const ok = state?.status === "ok" ? state.result : null;
@@ -431,15 +427,12 @@ export function RecordActions({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {primary}
         <Action.CopyToClipboard title="Copy Address" content={ip} />
+        {/* The second action gets ⌘↵ from Raycast, so it has no shortcut of its own. */}
         {apple ? (
-          <Action.Open
-            title="Open in Maps"
-            target={apple}
-            icon={Icon.Map}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-          />
+          <Action.Open title="Open in Maps" target={apple} icon={Icon.Map} />
+        ) : onRefresh ? (
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
         ) : null}
         {google ? (
           <Action.OpenInBrowser
@@ -490,7 +483,7 @@ export function RecordActions({
         ) : null}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {onRefresh ? (
+        {onRefresh && apple ? (
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
