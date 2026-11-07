@@ -374,6 +374,42 @@ export function extractOTP(text: string): string | null {
   return match ? match[0] : null;
 }
 
+export function selectOTP(text: string): string | null {
+  const codeLabel = /\b(?:code|passcode|otp|pin|verification|one[- ]time)(?:\s+is)?[\s:=#-]*$/i;
+  const codeLabelAfter =
+    /^\s+(?:is\s+)?(?:your|the)\s+(?:(?:one[- ]time|verification|security)\s+)*(?:code|passcode|otp|pin)\b/i;
+  const useLabel = /\b(?:use|enter|is)[\s:=#-]*$/i;
+  const otherNumberLabel =
+    /\b(?:ending\s+(?:in|with)|last\s+(?:4|four)(?:\s+digits)?|acct\.?|account|ref\.?|reference|call|phone|tel\.?)(?:\s+(?:number|no\.?|is))?[\s:#*•(-]*$/i;
+
+  let bestCode: string | null = null;
+  let bestScore = -1;
+
+  // Match connected digit groups as a unit so a phone number cannot supply a partial code.
+  for (const match of text.matchAll(/\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+)\d+)*\b/g)) {
+    const [number] = match;
+    if (!/^(?:\d{4,10}|\d{3,}-\d{3,})$/.test(number)) continue;
+
+    const code = number.replace("-", "");
+    if (code.length > 10) continue;
+
+    const before = text.slice(0, match.index);
+    const after = text.slice(match.index + number.length);
+    if (before.endsWith("+") || otherNumberLabel.test(before)) continue;
+
+    const score = codeLabel.test(before) || codeLabelAfter.test(after) ? 2 : useLabel.test(before) ? 1 : 0;
+    // A 3-4 split is also a local phone number, so require a code hint.
+    if (score === 0 && /^\d{3}-\d{4}$/.test(number)) continue;
+
+    if (score > bestScore || (score === bestScore && code.length >= (bestCode?.length ?? 0))) {
+      bestCode = code;
+      bestScore = score;
+    }
+  }
+
+  return bestCode;
+}
+
 export function getContactOrGroupInfo(
   info: ChatOrMessageInfo,
   contactMap: Map<string, Contact>,
