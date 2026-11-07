@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timestamp-converter",
+  "title": "Timestamp Converter",
+  "description": "Convert timestamps and date strings while keeping the current local and UTC time visible with live updates.",
+  "icon": "extension-icon.png",
+  "author": "sytuacmdyh",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert Timestamp",
+      "description": "Convert seconds, milliseconds, and date strings, and copy the current time.",
+      "mode": "view",
+      "keywords": [
+        "timestamp",
+        "time",
+        "date",
+        "时间",
+        "日期",
+        "时间戳转换"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "store:check": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.9.3",
+    "@raycast/eslint-config": "2.2.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.6.2"
+  }
+}
