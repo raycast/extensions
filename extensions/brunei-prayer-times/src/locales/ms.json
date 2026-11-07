@@ -1,0 +1,228 @@
+{
+  "prayer": {
+    "imsak": "Imsak",
+    "subuh": "Subuh",
+    "syuruk": "Syuruk",
+    "doha": "Dhuha",
+    "zuhur": "Zuhur",
+    "asar": "Asar",
+    "maghrib": "Maghrib",
+    "isyak": "Isyak"
+  },
+  "district": {
+    "label": "Daerah",
+    "bruneiMuara": "Brunei dan Muara",
+    "tutong": "Tutong",
+    "belait": "Belait"
+  },
+  "state": {
+    "loading": "Memuatkan…",
+    "unavailable": "Waktu sembahyang tidak tersedia.",
+    "offline": "Anda sedang luar talian. Memaparkan data terakhir.",
+    "refreshing": "Mengemas kini…",
+    "current": "Semasa"
+  },
+  "action": {
+    "retry": "Cuba lagi",
+    "menu": "Menu",
+    "reloadData": "Muat semula data",
+    "reloadApp": "Muat semula aplikasi",
+    "share": "Kongsi waktu sembahyang",
+    "downloads": "Platform lain",
+    "tasbih": "Tasbih"
+  },
+  "source": {
+    "label": "Sumber data",
+    "name": "Jabatan Hal Ehwal Ugama (KHEU), Brunei"
+  },
+  "update": {
+    "message": "Versi baharu tersedia. Muat semula untuk mengemas kini.",
+    "reload": "Muat semula",
+    "later": "Kemudian"
+  },
+  "duration": {
+    "hoursMinutes": "{hours} jam {minutes} minit",
+    "minutes": "{minutes} minit",
+    "seconds": "{seconds} saat"
+  },
+  "next": {
+    "in": "{duration} lagi {prayer}"
+  },
+  "share": {
+    "title": "Waktu Sembahyang Brunei",
+    "district": "Daerah: Brunei dan Muara",
+    "line": "{prayer}: {time}",
+    "offsets": "Tambah 1 minit untuk Tutong dan 3 minit untuk Belait.",
+    "copied": "Disalin ke papan klip",
+    "formatted": "Teks berformat",
+    "raw": "Teks mentah"
+  },
+  "pull": {
+    "reload": "Tarik ke bawah untuk muat semula",
+    "refreshing": "Memuat semula…"
+  },
+  "meta": {
+    "title": "Waktu Sembahyang Brunei",
+    "siteName": "Waktu Sembahyang Brunei",
+    "description": "Waktu sembahyang Brunei untuk Brunei dan Muara, Temburong, Tutong dan Belait — di mana-mana sahaja.",
+    "imageAlt": "Waktu Sembahyang Brunei — Subuh, Syuruk, Zuhur, Asar, Maghrib, Isyak"
+  },
+  "theme": {
+    "mode": "Mod warna",
+    "dark": "Gelap",
+    "light": "Cerah",
+    "palette": {
+      "label": "Warna utama",
+      "yellow": "Kuning",
+      "green": "Hijau",
+      "blue": "Biru",
+      "rose": "Ros",
+      "violet": "Ungu",
+      "custom": "Tersuai"
+    }
+  },
+  "notification": {
+    "enable": "Hidupkan notifikasi",
+    "enabled": "Notifikasi dihidupkan",
+    "unsupported": "Notifikasi tidak disokong",
+    "blocked": "Notifikasi disekat dalam pelayar",
+    "lead": "{prayer} dalam 15 minit",
+    "due": "Masuk waktu {prayer}",
+    "body": "{prayer} pada {time}"
+  },
+  "settings": {
+    "title": "Tetapan",
+    "back": "Kembali",
+    "language": "Bahasa",
+    "timeFormat": {
+      "label": "Format masa",
+      "h24": "24 jam",
+      "h12": "12 jam"
+    }
+  },
+  "extension": {
+    "title": "Sambungan pelayar",
+    "pageHeader": "Tunjuk waktu pada halaman",
+    "pageHeaderLabel": "Seterusnya",
+    "openApp": "Buka aplikasi",
+    "closeLabel": "Sembunyikan",
+    "updateAvailable": "Versi {version} tersedia",
+    "updateDownload": "Muat turun",
+    "enablePrompt": "Hidupkan notifikasi waktu sembahyang?",
+    "enableYes": "Hidupkan",
+    "enableNo": "Bukan sekarang"
+  },
+  "downloads": {
+    "title": "Muat turun",
+    "intro": "Waktu Sembahyang Brunei untuk platform lain. Satu teras, banyak cangkerang.",
+    "back": "Kembali ke aplikasi",
+    "available": "Tersedia",
+    "soon": "Akan datang",
+    "download": "Muat turun",
+    "marketplace": "Dapatkan di Marketplace",
+    "installNote": {
+      "extension": "Muat turun fail zip, kemudian buka chrome://extensions, hidupkan Mod Pembangun dan pilih \"Load unpacked\" pada folder yang telah diekstrak.",
+      "vscode": "Muat turun fail .vsix, kemudian jalankan \"Extensions: Install from VSIX…\" dari palet arahan."
+    },
+    "platforms": {
+      "extension": {
+        "name": "Sambungan pelayar",
+        "description": "Waktu sembahyang di bar alat dan pada setiap halaman, dengan notifikasi."
+      },
+      "cli": {
+        "name": "CLI",
+        "description": "Waktu sembahyang di terminal anda."
+      },
+      "tui": {
+        "name": "TUI",
+        "description": "Paparan terminal penuh untuk waktu sembahyang."
+      },
+      "vscode": {
+        "name": "Sambungan VS Code",
+        "description": "Waktu sembahyang di bar status editor."
+      },
+      "raycast": {
+        "name": "Sambungan Raycast",
+        "description": "Waktu sembahyang dari pelancar anda."
+      }
+    }
+  },
+  "admin": {
+    "title": "Pentadbir data",
+    "signIn": "Masuk dengan Google",
+    "signInHint": "Masuk dengan akaun Google yang dibenarkan untuk mengurus waktu sembahyang.",
+    "forbidden": "Akaun ini tidak dibenarkan mengurus data.",
+    "signOut": "Keluar",
+    "email": "Akaun",
+    "month": "Bulan",
+    "import": "Import bulan",
+    "importing": "Mengimport…",
+    "records": "Rekod bulan ini",
+    "empty": "Tiada rekod untuk bulan ini.",
+    "date": "Tarikh",
+    "district": "Daerah",
+    "prayer": "Waktu",
+    "time": "Masa",
+    "save": "Simpan",
+    "back": "Kembali ke aplikasi",
+    "prayers": {
+      "imsak": "Imsak",
+      "subuh": "Subuh",
+      "syuruk": "Syuruk",
+      "doha": "Dhuha",
+      "zuhur": "Zuhur",
+      "asar": "Asar",
+      "maghrib": "Maghrib",
+      "isyak": "Isyak"
+    },
+    "imported": "{count} rekod diimport.",
+    "saved": "Disimpan.",
+    "failed": "Tidak berjaya. Cuba lagi.",
+    "unauthorized": "Sesi tamat. Sila masuk semula."
+  },
+  "month": {
+    "prev": "Bulan sebelumnya",
+    "next": "Bulan seterusnya",
+    "today": "Bulan ini",
+    "date": "Tarikh",
+    "label": "Bulan",
+    "hijri": "Hijrah",
+    "view": "Paparan bulanan",
+    "dayView": "Paparan harian",
+    "tableLabel": "Jadual waktu sembahyang bulanan"
+  },
+  "page": {
+    "label": "Halaman",
+    "day": "Paparan harian",
+    "month": "Paparan bulanan",
+    "trend": "Grafik trend"
+  },
+  "chart": {
+    "label": "Grafik waktu sembahyang",
+    "filter": "Tapis waktu",
+    "prev": "Tempoh sebelumnya",
+    "next": "Tempoh seterusnya",
+    "today": "Tempoh ini",
+    "hideOutliers": "Sembunyi luar skala",
+    "range": {
+      "label": "Tempoh",
+      "week": "Minggu",
+      "month": "Bulan",
+      "year": "Tahun"
+    }
+  },
+  "tasbih": {
+    "title": "Tasbih",
+    "intro": "Tasbih digital untuk zikir. Ketik di mana-mana untuk mengira.",
+    "back": "Kembali ke aplikasi",
+    "label": "Kiraan tasbih, {count}",
+    "count": "Kiraan: {count}",
+    "hint": "Ketik di mana-mana untuk tambah satu. Guna kekunci sisi untuk tolak satu atau set semula.",
+    "increment": "Tambah satu",
+    "decrement": "Tolak satu",
+    "reset": "Set semula kepada sifar"
+  },
+  "a11y": {
+    "skipToContent": "Langkau ke kandungan"
+  }
+}
