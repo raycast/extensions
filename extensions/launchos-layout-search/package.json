@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "launchos-layout-search",
+  "title": "LaunchOS Layout Search",
+  "description": "Search the apps, custom aliases, folders, and pages in your LaunchOS layout without changing it.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-layout",
+      "title": "Search LaunchOS Layout",
+      "subtitle": "LaunchOS",
+      "description": "Find apps by their LaunchOS name or alias, filter by folder or page, and open the chosen app.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "databasePath",
+      "type": "textfield",
+      "placeholder": "/path/to/LaunchOS.sqlite",
+      "title": "LaunchOS Layout Database",
+      "description": "Optional path to LaunchOS.sqlite. Leave blank to use LaunchOS’s standard local database.",
+      "required": false
+    },
+    {
+      "name": "includeHidden",
+      "type": "checkbox",
+      "title": "Hidden Apps",
+      "label": "Include apps hidden in LaunchOS",
+      "default": false,
+      "required": false,
+      "description": "Show entries hidden in LaunchOS without changing their hidden state."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "tsx": "^4.21.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts"
+  }
+}
