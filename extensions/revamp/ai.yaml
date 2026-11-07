@@ -1,0 +1,15 @@
+mcp:
+  type: http
+  url: https://app.revamp.dev/mcp
+  oauth:
+    type: dynamic
+skills:
+  - name: build-with-revamp
+    title: Build with Revamp
+instructions: >-
+  Use the Build with Revamp skill for project work. Keep explanations in plain
+  language and share preview and Studio links as clickable Markdown links.
+evals:
+  - input: Create a modern one-page website for my law firm.
+  - input: Redesign my website to improve its look and conversion rate.
+  - input: Build a web app where clients can book appointments.

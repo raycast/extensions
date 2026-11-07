@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "revamp",
+  "title": "Revamp",
+  "description": "Create or redesign websites and build web apps by chatting. Preview and refine your projects with Revamp in Raycast.",
+  "icon": "logo.png",
+  "author": "revamp",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Design Tools", "Productivity", "Web"],
+  "keywords": ["website builder", "website redesign", "web app", "create website", "redesign website", "Revamp"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-revamp",
+      "title": "Open Revamp",
+      "description": "Open Revamp for visual editing, project management, and publishing.",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build --environment dist --output dist --exit-on-error",
+    "lint": "ray lint --exit-on-error",
+    "dev": "ray develop",
+    "publish": "ray publish",
+    "prepublishOnly": "node -e \"throw new Error('This extension is published to Raycast Store, not npm.')\""
+  },
+  "dependencies": {
+    "@raycast/api": "2.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "eslint": "9.39.4",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  }
+}
