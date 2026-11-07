@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "readcube-papers",
+  "title": "ReadCube Papers",
+  "description": "Search and browse your ReadCube Papers library (requires a ReadCube Papers account)",
+  "icon": "extension-icon.png",
+  "author": "nightowl",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-papers",
+      "title": "Search Papers",
+      "subtitle": "ReadCube Papers",
+      "description": "Search the papers in your ReadCube library",
+      "mode": "view"
+    },
+    {
+      "name": "browse-lists",
+      "title": "Browse Lists",
+      "subtitle": "ReadCube Papers",
+      "description": "Browse your ReadCube libraries and lists",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "The email you use to sign in to ReadCube Papers",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "you@example.com"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your ReadCube Papers password (stored securely by Raycast)",
+      "type": "password",
+      "required": false,
+      "placeholder": "ReadCube Papers password"
+    },
+    {
+      "name": "sessionCookie",
+      "title": "Session Cookie",
+      "description": "Alternative to email and password (for SSO accounts): the Cookie header of any sync.readcube.com request in your browser's developer tools",
+      "type": "password",
+      "required": false,
+      "placeholder": "Paste the Cookie request header"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
