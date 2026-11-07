@@ -19,7 +19,8 @@
     "xmok",
     "chrismessina",
     "alexi.build",
-    "just_me"
+    "just_me",
+    "ray.dhruv"
   ],
   "keywords": [
     "text",
@@ -199,11 +200,11 @@
   ],
   "preferences": [
     {
-      "name": "preserveCase",
+      "name": "preserveReadableCase",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "title": "Behavior",
-      "description": "Uncheck this option to first lowercase the text before applying transformations. See README for details.",
+      "description": "Keep the original casing as input to Capital Case, Title Case, and Sentence Case.",
       "label": "Preserve Casing",
       "required": true
     },
@@ -234,8 +235,8 @@
     {
       "name": "exceptions",
       "type": "textfield",
-      "title": "Title and Sentence Case Exceptions",
-      "description": "Words or phrases that should not be modified, separated by commas.",
+      "title": "Casing Exceptions",
+      "description": "Preferred spellings for Capital Case, Title Case, and Sentence Case, separated by commas.",
       "default": "iOS, iPadOS, iPhone, macOS, tvOS, watchOS",
       "placeholder": "Comma-separated list of words or phrases",
       "label": "label",

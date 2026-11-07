@@ -16,6 +16,10 @@ export async function applyCase(caseType: CaseType): Promise<void> {
   }
 
   const modified = modifyCasesWrapper(content, caseType).rawText;
+  if (!modified) {
+    await showHUD("Nothing to Convert");
+    return;
+  }
 
   if (preferences.action === "paste") {
     await Clipboard.paste(modified);
