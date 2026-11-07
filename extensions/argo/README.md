@@ -50,6 +50,8 @@ A bridge can instead run on your Mac, or use an existing working loopback tunnel
 
 Global command hotkeys are personal Raycast settings, not defaults an extension can install. Set them in **Raycast Settings → Argo**. Suggested mapping: **⌃⇧⌘J** for **Recent Agent Session**, **⌃⇧⌘K** for **Agent Sessions**, and **⌃⇧⌘L** for **Connect a Server**. Updates do not intentionally change these user-owned settings.
 
+Native conversation messages show routine delivery state as a small list-row icon. Hover for role, exact time and state meaning, or open **Message Details** from Actions for keyboard-accessible status and complete diagnostics. Failed and unknown results retain visible warning text. The reply pane is reserved for message content.
+
 Conversation replies support safe Markdown tables, headings, lists and code blocks. Message links, images and HTML remain inert; copying a message retains its original source. Herdr raw screens and approval review are always literal terminal text. **Read Full Width** remains available for wider HC tables.
 
 - **Agent Sessions** aggregates Argo bridges and Herdr terminals. **Agent Sessions** opens the full source-aware list. **Recent Agent Session** reopens the last valid conversation; use **All Sessions** to change targets. Reopening checks the configured loopback range and can relocate a paired bridge by its pinned identity when mapped ports change. It is not a system-wide background scanner.

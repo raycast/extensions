@@ -24,7 +24,7 @@ import {
 
 import { parseSessionTarget } from "./session-target.js";
 import { hcGroup, hcStatus } from "./session-target.js";
-import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
+import { interactionMarkdown, literal, originalParametersMarkdown } from "./interaction-format.js";
 
 const token = "a".repeat(64);
 
@@ -227,6 +227,7 @@ function viewHarness() {
       Toast: { Style: { Failure: "failure", Success: "success" } },
       safeMarkdown,
       messageMarkdown,
+      literal,
       interactionMarkdown,
       originalParametersMarkdown,
       OriginalParametersAction: "OriginalParametersAction",
@@ -1878,4 +1879,80 @@ test("native conversation preserves Markdown tables and literal fenced code in m
   assert.match(row.props.detail.props.markdown, /\| :--- \| ---: \|/);
   assert.match(row.props.detail.props.markdown, /const url = 'https:\/\/example.test';/);
   assert.equal(views(row).find((v) => v.props.title === "Copy Selected Message")!.props.content, body);
+});
+
+test("conversation status stays compact while message details retain exact diagnostic information", () => {
+  const h = viewHarness();
+  const messages = ["queued", "submitted", "accepted", "completed", "failed", "unknown"].map((state, index) => ({
+    id: state,
+    role: index === 0 ? "user" : "assistant",
+    text: "Reply " + state,
+    state,
+    createdAt: 1794083403000 + index,
+    detail: "Diagnostic <img src='https://example.test'> ```",
+  }));
+  const { Conversation } = viewLogic(
+    [
+      "project",
+      "title",
+      "sessionStatus",
+      "knownOnline",
+      "messageStatus",
+      "sendUnavailable",
+      "conversationSelection",
+      "interactionGroups",
+      "Conversation",
+    ],
+    {
+      ...h.globals,
+      Icon: Object.fromEntries(
+        [
+          "Clock",
+          "Upload",
+          "CircleProgress50",
+          "CheckCircle",
+          "XMarkCircle",
+          "ExclamationMark",
+          "Person",
+          "Message",
+          "Info",
+        ].map((name) => [name, name]),
+      ),
+      Color: { Green: "green", Blue: "blue", Orange: "orange", Red: "red" },
+      useHub: () => ({
+        snapshot: { session: sessionFixture(), messages, interactions: [] },
+        connection: "live",
+        connectionKey: "bridge-a",
+        hub: { current: { now: () => 1000 } },
+      }),
+      useDraft: () => ({ text: "", ready: true }),
+      useNavigation: () => ({ push() {} }),
+    },
+  );
+  let tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  h.reset();
+  tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  const icons = ["Clock", "Upload", "CircleProgress50", "CheckCircle", "XMarkCircle", "ExclamationMark"];
+  for (const [index, message] of messages.entries()) {
+    const row = views(tree).find((view) => view.props.id === message.id)!;
+    assert.equal(row.props.detail.props.markdown, message.text);
+    assert.equal(row.props.detail.props.metadata, undefined, "message metadata must not take space from content");
+    assert.equal(row.props.subtitle, undefined);
+    const badge = row.props.accessories[0];
+    assert.equal(badge.icon.source, icons[index]);
+    assert.ok(badge.tooltip.includes(new Date(message.createdAt).toLocaleString()));
+    assert.ok(badge.tooltip.includes(index === 0 ? "You" : "Agent"));
+    if (message.state === "unknown") assert.match(badge.tooltip, /never replayed automatically/);
+    if (message.state === "submitted") assert.match(badge.tooltip, /completion are not yet confirmed/);
+    if (message.state === "accepted") assert.match(badge.tooltip, /may still change/);
+    if (["failed", "unknown"].includes(message.state)) assert.ok(badge.text, "exception states need visible text");
+    else assert.equal(badge.text, undefined, "ordinary states need only an icon");
+    const action = views(row).find((view) => view.props.title === "Message Details")!;
+    assert.ok(action, "keyboard users can inspect status and timestamp without hover");
+    const detail = action.props.target.props.markdown;
+    assert.ok(detail.includes(safeMarkdown(new Date(message.createdAt).toLocaleString())));
+    assert.ok(detail.includes(message.detail), "diagnostics must remain complete and literal");
+    assert.ok(detail.includes("````"), "embedded fences must not activate diagnostic HTML");
+    assert.equal(views(row).find((view) => view.props.title === "Copy Selected Message")!.props.content, message.text);
+  }
 });

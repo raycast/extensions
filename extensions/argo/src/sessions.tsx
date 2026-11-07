@@ -24,7 +24,7 @@ import { errorText, recentKey, useBridges, useDraft, useHub } from "./hooks.js";
 import { loadConnection } from "./connections.js";
 import { DiscoverBridges, Setup } from "./onboarding.js";
 import { portRange } from "./discovery.js";
-import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
+import { interactionMarkdown, literal, originalParametersMarkdown } from "./interaction-format.js";
 import { Compose } from "./compose.js";
 import { messageMarkdown } from "./message-format.js";
 import { HcClient, hcTargetKey, type HcTarget } from "./herdr.js";
@@ -1324,35 +1324,52 @@ function Conversation({
       <List.Section title="Conversation" subtitle="Latest first">
         {allMessages.map((message) => {
           const state = messageStatus(message);
+          const attention = message.state === "failed" || message.state === "unknown";
+          const icon = {
+            queued: Icon.Clock,
+            submitted: Icon.Upload,
+            accepted: Icon.CircleProgress50,
+            completed: Icon.CheckCircle,
+            failed: Icon.XMarkCircle,
+            unknown: Icon.ExclamationMark,
+          }[message.state];
+          const color =
+            message.state === "failed"
+              ? Color.Red
+              : message.state === "unknown"
+                ? Color.Orange
+                : message.state === "completed"
+                  ? Color.Green
+                  : Color.Blue;
+          const role = message.role === "user" ? "You" : "Agent";
+          const time = new Date(message.createdAt).toLocaleString();
           return (
             <List.Item
               key={message.id}
               id={message.id}
               title={message.text.replace(/\s+/g, " ").slice(0, 100) || "Empty message"}
-              subtitle={state.label}
-              accessories={[{ text: message.role === "user" ? "You" : "Agent" }]}
+              accessories={[
+                {
+                  icon: { source: icon, tintColor: color },
+                  ...(attention ? { text: { value: state.label, color } } : {}),
+                  tooltip: `${role} · ${state.label} · ${time}\n${state.explanation}`,
+                },
+              ]}
               icon={message.role === "user" ? Icon.Person : Icon.Message}
-              detail={
-                <List.Item.Detail
-                  markdown={messageMarkdown(message.text)}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title={message.role === "user" ? "You" : "Agent"}
-                        text={new Date(message.createdAt).toLocaleString()}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Status" text={state.label} />
-                      <List.Item.Detail.Metadata.Label title="Meaning" text={state.explanation} />
-                      {message.detail ? (
-                        <List.Item.Detail.Metadata.Label title="Details" text={message.detail} />
-                      ) : null}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
+              detail={<List.Item.Detail markdown={messageMarkdown(message.text)} />}
               actions={
                 <ActionPanel>
                   {commonActions()}
+                  <Action.Push
+                    title="Message Details"
+                    icon={Icon.Info}
+                    target={
+                      <Detail
+                        navigationTitle="Message Details · Read Only"
+                        markdown={`# Message Details\n\n${role} · ${safeMarkdown(state.label)}\n\n${safeMarkdown(time)}\n\n${safeMarkdown(state.explanation)}${message.detail ? `\n\n## Diagnostics\n\n${literal(message.detail)}` : ""}`}
+                      />
+                    }
+                  />
                   <Action.CopyToClipboard
                     title="Copy Selected Message"
                     content={message.text}

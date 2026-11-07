@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Replace native message metadata panels with compact status icons and hover details. Keep failure and uncertainty labels visible, with exact timestamps and diagnostics available in Message Details. Preserve blank-separated nested Markdown lists instead of rendering them as standalone code.
+
 - Render conversation replies as safe Markdown with tables and unchanged code blocks, while keeping original terminal and approval screens literal. Document optional personal command hotkeys.
 
 - Preserve repeated answer endings during Herdr extraction and merge per-turn history writes across terminal views so returning to an earlier view cannot erase newer messages.

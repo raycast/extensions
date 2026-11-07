@@ -10,6 +10,74 @@ test("Chinese replies retain headings, lists, emphasis and ordinary text", () =>
   assert.equal(messageMarkdown(""), "");
 });
 
+test("blank lines do not turn nested list items into literal code", () => {
+  const text = "- Parent\n\n    - Child";
+  assert.equal(messageMarkdown(text), text);
+});
+
+test("bullet and ordered lists retain nested items and continuation paragraphs across blank lines", () => {
+  for (const marker of ["-", "+", "*", "1.", "12)", "123456789."]) {
+    const indent = " ".repeat(Math.max(4, marker.length + 1));
+    const text = [
+      `${marker} Parent`,
+      "",
+      "",
+      `${indent}- Child`,
+      "",
+      `${indent}  Child continuation`,
+      "",
+      `${indent}  2) Grandchild`,
+      "",
+      `${indent}     Grandchild continuation`,
+      "",
+      `${indent}Parent continuation`,
+      "",
+      `${indent}1. Sibling`,
+    ].join("\n");
+    assert.equal(messageMarkdown(text), text, marker);
+  }
+  for (const text of [
+    "  - Parent\n\n    - Child\n\n      Continuation",
+    "1. Parent\n\n\t- Child\n\n\t  Continuation",
+    "-\n\n    - Child",
+    "-    Parent\n\n     - Child",
+    "-\tParent\n\n\t- Child",
+    "- Parent\n\n    - Child\n\n  Parent continuation\n\n    - Sibling",
+    "- Parent\r\n\r\n    - Child\r\n\r\n      Continuation\r",
+  ]) {
+    assert.equal(messageMarkdown(text), text);
+  }
+});
+
+test("list context ends on dedent and does not come from code bodies or thematic breaks", () => {
+  const body = "    <img src='https://evil.test'>\n    https://example.test:8080\n    \\path";
+  for (const prefix of [
+    "- Parent\n\nOutside",
+    "1. Parent\n\n# Outside",
+    "   - Parent\n\n   Outside",
+    "- - -",
+    "* * *",
+    "```\n- not a list\n```",
+  ]) {
+    assert.ok(messageMarkdown(`${prefix}\n\n${body}`).includes(literal(body)), prefix);
+  }
+  // Adjacent indented paragraphs are one code block, including the apparent list marker.
+  assert.ok(messageMarkdown(`    - not a list\n\n${body}`).includes(literal(`    - not a list\n\n${body}`)));
+  // A new ordered item must use its own wider content column, not the previous bullet's.
+  assert.ok(messageMarkdown(`- Parent\n12. Next\n\n  Outside\n\n${body}`).includes(literal(body)));
+});
+
+test("nested list prose and tables still make untrusted links and HTML inert", () => {
+  const hostile =
+    "- Parent\n\n    - ![image](https://evil.test) <img src='https://evil.test'>\n\n      [open](command:run) \\![escaped](https://evil.test) &lt;img>\n\n      | Name | Link |\n      | :--- | ---: |\n      | value | [open](file:///private) |";
+  const markdown = messageMarkdown(hostile);
+  assert.equal(
+    markdown,
+    "- Parent\n\n    - &#33;&#91;image&#93;(https&#58;//evil.test) &lt;img src='https&#58;//evil.test'&gt;\n\n      &#91;open&#93;(command&#58;run) &#92;&#33;&#91;escaped&#93;(https&#58;//evil.test) &amp;lt;img&gt;\n\n      | Name | Link |\n      | :--- | ---: |\n      | value | &#91;open&#93;(file&#58;///private) |",
+  );
+  assert.ok(!markdown.includes("```"));
+});
+
 test("pipe tables retain alignment, all wide, empty and extra cells in order", () => {
   const text = [
     "| 项目 | 说明 | 状态 |",
