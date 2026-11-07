@@ -1,0 +1,31 @@
+syntax = "proto3";
+package blip;
+
+import "google/protobuf/timestamp.proto";
+
+enum DeviceKind {
+  GenericDevice = 0;
+  Phone = 2;
+  Tablet = 3;
+  Laptop = 4;
+  Desktop = 5;
+}
+
+message DeviceReach {
+  bool is_online = 1;
+  bool is_pushable = 2;
+}
+
+message DeviceSettings {
+  bool allow_diagnostics = 1;
+}
+
+message Device {
+  string device_id = 1;
+  blip.DeviceKind kind = 2;
+  string name = 3;
+  blip.DeviceReach reach = 4;
+  google.protobuf.Timestamp last_online = 5;
+  bool is_self = 6;
+  blip.DeviceSettings settings = 1000;
+}

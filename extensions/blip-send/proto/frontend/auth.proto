@@ -1,0 +1,26 @@
+syntax = "proto3";
+package frontend;
+
+import "frontend/error.proto";
+import "google/protobuf/timestamp.proto";
+
+message Auth {
+  bytes token = 201;
+  string user_id = 202;
+  string email = 203;
+  string device_id = 204;
+}
+
+message Registration {
+  enum registration_status {
+    NOT_STARTED = 0;
+    SENDING_CODE = 1;
+    CODE_SENT = 2;
+    REGISTERING = 3;
+  }
+  frontend.Registration.registration_status status = 1;
+  string attempt_id = 2;
+  string email = 4;
+  google.protobuf.Timestamp code_expiry = 3;
+  optional frontend.Err error = 999;
+}

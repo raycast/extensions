@@ -1,0 +1,33 @@
+syntax = "proto3";
+package frontend;
+
+import "user_agent.proto";
+import "plan.proto";
+import "frontend/state_inner.proto";
+import "frontend/auth.proto";
+import "frontend/transfer.proto";
+import "frontend/onboarding.proto";
+import "frontend/search.proto";
+import "google/protobuf/timestamp.proto";
+
+message State {
+  int32 version = 1;
+  blip.UserAgent user_agent = 50;
+  frontend.Config config = 100;
+  oneof session {
+    frontend.Registration registration = 200;
+    frontend.Auth auth = 201;
+  }
+  frontend.Onboarding onboarding = 300;
+  frontend.Messaging messaging = 400;
+  frontend.Users users = 500;
+  map<string, frontend.Transfer> transfers = 600;
+  map<string, frontend.TransferNotificationResponse> transfer_notification_responses = 700;
+  map<string, frontend.Search> searches = 800;
+  frontend.PushNotifications notifications = 901;
+  blip.Plan plan = 1000;
+  frontend.SystemInfo system_info = 1100;
+  google.protobuf.Timestamp launch_time = 90000;
+  bool shutting_down = 90001;
+  string test_plain_text = 99999;
+}

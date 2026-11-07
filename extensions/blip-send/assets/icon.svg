@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Colours sampled from the Blip app icon: background #963DFF → #5F01F5, glyph #FFFFFF → #BE95FC -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#963DFF"/>
+      <stop offset="0.5" stop-color="#7A1EFF"/>
+      <stop offset="1" stop-color="#5F01F5"/>
+    </linearGradient>
+    <linearGradient id="glyph" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.45" stop-color="#EDDDFF"/>
+      <stop offset="1" stop-color="#BE95FC"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#3B0099" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <path d="M 183.26 0 L 328.74 0 c 64.15 0 96.22 0 120.72 12.48 a 114.53 114.53 0 0 1 50.05 50.05 c 12.48 24.5 12.48 56.57 12.48 120.72 L 512 328.74 c 0 64.15 0 96.22 -12.48 120.72 a 114.53 114.53 0 0 1 -50.05 50.05 c -24.5 12.48 -56.57 12.48 -120.72 12.48 L 183.26 512 c -64.15 0 -96.22 0 -120.72 -12.48 a 114.53 114.53 0 0 1 -50.05 -50.05 c -12.48 -24.5 -12.48 -56.57 -12.48 -120.72 L 0 183.26 c 0 -64.15 0 -96.22 12.48 -120.72 a 114.53 114.53 0 0 1 50.05 -50.05 c 24.5 -12.48 56.57 -12.48 120.72 -12.48 Z" fill="url(#bg)"/>
+  <!-- arrow: up and to the right, white with the same lavender fall-off as the Blip glyph -->
+  <g filter="url(#shadow)" fill="none" stroke="url(#glyph)" stroke-width="58" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M158 354 L346 166"/>
+    <path d="M214 166 L346 166 L346 298"/>
+  </g>
+</svg>
+

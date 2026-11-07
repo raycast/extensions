@@ -1,0 +1,17 @@
+syntax = "proto3";
+package frontend;
+
+import "peerid.proto";
+
+message Search {
+  enum Status {
+    Unknown = 0;
+    InProgress = 1;
+    Failed = 2;
+    Complete = 3;
+  }
+  string query = 1;
+  frontend.Search.Status fetch_status = 2;
+  repeated blip.PeerId local_results = 3;
+  repeated blip.PeerId server_results = 4;
+}
