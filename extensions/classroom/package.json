@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "classroom",
+  "title": "Google Classroom",
+  "description": "See what's due, what's missing and what's graded across your Google Classroom courses.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "courses",
+      "title": "Search Courses",
+      "description": "Find courses and browse their assignments",
+      "mode": "view"
+    },
+    {
+      "name": "assignments",
+      "title": "Browse Assignments",
+      "description": "See what's overdue, due today and due this week across your courses, with turned-in, missing and graded status.",
+      "mode": "view"
+    },
+    {
+      "name": "connect",
+      "title": "Connect Google Classroom",
+      "description": "Sign in and verify access to your courses",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Classroom Due Soon",
+      "description": "Show missing work and assignments due this week in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "30m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "placeholder": "Your Google OAuth Client ID",
+      "title": "Google OAuth Client ID",
+      "description": "Your Google Cloud iOS OAuth client ID with bundle ID com.raycast. Enable the Classroom API first. See README.",
+      "required": false
+    },
+    {
+      "name": "role",
+      "type": "dropdown",
+      "title": "Classroom Role",
+      "description": "Student mode requests your own coursework. Teacher mode requests read-only coursework in classes you teach.",
+      "required": false,
+      "default": "student",
+      "data": [
+        {
+          "title": "Student",
+          "value": "student"
+        },
+        {
+          "title": "Teacher",
+          "value": "teacher"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "4.1.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}
