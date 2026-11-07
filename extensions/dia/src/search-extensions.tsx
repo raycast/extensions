@@ -82,12 +82,22 @@ function ExtensionItem({ extension, profile }: { extension: BrowserExtension; pr
 
 export default function Command() {
   const { showBuiltInExtensions } = getPreferenceValues<Preferences.SearchExtensions>();
-  const { data: profiles = [], isLoading } = useCachedPromise(getExtensionProfiles, [], {
+  const {
+    data: profiles = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getExtensionProfiles, [], {
     failureToastOptions: { title: "Could not read Dia extensions" },
   });
   const [selected, setSelected] = useCachedState<string>("profile-filter", ALL_PROFILES);
-  // Fall back to all profiles when the remembered profile was renamed or removed
-  const filter = profiles.some((profile) => PROFILE_PREFIX + profile.name === selected) ? selected : ALL_PROFILES;
+  const retryActions = (
+    <ActionPanel>
+      <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+    </ActionPanel>
+  );
+  // Fall back to all profiles when the remembered profile was removed
+  const filter = profiles.some((profile) => PROFILE_PREFIX + profile.directory === selected) ? selected : ALL_PROFILES;
 
   return (
     <List
@@ -103,7 +113,7 @@ export default function Command() {
               <List.Dropdown.Item
                 key={profile.directory}
                 title={profile.isActive ? `${profile.name} (Active)` : profile.name}
-                value={PROFILE_PREFIX + profile.name}
+                value={PROFILE_PREFIX + profile.directory}
                 icon={{ source: Icon.CircleFilled, tintColor: getSpaceTint(profile.color) }}
               />
             ))}
@@ -111,10 +121,31 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView icon={Icon.Plug} title="No extensions found" />
+      {error ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Could not read Dia extensions"
+          description={error.message}
+          actions={retryActions}
+        />
+      ) : (
+        <List.EmptyView icon={Icon.Plug} title="No extensions found" />
+      )}
       {profiles
-        .filter((profile) => filter === ALL_PROFILES || PROFILE_PREFIX + profile.name === filter)
+        .filter((profile) => filter === ALL_PROFILES || PROFILE_PREFIX + profile.directory === filter)
         .map((profile) => {
+          if (profile.error) {
+            return (
+              <List.Section key={profile.directory} title={profile.name}>
+                <List.Item
+                  icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+                  title={`Could not read ${profile.name}`}
+                  subtitle={profile.error}
+                  actions={retryActions}
+                />
+              </List.Section>
+            );
+          }
           const extensions = profile.extensions.filter((extension) => showBuiltInExtensions || !extension.builtIn);
           // Profiles without extensions get no section; they stay in the dropdown
           if (extensions.length === 0) return null;

@@ -1,4 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
+import { readFile } from "fs/promises";
 import { join } from "path";
 import { getSpaces } from "./dia";
 import { getProfiles, readJSON, type Profile } from "./profiles";
@@ -20,6 +21,8 @@ export type BrowserExtension = {
 export type ExtensionProfile = Profile & {
   isActive: boolean;
   extensions: BrowserExtension[];
+  /** Why the profile's extension settings couldn't be read. */
+  error?: string;
 };
 
 type Manifest = {
@@ -44,14 +47,24 @@ type ExtensionPreferences = {
   extensions?: { settings?: Record<string, ExtensionSettings>; pinned_extensions?: string[] };
 };
 
-/** Resolves a `__MSG_key__` placeholder from the extension's default locale. */
+/** Reads a JSON file; a missing file is undefined, any other read or parse error throws. */
+async function readOptionalJSON<T>(path: string): Promise<T | undefined> {
+  try {
+    return JSON.parse((await readFile(path, "utf-8")).replace(/^\uFEFF/, "")) as T;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+/** Replaces `__MSG_key__` placeholders (keys are case-insensitive) from the default locale; unknown keys stay as is. */
 async function localize(value: string | undefined, manifest: Manifest, extensionPath: string) {
-  const key = value?.match(/^__MSG_(.+)__$/)?.[1].toLowerCase();
-  if (!key) return value;
+  if (!value?.includes("__MSG_")) return value;
   const messages = await readJSON<Record<string, { message?: string }>>(
     join(extensionPath, "_locales", manifest.default_locale ?? "en", "messages.json"),
   );
-  return Object.entries(messages ?? {}).find(([k]) => k.toLowerCase() === key)?.[1].message;
+  const byKey = new Map(Object.entries(messages ?? {}).map(([key, entry]) => [key.toLowerCase(), entry.message]));
+  return value.replace(/__MSG_([\w@]+?)__/g, (match, key: string) => byKey.get(key.toLowerCase()) ?? match);
 }
 
 async function readExtension(
@@ -82,8 +95,8 @@ async function readExtension(
 
 async function readExtensions(profile: Profile): Promise<BrowserExtension[]> {
   const [preferences, securePreferences] = await Promise.all([
-    readJSON<ExtensionPreferences>(join(profile.path, "Preferences")),
-    readJSON<ExtensionPreferences>(join(profile.path, "Secure Preferences")),
+    readOptionalJSON<ExtensionPreferences>(join(profile.path, "Preferences")),
+    readOptionalJSON<ExtensionPreferences>(join(profile.path, "Secure Preferences")),
   ]);
   // Which file holds extension settings varies between builds, so merge both
   const settings = { ...preferences?.extensions?.settings, ...securePreferences?.extensions?.settings };
@@ -99,6 +112,7 @@ async function readExtensions(profile: Profile): Promise<BrowserExtension[]> {
 /** Profiles in Dia's sidebar order (Local State's order when Dia has no window), with their extensions. */
 export async function getExtensionProfiles(): Promise<ExtensionProfile[]> {
   const [profiles, spaces] = await Promise.all([getProfiles(), getSpaces().catch(() => undefined)]);
+  if (profiles.length === 0) throw new Error("No Dia profiles found. Open Dia at least once and try again.");
   const active = new Set(Object.values(spaces?.activeByWindow ?? {}));
   const position = (profile: Profile) => {
     const index = spaces?.names.indexOf(profile.name) ?? -1;
@@ -107,11 +121,14 @@ export async function getExtensionProfiles(): Promise<ExtensionProfile[]> {
   // Stable sort: profiles missing from Dia's list keep Local State's order
   profiles.sort((a, b) => position(a) - position(b));
   return Promise.all(
-    profiles.map(async (profile) => ({
-      ...profile,
-      isActive: active.has(profile.name),
-      extensions: await readExtensions(profile),
-    })),
+    profiles.map(async (profile): Promise<ExtensionProfile> => {
+      const isActive = active.has(profile.name);
+      try {
+        return { ...profile, isActive, extensions: await readExtensions(profile) };
+      } catch (error) {
+        return { ...profile, isActive, extensions: [], error: error instanceof Error ? error.message : String(error) };
+      }
+    }),
   );
 }
 
