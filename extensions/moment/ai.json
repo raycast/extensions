@@ -1,0 +1,68 @@
+{
+  "instructions": "Moment is a focus timer on this Mac. Its tools reach only the focus session or break in progress: they start a focus session, pause, resume, add time, stop, and read the time left.\n\nPass minutes only when the person says a number of minutes. Otherwise leave minutes out: Moment then starts a focus session of its own length, or adds 5 minutes. Never choose a length for the person.\n\nMoment receives no intention, task or topic through these tools. Never say a session is about something, and never invent an intention. The tools can't read past sessions, Stats or intentions. When the person asks about them, say so.\n\nTimes come back in seconds. Say them in whole minutes, as the timer shows them, or in seconds under a minute. A focus session or break runs for 90 minutes at most.\n\nA break is the rest between focus sessions; pausing stops the countdown. When a tool reports why it did nothing, tell the person in its words.",
+  "evals": [
+    {
+      "input": "@moment start a focus session",
+      "mocks": {
+        "start-focus": { "state": "running", "kind": "focus", "timeLeftSeconds": 1500, "durationSeconds": 1500 }
+      },
+      "expected": [
+        { "callsTool": "start-focus" },
+        { "not": { "callsTool": { "name": "start-focus", "arguments": { "minutes": { "matches": "\\d" } } } } }
+      ]
+    },
+    {
+      "input": "@moment focus for 45 minutes",
+      "mocks": {
+        "start-focus": { "state": "running", "kind": "focus", "timeLeftSeconds": 2700, "durationSeconds": 2700 }
+      },
+      "expected": [{ "callsTool": { "name": "start-focus", "arguments": { "minutes": 45 } } }]
+    },
+    {
+      "input": "@moment pause my timer",
+      "mocks": {
+        "pause-timer": { "state": "paused", "kind": "focus", "timeLeftSeconds": 742, "durationSeconds": 1500 }
+      },
+      "expected": [{ "callsTool": "pause-timer" }]
+    },
+    {
+      "input": "@moment resume",
+      "mocks": {
+        "resume-timer": { "state": "running", "kind": "focus", "timeLeftSeconds": 742, "durationSeconds": 1500 }
+      },
+      "expected": [{ "callsTool": "resume-timer" }]
+    },
+    {
+      "input": "@moment add ten minutes",
+      "mocks": {
+        "add-time": { "state": "running", "kind": "focus", "timeLeftSeconds": 1342, "durationSeconds": 2100 }
+      },
+      "expected": [{ "callsTool": { "name": "add-time", "arguments": { "minutes": 10 } } }]
+    },
+    {
+      "input": "@moment how long is left?",
+      "mocks": {
+        "time-left": { "state": "running", "kind": "focus", "timeLeftSeconds": 742, "durationSeconds": 1500 }
+      },
+      "expected": [{ "callsTool": "time-left" }, { "includes": "12 minutes" }]
+    },
+    {
+      "input": "@moment stop the timer",
+      "mocks": {
+        "stop-timer": { "state": "idle", "kind": "none", "timeLeftSeconds": 0, "durationSeconds": 0 }
+      },
+      "expected": [{ "callsTool": "stop-timer" }]
+    },
+    {
+      "input": "@moment start a focus session for my thesis",
+      "mocks": {
+        "start-focus": { "state": "running", "kind": "focus", "timeLeftSeconds": 1500, "durationSeconds": 1500 }
+      },
+      "expected": [
+        { "callsTool": "start-focus" },
+        { "meetsCriteria": "Doesn't say the session's topic or intention was saved in Moment" }
+      ],
+      "usedAsExample": false
+    }
+  ]
+}
