@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## [Update Icon] - {PR_MERGE_DATE}
+
+- Updated the extension icon to match the current Dia app icon, with a dark mode variant.
+
 ## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
 
 - Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
