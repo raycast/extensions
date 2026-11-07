@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "speak-reader",
+  "title": "Speak Reader",
+  "description": "Read any text aloud with natural Microsoft Edge voices in a floating glass reader with word highlighting and Markdown support. Free, no API key.",
+  "icon": "icon.png",
+  "author": "ethanlong",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "speak-selected-text",
+      "title": "Speak Selected Text",
+      "subtitle": "Speak Reader",
+      "description": "Read the selected text aloud. Run again while reading to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "speak-clipboard",
+      "title": "Speak Clipboard",
+      "subtitle": "Speak Reader",
+      "description": "Read the text on your clipboard aloud.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-speaking",
+      "title": "Stop Speaking",
+      "subtitle": "Speak Reader",
+      "description": "Close the reader and stop speaking.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "voice",
+      "title": "Voice",
+      "description": "The voice to read with. \"Last Used\" follows whatever you last picked in the reader's ⋯ menu.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Last Used (from the reader's menu)",
+          "value": "auto"
+        },
+        {
+          "title": "William — Australian",
+          "value": "en-AU-WilliamMultilingualNeural"
+        },
+        {
+          "title": "Natasha — Australian",
+          "value": "en-AU-NatashaNeural"
+        },
+        {
+          "title": "Ryan — British",
+          "value": "en-GB-RyanNeural"
+        },
+        {
+          "title": "Thomas — British",
+          "value": "en-GB-ThomasNeural"
+        },
+        {
+          "title": "Sonia — British",
+          "value": "en-GB-SoniaNeural"
+        },
+        {
+          "title": "Libby — British",
+          "value": "en-GB-LibbyNeural"
+        },
+        {
+          "title": "Connor — Irish",
+          "value": "en-IE-ConnorNeural"
+        },
+        {
+          "title": "Mitchell — New Zealand",
+          "value": "en-NZ-MitchellNeural"
+        },
+        {
+          "title": "Andrew — American",
+          "value": "en-US-AndrewMultilingualNeural"
+        },
+        {
+          "title": "Brian — American",
+          "value": "en-US-BrianMultilingualNeural"
+        },
+        {
+          "title": "Christopher — American",
+          "value": "en-US-ChristopherNeural"
+        },
+        {
+          "title": "Ava — American",
+          "value": "en-US-AvaMultilingualNeural"
+        },
+        {
+          "title": "Emma — American",
+          "value": "en-US-EmmaMultilingualNeural"
+        }
+      ]
+    },
+    {
+      "name": "tableHeaders",
+      "title": "Tables",
+      "label": "Read column names with every cell",
+      "description": "On: each cell is read as \"Column: value\". Off: column names are read once at the start of a table, then each cell is read with a short pause, like a full stop.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
