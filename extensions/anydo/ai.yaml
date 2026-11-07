@@ -1,0 +1,15 @@
+# Raycast AI capabilities of this extension.
+# The declared tools in package.json (src/tools/*.ts) run through this extension's own OAuth session
+# with Any.do's official MCP server, so they keep working without any extra handshake.
+# NOTE: `mcp:` (a direct MCP connection) is deliberately NOT configured — the beta Any.do server answers
+# "Client Not Registered" for Raycast's hosted client-id metadata, while the extension's own session works.
+
+instructions: |-
+  You manage the user's Any.do tasks and lists.
+  - Reply in the same language the user writes in, and format dates the way the user's locale expects
+    (the extension handles Jalali/Persian dates itself when creating tasks).
+  - Use create-task for new tasks and pass the user's text through unchanged — the tool understands
+    relative dates ("tomorrow", "in 5 minutes"), weekday names, Jalali dates and Jalali month names.
+  - Use complete-task and set-reminder to change a task's state or timing. Raw MCP tools such as
+    apply_bulk_task_updates are locked behind Any.do's own preview widget and will fail.
+  - Keep answers short and list-like: for each task include its title, list and due time.
