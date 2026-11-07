@@ -2,6 +2,8 @@
 
 A fast Raycast extension to search and switch Google Chrome tabs across all open windows.
 
+![Search for raycast, choose a tab from another window with the arrow keys, and press Return to switch to it](media/chrome-tab-switcher-demo.gif)
+
 ## Features
 
 - **Cross-Window Tab Search**: Quickly find any open Chrome tab across multiple windows.
@@ -13,7 +15,7 @@ A fast Raycast extension to search and switch Google Chrome tabs across all open
 
 1. Run the `Search Chrome Tabs` command in Raycast (assigning a hotkey is recommended).
 2. Type to filter open tabs by title or URL.
-3. Press `↵` (Enter) to switch to the selected tab.
+3. Use `↑` / `↓` to choose a tab, then press `↵` (Enter) to switch to it.
 
 ## Permissions
 
@@ -21,13 +23,3 @@ On first run, macOS will prompt you to allow Raycast to control Google Chrome.
 If you accidentally denied permission:
 1. Open **System Settings -> Privacy & Security -> Automation**.
 2. Enable **Google Chrome** under **Raycast**.
-
----
-
-## 使い方（日本語）
-
-Google Chrome で開いているすべてのウィンドウのタブを横断検索し、一瞬で切り替える Raycast 拡張機能です。
-
-1. Raycast で `Search Chrome Tabs` を起動（ショートカットキー設定推奨）
-2. キーワードを入力してタブを絞り込み
-3. `Enter` キーでそのタブとウィンドウに切り替え
