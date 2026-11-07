@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Render conversation replies as safe Markdown with tables and unchanged code blocks, while keeping original terminal and approval screens literal. Document optional personal command hotkeys.
+
 - Preserve repeated answer endings during Herdr extraction and merge per-turn history writes across terminal views so returning to an earlier view cannot erase newer messages.
 
 - Add local Herdr conversation rows for explicit Raycast messages and conservatively isolated per-turn output, with bounded history, streaming replacement and honest raw-screen fallbacks. Keep approvals tied to original-screen review and preserve no-replay delivery safeguards.

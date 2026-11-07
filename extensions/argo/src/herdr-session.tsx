@@ -25,6 +25,7 @@ import { openHerdr } from "./herdr-connection.js";
 import { HcConversation } from "./herdr-conversation.js";
 import type { HcTurn } from "./herdr-conversation.js";
 import { safeMarkdown } from "./core.js";
+import { messageMarkdown } from "./message-format.js";
 
 export type HcCapture = { text: string; complete: boolean; how: string; why?: string };
 export type HcScreen = {
@@ -133,14 +134,14 @@ export function hcScreenMarkdown(screen?: HcScreen, heading?: string): string {
 }
 
 function hcMessageMarkdown(turn: HcTurn, user: boolean): string {
-  if (user) return safeMarkdown(sanitizeTerminalText(turn.text));
+  if (user) return messageMarkdown(sanitizeTerminalText(turn.text));
   if (turn.state === "rejected") return "This message was not submitted. Your draft is kept.";
   if (turn.state === "unknown")
     return "Input delivery is uncertain. Inspect the raw terminal before acknowledging; nothing retries automatically.";
   if (!turn.isolated)
     return "This terminal redraw could not be separated reliably into a reply. Use **View Raw Terminal** to inspect it. Earlier screen history is not imported as a message.";
   if (turn.output)
-    return `${literal(sanitizeTerminalText(turn.output))}${turn.state === "paused" ? "\n\nCapture paused. Later output is not attributed to this message." : ""}`;
+    return `${messageMarkdown(sanitizeTerminalText(turn.output))}${turn.state === "paused" ? "\n\nCapture paused. Later output is not attributed to this message." : ""}`;
   return turn.state === "paused"
     ? "Capture paused when the view closed or another turn began. Use **View Raw Terminal** for current output."
     : turn.state === "done"

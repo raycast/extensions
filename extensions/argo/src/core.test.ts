@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { messageMarkdown } from "./message-format.js";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -225,6 +226,7 @@ function viewHarness() {
       RequestHistory: "RequestHistory",
       Toast: { Style: { Failure: "failure", Success: "success" } },
       safeMarkdown,
+      messageMarkdown,
       interactionMarkdown,
       originalParametersMarkdown,
       OriginalParametersAction: "OriginalParametersAction",
@@ -1834,4 +1836,46 @@ test("Agent Sessions opens the catalogue even with a saved recent session while 
   const result = Sessions({ launchContext: { recent: true } });
   assert.equal(result.type, "SessionCommand");
   assert.equal(result.props.recent, false);
+});
+
+test("native conversation preserves Markdown tables and literal fenced code in message details", () => {
+  const h = viewHarness();
+  const body =
+    "## Results\n\n| Item | State |\n| :--- | ---: |\n| SSH | Ready |\n\n```typescript\nconst url = 'https://example.test';\n```";
+  const feed = {
+    snapshot: {
+      session: sessionFixture(),
+      messages: [{ id: "table-reply", role: "assistant", text: body, state: "completed", createdAt: 1 }],
+      interactions: [],
+    },
+    connection: "live",
+    connectionKey: "bridge-a",
+    hub: { current: { now: () => 1000 } },
+  };
+  const { Conversation } = viewLogic(
+    [
+      "project",
+      "title",
+      "sessionStatus",
+      "knownOnline",
+      "messageStatus",
+      "sendUnavailable",
+      "conversationSelection",
+      "interactionGroups",
+      "Conversation",
+    ],
+    {
+      ...h.globals,
+      useHub: () => feed,
+      useDraft: () => ({ text: "", ready: true }),
+      useNavigation: () => ({ push() {} }),
+    },
+  );
+  let tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  h.reset();
+  tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  const row = views(tree).find((v) => v.props.id === "table-reply")!;
+  assert.match(row.props.detail.props.markdown, /\| :--- \| ---: \|/);
+  assert.match(row.props.detail.props.markdown, /const url = 'https:\/\/example.test';/);
+  assert.equal(views(row).find((v) => v.props.title === "Copy Selected Message")!.props.content, body);
 });

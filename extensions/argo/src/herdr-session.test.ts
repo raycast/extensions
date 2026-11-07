@@ -7,6 +7,7 @@ import test from "node:test";
 import ts from "typescript";
 import { HcConversation } from "./herdr-conversation.js";
 import { safeMarkdown } from "./core.js";
+import { messageMarkdown } from "./message-format.js";
 import { HcError, hcProgramFingerprint, hcTargetKey, type HcTarget, type HcTerminal } from "./herdr.js";
 import { literal } from "./interaction-format.js";
 import type { HcLocalState as LocalState, HcScreen } from "./herdr-session.js";
@@ -405,7 +406,12 @@ function componentHarness(names: string[], globals: Record<string, unknown>) {
     ...localLogic,
     HcConversation,
     safeMarkdown,
-    ...logic(["hcMessageMarkdown"], { safeMarkdown, sanitizeTerminalText: helpers.sanitizeTerminalText }),
+    messageMarkdown,
+    ...logic(["hcMessageMarkdown"], {
+      safeMarkdown,
+      messageMarkdown,
+      sanitizeTerminalText: helpers.sanitizeTerminalText,
+    }),
     element: (type: unknown, props: object, ...children: unknown[]) => ({ type, props: { ...props, children } }),
     Fragment: "Fragment",
     Action: Object.assign(member("Action"), {
@@ -1322,4 +1328,46 @@ test("All Sessions return refreshes saved messages from another view without sen
     /answer in another view/,
   );
   assert.equal(h.requests.length, 0);
+});
+
+test("derived HC replies render Markdown tables while raw screens and dialog review stay literal", async () => {
+  const baseline = screen({
+    terminal: terminal({ status: { state: "idle" }, turn: 0 }),
+    capture: { text: "old history\n", complete: true, how: "screen" },
+  });
+  const h = viewHarness(baseline);
+  h.render();
+  await settle();
+  h.render().props.onSearchTextChange("show table");
+  await settle();
+  await h.action("Send Message");
+  const body =
+    "## 检查结果\n\n| 项目 | 状态 |\n| :--- | ---: |\n| SSH | 正常 |\n\n```typescript\nconst url = 'https://example.test';\n```";
+  const next = screen({
+    terminal: terminal({ status: { state: "done" }, turn: 1 }),
+    capture: { text: baseline.capture.text + body, complete: true, how: "screen" },
+  });
+  h.feed.latest.current = next;
+  h.feed.screen = next;
+  h.render();
+  await settle();
+  let view = h.render();
+  const reply = views(view).find((v) => v.props.id?.startsWith("reply:"))!;
+  assert.match(reply.props.detail.props.markdown, /^## 检查结果/);
+  assert.match(reply.props.detail.props.markdown, /\| :--- \| ---: \|/);
+  assert.match(reply.props.detail.props.markdown, /const url = 'https:\/\/example.test';/);
+  await h.action("Read Full Width");
+  assert.equal(h.render().props.markdown, reply.props.detail.props.markdown);
+  await h.action("View Raw Terminal");
+  view = h.render();
+  assert.equal(
+    views(view).find((v) => v.props.id === "screen")!.props.detail.props.markdown,
+    literal(next.capture.text),
+  );
+  await h.action("Review Terminal Controls");
+  view = h.render();
+  const reviewed = views(view).find((v) => v.props.id === "review-screen")!;
+  assert.match(reviewed.props.detail.props.markdown, /Current Terminal Dialog/);
+  assert.ok(reviewed.props.detail.props.markdown.includes(literal(next.capture.text)));
+  assert.equal(h.requests.length, 1);
 });

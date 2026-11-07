@@ -26,6 +26,7 @@ import { DiscoverBridges, Setup } from "./onboarding.js";
 import { portRange } from "./discovery.js";
 import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
 import { Compose } from "./compose.js";
+import { messageMarkdown } from "./message-format.js";
 import { HcClient, hcTargetKey, type HcTarget } from "./herdr.js";
 import { HerdrSession } from "./herdr-session.js";
 import { useHerdr, hcGroup, hcStatus } from "./herdr-feed.js";
@@ -1333,7 +1334,7 @@ function Conversation({
               icon={message.role === "user" ? Icon.Person : Icon.Message}
               detail={
                 <List.Item.Detail
-                  markdown={safeMarkdown(message.text)}
+                  markdown={messageMarkdown(message.text)}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
