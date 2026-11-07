@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "anon-li",
+    title: "anon.li",
+    description:
+      "Manage anon.li email aliases, recipients, end-to-end encrypted file drops and encrypted forms from your AI assistant. anon.li is an open-source (AGPL-3.0) privacy suite: aliases forward to your real inbox, and Drop files are encrypted in the browser. Hosted remote Streamable HTTP server with OAuth sign-in, no API key to paste. Free plan available.",
+    icon: "https://anon.li/android-chrome-512x512.png",
+    homepage: "https://anon.li/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://anon.li/api/mcp"],
+    },
+    remoteUrl: "https://anon.li/api/mcp",
+  },
+  {
     name: "postel",
     title: "Postel",
     description:
