@@ -15,6 +15,7 @@ export default function Command() {
   const {
     data: tabs = [],
     isLoading,
+    error,
     revalidate,
   } = useCachedPromise(listTabs, [], {
     failureToastOptions: { title: "Failed to load tabs" },
@@ -41,9 +42,20 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setQuery} searchBarPlaceholder="Search tabs...">
-      {!isLoading && (
+      {!isLoading && error && tabs.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Failed to Load Tabs"
+          description={error.message || "Please check Raycast automation permissions for Google Chrome."}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : !isLoading ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title={tabs.length === 0 ? "No open tabs" : "No matching tabs"} />
-      )}
+      ) : null}
       {visible.map((tab) => (
         <List.Item
           key={tab.id}

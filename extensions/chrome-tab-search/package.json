@@ -18,7 +18,6 @@
     {
       "name": "search-tabs",
       "title": "Search Chrome Tabs",
-      "subtitle": "Chrome Tab Search",
       "description": "Search open tabs across all Chrome windows and switch to them",
       "mode": "view"
     }
