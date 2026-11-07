@@ -147,7 +147,6 @@ export const BROWSERS: Record<string, BrowserConfig> = {
   },
 };
 
-
 export function getSelectedBrowser(): BrowserConfig {
   const { browser } = getPreferenceValues<ExtensionPreferences>();
   return BROWSERS[browser] ?? BROWSERS["chrome"];
