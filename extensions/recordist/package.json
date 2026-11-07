@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recordist",
+  "title": "Recordist",
+  "description": "Search your Recordist meetings, start and stop recordings, and add markers, right from Raycast. Requires the Recordist app to be running.",
+  "icon": "extension-icon.png",
+  "author": "recordist",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "meeting notes",
+    "meeting recorder",
+    "transcript",
+    "action items",
+    "decisions"
+  ],
+  "commands": [
+    {
+      "name": "search-meetings",
+      "title": "Search Meetings",
+      "subtitle": "Recordist",
+      "description": "Find a meeting by what was said, and read its summary, decisions and action items.",
+      "mode": "view",
+      "keywords": [
+        "notes",
+        "transcript",
+        "action items",
+        "decisions"
+      ]
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "Recordist",
+      "description": "Start a recording, or bring up Recordist's card to ask first, as you set it in Recordist.",
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "meeting"
+      ],
+      "preferences": [
+        {
+          "name": "alwaysAsk",
+          "title": "Asking First",
+          "label": "Always show Recordist's card before recording",
+          "description": "Recordist asks with its own card, and nothing records until you answer it there. Without this, the command starts at once when Recordist allows other programs to start recordings.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "Recordist",
+      "description": "Stop the recording, and let Recordist write it up.",
+      "mode": "no-view",
+      "keywords": [
+        "end",
+        "finish"
+      ]
+    },
+    {
+      "name": "add-marker",
+      "title": "Add Marker",
+      "subtitle": "Recordist",
+      "description": "Mark this moment in the recording, with an optional label.",
+      "mode": "no-view",
+      "keywords": [
+        "bookmark",
+        "flag",
+        "highlight"
+      ],
+      "arguments": [
+        {
+          "name": "label",
+          "placeholder": "Label",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-recordist",
+      "title": "Open Recordist",
+      "subtitle": "Recordist",
+      "description": "Bring Recordist to the front, or open its download page if it is not installed.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Token",
+      "description": "Leave empty to use the token Recordist keeps for your own tools. Or paste a token from Recordist: Settings, Integrations, New token for another program.",
+      "placeholder": "Recordist's own token",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
