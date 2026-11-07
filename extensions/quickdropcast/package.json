@@ -1,0 +1,59 @@
+{
+  "name": "quickdropcast",
+  "type": "module",
+  "title": "QuickDropcast",
+  "description": "Send text and files through QuickDrop on macOS.",
+  "icon": "quickdropcast-transfer.png",
+  "author": "angelcontreras",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "commands": [
+    {
+      "name": "send-clipboard",
+      "title": "Send Clipboard",
+      "description": "Share with QuickDrop",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-files",
+      "title": "Send Files",
+      "description": "Share with QuickDrop",
+      "mode": "view"
+    },
+    {
+      "name": "send-text",
+      "title": "Send Text",
+      "description": "Share with QuickDrop",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "build:native": "bash scripts/build-native.sh assets/QuickDropcastBridge.app universal",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.8.0"
+  },
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
