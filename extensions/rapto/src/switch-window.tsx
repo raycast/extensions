@@ -31,7 +31,7 @@ function WindowItem({ window }: { window: RaptoWindow }) {
   const accessories: List.Item.Accessory[] = [];
   if (window.display) accessories.push({ text: window.display });
   accessories.push({
-    tag: window.isCurrentDesktop ? "This desktop" : `Desktop ${window.desktop}`,
+    tag: window.isFullScreen ? "Full Screen" : window.isCurrentDesktop ? "This desktop" : `Desktop ${window.desktop}`,
   });
 
   return (

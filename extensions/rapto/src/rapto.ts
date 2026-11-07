@@ -10,6 +10,8 @@ export type RaptoWindow = {
   title: string;
   appPath?: string;
   desktop: number;
+  /** In full screen, on a space of its own. Sent by Rapto 5.61 and later. */
+  isFullScreen?: boolean;
   isCurrentDesktop: boolean;
   display?: string;
 };
