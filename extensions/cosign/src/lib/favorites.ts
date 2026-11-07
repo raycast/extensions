@@ -90,7 +90,7 @@ async function forgetId(kind: FavoriteKind) {
 }
 
 /**
- * A failed read or write keeps the cached id unless its list is really gone (deleted on the web). A rate limit, a timeout or going offline says
+ * A failed write keeps the cached id unless its list is really gone (deleted on the web). A rate limit, a timeout or going offline says
  * nothing about the list, and forgetting the id then costs a `find_lists` call on the next load.
  */
 async function forgetIdIfGone(kind: FavoriteKind) {
@@ -142,13 +142,8 @@ export function fetchFavorites(): Promise<Favorites> {
 }
 
 async function readFavorites(): Promise<Favorites> {
-  try {
-    const [people, organizations] = await Promise.all([readList("people"), readList("organizations")]);
-    return { people, organizations };
-  } catch (error) {
-    await Promise.all([forgetIdIfGone("people"), forgetIdIfGone("organizations")]);
-    throw error;
-  }
+  const [people, organizations] = await Promise.all([readList("people"), readList("organizations")]);
+  return { people, organizations };
 }
 
 /** Drop any read that began before the write, so it can't show the old state. */
