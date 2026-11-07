@@ -152,12 +152,22 @@ export const MOCK_MESSAGES: MockMessageResult[] = [
   },
 ];
 
+/** Participants seen in a mock chat's messages, so sender checks behave as with real data. */
+function mockParticipants(chatId: string): BeeperDesktop.Chat["participants"] {
+  const items = [{ id: "mock-self", fullName: "You", isSelf: true }];
+  for (const message of MOCK_MESSAGES) {
+    if (message.chatId !== chatId || items.some((participant) => participant.id === message.senderName)) continue;
+    items.push({ id: message.senderName, fullName: message.senderName, isSelf: message.isSender });
+  }
+  return { hasMore: false, items, total: items.length };
+}
+
 /** Convert MockChatItem to BeeperDesktop.Chat for view components */
 export function mockChatToBeeperChat(item: MockChatItem): BeeperDesktop.Chat {
   return {
     id: item.id,
     accountID: item.accountId,
-    participants: { hasMore: false, items: [], total: 0 },
+    participants: mockParticipants(item.id),
     type: item.type === "space" ? "group" : item.type,
     unreadCount: item.unreadCount ?? 0,
     isArchived: item.isArchived ?? false,

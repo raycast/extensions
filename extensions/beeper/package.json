@@ -10,7 +10,8 @@
   "contributors": [
     "pernielsentikaer",
     "clins1994",
-    "gareth_price"
+    "gareth_price",
+    "itsdanielsultan"
   ],
   "license": "MIT",
   "platforms": [
@@ -47,6 +48,85 @@
       "subtitle": "Beeper Desktop",
       "description": "See unread chats from Beeper Desktop",
       "mode": "view"
+    },
+    {
+      "name": "awaiting-reply",
+      "title": "Awaiting Reply",
+      "description": "Find direct conversations where the other person sent the last message, read the context, mark them handled, or hand off a draft to Beeper.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "lookbackDays",
+          "type": "dropdown",
+          "title": "Conversation Activity Window",
+          "description": "Scan direct conversations in the primary inbox active within this period.",
+          "default": "14",
+          "required": false,
+          "data": [
+            {
+              "title": "7 days",
+              "value": "7"
+            },
+            {
+              "title": "14 days",
+              "value": "14"
+            },
+            {
+              "title": "30 days",
+              "value": "30"
+            }
+          ]
+        },
+        {
+          "name": "includeMuted",
+          "type": "checkbox",
+          "title": "Muted Conversations",
+          "description": "Include muted conversations in the reply queue.",
+          "label": "Include muted direct conversations",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "awaiting-reply-menu-bar",
+      "title": "Awaiting Reply Count",
+      "description": "Show how many conversations are waiting for your reply in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "lookbackDays",
+          "type": "dropdown",
+          "title": "Conversation Activity Window",
+          "description": "Scan direct conversations in the primary inbox active within this period.",
+          "default": "14",
+          "required": false,
+          "data": [
+            {
+              "title": "7 days",
+              "value": "7"
+            },
+            {
+              "title": "14 days",
+              "value": "14"
+            },
+            {
+              "title": "30 days",
+              "value": "30"
+            }
+          ]
+        },
+        {
+          "name": "includeMuted",
+          "type": "checkbox",
+          "title": "Muted Conversations",
+          "description": "Include muted conversations in the reply queue.",
+          "label": "Include muted direct conversations",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "contacts",
