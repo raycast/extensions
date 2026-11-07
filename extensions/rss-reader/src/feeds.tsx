@@ -17,6 +17,7 @@ import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
 import RenameFeedForm from "./rename-form";
 import DuplicateFeedForm from "./duplicate-form";
+import FeedTimeZoneForm from "./time-zone-form";
 
 export interface Feed {
   url: string;
@@ -24,6 +25,8 @@ export interface Feed {
   link?: string;
   icon: Image.ImageLike;
   originalTitle?: string;
+  /** IANA time zone for this feed's dates that have none; local time when unset. */
+  timeZone?: string;
 }
 
 function FeedsList() {
@@ -74,7 +77,10 @@ function FeedsList() {
           key={item.url}
           title={item.title}
           icon={item.icon}
-          accessories={[{ text: item.link }]}
+          accessories={[
+            ...(item.timeZone ? [{ tag: item.timeZone, tooltip: "Time zone for dates without one" }] : []),
+            { text: item.link },
+          ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section title={item.title}>
@@ -117,6 +123,11 @@ function FeedsList() {
                   title="Duplicate Feed"
                   target={<DuplicateFeedForm feed={item} />}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                />
+                <Action.Push
+                  icon={Icon.Globe}
+                  title="Set Time Zone"
+                  target={<FeedTimeZoneForm feed={item} onSave={revalidate} />}
                 />
               </ActionPanel.Section>
               {feeds.length > 1 && (
