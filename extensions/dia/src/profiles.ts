@@ -15,7 +15,7 @@ type PreferencesFile = {
   browser?: { theme?: { user_color2?: number } };
 };
 
-async function readJSON<T>(path: string): Promise<T | undefined> {
+export async function readJSON<T>(path: string): Promise<T | undefined> {
   try {
     const content = await readFile(path, "utf-8");
     return JSON.parse(content.replace(/^\uFEFF/, "")) as T;
@@ -30,31 +30,48 @@ function toHexColor(argb: number | undefined): string | undefined {
   return `#${((argb >>> 0) & 0xffffff).toString(16).padStart(6, "0")}`;
 }
 
+export type Profile = {
+  /** Profile folder inside Dia's User Data, such as `Default` or `Profile 2`. */
+  directory: string;
+  path: string;
+  name: string;
+  /** Theme color as `#rrggbb`. */
+  color?: string;
+};
+
 /**
- * Maps each Dia profile (space) name to its theme color as `#rrggbb`, read-only from Dia's Chromium data.
+ * Lists Dia's profiles (spaces) in Local State's `profiles_order`, read-only from Dia's Chromium data.
  * The color comes from the profile's `browser.theme.user_color2` preference, falling back to the
- * `profile_color_seed` in Local State. When two profiles share a name, the first in `profiles_order` wins.
- * Returns an empty map when the data is missing or unreadable.
+ * `profile_color_seed` in Local State. Returns an empty list when the data is missing or unreadable.
  */
-export async function getProfileColors(): Promise<Record<string, string>> {
+export async function getProfiles(): Promise<Profile[]> {
   const localState = await readJSON<LocalState>(join(USER_DATA_PATH, "Local State"));
   const infoCache = localState?.profile?.info_cache ?? {};
   const order = localState?.profile?.profiles_order ?? [];
   const directories = [...new Set([...order.filter((dir) => dir in infoCache), ...Object.keys(infoCache)])];
 
-  const profiles = await Promise.all(
+  return Promise.all(
     directories.map(async (directory) => {
       const info = infoCache[directory];
-      const preferences = await readJSON<PreferencesFile>(join(USER_DATA_PATH, directory, "Preferences"));
+      const path = join(USER_DATA_PATH, directory);
+      const preferences = await readJSON<PreferencesFile>(join(path, "Preferences"));
       return {
+        directory,
+        path,
         name: info.name || directory,
         color: toHexColor(preferences?.browser?.theme?.user_color2) ?? toHexColor(info.profile_color_seed),
       };
     }),
   );
+}
 
+/**
+ * Maps each Dia profile (space) name to its theme color as `#rrggbb`.
+ * When two profiles share a name, the first in `profiles_order` wins.
+ */
+export async function getProfileColors(): Promise<Record<string, string>> {
   const colors: Record<string, string> = {};
-  for (const { name, color } of profiles) {
+  for (const { name, color } of await getProfiles()) {
     if (color && !(name in colors)) colors[name] = color;
   }
   return colors;
