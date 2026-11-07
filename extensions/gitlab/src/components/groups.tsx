@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons } from "../icons";
-import { getFirstChar, getPreferences } from "../utils";
+import { getFirstChar, getInstance, getPreferences } from "../utils";
 import { useAvatars } from "../hooks";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { EpicList } from "./epics";
@@ -19,7 +19,7 @@ function webUrl(group: Group, partial: string) {
 }
 
 export function usePinnedGroups() {
-  return useCachedState<Group[]>("pinned-groups", []);
+  return useCachedState<Group[]>(`pinned-groups_${getInstance()}`, []);
 }
 
 export function GroupListItem(props: { group: Group; nameOnly?: boolean }) {

@@ -3,7 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { getFirstChar, getPreferences, projectDropdownTitle, projectIconUrl } from "../utils";
+import { getFirstChar, getInstance, getPreferences, projectDropdownTitle, projectIconUrl } from "../utils";
 import { useAvatars } from "../hooks";
 import {
   CloneProjectInGitPod,
@@ -33,7 +33,7 @@ export enum ProjectScope {
 }
 
 export function usePinnedProjects() {
-  return useCachedState<Project[]>("project-search-pinned", []);
+  return useCachedState<Project[]>(`project-search-pinned_${getInstance()}`, []);
 }
 
 export function ProjectListItem(props: {
