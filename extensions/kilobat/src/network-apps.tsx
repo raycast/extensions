@@ -12,6 +12,8 @@ type History = Map<string, { down: number[]; up: number[] }>;
 const push = (values: number[], value: number) => [...values, value].slice(-KEEP);
 const rate = (app: NetworkApp) => app.downloadBytesPerSecond + app.uploadBytesPerSecond;
 
+const historyKey = (id: string, grouped: boolean) => (grouped ? "group:" : "app:") + id;
+
 /** Helpers under the app they belong to, as the app's list shows them. */
 function group(apps: NetworkApp[], grouped: boolean): NetworkApp[] {
   if (!grouped) return apps;
@@ -60,14 +62,14 @@ export default function Command() {
         };
         let down = 0,
           up = 0;
+        // Raw and grouped rows keep separate histories, so every row either view shows gets one sample per poll.
         for (const app of status.apps) {
-          record(app.id, app.downloadBytesPerSecond, app.uploadBytesPerSecond);
+          record(historyKey(app.id, false), app.downloadBytesPerSecond, app.uploadBytesPerSecond);
           down += app.downloadBytesPerSecond;
           up += app.uploadBytesPerSecond;
         }
         for (const owner of group(status.apps, true))
-          if (owner.members && owner.members.length > 1)
-            record(owner.id, owner.downloadBytesPerSecond, owner.uploadBytesPerSecond);
+          record(historyKey(owner.id, true), owner.downloadBytesPerSecond, owner.uploadBytesPerSecond);
         record("mac", down, up);
         setApps(status.apps);
         setError(undefined);
@@ -108,7 +110,7 @@ export default function Command() {
   );
 
   const item = (app: NetworkApp) => {
-    const past = history.current.get(app.id) ?? { down: [], up: [] };
+    const past = history.current.get(app.id === "mac" ? "mac" : historyKey(app.id, grouped)) ?? { down: [], up: [] };
     const now = rate(app);
     const count = app.processIDs.length;
     const subtitle = `${now >= 1 ? formatRate(now) : "Idle"} · ${count} process${count === 1 ? "" : "es"}`;
