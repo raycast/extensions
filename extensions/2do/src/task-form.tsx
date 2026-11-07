@@ -1,19 +1,52 @@
 import { Action, ActionPanel, Form, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
-import { List, saveTask, Tag, tagOptions, Task, taskToValues, TaskValues, twoDo } from "./2do";
+import {
+  ACTIONS,
+  actionValueError,
+  List,
+  saveTask,
+  Tag,
+  tagOptions,
+  Task,
+  taskToValues,
+  TaskValues,
+  twoDo,
+} from "./2do";
+import { PageInfo } from "./link";
 
-// Creates a task, or edits `task` when given.
-export function TaskForm({ task, onSaved }: { task?: Task; onSaved?: () => void }) {
+// Creates a task, or edits `task` when given. `link` prefills a new task from a web page, with
+// the page as the task's link.
+export function TaskForm({
+  task,
+  link,
+  onSaved,
+}: {
+  task?: Task;
+  link?: PageInfo & { url: string };
+  onSaved?: () => void;
+}) {
   const { pop } = useNavigation();
   const lists = useCachedPromise(() => twoDo<{ list: List[] }>("list_lists").then((r) => r.list));
   const tags = useCachedPromise(() => twoDo<{ tags: Tag[] }>("list_tags").then((r) => r.tags));
 
-  const { handleSubmit, itemProps } = useForm<TaskValues>({
-    initialValues: task && taskToValues(task),
-    validation: { title: FormValidation.Required },
+  const { handleSubmit, itemProps, values } = useForm<TaskValues>({
+    initialValues: task
+      ? taskToValues(task)
+      : {
+          action_type: link ? "url" : "none",
+          action_value: link?.url ?? "",
+          ...(link && { title: link.title, notes: link.description }),
+        },
+    validation: {
+      title: FormValidation.Required,
+      action_value: (v): string | undefined => actionValueError(values.action_type, v),
+    },
     async onSubmit(v) {
       try {
-        await saveTask(v, task);
+        // Compare with the task as it is now, not as the list loaded it: an action or list changed in
+        // 2Do since still counts as changed when the form sets it back.
+        const current = task && (await twoDo<{ task: Task }>("get_task", { task_id: task.task_id })).task;
+        await saveTask(v, current);
         if (task) {
           await showToast({ style: Toast.Style.Success, title: "Task updated" });
           onSaved?.();
@@ -39,6 +72,21 @@ export function TaskForm({ task, onSaved }: { task?: Task; onSaved?: () => void 
     >
       <Form.TextField title="Title" placeholder="Task" {...itemProps.title} />
       <Form.TextArea title="Notes" placeholder="Notes" {...itemProps.notes} />
+      {values.action_type !== undefined && (
+        <Form.Dropdown title="Action" {...itemProps.action_type}>
+          <Form.Dropdown.Item value="none" title="None" />
+          {Object.entries(ACTIONS).map(([type, a]) => (
+            <Form.Dropdown.Item key={type} value={type} title={a.title} />
+          ))}
+        </Form.Dropdown>
+      )}
+      {values.action_type && values.action_type !== "none" && (
+        <Form.TextField
+          title={ACTIONS[values.action_type].label}
+          placeholder={ACTIONS[values.action_type].placeholder}
+          {...itemProps.action_value}
+        />
+      )}
       <Form.Dropdown title="List" storeValue={!task} {...itemProps.list_id}>
         {lists.data?.map((l) => (
           <Form.Dropdown.Item key={l.list_id} value={l.list_id} title={l.title} />

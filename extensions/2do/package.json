@@ -28,6 +28,12 @@
       "mode": "view"
     },
     {
+      "name": "add-link",
+      "title": "Add Link",
+      "description": "Add a web page to 2Do as a task, titled and described from the page.",
+      "mode": "view"
+    },
+    {
       "name": "view-tasks",
       "title": "View Tasks",
       "description": "Browse 2Do tasks by scope, list, or smart list, and edit, complete, or open them.",
