@@ -6,9 +6,10 @@ import { FormValidation, useForm } from "@raycast/utils";
 
 interface CreateProps {
   connectionToEdit?: ISSHConnection;
+  connectionToDuplicate?: ISSHConnection;
 }
 
-export default function Main({ connectionToEdit }: CreateProps) {
+export default function Main({ connectionToEdit, connectionToDuplicate }: CreateProps) {
   const isEditing = !!connectionToEdit;
   const { pop } = useNavigation();
 
@@ -19,7 +20,10 @@ export default function Main({ connectionToEdit }: CreateProps) {
     validation: {
       name: FormValidation.Required,
     },
-    initialValues: connectionToEdit ?? {},
+    initialValues: connectionToEdit ?? {
+      ...connectionToDuplicate,
+      name: connectionToDuplicate ? `${connectionToDuplicate.name}-duplicate` : undefined,
+    },
   });
 
   async function saveConnection(connection: ISSHConnection) {
