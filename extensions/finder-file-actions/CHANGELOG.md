@@ -1,5 +1,9 @@
 # Finder File Actions Changelog
 
+## [Collapse Selected Files] - {PR_MERGE_DATE}
+
+- Add preference to collapse the selected files list into a single summary row in Move to Folder and Copy to Folder
+
 ## [Finder-native undo and filename handling] - 2026-08-07
 
 - Fixed "Create Text File" treating a typed filename as an extension and creating names such as `untitled.notes`
