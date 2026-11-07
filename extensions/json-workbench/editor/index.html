@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; worker-src 'none'"
+    />
+    <title>JSON Workbench</title>
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="mark">{ }</span><strong>JSON Workbench</strong><span class="local">Local Only</span>
+      </div>
+      <nav aria-label="File Actions">
+        <button id="pin" title="Always on Top" aria-label="Always on Top" aria-pressed="false">Pin</button>
+        <select id="output-format" aria-label="Copy and Save Format" title="Choose the copy and save format">
+          <option value="json">JSON</option>
+          <option value="yaml">YAML</option>
+          <option value="xml">XML</option>
+          <option value="typescript">TypeScript</option>
+          <option value="escaped">Escaped JSON</option>
+        </select>
+        <button id="open" title="Open File · ⌘O">Open</button>
+        <button id="paste" title="Replace input with clipboard contents · ⌘⇧V">Paste</button>
+        <button id="copy" title="Copy complete result · ⌘⇧C">Copy Result</button>
+        <button id="save" title="Save complete result · ⌘S">Save Result</button>
+      </nav>
+    </header>
+    <main class="single">
+      <section class="pane source-pane" aria-label="Input Editor">
+        <div class="pane-heading">
+          <span>Input <small id="input-name">Clipboard / Selection</small></span
+          ><span id="input-format">JSON</span>
+        </div>
+        <div id="source" class="editor"></div>
+      </section>
+      <div id="divider" role="separator" aria-label="Resize Panels" aria-orientation="vertical" tabindex="0"></div>
+      <section class="pane result-pane" aria-label="Result Preview">
+        <div class="pane-heading">
+          <span>Result <small id="result-info">Live Preview</small></span
+          ><span id="result-format">JSON</span>
+        </div>
+        <div id="result" class="editor"></div>
+      </section>
+    </main>
+    <div id="status" role="status" aria-live="polite">Paste JSON or open a file to start.</div>
+    <footer>
+      <span class="this-label" title="this refers to the parsed input">this</span>
+      <input
+        id="expression"
+        aria-label="JavaScript Expression"
+        placeholder=";Object.values(this).map(x => x.map(y => y.name))"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <button id="run" title="Run Expression · ⌘↵">↵</button>
+      <div class="tools">
+        <button id="format" title="Format Input · ⌘⇧F">{ }</button>
+        <button id="fold" title="Collapse All Nodes">Collapse</button>
+        <button id="unfold" title="Expand All Nodes">Expand</button>
+        <button id="compact" title="Minify JSON and copy · ⌥C">Minify & Copy</button>
+        <button id="escaped-copy" title="Minify and escape JSON, then copy · ⌥Backslash">Escape & Copy</button>
+        <button id="sort" title="Sort JSON keys recursively">Sort</button>
+        <select id="indent" aria-label="Indentation Spaces">
+          <option value="2">2 Spaces</option>
+          <option value="4">4 Spaces</option>
+        </select>
+      </div>
+    </footer>
+    <script src="editor.js"></script>
+  </body>
+</html>
