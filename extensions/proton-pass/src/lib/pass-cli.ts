@@ -310,10 +310,6 @@ export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Ite
     return shareId ? MOCK_ITEMS.filter((item) => listedUnder(item) === shareId) : MOCK_ITEMS;
   }
 
-  if (shareId && isSharedWithMe({ shareId })) {
-    return (await listItemsOfSources(sharedSources(await listItemShares()))).items;
-  }
-
   const knownVaults = vaults ?? (await listVaults());
   if (shareId) {
     const vault = knownVaults.find((candidate) => candidate.shareId === shareId);

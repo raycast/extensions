@@ -334,7 +334,12 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                     title="View Items"
                     icon={Icon.List}
                     target={
-                      <SearchItemsView initialVault={sharedWithMe} sortChoice={sortChoice} vaultOrder={vaultOrder} />
+                      <SearchItemsView
+                        initialVault={sharedWithMe}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        vaultOrder={vaultOrder}
+                      />
                     }
                   />
                   {sortMenu}

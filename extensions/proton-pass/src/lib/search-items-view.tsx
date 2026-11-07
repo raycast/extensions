@@ -151,7 +151,9 @@ export function SearchItemsView({
       if (!isLatest()) return;
       if (ended) throw ended;
       if (isFresh) return;
-      if (initialVault && itemsRef.current.length === 0) {
+      // Not for Shared with Me: an item shared with the user that is also in one of their vaults only shows with that
+      // vault, which takes listing the vaults too.
+      if (initialVault && !isSharedWithMe(initialVault) && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
           if (err instanceof PassCliError && err.type === "not_authenticated") throw err;
