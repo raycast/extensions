@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-os-versions",
+  "title": "Pomme Versions",
+  "description": "Current macOS, iOS, iPadOS, watchOS, tvOS, and visionOS versions, with release dates, build numbers, and patched CVEs for recent releases.",
+  "icon": "pomme-versions-icon.png",
+  "author": "seann",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "apple-os-versions",
+      "title": "Pomme Versions",
+      "description": "Show the latest release of each macOS, iOS, iPadOS, watchOS, tvOS, and visionOS major version",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Action to run when you press Enter on an OS version.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copyVersion",
+      "data": [
+        {
+          "title": "Copy Version",
+          "value": "copyVersion"
+        },
+        {
+          "title": "Copy Build",
+          "value": "copyBuild"
+        },
+        {
+          "title": "Show CVEs",
+          "value": "showCves"
+        },
+        {
+          "title": "Search CVE",
+          "value": "searchCve"
+        },
+        {
+          "title": "Open Apple Security Notes",
+          "value": "openSecurityNotes"
+        },
+        {
+          "title": "Open in SOFA",
+          "value": "openSofa"
+        }
+      ]
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Data",
+      "description": "How long to cache SOFA data before refreshing it. SOFA updates about hourly.",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "data": [
+        {
+          "title": "Every Time I Open It",
+          "value": "0"
+        },
+        {
+          "title": "If Older Than 1 Hour",
+          "value": "1"
+        },
+        {
+          "title": "If Older Than 4 Hours",
+          "value": "4"
+        },
+        {
+          "title": "If Older Than 12 Hours",
+          "value": "12"
+        },
+        {
+          "title": "Once a Day",
+          "value": "24"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--no-deprecation ray build",
+    "dev": "NODE_OPTIONS=--no-deprecation ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
