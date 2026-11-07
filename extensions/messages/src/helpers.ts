@@ -380,18 +380,22 @@ export function selectOTP(text: string): string | null {
   const codeLabelAfter =
     /^\s+(?:is\s+)?(?:your|the)\s+(?:(?:one[- ]time|verification|security)\s+)*(?:code|passcode|otp|pin)\b/i;
   const useLabel = /\b(?:use|enter|is)[\s:=#-]*$/i;
+  const expiry = /^[ \t]+\d{1,3}(?::[0-5]\d\b|[ \t-]*(?:s|secs?|seconds?|m|mins?|minutes?|h|hrs?|hours?|days?)\b)/i;
   const otherNumberLabel =
     /\b(?:ending\s+(?:in|with)|last\s+(?:4|four)(?:\s+digits)?|acct\.?|account|ref\.?|reference|call|phone|tel\.?)(?:\s+(?:number|no\.?|is))?[\s:#*•(-]*$/i;
 
   let bestCode: string | null = null;
   let bestScore = -1;
 
-  // Keep phone number groups together unless the text explicitly labels the first group as a code.
+  // Keep grouped numbers intact unless a code is followed by a duration or countdown.
   for (const match of text.matchAll(/\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+)\d+)*\b/g)) {
     const [group] = match;
     const before = text.slice(0, match.index);
     const hasCodeLabel = codeLabel.test(before);
-    const number = hasCodeLabel ? group.split(/[ \t]/, 1)[0] : group;
+    const hasUseLabel = useLabel.test(before);
+    const [first] = group.split(/[ \t]/, 1);
+    const afterFirst = text.slice(match.index + first.length);
+    const number = (hasCodeLabel || hasUseLabel) && expiry.test(afterFirst) ? first : group;
     if (!/^(?:\d{4,10}|\d{3,}-\d{3,})$/.test(number)) continue;
 
     const code = number.replace("-", "");
@@ -400,7 +404,7 @@ export function selectOTP(text: string): string | null {
     const after = text.slice(match.index + number.length);
     if (before.endsWith("+") || (!hasCodeLabel && otherNumberLabel.test(before))) continue;
 
-    const score = hasCodeLabel || codeLabelAfter.test(after) ? 2 : useLabel.test(before) ? 1 : 0;
+    const score = hasCodeLabel || codeLabelAfter.test(after) ? 2 : hasUseLabel ? 1 : 0;
     // A 3-4 split is also a local phone number, so require a code hint.
     if (score === 0 && /^\d{3}-\d{4}$/.test(number)) continue;
 
