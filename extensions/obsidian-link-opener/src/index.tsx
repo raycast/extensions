@@ -9,12 +9,13 @@ import {
   Keyboard,
   launchCommand,
   LaunchType,
+  open,
 } from "@raycast/api";
 import { GroupedNote } from "./types";
 import { scanVaultForUrls } from "./services/fileScanner";
 import { NoteGrouper } from "./services/noteGrouper";
 import { getPropertyIcon } from "./utils/propertyIcons";
-import open from "open";
+import { primaryShortcut } from "./utils/shortcuts";
 
 export default function Command() {
   const [notes, setNotes] = useState<GroupedNote[]>([]);
@@ -241,13 +242,13 @@ export default function Command() {
                       <Action.CopyToClipboard
                         content={item.url}
                         title="Copy URL"
-                        shortcut={{ modifiers: ["cmd"], key: "c" }}
+                        shortcut={primaryShortcut("c")}
                       />
                       <Action
                         title="Open URL in Default App"
                         icon={Icon.Globe}
                         onAction={() => handleUrlOpen(item.url, item.noteId)}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                        shortcut={primaryShortcut("o", ["shift"])}
                       />
                     </ActionPanel.Section>
                     {item.noteUrls && item.noteUrls.length > 1 && (
@@ -263,16 +264,13 @@ export default function Command() {
                                 string,
                                 Keyboard.Shortcut
                               > = {
-                                documentation: { modifiers: ["cmd"], key: "d" },
-                                docs: { modifiers: ["cmd"], key: "d" },
-                                help: { modifiers: ["cmd"], key: "h" },
-                                github: { modifiers: ["cmd"], key: "g" },
-                                webapp: {
-                                  modifiers: ["cmd", "shift"],
-                                  key: "w",
-                                },
-                                dashboard: { modifiers: ["cmd"], key: "b" },
-                                homepage: { modifiers: ["cmd"], key: "o" },
+                                documentation: primaryShortcut("d"),
+                                docs: primaryShortcut("d"),
+                                help: primaryShortcut("h"),
+                                github: primaryShortcut("g"),
+                                webapp: primaryShortcut("w", ["shift"]),
+                                dashboard: primaryShortcut("b"),
+                                homepage: primaryShortcut("o"),
                               };
 
                               return (
