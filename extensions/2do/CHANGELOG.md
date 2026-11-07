@@ -1,6 +1,6 @@
 # 2Do Changelog
 
-## [Links and Actions] - {PR_MERGE_DATE}
+## [Links and Actions] - 2026-11-07
 
 - Add Link command that creates a task from a web address, optionally reading the page's title and description
 - Set a task's 2Do action (link, call, message, email, visit, or Google search) when adding or editing it
