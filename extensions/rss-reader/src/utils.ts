@@ -1,5 +1,38 @@
 import { createHash } from "crypto";
-import type Parser from "rss-parser";
+import Parser from "rss-parser";
+
+/** Mikan Project nests each item's date in `<torrent xmlns="https://mikanani.me/0.1/"><pubDate>`. */
+type TorrentFields = {
+  torrent?: { $?: { xmlns?: string }; pubDate?: string[] };
+};
+
+export type StoryItem = Parser.Item & TorrentFields;
+
+const MIKAN_TORRENT_NAMESPACE = "https://mikanani.me/0.1/";
+// Mikan writes China Standard Time without an offset, e.g. `2026-11-06T11:08:00`.
+const MIKAN_UTC_OFFSET = "+08:00";
+const ISO_WITHOUT_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/;
+
+export const storyParser = new Parser<Record<string, unknown>, TorrentFields>({
+  customFields: { item: ["torrent"] },
+});
+
+/**
+ * Returns the item's publish date, falling back to Mikan's torrent `pubDate` when the item has none.
+ */
+export function getStoryPubDate(item: StoryItem): string | undefined {
+  if (item.pubDate) {
+    return item.pubDate;
+  }
+  const torrentDate = item.torrent?.pubDate?.[0]?.trim();
+  if (!torrentDate) {
+    return undefined;
+  }
+  if (item.torrent?.$?.xmlns === MIKAN_TORRENT_NAMESPACE && ISO_WITHOUT_OFFSET.test(torrentDate)) {
+    return torrentDate + MIKAN_UTC_OFFSET;
+  }
+  return torrentDate;
+}
 
 /**
  * Returns an identifier that stays the same across fetches, so read state can be matched later.

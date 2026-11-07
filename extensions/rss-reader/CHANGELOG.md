@@ -1,5 +1,9 @@
 # RSS Reader Changelog
 
+## [Mikan Publish Dates] - {PR_MERGE_DATE}
+
+- Read publish dates from Mikan Project feeds, which nest them in a torrent element without a timezone
+
 ## [Read State Fixes] - 2026-10-20
 
 - Keep read state for stories from Atom feeds and feeds without GUIDs
