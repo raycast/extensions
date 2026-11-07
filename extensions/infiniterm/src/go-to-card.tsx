@@ -4,7 +4,16 @@ import { CardList } from "./components/card-list.tsx";
 import { focusCard, supportsFocus } from "./lib/ift.ts";
 
 export default function Command() {
-  const { data: supported, isLoading } = useCachedPromise(supportsFocus, [], { keepPreviousData: false });
+  const { data: supported, isLoading, error } = useCachedPromise(supportsFocus, [], { keepPreviousData: false });
+
+  // An ift that cannot start (bad ift Path) rejects instead of answering, so show why rather than spin.
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.ExclamationMark} title="Cannot run ift" description={error.message} />
+      </List>
+    );
+  }
 
   // An ift without the verb would open an editor card for a file called "focus", so the list is not offered at all.
   if (supported === false) {
