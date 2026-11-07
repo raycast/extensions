@@ -11,6 +11,30 @@
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language / Kieli",
+      "description": "Use the device language (Finnish when macOS is in Finnish, otherwise English), or choose a language. Käytä laitteen kieltä tai valitse englanti tai suomi.",
+      "type": "dropdown",
+      "required": false,
+      "default": "system",
+      "data": [
+        {
+          "title": "System Default / Laitteen kieli",
+          "value": "system"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Suomi",
+          "value": "fi"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "prh-search",

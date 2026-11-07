@@ -2,9 +2,14 @@
 
 FBL helps you look up Finnish businesses in Raycast using PRH YTJ open data.
 
+<a href="https://www.raycast.com/eljn/finnish-business-lookup" title="Install FBL - Finnish Business Lookup">
+  <img src="https://www.raycast.com/eljn/finnish-business-lookup/install_button@2x.png?v=1.1" height="64" alt="Install FBL from the Raycast Store" />
+</a>
+
 ## Features
 
 - Search by company name or Business ID
+- English and Finnish interface, following the device language with a manual override in extension settings
 - Business ID normalization (`01120389` -> `0112038-9`)
 - Safe query guards to avoid accidental full-dataset fetches
 - Pagination support with `Load More Results`

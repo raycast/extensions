@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Finnish Language Support] - {PR_MERGE_DATE}
+
+### Added
+
+- Finnish translations for search, company summaries and details, actions, validation hints, error messages, dates, and in-app release notes.
+- A **Language / Kieli** preference with **System Default / Laitteen kieli**, **English**, and **Suomi** options. Reopen the command after changing this preference.
+- Automatic language selection: Finnish when Finnish is the primary macOS language, and English otherwise.
+- An action on the start screen to open extension preferences.
+
+### Improved
+
+- PRH descriptions, city names, and copied postal addresses follow the selected language, with fallbacks for unavailable translations.
+- Cached company records are remapped when displayed so changing the language also updates cached labels.
+- The YTJ search-page action opens the Finnish source page when Finnish is selected.
+
 ## [More Readable Search Results] - 2026-08-04
 
 ### Improved
