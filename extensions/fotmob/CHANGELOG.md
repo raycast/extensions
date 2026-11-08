@@ -1,5 +1,9 @@
 # Changelog
 
+## [Favorite leagues first in Match Day] - {PR_MERGE_DATE}
+
+- List favorite leagues first in Match Day and its league dropdown, marked with a "Favorite" subtitle
+
 ## [Fixes] - 2026-05-14
 
 - Fix Match Day, Match Detail, Team Detail, and League Table data fetching after FotMob endpoint changes
