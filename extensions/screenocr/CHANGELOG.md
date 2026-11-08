@@ -1,5 +1,10 @@
 # ScreenOCR Changelog
 
+## [New Preferences] - {PR_MERGE_DATE}
+
+- Added `Close Raycast before selection` preference for `Recognize Text` and `Detect Barcode/QR Code` commands: Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.
+- Added `Include Raycast window in full-screen capture` preference for `Recognize Text on Entire Screen` command.
+
 ## [Clipboard Image OCR on macOS] - 2026-10-31
 
 - Added macOS support for **Recognize Text in Clipboard Image**, including copied image files, using Apple Vision with your recognition preferences.

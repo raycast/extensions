@@ -23,6 +23,8 @@ Assign hotkeys in Raycast Settings → Extensions → ScreenOCR. Cancel a select
 - **Ignore line breaks**: join recognized lines with spaces.
 - **Show toast messages**: control command-result notifications.
 - **macOS options**: recognition level, language correction, primary/additional languages, custom words, shutter sound, and copying the captured image before recognition. Shutter sound and keep-image apply to screen-capture commands only, not clipboard recognition. Copying recognized text may replace the clipboard image. These options do not configure the Windows OCR engine.
+- **Close Raycast before selection**: disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.
+- **Include Raycast window in full-screen capture**: Raycast is captured, then closed before the OCR result is handled.
 
 ## macOS requirements
 

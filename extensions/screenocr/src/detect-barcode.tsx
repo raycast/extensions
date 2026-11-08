@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { handleRecognitionOutcome } from "./ocr/result";
 import { RecognitionOutcome } from "./ocr/types";
 import { detectBarcode } from "./utils";
@@ -11,7 +11,11 @@ export default async function command() {
 
   let outcome: RecognitionOutcome;
   try {
-    await closeMainWindow();
+    const { closeRaycast } = getPreferenceValues<Preferences.DetectBarcode>();
+
+    if (closeRaycast) {
+      await closeMainWindow();
+    }
     outcome = await detectBarcode();
   } catch (error) {
     outcome = {
