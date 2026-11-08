@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rotara",
   "title": "Rotara",
-  "description": "Switch, create and move windows between Rotara workspaces",
+  "description": "Switch, create and move windows between workspaces. Requires the Rotara macOS app",
   "icon": "icon.png",
   "author": "ry504",
   "platforms": [
@@ -41,7 +41,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.11.1"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

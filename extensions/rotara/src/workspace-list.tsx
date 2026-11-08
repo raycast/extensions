@@ -1,15 +1,40 @@
 import { Action, ActionPanel, Icon, List, closeMainWindow, PopToRootType } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { readSession, switchTo, moveWindow, Workspace, ROTARA_SITE } from "./rotara";
 
-async function run(fn: () => Promise<void>) {
-  await closeMainWindow({ popToRootType: PopToRootType.Immediate });
-  await fn();
+/** Hands the request to Rotara, then closes Raycast; a failure stays on screen as a toast. */
+async function run(fn: () => Promise<void>, failure: string) {
+  try {
+    await fn();
+    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+  } catch (error) {
+    await showFailureToast(error, { title: failure });
+  }
 }
 
 export default function WorkspaceList({ mode }: { mode: "switch" | "move" }) {
-  const session = readSession();
+  const { data: session, isLoading, error, revalidate } = usePromise(readSession);
 
-  if (!session) {
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't read Rotara's workspaces"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (isLoading || session === undefined) return <List isLoading searchBarPlaceholder="Search workspaces" />;
+
+  if (session === null) {
     return (
       <List>
         <List.EmptyView
@@ -44,10 +69,18 @@ export default function WorkspaceList({ mode }: { mode: "switch" | "move" }) {
   const actions = (w: Workspace) => {
     const current = w.id === session.activeID;
     const moveHere = (
-      <Action title="Move Window Here" icon={Icon.ArrowRight} onAction={() => run(() => moveWindow(w.name, true))} />
+      <Action
+        title="Move Window Here"
+        icon={Icon.ArrowRight}
+        onAction={() => run(() => moveWindow(w.name, true), "Couldn't move the window")}
+      />
     );
     const sendHere = (
-      <Action title="Send Window Here" icon={Icon.Upload} onAction={() => run(() => moveWindow(w.name, false))} />
+      <Action
+        title="Send Window Here"
+        icon={Icon.Upload}
+        onAction={() => run(() => moveWindow(w.name, false), "Couldn't send the window")}
+      />
     );
     if (mode === "move") {
       return (
@@ -59,7 +92,11 @@ export default function WorkspaceList({ mode }: { mode: "switch" | "move" }) {
     }
     return (
       <ActionPanel>
-        <Action title="Switch" icon={Icon.ArrowRight} onAction={() => run(() => switchTo(w.name))} />
+        <Action
+          title="Switch"
+          icon={Icon.ArrowRight}
+          onAction={() => run(() => switchTo(w.name), "Couldn't switch workspace")}
+        />
         {!current && moveHere}
         {!current && sendHere}
       </ActionPanel>
