@@ -69,8 +69,6 @@ node scripts/generate-icon.mjs  # Regenerate the 512×512 extension icon
 
 Tests cover hierarchy operations, deep nesting, cycle prevention, application discovery and identity, search, serialization, schema migration, recovery backups, future-version protection, save failures, and concurrent actions.
 
-The performance workflow compares pull requests with their base revision and pushes to `main` with the preceding commit. It reports median assignment lookup time and simulated icon-store work in the GitHub Actions summary. The comparison fails on large lookup regressions or increased icon work; it does not measure Raycast UI or native icon extraction. To compare locally, run `npm run benchmark -- /path/to/baseline-checkout` with Node 24 or newer.
-
 Source layout:
 
 ```text
