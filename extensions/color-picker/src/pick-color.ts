@@ -5,8 +5,10 @@ import { PickColorCommandLaunchProps } from "./lib/types";
 import { isMac } from "./lib/utils";
 
 export default async function Command(props: PickColorCommandLaunchProps) {
-  const { showColorName } = getPreferenceValues<Preferences.PickColor>();
-  await closeMainWindow();
+  const { showColorName, closeRaycast } = getPreferenceValues<Preferences.PickColor>();
+  if (closeRaycast) {
+    await closeMainWindow();
+  }
 
   try {
     const outcome = await pickAndHandleColor({ launchContext: props.launchContext, showColorName });

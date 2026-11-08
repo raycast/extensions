@@ -13,8 +13,8 @@ type Input = {
 };
 
 /**
- * Returns the open tabs across all Dia windows, including pinned tabs.
- * Each tab has its window ID, tab ID, title, URL, and whether it is pinned or focused.
+ * Returns the open tabs across all Dia windows, including pinned tabs, from the space active in each window.
+ * Each tab has its window ID, tab ID, title, URL, space name, and whether it is pinned or focused.
  */
 export default async function tool(input: Input) {
   const tabs = await getTabs();
