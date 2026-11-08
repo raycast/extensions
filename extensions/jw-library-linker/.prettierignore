@@ -1,0 +1,6 @@
+node_modules/
+dist/
+assets/
+package-lock.json
+raycast-env.d.ts
+AGENTS.md

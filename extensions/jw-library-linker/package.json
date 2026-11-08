@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jw-library-linker",
+  "title": "JW Library Linker",
+  "description": "Navigate JW Library with Bible references, publication lookup, chapter search, and bookmarks.",
+  "icon": "icon.png",
+  "author": "martin_sakowski",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "jw-library-linker",
+      "title": "Search JW Library",
+      "description": "Open Bible references, publications, and bookmarks in JW Library",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "containerUuid",
+          "title": "JW Library Container UUID",
+          "description": "Optional UUID under ~/Library/Containers. Leave empty to auto-detect.",
+          "type": "textfield",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "8.72.1"
+  },
+  "overrides": {
+    "minimatch@^10": "11.0.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "npm run lint:code && ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --test-reporter=spec tests/*.test.mjs",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint:code && npm test && npm run format:check && npm run build",
+    "lint:code": "eslint src tests --max-warnings=0"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
