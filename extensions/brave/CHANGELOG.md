@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-11-08
 
 - **Search Bookmarks**: Create Quicklinks from saved bookmarks
 - **Search Bookmarks**: Clarify the selected bookmark's Open in New Tab action with a dedicated icon
