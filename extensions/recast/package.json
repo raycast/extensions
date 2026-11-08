@@ -1,0 +1,223 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recast",
+  "title": "Recast",
+  "description": "Rewrite, polish, and translate text with Claude on Amazon Bedrock using your own AWS account.",
+  "icon": "icon.png",
+  "author": "martin_sakowski",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rewrite-selected",
+      "title": "Rewrite Selected Text",
+      "description": "Rewrite selected text with your default tone, or enter text manually",
+      "mode": "view",
+      "subtitle": "Recast"
+    },
+    {
+      "name": "rewrite-with-tone",
+      "title": "Rewrite with Tone",
+      "description": "Rewrite text with a Friendly, Professional, Concise, Polished, or Neutral tone",
+      "mode": "view",
+      "subtitle": "Recast"
+    },
+    {
+      "name": "rewrite-with-instruction",
+      "title": "Rewrite with Custom Instruction",
+      "description": "Rewrite or translate text with your own instruction",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "instruction",
+          "placeholder": "Custom instruction",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "subtitle": "Recast"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "credentialMethod",
+      "title": "Credential Method",
+      "description": "Use AWS SDK credentials, a named AWS CLI profile, or environment variables inherited by Raycast. See the setup guide for SSO and credential_process.",
+      "type": "dropdown",
+      "required": true,
+      "default": "default",
+      "data": [
+        {
+          "title": "Default Chain (Recommended)",
+          "value": "default"
+        },
+        {
+          "title": "Named Profile",
+          "value": "profile"
+        },
+        {
+          "title": "Environment Variables",
+          "value": "environment"
+        }
+      ]
+    },
+    {
+      "name": "awsProfile",
+      "title": "AWS Profile",
+      "description": "AWS CLI profile name. Only used when Credential Method is set to 'Named Profile'.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "my-profile"
+    },
+    {
+      "name": "awsRegion",
+      "title": "AWS Region",
+      "description": "AWS region for Bedrock runtime (e.g. us-east-1, eu-central-1)",
+      "type": "textfield",
+      "required": true,
+      "default": "us-east-1",
+      "placeholder": "us-east-1"
+    },
+    {
+      "name": "modelId",
+      "title": "Model ID",
+      "description": "Base Bedrock model ID, without a geography prefix. The Inference Profile setting supplies the prefix. An inference profile ARN is used unchanged.",
+      "type": "textfield",
+      "required": true,
+      "default": "anthropic.claude-haiku-5-5",
+      "placeholder": "anthropic.claude-haiku-5-5"
+    },
+    {
+      "name": "inferenceProfile",
+      "title": "Inference Profile",
+      "description": "Global may process text outside your AWS Region. Choose a geography for regional routing, or None for direct invocation. Availability depends on the model and source Region; see the setup guide.",
+      "type": "dropdown",
+      "required": false,
+      "default": "global",
+      "data": [
+        {
+          "title": "Global",
+          "value": "global"
+        },
+        {
+          "title": "US",
+          "value": "us"
+        },
+        {
+          "title": "EU",
+          "value": "eu"
+        },
+        {
+          "title": "Asia Pacific (APAC)",
+          "value": "apac"
+        },
+        {
+          "title": "Australia",
+          "value": "au"
+        },
+        {
+          "title": "Japan",
+          "value": "jp"
+        },
+        {
+          "title": "Canada",
+          "value": "ca"
+        },
+        {
+          "title": "None (in-Region)",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "maxTokens",
+      "title": "Max Tokens",
+      "description": "Maximum response tokens (1\u201365536; your model may have a lower limit). Incomplete rewrites cannot be pasted. Increase this for long selections.",
+      "type": "textfield",
+      "required": false,
+      "default": "2048",
+      "placeholder": "2048"
+    },
+    {
+      "name": "temperature",
+      "title": "Temperature",
+      "description": "Optional value from 0 to 1. Leave empty for Claude Haiku 5.5 and other models with restricted sampling parameters.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Leave empty for the model default"
+    },
+    {
+      "name": "defaultTone",
+      "title": "Default Tone",
+      "description": "Tone to use when no tone is specified",
+      "type": "dropdown",
+      "required": false,
+      "default": "friendly",
+      "data": [
+        {
+          "title": "Friendly",
+          "value": "friendly"
+        },
+        {
+          "title": "Professional",
+          "value": "professional"
+        },
+        {
+          "title": "Concise",
+          "value": "concise"
+        },
+        {
+          "title": "Polished",
+          "value": "polished"
+        },
+        {
+          "title": "Neutral",
+          "value": "neutral"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1164.0",
+    "@aws-sdk/credential-providers": "^3.1164.0",
+    "@raycast/api": "^2.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "lint:fix": "ray lint --fix",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test && npm run lint && npm run build && npm run test:bundle",
+    "test:bundle": "node scripts/test-bundle.cjs",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "bedrock",
+    "claude",
+    "rewrite",
+    "proofread",
+    "translate",
+    "writing",
+    "aws"
+  ],
+  "overrides": {
+    "minimatch@>=7.0.0 <=11.0.0": "^11.0.5"
+  }
+}
