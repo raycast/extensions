@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Termalin MCP Server] - 2026-11-08
+
+- Add Termalin to the community registry: SSH, SFTP, databases and monitoring for your own Linux servers (23 tools), without handing the agent an SSH key. Hosted Streamable HTTP server at https://termal.in/mcp with direct HTTP in Raycast and OAuth 2.1 sign-in (dynamic client registration), `mcp-remote` fallback for other clients.
+
 ## [Add pdf-table-pull-lite, doc2md-lite and link-check-lite MCP Servers] - 2026-11-06
 
 - Add three free community servers by Tidy Byte Tools, all local stdio servers from PyPI through `uvx` with no API key: pdf-table-pull-lite (tables from text PDFs as CSV), doc2md-lite (text PDFs and HTML to Markdown) and link-check-lite (status codes, broken links and redirect chains).
