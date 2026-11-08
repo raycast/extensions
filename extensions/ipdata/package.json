@@ -68,9 +68,37 @@
       "name": "menu-bar",
       "title": "IP Menu Bar",
       "subtitle": "ipdata",
-      "description": "Show your public IPv4 address and country flag in the menu bar, with the full record one click away. Refreshes every 10 minutes.",
+      "description": "Show your country flag and public IP address in the menu bar, with the last part hidden by default and the full record one click away. Refreshes every 10 minutes.",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "menuBarLabel",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Label",
+          "description": "What the menu bar shows next to your country flag. The menu always lists your full addresses.",
+          "default": "partial",
+          "data": [
+            {
+              "title": "Partial Address (203.0.113.x)",
+              "value": "partial"
+            },
+            {
+              "title": "Full Address (203.0.113.42)",
+              "value": "full"
+            },
+            {
+              "title": "“My IP”",
+              "value": "label"
+            },
+            {
+              "title": "Flag Only",
+              "value": "flag"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [

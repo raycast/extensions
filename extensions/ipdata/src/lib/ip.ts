@@ -100,6 +100,18 @@ export function v6Groups(s: string): number[] | null {
   return groups.length === 8 && groups.every((x) => Number.isInteger(x) && x >= 0 && x <= 0xffff) ? groups : null;
 }
 
+// The address with its host part hidden, for places others may see, such as the menu bar. IPv4 keeps the
+// first three octets (203.0.113.x). IPv6 keeps the first three groups, the /48 routing prefix
+// (2001:db8:85a3:x:x:x:x:x): the split Google Analytics uses to anonymize addresses.
+export function maskIp(ip: string): string {
+  const v = version(ip);
+  if (v === 4) return ip.split(".").slice(0, 3).join(".") + ".x";
+  const groups = v === 6 ? v6Groups(ip) : null;
+  if (!groups) return ip;
+  const prefix = groups.slice(0, 3).map((g) => g.toString(16));
+  return [...prefix, "x", "x", "x", "x", "x"].join(":");
+}
+
 // Human label for addresses that are not routable on the public internet, else null.
 export function reservedLabel(s: string): string | null {
   const v = version(s);

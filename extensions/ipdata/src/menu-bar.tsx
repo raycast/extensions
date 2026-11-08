@@ -1,5 +1,6 @@
 import {
   Clipboard,
+  getPreferenceValues,
   Icon,
   Keyboard,
   LaunchType,
@@ -13,12 +14,13 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { cachedMyIp } from "./lib/cache";
 import { flagIcon } from "./lib/flags";
+import { maskIp } from "./lib/ip";
 import { IpRecord, LookupOk } from "./lib/ipdata";
 import * as P from "./lib/present";
 import { getSettings, settingsKey } from "./lib/settings";
 
-// Country flag and public IPv4 in the menu bar; the full record in the menu. Raycast runs the
-// command every 10 minutes in the background (see "interval" in package.json).
+// Country flag and public IP in the menu bar; the full addresses and record in the menu. Raycast runs
+// the command every 10 minutes in the background (see "interval" in package.json).
 export default function Command() {
   const settings = getSettings();
   const [nonce, setNonce] = useState(0);
@@ -38,7 +40,7 @@ export default function Command() {
   const primary = v4 ?? v6;
   const m = primary?.model ?? null;
 
-  const title = m ? m.ip : isLoading ? "…" : "No connection";
+  const title = menuBarTitle(m, isLoading);
   const tooltip = m ? `${P.placeOf(m).short} · ${P.operatorLine(m)}` : "ipdata · your public IP";
 
   return (
@@ -89,6 +91,23 @@ export default function Command() {
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
+}
+
+// The text next to the flag, from the Menu Bar Label preference. By default the last part of the address
+// is hidden, so the full address isn't on screen when the menu bar is shared or recorded.
+function menuBarTitle(m: IpRecord | null, isLoading: boolean): string | undefined {
+  const { menuBarLabel } = getPreferenceValues<Preferences.MenuBar>();
+  if (!m) return isLoading ? (menuBarLabel === "flag" ? undefined : "…") : "No connection";
+  switch (menuBarLabel) {
+    case "full":
+      return m.ip;
+    case "label":
+      return "My IP";
+    case "flag":
+      return undefined;
+    default:
+      return maskIp(m.ip);
+  }
 }
 
 async function copy(value: string, what: string) {
