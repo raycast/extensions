@@ -1,6 +1,6 @@
 # Soren Idle Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-08
 
 - A sci-fi idle game in Raycast. You crashed on the alien world Soren: salvage the wreck, mine, forage, cook, brew, build and fight.
 - Eight skills that level to 99, with per-task mastery and resource nodes that deplete and respawn.
