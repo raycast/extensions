@@ -2,7 +2,7 @@
 
 ## [Fix punycode deprecation warning] - 2026-11-08
 
-- Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` deprecation warning (`DEP0040`)
+- Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` module `exports` error
 
 ## [Pinned projects and groups] - 2026-11-07
 
