@@ -17,6 +17,7 @@
           "name": "containerUuid",
           "title": "JW Library Container UUID",
           "description": "Optional UUID under ~/Library/Containers. Leave empty to auto-detect.",
+          "placeholder": "Leave empty to auto-detect",
           "type": "textfield",
           "required": false
         }
@@ -24,7 +25,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "2.11.1"
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
@@ -47,7 +49,7 @@
     "publish": "npx @raycast/api@latest publish",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint:code && npm test && npm run format:check && npm run build",
+    "check": "npm run build && npm run typecheck && npm run lint:code && npm test && npm run format:check",
     "lint:code": "eslint src tests --max-warnings=0"
   },
   "platforms": [

@@ -7,12 +7,11 @@ import {
   List,
   open,
   openExtensionPreferences,
-  showToast,
-  Toast,
   type Image,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { BIBLE_BOOKS_DE, type BibleBook } from "./bible-books";
 import {
   findBibleReferenceBooks,
@@ -54,9 +53,8 @@ const PAGE_SIZE = 100;
 async function openInJWLibrary(url: string): Promise<void> {
   try {
     await open(url);
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
+  } catch (error) {
+    await showFailureToast(error, {
       title: "Could not open JW Library",
       message: "Make sure JW Library is installed, then try again.",
     });
@@ -310,83 +308,100 @@ function errorItem(error: unknown): ResultItem {
   };
 }
 
+class ResultsError extends Error {
+  constructor(
+    readonly query: string,
+    readonly revision: number,
+    cause: unknown,
+  ) {
+    super(cause instanceof Error ? cause.message : "Refresh and try again.", { cause });
+  }
+}
+
 export default function Command() {
-  const { containerUuid } = getPreferenceValues<{ containerUuid?: string }>();
+  const { containerUuid } = getPreferenceValues<Preferences.JwLibraryLinker>();
   const [searchText, setSearchText] = useState("");
-  const [library, setLibrary] = useState<Library | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [initialError, setInitialError] = useState<ResultItem | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
-  const [limit, setLimit] = useState(PAGE_SIZE);
-  const [result, setResult] = useState<{ query: string; items: ResultItem[]; loading: boolean }>({
-    query: "",
-    items: [],
-    loading: true,
-  });
+  const libraryAbortable = useRef<AbortController | null>(null);
+  const resultsAbortable = useRef<AbortController | null>(null);
+  const {
+    data: library,
+    isLoading: initialLoading,
+    error: initialError,
+  } = usePromise(
+    async ({ uuid }: { uuid?: string; revision: number }) => loadLibrary(uuid, libraryAbortable.current?.signal),
+    [{ uuid: containerUuid, revision: refreshVersion }],
+    { abortable: libraryAbortable, failureToastOptions: { title: "Could not read JW Library data" } },
+  );
+  const query = searchText.trim();
+  const independent =
+    isBibleReference(query) || MEETINGS_ALIASES.has(normalizeText(query)) || /^(v|version)$/i.test(query);
+  const {
+    data: results,
+    isLoading: resultsLoading,
+    error: resultsError,
+    pagination,
+  } = usePromise(
+    (input: { query: string; library: Library | null; failure?: string; revision: number; independent: boolean }) =>
+      async ({ page }: { page: number }) => {
+        const signal = resultsAbortable.current!.signal;
+        signal.throwIfAborted();
+        let items: ResultItem[];
+        try {
+          items =
+            input.failure && !input.independent
+              ? [errorItem(new Error(input.failure)), ...buildGeneralSearch(input.query, [])]
+              : await buildResults(input.query, input.library, signal);
+        } catch (error) {
+          if (isCancellation(error)) throw error;
+          throw new ResultsError(input.query, input.revision, error);
+        }
+        const warnings: ResultItem[] =
+          input.independent || input.query
+            ? []
+            : (input.library?.warnings ?? []).map((warning, index) => ({
+                id: `warning-${index}`,
+                title: "Some publications could not be loaded",
+                subtitle: warning,
+                icon: Icon.ExclamationMark,
+              }));
+        const all = [...items, ...warnings];
+        const pageItems: Array<ResultItem | null> = all.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+        // Keep the query identity even for an empty page so a new query shows
+        // a loading state rather than briefly flashing "No matching results".
+        if (pageItems.length === 0) pageItems.push(null);
+        return {
+          data: pageItems.map((item) => ({
+            query: input.query,
+            revision: input.revision,
+            item,
+          })),
+          hasMore: (page + 1) * PAGE_SIZE < all.length,
+        };
+      },
+    [{ query, library: library ?? null, failure: initialError?.message, revision: refreshVersion, independent }],
+    {
+      abortable: resultsAbortable,
+      execute: independent || !initialLoading,
+      failureToastOptions: { title: "Could not read JW Library data" },
+    },
+  );
 
   function refresh() {
     clearLibraryCache();
     setRefreshVersion((version) => version + 1);
   }
 
-  useEffect(() => {
-    const controller = new AbortController();
-    setInitialLoading(true);
-    setInitialError(null);
-    loadLibrary(containerUuid, controller.signal)
-      .then((next) => {
-        if (!controller.signal.aborted) {
-          setLibrary(next);
-          setInitialLoading(false);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted && !isCancellation(error)) {
-          setLibrary(null);
-          setInitialError(errorItem(error));
-          setInitialLoading(false);
-        }
-      });
-    return () => controller.abort();
-  }, [containerUuid, refreshVersion]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const query = searchText.trim();
-    setLimit(PAGE_SIZE);
-    setResult({ query, items: [], loading: true });
-    const independent =
-      isBibleReference(query) || MEETINGS_ALIASES.has(normalizeText(query)) || /^(v|version)$/i.test(query);
-    if (initialLoading && !independent) return () => controller.abort();
-    if (initialError && !independent) {
-      setResult({ query, items: [initialError, ...buildGeneralSearch(query, [])], loading: false });
-      return () => controller.abort();
-    }
-    buildResults(query, library, controller.signal)
-      .then((items) => {
-        if (!controller.signal.aborted) {
-          const warnings: ResultItem[] =
-            independent || query
-              ? []
-              : (library?.warnings ?? []).map((warning, index) => ({
-                  id: `warning-${index}`,
-                  title: "Some publications could not be loaded",
-                  subtitle: warning,
-                  icon: Icon.ExclamationMark,
-                }));
-          setResult({ query, items: [...items, ...warnings], loading: false });
-        }
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted && !isCancellation(error))
-          setResult({ query, items: [errorItem(error)], loading: false });
-      });
-    return () => controller.abort();
-  }, [searchText, library, initialLoading, initialError, refreshVersion]);
-
-  const query = searchText.trim();
-  const loading = result.loading || result.query !== query;
-  const items = result.query === query ? result.items : [];
+  const currentResults = (results ?? []).filter((row) => row.query === query && row.revision === refreshVersion);
+  const currentError =
+    resultsError instanceof ResultsError && resultsError.query === query && resultsError.revision === refreshVersion
+      ? resultsError
+      : undefined;
+  const loading = resultsLoading || (!independent && initialLoading) || (!currentResults.length && !currentError);
+  const items =
+    currentError && !loading
+      ? [errorItem(currentError)]
+      : currentResults.flatMap((row) => (row.item ? [row.item] : []));
   const refreshAction = (
     <Action
       title="Refresh Library"
@@ -405,11 +420,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Bible, publications, or chapters (rr 3)"
       throttle
-      pagination={{
-        hasMore: items.length > limit,
-        pageSize: PAGE_SIZE,
-        onLoadMore: () => setLimit((current) => current + PAGE_SIZE),
-      }}
+      pagination={pagination}
     >
       <List.EmptyView
         title={loading ? "Loading JW Library" : "No matching results"}
@@ -427,7 +438,7 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      {items.slice(0, limit).map((item) => {
+      {items.map((item) => {
         const { url, chapterSearch, searchText: fill, backSearch } = item;
         return (
           <List.Item
@@ -437,7 +448,9 @@ export default function Command() {
             icon={item.icon}
             actions={
               <ActionPanel>
-                {url ? <Action title="Open in JW Library" onAction={() => openInJWLibrary(url)} /> : null}
+                {url ? (
+                  <Action title="Open in JW Library" icon={Icon.Book} onAction={() => openInJWLibrary(url)} />
+                ) : null}
                 {fill ? (
                   <Action title="Use in Search" icon={Icon.MagnifyingGlass} onAction={() => setSearchText(fill)} />
                 ) : null}

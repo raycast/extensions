@@ -92,6 +92,10 @@ export type QueryOptions = {
 };
 
 export async function queryDatabase<T>(path: string, sql: string, options: QueryOptions = {}): Promise<T[]> {
+  // Intentionally retain the process adapter: @raycast/utils 2.3.3 executeSQL
+  // has no public AbortSignal, timeout, or output-limit options. Its busy-DB
+  // fallback also persists a copy of the database. Publication and bookmark
+  // reads must remain cancellable, bounded, and leave no personal DB copies.
   options.signal?.throwIfAborted();
   const version = await fingerprint(path);
   options.signal?.throwIfAborted();
