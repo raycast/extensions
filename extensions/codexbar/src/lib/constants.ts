@@ -3,6 +3,7 @@ import { join } from "path";
 
 export const APP_BUNDLE_ID = "com.steipete.codexbar";
 export const APP_PATH = "/Applications/CodexBar.app";
+export const APP_CANDIDATES = [APP_PATH, join(homedir(), "Applications", "CodexBar.app")];
 export const APP_HOMEPAGE = "https://github.com/steipete/CodexBar";
 
 /** Group Container folders are prefixed with the developer team id, e.g. `ABCDE12345.com.steipete.codexbar`. */

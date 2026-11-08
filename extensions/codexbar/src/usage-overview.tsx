@@ -12,7 +12,8 @@ function providerMarkdown(usage: ProviderUsage, mode: PercentMode, now: Date): s
   if (usage.error) return `${heading}\n\n_${usage.error}_`;
   if (usage.windows.length === 0) return `${heading}\n\n_No limits reported._`;
   const gauges = usage.windows.map((window) => windowGauge(window, mode, now));
-  return `${heading}\n\n${gaugeMarkdown(gauges, environment.appearance)}`;
+  const warning = usage.refreshError ? `\n\n> ⚠️ Last refresh failed: ${usage.refreshError}. Showing older data.` : "";
+  return `${heading}${warning}\n\n${gaugeMarkdown(gauges, environment.appearance)}`;
 }
 
 export default function Command(props: LaunchProps<{ launchContext?: UsageLaunchContext }>) {
@@ -35,7 +36,6 @@ export default function Command(props: LaunchProps<{ launchContext?: UsageLaunch
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={only && providers[0] ? `CodexBar · ${providers[0].name}` : undefined}
       markdown={markdown}
       metadata={
         providers.some((usage) => !usage.error && usage.windows.length > 0) ? (
@@ -96,6 +96,7 @@ export default function Command(props: LaunchProps<{ launchContext?: UsageLaunch
             onRefresh={refresh}
             onLayoutChange={reloadLayout}
             quicklinkFor={only ? [] : (all ?? [])}
+            standalone
           />
         </ActionPanel>
       }

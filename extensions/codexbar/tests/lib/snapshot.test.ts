@@ -82,7 +82,9 @@ describe("findSnapshotPath / readSnapshot", () => {
     writeFileSync(join(container, "widget-snapshot.json"), JSON.stringify(fixture));
     const path = findSnapshotPath(root);
     expect(path).toBe(join(container, "widget-snapshot.json"));
-    expect((await readSnapshot(path)).map((entry) => entry.provider)).toEqual(["codex", "claude"]);
+    const data = await readSnapshot(path);
+    expect(data.providers.map((entry) => entry.provider)).toEqual(["codex", "claude"]);
+    expect(data.enabledProviders).toEqual(["codex", "claude", "gemini"]);
   });
 
   it("returns undefined when nothing is there", () => {

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { parseSnapshot } from "../../src/lib/snapshot";
-import { mergeUsage, parseUsageCli, tightestWindow } from "../../src/lib/usage";
+import {
+  NoUsageDataError,
+  combineSources,
+  failedRefreshes,
+  mergeUsage,
+  parseUsageCli,
+  tightestWindow,
+} from "../../src/lib/usage";
 import snapshot from "../fixtures/widget-snapshot.json";
 import cliFixture from "../fixtures/usage-cli.json";
 
@@ -57,9 +64,54 @@ describe("mergeUsage", () => {
     expect(merged[2].error).toBeDefined();
   });
 
+  it("keeps the app reading but flags a failed refresh", () => {
+    const failing = cli.map((entry) =>
+      entry.provider === "claude" ? { ...entry, windows: [], error: "Session expired" } : entry,
+    );
+    const claude = mergeUsage(app, failing).find((u) => u.provider === "claude")!;
+    expect(claude.windows.length).toBeGreaterThan(0);
+    expect(claude.refreshError).toBe("Session expired");
+    expect(failedRefreshes(mergeUsage(app, failing))).toEqual(["Claude", "Gemini"]);
+  });
+
+  it("drops cached providers that were disabled in CodexBar", () => {
+    expect(mergeUsage(app, cli, ["codex", "claude"]).map((u) => u.provider)).toEqual(["codex", "claude"]);
+  });
+
   it("works with either side empty", () => {
     expect(mergeUsage(app, [])).toEqual(app);
     expect(mergeUsage([], cli)).toEqual(cli);
+  });
+});
+
+describe("combineSources", () => {
+  const app = parseSnapshot(snapshot);
+  const cli = parseUsageCli(cliFixture);
+
+  it("merges when the snapshot exists", () => {
+    const result = combineSources({
+      snapshot: { providers: app, enabledProviders: ["claude"] },
+      cached: cli,
+      appInstalled: true,
+    });
+    expect(result.map((u) => u.provider)).toEqual(["codex", "claude"]);
+  });
+
+  it("falls back to the cached refresh without a snapshot", () => {
+    expect(combineSources({ cached: cli, appInstalled: true })).toBe(cli);
+  });
+
+  it("tells a missing app apart from missing data", () => {
+    const missingApp = (() => {
+      try {
+        combineSources({ cached: [], appInstalled: false });
+      } catch (error) {
+        return error;
+      }
+    })();
+    expect(missingApp).toBeInstanceOf(NoUsageDataError);
+    expect((missingApp as NoUsageDataError).appInstalled).toBe(false);
+    expect(() => combineSources({ cached: [], appInstalled: true })).toThrow("has not written");
   });
 });
 

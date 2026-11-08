@@ -88,6 +88,13 @@ function WindowDetail(props: { usage: ProviderUsage; window: LimitWindow; mode: 
               text={`${formatCurrency(usage.last30DaysCost, usage.currency)} · ${formatTokens(usage.last30DaysTokens)} tokens`}
             />
           )}
+          {usage.refreshError && (
+            <List.Item.Detail.Metadata.Label
+              title="Last Refresh"
+              text={`Failed: ${usage.refreshError}`}
+              icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            />
+          )}
           {usage.updatedAt && (
             <List.Item.Detail.Metadata.Label
               title="Updated"
@@ -104,16 +111,17 @@ export default function Command(props: LaunchProps<{ launchContext?: UsageLaunch
   const { data, all, isLoading, error, refresh, mode, reloadLayout } = useUsage(props.launchContext?.provider);
   const [showingDetail, setShowingDetail] = useState(true);
   const now = new Date();
-  const actionsFor = (usage?: ProviderUsage) => (
+  const actionsFor = (usage?: ProviderUsage, standalone = false) => (
     <UsageActions
       data={data}
       all={all}
       onRefresh={refresh}
       onLayoutChange={reloadLayout}
       quicklinkFor={usage ? [usage] : []}
+      standalone={standalone}
     />
   );
-  const actions = actionsFor();
+  const actions = actionsFor(undefined, true);
 
   if (error && !data?.length) return <UsageErrorView error={error} data={data} onRefresh={refresh} />;
 
@@ -156,13 +164,23 @@ export default function Command(props: LaunchProps<{ launchContext?: UsageLaunch
                 <List.Item
                   key={`${usage.provider}-${window.id}`}
                   title={window.title}
-                  subtitle={showingDetail ? undefined : formatResetIn(window.resetsAt, now)}
+                  subtitle={
+                    showingDetail ? percentLabel(window.usedPercent, mode) : formatResetIn(window.resetsAt, now)
+                  }
                   icon={limitIcon(window.usedPercent, mode)}
                   keywords={[usage.name, usage.provider]}
                   accessories={
                     showingDetail
-                      ? [{ text: percentLabel(window.usedPercent, mode) }]
+                      ? undefined
                       : [
+                          ...(usage.refreshError
+                            ? [
+                                {
+                                  icon: { source: Icon.Warning, tintColor: Color.Orange },
+                                  tooltip: `Last refresh failed: ${usage.refreshError}`,
+                                },
+                              ]
+                            : []),
                           ...(pace ? [pace] : []),
                           {
                             tag: {

@@ -1,10 +1,10 @@
 import { Cache } from "@raycast/api";
 import { COST_TIMEOUT_MS, USAGE_TIMEOUT_MS } from "./constants";
-import { runCliJson } from "./cli";
+import { findCli, runCliJson } from "./cli";
 import { activeCostProviders, parseCostCli } from "./cost";
-import { readSnapshot } from "./snapshot";
+import { SnapshotData, SnapshotNotFoundError, readSnapshot } from "./snapshot";
 import { ProviderCost, ProviderUsage } from "./types";
-import { mergeUsage, parseUsageCli } from "./usage";
+import { combineSources, parseUsageCli } from "./usage";
 
 const cache = new Cache();
 const CLI_USAGE_KEY = "cli-usage";
@@ -20,9 +20,22 @@ function cachedCliUsage(): ProviderUsage[] {
   }
 }
 
+async function snapshotIfAvailable(): Promise<SnapshotData | undefined> {
+  try {
+    return await readSnapshot();
+  } catch (error) {
+    if (error instanceof SnapshotNotFoundError) return undefined;
+    throw error;
+  }
+}
+
 /** Instant: the app's widget snapshot merged with the last manual refresh. */
 export async function loadUsage(): Promise<ProviderUsage[]> {
-  return mergeUsage(await readSnapshot(), cachedCliUsage());
+  return combineSources({
+    snapshot: await snapshotIfAvailable(),
+    cached: cachedCliUsage(),
+    appInstalled: findCli() !== undefined,
+  });
 }
 
 /** Slow (~30s): asks every enabled provider for fresh numbers through the CLI. */
@@ -30,13 +43,8 @@ export async function refreshUsage(): Promise<ProviderUsage[]> {
   const json = await runCliJson(["usage", "--format", "json"], USAGE_TIMEOUT_MS);
   const fresh = parseUsageCli(json);
   cache.set(CLI_USAGE_KEY, JSON.stringify(json));
-  let app: ProviderUsage[] = [];
-  try {
-    app = await readSnapshot();
-  } catch {
-    // The CLI works without the menu bar app running; show its data alone.
-  }
-  return mergeUsage(app, fresh);
+  // The CLI works without the menu bar app running; then its data is shown alone.
+  return combineSources({ snapshot: await snapshotIfAvailable(), cached: fresh, appInstalled: true });
 }
 
 export async function loadCost(): Promise<ProviderCost[]> {

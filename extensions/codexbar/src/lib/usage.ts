@@ -63,14 +63,19 @@ export function parseUsageCli(json: unknown): ProviderUsage[] {
 /**
  * Combines the app snapshot with the last CLI refresh. Per provider the newest successful
  * reading wins; token/cost totals (only in the snapshot) and the plan name (only in the CLI)
- * are carried over from the other source. CLI errors only surface when the app has no data.
+ * are carried over from the other source. When the refresh failed for a provider the app
+ * reading is kept and the failure is attached as `refreshError`. With `enabled`, providers
+ * that were disabled in CodexBar are dropped from the CLI cache.
  */
-export function mergeUsage(app: ProviderUsage[], cli: ProviderUsage[]): ProviderUsage[] {
-  const cliByProvider = new Map(cli.map((entry) => [entry.provider, entry]));
-  const merged = app.map((fromApp) => {
+export function mergeUsage(app: ProviderUsage[], cli: ProviderUsage[], enabled?: string[]): ProviderUsage[] {
+  const cliByProvider = new Map(
+    cli.filter((entry) => !enabled || enabled.includes(entry.provider)).map((entry) => [entry.provider, entry]),
+  );
+  const merged = app.map((fromApp): ProviderUsage => {
     const fromCli = cliByProvider.get(fromApp.provider);
     cliByProvider.delete(fromApp.provider);
-    if (!fromCli || fromCli.error) return { ...fromApp, plan: fromApp.plan ?? fromCli?.plan };
+    if (!fromCli) return fromApp;
+    if (fromCli.error) return { ...fromApp, plan: fromApp.plan ?? fromCli.plan, refreshError: fromCli.error };
     const cliIsNewer = (fromCli.updatedAt?.getTime() ?? 0) > (fromApp.updatedAt?.getTime() ?? 0);
     const base = cliIsNewer && fromCli.windows.length > 0 ? fromCli : fromApp;
     return {
@@ -84,6 +89,33 @@ export function mergeUsage(app: ProviderUsage[], cli: ProviderUsage[]): Provider
     };
   });
   return [...merged, ...cliByProvider.values()];
+}
+
+export class NoUsageDataError extends Error {
+  constructor(readonly appInstalled: boolean) {
+    super(appInstalled ? "CodexBar has not written any usage data yet" : "CodexBar is not installed");
+    this.name = "NoUsageDataError";
+  }
+}
+
+/**
+ * Picks what to show from the app snapshot (if any) and the cached CLI refresh. Without a
+ * snapshot the cached refresh is enough; with neither, the error says whether CodexBar is
+ * missing altogether or simply has not produced data yet.
+ */
+export function combineSources(input: {
+  snapshot?: { providers: ProviderUsage[]; enabledProviders?: string[] };
+  cached: ProviderUsage[];
+  appInstalled: boolean;
+}): ProviderUsage[] {
+  if (input.snapshot) return mergeUsage(input.snapshot.providers, input.cached, input.snapshot.enabledProviders);
+  if (input.cached.length > 0) return input.cached;
+  throw new NoUsageDataError(input.appInstalled);
+}
+
+/** Providers that the last refresh could not update, by display name. */
+export function failedRefreshes(usage: ProviderUsage[]): string[] {
+  return usage.filter((entry) => entry.error || entry.refreshError).map((entry) => entry.name);
 }
 
 /** The window closest to running out, used for one-line summaries. */

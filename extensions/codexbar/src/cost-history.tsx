@@ -76,11 +76,12 @@ export default function Command() {
     failureToastOptions: { title: "Could not load cost history" },
   });
 
-  const reloadAction = (
+  // Raycast binds the first two actions to ↵ and ⌘↵, so the shortcut is only set when Reload comes later.
+  const reloadAction = (withShortcut: boolean) => (
     <Action
       title="Reload"
       icon={Icon.ArrowClockwise}
-      shortcut={Keyboard.Shortcut.Common.Refresh}
+      shortcut={withShortcut ? Keyboard.Shortcut.Common.Refresh : undefined}
       onAction={revalidate}
     />
   );
@@ -115,7 +116,7 @@ export default function Command() {
         }
         actions={
           <ActionPanel>
-            {isAppMissing(error) ? <DownloadCodexBarAction /> : reloadAction}
+            {isAppMissing(error) ? <DownloadCodexBarAction /> : reloadAction(false)}
             <OpenCodexBarAction />
           </ActionPanel>
         }
@@ -126,7 +127,7 @@ export default function Command() {
             title="Last 30 Days"
             icon={Icon.BarChart}
             keywords={[cost.provider]}
-            accessories={[{ text: formatCurrency(cost.last30DaysCost, cost.currency) }]}
+            subtitle={formatCurrency(cost.last30DaysCost, cost.currency)}
             detail={<List.Item.Detail markdown={summaryMarkdown(cost)} />}
             actions={
               <ActionPanel>
@@ -134,8 +135,8 @@ export default function Command() {
                   title="Copy Total"
                   content={formatCurrency(cost.last30DaysCost, cost.currency)}
                 />
-                {reloadAction}
                 <OpenCodexBarAction />
+                {reloadAction(true)}
               </ActionPanel>
             }
           />
@@ -145,13 +146,13 @@ export default function Command() {
               title={formatDay(day.date)}
               icon={Icon.Calendar}
               keywords={[cost.provider, day.date, ...day.models.map((model) => model.model)]}
-              accessories={[{ text: formatCurrency(day.cost, cost.currency) }]}
+              subtitle={formatCurrency(day.cost, cost.currency)}
               detail={<List.Item.Detail markdown={dayMarkdown(cost, day)} />}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy Cost" content={formatCurrency(day.cost, cost.currency)} />
-                  {reloadAction}
                   <OpenCodexBarAction />
+                  {reloadAction(true)}
                 </ActionPanel>
               }
             />

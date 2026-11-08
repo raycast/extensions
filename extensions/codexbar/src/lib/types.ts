@@ -27,6 +27,8 @@ export interface ProviderUsage {
   currency: string;
   updatedAt?: Date;
   error?: string;
+  /** The last manual refresh failed for this provider; the reading shown is older. */
+  refreshError?: string;
   source: "app" | "cli";
 }
 

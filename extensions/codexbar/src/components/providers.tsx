@@ -84,6 +84,7 @@ function ManageProviders(props: { providers: ProviderRef[] }) {
                     icon={hidden ? Icon.Eye : Icon.EyeDisabled}
                     onAction={() => save(toggleHidden(prefs, id))}
                   />
+                  <CreateQuicklinkAction {...provider} />
                   <Action
                     title="Move up"
                     icon={Icon.ArrowUp}
@@ -96,7 +97,6 @@ function ManageProviders(props: { providers: ProviderRef[] }) {
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
                     onAction={() => save(moveProvider(prefs, available, id, 1))}
                   />
-                  <CreateQuicklinkAction {...provider} />
                   <Action
                     title="Reset Layout"
                     icon={Icon.RotateAntiClockwise}

@@ -3,6 +3,7 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { errorMessage, isAppMissing, isSnapshotMissing } from "../lib/errors";
 import { summaryText } from "../lib/limits";
+import { failedRefreshes } from "../lib/usage";
 import { loadUsage, refreshUsage } from "../lib/store";
 import { ProviderUsage } from "../lib/types";
 import { percentMode } from "../lib/ui";
@@ -32,10 +33,17 @@ export function useUsage(only?: string) {
       message: "Asking every provider, this can take ~30s",
     });
     try {
-      await mutate(refreshUsage(), { shouldRevalidateAfter: false });
-      toast.style = Toast.Style.Success;
-      toast.title = "Usage refreshed";
-      toast.message = undefined;
+      const fresh = await mutate(refreshUsage(), { shouldRevalidateAfter: false });
+      const failed = failedRefreshes(fresh ?? []);
+      if (failed.length > 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Could not refresh ${failed.join(", ")}`;
+        toast.message = "Showing the last known usage for those providers";
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = "Usage refreshed";
+        toast.message = undefined;
+      }
     } catch (refreshError) {
       await toast.hide();
       await showFailureToast(refreshError, { title: "Refresh failed" });
@@ -62,16 +70,24 @@ export function UsageActions(props: {
   onRefresh: () => void;
   onLayoutChange?: () => void;
   quicklinkFor?: ProviderUsage[];
+  /** True when these are the whole panel: Refresh becomes the primary action (↵). */
+  standalone?: boolean;
 }) {
   const quicklinks = props.quicklinkFor ?? [];
+  // Raycast binds the first two actions to ↵ and ⌘↵, so shortcuts only go on later ones.
+  const refresh = (
+    <Action
+      title="Refresh from Providers"
+      icon={Icon.ArrowClockwise}
+      shortcut={props.standalone ? undefined : Keyboard.Shortcut.Common.Refresh}
+      onAction={props.onRefresh}
+    />
+  );
   return (
     <>
-      <Action
-        title="Refresh from Providers"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={props.onRefresh}
-      />
+      {props.standalone && refresh}
+      <OpenCodexBarAction />
+      {!props.standalone && refresh}
       <Action.CopyToClipboard
         title="Copy Summary"
         content={summaryText(props.data ?? [], percentMode())}
@@ -88,7 +104,6 @@ export function UsageActions(props: {
           ))}
         </ActionPanel.Submenu>
       )}
-      <OpenCodexBarAction />
     </>
   );
 }
@@ -113,7 +128,11 @@ export function UsageErrorView(props: { error: unknown; data: ProviderUsage[] | 
         }
         actions={
           <ActionPanel>
-            {appMissing ? <DownloadCodexBarAction /> : <UsageActions data={props.data} onRefresh={props.onRefresh} />}
+            {appMissing ? (
+              <DownloadCodexBarAction />
+            ) : (
+              <UsageActions data={props.data} onRefresh={props.onRefresh} standalone />
+            )}
           </ActionPanel>
         }
       />

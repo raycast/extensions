@@ -116,7 +116,13 @@ export function parseSnapshot(snapshot: WidgetSnapshot): ProviderUsage[] {
   }));
 }
 
-export async function readSnapshot(path: string | null = findSnapshotPath() ?? null): Promise<ProviderUsage[]> {
+export interface SnapshotData {
+  providers: ProviderUsage[];
+  /** Providers enabled in CodexBar, when the snapshot lists them. */
+  enabledProviders?: string[];
+}
+
+export async function readSnapshot(path: string | null = findSnapshotPath() ?? null): Promise<SnapshotData> {
   if (!path) throw new SnapshotNotFoundError();
   let text: string;
   try {
@@ -124,5 +130,9 @@ export async function readSnapshot(path: string | null = findSnapshotPath() ?? n
   } catch {
     throw new SnapshotNotFoundError();
   }
-  return parseSnapshot(JSON.parse(text) as WidgetSnapshot);
+  const snapshot = JSON.parse(text) as WidgetSnapshot;
+  return {
+    providers: parseSnapshot(snapshot),
+    enabledProviders: Array.isArray(snapshot.enabledProviders) ? snapshot.enabledProviders : undefined,
+  };
 }
