@@ -1,15 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  LocalStorage,
-  Toast,
-  getPreferenceValues,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, getPreferenceValues, useNavigation } from "@raycast/api";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { createHash } from "node:crypto";
 import { centsToUsd, specstreamRequest, type FindSnap, type ParseResult, type RowsPage } from "./api";
@@ -24,7 +14,6 @@ type Quote = {
   existing_execution?: { find_id?: string } | null;
 };
 type Saved = { q: string; canonical: string; quote: Quote; requestKey: string; attempted: boolean; findId?: string };
-type Prefs = { apiOrigin: string; apiKey: string };
 const TERMINAL = new Set(["completed", "partial", "failed", "canceled", "expired"]);
 const money = (cents: number, currency?: string) => `${currency === "EUR" ? "€" : "$"}${centsToUsd(cents).toFixed(2)}`;
 async function waitForFind(origin: string, apiKey: string, id: string): Promise<FindSnap> {
@@ -69,7 +58,14 @@ function Results({
         </ActionPanel>
       }
     >
-      <List.EmptyView title="No results" description="Nothing met the request, so nothing was charged." />
+      <List.EmptyView
+        title={rows.rows.length === 0 ? "No results" : "No matching results"}
+        description={
+          rows.rows.length === 0
+            ? "Nothing met the request, so nothing was charged."
+            : "Try a different search to find your results."
+        }
+      />
       {rows.rows.map((row) => (
         <List.Item
           key={row.entity_id}
@@ -86,37 +82,34 @@ function Results({
 }
 export default function StartFind() {
   const { push } = useNavigation();
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const storageKey =
     "specstream-request:" +
     createHash("sha256")
       .update(prefs.apiOrigin + ":" + prefs.apiKey)
       .digest("hex");
+  const {
+    value: saved,
+    setValue: setSaved,
+    removeValue: removeSaved,
+    isLoading: restoring,
+  } = useLocalStorage<Saved>(storageKey);
   const [q, setQ] = useState(""),
-    [saved, setSaved] = useState<Saved | null>(null);
-  const [confirm, setConfirm] = useState(""),
-    [busy, setBusy] = useState(false);
+    [confirm, setConfirm] = useState(""),
+    [busy, setBusy] = useState(false),
+    [restored, setRestored] = useState(false);
   useEffect(() => {
-    void LocalStorage.getItem<string>(storageKey)
-      .then((raw) => {
-        if (!raw) return;
-        const value = JSON.parse(raw) as Saved;
-        if (value.quote?.quote_id) {
-          setSaved(value);
-          setQ(value.q);
-        }
-      })
-      .catch(() => showToast({ style: Toast.Style.Failure, title: "Your earlier request could not be restored" }));
-  }, [storageKey]);
+    if (restoring || restored) return;
+    setRestored(true);
+    if (saved?.quote?.quote_id) setQ((typed) => typed || saved.q);
+  }, [restoring, restored, saved]);
   const call = <T,>(method: string, path: string, body?: unknown) =>
     specstreamRequest<T>(prefs.apiOrigin, prefs.apiKey, method, path, body);
   async function persist(value: Saved) {
-    await LocalStorage.setItem(storageKey, JSON.stringify(value));
-    setSaved(value);
+    await setSaved(value);
   }
   async function startAnother() {
-    await LocalStorage.removeItem(storageKey);
-    setSaved(null);
+    await removeSaved();
     setQ("");
     setConfirm("");
   }
@@ -126,7 +119,7 @@ export default function StartFind() {
     try {
       await operation();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "SpecStream did not confirm that", message: String(error) });
+      await showFailureToast(error, { title: "SpecStream did not confirm that" });
     } finally {
       setBusy(false);
     }
@@ -192,7 +185,7 @@ export default function StartFind() {
   }
   return (
     <Form
-      isLoading={busy}
+      isLoading={busy || restoring}
       actions={
         <ActionPanel>
           {!saved?.attempted ? <Action.SubmitForm title="Check My Request" onSubmit={() => act(review)} /> : null}
