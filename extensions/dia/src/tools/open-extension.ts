@@ -23,7 +23,7 @@ type Input = {
    * Name of the Dia space (profile) to open the extension in, e.g. "Work" (case-insensitive).
    *
    * @remarks
-   * Omit it to use the active space when the extension is installed there.
+   * Required when the extension is installed in more than one space.
    */
   space?: string;
 };
@@ -79,15 +79,14 @@ async function resolveExtension(input: Input) {
     candidates = exact;
   }
 
-  // The same extension in several spaces: prefer an active space, else ask
-  const active = candidates.filter(({ profile }) => profile.isActive);
-  const chosen = candidates.length === 1 ? candidates[0] : active.length === 1 ? active[0] : undefined;
-  if (!chosen) {
-    const spaces = (active.length > 1 ? active : candidates).map(({ profile }) => profile.name).join(", ");
+  // The same extension in several spaces: require the space, so the space shown in the confirmation is the one opened
+  if (candidates.length > 1) {
+    const spaces = candidates.map(({ profile }) => profile.name).join(", ");
     throw new Error(
-      `${candidates[0].extension.name} is installed in several spaces (${spaces}). Ask the user which space to open it in, then retry with that space.`,
+      `${candidates[0].extension.name} is installed in several spaces (${spaces}). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space.`,
     );
   }
+  const chosen = candidates[0];
 
   if (!chosen.extension.enabled) {
     throw new Error(

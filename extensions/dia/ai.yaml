@@ -17,7 +17,7 @@ instructions: |
   select-tab, close-tab and get-tab-contents also find tabs in spaces a window isn't showing; select-tab switches the window to the tab's space.
   Use get-spaces for questions about which spaces exist or which one is active, and switch-space to switch to a space, passing its name as the user said it. If switch-space reports there is no space with that name, tell the user which spaces exist instead of guessing.
   # dia-ai-extensions
-  Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space.
+  Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space. When the user means the space they are in, take the active space from get-spaces.
   If open-extension reports that Raycast needs Accessibility access, relay its System Settings instructions instead of retrying or claiming the extension opened.
   Extensions can't be installed, removed, turned on or turned off from Raycast. When asked to, say so and suggest doing it in Dia's extension settings.
 
@@ -539,6 +539,18 @@ evals:
     expected:
       - callsTool: open-extension
       - includes: "Accessibility"
+  - input: "@dia open Bitwarden"
+    usedAsExample: false
+    mocks:
+      open-extension: "Error: Bitwarden Password Manager is installed in several spaces (Personal, Work). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space."
+    expected:
+      - callsTool:
+          name: open-extension
+          arguments:
+            query:
+              includes: "bitwarden"
+      - includes: "Personal"
+      - includes: "Work"
   - input: "@dia uninstall uBlock"
     usedAsExample: false
     mocks:
