@@ -1,6 +1,6 @@
 # Infiniterm Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-08
 
 - Open Finder folders in Infiniterm as terminal cards, in a workspace you pick or a new one
 - New Terminal Card in a directory you choose
