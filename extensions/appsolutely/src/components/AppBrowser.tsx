@@ -29,7 +29,6 @@ export function AppBrowser({
   const { mode, isLoading: viewLoading, error: viewError, setMode } = useViewMode();
   const recentPaths = useRecentApplications();
   const [searchText, setSearchText] = useState("");
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const searching = searchText.trim().length > 0;
   // A reset/deletion in another pushed view cannot leave apps stranded in a stale view.
   const currentFolder = state.folders.some((f) => f.id === folderId) ? folderId : null;
@@ -176,8 +175,6 @@ export function AppBrowser({
     searchBarPlaceholder: "Search all applications…",
     searchText,
     onSearchTextChange: setSearchText,
-    selectedItemId: selectedItemId ?? undefined,
-    onSelectionChange: setSelectedItemId,
     filtering: false,
     searchBarAccessory: (
       <Dropdown

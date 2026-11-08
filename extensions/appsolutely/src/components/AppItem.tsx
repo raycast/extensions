@@ -32,6 +32,7 @@ export function AppItem({
         icon={Icon.AppWindow}
         onAction={() => perform("Could Not Open Application", () => launchApplication(app))}
       />
+      <Action.ShowInFinder path={app.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
       {status === "ready" && (
         <ActionPanel.Section title="Organize">
           <Action.Push
@@ -50,7 +51,6 @@ export function AppItem({
           )}
         </ActionPanel.Section>
       )}
-      <Action.ShowInFinder path={app.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
       <GlobalActions folderId={folderId} />
     </ActionPanel>
   );

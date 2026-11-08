@@ -25,10 +25,8 @@ function run(argv) {
 type SystemIconRenderer = (appPath: string, outputPath: string) => Promise<void>;
 
 async function renderSystemIcon(appPath: string, outputPath: string): Promise<void> {
-  await run("/usr/bin/osascript", ["-l", "JavaScript", "-e", SYSTEM_ICON_SCRIPT, appPath, outputPath], {
-    timeout: 10000,
-    maxBuffer: 1024 * 1024,
-  });
+  const { runAppleScript } = await import("@raycast/utils");
+  await runAppleScript(SYSTEM_ICON_SCRIPT, [appPath, outputPath], { language: "JavaScript", timeout: 10000 });
   await run("/usr/bin/sips", ["-Z", String(ICON_SIZE), outputPath], { timeout: 10000 });
 }
 

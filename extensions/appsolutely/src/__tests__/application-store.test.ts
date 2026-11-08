@@ -58,12 +58,15 @@ test("discovery errors retain the previous catalog and allow retry", async () =>
     },
   });
   await store.refresh();
+  assert.equal(store.getSnapshot().revision, 1);
   fail = true;
   await store.refresh();
   assert.equal(store.getSnapshot().error?.message, "Discovery failed");
+  assert.equal(store.getSnapshot().revision, 1);
   assert.equal(store.getSnapshot().isLoading, false);
   assert.equal(store.getSnapshot().applications[0].path, editor.path);
   fail = false;
   await store.refresh();
   assert.equal(store.getSnapshot().error, undefined);
+  assert.equal(store.getSnapshot().revision, 2);
 });

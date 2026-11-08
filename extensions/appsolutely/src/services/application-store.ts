@@ -5,6 +5,7 @@ import { toError } from "./state-repository.ts";
 interface ApplicationSnapshot {
   applications: LauncherApplication[];
   isLoading: boolean;
+  revision: number;
   error?: Error;
 }
 
@@ -13,7 +14,7 @@ interface ApplicationSource {
 }
 
 export function createApplicationStore(source: ApplicationSource) {
-  let snapshot: ApplicationSnapshot = { applications: [], isLoading: true };
+  let snapshot: ApplicationSnapshot = { applications: [], isLoading: true, revision: 0 };
   let pending: Promise<void> | undefined;
   const listeners = new Set<() => void>();
 
@@ -34,7 +35,7 @@ export function createApplicationStore(source: ApplicationSource) {
       pending = (async () => {
         try {
           const applications = prepareApplications(await source.discover());
-          publish({ applications, isLoading: false });
+          publish({ applications, isLoading: false, revision: snapshot.revision + 1 });
         } catch (error) {
           publish({ ...snapshot, isLoading: false, error: toError(error) });
         } finally {

@@ -6,7 +6,7 @@
 
 A Launchpad-inspired launcher for Raycast.
 
-![Appsolutely Home showing installed applications in Raycast](metadata/appsolutely-2.png)
+![Appsolutely Home showing installed applications in Raycast](media/appsolutely-2.png)
 
 ## Features
 
@@ -42,42 +42,4 @@ Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views
 | ⌘⇧V      | Cycle Grid, Grid (Large), and List views        |
 | Escape   | Clear search / return through native navigation |
 
-Your app organization is saved locally. Resetting the layout keeps your selected view. See [Privacy](docs/PRIVACY.md) for details about local data.
-
-## Run locally
-
-Requires macOS, Raycast, and Node.js **24 or newer** with npm.
-
-```sh
-npm ci
-npm run dev
-```
-
-With development running, open Raycast and select **Open Appsolutely**.
-
-## Development and validation
-
-```sh
-npm test                 # Node's built-in runner; no test dependencies
-npm run typecheck
-npm run lint             # Official Raycast manifest, icon, and ESLint validation
-npm run build            # Official Raycast production build
-npm run benchmark        # Synthetic assignment and icon-store benchmarks
-npm run format
-node scripts/generate-icon.mjs  # Regenerate the 512×512 extension icon
-```
-
-Tests cover hierarchy operations, deep nesting, cycle prevention, application discovery and identity, search, serialization, schema migration, recovery backups, future-version protection, save failures, and concurrent actions.
-
-Source layout:
-
-```text
-src/launcher.tsx              Command entry
-src/components/              Native grid, items, folder forms, destination picker, actions
-src/hooks/                   Shared catalog and layout subscriptions
-src/models/                  Application, folder, and storage types
-src/services/                Discovery, application identity, storage codec, save queue
-src/utils/                   Folder operations and sorting
-src/__tests__/               Pure-logic and persistence tests
-assets/extension-icon.png    Original 512×512 icon
-```
+Your app organization, recent apps, and view preference are saved locally. App icons and folder previews are cached locally. Resetting the layout preserves your view preference and recent history; it does not remove caches or recovery copies. Appsolutely does not send your application data over the network.
