@@ -115,7 +115,7 @@ function RecentEntries() {
           ))}
         </List.Section>
       ))}
-      <List.EmptyView icon={Icon.Clock} title="No time entries in the last two weeks" />
+      {!isLoading && <List.EmptyView icon={Icon.Clock} title="No time entries in the last two weeks" />}
     </List>
   );
 }

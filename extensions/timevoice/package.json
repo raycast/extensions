@@ -9,6 +9,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "start-timer",
@@ -54,21 +57,24 @@
       "description": "Where your Timevoice instance runs.",
       "type": "textfield",
       "required": false,
-      "default": "https://timevoice.mahadk.com"
+      "default": "https://timevoice.mahadk.com",
+      "placeholder": "https://timevoice.mahadk.com"
     },
     {
       "name": "clientId",
       "title": "OAuth Client ID",
       "description": "Only for a self-hosted Timevoice: the client ID of a public OAuth application from Settings → Developer, with redirect URI https://raycast.com/redirect?packageName=Extension and the read and time_entries scopes.",
       "type": "textfield",
-      "required": false
+      "required": false,
+      "placeholder": "Leave empty for timevoice.mahadk.com"
     },
     {
       "name": "workspaceId",
       "title": "Workspace ID",
       "description": "The ID in your Timevoice URL, such as k5nR8m in /k5nR8m/timer. Leave empty to use your first workspace.",
       "type": "textfield",
-      "required": false
+      "required": false,
+      "placeholder": "k5nR8m"
     }
   ],
   "dependencies": {
