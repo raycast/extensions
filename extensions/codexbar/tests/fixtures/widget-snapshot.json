@@ -1,0 +1,74 @@
+{
+  "enabledProviders": ["codex", "claude", "gemini"],
+  "entries": [
+    {
+      "dailyUsage": [],
+      "primary": {
+        "resetDescription": "Dec 7, 8:00 PM",
+        "resetsAt": "2026-12-07T19:00:00Z",
+        "usedPercent": 0,
+        "windowMinutes": 43200
+      },
+      "provider": "codex",
+      "updatedAt": "2026-11-07T19:00:00Z",
+      "usageRows": [
+        {
+          "id": "monthly",
+          "percentLeft": 100,
+          "title": "Monthly",
+          "window": {
+            "resetDescription": "Dec 7, 8:00 PM",
+            "resetsAt": "2026-12-07T19:00:00Z",
+            "usedPercent": 0,
+            "windowMinutes": 43200
+          }
+        }
+      ]
+    },
+    {
+      "dailyUsage": [{ "costUSD": 1.5, "dayKey": "2026-11-06", "totalTokens": 1000 }],
+      "provider": "claude",
+      "quotaOwnerKey": "0000000000000000000000000000000000000000000000000000000000000000",
+      "primary": {
+        "resetDescription": "Resets 11pm",
+        "resetsAt": "2026-11-07T22:00:00Z",
+        "usedPercent": 40,
+        "windowMinutes": 300
+      },
+      "secondary": {
+        "resetDescription": "Resets Nov 14 at 8am",
+        "resetsAt": "2026-11-14T07:00:00Z",
+        "usedPercent": 2,
+        "windowMinutes": 10080
+      },
+      "tokenUsage": {
+        "currencyCode": "USD",
+        "last30DaysCostUSD": 120.5,
+        "last30DaysLabel": "30d",
+        "last30DaysTokens": 50000000,
+        "sessionCostUSD": 4.25,
+        "sessionLabel": "Today",
+        "sessionTokens": 1200000,
+        "updatedAt": "2026-11-07T19:00:00Z"
+      },
+      "updatedAt": "2026-11-07T19:00:00Z",
+      "usageRows": [
+        { "id": "primary", "percentLeft": 60, "title": "Session" },
+        { "id": "secondary", "percentLeft": 98, "title": "Settimanale" },
+        {
+          "id": "claude-weekly-scoped-model",
+          "percentLeft": 99,
+          "title": "Opus only",
+          "window": {
+            "resetDescription": "Resets Nov 14 at 8am",
+            "resetsAt": "2026-11-14T07:00:00Z",
+            "usedPercent": 1,
+            "windowMinutes": 10080
+          }
+        }
+      ]
+    }
+  ],
+  "generatedAt": "2026-11-07T19:00:05Z",
+  "usageBarsShowUsed": false
+}
