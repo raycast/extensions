@@ -55,7 +55,10 @@ export default function PackageListItem({ pkg }: PackageListItemProps) {
           <Action.Push
             title="Show Versions"
             icon={Icon.Tag}
-            shortcut={{ modifiers: ["cmd"], key: "v" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "v" },
+              Windows: { modifiers: ["ctrl"], key: "v" },
+            }}
             target={<PackageVersions pkg={pkg} />}
           />
 
@@ -64,7 +67,10 @@ export default function PackageListItem({ pkg }: PackageListItemProps) {
               title="Open Repository"
               icon={Icon.Folder}
               url={pkg.repository.html_url}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "r" },
+                Windows: { modifiers: ["ctrl"], key: "r" },
+              }}
             />
           ) : null}
 
@@ -72,12 +78,18 @@ export default function PackageListItem({ pkg }: PackageListItemProps) {
             <Action.CopyToClipboard
               title="Copy Package Name"
               content={pkg.name}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "." },
+                Windows: { modifiers: ["ctrl", "shift"], key: "." },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy Package URL"
               content={pkg.html_url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "," },
+                Windows: { modifiers: ["ctrl", "shift"], key: "," },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

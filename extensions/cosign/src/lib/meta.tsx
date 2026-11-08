@@ -1,27 +1,33 @@
 import type { ReactNode } from "react";
-import { Detail, List } from "@raycast/api";
+import { Color, Detail, Icon, Image, List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 
 export type MetaItem =
-  | { kind: "label"; title: string; text: string }
+  | { kind: "label"; title: string; text?: string; icon?: Image.ImageLike }
   | { kind: "link"; title: string; text: string; target: string }
-  | { kind: "tags"; title: string; tags: string[] }
+  | { kind: "tags"; title: string; tags: string[]; color?: Color.ColorLike }
   | { kind: "separator" };
+
+/** What a person, company, round or role shows in a list sidebar or a pushed Detail. */
+export interface Content {
+  markdown: string;
+  meta: MetaItem[];
+}
 
 type MetaNamespace = typeof Detail.Metadata;
 
-/** One description of the sidebar, rendered into either Detail.Metadata (pushed screen) or List.Item.Detail.Metadata (list pane). */
 function renderItems(M: MetaNamespace, items: MetaItem[]): ReactNode {
   return items.map((item, i) => {
     switch (item.kind) {
       case "label":
-        return <M.Label key={i} title={item.title} text={item.text} />;
+        return <M.Label key={i} title={item.title} text={item.text} icon={item.icon} />;
       case "link":
         return <M.Link key={i} title={item.title} text={item.text} target={item.target} />;
       case "tags":
         return (
           <M.TagList key={i} title={item.title}>
             {item.tags.map((tag) => (
-              <M.TagList.Item key={tag} text={tag} />
+              <M.TagList.Item key={tag} text={tag} color={item.color} />
             ))}
           </M.TagList>
         );
@@ -44,3 +50,11 @@ export function listDetailMetadata(items: MetaItem[]): ReactNode {
 }
 
 export const host = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+export const favicon = (url: string) => getFavicon(url, { fallback: Icon.Globe, mask: Image.Mask.RoundedRectangle });
+
+export const avatar = (url: string | null): Image.ImageLike => ({
+  source: url ?? Icon.Person,
+  mask: Image.Mask.Circle,
+  fallback: Icon.Person,
+});

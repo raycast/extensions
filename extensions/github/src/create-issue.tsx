@@ -5,6 +5,7 @@ import {
   Form,
   Icon,
   Image,
+  Keyboard,
   Toast,
   getPreferenceValues,
   open,
@@ -75,13 +76,13 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
           toast.primaryAction = {
             title: "Open Issue",
-            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             onAction: () => push(<IssueDetail initialIssue={issue} />),
           };
 
           toast.secondaryAction = {
             title: `Copy URL`,
-            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: () => Clipboard.copy(issue.url),
           };
 
