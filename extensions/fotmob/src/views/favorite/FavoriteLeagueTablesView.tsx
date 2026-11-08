@@ -14,7 +14,7 @@ function SearchLeaguesAction({ onPop }: { onPop: () => void }) {
       title="Search Leagues"
       target={<LeagueSearchView />}
       onPop={onPop}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
     />
   );
 }

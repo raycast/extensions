@@ -27,12 +27,10 @@ export default function LeagueSearchView() {
   const favoriteService = useFavorite();
   const query = searchText.trim();
 
-  const { data, isLoading } = useCachedPromise(searchLeagues, [query], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(searchLeagues, [query], {
     execute: query.length > 0,
     keepPreviousData: true,
-    onError: (error) => {
-      showToast({ style: Toast.Style.Failure, title: "League search failed", message: error.message });
-    },
+    failureToastOptions: { title: "League search failed" },
   });
 
   const leagues = query.length > 0 ? (data ?? []) : [];
@@ -45,11 +43,24 @@ export default function LeagueSearchView() {
       isLoading={query.length > 0 && isLoading}
       throttle
     >
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={query.length > 0 ? "No leagues found" : "Search for a league"}
-        description={query.length > 0 ? undefined : "Type a name, e.g. Premier League, LaLiga, World Cup"}
-      />
+      {error && leagues.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="League search failed"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={query.length > 0 ? "No leagues found" : "Search for a league"}
+          description={query.length > 0 ? undefined : "Type a name, e.g. Premier League, LaLiga, World Cup"}
+        />
+      )}
       {leagues.map((league) => {
         const isFavorite = favoriteService.leagues.some((l) => l.id === league.id);
         return (
