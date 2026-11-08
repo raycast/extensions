@@ -81,6 +81,13 @@
       "description": "Unread Cosign messages and pending connection requests",
       "mode": "menu-bar",
       "interval": "10m"
+    },
+    {
+      "name": "sign-out",
+      "title": "Sign Out",
+      "subtitle": "Cosign",
+      "description": "Sign out of Cosign. The next Cosign command asks you to sign in again.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -98,11 +105,15 @@
     "prettier": "^3.9.10",
     "typescript": "^6.0.3"
   },
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "^11.0.5"
+  },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
