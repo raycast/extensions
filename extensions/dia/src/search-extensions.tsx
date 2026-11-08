@@ -1,8 +1,10 @@
 import { Action, ActionPanel, closeMainWindow, Color, getPreferenceValues, Icon, List, open } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import {
-  clickExtensionMenuItem,
+  extensionSettingsUrl,
   getExtensionProfiles,
+  needsAccessibility as isAccessibilityError,
+  openExtension,
   openURLInProfile,
   type BrowserExtension,
   type ExtensionProfile,
@@ -14,14 +16,12 @@ const ALL_PROFILES = "all";
 const PROFILE_PREFIX = "profile:";
 const ACCESSIBILITY_SETTINGS_URL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 
-const settingsUrl = (extension: BrowserExtension) => `chrome://extensions/?id=${extension.id}`;
-
 async function run(action: () => Promise<unknown>, failureTitle: string) {
   try {
     await closeMainWindow();
     await action();
   } catch (error) {
-    const needsAccessibility = /assistive access|-1719|-25211/.test(String(error));
+    const needsAccessibility = isAccessibilityError(error);
     await showFailureToast(error, {
       title: needsAccessibility ? "Raycast needs Accessibility access" : failureTitle,
       primaryAction: needsAccessibility
@@ -29,12 +29,6 @@ async function run(action: () => Promise<unknown>, failureTitle: string) {
         : undefined,
     });
   }
-}
-
-/** Picks the extension from Dia's Extensions menu, else opens its popup, else its settings page, in a tab. */
-async function openExtension(extension: BrowserExtension, profile: ExtensionProfile) {
-  if (await clickExtensionMenuItem(extension.name, profile.name)) return;
-  await openURLInProfile(extension.popupUrl ?? settingsUrl(extension), profile.name);
 }
 
 function ExtensionItem({ extension, profile }: { extension: BrowserExtension; profile: ExtensionProfile }) {
@@ -71,7 +65,7 @@ function ExtensionItem({ extension, profile }: { extension: BrowserExtension; pr
           <Action
             title="Show in Extension Settings"
             icon={Icon.List}
-            onAction={() => openInTab(settingsUrl(extension))}
+            onAction={() => openInTab(extensionSettingsUrl(extension))}
           />
           <Action.CopyToClipboard title="Copy Extension ID" content={extension.id} />
         </ActionPanel>

@@ -45,7 +45,9 @@ type PageText = { title: string; url: string; readyState: string; length: number
 export default async function tool(input: Input) {
   const maxLength = Math.min(Math.max(Math.floor(input.maxLength ?? DEFAULT_MAX_LENGTH), 1), MAX_LENGTH_CAP);
   const tab = await findTab(input);
-  const tabSpecifier = `tab id "${escapeAppleScriptString(tab.tabId)}" of window id "${escapeAppleScriptString(tab.windowId)}"`;
+  // A window's tabs only hold the space it shows, so a tab in another space is reached through its profile
+  const container = tab.space && !tab.isActiveSpace ? `profile "${escapeAppleScriptString(tab.space)}" of ` : "";
+  const tabSpecifier = `tab id "${escapeAppleScriptString(tab.tabId)}" of ${container}window id "${escapeAppleScriptString(tab.windowId)}"`;
 
   const stillLoading = await waitUntilLoaded(tabSpecifier).catch((error) => {
     throw toReadError(error, tab.title);

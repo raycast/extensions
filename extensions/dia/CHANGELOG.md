@@ -1,5 +1,11 @@
 # Dia Changelog
 
+## [AI Tools for Spaces and Extensions] - {PR_MERGE_DATE}
+
+- Ask Dia can now see and switch spaces: the new Get Spaces tool lists the spaces in Dia's order and which ones are active, and Switch Space switches a window to another space.
+- Get Tabs now returns the tabs of every space, each with its space name, and can return the tabs of a single space. Select Tab, Close Tab and Get Tab Contents also find tabs in spaces a window isn't showing, and Select Tab switches the window to the tab's space.
+- Added Get Extensions and Open Extension tools, so you can ask which browser extensions are installed in each space and open one like its toolbar button. Opening an extension requires Accessibility access for Raycast.
+
 ## [Search Extensions Command] - 2026-11-07
 
 - Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.

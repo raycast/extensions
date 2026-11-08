@@ -197,7 +197,7 @@
     {
       "name": "get-tabs",
       "title": "Get Tabs",
-      "description": "Return the open tabs across all Dia windows"
+      "description": "Return the open tabs across all Dia windows and spaces"
     },
     {
       "name": "get-focused-tab",
@@ -213,6 +213,26 @@
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "description": "Search the Dia bookmarks"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Return the Dia spaces and which ones are active"
+    },
+    {
+      "name": "switch-space",
+      "title": "Switch Space",
+      "description": "Switch a Dia window to another space"
+    },
+    {
+      "name": "get-extensions",
+      "title": "Get Extensions",
+      "description": "Return the browser extensions installed in each Dia space"
+    },
+    {
+      "name": "open-extension",
+      "title": "Open Extension",
+      "description": "Open a Dia browser extension like its toolbar button"
     }
   ],
   "dependencies": {

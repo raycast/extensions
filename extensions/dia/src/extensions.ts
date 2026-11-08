@@ -181,3 +181,24 @@ export async function clickExtensionMenuItem(extensionName: string, profileName:
   );
   return result === "clicked";
 }
+
+/** Dia's extension settings page for an extension. */
+export const extensionSettingsUrl = (extension: BrowserExtension) => `chrome://extensions/?id=${extension.id}`;
+
+/** Whether an error comes from Raycast missing Accessibility access, which clicking Dia's menus needs. */
+export function needsAccessibility(error: unknown): boolean {
+  return /assistive access|-1719|-25211/.test(String(error));
+}
+
+/**
+ * Picks the extension from Dia's Extensions menu, else opens its popup, else its settings page, in a tab.
+ * Returns how it was opened.
+ */
+export async function openExtension(
+  extension: BrowserExtension,
+  profile: Profile,
+): Promise<"menu" | "popup" | "settings"> {
+  if (await clickExtensionMenuItem(extension.name, profile.name)) return "menu";
+  await openURLInProfile(extension.popupUrl ?? extensionSettingsUrl(extension), profile.name);
+  return extension.popupUrl ? "popup" : "settings";
+}
