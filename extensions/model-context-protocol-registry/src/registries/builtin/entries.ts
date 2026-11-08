@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "roomlab",
+    title: "RoomLab.app",
+    description:
+      "AI photo and video editing for rooms and properties: Virtual Staging furnishes an empty room, Change Style restyles a furnished one, Declutter Room and Empty Room clear it, Replace Furniture and Replace Material swap a piece or a surface from a reference photo, and Wall Colors compares paint colors. Also Interior and Exterior Architectural Render, exterior touch-ups (blue sky, clean pool, clean garden, greener grass), Upscale Image to 4K, and Video Walkthrough, Video Transition and House Tour videos from photos. 19 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a RoomLab.app account is required.",
+    icon: "https://roomlab.app/favicon-512x512.png",
+    homepage: "https://roomlab.app/en/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.roomlab.app/mcp"],
+    },
+    remoteUrl: "https://mcp.roomlab.app/mcp",
+  },
+  {
     name: "folklore",
     title: "Folklore Clinical Variant Interpretation MCP",
     description:

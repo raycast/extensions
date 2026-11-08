@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RoomLab.app MCP Server] - 2026-11-08
+
+- Add RoomLab.app to the official registry: AI photo and video editing for rooms and properties (Virtual Staging, Change Style, Declutter Room, Empty Room, Replace Furniture, Replace Material, Wall Colors, Interior and Exterior Architectural Render, exterior touch-ups, Upscale Image to 4K, Video Walkthrough, Video Transition and House Tour). 19 tools. Hosted Streamable HTTP server at https://mcp.roomlab.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A RoomLab.app account is required.
+
 ## [Add Rinhelp MCP Server] - 2026-11-07
 
 - Add Rinhelp to the official registry: a help desk for small teams and AI agents. Reply to and triage conversations, search knowledge, write help center articles, manage saved replies, and find Shopify orders and Stripe customers; refunds and anything that can't be undone wait for a teammate's approval. About 80 tools. Hosted Streamable HTTP server at https://mcp.rinhelp.com/mcp with a Rinhelp API key as a Bearer header, through `mcp-remote`.
