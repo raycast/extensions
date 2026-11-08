@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timevoice",
   "title": "Timevoice",
-  "description": "Start and stop Timevoice timers, see what's running, and log time without leaving the keyboard.",
+  "description": "Start and stop Timevoice timers, see what's running, and log time without leaving the keyboard. Requires a Timevoice account.",
   "icon": "icon.png",
   "author": "mahad_kalam",
   "categories": [

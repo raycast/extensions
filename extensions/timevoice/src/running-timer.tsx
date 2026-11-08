@@ -13,7 +13,8 @@ import {
 } from "./api";
 
 function RunningTimer() {
-  const { data: entries, isLoading, mutate } = useCachedPromise(() => listEntries(7), [], { initialData: [] });
+  // All entries, not a recent window: a timer can run for any length of time.
+  const { data: entries, isLoading, mutate } = useCachedPromise(() => listEntries(), [], { initialData: [] });
   const running = entries.find((entry) => !entry.ended_at);
   // The running entry is the newest, so deduplicating first also drops older entries of the work it continues.
   const recent = uniqueByWork(entries.filter((entry) => entry.description))
@@ -56,7 +57,13 @@ function RunningTimer() {
         <MenuBarExtra.Item
           icon={Icon.Play}
           title="Start Timer…"
-          onAction={() => launchCommand({ name: "start-timer", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "start-timer", type: LaunchType.UserInitiated });
+            } catch (error) {
+              await showFailureToast(error, { title: "Could not open Start Timer" });
+            }
+          }}
         />
       </MenuBarExtra.Section>
       {recent.length > 0 && (

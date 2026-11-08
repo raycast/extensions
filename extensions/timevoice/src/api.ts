@@ -1,14 +1,18 @@
 import { LaunchType, OAuth, getPreferenceValues, launchCommand } from "@raycast/api";
 import { OAuthService, getAccessToken } from "@raycast/utils";
+import { createHash } from "node:crypto";
 
 // The public (PKCE) OAuth application registered on timevoice.mahadk.com.
 const TIMEVOICE_CLIENT_ID = "dizWuONAZf9JSgIlfkrTg90w-CJfiqcQGRwrzglsiks";
 
 const { clientId, baseUrl: rawBaseUrl, workspaceId: preferredWorkspaceId } = getPreferenceValues<Preferences>();
 export const baseUrl = (rawBaseUrl || "https://timevoice.mahadk.com").replace(/\/+$/, "");
+const effectiveClientId = clientId || TIMEVOICE_CLIENT_ID;
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
+  // One saved login per server and app, so changing either never sends an old token to a new server.
+  providerId: `timevoice-${createHash("sha256").update(`${baseUrl}\n${effectiveClientId}`).digest("hex").slice(0, 16)}`,
   providerName: "Timevoice",
   providerIcon: "icon.png",
   description: "Connect your Timevoice account to track time from Raycast.",
@@ -16,7 +20,7 @@ const client = new OAuth.PKCEClient({
 
 export const timevoice = new OAuthService({
   client,
-  clientId: clientId || TIMEVOICE_CLIENT_ID,
+  clientId: effectiveClientId,
   scope: "read time_entries",
   authorizeUrl: `${baseUrl}/oauth/authorize`,
   tokenUrl: `${baseUrl}/oauth/token`,
@@ -81,10 +85,15 @@ let workspaceId: Promise<string> | undefined;
 export function getWorkspaceId(): Promise<string> {
   if (preferredWorkspaceId) return Promise.resolve(preferredWorkspaceId);
 
-  workspaceId ??= request<{ id: string }[]>("/workspaces").then((workspaces) => {
-    if (!workspaces[0]) throw new Error("Your Timevoice account has no workspace.");
-    return workspaces[0].id;
-  });
+  workspaceId ??= request<{ id: string }[]>("/workspaces")
+    .then((workspaces) => {
+      if (!workspaces[0]) throw new Error("Your Timevoice account has no workspace.");
+      return workspaces[0].id;
+    })
+    .catch((error) => {
+      workspaceId = undefined;
+      throw error;
+    });
   return workspaceId;
 }
 

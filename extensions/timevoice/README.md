@@ -1,6 +1,6 @@
 # Timevoice for Raycast
 
-Track time in [Timevoice](https://timevoice.mahadk.com) without leaving the keyboard.
+Track time in [Timevoice](https://timevoice.mahadk.com) without leaving the keyboard. Requires a Timevoice account.
 
 | Command | What it does |
 | --- | --- |
@@ -28,14 +28,3 @@ If you belong to several workspaces, set **Workspace ID** in the extension prefe
    - **Scopes:** `read` and `time_entries`
    - **Confidential:** off (Raycast signs in with PKCE and keeps no secret)
 2. In the extension preferences, set **Timevoice URL** to your instance and **OAuth Client ID** to the application's client ID.
-
-## Development
-
-```sh
-npm install
-npm run dev    # loads the extension into Raycast
-npm run build  # type-checks and builds for distribution
-npm run lint
-```
-
-The extension uses only the public [Timevoice API v1](https://github.com/skyfallwastaken/timevoice/blob/main/docs/openapi.yml). Its source lives in the `raycast/` folder of the [Timevoice repository](https://github.com/skyfallwastaken/timevoice).

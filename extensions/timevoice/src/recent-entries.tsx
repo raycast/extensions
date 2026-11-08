@@ -16,14 +16,11 @@ import {
 
 function RecentEntries() {
   const {
-    data: entries,
+    data: entries = [],
     isLoading,
+    error,
     revalidate,
-  } = useCachedPromise(
-    async () => (await listEntries(14)).filter((entry) => new Date(entry.started_at) <= new Date()),
-    [],
-    { initialData: [] },
-  );
+  } = useCachedPromise(async () => (await listEntries(14)).filter((entry) => new Date(entry.started_at) <= new Date()));
   const { data: url } = useCachedPromise(timerUrl);
 
   async function run(title: string, doneTitle: string, action: () => Promise<unknown>) {
@@ -115,7 +112,21 @@ function RecentEntries() {
           ))}
         </List.Section>
       ))}
-      {!isLoading && <List.EmptyView icon={Icon.Clock} title="No time entries in the last two weeks" />}
+      {!isLoading &&
+        (error ? (
+          <List.EmptyView
+            icon={{ source: Icon.Warning, tintColor: Color.Red }}
+            title="Could not load time entries"
+            description={error.message}
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.EmptyView icon={Icon.Clock} title="No time entries in the last two weeks" />
+        ))}
     </List>
   );
 }
