@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Fix punycode deprecation warning] - 2026-11-08
+## [Fix punycode deprecation warning] - {PR_MERGE_DATE}
 
 - Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` module `exports` error
 
