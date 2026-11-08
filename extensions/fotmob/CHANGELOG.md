@@ -1,5 +1,11 @@
 # Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix League Table and Favorite League Tables crashing after FotMob changed the shape of its league table data
+- Make the "Search Leagues" action in Favorite League Tables open a league search instead of only showing a hint
+- Remove a league from Favorite League Tables immediately instead of after reopening the command
+
 ## [Fixes] - 2026-05-14
 
 - Fix Match Day, Match Detail, Team Detail, and League Table data fetching after FotMob endpoint changes
