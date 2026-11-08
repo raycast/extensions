@@ -1,6 +1,6 @@
 # Cosign Changelog
 
-## [Sign Out and Profile Photos] - {PR_MERGE_DATE}
+## [Sign Out and Profile Photos] - 2026-11-08
 
 - New command: Sign Out
 - Full profiles show the person's photo
