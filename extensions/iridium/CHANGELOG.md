@@ -1,5 +1,9 @@
 # Iridium Changelog
 
+## [Fix history search with apostrophes] - {PR_MERGE_DATE}
+
+- Escape search terms in history search, so `'`, `%` and `_` are matched literally instead of breaking the query or acting as wildcards
+
 ## [Profiles support] - 2023-01-22
 
 - Added support for profiles across all commands
