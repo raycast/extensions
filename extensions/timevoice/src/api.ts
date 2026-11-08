@@ -107,13 +107,14 @@ function daysAgo(days: number): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-// Without `days`, lists every entry: API v1 has no "running" filter, and a timer can run for any length of time.
-export function listEntries(days?: number): Promise<TimeEntry[]> {
-  return workspaceRequest(days === undefined ? "/time_entries" : `/time_entries?start_date=${daysAgo(days)}`);
+export function listEntries(days: number): Promise<TimeEntry[]> {
+  return workspaceRequest(`/time_entries?start_date=${daysAgo(days)}`);
 }
 
+// A timer can run for any length of time, so this has no date bound. Servers without the
+// `running` filter return every entry, which the local filter still handles.
 export async function getRunningEntries(): Promise<TimeEntry[]> {
-  return (await listEntries()).filter((entry) => !entry.ended_at);
+  return (await workspaceRequest<TimeEntry[]>("/time_entries?running=true")).filter((entry) => !entry.ended_at);
 }
 
 export function listProjects(): Promise<Project[]> {
