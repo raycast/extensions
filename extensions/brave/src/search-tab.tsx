@@ -18,7 +18,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} filtering={true}>
-      {isWindows && !isLoading && (
+      {isWindows && !isLoading && (data?.length ?? 0) === 0 && (
         <List.EmptyView
           icon={Icon.Window}
           title="No Tabs Found"

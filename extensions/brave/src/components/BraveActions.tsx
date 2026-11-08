@@ -87,6 +87,30 @@ function TabListItemActions({ tab, revalidate }: { tab: Tab; revalidate: () => P
           onAction={() => launchBrowserCommand()}
         />
         {!isWindows && (
+          <>
+            <Action
+              title="Move to New Window"
+              icon={Icon.Window}
+              onAction={() =>
+                updateTabs(async () => {
+                  await closeTabs([tab]);
+                  await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, newWindow: true });
+                }, "Could Not Move Tab")
+              }
+            />
+            <Action
+              title="Move to Private Window"
+              icon={Icon.EyeDisabled}
+              onAction={() =>
+                updateTabs(async () => {
+                  await closeTabs([tab]);
+                  await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, incognito: true });
+                }, "Could Not Move Tab")
+              }
+            />
+          </>
+        )}
+        {!isWindows && (
           <Action
             title="Close Tab"
             icon={Icon.XMarkCircle}
