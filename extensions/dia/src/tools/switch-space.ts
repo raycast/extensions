@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { focusSpace } from "../dia";
 import { toAutomationError } from "../find-tab";
 import { findSpaceName, readSpacesForTool } from "../spaces";
@@ -20,15 +21,35 @@ type Input = {
   windowId?: string;
 };
 
+/** Resolves the space name, and rejects a window ID that no longer matches an open window. */
+async function resolveTarget(input: Input) {
+  const spaces = await readSpacesForTool();
+  const space = findSpaceName(spaces.names, input.space);
+  if (input.windowId && !(input.windowId in spaces.activeByWindow)) {
+    throw new Error(
+      `No open Dia window has the ID "${input.windowId}". It may have been closed. Nothing was switched. Call get-spaces for the current window IDs, or omit windowId to switch the front window.`,
+    );
+  }
+  return { space, windowId: input.windowId, currentSpace: input.windowId && spaces.activeByWindow[input.windowId] };
+}
+
 /**
  * Switches a Dia window to another space, like picking it in Dia's sidebar, and brings Dia to the front.
  */
 export default async function tool(input: Input) {
-  const spaces = await readSpacesForTool();
-  const space = findSpaceName(spaces.names, input.space);
-  // focusSpace falls back to the front window when the window ID doesn't match one
-  await focusSpace(space, input.windowId ?? "").catch((error) => {
+  const { space, windowId } = await resolveTarget(input);
+  // Without a window ID, focusSpace switches the front window
+  await focusSpace(space, windowId ?? "").catch((error) => {
     throw toAutomationError(error);
   });
-  return { switchedTo: space };
+  return { switchedTo: space, windowId };
 }
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  // Throw rather than skip the dialog: a target that can't be resolved must not be switched
+  const { space, windowId, currentSpace } = await resolveTarget(input);
+  return {
+    message: `Switch ${windowId ? "the Dia window" : "the front Dia window"} to the ${space} space?`,
+    info: [{ name: "Space", value: space }, ...(currentSpace ? [{ name: "Current Space", value: currentSpace }] : [])],
+  };
+};

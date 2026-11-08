@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { getExtensionProfiles, needsAccessibility, openExtension } from "../extensions";
 import { toAutomationError } from "../find-tab";
 
@@ -27,12 +28,8 @@ type Input = {
   space?: string;
 };
 
-/**
- * Opens a Dia browser extension like its toolbar button: switches the front Dia window to the extension's space,
- * then picks it from Dia's Extensions menu. When the menu has no item for it, its popup, or without one its
- * settings page, opens in a new tab instead.
- */
-export default async function tool(input: Input) {
+/** Resolves the input to one installed extension and its space, or throws a message the AI can act on. */
+async function resolveExtension(input: Input) {
   const query = input.query?.trim().toLowerCase();
   if (!input.extensionId && !query) throw new Error("Pass the extension's extensionId or a query matching its name.");
 
@@ -54,6 +51,13 @@ export default async function tool(input: Input) {
       .map((extension) => ({ extension, profile })),
   );
   if (matches.length === 0) {
+    // A space whose settings couldn't be read has no extensions listed, so it can't prove the extension is missing
+    const unreadable = inSpace.filter((profile) => profile.error);
+    if (unreadable.length > 0) {
+      throw new Error(
+        `Couldn't read the extensions of ${unreadable.map((profile) => `${profile.name} (${profile.error})`).join(", ")}. Nothing was opened.`,
+      );
+    }
     const target = input.extensionId ? `with the ID "${input.extensionId}"` : `matching "${input.query?.trim()}"`;
     throw new Error(`No Dia extension ${target} is installed${input.space ? ` in ${input.space.trim()}` : ""}.`);
   }
@@ -85,12 +89,21 @@ export default async function tool(input: Input) {
     );
   }
 
-  const { extension, profile } = chosen;
-  if (!extension.enabled) {
+  if (!chosen.extension.enabled) {
     throw new Error(
-      `${extension.name} is turned off in ${profile.name}. Turn it on in Dia's extension settings first.`,
+      `${chosen.extension.name} is turned off in ${chosen.profile.name}. Turn it on in Dia's extension settings first.`,
     );
   }
+  return chosen;
+}
+
+/**
+ * Opens a Dia browser extension like its toolbar button: switches the front Dia window to the extension's space,
+ * then picks it from Dia's Extensions menu. When the menu has no item for it, its popup, or without one its
+ * settings page, opens in a new tab instead.
+ */
+export default async function tool(input: Input) {
+  const { extension, profile } = await resolveExtension(input);
 
   let openedVia: Awaited<ReturnType<typeof openExtension>>;
   try {
@@ -101,3 +114,15 @@ export default async function tool(input: Input) {
   }
   return { opened: extension.name, extensionId: extension.id, space: profile.name, openedVia };
 }
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  // Throw rather than skip the dialog: an extension that can't be resolved must not be opened
+  const { extension, profile } = await resolveExtension(input);
+  return {
+    message: `Open ${extension.name} in the ${profile.name} space? The front Dia window switches to this space.`,
+    info: [
+      { name: "Extension", value: extension.name },
+      { name: "Space", value: profile.name },
+    ],
+  };
+};
