@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timevoice",
+  "title": "Timevoice",
+  "description": "Start and stop Timevoice timers, see what's running, and log time without leaving the keyboard.",
+  "icon": "icon.png",
+  "author": "mahad_kalam",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "subtitle": "Timevoice",
+      "description": "Start a timer, stopping the one that's running.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Timevoice",
+      "description": "Stop the running timer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "running-timer",
+      "title": "Running Timer",
+      "subtitle": "Timevoice",
+      "description": "Show the running timer in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "recent-entries",
+      "title": "Recent Time Entries",
+      "subtitle": "Timevoice",
+      "description": "Browse the last two weeks of time entries, continue or stop them.",
+      "mode": "view"
+    },
+    {
+      "name": "add-entry",
+      "title": "Add Time Entry",
+      "subtitle": "Timevoice",
+      "description": "Log a finished block of time.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Timevoice URL",
+      "description": "Where your Timevoice instance runs.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://timevoice.mahadk.com"
+    },
+    {
+      "name": "clientId",
+      "title": "OAuth Client ID",
+      "description": "Only for a self-hosted Timevoice: the client ID of a public OAuth application from Settings → Developer, with redirect URI https://raycast.com/redirect?packageName=Extension and the read and time_entries scopes.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "description": "The ID in your Timevoice URL, such as k5nR8m in /k5nR8m/timer. Leave empty to use your first workspace.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
