@@ -123,7 +123,7 @@ export function UsageErrorView(props: { error: unknown; data: ProviderUsage[] | 
           appMissing
             ? "Install the CodexBar menu bar app to see your plan limits here."
             : snapshotMissing
-              ? "Open CodexBar and let it refresh once, or press ⌘R to fetch usage through its CLI."
+              ? "Open CodexBar and let it refresh once, or press Return to fetch usage through its CLI."
               : errorMessage(props.error)
         }
         actions={

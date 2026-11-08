@@ -30,7 +30,7 @@ export default function Command(props: LaunchProps<{ launchContext?: UsageLaunch
       : isLoading
         ? ""
         : only
-          ? `## No data for ${only}\n\nEnable it in CodexBar, then press ⌘R to refresh.`
+          ? `## No data for ${only}\n\nEnable it in CodexBar, then press Return to refresh.`
           : "## No providers to show\n\nEnable a provider in CodexBar, or show hidden ones with Manage Providers (⌘⇧L).";
 
   return (
