@@ -65,8 +65,8 @@ export async function downloadAttachments(item: StreamItem, course: Course, opti
 
 async function isRaycastFrontmost() {
   const app = await getFrontmostApplication();
-  // Also matches the beta and internal builds
-  return app.bundleId?.startsWith("com.raycast.macos") ?? app.name === "Raycast";
+  // Matches the stable, beta and Windows builds, whose IDs differ
+  return [app.bundleId, app.windowsAppId, app.name].some((id) => id?.toLowerCase().includes("raycast"));
 }
 
 // Raycast has no API to attach files to AI Chat, so the attachments and the details are pasted into it
