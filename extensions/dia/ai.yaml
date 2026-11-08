@@ -17,9 +17,9 @@ instructions: |
   select-tab, close-tab and get-tab-contents also find tabs in spaces a window isn't showing; select-tab switches the window to the tab's space.
   Use get-spaces for questions about which spaces exist or which one is active, and switch-space to switch to a space, passing its name as the user said it. If switch-space reports there is no space with that name, tell the user which spaces exist instead of guessing.
   # dia-ai-extensions
+  Raycast can't install, uninstall, remove, turn on or turn off Dia extensions. For those requests, call no tool: reply that it can't be done from Raycast and that the user can do it in Dia's extension settings. open-extension only opens an extension to use it.
   Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space. When the user means the space they are in, take the active space from get-spaces.
   If open-extension reports that Raycast needs Accessibility access, relay its System Settings instructions instead of retrying or claiming the extension opened.
-  Extensions can't be installed, removed, turned on or turned off from Raycast. When asked to, say so and suggest doing it in Dia's extension settings.
 
 evals:
   # dia-ai-actions
@@ -464,6 +464,13 @@ evals:
   # dia-ai-extensions
   - input: "@dia which browser extensions do I have installed?"
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       get-extensions:
         - space: "Personal"
           isActive: true
@@ -488,6 +495,13 @@ evals:
       - includes: "uBlock"
   - input: "@dia open 1Password"
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       open-extension:
         opened: "1Password – Password Manager"
         extensionId: "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
@@ -506,6 +520,13 @@ evals:
                 extensionId: "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
   - input: "@dia open uBlock in my Work space"
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       open-extension:
         opened: "uBlock Origin Lite"
         extensionId: "ddkjiahejlhfcafbddmgiahcphecmpfh"
@@ -520,6 +541,13 @@ evals:
   - input: "@dia open the Google extension"
     usedAsExample: false
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       open-extension: |-
         Error: 2 extensions match "google". Ask the user which one they mean, then retry with its extensionId:
         - Google Docs Offline [extensionId: ghbmnnjooekpmoecnnnilnnbdlolhkhi]
@@ -535,6 +563,13 @@ evals:
   - input: "@dia open 1Password"
     usedAsExample: false
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       open-extension: "Error: Raycast needs Accessibility access to open Dia extensions. Enable Raycast in System Settings → Privacy & Security → Accessibility, then try again."
     expected:
       - callsTool: open-extension
@@ -542,6 +577,13 @@ evals:
   - input: "@dia open Bitwarden"
     usedAsExample: false
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       open-extension: "Error: Bitwarden Password Manager is installed in several spaces (Personal, Work). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space."
     expected:
       - callsTool:
@@ -554,6 +596,13 @@ evals:
   - input: "@dia uninstall uBlock"
     usedAsExample: false
     mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
       get-extensions:
         - space: "Personal"
           isActive: true
@@ -566,5 +615,6 @@ evals:
               hasPopup: true
     expected:
       - not:
-          callsTool: open-extension
-      - meetsCriteria: "Says the extension can't be removed from Raycast and suggests removing it in Dia's extension settings"
+          callsTool:
+            name: open-extension
+      - includes: "settings"

@@ -97,9 +97,12 @@ async function resolveExtension(input: Input) {
 }
 
 /**
- * Opens a Dia browser extension like its toolbar button: switches the front Dia window to the extension's space,
- * then picks it from Dia's Extensions menu. When the menu has no item for it, its popup, or without one its
- * settings page, opens in a new tab instead.
+ * Opens a Dia browser extension so the user can use it, like clicking its toolbar button: switches the front Dia
+ * window to the extension's space, then picks it from Dia's Extensions menu. When the menu has no item for it, its
+ * popup opens in a new tab instead.
+ *
+ * Only for using an extension. Don't call it to install, remove, uninstall, turn on or turn off an extension:
+ * this can't be done from Raycast, so tell the user to do it in Dia's extension settings instead.
  */
 export default async function tool(input: Input) {
   const { extension, profile } = await resolveExtension(input);
