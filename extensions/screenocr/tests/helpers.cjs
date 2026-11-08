@@ -18,6 +18,8 @@ function createHost(options = {}) {
     showToast: true,
     resultAction: "copy",
     clipboardResultAction: "copy",
+    closeRaycast: true,
+    includeRaycast: false,
     ...options.preferences,
   };
   const api = {
