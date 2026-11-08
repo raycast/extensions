@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fix punycode deprecation warning] - 2026-11-08
+
+- Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` deprecation warning (`DEP0040`)
+
 ## [Pinned projects and groups] - 2026-11-07
 
 - Pin projects in `Search Projects` with the `Pin Project` action; pinned projects are shown in a "Pinned" section at the top of the list
