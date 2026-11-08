@@ -1,16 +1,5 @@
 import { RewriteError } from "./errors";
 
-export interface Preferences {
-  credentialMethod: "default" | "profile" | "environment";
-  awsProfile: string;
-  awsRegion: string;
-  modelId: string;
-  inferenceProfile: string;
-  maxTokens: string;
-  temperature: string;
-  defaultTone: string;
-}
-
 export const TONES: Record<string, string> = {
   professional:
     "Rewrite in a professional register: clear, direct, measured. Avoid slang, hedging, and filler. Prefer active voice and concrete language. Do not use words like 'crucial', 'delve', 'landscape', 'pivotal', 'foster', 'showcase', 'underscore', 'highlight', 'vibrant', 'enhance', or 'garner'. Do not inflate significance. State facts plainly.",

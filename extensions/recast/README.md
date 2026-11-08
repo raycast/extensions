@@ -101,27 +101,6 @@ Recast sends the selected or entered text, rewrite instruction, and built-in wri
 
 Your AWS account’s logging configuration and service terms still apply: if Bedrock model invocation logging is enabled, prompts and responses may be recorded in your AWS logging destinations. Copy and paste actions place text on the system clipboard, where Raycast Clipboard History or other clipboard managers may retain it. The preview renders text literally so embedded Markdown images do not trigger third-party requests.
 
-## Development
-
-Requires macOS, [Raycast](https://www.raycast.com/), Node.js 26.12.1 or later (matching the current Raycast runtime), and npm.
-
-```sh
-git clone https://github.com/msakowski/recast.git
-cd recast
-npm ci
-npm run dev
-```
-
-```sh
-npm run check      # types, behavioral tests, Raycast lint, production build, bundle smoke test
-npm audit         # dependency advisory check
-npm run publish   # submit to Raycast’s extension review; not npm publishing
-```
-
-The bundle smoke test loads all three generated commands and exercises the packaged AWS SDK through request serialization, without network access or real credentials. Tests cover stream failures, truncation, cancellation, routing, parameter validation, Unicode, and literal previews. The `minimatch` override pins the patched tooling dependency until upstream consumers update their ranges.
-
-Store publication requires Raycast’s review and merge of the generated pull request. Development changes can be submitted to [the source repository](https://github.com/msakowski/recast).
-
 ## License
 
-[MIT](LICENSE). Recast is independent and is not affiliated with or endorsed by Amazon Web Services or Anthropic.
+[MIT](https://github.com/raycast/extensions/blob/main/LICENSE). Recast is independent and is not affiliated with or endorsed by Amazon Web Services or Anthropic.

@@ -12,7 +12,6 @@ import {
   fromNodeProviderChain,
 } from "@aws-sdk/credential-providers";
 import {
-  type Preferences,
   SYSTEM_PROMPT,
   buildPrompt,
   resolveModelId,

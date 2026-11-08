@@ -3,12 +3,11 @@ import {
   getPreferenceValues,
   useNavigation,
 } from "@raycast/api";
-import { type Preferences } from "./config";
 import { ResultView } from "./result-view";
 import { SourceForm, SourceLoading, useSource } from "./source";
 
 export default function Command(
-  props: LaunchProps<{ arguments: { instruction?: string } }>,
+  props: LaunchProps<{ arguments: Arguments.RewriteWithInstruction }>,
 ) {
   const source = useSource();
   const { push } = useNavigation();

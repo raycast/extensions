@@ -7,8 +7,9 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { type Preferences, TONE_DETAILS, formatModelName } from "./config";
+import { useRef, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { TONE_DETAILS, formatModelName } from "./config";
 import { rewrite } from "./bedrock";
 import { rewriteError } from "./errors";
 import { type Source } from "./source";
@@ -26,67 +27,47 @@ export function ResultView({
   instruction?: string;
   nested?: boolean;
 }) {
-  const [result, setResult] = useState("");
+  // usePromise clears data on failure. Preserve the last successful text in
+  // memory so a canceled or failed retry does not discard the user’s work.
+  const [lastResult, setLastResult] = useState("");
   const [partial, setPartial] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
   const [showOriginal, setShowOriginal] = useState(false);
   const [preferences, setPreferences] = useState(() =>
     getPreferenceValues<Preferences>(),
   );
-  const pending = useRef<AbortController | undefined>(undefined);
-  const mounted = useRef(false);
-  const run = useCallback(async () => {
-    if (pending.current) return;
-    const controller = new AbortController();
-    pending.current = controller;
-    const currentPreferences = getPreferenceValues<Preferences>();
-    setPreferences(currentPreferences);
-    setIsLoading(true);
-    setPartial("");
-    setError(undefined);
-    try {
-      const text = await rewrite({
-        text: source.text,
+  const abortable = useRef<AbortController | undefined>(undefined);
+  const { data, error, isLoading, revalidate } = usePromise(
+    async (
+      text: string,
+      tone: string,
+      customInstruction: string | undefined,
+    ) => {
+      const currentPreferences = getPreferenceValues<Preferences>();
+      setPreferences(currentPreferences);
+      const signal = abortable.current?.signal;
+      return rewrite({
+        text,
         tone,
-        customInstruction: instruction,
+        customInstruction,
         preferences: currentPreferences,
-        signal: controller.signal,
+        signal,
         onPartial: (value) => {
-          if (
-            mounted.current &&
-            pending.current === controller &&
-            !controller.signal.aborted
-          )
-            setPartial(value);
+          if (!signal?.aborted) setPartial(value);
         },
       });
-      if (
-        mounted.current &&
-        pending.current === controller &&
-        !controller.signal.aborted
-      )
-        setResult(text);
-    } catch (err) {
-      if (mounted.current && pending.current === controller)
-        setError(rewriteError(err));
-    } finally {
-      if (mounted.current && pending.current === controller) {
-        setIsLoading(false);
-        setPartial("");
-      }
-      if (pending.current === controller) pending.current = undefined;
-    }
-  }, [source.text, tone, instruction]);
-  useEffect(() => {
-    mounted.current = true;
-    void run();
-    return () => {
-      mounted.current = false;
-      pending.current?.abort();
-      pending.current = undefined;
-    };
-  }, [run]);
+    },
+    [source.text, tone, instruction],
+    {
+      abortable,
+      onWillExecute: () => setPartial(""),
+      onData: setLastResult,
+      // Render sanitized, actionable errors inline. The default failure toast
+      // logs provider diagnostics that can include credential helper output.
+      onError: () => {},
+    },
+  );
+  const result = data ?? lastResult;
+  const message = !isLoading && error ? rewriteError(error) : undefined;
 
   const title = instruction
     ? "Custom Rewrite"
@@ -94,8 +75,12 @@ export function ResultView({
   const visible = showOriginal ? source.text : isLoading ? partial : result;
   const markdown = [
     showOriginal ? "# Original" : `# ${title}`,
-    error ? `> ${error}` : isLoading ? "Rewriting with Amazon Bedrock…" : "",
-    result && error && !showOriginal ? "Previous completed rewrite:" : "",
+    message
+      ? `> ${message}`
+      : isLoading
+        ? "Rewriting with Amazon Bedrock…"
+        : "",
+    result && message && !showOriginal ? "Previous completed rewrite:" : "",
     visible ? literalMarkdown(visible) : "",
   ]
     .filter(Boolean)
@@ -156,14 +141,16 @@ export function ResultView({
               <Action
                 title="Cancel Rewrite"
                 icon={Icon.Stop}
-                onAction={() => pending.current?.abort()}
-                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={() => abortable.current?.abort()}
+                // Cancellation convention: this does not pin an item.
+                // eslint-disable-next-line @raycast/prefer-common-shortcut
+                shortcut={{ modifiers: ["cmd"], key: "." }}
               />
             ) : (
               <Action
-                title={error ? "Retry Rewrite" : "Rewrite Again"}
+                title={message ? "Retry Rewrite" : "Rewrite Again"}
                 icon={Icon.ArrowClockwise}
-                onAction={run}
+                onAction={revalidate}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             )}
@@ -171,7 +158,9 @@ export function ResultView({
               title={showOriginal ? "Show Rewrite" : "Show Original"}
               icon={Icon.Document}
               onAction={() => setShowOriginal((value) => !value)}
-              shortcut={Keyboard.Shortcut.Common.Open}
+              // Toggle the source preview rather than opening an item.
+              // eslint-disable-next-line @raycast/prefer-common-shortcut
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
             <Action.CopyToClipboard
               title="Copy Original"

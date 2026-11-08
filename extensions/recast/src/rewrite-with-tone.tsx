@@ -7,7 +7,7 @@ import {
   openExtensionPreferences,
   useNavigation,
 } from "@raycast/api";
-import { type Preferences, TONE_DETAILS } from "./config";
+import { TONE_DETAILS } from "./config";
 import { ResultView } from "./result-view";
 import { type Source, SourceForm, SourceLoading, useSource } from "./source";
 

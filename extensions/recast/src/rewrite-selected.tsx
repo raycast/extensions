@@ -1,5 +1,4 @@
 import { getPreferenceValues, useNavigation } from "@raycast/api";
-import { type Preferences } from "./config";
 import { ResultView } from "./result-view";
 import { SourceForm, SourceLoading, useSource } from "./source";
 

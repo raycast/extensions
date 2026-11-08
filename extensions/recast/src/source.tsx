@@ -8,37 +8,37 @@ import {
   getSelectedText,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
 
 export interface Source {
   text: string;
   frontApp: string;
 }
 
+async function readSource(): Promise<Source> {
+  // Capture once at launch, before navigating to a picker or form. Unsupported
+  // selections fall back to manual entry without reading clipboard history.
+  const [selection, app] = await Promise.allSettled([
+    getSelectedText(),
+    getFrontmostApplication(),
+  ]);
+  return {
+    text: selection.status === "fulfilled" ? selection.value : "",
+    frontApp: app.status === "fulfilled" ? app.value.name : "",
+  };
+}
+
 export function useSource() {
-  const [source, setSource] = useState<Source>();
-  useEffect(() => {
-    let active = true;
-    // Capture the selection at launch, before navigating to a picker or form.
-    void Promise.allSettled([
-      getSelectedText(),
-      getFrontmostApplication(),
-    ]).then(([selection, app]) => {
-      if (active)
-        setSource({
-          text: selection.status === "fulfilled" ? selection.value : "",
-          frontApp: app.status === "fulfilled" ? app.value.name : "",
-        });
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
-  return source;
+  return usePromise(readSource).data;
 }
 
 export function SourceLoading() {
   return <Detail isLoading markdown="Reading selected text…" />;
+}
+
+interface SourceFormValues {
+  text: string;
+  instruction: string;
 }
 
 export function SourceForm({
@@ -52,10 +52,15 @@ export function SourceForm({
   instruction?: string;
   custom?: boolean;
 }) {
-  const [text, setText] = useState(source.text);
-  const [instruction, setInstruction] = useState(initialInstruction || "");
-  const [textError, setTextError] = useState<string>();
-  const [instructionError, setInstructionError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<SourceFormValues>({
+    initialValues: { text: source.text, instruction: initialInstruction || "" },
+    validation: {
+      text: FormValidation.Required,
+      instruction: custom ? FormValidation.Required : undefined,
+    },
+    onSubmit: ({ text, instruction }) =>
+      onSubmit({ ...source, text }, instruction),
+  });
   return (
     <Form
       actions={
@@ -63,18 +68,14 @@ export function SourceForm({
           <Action.SubmitForm
             title="Rewrite Text"
             icon={Icon.Wand}
-            onSubmit={() => {
-              setTextError(
-                text.trim() ? undefined : "Enter some text to rewrite.",
-              );
-              setInstructionError(
-                !custom || instruction.trim()
-                  ? undefined
-                  : "Describe how you want to change the text.",
-              );
-              if (text.trim() && (!custom || instruction.trim()))
-                onSubmit({ ...source, text }, instruction.trim());
-            }}
+            onSubmit={(values: SourceFormValues) =>
+              handleSubmit({
+                // Reject whitespace-only fields while retaining the exact source
+                // formatting for any nonempty selection.
+                text: values.text?.trim() ? values.text : "",
+                instruction: values.instruction?.trim() || "",
+              })
+            }
           />
           <Action
             title="Open Extension Preferences"
@@ -87,27 +88,15 @@ export function SourceForm({
     >
       {custom ? (
         <Form.TextField
-          id="instruction"
           title="Instruction"
           placeholder="Make it shorter, translate to Spanish, turn into bullet points…"
-          value={instruction}
-          error={instructionError}
-          onChange={(value) => {
-            setInstruction(value);
-            setInstructionError(undefined);
-          }}
+          {...itemProps.instruction}
         />
       ) : null}
       <Form.TextArea
-        id="text"
         title="Text"
         placeholder="Select text in another app before opening Recast, or paste it here…"
-        value={text}
-        error={textError}
-        onChange={(value) => {
-          setText(value);
-          setTextError(undefined);
-        }}
+        {...itemProps.text}
       />
       <Form.Description
         title="Your AWS Account"

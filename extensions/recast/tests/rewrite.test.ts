@@ -10,7 +10,6 @@ import {
   buildPrompt,
   resolveModelId,
   validateConfig,
-  type Preferences,
 } from "../src/config";
 import { RewriteError, rewriteError } from "../src/errors";
 import { literalMarkdown } from "../src/preview";

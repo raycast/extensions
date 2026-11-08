@@ -32,7 +32,7 @@
       "arguments": [
         {
           "name": "instruction",
-          "placeholder": "Custom instruction",
+          "placeholder": "Custom Instruction",
           "type": "text",
           "required": false
         }
@@ -46,7 +46,7 @@
       "title": "Credential Method",
       "description": "Use AWS SDK credentials, a named AWS CLI profile, or environment variables inherited by Raycast. See the setup guide for SSO and credential_process.",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "default",
       "data": [
         {
@@ -77,7 +77,7 @@
       "title": "AWS Region",
       "description": "AWS region for Bedrock runtime (e.g. us-east-1, eu-central-1)",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "us-east-1",
       "placeholder": "us-east-1"
     },
@@ -86,7 +86,7 @@
       "title": "Model ID",
       "description": "Base Bedrock model ID, without a geography prefix. The Inference Profile setting supplies the prefix. An inference profile ARN is used unchanged.",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "anthropic.claude-haiku-5-5",
       "placeholder": "anthropic.claude-haiku-5-5"
     },
@@ -135,7 +135,7 @@
     {
       "name": "maxTokens",
       "title": "Max Tokens",
-      "description": "Maximum response tokens (1\u201365536; your model may have a lower limit). Incomplete rewrites cannot be pasted. Increase this for long selections.",
+      "description": "Maximum response tokens (1–65536; your model may have a lower limit). Incomplete rewrites cannot be pasted. Increase this for long selections.",
       "type": "textfield",
       "required": false,
       "default": "2048",
@@ -184,13 +184,16 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1164.0",
     "@aws-sdk/credential-providers": "^3.1164.0",
-    "@raycast/api": "^2.11.1"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
+    "@types/react-test-renderer": "^19.3.1",
     "eslint": "^9.39.5",
+    "react-test-renderer": "^19.3.1",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3"
   },
@@ -200,9 +203,8 @@
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
     "lint:fix": "ray lint --fix",
-    "test": "node --import tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm test && npm run lint && npm run build && npm run test:bundle",
-    "test:bundle": "node scripts/test-bundle.cjs",
+    "test": "node --require ./tests/raycast-mock.cjs --import tsx --test tests/*.test.ts tests/*.test.tsx",
+    "check": "npm run build && npm test && npm run lint",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
