@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "freelance-link",
+    title: "freelance.link",
+    description:
+      "Keep your freelance.link availability current from your AI agent. Add, change and remove projects and absences, check when you are free again, confirm that your availability is still correct, and tell your waitlist when you have time. 11 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose what your agent may do. A freelance.link account is required (14-day free trial, no credit card).",
+    icon: "https://raw.githubusercontent.com/freelancelink/freelancelink-plugin/main/assets/icon.png",
+    homepage: "https://freelance.link/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://freelance.link/mcp"],
+    },
+    remoteUrl: "https://freelance.link/mcp",
+  },
+  {
     name: "alphagrowth",
     title: "AlphaGrowth",
     description:
