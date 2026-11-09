@@ -15,8 +15,17 @@ import {
 import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
 import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
 import { platformShortcut } from "./shortcuts";
+import {
+  SortVaultsByDropdown,
+  SortVaultsByMenu,
+  preferredSortOrder,
+  preferredVaultSortOrder,
+  sortVaults,
+  useVaultFrecency,
+} from "./sort";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
+import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
 
 /** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
@@ -43,6 +52,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);
+  // Sort by holds for every item list opened from this window, then the preference's order comes back.
+  const sortChoice = useRef(preferredSortOrder());
+  // The vaults' order, also given to the vault menu of the item lists opened from here.
+  const [vaultOrder, setVaultOrder] = useState(preferredVaultSortOrder);
 
   // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
   const loads = useMemo(createRequestTracker, []);
@@ -56,7 +69,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (hasOpenedItems.current) return;
     hasOpenedItems.current = true;
     // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
-    push(<SearchItemsView />, () => void loadVaults());
+    push(<SearchItemsView sortChoice={sortChoice} vaultOrder={vaultOrder} />, () => void loadVaults());
   }, []);
 
   async function loadVaults() {
@@ -143,6 +156,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
     [vaults, itemCounts],
   );
+  const unsortedVaults = useMemo(() => shownVaults.filter((vault) => !isSharedWithMe(vault)), [shownVaults]);
+  const { data: mostUsedVaults, visitItem: visitVault } = useVaultFrecency(unsortedVaults);
+  const listedVaults = sortVaults(unsortedVaults, vaultOrder, (vault) => vault.itemCount, mostUsedVaults);
+  const sortMenu = <SortVaultsByMenu value={vaultOrder} onChange={setVaultOrder} />;
+  const sharedWithMe = shownVaults.find(isSharedWithMe);
   const allItemsCount = totalItemCount(vaults, itemCounts);
 
   if (error?.type === "not_installed") {
@@ -224,7 +242,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search vaults...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search vaults..."
+      searchBarAccessory={<SortVaultsByDropdown value={vaultOrder} onChange={setVaultOrder} />}
+    >
       {vaults.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Folder}
@@ -244,13 +266,21 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={<SearchItemsView allVaults sessionConfirmed={sessionConfirmed} />}
+                    target={
+                      <SearchItemsView
+                        allVaults
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        vaultOrder={vaultOrder}
+                      />
+                    }
                   />
+                  {sortMenu}
                 </ActionPanel>
               }
             />
           )}
-          {shownVaults.map((vault) => (
+          {listedVaults.map((vault) => (
             <List.Item
               key={vault.shareId}
               icon={Icon.Folder}
@@ -264,7 +294,15 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={<SearchItemsView initialVault={vault} sessionConfirmed={sessionConfirmed} />}
+                    target={
+                      <SearchItemsView
+                        initialVault={vault}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        vaultOrder={vaultOrder}
+                      />
+                    }
+                    onPush={() => visitVault(vault)}
                   />
                   <Action.CopyToClipboard
                     title="Copy Vault Name"
@@ -276,10 +314,39 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                     content={vault.shareId}
                     shortcut={platformShortcut(["cmd", "shift"], "i")}
                   />
+                  {sortMenu}
                 </ActionPanel>
               }
             />
           ))}
+          {sharedWithMe && (
+            <List.Item
+              key={SHARED_WITH_ME.shareId}
+              icon={Icon.TwoPeople}
+              title={SHARED_WITH_ME.name}
+              subtitle="Items shared with you on their own"
+              accessories={
+                sharedWithMe.itemCount === undefined ? [] : [{ text: formatItemCount(sharedWithMe.itemCount) }]
+              }
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={
+                      <SearchItemsView
+                        initialVault={sharedWithMe}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        vaultOrder={vaultOrder}
+                      />
+                    }
+                  />
+                  {sortMenu}
+                </ActionPanel>
+              }
+            />
+          )}
         </>
       )}
     </List>

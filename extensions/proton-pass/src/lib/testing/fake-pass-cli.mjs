@@ -20,6 +20,7 @@ const expectedArgs = {
   "json:vaults-array": ["vault", "list", "--output", "json"],
   "json:vaults-wrapper": ["vault", "list", "--output", "json"],
   "json:vault-shares": ["share", "list", "--only-vaults", "true", "--output", "json"],
+  "json:item-shares": ["share", "list", "--only-items", "true", "--output", "json"],
   "json:vault-members": ["vault", "member", "list", "--share-id=vault-1", "--output", "json"],
   "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
@@ -51,6 +52,12 @@ const fixtures = {
       },
     ],
   },
+  "item-shares": {
+    shares: [
+      { id: "item-share-1", name: "Streaming", share_type: "Item", share_role: "Viewer" },
+      { id: "item-share-2", name: "Door Code", share_type: "Item", share_role: "Editor" },
+    ],
+  },
   "vault-members": [
     {
       member_share_id: "member-1",
@@ -74,6 +81,7 @@ const fixtures = {
       {
         id: "item-login",
         state: "Active",
+        create_time: "2025-01-15T08:00:00",
         modify_time: "2025-06-01T12:34:56",
         content: {
           title: "Example Login",
