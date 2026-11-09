@@ -122,3 +122,15 @@ test("About screen includes sourced international legal orientation and review d
     assert.ok(guide.trimEnd().endsWith("*Regulatory information last checked: 7 November 2026. Check the latest local rules before assessing a product. This is guidance, not legal advice.*"));
   }
 });
+
+test("rendered guides use US English spelling", () => {
+  const { criteria } = require("../scripts/load-typescript.cjs").loadModule("src/data.ts");
+  const { criterionMarkdown } = require("../scripts/load-typescript.cjs").loadModule("src/guide.ts");
+  const british = /\b(?:behaviour|behaviours|colour|colours|labelled|labelling|cancelled|cancelling|grey)\b/i;
+  for (const criterion of criteria) {
+    for (const version of ["2.1", "2.2"]) {
+      const markdown = criterionMarkdown(criterion, version);
+      assert.doesNotMatch(markdown, british, `${criterion.number} in WCAG ${version}`);
+    }
+  }
+});

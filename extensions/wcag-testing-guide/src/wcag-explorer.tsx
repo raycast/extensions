@@ -195,30 +195,42 @@ function ReviewScopeItem({
 function FullCriterionGuide({
   criterion,
   version,
-  initialRecord,
-  onSave,
   scopeControls,
-  ready,
+  store,
 }: {
   criterion: Criterion;
   version: WcagVersion;
-  ready: boolean;
-  initialRecord?: AuditResult;
-  onSave: SaveAuditResult;
   scopeControls: ScopeControls;
+  store: AuditStore;
 }) {
-  const [record, setRecord] = useState<AuditResult | undefined>(initialRecord);
+  const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const ready = snapshot.ready && !snapshot.busy;
+  const record = snapshot.audits[version][criterion.number];
   const markdown =
-    recordedResultMarkdown(record) + criterionMarkdown(criterion, version);
+    (ready
+      ? recordedResultMarkdown(record)
+      : "> Results are unavailable until the saved audit loads successfully. Reopen the command if loading failed.\n\n") +
+    criterionMarkdown(criterion, version);
   const testCase = testCaseMarkdown(criterion, version);
   const save: SaveAuditResult = async (item, status, notes) => {
-    const ok = await onSave(item, status, notes);
-    if (ok) setRecord({ status, notes, updatedAt: new Date().toISOString() });
-    return ok;
+    try {
+      await store.save(
+        snapshot.activeProject.id,
+        version,
+        item.number,
+        status,
+        notes,
+      );
+      return true;
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not save result" });
+      return false;
+    }
   };
   return (
     <Detail
       navigationTitle={`${criterion.number} ${criterion.title}`}
+      isLoading={snapshot.busy}
       markdown={markdown}
       actions={
         <ActionPanel>
@@ -269,10 +281,12 @@ function CriterionItem({
   record,
   onSave,
   ready,
+  store,
 }: {
   criterion: Criterion;
   version: WcagVersion;
   ready: boolean;
+  store: AuditStore;
   onSwitchVersion: () => void;
   scopeControls: ScopeControls;
   record?: AuditResult;
@@ -323,9 +337,7 @@ function CriterionItem({
                 <FullCriterionGuide
                   criterion={criterion}
                   version={version}
-                  initialRecord={record}
-                  ready={ready}
-                  onSave={onSave}
+                  store={store}
                   scopeControls={scopeControls}
                 />,
               )
@@ -990,6 +1002,7 @@ export default function Command() {
                 record={audits[version][criterion.number]}
                 onSave={saveAudit}
                 ready={auditLoaded}
+                store={store}
               />
             ))}
           </List.Section>

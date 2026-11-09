@@ -182,7 +182,7 @@ export const practicalScenarios: Record<string, PracticalScenario> = {
     ],
     mobile: [
       "Touch a button, drag the finger off its hit region and release without lifting on the button.",
-      "Check whether the action can be cancelled before completion or undone where applicable.",
+      "Check whether the action can be canceled before completion or undone where applicable.",
     ],
     commonFailure:
       "A destructive action fires immediately on touch-down, before a user has the chance to move the finger away.",

@@ -71,3 +71,32 @@ test("scope override preserves legacy raw storage and changes only after success
     assert.equal(h.data.has(REVIEW_SCOPE_STORAGE_KEY), false);
   } finally { await h.cleanup(); }
 });
+
+test("a guide opened during loading gains current results and actions without reopening", async () => {
+  const h = harness();
+  try {
+    const { projectStorageKey, AUDIT_PROJECTS_KEY, AUDIT_ACTIVE_PROJECT_KEY } = h.load("src/audit-projects.ts");
+    const project = { id: "f24d67de-9f5d-4a91-8179-af54d223b32a", name: "Previously selected", createdAt: "" };
+    h.data.set(AUDIT_PROJECTS_KEY, JSON.stringify([project]));
+    h.data.set(AUDIT_ACTIVE_PROJECT_KEY, project.id);
+    h.data.set(projectStorageKey(project.id, "2.2"), JSON.stringify({ "1.1.1": { status: "fail", notes: "Existing evidence", updatedAt: "" } }));
+    let release; const gate = new Promise((resolve) => { release = resolve; });
+    const read = h.api.LocalStorage.getItem;
+    h.api.LocalStorage.getItem = async (key) => { await gate; return read(key); };
+    const root = await h.mount(React.createElement(h.Command));
+    await h.invoke(root, "Open Full Guide");
+    const guide = await h.mount(h.stack.pop());
+    assert.equal(h.action(guide, "Mark as Pass"), undefined);
+    assert.equal(guide.root.findByType("Detail").props.isLoading, true);
+    await act(async () => { release(); });
+    assert.ok(h.action(guide, "Mark as Pass"));
+    assert.equal(guide.root.findByType("Detail").props.isLoading, false);
+    assert.match(guide.root.findByType("Detail").props.markdown, /Your test result: Fail/);
+    assert.match(guide.root.findByType("Detail").props.markdown, /Existing evidence/);
+    await h.invoke(guide, "Mark as Pass");
+    assert.match(guide.root.findByType("Detail").props.markdown, /Your test result: Pass/);
+    assert.equal(JSON.parse(h.data.get(projectStorageKey(project.id, "2.2")))["1.1.1"].status, "pass");
+    assert.equal(h.data.has(projectStorageKey("default", "2.2")), false);
+    assert.equal(h.errors.length, 0);
+  } finally { await h.cleanup(); }
+});
