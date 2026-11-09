@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "description": "Raycast runs extensions on Node 22; @raycast/api pins @types/node 22.x as a peer",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "22.x"
+    },
+    {
+      "description": "typescript-eslint (used by ray lint) does not support TypeScript 7 yet",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "5.x"
+    },
+    {
+      "description": "ESLint and the Raycast config must upgrade together",
+      "groupName": "eslint",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "@raycast/eslint-config",
+        "typescript-eslint",
+        "@typescript-eslint/**"
+      ]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
+  ]
+}

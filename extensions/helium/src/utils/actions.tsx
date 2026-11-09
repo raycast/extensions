@@ -235,8 +235,8 @@ export function OpenInNewTabAction({ tab }: BaseActionProps) {
     <OpenInHeliumAction
       title="Open in New Tab"
       url={tab.url}
-      icon={Icon.PlusCircle}
-      shortcut={SHORTCUTS.openInNewTab}
+      icon={Icon.PlusSquare}
+      shortcut={Keyboard.Shortcut.Common.Open}
     />
   );
 }
@@ -426,7 +426,7 @@ export function OpenBookmarkInNewTabAction({ bookmark }: BookmarkActionProps) {
     <OpenInHeliumAction
       title="Open in New Tab"
       url={bookmark.url}
-      icon={Icon.PlusCircle}
+      icon={Icon.PlusSquare}
       shortcut={SHORTCUTS.openInNewTab}
     />
   );
@@ -471,7 +471,13 @@ interface QuicklinkActionProps {
  * Works with tabs, bookmarks, history entries, and suggestions
  */
 export function CreateQuicklinkAction({ url, name }: QuicklinkActionProps) {
-  return <Action.CreateQuicklink quicklink={{ link: url, name: name }} shortcut={SHORTCUTS.createQuicklink} />;
+  return (
+    <Action.CreateQuicklink
+      icon={Icon.Quicklink}
+      quicklink={{ link: url, name: name }}
+      shortcut={SHORTCUTS.createQuicklink}
+    />
+  );
 }
 
 async function revalidateUntilIdsAbsent(

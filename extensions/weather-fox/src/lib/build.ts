@@ -152,11 +152,21 @@ export function dayHours(forecast: Forecast, d: number): StripHour[] {
     .filter((h) => Number.isFinite(h.temp));
 }
 
-/** 15-minute precipitation steps for the nowcast chart. */
+/**
+ * 15-minute precipitation steps for the nowcast chart, from the interval in
+ * progress onward. The response starts at the current interval when fetched,
+ * but it is only refreshed every 15 minutes (longer if a refresh fails), so by
+ * the time it is drawn its first intervals may already be in the past; those
+ * would otherwise be announced as upcoming rain.
+ */
 export function nowcastSteps(forecast: Forecast): NowcastStep[] {
   const m = forecast.minutely_15;
   if (!m || m.time.length === 0) return [];
-  return m.time.map((t, i) => ({ label: timeOf(t), mm: m.precipitation[i] ?? 0 }));
+  // Start of the current 15-minute interval, in the place's local time ("YYYY-MM-DDTHH:MM" like `m.time`).
+  const now = placeLocalIso(forecast);
+  const quarter = Math.floor(Number(now.slice(14, 16)) / 15) * 15;
+  const current = `${now.slice(0, 14)}${String(quarter).padStart(2, "0")}`;
+  return m.time.flatMap((t, i) => (t >= current ? [{ label: timeOf(t), mm: m.precipitation[i] ?? 0 }] : []));
 }
 
 /** One-line answer to "will it rain soon?", from 15-minute data. */

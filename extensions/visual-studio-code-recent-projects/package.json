@@ -5,6 +5,7 @@
   "description": "Control VS Code and compatible editors directly from Raycast",
   "icon": "icon.png",
   "author": "thomas",
+  "categories": ["Developer Tools"],
   "contributors": [
     "iainsimmons",
     "macbookandrew",

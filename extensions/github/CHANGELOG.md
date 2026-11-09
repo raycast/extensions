@@ -1,5 +1,14 @@
 # GitHub Changelog
 
+## [Windows Action Shortcuts] - 2026-11-06
+
+- Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
+
+## [Update] - 2026-11-06
+
+- Add **Create Repository** command (disabled by default) to create a repository on your account or in one of your organizations.
+- AI: Add a **Create Repository** tool, which always asks for confirmation before creating the repository.
+
 ## [Create Release and Dispatch Workflow Commands] - 2026-10-31
 
 - New **Create Release** command to publish a release with auto-suggested next tag, generated release notes, draft and pre-release options.

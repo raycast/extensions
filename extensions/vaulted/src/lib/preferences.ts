@@ -44,8 +44,7 @@ export function getPrefs(): Preferences {
 }
 
 export type PrefsResult =
-  | { ok: true; prefs: Preferences }
-  | { ok: false; error: string };
+  { ok: true; prefs: Preferences } | { ok: false; error: string };
 
 export function loadPrefs(): PrefsResult {
   try {
