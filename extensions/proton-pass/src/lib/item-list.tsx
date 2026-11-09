@@ -1,11 +1,14 @@
-import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FolderEntry, folderEntryValue, folderPathLabel } from "./folders";
 import { hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
 import { getListIcon } from "./item-icon";
+import { formatItemCount } from "./item-counts";
+import { platformShortcut } from "./shortcuts";
 import { SortOrder, compareNames, preferredSortOrder, sortItems } from "./sort";
 import { Item } from "./types";
 import { getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
@@ -36,6 +39,11 @@ function getKeywords(item: Item): string[] {
 
 export interface ItemListProps {
   items: Item[];
+  /** Shown before the items, e.g. the folders of the vault opened. */
+  folders?: FolderEntry[];
+  /** The view a folder opens on. */
+  openFolder?: (folder: FolderEntry) => ReactNode;
+  navigationTitle?: string;
   /** Shown first, in their own section, e.g. logins matching the active browser tab. */
   suggestedItems?: Item[];
   suggestionsTitle?: string;
@@ -49,6 +57,9 @@ export interface ItemListProps {
 
 export function ItemList({
   items,
+  folders = [],
+  openFolder,
+  navigationTitle,
   suggestedItems = [],
   suggestionsTitle = "Suggested",
   isLoading,
@@ -82,11 +93,15 @@ export function ItemList({
   const suggestedKeys = useMemo(() => new Set(suggestedItems.map(itemKey)), [suggestedItems]);
   const suggested = sortedItems.filter((item) => suggestedKeys.has(itemKey(item)));
   const others = suggested.length > 0 ? sortedItems.filter((item) => !suggestedKeys.has(itemKey(item))) : sortedItems;
-  // Until Raycast reports a selection, the first item shown is the selected one.
-  const firstItem = suggested[0] ?? others[0];
+  // Until Raycast reports a selection, the first row shown is the selected one, which can be a folder.
+  const firstItem = suggested[0] ?? (folders.length > 0 ? undefined : others[0]);
+  const folderKeys = useMemo(() => new Set(folders.map(folderEntryValue)), [folders]);
   const selectedItem = useMemo(
-    () => (selectedKey === null ? undefined : (items.find((item) => itemKey(item) === selectedKey) ?? firstItem)),
-    [items, selectedKey, firstItem],
+    () =>
+      selectedKey === null || (selectedKey !== undefined && folderKeys.has(selectedKey))
+        ? undefined
+        : (items.find((item) => itemKey(item) === selectedKey) ?? firstItem),
+    [items, selectedKey, firstItem, folderKeys],
   );
   const activeKey = selectedItem ? itemKey(selectedItem) : undefined;
   // Decided when the list first shows items: its first suggestion, if any, so that a suggestion showing up later
@@ -116,6 +131,57 @@ export function ItemList({
   );
   const toggleDetail = useCallback(() => setIsShowingDetail((value) => !value), [setIsShowingDetail]);
   const onUse = useCallback((item: Item) => void visitItem(item), [visitItem]);
+
+  function renderFolder(folder: FolderEntry) {
+    const name = folder.path[folder.path.length - 1].name;
+    return (
+      <List.Item
+        key={folderEntryValue(folder)}
+        id={folderEntryValue(folder)}
+        icon={Icon.Folder}
+        title={name}
+        accessories={[{ text: formatItemCount(folder.itemCount) }]}
+        detail={
+          isShowingDetail ? (
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label
+                    title="Folder"
+                    icon={Icon.Folder}
+                    text={folderPathLabel(folder.path)}
+                  />
+                  <List.Item.Detail.Metadata.Label title="Items" text={formatItemCount(folder.itemCount)} />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          ) : undefined
+        }
+        actions={
+          <ActionPanel>
+            {openFolder && <Action.Push title="Open Folder" icon={Icon.Folder} target={openFolder(folder)} />}
+            <Action.CopyToClipboard title="Copy Folder Name" content={name} shortcut={Keyboard.Shortcut.Common.Copy} />
+            <ActionPanel.Section>
+              <Action
+                title={isShowingDetail ? "Hide Details" : "Show Details"}
+                icon={Icon.AppWindowSidebarRight}
+                shortcut={platformShortcut(["cmd"], "d")}
+                onAction={toggleDetail}
+              />
+              {onRefresh && (
+                <Action
+                  title="Refresh Items"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={onRefresh}
+                />
+              )}
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   function renderItem(item: Item) {
     const key = itemKey(item);
@@ -164,15 +230,16 @@ export function ItemList({
 
   return (
     <List
+      navigationTitle={navigationTitle}
       isLoading={isLoading}
-      isShowingDetail={isShowingDetail && items.length > 0}
+      isShowingDetail={isShowingDetail && (items.length > 0 || folders.length > 0)}
       searchBarPlaceholder="Search by name, username or website…"
       filtering={true}
       selectedItemId={isInitialSelectionApplied ? undefined : (initialSelection.current ?? undefined)}
       onSelectionChange={onSelectionChange}
       searchBarAccessory={searchBarAccessory}
     >
-      {items.length === 0 && !isLoading ? (
+      {items.length === 0 && folders.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={emptyView.icon}
           title={emptyView.title}
@@ -185,10 +252,11 @@ export function ItemList({
             ) : undefined
           }
         />
-      ) : suggested.length > 0 ? (
+      ) : suggested.length > 0 || folders.length > 0 ? (
         <>
-          <List.Section title={suggestionsTitle}>{suggested.map(renderItem)}</List.Section>
-          <List.Section title="All Items">{others.map(renderItem)}</List.Section>
+          {suggested.length > 0 && <List.Section title={suggestionsTitle}>{suggested.map(renderItem)}</List.Section>}
+          {folders.length > 0 && <List.Section title="Folders">{folders.map(renderFolder)}</List.Section>}
+          <List.Section title={folders.length > 0 ? "Items" : "All Items"}>{others.map(renderItem)}</List.Section>
         </>
       ) : (
         others.map(renderItem)

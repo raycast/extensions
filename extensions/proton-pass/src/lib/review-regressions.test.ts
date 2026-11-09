@@ -19,6 +19,12 @@ import { Item, ItemDetail, PassCliError, Vault } from "./types";
 type Element = { props: Record<string, unknown> };
 type Component = (props: Record<string, unknown>) => Element;
 
+// What item lists hand their folders: the folder views themselves are tested on their own.
+const folderViewStub = {
+  createFolderSource: () => ({ get: () => undefined, set: () => undefined, subscribe: () => () => undefined }),
+  FolderView: () => null,
+};
+
 // Run the real UI callbacks with Raycast services replaced; no account or clipboard access.
 function loadView(
   file: string,
@@ -41,6 +47,7 @@ function loadView(
       if (name === "./format") return format;
       if (name === "./totp") return totp;
       if (name === "./folders" || name === "./lib/folders") return folders;
+      if (name === "./folder-view") return folderViewStub;
       if (name === "./sort" || name === "./lib/sort") return sort;
       if (name === "./vault-dropdown" || name === "./lib/vault-dropdown") return vaultDropdown;
       if (name === "./lib/item-counts") return itemCounts;
@@ -1041,6 +1048,8 @@ test("hiding item details stops automatic secret loads while showing them select
       },
       "./item-icon": { getListIcon: () => "" },
       "./format": format,
+      "./item-counts": itemCounts,
+      "./shortcuts": shortcuts,
       "./item-actions": {},
       "./item-detail-panel": {},
       "./item-detail-store": {
@@ -1075,7 +1084,10 @@ function loadItemList() {
   const { ItemList } = loadView("item-list.tsx", {
     react: { ...harness.react, useCallback: (callback: unknown) => callback },
     "@raycast/api": {
-      List: { Item: {}, Section: {}, EmptyView: {} },
+      List: { Item: { Detail: { Metadata: { Label: {} } } }, Section: {}, EmptyView: {} },
+      Action: { Push: {}, CopyToClipboard: {} },
+      ActionPanel: { Section: {} },
+      Keyboard: { Shortcut: { Common: {} } },
       Icon: {},
       Image: { Mask: {} },
       getPreferenceValues: () => ({}),
@@ -1086,6 +1098,8 @@ function loadItemList() {
     },
     "./item-icon": { getListIcon: () => "" },
     "./format": format,
+    "./item-counts": itemCounts,
+    "./shortcuts": shortcuts,
     "./item-actions": {},
     "./item-detail-panel": {},
     "./item-detail-store": {
@@ -2447,16 +2461,15 @@ test("the vault menu follows the vaults' order, and only a vault chosen in it co
       ["p", 1],
     ]),
     order: "itemCount",
-    folders: [
-      { shareId: "p", path: [{ id: "f", name: "Banking" }], itemCount: 1 },
-      { shareId: "w", path: [{ id: "f", name: "Clients" }], itemCount: 2 },
-    ],
     onVaultChange: (shareId: string) => changes.push(shareId),
   } as unknown as Record<string, unknown>);
-  const entries = actions(menu).filter((entry) => typeof entry.value === "string");
-  assert.equal(entries.map((entry) => entry.value).join(), "all,w,folder:w:f,p,folder:p:f,shared-with-me");
-  // Folders follow their vault, with its name, as the menu's search finds them by either.
-  assert.equal(entries[2].title, "Work › Clients · 2");
+  assert.equal(
+    actions(menu)
+      .filter((entry) => typeof entry.value === "string")
+      .map((entry) => entry.value)
+      .join(),
+    "all,w,p,shared-with-me",
+  );
   const onChange = menu.props.onChange as (shareId: string) => void;
   // The vault Raycast opens on, then one the user picks.
   onChange("w");
@@ -2618,9 +2631,8 @@ test("an older vault list load can't replace newer sharing or displayed counts",
 
 test("List Vaults opens Browse Items on the vault list, and says so when Browse Items is disabled", async () => {
   const { default: BrowseItems } = loadView("../search-items.tsx", { "./lib/vaults-view": { VaultsView: {} } });
-  assert.equal(BrowseItems({}).props.openOn, "items");
-  assert.equal(BrowseItems({ launchContext: { openOn: "vaults" } }).props.openOn, "vaults");
-  assert.equal(BrowseItems({ launchContext: { openOn: "folders" } }).props.openOn, "folders");
+  assert.equal(BrowseItems({}).props.startOnItems, true);
+  assert.equal(BrowseItems({ launchContext: { openOn: "vaults" } }).props.startOnItems, false);
   const launched: unknown[] = [];
   const toasts: { title: string }[] = [];
   let isEnabled = true;
@@ -2645,24 +2657,6 @@ test("List Vaults opens Browse Items on the vault list, and says so when Browse 
   isEnabled = false;
   await ListVaults({});
   assert.equal(toasts[0].title, "Couldn't Open Browse Items");
-
-  isEnabled = true;
-  launched.length = 0;
-  const { default: ListFolders } = loadView("../list-folders.tsx", {
-    "@raycast/api": {
-      LaunchType: { UserInitiated: "userInitiated" },
-      Toast: { Style: { Failure: "failure" } },
-      launchCommand: async (options: unknown) => {
-        launched.push(options);
-      },
-      showToast: async () => undefined,
-    },
-    "./search-items": {},
-  });
-  await ListFolders({});
-  assert.deepEqual(JSON.parse(JSON.stringify(launched)), [
-    { name: "search-items", type: "userInitiated", context: { openOn: "folders" } },
-  ]);
 });
 
 test("Browse Items opens all items over the vaults, which load only once they're shown", async () => {
@@ -2711,7 +2705,7 @@ test("Browse Items opens all items over the vaults, which load only once they're
     "./shortcuts": shortcuts,
     "./vault-sharing": vaultSharing,
   });
-  const render = () => harness.render(VaultsView, { openOn: "items" });
+  const render = () => harness.render(VaultsView, { startOnItems: true });
   render();
   // Twice, as React does in development: a second copy of the items would take a second Esc to leave.
   harness.effects.forEach((effect) => effect());
@@ -2728,108 +2722,6 @@ test("Browse Items opens all items over the vaults, which load only once they're
   const rows = (render().props.children as { props: { children: unknown[] } }).props.children.flat();
   const titles = rows.flatMap((row) => (row && typeof row === "object" ? [(row as Element).props.title] : []));
   assert.equal(titles.join(", "), "All Vaults, Personal");
-});
-
-test("every folder follows its vault in the vault list, empty ones included, and List Folders shows them alone by vault", async () => {
-  const banking = { id: "banking", name: "Banking" };
-  const listed = [
-    {
-      ...item,
-      itemId: "visa",
-      shareId: "vault",
-      folderId: "cards",
-      folderPath: [banking, { id: "cards", name: "Cards" }],
-    },
-    { ...item, itemId: "bank", shareId: "vault", folderId: "banking", folderPath: [banking] },
-    { ...item, itemId: "notes", shareId: "vault" },
-    { ...item, itemId: "vpn", shareId: "work" },
-  ];
-  async function rowsFor(openOn: string) {
-    const harness = hookHarness();
-    const { VaultsView } = loadView("vaults-view.tsx", {
-      react: harness.react,
-      "@raycast/api": {
-        List: { Item: {}, EmptyView: {}, Section: {} },
-        ActionPanel: {},
-        Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
-        Icon: {},
-        Keyboard: { Shortcut: { Common: { Copy: {} } } },
-        getPreferenceValues: () => ({}),
-        useNavigation: () => ({ push: () => undefined }),
-      },
-      "./pass-cli": {
-        endedSessionError: async () => undefined,
-        listVaultSharing: async () => new Map(),
-        listVaultsAndItems: async () => ({
-          vaults: [
-            { shareId: "work", name: "Work" },
-            { shareId: "vault", name: "Personal" },
-          ],
-          items: listed,
-          failedVaults: [],
-          // Work's Travel folder is empty.
-          folders: {
-            shareIds: ["vault", "work"],
-            folders: [
-              { shareId: "vault", path: [banking] },
-              { shareId: "vault", path: [banking, { id: "cards", name: "Cards" }] },
-              { shareId: "work", path: [{ id: "travel", name: "Travel" }] },
-            ],
-          },
-        }),
-      },
-      "./types": { PassCliError },
-      "./search-items-view": { SearchItemsView: {} },
-      "./error-views": {},
-      "./login-view": {},
-      "./cache": {
-        getCachedItems: async () => null,
-        getCachedFolders: async () => null,
-        getCachedVaults: async () => null,
-        getCachedSharing: async () => null,
-        setCachedSharing: async () => undefined,
-        setCachedItems: async () => undefined,
-        setCachedFolders: async () => undefined,
-        setCachedVaults: async () => undefined,
-      },
-      "./item-counts": itemCounts,
-      "./refresh": refresh,
-      "./shortcuts": shortcuts,
-      "./vault-sharing": vaultSharing,
-    });
-    harness.render(VaultsView, { openOn });
-    harness.effects.forEach((effect) => effect());
-    await new Promise(setImmediate);
-    return harness.render(VaultsView, { openOn });
-  }
-  const titleOf = (row: unknown) => (row && typeof row === "object" ? [(row as Element).props.title] : []);
-
-  const vaultList = await rowsFor("vaults");
-  const rows = (vaultList.props.children as { props: { children: unknown[] } }).props.children.flat();
-  assert.equal(
-    rows.flatMap(titleOf).join(", "),
-    "All Vaults, Personal, Personal › Banking, Personal › Banking › Cards, Work, Work › Travel",
-  );
-  const cards = rows.find((row) => titleOf(row)[0] === "Personal › Banking › Cards") as Element;
-  assert.equal((cards.props.accessories as { text: string }[])[0].text, "1 item");
-  const travel = rows.find((row) => titleOf(row)[0] === "Work › Travel") as Element;
-  assert.equal((travel.props.accessories as { text: string }[])[0].text, "0 items");
-  const bankingRow = rows.find((row) => titleOf(row)[0] === "Personal › Banking") as Element;
-  // A folder counts its subfolders' items too.
-  assert.equal((bankingRow.props.accessories as { text: string }[])[0].text, "2 items");
-  const opened = actions(bankingRow.props.actions).find((action) => action.title === "View Items")?.target as Element;
-  assert.equal((opened.props.initialVault as Vault).shareId, "vault");
-  assert.equal((opened.props.initialFolder as { path: { id: string }[] }).path[0].id, "banking");
-
-  const folderList = await rowsFor("folders");
-  const sections = (folderList.props.children as Element[]).map((section) => [
-    section.props.title,
-    [section.props.children].flat().flatMap(titleOf).join(", "),
-  ]);
-  assert.deepEqual(JSON.parse(JSON.stringify(sections)), [
-    ["Personal", "Banking, Banking › Cards"],
-    ["Work", "Travel"],
-  ]);
 });
 
 test("a vault opened from the vault list keeps its count when its items can't be listed", async () => {
@@ -3193,4 +3085,113 @@ test("Logout forgets the login that was over when it started, and only that one"
 
   await api.logout();
   assert.deepEqual(events, ["log out", "clear cache", "forget ended"]);
+});
+
+const BANKING = { id: "banking", name: "Banking" };
+const CARDS = { id: "cards", name: "Cards" };
+const TRAVEL = { id: "travel", name: "Travel" };
+const PERSONAL_FOLDERS = [
+  { shareId: "vault", path: [BANKING] },
+  { shareId: "vault", path: [BANKING, CARDS] },
+  // Empty.
+  { shareId: "vault", path: [TRAVEL] },
+];
+const unfiled = { ...item, itemId: "unfiled" };
+const inBanking = { ...item, itemId: "bank", folderId: "banking", folderPath: [BANKING] };
+const inCards = { ...item, itemId: "visa", folderId: "cards", folderPath: [BANKING, CARDS] };
+const inWork = { ...item, shareId: "work", vaultName: "Work", itemId: "vpn" };
+const ids = (items: unknown) => (items as Item[]).map((entry) => entry.itemId).join();
+const paths = (entries: unknown) =>
+  (entries as folders.FolderEntry[]).map((entry) => `${folders.folderPathLabel(entry.path)}:${entry.itemCount}`).join();
+
+test("an opened vault shows its folders, empty ones included, then only the items in none of them", async () => {
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: async () => [],
+      listVaultsAndItems: () => new Promise(() => undefined),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking, inCards, inWork], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({
+        data: [
+          { shareId: "vault", name: "Personal" },
+          { shareId: "work", name: "Work" },
+        ],
+        isStale: false,
+      }),
+    },
+  });
+  const render = () =>
+    harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" }, sessionConfirmed: true });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const list = render();
+  assert.equal(ids(list.props.items), "unfiled");
+  // Each counts its items and its subfolders'.
+  assert.equal(paths(list.props.folders), "Banking:2,Travel:0");
+  const opened = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
+  assert.equal(opened.props.vaultName, "Personal");
+
+  // No vault is opened in All Vaults: every item shows, and no folder.
+  const menu = list.props.searchBarAccessory as Element;
+  (menu.props.onVaultChange as (value: string) => void)(vaultDropdown.ALL_VAULTS_VALUE as unknown as string);
+  const all = render();
+  assert.equal(ids(all.props.items), "unfiled,bank,visa,vpn");
+  assert.equal(paths(all.props.folders), "");
+});
+
+test("an opened folder shows its subfolders, then the items right inside it, and follows the list underneath", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([unfiled, inBanking, inCards], PERSONAL_FOLDERS);
+  source.set({ items: [unfiled, inBanking, inCards], folders: known, isLoading: false });
+  const render = () =>
+    harness.render(view.FolderView, { source, vaultName: "Personal", folder: known[0], onRefresh: () => undefined });
+  let list = render();
+  assert.equal(list.props.navigationTitle, "Personal › Banking");
+  assert.equal(ids(list.props.items), "bank");
+  assert.equal(paths(list.props.folders), "Banking › Cards:1");
+  const sub = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
+  assert.equal(folders.folderPathLabel((sub.props.folder as folders.FolderEntry).path), "Banking › Cards");
+
+  // A refresh of the item list underneath reaches the folder on top of it.
+  harness.effects.forEach((effect) => effect());
+  const added = { ...inBanking, itemId: "loan" };
+  source.set({ items: [unfiled, inBanking, inCards, added], folders: known, isLoading: false });
+  list = render();
+  assert.equal(ids(list.props.items), "bank,loan");
+});
+
+test("folders come before the items, open with Enter, and load no item's details while selected", () => {
+  const { render, select, state } = loadItemList();
+  const banking = { shareId: "vault", path: [BANKING], itemCount: 2 };
+  const list = render([unfiled], [], { folders: [banking], openFolder: () => "the folder" });
+  const rows = actions(list).filter((props) => typeof props.id === "string");
+  assert.deepEqual(
+    rows.map((row) => row.id),
+    [folders.folderEntryValue(banking), format.itemKey(unfiled)],
+  );
+  assert.equal(actions(rows[0].actions).find((props) => props.title === "Open Folder")?.target, "the folder");
+  // The folder is the first row, so no item's secrets load until an item is selected.
+  assert.equal(state.requested, undefined);
+  select(list, format.itemKey(unfiled));
+  render([unfiled], [], { folders: [banking] });
+  assert.equal(state.requested, unfiled);
+  select(list, folders.folderEntryValue(banking));
+  render([unfiled], [], { folders: [banking] });
+  assert.equal(state.requested, undefined);
+  // A vault with folders and no item of its own isn't empty.
+  const onlyFolders = render([], [], { folders: [banking] });
+  assert.equal(actions(onlyFolders).filter((props) => typeof props.id === "string").length, 1);
 });

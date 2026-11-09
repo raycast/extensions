@@ -50,7 +50,7 @@ export interface VaultFolder {
   path: FolderRef[];
 }
 
-/** A folder for the vault menu and the vault list. */
+/** A folder row of an opened vault or folder. */
 export interface FolderEntry extends VaultFolder {
   /** Items in the folder, its subfolders' included. */
   itemCount: number;
@@ -69,17 +69,13 @@ export function vaultFolders(shareId: string, folders: Folder[]): VaultFolder[] 
   return [...folderPaths(folders).values()].map((path) => ({ shareId, path }));
 }
 
-/** The vault menu's value for a folder. Vault share IDs never start the same way. */
+/** A folder's key among its vault's and the other vaults' folders. Vault share IDs never start the same way. */
 export function folderValue(shareId: string, folderId: string): string {
   return `${FOLDER_VALUE_PREFIX}${shareId}:${folderId}`;
 }
 
 export function folderEntryValue(entry: VaultFolder): string {
   return folderValue(entry.shareId, entry.path[entry.path.length - 1].id);
-}
-
-export function isFolderValue(value: string): boolean {
-  return value.startsWith(FOLDER_VALUE_PREFIX);
 }
 
 function comparePaths(a: FolderRef[], b: FolderRef[]): number {
@@ -99,9 +95,9 @@ function compareEntries(a: VaultFolder, b: VaultFolder): number {
 }
 
 /**
- * The vault menu's and the vault list's folders: the ones listed, empty ones included, and those of the items, whose
- * vault's folders couldn't be listed this time. Each counts its items and its subfolders'. Sorted by path within each
- * vault, a folder before its subfolders.
+ * The vaults' folders: the ones listed, empty ones included, and those of the items, whose vault's folders couldn't be
+ * listed this time. Each counts its items and its subfolders'. Sorted by path within each vault, a folder before its
+ * subfolders.
  */
 export function folderEntries(items: Item[], listed: VaultFolder[] = []): FolderEntry[] {
   const entries = new Map<string, FolderEntry>(
@@ -135,22 +131,27 @@ export function refreshVaultFolders(
   return [...kept, ...listed.folders].sort(compareEntries);
 }
 
-/** Folders after a listing: those of vaults whose items couldn't be listed keep their earlier count. */
-export function refreshFolderEntries(
-  previous: FolderEntry[],
-  items: Item[],
-  known: VaultFolder[],
-  failedShareIds: Set<string>,
-): FolderEntry[] {
-  const kept = previous.filter((entry) => failedShareIds.has(entry.shareId));
-  const counted = folderEntries(items, known).filter((entry) => !failedShareIds.has(entry.shareId));
-  return [...kept, ...counted].sort(compareEntries);
+/** The folders right inside a vault, or inside `parent`, a folder of that vault. */
+export function subfolders(entries: FolderEntry[], shareId: string, parent?: VaultFolder): FolderEntry[] {
+  const depth = parent?.path.length ?? 0;
+  return entries.filter(
+    (entry) =>
+      entry.shareId === shareId &&
+      entry.path.length === depth + 1 &&
+      (!parent || entry.path[depth - 1].id === parent.path[depth - 1].id),
+  );
 }
 
-/** Whether an item shows for a choice of the vault menu other than All Vaults: a vault, Shared with Me or a folder. */
-export function isListedIn(item: Pick<Item, "shareId" | "sharedWithMe" | "folderPath">, value: string): boolean {
-  if (!isFolderValue(value)) return listedUnder(item) === value;
-  return (
-    !item.sharedWithMe && (item.folderPath?.some((folder) => folderValue(item.shareId, folder.id) === value) ?? false)
-  );
+/**
+ * Whether an item is right inside `folder`, a folder of the vault `shareId`, or with no folder given, in none of that
+ * vault's folders. An item whose folder isn't known is in none.
+ */
+export function isDirectlyIn(
+  item: Pick<Item, "shareId" | "sharedWithMe" | "folderPath">,
+  shareId: string,
+  folder?: VaultFolder,
+): boolean {
+  if (listedUnder(item) !== shareId) return false;
+  const itemFolder = item.folderPath?.[item.folderPath.length - 1];
+  return folder ? itemFolder?.id === folder.path[folder.path.length - 1].id : itemFolder === undefined;
 }

@@ -6,9 +6,9 @@ import {
   folderPathLabel,
   folderPaths,
   folderValue,
-  isListedIn,
-  refreshFolderEntries,
+  isDirectlyIn,
   refreshVaultFolders,
+  subfolders,
   vaultFolders,
   withFolderPaths,
 } from "./folders";
@@ -93,26 +93,38 @@ test("without a folder listing, the items' folders still show", () => {
 test("items shared with the user on their own have no folders", () => {
   const shared = { ...withFolderPaths([item("tv", "personal", "travel")], PERSONAL)[0], sharedWithMe: true };
   assert.deepEqual(folderEntries([shared]), []);
-  assert.equal(isListedIn(shared, folderValue("personal", "travel")), false);
+  assert.equal(isDirectlyIn(shared, "personal"), false);
 });
 
-test("a folder chosen in the vault menu shows its items and its subfolders'", () => {
-  const [visa, bank, notes] = withFolderPaths(
-    [item("visa", "personal", "cards"), item("bank", "personal", "banking"), item("notes", "personal")],
+test("an opened vault or folder shows the folders right inside it", () => {
+  const entries = folderEntries([], [...PERSONAL, ...WORK]);
+  assert.deepEqual(subfolders(entries, "personal").map(label), ["personal:Banking", "personal:Travel"]);
+  const [banking] = subfolders(entries, "personal");
+  assert.deepEqual(subfolders(entries, "personal", banking).map(label), ["personal:Banking › Cards"]);
+  assert.deepEqual(subfolders(entries, "work").map(label), ["work:Travel"]);
+});
+
+test("an opened vault or folder shows the items right inside it, not its subfolders'", () => {
+  const [visa, bank, notes, old] = withFolderPaths(
+    [
+      item("visa", "personal", "cards"),
+      item("bank", "personal", "banking"),
+      item("notes", "personal"),
+      item("old", "personal", "deleted"),
+    ],
     PERSONAL,
   );
-  const banking = folderValue("personal", "banking");
-  assert.deepEqual(
-    [visa, bank, notes].filter((entry) => isListedIn(entry, banking)).map((entry) => entry.itemId),
-    ["visa", "bank"],
-  );
-  assert.deepEqual(
-    [visa, bank, notes].filter((entry) => isListedIn(entry, folderValue("personal", "cards"))).map((e) => e.itemId),
-    ["visa"],
-  );
-  assert.equal(isListedIn(notes, "personal"), true);
+  const all = [visa, bank, notes, old];
+  const inside = (folder?: (typeof PERSONAL)[number]) =>
+    all.filter((entry) => isDirectlyIn(entry, "personal", folder)).map((entry) => entry.itemId);
+  const folder = (id: string) => PERSONAL.find(({ path }) => path[path.length - 1].id === id);
+  const [cards, banking] = [folder("cards"), folder("banking")];
+  // An item whose folder isn't known stays in sight, with the vault's own items.
+  assert.deepEqual(inside(), ["notes", "old"]);
+  assert.deepEqual(inside(banking), ["bank"]);
+  assert.deepEqual(inside(cards), ["visa"]);
   // The same folder ID in another vault is another folder.
-  assert.equal(isListedIn(visa, folderValue("work", "cards")), false);
+  assert.equal(isDirectlyIn(visa, "work", cards), false);
 });
 
 test("a vault whose folders couldn't be listed keeps the ones known, unless the vault is gone", () => {
@@ -122,23 +134,4 @@ test("a vault whose folders couldn't be listed keeps the ones known, unless the 
     { shareIds: ["personal"], folders: vaultFolders("personal", [{ folderId: "banking", name: "Banking" }]) },
   );
   assert.deepEqual(known.map(label), ["personal:Banking", "work:Travel"]);
-});
-
-test("a vault whose items couldn't be listed keeps its folders' counts", () => {
-  const previous = folderEntries(withFolderPaths([item("vpn", "work", "travel")], WORK), WORK);
-  const refreshed = refreshFolderEntries(
-    previous,
-    [item("notes", "personal")],
-    [...PERSONAL, ...WORK],
-    new Set(["work"]),
-  );
-  assert.deepEqual(
-    refreshed.map((entry) => [label(entry), entry.itemCount]),
-    [
-      ["personal:Banking", 0],
-      ["personal:Banking › Cards", 0],
-      ["personal:Travel", 0],
-      ["work:Travel", 1],
-    ],
-  );
 });

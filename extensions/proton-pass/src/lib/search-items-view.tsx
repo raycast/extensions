@@ -20,15 +20,8 @@ import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
 import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
-import {
-  FolderEntry,
-  folderEntries,
-  folderEntryValue,
-  isFolderValue,
-  isListedIn,
-  refreshVaultFolders,
-  VaultFolder,
-} from "./folders";
+import { folderEntries, isDirectlyIn, refreshVaultFolders, subfolders, VaultFolder } from "./folders";
+import { createFolderSource, FolderView } from "./folder-view";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -49,10 +42,8 @@ function matchesActiveOrigin(item: Item, activeOrigin?: string): boolean {
 }
 
 interface SearchItemsViewProps {
-  /** Vault opened from the vault list, or the vault of the folder opened. */
+  /** Vault opened from the vault list. */
   initialVault?: Vault;
-  /** Folder opened from the vault list. */
-  initialFolder?: FolderEntry;
   /** Opened from All Vaults in the vault list: shows every vault rather than the last selection. */
   allVaults?: boolean;
   /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
@@ -66,7 +57,6 @@ interface SearchItemsViewProps {
 /** The item list of Browse Items, with every vault, or the one opened from the vault list. */
 export function SearchItemsView({
   initialVault,
-  initialFolder,
   allVaults = false,
   sessionConfirmed = false,
   sortChoice,
@@ -78,10 +68,8 @@ export function SearchItemsView({
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(
     new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
   );
-  // A vault's share ID, Shared with Me's, a folder's value (see folderValue) or ALL_VAULTS_VALUE.
-  const [selectedVaultId, setSelectedVaultId] = useState<string>(
-    initialFolder ? folderEntryValue(initialFolder) : (initialVault?.shareId ?? ALL_VAULTS_VALUE),
-  );
+  // A vault's share ID, Shared with Me's or ALL_VAULTS_VALUE.
+  const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
   const [failedVaults, setFailedVaults] = useState<VaultFailure[]>([]);
@@ -266,17 +254,24 @@ export function SearchItemsView({
     }
   }
 
-  const filteredItems = useMemo(
-    () => (selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => isListedIn(item, selectedVaultId))),
-    [items, selectedVaultId],
-  );
+  // A vault shows its folders, then the items in none of them; All Vaults and Shared with Me have no folders.
+  const isVaultSelected = selectedVaultId !== ALL_VAULTS_VALUE && !isSharedWithMe({ shareId: selectedVaultId });
+  const filteredItems = useMemo(() => {
+    if (selectedVaultId === ALL_VAULTS_VALUE) return items;
+    if (!isVaultSelected) return items.filter((item) => listedUnder(item) === selectedVaultId);
+    return items.filter((item) => isDirectlyIn(item, selectedVaultId));
+  }, [items, selectedVaultId, isVaultSelected]);
   const folders = useMemo(() => folderEntries(items, knownFolders), [items, knownFolders]);
-  const selectedFolder = isFolderValue(selectedVaultId)
-    ? (folders.find((folder) => folderEntryValue(folder) === selectedVaultId) ?? initialFolder)
-    : undefined;
-  const selectedShareId = selectedFolder?.shareId ?? selectedVaultId;
+  const vaultFolders = useMemo(
+    () => (isVaultSelected ? subfolders(folders, selectedVaultId) : []),
+    [folders, selectedVaultId, isVaultSelected],
+  );
+  // The folders opened from here stay up to date with this list's items and folders.
+  const folderSource = useMemo(createFolderSource, []);
+  useEffect(() => folderSource.set({ items, folders, isLoading }), [folderSource, items, folders, isLoading]);
+  const vaultName = vaults.find((vault) => vault.shareId === selectedVaultId)?.name ?? initialVault?.name ?? "";
   const emptyFailureMessage =
-    failedVaults.find(({ vault }) => vault.shareId === selectedShareId)?.message ?? loadFailureMessage;
+    failedVaults.find(({ vault }) => vault.shareId === selectedVaultId)?.message ?? loadFailureMessage;
   const suggestedItems = useMemo(() => {
     if (!webIntegrationEnabled || !activeOrigin) return [];
     return filteredItems.filter((item) => matchesActiveOrigin(item, activeOrigin));
@@ -293,6 +288,16 @@ export function SearchItemsView({
       sortChoice={sortChoice}
       // Items wait for the active tab, so that the suggested login is selected from the start.
       items={isLoadingActiveTab ? [] : filteredItems}
+      folders={isLoadingActiveTab ? [] : vaultFolders}
+      openFolder={(folder) => (
+        <FolderView
+          source={folderSource}
+          vaultName={vaultName}
+          folder={folder}
+          sortChoice={sortChoice}
+          onRefresh={loadItems}
+        />
+      )}
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
       isLoading={isLoading || isLoadingActiveTab}
@@ -302,8 +307,6 @@ export function SearchItemsView({
           // Until vaults are loaded, the preselected vault must still be one of the options.
           vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
           itemCounts={itemCounts}
-          // Until items are loaded, the preselected folder must still be one of the options.
-          folders={folders.length === 0 && initialFolder ? [initialFolder] : folders}
           value={initialVault || allVaults ? selectedVaultId : undefined}
           onVaultChange={setSelectedVaultId}
         />
@@ -317,9 +320,7 @@ export function SearchItemsView({
             ? "Your vaults are empty"
             : isSharedWithMe({ shareId: selectedVaultId })
               ? "No items are shared with you"
-              : isFolderValue(selectedVaultId)
-                ? "No items in this folder"
-                : "No items in this vault"),
+              : "No items in this vault"),
         onRetry: emptyFailureMessage ? loadItems : undefined,
       }}
       onRefresh={loadItems}

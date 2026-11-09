@@ -88,13 +88,6 @@
       "mode": "no-view"
     },
     {
-      "name": "list-folders",
-      "title": "List Folders",
-      "subtitle": "Proton Pass",
-      "description": "Open Browse Items on your folders",
-      "mode": "no-view"
-    },
-    {
       "name": "generate-password",
       "title": "Generate Password",
       "subtitle": "Proton Pass",

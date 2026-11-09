@@ -42,7 +42,7 @@ pass-cli vault list
 
 Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
 
-Your Proton Pass folders follow their vault, in the vault list and in the vault menu at the top right of the items, written with their path ("Personal › Banking › Cards"). A folder shows its items and its subfolders' items. The item details say which folder an item is in, under Vault. List Folders opens Browse Items on the folders alone, by vault. Empty folders show too, with 0 items. Get TOTP Code's vault menu lists the folders that hold codes, as it lists the vaults that have codes.
+A vault, opened from the vault list or the vault menu, shows its Proton Pass folders first, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. The search finds what's on screen: an item in a folder shows once its folder is open, or in All Vaults. The item details say which folder an item is in, under Vault.
 
 ## Preferences
 

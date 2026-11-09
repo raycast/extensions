@@ -29,7 +29,6 @@ import { SortByMenu, compareNames, preferredSortOrder, sortItems } from "./lib/s
 import { ALL_VAULTS_VALUE, VaultDropdown } from "./lib/vault-dropdown";
 import { countItemsByVault } from "./lib/item-counts";
 import { listedUnder, SHARED_WITH_ME } from "./lib/shared-items";
-import { folderEntries, isListedIn } from "./lib/folders";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -103,11 +102,10 @@ export default function Command() {
   const [selectedVaultId, setSelectedVaultId] = useState(ALL_VAULTS_VALUE);
   const vaults = useMemo(() => vaultsWithCodes(items), [items]);
   const itemCounts = useMemo(() => countItemsByVault(vaults, items), [vaults, items]);
-  const folders = useMemo(() => folderEntries(items), [items]);
   const shownItems =
     selectedVaultId === ALL_VAULTS_VALUE
       ? sortedItems
-      : sortedItems.filter((item) => isListedIn(item, selectedVaultId));
+      : sortedItems.filter((item) => listedUnder(item) === selectedVaultId);
   // As in Browse Items. Made once per list rather than on every second of the countdown.
   const icons = useMemo(
     () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
@@ -301,7 +299,6 @@ export default function Command() {
         <VaultDropdown
           vaults={vaults}
           itemCounts={itemCounts}
-          folders={folders}
           // By name: Sort vaults by is Browse Items' preference, which this command can't read.
           order="name"
           onVaultChange={setSelectedVaultId}
