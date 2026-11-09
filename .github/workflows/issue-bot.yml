@@ -5,31 +5,33 @@ on:
   issue_comment:
     types: [created, edited]
 
-env:
-  # Use an exact version (not "latest") so setup-bun can cache the binary instead of downloading it from GitHub releases on every run.
-  BUN_VERSION: ${{ vars.BUN_VERSION || 'latest' }}
-
 jobs:
   issue_bot:
     name: Issue Bot
     if: ${{ !github.event.issue.pull_request && github.repository == 'raycast/extensions' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Checkout bot scripts
+        uses: actions/checkout@v7
         with:
-          bun-version: ${{ env.BUN_VERSION }}
-      - name: Setup Bot
-        run: bun create github.com/raycast/github-action-bot
-        env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          ref: ${{ github.event.repository.default_branch }}
+          path: .bots
+          sparse-checkout: scripts/bots
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .bots/.node-version
+          cache: npm
+          cache-dependency-path: .bots/scripts/bots/package-lock.json
+      - name: Install bot dependencies
+        working-directory: .bots/scripts/bots
+        run: npm ci --omit=dev
       - name: Run bot
-        run: |
-          cd github-action-bot
-          bun run index.ts
+        working-directory: .bots/scripts/bots
+        run: node run.ts issue-bot.ts
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          SCRIPT: "scripts/bots/issue-bot.ts"
 
       - name: Set SHORT_SHA
         if: always()

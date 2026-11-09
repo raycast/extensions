@@ -7,10 +7,6 @@ on:
       - "docs/**"
     branches: [main, master]
 
-env:
-  # Use an exact version (not "latest") so setup-bun can cache the binary instead of downloading it from GitHub releases on every run.
-  BUN_VERSION: ${{ vars.BUN_VERSION || 'latest' }}
-
 jobs:
   pr-bot:
     if: github.repository == 'raycast/extensions'
@@ -23,21 +19,29 @@ jobs:
         with:
           github_event_name: ${{ github.event_name }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      # The step above can check out the PR's code into the workspace root, so run the bot from
+      # a separate checkout of the default branch to never execute PR code with our secrets.
+      - name: Checkout bot scripts
+        uses: actions/checkout@v7
         with:
-          bun-version: ${{ env.BUN_VERSION }}
-      - name: Setup Bot
-        run: bun create github.com/raycast/github-action-bot
-        env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          ref: ${{ github.event.repository.default_branch }}
+          path: .bots
+          sparse-checkout: scripts/bots
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .bots/.node-version
+          cache: npm
+          cache-dependency-path: .bots/scripts/bots/package-lock.json
+      - name: Install bot dependencies
+        working-directory: .bots/scripts/bots
+        run: npm ci --omit=dev
       - name: Run bot
-        run: |
-          cd github-action-bot
-          bun run index.ts
+        working-directory: .bots/scripts/bots
+        run: node run.ts pr-bot.ts
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          SCRIPT: "scripts/bots/pr-bot.ts"
           CHANGED_EXTENSIONS: ${{ steps.get_changed_extensions.outputs.paths }}
 
       - name: Set SHORT_SHA
