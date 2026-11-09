@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Favicon Generator MCP Server] - {PR_MERGE_DATE}
+## [Add Favicon Generator MCP Server] - 2026-11-09
 
 - Add Favicon Generator to the official registry: text and emoji favicons, open-source icons as favicon SVGs, HTML head tags, a web manifest and platform install guides. 5 read-only tools. Hosted Streamable HTTP server at https://favicongenerator.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
