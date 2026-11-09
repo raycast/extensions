@@ -1,6 +1,6 @@
 # Fuzzy File Search Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-11-09
 
 - Add ⇧⌘V path pasting ([Raycast convention](https://manual.raycast.com/keyboard-shortcuts#copy-paste)), inspired by [@juezhong’s PathSeek #32726](https://github.com/raycast/extensions/pull/32726).
 - Add file icons.
