@@ -88,6 +88,9 @@ export function AddForm({
       }
     },
   });
+  // The selection resolves after the first render; read the latest typed value, not the initial one.
+  const originalRef = useRef(values.original);
+  originalRef.current = values.original;
   useEffect(() => {
     if (!prefillFromSelection) return;
     getSelectedText()
@@ -98,7 +101,7 @@ export function AddForm({
           word &&
           word.length <= 80 &&
           !word.includes("\n") &&
-          !values.original
+          !originalRef.current
         )
           setValue("original", word);
       })
