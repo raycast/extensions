@@ -1,6 +1,6 @@
 # 2Do Changelog
 
-## [Repeats and New Tags] - {PR_MERGE_DATE}
+## [Repeats and New Tags] - 2026-11-09
 
 - Set how a task repeats in Add Task and Edit Task, and see the rule on repeating tasks in View Tasks
 - New Tags field in Add Task and Edit Task, for tags not in 2Do yet
