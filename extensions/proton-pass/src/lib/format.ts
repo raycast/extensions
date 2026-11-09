@@ -4,6 +4,26 @@ export function itemKey(item: { shareId: string; itemId: string }): string {
   return `${item.shareId}-${item.itemId}`;
 }
 
+/**
+ * "09s · 418 877": the countdown comes first, on two digits, so that the code stays put while the seconds change. Raycast
+ * collapses repeated spaces, so en spaces set the dot apart, further than the code's halves are from each other.
+ */
+export function totpWithCountdown(formattedCode: string, remainingSeconds: number): string {
+  return `${monospace(`${String(remainingSeconds).padStart(2, "0")}s`)}\u2002·\u2002${monospace(formattedCode)}`;
+}
+
+/**
+ * Unicode's mathematical monospace digits and "s" all have the same width, unlike the panel's font, which an extension
+ * can't change: a countdown written with them keeps its width every second.
+ */
+const MONOSPACE: Record<string, string> = Object.fromEntries(
+  [..."0123456789s"].map((character, index) => [character, [..."𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝚜"][index]]),
+);
+
+export function monospace(text: string): string {
+  return [...text].map((character) => MONOSPACE[character] ?? character).join("");
+}
+
 /** "https://www.example.com/login" or "example.com/login" -> "example.com". Values that aren't URLs are returned unchanged. */
 export function hostnameOf(url: string): string {
   try {

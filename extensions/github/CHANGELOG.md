@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Windows Action Shortcuts] - 2026-11-06
+
+- Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
+
 ## [Update] - 2026-11-06
 
 - Add **Create Repository** command (disabled by default) to create a repository on your account or in one of your organizations.
