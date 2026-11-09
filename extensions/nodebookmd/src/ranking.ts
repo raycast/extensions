@@ -1,7 +1,27 @@
-// A copy of the title matcher in NodebookMD (`src/lib/search.ts`), so a query
-// ranks here as it ranks in the app. Change both together.
-import type { Hit } from "./types";
+// The title ranking, and the kind shown beside a page's name. Pure, with no
+// app imports: the Raycast extension (`integrations/raycast`) copies this file as is.
 
+/** The fields the ranking reads. A search hit and a Raycast row both have them. */
+export interface Page {
+  path: string;
+  title: string;
+}
+
+/** Shelf pages that are guides, not tools. */
+const NOT_TOOLS = ["shelf/index", "shelf/customize", "shelf/config_file"];
+
+/** The kind shown beside a page's name: its node type, or "Shelf tool" for a
+    shelf page, which has no node type. The Raycast extension says the same. */
+export function pageKind(path: string, nodeType?: string | null): string | undefined {
+  if (nodeType) return nodeType;
+  return path.startsWith("shelf/") && !NOT_TOOLS.includes(path) ? "Shelf tool" : undefined;
+}
+
+/**
+ * SideFX keeps the superseded version of a node at a trailing-dash slug —
+ * `copytopoints-` is v1, `copytopoints` is "Copy to Points 2.0". The old one is
+ * still worth finding, never worth ranking first.
+ */
 const SUPERSEDED = /-$/;
 
 /**
@@ -12,7 +32,7 @@ const SUPERSEDED = /-$/;
  * below the thing itself. An index page lists pages and is almost never the
  * page the reader meant.
  */
-export function weight(hit: Hit): number {
+export function weight(hit: Page): number {
   const path = hit.path;
   if (path.startsWith("examples/") || path.includes("/examples/")) return 0.55;
   if (path.endsWith("/index") || path === "index") return 0.6;
@@ -35,8 +55,8 @@ export function weight(hit: Hit): number {
  * appears. None of it depends on what was typed, so none of it belongs in the
  * loop. See spec: Local — Performance Harness and Budgets.
  */
-interface Ready {
-  hit: Hit;
+interface Ready<T extends Page> {
+  hit: T;
   path: string;
   title: string;
   /** The last part of the path, which is the page's own name. */
@@ -60,10 +80,10 @@ interface Ready {
  * runs when the background pass adds pages, and a prepared list that outlived
  * its pages would answer with pages that no longer exist.
  */
-const prepared = new WeakMap<Hit[], Ready[]>();
+const prepared = new WeakMap<Page[], Ready<Page>[]>();
 
-function ready(hits: Hit[]): Ready[] {
-  let rows = prepared.get(hits);
+function ready<T extends Page>(hits: T[]): Ready<T>[] {
+  let rows = prepared.get(hits) as Ready<T>[] | undefined;
   if (rows) return rows;
   rows = hits.map((hit) => {
     const path = hit.path.toLowerCase();
@@ -94,7 +114,7 @@ function ready(hits: Hit[]): Ready[] {
  *  caller: someone typing "copy to points" is naming `copytopoints` exactly,
  *  and comparing as written left that page at the substring tier under the LOP
  *  of the same title. */
-function score(row: Ready, query: string, tight: string, words: string[]): number {
+function score(row: Ready<Page>, query: string, tight: string, words: string[]): number {
   if (row.path === query) return 1000;
   if (row.leaf === tight || row.packed === tight) return 900;
   if (row.leaf.startsWith(tight) || row.packed.startsWith(tight)) return 700;
@@ -108,7 +128,7 @@ function score(row: Ready, query: string, tight: string, words: string[]): numbe
 
 /** The reader is looking for a node far more often than a shelf tool, and for
  *  a page far more often than the index that lists it. */
-function rank(hit: Hit): number {
+function rank(hit: Page): number {
   const section = hit.path.split("/")[0];
   const depth = hit.path.endsWith("/index") ? 1 : 0;
   const order = ["nodes", "vex", "hom", "expressions", "props"].indexOf(section);
@@ -126,7 +146,7 @@ const MIN_ABBREVIATION = 3;
 const NAMED = 600;
 
 /** The fast pick, straight out of the in-memory list. */
-export function match(hits: Hit[], query: string, limit = 8): Hit[] {
+export function match<T extends Page>(hits: T[], query: string, limit = 8): T[] {
   const wanted = query.trim().toLowerCase();
   if (!wanted) return [];
   const rows = ready(hits);
@@ -136,7 +156,7 @@ export function match(hits: Hit[], query: string, limit = 8): Hit[] {
   // Scored once and the score KEPT. The abbreviation gate below asks which
   // hits named the page, and asking that by scoring the list a second time
   // doubled the cost of every keystroke.
-  const hit: Array<{ row: Ready; score: number }> = [];
+  const hit: Array<{ row: Ready<T>; score: number }> = [];
   let named = 0;
   for (const row of rows) {
     const value = score(row, wanted, tight, words);
@@ -192,8 +212,8 @@ const ABBREVIATION_FAMILY = /^(nodes|vex|expressions|commands|hom)\//;
  * never fire: two float scores are almost never exactly equal, so a superseded
  * page would outrank the current one whenever it matched a hair tighter.
  */
-function abbreviated(rows: Ready[], query: string, limit: number): Hit[] {
-  const scored: Array<{ hit: Hit; score: number }> = [];
+function abbreviated<T extends Page>(rows: Ready<T>[], query: string, limit: number): T[] {
+  const scored: Array<{ hit: T; score: number }> = [];
   for (const row of rows) {
     if (!row.folded) {
       row.folded = true;

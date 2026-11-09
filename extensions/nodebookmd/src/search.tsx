@@ -18,10 +18,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BODY_SEARCH_DELAY, combine, MIN_BODY_QUERY, rankBodies } from "./combine";
 import { cacheIcons, cachedIcon } from "./icons";
 import { clearHistory, forgetPage, recentPages, rememberPage, save } from "./history";
-import { match } from "./ranking";
+import { match, pageKind } from "./ranking";
 import { inScope, parseScope } from "./scopes";
 import { nodebookServer } from "./server";
-import { pageKind, type Hit } from "./types";
+import type { Hit } from "./types";
 
 /** How long a page stays selected before it counts as read, in milliseconds. */
 const READ_DELAY = 3000;
@@ -166,7 +166,7 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
     <List.Item
       id={hit.path}
       title={hit.title}
-      subtitle={pageKind(hit)}
+      subtitle={pageKind(hit.path, hit.nodeType)}
       icon={rowIcon(hit)}
       detail={<PageDetail markdownUrl={markdownUrl} />}
       actions={

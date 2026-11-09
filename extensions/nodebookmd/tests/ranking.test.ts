@@ -2,9 +2,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { combine } from "../src/combine";
-import { match } from "../src/ranking";
+import { match, pageKind } from "../src/ranking";
 import { inScope, parseScope } from "../src/scopes";
-import { pageKind, type Hit } from "../src/types";
+import type { Hit } from "../src/types";
 
 const titles: Hit[] = [
   { path: "nodes/sop/copytopoints", title: "Copy to Points 2.0" },
@@ -48,7 +48,7 @@ test("a page name plus a word puts that page first", () => {
 });
 
 test("a shelf page is labeled as a shelf tool, its guides are not", () => {
-  assert.equal(pageKind({ path: "shelf/box", title: "Box" }), "Shelf tool");
-  assert.equal(pageKind({ path: "shelf/customize", title: "Customize the shelf" }), undefined);
-  assert.equal(pageKind({ path: "nodes/sop/box", title: "Box", nodeType: "Geometry node" }), "Geometry node");
+  assert.equal(pageKind("shelf/box"), "Shelf tool");
+  assert.equal(pageKind("shelf/customize"), undefined);
+  assert.equal(pageKind("nodes/sop/box", "Geometry node"), "Geometry node");
 });
