@@ -1,0 +1,125 @@
+{
+ "version": "4.3.5",
+ "icons": {
+  "FirstBracketIcon": {
+   "name": "1st-bracket",
+   "category": "math",
+   "tags": [
+    "parentheses",
+    "brackets"
+   ]
+  },
+  "ThreeDViewIcon": {
+   "name": "3d-view",
+   "category": "shapes",
+   "tags": [
+    "cube",
+    "three dimensions"
+   ]
+  },
+  "TwentyFourHoursClockIcon": {
+   "name": "24-hours-clock",
+   "category": "time",
+   "tags": [
+    "time",
+    "all day"
+   ]
+  },
+  "ClockHour7Icon": {
+   "name": "clock-hour-7",
+   "category": "time",
+   "tags": [
+    "time",
+    "seven"
+   ]
+  },
+  "ArrowDown01Icon": {
+   "name": "arrow-down-01",
+   "category": "arrows",
+   "tags": [
+    "down",
+    "direction"
+   ]
+  },
+  "ArrowDownZeroOneIcon": {
+   "name": "arrow-down-0-1",
+   "category": "arrows",
+   "tags": [
+    "sort",
+    "ascending"
+   ]
+  },
+  "Add01Icon": {
+   "name": "add-01",
+   "category": "math",
+   "tags": [
+    "plus",
+    "new"
+   ]
+  },
+  "PackageAdd01Icon": {
+   "name": "package-add-01",
+   "category": "shopping",
+   "tags": [
+    "box",
+    "parcel"
+   ]
+  },
+  "Ticket01Icon": {
+   "name": "ticket-01",
+   "category": "travel",
+   "tags": [
+    "admission",
+    "pass",
+    "event"
+   ]
+  },
+  "Ticket02Icon": {
+   "name": "ticket-02",
+   "category": "travel",
+   "tags": [
+    "admission",
+    "pass"
+   ]
+  },
+  "Ticket03Icon": {
+   "name": "ticket-03",
+   "category": "travel",
+   "tags": [
+    "admission",
+    "coupon"
+   ]
+  },
+  "TicketXIcon": {
+   "name": "ticket-x",
+   "category": "travel",
+   "tags": [
+    "cancel",
+    "refund"
+   ]
+  },
+  "SmileDizzyIcon": {
+   "name": "smile-dizzy",
+   "category": "emoji",
+   "tags": [
+    "happy face",
+    "emoji",
+    "dizzy"
+   ]
+  },
+  "CppIcon": {
+   "name": "cpp",
+   "category": "development",
+   "tags": [
+    "code",
+    "c plus plus"
+   ]
+  },
+  "NoNameIcon": {
+   "category": "shapes",
+   "tags": [
+    "broken"
+   ]
+  }
+ }
+}

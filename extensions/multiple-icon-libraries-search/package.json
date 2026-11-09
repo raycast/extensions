@@ -1,0 +1,311 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multiple-icon-libraries-search",
+  "title": "Multiple Icon Libraries Search",
+  "description": "Search Lucide and Hugeicons icons by name or by meaning, switch libraries with one key, and paste or copy any icon's name, SVG, or React code.",
+  "icon": "extension-icon.png",
+  "author": "jasoneric",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "keywords": [
+    "icon",
+    "icons",
+    "lucide",
+    "hugeicons",
+    "svg",
+    "icon library",
+    "react icon"
+  ],
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Multiple Icon Libraries",
+      "subtitle": "Lucide, Hugeicons",
+      "description": "Search Lucide and free Hugeicons icons by name or meaning, and paste, copy, or save the one you pick.",
+      "keywords": [
+        "icon library",
+        "icon set",
+        "icon pack",
+        "svg",
+        "symbol",
+        "glyph",
+        "react icon",
+        "lucide",
+        "hugeicons"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "libraryLucide",
+          "title": "Libraries",
+          "label": "Lucide",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Keep at least one on. ⌘L switches between the ones you turn on."
+        },
+        {
+          "name": "libraryHugeicons",
+          "title": "",
+          "label": "Hugeicons",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Free icons only (Stroke Rounded)."
+        },
+        {
+          "name": "defaultLibrary",
+          "title": "Default Library",
+          "description": "⌘L switches libraries while searching.",
+          "type": "dropdown",
+          "required": false,
+          "default": "last",
+          "data": [
+            {
+              "title": "Last Used",
+              "value": "last"
+            },
+            {
+              "title": "Lucide",
+              "value": "lucide"
+            },
+            {
+              "title": "Hugeicons",
+              "value": "hugeicons"
+            }
+          ]
+        },
+        {
+          "name": "showFavorites",
+          "title": "Favorites",
+          "label": "Show favorites before you search",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Favorites always come first among search results that match."
+        },
+        {
+          "name": "enterAction",
+          "title": "Enter Action",
+          "description": "What Enter does on an icon.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste-name",
+          "data": [
+            {
+              "title": "Paste Name",
+              "value": "paste-name"
+            },
+            {
+              "title": "Copy Name",
+              "value": "copy-name"
+            },
+            {
+              "title": "Paste SVG",
+              "value": "paste-svg"
+            },
+            {
+              "title": "Copy SVG",
+              "value": "copy-svg"
+            },
+            {
+              "title": "Copy React Code",
+              "value": "copy-react"
+            }
+          ]
+        },
+        {
+          "name": "nameFormat",
+          "title": "Name Format",
+          "description": "Applies to Paste Name and Copy Name.",
+          "type": "dropdown",
+          "required": false,
+          "default": "import",
+          "data": [
+            {
+              "title": "Import Name (Ticket01Icon)",
+              "value": "import"
+            },
+            {
+              "title": "Icon Name (ticket-01)",
+              "value": "icon"
+            }
+          ]
+        },
+        {
+          "name": "includeLibraryName",
+          "title": "Library Name",
+          "label": "Add the library, like \"Lucide Ticket\" instead of \"Ticket\"",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "description": "Helps when you use more than one library."
+        },
+        {
+          "name": "strokeWidth",
+          "title": "Stroke Width",
+          "description": "Applies to SVG and React code.",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Library Default",
+              "value": "default"
+            },
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "1.5",
+              "value": "1.5"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "2.5",
+              "value": "2.5"
+            }
+          ]
+        },
+        {
+          "name": "autoAi",
+          "title": "Automatic AI",
+          "label": "Ask Raycast AI when a search finds fewer than one row of icons",
+          "description": "Tab always asks. Uses your Raycast AI allowance.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "aiModel",
+          "title": "AI Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "gateway-deepseek/deepseek-v4.1-flash",
+          "description": "All three find about the same icons. Typical wait: DeepSeek 4 s, GPT-5.4 mini 1 s, GPT-6 Luna 2 s.",
+          "data": [
+            {
+              "title": "Lower Cost · DeepSeek V4.1 Flash",
+              "value": "gateway-deepseek/deepseek-v4.1-flash"
+            },
+            {
+              "title": "Faster · GPT-5.4 mini",
+              "value": "openai-gpt-5.4-mini"
+            },
+            {
+              "title": "Raycast Default · GPT-6 Luna",
+              "value": "default"
+            }
+          ]
+        },
+        {
+          "name": "saveAiKeywords",
+          "title": "Remember AI Picks",
+          "label": "Save your search words to icons picked from AI results",
+          "description": "Next time, those words find the icon without AI.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "find-icons",
+      "title": "Find Icons",
+      "description": "Find Lucide and Hugeicons icons by name or meaning, with each icon's name, React code, and SVG."
+    }
+  ],
+  "ai": {
+    "instructions": "When someone asks for an icon, call find-icons with several comma-separated keywords for what the icon shows or means, most likely first. Show each result's library and name, and give the SVG or React code only when asked. If nothing fits, try again with other words before saying no icon matches.",
+    "evals": [
+      {
+        "input": "@multiple-icon-libraries-search an icon for deleting a file",
+        "mocks": {
+          "find-icons": [
+            {
+              "library": "Lucide",
+              "name": "trash-2",
+              "importName": "Trash2",
+              "reactCode": "import { Trash2 } from \"lucide-react\";\n\n<Trash2 />",
+              "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"/>",
+              "url": "https://lucide.dev/icons/trash-2"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "find-icons"
+          },
+          {
+            "includes": "trash-2"
+          }
+        ]
+      },
+      {
+        "input": "@multiple-icon-libraries-search give me the SVG for a Hugeicons happy face",
+        "mocks": {
+          "find-icons": [
+            {
+              "library": "Hugeicons",
+              "name": "smile",
+              "importName": "SmileIcon",
+              "reactCode": "import { HugeiconsIcon } from \"@hugeicons/react\";\nimport { SmileIcon } from \"@hugeicons/core-free-icons\";\n\n<HugeiconsIcon icon={SmileIcon} />",
+              "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"/>",
+              "url": "https://hugeicons.com/icon/smile"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-icons",
+              "arguments": {
+                "library": "hugeicons"
+              }
+            }
+          },
+          {
+            "includes": "<svg"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "react": "^19.3.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

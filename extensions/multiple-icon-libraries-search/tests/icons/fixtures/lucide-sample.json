@@ -1,0 +1,469 @@
+{
+ "_source": "Lucide (https://lucide.dev), ISC License, Copyright (c) Lucide Icons and Contributors. A small sample of lucide.dev/api/tags, /api/categories, and /api/icon-nodes, trimmed for tests.",
+ "tags": {
+  "a-arrow-down": [
+   "letter",
+   "font size",
+   "text",
+   "formatting",
+   "smaller"
+  ],
+  "arrow-down": [
+   "backwards",
+   "reverse",
+   "direction",
+   "south"
+  ],
+  "arrow-down-0-1": [
+   "filter",
+   "sort",
+   "ascending",
+   "descending",
+   "increasing",
+   "decreasing",
+   "rising",
+   "falling",
+   "numerical"
+  ],
+  "arrow-up": [
+   "forward",
+   "direction",
+   "north"
+  ],
+  "braces": [
+   "json",
+   "code",
+   "token",
+   "curly brackets",
+   "data",
+   "{",
+   "}"
+  ],
+  "broom": [
+   "broomstick",
+   "brush",
+   "sweep",
+   "sweeping",
+   "floor",
+   "cleaning",
+   "housekeeping",
+   "chores",
+   "tidy",
+   "spotless",
+   "dust",
+   "debris",
+   "bristles",
+   "handle",
+   "janitor",
+   "maintenance",
+   "witch",
+   "halloween"
+  ],
+  "circle": [
+   "off",
+   "zero",
+   "record",
+   "shape"
+  ],
+  "hand": [
+   "wave",
+   "move",
+   "mouse",
+   "grab"
+  ],
+  "parentheses": [
+   "code",
+   "token",
+   "parenthesis",
+   "parens",
+   "brackets",
+   "parameters",
+   "arguments",
+   "args",
+   "input",
+   "call",
+   "math",
+   "formula",
+   "function",
+   "(",
+   ")"
+  ],
+  "square": [
+   "stop",
+   "playback",
+   "music",
+   "audio",
+   "video",
+   "rectangle",
+   "aspect ratio",
+   "1:1",
+   "shape"
+  ],
+  "ticket": [
+   "entry",
+   "pass",
+   "voucher",
+   "event",
+   "concert",
+   "show",
+   "perforated",
+   "dashed"
+  ],
+  "ticket-check": [
+   "entry",
+   "pass",
+   "voucher",
+   "event",
+   "concert",
+   "show",
+   "booked",
+   "purchased",
+   "receipt",
+   "redeemed",
+   "validated",
+   "verified",
+   "certified",
+   "checked",
+   "used"
+  ],
+  "triangle": [
+   "equilateral",
+   "delta",
+   "shape",
+   "pyramid",
+   "hierarchy"
+  ],
+  "wallet": [
+   "money",
+   "finance",
+   "pocket"
+  ]
+ },
+ "categories": {
+  "a-arrow-down": [
+   "text",
+   "design"
+  ],
+  "arrow-down": [
+   "arrows"
+  ],
+  "arrow-down-0-1": [
+   "text",
+   "layout",
+   "arrows"
+  ],
+  "arrow-up": [
+   "arrows"
+  ],
+  "braces": [
+   "development",
+   "files"
+  ],
+  "broom": [
+   "tools",
+   "home",
+   "gaming"
+  ],
+  "circle": [
+   "shapes"
+  ],
+  "hand": [
+   "cursors",
+   "accessibility"
+  ],
+  "parentheses": [
+   "development",
+   "files",
+   "math"
+  ],
+  "square": [
+   "shapes",
+   "multimedia"
+  ],
+  "ticket": [
+   "account",
+   "transportation"
+  ],
+  "ticket-check": [
+   "transportation"
+  ],
+  "triangle": [
+   "shapes"
+  ],
+  "wallet": [
+   "account",
+   "finance"
+  ]
+ },
+ "nodes": {
+  "a-arrow-down": [
+   [
+    "path",
+    {
+     "d": "m14 12 4 4 4-4"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M18 16V7"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M3.304 13h6.392"
+    }
+   ]
+  ],
+  "arrow-down": [
+   [
+    "path",
+    {
+     "d": "M12 5v14"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "m19 12-7 7-7-7"
+    }
+   ]
+  ],
+  "arrow-down-0-1": [
+   [
+    "path",
+    {
+     "d": "m3 16 4 4 4-4"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M7 20V4"
+    }
+   ],
+   [
+    "rect",
+    {
+     "x": "15",
+     "y": "4",
+     "width": "4",
+     "height": "6",
+     "ry": "2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M17 20v-6h-2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M15 20h4"
+    }
+   ]
+  ],
+  "arrow-up": [
+   [
+    "path",
+    {
+     "d": "m5 12 7-7 7 7"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M12 19V5"
+    }
+   ]
+  ],
+  "braces": [
+   [
+    "path",
+    {
+     "d": "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"
+    }
+   ]
+  ],
+  "broom": [
+   [
+    "path",
+    {
+     "d": "M13.5 10.5 22 2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "m5 18 2-2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "m7.699 10.7 5.602 5.601"
+    }
+   ]
+  ],
+  "circle": [
+   [
+    "circle",
+    {
+     "cx": "12",
+     "cy": "12",
+     "r": "10"
+    }
+   ]
+  ],
+  "hand": [
+   [
+    "path",
+    {
+     "d": "M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"
+    }
+   ]
+  ],
+  "parentheses": [
+   [
+    "path",
+    {
+     "d": "M8 21s-4-3-4-9 4-9 4-9"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M16 3s4 3 4 9-4 9-4 9"
+    }
+   ]
+  ],
+  "square": [
+   [
+    "rect",
+    {
+     "width": "18",
+     "height": "18",
+     "x": "3",
+     "y": "3",
+     "rx": "2"
+    }
+   ]
+  ],
+  "ticket": [
+   [
+    "path",
+    {
+     "d": "M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M13 5v2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M13 17v2"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M13 11v2"
+    }
+   ]
+  ],
+  "ticket-check": [
+   [
+    "path",
+    {
+     "d": "M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "m9 12 2 2 4-4"
+    }
+   ]
+  ],
+  "triangle": [
+   [
+    "path",
+    {
+     "d": "M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+    }
+   ]
+  ],
+  "wallet": [
+   [
+    "path",
+    {
+     "d": "M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"
+    }
+   ],
+   [
+    "path",
+    {
+     "d": "M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"
+    }
+   ]
+  ]
+ },
+ "baseline": [
+  "a-arrow-down",
+  "arrow-down",
+  "arrow-down-0-1",
+  "arrow-up",
+  "braces",
+  "circle",
+  "hand",
+  "parentheses",
+  "square",
+  "ticket",
+  "ticket-check",
+  "triangle",
+  "wallet"
+ ]
+}
