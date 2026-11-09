@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Real Alpha MCP Server] - {PR_MERGE_DATE}
+
+- Add Real Alpha to the official registry: search what the founders, CEOs and researchers building AI said in long podcast and YouTube interviews, with each quote's speaker, show, date and a page to cite. 6 read-only tools. Hosted Streamable HTTP server at https://realalpha.app/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Send4 MCP Server] - 2026-11-09
 
 - Add Send4 to the official registry: AI SMS and email for sales and support teams. Read and change flows, campaigns, conversations, leads and meetings in a Send4 workspace. 64 tools. Hosted Streamable HTTP server at https://mcp.send4.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
