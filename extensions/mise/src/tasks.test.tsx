@@ -234,8 +234,8 @@ describe("Manage Tasks editing", () => {
     const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
     const form = await pushed(await actions(await withMise("2026.11.0"), "greet"), "Edit Task");
     expect(field(form, "name")).toBeUndefined();
-    expect(field(form, "description")?.props.defaultValue).toBe("Say hello loudly");
-    expect(field(form, "run")?.props.defaultValue).toBe("echo 'HELLO there'");
+    expect(field(form, "description")?.props.value).toBe("Say hello loudly");
+    expect(field(form, "run")?.props.value).toBe("echo 'HELLO there'");
 
     await submit(form, { description: "Say hello loudly", run: "echo 'HELLO there'" });
     expect(runMise).not.toHaveBeenCalled();

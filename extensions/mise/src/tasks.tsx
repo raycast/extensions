@@ -10,8 +10,7 @@ import {
   List,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { basename } from "node:path";
 import type { MiseLocation } from "./mise/locate";
 import { addTask, deleteTask, editTask, runTask } from "./mise/operations";
@@ -149,8 +148,7 @@ function Tasks({ location }: { location: MiseLocation }) {
   );
 }
 
-type TaskFormValues = { name?: string; description: string; run?: string };
-type TaskFormErrors = { name?: string; run?: string };
+type TaskFormValues = { name: string; description: string; run: string };
 
 // Creates a task in the global config, or edits `task` in the file that defines it. The run field
 // holds one command line, so a task with several run commands keeps them and the field is left out.
@@ -166,26 +164,22 @@ function TaskForm({
   onSaved: () => void;
 }) {
   const { pop } = useNavigation();
-  const [errors, setErrors] = useState<TaskFormErrors>({});
   const runCount = task?.run.length ?? 0;
   const initialRun = task?.run[0] ?? "";
+  const editsRun = runCount <= 1;
   const saved = () => {
     onSaved();
     pop();
   };
 
   const create = async (values: TaskFormValues) => {
-    const name = values.name?.trim() ?? "";
-    const nameError = validateTaskName(name, taken);
-    const run = splitCommand(values.run ?? "");
-    if (nameError || "error" in run) {
-      setErrors({ name: nameError, run: "error" in run ? run.error : undefined });
-      return;
-    }
+    const name = values.name.trim();
+    const run = splitCommand(values.run);
+    if ("error" in run) return;
     try {
       const preview = await previewAddTask(location, name);
       if (preview.action === "replaced") {
-        setErrors({ name: `${basename(preview.path)} already has a task with this name` });
+        setValidationError("name", `${basename(preview.path)} already has a task with this name`);
         return;
       }
     } catch (error) {
@@ -198,21 +192,28 @@ function TaskForm({
   const edit = async (task: Task, values: TaskFormValues) => {
     const changes: { description?: string; run?: string[] } = {};
     if (values.description.trim() !== task.description) changes.description = values.description.trim();
-    if (values.run !== undefined && values.run !== initialRun) {
+    if (editsRun && values.run !== initialRun) {
       const run = splitCommand(values.run);
-      if ("error" in run) {
-        setErrors({ run: run.error });
-        return;
-      }
+      if ("error" in run) return;
       changes.run = run.words;
     }
     if (changes.description === undefined && changes.run === undefined) pop();
     else await runOperation(location, editTask(task, changes), saved);
   };
 
-  const clear = (field: keyof TaskFormErrors) => () => {
-    if (errors[field]) setErrors({ ...errors, [field]: undefined });
-  };
+  const { handleSubmit, itemProps, setValidationError } = useForm<TaskFormValues>({
+    initialValues: { name: "", description: task?.description ?? "", run: initialRun },
+    validation: {
+      name: (value) => (task ? undefined : validateTaskName(value?.trim() ?? "", taken)),
+      // An edit that leaves the run command as it was saves without re-splitting it.
+      run: (value) => {
+        if (!editsRun || (task && value === initialRun)) return undefined;
+        const run = splitCommand(value ?? "");
+        return "error" in run ? run.error : undefined;
+      },
+    },
+    onSubmit: (values) => (task ? edit(task, values) : create(values)),
+  });
 
   return (
     <Form
@@ -222,7 +223,7 @@ function TaskForm({
           <Action.SubmitForm
             title={task ? "Save Task" : "Create Task"}
             icon={task ? Icon.Check : Icon.Plus}
-            onSubmit={(values: TaskFormValues) => (task ? edit(task, values) : create(values))}
+            onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
@@ -231,32 +232,22 @@ function TaskForm({
         <Form.Description title="Name" text={task.name} />
       ) : (
         <Form.TextField
-          id="name"
           title="Name"
           placeholder="notes:sync"
           info="Group tasks with a colon, as in notes:sync"
-          error={errors.name}
-          onChange={clear("name")}
+          {...itemProps.name}
         />
       )}
-      <Form.TextField
-        id="description"
-        title="Description"
-        placeholder="Sync notes to the backup drive"
-        defaultValue={task?.description}
-      />
-      {task && runCount > 1 ? (
-        <Form.Description title="Run" text={`${runCount} commands; edit them in ${basename(task.source)}`} />
-      ) : (
+      <Form.TextField title="Description" placeholder="Sync notes to the backup drive" {...itemProps.description} />
+      {editsRun ? (
         <Form.TextField
-          id="run"
           title="Run"
           placeholder="brew upgrade"
           info="One command with its arguments. mise quotes each word, so for pipes, && or $VAR use sh -c '…'"
-          defaultValue={initialRun}
-          error={errors.run}
-          onChange={clear("run")}
+          {...itemProps.run}
         />
+      ) : (
+        <Form.Description title="Run" text={`${runCount} commands; edit them in ${basename(task?.source ?? "")}`} />
       )}
       {task && <Form.Description title="File" text={task.source} />}
     </Form>

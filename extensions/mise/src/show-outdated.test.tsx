@@ -251,4 +251,11 @@ describe("Show Outdated Tools mise update", () => {
     expect(updateItem(root)).toBeUndefined();
     expect(root.findByType(List.EmptyView).props.title).toBe("Couldn't load from mise");
   });
+  it("keeps the load error visible when the check fails over a list cached by the previous release", async () => {
+    vi.spyOn(version, "readVersion").mockResolvedValue({ version: "2026.10.15", latest: "2026.10.25" });
+    useCachedPromiseFixtures.fail(listOutdated, new Error("boom"), parseOutdated(outdatedFixture).tools);
+    const { root } = await render(<Command {...launch} />);
+    expect(updateItem(root)).toBeUndefined();
+    expect(root.findByType(List.EmptyView).props.title).toBe("Couldn't load from mise");
+  });
 });

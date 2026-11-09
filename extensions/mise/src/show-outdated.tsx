@@ -58,7 +58,7 @@ function OutdatedTools({ location, upgradeOnLaunch }: { location: MiseLocation; 
         )
       )}
       {/* Any item hides the EmptyView, which carries the load error and its Retry. */}
-      {!(outdated.error && !outdated.data) && <MiseUpdateListItem location={location} />}
+      {!(outdated.error && !data) && <MiseUpdateListItem location={location} />}
       {tools.map((tool) => (
         <ToolItem
           key={tool.name}

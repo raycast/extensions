@@ -90,7 +90,9 @@ describe("--global scope against the real mise", () => {
 
   it("listOutdated with the gated flag", async (ctx) => {
     if (!atLeast(loc().version, GLOBAL_FLAG_SINCE)) return ctx.skip(`mise is older than ${GLOBAL_FLAG_SINCE}`);
-    expect(Array.isArray(await listOutdated(loc(), { global: true }))).toBe(true);
+    const { tools, unchecked } = await listOutdated(loc(), { global: true });
+    expect(Array.isArray(tools)).toBe(true);
+    expect(Array.isArray(unchecked)).toBe(true);
   });
 });
 
@@ -208,15 +210,17 @@ describe("read paths parse the real mise output", () => {
 
   it("listTasks lists the global tasks without running any", async () => {
     const tasks = await listTasks(loc());
-    expect(tasks.map((t) => t.name)).toEqual(["dotfiles:apply", "dotfiles:status", "nvim:check", "nvim:sync"]);
-    expect(tasks.every((t) => t.source.endsWith("tasks.toml"))).toBe(true);
+    // The names are this machine's own global tasks; what matters is that each parses with a source.
+    expect(tasks.length).toBeGreaterThan(0);
+    expect(tasks.every((t) => t.source.endsWith(".toml") || t.file !== undefined)).toBe(true);
   });
 
   it("listConfigFiles", async () => {
     const files = await listConfigFiles(loc());
     expect(files.length).toBeGreaterThan(0);
     const globalDir = join(homedir(), ".config", "mise") + "/";
-    expect(files.every((f) => f.path.startsWith(globalDir))).toBe(true);
+    // From ~, mise also lists home-level files such as ~/.tool-versions, so only require the global dir.
+    expect(files.some((f) => f.path.startsWith(globalDir))).toBe(true);
   });
 });
 
