@@ -12,6 +12,7 @@ import {
   rmSync,
   statSync,
   unlinkSync,
+  utimesSync,
   writeFileSync,
 } from "node:fs";
 import { homedir, tmpdir } from "node:os";
@@ -162,8 +163,9 @@ const LEGACY_SHARE_FILES = ["forecast-share.png", "radar-share.gif"];
  * Receiving apps may cache a pasted attachment by its path or file name, so
  * reusing one name made a second paste show the first image. The name carries
  * a content hash, so an existing file with that name already holds the same
- * bytes and is left alone, which also avoids overwriting a file a receiving
- * app still has open (Windows locks those).
+ * bytes and is reused rather than overwritten, which also avoids touching a
+ * file a receiving app still has open (Windows locks those). Pruning orders
+ * shares by modification time, so a reused file is re-stamped as the latest.
  */
 function stageShareFile(source: string, fileName: string): string {
   mkdirSync(SHARE_DIR, { recursive: true });
@@ -172,7 +174,16 @@ function stageShareFile(source: string, fileName: string): string {
   const safe = safeFileName(fileName);
   const dot = safe.lastIndexOf(".");
   const target = join(SHARE_DIR, `${safe.slice(0, dot)}-${hash}${safe.slice(dot)}`);
-  if (!existsSync(target)) writeFileSync(target, bytes);
+  if (existsSync(target)) {
+    try {
+      const now = new Date();
+      utimesSync(target, now, now);
+    } catch {
+      // Locked elsewhere; it keeps its older timestamp.
+    }
+  } else {
+    writeFileSync(target, bytes);
+  }
   pruneShares(target);
   return target;
 }
