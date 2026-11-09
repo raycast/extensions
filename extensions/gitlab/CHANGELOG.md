@@ -1,5 +1,13 @@
 # GitLab Changelog
 
+## [Pinned projects and groups] - 2026-11-07
+
+- Pin projects in `Search Projects` with the `Pin Project` action; pinned projects are shown in a "Pinned" section at the top of the list
+- Add a "Pinned" scope to `Search Projects` that lists only pinned projects
+- Reorder pinned projects and groups with the `Move Up in Pinned` and `Move Down in Pinned` actions
+- Show pinned projects in a "Pinned" section of the project dropdown in merge request commands
+- Pin groups in `Search Groups` and `My Groups`; pinned groups are shown in a "Pinned" section at the top of the list
+
 ## [My Merge Requests scope fix] - 2026-10-04
 
 - Change the `My Merge Requests` command to list merge requests you created, matching its title and the menu bar

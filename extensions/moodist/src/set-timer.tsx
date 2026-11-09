@@ -26,7 +26,7 @@ export default function Command() {
       return;
     }
     try {
-      setTimer(minutes);
+      await setTimer(minutes);
       await showHUD(`Sleep timer set for ${formatMinutes(minutes)}`);
     } catch (e) {
       await showFailureToast(e, { title: "Could not set timer" });
@@ -47,7 +47,7 @@ export default function Command() {
               style={Action.Style.Destructive}
               shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
-                cancelTimer();
+                await cancelTimer();
                 await showHUD("Sleep timer cancelled");
               }}
             />

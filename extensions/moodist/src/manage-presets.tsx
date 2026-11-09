@@ -39,7 +39,10 @@ const STATUS_TAGS: Record<PresetStatus, List.Item.Accessory> = {
 };
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(async () => ({ presets: await getPresets(), mix: getMix() }));
+  const { data, isLoading, revalidate } = usePromise(async () => ({
+    presets: await getPresets(),
+    mix: await getMix(),
+  }));
   const { push } = useNavigation();
   const presets = data?.presets ?? [];
   const mixSize = data ? Object.keys(data.mix.sounds).length : 0;
@@ -63,7 +66,7 @@ export default function Command() {
       <PresetNameForm
         title="Save Preset"
         onSubmit={async (name) => {
-          await savePreset(name, getMix());
+          await savePreset(name, await getMix());
           await showToast({ style: Toast.Style.Success, title: `Saved "${name}"` });
           revalidate();
         }}
@@ -163,7 +166,9 @@ export default function Command() {
                             primaryAction: { title: "Overwrite", style: Alert.ActionStyle.Destructive },
                           })
                         ) {
-                          await run("Saving", `Updated "${preset.name}"`, () => overwritePreset(preset.id, getMix()));
+                          await run("Saving", `Updated "${preset.name}"`, async () =>
+                            overwritePreset(preset.id, await getMix()),
+                          );
                         }
                       }}
                     />

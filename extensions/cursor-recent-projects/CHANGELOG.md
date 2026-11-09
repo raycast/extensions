@@ -1,5 +1,9 @@
 # Cursor Changelog
 
+## [Fix Remote Project Icons] - 2026-11-09
+
+- Add the missing remote icon so SSH and other remote projects no longer show an empty placeholder
+
 ## [Fix Active Workspaces Across Spaces] - 2026-11-04
 
 - List Cursor windows across all macOS Spaces and switch to their Space when focusing a window

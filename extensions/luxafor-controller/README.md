@@ -1,98 +1,67 @@
 # Luxafor Controller
 
-Control your Luxafor LED device directly from Raycast with real-time status monitoring and quick color controls. Perfect for developers, streamers, or anyone who wants quick access to their Luxafor device controls.
+Change your Luxafor light from Raycast. Set a color, blink the light or switch it off, with quick controls in the menu bar.
 
-## Key Features
+[Install from the Raycast Store](https://www.raycast.com/smcnab1/luxafor-controller) · macOS
 
-* **Basic Controls**: Turn device on/off, set solid colors (red, green, blue, yellow, cyan, magenta, white)
-* **Blink Effects**: Make your device blink with any of the basic colors
-* **Connection Testing**: Test if your device is reachable and monitor health
-* **Menubar Status**: Real-time status indicator in your menubar showing current color and device status
-* **Global State Management**: Keeps menubar and main UI in sync with smart auto-refresh
+![Color controls and request history in Raycast](media/controller.jpg)
 
 ## Setup
 
-### Prerequisites
+You'll need a compatible Luxafor device and the Luxafor companion app running with **Webhook** mode enabled. The [Luxafor Webhook guide](https://luxafor.helpscoutdocs.com/article/25-webhook-api-basics-and-guidelines) lists supported devices and software.
 
-* Raycast installed on macOS
-* Luxafor device (Flag, Orb, Bluetooth Pro, etc.)
-* Luxafor software running with Webhook mode enabled
+1. Copy your **User ID** from the Luxafor app's **Webhook** tab.
+2. Open **Raycast Settings → Extensions → Luxafor Controller**.
+3. Enter **Luxafor User ID** and select **api.luxafor.com** as the API endpoint.
+4. Open **Control Luxafor** and choose a color or **Turn off**.
 
-### Quick Setup
-
-1. **Get your Luxafor User ID**:
-   - Open Luxafor software
-   - Go to the "Webhook" tab
-   - Copy your User ID
-
-2. **Configure the extension**:
-   - Open Raycast preferences
-   - Go to Extensions → Luxafor Controller
-   - Enter your User ID
-   - Choose your preferred API endpoint (US or UK)
-
-3. **Enable menubar status** (optional):
-   - The "Luxafor Status" command will appear in your menubar
-   - Shows current device color and status
-   - Provides quick access to common actions
+Keep the companion app running while using the extension. The older `api.luxafor.co.uk` option is retained, but its current operation is unverified; use the documented `.com` endpoint. Opening a command or refreshing history never changes the light.
 
 ## Commands
 
-### Control Luxafor
-Main interface for controlling your device with full color options and patterns.
+| Command          | What it does                                              |
+| ---------------- | --------------------------------------------------------- |
+| Control Luxafor  | Set a color, blink a color, turn off or view history.     |
+| Luxafor Menu Bar | Change colors and view request history from the menu bar. |
+| Set Busy         | Send solid red.                                           |
+| Set Available    | Send solid green.                                         |
+| Turn off         | Send custom `000000` to switch the light off.             |
+| Set Custom Color | Send a three- or six-digit hex color.                     |
 
-### Luxafor Status (Menubar)
-Shows real-time device status in your menubar:
-* **Color indicator**: Shows current device color with matching icon tint
-* **Online/offline status**: Real-time connection status
-* **Quick actions**: Turn off, set red/green/blue directly from menubar
-* **Customise**: Choose from a simple red/green toggle menu or a colorful menu
-* **Auto-refresh**: Updates every 30 seconds (won't overwrite recent user actions)
+Choose red, green, blue, yellow, cyan, magenta or white. In **Control Luxafor**, open Actions on a color to blink it. Blink duration and restoration are not controlled by the extension. **Menubar Layout** in extension settings offers Busy/Available actions or the full color menu.
 
-## Frequently Asked Questions
+Assign aliases or hotkeys to Busy, Available and Off in Raycast's command settings. No Raycast Pro subscription is needed.
 
-**Do I need the Luxafor software running?**
+## Custom and recent colors
 
-Yes. The extension uses the official Luxafor Webhook API, so the Luxafor app must be running with Webhook mode enabled.
+Enter `#RGB` or `#RRGGBB` in **Set Custom Color**; the `#` is optional. For example, `#3A7` expands to `33aa77`, and `#000` turns the light off. Invalid input sends nothing.
 
-**My device isn't responding.**
+The main view keeps your five most recent API-accepted solid colors. Select one to send it again. **Clear Recent Colors** clears that list without changing the light or request history. A saved color from the older release appears separately as **Previous saved choice · unverified**; **Forget Saved Choice** removes it locally.
 
-Check your User ID is correct (from Luxafor app → Webhook tab), ensure Luxafor software is running, and verify your device is connected and powered on. Try the "Test Connection" feature first.
+![Custom color form](media/custom-color.jpg)
 
-**The menubar isn't showing.**
+## Understanding history
 
-Make sure the "Luxafor Status" command is enabled in Raycast preferences. Restart Raycast if needed.
+The extension shows API request history, not live device status. **Request Accepted** means the API returned HTTP 200 and a JSON object without an explicit error indicator. It cannot confirm that the light changed.
 
-**Can I control the device without the menubar?**
+Previous accepted history is preserved when a request fails or delivery is uncertain. Requests time out after ten seconds and are never retried automatically. Overlapping commands are refused, not queued. Check the light before deliberately sending another command.
 
-Yes. The main "Control Luxafor" command provides full access to all features without needing the menubar integration.
+Use **View Request Details** for the full timestamp and recovery guidance, or **Refresh History** to reload the saved record. History older than five minutes is marked stale. An interrupted pending request has an unknown outcome. The menu reloads local history on Raycast's approximate one-minute schedule; this does not contact Luxafor.
 
-**How often does it update?**
-
-The menubar status updates every 30 seconds automatically, but won't interfere with recent user actions.
+![Request details and refresh shortcut](media/history-actions.jpg)
 
 ## Troubleshooting
 
-**Device not responding?**
-* Check your User ID is correct
-* Ensure Luxafor software is running
-* Verify your device is connected and powered on
-* Try the "Test Connection" feature
+If the light does not change, check the User ID, device connection and Webhook mode, then restart the companion app if needed. A successful API response alone does not confirm that the light changed.
 
-**API errors?**
-* Check your internet connection
-* Verify the API endpoint is correct
-* Ensure your User ID is valid
+**Send Red Test…** asks for confirmation. Cancel sends nothing; confirming sends red once and does not restore the previous color. Closing a command cannot undo a request already sent.
 
-**Still having issues?**
-* Check the Luxafor software logs
-* Verify your device supports webhook API
-* Try restarting Luxafor software
+For menu bar controls, enable **Luxafor Menu Bar** in Raycast's extension settings. See [setup and troubleshooting](SETUP.md) for more detail, or [report a bug or request a feature](https://github.com/smcnab1/luxafor-controller/issues). Keep your User ID out of issue reports and screenshots.
 
-## Supported Devices
+## Compatibility and privacy
 
-* Luxafor Flag (Tested to work)
-* Luxafor Colorblind Flag  
-* Luxafor Orb
-* Luxafor Bluetooth Pro
-* Luxafor Bluetooth
+This extension supports macOS. Device compatibility depends on the Luxafor companion software and Webhook support; real-device and upgrade checks for this update remain unverified.
+
+Your User ID is masked in preferences and sent only in the HTTPS request body to the selected Luxafor host. Redirects are refused. Raw request bodies, responses and errors are not logged or exported. No analytics or AI tools are included. Existing preference keys and the original storage record are retained; old online/offline flags are not treated as device telemetry.
+
+See the [changelog](CHANGELOG.md). [MIT licensed](LICENSE).
