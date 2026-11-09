@@ -741,6 +741,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "comunicate-eu",
+    title: "Comunicate.eu",
+    description:
+      "Plan and publish press releases, advertorials and SEO articles on 3,800+ news sites in Romania and other European markets. Without an account: search the catalog, compare prices per campaign type, read each publication's rules and build budget plans by niche, topic and city. With an account: read the balance, write and check drafts, prepare editorial plans and track publications. Orders stay off until the organization turns them on, and each order needs confirmation. 27 tools. Hosted remote Streamable HTTP server at https://app.comunicate.eu/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; catalog tools need no sign-in, account tools use OAuth 2.1 sign-in with dynamic client registration and PKCE.",
+    icon: "https://comunicate.eu/icoane/icon-512.png",
+    homepage: "https://comunicate.eu/en/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.comunicate.eu/mcp"],
+    },
+    remoteUrl: "https://app.comunicate.eu/mcp",
+  },
+  {
     name: "connectmachine",
     title: "ConnectMachine",
     description:
