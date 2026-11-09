@@ -246,9 +246,12 @@ final class ScannerController: NSObject, NSWindowDelegate {
     let output = AVCaptureVideoDataOutput()
     output.alwaysDiscardsLateVideoFrames = true
     output.setSampleBufferDelegate(reader, queue: reader.queue)
-    session.beginConfiguration()
-    if session.canAddOutput(output) { session.addOutput(output) }
-    session.commitConfiguration()
+    let session = session
+    sessionQueue.async {
+      session.beginConfiguration()
+      if session.canAddOutput(output) { session.addOutput(output) }
+      session.commitConfiguration()
+    }
 
     let center = NotificationCenter.default
     for name in [AVCaptureDevice.wasConnectedNotification, AVCaptureDevice.wasDisconnectedNotification] {
@@ -289,15 +292,18 @@ final class ScannerController: NSObject, NSWindowDelegate {
       return
     }
     let session = session
-    session.beginConfiguration()
-    session.inputs.forEach { session.removeInput($0) }
-    if session.canAddInput(input) { session.addInput(input) }
-    session.commitConfiguration()
+    // AVFoundation rejects startRunning() between begin/commitConfiguration, so both stay on one queue.
+    sessionQueue.async {
+      session.beginConfiguration()
+      session.inputs.forEach { session.removeInput($0) }
+      if session.canAddInput(input) { session.addInput(input) }
+      session.commitConfiguration()
+      if !session.isRunning { session.startRunning() }
+    }
     currentDevice = device
     if let index = devices.firstIndex(where: { $0.uniqueID == device.uniqueID }) {
       popup.selectItem(at: index)
     }
-    sessionQueue.async { if !session.isRunning { session.startRunning() } }
     // The preview connection exists only after the input is added; update again once it is live.
     updateRegion()
     for delay in [0.3, 1.0] {
@@ -337,11 +343,14 @@ final class ScannerController: NSObject, NSWindowDelegate {
       checkAccessibility()
       return
     }
+    // Reads pause while a code types, so a long code seen every frame cannot queue up and type later.
+    typing = true
     guard once else {
-      Typing.type(text, suffix: options.suffix, stop: stopFlag)
+      Typing.type(text, suffix: options.suffix, stop: stopFlag) { [weak self] _ in
+        onMainRunLoop { MainActor.assumeIsolated { self?.typing = false } }
+      }
       return
     }
-    typing = true  // one code per run
     Typing.type(text, suffix: options.suffix, stop: stopFlag) { [weak self] complete in
       onMainRunLoop {
         MainActor.assumeIsolated {
