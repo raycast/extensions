@@ -10,7 +10,7 @@
 - The extension installs Proton Pass CLI 2.5.1 instead of 2.3.3, which brings folders, proxy fixes and network updates. The copy of the previous version is deleted once the new one is installed
 - The README no longer suggests `pass-cli login --interactive`: pass-cli 2.5.0 removed logging in with a password in the terminal, leaving the browser login and personal access tokens
 
-## [Shared with Me, Sorting and TOTP] - {PR_MERGE_DATE}
+## [Shared with Me, Sorting and TOTP] - 2026-11-09
 
 - Items shared with you one by one show in Browse Items, under Shared with Me in the vault list and the vault menu, as in Proton Pass. They were missing, since they're in none of your vaults. They're also in All Vaults, the search and Get TOTP Code, and one that's also in one of your vaults shows once, with that vault
 - After half an hour unused, pass-cli first catches up with your account's changes, which can take several seconds. Items opened meanwhile, e.g. to fill a login, waited as long again, since each pass-cli command did it too. They now wait for the session check, which does it once

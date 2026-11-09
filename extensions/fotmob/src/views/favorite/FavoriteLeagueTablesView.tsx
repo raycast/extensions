@@ -1,12 +1,33 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import type { DisplayableTable } from "@/types/league-detail";
 import { useFavorite } from "@/hooks/useFavorite";
 import { useLeagueDetail } from "@/hooks/useLeagueDetail";
+import { extractDisplayableTables } from "@/utils/league-table";
 import { buildLeagueDetailUrl, buildLeagueLogoUrl, buildTeamDetailUrl, buildTeamLogoUrl } from "@/utils/url-builder";
+import LeagueSearchView from "@/views/search/LeagueSearchView";
 
-function LeagueTableSection({ league }: { league: { id: string; name: string; countryCode: string } }) {
+type FavoriteService = ReturnType<typeof useFavorite>;
+
+function SearchLeaguesAction({ onPop }: { onPop: () => void }) {
+  return (
+    <Action.Push
+      icon={Icon.MagnifyingGlass}
+      title="Search Leagues"
+      target={<LeagueSearchView />}
+      onPop={onPop}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
+    />
+  );
+}
+
+function LeagueTableSection({
+  league,
+  favoriteService,
+}: {
+  league: { id: string; name: string; countryCode: string };
+  favoriteService: FavoriteService;
+}) {
   const { data, error, isLoading } = useLeagueDetail(league.id);
-  const favoriteService = useFavorite();
+  const searchAction = <SearchLeaguesAction onPop={favoriteService.reloadData} />;
 
   if (isLoading) {
     return (
@@ -39,6 +60,7 @@ function LeagueTableSection({ league }: { league: { id: string; name: string; co
               }}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
+            {searchAction}
           </ActionPanel>
         }
       />
@@ -46,23 +68,7 @@ function LeagueTableSection({ league }: { league: { id: string; name: string; co
   }
 
   // Extract table data
-  let displayableTables: DisplayableTable[] = [];
-
-  if (data.overview?.table) {
-    displayableTables = data.overview.table.tables.map((table) => ({
-      tableName: table.tableName || "League Table",
-      teams: table.tableRows,
-      legend: data.overview?.table.legend,
-    }));
-  } else if (data.table && data.table.length > 0) {
-    displayableTables = data.table.flatMap((leagueTable) =>
-      leagueTable.tables.map((table) => ({
-        tableName: table.tableName || "League Table",
-        teams: table.tableRows,
-        legend: leagueTable.legend,
-      })),
-    );
-  }
+  const displayableTables = extractDisplayableTables(data);
 
   if (displayableTables.length === 0) {
     return (
@@ -85,6 +91,7 @@ function LeagueTableSection({ league }: { league: { id: string; name: string; co
               }}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
+            {searchAction}
           </ActionPanel>
         }
       />
@@ -153,6 +160,7 @@ function LeagueTableSection({ league }: { league: { id: string; name: string; co
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
+                {searchAction}
               </ActionPanel>
             }
           />
@@ -174,16 +182,7 @@ export default function FavoriteLeagueTablesView() {
           description="Add some leagues to your favorites to see their tables here."
           actions={
             <ActionPanel>
-              <Action
-                icon={Icon.MagnifyingGlass}
-                title="Search Leagues"
-                onAction={() => {
-                  showToast({
-                    style: Toast.Style.Animated,
-                    title: "Use the search command to find and add leagues to favorites",
-                  });
-                }}
-              />
+              <SearchLeaguesAction onPop={favoriteService.reloadData} />
             </ActionPanel>
           }
         />
@@ -199,7 +198,7 @@ export default function FavoriteLeagueTablesView() {
     >
       {favoriteService.leagues.map((league) => (
         <List.Section title={league.name} key={league.id}>
-          <LeagueTableSection league={league} />
+          <LeagueTableSection league={league} favoriteService={favoriteService} />
         </List.Section>
       ))}
     </List>

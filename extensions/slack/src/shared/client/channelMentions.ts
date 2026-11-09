@@ -5,6 +5,8 @@ import type { SlackConversation } from "./slackTypes";
 
 const MAX_MENTIONS = 50;
 const MAX_DESCRIPTION_LENGTH = 120;
+/** A query that matches nothing in a directory snapshot older than this rescans, so new channels are still found. */
+export const CHANNEL_MISS_RESCAN_AFTER_MS = 60 * 1000;
 
 type MentionChannel = {
   id: string;
@@ -15,13 +17,14 @@ type MentionChannel = {
   description: string;
 };
 
-type LoadConversationsPage = (cursor?: string) => Promise<CursorPage<SlackConversation>>;
+/** `savedAt` is set when the page came from a cached directory snapshot saved at that time. */
+type ConversationsPage = CursorPage<SlackConversation> & { savedAt?: number };
 
 type ChannelMentionSources = {
   /** Channels the signed-in user belongs to, used for the default list. */
-  loadMemberChannelsPage: LoadConversationsPage;
-  /** Every channel visible to the signed-in user, used when they type a query. */
-  loadChannelsPage: LoadConversationsPage;
+  loadMemberChannelsPage: (cursor?: string) => Promise<ConversationsPage>;
+  /** Every channel visible to the signed-in user, used when they type a query. `maxAgeMs` asks for a newer scan. */
+  loadChannelsPage: (cursor?: string, options?: { maxAgeMs?: number }) => Promise<ConversationsPage>;
 };
 
 function compactText(value: string | undefined): string {
@@ -82,15 +85,40 @@ export async function searchChannelMentions(query: string, sources: ChannelMenti
     return toChannelMentions(channels.sort(compareChannels));
   }
 
-  const channels = await collectPaginatedResults({
-    loadPage: sources.loadChannelsPage,
-    transform: toMentionChannel,
-    matches: (channel) => matchesAllWords([channel.name], normalizedQuery),
-    maxResults: MAX_MENTIONS,
-    scanAllPages: true,
-    prioritize: (channel) => channel.isMember,
-    signal,
-  });
+  const searchDirectory = async (options?: { maxAgeMs?: number }) => {
+    let savedAt: number | undefined;
+    const channels = await collectPaginatedResults({
+      loadPage: async (cursor?: string) => {
+        const page = await sources.loadChannelsPage(cursor, options);
+        savedAt ??= page.savedAt;
+        return page;
+      },
+      transform: toMentionChannel,
+      matches: (channel) => matchesAllWords([channel.name], normalizedQuery),
+      maxResults: MAX_MENTIONS,
+      scanAllPages: true,
+      prioritize: (channel) => channel.isMember,
+      signal,
+    });
+    return { channels, savedAt };
+  };
+
+  const cached = await searchDirectory();
+  let channels = cached.channels;
+  // The directory snapshot can be up to an hour old. Rather than miss a channel created since, a query with no match
+  // rescans once the snapshot is a minute old; the scan is shared, so later keystrokes join it instead of starting more.
+  if (
+    channels.length === 0 &&
+    cached.savedAt !== undefined &&
+    Date.now() - cached.savedAt >= CHANNEL_MISS_RESCAN_AFTER_MS
+  ) {
+    try {
+      channels = (await searchDirectory({ maxAgeMs: CHANNEL_MISS_RESCAN_AFTER_MS })).channels;
+    } catch (error) {
+      // The snapshot already answered; a failed rescan leaves that answer instead of failing the search.
+      if (signal?.aborted) throw error;
+    }
+  }
   return toChannelMentions(channels.sort(compareChannels));
 }
 

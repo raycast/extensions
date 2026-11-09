@@ -1,16 +1,17 @@
 import { checkSchedule } from "../status";
-import { isCaffeinateRunning, deviceName } from "../utils";
+import { getCaffeinationState, deviceName } from "../utils";
 
-/**
- * Checks if your computer is currently prevented from sleeping
- */
+/** Reports Coffee's session and any detected external caffeinate processes. */
 export default async function () {
-  const isCaffeinated = await isCaffeinateRunning();
-  const isScheduled = await checkSchedule();
-
-  if (isCaffeinated || isScheduled) {
-    return `Your ${deviceName()} is currently caffeinated (sleep is prevented)`;
-  } else {
-    return `Your ${deviceName()} is not caffeinated (normal sleep settings apply)`;
+  await checkSchedule();
+  const state = await getCaffeinationState();
+  const externalSummary = `${state.externalCount} ${state.externalCount === 1 ? "process" : "processes"}`;
+  if (state.isManaged) {
+    const external = state.externalCount ? `; external caffeination is also active (${externalSummary})` : "";
+    return `Coffee is currently keeping your ${deviceName()} awake${external}`;
   }
+  if (state.externalCount) {
+    return `Coffee is inactive; external caffeination is active (${externalSummary})`;
+  }
+  return `Coffee is inactive; ${state.externalCount === null ? "external sleep prevention is not monitored on Windows" : "no caffeinate processes were detected"}`;
 }

@@ -8,10 +8,18 @@ const FILTER = /^!?(ext|type|kind|in|size|mtime|modified|re|path|limit):\S/;
  */
 export function splitContentQuery(text: string): { pattern: string; q: string } {
   // Words and the whitespace between them, alternating; nothing is collapsed.
-  const parts = text.split(/(\s+)/);
+  const parts = text.trim().split(/(\s+)/);
   const q: string[] = [];
-  for (let i = 0; i < parts.length; i++) {
-    if (!FILTER.test(parts[i])) continue;
+  let beforePattern = true;
+  for (let i = 0; i < parts.length; i += 2) {
+    // After optional leading filters, `--` makes the rest of the input the pattern.
+    if (beforePattern && parts[i] === "--" && i + 2 < parts.length) {
+      return { pattern: parts.slice(i + 2).join(""), q: q.join(" ") };
+    }
+    if (!FILTER.test(parts[i])) {
+      beforePattern = false;
+      continue;
+    }
     q.push(parts[i]);
     // Drop the filter and the whitespace after it, so `foo ext:rs bar` leaves `foo bar`.
     parts[i] = "";

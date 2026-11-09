@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getCurrentExplorerPath } from "./utils/win-scripts";
 import { isIncorrectPortableConfig, wtPath } from "./utils/constants";
+import { getWindowsTerminalEnv } from "./utils/terminal-env";
 import { showFailureToast } from "@raycast/utils";
 
 function resolveDirectory(selectedPath: string): string {
@@ -21,7 +22,7 @@ function resolveDirectory(selectedPath: string): string {
 function launchTerminal(directory: string, quake: boolean): Promise<void> {
   const args = quake ? ["-w", "_quake", "new-tab", "-d", directory] : ["-d", directory];
   return new Promise((resolve, reject) => {
-    execFile(wtPath, args, (error) => {
+    execFile(wtPath, args, { env: getWindowsTerminalEnv() }, (error) => {
       if (error) {
         reject(error);
       } else {

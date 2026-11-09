@@ -2,8 +2,7 @@ import { Action, ActionPanel, BrowserExtension, Icon, List, showToast, Toast, ge
 import { useEffect, useState } from "react";
 import { loadRules, saveRules, getDefaultBrowser } from "./storage";
 import { Rule } from "./types";
-import { expandTilde } from "./utils/path";
-import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
+import { syncConfigFile } from "./utils/finicky";
 
 interface Tab {
   id: number;
@@ -52,12 +51,6 @@ function generatePattern(url: string): string {
   } catch {
     return "";
   }
-}
-
-async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
-  const configPath = expandTilde(args.configPath);
-  const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules: args.rules });
-  await writeConfigFile({ configPath, configContents: contents });
 }
 
 export default function Command() {
@@ -110,11 +103,16 @@ export default function Command() {
     try {
       const existingRules = await loadRules();
       const updatedRules = [...existingRules, rule];
-      await saveRules(updatedRules);
 
       if (configPath) {
-        await syncConfigFile({ configPath, defaultBrowser, rules: updatedRules });
+        await syncConfigFile({
+          configPath,
+          defaultBrowser,
+          rules: updatedRules,
+          previousRuleCount: existingRules.length,
+        });
       }
+      await saveRules(updatedRules);
 
       await showToast({
         style: Toast.Style.Success,

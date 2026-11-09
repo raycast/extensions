@@ -1,5 +1,26 @@
 # Dia Changelog
 
+## [Search Extensions Command] - 2026-11-07
+
+- Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.
+- Open Extension switches the front window to the extension's profile and picks the extension from Dia's Extensions menu, which opens it like its toolbar button. Requires Accessibility access for Raycast.
+- When the Extensions menu has no item for the extension, its popup (or, without one, its settings page) opens in a new tab instead.
+- Added actions to open an extension's popup or settings page in a new tab and to copy its ID, and a profile filter (⌘P) that marks the active profile. Built-in extensions are hidden unless enabled in the command preferences.
+
+## [Search Tabs Across Spaces] - 2026-11-07
+
+- Search Tabs now lists tabs from every Dia space, not only the space active in each window.
+- With more than one space, tabs are grouped by space in Dia's order. Each section shows the space's tab count and which space is active, and every tab shows its space in the space's Dia color, as a name or a dot (new "Space Label" preference, default name).
+- A dropdown (⌘P) filters by space, showing each space's color and marking the active space. The last choice is remembered.
+- Added "Switch to Space" actions (⌘K) that switch the tab's Dia window to another space.
+- Focus and Close find tabs in any space; focusing a tab from another space switches its window to that space.
+- Tabs load faster: tab fetching now uses the bulk AppleScript path first.
+- Focusing a tab that was already closed now shows an error instead of failing silently.
+
+## [Update Icon] - 2026-11-07
+
+- Updated the extension icon to match the current Dia app icon, with a dark mode variant.
+
 ## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
 
 - Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.

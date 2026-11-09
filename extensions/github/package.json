@@ -49,7 +49,9 @@
     "0xdhrv",
     "ernest0n",
     "raycast_0ukl",
-    "olafvanmidden"
+    "olafvanmidden",
+    "Berenger",
+    "Robot-Inventor"
   ],
   "pastContributors": [
     "Lemon",
@@ -210,6 +212,13 @@
       "title": "Create Release",
       "description": "Create a release in one of your GitHub repositories.",
       "mode": "view"
+    },
+    {
+      "name": "create-repository",
+      "title": "Create Repository",
+      "description": "Create a repository on your GitHub account or in one of your organizations",
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "search-repositories",
@@ -734,6 +743,11 @@
       "name": "get-pull-request-diff",
       "title": "Get Pull Request Diff",
       "description": "Get the files changed in a pull request along with their patches"
+    },
+    {
+      "name": "create-repository",
+      "title": "Create Repository",
+      "description": "Create a repository on the user's account or in one of their organizations"
     }
   ],
   "ai": {
@@ -745,6 +759,37 @@
     ],
     "instructions": "- Always format pull requests and issues as markdown links: [pull-request-title](https://github.com/:org/:repo/pull/:number) and [issue-title](https://github.com/:org/:repo/issues/:number).\\n- IMPORTANT: Use repo name from user input ONLY when it is in format `owner/repo`. Otherwise always search for repos using `search-repositories` tool as a first step and use the best match. When user ask for any action with issue, always use `search-issues` to get the actual `issueId`. When user ask for any action with pull request, always use `search-pull-requests` to get the actual `pullRequestId`",
     "evals": [
+      {
+        "input": "@github create a repository called raycast-playground",
+        "mocks": {
+          "create-repository": {
+            "fullName": "octocat/raycast-playground",
+            "url": "https://github.com/octocat/raycast-playground",
+            "cloneUrl": "https://github.com/octocat/raycast-playground.git",
+            "private": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-repository",
+              "arguments": {
+                "name": "raycast-playground"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": {
+                "name": "create-repository",
+                "arguments": {
+                  "private": false
+                }
+              }
+            }
+          }
+        ]
+      },
       {
         "input": "@github what's in my inbox?",
         "mocks": {

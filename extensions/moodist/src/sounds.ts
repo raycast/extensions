@@ -1,4 +1,3 @@
-// Generated from https://github.com/remvze/moodist (src/data/sounds)
 export type Sound = { id: string; label: string; path: string };
 export type Category = { id: string; title: string; sounds: Sound[] };
 

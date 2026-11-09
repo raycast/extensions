@@ -52,6 +52,10 @@ export function getHeliumPathPreference(): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+export function getUserDataPathPreference(): string | undefined {
+  return getPreferenceValues<Preferences>().userDataPath?.trim() || undefined;
+}
+
 /**
  * Install roots in probe order: the per-user locations the default installer
  * uses first, then the machine-wide ones.
@@ -149,6 +153,7 @@ export function parseStartMenuInternetCommands(registryOutput: string): string[]
 
 interface WindowsPathOptions {
   override?: string;
+  userDataPath?: string;
   env?: NodeJS.ProcessEnv;
   /** Injectable so tests never probe the real user's home directory. */
   home?: string;
@@ -235,6 +240,15 @@ export function getHeliumAppTarget(): string | undefined {
  * cannot simply be derived from the executable — candidates are probed in turn.
  */
 export function getWindowsUserDataPath(options: WindowsPathOptions = {}): string | undefined {
+  const override = "userDataPath" in options ? options.userDataPath?.trim() : getUserDataPathPreference();
+  if (override) {
+    try {
+      if (statSync(override).isDirectory()) return override;
+    } catch {
+      // Report a configured path failure instead of silently using a different profile.
+    }
+    throw new Error("The User Data Directory preference must point to an existing Helium User Data folder.");
+  }
   const env = options.env ?? process.env;
   const executable =
     "override" in options || options.env ? findHeliumExecutable(options) : findHeliumExecutableCached();
