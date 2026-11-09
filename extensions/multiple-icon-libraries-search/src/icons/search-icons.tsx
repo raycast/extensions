@@ -1,8 +1,10 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
   Color,
+  confirmAlert,
   Detail,
   environment,
   Form,
@@ -16,7 +18,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -35,6 +37,7 @@ import {
   otherLibraries,
   searchPlaceholder,
 } from "./libraries";
+import { autoAiReady } from "./ai";
 import { aiRank, keywordSearch, normalizePhrase } from "./search";
 import {
   ALL,
@@ -81,12 +84,13 @@ interface ItemHandlers {
   nameFormat: NameFormat;
   withLibraryName: boolean;
   strokeWidth?: string;
-  /** Records the use; returns the notice when an AI pick's words were saved. */
-  onUse: (icon: IconEntry, fromAi: boolean) => string | undefined;
+  /** Records the use; resolves to the notice when an AI pick's words were saved. */
+  onUse: (icon: IconEntry, fromAi: boolean) => Promise<string | undefined>;
   /** Returns whether the change was saved. */
   onToggleFavorite: (icon: IconEntry) => boolean;
-  onSetKeywords: (icon: IconEntry, text: string) => void;
-  onForgetKeywords: (icon: IconEntry) => void;
+  /** Resolve once saved; reject when saving failed, and then nothing changed. */
+  onSetKeywords: (icon: IconEntry, text: string) => Promise<void>;
+  onForgetKeywords: (icon: IconEntry) => Promise<void>;
   onSwitchLibrary: (library: LibraryId) => void;
   onSwitchLayout: () => void;
   onRefresh: () => void;
@@ -141,13 +145,13 @@ function copySvg(icon: IconEntry, handlers: ItemHandlers): string {
 /** The five main actions, in the Enter Action setting's order. */
 function mainActions(icon: IconEntry, handlers: ItemHandlers, fromAi: boolean): Record<MainAction, ReactNode> {
   const name = iconName(handlers.library, icon, handlers.nameFormat, handlers.withLibraryName);
-  const hud = (done?: string) => {
-    const text = hudText(done, handlers.onUse(icon, fromAi));
-    if (text) void showHUD(text);
+  const hud = async (done?: string) => {
+    const text = hudText(done, await handlers.onUse(icon, fromAi));
+    if (text) await showHUD(text);
   };
   const copy = async (content: string, done: string) => {
     await Clipboard.copy(content);
-    hud(done);
+    await hud(done);
   };
   return {
     "paste-name": <Action.Paste key="paste-name" title="Paste Name" content={name} onPaste={() => hud()} />,
@@ -155,13 +159,11 @@ function mainActions(icon: IconEntry, handlers: ItemHandlers, fromAi: boolean): 
       <Action key="copy-name" title="Copy Name" icon={Icon.Clipboard} onAction={() => copy(name, "Copied name")} />
     ),
     "paste-svg": (
-      // eslint-disable-next-line @raycast/prefer-title-case -- "SVG" is a format name.
       <Action.Paste key="paste-svg" title="Paste SVG" content={copySvg(icon, handlers)} onPaste={() => hud()} />
     ),
     "copy-svg": (
       <Action
         key="copy-svg"
-        // eslint-disable-next-line @raycast/prefer-title-case -- "SVG" is a format name.
         title="Copy SVG"
         icon={Icon.CodeBlock}
         onAction={() => copy(copySvg(icon, handlers), "Copied SVG")}
@@ -209,7 +211,7 @@ function IconActions({
           <Action.Push
             title="Show Preview"
             icon={Icon.Eye}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
             target={<IconPreview icon={icon} section={section} handlers={handlers} />}
           />
         )}
@@ -225,14 +227,13 @@ function IconActions({
       <ActionPanel.Section>
         {rest}
         <Action
-          // eslint-disable-next-line @raycast/prefer-title-case -- "SVG" is a format name.
           title="Save SVG to Downloads"
           icon={Icon.Download}
           onAction={async () => {
             const downloads = join(homedir(), "Downloads");
             const file = freeFileName(icon.name, (name) => existsSync(join(downloads, name)));
             writeFileSync(join(downloads, file), copySvg(icon, handlers));
-            const text = hudText(`Saved ${file} to Downloads`, handlers.onUse(icon, fromAi));
+            const text = hudText(`Saved ${file} to Downloads`, await handlers.onUse(icon, fromAi));
             if (text) await showHUD(text);
           }}
         />
@@ -253,7 +254,24 @@ function IconActions({
           target={<KeywordsForm icon={icon} saved={saved} onSave={(text) => handlers.onSetKeywords(icon, text)} />}
         />
         {saved.length > 0 && (
-          <Action title="Forget Keywords" icon={Icon.XMarkCircle} onAction={() => handlers.onForgetKeywords(icon)} />
+          <Action
+            title="Forget Keywords"
+            icon={Icon.XMarkCircle}
+            style={Action.Style.Destructive}
+            onAction={async () => {
+              const confirmed = await confirmAlert({
+                title: `Forget keywords for ${icon.name}?`,
+                message: "Your saved words will stop finding this icon. You can't undo this.",
+                primaryAction: { title: "Forget Keywords", style: Alert.ActionStyle.Destructive },
+              });
+              if (!confirmed) return;
+              try {
+                await handlers.onForgetKeywords(icon);
+              } catch (error) {
+                await showFailureToast(error, { title: "Couldn't forget keywords" });
+              }
+            }}
+          />
         )}
         {!inPreview && <LibraryActions handlers={handlers} />}
       </ActionPanel.Section>
@@ -320,12 +338,12 @@ function IconPreview({
       if (saved) setFavorite(!favorite);
       return saved;
     },
-    onSetKeywords: (target, text) => {
-      opened.onSetKeywords(target, text);
+    onSetKeywords: async (target, text) => {
+      await opened.onSetKeywords(target, text);
       setSaved(setSavedKeywords({}, target.name, text)[target.name] ?? []);
     },
-    onForgetKeywords: (target) => {
-      opened.onForgetKeywords(target);
+    onForgetKeywords: async (target) => {
+      await opened.onForgetKeywords(target);
       setSaved([]);
     },
   };
@@ -371,7 +389,15 @@ function IconPreview({
 }
 
 /** Your own words for an icon, one per line. They find it the way AI picks do, without AI. */
-function KeywordsForm({ icon, saved, onSave }: { icon: IconEntry; saved: string[]; onSave: (text: string) => void }) {
+function KeywordsForm({
+  icon,
+  saved,
+  onSave,
+}: {
+  icon: IconEntry;
+  saved: string[];
+  onSave: (text: string) => Promise<void>;
+}) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -381,9 +407,14 @@ function KeywordsForm({ icon, saved, onSave }: { icon: IconEntry; saved: string[
           <Action.SubmitForm
             title="Save Keywords"
             icon={Icon.Check}
-            onSubmit={({ keywords }: { keywords: string }) => {
-              onSave(keywords);
-              pop();
+            onSubmit={async ({ keywords }: { keywords: string }) => {
+              // The form stays open with what was typed when saving fails.
+              try {
+                await onSave(keywords);
+                pop();
+              } catch (error) {
+                await showFailureToast(error, { title: "Couldn't save keywords" });
+              }
             }}
           />
         </ActionPanel>
@@ -393,6 +424,7 @@ function KeywordsForm({ icon, saved, onSave }: { icon: IconEntry; saved: string[
         id="keywords"
         title="Keywords"
         info="One per line. Each one finds this icon."
+        placeholder="happy face"
         defaultValue={saved.join("\n")}
       />
     </Form>
@@ -470,7 +502,7 @@ function SearchIcons({ libraries }: { libraries: LibraryId[] }) {
   const { canUseAi, ai, aiPending, requestNow } = useAiKeywords(
     searchText,
     results.length,
-    prefs.autoAi,
+    autoAiReady(prefs.autoAi, Boolean(catalog), memory.loaded),
     prefs.aiModel,
   );
   const aiResults = useMemo(() => (ai?.status === "done" ? aiRank(filtered, ai.keywords) : undefined), [ai, filtered]);
@@ -566,13 +598,17 @@ function SearchIcons({ libraries }: { libraries: LibraryId[] }) {
       nameFormat: prefs.nameFormat,
       withLibraryName: prefs.includeLibraryName,
       strokeWidth: LIBRARIES[library].filled ? undefined : strokeOverride(prefs.strokeWidth),
-      onUse: (icon, fromAi) => {
-        memory.setUses(recordUse(memory.uses, icon.name, Date.now()));
+      onUse: async (icon, fromAi) => {
+        // Best effort: use counts only order Frequently Used, so a failed save isn't worth interrupting a copy.
+        void memory.updateUses((uses) => recordUse(uses, icon.name, Date.now())).catch(() => undefined);
         if (!fromAi || !saveAiKeywords) return undefined;
-        const next = addSavedKeyword(memory.saved, icon.name, searchText);
-        if (next === memory.saved) return undefined;
-        memory.setSaved(next);
-        return savedNotice(normalizePhrase(searchText), icon.name);
+        try {
+          const added = await memory.updateSaved((saved) => addSavedKeyword(saved, icon.name, searchText));
+          return added ? savedNotice(normalizePhrase(searchText), icon.name) : undefined;
+        } catch (error) {
+          await showFailureToast(error, { title: "Couldn't save keywords" });
+          return undefined;
+        }
       },
       onToggleFavorite: (icon) => {
         const next = memory.updateFavorites((favorites) => toggleFavorite(favorites, icon.name));
@@ -586,11 +622,13 @@ function SearchIcons({ libraries }: { libraries: LibraryId[] }) {
         });
         return true;
       },
-      onSetKeywords: (icon, text) => {
-        memory.setSaved(setSavedKeywords(memory.saved, icon.name, text));
-        void showToast({ style: Toast.Style.Success, title: "Keywords saved" });
+      onSetKeywords: async (icon, text) => {
+        await memory.updateSaved((saved) => setSavedKeywords(saved, icon.name, text));
+        await showToast({ style: Toast.Style.Success, title: "Keywords saved" });
       },
-      onForgetKeywords: (icon) => memory.setSaved(forgetSavedKeywords(memory.saved, icon.name)),
+      onForgetKeywords: async (icon) => {
+        await memory.updateSaved((saved) => forgetSavedKeywords(saved, icon.name));
+      },
       onSwitchLibrary: (next) => {
         setFilter(ALL);
         setLibrary(next);

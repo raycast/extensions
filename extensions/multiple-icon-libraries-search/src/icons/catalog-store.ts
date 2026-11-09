@@ -82,10 +82,15 @@ export function readCopySvg(root: string, library: LibraryId, icon: IconEntry): 
   return tileToCopy(readFileSync(tilePath(root, library, icon), "utf8"), icon.viewBox);
 }
 
-function removeOtherDrawings(dir: string, keep: string): void {
+function removeOtherDrawings(dir: string, keep: (string | undefined)[]): void {
   for (const entry of readdirSync(dir)) {
-    if (entry.startsWith("svg-") && entry !== keep) rmSync(join(dir, entry), { recursive: true, force: true });
+    if (entry.startsWith("svg-") && !keep.includes(entry)) rmSync(join(dir, entry), { recursive: true, force: true });
   }
+}
+
+/** The folder a catalog's drawings are in. */
+function drawingsFolder(catalog: Catalog | undefined): string | undefined {
+  return catalog?.icons[0]?.file.split("/")[0];
 }
 
 const HUGEICONS_INDEX = "package/dist/esm/index.js";
@@ -257,7 +262,10 @@ async function refreshLucide(dir: string, fetcher: Fetcher, now: number, previou
   };
 }
 
-/** Downloads a fresh catalog, saves it, and clears out older drawings. The previous one stays until this succeeds. */
+/**
+ * Downloads a fresh catalog, saves it, and clears out drawings older than the previous catalog's. The previous
+ * catalog stays until this succeeds.
+ */
 export async function refreshCatalog(
   root: string,
   library: LibraryId,
@@ -275,7 +283,8 @@ export async function refreshCatalog(
         ? await refreshLucide(dir, fetcher, now, previous)
         : await extraLibrary(library).refresh(dir, fetcher, now, sources.extra ?? {});
   writeJsonAtomic(join(dir, CATALOG_FILE), catalog);
-  removeOtherDrawings(dir, catalog.icons[0].file.split("/")[0]);
+  // The previous drawings stay until the next refresh, since a view opened before this one may still copy from them.
+  removeOtherDrawings(dir, [drawingsFolder(catalog), drawingsFolder(previous)]);
   return catalog;
 }
 

@@ -1,4 +1,5 @@
 import { AI, Cache, environment, LocalStorage, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { existsSync } from "node:fs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -14,11 +15,13 @@ import {
   pruneCallTimes,
   shouldAskAi,
   withinRateLimit,
+  withoutLoading,
 } from "./ai";
 import { askAi } from "./ai-call";
 import { startRefresh } from "./catalog-loader";
 import { isStale, readCatalog } from "./catalog-store";
 import { LIBRARY_IDS } from "./libraries";
+import { SavedStore } from "./memory-store";
 import { adoptPins, PinsFile, pinsPath, readPins, updatePins as updatePinsFile, watchPins } from "./pins-file";
 import { normalizePhrase, prepareSearch, SavedKeywords, SearchItem } from "./search";
 import { Uses } from "./stores";
@@ -97,8 +100,12 @@ export interface LibraryMemory {
    * the new favorites, or undefined when saving failed (a toast says so).
    */
   updateFavorites: (update: (favorites: string[]) => string[]) => string[] | undefined;
-  setUses: (uses: Uses) => void;
-  setSaved: (saved: SavedKeywords) => void;
+  /**
+   * Saves a change to the use counts or saved keywords, applied to the newest value. Resolves once saved,
+   * to whether anything changed; rejects when saving failed, and then nothing changes.
+   */
+  updateUses: (update: (uses: Uses) => Uses) => Promise<boolean>;
+  updateSaved: (update: (saved: SavedKeywords) => SavedKeywords) => Promise<boolean>;
 }
 
 async function readJson<T>(key: string, fallback: T): Promise<T> {
@@ -139,69 +146,74 @@ async function loadPins(path: string, library: LibraryId): Promise<string[]> {
   return readPins(path, library);
 }
 
+interface Stored {
+  uses: Uses;
+  saved: SavedKeywords;
+}
+
+/** The LocalStorage key prefix for each stored value. */
+const STORAGE_KEYS: Record<keyof Stored, string> = { uses: "uses", saved: "keywords" };
+
 /** Favorites (in the pins file), use counts, and saved AI keywords (in LocalStorage), per library. */
 export function useLibraryMemory(library: LibraryId): LibraryMemory {
-  const [state, setState] = useState<{ library?: LibraryId; pins: string[]; uses: Uses; saved: SavedKeywords }>({
-    pins: [],
-    uses: {},
-    saved: {},
-  });
+  const [pins, setPins] = useState<{ library?: LibraryId; names: string[] }>({ names: [] });
+  const [stored, setStored] = useState<{ library?: LibraryId; value: Stored }>({ value: { uses: {}, saved: {} } });
   const path = pinsPath(environment.supportPath);
+  // One store per library: every update, from any view, goes through it in turn.
+  const store = useMemo(
+    () =>
+      new SavedStore<Stored>(
+        { uses: {}, saved: {} },
+        (field, value) => LocalStorage.setItem(`${STORAGE_KEYS[field]}:${library}`, JSON.stringify(value)),
+        (value) => setStored({ library, value }),
+      ),
+    [library],
+  );
 
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([
-      loadPins(path, library),
-      readJson<Uses>(`uses:${library}`, {}),
-      readJson<SavedKeywords>(`keywords:${library}`, {}),
-    ]).then(([pins, uses, saved]) => {
-      if (!cancelled) setState({ library, pins, uses, saved });
+    void loadPins(path, library).then((names) => {
+      if (!cancelled) setPins({ library, names });
     });
+    void store.load(
+      Promise.all([readJson<Uses>(`uses:${library}`, {}), readJson<SavedKeywords>(`keywords:${library}`, {})]).then(
+        ([uses, saved]) => ({ uses, saved }),
+      ),
+    );
     // Raycast keeps the command warm between opens, so pick up pins changed outside it.
     const stopWatching = watchPins(path, () => {
-      if (!cancelled) setState((current) => ({ ...current, pins: readPins(path, library) }));
+      if (!cancelled) setPins({ library, names: readPins(path, library) });
     });
     return () => {
       cancelled = true;
       stopWatching();
     };
-  }, [library]);
+  }, [store]);
 
-  const updatePins = (update: (pins: string[]) => string[]) => {
+  const updateFavorites = (update: (pins: string[]) => string[]) => {
     try {
       const next = updatePinsFile(path, library, update);
-      setState((current) => ({ ...current, pins: next }));
+      setPins({ library, names: next });
       return next;
     } catch (error) {
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't save favorites",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      void showFailureToast(error, { title: "Couldn't save favorites" });
       return undefined;
     }
   };
 
-  const persist =
-    <K extends "uses" | "saved">(field: K, key: string) =>
-    (value: (typeof state)[K]) => {
-      setState((current) => ({ ...current, [field]: value }));
-      void LocalStorage.setItem(`${key}:${library}`, JSON.stringify(value));
-    };
-
   // Stable between renders, so tiles that depend on it re-render only when something changed.
-  return useMemo(
-    () => ({
-      loaded: state.library === library,
-      favorites: state.pins,
-      uses: state.uses,
-      saved: state.saved,
-      updateFavorites: updatePins,
-      setUses: persist("uses", "uses"),
-      setSaved: persist("saved", "keywords"),
-    }),
-    [state, library],
-  );
+  return useMemo(() => {
+    const value = stored.library === library ? stored.value : { uses: {}, saved: {} };
+    return {
+      loaded: pins.library === library && stored.library === library,
+      favorites: pins.library === library ? pins.names : [],
+      uses: value.uses,
+      saved: value.saved,
+      updateFavorites,
+      updateUses: (update) => store.update("uses", update),
+      updateSaved: (update) => store.update("saved", update),
+    };
+  }, [pins, stored, store, library]);
 }
 
 export interface AiState {
@@ -324,8 +336,14 @@ export function useAiKeywords(searchText: string, keywordMatches: number, auto =
     return () => clearTimeout(timer);
   }, [phrase, keywordMatches, auto]);
 
-  // A changed query makes any running call moot.
-  useEffect(() => () => controller.current?.abort(), [phrase]);
+  // A changed query makes any running call moot. Its loading state goes too, so the same words can ask again.
+  useEffect(
+    () => () => {
+      controller.current?.abort();
+      setState(withoutLoading);
+    },
+    [phrase],
+  );
 
   const ai = state?.query === phrase ? state : undefined;
   return {

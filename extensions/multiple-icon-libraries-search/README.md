@@ -25,6 +25,8 @@ Search the Lucide and Hugeicons icon libraries from one command, by name or by w
 
 ## Settings
 
+![The command's settings in Raycast: Libraries and Default Library](media/multiple-icon-libraries-search-5.png)
+
 - **Libraries:** turn Lucide or Hugeicons off.
 - **Default Library:** open on the last one used, or always on one.
 - **Enter Action**, **Name Format** (`Ticket01Icon` or `ticket-01`), **Library Name** (paste "Lucide Ticket"), and **Stroke Width** (applies to SVG and React code).
@@ -52,3 +54,5 @@ Your favorites, saved keywords, and usage counts stay on your Mac.
 
 - [Lucide](https://lucide.dev): ISC License, Lucide Contributors.
 - [Hugeicons](https://hugeicons.com) free icons: MIT License.
+
+Made by [Jason Eric Siegel](https://www.linkedin.com/in/jasonericsiegel/).

@@ -103,10 +103,10 @@ describe("searchSections", () => {
     ]);
   });
 
-  it("leaves the results untitled when no favorite matches, and shows Favorites alone when all are", () => {
+  it("heads the results Keyword Results when no favorite matches, and shows Favorites alone when all are", () => {
     const favorites = new Set(["hand"]);
     expect(searchSections([icons[0]], undefined, 0, favorites)).toEqual([
-      { kind: "results", title: "", icons: [icons[0]] },
+      { kind: "results", title: "Keyword Results", icons: [icons[0]] },
     ]);
     expect(searchSections([icons[2]], undefined, 0, favorites)).toEqual([
       { kind: "favorites", title: "Favorites", icons: [icons[2]] },
@@ -131,7 +131,7 @@ describe("searchSections", () => {
 
   it("holds a loading tile in AI Results while AI works", () => {
     expect(searchSections([icons[0]], undefined, 1)).toEqual([
-      { kind: "results", title: "", icons: [icons[0]] },
+      { kind: "results", title: "Keyword Results", icons: [icons[0]] },
       { kind: "ai", title: "AI Results", icons: [], placeholders: 1 },
     ]);
     expect(searchSections([], undefined, 1)).toEqual([{ kind: "ai", title: "AI Results", icons: [], placeholders: 1 }]);

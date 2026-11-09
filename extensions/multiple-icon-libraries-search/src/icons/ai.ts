@@ -62,6 +62,22 @@ export function shouldAskAi(query: string, keywordMatches: number, tabRequested:
 }
 
 /**
+ * The AI state to keep once the query changes. The change aborts a running call, so its loading state is
+ * dropped; otherwise typing the same words again would find it and never ask. Answers and errors stay.
+ */
+export function withoutLoading<T extends { status: string }>(state: T | undefined): T | undefined {
+  return state?.status === "loading" ? undefined : state;
+}
+
+/**
+ * Whether automatic AI may run: the setting is on, and the icons and saved keywords have loaded. Before
+ * that, every search finds nothing, so a first download would spend AI calls on ordinary names. Tab still works.
+ */
+export function autoAiReady(setting: boolean, iconsLoaded: boolean, keywordsLoaded: boolean): boolean {
+  return setting && iconsLoaded && keywordsLoaded;
+}
+
+/**
  * Raycast's default for extensions (GPT-6 Luna in @raycast/api 2.7), which every plan with AI can use.
  * It is not the model the user picked for AI Chat or Quick AI; extensions can't read that.
  */

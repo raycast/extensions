@@ -105,8 +105,8 @@ function favoritesFirst(icons: IconEntry[], favorites: Set<string>): IconEntry[]
 
 /**
  * The view while typing: favorites among the keyword results (best match first), the other keyword
- * results, then AI results that aren't already among them, favorites first. The other results get a
- * heading only when Favorites sits above them. While AI works, the AI section holds
+ * results, then AI results that aren't already among them, favorites first. The other results are
+ * headed More Results under Favorites, and Keyword Results otherwise. While AI works, the AI section holds
  * `aiPlaceholders` placeholder tiles instead.
  */
 export function searchSections(
@@ -121,7 +121,11 @@ export function searchSections(
   const sections: Section[] = [];
   if (favoriteResults.length) sections.push({ kind: "favorites", title: "Favorites", icons: favoriteResults });
   if (otherResults.length) {
-    sections.push({ kind: "results", title: favoriteResults.length ? "More Results" : "", icons: otherResults });
+    sections.push({
+      kind: "results",
+      title: favoriteResults.length ? "More Results" : "Keyword Results",
+      icons: otherResults,
+    });
   }
   if (aiPlaceholders) {
     sections.push({ kind: "ai", title: "AI Results", icons: [], placeholders: aiPlaceholders });

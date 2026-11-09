@@ -139,12 +139,15 @@ describe("Hugeicons refresh", () => {
     await expect(refreshCatalog(root, "hugeicons", fetcher, NOW)).rejects.toThrow("Hugeicons list is missing");
   });
 
-  it("swaps in a new package version and clears the old drawings", async () => {
+  it("swaps in a new package version and keeps only the previous drawings for views still open", async () => {
     await refreshHuge();
     fetcher.responses[URLS.hugeiconsLatest] = { version: "4.4.0", dist: { tarball: TARBALL, integrity: INTEGRITY } };
     const catalog = await refreshHuge(NOW + 1);
     expect(catalog.drawingsVersion).toBe("4.4.0");
-    expect(readdirSync(join(root, "hugeicons")).sort()).toEqual(["catalog.json", "svg-9-4.4.0"]);
+    expect(readdirSync(join(root, "hugeicons")).sort()).toEqual(["catalog.json", "svg-9-4.3.5", "svg-9-4.4.0"]);
+    fetcher.responses[URLS.hugeiconsLatest] = { version: "4.5.0", dist: { tarball: TARBALL, integrity: INTEGRITY } };
+    await refreshHuge(NOW + 2);
+    expect(readdirSync(join(root, "hugeicons")).sort()).toEqual(["catalog.json", "svg-9-4.4.0", "svg-9-4.5.0"]);
   });
 
   it("keeps the last catalog when offline", async () => {
@@ -204,8 +207,16 @@ describe("Lucide refresh", () => {
     await refreshCatalog(root, "lucide", fetcher, NOW + STALE_AFTER_MS);
     expect(fetcher.calls).not.toContain(URLS.lucideTagsAt("1.23.0"));
     expect(readdirSync(join(root, "lucide")).filter((entry) => entry.startsWith("svg-"))).toEqual([
+      `svg-9-${NOW}`,
       `svg-9-${NOW + STALE_AFTER_MS}`,
     ]);
+  });
+
+  it("keeps an icon opened before a refresh copyable after it", async () => {
+    const before = await refreshCatalog(root, "lucide", fetcher, NOW);
+    const opened = before.icons.find((icon) => icon.name === "ticket")!;
+    await refreshCatalog(root, "lucide", fetcher, NOW + STALE_AFTER_MS);
+    expect(readCopySvg(root, "lucide", opened)).toContain("<svg");
   });
 
   it("keeps the last New set when npm is unreachable", async () => {
