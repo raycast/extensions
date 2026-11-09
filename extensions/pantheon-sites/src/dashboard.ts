@@ -1,60 +1,23 @@
-import { Cache, open, showToast, Toast } from "@raycast/api";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
-import { terminusCmd } from "./utils";
 import { Site } from "./types";
 
 const DASHBOARD_URL = "https://dashboard.pantheon.io";
-// A site's workspace rarely changes; re-check monthly in case it was moved.
-const WORKSPACE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-const execAsync = promisify(exec);
-const workspaceCache = new Cache({ namespace: "workspaces" });
-
-type WorkspaceEntry = { workspaceId: string | null; fetchedAt: number };
-
-function getCachedWorkspace(siteId: string): WorkspaceEntry | undefined {
-  const raw = workspaceCache.get(siteId);
-  if (!raw) return undefined;
-  try {
-    const entry: WorkspaceEntry = JSON.parse(raw);
-    return Date.now() - entry.fetchedAt < WORKSPACE_TTL_MS ? entry : undefined;
-  } catch {
-    return undefined;
-  }
+// The dashboard's workspace is the org you access the site *through*, not the org that
+// owns it. site:list's `memberships` ("<uuid>:<name>,...") only lists workspaces you can
+// access: org memberships, plus a "Team" entry whose UUID is your personal workspace.
+// Sites in several of your orgs open from any of them, so the first org wins.
+function workspaceId(site: Site): string | undefined {
+  const memberships = (site.memberships ?? "")
+    .split(",")
+    .map((m) => m.split(":").map((part) => part.trim()))
+    .filter(([id]) => id);
+  const org = memberships.find(([, name]) => name?.toLowerCase() !== "team");
+  return (org ?? memberships[0])?.[0];
 }
 
-// The dashboard's workspace UUID is the site's owning organization, which
-// site:list doesn't expose unambiguously (sites can have several memberships).
-async function fetchWorkspace(siteId: string, terminusPath: string | undefined): Promise<string | null> {
-  const { stdout } = await execAsync(terminusCmd(terminusPath, `site:info ${siteId} --format=json`), {
-    timeout: 30_000,
-    env: { ...process.env, PATH: `${process.env.PATH ?? ""}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin` },
-  });
-  const workspaceId: string | null = JSON.parse(stdout).organization || null;
-  workspaceCache.set(siteId, JSON.stringify({ workspaceId, fetchedAt: Date.now() } satisfies WorkspaceEntry));
-  return workspaceId;
-}
-
-export async function openDashboard(site: Site, terminusPath: string | undefined) {
-  let workspaceId = getCachedWorkspace(site.id)?.workspaceId;
-
-  if (workspaceId === undefined) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Looking up workspace…" });
-    try {
-      workspaceId = await fetchWorkspace(site.id, terminusPath);
-      await toast.hide();
-    } catch {
-      workspaceId = null;
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't look up workspace";
-      toast.message = "Opening legacy dashboard URL";
-    }
-  }
-
+export function dashboardUrl(site: Site): string {
+  const workspace = workspaceId(site);
+  if (!workspace) return `${DASHBOARD_URL}/sites/${site.id}`;
   const siteType = site.framework === "nodejs" ? "node-site" : "cms-site";
-  const url = workspaceId
-    ? `${DASHBOARD_URL}/workspace/${workspaceId}/${siteType}/${site.id}`
-    : `${DASHBOARD_URL}/sites/${site.id}`;
-  await open(url);
+  return `${DASHBOARD_URL}/workspace/${workspace}/${siteType}/${site.id}`;
 }

@@ -5,7 +5,7 @@ import { terminusCmd } from "./utils";
 import { Sites } from "./types";
 import { TerminusSetup } from "./components/TerminusSetup";
 import { SiteDetail } from "./components/SiteDetail";
-import { openDashboard } from "./dashboard";
+import { dashboardUrl } from "./dashboard";
 
 function getMemberships(site: Sites[string]): string[] {
   if (!site.memberships) return [];
@@ -164,10 +164,10 @@ export default function Command() {
                       title="Show Environments"
                       target={<SiteDetail site={sites[key]} preferences={preferences} />}
                     />
-                    <Action
+                    <Action.OpenInBrowser
                       icon={Icon.AppWindowList}
                       title="Open Pantheon Dashboard"
-                      onAction={() => openDashboard(sites[key], preferences.terminusPath)}
+                      url={dashboardUrl(sites[key])}
                     />
                     <Action
                       icon={Icon.ArrowClockwise}
