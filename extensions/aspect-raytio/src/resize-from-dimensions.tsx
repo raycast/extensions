@@ -120,7 +120,7 @@ function renderContent(query: ReturnType<typeof parseQuery>) {
           icon={result.id === "new-width" ? Icon.ArrowRight : Icon.ArrowDown}
           title={formatDimensions(result)}
           subtitle={result.label}
-          accessories={result.rounded ? [{ tag: "Rounded", tooltip: "The other side was rounded" }] : undefined}
+          accessories={result.rounded ? [{ tag: "Rounded", tooltip: "Rounded to fit the output precision" }] : undefined}
           actions={<ResizeActions result={result} ratio={ratio} />}
         />
       ))}

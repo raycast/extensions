@@ -130,33 +130,38 @@ function roundTo(value: number, decimals: number): number {
  * Computes both resize results for a new size, keeping the original aspect ratio:
  * the new size used as the width, and the new size used as the height.
  *
- * Results are whole numbers when every input is a whole number (pixels), otherwise they keep up to
- * two decimal places.
+ * Results are whole numbers when every input is a whole number (pixels), otherwise both sides keep
+ * up to two decimal places. The new size is rounded to the same precision first, and the other side
+ * is computed from that rounded value so both sides stay consistent.
  */
 export function resize(original: Dimensions, newSize: number): ResizeResult[] {
   const allIntegers = [original.width, original.height, newSize].every(Number.isInteger);
   const decimals = allIntegers ? 0 : MAX_DECIMALS;
+  // Never round a positive side down to zero.
+  const minimum = 10 ** -decimals;
 
-  const exactHeight = (newSize * original.height) / original.width;
-  const exactWidth = (newSize * original.width) / original.height;
-  const height = roundTo(exactHeight, decimals);
-  const width = roundTo(exactWidth, decimals);
+  const size = roundTo(newSize, decimals) || minimum;
+  const sizeRounded = size !== newSize;
+
+  const exactHeight = (size * original.height) / original.width;
+  const exactWidth = (size * original.width) / original.height;
+  const height = roundTo(exactHeight, decimals) || minimum;
+  const width = roundTo(exactWidth, decimals) || minimum;
 
   return [
     {
       id: "new-width",
       label: "New Width",
-      width: newSize,
-      // Never round a positive side down to zero.
-      height: height || 10 ** -decimals,
-      rounded: height !== exactHeight,
+      width: size,
+      height,
+      rounded: sizeRounded || height !== exactHeight,
     },
     {
       id: "new-height",
       label: "New Height",
-      width: width || 10 ** -decimals,
-      height: newSize,
-      rounded: width !== exactWidth,
+      width,
+      height: size,
+      rounded: sizeRounded || width !== exactWidth,
     },
   ];
 }
