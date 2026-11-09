@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Fix Remote Project Icons] - {PR_MERGE_DATE}
+## [Fix Remote Project Icons] - 2026-11-09
 
 - Add the missing remote icon so SSH and other remote projects no longer show an empty placeholder
 
