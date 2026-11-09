@@ -21,7 +21,7 @@ import { askAi } from "./ai-call";
 import { startRefresh } from "./catalog-loader";
 import { isStale, readCatalog } from "./catalog-store";
 import { LIBRARY_IDS } from "./libraries";
-import { SavedStore } from "./memory-store";
+import { SavedStore, withValue } from "./memory-store";
 import { adoptPins, PinsFile, pinsPath, readPins, updatePins as updatePinsFile, watchPins } from "./pins-file";
 import { normalizePhrase, prepareSearch, SavedKeywords, SearchItem } from "./search";
 import { Uses } from "./stores";
@@ -157,7 +157,8 @@ const STORAGE_KEYS: Record<keyof Stored, string> = { uses: "uses", saved: "keywo
 /** Favorites (in the pins file), use counts, and saved AI keywords (in LocalStorage), per library. */
 export function useLibraryMemory(library: LibraryId): LibraryMemory {
   const [pins, setPins] = useState<{ library?: LibraryId; names: string[] }>({ names: [] });
-  const [stored, setStored] = useState<{ library?: LibraryId; value: Stored }>({ value: { uses: {}, saved: {} } });
+  // Kept per library: a store for a library the user left can still finish, and must not touch the current one.
+  const [stored, setStored] = useState<Partial<Record<LibraryId, Stored>>>({});
   const path = pinsPath(environment.supportPath);
   // One store per library: every update, from any view, goes through it in turn.
   const store = useMemo(
@@ -165,7 +166,7 @@ export function useLibraryMemory(library: LibraryId): LibraryMemory {
       new SavedStore<Stored>(
         { uses: {}, saved: {} },
         (field, value) => LocalStorage.setItem(`${STORAGE_KEYS[field]}:${library}`, JSON.stringify(value)),
-        (value) => setStored({ library, value }),
+        (value) => setStored((current) => withValue(current, library, value)),
       ),
     [library],
   );
@@ -203,9 +204,9 @@ export function useLibraryMemory(library: LibraryId): LibraryMemory {
 
   // Stable between renders, so tiles that depend on it re-render only when something changed.
   return useMemo(() => {
-    const value = stored.library === library ? stored.value : { uses: {}, saved: {} };
+    const value = stored[library] ?? { uses: {}, saved: {} };
     return {
-      loaded: pins.library === library && stored.library === library,
+      loaded: pins.library === library && stored[library] !== undefined,
       favorites: pins.library === library ? pins.names : [],
       uses: value.uses,
       saved: value.saved,

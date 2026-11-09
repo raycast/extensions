@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SavedStore } from "../../src/icons/memory-store";
+import { SavedStore, withValue } from "../../src/icons/memory-store";
 
 interface Value {
   uses: Record<string, number>;
@@ -72,5 +72,16 @@ describe("SavedStore", () => {
     const { store, changes } = makeStore();
     await store.load(Promise.resolve({ uses: { star: 1 }, saved: {} }));
     expect(changes).toEqual([{ uses: { star: 1 }, saved: {} }]);
+  });
+});
+
+describe("withValue", () => {
+  it("keeps each library's values apart, so a late answer for the old library can't replace the new one's", () => {
+    let byLibrary: Partial<Record<"lucide" | "hugeicons", Value>> = {};
+    byLibrary = withValue(byLibrary, "hugeicons", { uses: {}, saved: { savings: ["save money"] } });
+    // A Lucide load or write that finishes after the switch.
+    byLibrary = withValue(byLibrary, "lucide", { uses: { star: 1 }, saved: {} });
+    expect(byLibrary.hugeicons).toEqual({ uses: {}, saved: { savings: ["save money"] } });
+    expect(byLibrary.lucide).toEqual({ uses: { star: 1 }, saved: {} });
   });
 });

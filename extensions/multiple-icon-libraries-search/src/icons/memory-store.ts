@@ -45,3 +45,11 @@ export class SavedStore<T extends object> {
     return run;
   }
 }
+
+/**
+ * Records one library's values beside the others'. A store for a library the user switched away from can still
+ * finish a load or a write; keyed this way, it changes only its own library's values.
+ */
+export function withValue<K extends string, T>(byKey: Partial<Record<K, T>>, key: K, value: T): Partial<Record<K, T>> {
+  return { ...byKey, [key]: value } as Partial<Record<K, T>>;
+}
