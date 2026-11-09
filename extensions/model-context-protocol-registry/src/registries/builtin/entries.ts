@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "real-alpha",
+    title: "Real Alpha",
+    description:
+      "Search what the founders, CEOs and researchers building AI said in long podcast and YouTube interviews, from Dwarkesh Podcast and Lenny's Podcast to No Priors, Latent Space and BG2. Each result is a moment of a few minutes with the speaker, what they do, the show, the date, their words and a page to cite that plays the episode from that second. 6 read-only tools: search every moment, everything one person said, how builders answer big questions like \"Is AI a bubble?\", one moment in full, a minute of any episode's transcript, and the latest moments. Open source (MIT). Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://realalpha.app/icons/icon-512.png",
+    homepage: "https://realalpha.app/mcp/?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://realalpha.app/mcp"],
+    },
+    remoteUrl: "https://realalpha.app/mcp",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
