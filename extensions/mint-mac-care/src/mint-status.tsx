@@ -2,9 +2,13 @@ import { Action, ActionPanel, Detail, Icon, Keyboard, LaunchType, environment, l
 import { useExec, usePromise } from "@raycast/utils";
 import { canRevalidateMintCLI, formatCompact, openMint, parseMintCommandJSON, runMintSurface } from "./mint-cli";
 import { AutoCareJSON, MemoryJSON, StatusJSON, diskCard, folderCards, memoryCard } from "./mint-model";
-import { savedFolderProgress, savedGroups } from "./mint-saved";
+import { nudgeCard, notifyLevel, parseIslandHistory } from "./mint-nudge";
+import { mintDefault, savedFolderProgress, savedGroups, savedIslandHistory } from "./mint-saved";
 import { GLANCE_WIDTH, glanceSVG, markdownImage } from "./mint-visuals";
+import { AutoCareAction } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
+import { allowanceLine } from "./mint-parity";
+import type { AccessAnswer } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
 
 type Folder = { path: string; enabled?: boolean; organizeOnArrival?: boolean };
@@ -31,6 +35,16 @@ export default function Command() {
     },
     [cli ?? ""],
     { execute: Boolean(cli) },
+  );
+  // The free week's allowance, as the app's plan button says it (none on a plan without a limit).
+  const access = usePromise(
+    async (path: string) => runMintSurface<AccessAnswer>(path, { action: "access.check" }, 30_000),
+    [cli ?? ""],
+    { execute: Boolean(cli) },
+  );
+  // The person's level for notes about space to get back (Mint 1.1.2's Notify me).
+  const level = usePromise(async () =>
+    notifyLevel(await mintDefault("Mint.Island.FoundNotifyOn"), await mintDefault("Mint.Island.FoundNotifyGB")),
   );
   // How many files each shown folder would sort: the dropdown's own dry run.
   const shown = (folders.data ?? []).slice(0, 2);
@@ -61,6 +75,16 @@ export default function Command() {
   // The dropdown's last count shows at once; the fresh preview replaces it.
   const saved = savedFolderProgress();
 
+  // The island's Get back card, from the same groups as the Disk card (Mint 1.1.2).
+  const nudge = parsed
+    ? nudgeCard(
+        resolution.version.appVersion,
+        parsed.groups,
+        parseIslandHistory(savedIslandHistory()),
+        level.data,
+        Date.now(),
+      )
+    : undefined;
   let markdown = "";
   if (failure) {
     markdown = `## Mint could not read its status\n\n${failure}`;
@@ -68,7 +92,8 @@ export default function Command() {
     const { svg, height } = glanceSVG({
       appearance,
       format: formatCompact,
-      disk: diskCard(parsed, care.data, formatCompact),
+      nudge,
+      disk: diskCard(parsed, care.data, formatCompact, Boolean(nudge)),
       memory: memoryCard(memory.data, care.data, formatCompact),
       folders: folderCards(
         shown.map((folder) => ({ ...folder, toSort: toSort.data?.[folder.path] ?? saved[folder.path] })),
@@ -77,6 +102,8 @@ export default function Command() {
       moreFolders: Math.max(0, (folders.data?.length ?? 0) - shown.length),
     });
     markdown = markdownImage(svg, GLANCE_WIDTH, height, "Mint");
+    const allowance = allowanceLine(access.data);
+    if (allowance) markdown += `\n\n${allowance}`;
   }
 
   const refresh = () => {
@@ -85,6 +112,8 @@ export default function Command() {
     care.revalidate();
     memory.revalidate();
     folders.revalidate();
+    level.revalidate();
+    access.revalidate();
   };
   const open = (name: string) => () => launchCommand({ name, type: LaunchType.UserInitiated });
 
@@ -101,8 +130,16 @@ export default function Command() {
             <Action title="Free Memory" icon={Icon.MemoryChip} onAction={open("mint-memory")} />
             <Action title="Organize a Folder" icon={Icon.Folder} onAction={open("mint-organize")} />
             <Action title="Show Disk Growth" icon={Icon.LineChart} onAction={open("mint-why")} />
+            <Action title="Mint History" icon={Icon.Clock} onAction={open("mint-history")} />
+            <AutoCareAction context={{ section: "disk" }} />
             <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           </ActionPanel.Section>
+          {nudge ? (
+            <ActionPanel.Section>
+              {/* Raycast writes no Mint setting: the level is changed in Mint. */}
+              <Action title="Change Notify Me in Mint" icon={Icon.Bell} onAction={openMint} />
+            </ActionPanel.Section>
+          ) : null}
           <ActionPanel.Section>
             <Action
               title="Refresh"

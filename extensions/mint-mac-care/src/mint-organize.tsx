@@ -17,7 +17,10 @@ import { openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { AutoCareJSON, folderCare, folderStatus } from "./mint-model";
 import { savedFolderProgress } from "./mint-saved";
 
+import { AutoCareAction } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
+import { runConfirmedInMint } from "./confirm-in-mint";
+import { NATIVE_APPROVAL_CAPABILITY, hasCapability } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
 import { Folder, SortResult, TEMPLATES, Template, destinationsPicture, templateTitle } from "./mint-panes";
 import { accent } from "./mint-visuals";
@@ -31,10 +34,11 @@ type OrganizeResponse = { preview: boolean; folder: string; result: SortResult }
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
   if (resolution.status !== "ready") return <MissingMint resolution={resolution} onRetry={recheck} />;
-  return <FolderList cli={resolution.path} />;
+  // Mint 1.2 confirms a folder's removal in its own window (row 16, 2026-11-05).
+  return <FolderList cli={resolution.path} canStop={hasCapability(resolution.version, NATIVE_APPROVAL_CAPABILITY)} />;
 }
 
-function FolderList({ cli }: { cli: string }) {
+function FolderList({ cli, canStop }: { cli: string; canStop: boolean }) {
   const folders = usePromise(
     async (path: string) => {
       const [listed, care] = await Promise.all([
@@ -82,9 +86,10 @@ function FolderList({ cli }: { cli: string }) {
           cli={cli}
           folder={folder}
           active={selected === folder.path}
-          care={folderCare(folder.path, folders.data?.care, folder.organizeOnArrival)}
+          care={folderCare(folder.path, folders.data?.care)}
           saved={saved[folder.path]}
           addFolder={addFolder}
+          canStop={canStop}
           onChanged={folders.revalidate}
         />
       ))}
@@ -104,6 +109,7 @@ function FolderRow({
   care,
   saved,
   addFolder,
+  canStop,
   onChanged,
 }: {
   cli: string;
@@ -112,6 +118,7 @@ function FolderRow({
   care: string;
   saved: number | undefined;
   addFolder: React.ReactElement;
+  canStop: boolean;
   onChanged: () => void;
 }) {
   const name = folderName(folder.path);
@@ -279,6 +286,22 @@ function FolderRow({
                 preview.revalidate();
               }}
             />
+            <AutoCareAction context={{ section: "folders", folder: folder.path }} />
+            {canStop ? (
+              <Action
+                title="Stop Managing This Folder…"
+                icon={Icon.XMarkCircle}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  const stopped = await runConfirmedInMint(
+                    cli,
+                    { action: "organize.remove", path: folder.path },
+                    { done: () => `Mint no longer manages ${name}`, failed: `Mint could not stop managing ${name}` },
+                  );
+                  if (stopped) onChanged();
+                }}
+              />
+            ) : null}
             <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           </ActionPanel.Section>
         </ActionPanel>

@@ -3,7 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { useMemo, useRef, useState } from "react";
-import { formatCompact, openMint, plural, runMintSurface, shortPath } from "./mint-cli";
+import { MintCLIVersion, formatCompact, openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { TIER_COLORS, sourceTitle } from "./mint-model";
 import { MissingMint } from "./missing-mint";
 import { progressMarkdown, updatingDots } from "./progress-row";
@@ -11,11 +11,14 @@ import { useMintCLI } from "./use-mint-cli";
 import { newProgressToken, useMintProgress } from "./use-progress";
 import { rememberDuration } from "./use-wait";
 import {
+  OptimizePresent,
   OptimizeScan,
   Source,
   baseName,
   expectedSources,
   groupCopies,
+  groupDetail,
+  presented,
   isDone,
   sourcePicture,
   sourcesOf,
@@ -26,6 +29,8 @@ import { useStrike } from "./use-strike";
 
 type OptimizeResult = {
   sharedFiles: number;
+  /** Mint 1.1.3: idle files the same run compressed in place. */
+  compressedFiles?: number;
   reclaimedBytes: number;
   cancelled: boolean;
   failures?: Array<{ name: string; reason: string }>;
@@ -38,17 +43,20 @@ const HOME = homedir();
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
   if (resolution.status !== "ready") return <MissingMint resolution={resolution} onRetry={recheck} />;
-  return <Optimize cli={resolution.path} />;
+  return <Optimize cli={resolution.path} version={resolution.version} />;
 }
 
 /**
  * Where space can come back without deleting anything: one row per source,
  * the AI agents first, listed from the first second and filled when Mint
- * answers; the source's duplicate files on the right. ↵ optimizes every
- * source, ⌘↵ the selected one, and the files are struck one by one as they
- * start to share their storage.
+ * answers; the source's files on the right. Mint 1.1.3 lists what the app's
+ * Optimizable lists, identical copies and idle files to compress in place,
+ * and what the Disk page offers of them against the app's last Scan. ↵
+ * optimizes every source, ⌘↵ the selected one, and the files are struck one
+ * by one as Mint reaches them.
  */
-function Optimize({ cli }: { cli: string }) {
+function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
+  const bothHalves = version.capabilities?.includes("surface.optimizable.v1") ?? false;
   const [run, setRun] = useState<{ keys: string[]; ids: string[] } | undefined>();
   const [receipt, setReceipt] = useState<{ keys: string[]; bytes: number } | undefined>();
   // Mint's answer is single-use: after an Optimize, the files it kept need a new look.
@@ -61,11 +69,19 @@ function Optimize({ cli }: { cli: string }) {
       const started = Date.now();
       const result = await runMintSurface<OptimizeScan>(
         path,
-        { action: "disk.optimize.scan", progressToken },
+        { action: "disk.optimize.scan", progressToken, ...(bothHalves ? { includeCompressions: true } : {}) },
         30 * 60_000,
       );
+      // The Disk page's offer: a file under one of the last Scan's rows is that row's.
+      const present = bothHalves
+        ? await runMintSurface<OptimizePresent>(
+            path,
+            { action: "disk.optimize.present", sessionID: result.sessionID },
+            60_000,
+          ).catch(() => undefined)
+        : undefined;
       rememberDuration(SCAN_KEY, (Date.now() - started) / 1000);
-      return result;
+      return { ...result, items: presented(result, present) };
     },
     [cli, token.current],
   );
@@ -133,7 +149,9 @@ function Optimize({ cli }: { cli: string }) {
     ? total > 0
       ? `${formatCompact(total)} can come back · nothing is deleted`
       : "Nothing to optimize right now"
-    : "Looking for identical copies…";
+    : bothHalves
+      ? "Looking for what can come back…"
+      : "Looking for identical copies…";
   const busy = Boolean(run) || strike.active;
 
   return (
@@ -144,7 +162,11 @@ function Optimize({ cli }: { cli: string }) {
       searchBarPlaceholder={placeholder}
     >
       {scan.error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not look for copies" description={scan.error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title={bothHalves ? "Mint could not look" : "Mint could not look for copies"}
+          description={scan.error.message}
+        />
       ) : null}
       <List.Section title="Can come back">
         {sources.map((source, _index, all) => {
@@ -200,14 +222,23 @@ function Optimize({ cli }: { cli: string }) {
                 <List.Item.Detail
                   markdown={
                     scan.isLoading
-                      ? progressMarkdown("Looking for identical copies", progress)
-                      : sourcePicture(source, sources, appearance, {
-                          struck: strike.struck,
-                          gone: strike.gone,
-                          running: mine ? `Optimizing · ${shared} of ${sourceIDs.length}` : undefined,
-                          // Each source states its own share of what came back.
-                          receipt: finished ? { bytes: freed, text: receiptText } : undefined,
-                        })
+                      ? progressMarkdown(
+                          bothHalves ? "Looking for what can come back" : "Looking for identical copies",
+                          progress,
+                        )
+                      : sourcePicture(
+                          source,
+                          sources,
+                          appearance,
+                          {
+                            struck: strike.struck,
+                            gone: strike.gone,
+                            running: mine ? `Optimizing · ${shared} of ${sourceIDs.length}` : undefined,
+                            // Each source states its own share of what came back.
+                            receipt: finished ? { bytes: freed, text: receiptText } : undefined,
+                          },
+                          bothHalves,
+                        )
                   }
                 />
               }
@@ -231,7 +262,7 @@ function Optimize({ cli }: { cli: string }) {
                   ) : null}
                   {source.groups.length ? (
                     <Action.Push
-                      title="Show Every Copy"
+                      title={bothHalves ? "Show Every File" : "Show Every Copy"}
                       icon={Icon.List}
                       shortcut={Keyboard.Shortcut.Common.Open}
                       target={<CopyList source={source} />}
@@ -258,7 +289,7 @@ function Optimize({ cli }: { cli: string }) {
   );
 }
 
-/** Every file of a source and where each of its copies is. */
+/** Every file of a source: where each of its copies is, and each idle file stored compressed. */
 function CopyList({ source }: { source: Source }) {
   return (
     <List navigationTitle={sourceTitle(source.key)} searchBarPlaceholder={`Search ${sourceTitle(source.key)}`}>
@@ -266,14 +297,26 @@ function CopyList({ source }: { source: Source }) {
         <List.Section
           key={group.id}
           title={baseName(group.keeper)}
-          subtitle={`${group.copies.length + 1} copies · ${formatCompact(group.bytes)} back`}
+          subtitle={`${groupDetail(group)} · ${formatCompact(group.bytes)} back`}
         >
-          {[group.keeper, ...group.copies.map((copy) => copy.path)].map((path, index) => (
+          {(group.kind === "compression"
+            ? [group.keeper]
+            : [group.keeper, ...group.copies.map((copy) => copy.path)]
+          ).map((path, index) => (
             <List.Item
               key={`${group.id}:${path}`}
               icon={{ fileIcon: path }}
               title={shortPath(path)}
-              accessories={[{ text: index === 0 ? "kept as it is" : "shares its storage" }]}
+              accessories={[
+                {
+                  text:
+                    group.kind === "compression"
+                      ? "stored compressed"
+                      : index === 0
+                        ? "kept as it is"
+                        : "shares its storage",
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.ShowInFinder path={path} />

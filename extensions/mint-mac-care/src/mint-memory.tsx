@@ -17,6 +17,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 
+import { AutoCareAction } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
 import { MemoryApp as App, MemoryScan, Pile, PileKey, everyPile, pilePicture, pilesOf } from "./mint-panes";
@@ -222,6 +223,7 @@ function FreeMemory({ cli }: { cli: string }) {
                           onAction={lookAgain}
                         />
                       ) : null}
+                      <AutoCareAction context={{ section: "memory" }} />
                       <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                     </ActionPanel.Section>
                   </ActionPanel>
