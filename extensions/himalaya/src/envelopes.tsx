@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color, useNavigation, Alert } from "@raycast/api";
+import { getMajorVersion, messageReadArgs, readMessageBody } from "./cli";
 import { Envelope, Flags, Folder } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
@@ -65,13 +66,14 @@ function MessageDetail({ envelope, onDelete }: { envelope: Envelope; onDelete: (
       setIsLoading(true);
 
       // Execute CLI command to get message body
+      const major = await getMajorVersion(preferences.binaryPath);
       const result = await execa(
         preferences.binaryPath,
-        ["message", "read", "--no-headers", envelope.id, "--account", preferences.defaultAccount],
+        messageReadArgs(major, preferences.defaultAccount, envelope.id),
         {},
       );
 
-      setMessageBody(result.stdout);
+      setMessageBody(readMessageBody(major, result.stdout));
     } catch (error) {
       console.error("Error fetching message body:", error);
       setMessageBody("Error loading message body.");

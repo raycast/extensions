@@ -1,6 +1,15 @@
 import { execa } from "execa";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { z } from "zod";
+import {
+  envelopeListArgs,
+  folderListArgs,
+  getMajorVersion,
+  messageDeleteArgs,
+  messageMoveArgs,
+  parseEnvelopes,
+  parseFolders,
+} from "./cli";
 import { Envelope, Folder } from "./models";
 import { Preferences } from "./preferences";
 
@@ -15,28 +24,15 @@ export async function fetchEnvelopesFromCLI(preferences: Preferences, folder?: s
 
   try {
     // Build command arguments
-    const args = [
-      "envelope",
-      "list",
-      "--account",
-      preferences.defaultAccount,
-      "--output",
-      "json",
-      "--page-size",
-      `${pageSize}`,
-    ];
-
-    // Add folder parameter if specified
-    if (folder) {
-      args.push("--folder", folder);
-    }
+    const major = await getMajorVersion(preferences.binaryPath);
+    const args = envelopeListArgs(major, preferences.defaultAccount, pageSize, folder);
 
     // Execute the CLI command to list envelopes
     const result = await execa(preferences.binaryPath, args, {});
 
     // Parse the JSON response
     const parsedData = JSON.parse(result.stdout);
-    const envelopes = z.array(Envelope).parse(parsedData);
+    const envelopes = parseEnvelopes(major, parsedData);
 
     // Add folder_name to each envelope if a folder was specified
     if (folder) {
@@ -103,11 +99,8 @@ export async function deleteEnvelopeAndRefresh(
     });
 
     // Execute delete command - wait for this to complete first
-    await execa(
-      preferences.binaryPath,
-      ["message", "delete", id, "--account", preferences.defaultAccount, "--output", "json"],
-      {},
-    );
+    const major = await getMajorVersion(preferences.binaryPath);
+    await execa(preferences.binaryPath, messageDeleteArgs(major, preferences.defaultAccount, id), {});
 
     // Only after successful CLI deletion, update localStorage
     const { envelopes } = await loadEnvelopesFromStorage();
@@ -141,15 +134,12 @@ export async function deleteEnvelopeAndRefresh(
 export async function fetchFoldersFromCLI(preferences: Preferences): Promise<Folder[]> {
   try {
     // Execute the CLI command to list folders
-    const result = await execa(
-      preferences.binaryPath,
-      ["folder", "list", "--account", preferences.defaultAccount, "--output", "json"],
-      {},
-    );
+    const major = await getMajorVersion(preferences.binaryPath);
+    const result = await execa(preferences.binaryPath, folderListArgs(major, preferences.defaultAccount), {});
 
     // Parse the JSON response
     const parsedData = JSON.parse(result.stdout);
-    const folders = z.array(Folder).parse(parsedData);
+    const folders = parseFolders(major, parsedData);
 
     // Update LocalStorage
     await updateFoldersInStorage(folders);
@@ -212,11 +202,8 @@ export async function moveEnvelopeAndRefresh(
     });
 
     // Execute move command - wait for this to complete first
-    await execa(
-      preferences.binaryPath,
-      ["message", "move", targetFolder, id, "--account", preferences.defaultAccount, "--output", "json"],
-      {},
-    );
+    const major = await getMajorVersion(preferences.binaryPath);
+    await execa(preferences.binaryPath, messageMoveArgs(major, preferences.defaultAccount, id, targetFolder), {});
 
     // Only after successful CLI move, update localStorage
     const { envelopes } = await loadEnvelopesFromStorage();
