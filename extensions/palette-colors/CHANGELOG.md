@@ -1,6 +1,6 @@
 # Color Palette Manager Changelog
 
-## [Reimagined as Color Palette Manager] - {PR_MERGE_DATE}
+## [Reimagined as Color Palette Manager] - 2026-11-09
 
 This extension has been reimagined as **Color Palette Manager** — a library for building and organizing your own color palettes, rather than a one-shot random palette generator. Thanks to [@douglas-pires](https://github.com/douglas-pires), the original creator, for supporting the handover.
 
