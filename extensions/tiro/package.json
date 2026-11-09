@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tiro",
+  "title": "Tiro",
+  "description": "Search Tiro notes and control desktop recordings from your keyboard.",
+  "icon": "tiro-icon.png",
+  "author": "paul-theplato",
+  "owner": "theplato",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "meeting",
+    "notes",
+    "transcription",
+    "minutes",
+    "티로",
+    "회의록"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Tiro",
+      "description": "Search your Tiro notes and read summaries and transcripts.",
+      "mode": "view"
+    },
+    {
+      "name": "start-live-note",
+      "title": "Start Live Note",
+      "subtitle": "Tiro",
+      "description": "Start a new live note in the Tiro desktop app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "end-live-note",
+      "title": "End Live Note and Create Document",
+      "subtitle": "Tiro",
+      "description": "End the current live note and create its document. Requires Tiro desktop 4.12.1 or later.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-offline-recording",
+      "title": "Start Offline Recording",
+      "subtitle": "Tiro",
+      "description": "Start a new offline recording in the Tiro desktop app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "end-offline-recording",
+      "title": "End and Upload Offline Recording",
+      "subtitle": "Tiro",
+      "description": "End and upload the current offline recording. Does not end a live note. Requires the latest Tiro desktop app.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search Tiro notes by keyword, or list the most recent notes when no keyword is given."
+    },
+    {
+      "name": "get-note",
+      "title": "Get Note",
+      "description": "Get a Tiro note's summary and, when asked, its speaker-attributed transcript."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional. Paste an account API key from tiro.ooo/platform/me/api-keys to use it instead of signing in.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node scripts/test-recording-links.mjs",
+    "security:package": "node scripts/check-package.mjs",
+    "package:secure": "npm run build && node scripts/package-release.mjs"
+  },
+  "access": "public",
+  "overrides": {
+    "minimatch": "^11.0.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
