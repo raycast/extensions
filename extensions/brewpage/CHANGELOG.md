@@ -1,6 +1,6 @@
 # BrewPage Publisher Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-11-09
 
 - Publish selected HTML or Markdown and pasted reports with explicit visibility and reader access choices.
 - Copy or open the returned reader link; retain owner credentials in encrypted extension storage.
