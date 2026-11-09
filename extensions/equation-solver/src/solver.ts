@@ -25,6 +25,19 @@
  * N(v) = 0 is the standard form a·v² + b·v + c = 0, solved directly
  * (linear formula / quadratic formula), so the "steps" shown to the user
  * are the real algebra, not a numeric guess.
+ *
+ * Robustness notes:
+ *   - Every denominator that appears while parsing is remembered in
+ *     Rat.excl, because simplification can cancel one away (x/(1/x)
+ *     becomes x²) while the value is still excluded from the domain.
+ *   - Zero tests and the discriminant are judged relative to the scale
+ *     of the numbers involved, and the numerator is scaled to a leading
+ *     coefficient of 1 before solving — an equation multiplied by a tiny
+ *     or huge constant solves exactly like the original.
+ *   - Quadratic roots use the numerically stable q-form, so a small
+ *     root next to a huge one (x² + 1000000000x + 1) is not lost.
+ *   - Intermediate polynomial degrees are capped (MAX_DEGREE), so
+ *     nested powers fail fast instead of expanding forever.
  */
 
 export type SolveResult =
@@ -46,6 +59,17 @@ export type SolveResult =
 
 const EPS = 1e-12;
 
+/**
+ * Trailing-coefficient trim threshold for polynomials. Deliberately much
+ * smaller than EPS: a coefficient like the 0.0000000000005 in
+ * 0.0000000000005x = 1 is genuine user input, not rounding residue, and
+ * trimming it away would change the answer.
+ */
+const TRIM_EPS = 1e-13;
+
+/** Intermediate polynomials are capped well below any size that could stall the UI. */
+const MAX_DEGREE = 100;
+
 /* ------------------------------------------------------------------ */
 /* Number formatting                                                   */
 /* ------------------------------------------------------------------ */
@@ -55,7 +79,13 @@ export function formatDecimal(n: number): string {
   if (!Number.isFinite(n)) return String(n);
   if (Math.abs(n) < EPS) return "0";
   if (Math.abs(n - Math.round(n)) < 1e-10) return String(Math.round(n));
-  return String(parseFloat(n.toPrecision(10)));
+  const s = String(parseFloat(n.toPrecision(10)));
+  // Avoid scientific notation for small magnitudes: -0.000000001, not -1e-9.
+  if (s.includes("e") && Math.abs(n) < 1e-4) {
+    const fixed = n.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
+    return fixed === "" || fixed === "-0" ? "0" : fixed;
+  }
+  return s;
 }
 
 /** Fraction if there is a tidy one, else a plain decimal: "15/4", "0.3333333333". */
@@ -92,7 +122,7 @@ type Poly = number[];
 
 function trimPoly(p: Poly): Poly {
   const out = [...p];
-  while (out.length > 1 && Math.abs(out[out.length - 1]) < EPS) out.pop();
+  while (out.length > 1 && Math.abs(out[out.length - 1]) < TRIM_EPS) out.pop();
   return out.length === 0 ? [0] : out;
 }
 
@@ -102,7 +132,10 @@ function polyDegree(p: Poly): number {
 }
 
 function isZeroPoly(p: Poly): boolean {
-  return trimPoly(p).every((c) => Math.abs(c) < EPS);
+  // Exact zero only: a tiny-but-genuine coefficient (0.0000000000005x)
+  // must not be mistaken for zero. Residue-scale values are handled by
+  // the EPS checks where equations are classified, not here.
+  return trimPoly(p).every((c) => c === 0);
 }
 
 function isConstantOne(p: Poly): boolean {
@@ -126,6 +159,9 @@ function subPoly(a: Poly, b: Poly): Poly {
 
 function mulPoly(a: Poly, b: Poly): Poly {
   if (isZeroPoly(a) || isZeroPoly(b)) return [0];
+  if (polyDegree(a) + polyDegree(b) > MAX_DEGREE) {
+    throw new Error(`That expression expands beyond degree ${MAX_DEGREE} — too complex for this solver.`);
+  }
   const out: Poly = new Array(a.length + b.length - 1).fill(0);
   for (let i = 0; i < a.length; i++) {
     for (let j = 0; j < b.length; j++) {
@@ -141,34 +177,46 @@ function powPoly(base: Poly, e: number): Poly {
   return out;
 }
 
-function evalPoly(p: Poly, v: number): number {
-  let sum = 0;
-  for (let i = 0; i < p.length; i++) sum += (p[i] ?? 0) * Math.pow(v, i);
-  return sum;
-}
-
-/** True when v (a candidate root) would make this denominator polynomial 0. */
+/**
+ * True when v (a candidate root) would make this denominator polynomial 0.
+ * The test is relative to the size of the terms at v: a small but genuine
+ * denominator like (x − 0.000001) at x = 0 must NOT count as zero.
+ */
 function isZeroAt(p: Poly, v: number): boolean {
-  let bound = 0;
-  for (let i = 0; i < p.length; i++) bound += Math.abs(p[i] ?? 0) * Math.pow(Math.max(1, Math.abs(v)), i);
-  return Math.abs(evalPoly(p, v)) <= 1e-6 * Math.max(1, bound);
+  let value = 0;
+  let scale = 0;
+  for (let i = 0; i < p.length; i++) {
+    const term = (p[i] ?? 0) * Math.pow(v, i);
+    value += term;
+    scale += Math.abs(term);
+  }
+  if (scale === 0) return true;
+  return Math.abs(value) <= 1e-9 * scale;
 }
 
-/** Real roots of a polynomial of degree ≤ 2, or null when the degree is higher. */
+/**
+ * Real roots of a polynomial of degree ≤ 2, or null when the degree is
+ * higher. The polynomial is first scaled to a leading coefficient of 1,
+ * so the discriminant test is relative and tiny-but-genuine coefficients
+ * (e.g. every term scaled by 0.0000001) are judged correctly.
+ */
 function realRootsOf(p: Poly): number[] | null {
   const t = trimPoly(p);
   const deg = t.length - 1;
   if (deg <= 0) return [];
-  if (deg === 1) return [-(t[0] ?? 0) / t[1]];
+  const lead = t[deg];
+  if (deg === 1) return [-(t[0] ?? 0) / lead];
   if (deg === 2) {
-    const a = t[2];
-    const b = t[1] ?? 0;
-    const c = t[0] ?? 0;
-    const d = b * b - 4 * a * c;
-    if (d < -EPS) return [];
-    if (Math.abs(d) <= EPS) return [-b / (2 * a)];
+    const b = (t[1] ?? 0) / lead;
+    const c = (t[0] ?? 0) / lead;
+    const d = b * b - 4 * c;
+    const dScale = b * b + 4 * Math.abs(c);
+    if (d < -1e-12 * dScale) return [];
+    if (Math.abs(d) <= 1e-12 * dScale) return [-b / 2];
     const s = Math.sqrt(d);
-    return [(-b + s) / (2 * a), (-b - s) / (2 * a)];
+    // Numerically stable form: one root from q, the other from c / q.
+    const q = -0.5 * (b + (b >= 0 ? s : -s));
+    return [q, c / q];
   }
   return null;
 }
@@ -209,6 +257,36 @@ export function polyToString(p: Poly, variable: string): string {
 interface Rat {
   num: Poly;
   den: Poly;
+  /**
+   * Denominator polynomials from every sub-expression, kept separately.
+   * Simplification can cancel a denominator out of num/den (x/(1/x)
+   * simplifies to x²), but the original expression is still undefined
+   * where any of these is 0 — so the exclusions travel with the value
+   * and are checked at solve time.
+   */
+  excl: Poly[];
+}
+
+/** Restrictions a value carries: its recorded exclusions plus its current denominator. */
+function domainOf(r: Rat): Poly[] {
+  return polyDegree(r.den) >= 1 ? [...r.excl, r.den] : [...r.excl];
+}
+
+/** Union of exclusion lists, keeping only polys that can actually be 0 (degree ≥ 1), de-duplicated. */
+function mergeExcl(...lists: Poly[][]): Poly[] {
+  const seen = new Set<string>();
+  const out: Poly[] = [];
+  for (const list of lists) {
+    for (const p of list) {
+      const t = trimPoly(p);
+      if (polyDegree(t) < 1) continue;
+      const key = t.map((c) => c.toPrecision(12)).join(",");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(t);
+    }
+  }
+  return out;
 }
 
 function gcdInt(a: number, b: number): number {
@@ -222,7 +300,7 @@ function gcdInt(a: number, b: number): number {
   return a;
 }
 
-function makeRat(num: Poly, den: Poly = [1]): Rat {
+function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = []): Rat {
   let n = trimPoly(num);
   let d = trimPoly(den);
   if (isZeroPoly(d)) throw new Error("Division by zero.");
@@ -243,33 +321,43 @@ function makeRat(num: Poly, den: Poly = [1]): Rat {
   // for every x except 2).
   // Keep the denominator's leading coefficient positive, for tidy display.
   if (d[d.length - 1] < 0) {
-    return { num: n.map((c) => -c), den: d.map((c) => -c) };
+    return { num: n.map((c) => -c), den: d.map((c) => -c), excl };
   }
-  return { num: n, den: d };
+  return { num: n, den: d, excl };
 }
 
 function negRat(a: Rat): Rat {
   return makeRat(
     a.num.map((c) => -c),
     a.den,
+    a.excl,
   );
 }
 
 function addRat(a: Rat, b: Rat): Rat {
-  return makeRat(addPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)), mulPoly(a.den, b.den));
+  return makeRat(
+    addPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
+    mulPoly(a.den, b.den),
+    mergeExcl(domainOf(a), domainOf(b)),
+  );
 }
 
 function subRat(a: Rat, b: Rat): Rat {
-  return makeRat(subPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)), mulPoly(a.den, b.den));
+  return makeRat(
+    subPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
+    mulPoly(a.den, b.den),
+    mergeExcl(domainOf(a), domainOf(b)),
+  );
 }
 
 function mulRat(a: Rat, b: Rat): Rat {
-  return makeRat(mulPoly(a.num, b.num), mulPoly(a.den, b.den));
+  return makeRat(mulPoly(a.num, b.num), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)));
 }
 
 function divRat(a: Rat, b: Rat): Rat {
   if (isZeroPoly(b.num)) throw new Error("Division by zero.");
-  return makeRat(mulPoly(a.num, b.den), mulPoly(a.den, b.num));
+  // Dividing by b also requires b ≠ 0, so b's numerator joins the exclusions.
+  return makeRat(mulPoly(a.num, b.den), mulPoly(a.den, b.num), mergeExcl(domainOf(a), domainOf(b), [b.num]));
 }
 
 function powRat(base: Rat, exponent: Rat): Rat {
@@ -281,15 +369,23 @@ function powRat(base: Rat, exponent: Rat): Rat {
   const e = (eNum[0] ?? 0) / (eDen[0] ?? 1);
   if (!Number.isInteger(e)) throw new Error("Only whole-number powers are supported (e.g. x^2).");
   if (Math.abs(e) > 10) throw new Error("That power is too large (max ^10).");
-  if (e >= 0) return makeRat(powPoly(base.num, e), powPoly(base.den, e));
+  // Check the expanded degree from the degrees alone, before expanding:
+  // nested powers like ((((x^10)^10)^10)… must fail fast, not hang.
+  if (polyDegree(base.num) * Math.abs(e) > MAX_DEGREE || polyDegree(base.den) * Math.abs(e) > MAX_DEGREE) {
+    throw new Error(`That power expands beyond degree ${MAX_DEGREE} — too complex for this solver.`);
+  }
+  if (e >= 0) return makeRat(powPoly(base.num, e), powPoly(base.den, e), mergeExcl(domainOf(base)));
   if (isZeroPoly(base.num)) throw new Error("Division by zero.");
-  return makeRat(powPoly(base.den, -e), powPoly(base.num, -e));
+  // A negative power moves the base's numerator into a denominator,
+  // so the base must also be nonzero.
+  return makeRat(powPoly(base.den, -e), powPoly(base.num, -e), mergeExcl(domainOf(base), [base.num]));
 }
 
 function ratToString(r: Rat, variable: string): string {
   const numStr = polyToString(r.num, variable);
   if (isConstantOne(r.den)) return numStr;
-  return `(${numStr}) / (${polyToString(r.den, variable)})`;
+  const denStr = polyToString(r.den, variable);
+  return polyDegree(r.den) === 0 ? `(${numStr}) / ${denStr}` : `(${numStr}) / (${denStr})`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -529,27 +625,34 @@ function solvePolynomialCore(p: Poly, variable: string): PolyCore {
   const b = poly[1] ?? 0;
   const c = poly[0] ?? 0;
   const discriminant = b * b - 4 * a * c;
+  // Judge the discriminant relative to the terms that produced it, so an
+  // equation whose coefficients are all tiny (or all huge) is classified
+  // the same as its scaled-by-a-constant equivalent.
+  const discScale = b * b + 4 * Math.abs(a * c);
   const steps = [
     `Here a = ${formatDecimal(a)}, b = ${formatDecimal(b)}, c = ${formatDecimal(c)}`,
     `Discriminant: b² − 4ac = ${formatDecimal(b)}² − 4·${formatDecimal(a)}·${formatDecimal(c)} = ${formatDecimal(discriminant)}`,
   ];
 
-  if (discriminant > EPS) {
+  if (discriminant > 1e-12 * discScale) {
     const sqrtD = Math.sqrt(discriminant);
-    const r1 = (-b + sqrtD) / (2 * a);
-    const r2 = (-b - sqrtD) / (2 * a);
-    const s1 = formatAnswer(r1);
-    const s2 = formatAnswer(r2);
+    // Numerically stable form: the textbook (−b ± √D) / 2a can cancel the
+    // smaller root to exactly 0 when |b| is huge (x² + 1000000000x + 1).
+    // Compute the larger root via q, then the other from the product c/a.
+    const q = -0.5 * (b + (b >= 0 ? sqrtD : -sqrtD));
+    const roots = [q / a, c / q].sort((m, n) => n - m);
+    const s1 = formatAnswer(roots[0]);
+    const s2 = formatAnswer(roots[1]);
     steps.push(`Quadratic formula: ${variable} = (−b ± √${formatDecimal(discriminant)}) / 2a = ${s1} or ${s2}`);
     return {
       kind: "two",
       solutions: [s1, s2],
-      numericSolutions: [r1, r2],
+      numericSolutions: roots,
       steps,
     };
   }
 
-  if (Math.abs(discriminant) <= EPS) {
+  if (Math.abs(discriminant) <= 1e-12 * discScale) {
     const r = -b / (2 * a);
     const s = formatAnswer(r);
     steps.push(`The discriminant is 0, so there is one repeated root: ${variable} = −b / 2a = ${s}`);
@@ -617,14 +720,54 @@ function solveUnsafe(rawInput: string): SolveResult {
 
   const lhs = new Parser(lhsTokens, variableKey).parse();
   const rhs = new Parser(rhsTokens, variableKey).parse();
-  const diff = subRat(lhs, rhs);
+  const rawDiff = subRat(lhs, rhs);
+
+  // Scale the numerator to a leading coefficient of 1 (when it has one).
+  // Zero tests and the discriminant then judge the equation by its shape,
+  // not by how tiny or huge the typed coefficients are: 0.0000000000005x = 1
+  // must solve exactly like x = 2000000000000. The degree scan uses a
+  // near-zero floor so a genuine tiny leading coefficient still counts.
+  let num = trimPoly(rawDiff.num);
+  let topDeg = num.length - 1;
+  while (topDeg > 0 && Math.abs(num[topDeg]) < 1e-280) topDeg--;
+  num = num.slice(0, topDeg + 1);
+  if (topDeg >= 1 && Math.abs(num[topDeg] - 1) >= 1e-12) {
+    const leadCoeff = num[topDeg];
+    num = trimPoly(num.map((c) => c / leadCoeff));
+  }
+  const diff: Rat = { num, den: rawDiff.den, excl: rawDiff.excl };
+
   const hasDenominator = !isConstantOne(diff.den);
   const standardForm = `${ratToString(diff, variable)} = 0`;
 
-  // Values that would make a denominator 0 are never allowed.
-  const excludedRoots = hasDenominator ? realRootsOf(diff.den) : [];
+  // Values that make any denominator in the original equation 0 are never
+  // allowed — including denominators that cancelled away while simplifying
+  // (x/(1/x) simplifies to x², but x = 0 is still not a valid answer),
+  // which diff.excl remembers.
+  // diff.excl already covers every denominator root: each operation
+  // records its operands' denominators, and the final combined
+  // denominator's roots are a subset of those. (Enumerating the combined
+  // denominator itself would fail: it can be degree 4+ even when every
+  // original denominator is linear.) The fallback is defensive only.
+  const excludedPolys = diff.excl.length > 0 ? diff.excl : hasDenominator ? [diff.den] : [];
+  let excludedRoots: number[] | null = [];
+  for (const p of excludedPolys) {
+    const roots = realRootsOf(p);
+    if (roots === null) {
+      excludedRoots = null;
+      break;
+    }
+    excludedRoots.push(...roots);
+  }
+  if (excludedRoots) {
+    excludedRoots.sort((a, b) => a - b);
+    excludedRoots = excludedRoots.filter(
+      (r, i) => i === 0 || Math.abs(r - (excludedRoots as number[])[i - 1]) > 1e-9 * Math.max(1, Math.abs(r)),
+    );
+  }
   const excludedList =
     excludedRoots && excludedRoots.length > 0 ? excludedRoots.map((r) => formatFractionOrDecimal(r)).join(", ") : null;
+  const exclusionsUnknown = excludedRoots === null;
 
   const leadSteps: string[] = [];
   if (!hasDenominator) {
@@ -633,6 +776,8 @@ function solveUnsafe(rawInput: string): SolveResult {
     leadSteps.push(`Combine into a single fraction: ${standardForm}`);
     if (excludedList) {
       leadSteps.push(`A denominator can't be 0, so ${variable} ≠ ${excludedList}.`);
+    } else if (exclusionsUnknown) {
+      leadSteps.push(`A denominator can't be 0, so any answer that makes one 0 will be rejected.`);
     }
     leadSteps.push(`A fraction is 0 exactly when its top is 0, so solve: ${polyToString(diff.num, variable)} = 0`);
   }
@@ -640,13 +785,13 @@ function solveUnsafe(rawInput: string): SolveResult {
   const core = solvePolynomialCore(diff.num, variable);
   const steps = [...leadSteps, ...core.steps];
 
-  // Reject candidate roots that make a denominator 0 (extraneous roots).
+  // Reject candidate roots that make any original denominator 0 (extraneous roots).
   let kind = core.kind;
   let solutions = core.solutions;
-  if (hasDenominator && (kind === "unique" || kind === "two" || kind === "double")) {
+  if (excludedPolys.length > 0 && (kind === "unique" || kind === "two" || kind === "double")) {
     const kept: string[] = [];
     core.numericSolutions.forEach((value, i) => {
-      if (isZeroAt(diff.den, value)) {
+      if (excludedPolys.some((p) => isZeroAt(p, value))) {
         steps.push(
           `${variable} = ${core.solutions[i]} is rejected — it makes a denominator 0 in the original equation.`,
         );
@@ -675,10 +820,15 @@ function solveUnsafe(rawInput: string): SolveResult {
       answerText = `${variable} = ${solutions[0]} (repeated root)`;
       break;
     case "infinite":
-      answerText = excludedList
-        ? `${variable} can be any real number except ${excludedList}`
-        : `${variable} can be any real number`;
-      if (excludedList) solutions = [`any real number except ${excludedList}`];
+      if (excludedList) {
+        answerText = `${variable} can be any real number except ${excludedList}`;
+        solutions = [`any real number except ${excludedList}`];
+      } else if (exclusionsUnknown) {
+        answerText = `${variable} can be any real number except values that make a denominator 0`;
+        solutions = [`any real number except values that make a denominator 0`];
+      } else {
+        answerText = `${variable} can be any real number`;
+      }
       break;
     case "complex":
       answerText = `No real solution (${variable} = ${solutions[0]} or ${variable} = ${solutions[1]})`;

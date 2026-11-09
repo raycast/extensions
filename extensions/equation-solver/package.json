@@ -9,13 +9,11 @@
       "description": "Type an equation like x+15=20 and get x = 5, with steps",
       "mode": "view",
       "name": "equation-solver",
-      "subtitle": "Linear & quadratic, one unknown",
       "title": "Equation Solver"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.11.1",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^2.11.1"
   },
   "description": "Solve linear and quadratic equations in one unknown (x, y, z, ...) by typing them in",
   "devDependencies": {
@@ -40,6 +38,5 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
-  "title": "Equation Solver",
-  "tools": []
+  "title": "Equation Solver"
 }
