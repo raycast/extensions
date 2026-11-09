@@ -111,7 +111,7 @@ export default function Command() {
       if (!fs.existsSync(ignoreFile)) {
         console.log(`creating default .fdignore file in: ${ignoreFile}`);
         // Create directories
-        afs.mkdir(path.dirname(ignoreFile), { recursive: true });
+        await afs.mkdir(path.dirname(ignoreFile), { recursive: true });
         const ignorePaths = [
           "/nix/",
           "/System/",
@@ -334,6 +334,11 @@ export default function Command() {
                   title="Copy Path to Clipboard"
                   content={filepath}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <Action.Paste
+                  title="Paste Path in Active App"
+                  content={filepath}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                 />
                 <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
               </ActionPanel>
