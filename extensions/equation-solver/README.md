@@ -2,7 +2,7 @@
 
 Solve linear and quadratic equations right inside Raycast. Type an equation in the search bar and get the answer instantly — with the algebra steps shown beside it, so you can check the working, not just the result.
 
-![Equation Solver in action](metadata/equation-solver-1.png)
+![Equation Solver in action](media/equation-solver-1.png)
 
 ## Features
 
