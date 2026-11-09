@@ -1,6 +1,6 @@
 # Little Chrome Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-09
 
 - Open URLs or Google searches in a chromeless Chrome app window
 - Suggestions from Chrome history with favicons, ranked by frecency
