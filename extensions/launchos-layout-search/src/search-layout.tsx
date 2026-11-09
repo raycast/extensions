@@ -7,6 +7,7 @@ import {
   List,
   getPreferenceValues,
   open,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { showFailureToast, useSQL } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -31,7 +32,50 @@ async function openApp(app: LayoutApp) {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const database = preferences.databasePath?.trim() || DEFAULT_DATABASE;
+  const [, setCheck] = useState(0);
+  // Checked before useSQL is ever mounted: useSQL validates its path even with execute: false.
   const pathProblem = databasePathProblem(database);
+  if (pathProblem) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Could Not Read LaunchOS Layout"
+          icon={Icon.Warning}
+          description={pathProblem}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Check Again"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={() => setCheck((n) => n + 1)}
+              />
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+  return (
+    <LayoutList
+      database={database}
+      includeHidden={preferences.includeHidden === true}
+    />
+  );
+}
+
+function LayoutList({
+  database,
+  includeHidden,
+}: {
+  database: string;
+  includeHidden: boolean;
+}) {
   const {
     data: rows,
     isLoading,
@@ -39,25 +83,22 @@ export default function Command() {
     permissionView,
     revalidate,
   } = useSQL<Record<string, unknown>>(database, READ_QUERY, {
-    execute: !pathProblem,
     permissionPriming: "This is required to read your LaunchOS layout.",
     onError: () => undefined,
   });
   const { data, parseError } = useMemo(() => {
     if (!rows) return {};
     try {
-      return { data: parseLayout(rows, preferences.includeHidden === true) };
+      return { data: parseLayout(rows, includeHidden) };
     } catch (failure) {
       return { parseError: failure as Error };
     }
-  }, [rows, preferences.includeHidden]);
-  const error = pathProblem
-    ? new Error(pathProblem)
-    : sqlError
-      ? new Error(
-          "Could not read this LaunchOS layout. Its database may be busy or use a newer format. Refresh after LaunchOS finishes loading.",
-        )
-      : parseError;
+  }, [rows, includeHidden]);
+  const error = sqlError
+    ? new Error(
+        "Could not read this LaunchOS layout. Its database may be busy or use a newer format. Refresh after LaunchOS finishes loading.",
+      )
+    : parseError;
   const [group, setGroup] = useState("all");
   const apps = data?.apps || [];
   const groups = [...new Set(apps.map((app) => app.group))].sort((a, b) =>
