@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, List, Toast, open, popToRoot, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  open,
+  popToRoot,
+  showToast,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 
@@ -84,7 +96,7 @@ function CreateRelease() {
               <Action
                 title="Refresh Releases"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => mutate()}
               />
             </ActionPanel>
@@ -119,12 +131,15 @@ function CreateRelease() {
                   <Action.CopyToClipboard
                     title="Copy Release URL"
                     content={release.html_url}
-                    shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                    }}
                   />
                   <Action
                     title="Refresh Releases"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={() => mutate()}
                   />
                 </ActionPanel>
@@ -193,12 +208,12 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
         toast.title = `Created release ${data.tag_name}`;
         toast.primaryAction = {
           title: "Open Release in Browser",
-          shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+          shortcut: Keyboard.Shortcut.Common.OpenWith,
           onAction: () => open(data.html_url),
         };
         toast.secondaryAction = {
           title: "Copy Release URL",
-          shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+          shortcut: Keyboard.Shortcut.Common.Copy,
           onAction: () => Clipboard.copy(data.html_url),
         };
 
@@ -346,7 +361,10 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
           <Action
             title={notesAreGenerated ? "Regenerate Release Notes" : "Generate Release Notes"}
             icon={Icon.Wand}
-            shortcut={{ modifiers: ["cmd"], key: "g" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "g" },
+              Windows: { modifiers: ["ctrl"], key: "g" },
+            }}
             onAction={generateNotes}
           />
           <Action.OpenInBrowser title="Open Releases in Browser" url={`https://github.com/${repository}/releases`} />
@@ -385,7 +403,7 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
       <Form.TextArea
         {...itemProps.notes}
         title="Notes"
-        placeholder="Generate notes from merged pull requests (⌘G) or write your own Markdown."
+        placeholder="Generate notes from merged pull requests or write your own Markdown."
         enableMarkdown
         info="Leave empty to let GitHub generate the release notes automatically."
         onChange={handleNotesChange}

@@ -1,12 +1,12 @@
-import { Action, Clipboard, Icon, showToast, Toast } from "@raycast/api";
+import { failToast, onErrorToast } from "@chrismessina/raycast-kit";
+import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { addFavorite, fetchFavorites, removeFavorite, type Favorite, type FavoriteKind } from "../lib/favorites";
 
 export function useFavorites() {
-  return useCachedPromise(fetchFavorites, [], { failureToastOptions: { title: "Couldn't load favorites" } });
+  return useCachedPromise(fetchFavorites, [], { onError: onErrorToast({ title: "Couldn't load favorites" }) });
 }
 
-/** Toggle a person or company in the matching private Cosign list. */
 export function FavoriteAction({
   kind,
   id,
@@ -33,11 +33,9 @@ export function FavoriteAction({
       toast.style = Toast.Style.Success;
       toast.title = existing ? `Removed ${name}` : `Favorited ${name}`;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = existing ? "Couldn't remove favorite" : "Couldn't add favorite";
-      toast.message = message;
-      toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+      failToast(toast, error, {
+        title: existing ? "Couldn't remove favorite" : "Couldn't add favorite",
+      });
     }
   }
 

@@ -18,6 +18,7 @@ export type Task = {
   due_date?: string;
   due_time?: string;
   tags: Tag[];
+  action: { type: string; value?: string };
   presentation: { due_date_formatted?: string; is_overdue: boolean };
 };
 
@@ -30,7 +31,39 @@ export type TaskValues = {
   priority: string;
   starred: boolean;
   tag_ids: string[];
+  // Undefined when the form leaves the task's action alone (a type missing from ACTIONS).
+  action_type?: string;
+  action_value?: string;
 };
+
+// 2Do's task action types besides "none", with how the form asks for each one's value.
+export const ACTIONS: Record<string, { title: string; label: string; placeholder: string }> = {
+  url: { title: "Link", label: "URL", placeholder: "https://" },
+  call: { title: "Call", label: "Phone Number", placeholder: "+1 555 0100" },
+  message: { title: "Message", label: "Phone Number", placeholder: "+1 555 0100" },
+  mail: { title: "Email", label: "Email Address", placeholder: "name@example.com" },
+  visit: { title: "Visit", label: "Address", placeholder: "1 Infinite Loop, Cupertino" },
+  google: { title: "Google", label: "Search Terms", placeholder: "Search Google" },
+};
+
+export function actionValueError(type?: string, value?: string) {
+  if (!type || type === "none") return;
+  if (!value?.trim()) return "Required";
+  if (type === "url" && !(/^[a-z][\w+.-]*:\/\//i.test(value) && URL.canParse(value)))
+    return "Enter a full link, like https://example.com";
+}
+
+// The URL that runs a task's action, e.g. tel: for a call. Undefined for no action or an unknown type.
+export function actionURL({ type, value = "" }: Task["action"]) {
+  const phone = value.replace(/[^\d+*#]/g, "");
+  const query = encodeURIComponent(value);
+  if (type === "url") return value;
+  if (type === "call") return `tel:${phone}`;
+  if (type === "message") return `sms:${phone}`;
+  if (type === "mail") return `mailto:${value}`;
+  if (type === "visit") return `maps://?q=${query}`;
+  if (type === "google") return `https://www.google.com/search?q=${query}`;
+}
 
 // Calls a command from 2Do's AppleScript "Automation Suite" (same commands and arguments as 2Do's MCP server).
 // 2Do errors are thrown as script errors, e.g. "not_found: Task 'x' was not found."
@@ -80,7 +113,19 @@ export function taskToValues(task: Task): TaskValues {
     priority: task.priority,
     starred: task.starred,
     tag_ids: task.tags.map((t) => t.tag_id),
+    action_type: task.action.type === "none" || task.action.type in ACTIONS ? task.action.type : undefined,
+    action_value: task.action.value ?? "",
   };
+}
+
+// The task's links: its link action first, then URLs in the notes, without duplicates.
+export function taskLinks(task: Task): string[] {
+  const inNotes = (task.notes.match(/\b[a-z][\w+.-]*:\/\/[^\s<>"]+/gi) ?? []).map((u) => {
+    u = u.replace(/[.,;:!?]+$/, "");
+    return u.endsWith(")") && !u.includes("(") ? u.slice(0, -1) : u;
+  });
+  const link = task.action.type === "url" ? task.action.value : undefined;
+  return [...new Set([link, ...inNotes].filter((u): u is string => !!u))];
 }
 
 // Creates a task, or updates `task` (moving it if the list changed).
@@ -92,12 +137,18 @@ export async function saveTask(v: TaskValues, task?: Task) {
     ...dateFields("start", v.start, !!task),
     ...dateFields("due", v.due, !!task),
   };
+  // 2Do rejects a value on "none" and requires one on every other type.
+  const action =
+    !v.action_type || v.action_type === "none"
+      ? { type: "none" }
+      : { type: v.action_type, value: v.action_value?.trim() };
   if (!task) {
     await twoDo("create_task", {
       ...fields,
       list_id: v.list_id,
       notes: v.notes || undefined,
       ...(v.tag_ids.length > 0 && { tag_update: { operation: "set", tag_ids: v.tag_ids } }),
+      ...(action.type !== "none" && { action }),
     });
     return;
   }
@@ -106,6 +157,8 @@ export async function saveTask(v: TaskValues, task?: Task) {
     task_id: task.task_id,
     notes: v.notes,
     tag_update: { operation: "set", tag_ids: v.tag_ids },
+    ...(v.action_type !== undefined &&
+      (action.type !== task.action.type || action.value !== task.action.value) && { action }),
   });
   if (v.list_id !== task.list_id) await twoDo("move_task", { task_id: task.task_id, list_id: v.list_id });
 }
