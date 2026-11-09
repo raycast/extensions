@@ -3256,8 +3256,13 @@ test("a selected folder shows its subfolders, then its items, next to the list",
   const cards = { shareId: "vault", path: [BANKING, CARDS], itemCount: 1 };
   const travel = { shareId: "vault", path: [TRAVEL], itemCount: 0 };
   const loan = { ...inBanking, itemId: "loan", title: "Alpha", email: undefined, username: "alice" };
+  const card: Item = { ...inBanking, itemId: "card", title: "Visa", type: "credit_card", email: undefined };
+  const note: Item = { ...inBanking, itemId: "note", title: "Zeta", type: "note", email: undefined };
   const insideFolders = new Map([
-    [folders.folderEntryValue(banking), { folders: [cards], items: [inBanking, loan] }],
+    [
+      folders.folderEntryValue(banking),
+      { folders: [cards], items: [inBanking, loan, { ...card, cardLastDigits: "4242" }, note] },
+    ],
     [folders.folderEntryValue(travel), { folders: [], items: [] }],
   ]);
   const list = render([unfiled], [], { folders: [banking, travel], insideFolders, sortChoice: { current: "name" } });
@@ -3266,8 +3271,8 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     actions((bankingRow.detail as Element).props.metadata)
       .filter((props) => typeof props.title === "string")
       .map((props) => `${props.title}: ${props.text}`),
-    // By name, as the folder lists them once open.
-    ["Cards: 1 item", "Alpha: alice", "Example: test@example.com"],
+    // By name, as the folder lists them once open. A card shows its last digits, as in its details.
+    ["Cards: 1 item", "Alpha: alice", "Example: test@example.com", "Visa: •••• 4242", "Zeta: Note"],
   );
   assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
 });

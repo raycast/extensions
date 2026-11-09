@@ -44,6 +44,8 @@ export interface Item {
   hasNote?: boolean;
   /** Shared with the user on its own: `shareId` is then that item's share, not a vault's. */
   sharedWithMe?: boolean;
+  /** The last 4 digits of a card's number, which tell cards apart. The number itself is never part of `Item`. */
+  cardLastDigits?: string;
   /** The folder of its vault the item is in, if any. */
   folderId?: string;
   /** The item's folder and the ones it's in, from the vault's root down, once their names are known. */

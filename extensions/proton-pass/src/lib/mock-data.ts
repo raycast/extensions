@@ -70,6 +70,7 @@ export const MOCK_ITEMS: Item[] = [
     type: "credit_card",
     vaultName: "Personal",
     hasTotp: false,
+    cardLastDigits: "4242",
   },
   {
     shareId: "vault-2",

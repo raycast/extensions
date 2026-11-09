@@ -365,3 +365,14 @@ test("still reads custom fields printed as name, value and type", () => {
   );
   assert.deepEqual(detail.customFields, [{ name: "PIN", value: "1234", type: "hidden" }]);
 });
+
+test("a listed card keeps its last 4 digits, never its number, which would be cached", () => {
+  const item = normalizeItem(
+    viewed({ CreditCard: { number: "4242 4242 4242 1234", verification_number: "123", pin: "0000" } }),
+    "Personal",
+  );
+  assert.equal(item.cardLastDigits, "1234");
+  assert.equal(JSON.stringify(item).includes("4242"), false);
+  assert.equal(Object.hasOwn(item, "fields"), false);
+  assert.equal(normalizeItem(viewed({ CreditCard: { number: "" } }), "Personal").cardLastDigits, undefined);
+});

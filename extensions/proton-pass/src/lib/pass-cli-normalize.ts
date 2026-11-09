@@ -1,4 +1,4 @@
-import { formatAddress, formatExpirationDate, formatFieldDate, formatWifiSecurity } from "./item-fields";
+import { formatAddress, formatExpirationDate, formatFieldDate, formatWifiSecurity, lastDigitsOf } from "./item-fields";
 import { Folder, Item, ItemDetail, ItemType, PassCliError, Vault, VaultRole } from "./types";
 
 function trimOrUndefined(value: unknown): string | undefined {
@@ -146,6 +146,9 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
   const createdAt = normalizeTimestamp(raw.create_time ?? raw.createTime ?? raw.created_at);
   const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
   const folderId = trimOrUndefined(raw.folder_id ?? raw.folderId);
+  // A card's last digits tell it apart in lists; its number itself is never part of `Item`, which gets cached.
+  const cardNumber = type === "credit_card" ? getTypeSpecificData(raw)?.number : undefined;
+  const cardLastDigits = typeof cardNumber === "string" ? lastDigitsOf(cardNumber) : undefined;
 
   const vaultName = vaultNameOverride ?? trimOrUndefined(raw.vaultName ?? raw.vault_name) ?? "Unknown Vault";
 
@@ -168,6 +171,7 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
     createdAt,
     hasNote,
     folderId,
+    ...(cardLastDigits ? { cardLastDigits } : {}),
   };
 }
 

@@ -174,7 +174,12 @@ export function ItemList({
                 key={itemKey(item)}
                 title={item.title}
                 icon={getListIcon(item, showWebsiteIcons)}
-                text={item.username ?? item.email ?? formatTypeLabel(item.type)}
+                // What tells the item apart, as the details show it: a login's username or email, a card's last digits.
+                text={
+                  item.username ??
+                  item.email ??
+                  (item.cardLastDigits ? `•••• ${item.cardLastDigits}` : formatTypeLabel(item.type))
+                }
               />
             ))}
           </List.Item.Detail.Metadata>
