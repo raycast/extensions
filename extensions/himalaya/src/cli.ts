@@ -55,21 +55,30 @@ export function messageMoveArgs(major: number, account: string, id: string, targ
 }
 
 export function messageReadArgs(major: number, account: string, id: string): string[] {
-  // v2 has no `--no-headers`; readMessageBody drops the header block instead
+  // v2 has no `--no-headers`, so read the JSON and take the text parts from it
   return major >= 2
-    ? ["message", "read", id, "--account", account]
+    ? ["message", "read", id, "--account", account, "--json"]
     : ["message", "read", "--no-headers", id, "--account", account];
 }
 
-/**
- * The body of `message read` output. v2 prints the headers first, up to a blank line,
- * and a line like `[1] text/plain (13 B)` before each part.
- */
+const V2Message = z.object({
+  text_body: z.array(z.number()).default([]),
+  html_body: z.array(z.number()).default([]),
+  parts: z.array(z.object({ body: z.unknown() })).default([]),
+});
+
+/** The body of `message read` output: v2 prints JSON, where `text_body` and `html_body` index the decoded parts. */
 export function readMessageBody(major: number, stdout: string): string {
   if (major < 2) return stdout;
-  const end = stdout.search(/\r?\n\r?\n/);
-  const body = end === -1 ? stdout : stdout.slice(end);
-  return body.replace(/^\[\d+\] \S+\/\S+ \([^)]*\)\r?\n/gm, "").trim();
+  const message = V2Message.parse(JSON.parse(stdout));
+  const contents = (indexes: number[], kind: "Text" | "Html") =>
+    indexes.flatMap((index) => {
+      const body = message.parts[index]?.body;
+      const content = body && typeof body === "object" ? (body as Record<string, unknown>)[kind] : undefined;
+      return typeof content === "string" ? [content] : [];
+    });
+  const text = contents(message.text_body, "Text");
+  return (text.length > 0 ? text : contents(message.html_body, "Html")).join("\n\n");
 }
 
 const V2Address = z.object({
