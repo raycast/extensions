@@ -9,9 +9,22 @@ import { ensureFfmpeg } from "./ffmpeg";
 import { adapterFor, Device, Playback } from "./protocols";
 import { CAST_LOG, protocolLog } from "./protocols/log";
 
-const HLS_DIR = path.join(environment.supportPath, "hls");
+// Per-cast files, named by session id: cleaning up one cast can never delete another cast's files.
+const hlsDir = (session: string) => path.join(environment.supportPath, `hls-${session}`);
+const mirrorStatus = (session: string) => path.join(environment.supportPath, `mirror-status-${session}.json`);
+
+/** Files from earlier versions, which shared one folder between casts. */
+function removeLegacyFiles() {
+  fs.rmSync(path.join(environment.supportPath, "hls"), { recursive: true, force: true });
+  fs.rmSync(path.join(environment.supportPath, "mirror-status.json"), { force: true });
+}
+
+/** Delete a cast's temporary files (captured screen contents and status). */
+function removeSessionFiles(session: string) {
+  fs.rmSync(hlsDir(session), { recursive: true, force: true });
+  fs.rmSync(mirrorStatus(session), { force: true });
+}
 const LOG_FILE = path.join(environment.supportPath, "ffmpeg.log");
-const MIRROR_STATUS = path.join(environment.supportPath, "mirror-status.json");
 
 /** Thrown when macOS isn't delivering screen frames (Screen Recording permission missing). */
 export class ScreenPermissionError extends Error {}
@@ -261,6 +274,7 @@ export async function startCast(device: Device, onProgress?: (message: string) =
   const session = randomBytes(12).toString("hex");
   const previous = swapActive({ session, pid: 0, device, playback: {} });
   if (previous) await cleanUp(previous);
+  removeLegacyFiles();
   try {
     const ffmpeg = await ensureFfmpeg(onProgress);
     await ensureCurrent(session);
@@ -281,6 +295,7 @@ export async function startCast(device: Device, onProgress?: (message: string) =
     // Clean up only if this cast still owns the record; otherwise whoever replaced it already did.
     const mine = takeActive(session);
     if (mine) await cleanUp(mine);
+    else removeSessionFiles(session); // cancelled: its worker is already stopped, only its files remain
     throw e;
   }
 }
@@ -299,7 +314,8 @@ async function startMirror(
   latency: { targetDelayMs: number; fps: number; auto: boolean },
 ) {
   protocolLog("mirror")(`mirroring to ${device.name} (${device.host}:${device.port})`);
-  fs.rmSync(MIRROR_STATUS, { force: true });
+  const statusFile = mirrorStatus(session);
+  fs.rmSync(statusFile, { force: true });
   const config = {
     session,
     host: device.host,
@@ -309,7 +325,7 @@ async function startMirror(
     captureArgs: capture,
     castLog: CAST_LOG,
     ffmpegLog: LOG_FILE,
-    statusFile: MIRROR_STATUS,
+    statusFile,
     ...latency,
   };
   const pid = spawnDetached("mirror.js", [JSON.stringify(config)]);
@@ -320,7 +336,7 @@ async function startMirror(
     await sleep(500);
     await ensureCurrent(session, pid);
     try {
-      status = JSON.parse(fs.readFileSync(MIRROR_STATUS, "utf8"));
+      status = JSON.parse(fs.readFileSync(statusFile, "utf8"));
     } catch {
       // not written yet
     }
@@ -347,8 +363,9 @@ async function startMirror(
 
 /** HLS: the device plays the screen like a live video (DLNA, Roku, and Google Cast fallback). */
 async function startHls(session: string, device: Device, ffmpeg: string, capture: string[], bindIp: string) {
-  fs.rmSync(HLS_DIR, { recursive: true, force: true });
-  fs.mkdirSync(HLS_DIR, { recursive: true, mode: 0o700 });
+  const dir = hlsDir(session);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   const token = randomBytes(24).toString("hex");
 
   const args = [
@@ -358,14 +375,14 @@ async function startHls(session: string, device: Device, ffmpeg: string, capture
     "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-g", "30",
     "-f", "hls", "-hls_time", "1", "-hls_list_size", "4",
     "-hls_flags", "delete_segments+independent_segments",
-    path.join(HLS_DIR, "index.m3u8"),
+    path.join(dir, "index.m3u8"),
   ]; // prettier-ignore
 
   const pid = spawnDetached("streamer.js", [
     bindIp,
     device.host,
     token,
-    HLS_DIR,
+    dir,
     ffmpeg,
     JSON.stringify(args),
     LOG_FILE,
@@ -374,8 +391,8 @@ async function startHls(session: string, device: Device, ffmpeg: string, capture
   await updateActive(session, { pid, playback: { streamToken: token } }, pid);
 
   // Wait for the server's port and the first playlist before telling the device to load it.
-  const playlist = path.join(HLS_DIR, "index.m3u8");
-  const portFile = path.join(HLS_DIR, ".port");
+  const playlist = path.join(dir, "index.m3u8");
+  const portFile = path.join(dir, ".port");
   const ready = () => fs.existsSync(playlist) && fs.existsSync(portFile);
   for (let i = 0; i < 30 && !ready() && isAlive(pid); i++) {
     await sleep(500);
@@ -409,6 +426,5 @@ async function cleanUp(active: ActiveCast): Promise<void> {
     // device unreachable; the stream itself is already stopped locally
   }
   // Don't leave captured screen contents on disk.
-  fs.rmSync(HLS_DIR, { recursive: true, force: true });
-  fs.rmSync(MIRROR_STATUS, { force: true });
+  removeSessionFiles(active.session);
 }
