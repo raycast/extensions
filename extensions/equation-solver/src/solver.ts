@@ -67,6 +67,15 @@ const EPS = 1e-12;
  */
 const TRIM_EPS = 1e-13;
 
+/**
+ * Relative bound for judging a discriminant as zero. The discriminant
+ * b² - 4c is computed with a rounding error of a few ulps of its scale
+ * (~1e-15 relative), so 1e-13 leaves two orders of magnitude of margin
+ * while still preserving genuine small discriminants at large scales
+ * (x² - 2000000x + 999999999999 has discriminant exactly 4 at scale 8e12).
+ */
+const DISC_REL_EPS = 1e-13;
+
 /** Intermediate polynomials are capped well below any size that could stall the UI. */
 const MAX_DEGREE = 100;
 
@@ -74,18 +83,35 @@ const MAX_DEGREE = 100;
 /* Number formatting                                                   */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Expand a scientific-notation string ("1.600000000e-10") into plain
+ * decimal ("0.00000000016"), keeping every significant digit. A fixed
+ * number of decimal places (toFixed(10)) would round 1.6e-10 up to
+ * 0.0000000002 — a 25% error — so the digits are moved, not recomputed.
+ * Returns null for large exponents, where scientific form is left as is.
+ */
+function expandScientific(s: string): string | null {
+  const m = /^(-?)(\d+)(?:\.(\d+))?e([+-]?\d+)$/.exec(s);
+  if (!m) return null;
+  const exp = parseInt(m[4], 10);
+  if (exp >= 0) return null;
+  const digits = (m[2] + (m[3] ?? "")).replace(/0+$/, "");
+  if (digits === "") return "0";
+  return `${m[1]}0.${"0".repeat(-exp - 1)}${digits}`;
+}
+
 /** Plain decimal, trimmed: 3.75, -2, 0.3333333333 */
 export function formatDecimal(n: number): string {
   if (!Number.isFinite(n)) return String(n);
   if (Math.abs(n) < EPS) return "0";
   if (Math.abs(n - Math.round(n)) < 1e-10) return String(Math.round(n));
-  const s = String(parseFloat(n.toPrecision(10)));
+  const precise = n.toPrecision(10);
   // Avoid scientific notation for small magnitudes: -0.000000001, not -1e-9.
-  if (s.includes("e") && Math.abs(n) < 1e-4) {
-    const fixed = n.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
-    return fixed === "" || fixed === "-0" ? "0" : fixed;
+  if (precise.includes("e") && Math.abs(n) < 1e-4) {
+    const expanded = expandScientific(precise);
+    if (expanded !== null) return expanded;
   }
-  return s;
+  return String(parseFloat(precise));
 }
 
 /** Fraction if there is a tidy one, else a plain decimal: "15/4", "0.3333333333". */
@@ -211,8 +237,8 @@ function realRootsOf(p: Poly): number[] | null {
     const c = (t[0] ?? 0) / lead;
     const d = b * b - 4 * c;
     const dScale = b * b + 4 * Math.abs(c);
-    if (d < -1e-12 * dScale) return [];
-    if (Math.abs(d) <= 1e-12 * dScale) return [-b / 2];
+    if (d < -DISC_REL_EPS * dScale) return [];
+    if (Math.abs(d) <= DISC_REL_EPS * dScale) return [-b / 2];
     const s = Math.sqrt(d);
     // Numerically stable form: one root from q, the other from c / q.
     const q = -0.5 * (b + (b >= 0 ? s : -s));
@@ -265,6 +291,22 @@ interface Rat {
    * and are checked at solve time.
    */
   excl: Poly[];
+  /**
+   * Upper bound on the rounding error carried by num's coefficients,
+   * in num's current scale. Cancellation of large numbers leaves a
+   * leftover proportional to the operands (10000.1 - 10000 leaves
+   * ~3.6e-13), while a typed 0.0000000000005 is exact — a fixed cutoff
+   * cannot tell them apart, so every operation propagates this bound
+   * and the solver only trusts coefficients that exceed it.
+   */
+  err: number;
+}
+
+/** Largest absolute coefficient of a polynomial. */
+function maxAbs(p: Poly): number {
+  let m = 0;
+  for (const c of p) m = Math.max(m, Math.abs(c));
+  return m;
 }
 
 /** Restrictions a value carries: its recorded exclusions plus its current denominator. */
@@ -300,9 +342,10 @@ function gcdInt(a: number, b: number): number {
   return a;
 }
 
-function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = []): Rat {
+function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err = 0): Rat {
   let n = trimPoly(num);
   let d = trimPoly(den);
+  let e = err;
   if (isZeroPoly(d)) throw new Error("Division by zero.");
   // Cancel a common whole-number factor so steps stay tidy:
   // (-125Va + 1250) / 250 displays as (-Va + 10) / 2.
@@ -313,6 +356,7 @@ function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = []): Rat {
     if (g > 1) {
       n = n.map((c) => c / g);
       d = d.map((c) => c / g);
+      e = e / g;
     }
   }
   // Note: the denominator is kept even when the numerator is 0 — the
@@ -321,9 +365,9 @@ function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = []): Rat {
   // for every x except 2).
   // Keep the denominator's leading coefficient positive, for tidy display.
   if (d[d.length - 1] < 0) {
-    return { num: n.map((c) => -c), den: d.map((c) => -c), excl };
+    return { num: n.map((c) => -c), den: d.map((c) => -c), excl, err: e };
   }
-  return { num: n, den: d, excl };
+  return { num: n, den: d, excl, err: e };
 }
 
 function negRat(a: Rat): Rat {
@@ -331,33 +375,48 @@ function negRat(a: Rat): Rat {
     a.num.map((c) => -c),
     a.den,
     a.excl,
+    a.err,
   );
 }
 
 function addRat(a: Rat, b: Rat): Rat {
+  // num = a.num·b.den ± b.num·a.den: the error bound follows the same
+  // cross-multiplication, plus one rounding allowance for the new sums.
+  const err =
+    a.err * maxAbs(b.den) +
+    b.err * maxAbs(a.den) +
+    Number.EPSILON * (maxAbs(a.num) * maxAbs(b.den) + maxAbs(b.num) * maxAbs(a.den));
   return makeRat(
     addPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
     mulPoly(a.den, b.den),
     mergeExcl(domainOf(a), domainOf(b)),
+    err,
   );
 }
 
 function subRat(a: Rat, b: Rat): Rat {
+  const err =
+    a.err * maxAbs(b.den) +
+    b.err * maxAbs(a.den) +
+    Number.EPSILON * (maxAbs(a.num) * maxAbs(b.den) + maxAbs(b.num) * maxAbs(a.den));
   return makeRat(
     subPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
     mulPoly(a.den, b.den),
     mergeExcl(domainOf(a), domainOf(b)),
+    err,
   );
 }
 
 function mulRat(a: Rat, b: Rat): Rat {
-  return makeRat(mulPoly(a.num, b.num), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)));
+  const err = a.err * maxAbs(b.num) + b.err * maxAbs(a.num) + Number.EPSILON * maxAbs(a.num) * maxAbs(b.num);
+  return makeRat(mulPoly(a.num, b.num), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)), err);
 }
 
 function divRat(a: Rat, b: Rat): Rat {
   if (isZeroPoly(b.num)) throw new Error("Division by zero.");
   // Dividing by b also requires b ≠ 0, so b's numerator joins the exclusions.
-  return makeRat(mulPoly(a.num, b.den), mulPoly(a.den, b.num), mergeExcl(domainOf(a), domainOf(b), [b.num]));
+  const err = a.err * maxAbs(b.den) + b.err * maxAbs(a.den) + Number.EPSILON * maxAbs(a.num) * maxAbs(b.den);
+  return makeRat(mulPoly(a.num, b.den), mulPoly(a.den, b.num), mergeExcl(domainOf(a), domainOf(b), [b.num]), err);
 }
 
 function powRat(base: Rat, exponent: Rat): Rat {
@@ -374,11 +433,25 @@ function powRat(base: Rat, exponent: Rat): Rat {
   if (polyDegree(base.num) * Math.abs(e) > MAX_DEGREE || polyDegree(base.den) * Math.abs(e) > MAX_DEGREE) {
     throw new Error(`That power expands beyond degree ${MAX_DEGREE} — too complex for this solver.`);
   }
-  if (e >= 0) return makeRat(powPoly(base.num, e), powPoly(base.den, e), mergeExcl(domainOf(base)));
+  if (e >= 0) {
+    // Error bound for a polynomial power: each of the e factors can
+    // contribute its error, amplified by the other factors' magnitudes.
+    const err =
+      e *
+      (base.err + Number.EPSILON * maxAbs(base.num)) *
+      Math.pow(maxAbs(base.num), Math.max(0, e - 1)) *
+      (polyDegree(base.num) + 1);
+    return makeRat(powPoly(base.num, e), powPoly(base.den, e), mergeExcl(domainOf(base)), err);
+  }
   if (isZeroPoly(base.num)) throw new Error("Division by zero.");
   // A negative power moves the base's numerator into a denominator,
   // so the base must also be nonzero.
-  return makeRat(powPoly(base.den, -e), powPoly(base.num, -e), mergeExcl(domainOf(base), [base.num]));
+  const err =
+    -e *
+    (base.err + Number.EPSILON * maxAbs(base.den)) *
+    Math.pow(maxAbs(base.den), Math.max(0, -e - 1)) *
+    (polyDegree(base.den) + 1);
+  return makeRat(powPoly(base.den, -e), powPoly(base.num, -e), mergeExcl(domainOf(base), [base.num]), err);
 }
 
 function ratToString(r: Rat, variable: string): string {
@@ -634,7 +707,7 @@ function solvePolynomialCore(p: Poly, variable: string): PolyCore {
     `Discriminant: b² − 4ac = ${formatDecimal(b)}² − 4·${formatDecimal(a)}·${formatDecimal(c)} = ${formatDecimal(discriminant)}`,
   ];
 
-  if (discriminant > 1e-12 * discScale) {
+  if (discriminant > DISC_REL_EPS * discScale) {
     const sqrtD = Math.sqrt(discriminant);
     // Numerically stable form: the textbook (−b ± √D) / 2a can cancel the
     // smaller root to exactly 0 when |b| is huge (x² + 1000000000x + 1).
@@ -652,7 +725,7 @@ function solvePolynomialCore(p: Poly, variable: string): PolyCore {
     };
   }
 
-  if (Math.abs(discriminant) <= 1e-12 * discScale) {
+  if (Math.abs(discriminant) <= DISC_REL_EPS * discScale) {
     const r = -b / (2 * a);
     const s = formatAnswer(r);
     steps.push(`The discriminant is 0, so there is one repeated root: ${variable} = −b / 2a = ${s}`);
@@ -722,20 +795,29 @@ function solveUnsafe(rawInput: string): SolveResult {
   const rhs = new Parser(rhsTokens, variableKey).parse();
   const rawDiff = subRat(lhs, rhs);
 
-  // Scale the numerator to a leading coefficient of 1 (when it has one).
-  // Zero tests and the discriminant then judge the equation by its shape,
-  // not by how tiny or huge the typed coefficients are: 0.0000000000005x = 1
-  // must solve exactly like x = 2000000000000. The degree scan uses a
-  // near-zero floor so a genuine tiny leading coefficient still counts.
+  // Decide which numerator coefficients can be trusted. Every operation
+  // tracked its rounding-error bound (Rat.err): a coefficient at or
+  // below that bound may be pure cancellation leftover — (10000.1-10000)*x
+  // = 0.1*x leaves ~3.6e-13 of x — and must not be promoted into a real
+  // term, while a typed 0.0000000000005 carries no error and stays.
+  const errBound = 64 * rawDiff.err;
   let num = trimPoly(rawDiff.num);
   let topDeg = num.length - 1;
-  while (topDeg > 0 && Math.abs(num[topDeg]) < 1e-280) topDeg--;
+  while (topDeg > 0 && Math.abs(num[topDeg]) <= Math.max(errBound, 1e-280)) topDeg--;
   num = num.slice(0, topDeg + 1);
+  if (topDeg === 0 && Math.abs(num[0]) <= errBound) num = [0];
+
+  // Scale the numerator to a leading coefficient of 1 (when a trusted
+  // one exists). Zero tests and the discriminant then judge the equation
+  // by its shape, not by how tiny or huge the typed coefficients are:
+  // 0.0000000000005x = 1 must solve exactly like x = 2000000000000.
+  let err = rawDiff.err;
   if (topDeg >= 1 && Math.abs(num[topDeg] - 1) >= 1e-12) {
     const leadCoeff = num[topDeg];
     num = trimPoly(num.map((c) => c / leadCoeff));
+    err = err / Math.abs(leadCoeff);
   }
-  const diff: Rat = { num, den: rawDiff.den, excl: rawDiff.excl };
+  const diff: Rat = { num, den: rawDiff.den, excl: rawDiff.excl, err };
 
   const hasDenominator = !isConstantOne(diff.den);
   const standardForm = `${ratToString(diff, variable)} = 0`;
