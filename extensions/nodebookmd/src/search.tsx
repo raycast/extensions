@@ -13,8 +13,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
-import { combine, MIN_BODY_QUERY, rankBodies } from "./combine";
+import { existsSync } from "node:fs";
+import { pathToFileURL } from "node:url";
+import { useEffect, useMemo, useState } from "react";
+import { BODY_SEARCH_DELAY, combine, MIN_BODY_QUERY, rankBodies } from "./combine";
+import { cacheIcons, iconFile } from "./icons";
 import { clearHistory, forgetPage, recentPages, rememberPage, save } from "./history";
 import { match } from "./ranking";
 import { inScope, parseScope } from "./scopes";
@@ -33,19 +36,36 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
 
   // Two searches, as in the app: every title once, matched in memory on each key,
   // and the body search for words of three letters or more.
-  const titleList = useFetch<Hit[]>(`${baseUrl}/api/titles`, { execute: Boolean(baseUrl) });
+  // Only the fields a row needs: the full list is twice the size, and Raycast caches what it keeps.
+  const titleList = useFetch(`${baseUrl}/api/titles`, {
+    execute: Boolean(baseUrl),
+    parseResponse: async (response): Promise<Hit[]> =>
+      ((await response.json()) as Hit[]).map(({ path, title, nodeType, icon }) => ({ path, title, nodeType, icon })),
+  });
+  // The body search waits for a pause in typing, as the app does, so each key does not queue a request.
+  const [bodyWords, setBodyWords] = useState(words);
+  useEffect(() => {
+    const timer = setTimeout(() => setBodyWords(words), BODY_SEARCH_DELAY);
+    return () => clearTimeout(timer);
+  }, [words]);
   // ponytail: the server has no scope filter, so a scoped body search asks for more hits and filters here.
   const bodyLimit = scope ? 120 : 18;
-  const searchesBodies = Boolean(baseUrl) && !scope?.history && words.length >= MIN_BODY_QUERY;
-  const bodySearch = useFetch<Hit[]>(`${baseUrl}/api/search?query=${encodeURIComponent(words)}&limit=${bodyLimit}`, {
-    execute: searchesBodies,
-    keepPreviousData: true,
-  });
+  const searchesBodies = Boolean(baseUrl) && !scope?.history && bodyWords.length >= MIN_BODY_QUERY;
+  const bodySearch = useFetch<Hit[]>(
+    `${baseUrl}/api/search?query=${encodeURIComponent(bodyWords)}&limit=${bodyLimit}`,
+    {
+      execute: searchesBodies,
+      keepPreviousData: true,
+    },
+  );
   const scopedTitles = useMemo(
     () => (titleList.data ?? []).filter((hit) => inScope(scope, hit.path)),
     [titleList.data, scope],
   );
-  const bodies = searchesBodies ? (bodySearch.data ?? []).filter((hit) => inScope(scope, hit.path)) : [];
+  const bodies =
+    searchesBodies && words.length >= MIN_BODY_QUERY
+      ? (bodySearch.data ?? []).filter((hit) => inScope(scope, hit.path))
+      : [];
 
   // Nothing typed, or `h:` alone: the pages opened before. `h:` with words searches only them.
   const showsHistory = !words || scope?.history;
@@ -54,6 +74,13 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
     : words
       ? match(recent, words, 30)
       : recent;
+
+  const [, setIconsSaved] = useState(0);
+  const shownIcons = hits.flatMap((hit) => (hit.icon ? [hit.icon] : [])).join("|");
+  useEffect(() => {
+    if (!baseUrl || !shownIcons) return;
+    cacheIcons(baseUrl, shownIcons.split("|")).then((added) => added && setIconsSaved((count) => count + 1));
+  }, [baseUrl, shownIcons]);
 
   const actions = {
     remember: (hit: Hit) => rememberPage(hit).then(() => history.revalidate()),
@@ -65,7 +92,7 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
 
   return (
     <List
-      isLoading={server.isLoading || history.isLoading || titleList.isLoading || bodySearch.isLoading}
+      isLoading={server.isLoading || history.isLoading || titleList.isLoading}
       isShowingDetail={hits.length > 0}
       searchText={query}
       onSearchTextChange={setQuery}
@@ -115,8 +142,7 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
       id={hit.path}
       title={hit.title}
       subtitle={hit.nodeType ?? undefined}
-      // Some icons the index names are not in the install. The fallback keeps the row from looking empty.
-      icon={hit.icon ? { source: `${baseUrl}/hicon/${hit.icon}`, fallback: Icon.Document } : Icon.Document}
+      icon={rowIcon(hit, baseUrl)}
       detail={<PageDetail markdownUrl={markdownUrl} />}
       actions={
         <ActionPanel>
@@ -166,6 +192,17 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
       }
     />
   );
+}
+
+/** The icon from disk once it is cached, from the server until then. Raycast for Windows
+    draws a local file only from a `file://` address. Some icons the index
+    names are not in the install, so the fallback keeps the row from looking empty. */
+function rowIcon(hit: Hit, baseUrl: string) {
+  if (!hit.icon) return Icon.Document;
+  const file = iconFile(hit.icon);
+  return existsSync(file)
+    ? { source: process.platform === "win32" ? pathToFileURL(file).href : file, fallback: Icon.Document }
+    : { source: `${baseUrl}/hicon/${hit.icon}`, fallback: Icon.Document };
 }
 
 /** Copies the page, and says whether it did: a failed fetch leaves the clipboard alone. */

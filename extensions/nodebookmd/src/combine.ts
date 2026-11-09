@@ -6,6 +6,9 @@ import type { Hit } from "./types";
 /** Below this the body search ranks noise, so the title list answers alone. */
 export const MIN_BODY_QUERY = 3;
 
+/** How long the body search waits after a key, in milliseconds. The app uses the same. */
+export const BODY_SEARCH_DELAY = 120;
+
 /** Body hits reordered by page kind, as the app does: the node before its shelf button. */
 export function rankBodies(hits: Hit[], limit: number): Hit[] {
   const weighted = (hit: Hit) => (hit.score ?? 0) * weight(hit);
