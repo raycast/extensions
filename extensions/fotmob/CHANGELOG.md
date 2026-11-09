@@ -1,5 +1,9 @@
 # Changelog
 
+## [Favorite leagues first in Match Day] - 2026-11-09
+
+- List favorite leagues first in Match Day and its league dropdown, marked with a "Favorite" subtitle
+
 ## [Fixes] - 2026-11-09
 
 - Fix League Table and Favorite League Tables crashing after FotMob changed the shape of its league table data
