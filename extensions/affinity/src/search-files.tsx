@@ -82,7 +82,7 @@ export default function SearchFiles() {
       {data?.truncated ? (
         <List.Item
           icon={Icon.Info}
-          title={`Showing ${LIMIT} of ${data.total} Spotlight matches`}
+          title={`Showing ${data.files.length} of ${data.total} Spotlight matches`}
           subtitle="Other files are not searched here; open them from Finder or Affinity"
           actions={<ActionPanel>{refresh}</ActionPanel>}
         />
