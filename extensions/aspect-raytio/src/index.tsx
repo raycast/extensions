@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { List, LaunchProps, Form } from "@raycast/api";
+import { List, LaunchProps } from "@raycast/api";
 import DimensionsDropdown from "./dimensions-dropdown";
 import AspectRatiosList from "./aspect-ratios-list";
 import { useAllCustomRatios } from "../hooks/useCustomRatios";
@@ -60,57 +60,51 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
   }, [sizeValue]);
 
   return (
-    <>
-      <Form>
-        <Form.TextField id="width" title="Width" />
-        <Form.TextField id="height" title="Height" />
-      </Form>
-      <List
-        navigationTitle={`Raytio for ${orientation}`}
-        searchBarPlaceholder="Width or Height"
-        searchBarAccessory={<DimensionsDropdown value={basedDimension} handleDimensionChange={handleDimensionChange} />}
-        onSearchTextChange={(text: string) => setSizeValue(Number(text))}
-      >
-        {!isNaN(Number(sizeValue)) ? (
-          <>
-            <AspectRatiosList
-              title="Defaults"
-              list={defaultRatios}
-              sizeValue={sizeValue}
-              basedDimension={basedDimension}
-              orientation={orientation}
-              totalCustomRatios={customRatios.length}
-              handleOrientationChange={handleOrientationChange}
-              handleNewCustomRatio={(ar: RatioType) => {
-                setCustomRatios([...customRatios, ar]);
-              }}
-              handleDeleteAll={() => {
-                if (customRatios.length > 0) setCustomRatios([]);
-              }}
-            />
-            <AspectRatiosList
-              title="Custom"
-              list={customRatios}
-              sizeValue={sizeValue}
-              basedDimension={basedDimension}
-              orientation={orientation}
-              totalCustomRatios={customRatios.length}
-              handleOrientationChange={handleOrientationChange}
-              handleNewCustomRatio={(ar: RatioType) => {
-                setCustomRatios([...customRatios, ar]);
-              }}
-              handleDeleteItem={(id: string) => {
-                setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
-              }}
-              handleDeleteAll={() => {
-                if (customRatios.length > 0) setCustomRatios([]);
-              }}
-            />
-          </>
-        ) : (
-          <List.EmptyView title="Type only numbers with or without decimal values" description="e.g. 1920, 600.25" />
-        )}
-      </List>
-    </>
+    <List
+      navigationTitle={`Raytio for ${orientation}`}
+      searchBarPlaceholder="Width or Height"
+      searchBarAccessory={<DimensionsDropdown value={basedDimension} handleDimensionChange={handleDimensionChange} />}
+      onSearchTextChange={(text: string) => setSizeValue(Number(text))}
+    >
+      {!isNaN(Number(sizeValue)) ? (
+        <>
+          <AspectRatiosList
+            title="Defaults"
+            list={defaultRatios}
+            sizeValue={sizeValue}
+            basedDimension={basedDimension}
+            orientation={orientation}
+            totalCustomRatios={customRatios.length}
+            handleOrientationChange={handleOrientationChange}
+            handleNewCustomRatio={(ar: RatioType) => {
+              setCustomRatios([...customRatios, ar]);
+            }}
+            handleDeleteAll={() => {
+              if (customRatios.length > 0) setCustomRatios([]);
+            }}
+          />
+          <AspectRatiosList
+            title="Custom"
+            list={customRatios}
+            sizeValue={sizeValue}
+            basedDimension={basedDimension}
+            orientation={orientation}
+            totalCustomRatios={customRatios.length}
+            handleOrientationChange={handleOrientationChange}
+            handleNewCustomRatio={(ar: RatioType) => {
+              setCustomRatios([...customRatios, ar]);
+            }}
+            handleDeleteItem={(id: string) => {
+              setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
+            }}
+            handleDeleteAll={() => {
+              if (customRatios.length > 0) setCustomRatios([]);
+            }}
+          />
+        </>
+      ) : (
+        <List.EmptyView title="Type only numbers with or without decimal values" description="e.g. 1920, 600.25" />
+      )}
+    </List>
   );
 }
