@@ -15,10 +15,15 @@ const TAG_COLOR: Record<Protocol, Color> = {
 export default function Command() {
   // Devices appear as they answer; `live` holds the scan in progress, `data` the finished one.
   const [live, setLive] = useState<Discovered>(initialDiscovered);
+  const scanId = useRef(0);
   const { data, isLoading, error, revalidate } = usePromise(
     async () => {
+      // A refresh starts a new scan; progress from older scans still running is ignored.
+      const id = ++scanId.current;
       setLive(initialDiscovered());
-      return discoverAll(setLive);
+      return discoverAll((found) => {
+        if (id === scanId.current) setLive(found);
+      });
     },
     [],
     {

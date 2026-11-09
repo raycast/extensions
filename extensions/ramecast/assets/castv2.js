@@ -218,8 +218,14 @@ class CastClient {
   /** Launch the Default Media Receiver and play a URL on it; returns the launched app (with its sessionId). */
   async loadMedia(media) {
     const app = await this.launch(DEFAULT_MEDIA_RECEIVER);
-    const res = await this.request(app.transportId, NS.media, { type: "LOAD", media, autoplay: true }, 30000);
-    if (res.type !== "MEDIA_STATUS") throw new Error(`Device refused the stream: ${res.reason ?? res.type}`);
+    try {
+      const res = await this.request(app.transportId, NS.media, { type: "LOAD", media, autoplay: true }, 30000);
+      if (res.type !== "MEDIA_STATUS") throw new Error(`Device refused the stream: ${res.reason ?? res.type}`);
+    } catch (e) {
+      // The receiver was launched but never got our stream: close it rather than leave it idle on the TV.
+      await this.stopSession(app.sessionId).catch(() => undefined);
+      throw e;
+    }
     return app;
   }
 

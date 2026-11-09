@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { runPowerShellScript } from "@raycast/utils";
 import { execFileSync, spawn } from "child_process";
 import { randomBytes } from "crypto";
@@ -9,7 +9,6 @@ import { ensureFfmpeg } from "./ffmpeg";
 import { adapterFor, Device, Playback } from "./protocols";
 import { CAST_LOG, protocolLog } from "./protocols/log";
 
-const STATE_KEY = "active-cast";
 const HLS_DIR = path.join(environment.supportPath, "hls");
 const LOG_FILE = path.join(environment.supportPath, "ffmpeg.log");
 const MIRROR_STATUS = path.join(environment.supportPath, "mirror-status.json");
@@ -125,27 +124,83 @@ interface ActiveCast {
   playback: Playback;
 }
 
-async function readActive(): Promise<ActiveCast | undefined> {
-  const raw = await LocalStorage.getItem<string>(STATE_KEY);
-  if (!raw) return undefined;
+// --- Active-cast record ------------------------------------------------------------------------
+// One record describes the cast in progress. Cast Screen and Stop Casting run as separate commands,
+// so every read-modify-write happens under a lock (an atomically created directory) with synchronous
+// file I/O: claiming, updating and clearing the record can never interleave or overwrite each other.
+const STATE_FILE = path.join(environment.supportPath, "active-cast.json");
+const LOCK_DIR = `${STATE_FILE}.lock`;
+const pause = new Int32Array(new SharedArrayBuffer(4));
+
+function withStateLock<T>(fn: (current: ActiveCast | undefined) => T): T {
+  fs.mkdirSync(environment.supportPath, { recursive: true });
+  for (let waited = 0; ; waited += 5) {
+    try {
+      fs.mkdirSync(LOCK_DIR);
+      break;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
+      // A holder only does a few file operations; a lock this old was left by a crashed process.
+      try {
+        if (Date.now() - fs.statSync(LOCK_DIR).mtimeMs > 5000) fs.rmSync(LOCK_DIR, { recursive: true, force: true });
+      } catch {
+        // released meanwhile
+      }
+      if (waited > 5000) throw new Error("Timed out waiting for another RameCast command");
+      Atomics.wait(pause, 0, 0, 5);
+    }
+  }
   try {
-    return JSON.parse(raw) as ActiveCast;
-  } catch {
-    return undefined;
+    let current: ActiveCast | undefined;
+    try {
+      current = JSON.parse(fs.readFileSync(STATE_FILE, "utf8")) as ActiveCast;
+    } catch {
+      current = undefined;
+    }
+    return fn(current);
+  } finally {
+    fs.rmSync(LOCK_DIR, { recursive: true, force: true });
   }
 }
 
+function writeState(next: ActiveCast | undefined) {
+  if (!next) return fs.rmSync(STATE_FILE, { force: true });
+  const tmp = `${STATE_FILE}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(next), { mode: 0o600 });
+  fs.renameSync(tmp, STATE_FILE);
+}
+
+/** Atomically make `next` the active cast; returns the one it replaced (which the caller must clean up). */
+function swapActive(next: ActiveCast): ActiveCast | undefined {
+  return withStateLock((current) => {
+    writeState(next);
+    return current;
+  });
+}
+
+/** Atomically remove the active cast (only if it's `session`, when given) and return it. */
+function takeActive(session?: string): ActiveCast | undefined {
+  return withStateLock((current) => {
+    if (!current || (session && current.session !== session)) return undefined;
+    writeState(undefined);
+    return current;
+  });
+}
+
 /**
- * Update this session's saved record. If another cast or Stop Casting replaced it in the meantime,
- * this start has been cancelled: kill the worker it just started and stop.
+ * Update this session's record. If another cast or Stop Casting replaced it in the meantime, this
+ * start has been cancelled: kill the worker it just started and stop.
  */
 async function updateActive(session: string, update: Partial<ActiveCast>, ownPid = 0): Promise<void> {
-  const current = await readActive();
-  if (current?.session !== session) {
+  const updated = withStateLock((current) => {
+    if (current?.session !== session) return false;
+    writeState({ ...current, ...update });
+    return true;
+  });
+  if (!updated) {
     await killOwned(ownPid, session);
     throw new CancelledError();
   }
-  await LocalStorage.setItem(STATE_KEY, JSON.stringify({ ...current, ...update }));
 }
 
 async function ensureCurrent(session: string, ownPid = 0): Promise<void> {
@@ -201,10 +256,11 @@ function spawnDetached(script: string, args: string[]): number {
 }
 
 export async function startCast(device: Device, onProgress?: (message: string) => void): Promise<void> {
-  await stopCast();
-  // Claim the active-cast record first: a newer cast or Stop Casting replaces it, which cancels this one.
+  // Atomically claim the record and take over from any previous cast. A newer cast or Stop Casting
+  // replacing the record later cancels this one (see updateActive).
   const session = randomBytes(12).toString("hex");
-  await LocalStorage.setItem(STATE_KEY, JSON.stringify({ session, pid: 0, device, playback: {} } satisfies ActiveCast));
+  const previous = swapActive({ session, pid: 0, device, playback: {} });
+  if (previous) await cleanUp(previous);
   try {
     const ffmpeg = await ensureFfmpeg(onProgress);
     await ensureCurrent(session);
@@ -223,7 +279,8 @@ export async function startCast(device: Device, onProgress?: (message: string) =
     await startHls(session, device, ffmpeg, captureArgs(ffmpeg, 30), bindIp);
   } catch (e) {
     // Clean up only if this cast still owns the record; otherwise whoever replaced it already did.
-    if ((await readActive())?.session === session) await stopCast();
+    const mine = takeActive(session);
+    if (mine) await cleanUp(mine);
     throw e;
   }
 }
@@ -339,9 +396,12 @@ async function startHls(session: string, device: Device, ffmpeg: string, capture
  * (never other apps), and the temporary screen recordings.
  */
 export async function stopCast(): Promise<ActiveCast | undefined> {
-  const active = await readActive();
-  await LocalStorage.removeItem(STATE_KEY);
-  if (!active) return undefined;
+  const active = takeActive();
+  if (active) await cleanUp(active);
+  return active;
+}
+
+async function cleanUp(active: ActiveCast): Promise<void> {
   await killOwned(active.pid, active.session);
   try {
     await adapterFor(active.device.protocol ?? "googlecast").stop(active.device, active.playback ?? {});
@@ -351,5 +411,4 @@ export async function stopCast(): Promise<ActiveCast | undefined> {
   // Don't leave captured screen contents on disk.
   fs.rmSync(HLS_DIR, { recursive: true, force: true });
   fs.rmSync(MIRROR_STATUS, { force: true });
-  return active;
 }
