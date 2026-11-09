@@ -18,7 +18,7 @@ import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Blocklist, CHROME_DIR, currentProfile, loadBlocklist, saveBlocklist } from "./blocklist";
+import { Blocklist, CHROME_DIR, currentProfile, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
 import { ManageHiddenSuggestions } from "./manage-hidden";
 
@@ -102,7 +102,16 @@ export async function openLittleChrome(url: string): Promise<void> {
 // Raycast stops a view command once its window closes, before the new window is resized and
 // recorded, so hand the URL to the no-view Open URL command.
 async function launchLittleChrome(url: string): Promise<void> {
-  await launchCommand({ name: "open-url", type: LaunchType.Background, arguments: { url } });
+  try {
+    await launchCommand({ name: "open-url", type: LaunchType.Background, arguments: { url } });
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Little Chrome failed",
+      message: e instanceof Error ? e.message : String(e),
+    });
+    return;
+  }
   await closeMainWindow({ clearRootSearch: true });
 }
 
@@ -235,6 +244,12 @@ export default function Command(props: LaunchProps) {
   async function updateBlocklist(next: Blocklist) {
     await saveBlocklist(profile, next);
     setBlocklist(next);
+    // The cached empty-search rows are only rewritten by an empty search, so drop hidden ones now.
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      const rows: HistoryItem[] = JSON.parse(cached);
+      cache.set(cacheKey, JSON.stringify(rows.filter((r) => !isBlocked(r.url, next))));
+    }
   }
 
   async function hide(next: Blocklist, title: string) {
@@ -274,6 +289,7 @@ export default function Command(props: LaunchProps) {
   }, [db, searchText, blocklist, cacheKey]);
 
   const typed = searchText.trim();
+  const visible = blocklist ? items.filter((item) => !isBlocked(item.url, blocklist)) : items;
 
   // Also offered on the typed row and the empty view, so it stays reachable after hiding everything.
   const manageAction = blocklist && (blocklist.urls.length > 0 || blocklist.hosts.length > 0) && (
@@ -292,7 +308,7 @@ export default function Command(props: LaunchProps) {
       searchBarPlaceholder="URL or search"
       isLoading={isLoading}
       filtering={false}
-      selectedItemId={items[0] ? `${generation}:${items[0].url}` : undefined}
+      selectedItemId={visible[0] ? `${generation}:${visible[0].url}` : undefined}
     >
       <List.EmptyView
         icon={Icon.Globe}
@@ -320,7 +336,7 @@ export default function Command(props: LaunchProps) {
         />
       )}
       <List.Section title="History">
-        {items.map((item) => (
+        {visible.map((item) => (
           <List.Item
             key={`${generation}:${item.url}`}
             id={`${generation}:${item.url}`}

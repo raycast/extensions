@@ -20,17 +20,19 @@ const blocklistKey = (profile: string) => `blocklist:${profile}`;
 
 export async function loadBlocklist(profile: string): Promise<Blocklist> {
   const raw = await LocalStorage.getItem<string>(blocklistKey(profile));
-  if (raw) return JSON.parse(raw);
-  // Early builds kept one list for all profiles; hand it to the first profile that loads.
-  const legacy = await LocalStorage.getItem<string>("blocklist");
-  if (legacy) {
-    await LocalStorage.setItem(blocklistKey(profile), legacy);
-    await LocalStorage.removeItem("blocklist");
-    return JSON.parse(legacy);
-  }
-  return { urls: [], hosts: [] };
+  return raw ? JSON.parse(raw) : { urls: [], hosts: [] };
 }
 
 export async function saveBlocklist(profile: string, blocklist: Blocklist): Promise<void> {
   await LocalStorage.setItem(blocklistKey(profile), JSON.stringify(blocklist));
+}
+
+export function isBlocked(url: string, blocklist: Blocklist): boolean {
+  if (blocklist.urls.includes(url)) return true;
+  try {
+    const { protocol, host } = new URL(url);
+    return (protocol === "https:" || protocol === "http:") && blocklist.hosts.includes(host);
+  } catch {
+    return false;
+  }
 }
