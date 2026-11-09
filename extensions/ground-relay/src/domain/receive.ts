@@ -20,7 +20,7 @@ export function receiveHandoff(value: unknown): GroundPacketDraft {
       claim: `[${r.kind}; ${r.currentness}] ${r.content}`,
       ...(r.kind !== "memory" && r.sourceRef ? { sourceRef: r.sourceRef } : {}),
       ...(r.observedAt ? { observedAt: r.observedAt } : {}),
-      receiptBearing: r.kind !== "memory" && !!r.sourceRef,
+      receiptBearing: r.receiptBearing && r.kind !== "memory" && !!r.sourceRef,
     })),
     uncertainties: [
       {

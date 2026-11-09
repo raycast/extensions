@@ -47,10 +47,10 @@ export function readHandoff(
     verified.id !== h.id ||
     verified.rootId !== h.rootId ||
     verified.version !== h.version ||
-    verified.sha256 !== h.sha256
+    createHash("sha256").update(h.recordJson).digest("hex") !== h.sha256
   )
     throw new Error(
       "Handoff identity or digest does not match its source snapshot.",
     );
-  return verified;
+  return { ...verified, sha256: h.sha256, recordJson: h.recordJson };
 }

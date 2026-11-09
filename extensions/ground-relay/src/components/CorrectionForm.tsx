@@ -6,7 +6,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   draftFromForm,
   evidenceToInput,
@@ -35,10 +35,13 @@ function uncertainties(base: GroundPacketRecord): string {
 }
 
 export function CorrectionForm({ base, onComplete }: Props) {
+  const busy = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
 
   async function submit(values: CorrectionFormValues) {
+    if (busy.current) return;
+    busy.current = true;
     setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -60,6 +63,7 @@ export function CorrectionForm({ base, onComplete }: Props) {
       toast.message =
         error instanceof Error ? error.message : "Unknown failure";
     } finally {
+      busy.current = false;
       setIsLoading(false);
     }
   }
@@ -127,6 +131,7 @@ export function CorrectionForm({ base, onComplete }: Props) {
         title="Scope Boundary"
         defaultValue={base.draft.scopeBoundary}
       />
+      <Form.Description text="Existing evidence uses one JSON object per line to preserve exact text and sources. Keep these objects intact or edit their fields. New entries may use claim || source || date." />
       <Form.TextArea
         id="evidence"
         title="Evidence"

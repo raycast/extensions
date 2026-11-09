@@ -103,3 +103,15 @@ A correction lock is never reclaimed merely because it is old. If Raycast crashe
 ## External-volume development
 
 On exFAT, macOS creates `._*` sidecars. Tests and ESLint ignore them, but Raycast's metadata validator treats PNG sidecars as images. Make a clean local release staging copy excluding `.git`, `node_modules`, `._*`, `.DS_Store`, and generated outputs; install/link the existing dependencies there, then run validation and publication from that copy. Do not submit sidecars to Git or the Store. CLI evals also require `node_modules/.bin` on PATH (as in `npm exec -- ray evals`); check the per-case scores because this CLI can exit zero after an evaluation error.
+
+## Browsing and recovery
+
+The browser shows the latest version of each packet by default and searches all stored fields. Use **⌘⇧H** to show all versions, **⌘N** to capture a new packet, and **⌘R** to refresh. Ledger warnings open in a separate view; Enter always opens the selected packet.
+
+Existing evidence is edited as one JSON object per line so embedded newlines, literal `||`, IDs, and advisory flags survive a round trip. New plain lines still use the documented `claim || source || date` syntax. Malformed structured evidence is rejected. Handoffs verify and preserve the exact source snapshot bytes.
+
+Trashing a version keeps a small `.retired-<id>.json` version reservation. Restore the original file from Trash to recover it; newer corrections do not reuse its number. Preserve these reservations when backing up or moving the ledger. Older competing latest versions are all shown; inspect and trash the unwanted duplicate before correcting further.
+
+## Local validation build (2026-11-09)
+
+The upgraded development copy is imported from this repository and uses its own Raycast support directory. It does not share or automatically merge the private Store copy’s ledger. The private Store update is currently blocked by the organization command quota; its prior signed bundle was restored and remains separate. See `docs/ux-audit-2026-11-09.md` for the tested release boundary.

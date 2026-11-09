@@ -152,6 +152,7 @@ export interface SplatRecord {
   createdAt: string;
   centerStatus: "protected-held-open-not-computed";
   persistence: "ledger" | "candidate-only";
+  analysisOrigin?: "local-intake" | "raycast-ai";
   draft: SplatDraft;
   analysis: SplatAnalysis;
 }

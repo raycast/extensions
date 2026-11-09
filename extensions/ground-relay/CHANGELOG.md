@@ -1,5 +1,13 @@
 # Changelog
 
+## Capture and review UX — 2026-11-09
+
+- Preserve multiline evidence, literal delimiters, IDs, and advisory flags through handoff review and correction.
+- Verify and retain the exact incoming handoff snapshot bytes.
+- Reserve trashed revision numbers so restoring older versions does not collide with new corrections.
+- Show latest versions by default with searchable history, capture and refresh shortcuts.
+- Keep opening a packet as the primary action when warnings exist; show warnings without replacing the clipboard.
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Add read-only AI listing/search and exact-record retrieval with pagination and history.

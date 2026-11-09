@@ -139,3 +139,79 @@ export function requireLatest<T extends LedgerRecord>(
     );
   return latest;
 }
+
+// Reserve trashed revision numbers before moving their contents to the system Trash.
+// A failed trash operation can leave a harmless reservation; numbers are never reused.
+export async function nextVersion(
+  directory: string,
+  rootId: string,
+  records: LedgerRecord[],
+): Promise<number> {
+  let highest = Math.max(
+    0,
+    ...records.filter((r) => r.rootId === rootId).map((r) => r.version),
+  );
+  for (const name of (await readdir(directory)).filter(
+    (n) => n.startsWith(".retired-") && n.endsWith(".json"),
+  )) {
+    const r = JSON.parse(
+      await readFile(join(directory, name), "utf8"),
+    ) as LedgerRecord;
+    if (
+      !uuid(r.id) ||
+      !uuid(r.rootId) ||
+      !Number.isSafeInteger(r.version) ||
+      r.version < 1 ||
+      name !== `.retired-${r.id}.json`
+    )
+      throw new Error(
+        "Invalid deleted-version reservation; inspect the ledger before editing.",
+      );
+    if (r.rootId === rootId) highest = Math.max(highest, r.version);
+  }
+  return highest + 1;
+}
+export async function retireRecord<T extends LedgerRecord>(
+  directory: string,
+  id: string,
+  valid: (v: unknown) => boolean,
+  moveToTrash: (path: string) => Promise<void>,
+): Promise<void> {
+  const path = recordPath(directory, id);
+  let r: T;
+  try {
+    r = JSON.parse(await readFile(path, "utf8")) as T;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw error;
+  }
+  if (!valid(r) || r.id !== id)
+    throw new Error("Cannot trash an invalid ledger record.");
+  await withLineageLock(directory, r.rootId, async () => {
+    const reservation = join(directory, `.retired-${id}.json`);
+    const data = {
+      id: r.id,
+      rootId: r.rootId,
+      version: r.version,
+      createdAt: r.createdAt,
+    };
+    try {
+      await writeFile(reservation, JSON.stringify(data), {
+        encoding: "utf8",
+        flag: "wx",
+      });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      const prior = JSON.parse(
+        await readFile(reservation, "utf8"),
+      ) as LedgerRecord;
+      if (
+        prior.id !== r.id ||
+        prior.rootId !== r.rootId ||
+        prior.version !== r.version
+      )
+        throw new Error("Conflicting deleted-version reservation.");
+    }
+    await moveToTrash(path);
+  });
+}

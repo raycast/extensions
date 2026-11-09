@@ -19,8 +19,13 @@ import { appendGroundPacket } from "./services/ledger";
 
 export default function CreateGroundPacketCommand({
   initialDraft,
-}: { initialDraft?: GroundPacketDraft } = {}) {
+  onSaved,
+}: {
+  initialDraft?: GroundPacketDraft;
+  onSaved?: () => void | Promise<void>;
+} = {}) {
   const edited = useRef(false);
+  const busy = useRef(false);
   const [situation, setSituation] = useState(initialDraft?.situation ?? "");
   const [captureSource, setCaptureSource] = useState(
     initialDraft ? "structured handoff" : "manual entry",
@@ -56,6 +61,8 @@ export default function CreateGroundPacketCommand({
   }, []);
 
   async function submit(values: GroundPacketFormValues) {
+    if (busy.current) return;
+    busy.current = true;
     setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -76,13 +83,20 @@ export default function CreateGroundPacketCommand({
       await appendGroundPacket(record);
       toast.style = Toast.Style.Success;
       toast.title = "Ground packet saved locally";
-      navigation.push(<GroundPacketDetail record={record} />);
+      navigation.push(
+        <GroundPacketDetail
+          record={record}
+          {...(onSaved ? { onChanged: onSaved, onDeleted: onSaved } : {})}
+        />,
+      );
+      await onSaved?.();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not create packet";
       toast.message =
         error instanceof Error ? error.message : "Unknown failure";
     } finally {
+      busy.current = false;
       setIsLoading(false);
     }
   }
@@ -166,6 +180,7 @@ export default function CreateGroundPacketCommand({
         placeholder="What is in and out of this packet?"
       />
       <Form.Separator />
+      <Form.Description text="Existing evidence uses one JSON object per line to preserve exact text and sources. Keep these objects intact or edit their fields. New entries may use claim || source || date." />
       <Form.TextArea
         id="evidence"
         defaultValue={

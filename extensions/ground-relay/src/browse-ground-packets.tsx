@@ -1,8 +1,12 @@
+import CreateCommand from "./create-ground-packet";
+import { latestVersions, matchesQuery } from "./domain/query";
 import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   List,
+  Detail,
   Toast,
   showToast,
 } from "@raycast/api";
@@ -15,6 +19,8 @@ type TypeFilter = "all" | CarrierType;
 
 export default function BrowseGroundPacketsCommand() {
   const [records, setRecords] = useState<GroundPacketRecord[]>([]);
+  const [search, setSearch] = useState("");
+  const [history, setHistory] = useState(false);
   const [readError, setReadError] = useState<string>();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,10 +52,43 @@ export default function BrowseGroundPacketsCommand() {
 
   const visible = useMemo(
     () =>
-      type === "all"
-        ? records
-        : records.filter((record) => record.draft.carrierType === type),
-    [records, type],
+      (history ? records : latestVersions(records)).filter(
+        (record) =>
+          (type === "all" || record.draft.carrierType === type) &&
+          matchesQuery(record, search),
+      ),
+    [records, history, search, type],
+  );
+  const utilities = (
+    <>
+      <Action.Push
+        title="Capture New Context"
+        icon={Icon.Plus}
+        shortcut={Keyboard.Shortcut.Common.New}
+        target={<CreateCommand onSaved={refresh} />}
+      />
+      <Action
+        title={history ? "Show Latest Versions" : "Show All Versions"}
+        icon={Icon.Clock}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "h" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+        }}
+        onAction={() => setHistory((v) => !v)}
+      />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={refresh}
+      />
+      {warnings.length > 0 && (
+        <Action.Push
+          title="Show Ledger Warnings"
+          target={<Detail markdown={warnings.join("\n\n")} />}
+        />
+      )}
+    </>
   );
 
   return (
@@ -59,9 +98,14 @@ export default function BrowseGroundPacketsCommand() {
           ? "Ledger unavailable — refresh to retry"
           : warnings.length
             ? `${warnings.length} ledger warning(s)`
-            : "Local Ledger"
+            : history
+              ? "All Versions"
+              : "Latest Context"
       }
       isLoading={isLoading}
+      filtering={false}
+      searchText={search}
+      onSearchTextChange={setSearch}
       searchBarPlaceholder="Search packets, intent, boundaries, or evidence"
       searchBarAccessory={
         <List.Dropdown
@@ -88,21 +132,7 @@ export default function BrowseGroundPacketsCommand() {
               ? "Some records are unreadable. Review ledger warnings."
               : "Create a packet or change the context filter.")
           }
-          actions={
-            <ActionPanel>
-              {warnings.length > 0 && (
-                <Action.CopyToClipboard
-                  title="Show Ledger Warnings"
-                  content={warnings.join("\n")}
-                />
-              )}
-              <Action
-                title="Refresh Ledger"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-              />
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{utilities}</ActionPanel>}
         />
       ) : null}
       {visible.map((record) => (
@@ -133,12 +163,6 @@ export default function BrowseGroundPacketsCommand() {
           ]}
           actions={
             <ActionPanel>
-              {warnings.length > 0 && (
-                <Action.CopyToClipboard
-                  title="Show Ledger Warnings"
-                  content={warnings.join("\n")}
-                />
-              )}
               <Action.Push
                 title="Inspect Ground Packet"
                 icon={Icon.Eye}
@@ -150,11 +174,7 @@ export default function BrowseGroundPacketsCommand() {
                   />
                 }
               />
-              <Action
-                title="Refresh Ledger"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-              />
+              {utilities}
             </ActionPanel>
           }
         />

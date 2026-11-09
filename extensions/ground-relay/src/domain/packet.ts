@@ -1,3 +1,4 @@
+import { evidenceItem } from "./validation-common";
 import { randomUUID } from "node:crypto";
 import type {
   CarrierType,
@@ -35,6 +36,15 @@ export function parseEvidence(values: string[]): EvidenceItem[] {
     .map((value) => value.trim())
     .filter(Boolean)
     .map((value) => {
+      if (value.startsWith("{")) {
+        const item: unknown = JSON.parse(value);
+        if (!evidenceItem(item))
+          throw new Error(
+            "Invalid structured evidence. Keep one evidence JSON object per line.",
+          );
+        const e = item as EvidenceItem;
+        return { ...e, receiptBearing: e.receiptBearing && !!e.sourceRef };
+      }
       const [claim = "", sourceRef = "", observedAt = ""] = value
         .split("||")
         .map((part) => part.trim());
@@ -212,9 +222,7 @@ export function findContextGap(draft: GroundPacketDraft): ContextGap {
 }
 
 export function evidenceToInput(evidence: EvidenceItem[]): string {
-  return evidence
-    .map((e) => [e.claim, e.sourceRef ?? "", e.observedAt ?? ""].join(" || "))
-    .join("\n");
+  return evidence.map((e) => JSON.stringify(e)).join("\n");
 }
 export function retainEvidenceIds(
   next: EvidenceItem[],

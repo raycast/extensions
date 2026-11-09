@@ -1,7 +1,8 @@
 import {
   readLedger,
   appendRecord,
-  recordPath,
+  retireRecord,
+  nextVersion,
   withLineageLock,
   requireLatest,
 } from "./ledger-core";
@@ -26,9 +27,7 @@ export async function deleteGroundPacketInDirectory(
   id: string,
   moveToTrash: (path: string) => Promise<void>,
 ): Promise<void> {
-  await moveToTrash(recordPath(directory, id)).catch((error: unknown) => {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  });
+  await retireRecord(directory, id, groundRecord, moveToTrash);
 }
 import { createGroundPacket } from "../domain/packet";
 import type { GroundPacketDraft } from "../domain/types";
@@ -38,13 +37,11 @@ export async function appendCorrectionInDirectory(
   draft: GroundPacketDraft,
 ): Promise<GroundPacketRecord> {
   return withLineageLock(directory, base.rootId, async () => {
-    const latest = requireLatest(
-      await inspectGroundPacketsInDirectory(directory),
-      base,
-    );
+    const result = await inspectGroundPacketsInDirectory(directory);
+    const latest = requireLatest(result, base);
     const record = createGroundPacket(draft, {
       rootId: latest.rootId,
-      version: latest.version + 1,
+      version: await nextVersion(directory, latest.rootId, result.records),
       supersedesId: latest.id,
     });
     await appendGroundPacketInDirectory(directory, record);

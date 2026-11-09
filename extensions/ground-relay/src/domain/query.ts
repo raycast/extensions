@@ -5,6 +5,22 @@ export interface Query {
   offset?: number;
   limit?: number;
 }
+export function latestVersions<T extends LedgerRecord>(records: T[]): T[] {
+  const versions = new Map<string, number>();
+  for (const r of records)
+    versions.set(r.rootId, Math.max(versions.get(r.rootId) ?? 0, r.version));
+  // Retain ties so restored conflicts are visible rather than silently hidden.
+  return records.filter((r) => r.version === versions.get(r.rootId));
+}
+export function matchesQuery(value: unknown, query: string): boolean {
+  const text = JSON.stringify(value).toLocaleLowerCase();
+  return query
+    .toLocaleLowerCase()
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => text.includes(word));
+}
 export function queryRecords<T extends LedgerRecord>(
   result: LedgerRead<T>,
   input: Query,
@@ -22,18 +38,13 @@ export function queryRecords<T extends LedgerRecord>(
     throw new Error(
       "Use a nonnegative offset and a limit from 1 to 100; page through remaining results.",
     );
-  const latest = new Map<string, T>();
-  for (const r of result.records) {
-    const previous = latest.get(r.rootId);
-    if (!previous || r.version > previous.version) latest.set(r.rootId, r);
-  }
   const words = (input.query ?? "")
     .toLocaleLowerCase()
     .trim()
     .split(/\s+/)
     .filter(Boolean);
   const matches = (
-    input.includeHistory ? result.records : [...latest.values()]
+    input.includeHistory ? result.records : latestVersions(result.records)
   ).filter((r) =>
     words.every((word) => text(r).toLocaleLowerCase().includes(word)),
   );

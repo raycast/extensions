@@ -60,6 +60,13 @@ const lineage = {
   createdAt: date,
   supersedesId: optional(uuid),
 };
+export const evidenceItem = object({
+  id: str,
+  claim: str,
+  sourceRef: optional(str),
+  observedAt: optional(str),
+  receiptBearing: bool,
+});
 export const groundDraft = object({
   title: str,
   carrierType: one("project", "person", "team", "organization", "other"),
@@ -69,15 +76,7 @@ export const groundDraft = object({
   constraints: strings,
   authorityBoundary: str,
   scopeBoundary: str,
-  evidence: array(
-    object({
-      id: str,
-      claim: str,
-      sourceRef: optional(str),
-      observedAt: optional(str),
-      receiptBearing: bool,
-    }),
-  ),
+  evidence: array(evidenceItem),
   uncertainties: array(
     object({
       statement: str,
@@ -99,6 +98,28 @@ export const groundRecord = object({
   authorityStatus: one("advisory-no-authority-grant"),
   draft: groundDraft,
 });
+export const receipt = object({
+  id: str,
+  kind: one(
+    "canonical-intent",
+    "runtime-telemetry",
+    "statement-of-record",
+    "direct-observation",
+    "artifact",
+    "authority-grant",
+    "policy",
+    "cost",
+    "constraint",
+    "contradiction",
+    "absence",
+    "memory",
+  ),
+  content: str,
+  sourceRef: optional(str),
+  observedAt: optional(str),
+  currentness: one("current", "historical", "unknown"),
+  receiptBearing: bool,
+});
 export const splatDraft = object({
   title: str,
   subject: str,
@@ -111,30 +132,7 @@ export const splatDraft = object({
   conditions: strings,
   constraints: strings,
   lanes: array(lanes),
-  receipts: array(
-    object({
-      id: str,
-      kind: one(
-        "canonical-intent",
-        "runtime-telemetry",
-        "statement-of-record",
-        "direct-observation",
-        "artifact",
-        "authority-grant",
-        "policy",
-        "cost",
-        "constraint",
-        "contradiction",
-        "absence",
-        "memory",
-      ),
-      content: str,
-      sourceRef: optional(str),
-      observedAt: optional(str),
-      currentness: one("current", "historical", "unknown"),
-      receiptBearing: bool,
-    }),
-  ),
+  receipts: array(receipt),
   correctionReason: optional(str),
   handoff: optional(source),
 });
@@ -225,6 +223,7 @@ export const splatRecord = object({
   ...lineage,
   centerStatus: one("protected-held-open-not-computed"),
   persistence: one("ledger", "candidate-only"),
+  analysisOrigin: optional(one("local-intake", "raycast-ai")),
   draft: splatDraft,
   analysis,
 });
