@@ -1,6 +1,6 @@
 # Changelog
 
-## [Favorite leagues first in Match Day] - {PR_MERGE_DATE}
+## [Favorite leagues first in Match Day] - 2026-11-09
 
 - List favorite leagues first in Match Day and its league dropdown, marked with a "Favorite" subtitle
 
