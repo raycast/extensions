@@ -63,7 +63,7 @@ export function VaultsView({ openOn }: { openOn: "items" | "vaults" | "folders" 
   const [error, setError] = useState<PassCliError | null>(null);
   // Once pass-cli has confirmed the session, the item lists opened from here don't ask it again.
   const [sessionConfirmed, setSessionConfirmed] = useState(false);
-  const preferences = getPreferenceValues<Preferences.SearchItems>();
+  const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);
@@ -424,7 +424,12 @@ export function VaultsView({ openOn }: { openOn: "items" | "vaults" | "folders" 
                     title="View Items"
                     icon={Icon.List}
                     target={
-                      <SearchItemsView initialVault={sharedWithMe} sortChoice={sortChoice} vaultOrder={vaultOrder} />
+                      <SearchItemsView
+                        initialVault={sharedWithMe}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        vaultOrder={vaultOrder}
+                      />
                     }
                   />
                   {sortMenu}

@@ -32,7 +32,7 @@ export function ItemView({ item, store, onUse }: ItemViewProps) {
       metadata={renderItemMetadata(
         Detail.Metadata,
         item,
-        { ...rows, fields: rows.fields.filter((row) => row.id !== "note") },
+        { ...rows, details: rows.details.filter((row) => row.id !== "note") },
         error,
       )}
       actions={<ItemActions item={item} detail={detail} store={store} onUse={onUse} />}

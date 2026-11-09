@@ -2238,6 +2238,34 @@ test("an item list opened from the vault list once the session is confirmed does
   assert.equal((harness.render(SearchItemsView, props).props.items as Item[]).length, 1);
 });
 
+test("Shared with Me opened with nothing saved waits for the vaults, rather than showing items that then move", async () => {
+  const previewed = async (initialVault: Vault) => {
+    const shareIds: string[] = [];
+    const { harness, SearchItemsView } = searchItemsFixture({
+      "./pass-cli": {
+        endedSessionError: async () => undefined,
+        listItems: async (shareId: string) => {
+          shareIds.push(shareId);
+          return [{ ...item, shareId }];
+        },
+        listVaultsAndItems: () => new Promise(() => undefined),
+      },
+      "./cache": {
+        getCachedItems: async () => null,
+        getCachedFolders: async () => null,
+        getCachedVaults: async () => null,
+      },
+    });
+    harness.render(SearchItemsView, { initialVault, sessionConfirmed: true });
+    harness.effects.forEach((effect) => effect());
+    await new Promise(setImmediate);
+    return shareIds.join();
+  };
+  assert.equal(await previewed({ shareId: "vault", name: "Personal" }), "vault");
+  // An item shared with the user that is also in one of their vaults shows with that vault only.
+  assert.equal(await previewed(sharedItems.SHARED_WITH_ME), "");
+});
+
 test("the vault list passes on a session it confirmed to the item lists it opens", async () => {
   const harness = hookHarness();
   const { VaultsView } = loadView("vaults-view.tsx", {
@@ -2255,8 +2283,8 @@ test("the vault list passes on a session it confirmed to the item lists it opens
       endedSessionError: async () => undefined,
       listVaultSharing: async () => new Map(),
       listVaultsAndItems: async () => ({
-        vaults: [{ shareId: "vault", name: "Personal" }],
-        items: [],
+        vaults: [{ shareId: "vault", name: "Personal" }, sharedItems.SHARED_WITH_ME],
+        items: [{ ...item, shareId: "item-share", sharedWithMe: true }],
         failedVaults: [],
       }),
     },
@@ -2288,8 +2316,8 @@ test("the vault list passes on a session it confirmed to the item lists it opens
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
-  // All Vaults and the vault.
-  assert.equal(confirmed().join(), "true,true");
+  // All Vaults, the vault and Shared with Me.
+  assert.equal(confirmed().join(), "true,true,true");
 });
 
 test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {

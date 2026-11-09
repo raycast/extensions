@@ -31,37 +31,6 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "primaryAction",
-          "type": "dropdown",
-          "title": "Primary Action",
-          "description": "What Enter does on an item.",
-          "default": "details",
-          "required": false,
-          "data": [
-            {
-              "title": "View Details",
-              "value": "details"
-            },
-            {
-              "title": "Copy Password",
-              "value": "copy"
-            },
-            {
-              "title": "Fill Login (macOS)",
-              "value": "fill"
-            }
-          ]
-        },
-        {
-          "name": "submitAfterFill",
-          "type": "checkbox",
-          "title": "Fill Login",
-          "label": "Press Return after the password",
-          "description": "Submits the login form.",
-          "default": false,
-          "required": false
-        },
-        {
           "name": "sortBy",
           "type": "dropdown",
           "title": "Sort items by",
@@ -108,33 +77,6 @@
               "value": "mostUsed"
             }
           ]
-        },
-        {
-          "name": "enableBackgroundRefresh",
-          "type": "checkbox",
-          "title": "Item List",
-          "label": "Refresh items in the background",
-          "description": "Even when the cache is still fresh.",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "enableWebIntegration",
-          "type": "checkbox",
-          "title": "",
-          "label": "Suggest logins for the active browser tab",
-          "description": "Requires the Raycast browser extension.",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showWebsiteIcons",
-          "type": "checkbox",
-          "title": "",
-          "label": "Show website icons",
-          "description": "Needs a Favicon Provider in Raycast's settings. It sees the domains.",
-          "default": false,
-          "required": false
         }
       ]
     },
@@ -353,15 +295,6 @@
               "value": "created"
             }
           ]
-        },
-        {
-          "name": "showWebsiteIcons",
-          "type": "checkbox",
-          "title": "Website Icons",
-          "label": "Show website icons",
-          "description": "Needs a Favicon Provider in Raycast's settings. It sees the domains.",
-          "default": false,
-          "required": false
         }
       ]
     },
@@ -380,6 +313,37 @@
       "title": "CLI Path",
       "description": "Path to pass-cli executable",
       "default": "pass-cli",
+      "required": false
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "What Enter does on an item.",
+      "default": "details",
+      "required": false,
+      "data": [
+        {
+          "title": "View Details",
+          "value": "details"
+        },
+        {
+          "title": "Copy Password",
+          "value": "copy"
+        },
+        {
+          "title": "Fill Login (macOS)",
+          "value": "fill"
+        }
+      ]
+    },
+    {
+      "name": "submitAfterFill",
+      "type": "checkbox",
+      "title": "Fill Login",
+      "label": "Press Return after the password",
+      "description": "Submits the login form.",
+      "default": false,
       "required": false
     },
     {
@@ -424,6 +388,33 @@
           "value": "43200"
         }
       ]
+    },
+    {
+      "name": "enableBackgroundRefresh",
+      "type": "checkbox",
+      "title": "Item List",
+      "label": "Refresh items in the background",
+      "description": "Even when the cache is still fresh.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableWebIntegration",
+      "type": "checkbox",
+      "title": "",
+      "label": "Suggest logins for the active browser tab",
+      "description": "Requires the Raycast browser extension.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showWebsiteIcons",
+      "type": "checkbox",
+      "title": "",
+      "label": "Show website icons",
+      "description": "Needs a Favicon Provider in Raycast's settings. It sees the domains.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

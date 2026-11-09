@@ -46,22 +46,20 @@ Your Proton Pass folders follow their vault, in the vault list and in the vault 
 
 ## Preferences
 
-Preferences shared by all commands:
-
 - **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
-- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
-- **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
-
-### Browse Items
-
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
-- **Sort items by**: Order of the items: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) changes it until the window closes
-- **Sort vaults by**: Order of the vaults in the vault list and the vault menu: name (default), item count or most used. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes
+- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
+- **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
-  - Show website icons instead of initials, from the Favicon Provider chosen in Raycast's Advanced settings, which receives the domains (off by default). With no provider chosen there, initials show
+  - Show website icons instead of initials, in Browse Items and Get TOTP Code, from the Favicon Provider chosen in Raycast's Advanced settings, which receives the domains (off by default). With no provider chosen there, initials show
+
+### Browse Items
+
+- **Sort items by**: Order of the items: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) changes it until the window closes
+- **Sort vaults by**: Order of the vaults in the vault list and the vault menu: name (default), item count or most used. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes
 
 ### Generate Password
 
@@ -78,7 +76,6 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 - **Codes**: Hide codes behind dots, until Show Codes (⌘H) shows them while the command stays open. Copying still works (off by default)
 - **Sort items by**: Order of the codes, as in Browse Items but set apart. The vault menu lists vaults by name
-- **Website Icons**: Show website icons instead of initials, as in Browse Items but set apart (off by default)
 
 ## Filling Logins (macOS)
 

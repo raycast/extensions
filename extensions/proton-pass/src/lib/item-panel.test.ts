@@ -42,11 +42,11 @@ const bareLogin: Item = {
 const NOW = Date.parse("2026-06-15T12:00:00Z");
 
 function layout(rows: PanelRows) {
-  return [...rows.fields, ...rows.metadata].map((row) => `${row.id}:${row.title}`);
+  return [...rows.credentials, ...rows.details].map((row) => `${row.id}:${row.title}`);
 }
 
 function valueOf(rows: PanelRows, id: string) {
-  return [...rows.fields, ...rows.metadata, ...rows.customFields].find((row) => row.id === id)?.value;
+  return [...rows.credentials, ...rows.details, ...rows.customFields].find((row) => row.id === id)?.value;
 }
 
 test("shows the same rows in the same order for every item", () => {
@@ -80,6 +80,18 @@ test("the Folder row shows the item's folder with the ones it's in", () => {
     kind: "text",
     text: "Banking › Cards",
   });
+});
+
+test("groups the credentials apart from the details about the item", () => {
+  const rows = getPanelRows({ item: login, isLoading: false, now: NOW });
+  assert.deepEqual(
+    rows.credentials.map((row) => row.id),
+    ["username", "email", "password", "totp"],
+  );
+  assert.deepEqual(
+    rows.details.map((row) => row.id),
+    ["website", "note", "vault", "folder", "type", "modified"],
+  );
 });
 
 test("marks missing values as empty and keeps secrets masked", () => {

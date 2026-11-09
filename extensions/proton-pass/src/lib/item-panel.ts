@@ -18,8 +18,10 @@ export interface PanelRow {
 }
 
 export interface PanelRows {
-  fields: PanelRow[];
-  metadata: PanelRow[];
+  /** What signs in: username, email, password and TOTP code. */
+  credentials: PanelRow[];
+  /** What tells about the item: its websites, note, vault, type and last change. */
+  details: PanelRow[];
   customFields: PanelRow[];
 }
 
@@ -74,15 +76,15 @@ export function getPanelRows({ item, detail, totp, totpFailed, isLoading, error,
   else if (hasNote === undefined) note = notLoaded;
 
   return {
-    fields: [
+    credentials: [
       { id: "username", title: "Username", value: text((detail ?? item).username) },
       { id: "email", title: "Email", value: text((detail ?? item).email) },
       { id: "password", title: "Password", value: password },
       { id: "totp", title: "TOTP Code", value: code },
+    ],
+    details: [
       { id: "website", title: "Website", value: websites },
       { id: "note", title: "Note", value: note },
-    ],
-    metadata: [
       { id: "vault", title: "Vault", value: text(item.vaultName) },
       { id: "folder", title: "Folder", value: text(item.folderPath && folderPathLabel(item.folderPath)) },
       { id: "type", title: "Type", value: text(formatTypeLabel(item.type)) },
