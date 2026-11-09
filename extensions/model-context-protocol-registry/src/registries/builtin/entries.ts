@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "pigmentalab",
+    title: "PigmentaLab",
+    description:
+      "Pre-press for DTF and textile printing: check whether an image prints well at a given size, remove backgrounds with clean edges, upscale to print size at 300 dpi, knock out colors, make halftones for dark garments and nest designs on gang sheets, plus print sizes by garment and advice on print techniques. 14 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a PigmentaLab API key as a Bearer header; a PigmentaLab account is required, and the free plan includes daily credits.",
+    icon: "https://pigmentalab.io/android-chrome-512x512.png",
+    homepage: "https://pigmentalab.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pigmentalab.io/mcp"],
+    },
+    remoteUrl: "https://mcp.pigmentalab.io/mcp",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
