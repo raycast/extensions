@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "model-salt",
+    title: "Model Salt",
+    description:
+      "Outside randomness for creative requests, so the same prompt gives different answers that still do what was asked. One tool: before a creative task the model calls it and gets back a few choices to settle this time (a palette, a name, an opening line), drawn from randomness outside the model, then does the request as asked. Open source (MIT). Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/modelsalt/model-salt/main/mcpb/icon.png",
+    homepage: "https://modelsalt.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://modelsalt.com/mcp"],
+    },
+    remoteUrl: "https://modelsalt.com/mcp",
+  },
+  {
     name: "roomlab",
     title: "RoomLab.app",
     description:
