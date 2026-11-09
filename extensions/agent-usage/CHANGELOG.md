@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Claude plans without a 5h limit] - {PR_MERGE_DATE}
+## [Claude plans without a 5h limit] - 2026-11-09
 
 - Show Claude usage when the response has no 5-hour window, as happens on Max plans, instead of failing with "Missing five_hour usage"
 
