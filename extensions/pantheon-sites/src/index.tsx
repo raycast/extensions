@@ -20,11 +20,6 @@ function parseTimeout(value: string | undefined): number {
   return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : 120_000;
 }
 
-function siteListArgs(organization: string | undefined): string {
-  const org = organization?.trim();
-  return org ? `site:list --org=${JSON.stringify(org)} --format=json` : "site:list --format=json";
-}
-
 // framework can be null (uninitialized site) or variants like "drupal10" / "wordpress_network".
 function frameworkIcon(framework: string | null) {
   if (framework?.startsWith("wordpress")) return { source: "wordpress.svg", tintColor: Color.PrimaryText };
@@ -50,7 +45,7 @@ export default function Command() {
     isLoading: sitesLoading,
     data,
     revalidate,
-  } = useExec(terminusCmd(preferences.terminusPath, siteListArgs(preferences.organization)), {
+  } = useExec(terminusCmd(preferences.terminusPath, "site:list --format=json"), {
     shell: true,
     execute: !checkLoading && !checkError,
     timeout: parseTimeout(preferences.siteListTimeout),
@@ -66,9 +61,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: timedOut ? "Terminus timed out" : "Failed to load sites",
-        message: timedOut
-          ? "Increase 'Site List Timeout' or set an 'Organization Filter' in preferences."
-          : error.message,
+        message: timedOut ? "Increase 'Site List Timeout' in preferences." : error.message,
       });
     },
   });
