@@ -3195,3 +3195,25 @@ test("folders come before the items, open with Enter, and load no item's details
   const onlyFolders = render([], [], { folders: [banking] });
   assert.equal(actions(onlyFolders).filter((props) => typeof props.id === "string").length, 1);
 });
+
+test("a selected folder shows its subfolders, then its items, next to the list", () => {
+  const { render } = loadItemList();
+  const banking = { shareId: "vault", path: [BANKING], itemCount: 3 };
+  const cards = { shareId: "vault", path: [BANKING, CARDS], itemCount: 1 };
+  const travel = { shareId: "vault", path: [TRAVEL], itemCount: 0 };
+  const loan = { ...inBanking, itemId: "loan", title: "Alpha", email: undefined, username: "alice" };
+  const insideFolders = new Map([
+    [folders.folderEntryValue(banking), { folders: [cards], items: [inBanking, loan] }],
+    [folders.folderEntryValue(travel), { folders: [], items: [] }],
+  ]);
+  const list = render([unfiled], [], { folders: [banking, travel], insideFolders, sortChoice: { current: "name" } });
+  const [bankingRow, travelRow] = actions(list).filter((props) => typeof props.id === "string");
+  assert.deepEqual(
+    actions((bankingRow.detail as Element).props.metadata)
+      .filter((props) => typeof props.title === "string")
+      .map((props) => `${props.title}: ${props.text}`),
+    // By name, as the folder lists them once open.
+    ["Cards: 1 item", "Alpha: alice", "Example: test@example.com"],
+  );
+  assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
+});

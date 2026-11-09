@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
-import { FolderEntry, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
+import { FolderEntry, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
 import { ItemList } from "./item-list";
 import { SortOrder } from "./sort";
 import { Item } from "./types";
@@ -54,6 +54,10 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
     [contents.items, folder],
   );
   const folders = useMemo(() => subfolders(contents.folders, folder.shareId, folder), [contents.folders, folder]);
+  const inside = useMemo(
+    () => insideFolders(contents.folders, contents.items, folders),
+    [contents.folders, contents.items, folders],
+  );
 
   return (
     <ItemList
@@ -61,6 +65,7 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
       sortChoice={sortChoice}
       items={items}
       folders={folders}
+      insideFolders={inside}
       openFolder={(subfolder) => (
         <FolderView
           source={source}

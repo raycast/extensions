@@ -20,7 +20,7 @@ import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
 import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
-import { folderEntries, isDirectlyIn, refreshVaultFolders, subfolders, VaultFolder } from "./folders";
+import { folderEntries, insideFolders, isDirectlyIn, refreshVaultFolders, subfolders, VaultFolder } from "./folders";
 import { createFolderSource, FolderView } from "./folder-view";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
@@ -266,6 +266,7 @@ export function SearchItemsView({
     () => (isVaultSelected ? subfolders(folders, selectedVaultId) : []),
     [folders, selectedVaultId, isVaultSelected],
   );
+  const vaultFoldersInside = useMemo(() => insideFolders(folders, items, vaultFolders), [folders, items, vaultFolders]);
   // The folders opened from here stay up to date with this list's items and folders.
   const folderSource = useMemo(createFolderSource, []);
   useEffect(() => folderSource.set({ items, folders, isLoading }), [folderSource, items, folders, isLoading]);
@@ -289,6 +290,7 @@ export function SearchItemsView({
       // Items wait for the active tab, so that the suggested login is selected from the start.
       items={isLoadingActiveTab ? [] : filteredItems}
       folders={isLoadingActiveTab ? [] : vaultFolders}
+      insideFolders={vaultFoldersInside}
       openFolder={(folder) => (
         <FolderView
           source={folderSource}

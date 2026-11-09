@@ -142,6 +142,25 @@ export function subfolders(entries: FolderEntry[], shareId: string, parent?: Vau
   );
 }
 
+/** What a folder holds right inside it. */
+export interface InsideFolder {
+  folders: FolderEntry[];
+  items: Item[];
+}
+
+/** For each of `shown`, by its key (see folderEntryValue), its subfolders and the items right inside it. */
+export function insideFolders(entries: FolderEntry[], items: Item[], shown: FolderEntry[]): Map<string, InsideFolder> {
+  return new Map(
+    shown.map((folder) => [
+      folderEntryValue(folder),
+      {
+        folders: subfolders(entries, folder.shareId, folder),
+        items: items.filter((item) => isDirectlyIn(item, folder.shareId, folder)),
+      },
+    ]),
+  );
+}
+
 /**
  * Whether an item is right inside `folder`, a folder of the vault `shareId`, or with no folder given, in none of that
  * vault's folders. An item whose folder isn't known is in none.

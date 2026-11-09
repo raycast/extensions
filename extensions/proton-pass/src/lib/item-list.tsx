@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderEntry, folderEntryValue, folderPathLabel } from "./folders";
-import { hostnameOf, itemKey } from "./format";
+import { FolderEntry, folderEntryValue, InsideFolder } from "./folders";
+import { formatTypeLabel, hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
@@ -43,6 +43,8 @@ export interface ItemListProps {
   folders?: FolderEntry[];
   /** The view a folder opens on. */
   openFolder?: (folder: FolderEntry) => ReactNode;
+  /** What each folder holds, shown next to the list while it's selected (see insideFolders). */
+  insideFolders?: Map<string, InsideFolder>;
   navigationTitle?: string;
   /** Shown first, in their own section, e.g. logins matching the active browser tab. */
   suggestedItems?: Item[];
@@ -59,6 +61,7 @@ export function ItemList({
   items,
   folders = [],
   openFolder,
+  insideFolders,
   navigationTitle,
   suggestedItems = [],
   suggestionsTitle = "Suggested",
@@ -73,13 +76,30 @@ export function ItemList({
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);
   const [sortOrder, setSortOrder] = useState(() => sortChoice?.current ?? preferredSortOrder());
+  // The folders' items are ranked with the list's, so that a folder shows them in the order it opens on.
+  const folderItems = useMemo(
+    () => Array.from(insideFolders?.values() ?? []).flatMap((inside) => inside.items),
+    [insideFolders],
+  );
+  const rankedItems = useMemo(
+    () => (folderItems.length > 0 ? [...items, ...folderItems] : items),
+    [items, folderItems],
+  );
   // Items never used from Raycast come after the others, by name.
-  const { data: mostUsed, visitItem } = useFrecencySorting(items, {
+  const { data: mostUsed, visitItem } = useFrecencySorting(rankedItems, {
     key: itemKey,
     namespace: "items",
     sortUnvisited: compareNames,
   });
-  const sortedItems = useMemo(() => sortItems(items, sortOrder, mostUsed), [items, sortOrder, mostUsed]);
+  const inSortOrder = useCallback(
+    (subset: Item[]) => {
+      if (sortOrder !== "mostUsed") return sortItems(subset, sortOrder, []);
+      const keys = new Set(subset.map(itemKey));
+      return mostUsed.filter((item) => keys.has(itemKey(item)));
+    },
+    [sortOrder, mostUsed],
+  );
+  const sortedItems = useMemo(() => inSortOrder(items), [inSortOrder, items]);
   const onSortOrderChange = useCallback(
     (order: SortOrder) => {
       if (sortChoice) sortChoice.current = order;
@@ -132,6 +152,37 @@ export function ItemList({
   const toggleDetail = useCallback(() => setIsShowingDetail((value) => !value), [setIsShowingDetail]);
   const onUse = useCallback((item: Item) => void visitItem(item), [visitItem]);
 
+  /** The folder's subfolders, then its items, as the folder shows them once opened. */
+  function renderInsideFolder(folder: FolderEntry) {
+    const inside = insideFolders?.get(folderEntryValue(folder));
+    if (!inside) return undefined;
+    if (inside.folders.length === 0 && inside.items.length === 0) return <List.Item.Detail markdown="Empty folder" />;
+    return (
+      <List.Item.Detail
+        metadata={
+          <List.Item.Detail.Metadata>
+            {inside.folders.map((subfolder) => (
+              <List.Item.Detail.Metadata.Label
+                key={folderEntryValue(subfolder)}
+                title={subfolder.path[subfolder.path.length - 1].name}
+                icon={Icon.Folder}
+                text={formatItemCount(subfolder.itemCount)}
+              />
+            ))}
+            {inSortOrder(inside.items).map((item) => (
+              <List.Item.Detail.Metadata.Label
+                key={itemKey(item)}
+                title={item.title}
+                icon={getListIcon(item, showWebsiteIcons)}
+                text={item.username ?? item.email ?? formatTypeLabel(item.type)}
+              />
+            ))}
+          </List.Item.Detail.Metadata>
+        }
+      />
+    );
+  }
+
   function renderFolder(folder: FolderEntry) {
     const name = folder.path[folder.path.length - 1].name;
     return (
@@ -141,22 +192,7 @@ export function ItemList({
         icon={Icon.Folder}
         title={name}
         accessories={[{ text: formatItemCount(folder.itemCount) }]}
-        detail={
-          isShowingDetail ? (
-            <List.Item.Detail
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Folder"
-                    icon={Icon.Folder}
-                    text={folderPathLabel(folder.path)}
-                  />
-                  <List.Item.Detail.Metadata.Label title="Items" text={formatItemCount(folder.itemCount)} />
-                </List.Item.Detail.Metadata>
-              }
-            />
-          ) : undefined
-        }
+        detail={isShowingDetail ? renderInsideFolder(folder) : undefined}
         actions={
           <ActionPanel>
             {openFolder && <Action.Push title="Open Folder" icon={Icon.Folder} target={openFolder(folder)} />}
