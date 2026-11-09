@@ -86,7 +86,7 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
         <List.EmptyView
           icon="extension-icon.png"
           title="Search the Houdini docs"
-          description="sop:, lop:, v:, py: keep the search to one part. h: searches the pages you opened."
+          description="Use sop:, lop:, or vex: to filter the search to a specific context. Use h: to search the pages you opened previously."
         />
       )}
       {baseUrl && (
