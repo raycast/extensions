@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-11-09
 
 - Fix League Table and Favorite League Tables crashing after FotMob changed the shape of its league table data
 - Make the "Search Leagues" action in Favorite League Tables open a league search instead of only showing a hint
