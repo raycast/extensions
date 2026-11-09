@@ -92,7 +92,8 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
     clear:
       recent.length > 0
         ? () =>
-            confirmClear().then(() => {
+            confirmClear().then((cleared) => {
+              if (!cleared) return;
               setSelectedPath(null);
               return history.revalidate();
             })
@@ -253,13 +254,15 @@ async function removeWithUndo(hit: Hit, refresh: () => Promise<unknown>) {
   });
 }
 
-async function confirmClear() {
+/** Asks first, then clears. Says whether it cleared. */
+async function confirmClear(): Promise<boolean> {
   const confirmed = await confirmAlert({
     title: "Clear History?",
     message: "This removes every page from the list of pages you opened.",
     primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
   });
   if (confirmed) await clearHistory();
+  return confirmed;
 }
 
 /** The page without its YAML front matter, so the preview starts at the title.
