@@ -108,7 +108,7 @@ function Command(props: LaunchProps<{ draftValues: Post }>) {
         ))}
       </Form.TagPicker>
       <Form.Separator />
-      <Form.TextArea title="Post" {...itemProps.content} />
+      <Form.TextArea title="Post" placeholder="Write your post…" {...itemProps.content} />
     </Form>
   );
 }

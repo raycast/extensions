@@ -86,7 +86,7 @@ function EditPost({ post, onSaved }: { post: PublishedPost; onSaved: () => void 
         ))}
       </Form.TagPicker>
       <Form.Separator />
-      <Form.TextArea title="Post" {...itemProps.content} />
+      <Form.TextArea title="Post" placeholder="Write your post…" {...itemProps.content} />
     </Form>
   );
 }
@@ -95,15 +95,15 @@ function Command() {
   const { token } = getAccessToken();
   const [status, setStatus] = useCachedState<string>("status-filter", "all");
 
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
-    (status: string) => async (options: { page: number }) => {
+  const { data, error, isLoading, pagination, revalidate } = useCachedPromise(
+    (token: string, status: string) => async (options: { page: number }) => {
       const { posts, pagination } = await listPosts(token, {
         status: status === "all" ? undefined : (status as PostStatus),
         page: options.page + 1,
       });
       return { data: posts, hasMore: pagination.hasNextPage };
     },
-    [status],
+    [token, status],
   );
 
   const remove = async (post: PublishedPost) => {
@@ -127,6 +127,7 @@ function Command() {
     <List
       isLoading={isLoading}
       pagination={pagination}
+      searchBarPlaceholder="Search posts…"
       searchBarAccessory={
         <List.Dropdown tooltip="Status" value={status} onChange={setStatus}>
           <List.Dropdown.Item title="All Posts" value="all" />
@@ -137,7 +138,20 @@ function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView icon={Icon.Calendar} title="No posts here yet" />
+      {error && !data?.length ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load your posts"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        !isLoading && <List.EmptyView icon={Icon.Calendar} title="No posts here yet" />
+      )}
       {data?.map((post) => (
         <List.Item
           key={post.postGroupId}
