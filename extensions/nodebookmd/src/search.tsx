@@ -1,5 +1,16 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, LaunchProps, List, showHUD } from "@raycast/api";
-import { useFetch, usePromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  showHUD,
+} from "@raycast/api";
+import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { combine, MIN_BODY_QUERY, rankBodies } from "./combine";
 import { clearHistory, forgetPage, recentPages, rememberPage } from "./history";
@@ -45,8 +56,10 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
   const actions = {
     remember: (hit: Hit) => rememberPage(hit).then(() => history.revalidate()),
     forget: showsHistory ? (hit: Hit) => forgetPage(hit.path).then(() => history.revalidate()) : undefined,
-    clear: recent.length > 0 ? () => clearHistory().then(() => history.revalidate()) : undefined,
+    clear: recent.length > 0 ? () => confirmClear().then(() => history.revalidate()) : undefined,
   };
+  const failure = server.error ?? titleList.error ?? (searchesBodies ? bodySearch.error : undefined);
+  const retry = () => (server.error ? server.revalidate() : (titleList.revalidate(), bodySearch.revalidate()));
 
   return (
     <List
@@ -58,8 +71,17 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
       selectedItemId={hits[0]?.path}
       searchBarPlaceholder="Search Houdini docs, v:point for VEX only, h: for history"
     >
-      {server.error ? (
-        <List.EmptyView icon={Icon.Warning} title="NodebookMD is not reachable" description={server.error.message} />
+      {failure ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="NodebookMD is not reachable"
+          description={failure.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={retry} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView
           icon="extension-icon.png"
@@ -109,7 +131,7 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
               title="Copy as Markdown"
               icon={Icon.Clipboard}
               shortcut={Keyboard.Shortcut.Common.Copy}
-              onAction={() => copyPage(markdownUrl).then(() => remember(hit))}
+              onAction={() => copyPage(markdownUrl).then((copied) => copied && remember(hit))}
             />
             <Action.OpenInBrowser
               title="Open on SideFX"
@@ -144,10 +166,27 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
   );
 }
 
-async function copyPage(markdownUrl: string) {
-  const response = await fetch(markdownUrl);
-  await Clipboard.copy(await response.text());
-  await showHUD("Copied page as Markdown");
+/** Copies the page, and says whether it did: a failed fetch leaves the clipboard alone. */
+async function copyPage(markdownUrl: string): Promise<boolean> {
+  try {
+    const response = await fetch(markdownUrl);
+    if (!response.ok) throw new Error(`NodebookMD answered ${response.status}`);
+    await Clipboard.copy(await response.text());
+    await showHUD("Copied page as Markdown");
+    return true;
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not copy the page" });
+    return false;
+  }
+}
+
+async function confirmClear() {
+  const confirmed = await confirmAlert({
+    title: "Clear History?",
+    message: "This removes every page from the list of pages you opened.",
+    primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
+  });
+  if (confirmed) await clearHistory();
 }
 
 /** The page without its YAML front matter, so the preview starts at the title.

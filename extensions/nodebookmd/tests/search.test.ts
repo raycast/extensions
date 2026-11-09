@@ -29,6 +29,8 @@ test("the first hit is the page the app puts first", async (context) => {
     "v:point": "vex/functions/point",
     "sop:scatter": "nodes/sop/scatter",
     "box size": "nodes/sop/box",
+    "sop:aprn": "nodes/sop/adaptiveprune",
+    "hs:oprn": "commands/oprename",
   };
   for (const [query, path] of Object.entries(expected)) {
     assert.equal(await firstHit(titles, query), path, query);

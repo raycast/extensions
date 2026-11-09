@@ -26,9 +26,3 @@ starts the app when it is not running.
 | Open on SideFX      | ⌘⇧O   | Ctrl+Shift+O |
 | Remove from History | ⌃X    | Ctrl+D       |
 | Clear History       | ⌃⇧X   | Ctrl+Alt+D   |
-
-## Try it before it is in the Store
-
-1. Install [Node.js](https://nodejs.org) 22 or later and Raycast.
-2. In this folder, run `npm install`, then `npm run dev`.
-3. Raycast imports the extension. You can then close the terminal: the extension stays in Raycast.

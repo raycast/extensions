@@ -18,7 +18,6 @@
     {
       "name": "search",
       "title": "Search Houdini Docs",
-      "subtitle": "NodebookMD",
       "description": "Search nodes, VEX functions, Python and every other page of the Houdini docs. Type v:, sop: or h: to search one part.",
       "mode": "view",
       "arguments": [

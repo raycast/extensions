@@ -22,7 +22,7 @@ export function weight(hit: Hit): number {
   // ("Attribute Wrangle" is a SOP, a LOP and a COP) has to break the tie
   // somehow, and SOPs are what most readers are in.
   if (path.startsWith("nodes/sop/")) return 1;
-  if (/^(nodes|vex|expressions|hscript|hom)\//.test(path)) return 0.97;
+  if (/^(nodes|vex|expressions|commands|hom)\//.test(path)) return 0.97;
   return 0.9;
 }
 
@@ -182,7 +182,7 @@ export function match(hits: Hit[], query: string, limit = 8): Hit[] {
  * ever searches nodes, which is why the matcher behaves there; the families
  * here are that same idea, widened to the scripting references.
  */
-const ABBREVIATION_FAMILY = /^(nodes|vex|expressions|hscript|hom)\//;
+const ABBREVIATION_FAMILY = /^(nodes|vex|expressions|commands|hom)\//;
 
 /**
  * `cptp` should find "Copy to Points" the way it does in Houdini's own TAB
@@ -267,46 +267,32 @@ function fold(text: string): Folded {
  * `geoutils::copytopointstargetattribs` when `cptp` spans 7 characters in both.
  * The word-start share then lifts a true abbreviation over a tighter accident.
  *
- * Every window is scored, not just the shortest, because the shortest window
- * and the best-aligned one are often not the same.
+ * Every word start that holds the first letter is tried. From a start, the
+ * earliest run forward ends first, so it is the tightest window for that start.
+ * Pulling the start back from the end instead could land mid-word: for `aprn`
+ * it picked the second `a` of "Adaptive" and lost Adaptive Prune.
  */
 function subsequence(query: string, name: Folded): number | null {
   const { chars, starts } = name;
   if (chars.length < query.length) return null;
   let best: number | null = null;
 
-  for (let from = 0; from < chars.length;) {
-    let qi = 0;
-    let end = from;
-    for (; end < chars.length && qi < query.length; end++) {
-      if (chars[end] === query[qi]) qi++;
+  for (let start = 0; start < chars.length; start++) {
+    if (!starts[start] || chars[start] !== query[0]) continue;
+    let matched = 0;
+    let onStart = 0;
+    let end = start;
+    for (; end < chars.length && matched < query.length; end++) {
+      if (chars[end] !== query[matched]) continue;
+      if (starts[end]) onStart++;
+      matched++;
     }
-    if (qi < query.length) break; // no complete match remains
-    end--;
-
-    // Pull the start inward to the tightest window with this end.
-    let qk = query.length - 1;
-    let start = end;
-    for (; start >= 0 && qk >= 0; start--) {
-      if (chars[start] === query[qk]) qk--;
-    }
-    start++;
-
-    if (starts[start]) {
-      let onStart = 0;
-      let qj = 0;
-      for (let i = start; i <= end && qj < query.length; i++) {
-        if (chars[i] !== query[qj]) continue;
-        if (starts[i]) onStart++;
-        qj++;
-      }
-      const density = query.length / (end - start + 1);
-      const coverage = query.length / chars.length;
-      const value = density * coverage * (1 + onStart / query.length);
-      if (best === null || value > best) best = value;
-    }
-
-    from = start + 1;
+    // A later start has fewer letters after it, so it cannot match either.
+    if (matched < query.length) break;
+    const density = query.length / (end - start);
+    const coverage = query.length / chars.length;
+    const value = density * coverage * (1 + onStart / query.length);
+    if (best === null || value > best) best = value;
   }
 
   return best;
