@@ -205,19 +205,39 @@ export function NewRoutine({
     deviceId: "",
     steps: template ? [{ type: "wake" }] : [],
   }));
+  // The pushed editor reports its draft back here, so going Back to change the
+  // details and choosing steps again continues the same routine instead of resetting it.
+  const latest = useRef<{ draft: Routine; savedVersion: string }>({ draft, savedVersion: "" });
   return (
     <RoutineDetailsForm
       devices={devices}
       initial={draft}
       stayOpen
       onSave={async (values) => {
+        const current = latest.current.draft;
+        let steps = current.steps;
+        if (current.deviceId && values.deviceId !== current.deviceId && steps.length && steps !== draft.steps) {
+          if (
+            !(await confirmAlert({
+              title: "Change the routine's TV?",
+              message: "Existing steps will be cleared so you can choose apps and controls for the new TV.",
+              primaryAction: { title: "Change TV" },
+            }))
+          )
+            return false;
+          steps = [];
+        }
         push(
           <RoutineEditor
-            initial={{ ...draft, ...values }}
-            isNew
+            initial={{ ...current, ...values, steps }}
+            isNew={!latest.current.savedVersion}
+            initialSavedVersion={latest.current.savedVersion || undefined}
             devices={devices}
             template={template}
             onChanged={onChanged}
+            onDraftChange={(next, savedVersion) => {
+              latest.current = { draft: next, savedVersion };
+            }}
           />,
         );
         return true;
@@ -232,6 +252,8 @@ export function RoutineEditor({
   devices,
   template,
   onChanged,
+  initialSavedVersion,
+  onDraftChange,
 }: {
   initial: Routine;
   /** True while the routine has never been saved. */
@@ -239,10 +261,17 @@ export function RoutineEditor({
   devices: RokuDevice[];
   template?: Template;
   onChanged?: Changed;
+  /** The last saved version when the editor is reopened for a routine with unsaved edits. */
+  initialSavedVersion?: string;
+  /** Reports every draft change so a parent screen can reopen the editor without losing it. */
+  onDraftChange?: (draft: Routine, savedVersion: string) => void;
 }) {
   const { push } = useNavigation();
   const [draft, setDraft] = useState<Routine>(initial);
-  const [savedVersion, setSavedVersion] = useState(isNew ? "" : JSON.stringify(initial));
+  const [savedVersion, setSavedVersion] = useState(initialSavedVersion ?? (isNew ? "" : JSON.stringify(initial)));
+  useEffect(() => {
+    onDraftChange?.(draft, savedVersion);
+  }, [draft, savedVersion]);
   const [isSaving, setIsSaving] = useState(false);
   const [selection, setSelection] = useState<string>();
   const device = devices.find((tv) => tv.id === draft.deviceId);

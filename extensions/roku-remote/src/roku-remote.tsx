@@ -310,7 +310,21 @@ function RemoteForDevice({
   }
 
   function submitText() {
-    typeOnDevice(target, { enter: true }).catch((cause) => fail("Couldn't press Enter", cause));
+    // Enter waits behind pending text edits so the TV never submits partial text.
+    const session = textSession.current;
+    textQueue.current = textQueue.current.then(async () => {
+      if (session !== textSession.current) return;
+      try {
+        await typeOnDevice(target, { enter: true });
+      } catch (cause) {
+        if (session !== textSession.current) return;
+        textSession.current += 1;
+        typed.current = "";
+        setSearchText("");
+        setLastSent(undefined);
+        await fail("Couldn't press Enter", cause);
+      }
+    });
     typed.current = "";
     setSearchText("");
     setLastSent("Enter");
