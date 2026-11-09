@@ -1,5 +1,11 @@
 # com.matbrady.pantheon Changelog
 
+## [New Dashboard URLs] - {PR_MERGE_DATE}
+
+### Changed
+
+- "Open Pantheon Dashboard" uses Pantheon's new `/workspace/<workspace>/<cms-site|node-site>/<site>` URLs. The workspace is looked up once per site via `terminus site:info` and cached; falls back to the legacy `/sites/<site>` URL if the lookup fails
+
 ## [Uninitialized Site Fix] - 2026-11-13
 
 ### Fixed
