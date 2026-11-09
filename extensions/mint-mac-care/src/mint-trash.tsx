@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { formatCompact, openMint, plural, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
-import { NeedsNewerMint, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
+import { NeedsNewerMint, RetryActions, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
 import { NATIVE_APPROVAL_CAPABILITY, hasCapability, runParity, trashReceipt, trashRows } from "./mint-parity";
 import type { TrashItem, TrashRemoval, TrashScan } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
@@ -55,7 +55,12 @@ function EmptyTrash({ cli }: { cli: string }) {
   return (
     <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read the Trash" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read the Trash"
+          description={error.message}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {!error && !isLoading && rows.length === 0 ? (
         <List.EmptyView icon={Icon.CheckCircle} title="The Trash is empty" />

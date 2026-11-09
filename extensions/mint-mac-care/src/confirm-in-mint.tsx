@@ -62,6 +62,16 @@ export async function runConfirmedInMint<T extends object>(
   }
 }
 
+/** For a view whose read failed: look again, or open Mint. */
+export function RetryActions({ onRetry }: { onRetry: () => void }) {
+  return (
+    <ActionPanel>
+      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+      <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+    </ActionPanel>
+  );
+}
+
 /** Rows the person ticks one by one, as Free Disk's chooser does. */
 export function useChosen() {
   const [chosen, setChosen] = useState<Set<string>>(new Set());

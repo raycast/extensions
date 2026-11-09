@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { useEffect, useState } from "react";
 import { formatCompact, openMint, plural, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
-import { NeedsNewerMint, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
+import { NeedsNewerMint, RetryActions, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
 import {
   NATIVE_APPROVAL_CAPABILITY,
   PICTURES_PER_REQUEST,
@@ -228,6 +228,7 @@ function Conversations({ cli }: { cli: string }) {
                   <Action
                     title={`Remove Pictures${many ? ` from${many}` : ""}…`}
                     icon={Icon.EyeDisabled}
+                    style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => onFamilies("agents.remove-media", rows)}
                   />
@@ -290,6 +291,7 @@ function Conversations({ cli }: { cli: string }) {
                   <Action
                     title={`Remove Pictures${many}…`}
                     icon={Icon.EyeDisabled}
+                    style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => onTranscripts(rows)}
                   />
@@ -343,16 +345,6 @@ function Conversations({ cli }: { cli: string }) {
         </List.Section>
       ) : null}
     </List>
-  );
-}
-
-/** A source Mint could not read: look again, or open Mint. */
-function RetryActions({ onRetry }: { onRetry: () => void }) {
-  return (
-    <ActionPanel>
-      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
-      <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
-    </ActionPanel>
   );
 }
 
@@ -480,7 +472,12 @@ function Pictures({
       }
     >
       {scan.error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read the pictures" description={scan.error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read the pictures"
+          description={scan.error.message}
+          actions={<RetryActions onRetry={scan.revalidate} />}
+        />
       ) : null}
       {rows.map((picture) => {
         const isChosen = chosen.has(picture.id);
@@ -493,10 +490,10 @@ function Pictures({
           <List.Item
             key={picture.id}
             id={picture.id}
-            icon={picture.kept ? Icon.Pin : Icon.Image}
+            // The detail pane hides accessories, so the icon says what is chosen.
+            icon={isChosen ? Icon.CheckCircle : picture.kept ? Icon.Pin : Icon.Image}
             title={picture.kept ? "Kept" : formatCompact(picture.estimatedSavingBytes)}
             subtitle={picture.copies > 1 ? `${picture.copies} copies` : undefined}
-            accessories={[chosenAccessory(isChosen)]}
             detail={<List.Item.Detail markdown={markdown} />}
             actions={
               <ActionPanel>

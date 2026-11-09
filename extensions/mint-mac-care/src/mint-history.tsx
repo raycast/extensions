@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { openMint } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
+import { RetryActions } from "./confirm-in-mint";
 import { historyRows, runParity } from "./mint-parity";
 import type { HistoryAnswer, HistoryKind } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
@@ -35,7 +36,12 @@ function History({ cli }: { cli: string }) {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search what Mint did">
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read its history" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read its history"
+          description={error.message}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {!error && !isLoading && rows.length === 0 ? <List.EmptyView icon={Icon.Clock} title="Nothing yet" /> : null}
       {rows.map((row, index) => (

@@ -3,7 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { formatCompact, openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
-import { NeedsNewerMint, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
+import { NeedsNewerMint, RetryActions, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
 import {
   NATIVE_APPROVAL_CAPABILITY,
   customRule,
@@ -57,7 +57,12 @@ function Rules({ cli }: { cli: string }) {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search rules">
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read its rules" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read its rules"
+          description={error.message}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {(["builtin", "custom"] as const).map((group) => (
         <List.Section key={group} title={group === "builtin" ? "Built in" : "Made by hand"}>
@@ -73,6 +78,8 @@ function Rules({ cli }: { cli: string }) {
                 actions={
                   <ActionPanel>
                     <Action.Push title="Preview" icon={Icon.Eye} target={<RulePreview cli={cli} rule={rule} />} />
+                    {/* Read-only in the ⌘↵ slot: a rule changes only from the actions below. */}
+                    <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                     {rule.enabled ? (
                       <Action
                         title="Turn off Rule…"
@@ -104,7 +111,6 @@ function Rules({ cli }: { cli: string }) {
                       </>
                     ) : null}
                     {create}
-                    <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                   </ActionPanel>
                 }
               />
@@ -227,7 +233,12 @@ function RulePreview({ cli, rule }: { cli: string; rule: Rule }) {
       searchBarPlaceholder={data ? `${plural(rows.length, "file")} · ${formatCompact(data.totalBytes)}` : "Looking…"}
     >
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not run the rule" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not run the rule"
+          description={error.message}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {!error && !isLoading && rows.length === 0 ? (
         <List.EmptyView icon={Icon.CheckCircle} title="Nothing matches now" />

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, LaunchType, environment, launchCommand } from "@raycast/api";
-import { useExec, usePromise } from "@raycast/utils";
+import { showFailureToast, useExec, usePromise } from "@raycast/utils";
 import { canRevalidateMintCLI, formatCompact, openMint, parseMintCommandJSON, runMintSurface } from "./mint-cli";
 import { AutoCareJSON, MemoryJSON, StatusJSON, diskCard, folderCards, memoryCard } from "./mint-model";
 import { nudgeCard, notifyLevel, parseIslandHistory } from "./mint-nudge";
@@ -115,7 +115,14 @@ export default function Command() {
     level.revalidate();
     access.revalidate();
   };
-  const open = (name: string) => () => launchCommand({ name, type: LaunchType.UserInitiated });
+  const open = (name: string, title: string) => async () => {
+    try {
+      await launchCommand({ name, type: LaunchType.UserInitiated });
+    } catch (error) {
+      // Raycast refuses when that command is turned off in its settings.
+      await showFailureToast(error, { title: `Could not open ${title}` });
+    }
+  };
 
   return (
     <Detail
@@ -125,12 +132,16 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Free Disk" icon={Icon.HardDrive} onAction={open("mint-scan")} />
-            <Action title="Optimize Storage" icon={Icon.Stars} onAction={open("mint-optimize")} />
-            <Action title="Free Memory" icon={Icon.MemoryChip} onAction={open("mint-memory")} />
-            <Action title="Organize a Folder" icon={Icon.Folder} onAction={open("mint-organize")} />
-            <Action title="Show Disk Growth" icon={Icon.LineChart} onAction={open("mint-why")} />
-            <Action title="Mint History" icon={Icon.Clock} onAction={open("mint-history")} />
+            <Action title="Free Disk" icon={Icon.HardDrive} onAction={open("mint-scan", "Free Disk")} />
+            <Action title="Optimize Storage" icon={Icon.Stars} onAction={open("mint-optimize", "Optimize Storage")} />
+            <Action title="Free Memory" icon={Icon.MemoryChip} onAction={open("mint-memory", "Free Memory")} />
+            <Action
+              title="Organize a Folder"
+              icon={Icon.Folder}
+              onAction={open("mint-organize", "Organize a Folder")}
+            />
+            <Action title="Show Disk Growth" icon={Icon.LineChart} onAction={open("mint-why", "Show Disk Growth")} />
+            <Action title="Mint History" icon={Icon.Clock} onAction={open("mint-history", "Mint History")} />
             <AutoCareAction context={{ section: "disk" }} />
             <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           </ActionPanel.Section>

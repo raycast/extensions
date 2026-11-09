@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, Keyboard, List, Toast, showToast, useN
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { openMint, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
-import { NeedsNewerMint, runConfirmedInMint } from "./confirm-in-mint";
+import { NeedsNewerMint, RetryActions, runConfirmedInMint } from "./confirm-in-mint";
 import { NATIVE_APPROVAL_CAPABILITY, handlingRows, handlingTitle, hasCapability, runParity } from "./mint-parity";
 import type { HandlingAnswer, HandlingPermission, ParityRequest } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
@@ -69,7 +69,12 @@ function Handling({ cli }: { cli: string }) {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search protected locations">
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read its settings" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read its settings"
+          description={error.message}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {!error && !isLoading && rows.length === 0 ? (
         <List.EmptyView
