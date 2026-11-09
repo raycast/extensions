@@ -20,7 +20,15 @@ import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
 import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
-import { folderEntries, insideFolders, isDirectlyIn, refreshVaultFolders, subfolders, VaultFolder } from "./folders";
+import {
+  folderEntries,
+  insideFolders,
+  isDirectlyIn,
+  refreshVaultFolders,
+  subfolders,
+  VaultFolder,
+  withFolderPaths,
+} from "./folders";
 import { createFolderSource, FolderView } from "./folder-view";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
@@ -195,10 +203,15 @@ export function SearchItemsView({
       } = await listVaultsAndItems();
       if (!isLatest()) return;
       setFailedVaults(failures);
-      // Vaults that failed to load keep the items already known, instead of looking empty.
-      const { items: nextItems, isComplete, failureMessage } = getRefreshResult(freshItems, itemsRef.current, failures);
-      updateItems(nextItems);
       const nextFolders = refreshVaultFolders(knownFoldersRef.current, freshVaults, listedFolders);
+      // Vaults that failed to load keep the items already known, instead of looking empty. A vault whose folders
+      // couldn't be listed this time keeps its items in the folders known before.
+      const {
+        items: nextItems,
+        isComplete,
+        failureMessage,
+      } = getRefreshResult(withFolderPaths(freshItems, nextFolders), itemsRef.current, failures);
+      updateItems(nextItems);
       updateKnownFolders(nextFolders);
       setVaults(freshVaults);
       setItemCounts((previous) =>

@@ -285,6 +285,16 @@ export function ItemList({
               <ActionPanel>
                 <Action title="Retry" icon={Icon.ArrowClockwise} onAction={emptyView.onRetry} />
               </ActionPanel>
+            ) : onRefresh ? (
+              // An empty vault or folder can still be refreshed, as its rows would be.
+              <ActionPanel>
+                <Action
+                  title="Refresh Items"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={onRefresh}
+                />
+              </ActionPanel>
             ) : undefined
           }
         />

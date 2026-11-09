@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
-import { FolderEntry, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
+import { FolderEntry, folderEntryValue, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
 import { ItemList } from "./item-list";
 import { SortOrder } from "./sort";
 import { Item } from "./types";
@@ -49,11 +49,16 @@ interface FolderViewProps {
 export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }: FolderViewProps) {
   const [contents, setContents] = useState(source.get);
   useEffect(() => source.subscribe(() => setContents(source.get())), [source]);
-  const items = useMemo(
-    () => contents.items.filter((item) => isDirectlyIn(item, folder.shareId, folder)),
-    [contents.items, folder],
+  // The folder as the list underneath knows it now: moved in Proton Pass meanwhile, it has another path.
+  const current = useMemo(
+    () => contents.folders.find((entry) => folderEntryValue(entry) === folderEntryValue(folder)) ?? folder,
+    [contents.folders, folder],
   );
-  const folders = useMemo(() => subfolders(contents.folders, folder.shareId, folder), [contents.folders, folder]);
+  const items = useMemo(
+    () => contents.items.filter((item) => isDirectlyIn(item, current.shareId, current)),
+    [contents.items, current],
+  );
+  const folders = useMemo(() => subfolders(contents.folders, current.shareId, current), [contents.folders, current]);
   const inside = useMemo(
     () => insideFolders(contents.folders, contents.items, folders),
     [contents.folders, contents.items, folders],
@@ -61,7 +66,7 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
 
   return (
     <ItemList
-      navigationTitle={[vaultName, ...folder.path.map(({ name }) => name)].join(PATH_SEPARATOR)}
+      navigationTitle={[vaultName, ...current.path.map(({ name }) => name)].join(PATH_SEPARATOR)}
       sortChoice={sortChoice}
       items={items}
       folders={folders}

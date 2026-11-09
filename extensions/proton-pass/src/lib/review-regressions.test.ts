@@ -3217,3 +3217,143 @@ test("a selected folder shows its subfolders, then its items, next to the list",
   );
   assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
 });
+
+// As pass-cli lists them when their vault's folders couldn't be listed: in a folder, without its path.
+const pathless = (entry: Item) => ({ ...entry, folderPath: undefined });
+
+test("a vault whose folders couldn't be listed keeps its items in the folders known before", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  let savedItems: Item[] = [];
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: async () => [],
+      listVaultsAndItems: async () => ({
+        vaults: [personal],
+        items: [unfiled, inBanking, inCards].map(pathless),
+        failedVaults: [],
+        folders: { shareIds: [], folders: [] },
+      }),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking, inCards], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({ data: [personal], isStale: false }),
+      setCachedItems: async (items: Item[]) => {
+        savedItems = items;
+      },
+      setCachedVaults: async () => undefined,
+      setCachedFolders: async () => undefined,
+    },
+  });
+  const render = () => harness.render(SearchItemsView, { initialVault: personal, sessionConfirmed: true });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  const list = render();
+  assert.equal(list.props.isLoading, false);
+  assert.equal(ids(list.props.items), "unfiled");
+  assert.equal(paths(list.props.folders), "Banking:2,Travel:0");
+  assert.equal(ids(savedItems.filter((entry) => entry.folderPath)), "bank,visa");
+
+  // The vault list saves them in their folders too, for the item list opened next.
+  let savedByVaultList: Item[] = [];
+  const vaultsHarness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: vaultsHarness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [personal],
+        items: [unfiled, inBanking, inCards].map(pathless),
+        failedVaults: [],
+        folders: { shareIds: [], folders: [] },
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking, inCards], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({ data: [personal], isStale: false }),
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async (items: Item[]) => {
+        savedByVaultList = items;
+      },
+      setCachedFolders: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  vaultsHarness.render(VaultsView, { startOnItems: false });
+  vaultsHarness.effects[0]();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(ids(savedByVaultList.filter((entry) => entry.folderPath)), "bank,visa");
+});
+
+test("an opened folder moved in Proton Pass meanwhile follows its new place", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([inBanking, inCards], PERSONAL_FOLDERS);
+  source.set({ items: [inBanking, inCards], folders: known, isLoading: false });
+  const cards = known.find((entry) => entry.path.length === 2)!;
+  const render = () =>
+    harness.render(view.FolderView, { source, vaultName: "Personal", folder: cards, onRefresh: () => undefined });
+  render();
+  harness.effects.forEach((effect) => effect());
+
+  // Cards moved to the vault's root, with a new subfolder, and the list underneath refreshed.
+  const GOLD = { id: "gold", name: "Gold" };
+  const moved = [
+    { shareId: "vault", path: [BANKING] },
+    { shareId: "vault", path: [CARDS] },
+    { shareId: "vault", path: [CARDS, GOLD] },
+  ];
+  const visa = { ...inCards, folderPath: [CARDS] };
+  source.set({ items: [inBanking, visa], folders: folders.folderEntries([inBanking, visa], moved), isLoading: false });
+  const list = render();
+  assert.equal(list.props.navigationTitle, "Personal › Cards");
+  assert.equal(ids(list.props.items), "visa");
+  assert.equal(paths(list.props.folders), "Cards › Gold:0");
+});
+
+test("an empty vault or folder can still be refreshed", () => {
+  const { render } = loadItemList();
+  let refreshes = 0;
+  const empty = render([], [], { onRefresh: () => refreshes++ });
+  const refreshAction = actions((empty.props.children as Element).props.actions).find(
+    (props) => props.title === "Refresh Items",
+  );
+  (refreshAction?.onAction as () => void)();
+  assert.equal(refreshes, 1);
+  // A failed listing offers Retry instead.
+  const failed = render([], [], { onRefresh: () => refreshes++, emptyView: { onRetry: () => undefined } });
+  const titles = actions((failed.props.children as Element).props.actions).map((props) => props.title);
+  assert.deepEqual(titles.filter(Boolean), ["Retry"]);
+});
