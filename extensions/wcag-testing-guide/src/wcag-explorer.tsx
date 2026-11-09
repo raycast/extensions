@@ -166,6 +166,7 @@ function ReviewScopeItem({
                   actions={
                     <ActionPanel>
                       <Action.CopyToClipboard
+                        icon={Icon.Clipboard}
                         title="Copy Review Checklist"
                         content={checklist}
                       />
@@ -182,6 +183,7 @@ function ReviewScopeItem({
             }
           />
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy Review Checklist"
             content={checklist}
           />
@@ -242,10 +244,12 @@ function FullCriterionGuide({
             />
           )}
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy Manual Test Case"
             content={testCase}
           />
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy Practical Guide"
             content={markdown}
           />
@@ -351,14 +355,17 @@ function CriterionItem({
             />
           )}
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy Manual Test Case"
             content={testCase}
           />
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy Practical Guide"
             content={detail}
           />
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy Criterion Reference"
             content={`${criterion.number} ${criterion.title} (WCAG ${version}, Level ${criterion.level})`}
           />
@@ -434,6 +441,7 @@ function AboutWcagItem({
                   actions={
                     <ActionPanel>
                       <Action.CopyToClipboard
+                        icon={Icon.Clipboard}
                         title="Copy WCAG Orientation"
                         content={detail}
                       />
@@ -472,6 +480,7 @@ function AboutWcagItem({
             }
           />
           <Action.CopyToClipboard
+            icon={Icon.Clipboard}
             title="Copy WCAG Orientation"
             content={detail}
           />
@@ -550,6 +559,7 @@ function HowToUseItem({
                   actions={
                     <ActionPanel>
                       <Action.CopyToClipboard
+                        icon={Icon.Clipboard}
                         title="Copy Usage Guide"
                         content={detail}
                       />
@@ -565,7 +575,11 @@ function HowToUseItem({
               )
             }
           />
-          <Action.CopyToClipboard title="Copy Usage Guide" content={detail} />
+          <Action.CopyToClipboard
+            icon={Icon.Clipboard}
+            title="Copy Usage Guide"
+            content={detail}
+          />
           <ReviewScopeMenu controls={scopeControls} />
           <Action.OpenInBrowser
             title={`WCAG ${version} Standard`}

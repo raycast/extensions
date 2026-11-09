@@ -100,3 +100,35 @@ test("a guide opened during loading gains current results and actions without re
     assert.equal(h.errors.length, 0);
   } finally { await h.cleanup(); }
 });
+
+test("every rendered action has an icon in the root and all guide panels", async () => {
+  const h = harness();
+  const assertIcons = (view) => {
+    const actions = view.root.findAll((node) => typeof node.type === "string" && (node.type === "Action" || node.type.startsWith("Action.")));
+    assert.ok(actions.length > 0);
+    for (const action of actions) assert.ok(action.props.icon, `Missing icon: ${action.props.title}`);
+  };
+  try {
+    const root = await h.mount(React.createElement(h.Command));
+    assertIcons(root);
+    for (const title of ["Open Full Guide", "Open Review Scope Guide", "Open WCAG Guide in Full View", "Open How to Use This Guide", "Open About Me", "Open Audit Summary"]) {
+      await h.invoke(root, title);
+      assertIcons(await h.mount(h.stack.pop()));
+    }
+  } finally { await h.cleanup(); }
+});
+
+test("recorded results and all built-in user guidance retain US English spelling", () => {
+  const h = harness();
+  const { recordedResultMarkdown } = h.load("src/audit-ui.tsx");
+  const { aboutWcagMarkdown, howToUseMarkdown } = h.load("src/about.ts");
+  const { aboutMeMarkdown } = h.load("src/author.ts");
+  const { reviewScopeMarkdown } = h.load("src/review-scope.ts");
+  const { criteria } = h.load("src/data.ts");
+  const british = /\b(?:behaviour|behaviours|colour|colours|labelled|labelling|cancelled|cancelling|grey)\b/i;
+  const result = recordedResultMarkdown({ status: "fail", notes: "", updatedAt: "" });
+  assert.match(result, /actual behavior/);
+  for (const text of [result, aboutMeMarkdown(), ...["2.1", "2.2"].flatMap((version) => [aboutWcagMarkdown(version), howToUseMarkdown(version), reviewScopeMarkdown(criteria, version, "AA", false)])]) {
+    assert.doesNotMatch(text, british);
+  }
+});
