@@ -3,6 +3,7 @@
 ## [CLI search keywords] - {PR_MERGE_DATE}
 
 - Fixed: root search finds Show Upgrades with "outdated", Show Installed with "list", Manage Taps with "untap" or "trust", and Clean up with "cleanup". Adopt Apps now says Brew, like the other commands
+- Fixed: searching "homebrew" finds every Brew command
 
 ## [Show unscanned formulae in Show Vulnerabilities] - 2026-11-06
 
