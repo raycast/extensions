@@ -14,6 +14,24 @@ function getMemberships(site: Sites[string]): string[] {
     .filter(Boolean);
 }
 
+// 0 = no limit. Falls back to 120s on blank/invalid input.
+function parseTimeout(value: string | undefined): number {
+  const seconds = Number(value?.trim() || "120");
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : 120_000;
+}
+
+function siteListArgs(organization: string | undefined): string {
+  const org = organization?.trim();
+  return org ? `site:list --org=${JSON.stringify(org)} --format=json` : "site:list --format=json";
+}
+
+// framework can be null (uninitialized site) or variants like "drupal10" / "wordpress_network".
+function frameworkIcon(framework: string | null) {
+  if (framework?.startsWith("wordpress")) return { source: "wordpress.svg", tintColor: Color.PrimaryText };
+  if (framework?.startsWith("drupal")) return { source: "drupal.svg", tintColor: Color.PrimaryText };
+  return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+}
+
 function getOrgLabel(orgName: string): string {
   return orgName.toLowerCase() === "team" ? "Personal" : orgName;
 }
@@ -28,9 +46,31 @@ export default function Command() {
     shell: true,
   });
 
-  const { isLoading: sitesLoading, data } = useExec(terminusCmd(preferences.terminusPath, "site:list --format=json"), {
+  const {
+    isLoading: sitesLoading,
+    data,
+    revalidate,
+  } = useExec(terminusCmd(preferences.terminusPath, siteListArgs(preferences.organization)), {
     shell: true,
     execute: !checkLoading && !checkError,
+    timeout: parseTimeout(preferences.siteListTimeout),
+    keepPreviousData: true,
+    onWillExecute: () => {
+      showToast({ style: Toast.Style.Animated, title: "Fetching sites from Pantheon…" });
+    },
+    onData: () => {
+      showToast({ style: Toast.Style.Success, title: "Site list updated" });
+    },
+    onError: (error) => {
+      const timedOut = /timed out|ETIMEDOUT|SIGTERM/i.test(error.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: timedOut ? "Terminus timed out" : "Failed to load sites",
+        message: timedOut
+          ? "Increase 'Site List Timeout' or set an 'Organization Filter' in preferences."
+          : error.message,
+      });
+    },
   });
 
   const isLoading = checkLoading || sitesLoading;
@@ -99,6 +139,20 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      <List.EmptyView
+        icon={Icon.Globe}
+        title={isLoading ? "Loading sites… (large accounts can take a minute)" : "No sites found"}
+        actions={
+          <ActionPanel>
+            <Action
+              icon={Icon.ArrowClockwise}
+              title="Refresh Site List"
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={revalidate}
+            />
+          </ActionPanel>
+        }
+      />
       {sites && (
         <List.Section title="Sites" subtitle={`${filteredSiteKeys.length}`}>
           {filteredSiteKeys.map((key) => {
@@ -111,7 +165,7 @@ export default function Command() {
 
             return (
               <List.Item
-                icon={{ source: `${sites[key].framework.replace(/\d+$/, "")}.svg`, tintColor: Color.PrimaryText }}
+                icon={frameworkIcon(sites[key].framework)}
                 title={sites[key].name}
                 key={sites[key].id}
                 accessories={[
@@ -143,11 +197,8 @@ export default function Command() {
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Framework"
-                          icon={{
-                            source: `${sites[key].framework.replace(/\d+$/, "")}.svg`,
-                            tintColor: Color.PrimaryText,
-                          }}
-                          text={`${sites[key].framework}`}
+                          icon={frameworkIcon(sites[key].framework)}
+                          text={sites[key].framework ?? "Not initialized"}
                         />
                       </List.Item.Detail.Metadata>
                     }
@@ -169,6 +220,12 @@ export default function Command() {
                       title="Refresh Screenshot"
                       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                       onAction={() => setRefreshStamps((prev) => ({ ...prev, [key]: Date.now() }))}
+                    />
+                    <Action
+                      icon={Icon.ArrowClockwise}
+                      title="Refresh Site List"
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={revalidate}
                     />
                   </ActionPanel>
                 }

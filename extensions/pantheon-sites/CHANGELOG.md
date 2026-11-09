@@ -1,5 +1,18 @@
 # com.matbrady.pantheon Changelog
 
+## [Large Account Support] - {PR_MERGE_DATE}
+
+### Fixed
+
+- `terminus site:list` no longer times out after 10s on accounts with many sites
+- Crash when a site has no framework (uninitialized site)
+
+### Added
+
+- "Site List Timeout" preference (default 120s, 0 = no limit)
+- "Organization Filter" preference to pass `--org` to `site:list`
+- "Refresh Site List" action (⌘R) and loading/error toasts
+
 ## [Latest Changes] - 2026-05-11
 
 ### Added
