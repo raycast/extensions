@@ -340,10 +340,6 @@ function addVec(a: Poly, b: Poly): Poly {
   return out;
 }
 
-function scaleVec(a: Poly, s: number): Poly {
-  return a.map((c) => c * s);
-}
-
 /** A Rat's numerator error bounds, padded to num's length with zeros. */
 function errVec(r: Rat): Poly {
   const out = new Array<number>(r.num.length).fill(0);
@@ -358,16 +354,69 @@ function denErrVec(r: Rat): Poly {
   return out;
 }
 
+/** Knuth TwoSum: [s, e] with s = fl(a + b) and s + e = a + b exactly. */
+function twoSum(a: number, b: number): [number, number] {
+  const s = a + b;
+  const bb = s - a;
+  const e = a - (s - bb) + (b - bb);
+  return [s, e];
+}
+
+/** Dekker TwoProduct: [p, e] with p = fl(a · b) and p + e = a · b exactly. */
+function twoProduct(a: number, b: number): [number, number] {
+  const p = a * b;
+  const SPLIT = 134217729; // 2^27 + 1
+  const aBig = SPLIT * a;
+  const aHi = aBig - (aBig - a);
+  const aLo = a - aHi;
+  const bBig = SPLIT * b;
+  const bHi = bBig - (bBig - b);
+  const bLo = b - bHi;
+  const e = aHi * bHi - p + aHi * bLo + aLo * bHi + aLo * bLo;
+  return [p, e];
+}
+
+/**
+ * The rounding error mulPoly(a, b) actually makes, per coefficient:
+ * replays the same loops, summing the exact residuals of every product
+ * and addition. This is 0 whenever the arithmetic happens to be exact
+ * (100000000000000 + 1 - 100000000000000 is), where a worst-case bound
+ * proportional to the operands would invent an error of ~0.04 and let
+ * it erase genuine small terms elsewhere in the equation.
+ */
+function mulResidual(a: Poly, b: Poly): Poly {
+  if (a.length === 0 || b.length === 0) return [];
+  const acc = new Array<number>(a.length + b.length - 1).fill(0);
+  const err = new Array<number>(a.length + b.length - 1).fill(0);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      const [p, pe] = twoProduct(a[i], b[j]);
+      const [s, se] = twoSum(acc[i + j], p);
+      acc[i + j] = s;
+      err[i + j] += Math.abs(pe) + Math.abs(se);
+    }
+  }
+  return err;
+}
+
+/** The rounding error of adding two polynomials elementwise, per coefficient. */
+function addResidual(a: Poly, b: Poly): Poly {
+  const out = new Array<number>(Math.max(a.length, b.length)).fill(0);
+  for (let i = 0; i < out.length; i++) {
+    const [, e] = twoSum(a[i] ?? 0, b[i] ?? 0);
+    out[i] = Math.abs(e);
+  }
+  return out;
+}
+
 /**
  * Error bounds for a product of two polynomials whose own bounds are
  * known: each factor's error is amplified by the other factor's
- * magnitudes, plus one rounding allowance for the new products.
+ * magnitudes, plus the rounding this multiplication itself makes —
+ * measured exactly (mulResidual), not estimated from magnitudes.
  */
 function mulErr(aErr: Poly, aVal: Poly, bErr: Poly, bVal: Poly): Poly {
-  return addVec(
-    addVec(convAbs(aErr, absPoly(bVal)), convAbs(bErr, absPoly(aVal))),
-    scaleVec(convAbs(absPoly(aVal), absPoly(bVal)), Number.EPSILON),
-  );
+  return addVec(addVec(convAbs(aErr, absPoly(bVal)), convAbs(bErr, absPoly(aVal))), mulResidual(aVal, bVal));
 }
 
 /** Restrictions a value carries: its recorded exclusions plus its current denominator. */
@@ -458,23 +507,24 @@ function denMulErr(a: Rat, b: Rat): Poly {
 }
 
 function addRat(a: Rat, b: Rat): Rat {
-  return makeRat(
-    addPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
-    mulPoly(a.den, b.den),
-    mergeExcl(domainOf(a), domainOf(b)),
-    crossErr(a, b),
-    denMulErr(a, b),
-  );
+  const p1 = mulPoly(a.num, b.den);
+  const p2 = mulPoly(b.num, a.den);
+  // Plus the measured rounding of the final addition itself.
+  const err = addVec(crossErr(a, b), addResidual(p1, p2));
+  return makeRat(addPoly(p1, p2), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)), err, denMulErr(a, b));
 }
 
 function subRat(a: Rat, b: Rat): Rat {
-  return makeRat(
-    subPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
-    mulPoly(a.den, b.den),
-    mergeExcl(domainOf(a), domainOf(b)),
+  const p1 = mulPoly(a.num, b.den);
+  const p2 = mulPoly(b.num, a.den);
+  const err = addVec(
     crossErr(a, b),
-    denMulErr(a, b),
+    addResidual(
+      p1,
+      p2.map((c) => -c),
+    ),
   );
+  return makeRat(subPoly(p1, p2), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)), err, denMulErr(a, b));
 }
 
 function mulRat(a: Rat, b: Rat): Rat {
@@ -521,13 +571,13 @@ function powRat(base: Rat, exponent: Rat): Rat {
   const powErr = (startErr: Poly, startPoly: Poly, count: number): Poly => {
     if (count === 0) return [];
     let curErr = startErr;
-    let curAbs = absPoly(startPoly);
+    let curVal = startPoly;
     for (let k = 1; k < count; k++) {
       curErr = addVec(
-        addVec(convAbs(curErr, absPoly(startPoly)), convAbs(startErr, curAbs)),
-        scaleVec(convAbs(curAbs, absPoly(startPoly)), Number.EPSILON),
+        addVec(convAbs(curErr, absPoly(startPoly)), convAbs(startErr, absPoly(curVal))),
+        mulResidual(curVal, startPoly),
       );
-      curAbs = convAbs(curAbs, absPoly(startPoly));
+      curVal = mulPoly(curVal, startPoly);
     }
     return curErr;
   };
@@ -565,11 +615,53 @@ function ratToString(r: Rat, variable: string): string {
 /* ------------------------------------------------------------------ */
 
 type Token =
-  | { type: "number"; value: number }
+  | { type: "number"; value: number; err: number }
   | { type: "variable"; name: string }
   | { type: "op"; value: "+" | "-" | "*" | "/" | "^" }
   | { type: "lparen" }
   | { type: "rparen" };
+
+/**
+ * The exact representation error of a decimal literal: |typed − float|,
+ * computed with big-integer rationals. Integers and dyadic decimals
+ * (0.5, 0.25) are exact and get 0; 10000.1 gets ~3.6e-13, because the
+ * nearest double is that far from the typed value. This is the seed of
+ * all error tracking: arithmetic on the doubles can be exact while the
+ * doubles themselves only approximate what the user typed, and a
+ * difference like 10000.1 − 10000 inherits the full 3.6e-13.
+ */
+function literalError(text: string, value: number): number {
+  const m = /^(\d*)(?:\.(\d*))?$/.exec(text);
+  if (!m || value === 0) return 0;
+  const digits = (m[1] + (m[2] ?? "")).replace(/^0+(?=\d)/, "");
+  const num = BigInt(digits === "" ? "0" : digits);
+  const den = 10n ** BigInt((m[2] ?? "").length);
+  // The double's exact value as mantissa × 2^exp2.
+  const buf = new DataView(new ArrayBuffer(8));
+  buf.setFloat64(0, value);
+  const bits = buf.getBigUint64(0);
+  const expBits = Number((bits >> 52n) & 0x7ffn);
+  let mant = bits & ((1n << 52n) - 1n);
+  let exp2: number;
+  if (expBits === 0) {
+    exp2 = -1074;
+  } else {
+    mant |= 1n << 52n;
+    exp2 = expBits - 1075;
+  }
+  let c = mant;
+  let d = 1n;
+  if (exp2 >= 0) c = mant << BigInt(exp2);
+  else d = 1n << BigInt(-exp2);
+  const lhs = num * d;
+  const rhs = c * den;
+  const diffNum = lhs >= rhs ? lhs - rhs : rhs - lhs;
+  if (diffNum === 0n) return 0;
+  const result = Number(diffNum) / Number(den) / Number(d);
+  // Pathological magnitudes can overflow the conversion; fall back to
+  // the half-ulp bound for the value's scale.
+  return Number.isFinite(result) ? result : Number.EPSILON * Math.abs(value);
+}
 
 function normalizeInput(raw: string): string {
   return raw
@@ -596,7 +688,8 @@ function tokenize(input: string): Token[] {
         i++;
       }
       if (dots > 1 || text === ".") throw new Error(`"${text}" isn't a valid number.`);
-      tokens.push({ type: "number", value: parseFloat(text) });
+      const value = parseFloat(text);
+      tokens.push({ type: "number", value, err: literalError(text, value) });
     } else if (/[a-zA-Z]/.test(ch)) {
       // A variable name: a letter, then letters/digits/underscores (Va, Vout, x1, V_A).
       let name = "";
@@ -712,7 +805,7 @@ class Parser {
   private parsePrimary(): Rat {
     const t = this.next();
     if (!t) throw new Error("That expression ends unexpectedly — is something missing after an operator?");
-    if (t.type === "number") return makeRat([t.value]);
+    if (t.type === "number") return makeRat([t.value], [1], [], [t.err]);
     if (t.type === "variable") {
       if (t.name.toLowerCase() !== this.variableKey) {
         throw new Error(`Found more than one unknown — this solver handles one unknown at a time.`);
