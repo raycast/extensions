@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Terminal Tax MCP Server] - {PR_MERGE_DATE}
+## [Update Terminal Tax MCP Server] - 2026-11-09
 
 - Update Terminal Tax: Let your AI agent file your taxes directly with the IRS. Tax software: your AI agent sends the return, you review and sign it, we e-file. Nothing to install: any agent that can make an HTTPS request sends JSON-RPC POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly, with no account, API key or OAuth.
 
