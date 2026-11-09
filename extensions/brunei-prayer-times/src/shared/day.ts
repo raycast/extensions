@@ -11,10 +11,13 @@ import { SupabasePrayerSource } from '../vendor/supabase.js'
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config.js'
 
 export interface LoadedDay {
+  /** The date these entries belong to (older than today when stale). */
   date: string
   entries: PrayerEntry[]
   hijriDate: string
   stale: boolean
+  /** Only meaningful for a forced reload: true when fresh data was stored. */
+  refreshed: boolean
 }
 
 /** Async string cache over a minimal store; sync read speeds the first paint. */
@@ -62,13 +65,16 @@ export async function loadDay(
   force = false,
 ): Promise<LoadedDay | null> {
   const date = bruneiNow().date
-  if (force) await repo.refresh(date, 'bruneiMuara')
+  const refreshed = force ? await repo.refresh(date, 'bruneiMuara') : false
   const result = await repo.read(date, 'bruneiMuara')
   if (result.status === 'unavailable') return null
+  // A stale read carries the day the entries were fetched for; label the list
+  // with that date so yesterday's times never appear under today's date.
   return {
-    date,
+    date: result.date,
     entries: result.entries,
     hijriDate: result.hijriDate,
     stale: result.stale,
+    refreshed,
   }
 }

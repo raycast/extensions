@@ -74,6 +74,13 @@ export interface PrayerProgress {
 /** Minutes before a prayer when a reminder is due. */
 export const NOTIFICATION_LEAD_MINUTES = 15
 
+/**
+ * specs/web/spec.md — the duration to the next entry turns primary when this
+ * many minutes or fewer remain. It is a presentation rule, deliberately kept
+ * apart from the notification lead so changing one never moves the other.
+ */
+export const NEXT_SOON_MINUTES = 15
+
 export type PrayerNotificationKind = 'lead' | 'due'
 
 export interface PrayerNotification {
@@ -188,6 +195,140 @@ export function prayerProgress(
     next: nextEntry.prayer,
     minutesToNext: Math.floor(secondsToNext / 60),
     secondsToNext,
+  }
+}
+
+/** How long after an entry the passed-entry note shows instead of the countdown. */
+export const PASSED_WINDOW_MINUTES = 20
+
+export interface PassedPrayer {
+  prayer: PrayerName
+  /** Whole minutes since that entry's time; 0 at the exact minute. */
+  minutes: number
+}
+
+/**
+ * The entry just reached, while its window (0..20 minutes after) is open.
+ * Imsak is skipped: it sits only ten minutes before Subuh, so a passed note
+ * there would hide the Subuh countdown.
+ */
+export function passedPrayer(
+  entries: readonly PrayerEntry[],
+  nowSeconds: number,
+): PassedPrayer | null {
+  let latest: PrayerEntry | null = null
+  for (const entry of entries) {
+    const at = entry.minutes * 60
+    if (at > nowSeconds) continue
+    if (!latest || at > latest.minutes * 60) latest = entry
+  }
+  if (!latest || latest.prayer === 'imsak') return null
+  const elapsed = nowSeconds - latest.minutes * 60
+  if (elapsed >= PASSED_WINDOW_MINUTES * 60) return null
+  return { prayer: latest.prayer, minutes: Math.floor(elapsed / 60) }
+}
+
+/**
+ * Which part of the prayer day "now" falls in: before Subuh (both the small
+ * hours and the Imsak interval), the day, the evening from Asar, and the night
+ * from Maghrib.
+ */
+export type PrayerPhase = 'dawn' | 'day' | 'evening' | 'night'
+
+/** Entries still shown after Asar, when the morning ones have passed. */
+export const EVENING_PRAYERS: readonly PrayerName[] = [
+  'zuhur',
+  'asar',
+  'maghrib',
+  'isyak',
+]
+
+/** The two early entries shown at the bottom outside the normal order. */
+export const NEXT_DAY_PRAYERS: readonly PrayerName[] = ['imsak', 'subuh']
+
+/**
+ * The day runs until Asar; from Asar to Maghrib is the evening; from Maghrib
+ * until midnight the Hijri date has already rolled over to the next day; and
+ * from midnight until Subuh the early entries sit at the bottom of the list.
+ */
+export function prayerPhase(
+  entries: readonly PrayerEntry[],
+  nowSeconds: number,
+): PrayerPhase {
+  const minutesOf = (prayer: PrayerName) =>
+    entries.find((entry) => entry.prayer === prayer)?.minutes
+  const maghrib = minutesOf('maghrib')
+  const asar = minutesOf('asar')
+  const subuh = minutesOf('subuh')
+  if (maghrib !== undefined && nowSeconds >= maghrib * 60) return 'night'
+  if (asar !== undefined && nowSeconds >= asar * 60) return 'evening'
+  if (subuh !== undefined && nowSeconds < subuh * 60) return 'dawn'
+  return 'day'
+}
+
+/** One displayed row; minutes is null when the source has no value. */
+export interface DisplayPrayerEntry {
+  prayer: PrayerName
+  minutes: number | null
+  /** 1 for next day's early entries shown under the evening list. */
+  dayOffset: 0 | 1
+  /** Set for today's early entries moved to the bottom before Subuh. */
+  trailing?: boolean
+}
+
+/**
+ * The rows the daily view shows. From Subuh to the end of Zuhur it is the
+ * documented order. From midnight until Subuh the early entries are moved to
+ * the bottom (today's own). From Asar only the remaining obligatory prayers
+ * show, plus the next day's Imsak and Subuh at the bottom.
+ */
+export function displayPrayers(
+  today: readonly PrayerEntry[],
+  tomorrow: readonly PrayerEntry[],
+  nowSeconds: number,
+): { phase: PrayerPhase; entries: DisplayPrayerEntry[] } {
+  const phase = prayerPhase(today, nowSeconds)
+  const minutesOf = (source: readonly PrayerEntry[], prayer: PrayerName) =>
+    source.find((entry) => entry.prayer === prayer)?.minutes ?? null
+
+  const entry = (source: readonly PrayerEntry[], prayer: PrayerName) => ({
+    prayer,
+    minutes: minutesOf(source, prayer),
+    dayOffset: 0 as const,
+  })
+
+  if (phase === 'dawn') {
+    return {
+      phase,
+      entries: [
+        ...PRAYER_ORDER.filter(
+          (prayer) => !NEXT_DAY_PRAYERS.includes(prayer),
+        ).map((prayer) => entry(today, prayer)),
+        ...NEXT_DAY_PRAYERS.map((prayer) => ({
+          ...entry(today, prayer),
+          trailing: true,
+        })),
+      ],
+    }
+  }
+
+  if (phase === 'day') {
+    return {
+      phase,
+      entries: PRAYER_ORDER.map((prayer) => entry(today, prayer)),
+    }
+  }
+
+  return {
+    phase,
+    entries: [
+      ...EVENING_PRAYERS.map((prayer) => entry(today, prayer)),
+      ...NEXT_DAY_PRAYERS.map((prayer) => ({
+        prayer,
+        minutes: minutesOf(tomorrow, prayer),
+        dayOffset: 1 as const,
+      })),
+    ],
   }
 }
 
@@ -413,6 +554,22 @@ export function chartIsCurrent(
   return chartBounds(date, range).start === chartBounds(today, range).start
 }
 
+/**
+ * The period a chart range covers, named for display: a month, a year, or the
+ * dates a week spans. This is the label a shell shows so the reader always
+ * knows which period they are looking at.
+ */
+export function formatChartPeriod(
+  date: string,
+  range: ChartRange,
+  locale: string,
+): string {
+  if (range === 'year') return date.slice(0, 4)
+  if (range === 'month') return formatMonth(monthOf(date), locale)
+  const { start, end } = chartBounds(date, range)
+  return `${formatShortDate(start, locale)} – ${formatShortDate(end, locale)}`
+}
+
 /** A chart value farther than this from its entry's median is bad data. */
 export const CHART_OUTLIER_MINUTES = 90
 
@@ -543,3 +700,5 @@ export function createPrayerTimes(
     entries: adjustForDistrict(baseEntries, district),
   }
 }
+
+export * from './quran.js'

@@ -15,8 +15,8 @@ import {
   type PrayerName,
   type TimeFormat,
 } from '../vendor/core.js'
-import { t } from './i18n.js'
-import type { ExtensionSettings } from './settings.js'
+import { PRAYER_LABELS } from './strings.js'
+import { SHELL_LOCALE, type ExtensionSettings } from './settings.js'
 
 export interface RowView {
   prayer: PrayerName
@@ -49,7 +49,7 @@ export function buildDayView(
   settings: ExtensionSettings,
   nowSeconds: number = bruneiNow().seconds,
 ): DayView {
-  const locale = settings.locale
+  const locale = SHELL_LOCALE
   const format: TimeFormat = settings.timeFormat ?? DEFAULT_TIME_FORMAT
   const entries = adjustForDistrict(day.entries, settings.district)
   const progress = prayerProgress(entries, nowSeconds)
@@ -58,29 +58,22 @@ export function buildDayView(
   const n = (value: number) => formatNumber(value, locale)
   const duration =
     total < 60
-      ? t(locale, 'duration.seconds', { seconds: n(parts.seconds) })
+      ? `${n(parts.seconds)}s`
       : parts.hours > 0
-        ? t(locale, 'duration.hoursMinutes', {
-            hours: n(parts.hours),
-            minutes: n(parts.minutes),
-          })
-        : t(locale, 'duration.minutes', { minutes: n(parts.minutes) })
-  const label = (prayer: string) => t(locale, `prayer.${prayer}`)
+        ? `${n(parts.hours)}h ${n(parts.minutes)}m`
+        : `${n(parts.minutes)}m`
 
   return {
     weekday: formatWeekday(day.date, locale),
     masihi: formatDate(day.date, locale),
     hijri: formatHijriDate(day.date, locale, day.hijriDate),
-    next: t(locale, 'next.in', {
-      duration,
-      prayer: label(progress.next),
-    }),
+    next: `${duration} until ${PRAYER_LABELS[progress.next]}`,
     nextPrayer: progress.next,
     soon: total <= 15 * 60,
     currentPrayer: progress.current,
     rows: entries.map((entry) => ({
       prayer: entry.prayer,
-      label: label(entry.prayer),
+      label: PRAYER_LABELS[entry.prayer],
       time: formatTime(entry.minutes, locale, format),
       current: entry.prayer === progress.current,
       next: entry.prayer === progress.next,
@@ -90,5 +83,5 @@ export function buildDayView(
 
 /** The section title: weekday, both dates and the duration to next. */
 export function dayTitle(view: DayView): string {
-  return `${view.weekday} · ${view.masihi} · ${view.hijri}`
+  return `${view.weekday} · ${view.masihi} · ${view.hijri} · ${view.next}`
 }

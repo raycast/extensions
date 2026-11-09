@@ -1,6 +1,6 @@
 // specs/raycast/spec.md — the prayer-times command. Rendering and platform
 // glue only; core computes, the data port supplies.
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Action,
   ActionPanel,
@@ -13,21 +13,18 @@ import {
   showToast,
 } from '@raycast/api'
 import { MORA_PAGE_URL } from './vendor/source.js'
-import type { District } from './vendor/core.js'
+import { bruneiNow, type District } from './vendor/core.js'
 import { localStore, rememberDistrict, storedDistrict } from './shared/store.js'
 import { loadDay, repository, storeCache, type LoadedDay } from './shared/day.js'
-import { t } from './shared/i18n.js'
 import { resolveSettings, type ExtensionSettings } from './shared/settings.js'
 import { buildDayView, dayTitle, type DayView } from './shared/view.js'
+import { DISTRICT_LABELS, UI } from './shared/strings.js'
 import { WEB_APP_URL } from './shared/constants.js'
 
 const DISTRICTS: readonly District[] = ['bruneiMuara', 'tutong', 'belait']
 
-interface Preferences {
-  locale?: string
-  timeFormat?: string
-  district?: string
-}
+/** How often the clock re-renders, so "Now"/"Next" follow the real time. */
+const CLOCK_TICK_MS = 1_000
 
 function stored(base: District): District {
   const value = storedDistrict()
@@ -42,43 +39,55 @@ export default function Command() {
   )
   const [day, setDay] = useState<LoadedDay | null>(null)
   const [loading, setLoading] = useState(true)
-  const strings = useMemo(() => {
-    const s = (key: string) => t(base.locale, key)
-    return {
-      title: s('meta.title'),
-      district: s('district.label'),
-      reload: s('action.reloadData'),
-      openApp: s('extension.openApp'),
-      source: s('source.label'),
-      sourceName: s('source.name'),
-      settings: s('settings.title'),
-      loading: s('state.loading'),
-      unavailable: s('state.unavailable'),
-      refreshing: s('state.refreshing'),
-      retry: s('action.retry'),
-      next: s('extension.pageHeaderLabel'),
-      now: s('state.current'),
-      offline: s('state.offline'),
-    }
-  }, [base.locale])
+  // Ticks every second so the current/next markers move while the list is
+  // open; the loaded day is reloaded when the Brunei date changes.
+  const [now, setNow] = useState(() => bruneiNow())
+  // The date the current data was requested for. Deliberately not the returned
+  // date: a stale day reports the older date it was fetched for, and comparing
+  // that to today would reload every tick while offline.
+  const requestedDate = useRef<string | null>(null)
+
+  const strings = UI
 
   const settings: ExtensionSettings = { ...base, district }
 
   const load = useCallback(async (force = false) => {
     setLoading(true)
+    requestedDate.current = bruneiNow().date
     const result = await loadDay(repository(storeCache(localStore)), force)
     setDay(result)
     setLoading(false)
+    return result
   }, [])
 
   useEffect(() => {
     void load()
   }, [load])
 
-  const view: DayView | null = day ? buildDayView(day, settings) : null
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const current = bruneiNow()
+      setNow(current)
+      // The list is open across midnight: the previous day's schedule would
+      // otherwise stay on screen until the user reloads by hand.
+      if (requestedDate.current && current.date !== requestedDate.current)
+        void load()
+    }, CLOCK_TICK_MS)
+    return () => clearInterval(timer)
+  }, [load])
+
+  const view: DayView | null = day
+    ? buildDayView(day, settings, now.seconds)
+    : null
   const currentId = view?.rows.find((row) => row.current)?.prayer
   const nextId = view?.rows.find((row) => row.next)?.prayer
-  const districtLabel = t(base.locale, `district.${district}`)
+  // Keep the focused row stable while the clock ticks; it only follows the
+  // current entry when that entry actually changes.
+  const selectedId = useMemo(
+    () => currentId ?? nextId,
+    [currentId, nextId],
+  )
+  const districtLabel = DISTRICT_LABELS[district]
   const sectionSubtitle = day?.stale
     ? `${districtLabel} · ${strings.offline}`
     : districtLabel
@@ -88,9 +97,15 @@ export default function Command() {
       style: Toast.Style.Animated,
       title: strings.refreshing,
     })
-    await load(true)
-    toast.style = Toast.Style.Success
-    toast.title = strings.reload
+    const result = await load(true)
+    // Report the refresh itself, not what the cache happened to hold.
+    if (result?.refreshed) {
+      toast.style = Toast.Style.Success
+      toast.title = strings.reload
+    } else {
+      toast.style = Toast.Style.Failure
+      toast.title = strings.refreshFailed
+    }
   }
 
   const actions = (
@@ -123,8 +138,7 @@ export default function Command() {
   return (
     <List
       isLoading={loading}
-      navigationTitle={strings.title}
-      selectedItemId={currentId ?? nextId}
+      selectedItemId={selectedId}
       searchBarAccessory={
         <List.Dropdown
           tooltip={strings.district}
@@ -138,7 +152,7 @@ export default function Command() {
           {DISTRICTS.map((entry) => (
             <List.Dropdown.Item
               key={entry}
-              title={t(base.locale, `district.${entry}`)}
+              title={DISTRICT_LABELS[entry]}
               value={entry}
             />
           ))}
@@ -146,10 +160,7 @@ export default function Command() {
       }
     >
       {view ? (
-        <List.Section
-          title={dayTitle(view)}
-          subtitle={sectionSubtitle}
-        >
+        <List.Section title={dayTitle(view)} subtitle={sectionSubtitle}>
           {view.rows.map((row) => (
             <List.Item
               key={row.prayer}

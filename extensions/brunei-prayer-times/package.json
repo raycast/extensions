@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "lordsayur",
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -25,32 +28,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "locale",
-      "title": "Language",
-      "description": "Language for labels and dates.",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Bahasa Melayu",
-          "value": "ms"
-        },
-        {
-          "title": "بهاس ملايو (Jawi)",
-          "value": "ms-Arab"
-        },
-        {
-          "title": "العربية",
-          "value": "ar"
-        }
-      ]
-    },
     {
       "name": "timeFormat",
       "title": "Time Format",

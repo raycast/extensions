@@ -46,7 +46,6 @@ export class SupabasePrayerSource implements RemotePrayerSource {
   ): Promise<PrayerDay> {
     const rows = await this.request({
       prayer_date: `eq.${date}`,
-      district: 'eq.bruneiMuara',
       select: 'prayer,time,hijri_date',
     })
     return {
@@ -65,7 +64,6 @@ export class SupabasePrayerSource implements RemotePrayerSource {
     if (!from || !to) throw new Error('Invalid month')
     const rows = await this.request({
       and: `(prayer_date.gte.${from},prayer_date.lte.${to})`,
-      district: 'eq.bruneiMuara',
       select: 'prayer_date,prayer,time,hijri_date',
       order: 'prayer_date.asc',
     })
@@ -120,6 +118,13 @@ export function toEntries(rows: readonly PrayerTimeRow[]): PrayerEntry[] {
     if (!time) continue
     entries.push({ prayer, minutes: timeToMinutes(time) })
   }
-  if (entries.length === 0) throw new Error('No prayer times for this date')
+  // specs/data/spec.md — a day is complete only when all eight prayers are
+  // present. A partial day is rejected so it is never cached as complete; the
+  // repository then falls back to the last known good day or unavailable.
+  if (entries.length < PRAYER_ORDER.length) {
+    throw new Error(
+      `Incomplete prayer day: ${entries.length}/${PRAYER_ORDER.length}`,
+    )
+  }
   return entries
 }
