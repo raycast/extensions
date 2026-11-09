@@ -32,7 +32,7 @@
   },
   "name": "downie",
   "title": "Downie",
-  "description": "Send URLs to Downie with per-download audio, MP4, extraction, and destination options.",
+  "description": "Send URLs to Downie with per-download audio, MP4, extraction, and destination options. Requires Downie to be installed.",
   "commands": [
     {
       "name": "download-current-tab",
