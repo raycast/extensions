@@ -1,5 +1,15 @@
 # proton-pass Changelog
 
+## [Details for Every Item Type] - {PR_MERGE_DATE}
+
+- The item details show what each type of item holds, instead of a login's rows left empty. A card shows its cardholder name, number, expiration date (as on the card, 12/27), security code and PIN; an identity its full name, email, phone number and address on one line, then its other fields that are filled; an alias its address; an SSH key its public and private keys; a Wi-Fi network its name, password and security. A note shows its note first. The rows of a type stay the same from one item to the next, with a dash when empty. Website now shows on logins only
+- Secrets are masked: a card's number, which shows its last 4 digits only, security code and PIN, an identity's social security, passport and license numbers, an SSH private key and a Wi-Fi password
+- Each filled field has a Copy action, the main one on ⌘C: a card's number, an alias's address and a Wi-Fi network's password. Secrets are copied out of clipboard history with Transient Clipboard, as passwords are
+- Aliases showed as notes, since pass-cli prints nothing in an alias's content: they show as aliases, with their address
+- Custom items show their fields, by section, instead of being taken for notes
+- Custom fields didn't show: pass-cli 2.5 prints them in a form the extension didn't read. They show last in the details, by section, an identity's extra details under their group: text as it is, hidden fields masked, dates as dates, and TOTP fields masked, their Copy action giving the current code
+- Copy Item Debug Info lists which fields an item has filled, never their values
+
 ## [Folders and Proton Pass CLI 2.5.1] - {PR_MERGE_DATE}
 
 - Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. All Vaults still shows every item

@@ -14,6 +14,7 @@ import * as keyPress from "./key-press";
 import * as sharedItems from "./shared-items";
 import * as totp from "./totp";
 import * as folders from "./folders";
+import * as itemFields from "./item-fields";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -46,6 +47,7 @@ function loadView(
       if (name === "./shared-items") return sharedItems;
       if (name === "./format") return format;
       if (name === "./totp") return totp;
+      if (name === "./item-fields") return itemFields;
       if (name === "./folders" || name === "./lib/folders") return folders;
       if (name === "./folder-view") return folderViewStub;
       if (name === "./sort" || name === "./lib/sort") return sort;
@@ -131,6 +133,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
   const events: string[] = [];
   const fills: { values: string[]; target: unknown }[] = [];
   const contents: string[] = [];
+  const concealed: boolean[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
     "@raycast/api": {
@@ -141,6 +144,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
       Keyboard: {
         Shortcut: {
           Common: {
+            Copy: "copy-shortcut",
             CopyName: {
               macOS: { modifiers: ["cmd", "shift"], key: "." },
               Windows: { modifiers: ["ctrl", "alt"], key: "c" },
@@ -150,8 +154,9 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
       },
       getPreferenceValues: () => ({ primaryAction }),
       Clipboard: {
-        copy: async (value: string) => {
+        copy: async (value: string, options?: { concealed?: boolean }) => {
           contents.push(value);
+          concealed.push(Boolean(options?.concealed));
           events.push("copy");
         },
       },
@@ -172,6 +177,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
     "./format": { websiteLabels: () => [] },
     "./item-view": {},
     "./note-view": {},
+    "./row-icons": { rowIcon: () => undefined },
     "./shortcuts": shortcuts,
     "./use-totp-code": {},
   });
@@ -188,7 +194,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
     onToggleDetail: () => undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), events, fills, contents };
+  return { entries: actions(panel), events, fills, contents, concealed };
 }
 
 test("Enter views details by default and copies or fills only when selected in preferences", async () => {
@@ -242,6 +248,54 @@ test("copying and pasting item fields uses loaded values and omits fields remove
     ),
     false,
   );
+});
+
+test("cards, aliases, SSH keys and Wi-Fi networks copy their own fields, their secrets kept out of the history", async () => {
+  const card: Item = { ...item, type: "credit_card", email: undefined, hasPassword: undefined };
+  const titles = (entries: Element["props"][]) => entries.map((entry) => entry.title).filter(Boolean);
+  // Until the details are loaded, the card's fields that are always shown are offered, like Copy Password.
+  assert.deepEqual(
+    titles(itemActions(undefined, card).entries)
+      .filter((title) => String(title).startsWith("Copy "))
+      .slice(0, 5),
+    ["Copy Cardholder Name", "Copy Card Number", "Copy Expiration Date", "Copy Security Code", "Copy PIN"],
+  );
+  const loaded: ItemDetail = { ...card, fields: { cardNumber: "4242424242424242", expirationDate: "12/27" } };
+  const { entries, contents, concealed } = itemActions(undefined, card, loaded);
+  assert.equal(titles(entries).includes("Copy Security Code"), false);
+  const copyNumber = entries.find((entry) => entry.title === "Copy Card Number");
+  assert.equal(copyNumber?.shortcut, "copy-shortcut");
+  await (copyNumber?.onAction as () => Promise<void>)();
+  await (entries.find((entry) => entry.title === "Copy Expiration Date")?.onAction as () => Promise<void>)();
+  assert.deepEqual(contents, ["4242424242424242", "12/27"]);
+  assert.deepEqual(concealed, [true, false]);
+  assert.equal(titles(entries).includes("Copy Password"), false);
+
+  const wifi: Item = { ...card, type: "wifi" };
+  const wifiActions = itemActions(undefined, wifi, { ...wifi, fields: { ssid: "Example", wifiPassword: "secret" } });
+  assert.equal(wifiActions.entries.find((entry) => entry.title === "Copy Password")?.shortcut, "copy-shortcut");
+  assert.equal(titles(wifiActions.entries).includes("Fill Login"), false);
+  const alias: Item = { ...card, type: "alias" };
+  const aliasActions = itemActions(undefined, alias, { ...alias, fields: { aliasAddress: "news@example.com" } });
+  assert.equal(aliasActions.entries.find((entry) => entry.title === "Copy Alias Address")?.shortcut, "copy-shortcut");
+});
+
+test("custom fields copy a TOTP field's current code, concealed, and a date as shown", async () => {
+  const detail: ItemDetail = {
+    ...item,
+    customFields: [
+      // RFC 6238 test secret ("12345678901234567890"), not a real account.
+      { name: "Backup Code", value: "otpauth://totp/Example?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ", type: "totp" },
+      { name: "Renewal", value: "Jun 14, 2026", type: "date", section: "Contract" },
+    ],
+  };
+  const { entries, contents, concealed } = itemActions(undefined, item, detail);
+  for (const title of ["Copy Backup Code", "Copy Renewal"]) {
+    await (entries.find((entry) => entry.title === title)?.onAction as () => Promise<void>)();
+  }
+  assert.match(contents[0], /^\d{6}$/);
+  assert.equal(contents[1], "Jun 14, 2026");
+  assert.deepEqual(concealed, [true, false]);
 });
 
 test("Copy Email and Copy Title have distinct Windows shortcuts", () => {

@@ -2,7 +2,7 @@ export const PROTON_PASS_CLI_DOCS = "https://protonpass.github.io/pass-cli/";
 
 export type VaultRole = "owner" | "manager" | "editor" | "viewer";
 
-export type ItemType = "login" | "note" | "credit_card" | "identity" | "alias" | "ssh_key" | "wifi";
+export type ItemType = "login" | "note" | "credit_card" | "identity" | "alias" | "ssh_key" | "wifi" | "custom";
 
 export type PasswordType = "random" | "passphrase";
 
@@ -65,8 +65,11 @@ export interface FolderRef {
 
 export interface CustomField {
   name: string;
+  /** A date field's value is its date, already formatted; a TOTP field's is its otpauth URI or secret. */
   value: string;
-  type: "text" | "hidden";
+  type: "text" | "hidden" | "totp" | "date";
+  /** The section of the item the field is in, if any: SSH keys, Wi-Fi networks, identities and custom items have some. */
+  section?: string;
 }
 
 export interface ItemDetail extends Item {
@@ -76,6 +79,8 @@ export interface ItemDetail extends Item {
   customFields?: CustomField[];
   /** otpauth:// URI, kept in memory only so codes can be generated locally. */
   totpUri?: string;
+  /** The filled fields of a card, identity, alias, SSH key or Wi-Fi network, by ID (see item-fields.ts). */
+  fields?: Record<string, string>;
 }
 
 export interface PasswordOptions {

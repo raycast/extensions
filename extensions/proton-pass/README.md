@@ -44,12 +44,14 @@ Browse Items opens on your items. Esc goes back to the vault list, where All Vau
 
 A vault, opened from the vault list or the vault menu, shows its Proton Pass folders first, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. The search finds what's on screen: an item in a folder shows once its folder is open, or in All Vaults. The item details say which folder an item is in, under Vault.
 
+The item details show what each type of item holds: a login's username, email, password and TOTP code; a card's cardholder name, number, expiration date, security code and PIN; an identity's name, email, phone number and address, then its other fields that are filled; an alias's address; an SSH key's public and private keys; a Wi-Fi network's name, password and security. Secrets are masked, a card's number showing its last 4 digits only, and every field has a Copy action. Custom fields come last, by section, and custom items show them first.
+
 ## Preferences
 
 - **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
-- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
+- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes, card numbers and codes, private keys, government ID numbers and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
