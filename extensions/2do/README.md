@@ -8,7 +8,7 @@ Add, browse, and edit [2Do](https://www.2doapp.com) tasks from Raycast.
 ## Requirements
 
 - macOS with the 2Do Mac app installed (direct download or Setapp).
-- A 2Do version that includes the AppleScript Automation Suite. Tested with 2Do 2026.4.3.
+- A 2Do version that includes the AppleScript Automation Suite. Tested with 2Do 2026.4.3. With an older 2Do, commands say to update it.
 
 ## Setup
 
@@ -21,6 +21,10 @@ If you clicked **Don't Allow**, turn it back on in **System Settings → Privacy
 ### Add Task
 
 Create a task with a title, notes, action, list, start and due dates (with optional times), priority, star, and tags. The list you pick is remembered for next time.
+
+Check **Repeat** to make the task repeat: daily, on weekdays, weekly (optionally on chosen days), monthly (optionally on, say, the second Tuesday), yearly, or every so many days, weeks, months or years. Choose whether it repeats from the due date or from when you complete it, and whether it ends after a number of times or on a date. A repeating task with no start or due date starts today.
+
+For tags not in 2Do yet, type their names in **New Tags**, separated by commas. Saving creates them in 2Do. A name that matches an existing tag, in any letter case, uses that tag instead of creating another.
 
 The action is 2Do's one-tap task action: **Link** (a URL), **Call** or **Message** (a phone number), **Email** (an address), **Visit** (a place, opened in Maps), or **Google** (search terms). Edit Task changes or removes it.
 
@@ -35,6 +39,8 @@ Either way, the task form opens with the address as the task's Link action, so 2
 ### View Tasks
 
 Browse tasks by scope: All, Today, Starred, Scheduled, Done, any list, or any smart list. Type to filter by title, notes, tag, or link.
+
+Repeating tasks show a repeat icon whose tooltip gives the rule, like "Every 3 days" or "Weekly on Mon, Fri".
 
 ⌘L runs the task's 2Do action: it opens the link, calls or messages the number (through FaceTime or Messages), starts an email, opens the place in Maps, or searches Google. A task with no action opens the first link in its notes instead. An icon shows which kind of action a task has. Choose Link lists every link, from the action and the notes.
 
