@@ -7,6 +7,10 @@ on:
       - "docs/**"
     branches: [main, master]
 
+env:
+  # Use an exact version (not "latest") so setup-bun can cache the binary instead of downloading it from GitHub releases on every run.
+  BUN_VERSION: ${{ vars.BUN_VERSION || 'latest' }}
+
 jobs:
   pr-bot:
     if: github.repository == 'raycast/extensions'
@@ -19,9 +23,10 @@ jobs:
         with:
           github_event_name: ${{ github.event_name }}
 
-      - uses: oven-sh/setup-bun@v2
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
       - name: Setup Bot
         run: bun create github.com/raycast/github-action-bot
         env:
@@ -43,7 +48,7 @@ jobs:
         if: failure()
         uses: raycast/github-actions/slack-send@master
         with:
-          webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
+          webhook: ${{ secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
           text: |
             :no_entry_sign: ${{ github.workflow }} has failed
