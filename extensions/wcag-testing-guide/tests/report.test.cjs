@@ -130,29 +130,72 @@ test("audit summary leads with active project and instructions; project names ar
   assert.match(markdown, /Export PDF Report/);
 });
 
-test("audit summary replaces standalone Current Audit screen without removing management", () => {
-  const explorer = fs.readFileSync(path.resolve(__dirname, "../src/wcag-explorer.tsx"), "utf8");
-  const ui = fs.readFileSync(path.resolve(__dirname, "../src/audit-ui.tsx"), "utf8");
-  assert.doesNotMatch(explorer, /function AuditProjectsItem|id="audit-projects"|title="Current Audit"/);
-  assert.match(explorer, /<ActionPanel\.Submenu title="Manage Audits"/);
-  assert.match(explorer, /Create New Audit…/);
-  assert.match(explorer, /Switch to: /);
-  assert.match(explorer, /Delete Selected Audit…/);
-  assert.match(explorer, /<List\.Section\s+title="Your Audit"[\s\S]*?<AuditSummaryItem[\s\S]*?<ReviewScopeItem/);
-  assert.match(ui, /\{auditManagement\}/);
+test("audit summary replaces standalone Current Audit screen without removing management", async () => {
+  const React = require("react");
+  const { harness } = require("./helpers/raycast.cjs"); const h = harness();
+  try {
+    const root = await h.mount(React.createElement(h.Command));
+    assert.ok(h.action(root, "Manage Audits"));
+    assert.ok(h.action(root, "Create New Audit…"));
+    assert.equal(h.action(root, "Current Audit"), undefined);
+    await h.invoke(root, "Open Audit Summary"); const summary = await h.mount(h.stack.pop());
+    assert.ok(h.action(summary, "Manage Audits"));
+    assert.ok(h.action(summary, "Create New Audit…"));
+  } finally { await h.cleanup(); }
 });
 
+test("Audit Summary exposes separate HTML and PDF export actions on list and detail", async () => {
+  const React = require("react");
+  const { harness } = require("./helpers/raycast.cjs"); const h = harness();
+  try {
+    const root = await h.mount(React.createElement(h.Command));
+    await h.invoke(root, "Open Audit Summary"); const summary = await h.mount(h.stack.pop());
+    for (const view of [root, summary]) for (const format of ["HTML", "PDF"]) {
+      await h.invoke(view, `Export ${format} Report`);
+      const form = await h.mount(h.stack.pop());
+      assert.equal(form.root.findByType("Action.SubmitForm").props.title, `Export ${format} Report`);
+      const text = form.root.findAllByType("Form.Description").map((node) => node.props.text).join(" ");
+      assert.match(text, format === "HTML" ? /HTML is the recommended accessible format/ : /PDF export uses a local Chrome/);
+    }
+  } finally { await h.cleanup(); }
+});
 
-test("Audit Summary exposes separate HTML and PDF export actions on list and detail", () => {
-  const ui = fs.readFileSync(path.resolve(__dirname, "../src/audit-ui.tsx"), "utf8");
-  assert.doesNotMatch(ui, /Export Report \(HTML or PDF\)/);
-  assert.equal((ui.match(/title="Export HTML Report"/g) || []).length, 2);
-  assert.equal((ui.match(/title="Export PDF Report"/g) || []).length, 2);
-  assert.equal((ui.match(/onAction=\{\(\) => openExport\("html"\)\}/g) || []).length, 2);
-  assert.equal((ui.match(/onAction=\{\(\) => openExport\("pdf"\)\}/g) || []).length, 2);
-  assert.match(ui, /format: "html" \| "pdf";/);
-  assert.match(ui, /title=\{`Export \$\{format\.toUpperCase\(\)\} Report`\}/);
-  assert.match(ui, /onSubmit=\{\(values: ExportFormValues\) => void exportReport\(values\)\}/);
-  assert.match(ui, /format === "html"[\s\S]*?HTML is the recommended accessible format/);
-  assert.match(ui, /PDF export uses a local Chrome/);
+test("concurrent HTML exports reserve different files and preserve both contents", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "wcag-concurrent-html-"));
+  try {
+    const outputs = await Promise.all(Array.from({ length: 12 }, (_, i) => saveAuditReport(`Report ${i}`, "Same project", "html", { outputDirectory: dir })));
+    assert.equal(new Set(outputs.map((output) => output.path)).size, 12);
+    outputs.forEach((output, i) => assert.equal(fs.readFileSync(output.path, "utf8"), `Report ${i}`));
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("concurrent PDF failure preserves unrelated successful output; sandbox stays enabled", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "wcag-concurrent-pdf-"));
+  try {
+    const browser = path.join(dir, "test-browser");
+    fs.writeFileSync(browser, `#!${process.execPath}
+const fs = require("node:fs");
+const { fileURLToPath } = require("node:url");
+const args = process.argv.slice(2);
+if (args.some((arg) => arg.includes("no-sandbox") || arg.includes("disable-setuid-sandbox"))) process.exit(91);
+if (!args.includes("--export-tagged-pdf")) process.exit(92);
+const html = fs.readFileSync(fileURLToPath(args.at(-1)), "utf8");
+const pdf = args.find((arg) => arg.startsWith("--print-to-pdf=")).slice("--print-to-pdf=".length);
+if (html === "FAIL") { fs.writeFileSync(pdf, "partial"); process.exit(1); }
+fs.writeFileSync(pdf, "%PDF-1.7\\n" + (html === "UNTAGGED" ? "" : "/StructTreeRoot /MarkInfo") + "x".repeat(1200));
+`, { mode: 0o755 });
+    const [success, failure] = await Promise.all([
+      saveAuditReport("SUCCESS", "Same", "pdf", { browser, outputDirectory: dir }),
+      saveAuditReport("FAIL", "Same", "pdf", { browser, outputDirectory: dir }),
+    ]);
+    assert.equal(success.format, "pdf");
+    assert.equal(failure.format, "print-ready-html");
+    assert.match(fs.readFileSync(success.path, "utf8"), /\/StructTreeRoot \/MarkInfo/);
+    assert.equal(fs.readFileSync(failure.path, "utf8"), "FAIL");
+    const untagged = await saveAuditReport("UNTAGGED", "Same", "pdf", { browser, outputDirectory: dir });
+    assert.equal(untagged.format, "print-ready-html");
+    assert.match(untagged.reason, /without verifiable structure tags/);
+    assert.equal(fs.readdirSync(dir).filter((file) => file.endsWith(".pdf")).length, 1);
+    assert.ok(fs.existsSync(success.path));
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });

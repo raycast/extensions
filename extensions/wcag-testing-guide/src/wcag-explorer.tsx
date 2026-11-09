@@ -14,18 +14,10 @@ import {
   showToast,
   Toast,
   useNavigation,
-  Keyboard,
 } from "@raycast/api";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { randomUUID } from "node:crypto";
-import {
-  AUDIT_ACTIVE_PROJECT_KEY,
-  AUDIT_PROJECTS_KEY,
-  DEFAULT_PROJECT,
-  parseAuditProjects,
-  projectStorageKey,
-  safeActiveProjectId,
-} from "./audit-projects";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { AuditStore } from "./audit-store";
 import type { AuditProject } from "./audit-projects";
 import {
   aboutWcagMarkdown,
@@ -43,8 +35,8 @@ import {
   authorBlogUrl,
   supportUrl,
 } from "./author";
-import { parseAuditResults, auditStats, statusLabel } from "./audit";
-import type { AuditResults, AuditResult, AuditStatus } from "./audit";
+import { auditStats, statusLabel } from "./audit";
+import type { AuditResult, AuditStatus } from "./audit";
 import {
   AuditSummaryItem,
   recordedResultMarkdown,
@@ -71,11 +63,6 @@ import {
 } from "./review-scope";
 import type { ReviewScope } from "./review-scope";
 import type { Criterion, Principle, WcagVersion } from "./types";
-
-type Preferences = {
-  defaultVersion: WcagVersion;
-  defaultLevel: ReviewScope;
-};
 
 const principles: Principle[] = [
   "Perceivable",
@@ -154,11 +141,6 @@ function ReviewScopeItem({
       title={`Review Scope: ${reviewScopeLabel(controls.scope)}`}
       subtitle={`${total} selected · ${includedLevels}`}
       icon={Icon.CheckCircle}
-      accessories={
-        controls.scope === "AA"
-          ? [{ tag: "Recommended" }]
-          : [{ text: "Custom scope" }]
-      }
       keywords={[
         "testing scope",
         "review settings",
@@ -202,7 +184,6 @@ function ReviewScopeItem({
           <Action.CopyToClipboard
             title="Copy Review Checklist"
             content={checklist}
-            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <ReviewScopeMenu controls={controls} />
         </ActionPanel>
@@ -217,9 +198,11 @@ function FullCriterionGuide({
   initialRecord,
   onSave,
   scopeControls,
+  ready,
 }: {
   criterion: Criterion;
   version: WcagVersion;
+  ready: boolean;
   initialRecord?: AuditResult;
   onSave: SaveAuditResult;
   scopeControls: ScopeControls;
@@ -239,16 +222,20 @@ function FullCriterionGuide({
       markdown={markdown}
       actions={
         <ActionPanel>
-          <ResultActions criterion={criterion} record={record} onSave={save} />
+          {ready && (
+            <ResultActions
+              criterion={criterion}
+              record={record}
+              onSave={save}
+            />
+          )}
           <Action.CopyToClipboard
             title="Copy Manual Test Case"
             content={testCase}
-            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard
             title="Copy Practical Guide"
             content={markdown}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <ReviewScopeMenu controls={scopeControls} />
           <ActionPanel.Section title="Official W3C Resources">
@@ -281,9 +268,11 @@ function CriterionItem({
   scopeControls,
   record,
   onSave,
+  ready,
 }: {
   criterion: Criterion;
   version: WcagVersion;
+  ready: boolean;
   onSwitchVersion: () => void;
   scopeControls: ScopeControls;
   record?: AuditResult;
@@ -304,10 +293,7 @@ function CriterionItem({
       id={criterion.number}
       title={`${criterion.number}  ${criterion.title}`}
       icon={{ source: appearance.icon, tintColor: appearance.color }}
-      accessories={[
-        { tag: { value: statusLabel(resultStatus), color: appearance.color } },
-        { text: `Level ${criterion.level}` },
-      ]}
+      subtitle={`Level ${criterion.level} · ${ready ? statusLabel(resultStatus) : "Results unavailable"}`}
       keywords={[
         criterion.number,
         criterion.title,
@@ -317,7 +303,16 @@ function CriterionItem({
         criterion.technical,
         ...criterion.keywords,
       ]}
-      detail={<List.Item.Detail markdown={preview} />}
+      detail={
+        <List.Item.Detail
+          markdown={
+            ready
+              ? preview
+              : "# Results unavailable\n\nWait for audit loading to finish. Reopen the command if loading failed.\n\n" +
+                criterionMarkdown(criterion, version, "preview")
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <Action
@@ -329,26 +324,27 @@ function CriterionItem({
                   criterion={criterion}
                   version={version}
                   initialRecord={record}
+                  ready={ready}
                   onSave={onSave}
                   scopeControls={scopeControls}
                 />,
               )
             }
           />
-          <ResultActions
-            criterion={criterion}
-            record={record}
-            onSave={onSave}
-          />
+          {ready && (
+            <ResultActions
+              criterion={criterion}
+              record={record}
+              onSave={onSave}
+            />
+          )}
           <Action.CopyToClipboard
             title="Copy Manual Test Case"
             content={testCase}
-            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard
             title="Copy Practical Guide"
             content={detail}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action.CopyToClipboard
             title="Copy Criterion Reference"
@@ -428,7 +424,6 @@ function AboutWcagItem({
                       <Action.CopyToClipboard
                         title="Copy WCAG Orientation"
                         content={detail}
-                        shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <ReviewScopeMenu controls={scopeControls} />
                       <ActionPanel.Section title="Official W3C Resources">
@@ -467,7 +462,6 @@ function AboutWcagItem({
           <Action.CopyToClipboard
             title="Copy WCAG Orientation"
             content={detail}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <ReviewScopeMenu controls={scopeControls} />
           <ActionPanel.Section title="Official W3C Resources">
@@ -546,7 +540,6 @@ function HowToUseItem({
                       <Action.CopyToClipboard
                         title="Copy Usage Guide"
                         content={detail}
-                        shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <ReviewScopeMenu controls={scopeControls} />
                       <Action.OpenInBrowser
@@ -560,11 +553,7 @@ function HowToUseItem({
               )
             }
           />
-          <Action.CopyToClipboard
-            title="Copy Usage Guide"
-            content={detail}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Usage Guide" content={detail} />
           <ReviewScopeMenu controls={scopeControls} />
           <Action.OpenInBrowser
             title={`WCAG ${version} Standard`}
@@ -677,6 +666,7 @@ function NewAuditForm({
             title="Create Separate Audit"
             icon={Icon.Plus}
             onSubmit={async () => {
+              if (saving) return;
               if (!name.trim()) {
                 await showToast(Toast.Style.Failure, "Enter an audit name");
                 return;
@@ -751,258 +741,128 @@ export default function Command() {
   const [version, setVersion] = useState<WcagVersion>(
     preferences.defaultVersion,
   );
-  const [scope, setScope] = useState<ReviewScope>(
-    preferences.defaultLevel ?? "AA",
-  );
-  const [overridden, setOverridden] = useState(false);
-  const [scopeLoaded, setScopeLoaded] = useState(false);
-  const [auditLoaded, setAuditLoaded] = useState(false);
-  const [projects, setProjects] = useState<AuditProject[]>([DEFAULT_PROJECT]);
-  const [activeProject, setActiveProject] =
-    useState<AuditProject>(DEFAULT_PROJECT);
-  const activeProjectRef = useRef<AuditProject>(DEFAULT_PROJECT);
-  const [audits, setAudits] = useState<Record<WcagVersion, AuditResults>>({
-    "2.1": {},
-    "2.2": {},
-  });
-  const auditsRef = useRef<Record<WcagVersion, AuditResults>>({
-    "2.1": {},
-    "2.2": {},
-  });
-  const pendingWritesRef = useRef<Promise<unknown>>(Promise.resolve());
-
-  const validNumbers21 = useMemo(
-    () =>
-      new Set(
-        criteria
-          .filter((item) => appliesToVersion(item, "2.1"))
-          .map((item) => item.number),
-      ),
-    [],
-  );
-  const validNumbers22 = useMemo(
-    () =>
-      new Set(
-        criteria
-          .filter((item) => appliesToVersion(item, "2.2"))
-          .map((item) => item.number),
-      ),
-    [],
-  );
-
-  const loadProject = async (project: AuditProject): Promise<void> => {
-    setAuditLoaded(false);
-    try {
-      await pendingWritesRef.current.catch(() => undefined);
-      const [r21, r22] = await Promise.all(
-        (["2.1", "2.2"] as WcagVersion[]).map((edition) =>
-          LocalStorage.getItem<string>(projectStorageKey(project.id, edition)),
-        ),
-      );
-      const loaded = {
-        "2.1": parseAuditResults(r21, validNumbers21),
-        "2.2": parseAuditResults(r22, validNumbers22),
-      };
-      await LocalStorage.setItem(AUDIT_ACTIVE_PROJECT_KEY, project.id);
-      auditsRef.current = loaded;
-      activeProjectRef.current = project;
-      setAudits(loaded);
-      setActiveProject(project);
-    } catch {
-      await showToast(
-        Toast.Style.Failure,
-        "Could not load selected audit",
-        "The previous audit remains active.",
-      );
-    } finally {
-      setAuditLoaded(true);
-    }
-  };
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      LocalStorage.getItem<string>(AUDIT_PROJECTS_KEY),
-      LocalStorage.getItem<string>(AUDIT_ACTIVE_PROJECT_KEY),
-    ])
-      .then(async ([storedProjects, storedId]) => {
-        if (!active) return;
-        const list = parseAuditProjects(storedProjects);
-        const id = safeActiveProjectId(storedId, list);
-        setProjects(list);
-        await loadProject(list.find((p) => p.id === id) ?? DEFAULT_PROJECT);
-      })
-      .catch(() => {
-        if (active) {
-          setAuditLoaded(true);
-          void showToast(Toast.Style.Failure, "Could not load saved audits");
-        }
+  const {
+    data: savedScope,
+    revalidate: refreshScope,
+    isLoading: scopeLoading,
+  } = usePromise(() => LocalStorage.getItem<string>(REVIEW_SCOPE_STORAGE_KEY));
+  const scopeWrites = useRef<Promise<unknown>>(Promise.resolve());
+  const persistScope = (next?: ReviewScope) => {
+    const write = scopeWrites.current
+      .catch(() => undefined)
+      .then(async () => {
+        if (next) await LocalStorage.setItem(REVIEW_SCOPE_STORAGE_KEY, next);
+        else await LocalStorage.removeItem(REVIEW_SCOPE_STORAGE_KEY);
+        await refreshScope();
       });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const createAudit = async (name: string): Promise<boolean> => {
-    if (projects.length >= 100 || name.length > 90 || !name.trim()) {
-      await showToast(Toast.Style.Failure, "Enter a name of 1–90 characters");
-      return false;
-    }
-    const project = {
-      id: randomUUID(),
-      name,
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [...projects, project];
-    try {
-      await LocalStorage.setItem(AUDIT_PROJECTS_KEY, JSON.stringify(updated));
-      setProjects(updated);
-      await loadProject(project);
-      return activeProjectRef.current.id === project.id;
-    } catch {
-      await showToast(Toast.Style.Failure, "Could not create audit");
-      return false;
-    }
+    scopeWrites.current = write;
+    return write;
   };
-
-  const deleteAudit = async (project: AuditProject): Promise<void> => {
-    if (project.id === "default") return;
-    const confirmed = await confirmAlert({
-      title: `Delete ${project.name}?`,
-      message:
-        "This permanently removes both WCAG versions and their notes for this audit. Export the results first if needed.",
-      primaryAction: {
-        title: "Delete Audit",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (!confirmed) return;
-    try {
-      await pendingWritesRef.current.catch(() => undefined);
-      await Promise.all(
-        (["2.1", "2.2"] as WcagVersion[]).map((v) =>
-          LocalStorage.removeItem(projectStorageKey(project.id, v)),
-        ),
+  const scope = isReviewScope(savedScope)
+    ? savedScope
+    : preferences.defaultLevel;
+  const overridden = isReviewScope(savedScope);
+  const storeRef = useRef<AuditStore | null>(null);
+  if (!storeRef.current) {
+    const valid = (edition: WcagVersion) =>
+      new Set(
+        criteria
+          .filter((item) => appliesToVersion(item, edition))
+          .map((item) => item.number),
       );
-      const remaining = projects.filter((p) => p.id !== project.id);
-      await LocalStorage.setItem(AUDIT_PROJECTS_KEY, JSON.stringify(remaining));
-      setProjects(remaining);
-      await loadProject(DEFAULT_PROJECT);
-    } catch {
-      await showToast(Toast.Style.Failure, "Could not delete selected audit");
+    storeRef.current = new AuditStore(LocalStorage, {
+      "2.1": valid("2.1"),
+      "2.2": valid("2.2"),
+    });
+  }
+  const store = storeRef.current;
+  const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const { projects, activeProject, audits } = snapshot;
+  const auditLoaded = snapshot.ready && !snapshot.busy;
+  useEffect(() => {
+    void store
+      .initialize()
+      .catch((error) =>
+        showFailureToast(error, { title: "Could not load saved audits" }),
+      );
+  }, [store]);
+
+  const loadProject = async (project: AuditProject) => {
+    try {
+      await store.switchProject(project.id);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not switch audit" });
     }
   };
-
+  const createAudit = async (name: string): Promise<boolean> => {
+    try {
+      await store.create(name);
+      return true;
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Could not create or select audit",
+      });
+      return false;
+    }
+  };
+  const deleteAudit = async (project: AuditProject) => {
+    if (
+      !(await confirmAlert({
+        title: `Delete ${project.name}?`,
+        message:
+          "This removes both WCAG versions and their notes. Export the results first if needed.",
+        primaryAction: {
+          title: "Delete Audit",
+          style: Alert.ActionStyle.Destructive,
+        },
+      }))
+    )
+      return;
+    try {
+      await store.delete(project.id);
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Could not complete audit deletion",
+      });
+    }
+  };
+  // Capture the editor's project and edition, so old forms cannot write to a new audit.
   const saveAudit: SaveAuditResult = async (criterion, status, notes) => {
-    const edition = version;
-    const project = activeProjectRef.current;
-    const updated: AuditResults = {
-      ...auditsRef.current[edition],
-      [criterion.number]: {
+    try {
+      await store.save(
+        activeProject.id,
+        version,
+        criterion.number,
         status,
         notes,
-        updatedAt: new Date().toISOString(),
-      },
-    };
-    const next = { ...auditsRef.current, [edition]: updated };
-    auditsRef.current = next;
-    setAudits(next);
-    const write = pendingWritesRef.current
-      .catch(() => undefined)
-      .then(() =>
-        LocalStorage.setItem(
-          projectStorageKey(project.id, edition),
-          JSON.stringify(updated),
-        ),
       );
-    pendingWritesRef.current = write;
-    try {
-      await write;
       return true;
-    } catch {
-      await showToast(
-        Toast.Style.Failure,
-        "Could not save result",
-        "The change is visible now, but may be lost when Raycast closes.",
-      );
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not save result" });
       return false;
     }
   };
-
   const clearAudit = async (edition: WcagVersion): Promise<boolean> => {
-    const project = activeProjectRef.current;
-    const next = { ...auditsRef.current, [edition]: {} };
-    auditsRef.current = next;
-    setAudits(next);
-    const write = pendingWritesRef.current
-      .catch(() => undefined)
-      .then(() =>
-        LocalStorage.removeItem(projectStorageKey(project.id, edition)),
-      );
-    pendingWritesRef.current = write;
     try {
-      await write;
-      await showToast(
-        Toast.Style.Success,
-        `WCAG ${edition} results cleared for ${project.name}`,
-      );
+      await store.clear(activeProject.id, edition);
       return true;
-    } catch {
-      await showToast(Toast.Style.Failure, "Could not remove saved results");
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not clear results" });
       return false;
     }
   };
-
-  // Keep the active scope in sync when the native preferences change,
-  // unless the user explicitly saved an override from the Actions menu.
-  useEffect(() => {
-    if (scopeLoaded && !overridden) {
-      setScope(preferences.defaultLevel ?? "AA");
-    }
-  }, [preferences.defaultLevel, scopeLoaded, overridden]);
-
-  useEffect(() => {
-    let active = true;
-    LocalStorage.getItem<string>(REVIEW_SCOPE_STORAGE_KEY)
-      .then((saved) => {
-        if (!active) return;
-        if (isReviewScope(saved)) {
-          setScope(saved);
-          setOverridden(true);
-        }
-      })
-      .catch(() => {
-        if (active)
-          void showToast(
-            Toast.Style.Failure,
-            "Could not read saved review scope",
-          );
-      })
-      .finally(() => {
-        if (active) setScopeLoaded(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
   const chooseScope = async (next: ReviewScope) => {
     try {
-      await LocalStorage.setItem(REVIEW_SCOPE_STORAGE_KEY, next);
-      setScope(next);
-      setOverridden(true);
-    } catch {
-      await showToast(Toast.Style.Failure, "Could not save review scope");
+      await persistScope(next);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not save review scope" });
     }
   };
-
   const resetScope = async () => {
     try {
-      await LocalStorage.removeItem(REVIEW_SCOPE_STORAGE_KEY);
-      setScope(preferences.defaultLevel ?? "AA");
-      setOverridden(false);
-    } catch {
-      await showToast(Toast.Style.Failure, "Could not reset review scope");
+      await persistScope();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not reset review scope" });
     }
   };
 
@@ -1013,17 +873,36 @@ export default function Command() {
     onResetScope: () => void resetScope(),
   };
 
-  const visibleCriteria = useMemo(
-    () => criteriaForScope(criteria, version, scope),
-    [version, scope],
-  );
+  const visibleCriteria = criteriaForScope(criteria, version, scope);
 
   const switchVersion = () =>
     setVersion((current) => (current === "2.2" ? "2.1" : "2.2"));
 
+  const summaryProps = {
+    criteria,
+    version,
+    scope,
+    results: audits[version],
+    onReset: clearAudit,
+    projectName: activeProject.name,
+    ready: auditLoaded,
+    loading: snapshot.busy,
+    auditManagement: (
+      <AuditManagementActions
+        projects={projects}
+        activeProject={activeProject}
+        onSwitch={loadProject}
+        onCreate={createAudit}
+        onDelete={deleteAudit}
+      />
+    ),
+  };
+  const summaryRef = useRef(summaryProps);
+  summaryRef.current = summaryProps;
+
   return (
     <List
-      isLoading={!scopeLoaded || !auditLoaded}
+      isLoading={scopeLoading || snapshot.busy}
       isShowingDetail
       filtering={{ keepSectionOrder: true }}
       searchBarPlaceholder="Search by number, topic, problem, or technique…"
@@ -1047,21 +926,41 @@ export default function Command() {
         subtitle={`${activeProject.name} · WCAG ${version} · ${reviewScopeLabel(scope)} · ${auditStats(visibleCriteria, audits[version]).progress}% reviewed`}
       >
         <AuditSummaryItem
-          criteria={criteria}
-          version={version}
-          scope={scope}
-          results={audits[version]}
-          onReset={clearAudit}
-          projectName={activeProject.name}
-          auditManagement={
-            <AuditManagementActions
-              projects={projects}
-              activeProject={activeProject}
-              onSwitch={loadProject}
-              onCreate={createAudit}
-              onDelete={deleteAudit}
-            />
-          }
+          {...summaryProps}
+          live={{
+            subscribe: store.subscribe,
+            getSnapshot: store.getSnapshot,
+            getProps: () => {
+              const current = store.getSnapshot();
+              return {
+                ...summaryRef.current,
+                results: current.audits[summaryRef.current.version],
+                projectName: current.activeProject.name,
+                ready: current.ready && !current.busy,
+                loading: current.busy,
+                onReset: async (edition) => {
+                  try {
+                    await store.clear(current.activeProject.id, edition);
+                    return true;
+                  } catch (error) {
+                    await showFailureToast(error, {
+                      title: "Could not clear results",
+                    });
+                    return false;
+                  }
+                },
+                auditManagement: (
+                  <AuditManagementActions
+                    projects={current.projects}
+                    activeProject={current.activeProject}
+                    onSwitch={loadProject}
+                    onCreate={createAudit}
+                    onDelete={deleteAudit}
+                  />
+                ),
+              };
+            },
+          }}
         />
         <ReviewScopeItem version={version} controls={scopeControls} />
       </List.Section>
@@ -1090,6 +989,7 @@ export default function Command() {
                 scopeControls={scopeControls}
                 record={audits[version][criterion.number]}
                 onSave={saveAudit}
+                ready={auditLoaded}
               />
             ))}
           </List.Section>

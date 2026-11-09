@@ -164,7 +164,7 @@ export function auditReportMarkdown(
   return lines.join("\n");
 }
 
-/** Neutralise spreadsheet formula injection in user-provided fields before CSV escaping. */
+/** Neutralize spreadsheet formula injection in user-provided fields before CSV escaping. */
 export function csvCell(value: string): string {
   // Excel/Sheets may execute leading = + - @, even after spaces or line breaks.
   const safe = /^[\s\uFEFF]*[=+@-]/u.test(value) ? `'${value}` : value;

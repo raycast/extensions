@@ -16,7 +16,7 @@ This independent software references the numbering, names, levels and applicabil
 
 The W3C [Document License (2023)](https://www.w3.org/copyright/document-license-2023/) sets the terms for redistribution and implementation-supporting material. The official document and its normative requirements remain authoritative. The W3C logo and W3C trademarks are not used to claim any endorsement, affiliation or certification.
 
-The MIT license in `LICENSE` applies to the author's original extension code and materials; it does not replace third-party copyright notices.
+The repository MIT license applies to the author's original extension code and materials; it does not replace third-party copyright notices.
 
 This project is not affiliated with, sponsored by or endorsed by W3C or the Web Accessibility Initiative (WAI).
 

@@ -88,9 +88,11 @@ async function uniqueFilePath(
       `${base}${suffix ? `-${suffix}` : ""}.${extension}`,
     );
     try {
-      await access(file);
-    } catch {
+      const handle = await openFile(file, "wx");
+      await handle.close();
       return file;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
     }
   }
   throw new Error("Could not create a unique report filename");
@@ -129,8 +131,6 @@ async function printWithBrowser(
     `--print-to-pdf=${pdfPath}`,
     pathToFileURL(htmlPath).href,
   ];
-  if (process.platform === "linux" && process.getuid?.() === 0)
-    args.unshift("--no-sandbox");
   await run(browser, args, { timeout: 60000, maxBuffer: 1024 * 1024 });
   if (!(await validPdf(pdfPath)))
     throw new Error("Browser did not produce a valid PDF");

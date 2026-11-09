@@ -13,7 +13,9 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
+import { showFailureToast } from "@raycast/utils";
+import type { AuditSnapshot } from "./audit-store";
 import type { JSX } from "react";
 import { auditReportHtml } from "./report-html";
 import { saveAuditReport } from "./report-export";
@@ -56,7 +58,7 @@ export function recordedResultMarkdown(record?: AuditResult): string {
     lines.push(`**Evidence / justification:** ${record.notes.trim()}`, "");
   else if (status === "fail")
     lines.push(
-      "**Add evidence:** record steps, actual behaviour and affected environment.",
+      "**Add evidence:** record steps, actual behavior and affected environment.",
       "",
     );
   if (record?.updatedAt) lines.push(`Last recorded: ${record.updatedAt}`, "");
@@ -89,6 +91,7 @@ function ResultForm({
             title="Save Test Result"
             icon={Icon.CheckCircle}
             onSubmit={async () => {
+              if (submitting) return;
               setSubmitting(true);
               const saved = await onSave(criterion, status, notes.trim());
               setSubmitting(false);
@@ -122,7 +125,7 @@ function ResultForm({
         placeholder={
           status === "not-applicable"
             ? "Optional: explain why the requirement does not apply to this page, screen or journey."
-            : "Environment, steps to reproduce, expected vs actual behaviour, screenshot or issue reference…"
+            : "Environment, steps to reproduce, expected vs actual behavior, screenshot or issue reference…"
         }
         value={notes}
         onChange={(value) => setNotes(value.slice(0, 15000))}
@@ -204,7 +207,10 @@ function ReportExportForm({
 }) {
   const { pop } = useNavigation();
   const [isExporting, setIsExporting] = useState(false);
+  const exporting = useRef(false);
   const exportReport = async (metadata: ExportFormValues) => {
+    if (exporting.current) return;
+    exporting.current = true;
     setIsExporting(true);
     try {
       const html = auditReportHtml(criteria, version, scope, results, metadata);
@@ -234,12 +240,9 @@ function ReportExportForm({
       pop();
       await open(output.path);
     } catch (error) {
-      await showToast(
-        Toast.Style.Failure,
-        "Could not export audit report",
-        error instanceof Error ? error.message : String(error),
-      );
+      await showFailureToast(error, { title: "Could not export audit report" });
     } finally {
+      exporting.current = false;
       setIsExporting(false);
     }
   };
@@ -303,6 +306,28 @@ function ReportExportForm({
   );
 }
 
+type SummaryProps = {
+  criteria: Criterion[];
+  version: WcagVersion;
+  scope: ReviewScope;
+  results: AuditResults;
+  onReset: (version: WcagVersion) => Promise<boolean>;
+  projectName: string;
+  auditManagement: JSX.Element;
+  ready: boolean;
+  loading: boolean;
+};
+type LiveSummary = {
+  subscribe: (listener: () => void) => () => void;
+  getSnapshot: () => AuditSnapshot;
+  getProps: () => SummaryProps;
+};
+
+function LiveAuditSummary({ live }: { live: LiveSummary }) {
+  useSyncExternalStore(live.subscribe, live.getSnapshot);
+  return <AuditSummaryItem {...live.getProps()} live={live} asDetail />;
+}
+
 export function AuditSummaryItem({
   criteria,
   version,
@@ -311,15 +336,11 @@ export function AuditSummaryItem({
   onReset,
   projectName,
   auditManagement,
-}: {
-  criteria: Criterion[];
-  version: WcagVersion;
-  scope: ReviewScope;
-  results: AuditResults;
-  onReset: (version: WcagVersion) => Promise<boolean>;
-  projectName: string;
-  auditManagement: JSX.Element;
-}) {
+  ready,
+  loading,
+  live,
+  asDetail = false,
+}: SummaryProps & { live: LiveSummary; asDetail?: boolean }) {
   const { push } = useNavigation();
   const stats = auditStats(criteriaForScope(criteria, version, scope), results);
   const summary = auditSummaryMarkdown(
@@ -344,91 +365,8 @@ export function AuditSummaryItem({
     );
   const actions = (
     <ActionPanel>
-      <Action
-        title="Export HTML Report"
-        icon={Icon.Document}
-        onAction={() => openExport("html")}
-      />
-      <Action
-        title="Export PDF Report"
-        icon={Icon.Download}
-        onAction={() => openExport("pdf")}
-      />
-      <Action.CopyToClipboard
-        title="Copy Full Audit Report"
-        content={report}
-        icon={Icon.Clipboard}
-      />
-      <Action.CopyToClipboard
-        title="Copy Results as CSV"
-        content={csv}
-        icon={Icon.List}
-      />
-      {auditManagement}
-    </ActionPanel>
-  );
-  const reset = async () => {
-    const ok = await confirmAlert({
-      title: `Clear WCAG ${version} results?`,
-      message: `Delete all recorded WCAG ${version} outcomes for the current named audit, including levels hidden by the filter? This cannot be undone.`,
-      primaryAction: {
-        title: "Delete All Results",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (ok) await onReset(version);
-  };
-  return (
-    <List.Item
-      id="audit-summary"
-      title="Audit Summary"
-      subtitle={`${projectName} · ${stats.progress}% reviewed · ${stats.reviewed}/${stats.total} assessed`}
-      icon={{
-        source: Icon.BarChart,
-        tintColor: stats.fail ? Color.Red : Color.Blue,
-      }}
-      accessories={[
-        {
-          tag: {
-            value: `${stats.fail} Fail`,
-            color: stats.fail ? Color.Red : Color.SecondaryText,
-          },
-        },
-        { text: `${stats.notTested} not tested` },
-      ]}
-      keywords={[
-        "results",
-        "summary",
-        "progress",
-        "pass",
-        "fail",
-        "not applicable",
-        "export",
-        "audit",
-        "create audit",
-        "switch audit",
-        "manage audits",
-        "csv",
-        "report",
-        "HTML",
-        "PDF",
-      ]}
-      detail={<List.Item.Detail markdown={summary} />}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Open Audit Summary"
-            icon={Icon.BarChart}
-            onAction={() =>
-              push(
-                <Detail
-                  navigationTitle={`WCAG ${version} Audit Summary`}
-                  markdown={summary}
-                  actions={actions}
-                />,
-              )
-            }
-          />
+      {ready && (
+        <ActionPanel.Section>
           <Action
             title="Export HTML Report"
             icon={Icon.Document}
@@ -449,13 +387,86 @@ export function AuditSummaryItem({
             content={csv}
             icon={Icon.List}
           />
-          {auditManagement}
+        </ActionPanel.Section>
+      )}
+      {ready && auditManagement}
+      {ready && (
+        <Action
+          title="Clear All Results for This WCAG Version"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => void reset()}
+        />
+      )}
+    </ActionPanel>
+  );
+  const reset = async () => {
+    const ok = await confirmAlert({
+      title: `Clear WCAG ${version} results?`,
+      message: `Delete all recorded WCAG ${version} outcomes for the current named audit, including levels hidden by the filter? This cannot be undone.`,
+      primaryAction: {
+        title: "Delete All Results",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (ok) await onReset(version);
+  };
+  if (asDetail)
+    return (
+      <Detail
+        isLoading={loading}
+        navigationTitle={`WCAG ${version} Audit Summary · ${projectName}`}
+        markdown={
+          ready
+            ? summary
+            : "# Audit unavailable\n\nResults and actions are available after the saved audit loads successfully. Reopen the command if loading failed."
+        }
+        actions={actions}
+      />
+    );
+  return (
+    <List.Item
+      id="audit-summary"
+      title="Audit Summary"
+      subtitle={`${projectName} · ${stats.progress}% reviewed · ${stats.reviewed}/${stats.total} assessed`}
+      icon={{
+        source: Icon.BarChart,
+        tintColor: stats.fail ? Color.Red : Color.Blue,
+      }}
+      keywords={[
+        "results",
+        "summary",
+        "progress",
+        "pass",
+        "fail",
+        "not applicable",
+        "export",
+        "audit",
+        "create audit",
+        "switch audit",
+        "manage audits",
+        "csv",
+        "report",
+        "HTML",
+        "PDF",
+      ]}
+      detail={
+        <List.Item.Detail
+          markdown={
+            ready
+              ? summary
+              : "# Audit unavailable\n\nWait for loading to finish. If loading failed, reopen the command to retry. Saved data has not been changed."
+          }
+        />
+      }
+      actions={
+        <ActionPanel>
           <Action
-            title="Clear All Results for This WCAG Version"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={() => void reset()}
+            title="Open Audit Summary"
+            icon={Icon.BarChart}
+            onAction={() => push(<LiveAuditSummary live={live} />)}
           />
+          {actions.props.children}
         </ActionPanel>
       }
     />

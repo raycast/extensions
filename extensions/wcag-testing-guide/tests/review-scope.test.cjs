@@ -73,19 +73,24 @@ test("each checklist contains only the selected version and level with initially
   }
 });
 
-test("review scope is persisted through a menu override, and can be reset", () => {
+test("review scope is persisted through a menu override, and can be reset", async () => {
   assert.equal(isReviewScope("AA"), true);
   assert.equal(isReviewScope("AAA"), true);
   assert.equal(isReviewScope("invalid"), false);
   assert.equal(isReviewScope(undefined), false);
   assert.match(REVIEW_SCOPE_STORAGE_KEY, /review-scope/);
-  const source = fs.readFileSync(path.join(__dirname, "../src/wcag-explorer.tsx"), "utf8");
-  assert.match(source, /LocalStorage\.getItem/);
-  assert.match(source, /LocalStorage\.setItem/);
-  assert.match(source, /LocalStorage\.removeItem/);
-  assert.match(source, /<ActionPanel\.Submenu title="Change Review Scope"/);
-  assert.match(source, /title="Copy Review Checklist"/);
-  assert.match(source, /title="Open Extension Settings"/);
+  const React = require("react");
+  const { harness } = require("./helpers/raycast.cjs"); const h = harness();
+  try {
+    const root = await h.mount(React.createElement(h.Command));
+    assert.ok(h.action(root, "Change Review Scope"));
+    assert.ok(h.action(root, "Copy Review Checklist"));
+    assert.ok(h.action(root, "Open Extension Settings"));
+    await h.invoke(root, "Level A Only");
+    assert.equal(h.data.get(REVIEW_SCOPE_STORAGE_KEY), "A");
+    await h.invoke(root, "Use Default from Preferences");
+    assert.equal(h.data.has(REVIEW_SCOPE_STORAGE_KEY), false);
+  } finally { await h.cleanup(); }
 });
 
 test("scope list subtitle explicitly distinguishes included and hidden levels", () => {

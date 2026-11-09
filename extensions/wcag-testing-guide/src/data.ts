@@ -357,7 +357,7 @@ export const criteria: Criterion[] = [
         "View in grayscale or use a color-vision simulation.",
         "Confirm every state and instruction remains understandable.",
       ],
-      ["colour", "errors", "links", "status"],
+      ["color", "errors", "links", "status"],
     ),
     e(
       "1.4.2",
@@ -827,7 +827,7 @@ export const criteria: Criterion[] = [
       "Provide a way to bypass content that repeats across pages. A skip link is a common solution, while suitable landmarks or heading navigation can also provide an effective mechanism.",
       [
         "Add a visible-on-focus “Skip to main content” link.",
-        "Use well-labelled landmarks and a logical heading structure.",
+        "Use well-labeled landmarks and a logical heading structure.",
       ],
       [
         "Press Tab from the top of several pages.",

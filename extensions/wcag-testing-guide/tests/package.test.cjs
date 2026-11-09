@@ -55,3 +55,24 @@ test("official W3C references remain accessible in full guides", () => {
     assert.match(guide, /https:\/\/www\.w3\.org\/TR\/WCAG/);
   }
 });
+
+test("both first-run preferences require an explicit choice without defaults", () => {
+  for (const name of ["defaultVersion", "defaultLevel"]) {
+    const preference = manifest.preferences.find((item) => item.name === name);
+    assert.ok(preference);
+    assert.equal(preference.required, true);
+    assert.equal(Object.hasOwn(preference, "default"), false);
+    assert.equal(preference.type, "dropdown");
+    assert.ok(preference.data.length >= 2);
+  }
+});
+
+test("all Store screenshots have the required native PNG dimensions", () => {
+  const screenshots = fs.readdirSync(path.join(root, "metadata")).filter((name) => name.endsWith(".png"));
+  assert.equal(screenshots.length, 4);
+  for (const name of screenshots) {
+    const bytes = fs.readFileSync(path.join(root, "metadata", name));
+    assert.equal(bytes.readUInt32BE(16), 2000, name);
+    assert.equal(bytes.readUInt32BE(20), 1250, name);
+  }
+});
