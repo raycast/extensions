@@ -317,8 +317,9 @@
 /extensions/brave-search                                            @VishwasShashidhar @Spl0itable @Justiniscoding
 /extensions/brave-search-with-results                               @electerious
 /extensions/brawlstars                                              @MaximeGuiliani
-/extensions/brew                                                    @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare @ashokbaruaakas @MillerApps @pernielsentikaer @jfkisafk @vpukhanov @j3lte @alexander-cato @ViGeng @ridemountainpig @chrismessina @clins1994 @alexibuild @dibas-np
+/extensions/brew                                                    @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare @ashokbaruaakas @MillerApps @pernielsentikaer @jfkisafk @vpukhanov @j3lte @alexander-cato @ViGeng @ridemountainpig @chrismessina @clins1994 @alexibuild @dibas-np @raulgg
 /extensions/brew-services                                           @erics118
+/extensions/brewpage                                                @kochetkov-ma
 /extensions/bricks-builder                                          @matejmohar
 /extensions/brightness-control                                      @CaliCastle @pavzagor @fisaogullari @0xdhrv @muhammadrizo-y
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
@@ -1366,6 +1367,7 @@
 /extensions/indiehackers                                            @xmok
 /extensions/inertiajs-documentation                                 @danyelkeddah
 /extensions/infakt                                                  @teziovsky
+/extensions/infiniterm                                              @tarikkavaz
 /extensions/infisical                                               @xmok @aicayzer
 /extensions/infomaniak                                              @xmok
 /extensions/ingredients-lister                                      @Visual-Studio-Coder
@@ -1622,6 +1624,7 @@
 /extensions/litellm                                                 @Lp-Francois
 /extensions/literal                                                 @OkanBilal
 /extensions/litterbox                                               @0xdhrv
+/extensions/little-chrome                                           @TomPenguin
 /extensions/liveblocks                                              @andreaselia
 /extensions/llm-stats                                               @Ernest0-Production
 /extensions/llms-txt                                                @thedaviddias @pernielsentikaer @xmok
@@ -2019,6 +2022,7 @@
 /extensions/oblique-strategies                                      @dnnsmnstrr
 /extensions/obs-clippings                                           @trevware
 /extensions/obs-control                                             @Yukaii @j3lte @RealCyGuy
+/extensions/obscurify-ai                                            @tonydavis629
 /extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort @MuuNU @marcjulianschwarz @theherk @yokuraki8 @vicampuzano @ErBlack @byheaven @tofrankie @alexibuild @RLuf @SWHL @raulkolaric @Just-Me-22
 /extensions/obsidian-bookmarks                                      @Dru89 @moeyua @iwex @qfettes @Victor-Cz
 /extensions/obsidian-link-opener                                    @osteele
@@ -2840,6 +2844,7 @@
 /extensions/sonarr                                                  @Aayush9029 @j3lte @JohanDevl
 /extensions/sonos                                                   @AntonNiklasson @pastenes @krsntn
 /extensions/sonu-stream                                             @bob-obringer
+/extensions/soren-idle                                              @Tomteluvan
 /extensions/sort-mentions                                           @YamenSharaf
 /extensions/soulver                                                 @BitForger
 /extensions/sound-search                                            @clins1994 @perfectbase @clins1994 @pernielsentikaer

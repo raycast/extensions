@@ -1,5 +1,12 @@
 # Brew Changelog
 
+## [CLI search keywords] - {PR_MERGE_DATE}
+
+- Fixed: Show Upgrades answers to "outdated" again. The keyword was removed by accident and is restored
+- New: root search finds Show Installed with "list", Manage Taps with "untap" or "trust", and Clean up with "cleanup"
+- New: "homebrew" is on every command, so search finds the whole extension
+- Improved: the Adopt Apps subtitle changed from Homebrew to Brew
+
 ## [Show unscanned formulae in Show Vulnerabilities] - 2026-11-06
 
 - Fixed: Show Vulnerabilities lists the formulae `brew vulns` didn't scan, such as ones from untrusted taps, and why

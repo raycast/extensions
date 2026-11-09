@@ -1,11 +1,13 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { memo } from "react";
 import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
+import { TOTP_ICON } from "./utils";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
 import { ItemView } from "./item-view";
 import { NoteView } from "./note-view";
 import { platformShortcut } from "./shortcuts";
+import { SortByMenu, SortOrder } from "./sort";
 import { Item, ItemDetail } from "./types";
 import { getCurrentTotpCode } from "./use-totp-code";
 
@@ -18,6 +20,9 @@ interface ItemActionsProps {
   onToggleDetail?: () => void;
   onRefresh?: () => void;
   onUse: (item: Item) => void;
+  /** Given in the list only, like isShowingDetail. */
+  sortOrder?: SortOrder;
+  onSortOrderChange?: (order: SortOrder) => void;
 }
 
 export const ItemActions = memo(function ItemActions({
@@ -28,6 +33,8 @@ export const ItemActions = memo(function ItemActions({
   onToggleDetail,
   onRefresh,
   onUse,
+  sortOrder,
+  onSortOrderChange,
 }: ItemActionsProps) {
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
@@ -80,7 +87,8 @@ export const ItemActions = memo(function ItemActions({
   /** Pastes into the app that was in front of Raycast; the TOTP code is then left in the clipboard. */
   async function fill(fields: "login" | "email" | "username" | "password") {
     try {
-      // Taken first: loading the item can take a moment, during which another app could come in front.
+      // Taken first: loading the item can take a moment, during which another app could come in front. Raycast stays
+      // open while it loads, with its toast, and closes to fill.
       const target = await getTargetApp();
       const loaded = await loadDetail();
       // Most logins use the email, so it comes first; the username is used when there's no email.
@@ -122,6 +130,8 @@ export const ItemActions = memo(function ItemActions({
   async function pasteTotpCode() {
     try {
       const target = await getTargetApp();
+      // Without the item's details, the code comes from pass-cli.
+      if (!store.peek(item)) await showToast({ style: Toast.Style.Animated, title: "Loading TOTP Code…" });
       const code = await getTotpCode();
       onUse(item);
       await fillApp(target, { values: [code] });
@@ -196,7 +206,7 @@ export const ItemActions = memo(function ItemActions({
         {item.hasTotp && (
           <Action
             title="Copy TOTP Code"
-            icon={Icon.Clock}
+            icon={TOTP_ICON}
             shortcut={platformShortcut(["cmd"], "t")}
             onAction={() => copy("TOTP Code", getTotpCode, true)}
           />
@@ -217,7 +227,7 @@ export const ItemActions = memo(function ItemActions({
           {item.hasTotp && (
             <Action
               title="Paste TOTP Code"
-              icon={Icon.Clock}
+              icon={TOTP_ICON}
               shortcut={platformShortcut(["cmd", "shift"], "t")}
               onAction={pasteTotpCode}
             />
@@ -299,6 +309,7 @@ export const ItemActions = memo(function ItemActions({
             onAction={onToggleDetail}
           />
         )}
+        {sortOrder && onSortOrderChange && <SortByMenu value={sortOrder} onChange={onSortOrderChange} />}
         {onRefresh && (
           <Action
             title="Refresh Items"
