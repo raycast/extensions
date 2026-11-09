@@ -3,6 +3,8 @@
 ## [Fix stale shared images] - {PR_MERGE_DATE}
 
 - Fixed pasting a second location's image showing the previous one in apps that cache attachments by file name: every copy or paste now gets its own file (named after the location and time), and only the last few are kept
+- Radar no longer shows missing tiles for places near the antimeridian or after panning across it
+- Rain nowcast no longer announces rain for 15-minute intervals that have already passed
 
 ## [Initial Release] - 2026-11-04
 
