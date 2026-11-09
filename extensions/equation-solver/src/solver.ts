@@ -292,21 +292,55 @@ interface Rat {
    */
   excl: Poly[];
   /**
-   * Upper bound on the rounding error carried by num's coefficients,
-   * in num's current scale. Cancellation of large numbers leaves a
-   * leftover proportional to the operands (10000.1 - 10000 leaves
-   * ~3.6e-13), while a typed 0.0000000000005 is exact — a fixed cutoff
-   * cannot tell them apart, so every operation propagates this bound
-   * and the solver only trusts coefficients that exceed it.
+   * Per-coefficient upper bounds on rounding error, parallel to num:
+   * err[i] bounds the error of num[i]. Cancellation of large numbers
+   * leaves a leftover proportional to the operands (10000.1 - 10000
+   * leaves ~3.6e-13 in that constant), while a typed 0.0000000000005 is
+   * exact — no fixed cutoff can tell them apart, so every operation
+   * propagates these bounds and the solver trusts each coefficient
+   * only beyond its own bound. A single shared bound would let an
+   * unrelated huge constant (x + 100000000000000) swamp the error of
+   * the exactly-computed x coefficient and erase it.
    */
-  err: number;
+  err: Poly;
 }
 
-/** Largest absolute coefficient of a polynomial. */
-function maxAbs(p: Poly): number {
-  let m = 0;
-  for (const c of p) m = Math.max(m, Math.abs(c));
-  return m;
+/** |p| elementwise. */
+function absPoly(p: Poly): Poly {
+  return p.map((c) => Math.abs(c));
+}
+
+/**
+ * Convolution of absolute values: out[k] = Σ |a[i]| · |b[k−i]|.
+ * This is how per-coefficient error bounds combine when polynomials
+ * are multiplied (the same shape as mulPoly, with magnitudes).
+ */
+function convAbs(a: Poly, b: Poly): Poly {
+  if (a.length === 0 || b.length === 0) return [];
+  const out = new Array<number>(a.length + b.length - 1).fill(0);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) out[i + j] += Math.abs(a[i]) * Math.abs(b[j]);
+  }
+  return out;
+}
+
+/** Elementwise sum of two bound vectors (missing entries count as 0). */
+function addVec(a: Poly, b: Poly): Poly {
+  const out = new Array<number>(Math.max(a.length, b.length)).fill(0);
+  for (let i = 0; i < a.length; i++) out[i] += a[i];
+  for (let i = 0; i < b.length; i++) out[i] += b[i];
+  return out;
+}
+
+function scaleVec(a: Poly, s: number): Poly {
+  return a.map((c) => c * s);
+}
+
+/** A Rat's error bounds, padded to its numerator's length with zeros. */
+function errVec(r: Rat): Poly {
+  const out = new Array<number>(r.num.length).fill(0);
+  for (let i = 0; i < Math.min(r.err.length, out.length); i++) out[i] = r.err[i];
+  return out;
 }
 
 /** Restrictions a value carries: its recorded exclusions plus its current denominator. */
@@ -342,7 +376,7 @@ function gcdInt(a: number, b: number): number {
   return a;
 }
 
-function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err = 0): Rat {
+function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err: Poly = []): Rat {
   let n = trimPoly(num);
   let d = trimPoly(den);
   let e = err;
@@ -356,7 +390,7 @@ function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err = 0): Rat {
     if (g > 1) {
       n = n.map((c) => c / g);
       d = d.map((c) => c / g);
-      e = e / g;
+      e = e.map((v) => v / g);
     }
   }
   // Note: the denominator is kept even when the numerator is 0 — the
@@ -379,43 +413,51 @@ function negRat(a: Rat): Rat {
   );
 }
 
+/** Error bounds for a cross-multiplied sum a.num·b.den ± b.num·a.den. */
+function crossErr(a: Rat, b: Rat): Poly {
+  const carried = addVec(convAbs(errVec(a), absPoly(b.den)), convAbs(errVec(b), absPoly(a.den)));
+  const fresh = scaleVec(
+    addVec(convAbs(absPoly(a.num), absPoly(b.den)), convAbs(absPoly(b.num), absPoly(a.den))),
+    Number.EPSILON,
+  );
+  return addVec(carried, fresh);
+}
+
 function addRat(a: Rat, b: Rat): Rat {
-  // num = a.num·b.den ± b.num·a.den: the error bound follows the same
-  // cross-multiplication, plus one rounding allowance for the new sums.
-  const err =
-    a.err * maxAbs(b.den) +
-    b.err * maxAbs(a.den) +
-    Number.EPSILON * (maxAbs(a.num) * maxAbs(b.den) + maxAbs(b.num) * maxAbs(a.den));
   return makeRat(
     addPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
     mulPoly(a.den, b.den),
     mergeExcl(domainOf(a), domainOf(b)),
-    err,
+    crossErr(a, b),
   );
 }
 
 function subRat(a: Rat, b: Rat): Rat {
-  const err =
-    a.err * maxAbs(b.den) +
-    b.err * maxAbs(a.den) +
-    Number.EPSILON * (maxAbs(a.num) * maxAbs(b.den) + maxAbs(b.num) * maxAbs(a.den));
   return makeRat(
     subPoly(mulPoly(a.num, b.den), mulPoly(b.num, a.den)),
     mulPoly(a.den, b.den),
     mergeExcl(domainOf(a), domainOf(b)),
-    err,
+    crossErr(a, b),
   );
 }
 
 function mulRat(a: Rat, b: Rat): Rat {
-  const err = a.err * maxAbs(b.num) + b.err * maxAbs(a.num) + Number.EPSILON * maxAbs(a.num) * maxAbs(b.num);
+  const err = addVec(
+    addVec(convAbs(errVec(a), absPoly(b.num)), convAbs(errVec(b), absPoly(a.num))),
+    scaleVec(convAbs(absPoly(a.num), absPoly(b.num)), Number.EPSILON),
+  );
   return makeRat(mulPoly(a.num, b.num), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)), err);
 }
 
 function divRat(a: Rat, b: Rat): Rat {
   if (isZeroPoly(b.num)) throw new Error("Division by zero.");
   // Dividing by b also requires b ≠ 0, so b's numerator joins the exclusions.
-  const err = a.err * maxAbs(b.den) + b.err * maxAbs(a.den) + Number.EPSILON * maxAbs(a.num) * maxAbs(b.den);
+  // The new numerator is a.num·b.den; b.den's own error is not tracked
+  // (denominators are rebuilt from numerators, whose bounds are).
+  const err = addVec(
+    convAbs(errVec(a), absPoly(b.den)),
+    scaleVec(convAbs(absPoly(a.num), absPoly(b.den)), Number.EPSILON),
+  );
   return makeRat(mulPoly(a.num, b.den), mulPoly(a.den, b.num), mergeExcl(domainOf(a), domainOf(b), [b.num]), err);
 }
 
@@ -433,25 +475,40 @@ function powRat(base: Rat, exponent: Rat): Rat {
   if (polyDegree(base.num) * Math.abs(e) > MAX_DEGREE || polyDegree(base.den) * Math.abs(e) > MAX_DEGREE) {
     throw new Error(`That power expands beyond degree ${MAX_DEGREE} — too complex for this solver.`);
   }
+  // Error bounds for a polynomial power: multiply the value out one
+  // factor at a time, propagating the bounds like mulRat does.
+  const powErr = (startErr: Poly, startPoly: Poly, count: number): Poly => {
+    if (count === 0) return [];
+    let curErr = startErr;
+    let curAbs = absPoly(startPoly);
+    for (let k = 1; k < count; k++) {
+      curErr = addVec(
+        addVec(convAbs(curErr, absPoly(startPoly)), convAbs(startErr, curAbs)),
+        scaleVec(convAbs(curAbs, absPoly(startPoly)), Number.EPSILON),
+      );
+      curAbs = convAbs(curAbs, absPoly(startPoly));
+    }
+    return curErr;
+  };
   if (e >= 0) {
-    // Error bound for a polynomial power: each of the e factors can
-    // contribute its error, amplified by the other factors' magnitudes.
-    const err =
-      e *
-      (base.err + Number.EPSILON * maxAbs(base.num)) *
-      Math.pow(maxAbs(base.num), Math.max(0, e - 1)) *
-      (polyDegree(base.num) + 1);
-    return makeRat(powPoly(base.num, e), powPoly(base.den, e), mergeExcl(domainOf(base)), err);
+    return makeRat(
+      powPoly(base.num, e),
+      powPoly(base.den, e),
+      mergeExcl(domainOf(base)),
+      powErr(errVec(base), base.num, e),
+    );
   }
   if (isZeroPoly(base.num)) throw new Error("Division by zero.");
   // A negative power moves the base's numerator into a denominator,
-  // so the base must also be nonzero.
-  const err =
-    -e *
-    (base.err + Number.EPSILON * maxAbs(base.den)) *
-    Math.pow(maxAbs(base.den), Math.max(0, -e - 1)) *
-    (polyDegree(base.den) + 1);
-  return makeRat(powPoly(base.den, -e), powPoly(base.num, -e), mergeExcl(domainOf(base), [base.num]), err);
+  // so the base must also be nonzero. The new numerator is a power of
+  // the base's denominator, whose own error is untracked — propagate
+  // rounding allowances only.
+  return makeRat(
+    powPoly(base.den, -e),
+    powPoly(base.num, -e),
+    mergeExcl(domainOf(base), [base.num]),
+    powErr(new Array(base.den.length).fill(0), base.den, -e),
+  );
 }
 
 function ratToString(r: Rat, variable: string): string {
@@ -800,12 +857,15 @@ function solveUnsafe(rawInput: string): SolveResult {
   // below that bound may be pure cancellation leftover — (10000.1-10000)*x
   // = 0.1*x leaves ~3.6e-13 of x — and must not be promoted into a real
   // term, while a typed 0.0000000000005 carries no error and stays.
-  const errBound = 64 * rawDiff.err;
+  // Each coefficient is judged against its OWN tracked error bound:
+  // a huge constant elsewhere in the equation must not erase an
+  // exactly-computed x coefficient (x + 100000000000000 = 0).
+  const trustBound = (i: number) => 64 * (rawDiff.err[i] ?? 0);
   let num = trimPoly(rawDiff.num);
   let topDeg = num.length - 1;
-  while (topDeg > 0 && Math.abs(num[topDeg]) <= Math.max(errBound, 1e-280)) topDeg--;
+  while (topDeg > 0 && Math.abs(num[topDeg]) <= Math.max(trustBound(topDeg), 1e-280)) topDeg--;
   num = num.slice(0, topDeg + 1);
-  if (topDeg === 0 && Math.abs(num[0]) <= errBound) num = [0];
+  if (topDeg === 0 && Math.abs(num[0]) <= trustBound(0)) num = [0];
 
   // Scale the numerator to a leading coefficient of 1 (when a trusted
   // one exists). Zero tests and the discriminant then judge the equation
@@ -815,7 +875,7 @@ function solveUnsafe(rawInput: string): SolveResult {
   if (topDeg >= 1 && Math.abs(num[topDeg] - 1) >= 1e-12) {
     const leadCoeff = num[topDeg];
     num = trimPoly(num.map((c) => c / leadCoeff));
-    err = err / Math.abs(leadCoeff);
+    err = rawDiff.err.map((v) => v / Math.abs(leadCoeff));
   }
   const diff: Rat = { num, den: rawDiff.den, excl: rawDiff.excl, err };
 
