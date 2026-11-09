@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ramecast",
+  "title": "RameCast",
+  "description": "Cast your screen to Chromecast, smart TVs (DLNA), Roku, AirPlay and Miracast displays from Raycast",
+  "icon": "extension-icon.png",
+  "author": "michaelhazan",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cast-screen",
+      "title": "Cast Screen",
+      "subtitle": "RameCast",
+      "description": "Find Chromecast, Google TV, DLNA smart TVs, Roku, AirPlay and Miracast displays on your network and cast your screen to one",
+      "mode": "view",
+      "keywords": [
+        "chromecast",
+        "google cast",
+        "airplay",
+        "dlna",
+        "roku",
+        "miracast",
+        "screen mirroring",
+        "tv"
+      ]
+    },
+    {
+      "name": "stop-casting",
+      "title": "Stop Casting",
+      "subtitle": "RameCast",
+      "description": "Stop the current screen cast and close the player on the device",
+      "mode": "no-view",
+      "keywords": [
+        "chromecast",
+        "cast",
+        "mirroring"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "bonjour-service": "^1.4.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "latency",
+      "type": "dropdown",
+      "required": false,
+      "title": "Latency",
+      "default": "auto",
+      "description": "Google Cast mirroring only. Auto adjusts the device buffer while you cast: it rises when Wi-Fi drops packets and falls again once the connection is clean.",
+      "data": [
+        {
+          "title": "Auto (adjusts to your network)",
+          "value": "auto"
+        },
+        {
+          "title": "Lowest (~0.1 s, 60 fps) – strong Wi-Fi or wired",
+          "value": "lowest"
+        },
+        {
+          "title": "Balanced (~0.2 s)",
+          "value": "balanced"
+        },
+        {
+          "title": "Smooth (~0.4 s) – weak Wi-Fi",
+          "value": "smooth"
+        }
+      ]
+    },
+    {
+      "name": "ffmpegPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom ffmpeg Path",
+      "description": "Optional: use your own ffmpeg binary instead of the one RameCast downloads automatically on first use.",
+      "placeholder": "/opt/homebrew/bin/ffmpeg"
+    }
+  ]
+}
