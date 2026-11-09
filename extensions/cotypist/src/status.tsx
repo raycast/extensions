@@ -77,6 +77,12 @@ export default function Status() {
               }
             />
           )}
+          <Action
+            title="Refresh Status"
+            icon={Icon.ArrowClockwise}
+            onAction={refresh}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
           {data && (
             <Action
               title="Toggle Default Completions"
@@ -84,12 +90,6 @@ export default function Status() {
               onAction={() => change("toggle-default")}
             />
           )}
-          <Action
-            title="Refresh Status"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-          />
           <Action
             title="Open Cotypist Shortcuts"
             icon={Icon.Keyboard}
