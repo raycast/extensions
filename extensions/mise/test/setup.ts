@@ -3,7 +3,11 @@ import * as version from "../src/mise/version";
 import { useCachedPromiseFixtures } from "./raycast-utils";
 
 vi.mock("@raycast/api", () => import("./raycast-api"));
-vi.mock("@raycast/utils", () => import("./raycast-utils"));
+// useForm is plain React state over the Form props, so the real one runs as is.
+vi.mock("@raycast/utils", async (importOriginal) => {
+  const { useForm, FormValidation } = await importOriginal<typeof import("@raycast/utils")>();
+  return { ...(await import("./raycast-utils")), useForm, FormValidation };
+});
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { vi, type Mock } from "vitest";
 
-// useForm is plain React state over the Form props, so the real one runs as is.
-const actual = await vi.importActual<typeof import("@raycast/utils")>("@raycast/utils");
-export const { useForm, FormValidation } = actual;
-
 type AnyFn = (...args: never[]) => unknown;
 type Fixture<F extends AnyFn> = Awaited<ReturnType<F>>;
 
