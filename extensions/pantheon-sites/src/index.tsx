@@ -14,6 +14,13 @@ function getMemberships(site: Sites[string]): string[] {
     .filter(Boolean);
 }
 
+// framework can be null (uninitialized site) or variants like "drupal10" / "wordpress_network".
+function frameworkIcon(framework: string | null) {
+  if (framework?.startsWith("wordpress")) return { source: "wordpress.svg", tintColor: Color.PrimaryText };
+  if (framework?.startsWith("drupal")) return { source: "drupal.svg", tintColor: Color.PrimaryText };
+  return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+}
+
 function getOrgLabel(orgName: string): string {
   return orgName.toLowerCase() === "team" ? "Personal" : orgName;
 }
@@ -111,7 +118,7 @@ export default function Command() {
 
             return (
               <List.Item
-                icon={{ source: `${sites[key].framework.replace(/\d+$/, "")}.svg`, tintColor: Color.PrimaryText }}
+                icon={frameworkIcon(sites[key].framework)}
                 title={sites[key].name}
                 key={sites[key].id}
                 accessories={[
@@ -143,11 +150,8 @@ export default function Command() {
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Framework"
-                          icon={{
-                            source: `${sites[key].framework.replace(/\d+$/, "")}.svg`,
-                            tintColor: Color.PrimaryText,
-                          }}
-                          text={`${sites[key].framework}`}
+                          icon={frameworkIcon(sites[key].framework)}
+                          text={sites[key].framework ?? "Not initialized"}
                         />
                       </List.Item.Detail.Metadata>
                     }

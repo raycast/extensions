@@ -1,5 +1,12 @@
 # com.matbrady.pantheon Changelog
 
+## [Uninitialized Site Fix] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Crash when a site has no framework (created but never initialized); these now show a fallback icon and "Not initialized"
+- Framework variants like `wordpress_network` now show the correct icon
+
 ## [Latest Changes] - 2026-05-11
 
 ### Added
