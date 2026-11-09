@@ -327,7 +327,9 @@ export default function Command() {
   const {
     data: stored,
     isLoading: loading,
+    error: loadError,
     mutate,
+    revalidate,
   } = usePromise(async () => {
     const value = await LocalStorage.getItem(STORAGE_KEY);
     const raw =
@@ -405,14 +407,37 @@ export default function Command() {
     );
   }
 
-  const addAction = loading ? null : (
-    <Action.Push
-      title="Add Action"
-      icon={Icon.Plus}
-      target={<ActionEditor actions={actions} onSave={persist} />}
-      shortcut={Keyboard.Shortcut.Common.New}
-    />
-  );
+  // If LocalStorage could not be read, never offer an empty list that a save could overwrite.
+  if (loadError && !stored) {
+    return (
+      <List isLoading={loading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could Not Load Saved Actions"
+          description={`${errorMessage(loadError)} Your saved actions have not been changed.`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  const addAction =
+    loading || !stored ? null : (
+      <Action.Push
+        title="Add Action"
+        icon={Icon.Plus}
+        target={<ActionEditor actions={actions} onSave={persist} />}
+        shortcut={Keyboard.Shortcut.Common.New}
+      />
+    );
   return (
     <List isLoading={loading} searchBarPlaceholder="Search saved Alter actions">
       <List.EmptyView
