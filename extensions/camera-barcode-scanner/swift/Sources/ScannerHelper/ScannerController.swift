@@ -293,23 +293,18 @@ final class ScannerController: NSObject, NSWindowDelegate {
     }
     let session = session
     // AVFoundation rejects startRunning() between begin/commitConfiguration, so both stay on one queue.
-    sessionQueue.async {
+    // The preview connection exists only after the input is added, so refresh the region after setup.
+    sessionQueue.async { [weak self] in
       session.beginConfiguration()
       session.inputs.forEach { session.removeInput($0) }
       if session.canAddInput(input) { session.addInput(input) }
       session.commitConfiguration()
       if !session.isRunning { session.startRunning() }
+      onMainRunLoop { MainActor.assumeIsolated { self?.updateRegion() } }
     }
     currentDevice = device
     if let index = devices.firstIndex(where: { $0.uniqueID == device.uniqueID }) {
       popup.selectItem(at: index)
-    }
-    // The preview connection exists only after the input is added; update again once it is live.
-    updateRegion()
-    for delay in [0.3, 1.0] {
-      DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-        MainActor.assumeIsolated { self?.updateRegion() }
-      }
     }
     show(once ? "Scan one barcode" : "Point the camera at a barcode")
   }
