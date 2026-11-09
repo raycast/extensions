@@ -38,7 +38,9 @@ export function copyAsJSON(palette: SavedPalette): string {
  * Generates CSS color definitions using class selectors.
  */
 export function copyAsCSS(palette: SavedPalette): string {
-  const sanitizedName = palette.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const slug = palette.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  // A class selector can't start with a digit or "-digit" (e.g. "2026 Summer").
+  const sanitizedName = /^[a-z]/.test(slug) ? slug : `palette-${slug}`;
   const lines = [createCSSHeader(palette), ""];
 
   palette.colors.forEach((color, index) => {

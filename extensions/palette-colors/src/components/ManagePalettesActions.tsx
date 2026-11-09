@@ -20,7 +20,7 @@ const generateCoolorsUrl = (colors: string[]): string => {
   try {
     const colorCodes = colors
       .filter(isValidHexColor) // Validate hex format
-      .map((color) => color.replace(/^#/, "")) // Remove # prefix for URL
+      .map((color) => color.trim().replace(/^#/, "")) // Remove # prefix for URL
       .join("-");
 
     return colorCodes ? `https://coolors.co/${colorCodes}` : "https://coolors.co/";

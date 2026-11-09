@@ -166,7 +166,10 @@ export default function ImportColorPalette() {
           <Action
             icon={Icon.Wand}
             title="Clear Form"
-            onAction={() => reset(INITIAL_VALUES)}
+            onAction={() => {
+              reset(INITIAL_VALUES);
+              keywordsInput.setText("");
+            }}
             shortcut={SHORTCUTS.CLEAR_FORM}
             style={Action.Style.Destructive}
           />

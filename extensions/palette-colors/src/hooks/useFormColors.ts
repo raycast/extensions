@@ -12,13 +12,15 @@ type UseFormColorsReturn = {
  */
 export function useFormColors(initialValues: PaletteFormFields): UseFormColorsReturn {
   const initialColorCount = useMemo(() => {
-    // Count only color keys with non-empty values. useFormPalette pre-registers
-    // all 15 color keys (so useForm can produce itemProps for any of them); on
-    // draft restore those empty keys would otherwise inflate the count to 15.
-    const colorKeys = Object.keys(initialValues).filter(
-      (key) => key.startsWith("color") && key !== "colors" && !!initialValues[key as keyof PaletteFormFields],
-    );
-    return Math.max(1, Math.min(MAX_COLOR_FIELDS, colorKeys.length));
+    // Show fields up to the highest filled color. useFormPalette pre-registers
+    // all 15 color keys, so counting keys would inflate the count to 15; counting
+    // only filled keys would hide a color after an empty field (color1, "", color3)
+    // and drop it on save.
+    let highestFilled = 0;
+    for (let i = 1; i <= MAX_COLOR_FIELDS; i++) {
+      if (initialValues[`color${i}` as keyof PaletteFormFields]) highestFilled = i;
+    }
+    return Math.max(1, highestFilled);
   }, [initialValues]);
 
   const [count, setCount] = useState<number>(initialColorCount);

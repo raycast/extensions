@@ -69,7 +69,10 @@ export function SavePaletteActions({ form, formActions, colorFields, focus, keyw
       <Action
         icon={Icon.Wand}
         title="Clear Form"
-        onAction={formActions.clear}
+        onAction={() => {
+          formActions.clear();
+          keywordsInput.setText("");
+        }}
         shortcut={SHORTCUTS.CLEAR_FORM}
         style={Action.Style.Destructive}
       />
