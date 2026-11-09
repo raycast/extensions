@@ -1,4 +1,14 @@
-import { ActionPanel, List, Action, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  Color,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState } from "react";
 import { terminusCmd } from "./utils";
@@ -38,6 +48,7 @@ export default function Command() {
   const {
     isLoading: sitesLoading,
     data,
+    error: sitesError,
     revalidate,
   } = useExec(terminusCmd(preferences.terminusPath, "site:list --format=json"), {
     shell: true,
@@ -50,17 +61,13 @@ export default function Command() {
     onData: () => {
       showToast({ style: Toast.Style.Success, title: "Site list updated" });
     },
-    onError: (error) => {
-      const timedOut = /timed out|ETIMEDOUT|SIGTERM/i.test(error.message);
-      showToast({
-        style: Toast.Style.Failure,
-        title: timedOut ? "Terminus timed out" : "Failed to load sites",
-        message: timedOut ? "Increase 'Site List Timeout' in preferences." : error.message,
-      });
-    },
+    // Keeps the built-in Retry action and error message; timeout guidance is in the empty view.
+    failureToastOptions: { title: "Failed to load sites" },
   });
 
   const isLoading = checkLoading || sitesLoading;
+  const loadFailed = !isLoading && !!sitesError;
+  const timedOut = loadFailed && /timed out|ETIMEDOUT|SIGTERM/i.test(sitesError.message);
 
   if (!checkLoading && checkError) {
     return <TerminusSetup />;
@@ -127,16 +134,29 @@ export default function Command() {
       }
     >
       <List.EmptyView
-        icon={Icon.Globe}
-        title={isLoading ? "Loading sites… (large accounts can take a minute)" : "No sites found"}
+        icon={loadFailed ? Icon.Warning : Icon.Globe}
+        title={
+          isLoading
+            ? "Loading sites… (large accounts can take a minute)"
+            : timedOut
+              ? "Terminus timed out"
+              : loadFailed
+                ? "Failed to load sites"
+                : "No sites found"
+        }
+        description={
+          timedOut
+            ? "Increase 'Site List Timeout' in the extension preferences, then refresh."
+            : loadFailed
+              ? sitesError.message
+              : undefined
+        }
         actions={
           <ActionPanel>
-            <Action
-              icon={Icon.ArrowClockwise}
-              title="Refresh Site List"
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={revalidate}
-            />
+            <Action icon={Icon.ArrowClockwise} title="Refresh Site List" onAction={revalidate} />
+            {timedOut && (
+              <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            )}
           </ActionPanel>
         }
       />
