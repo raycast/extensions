@@ -66,11 +66,11 @@ export const MOCK_ITEMS: Item[] = [
     itemId: "item-5",
     folderId: "folder-finance",
     folderPath: [{ id: "folder-finance", name: "Finance" }],
-    title: "Personal Visa",
+    title: "Example Bank",
     type: "credit_card",
     vaultName: "Personal",
     hasTotp: false,
-    cardLastDigits: "4242",
+    summary: "•••• 4242",
   },
   {
     shareId: "vault-2",
@@ -136,6 +136,7 @@ export const MOCK_ITEMS: Item[] = [
     type: "wifi",
     vaultName: "Family",
     hasTotp: false,
+    summary: "Doe-Family",
   },
   {
     shareId: "vault-4",
@@ -155,6 +156,7 @@ export const MOCK_ITEMS: Item[] = [
     hasTotp: false,
     hasNote: false,
     modifiedAt: "2026-05-04T10:00:00.000Z",
+    summary: "John Doe",
   },
   {
     shareId: "vault-1",
@@ -165,6 +167,7 @@ export const MOCK_ITEMS: Item[] = [
     hasTotp: false,
     hasNote: true,
     modifiedAt: "2026-04-11T16:20:00.000Z",
+    summary: "newsletters.doe@example.com",
   },
   {
     shareId: "vault-2",
@@ -267,7 +270,7 @@ export const MOCK_ITEM_DETAILS: Record<string, ItemDetail> = {
     itemId: "item-5",
     folderId: "folder-finance",
     folderPath: [{ id: "folder-finance", name: "Finance" }],
-    title: "Personal Visa",
+    title: "Example Bank",
     type: "credit_card",
     vaultName: "Personal",
     hasTotp: false,

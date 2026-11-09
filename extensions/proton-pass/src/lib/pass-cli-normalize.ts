@@ -109,6 +109,29 @@ function getItemTypeFromContent(contentData: unknown): {
 }
 
 /**
+ * What tells an item that isn't a login apart, shown next to its name: a card's last 4 digits, an alias's address, a Wi-Fi
+ * network's name, an identity's full name or email. Never a secret: `Item` gets cached. Notes, SSH keys and custom items
+ * have none, their content being secret or long.
+ */
+function summaryOf(type: ItemType, raw: Record<string, unknown>): string | undefined {
+  const data = getTypeSpecificData(raw);
+  switch (type) {
+    case "credit_card": {
+      const lastDigits = typeof data?.number === "string" ? lastDigitsOf(data.number) : undefined;
+      return lastDigits ? `•••• ${lastDigits}` : undefined;
+    }
+    case "alias":
+      return trimOrUndefined(raw.alias_email ?? raw.aliasEmail);
+    case "wifi":
+      return trimOrUndefined(data?.ssid);
+    case "identity":
+      return trimOrUndefined(data?.full_name) ?? trimOrUndefined(data?.email);
+    default:
+      return undefined;
+  }
+}
+
+/**
  * The otpauth URI of a listed login: its TOTP secret. Kept apart from `Item`, which gets cached, so that it's only ever
  * held in memory.
  */
@@ -146,9 +169,7 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
   const createdAt = normalizeTimestamp(raw.create_time ?? raw.createTime ?? raw.created_at);
   const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
   const folderId = trimOrUndefined(raw.folder_id ?? raw.folderId);
-  // A card's last digits tell it apart in lists; its number itself is never part of `Item`, which gets cached.
-  const cardNumber = type === "credit_card" ? getTypeSpecificData(raw)?.number : undefined;
-  const cardLastDigits = typeof cardNumber === "string" ? lastDigitsOf(cardNumber) : undefined;
+  const summary = summaryOf(type, raw);
 
   const vaultName = vaultNameOverride ?? trimOrUndefined(raw.vaultName ?? raw.vault_name) ?? "Unknown Vault";
 
@@ -171,7 +192,7 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
     createdAt,
     hasNote,
     folderId,
-    ...(cardLastDigits ? { cardLastDigits } : {}),
+    ...(summary ? { summary } : {}),
   };
 }
 

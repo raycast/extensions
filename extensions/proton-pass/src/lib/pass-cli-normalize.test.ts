@@ -366,13 +366,30 @@ test("still reads custom fields printed as name, value and type", () => {
   assert.deepEqual(detail.customFields, [{ name: "PIN", value: "1234", type: "hidden" }]);
 });
 
-test("a listed card keeps its last 4 digits, never its number, which would be cached", () => {
-  const item = normalizeItem(
+test("listed items keep what tells them apart, never a secret, which would be cached", () => {
+  const card = normalizeItem(
     viewed({ CreditCard: { number: "4242 4242 4242 1234", verification_number: "123", pin: "0000" } }),
     "Personal",
   );
-  assert.equal(item.cardLastDigits, "1234");
-  assert.equal(JSON.stringify(item).includes("4242"), false);
-  assert.equal(Object.hasOwn(item, "fields"), false);
-  assert.equal(normalizeItem(viewed({ CreditCard: { number: "" } }), "Personal").cardLastDigits, undefined);
+  assert.equal(card.summary, "•••• 1234");
+  assert.equal(JSON.stringify(card).includes("4242"), false);
+  assert.equal(Object.hasOwn(card, "fields"), false);
+  assert.equal(normalizeItem(viewed({ CreditCard: { number: "" } }), "Personal").summary, undefined);
+
+  const alias = normalizeItem({ ...viewed({ Alias: null }), alias_email: "news@example.com" }, "Personal");
+  assert.equal(alias.summary, "news@example.com");
+  const wifi = normalizeItem(viewed({ Wifi: { ssid: "Example-Network", password: "network-secret" } }), "Personal");
+  assert.equal(wifi.summary, "Example-Network");
+  assert.equal(JSON.stringify(wifi).includes("network-secret"), false);
+  const identity = normalizeItem(viewed({ Identity: { full_name: "Jean Example", email: "jean@example.com" } }));
+  assert.equal(identity.summary, "Jean Example");
+  const unnamed = normalizeItem(viewed({ Identity: { full_name: "", email: "jean@example.com" } }));
+  assert.equal(unnamed.summary, "jean@example.com");
+  for (const content of [
+    { Note: null },
+    { SshKey: { public_key: "ssh-ed25519 AAAA" } },
+    { Custom: { sections: [] } },
+  ]) {
+    assert.equal(Object.hasOwn(normalizeItem(viewed(content)), "summary"), false);
+  }
 });

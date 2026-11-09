@@ -3261,7 +3261,7 @@ test("a selected folder shows its subfolders, then its items, next to the list",
   const insideFolders = new Map([
     [
       folders.folderEntryValue(banking),
-      { folders: [cards], items: [inBanking, loan, { ...card, cardLastDigits: "4242" }, note] },
+      { folders: [cards], items: [inBanking, loan, { ...card, summary: "•••• 4242" }, note] },
     ],
     [folders.folderEntryValue(travel), { folders: [], items: [] }],
   ]);
@@ -3271,8 +3271,8 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     actions((bankingRow.detail as Element).props.metadata)
       .filter((props) => typeof props.title === "string")
       .map((props) => `${props.title}: ${props.text}`),
-    // By name, as the folder lists them once open. A card shows its last digits, as in its details.
-    ["Cards: 1 item", "Alpha: alice", "Example: test@example.com", "Visa: •••• 4242", "Zeta: Note"],
+    // By name, as the folder lists them once open. A card shows its last digits; a note, its icon only.
+    ["Cards: 1 item", "Alpha: alice", "Example: test@example.com", "Visa: •••• 4242", "Zeta: undefined"],
   );
   assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
 });
