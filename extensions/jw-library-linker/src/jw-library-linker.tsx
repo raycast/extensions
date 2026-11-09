@@ -27,6 +27,7 @@ import {
   type Publication,
 } from "./publications";
 import { bookmarkDestination } from "./bookmarks";
+import { readSnapshotPage } from "./pagination";
 import { clearLibraryCache, isCancellation, loadLibrary, queryBookmarks, queryChapters, type Library } from "./library";
 
 type ResultItem = {
@@ -343,41 +344,48 @@ export default function Command() {
     pagination,
   } = usePromise(
     (input: { query: string; library: Library | null; failure?: string; revision: number; independent: boolean }) =>
-      async ({ page }: { page: number }) => {
+      async ({ page, cursor }: { page: number; cursor?: readonly ResultItem[] }) => {
         const signal = resultsAbortable.current!.signal;
         signal.throwIfAborted();
-        let items: ResultItem[];
         try {
-          items =
-            input.failure && !input.independent
-              ? [errorItem(new Error(input.failure)), ...buildGeneralSearch(input.query, [])]
-              : await buildResults(input.query, input.library, signal);
+          const result = await readSnapshotPage(
+            page,
+            cursor,
+            async () => {
+              const items =
+                input.failure && !input.independent
+                  ? [errorItem(new Error(input.failure)), ...buildGeneralSearch(input.query, [])]
+                  : await buildResults(input.query, input.library, signal);
+              const warnings: ResultItem[] =
+                input.independent || input.query
+                  ? []
+                  : (input.library?.warnings ?? []).map((warning, index) => ({
+                      id: `warning-${index}`,
+                      title: "Some publications could not be loaded",
+                      subtitle: warning,
+                      icon: Icon.ExclamationMark,
+                    }));
+              return [...items, ...warnings];
+            },
+            PAGE_SIZE,
+          );
+          signal.throwIfAborted();
+          const pageItems: Array<ResultItem | null> = result.data;
+          // Keep the query identity even for an empty page so a new query shows
+          // a loading state rather than briefly flashing "No matching results".
+          if (pageItems.length === 0) pageItems.push(null);
+          return {
+            ...result,
+            data: pageItems.map((item) => ({
+              query: input.query,
+              revision: input.revision,
+              item,
+            })),
+          };
         } catch (error) {
           if (isCancellation(error)) throw error;
           throw new ResultsError(input.query, input.revision, error);
         }
-        const warnings: ResultItem[] =
-          input.independent || input.query
-            ? []
-            : (input.library?.warnings ?? []).map((warning, index) => ({
-                id: `warning-${index}`,
-                title: "Some publications could not be loaded",
-                subtitle: warning,
-                icon: Icon.ExclamationMark,
-              }));
-        const all = [...items, ...warnings];
-        const pageItems: Array<ResultItem | null> = all.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-        // Keep the query identity even for an empty page so a new query shows
-        // a loading state rather than briefly flashing "No matching results".
-        if (pageItems.length === 0) pageItems.push(null);
-        return {
-          data: pageItems.map((item) => ({
-            query: input.query,
-            revision: input.revision,
-            item,
-          })),
-          hasMore: (page + 1) * PAGE_SIZE < all.length,
-        };
       },
     [{ query, library: library ?? null, failure: initialError?.message, revision: refreshVersion, independent }],
     {
