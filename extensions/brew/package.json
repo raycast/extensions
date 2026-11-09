@@ -34,7 +34,8 @@
       "title": "Show Installed",
       "subtitle": "Brew",
       "description": "List installed brew formulae & casks",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["list"]
     },
     {
       "name": "search",
@@ -67,7 +68,8 @@
       "title": "Show Upgrades",
       "subtitle": "Brew",
       "description": "Review available upgrades, choose which to apply, and run it",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["outdated"]
     },
     {
       "name": "show-vulnerabilities",
@@ -100,7 +102,7 @@
     {
       "name": "adopt-apps",
       "title": "Adopt Apps",
-      "subtitle": "Homebrew",
+      "subtitle": "Brew",
       "description": "Find applications already on your Mac that Homebrew can manage, and adopt them into a cask.",
       "mode": "view"
     },
@@ -124,6 +126,7 @@
       "subtitle": "Brew",
       "description": "Add, trust & remove third-party Homebrew taps, and explore what they provide",
       "mode": "view",
+      "keywords": ["untap", "trust"],
       "arguments": [
         {
           "name": "tap",
@@ -147,6 +150,7 @@
       "subtitle": "Brew",
       "description": "Clean files and packages from the cache that are older than 120 days",
       "mode": "no-view",
+      "keywords": ["cleanup"],
       "preferences": [
         {
           "name": "withoutThreshold",
