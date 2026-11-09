@@ -2,8 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "publora",
   "title": "Publora",
-  "description": "Manage your social media with Publora",
-  "categories": ["Communication", "Web", "Fun"],
+  "description": "Schedule and manage social media posts with Publora",
+  "categories": [
+    "Communication",
+    "Productivity",
+    "Web"
+  ],
   "icon": "publora_512x512.png",
   "author": "anton_shvein",
   "license": "MIT",
@@ -13,6 +17,12 @@
       "title": "Schedule Post",
       "description": "Create and schedule a post in Publora",
       "mode": "view"
+    },
+    {
+      "name": "manage-posts",
+      "title": "Manage Posts",
+      "description": "Browse, edit and delete your Publora drafts and scheduled posts",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -20,8 +30,8 @@
       "name": "api_key",
       "type": "password",
       "title": "Publora API Key",
-      "required": true,
-      "description": "Your Publora API key. You can find it in your Publora account settings."
+      "required": false,
+      "description": "Optional. Leave empty to sign in with your Publora account instead."
     }
   ],
   "dependencies": {

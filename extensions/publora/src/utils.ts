@@ -1,9 +1,11 @@
 import { Toast, showToast } from "@raycast/api";
 
+import { Platform } from "./types";
+
+// X and Threads are not listed: Publora splits longer posts there into a thread
 export const PLATFORM_LIMITS = {
-  twitter: 280,
   bluesky: 300,
-  threads: 500,
+  mastodon: 500,
 } as const;
 
 export type PlatformName = keyof typeof PLATFORM_LIMITS;
@@ -12,7 +14,7 @@ export type PlatformName = keyof typeof PLATFORM_LIMITS;
  * Check if a platform is selected in the platforms array
  */
 export const hasPlatform = (platforms: string[] | undefined, platformName: string): boolean => {
-  return platforms?.findIndex((v) => v.startsWith(platformName)) !== -1;
+  return !!platforms?.some((v) => v.startsWith(platformName));
 };
 
 /**
@@ -45,14 +47,23 @@ export const validateContent = (content: string | undefined, platforms: string[]
   }
 
   // Check each platform's character limit
-  const twitterError = validatePlatformLength(content, platforms, "twitter", "X");
-  if (twitterError) return twitterError;
-
   const blueskyError = validatePlatformLength(content, platforms, "bluesky", "Bluesky");
   if (blueskyError) return blueskyError;
 
-  const threadsError = validatePlatformLength(content, platforms, "threads", "Threads");
-  if (threadsError) return threadsError;
+  const mastodonError = validatePlatformLength(content, platforms, "mastodon", "Mastodon");
+  if (mastodonError) return mastodonError;
 
   return undefined;
+};
+
+/**
+ * Publora still calls X "twitter" in its API
+ */
+export const networkName = (platform: string): string => (platform === "twitter" ? "x" : platform);
+
+/**
+ * Tells apart several accounts on the same network
+ */
+export const accountTitle = (platform: Platform): string => {
+  return `${networkName(platform.platformId.split("-")[0])} (${platform.displayName || platform.username})`;
 };

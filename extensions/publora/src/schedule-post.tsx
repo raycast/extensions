@@ -1,15 +1,23 @@
-import { Form, ActionPanel, Action, LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
-import { useCachedState, useForm, FormValidation, showFailureToast } from "@raycast/utils";
+import { Form, ActionPanel, Action, LaunchProps, Toast, showToast } from "@raycast/api";
+import {
+  getAccessToken,
+  useCachedState,
+  useForm,
+  FormValidation,
+  showFailureToast,
+  withAccessToken,
+} from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { Post, Platform } from "./types";
 import { fetchPlatforms, schedulePost } from "./api";
-import { validateContent } from "./utils";
+import { publora } from "./oauth";
+import { accountTitle, validateContent } from "./utils";
 
-export default function Command(props: LaunchProps<{ draftValues: Post }>) {
+function Command(props: LaunchProps<{ draftValues: Post }>) {
   const { draftValues: draftPost } = props;
 
-  const { api_key } = getPreferenceValues<ExtensionPreferences>();
+  const { token } = getAccessToken();
 
   const [isLoading, setIsLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
@@ -31,11 +39,11 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
       }
 
       try {
-        await schedulePost(api_key, post);
+        await schedulePost(token, post);
         reset({ content: "", platforms: [], scheduledTime: undefined });
         showToast({
           title: "Success",
-          message: "Your post scheduled successfully",
+          message: post.scheduledTime ? "Your post scheduled successfully" : "Your post saved as a draft",
           style: Toast.Style.Success,
         });
         return true;
@@ -56,14 +64,14 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
     const getPlatforms = async () => {
       setIsLoading(true);
       try {
-        const platforms = await fetchPlatforms(api_key);
+        const platforms = await fetchPlatforms(token);
         setAllPlatforms(platforms);
         setCanSubmit(true);
       } catch (error) {
         console.error("Error fetching platforms:", error);
         showToast({
           title: "Error",
-          message: "Error fetching platforms, check API key",
+          message: "Error fetching accounts, check your connection to Publora",
           style: Toast.Style.Failure,
         });
         setCanSubmit(false);
@@ -72,10 +80,8 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
       }
     };
 
-    if (api_key) {
-      getPlatforms();
-    }
-  }, [api_key]);
+    getPlatforms();
+  }, [token]);
 
   return (
     <Form
@@ -88,7 +94,7 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
         </ActionPanel>
       }
     >
-      <Form.Description text="Schedule a post in Publora" />
+      <Form.Description text="Leave Schedule empty to save a draft in Publora" />
 
       <Form.DatePicker title="Schedule" type={Form.DatePicker.Type.DateTime} {...itemProps.scheduledTime} />
       <Form.TagPicker title="Publish to" {...itemProps.platforms}>
@@ -96,7 +102,7 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
           <Form.TagPicker.Item
             key={platform.platformId}
             value={platform.platformId}
-            title={platform.platformId.split("-")[0]}
+            title={accountTitle(platform)}
             icon={{ source: platform.profileImageUrl }}
           />
         ))}
@@ -106,3 +112,5 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
     </Form>
   );
 }
+
+export default withAccessToken(publora)(Command);
