@@ -55,7 +55,7 @@
     {
       "title": "Site List Timeout (seconds)",
       "name": "siteListTimeout",
-      "description": "Max seconds to wait for 'terminus site:list'. Accounts with many sites can take well over the 10s default. Use 0 for no limit.",
+      "description": "Max seconds to wait for 'terminus site:list'. Accounts with many sites can take well over the 10s default.",
       "type": "textfield",
       "required": false,
       "default": "120"

@@ -14,10 +14,11 @@ function getMemberships(site: Sites[string]): string[] {
     .filter(Boolean);
 }
 
-// 0 = no limit. Falls back to 120s on blank/invalid input.
+// Lenient ("30s" → 30). Falls back to 120s on blank/invalid/non-positive input
+// (useExec treats 0 as "use its 10s default").
 function parseTimeout(value: string | undefined): number {
-  const seconds = Number(value?.trim() || "120");
-  return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : 120_000;
+  const seconds = parseFloat(value?.trim() || "120");
+  return Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 120_000;
 }
 
 // framework can be null (uninitialized site) or variants like "drupal10" / "wordpress_network".

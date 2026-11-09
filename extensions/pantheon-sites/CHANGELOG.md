@@ -9,7 +9,7 @@
 
 ### Added
 
-- "Site List Timeout" preference (default 120s, 0 = no limit)
+- "Site List Timeout" preference (default 120s)
 - "Refresh Site List" action (⌘R) and loading/error toasts
 
 ## [Latest Changes] - 2026-05-11
