@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import {
   CLUELY_DASHBOARD,
@@ -27,19 +27,24 @@ export function MeetingDetail({
     isLoading: loading,
     revalidate,
   } = usePromise(
-    (path: string, id: string) =>
-      loadMeeting(path, id, abortable.current?.signal),
+    async (path: string, id: string) => {
+      const signal = abortable.current?.signal;
+      try {
+        return await loadMeeting(path, id, signal);
+      } catch (err) {
+        // Keep cancellations as they are; turn everything else into a safe, readable message
+        // so the hook's own failure toast (with Retry) never shows raw CLI output.
+        if (signal?.aborted) throw err;
+        throw new Error(readableError(err));
+      }
+    },
     [cliPath, meeting.id],
     {
       abortable,
-      onError: async (err) => {
-        await showFailureToast(readableError(err), {
-          title: "Could Not Read Meeting",
-        });
-      },
+      failureToastOptions: { title: "Could Not Read Meeting" },
     },
   );
-  const error = failure ? readableError(failure) : undefined;
+  const error = failure?.message;
   const transcript = data ? transcriptText(data.transcript) : "";
   const content =
     view === "summary"
