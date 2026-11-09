@@ -28,12 +28,12 @@ Adopted files and their local counterparts:
 - The reused source is the **Raycast extension** listed above, not the full Raindrop web application or its backend. The additional collection SVG assets have a separate source and copyright below. The table records the provenance of adapted UI, collection helpers and view types; local behavior has changed as described.
 - The Raindrop REST/OAuth/account client, Pro/AI account features, cloud data operations are not distributed by this extension. Data hooks with similar filenames implement ME queries rather than the upstream REST client.
 - Bookmark data is accessed through ME’s installed local stdio helper. Versioned edits, duplicate checks, pending-command handling and ME-specific projections live in this companion’s adapter code; the data core, browser manager, import, synchronization and pinyin indexing remain in the separate ME project.
-- `src/core-api.d.ts` is an exact declaration snapshot from ME, documented in [docs/protocol-source.json](docs/protocol-source.json). It is a type contract, not a copy of the data core or sync implementation.
+- `src/core-api.d.ts` is an exact declaration snapshot from ME, documented in [protocol provenance](https://github.com/Schnee013/mark-everything-raycast/blob/main/docs/protocol-source.json). It is a type contract, not a copy of the data core or sync implementation.
 - The light and dark Mark Everything icons were supplied by this project’s maintainer and resized to the required dimensions. They are not Raindrop icons. Project names identify provenance only; no affiliation, sponsorship or endorsement by Raindrop is claimed.
 
 ## License preservation
 
-The complete upstream MIT license, including **Copyright (c) 2021 Raycast**, is preserved verbatim in [assets/THIRD-PARTY-NOTICES.txt](assets/THIRD-PARTY-NOTICES.txt). This file is included both in the public source and in the bundled extension. The project’s [MIT license](LICENSE) does not replace or remove the upstream notice.
+The complete upstream MIT license, including **Copyright (c) 2021 Raycast**, is preserved verbatim in [assets/THIRD-PARTY-NOTICES.txt](assets/THIRD-PARTY-NOTICES.txt). This file is included both in the public source and in the bundled extension. The project’s [MIT license](https://github.com/Schnee013/mark-everything-raycast/blob/main/LICENSE) does not replace or remove the upstream notice.
 
 ## Raindrop.io application collection icons
 

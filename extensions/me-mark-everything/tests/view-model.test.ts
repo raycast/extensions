@@ -61,7 +61,20 @@ test("missing titles fall back to the URL and unknown collections read as Unsort
 test("conflicts and structural problems surface as review flags", () => {
   const view = toBookmark(
     bookmark({
-      conflicts: { title: [{ entity: "b1", kind: "bookmark", field: "title", value: "x", parents: [], version: "v", actor: "a", time: 1 }] },
+      conflicts: {
+        title: [
+          {
+            entity: "b1",
+            kind: "bookmark",
+            field: "title",
+            value: "x",
+            parents: [],
+            version: "v",
+            actor: "a",
+            time: 1,
+          },
+        ],
+      },
       structural: [{ field: "position", reason: "deleted-parent" }],
     }),
     new Map(),
@@ -91,8 +104,6 @@ test("collections flatten into the upstream nested labels", () => {
     ["Reading", "Reading > Papers"],
   );
 });
-
-
 
 test("links accept bare hosts but reject non-web schemes", () => {
   assert.equal(inputUrl("example.org"), "https://example.org");

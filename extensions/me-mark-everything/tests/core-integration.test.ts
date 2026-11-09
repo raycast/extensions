@@ -1,14 +1,7 @@
 import { isolatedLibrary } from "./fixtures/library";
 import test, { after } from "node:test";
 import assert from "node:assert/strict";
-import {
-  mkdtempSync,
-  rmSync,
-  mkdirSync,
-  writeFileSync,
-  readFileSync,
-  chmodSync,
-} from "node:fs";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -28,10 +21,9 @@ import {
 } from "../src/helper";
 const root = mkdtempSync(join(tmpdir(), "ME 中文 空格 "));
 after(() => rmSync(root, { recursive: true, force: true }));
-const host =
-  process.env.ME_CORE_HOST ||
-  "";
-if (!host && !process.env.ME_INSTALLED_DISCOVERY) throw Error("Set ME_CORE_HOST or ME_INSTALLED_DISCOVERY; tests write only temporary libraries.");
+const host = process.env.ME_CORE_HOST || "";
+if (!host && !process.env.ME_INSTALLED_DISCOVERY)
+  throw Error("Set ME_CORE_HOST or ME_INSTALLED_DISCOVERY; tests write only temporary libraries.");
 const python = process.env.ME_TEST_PYTHON || join(dirname(host), "..", ".venv", "bin", "python");
 const installed = process.env.ME_INSTALLED_DISCOVERY
   ? JSON.parse(readFileSync(process.env.ME_INSTALLED_DISCOVERY, "utf8"))
@@ -55,14 +47,8 @@ test("real source helper isolated library setup; no global binding", async () =>
     installation,
     discoveryPath: join(root, "helper-install.json"),
   });
-  writeFileSync(
-    join(root, "helper-install.json"),
-    JSON.stringify(installation),
-  );
-  assert.equal(
-    (await discover(join(root, "helper-install.json"))).installation.executable,
-    installation.executable,
-  );
+  writeFileSync(join(root, "helper-install.json"), JSON.stringify(installation));
+  assert.equal((await discover(join(root, "helper-install.json"))).installation.executable, installation.executable);
 });
 test("1000 real bookmarks paginate completely; matches title URL summary notes tag", async () => {
   const collection = randomUUID(),
@@ -90,25 +76,15 @@ test("1000 real bookmarks paginate completely; matches title URL summary notes t
         ["tag:" + tag]: true,
       },
     });
-  await rpc(
-    installation,
-    "execute",
-    { id: randomUUID(), libraryId: s.libraryId, edits },
-    s.libraryId,
-    { timeoutMs: 30000 },
-  );
+  await rpc(installation, "execute", { id: randomUUID(), libraryId: s.libraryId, edits }, s.libraryId, {
+    timeoutMs: 30000,
+  });
   const start = performance.now();
   const all = await queryAll(s);
   const queryMs = Math.round(performance.now() - start);
   assert.equal(all.total, 1000);
   assert.equal(all.items.length, 1000);
-  for (const q of [
-    "Page 0999",
-    "example.org/me/999",
-    "摘要-999",
-    "备注-999",
-    "中文标签",
-  ])
+  for (const q of ["Page 0999", "example.org/me/999", "摘要-999", "备注-999", "中文标签"])
     assert.ok((await queryAll(s, { q })).total > 0);
   assert.equal((await queryAll(s, { collection })).total, 1000);
   writeFileSync(
@@ -162,7 +138,8 @@ test("changed payload reuse rejected even after committed-readable", async () =>
 test("a page already in the library is found instead of saved twice", async (t) => {
   const fixture = await isolatedLibrary();
   t.after(fixture.cleanup);
-  const s = fixture.session, installation = s.installation;
+  const s = fixture.session,
+    installation = s.installation;
   const saved = "https://example.org/duplicate-check?utm_source=newsletter";
   await rpc(
     installation,
@@ -204,7 +181,8 @@ test("a page already in the library is found instead of saved twice", async (t) 
 test("a hit stops the whole batch: the existing row is untouched and no new row is written", async (t) => {
   const fixture = await isolatedLibrary();
   t.after(fixture.cleanup);
-  const s = fixture.session, installation = s.installation;
+  const s = fixture.session,
+    installation = s.installation;
   const link = "https://example.org/redirect-target";
   const created = (await rpc(
     installation,
@@ -274,27 +252,17 @@ test("switch library prevents original frozen command being delivered to new lib
   await rpc(installation, "bind", { path: join(root, "library") });
 });
 test("missing helper and protocol mismatch are explicit", async () => {
-  await assert.rejects(
-    rpc(
-      { ...installation, executable: "/no-such-me-helper" },
-      "capabilities",
-      {},
-    ),
-    { code: "HELPER_MISSING" },
-  );
+  await assert.rejects(rpc({ ...installation, executable: "/no-such-me-helper" }, "capabilities", {}), {
+    code: "HELPER_MISSING",
+  });
   const f = join(root, "wrong-version.cjs");
   writeFileSync(
     f,
     "let s='';process.stdin.on('data',b=>s+=b);process.stdin.on('end',()=>{const r=JSON.parse(s);console.log(JSON.stringify({v:2,id:r.id,ok:true,result:{}}))});",
   );
-  await assert.rejects(
-    rpc(
-      { ...installation, executable: process.execPath, args: [f] },
-      "capabilities",
-      {},
-    ),
-    { code: "VERSION" },
-  );
+  await assert.rejects(rpc({ ...installation, executable: process.execPath, args: [f] }, "capabilities", {}), {
+    code: "VERSION",
+  });
 });
 test("real field conflict retains candidates; trash excluded", async () => {
   const b = (await queryAll(s, { q: "ME真实核心" })).items[0];
@@ -305,9 +273,7 @@ test("real field conflict retains candidates; trash excluded", async () => {
       {
         id: randomUUID(),
         libraryId: s.libraryId,
-        edits: [
-          { entity: b.id, kind: "bookmark", base: b.heads, values: { title } },
-        ],
+        edits: [{ entity: b.id, kind: "bookmark", base: b.heads, values: { title } }],
       },
       s.libraryId,
     );
@@ -321,9 +287,7 @@ test("real field conflict retains candidates; trash excluded", async () => {
     {
       id: randomUUID(),
       libraryId: s.libraryId,
-      edits: [
-        { entity: item.id, base: item.heads, values: { life: "trashed" } },
-      ],
+      edits: [{ entity: item.id, base: item.heads, values: { life: "trashed" } }],
     },
     s.libraryId,
   );
@@ -432,8 +396,7 @@ test("oversized real result pages shrink without truncating notes", async () => 
   const result = await queryAll(s, { q: "Large note" });
   assert.equal(result.total, 12);
   assert.equal(result.items.length, 12);
-  for (const b of result.items)
-    assert.equal((b.values.note as string).length, 90000);
+  for (const b of result.items) assert.equal((b.values.note as string).length, 90000);
 });
 
 test("discovery prefers the installed record over a retired 0.2 record", async () => {
@@ -453,16 +416,9 @@ test("discovery prefers the installed record over a retired 0.2 record", async (
     gone = join(dir, "gone.json");
   writeFileSync(
     retired,
-    record(
-      "/Users/x/Library/Application Support/me-mark-everything/runtime/me-mark-everything-host",
-    ),
+    record("/Users/x/Library/Application Support/me-mark-everything/runtime/me-mark-everything-host"),
   );
-  writeFileSync(
-    daily,
-    record(
-      "/Users/x/Library/Application Support/me-raindrop/runtime/me-raindrop-host",
-    ),
-  );
+  writeFileSync(daily, record("/Users/x/Library/Application Support/me-raindrop/runtime/me-raindrop-host"));
   writeFileSync(other, record("/opt/me/helper"));
   const fallback = await discover(retired, daily);
   assert.equal(fallback.discoveryPath, daily);
@@ -476,10 +432,7 @@ test("discovery prefers the installed record over a retired 0.2 record", async (
 });
 test("manager receipt accepts the installed manager's routes only", () => {
   const base = { requestId: "r", libraryId: "L", opened: true };
-  assert.equal(
-    managerReceipt({ ...base, fragment: "/my/0/item/12345" }, "L", true).opened,
-    true,
-  );
+  assert.equal(managerReceipt({ ...base, fragment: "/my/0/item/12345" }, "L", true).opened, true);
   assert.equal(managerReceipt({ ...base, fragment: "/my/0" }, "L", false).opened, true);
   for (const [value, item] of [
     [{ ...base, fragment: "item=63232a6b-81c8-4282-9a03-1af77244435c" }, true],

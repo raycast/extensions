@@ -48,9 +48,7 @@ test("collection icons use real packaged assets and ignore the bookmark cover fi
 
 // Resource provenance protects the separate graphics license and unmodified artwork.
 test("color icon assets retain the pinned Twemoji bytes and license", () => {
-  const provenance = JSON.parse(
-    readFileSync(path.resolve(__dirname, "../assets/twemoji-source.json"), "utf8"),
-  );
+  const provenance = JSON.parse(readFileSync(path.resolve(__dirname, "../assets/twemoji-source.json"), "utf8"));
   assert.equal(provenance.license, "CC-BY-4.0");
   assert.deepEqual(
     icons.filter((name) => name.startsWith("twemoji-")),

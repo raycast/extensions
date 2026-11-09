@@ -80,6 +80,7 @@ async function fixture(state: string, phase = "execute") {
         return accepted;
       },
     },
+    "@raycast/utils": { showFailureToast: async () => {} },
     "../helper": { Failure },
   };
   runInNewContext(code, {

@@ -6,7 +6,7 @@
  * form editable when a read fails.
  */
 import { useEffect, useRef, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { createPageCapture } from "../current-page";
 import type { CurrentPage } from "../page-capture";
 
@@ -32,11 +32,7 @@ export function useCurrentPage(enabled: boolean) {
       (cause) => {
         if (!active) return;
         setIsLoading(false);
-        void showToast({
-          style: Toast.Style.Failure,
-          title: "Current page not filled",
-          message: cause instanceof Error ? cause.message : String(cause),
-        });
+        void showFailureToast(cause, { title: "Current page not filled" });
       },
     );
     return () => {

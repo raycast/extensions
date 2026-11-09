@@ -2,10 +2,7 @@ import { Failure } from "../helper";
 
 /** One field represents one URL. Never split punctuation inside a URL. */
 export function singleUrl(value: string): string {
-  if (
-    !/^https?:\/\//.test(value) ||
-    [...value].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
-  )
+  if (!/^https?:\/\//.test(value) || [...value].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127))
     throw new Failure("INVALID", "Enter one complete HTTP or HTTPS URL without control characters.");
   try {
     if (!new URL(value).hostname) throw Error();

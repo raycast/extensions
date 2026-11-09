@@ -74,10 +74,7 @@ export function tagChoices(tags: Entity[], members: string[]): TagChoices {
     while (true) {
       const tag = byId.get(id);
       if (seen.has(id) || !tag || tag.kind !== "tag" || !usable(tag))
-        throw new Failure(
-          "INVALID",
-          "A selected tag is unavailable or has an invalid redirect. Open the ME manager.",
-        );
+        throw new Failure("INVALID", "A selected tag is unavailable or has an invalid redirect. Open the ME manager.");
       seen.add(id);
       const redirect = tag.values.redirect;
       if (redirect === null || redirect === undefined) return id;
@@ -142,8 +139,7 @@ export function prepareEdit(
       if (!items.some((item) => item._id === id)) throw new Failure("INVALID", "Tag is unavailable.");
       if (!selected.includes(id)) change("tag:" + id, true);
     }
-    for (const id of selected)
-      if (!after.has(id)) for (const member of members[id]) change("tag:" + member, false);
+    for (const id of selected) if (!after.has(id)) for (const member of members[id]) change("tag:" + member, false);
   }
   if (!Object.keys(changes).length) return null;
   change("life", "active");

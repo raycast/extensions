@@ -4,14 +4,7 @@ import { useForm } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { randomUUID } from "node:crypto";
 import { Failure, getBookmark, type Entity, type Session } from "../helper";
-import {
-  editBaseline,
-  prepareEdit,
-  preflightEdit,
-  tagChoices,
-  usable,
-  type TagChoices,
-} from "../helpers/edit";
+import { editBaseline, prepareEdit, preflightEdit, tagChoices, usable, type TagChoices } from "../helpers/edit";
 import { findSaved } from "../helpers/duplicates";
 import { buildCollectionsOptions } from "../helpers/collections";
 import { toCollections } from "../helpers/me";
@@ -125,10 +118,7 @@ export default function EditBookmark(props: {
         }
       />
     );
-  if (
-    result?.kind === "committed-conflict" ||
-    (result?.kind === "committed-read-failed" && !submission.pending)
-  )
+  if (result?.kind === "committed-conflict" || (result?.kind === "committed-read-failed" && !submission.pending))
     return (
       <Detail
         markdown={`# ${outcomeText(result).title}\n\n${outcomeText(result).message}`}
@@ -183,10 +173,7 @@ export default function EditBookmark(props: {
       if (collections.libraryId !== snapshot.session.libraryId)
         throw new Failure("LIBRARY_MISMATCH", "Collections belong to another library.");
       options = buildCollectionsOptions(toCollections(collections.entities.filter(usable)));
-      if (
-        snapshot.baseline.collection !== "-1" &&
-        !options.some((c) => c.value === snapshot.baseline.collection)
-      )
+      if (snapshot.baseline.collection !== "-1" && !options.some((c) => c.value === snapshot.baseline.collection))
         throw new Failure("INVALID", "The bookmark's collection is unavailable. Open the ME manager.");
     }
   } catch (cause) {

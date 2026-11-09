@@ -33,8 +33,7 @@ export function collectionQuery(value: string): Query {
 
 export function toCollection(entity: Entity): Collection {
   const icon = entity.values.icon;
-  const cover =
-    typeof icon === "string" && collectionIcons.has(icon) ? icon.slice("assets/".length) : undefined;
+  const cover = typeof icon === "string" && collectionIcons.has(icon) ? icon.slice("assets/".length) : undefined;
   return {
     _id: entity.id,
     title: text(entity.values.name),

@@ -11,11 +11,11 @@ import { getShortcuts } from "../shortcut-settings";
  * - List, detail and editor actions move active bookmarks to Trash; recovery remains in the manager.
  */
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useRef } from "react";
 import { getBookmark, queryAll } from "../helper";
 import { toBookmark } from "../helpers/me";
 import { tagChoices } from "../helpers/edit";
-import { getFavicon } from "@raycast/utils";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { Bookmark } from "../types";
 import { failure, manager } from "../ui";
 import { session } from "../session";
@@ -49,11 +49,7 @@ function typeIcon(type: string) {
 
 type OpenEditor = (id: string, revalidate: () => void | Promise<void>) => void;
 
-export default function BookmarkItem(props: {
-  bookmark: Bookmark;
-  revalidate: () => void;
-  onEdit: OpenEditor;
-}) {
+export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void; onEdit: OpenEditor }) {
   const { bookmark, revalidate, onEdit } = props;
   const hasConflicts = bookmark.conflicts.length > 0 || bookmark.structural > 0;
   const accessories: List.Item.Accessory[] = [
@@ -102,11 +98,7 @@ function BookmarkActions({
   return (
     <ActionPanel>
       {openable && <Action.OpenInBrowser url={bookmark.link} shortcut={getShortcuts().shortcutOpen} />}
-      <Action.CopyToClipboard
-        title="Copy URL"
-        content={bookmark.link}
-        shortcut={getShortcuts().shortcutCopy}
-      />
+      <Action.CopyToClipboard title="Copy URL" content={bookmark.link} shortcut={getShortcuts().shortcutCopy} />
       {!inDetail && (
         <Action.Push
           title="Show Details"
@@ -134,9 +126,7 @@ function BookmarkActions({
         shortcut={getShortcuts().shortcutManager}
         onAction={openManager}
       />
-      {hasConflicts && (
-        <Action title="Open Conflict List in ME" icon={Icon.ExclamationMark} onAction={openConflicts} />
-      )}
+      {hasConflicts && <Action title="Open Conflict List in ME" icon={Icon.ExclamationMark} onAction={openConflicts} />}
       <Action
         title="Refresh"
         shortcut={getShortcuts().shortcutRefresh}
@@ -147,20 +137,17 @@ function BookmarkActions({
   );
 }
 
-function BookmarkDetail(props: {
-  bookmark: Bookmark;
-  revalidate: () => void | Promise<void>;
-  onEdit: OpenEditor;
-}) {
-  const [bookmark, setBookmark] = useState(props.bookmark);
-  const [error, setError] = useState<Error>();
-  const load = useCallback(async () => {
-    try {
+function BookmarkDetail(props: { bookmark: Bookmark; revalidate: () => void | Promise<void>; onEdit: OpenEditor }) {
+  const abortable = useRef<AbortController | undefined>(undefined);
+  const request = usePromise(
+    async (id: string) => {
+      const signal = abortable.current?.signal;
       const active = await session();
+      signal?.throwIfAborted();
       const [entity, tags, collections] = await Promise.all([
-        getBookmark(active, props.bookmark._id),
-        queryAll(active, { kind: "tag" }),
-        queryAll(active, { kind: "collection" }),
+        getBookmark(active, id),
+        queryAll(active, { kind: "tag" }, signal),
+        queryAll(active, { kind: "collection" }, signal),
       ]);
       const members = Object.keys(entity.values)
         .filter((k) => k.startsWith("tag:") && entity.values[k] === true)
@@ -172,24 +159,24 @@ function BookmarkDetail(props: {
       } catch {
         names = members;
       }
-      setBookmark(
-        toBookmark(
-          { ...entity, tags: names, candidateMatch: false },
-          new Map(collections.items.map((c) => [c.id, String(c.values.name ?? c.id)])),
-        ),
+      return toBookmark(
+        { ...entity, tags: names, candidateMatch: false },
+        new Map(collections.items.map((c) => [c.id, String(c.values.name ?? c.id)])),
       );
-      setError(undefined);
-      await props.revalidate();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause : new Error(String(cause)));
-      throw cause;
-    }
-  }, [props.bookmark._id, props.revalidate]);
-  useEffect(() => {
-    void load().catch(failure);
-  }, [load]);
+    },
+    [props.bookmark._id],
+    { abortable, onError: failure },
+  );
+  const bookmark = request.data ?? props.bookmark;
+  const error = request.error;
+  const load = useCallback(async () => {
+    const value = await request.revalidate();
+    if (value instanceof Error) return; // usePromise already reports the read error.
+    await props.revalidate();
+  }, [request.revalidate, props.revalidate]);
   return (
     <Detail
+      isLoading={request.isLoading}
       markdown={error ? `# Refresh failed\n\n${error.message}` : details(bookmark)}
       navigationTitle="Bookmark Details"
       actions={<BookmarkActions bookmark={bookmark} revalidate={load} onEdit={props.onEdit} inDetail />}

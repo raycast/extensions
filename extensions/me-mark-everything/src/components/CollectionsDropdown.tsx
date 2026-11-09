@@ -40,9 +40,7 @@ const CollectionsDropdown = React.memo(function CollectionsDropdown({
               collection.cover
                 ? {
                     source: collection.cover,
-                    tintColor: collection.cover.startsWith("collection-icons/twemoji-")
-                      ? undefined
-                      : Color.PrimaryText,
+                    tintColor: collection.cover.startsWith("collection-icons/twemoji-") ? undefined : Color.PrimaryText,
                   }
                 : { source: Icon.Folder }
             }

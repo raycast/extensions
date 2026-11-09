@@ -42,13 +42,9 @@ export async function manager(s: Session, id?: string, conflicts = false) {
       toast.message = notice.message;
       return;
     }
-    const raw = await rpc<"openManager">(
-      s.installation,
-      "openManager",
-      { id, conflicts, launch: true },
-      s.libraryId,
-      { timeoutMs: 15000 },
-    );
+    const raw = await rpc<"openManager">(s.installation, "openManager", { id, conflicts, launch: true }, s.libraryId, {
+      timeoutMs: 15000,
+    });
     const receipt = managerReceipt(raw, s.libraryId, !!id);
     const update = (opened: boolean) => {
       if (opened) {

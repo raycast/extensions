@@ -18,8 +18,7 @@ export class SaveInputError extends Failure {
 }
 
 export function validateEntries(entries: SaveEntry[]): SaveEntry[] {
-  if (!entries.length || entries.length > MAX_URLS)
-    throw new Failure("INVALID", "Enter between 1 and 10 URLs.");
+  if (!entries.length || entries.length > MAX_URLS) throw new Failure("INVALID", "Enter between 1 and 10 URLs.");
   const fields: Record<number, string> = {};
   const seen = new Map<string, number>();
   const parsed = entries.map((entry, index) => {

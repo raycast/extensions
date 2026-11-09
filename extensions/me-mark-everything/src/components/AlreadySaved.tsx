@@ -49,20 +49,10 @@ export default function AlreadySaved({ links }: { links: string[] }) {
   }, [collections]);
 
   return (
-    <List
-      isLoading={!hits && !error}
-      navigationTitle="Already Saved"
-      searchBarPlaceholder="Already in your library"
-    >
+    <List isLoading={!hits && !error} navigationTitle="Already Saved" searchBarPlaceholder="Already in your library">
       <List.EmptyView
         icon={error ? Icon.ExclamationMark : Icon.Bookmark}
-        title={
-          error
-            ? "Cannot check the library"
-            : hits
-              ? "No bookmarks match these links"
-              : "Checking the library"
-        }
+        title={error ? "Cannot check the library" : hits ? "No bookmarks match these links" : "Checking the library"}
         description={
           error
             ? error.message
@@ -86,8 +76,7 @@ export default function AlreadySaved({ links }: { links: string[] }) {
         <List.Section
           title={error ? "Refresh failed · Showing previous results" : "Already in your library"}
           subtitle={
-            error?.message ??
-            `Nothing new was created · ${hits.length} ${hits.length === 1 ? "bookmark" : "bookmarks"}`
+            error?.message ?? `Nothing new was created · ${hits.length} ${hits.length === 1 ? "bookmark" : "bookmarks"}`
           }
         >
           {hits.map(({ entity }) => (

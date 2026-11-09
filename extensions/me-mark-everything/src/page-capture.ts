@@ -63,9 +63,7 @@ export function pageReadFailure(error: unknown, browser: Browser): Error {
       `Allow Raycast to control ${browser.name} in System Settings → Privacy & Security → Automation, then retry. Manual entry is available.`,
     );
   if (detail.timedOut || /timed out|timeout|-1712/i.test(message))
-    return Error(
-      `${browser.name} did not respond. Check any macOS Automation prompt, then retry, or paste a URL.`,
-    );
+    return Error(`${browser.name} did not respond. Check any macOS Automation prompt, then retry, or paste a URL.`);
   return Error(
     `Could not read ${browser.name}. Check its active tab and Automation permission, then retry, or paste a URL.`,
   );

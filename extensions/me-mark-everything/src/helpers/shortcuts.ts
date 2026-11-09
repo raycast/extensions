@@ -68,9 +68,7 @@ export function parseShortcut(value: string): Shortcut | undefined {
   if (!key) throw new Error(`Unsupported key: ${keyText || "(missing)"}. Example: ctrl+shift+x.`);
   const shortcut = { modifiers: modifierOrder.filter((mod) => mods.includes(mod)), key };
   const signature = shortcutSignature(shortcut);
-  if (
-    ["cmd+k", "cmd+,", "cmd+return", "cmd+enter", "cmd+shift+return", "cmd+shift+enter"].includes(signature)
-  ) {
+  if (["cmd+k", "cmd+,", "cmd+return", "cmd+enter", "cmd+shift+return", "cmd+shift+enter"].includes(signature)) {
     throw new Error("This shortcut is reserved by Raycast. Choose another combination.");
   }
   return shortcut;
@@ -116,9 +114,7 @@ export function resolveShortcuts(values: Partial<Record<ShortcutName, string>>):
       const signature = shortcutSignature(shortcut);
       const previous = seen.get(signature);
       if (previous)
-        throw new Error(
-          `${labels[previous]} and ${labels[name]} both use ${signature}. Choose different shortcuts.`,
-        );
+        throw new Error(`${labels[previous]} and ${labels[name]} both use ${signature}. Choose different shortcuts.`);
       seen.set(signature, name);
     }
   }

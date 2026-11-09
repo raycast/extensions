@@ -16,22 +16,12 @@ type Props = {
   collectionsError?: Error;
   tagsError?: Error;
 };
-export function BookmarkFields({
-  itemProps,
-  identity,
-  edit,
-  collections,
-  tags,
-  collectionsError,
-  tagsError,
-}: Props) {
+export function BookmarkFields({ itemProps, identity, edit, collections, tags, collectionsError, tagsError }: Props) {
   return (
     <>
       {identity}
       <Form.TextArea {...itemProps.note} title="Note" placeholder="Add a note" />
-      {edit && (
-        <Form.TextArea {...itemProps.description} title="Description" placeholder="Add a description" />
-      )}
+      {edit && <Form.TextArea {...itemProps.description} title="Description" placeholder="Add a description" />}
       {edit && <Form.Checkbox {...itemProps.favorite} label="Favorite" />}
       {collections ? (
         <Form.Dropdown {...itemProps.collection} title="Collection">
@@ -46,9 +36,7 @@ export function BookmarkFields({
                   cover
                     ? {
                         source: cover,
-                        tintColor: cover.startsWith("collection-icons/twemoji-")
-                          ? undefined
-                          : Color.PrimaryText,
+                        tintColor: cover.startsWith("collection-icons/twemoji-") ? undefined : Color.PrimaryText,
                       }
                     : Icon.Folder
                 }
@@ -59,11 +47,7 @@ export function BookmarkFields({
       ) : (
         <Form.Description
           title="Collection"
-          text={
-            collectionsError
-              ? `Unavailable; kept unchanged. ${collectionsError.message}`
-              : "Loading collections…"
-          }
+          text={collectionsError ? `Unavailable; kept unchanged. ${collectionsError.message}` : "Loading collections…"}
         />
       )}
       {tags ? (

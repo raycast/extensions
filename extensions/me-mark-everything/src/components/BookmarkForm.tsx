@@ -179,18 +179,12 @@ export const BookmarkForm = (props: {
                     return;
                   }
                   setRows((current) =>
-                    current.length < MAX_URLS
-                      ? [...current, { id: nextId.current++, url: "", title: "" }]
-                      : current,
+                    current.length < MAX_URLS ? [...current, { id: nextId.current++, url: "", title: "" }] : current,
                   );
                 }}
               />
               {rows.length > 1 && (
-                <ActionPanel.Submenu
-                  title="Remove URL…"
-                  icon={Icon.Minus}
-                  shortcut={getShortcuts().shortcutRemoveUrl}
-                >
+                <ActionPanel.Submenu title="Remove URL…" icon={Icon.Minus} shortcut={getShortcuts().shortcutRemoveUrl}>
                   {rows.map((row, index) => (
                     <Action
                       key={row.id}
@@ -238,9 +232,7 @@ export const BookmarkForm = (props: {
         </ActionPanel>
       }
     >
-      {submission.error && (
-        <Form.Description title="Cannot load pending save" text={submission.error.message} />
-      )}
+      {submission.error && <Form.Description title="Cannot load pending save" text={submission.error.message} />}
       {submission.pending ? (
         <Form.Description
           title="Previous save"
@@ -277,9 +269,7 @@ export const BookmarkForm = (props: {
                       index={index}
                       error={
                         errors[index] ??
-                        (duplicate
-                          ? "Already saved. View the existing bookmark or change/remove this URL."
-                          : undefined)
+                        (duplicate ? "Already saved. View the existing bookmark or change/remove this URL." : undefined)
                       }
                       onChange={(update) => changeRow(index, update)}
                     />

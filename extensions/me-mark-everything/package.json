@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "me-mark-everything",
   "title": "Mark Everything",
-  "description": "Search, save, and edit bookmarks in your local ME library.",
+  "description": "Search, save, and edit bookmarks in your local ME library. Requires Mark Everything to be installed and configured separately.",
   "icon": "me-icon.png",
   "author": "roy",
   "license": "MIT",
@@ -142,7 +142,7 @@
     "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "test": "node --import tsx --test tests/*.test.ts tests/*.test.cjs",
-    "bundle": "ray bundle -o releases/ME-0.8.7.rayext",
+    "bundle": "ray bundle -o releases/Mark-Everything.rayext",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
   },
@@ -159,7 +159,6 @@
     "eslint": "^9.39.4",
     "prettier": "^3.8.3"
   },
-  "version": "0.8.7",
   "engines": {
     "node": ">=22.22.2"
   },

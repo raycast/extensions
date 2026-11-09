@@ -81,13 +81,7 @@ test("one URL preserves comma semicolon Unicode and does not touch metadata", ()
   const url = "https://example.org/中文/a,b;c?q=hello world";
   assert.equal(singleUrl(url), url);
   assert.deepEqual(prepare(entity(), { link: url })!.command.edits[0].values, { url, life: "active" });
-  for (const url of [
-    "https://",
-    "HTTPS://example.org",
-    "ftp://example.org",
-    "https://example.org/a\nb",
-    "a.com",
-  ])
+  for (const url of ["https://", "HTTPS://example.org", "ftp://example.org", "https://example.org/a\nb", "a.com"])
     assert.throws(() => singleUrl(url), { code: "INVALID" });
 });
 test("malformed existing field values and missing order cannot be guessed", () => {
@@ -137,10 +131,7 @@ test("redirect display deduplicates aliases; removing display removes every orig
     tags = [tag("t1", "t2"), tag("t2"), tag("t3")];
   const choices = tagChoices(tags, ["t1", "t2"]);
   assert.deepEqual(choices.selected, ["t2"]);
-  assert.equal(
-    prepareEdit(e, editBaseline(e), input(e, { tags: ["t2"] }), "cmd", session, { tags: choices }),
-    null,
-  );
+  assert.equal(prepareEdit(e, editBaseline(e), input(e, { tags: ["t2"] }), "cmd", session, { tags: choices }), null);
   const p = prepareEdit(e, editBaseline(e), input(e, { tags: ["t3"] }), "cmd", session, { tags: choices })!;
   assert.deepEqual(p.command.edits[0].values, {
     "tag:t3": true,

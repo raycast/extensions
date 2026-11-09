@@ -207,10 +207,7 @@ test("creation has at most ten independent URL/title rows; removal preserves eac
   assert.equal(f.toast.at(-1).title, "Maximum 10 URLs");
   for (const [index, row] of rows(tree).entries()) {
     const fields = row.type(row.props);
-    assert.equal(
-      walk(fields, (node) => node.type === "TextField")[0].props.id,
-      index ? `url${index}` : "url",
-    );
+    assert.equal(walk(fields, (node) => node.type === "TextField")[0].props.id, index ? `url${index}` : "url");
   }
   action(tree, "URL 5").props.onAction();
   tree = f.render();
@@ -234,9 +231,7 @@ test("a submit-time duplicate keeps its view action even after a background no-m
   rows(tree)[0].props.onChange({ url: "https://example.org/late", title: "My title" });
   f.setLookup({ lookup: { hits: [] } });
   tree = f.render();
-  f.setSubmitError({ 0: "Already saved" }, [
-    { link: "https://example.org/late", entity: { id: "existing" } },
-  ]);
+  f.setSubmitError({ 0: "Already saved" }, [{ link: "https://example.org/late", entity: { id: "existing" } }]);
   await f.submit({ note: "Keep my note", tags: [], collection: "-1" });
   tree = f.render();
   assert.match(rows(tree)[0].props.error, /Already saved/);

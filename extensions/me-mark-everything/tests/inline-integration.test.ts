@@ -1,14 +1,6 @@
 import assert from "node:assert/strict";
 import test, { after } from "node:test";
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  writeFileSync,
-  rmSync,
-  readdirSync,
-  renameSync,
-} from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync, readdirSync, renameSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -27,10 +19,9 @@ import { findSaved } from "../src/helpers/duplicates";
 import { SubmissionController, type Store } from "../src/helpers/submission";
 import { prepareSave } from "../src/helpers/save";
 const root = mkdtempSync("/private/tmp/me-inline-integration-");
-const host =
-  process.env.ME_CORE_HOST ??
-  "";
-if (!host && !process.env.ME_INSTALLED_DISCOVERY) throw Error("Set ME_CORE_HOST or ME_INSTALLED_DISCOVERY; tests write only temporary libraries.");
+const host = process.env.ME_CORE_HOST ?? "";
+if (!host && !process.env.ME_INSTALLED_DISCOVERY)
+  throw Error("Set ME_CORE_HOST or ME_INSTALLED_DISCOVERY; tests write only temporary libraries.");
 const python = process.env.ME_TEST_PYTHON || join(dirname(host), "..", ".venv", "bin", "python");
 const installed = process.env.ME_INSTALLED_DISCOVERY
   ? JSON.parse(readFileSync(process.env.ME_INSTALLED_DISCOVERY, "utf8"))
@@ -128,10 +119,7 @@ test("all daily fields preserve order and metadata policy of untouched fields", 
     { tags: tagChoices(tags, []), collections: [collection] },
   )!;
   await preflightEdit(p);
-  assert.equal(
-    (await new SubmissionController(memoryStore()).start("edit", async () => p)).kind,
-    "committed",
-  );
+  assert.equal((await new SubmissionController(memoryStore()).start("edit", async () => p)).kind, "committed");
   const saved = await getBookmark(s, e.id);
   assert.equal(saved.values.url, url);
   assert.equal(saved.values.title, "");
@@ -181,10 +169,7 @@ test("trash race keeps life conflict; pre-existing trash is rejected", async () 
   await preflightEdit(p);
   await write([{ entity: e.id, base: e.heads, values: { life: "trashed" } }]);
   assert.throws(() => editBaseline({ ...e, values: { ...e.values, life: "trashed" } }));
-  assert.equal(
-    (await new SubmissionController(memoryStore()).start("edit", async () => p)).kind,
-    "committed-conflict",
-  );
+  assert.equal((await new SubmissionController(memoryStore()).start("edit", async () => p)).kind, "committed-conflict");
   assert.equal((await getBookmark(s, e.id)).conflicts.life.length, 2);
 });
 test("collection deletion race is a committed structural issue", async () => {
@@ -204,10 +189,7 @@ test("collection deletion race is a committed structural issue", async () => {
   await preflightEdit(p);
   const c = (await rpc(installation, "get", { id: collection }, s.libraryId)) as Entity;
   await write([{ entity: c.id, base: c.heads, values: { life: "trashed" } }]);
-  assert.equal(
-    (await new SubmissionController(memoryStore()).start("edit", async () => p)).kind,
-    "committed-conflict",
-  );
+  assert.equal((await new SubmissionController(memoryStore()).start("edit", async () => p)).kind, "committed-conflict");
   assert.ok((await getBookmark(s, e.id)).structural.some((issue) => issue.reason === "deleted-parent"));
 });
 test("redirect removal writes original alias members with their versions", async () => {
@@ -218,21 +200,14 @@ test("redirect removal writes original alias members with their versions", async
     { entity: canonical, kind: "tag", values: { name: "Canonical" }, base: {} },
     { entity: alias, kind: "tag", values: { name: "Alias", redirect: canonical }, base: {} },
   ]);
-  await write([
-    { entity: e.id, base: e.heads, values: { ["tag:" + alias]: true, ["tag:" + canonical]: true } },
-  ]);
+  await write([{ entity: e.id, base: e.heads, values: { ["tag:" + alias]: true, ["tag:" + canonical]: true } }]);
   const current = await getBookmark(s, e.id),
     tags = await Promise.all(
       [alias, canonical].map((id) => rpc(installation, "get", { id }, s.libraryId) as Promise<Entity>),
     );
-  const p = prepareEdit(
-    current,
-    editBaseline(current),
-    { ...editBaseline(current), tags: [] },
-    randomUUID(),
-    s,
-    { tags: tagChoices(tags, [alias, canonical]) },
-  )!;
+  const p = prepareEdit(current, editBaseline(current), { ...editBaseline(current), tags: [] }, randomUUID(), s, {
+    tags: tagChoices(tags, [alias, canonical]),
+  })!;
   await submit(p);
   const result = await getBookmark(s, e.id);
   assert.equal(result.values["tag:" + alias], false);
@@ -272,10 +247,7 @@ test("not-found recovery replays original command and read failures never re-exe
     "if(req.method==='get') console.log(JSON.stringify({v:1,id:req.id,ok:false,error:{code:'IO',message:'read fail'}})); else process.stdout.write(call().stdout);",
   );
   const next = { ...edit(await getBookmark(s, e.id), { note: "read retry" }), session: unreadable };
-  assert.equal(
-    (await new SubmissionController(store).start("edit", async () => next)).kind,
-    "committed-read-failed",
-  );
+  assert.equal((await new SubmissionController(store).start("edit", async () => next)).kind, "committed-read-failed");
   const forbid = wrapper(
     "forbid-execute",
     "if(req.method==='execute') throw Error('must not execute'); else process.stdout.write(call().stdout);",

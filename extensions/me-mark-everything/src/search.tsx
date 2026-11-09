@@ -77,11 +77,7 @@ function SearchBookmarks() {
       />
       <List.Section
         title={
-          error
-            ? stale
-              ? "Refresh failed · Showing previous results"
-              : "ME needs attention"
-            : state || undefined
+          error ? (stale ? "Refresh failed · Showing previous results" : "ME needs attention") : state || undefined
         }
         subtitle={error}
       >

@@ -18,9 +18,7 @@ function fixture(body: string): Session {
   } as Session;
 }
 test("1000-candidate limit is unconfirmed, never no-match", async () => {
-  const s = fixture(
-    "return {items:Array.from({length:limit},(_,i)=>entity(offset+i)),total:1001,revision:'r'};",
-  );
+  const s = fixture("return {items:Array.from({length:limit},(_,i)=>entity(offset+i)),total:1001,revision:'r'};");
   await assert.rejects(findSaved(s, ["https://example.org/target"]), { code: "DUPLICATES_UNCONFIRMED" });
 });
 test("revision changes and short incomplete scans cannot authorize writes", async () => {

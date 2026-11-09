@@ -16,10 +16,7 @@ export function managerAvailability(target?: ManagerTarget): ManagerAvailability
   return target.browser === "chrome" || target.browser === "edge" ? "ready" : "unsupported";
 }
 
-export function managerNotice(
-  availability: ManagerAvailability,
-  browser?: string,
-): { title: string; message: string } {
+export function managerNotice(availability: ManagerAvailability, browser?: string): { title: string; message: string } {
   switch (availability) {
     case "unbound":
       return {

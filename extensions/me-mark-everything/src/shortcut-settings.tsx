@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import type { ReactNode } from "react";
-import { resolveShortcuts, type ShortcutName, type Shortcuts } from "./helpers/shortcuts";
+import { resolveShortcuts, type Shortcuts } from "./helpers/shortcuts";
 
 let shortcuts: Shortcuts | undefined;
 export function getShortcuts(): Shortcuts {
   // Raycast loads preferences when a command starts; reopen it after changing settings.
-  return (shortcuts ??= resolveShortcuts(getPreferenceValues<Partial<Record<ShortcutName, string>>>()));
+  return (shortcuts ??= resolveShortcuts(getPreferenceValues<Preferences>()));
 }
 
 export function ShortcutSettingsGate({ children }: { children: ReactNode }) {

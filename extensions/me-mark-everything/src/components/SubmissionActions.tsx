@@ -1,4 +1,5 @@
 import { Action, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Failure, type Session } from "../helper";
 import type { Outcome, SubmissionController } from "../helpers/submission";
 
@@ -37,10 +38,7 @@ export function outcomeText(outcome: Outcome) {
 }
 export async function showOutcome(outcome: Outcome) {
   await showToast({
-    style:
-      outcome.kind === "committed" || outcome.kind === "no-change"
-        ? Toast.Style.Success
-        : Toast.Style.Failure,
+    style: outcome.kind === "committed" || outcome.kind === "no-change" ? Toast.Style.Success : Toast.Style.Failure,
     ...outcomeText(outcome),
   });
 }
@@ -68,11 +66,7 @@ export function SubmissionActions(props: {
               }),
             );
           } catch (e) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Cannot check result",
-              message: String(e),
-            });
+            await showFailureToast(e, { title: "Cannot check result" });
           }
         }}
       />

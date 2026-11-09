@@ -19,8 +19,7 @@ export type SavedEntity = QueryResult["items"][number];
 export type SavedHit = { link: string; entity: SavedEntity };
 
 /** Campaign/session parameters that never select a different document. */
-const TRACKING =
-  /^(?:utm_|ga_|pk_|mtm_|mc_|_hs|vero_|fbclid$|gclid$|dclid$|msclkid$|igshid$|yclid$|srsltid$)/i;
+const TRACKING = /^(?:utm_|ga_|pk_|mtm_|mc_|_hs|vero_|fbclid$|gclid$|dclid$|msclkid$|igshid$|yclid$|srsltid$)/i;
 
 /** Query pages hold 200 items at most; a personal library rarely needs more than one. */
 const PAGE = 200;
@@ -63,12 +62,7 @@ export function canonicalUrl(value: string): string | null {
     .sort()
     .join("&");
   return (
-    "//" +
-    hostOf(url) +
-    (url.port ? ":" + url.port : "") +
-    pathOf(url) +
-    (search ? "?" + search : "") +
-    hashOf(url)
+    "//" + hostOf(url) + (url.port ? ":" + url.port : "") + pathOf(url) + (search ? "?" + search : "") + hashOf(url)
   );
 }
 
@@ -145,20 +139,14 @@ export async function findSaved(
         throw error;
       }
       if (revision !== undefined && revision !== result.revision)
-        throw new Failure(
-          "DUPLICATES_UNCONFIRMED",
-          "Cannot confirm duplicates: the library changed during the scan.",
-        );
+        throw new Failure("DUPLICATES_UNCONFIRMED", "Cannot confirm duplicates: the library changed during the scan.");
       revision = result.revision;
       if (!result.items.length && offset < result.total)
         throw new Failure("DUPLICATES_UNCONFIRMED", "Cannot confirm duplicates: incomplete scan.");
       for (const item of result.items) {
         assertEntity(item);
         if (item.kind !== "bookmark" || item.purged || item.values.life !== "active" || pageIds.has(item.id))
-          throw new Failure(
-            "DUPLICATES_UNCONFIRMED",
-            "Cannot confirm duplicates: invalid or repeated candidate.",
-          );
+          throw new Failure("DUPLICATES_UNCONFIRMED", "Cannot confirm duplicates: invalid or repeated candidate.");
         pageIds.add(item.id);
         if (item.id === excludeId || seen.has(item.id)) continue;
         const link = targets.get(canonicalUrl(String(item.values.url ?? "")) ?? "");

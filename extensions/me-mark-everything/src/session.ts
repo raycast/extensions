@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { discover, handshake, type Session } from "./helper";
 
-export const preferences = () => getPreferenceValues<{ discoveryPath?: string }>();
+export const preferences = () => getPreferenceValues<Preferences>();
 
 let connecting: Promise<Session> | undefined;
 function connect() {

@@ -15,22 +15,17 @@ test("Arc reads the front window and active tab without resolving their object r
   );
   const windows = Object.assign(
     () => {
-      throw Error(
-        "Eager window resolution reproduces Arc's incompatible reference",
-      );
+      throw Error("Eager window resolution reproduces Arc's incompatible reference");
     },
     { 0: { activeTab } },
   );
   Object.defineProperty(windows, "length", { value: 1 });
-  const raw = runInNewContext(
-    pageScript + '\nrun(["company.thebrowser.Browser"])',
-    {
-      Application: (id: string) => {
-        assert.equal(id, "company.thebrowser.Browser");
-        return { running: () => true, windows };
-      },
+  const raw = runInNewContext(pageScript + '\nrun(["company.thebrowser.Browser"])', {
+    Application: (id: string) => {
+      assert.equal(id, "company.thebrowser.Browser");
+      return { running: () => true, windows };
     },
-  );
+  });
   assert.deepEqual(JSON.parse(raw), {
     url: "https://example.org/arc?q=a,b",
     title: '中文, "quoted"\nsecond line',

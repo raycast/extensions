@@ -10,16 +10,34 @@ export async function isolatedLibrary() {
     const discovery = process.env.ME_INSTALLED_DISCOVERY;
     const host = process.env.ME_CORE_HOST;
     if (!discovery && !host) throw Error("Set ME_INSTALLED_DISCOVERY or ME_CORE_HOST for isolated integration tests.");
-    const executable = discovery ? JSON.parse(readFileSync(discovery, "utf8")).executable as string : "/usr/bin/env";
-    const args = discovery ? [] : [process.env.ME_TEST_PYTHON ?? join(dirname(host!), "..", ".venv", "bin", "python"), host!];
-    const installation: Installation = { executable, args: [...args, "--stdio", "--config", join(root, "config")], protocol: 1, extensionId: "a".repeat(32) };
+    const executable = discovery ? (JSON.parse(readFileSync(discovery, "utf8")).executable as string) : "/usr/bin/env";
+    const args = discovery
+      ? []
+      : [process.env.ME_TEST_PYTHON ?? join(dirname(host!), "..", ".venv", "bin", "python"), host!];
+    const installation: Installation = {
+      executable,
+      args: [...args, "--stdio", "--config", join(root, "config")],
+      protocol: 1,
+      extensionId: "a".repeat(32),
+    };
     await rpc(installation, "create", { path: join(root, "library"), name: "Isolated release verification" });
     const session = await handshake({ installation, discoveryPath: join(root, "record.json") });
     return { root, session, cleanup: () => rmSync(root, { recursive: true, force: true }) };
-  } catch (error) { rmSync(root, { recursive: true, force: true }); throw error; }
+  } catch (error) {
+    rmSync(root, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 export function memoryStore(): Store {
   let raw: string | undefined;
-  return { getItem: async () => raw, setItem: async (_, value) => { raw = value; }, removeItem: async () => { raw = undefined; } };
+  return {
+    getItem: async () => raw,
+    setItem: async (_, value) => {
+      raw = value;
+    },
+    removeItem: async () => {
+      raw = undefined;
+    },
+  };
 }

@@ -56,9 +56,7 @@ const obj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "o
 /** The installed ME records the daily assistant here; see docs/INSTALL.md of the main product. */
 export function dailyRecord(): string {
   return join(
-    process.platform === "win32"
-      ? process.env.LOCALAPPDATA || ""
-      : join(homedir(), "Library", "Application Support"),
+    process.platform === "win32" ? process.env.LOCALAPPDATA || "" : join(homedir(), "Library", "Application Support"),
     "me-raindrop",
     "helper-install.json",
   );
@@ -89,9 +87,7 @@ async function readRecord(path: string): Promise<Installation> {
   )
     throw new Failure(
       "VERSION",
-      "The helper discovery record at " +
-        path +
-        " is invalid or incompatible. Repair the main product installation.",
+      "The helper discovery record at " + path + " is invalid or incompatible. Repair the main product installation.",
     );
   return data as Installation;
 }
@@ -103,8 +99,7 @@ export async function discover(override?: string, daily = dailyRecord()): Promis
     return {
       installation: await readRecord(daily),
       discoveryPath: daily,
-      notice:
-        "Ignoring the retired ME 0.2 helper record. Clear Helper Discovery Record in extension preferences.",
+      notice: "Ignoring the retired ME 0.2 helper record. Clear Helper Discovery Record in extension preferences.",
     };
   }
   return { installation, discoveryPath: path };
@@ -147,8 +142,7 @@ export function rpc<K extends keyof Methods, T = unknown>(
         }
       } else resolve(result as T);
     };
-    const cancel = () =>
-      finish(new Failure("CANCELLED", "Cancelled; submitted writes may already be saved."));
+    const cancel = () => finish(new Failure("CANCELLED", "Cancelled; submitted writes may already be saved."));
     const timer = setTimeout(
       () =>
         finish(
@@ -171,8 +165,7 @@ export function rpc<K extends keyof Methods, T = unknown>(
     child.stdin.on("error", () => {});
     child.stdout.on("data", (b: Buffer) => {
       out = Buffer.concat([out, b]);
-      if (out.length > 1000000)
-        finish(new Failure("TOO_LARGE", "Helper response exceeds the protocol limit."));
+      if (out.length > 1000000) finish(new Failure("TOO_LARGE", "Helper response exceeds the protocol limit."));
     });
     child.stderr.on("data", (b: Buffer) => {
       stderr += b.length;
@@ -195,8 +188,7 @@ export function rpc<K extends keyof Methods, T = unknown>(
         if (r.id !== req.id && !(r.ok === false && (r.id === undefined || r.id === null)))
           throw new Failure("RESPONSE_MISMATCH", "Helper response does not match this request.");
         if (r.ok === false) {
-          if (!obj(r.error) || typeof r.error.code !== "string" || typeof r.error.message !== "string")
-            throw Error();
+          if (!obj(r.error) || typeof r.error.code !== "string" || typeof r.error.message !== "string") throw Error();
           throw new Failure(r.error.code, r.error.message);
         }
         if (r.ok !== true || !("result" in r)) throw Error();
@@ -251,11 +243,7 @@ export function entity(x: unknown): asserts x is Entity {
   )
     throw new Failure("INVALID_RESPONSE", "Invalid bookmark data from helper.");
 }
-export async function queryAll(
-  session: Session,
-  query: Query = {},
-  signal?: AbortSignal,
-): Promise<QueryResult> {
+export async function queryAll(session: Session, query: Query = {}, signal?: AbortSignal): Promise<QueryResult> {
   for (let restart = 0; restart < 3; restart++) {
     let offset = 0,
       limit = 100,
@@ -382,22 +370,15 @@ export async function submit(
   const state = await commandState(p);
   if (state.state === "committed-recovering") {
     await controls.phase?.("recovering");
-    throw new Failure(
-      "COMMITTED_RECOVERING",
-      "Saved operation is waiting for dependencies. Open the ME manager.",
-    );
+    throw new Failure("COMMITTED_RECOVERING", "Saved operation is waiting for dependencies. Open the ME manager.");
   }
   if (state.state === "committed-readable") await controls.phase?.("readable");
   else await controls.beforeReplay?.();
   // An identical replay verifies requestHash and repairs the receipt/cache.
   await controls.phase?.("execute");
-  const r = await rpc<"execute", CommandResult>(
-    p.session.installation,
-    "execute",
-    p.command,
-    p.session.libraryId,
-    { timeoutMs },
-  );
+  const r = await rpc<"execute", CommandResult>(p.session.installation, "execute", p.command, p.session.libraryId, {
+    timeoutMs,
+  });
   if (
     !obj(r) ||
     !["committed-readable", "no-change"].includes(r.state) ||
@@ -412,6 +393,7 @@ export async function submit(
  * The manager is the extension page at HashRouter routes /my/0 and
  * /my/0/item/<displayId>. The helper derives that display id, so the receipt is
  * checked for its route kind, library and acknowledgement only.
+ * The helper places conflicts=1 in the page query, before #, not in this fragment.
  */
 const MANAGER_ROUTE = /^\/my\/0(\/item\/\d+)?$/;
 export type ManagerReceipt = {

@@ -63,10 +63,7 @@ export class SubmissionController {
       !["create", "edit"].includes(r.mode) ||
       !["prepared", "execute", "readable", "committed", "recovering", "blocked"].includes(r.phase)
     )
-      throw new Failure(
-        "INVALID",
-        "Invalid pending submission. Keep the record and repair it before saving.",
-      );
+      throw new Failure("INVALID", "Invalid pending submission. Keep the record and repair it before saving.");
     return r;
   }
   async load() {
@@ -158,11 +155,7 @@ export class SubmissionController {
       this.changed();
     }
   }
-  private async deliver(
-    session: Session,
-    recovery: boolean,
-    confirmReplay?: () => Promise<void>,
-  ): Promise<Outcome> {
+  private async deliver(session: Session, recovery: boolean, confirmReplay?: () => Promise<void>): Promise<Outcome> {
     let r = this.record!;
     const attempt: { phase: SubmitPhase } = { phase: "checking" };
     let confirmed = ["readable", "committed", "recovering"].includes(r.phase);

@@ -1,53 +1,37 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { queryAll, type Entity, type Session } from "../helper";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
+import { queryAll, type Session } from "../helper";
 import { session } from "../session";
 
-/** Collection/tag options share cancellation and library ownership, not a global cache. */
+/** Collection/tag options are scoped to the bound library and never cached globally. */
 export function useEntities(kind: "collection" | "tag", bound?: Session | null) {
-  const [result, setResult] = useState<{ entities: Entity[]; libraryId: string }>();
-  const [error, setError] = useState<Error>();
-  const [isLoading, setIsLoading] = useState(true);
-  const controller = useRef<AbortController | undefined>(undefined);
-  const load = useCallback(async () => {
-    controller.current?.abort();
-    const current = new AbortController();
-    controller.current = current;
-    setError(undefined);
-    if (bound === null) {
-      setResult(undefined);
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const active = bound ?? (await session());
-      if (current.signal.aborted) return;
-      setResult((previous) => (previous?.libraryId === active.libraryId ? previous : undefined));
-      const rows = await queryAll(active, { kind }, current.signal);
-      if (!current.signal.aborted) setResult({ entities: rows.items, libraryId: active.libraryId });
-    } catch (cause) {
-      if (
-        !current.signal.aborted &&
-        cause instanceof Error &&
-        "code" in cause &&
-        cause.code === "LIBRARY_MISMATCH"
-      )
-        setResult(undefined);
-      if (!current.signal.aborted) setError(cause instanceof Error ? cause : new Error(String(cause)));
-    } finally {
-      if (!current.signal.aborted) setIsLoading(false);
-    }
-  }, [kind, bound]);
-  useEffect(() => {
-    void load();
-    return () => controller.current?.abort();
-  }, [load]);
-  const visible = bound === null || (bound && result?.libraryId !== bound.libraryId) ? undefined : result;
+  const abortable = useRef<AbortController | undefined>(undefined);
+  const library = useRef<string | undefined>(undefined);
+  const request = usePromise(
+    async (entityKind: "collection" | "tag", binding?: Session | null) => {
+      const signal = abortable.current?.signal;
+      const active = binding ?? (await session());
+      signal?.throwIfAborted();
+      library.current = active.libraryId;
+      const rows = await queryAll(active, { kind: entityKind }, signal);
+      return { entities: rows.items, libraryId: active.libraryId };
+    },
+    [kind, bound],
+    {
+      execute: bound !== null,
+      abortable,
+      onError: (error) => {
+        // Keep the filter identity through ordinary read failures, but never a library mismatch.
+        if ("code" in error && error.code === "LIBRARY_MISMATCH") library.current = undefined;
+      },
+    },
+  );
+  const visible = bound === null || (bound && request.data?.libraryId !== bound.libraryId) ? undefined : request.data;
   return {
-    entities: error ? undefined : visible?.entities,
-    libraryId: visible?.libraryId,
-    error,
-    isLoading,
-    revalidate: load,
+    entities: request.error ? undefined : visible?.entities,
+    libraryId: bound === null ? undefined : library.current,
+    error: bound === null ? undefined : request.error,
+    isLoading: request.isLoading,
+    revalidate: request.revalidate,
   };
 }

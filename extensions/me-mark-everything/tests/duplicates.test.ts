@@ -39,13 +39,7 @@ test("different documents stay different", () => {
 });
 
 test("only web pages get an identity", () => {
-  for (const value of [
-    "mailto:someone@example.com",
-    "javascript:alert(1)",
-    "file:///tmp/a",
-    "example.com/a",
-    "",
-  ])
+  for (const value of ["mailto:someone@example.com", "javascript:alert(1)", "file:///tmp/a", "example.com/a", ""])
     assert.equal(canonicalUrl(value), null, value);
 });
 
@@ -74,13 +68,14 @@ test("a batch keys on every document it names", () => {
 });
 
 test("encoded paths and IDN hosts broaden candidates without changing identity", () => {
-  assert.equal(
-    canonicalUrl("https://example.org/中文"),
-    canonicalUrl("https://example.org/%E4%B8%AD%E6%96%87"),
-  );
+  assert.equal(canonicalUrl("https://example.org/中文"), canonicalUrl("https://example.org/%E4%B8%AD%E6%96%87"));
 });
 
 test("encoded query delimiters never collapse parameter boundaries", () => {
- for (const [left, right] of [["?a=1%26b%3D2", "?a=1&b=2"], ["?a%3Db=c", "?a=b%3Dc"], ["?a=%23x", "?a=#x"]])
- assert.notEqual(canonicalUrl("https://example.org/"+left), canonicalUrl("https://example.org/"+right));
+  for (const [left, right] of [
+    ["?a=1%26b%3D2", "?a=1&b=2"],
+    ["?a%3Db=c", "?a=b%3Dc"],
+    ["?a=%23x", "?a=#x"],
+  ])
+    assert.notEqual(canonicalUrl("https://example.org/" + left), canonicalUrl("https://example.org/" + right));
 });

@@ -1,55 +1,27 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createPageReader,
-  identifyBrowser,
-  parsePage,
-  browsers,
-  pageReadFailure,
-} from "../src/page-capture";
+import { createPageReader, identifyBrowser, parsePage, browsers, pageReadFailure } from "../src/page-capture";
 
 test("optional bundle identity uses exact known names, never an unrelated running browser", () => {
-  assert.equal(
-    identifyBrowser({ name: "Google Chrome" }).bundleId,
-    "com.google.Chrome",
-  );
+  assert.equal(identifyBrowser({ name: "Google Chrome" }).bundleId, "com.google.Chrome");
   assert.equal(identifyBrowser({ name: "Arc.app" }).name, "Arc");
-  assert.equal(
-    identifyBrowser({ name: "localized", bundleId: "com.microsoft.edgemac" })
-      .name,
-    "Microsoft Edge",
-  );
-  assert.throws(
-    () => identifyBrowser({ name: "Finder", bundleId: "com.apple.finder" }),
-    /Started from Finder/,
-  );
-  assert.throws(() =>
-    identifyBrowser({ name: "Google Chrome", bundleId: "not.chrome" }),
-  );
+  assert.equal(identifyBrowser({ name: "localized", bundleId: "com.microsoft.edgemac" }).name, "Microsoft Edge");
+  assert.throws(() => identifyBrowser({ name: "Finder", bundleId: "com.apple.finder" }), /Started from Finder/);
+  assert.throws(() => identifyBrowser({ name: "Google Chrome", bundleId: "not.chrome" }));
 });
 test("structured URL/title capture preserves Unicode, commas, quotes and newlines; rejects internal URLs", () => {
   const title = '中文, “title” "quoted"\nsecond line';
-  assert.deepEqual(
-    parsePage(
-      JSON.stringify({ url: "https://example.org/a?q=x,y", title }),
-      browsers[0],
-    ),
-    { url: "https://example.org/a?q=x,y", title, browser: "Google Chrome" },
-  );
+  assert.deepEqual(parsePage(JSON.stringify({ url: "https://example.org/a?q=x,y", title }), browsers[0]), {
+    url: "https://example.org/a?q=x,y",
+    title,
+    browser: "Google Chrome",
+  });
   assert.throws(
-    () =>
-      parsePage(
-        JSON.stringify({ url: "chrome://settings", title: "Settings" }),
-        browsers[0],
-      ),
+    () => parsePage(JSON.stringify({ url: "chrome://settings", title: "Settings" }), browsers[0]),
     /internal/,
   );
   assert.throws(
-    () =>
-      parsePage(
-        JSON.stringify({ url: "https://example.org/", title: 42 }),
-        browsers[0],
-      ),
+    () => parsePage(JSON.stringify({ url: "https://example.org/", title: 42 }), browsers[0]),
     /Could not read/,
   );
 });
@@ -99,7 +71,6 @@ test("automatic read and retry coalesce instead of starting two permission reque
   assert.equal(calls, 1);
 });
 
-
 test("cancel before origin lookup completes prevents a late browser permission request", async () => {
   let release!: (app: { name: string }) => void,
     calls = 0;
@@ -143,18 +114,11 @@ test("SDK rejections become actionable permission or timeout errors without expo
     /Allow Raycast to control Arc.*Manual entry/,
   );
   assert.match(
-    pageReadFailure(new Error("AppleEvent timed out (-1712)"), browsers[0])
-      .message,
+    pageReadFailure(new Error("AppleEvent timed out (-1712)"), browsers[0]).message,
     /Google Chrome did not respond/,
   );
-  assert.match(
-    pageReadFailure({ name: "AbortError" }, browsers[0]).message,
-    /cancelled/,
-  );
-  const failure = pageReadFailure(
-    new Error("unexpected private diagnostic https://private.invalid"),
-    browsers[0],
-  );
+  assert.match(pageReadFailure({ name: "AbortError" }, browsers[0]).message, /cancelled/);
+  const failure = pageReadFailure(new Error("unexpected private diagnostic https://private.invalid"), browsers[0]);
   assert.match(failure.message, /Could not read Google Chrome/);
   assert.doesNotMatch(failure.message, /private/);
 });
