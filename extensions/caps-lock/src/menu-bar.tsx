@@ -17,7 +17,7 @@ export default function CapsLockMenuBar() {
   async function change(on: boolean) {
     setIsChanging(true);
     try {
-      await mutate(setCapsLock(on), { shouldRevalidateAfter: false });
+      await mutate(setCapsLock(on));
     } finally {
       setIsChanging(false);
     }
