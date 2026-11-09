@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>view_grid</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-427.000000, -166.000000)" fill="#000000">
+            <g id="Group-5" transform="translate(429.000000, 169.000000)">
+                <rect id="Rectangle-1624" opacity="0.119999997" x="0" y="0" width="7" height="7" rx="1"></rect>
+                <rect id="Rectangle-1624-Copy" opacity="0.119999997" x="8" y="0" width="7" height="7" rx="1"></rect>
+                <rect id="Rectangle-1624-Copy-3" opacity="0.119999997" x="0" y="8" width="7" height="7" rx="1"></rect>
+                <rect id="Rectangle-1624-Copy-2" opacity="0.119999997" x="8" y="8" width="7" height="7" rx="1"></rect>
+                <path d="M0,1.00292933 C0,0.449026756 0.437881351,0 1.00292933,0 L5.99707067,0 C6.55097324,0 7,0.437881351 7,1.00292933 L7,5.99707067 C7,6.55097324 6.56211865,7 5.99707067,7 L1.00292933,7 C0.449026756,7 0,6.56211865 0,5.99707067 L0,1.00292933 Z M1,1 L6,1 L6,6 L1,6 L1,1 Z" id="Combined-Shape"></path>
+                <path d="M8,1.00292933 C8,0.449026756 8.43788135,0 9.00292933,0 L13.9970707,0 C14.5509732,0 15,0.437881351 15,1.00292933 L15,5.99707067 C15,6.55097324 14.5621186,7 13.9970707,7 L9.00292933,7 C8.44902676,7 8,6.56211865 8,5.99707067 L8,1.00292933 Z M9,1 L14,1 L14,6 L9,6 L9,1 Z" id="Combined-Shape-Copy-6"></path>
+                <path d="M0,9.00292933 C0,8.44902676 0.437881351,8 1.00292933,8 L5.99707067,8 C6.55097324,8 7,8.43788135 7,9.00292933 L7,13.9970707 C7,14.5509732 6.56211865,15 5.99707067,15 L1.00292933,15 C0.449026756,15 0,14.5621186 0,13.9970707 L0,9.00292933 Z M1,9 L6,9 L6,14 L1,14 L1,9 Z" id="Combined-Shape-Copy-8"></path>
+                <path d="M8,9.00292933 C8,8.44902676 8.43788135,8 9.00292933,8 L13.9970707,8 C14.5509732,8 15,8.43788135 15,9.00292933 L15,13.9970707 C15,14.5509732 14.5621186,15 13.9970707,15 L9.00292933,15 C8.44902676,15 8,14.5621186 8,13.9970707 L8,9.00292933 Z M9,9 L14,9 L14,14 L9,14 L9,9 Z" id="Combined-Shape-Copy-7"></path>
+            </g>
+        </g>
+    </g>
+</svg>

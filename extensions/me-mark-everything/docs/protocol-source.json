@@ -1,0 +1,7 @@
+{
+  "source": "ME docs/api-v1.d.ts",
+  "protocol": 1,
+  "schema": 1,
+  "sha256": "4ad58ca9ed46e5eaf7b1fd796572bdbd2294e63d1d1b805e133aee704d43b4fb",
+  "policy": "Exact distribution snapshot of the ME-owned contract. Refresh from the owning source; do not edit or maintain another protocol definition."
+}

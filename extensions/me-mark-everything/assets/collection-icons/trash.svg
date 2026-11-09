@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>trash</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-280.000000, -16.000000)" fill="#000000">
+            <rect id="Rectangle-1362" opacity="0.0899999961" x="285" y="22" width="10" height="11"></rect>
+            <rect id="Rectangle-1362-Copy" opacity="0.0799999982" x="285" y="21" width="10" height="1"></rect>
+            <rect id="Rectangle-1362-Copy-2" opacity="0.15" x="285" y="32" width="10" height="1"></rect>
+            <path d="M286,33 C285.4,33 285,32.52 285,31.8 L285,21 L295,21 L295,31.8 C295,32.52 294.6,33 294,33 L286,33 Z M288.5,19 L291.5,19 C291.8,19 292,19.2 292,19.5 L292,20 L288,20 L288,19.5 C288,19.2 288.2,19 288.5,19 L288.5,19 Z M293,19 C293,18.4 292.6,18 292,18 L288,18 C287.4,18 287,18.4 287,19 L287,20 L284,20 C283.4,20 283,20.4 283,21 L284,21 L284,32 C284,33 285,34 286,34 L294,34 C295,34 296,33 296,32 L296,21 L297,21 C297,20.4 296.6,20 296,20 L293,20 L293,19 Z" id="trash-copy"></path>
+            <rect id="Rectangle-1424" x="288" y="24" width="1" height="6"></rect>
+            <rect id="Rectangle-1424-Copy" x="291" y="24" width="1" height="6"></rect>
+        </g>
+    </g>
+</svg>

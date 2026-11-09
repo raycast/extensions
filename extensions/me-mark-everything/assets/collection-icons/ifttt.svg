@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
+    <title>ifttt</title>
+    <desc>Created with Sketch.</desc>
+    <g id="ifttt" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Blue" fill="#000000" fill-rule="nonzero" opacity="0.699999988" points="1 1 19 1 19 12.268 1 12.268"></polygon>
+        <polygon id="Red" fill="#000000" fill-rule="nonzero" opacity="0.400000006" points="1 12.268 12.268 12.268 12.268 19 1 19"></polygon>
+        <polygon id="Gray" fill="#000000" fill-rule="nonzero" points="12.268 12.268 19 12.268 19 19 12.268 19"></polygon>
+    </g>
+</svg>

@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "me-mark-everything",
+  "title": "Mark Everything",
+  "description": "Search, save, and edit bookmarks in your local ME library.",
+  "icon": "me-icon.png",
+  "author": "roy",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Bookmarks",
+      "subtitle": "ME",
+      "description": "Search your ME library; edit bookmarks inline with configurable shortcuts",
+      "mode": "view",
+      "icon": "me-icon.png"
+    },
+    {
+      "name": "save",
+      "title": "Save Bookmark",
+      "subtitle": "ME",
+      "description": "Save bookmarks and their details to your local ME library.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": false,
+          "placeholder": "URL"
+        }
+      ],
+      "icon": "me-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "discoveryPath",
+      "type": "textfield",
+      "title": "Helper Discovery Record",
+      "description": "Optional absolute helper-install.json path; leave blank to use the installed ME (me-raindrop).",
+      "required": false,
+      "placeholder": "/absolute/path/to/helper-install.json"
+    },
+    {
+      "name": "shortcutOpen",
+      "type": "textfield",
+      "title": "Shortcut: Open in Browser",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes. Additional shortcut; Return remains available.",
+      "required": false,
+      "default": "",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutCopy",
+      "type": "textfield",
+      "title": "Shortcut: Copy URL",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes. Additional shortcut; cmd+Return remains available when this is the second action.",
+      "required": false,
+      "default": "",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutDetails",
+      "type": "textfield",
+      "title": "Shortcut: Show Details",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes.",
+      "required": false,
+      "default": "cmd+shift+d",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutEdit",
+      "type": "textfield",
+      "title": "Shortcut: Edit in Raycast",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes.",
+      "required": false,
+      "default": "cmd+e",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutTrash",
+      "type": "textfield",
+      "title": "Shortcut: Move to Trash",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes. The confirmation dialog still appears.",
+      "required": false,
+      "default": "ctrl+x",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutManager",
+      "type": "textfield",
+      "title": "Shortcut: Open in ME Manager",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes.",
+      "required": false,
+      "default": "",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutRefresh",
+      "type": "textfield",
+      "title": "Shortcut: Refresh / Reload",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes.",
+      "required": false,
+      "default": "",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutSave",
+      "type": "textfield",
+      "title": "Shortcut: Save Bookmark / Changes",
+      "description": "Use cmd, ctrl, opt, shift and a key, e.g. ctrl+shift+x. Use none to disable. Reopen the command after changes. Additional shortcut; cmd+Return remains available.",
+      "required": false,
+      "default": "",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutAddUrl",
+      "type": "textfield",
+      "title": "Shortcut: Add Another URL",
+      "description": "Use cmd, ctrl, opt, shift and a key. Use none to disable. Reopen the command after changes.",
+      "required": false,
+      "default": "ctrl+shift+a",
+      "placeholder": "cmd+shift+x or none"
+    },
+    {
+      "name": "shortcutRemoveUrl",
+      "type": "textfield",
+      "title": "Shortcut: Remove URL",
+      "description": "Use cmd, ctrl, opt, shift and a key. Use none to disable. Reopen the command after changes.",
+      "required": false,
+      "default": "ctrl+shift+r",
+      "placeholder": "cmd+shift+x or none"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "test": "node --import tsx --test tests/*.test.ts tests/*.test.cjs",
+    "bundle": "ray bundle -o releases/ME-0.8.7.rayext",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "tsx": "latest",
+    "typescript": "latest",
+    "@raycast/eslint-config": "2.2.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3"
+  },
+  "version": "0.8.7",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Schnee013/mark-everything-raycast.git"
+  },
+  "homepage": "https://github.com/Schnee013/mark-everything-raycast#readme",
+  "bugs": {
+    "url": "https://github.com/Schnee013/mark-everything-raycast/issues"
+  }
+}

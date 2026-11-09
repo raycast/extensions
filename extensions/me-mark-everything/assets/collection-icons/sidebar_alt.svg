@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>sidebar_alt</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-277.000000, -106.000000)" fill="#000000">
+            <rect id="1" opacity="0.100000001" x="284" y="108" width="12" height="16"></rect>
+            <path d="M277,109.000872 C277,108.448106 277.455306,108 277.991803,108 L296.008197,108 C296.555955,108 297,108.444631 297,109.000872 L297,122.999128 C297,123.551894 296.544694,124 296.008197,124 L277.991803,124 C277.444045,124 277,123.555369 277,122.999128 L277,109.000872 Z M278,109 L296,109 L296,123 L278,123 L278,109 Z M283,109 L284,109 L284,123 L283,123 L283,109 Z" id="Combined-Shape"></path>
+            <path d="M279,114 L282,114 L282,115 L279,115 L279,114 Z M279,112 L282,112 L282,113 L279,113 L279,112 Z M279,110 L282,110 L282,111 L279,111 L279,110 Z" id="Rectangle-1763-Copy-2" opacity="0.7"></path>
+        </g>
+    </g>
+</svg>
