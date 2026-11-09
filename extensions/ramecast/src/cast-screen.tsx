@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, open, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Discovered, discoverAll } from "./lib/discover";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
+import { Discovered, discoverAll, initialDiscovered } from "./lib/discover";
 import { adapterFor, Device, Protocol } from "./lib/protocols";
 import { openSystemMirroring, SystemTarget } from "./lib/protocols/system";
-import { ScreenPermissionError, startCast, stopCast } from "./lib/stream";
+import { CancelledError, ScreenPermissionError, startCast, stopCast } from "./lib/stream";
 
 const TAG_COLOR: Record<Protocol, Color> = {
   googlecast: Color.Blue,
@@ -12,21 +13,36 @@ const TAG_COLOR: Record<Protocol, Color> = {
 };
 
 export default function Command() {
-  const [found, setFound] = useState<Discovered>({ devices: [], system: [] });
-  const [isLoading, setIsLoading] = useState(true);
-  const [scan, setScan] = useState(0);
-  const rescan = () => setScan((n) => n + 1);
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-    discoverAll((f) => !cancelled && setFound(f)).then(() => !cancelled && setIsLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [scan]);
+  // Devices appear as they answer; `live` holds the scan in progress, `data` the finished one.
+  const [live, setLive] = useState<Discovered>(initialDiscovered);
+  const { data, isLoading, error, revalidate } = usePromise(
+    async () => {
+      setLive(initialDiscovered());
+      return discoverAll(setLive);
+    },
+    [],
+    {
+      failureToastOptions: { title: "Could not search for devices" },
+      onData: (result) => {
+        if (result.errors.length) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Some device types couldn't be searched",
+            message: result.errors.join("\n"),
+          });
+        }
+      },
+    },
+  );
+  const found = isLoading ? live : (data ?? live);
+  const casting = useRef(false);
 
   async function cast(device: Device) {
+    if (casting.current) {
+      await showToast({ style: Toast.Style.Failure, title: "A cast is already starting" });
+      return;
+    }
+    casting.current = true;
     const toast = await showToast({ style: Toast.Style.Animated, title: `Casting to ${device.name}…` });
     try {
       await startCast(device, (message) => (toast.message = message));
@@ -35,7 +51,7 @@ export default function Command() {
       toast.message = undefined;
     } catch (e) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Could not start casting";
+      toast.title = e instanceof CancelledError ? "Cast cancelled" : "Could not start casting";
       toast.message = e instanceof Error ? e.message : String(e);
       if (e instanceof ScreenPermissionError) {
         toast.primaryAction = {
@@ -43,6 +59,28 @@ export default function Command() {
           onAction: () => open("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"),
         };
       }
+    } finally {
+      casting.current = false;
+    }
+  }
+
+  async function stop() {
+    try {
+      const active = await stopCast();
+      await showToast({
+        style: Toast.Style.Success,
+        title: active ? `Stopped casting to ${active.device.name}` : "Nothing is being cast",
+      });
+    } catch (e) {
+      await showFailureToast(e, { title: "Could not stop casting" });
+    }
+  }
+
+  async function mirror(target: SystemTarget) {
+    try {
+      await openSystemMirroring(target);
+    } catch (e) {
+      await showFailureToast(e, { title: "Could not open screen mirroring" });
     }
   }
 
@@ -50,19 +88,29 @@ export default function Command() {
     <Action
       title="Refresh Devices"
       icon={Icon.ArrowClockwise}
-      onAction={rescan}
+      onAction={revalidate}
       shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
+  const nothingFound = !isLoading && !found.devices.length && !found.system.length;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select a device to cast your screen to">
-      <List.EmptyView
-        icon={Icon.Wifi}
-        title={isLoading ? "Searching for devices…" : "No devices found"}
-        description="Make sure your computer and the device are on the same network."
-        actions={<ActionPanel>{refresh}</ActionPanel>}
-      />
+      {error && nothingFound ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Could not search for devices"
+          description={error.message}
+          actions={<ActionPanel>{refresh}</ActionPanel>}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Wifi}
+          title={isLoading ? "Searching for devices…" : "No devices found"}
+          description="Make sure your computer and the device are on the same network."
+          actions={<ActionPanel>{refresh}</ActionPanel>}
+        />
+      )}
       <List.Section title="Cast Devices" subtitle="Streamed by RameCast">
         {found.devices.map((d) => (
           <List.Item
@@ -78,7 +126,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action title="Cast Screen" icon={Icon.Play} onAction={() => cast(d)} />
-                <Action title="Stop Casting" icon={Icon.Stop} onAction={() => stopCast()} />
+                <Action title="Stop Casting" icon={Icon.Stop} onAction={stop} />
                 {refresh}
               </ActionPanel>
             }
@@ -86,7 +134,7 @@ export default function Command() {
         ))}
       </List.Section>
       <List.Section title="System Mirroring" subtitle="Opens your system's screen mirroring">
-        {found.system.map((t: SystemTarget) => (
+        {found.system.map((t) => (
           <List.Item
             key={`${t.kind}:${t.id}`}
             icon={t.kind === "airplay" ? Icon.Livestream : Icon.Desktop}
@@ -100,7 +148,7 @@ export default function Command() {
                 <Action
                   title={t.kind === "airplay" ? "Mirror with AirPlay" : "Open Cast Panel"}
                   icon={Icon.Play}
-                  onAction={() => openSystemMirroring(t)}
+                  onAction={() => mirror(t)}
                 />
                 {refresh}
               </ActionPanel>

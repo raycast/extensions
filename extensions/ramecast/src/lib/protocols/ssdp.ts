@@ -9,13 +9,34 @@ export interface SsdpResponse {
   address: string;
 }
 
+/**
+ * Parse a URL a device gave us and accept it only if it points back at that same device over HTTP.
+ * Discovery data comes from anyone on the LAN, so this stops a reply from steering requests at
+ * localhost or other internal services.
+ */
+export function deviceUrl(raw: string | undefined, deviceHost: string, base?: string): URL | undefined {
+  if (!raw) return undefined;
+  try {
+    const url = base ? new URL(raw, base) : new URL(raw);
+    if (url.protocol !== "http:" || url.hostname !== deviceHost || url.username || url.password) return undefined;
+    return url;
+  } catch {
+    return undefined; // malformed
+  }
+}
+
+/** fetch() limited to the device: redirects are refused, since they could lead anywhere. */
+export function fetchDevice(url: URL, init: RequestInit = {}, timeoutMs = 4000): Promise<Response> {
+  return fetch(url, { ...init, redirect: "error", signal: AbortSignal.timeout(timeoutMs) });
+}
+
 /** Send SSDP M-SEARCH queries for the given search targets and report every response. */
 export function ssdpSearch(
   targets: string[],
   durationMs: number,
   onResponse: (res: SsdpResponse) => void,
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
     const send = () => {
       for (const st of targets) {
@@ -31,19 +52,33 @@ export function ssdpSearch(
         const i = line.indexOf(":");
         if (i > 0) headers[line.slice(0, i).trim().toLowerCase()] = line.slice(i + 1).trim();
       }
-      onResponse({ headers, address: rinfo.address });
+      try {
+        onResponse({ headers, address: rinfo.address });
+      } catch {
+        // one malformed reply must not end the scan
+      }
     });
-    socket.on("error", () => undefined);
     let timer: NodeJS.Timeout | undefined;
+    let done = false;
+    const finish = (err?: Error) => {
+      if (done) return;
+      done = true;
+      if (timer) clearInterval(timer);
+      clearTimeout(deadline);
+      try {
+        socket.close();
+      } catch {
+        // already closed
+      }
+      if (err) reject(err);
+      else resolve();
+    };
+    socket.on("error", (err) => finish(err));
     socket.bind(0, () => {
       send();
       timer = setInterval(send, 2000);
     });
-    setTimeout(() => {
-      if (timer) clearInterval(timer);
-      socket.close();
-      resolve();
-    }, durationMs);
+    const deadline = setTimeout(() => finish(), durationMs);
   });
 }
 

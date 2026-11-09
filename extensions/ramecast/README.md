@@ -9,17 +9,20 @@ Cast your screen to Chromecast, smart TVs, Roku and AirPlay or Miracast displays
 
 ## Supported devices
 
-| Type        | Devices                                                         | How                            |
-| ----------- | --------------------------------------------------------------- | ------------------------------ |
-| Google Cast | Chromecast, Google TV, Android TV, TVs with Chromecast built in | Streamed by RameCast (HLS)     |
-| DLNA / UPnP | Most Samsung, LG, Sony and Philips smart TVs                    | Streamed by RameCast (MPEG-TS) |
-| Roku        | Roku players and Roku TVs                                       | Streamed by RameCast (HLS)     |
-| AirPlay     | Apple TV, AirPlay 2 TVs (macOS)                                 | Opens macOS screen mirroring   |
-| Miracast    | Wireless displays, Fire TV, many TVs (Windows)                  | Opens the Windows Cast panel   |
+| Type        | Devices                                                         | How                                                                     |
+| ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Google Cast | Chromecast, Google TV, Android TV, TVs with Chromecast built in | Screen mirroring like Chrome (Cast Streaming); HLS stream as a fallback |
+| Roku        | Roku players and Roku TVs                                       | Streamed by RameCast (HLS)                                              |
+| DLNA / UPnP | Most Samsung, LG, Sony and Philips smart TVs                    | Streamed by RameCast (MPEG-TS)                                          |
+| AirPlay     | Apple TV, AirPlay 2 TVs (macOS)                                 | Opens macOS screen mirroring                                            |
+| Miracast    | Wireless displays, Fire TV, many TVs (Windows)                  | Opens the Windows Cast panel                                            |
 
 AirPlay mirroring uses a closed, encrypted protocol, and Miracast is built into Windows, so for those RameCast hands
-off to the operating system, which also gives lower latency. If a TV supports several types, RameCast lists it once,
-using the first type in the table.
+off to the operating system, which also gives lower latency.
+
+If a TV answers on more than one of the types RameCast streams to itself, it's listed once under **Cast Devices**,
+preferring Google Cast, then Roku, then DLNA. AirPlay receivers are listed separately under **System Mirroring**, so a
+TV that supports both Google Cast and AirPlay appears in both sections.
 
 **Roku:** set **Settings → System → Advanced system settings → Control by mobile apps** to _Default_ or _Permissive_.
 
@@ -55,7 +58,8 @@ Your screen is streamed only on your local network, and only to the device you p
 - Screen mirroring to Google Cast devices goes straight to the device over UDP, encrypted with a new AES-128 key
   for each session.
 - Nothing is sent to the internet, apart from the one-time encoder download from GitHub.
-- **Stop Casting** stops the encoder and the server, and closes the player on the device.
+- **Stop Casting** stops the encoder and the server, deletes the temporary stream files, and closes the player on the
+  device. It only stops what RameCast started: if you've since opened another app on the TV, it's left alone.
 
 ## How it works
 
@@ -94,10 +98,3 @@ MPEG-TS for DLNA TVs), served by a small local HTTP server, and the device plays
 of delay.
 
 If casting fails, `cast.log` and `ffmpeg.log` in the extension's support folder show what happened.
-
-## Development
-
-```sh
-npm install
-npm run dev
-```

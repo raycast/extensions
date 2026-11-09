@@ -1,12 +1,15 @@
 import { protocolLog } from "./log";
-import { escapeXml, ssdpSearch, xmlTag } from "./ssdp";
+import { deviceUrl, escapeXml, fetchDevice, ssdpSearch, xmlTag } from "./ssdp";
 import type { Adapter, Device } from "./types";
 
 const RENDERER = "urn:schemas-upnp-org:device:MediaRenderer:1";
 
 /** Fetch a UPnP device description and pull out what we need to control its AVTransport service. */
-async function describe(location: string, address: string): Promise<Device | undefined> {
-  const res = await fetch(location, { signal: AbortSignal.timeout(4000) });
+async function describe(rawLocation: string | undefined, address: string): Promise<Device | undefined> {
+  // Every URL must point back at the device that answered (see deviceUrl).
+  const location = deviceUrl(rawLocation, address);
+  if (!location) return undefined;
+  const res = await fetchDevice(location);
   if (!res.ok) return undefined;
   const xml = await res.text();
 
@@ -14,41 +17,48 @@ async function describe(location: string, address: string): Promise<Device | und
     .map((m) => m[1])
     .find((s) => /AVTransport/i.test(xmlTag(s, "serviceType") ?? ""));
   const serviceType = service && xmlTag(service, "serviceType");
-  const controlPath = service && xmlTag(service, "controlURL");
-  if (!serviceType || !controlPath) return undefined;
+  if (!service || !serviceType || !/^urn:[\w.:-]+$/.test(serviceType)) return undefined;
 
-  const base = xmlTag(xml, "URLBase") || location;
-  const url = new URL(location);
+  const base = deviceUrl(xmlTag(xml, "URLBase"), address) ?? location;
+  const controlUrl = deviceUrl(xmlTag(service, "controlURL"), address, base.toString());
+  if (!controlUrl) return undefined;
+
   return {
     protocol: "dlna",
-    id: xmlTag(xml, "UDN") ?? location,
+    id: xmlTag(xml, "UDN") ?? location.toString(),
     name: xmlTag(xml, "friendlyName") ?? address,
     model: [xmlTag(xml, "manufacturer"), xmlTag(xml, "modelName")].filter(Boolean).join(" ") || "DLNA Renderer",
     host: address,
-    port: Number(url.port) || 80,
-    meta: { controlUrl: new URL(controlPath, base).toString(), serviceType },
+    port: Number(location.port) || 80,
+    meta: { controlUrl: controlUrl.toString(), serviceType },
   };
 }
 
-async function soap(device: Device, action: string, args: string, log?: (l: string) => void): Promise<void> {
-  const { controlUrl, serviceType } = device.meta ?? {};
+async function soap(device: Device, action: string, args: string, log?: (l: string) => void): Promise<string> {
+  const { serviceType } = device.meta ?? {};
+  const controlUrl = deviceUrl(device.meta?.controlUrl, device.host);
+  if (!controlUrl || !serviceType) throw new Error("This TV's control address is invalid");
   const body =
     `<?xml version="1.0" encoding="utf-8"?>` +
     `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">` +
     `<s:Body><u:${action} xmlns:u="${serviceType}"><InstanceID>0</InstanceID>${args}</u:${action}></s:Body></s:Envelope>`;
   log?.(`>> ${action} ${controlUrl}`);
-  const res = await fetch(controlUrl, {
-    method: "POST",
-    headers: { "Content-Type": 'text/xml; charset="utf-8"', SOAPAction: `"${serviceType}#${action}"` },
-    body,
-    signal: AbortSignal.timeout(10000),
-  });
+  const res = await fetchDevice(
+    controlUrl,
+    {
+      method: "POST",
+      headers: { "Content-Type": 'text/xml; charset="utf-8"', SOAPAction: `"${serviceType}#${action}"` },
+      body,
+    },
+    10000,
+  );
   const text = await res.text();
   log?.(`<< ${res.status} ${text.slice(0, 1000)}`);
   if (!res.ok) {
     const reason = xmlTag(text, "errorDescription") ?? xmlTag(text, "faultstring") ?? `HTTP ${res.status}`;
     throw new Error(`TV rejected ${action}: ${reason}`);
   }
+  return text;
 }
 
 /** DIDL-Lite metadata; many TVs refuse a URI without it. Flags mark the stream as live (no seeking). */
@@ -84,11 +94,6 @@ export const dlna: Adapter = {
 
   async play(device, urls) {
     const log = protocolLog("dlna");
-    try {
-      await soap(device, "Stop", "", log);
-    } catch {
-      // nothing was playing
-    }
     await soap(
       device,
       "SetAVTransportURI",
@@ -96,9 +101,15 @@ export const dlna: Adapter = {
       log,
     );
     await soap(device, "Play", "<Speed>1</Speed>", log);
+    return {};
   },
 
-  stop(device) {
-    return soap(device, "Stop", "", protocolLog("dlna", false));
+  async stop(device, playback) {
+    if (!playback.streamToken) return;
+    const log = protocolLog("dlna", false);
+    // Only stop the TV if it's still playing RameCast's stream, not something the user started since.
+    const info = await soap(device, "GetMediaInfo", "", log);
+    if (!(xmlTag(info, "CurrentURI") ?? "").includes(playback.streamToken)) return;
+    await soap(device, "Stop", "", log);
   },
 };

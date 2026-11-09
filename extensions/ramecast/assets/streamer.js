@@ -1,5 +1,6 @@
 // Detached helper: runs ffmpeg (screen -> HLS) and serves the HLS folder over HTTP.
-// Usage: node streamer.js <bindIp> <allowedIp> <token> <dir> <ffmpegPath> <ffmpegArgsJson> <logFile>
+// Usage: node streamer.js <bindIp> <allowedIp> <token> <dir> <ffmpegPath> <ffmpegArgsJson> <logFile> <sessionId>
+// (sessionId is unused here; it's on the command line so the extension can confirm a PID is this worker.)
 //
 // Access control: the server binds only to the interface facing the Cast device, picks a random
 // port, only answers requests from the device's IP, and only under /<random token>/. The chosen
@@ -70,15 +71,26 @@ function serveLive(req, res) {
   if (req.method === "HEAD") return res.end();
 
   let last = null; // number of the last segment sent
+  let blockedSince = 0;
   const tick = () => {
+    // Backpressure: don't queue more video while the TV isn't reading. If it stays stuck (paused,
+    // gone), close the connection rather than buffering the live stream in memory indefinitely.
+    if (res.writableNeedDrain) {
+      blockedSince ||= Date.now();
+      if (Date.now() - blockedSince > 15000 || res.writableLength > 32 * 1024 * 1024) res.destroy();
+      return;
+    }
+    blockedSince = 0;
     const segs = playlistSegments();
     if (!segs.length) return;
-    // Start at the newest segment to keep latency low, then follow along.
-    const todo = last === null ? segs.slice(-1) : segs.filter((s) => segNum(s) > last);
+    // Start at the newest segment to keep latency low, then follow along. After a stall, skip ahead
+    // to the newest segment instead of replaying old ones.
+    const fresh = last === null ? [] : segs.filter((s) => segNum(s) > last);
+    const todo = last === null || fresh.length > 2 ? segs.slice(-1) : fresh;
     for (const name of todo) {
       try {
-        res.write(fs.readFileSync(path.join(dir, name)));
         last = segNum(name);
+        if (!res.write(fs.readFileSync(path.join(dir, name)))) break; // wait for 'drain' (next tick)
       } catch {
         // segment rotated away between listing and reading; skip it
       }

@@ -1,6 +1,6 @@
 import { closeMainWindow, open, showHUD } from "@raycast/api";
-import { Bonjour } from "bonjour-service";
-import { execFile } from "child_process";
+import { runPowerShellScript } from "@raycast/utils";
+import { browseMdns } from "./mdns";
 
 /**
  * Targets mirrored by the operating system itself rather than by RameCast: AirPlay on macOS
@@ -16,25 +16,14 @@ export interface SystemTarget {
 /** AirPlay receivers (Apple TV, AirPlay 2 TVs). macOS only; resolves when the scan window ends. */
 export function discoverAirPlay(onFound: (t: SystemTarget) => void, durationMs: number): Promise<void> {
   if (process.platform !== "darwin") return Promise.resolve();
-  return new Promise((resolve) => {
-    const bonjour = new Bonjour();
-    const browser = bonjour.find({ type: "airplay" }, (service) => {
+  return browseMdns(
+    "airplay",
+    (service) => {
       const txt = (service.txt ?? {}) as Record<string, string>;
-      onFound({
-        kind: "airplay",
-        id: txt.deviceid ?? service.name,
-        name: service.name,
-        model: txt.model ?? "AirPlay",
-      });
-    });
-    const requery = setInterval(() => browser.update(), 1500);
-    setTimeout(() => {
-      clearInterval(requery);
-      browser.stop();
-      bonjour.destroy();
-      resolve();
-    }, durationMs);
-  });
+      onFound({ kind: "airplay", id: txt.deviceid ?? service.name, name: service.name, model: txt.model ?? "AirPlay" });
+    },
+    durationMs,
+  );
 }
 
 /** Windows always offers its built-in wireless display picker. */
@@ -53,13 +42,15 @@ const WIN_K = [
 ].join("");
 
 export async function openSystemMirroring(target: SystemTarget): Promise<void> {
-  await closeMainWindow();
+  // Throws if the hand-off fails, so the caller can show an error instead of a misleading HUD.
   if (target.kind === "airplay") {
     // Displays settings lists AirPlay receivers under the "+" (Add Display) menu.
     await open("x-apple.systempreferences:com.apple.Displays-Settings.extension");
+    await closeMainWindow();
     await showHUD(`Choose “${target.name}” from the + menu in Displays settings`);
   } else {
-    execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", WIN_K], { windowsHide: true });
+    await closeMainWindow(); // the Cast panel needs focus
+    await runPowerShellScript(WIN_K);
     await showHUD("Pick your wireless display in the Cast panel");
   }
 }

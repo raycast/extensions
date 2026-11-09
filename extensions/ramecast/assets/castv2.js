@@ -13,6 +13,7 @@ const NS = {
   webrtc: "urn:x-cast:com.google.cast.webrtc", // Cast Streaming session (OFFER / ANSWER)
 };
 const SENDER = "sender-0";
+const MAX_MESSAGE = 64 * 1024; // Cast messages are capped at 64 KiB; anything larger is a broken or hostile peer
 const DEFAULT_MEDIA_RECEIVER = "CC1AD845";
 const MIRRORING_RECEIVER = "0F5096E8"; // the receiver Chrome uses for tab/screen mirroring
 
@@ -137,6 +138,12 @@ class CastClient {
     this.buffer = Buffer.concat([this.buffer, chunk]);
     while (this.buffer.length >= 4) {
       const len = this.buffer.readUInt32BE(0);
+      if (len > MAX_MESSAGE) {
+        this.log?.(`message too large (${len} bytes); closing connection`);
+        this.buffer = Buffer.alloc(0);
+        this.socket?.destroy();
+        return;
+      }
       if (this.buffer.length < 4 + len) break;
       const msg = decode(this.buffer.subarray(4, 4 + len));
       this.buffer = this.buffer.subarray(4 + len);
@@ -208,18 +215,20 @@ class CastClient {
     return app;
   }
 
-  /** Launch the Default Media Receiver and play a URL on it. */
+  /** Launch the Default Media Receiver and play a URL on it; returns the launched app (with its sessionId). */
   async loadMedia(media) {
     const app = await this.launch(DEFAULT_MEDIA_RECEIVER);
     const res = await this.request(app.transportId, NS.media, { type: "LOAD", media, autoplay: true }, 30000);
     if (res.type !== "MEDIA_STATUS") throw new Error(`Device refused the stream: ${res.reason ?? res.type}`);
+    return app;
   }
 
-  async stopApps() {
+  /** Stop one receiver session if it's still running. Other apps (e.g. YouTube started later) are left alone. */
+  async stopSession(sessionId) {
     const { applications } = await this.getStatus();
-    for (const app of applications ?? []) {
-      await this.request("receiver-0", NS.receiver, { type: "STOP", sessionId: app.sessionId });
-    }
+    if (!applications?.some((a) => a.sessionId === sessionId)) return false;
+    await this.request("receiver-0", NS.receiver, { type: "STOP", sessionId });
+    return true;
   }
 }
 

@@ -12,4 +12,4 @@ export function adapterFor(protocol: Protocol): Adapter {
   return adapter;
 }
 
-export type { Adapter, Device, Protocol, StreamUrls } from "./types";
+export type { Adapter, Device, Playback, Protocol, StreamUrls } from "./types";

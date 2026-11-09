@@ -1,11 +1,12 @@
 import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { runPowerShellScript } from "@raycast/utils";
 import { execFileSync, spawn } from "child_process";
 import { randomBytes } from "crypto";
 import fs from "fs";
 import os from "os";
 import path from "path";
 import { ensureFfmpeg } from "./ffmpeg";
-import { adapterFor, Device } from "./protocols";
+import { adapterFor, Device, Playback } from "./protocols";
 import { CAST_LOG, protocolLog } from "./protocols/log";
 
 const STATE_KEY = "active-cast";
@@ -16,6 +17,13 @@ const MIRROR_STATUS = path.join(environment.supportPath, "mirror-status.json");
 /** Thrown when macOS isn't delivering screen frames (Screen Recording permission missing). */
 export class ScreenPermissionError extends Error {}
 
+/** Thrown when a newer cast or Stop Casting took over while this cast was still starting. */
+export class CancelledError extends Error {
+  constructor() {
+    super("Cancelled by a newer cast or Stop Casting");
+  }
+}
+
 /** Latency preference: the receiver's playout buffer and the capture frame rate. */
 const LATENCY = {
   auto: { targetDelayMs: 200, fps: 30, auto: true },
@@ -25,8 +33,8 @@ const LATENCY = {
 } as const;
 
 function latencySettings() {
-  const { latency } = getPreferenceValues<{ latency?: keyof typeof LATENCY }>();
-  return LATENCY[latency ?? "auto"] ?? LATENCY.auto;
+  const { latency } = getPreferenceValues<Preferences>();
+  return LATENCY[latency] ?? LATENCY.auto;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -42,6 +50,7 @@ function noFramesError(): Error {
 }
 
 function isAlive(pid: number): boolean {
+  if (!(pid > 0)) return false;
   try {
     process.kill(pid, 0);
     return true;
@@ -50,7 +59,29 @@ function isAlive(pid: number): boolean {
   }
 }
 
-/** Kill the streamer and everything it spawned (ffmpeg). */
+/**
+ * Whether `pid` is still the worker started for `session`. Every worker has its session id on its
+ * command line, so a PID the OS has since reused for another app never matches.
+ */
+async function ownsProcess(pid: number, session: string | undefined): Promise<boolean> {
+  if (!session || !Number.isInteger(pid) || pid <= 0 || !isAlive(pid)) return false;
+  try {
+    const commandLine =
+      process.platform === "win32"
+        ? await runPowerShellScript(`(Get-CimInstance Win32_Process -Filter "ProcessId=${pid}").CommandLine`)
+        : execFileSync("ps", ["-o", "command=", "-p", String(pid)], { encoding: "utf8" });
+    return commandLine.includes(session);
+  } catch {
+    return false;
+  }
+}
+
+/** Kill a worker (and its ffmpeg), but only after confirming it belongs to `session`. */
+async function killOwned(pid: number, session: string | undefined) {
+  if (await ownsProcess(pid, session)) killTree(pid);
+}
+
+/** Kill the streamer and everything it spawned (ffmpeg). Callers must check ownership first. */
 function killTree(pid: number) {
   try {
     if (process.platform === "win32") execFileSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
@@ -85,8 +116,40 @@ function ffmpegFailure(): string {
 }
 
 interface ActiveCast {
+  /** Random id for this cast; also on the worker's command line (see ownsProcess). */
+  session: string;
+  /** Worker PID, 0 while still starting. */
   pid: number;
   device: Device;
+  /** What was started on the device, so Stop only stops that. */
+  playback: Playback;
+}
+
+async function readActive(): Promise<ActiveCast | undefined> {
+  const raw = await LocalStorage.getItem<string>(STATE_KEY);
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as ActiveCast;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Update this session's saved record. If another cast or Stop Casting replaced it in the meantime,
+ * this start has been cancelled: kill the worker it just started and stop.
+ */
+async function updateActive(session: string, update: Partial<ActiveCast>, ownPid = 0): Promise<void> {
+  const current = await readActive();
+  if (current?.session !== session) {
+    await killOwned(ownPid, session);
+    throw new CancelledError();
+  }
+  await LocalStorage.setItem(STATE_KEY, JSON.stringify({ ...current, ...update }));
+}
+
+async function ensureCurrent(session: string, ownPid = 0): Promise<void> {
+  await updateActive(session, {}, ownPid);
 }
 
 /** The local IPv4 address on the same subnet as the device (falls back to the first external one). */
@@ -128,6 +191,7 @@ function captureArgs(ffmpeg: string, fps: number): string[] {
 }
 
 function spawnDetached(script: string, args: string[]): number {
+  // The last argument always carries the session id (see ownsProcess).
   const child = spawn(process.execPath, [path.join(environment.assetsPath, script), ...args], {
     detached: true,
     stdio: "ignore",
@@ -138,19 +202,30 @@ function spawnDetached(script: string, args: string[]): number {
 
 export async function startCast(device: Device, onProgress?: (message: string) => void): Promise<void> {
   await stopCast();
-  const ffmpeg = await ensureFfmpeg(onProgress);
-  const bindIp = localIp(device.host);
+  // Claim the active-cast record first: a newer cast or Stop Casting replaces it, which cancels this one.
+  const session = randomBytes(12).toString("hex");
+  await LocalStorage.setItem(STATE_KEY, JSON.stringify({ session, pid: 0, device, playback: {} } satisfies ActiveCast));
+  try {
+    const ffmpeg = await ensureFfmpeg(onProgress);
+    await ensureCurrent(session);
+    const bindIp = localIp(device.host);
 
-  if (device.protocol === "googlecast") {
-    onProgress?.("Starting screen mirroring…");
-    const latency = latencySettings();
-    const unavailable = await startMirror(device, ffmpeg, captureArgs(ffmpeg, latency.fps), bindIp, latency);
-    if (!unavailable) return;
-    onProgress?.("Mirroring unavailable on this device, using video stream…");
-  } else {
-    onProgress?.("Starting stream…");
+    if (device.protocol === "googlecast") {
+      onProgress?.("Starting screen mirroring…");
+      const latency = latencySettings();
+      const capture = captureArgs(ffmpeg, latency.fps);
+      const unavailable = await startMirror(session, device, ffmpeg, capture, bindIp, latency);
+      if (!unavailable) return;
+      onProgress?.("Mirroring unavailable on this device, using video stream…");
+    } else {
+      onProgress?.("Starting stream…");
+    }
+    await startHls(session, device, ffmpeg, captureArgs(ffmpeg, 30), bindIp);
+  } catch (e) {
+    // Clean up only if this cast still owns the record; otherwise whoever replaced it already did.
+    if ((await readActive())?.session === session) await stopCast();
+    throw e;
   }
-  await startHls(device, ffmpeg, captureArgs(ffmpeg, 30), bindIp);
 }
 
 /**
@@ -159,6 +234,7 @@ export async function startCast(device: Device, onProgress?: (message: string) =
  * failures a fallback can't fix (device unreachable, screen capture broken).
  */
 async function startMirror(
+  session: string,
   device: Device,
   ffmpeg: string,
   capture: string[],
@@ -168,6 +244,7 @@ async function startMirror(
   protocolLog("mirror")(`mirroring to ${device.name} (${device.host}:${device.port})`);
   fs.rmSync(MIRROR_STATUS, { force: true });
   const config = {
+    session,
     host: device.host,
     port: device.port,
     bindIp,
@@ -179,34 +256,40 @@ async function startMirror(
     ...latency,
   };
   const pid = spawnDetached("mirror.js", [JSON.stringify(config)]);
-  await LocalStorage.setItem(STATE_KEY, JSON.stringify({ pid, device } satisfies ActiveCast));
+  await updateActive(session, { pid }, pid);
 
-  let status: { state: string; stage?: string; message?: string } | undefined;
+  let status: { state: string; stage?: string; message?: string; castSessionId?: string } | undefined;
   for (let i = 0; i < 120 && !status && isAlive(pid); i++) {
     await sleep(500);
+    await ensureCurrent(session, pid);
     try {
       status = JSON.parse(fs.readFileSync(MIRROR_STATUS, "utf8"));
     } catch {
       // not written yet
     }
   }
-  if (status?.state === "streaming") return undefined;
+  if (status?.state === "streaming") {
+    await updateActive(session, { playback: { castSessionId: status.castSessionId } }, pid);
+    return undefined;
+  }
 
-  await stopCast();
-  if (!status) throw new Error(isAlive(pid) ? "Mirroring timed out" : "Mirroring stopped unexpectedly (see cast.log)");
+  const stillRunning = isAlive(pid);
+  await killOwned(pid, session); // this attempt only; the caller decides what else to clean up
+  if (!status) throw new Error(stillRunning ? "Mirroring timed out" : "Mirroring stopped unexpectedly (see cast.log)");
   if (status.stage === "launch" || status.stage === "offer") {
     fs.copyFileSync(CAST_LOG, CAST_LOG.replace(/\.log$/, "-mirror.log")); // keep the trace; HLS starts a new one
     return status.message ?? "mirroring unavailable";
   }
-  if (status.stage === "capture")
+  if (status.stage === "capture") {
     throw status.message === "no screen frames"
       ? noFramesError()
       : new Error(`Screen capture failed: ${ffmpegFailure()}`);
+  }
   throw new Error(status.message ?? "Mirroring failed");
 }
 
 /** HLS: the device plays the screen like a live video (DLNA, Roku, and Google Cast fallback). */
-async function startHls(device: Device, ffmpeg: string, capture: string[], bindIp: string) {
+async function startHls(session: string, device: Device, ffmpeg: string, capture: string[], bindIp: string) {
   fs.rmSync(HLS_DIR, { recursive: true, force: true });
   fs.mkdirSync(HLS_DIR, { recursive: true, mode: 0o700 });
   const token = randomBytes(24).toString("hex");
@@ -229,40 +312,44 @@ async function startHls(device: Device, ffmpeg: string, capture: string[], bindI
     ffmpeg,
     JSON.stringify(args),
     LOG_FILE,
+    session,
   ]);
-  await LocalStorage.setItem(STATE_KEY, JSON.stringify({ pid, device } satisfies ActiveCast));
+  await updateActive(session, { pid, playback: { streamToken: token } }, pid);
 
   // Wait for the server's port and the first playlist before telling the device to load it.
   const playlist = path.join(HLS_DIR, "index.m3u8");
   const portFile = path.join(HLS_DIR, ".port");
   const ready = () => fs.existsSync(playlist) && fs.existsSync(portFile);
-  for (let i = 0; i < 30 && !ready() && isAlive(pid); i++) await sleep(500);
+  for (let i = 0; i < 30 && !ready() && isAlive(pid); i++) {
+    await sleep(500);
+    await ensureCurrent(session, pid);
+  }
   if (!ready()) {
-    const crashed = !isAlive(pid);
-    await stopCast();
-    throw crashed ? new Error(`Screen capture failed: ${ffmpegFailure()}`) : noFramesError();
+    throw isAlive(pid) ? noFramesError() : new Error(`Screen capture failed: ${ffmpegFailure()}`);
   }
 
   const port = fs.readFileSync(portFile, "utf8").trim();
   const base = `http://${bindIp}:${port}/${token}`;
-  try {
-    await adapterFor(device.protocol).play(device, { hls: `${base}/index.m3u8`, ts: `${base}/live.ts` });
-  } catch (e) {
-    await stopCast();
-    throw e;
-  }
+  const playback = await adapterFor(device.protocol).play(device, { hls: `${base}/index.m3u8`, ts: `${base}/live.ts` });
+  await updateActive(session, { playback: { ...playback, streamToken: token } }, pid);
 }
 
+/**
+ * Stop the active cast: the worker (only if it's really ours), RameCast's playback on the device
+ * (never other apps), and the temporary screen recordings.
+ */
 export async function stopCast(): Promise<ActiveCast | undefined> {
-  const raw = await LocalStorage.getItem<string>(STATE_KEY);
-  if (!raw) return undefined;
-  const active = JSON.parse(raw) as ActiveCast;
+  const active = await readActive();
   await LocalStorage.removeItem(STATE_KEY);
-  killTree(active.pid);
+  if (!active) return undefined;
+  await killOwned(active.pid, active.session);
   try {
-    await adapterFor(active.device.protocol ?? "googlecast").stop(active.device);
+    await adapterFor(active.device.protocol ?? "googlecast").stop(active.device, active.playback ?? {});
   } catch {
-    // device unreachable; stream is already stopped locally
+    // device unreachable; the stream itself is already stopped locally
   }
+  // Don't leave captured screen contents on disk.
+  fs.rmSync(HLS_DIR, { recursive: true, force: true });
+  fs.rmSync(MIRROR_STATUS, { force: true });
   return active;
 }

@@ -158,8 +158,9 @@ function startPacer() {
 }
 
 /** Queue a retransmission, unless that packet was just resent (receivers repeat NACKs every few ms). */
+const MAX_QUEUE = 4000; // packets (~5.6 MB); retransmissions beyond this are dropped rather than buffered
 function resend(frame, packetId, now) {
-  if (packetId >= frame.count) return;
+  if (packetId >= frame.count || queue.length >= MAX_QUEUE) return;
   if (now - (frame.resentAt[packetId] ?? 0) < 40) return;
   frame.resentAt[packetId] = now;
   queue.unshift({ frame, packetId });
@@ -199,7 +200,7 @@ function sendFrame(data, isKey, captureMs) {
     streaming = true;
     lastAckProgressAt = performance.now();
     clearTimeout(frameWatchdog);
-    setStatus({ state: "streaming", codec: cfg.codec });
+    setStatus({ state: "streaming", codec: cfg.codec, castSessionId: session.sessionId });
     log(`first frame sent (${isKey ? "key" : "delta"}, ${data.length} bytes)`);
   }
 }
@@ -222,7 +223,7 @@ function setTargetDelay(ms, why) {
   targetDelayMs = next;
   delayChangeFrameId = nextFrameId;
   lastChangeAt = performance.now();
-  setStatus({ state: "streaming", codec: cfg.codec, targetDelayMs });
+  setStatus({ state: "streaming", codec: cfg.codec, castSessionId: session.sessionId, targetDelayMs });
 }
 
 function checkStall(now) {
@@ -562,7 +563,10 @@ async function main() {
 
   stage = "stream";
   udp = dgram.createSocket("udp4");
-  udp.on("message", onRtcp);
+  // Only the negotiated receiver may send feedback; anything else on the LAN is ignored.
+  udp.on("message", (msg, rinfo) => {
+    if (rinfo.address === cfg.host) onRtcp(msg);
+  });
   udp.on("error", (e) => log(`udp error: ${e.message}`));
   await new Promise((resolve) => udp.bind(0, cfg.bindIp, resolve));
   udp.setSendBufferSize(1 << 20);

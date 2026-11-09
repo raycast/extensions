@@ -1,6 +1,6 @@
-import { Bonjour } from "bonjour-service";
 import { CastClient, castv2 } from "./castv2";
 import { protocolLog } from "./log";
+import { browseMdns } from "./mdns";
 import type { Adapter, Device } from "./types";
 
 async function withDevice<T>(device: Device, fn: (client: CastClient) => Promise<T>, fresh = true): Promise<T> {
@@ -18,9 +18,9 @@ export const googleCast: Adapter = {
   label: "Google Cast",
 
   discover(onFound, durationMs) {
-    return new Promise((resolve) => {
-      const bonjour = new Bonjour();
-      const browser = bonjour.find({ type: "googlecast" }, (service) => {
+    return browseMdns(
+      "googlecast",
+      (service) => {
         const txt = (service.txt ?? {}) as Record<string, string>;
         const host = service.addresses?.find((a) => /^\d+\.\d+\.\d+\.\d+$/.test(a)) ?? service.referer?.address;
         if (!host) return;
@@ -32,25 +32,20 @@ export const googleCast: Adapter = {
           host,
           port: service.port,
         });
-      });
-      // A single query is easily missed by devices waking from standby, so re-ask periodically.
-      const requery = setInterval(() => browser.update(), 1500);
-      setTimeout(() => {
-        clearInterval(requery);
-        browser.stop();
-        bonjour.destroy();
-        resolve();
-      }, durationMs);
-    });
-  },
-
-  play(device, urls) {
-    return withDevice(device, (c) =>
-      c.loadMedia({ contentId: urls.hls, contentType: "application/x-mpegURL", streamType: "LIVE" }),
+      },
+      durationMs,
     );
   },
 
-  stop(device) {
-    return withDevice(device, (c) => c.stopApps(), false);
+  async play(device, urls) {
+    const app = await withDevice(device, (c) =>
+      c.loadMedia({ contentId: urls.hls, contentType: "application/x-mpegURL", streamType: "LIVE" }),
+    );
+    return { castSessionId: app.sessionId };
+  },
+
+  async stop(device, playback) {
+    if (!playback.castSessionId) return; // never stop an app RameCast didn't launch
+    await withDevice(device, (c) => c.stopSession(playback.castSessionId as string), false);
   },
 };

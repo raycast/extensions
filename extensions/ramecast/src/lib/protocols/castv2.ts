@@ -11,8 +11,14 @@ export interface CastClient {
   connect(host: string, port?: number, timeoutMs?: number): Promise<void>;
   close(): void;
   getStatus(): Promise<{ applications?: { appId: string; sessionId: string; transportId: string }[] }>;
-  loadMedia(media: { contentId: string; contentType: string; streamType: "LIVE" | "BUFFERED" }): Promise<void>;
-  stopApps(): Promise<void>;
+  /** Launches the Default Media Receiver, plays the URL, and returns the launched app's session. */
+  loadMedia(media: {
+    contentId: string;
+    contentType: string;
+    streamType: "LIVE" | "BUFFERED";
+  }): Promise<{ appId: string; sessionId: string; transportId: string }>;
+  /** Stops that receiver session if it's still running; any other app on the device is left alone. */
+  stopSession(sessionId: string): Promise<boolean>;
 }
 
 interface CastModule {

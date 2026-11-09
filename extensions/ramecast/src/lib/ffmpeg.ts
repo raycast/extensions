@@ -22,7 +22,7 @@ function platformKey(): string {
 
 /** Returns a usable ffmpeg binary, downloading the bundled build on first use. */
 export async function ensureFfmpeg(onProgress?: (message: string) => void): Promise<string> {
-  const { ffmpegPath } = getPreferenceValues<{ ffmpegPath?: string }>();
+  const { ffmpegPath } = getPreferenceValues<Preferences>();
   if (ffmpegPath) {
     if (!fs.existsSync(ffmpegPath)) throw new Error(`ffmpeg not found at ${ffmpegPath} (set in preferences)`);
     return ffmpegPath;
