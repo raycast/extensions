@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agent Garrett MCP Server] - 2026-11-09
+
+- Add Agent Garrett to the official registry: persistent personal cybersecurity for authorized websites and identities, including monitoring after logout, investigation, evidence preservation, owner alerts, and narrowly approved Cloudflare Worker recovery with an audit trail. Hosted Streamable HTTP server at https://api.garrettstimpson.ca/mcp with a Garrett API key as a Bearer header through `mcp-remote`.
+
 ## [Add Model Salt MCP Server] - 2026-11-09
 
 - Add Model Salt to the official registry: outside randomness for creative requests, so the same prompt gives different answers that still do what was asked. 1 tool. Hosted Streamable HTTP server at https://modelsalt.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

@@ -293,6 +293,27 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://outbox.roxinbox.io/mcp",
   },
   {
+    name: "agent-garrett",
+    title: "Agent Garrett",
+    description:
+      "Personal cybersecurity for authorized websites and identities. Monitors after logout, investigates suspicious activity, preserves evidence, alerts the owner, and can perform narrowly approved Cloudflare Worker recovery with an auditable record. Hosted remote Streamable HTTP server through `mcp-remote`; Garrett API key as an `Authorization: Bearer` header. Plans start at CAD $2.99/month. Replace YOUR_GARRETT_API_KEY in GARRETT_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://garrettstimpson.ca/assets/img/agent-garrett-logo.png",
+    homepage: "https://agent.garrettstimpson.ca/",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://api.garrettstimpson.ca/mcp",
+        "--header",
+        "Authorization:${GARRETT_AUTH_HEADER}",
+      ],
+      env: {
+        GARRETT_AUTH_HEADER: "Bearer YOUR_GARRETT_API_KEY",
+      },
+    },
+  },
+  {
     name: "agenticwebscore",
     title: "AgenticWebScore",
     description:
