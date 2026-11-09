@@ -4,6 +4,9 @@ export const supportedBrowsers = [
   // `getDefaultApplication` and the frontmost-process lookup, and the one
   // AppleScript needs in `tell application`.
   "Brave Browser",
+  // Brave Origin is a separate Brave build (bundle `com.brave.Browser.origin`) that
+  // installs as `Brave Origin.app`; it is Chromium-based and scripted like Brave.
+  "Brave Origin",
   "Firefox",
   "Firefox Developer Edition",
   "Google Chrome",

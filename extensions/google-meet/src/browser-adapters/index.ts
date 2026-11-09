@@ -21,6 +21,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers, application
       return createFirefoxFamilyAdapter(browserName);
     case "Google Chrome":
     case "Brave Browser":
+    case "Brave Origin":
     case "Helium":
     case "Microsoft Edge":
     case "Opera":
