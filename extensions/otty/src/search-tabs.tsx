@@ -4,26 +4,22 @@ import { useMemo, useState } from "react";
 import { PaneDetail } from "./components/pane-detail";
 import { SendMessageForm } from "./components/send-message-form";
 import { loadWorkspace, openInTab, readOtty, runOtty, sectionsFor, showFailure } from "./lib/otty";
+import { buildPaneLinkArgs } from "./lib/otty-core";
+import { activeRowId, sidebarToggles } from "./lib/preview";
 import {
   isOttyUnavailable,
   LoadFailureView,
+  RefreshAction,
   runAndClose,
+  shiftShortcut,
   statusIcon,
   ToggleSidebarAction,
-  useInterval,
   usePersistentState,
+  usePollWhileIdle,
   useRefreshFailureToast,
   useSpinnerFrame,
 } from "./lib/ui";
-import {
-  activeRowId,
-  buildPaneLinkArgs,
-  pushRecent,
-  sidebarToggles,
-  withRecent,
-  type Row,
-  type ViewMode,
-} from "./lib/workspace";
+import { pushRecent, withRecent, type Row, type ViewMode } from "./lib/workspace";
 
 const REFRESH_MS = 3000;
 
@@ -46,18 +42,12 @@ export default function Command() {
     keepPreviousData: true,
     onError: () => {},
   });
-  // Agent states change constantly; keep the list live while it is open.
-  // Skip a tick while the last refresh is still running, so a slow Otty can't
-  // keep superseding its own requests.
-  useInterval(() => {
-    if (!isLoading) revalidate();
-  }, REFRESH_MS);
+  usePollWhileIdle(revalidate, isLoading, REFRESH_MS);
 
   // Tabs, panes, and windows switched to from Raycast, newest first. Ids are
   // unique across kinds (t_, p_, w_), so one list serves all three views.
   const { value: recentIds = [], setValue: setRecentIds } = useLocalStorage<string[]>("recent-targets", []);
   const sections = useMemo(() => (data ? withRecent(sectionsFor(mode, data), recentIds) : []), [data, mode, recentIds]);
-  // Only the selected row's sidebar captures its pane.
   const [selectedId, setSelectedId] = useState<string | null>();
   const activeId = activeRowId(sections, selectedId);
   const working = sections.some((section) => section.rows.some((row) => row.agentState === "processing"));
@@ -83,11 +73,25 @@ export default function Command() {
 
   if (isUnavailable || (error && !data)) {
     return (
-      <List searchBarAccessory={dropdown}>
-        <LoadFailureView title="Could Not Read Otty" error={error} onRetry={revalidate} />
+      <List isLoading={isLoading} searchBarAccessory={dropdown}>
+        <LoadFailureView title="Could Not Read Otty" error={error} onRetry={revalidate} polling />
       </List>
     );
   }
+
+  const emptyView = data ? (
+    <List.EmptyView
+      icon={Icon.MagnifyingGlass}
+      title={`No Matching ${noun}s`}
+      description="Try a title, folder, or agent name."
+    />
+  ) : (
+    <List.EmptyView
+      icon={Icon.CircleProgress}
+      title={`Loading Otty ${noun}s`}
+      description="Reading windows, tabs, and panes from Otty."
+    />
+  );
 
   return (
     <List
@@ -97,11 +101,7 @@ export default function Command() {
       searchBarAccessory={dropdown}
       onSelectionChange={setSelectedId}
     >
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={`No Matching ${noun}s`}
-        description="Try a title, folder, or agent name."
-      />
+      {emptyView}
       {sections.map((section) => (
         <List.Section key={section.id} title={section.title} subtitle={section.subtitle}>
           {section.rows.map((row) => (
@@ -224,10 +224,7 @@ function RowActions({
               <Action
                 title={sidebar.preview ? "Hide Preview" : "Show Preview"}
                 icon={Icon.Text}
-                shortcut={{
-                  macOS: { modifiers: ["cmd", "shift"], key: "y" },
-                  Windows: { modifiers: ["ctrl", "shift"], key: "y" },
-                }}
+                shortcut={shiftShortcut("y")}
                 onAction={onTogglePreview}
               />
             ) : null}
@@ -235,21 +232,13 @@ function RowActions({
               <Action
                 title={sidebar.details ? "Hide Details" : "Show Details"}
                 icon={Icon.Info}
-                shortcut={{
-                  macOS: { modifiers: ["cmd", "shift"], key: "i" },
-                  Windows: { modifiers: ["ctrl", "shift"], key: "i" },
-                }}
+                shortcut={shiftShortcut("i")}
                 onAction={onToggleDetails}
               />
             ) : null}
           </>
         ) : null}
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={onChange}
-        />
+        <RefreshAction onRefresh={onChange} />
       </ActionPanel.Section>
     </ActionPanel>
   );
