@@ -18,26 +18,14 @@ The extension preferences retain their existing defaults: **Always** for option 
 
 The toggle command's subtitle shows the last confirmed mode. A read-only background refresh runs at Raycast's one-minute interval to pick up changes made in System Settings. It only reads status and updates the subtitle: it does not read extension preferences, change the menu bar, show toasts, or close windows. Failed reads clear the subtitle to **Current: Unknown**.
 
-## Native implementation
+## How it works
 
-A bundled shell wrapper forwards `status`, `set`, and `toggle` to a signed universal Objective-C helper. The helper holds an exclusive kernel `flock` across each mutation's read, target choice, and pulse; status reads take a shared lock and wait for a pulse to finish. Locks are released automatically if a process dies. The helper synchronizes the global preferences and Control Center selection, updates WindowServer through the private SkyLight API, and posts refresh notifications. It briefly traverses all four modes to refresh already-open AppKit full-screen spaces, then restores the requested mode and validates the final preferences before reporting success. On a failed intermediate write it makes a best-effort restoration to the requested mode and reports failure.
+The commands call a small Swift helper that Raycast builds with the extension. It writes the two global menu bar preferences, keeps the Control Center selection in sync, updates WindowServer through the private SkyLight API, and posts the refresh notifications macOS uses for this setting. It briefly steps through all four modes so already-open AppKit full-screen spaces pick up the change, then applies the requested mode and checks that macOS kept it before reporting success. Changes are serialized, so quick repeated toggles run one after another.
 
-No AppleScript, Automation permission, Accessibility permission, or System Settings UI control is required. Source for the helper is included under `native/`. `npm run build:native` rebuilds and ad-hoc signs an executable containing both arm64 and x86_64, with a macOS 13 deployment target. Building requires Apple's command line developer tools; the shipped helper is ready to use.
+No AppleScript, Automation permission, Accessibility permission, or System Settings UI control is required. Settings saved by earlier versions of this extension keep working.
 
 ## Limitations
 
 Private APIs can change between macOS versions. Live refresh is best-effort: some video players and browser HTML5 full-screen windows control their own menu bar presentation. Leave and re-enter full screen if such an app does not reflect the new setting. When a mode that hides the bar is applied while an AppKit full-screen space is already open, macOS keeps the bar revealed until the pointer moves. Final preference validation confirms the selected system mode, not the appearance of every application's full-screen space. The pulse may briefly change menu bar visibility while it applies the setting.
-
-## Development
-
-```sh
-npm ci
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
-
-Command and wrapper tests replace external execution with isolated fixtures. Native process tests compile the production command flow with a test-only file-backed preference and notification backend, using real kernel locks and checkpoint barriers. The shipped helper has no runtime switch for this backend. Tests do not change the host menu bar. Production builds rebuild and sign the native helper. Real Raycast behavior and full-screen appearance require manual verification on macOS.
 
 Originally created by **iamyeizi**, retaining the original extension icon and MIT license. Native controls and the mode picker contributed by **0xAdriaTorralba**.

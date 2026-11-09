@@ -1,7 +1,5 @@
-import { environment, launchCommand, LaunchType, updateCommandMetadata } from "@raycast/api";
-import { execFile } from "node:child_process";
-import path from "node:path";
-import { promisify } from "node:util";
+import { launchCommand, LaunchType, updateCommandMetadata } from "@raycast/api";
+import { applyMode, currentMode, toggleModes } from "swift:../swift/menu-bar-helper";
 
 export const MENU_BAR_MODES = [
   {
@@ -31,47 +29,25 @@ export type MenuBarMode = (typeof MENU_BAR_MODES)[number]["value"];
 export interface MenuBarStatus {
   mode: MenuBarMode;
   label: string;
-  message: string;
 }
 
-interface CommandFailure extends Error {
-  stderr?: string;
-  stdout?: string;
+// The Swift helper returns the mode macOS reports after reading or applying it.
+function statusFor(mode: string): MenuBarStatus {
+  const definition = MENU_BAR_MODES.find((candidate) => candidate.value === mode);
+  if (!definition) throw new Error(`Unknown menu bar mode: ${mode}`);
+  return { mode: definition.value, label: definition.label };
 }
 
-const execFileAsync = promisify(execFile);
-const helperPath = path.join(environment.assetsPath, "menu-bar-auto-hide");
-
-function parseStatus(output: string): MenuBarStatus {
-  const message = output.trim();
-  const match = /^Menu bar auto-hide:\s*(.+)$/m.exec(message);
-  if (!match) throw new Error("Couldn’t read the current menu bar mode");
-
-  const label = match[1];
-  const mode = MENU_BAR_MODES.find((candidate) => candidate.label === label);
-  if (!mode) throw new Error(`Unknown menu bar mode: ${label}`);
-
-  return { mode: mode.value, label, message };
+export async function readMenuBarStatus() {
+  return statusFor(await currentMode());
 }
 
-async function runHelper(args: string[], timeout: number) {
-  const { stdout } = await execFileAsync("/bin/bash", [helperPath, ...args], {
-    timeout,
-    maxBuffer: 1024 * 1024,
-  });
-  return parseStatus(stdout);
+export async function setMenuBarMode(mode: MenuBarMode) {
+  return statusFor(await applyMode(mode));
 }
 
-export function readMenuBarStatus() {
-  return runHelper(["status"], 30_000);
-}
-
-export function setMenuBarMode(mode: MenuBarMode) {
-  return runHelper(["set", mode], 30_000);
-}
-
-export function toggleMenuBarModes(firstMode: MenuBarMode, secondMode: MenuBarMode) {
-  return runHelper(["toggle", firstMode, secondMode], 30_000);
+export async function toggleMenuBarModes(firstMode: MenuBarMode, secondMode: MenuBarMode) {
+  return statusFor(await toggleModes(firstMode, secondMode));
 }
 
 export async function updateCommandSubtitle(subtitle: string) {
@@ -104,9 +80,5 @@ export async function refreshToggleCommandSubtitle() {
 }
 
 export function failureMessage(error: unknown): string {
-  if (!(error instanceof Error)) return String(error);
-
-  const commandError = error as CommandFailure;
-  const output = commandError.stderr?.trim() || commandError.stdout?.trim();
-  return output || commandError.message;
+  return error instanceof Error ? error.message : String(error);
 }
