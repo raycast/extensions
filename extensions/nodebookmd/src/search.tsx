@@ -84,13 +84,21 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
     cacheIcons(baseUrl, shownIcons.split("|")).then((added) => added && setIconsSaved((count) => count + 1));
   }, [baseUrl, shownIcons]);
 
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const actions = {
     remember: (hit: Hit) => rememberPage(hit).then(() => history.revalidate()),
     forget: showsHistory ? (hit: Hit) => removeWithUndo(hit, history.revalidate) : undefined,
-    clear: recent.length > 0 ? () => confirmClear().then(() => history.revalidate()) : undefined,
+    // Clearing also drops the selection, which stops a pending read from adding a page back.
+    clear:
+      recent.length > 0
+        ? () =>
+            confirmClear().then(() => {
+              setSelectedPath(null);
+              return history.revalidate();
+            })
+        : undefined,
   };
   // A page left selected for a few seconds was read in the preview, so it joins the history.
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const shownHits = useRef(hits);
   shownHits.current = hits;
   useEffect(() => {
