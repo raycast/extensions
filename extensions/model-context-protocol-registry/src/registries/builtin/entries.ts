@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "postmately",
+    title: "Postmately",
+    description:
+      "Run social media from your AI assistant: make carousels and short vertical videos from a website link or a topic, check each post against the rules of every network, save drafts, schedule or publish to TikTok, YouTube, Instagram, Facebook, Threads, Pinterest, Telegram channels, VK, Bluesky and Mastodon, and read post and channel metrics. 25 tools; posts stay drafts until you approve them, and making carousels or videos spends Postmately credits. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Postmately API key as a Bearer token.",
+    icon: "https://postmately.com/brand/mark-192.png",
+    homepage: "https://postmately.com/en/mcp-social-media/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.postmately.com/mcp"],
+    },
+    remoteUrl: "https://api.postmately.com/mcp",
+  },
+  {
     name: "roomlab",
     title: "RoomLab.app",
     description:
