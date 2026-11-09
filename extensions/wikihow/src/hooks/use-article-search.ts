@@ -37,7 +37,7 @@ export function useArticleSearch(query: string, page: number, apiKey: string, re
     {
       abortable,
       execute: Boolean(query.trim() && apiKey.trim()),
-      keepPreviousData: false,
+      keepPreviousData: true,
       onError: () => undefined,
     },
   );

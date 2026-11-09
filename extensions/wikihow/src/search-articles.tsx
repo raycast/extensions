@@ -104,11 +104,13 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
   const { data, error, isLoading } = useArticleSearch(query, page, braveApiKey, revision);
   const history = useRecent();
   const trimmed = query.trim();
+  // Previous results stay visible while a new search loads, but not once the search is cleared.
+  const results = trimmed && hasKey ? data : undefined;
 
   const pagingActions = (
     <ActionPanel.Section title="Search">
       {trimmed ? <Action.OpenInBrowser title="Search on WikiHow.com" url={siteSearchUrl(trimmed)} /> : null}
-      {data?.hasMore ? (
+      {results?.hasMore ? (
         <Action
           title="Next Results Page"
           icon={Icon.ArrowRight}
@@ -214,7 +216,7 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
       searchText={query}
       filtering={false}
       isLoading={isLoading}
-      isShowingDetail={Boolean(data?.articles.length || (!trimmed && history.recent.length) || !hasKey)}
+      isShowingDetail={Boolean(results?.articles.length || (!trimmed && history.recent.length) || !hasKey)}
       onSearchTextChange={(text) => {
         setQuery(text);
         setPage(0);
@@ -253,9 +255,9 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
           />
         </List.Section>
       ) : null}
-      {data ? (
+      {results ? (
         <List.Section title={`Page ${page + 1}`} subtitle="Search excerpts · Full guides open on wikiHow">
-          {data.articles.map((article) => articleItem(article))}
+          {results.articles.map((article) => articleItem(article))}
         </List.Section>
       ) : null}
       {!trimmed && history.recent.length ? (
