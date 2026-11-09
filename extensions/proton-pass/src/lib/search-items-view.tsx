@@ -282,7 +282,10 @@ export function SearchItemsView({
   const vaultFoldersInside = useMemo(() => insideFolders(folders, items, vaultFolders), [folders, items, vaultFolders]);
   // The folders opened from here stay up to date with this list's items and folders.
   const folderSource = useMemo(createFolderSource, []);
-  useEffect(() => folderSource.set({ items, folders, isLoading }), [folderSource, items, folders, isLoading]);
+  useEffect(
+    () => folderSource.set({ items, folders, isLoading, error }),
+    [folderSource, items, folders, isLoading, error],
+  );
   const vaultName = vaults.find((vault) => vault.shareId === selectedVaultId)?.name ?? initialVault?.name ?? "";
   const emptyFailureMessage =
     failedVaults.find(({ vault }) => vault.shareId === selectedVaultId)?.message ?? loadFailureMessage;

@@ -3149,6 +3149,8 @@ test("an opened folder shows its subfolders, then the items right inside it, and
     react: harness.react,
     "@raycast/api": { Icon: {} },
     "./item-list": {},
+    "./login-view": {},
+    "./error-views": { renderErrorView: () => null },
   }) as unknown as {
     createFolderSource: () => { set(contents: unknown): void };
     FolderView: Component;
@@ -3315,6 +3317,8 @@ test("an opened folder moved in Proton Pass meanwhile follows its new place", ()
     react: harness.react,
     "@raycast/api": { Icon: {} },
     "./item-list": {},
+    "./login-view": {},
+    "./error-views": { renderErrorView: () => null },
   }) as unknown as {
     createFolderSource: () => { set(contents: unknown): void };
     FolderView: Component;
@@ -3356,4 +3360,103 @@ test("an empty vault or folder can still be refreshed", () => {
   const failed = render([], [], { onRefresh: () => refreshes++, emptyView: { onRetry: () => undefined } });
   const titles = actions((failed.props.children as Element).props.actions).map((props) => props.title);
   assert.deepEqual(titles.filter(Boolean), ["Retry"]);
+});
+
+test("an opened folder shows the login screen once the session has ended, and its contents again after logging in", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+    "./login-view": {},
+    "./error-views": {
+      renderErrorView: (type: unknown, onRetry: unknown) => (type ? { props: { error: type, onRetry } } : null),
+    },
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([inBanking], PERSONAL_FOLDERS);
+  source.set({ items: [inBanking], folders: known, isLoading: false });
+  const onRefresh = () => undefined;
+  const render = () => harness.render(view.FolderView, { source, vaultName: "Personal", folder: known[0], onRefresh });
+  render();
+  harness.effects.forEach((effect) => effect());
+
+  // The list underneath lost its items with the session: the folder doesn't say it's empty.
+  source.set({ items: [], folders: [], isLoading: false, error: { type: "not_authenticated" } });
+  const login = render();
+  assert.equal(login.props.reload, onRefresh);
+  assert.equal(login.props.navigationTitle, undefined);
+  source.set({ items: [], folders: [], isLoading: false, error: { type: "not_installed", message: "Not found" } });
+  assert.equal(render().props.error, "not_installed");
+
+  source.set({ items: [inBanking], folders: known, isLoading: false, error: null });
+  const list = render();
+  assert.equal(list.props.navigationTitle, "Personal › Banking");
+  assert.equal(ids(list.props.items), "bank");
+});
+
+test("the folders opened from Browse Items learn that the session has ended", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  const harness = hookHarness();
+  // The effects of the latest render, which the harness otherwise runs once.
+  let rendered: (() => void)[] = [];
+  const react = {
+    ...harness.react,
+    useEffect: (effect: () => void) => {
+      harness.react.useEffect(effect);
+      rendered.push(effect);
+    },
+  };
+  const sent: { items: Item[]; error?: { type: string } | null }[] = [];
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./types": { PassCliError },
+    "./error-views": { renderErrorView: () => null },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+    "./item-counts": itemCounts,
+    "./folder-view": {
+      createFolderSource: () => ({ set: (contents: (typeof sent)[number]) => sent.push(contents) }),
+      FolderView: () => null,
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        throw new PassCliError("Not authenticated.", "not_authenticated");
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({ data: [personal], isStale: false }),
+    },
+  });
+  const render = () => {
+    rendered = [];
+    return harness.render(SearchItemsView, { initialVault: personal, sessionConfirmed: true });
+  };
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  // The list underneath shows the login screen, and hands its state to the folders open on top of it.
+  assert.equal(typeof render().props.reload, "function");
+  rendered[rendered.length - 1]();
+  const last = sent[sent.length - 1];
+  assert.equal(last.items.length, 0);
+  assert.equal(last.error?.type, "not_authenticated");
 });

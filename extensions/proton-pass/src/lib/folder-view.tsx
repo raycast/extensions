@@ -1,15 +1,19 @@
 import { Icon } from "@raycast/api";
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
+import { renderErrorView } from "./error-views";
 import { FolderEntry, folderEntryValue, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
 import { ItemList } from "./item-list";
+import { NotLoggedInView } from "./login-view";
 import { SortOrder } from "./sort";
-import { Item } from "./types";
+import { Item, PassCliErrorType } from "./types";
 
 /** What the folders opened from an item list show: that list's items and folders, as it loads them. */
 export interface FolderContents {
   items: Item[];
   folders: FolderEntry[];
   isLoading: boolean;
+  /** What that list shows instead of its items, e.g. the login screen once the session has ended. */
+  error?: { type: PassCliErrorType; message?: string } | null;
 }
 
 /** Hands an item list's latest items and folders to the folders opened from it, which stay open on top of it. */
@@ -63,6 +67,12 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
     () => insideFolders(contents.folders, contents.items, folders),
     [contents.folders, contents.items, folders],
   );
+
+  // An opened folder shows the same login screen or error as the list underneath, rather than looking empty, and its
+  // contents again once they're fixed.
+  if (contents.error?.type === "not_authenticated") return <NotLoggedInView reload={onRefresh} />;
+  const errorView = renderErrorView(contents.error?.type ?? null, onRefresh, "Load Items", contents.error?.message);
+  if (errorView) return errorView;
 
   return (
     <ItemList
