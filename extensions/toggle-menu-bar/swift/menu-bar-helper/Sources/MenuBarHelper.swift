@@ -189,18 +189,25 @@ private func readGlobalOption() throws -> Int {
   return option(hideOnDesktop: hideOnDesktop, visibleInFullScreen: visibleInFullScreen)
 }
 
-/// The current mode. The global preferences are authoritative; when either is
-/// missing, the Control Center value is used, and otherwise macOS's defaults
-/// (menu bar shown on the desktop, hidden in full screen) fill the gap.
+/// The current mode. The global preferences are authoritative. Only when a key is
+/// absent is the Control Center value used, and otherwise macOS's defaults (menu bar
+/// shown on the desktop, hidden in full screen) fill the gap. Failed reads and
+/// invalid stored values are errors, never guesses.
 private func readCurrentOption() throws -> Int {
-  if let option = try? readGlobalOption() {
-    return option
+  guard
+    CFPreferencesSynchronize(
+      kCFPreferencesAnyApplication, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+  else {
+    throw MenuBarError("Could not read the global menu bar preferences")
+  }
+  let hideOnDesktop = try readFlag("_HIHideMenuBar")
+  let visibleInFullScreen = try readFlag("AppleMenuBarVisibleInFullscreen")
+  if let hideOnDesktop, let visibleInFullScreen {
+    return option(hideOnDesktop: hideOnDesktop, visibleInFullScreen: visibleInFullScreen)
   }
   if let option = readControlCenterOption() {
     return option
   }
-  let hideOnDesktop = (try? readFlag("_HIHideMenuBar")) ?? nil
-  let visibleInFullScreen = (try? readFlag("AppleMenuBarVisibleInFullscreen")) ?? nil
   return option(
     hideOnDesktop: hideOnDesktop ?? false, visibleInFullScreen: visibleInFullScreen ?? false)
 }
