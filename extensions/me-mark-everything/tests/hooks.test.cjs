@@ -284,7 +284,7 @@ test("detail shows loading for initial and manual reads, then clears it on succe
   assert.equal(h.render().props.isLoading, false);
   assert.equal(refreshed, 1);
   fail = true;
-  const failed = h.render().props.actions.props.revalidate();
+  const failed = assert.rejects(h.render().props.actions.props.revalidate(), /read failed/);
   await h.flush();
   release();
   await failed;

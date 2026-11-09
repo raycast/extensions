@@ -171,7 +171,7 @@ function BookmarkDetail(props: { bookmark: Bookmark; revalidate: () => void | Pr
   const error = request.error;
   const load = useCallback(async () => {
     const value = await request.revalidate();
-    if (value instanceof Error) return; // usePromise already reports the read error.
+    if (value instanceof Error) throw value;
     await props.revalidate();
   }, [request.revalidate, props.revalidate]);
   return (
