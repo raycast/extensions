@@ -4,6 +4,10 @@
 
 - Add Real Alpha to the official registry: search what the founders, CEOs and researchers building AI said in long podcast and YouTube interviews, with each quote's speaker, show, date and a page to cite. 6 read-only tools. Hosted Streamable HTTP server at https://realalpha.app/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add Favicon Generator MCP Server] - 2026-11-09
+
+- Add Favicon Generator to the official registry: text and emoji favicons, open-source icons as favicon SVGs, HTML head tags, a web manifest and platform install guides. 5 read-only tools. Hosted Streamable HTTP server at https://favicongenerator.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Model Salt MCP Server] - 2026-11-09
 
 - Add Model Salt to the official registry: outside randomness for creative requests, so the same prompt gives different answers that still do what was asked. 1 tool. Hosted Streamable HTTP server at https://modelsalt.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

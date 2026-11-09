@@ -1094,6 +1094,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "favicon-generator",
+    title: "Favicon Generator",
+    description:
+      "Free favicons for any website. Generate a text or emoji favicon, search an open-source icon library (Feather, Lucide, Tabler, Heroicons) and get any icon as a favicon SVG, plus the HTML head tags, a site.webmanifest and install steps for WordPress, Webflow, Wix, Shopify, Squarespace, Next.js, static HTML and PWAs. 5 read-only tools. Returns SVG and conversion commands; it does not render PNG or ICO files. Hosted remote Streamable HTTP server at https://favicongenerator.io/mcp; no sign-in, no API key.",
+    icon: "https://favicongenerator.io/icon-512.png",
+    homepage: "https://favicongenerator.io/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://favicongenerator.io/mcp"],
+    },
+    remoteUrl: "https://favicongenerator.io/mcp",
+  },
+  {
     name: "fictura",
     title: "Fictura",
     description:

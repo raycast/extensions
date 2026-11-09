@@ -1,0 +1,25 @@
+{
+  "jq": {
+    "name": "jq",
+    "requested": "1.7",
+    "current": null,
+    "bump": null,
+    "latest": "1.7",
+    "release_url": "https://github.com/jqlang/jq/releases/tag/jq-1.7",
+    "source": {
+      "type": "mise.toml",
+      "path": "/tmp/mise-issue7/config/config.toml"
+    }
+  },
+  "node": {
+    "name": "node",
+    "requested": "lts",
+    "current": null,
+    "bump": null,
+    "latest": "26.13.0",
+    "source": {
+      "type": "mise.toml",
+      "path": "/tmp/mise-issue7/config/config.toml"
+    }
+  }
+}
