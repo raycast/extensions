@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { combine } from "../src/combine";
 import { match } from "../src/ranking";
 import { inScope, parseScope } from "../src/scopes";
-import type { Hit } from "../src/types";
+import { pageKind, type Hit } from "../src/types";
 
 const titles: Hit[] = [
   { path: "nodes/sop/copytopoints", title: "Copy to Points 2.0" },
@@ -45,4 +45,10 @@ test("a shorthand keeps the search to one part", () => {
 test("a page name plus a word puts that page first", () => {
   const bodies: Hit[] = [{ path: "nodes/sop/box", title: "Box", score: 1 }];
   assert.equal(combine(titles, bodies, "box size", 8)[0]?.path, "nodes/sop/box");
+});
+
+test("a shelf page is labeled as a shelf tool, its guides are not", () => {
+  assert.equal(pageKind({ path: "shelf/box", title: "Box" }), "Shelf tool");
+  assert.equal(pageKind({ path: "shelf/customize", title: "Customize the shelf" }), undefined);
+  assert.equal(pageKind({ path: "nodes/sop/box", title: "Box", nodeType: "Geometry node" }), "Geometry node");
 });

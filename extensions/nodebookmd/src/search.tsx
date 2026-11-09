@@ -13,16 +13,18 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
-import { existsSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BODY_SEARCH_DELAY, combine, MIN_BODY_QUERY, rankBodies } from "./combine";
-import { cacheIcons, iconFile } from "./icons";
+import { cacheIcons, cachedIcon } from "./icons";
 import { clearHistory, forgetPage, recentPages, rememberPage, save } from "./history";
 import { match } from "./ranking";
 import { inScope, parseScope } from "./scopes";
 import { nodebookServer } from "./server";
-import type { Hit } from "./types";
+import { pageKind, type Hit } from "./types";
+
+/** How long a page stays selected before it counts as read, in milliseconds. */
+const READ_DELAY = 3000;
 
 export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Arguments.Search }>) {
   // `hd box` in the root search, or a fallback search, starts with words already typed.
@@ -87,17 +89,31 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
     forget: showsHistory ? (hit: Hit) => removeWithUndo(hit, history.revalidate) : undefined,
     clear: recent.length > 0 ? () => confirmClear().then(() => history.revalidate()) : undefined,
   };
+  // A page left selected for a few seconds was read in the preview, so it joins the history.
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const shownHits = useRef(hits);
+  shownHits.current = hits;
+  useEffect(() => {
+    if (!selectedPath || showsHistory) return;
+    const timer = setTimeout(() => {
+      const hit = shownHits.current.find((entry) => entry.path === selectedPath);
+      if (hit) actions.remember(hit);
+    }, READ_DELAY);
+    return () => clearTimeout(timer);
+  }, [selectedPath, showsHistory]);
+
   const failure = server.error ?? titleList.error ?? (searchesBodies ? bodySearch.error : undefined);
   const retry = () => (server.error ? server.revalidate() : (titleList.revalidate(), bodySearch.revalidate()));
 
   return (
     <List
-      isLoading={server.isLoading || history.isLoading || titleList.isLoading}
+      isLoading={server.isLoading || history.isLoading || titleList.isLoading || bodySearch.isLoading}
       isShowingDetail={hits.length > 0}
       searchText={query}
       onSearchTextChange={setQuery}
       // Raycast keeps the row that was selected before a key, so a fast typist lands on an old hit.
       selectedItemId={hits[0]?.path}
+      onSelectionChange={setSelectedPath}
       searchBarPlaceholder="Search Houdini docs, v:point for VEX only, h: for history"
     >
       {failure ? (
@@ -141,8 +157,8 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
     <List.Item
       id={hit.path}
       title={hit.title}
-      subtitle={hit.nodeType ?? undefined}
-      icon={rowIcon(hit, baseUrl)}
+      subtitle={pageKind(hit)}
+      icon={rowIcon(hit)}
       detail={<PageDetail markdownUrl={markdownUrl} />}
       actions={
         <ActionPanel>
@@ -194,15 +210,13 @@ function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl:
   );
 }
 
-/** The icon from disk once it is cached, from the server until then. Raycast for Windows
-    draws a local file only from a `file://` address. Some icons the index
-    names are not in the install, so the fallback keeps the row from looking empty. */
-function rowIcon(hit: Hit, baseUrl: string) {
-  if (!hit.icon) return Icon.Document;
-  const file = iconFile(hit.icon);
-  return existsSync(file)
-    ? { source: process.platform === "win32" ? pathToFileURL(file).href : file, fallback: Icon.Document }
-    : { source: `${baseUrl}/hicon/${hit.icon}`, fallback: Icon.Document };
+/** The icon from disk. Until it is there, or when the install has none, the row shows a page:
+    asking Raycast for the URL drew the icons one by one, and a missing one only after it failed. */
+function rowIcon(hit: Hit) {
+  const file = hit.icon ? cachedIcon(hit.icon) : undefined;
+  if (!file) return Icon.Document;
+  // Raycast for Windows draws a local file only from a `file://` address.
+  return process.platform === "win32" ? pathToFileURL(file).href : file;
 }
 
 /** Copies the page, and says whether it did: a failed fetch leaves the clipboard alone. */

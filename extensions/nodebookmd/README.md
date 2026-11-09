@@ -16,7 +16,7 @@ starts the app when it is not running.
 - Start with a shorthand to search one part of the docs: `v:` (VEX functions),
   `sop:`, `lop:`, `dop:`, `cop:`, `vop:`, `py:` (Python), `e:` (expressions),
   `hs:` (HScript), `ex:` (examples).
-- With nothing typed, the list shows the pages you opened from Raycast. `h:`
+- With nothing typed, the list shows the pages you opened or read in the preview. `h:`
   searches only those pages.
 
 | Action              | macOS | Windows      |
