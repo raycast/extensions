@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
-import { FormValidation, useCachedState, useForm, usePromise } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createDraft, getSocialSetDetail, listSocialSets, listTags } from "../lib/api";
 import {
@@ -13,10 +13,11 @@ import {
 } from "../lib/constants";
 import { ApiKeyRequiredView } from "../components/api-key-required";
 import { getPreferences } from "../lib/preferences";
-import { readClipboardImage, removeClipboardImages, validateImageFiles } from "../lib/clipboard-images";
+import { removeClipboardImages, validateImageFiles } from "../lib/clipboard-images";
+import { useClipboardImages } from "../lib/use-clipboard-images";
 import { uploadMedia } from "../lib/media";
 import type { DraftCreatePlatforms, Tag } from "../lib/types";
-import { buildPostsFromContent, getErrorMessage, groupSocialSetsByTeam } from "../lib/utils";
+import { buildPostsFromContent, groupSocialSetsByTeam } from "../lib/utils";
 
 type PublishOption = "draft" | "now" | "next-free-slot" | "schedule";
 type ShareOption = "yes" | "no";
@@ -64,7 +65,7 @@ function buildScheduledDate(date: Date, time: string) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0, 0);
 }
 
-export function CreateDraftForm(props: { socialSetId?: string; draftValues?: Form.Values }) {
+export function CreateDraftForm(props: { socialSetId?: string; draftValues?: Form.Values; preserveDrafts?: boolean }) {
   const [defaultSocialSetId] = useCachedState<string>(DEFAULT_SOCIAL_SET_STORAGE_KEY);
   const [lastSocialSetId, setLastSocialSetId] = useCachedState<string>(LAST_SOCIAL_SET_STORAGE_KEY);
   const [platformSelectionsBySocialSet, setPlatformSelectionsBySocialSet] = useCachedState<Record<string, string[]>>(
@@ -202,17 +203,15 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
           },
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to create draft",
-          message: getErrorMessage(error),
-        });
+        await showFailureToast(error, { title: "Failed to create draft" });
       } finally {
         busy.current = false;
         setIsBusy(false);
       }
     },
   });
+
+  const attachClipboardImage = useClipboardImages(values.images, Boolean(props.preserveDrafts));
 
   const handleAttachImage = async () => {
     if (busy.current) return;
@@ -223,12 +222,13 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
     busy.current = true;
     setIsBusy(true);
     try {
-      const image = await readClipboardImage();
+      const image = await attachClipboardImage();
+      if (!image) return;
       setValue("images", (current) => [...current, image]);
       setValidationError("content", undefined);
       await showToast({ style: Toast.Style.Success, title: "Image attached" });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could not attach image", message: getErrorMessage(error) });
+      await showFailureToast(error, { title: "Could not attach image" });
     } finally {
       busy.current = false;
       setIsBusy(false);
@@ -362,7 +362,7 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
 
   return (
     <Form
-      enableDrafts
+      enableDrafts={props.preserveDrafts}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -373,7 +373,10 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
             <Action
               title="Attach Image from Clipboard"
               icon={Icon.Image}
-              shortcut={{ modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"], key: "v" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+              }}
               onAction={handleAttachImage}
             />
             <Action title="Paste from Clipboard" icon={Icon.Document} onAction={handlePasteFromClipboard} />
@@ -488,5 +491,5 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
   if (!apiKey) {
     return <ApiKeyRequiredView />;
   }
-  return <CreateDraftForm draftValues={props.draftValues} />;
+  return <CreateDraftForm draftValues={props.draftValues} preserveDrafts />;
 }

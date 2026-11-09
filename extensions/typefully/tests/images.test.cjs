@@ -57,6 +57,7 @@ for (const status of ["ready", "failed", "processing"]) {
       },
       "@raycast/utils": {
         FormValidation: {},
+        showFailureToast: async () => ({}),
         useCachedState: () => [undefined, () => {}],
         usePromise: () => ({}),
         useForm: (options) => {
@@ -87,6 +88,7 @@ for (const status of ["ready", "failed", "processing"]) {
           cleanedUp = true;
         },
       },
+      "../lib/use-clipboard-images": { useClipboardImages: () => async () => undefined },
       "../lib/media": {
         uploadMedia: async () => {
           if (status === "failed") throw new Error("Upload failed");
@@ -198,6 +200,7 @@ test("clipboard file URLs are snapshotted and cleanup preserves original files",
   const source = path.join(directory, "my image.PNG");
   await fs.writeFile(source, "original image");
   const helpers = loadSource("lib/clipboard-images.ts", {
+    "@raycast/utils": {},
     "@raycast/api": {
       Clipboard: { read: async () => ({ file: require("node:url").pathToFileURL(source).href }) },
       environment: { supportPath: path.join(directory, "support") },
@@ -218,6 +221,101 @@ test("clipboard file URLs are snapshotted and cleanup preserves original files",
   await assert.rejects(helpers.validateImageFiles([empty]), /empty or unavailable/);
 });
 
+test("startup cleanup removes old orphans while preserving saved drafts and recent snapshots", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const snapshots = path.join(directory, "draft-images");
+  await fs.mkdir(snapshots);
+  const saved = path.join(snapshots, "saved.png");
+  const orphan = path.join(snapshots, "orphan.png");
+  const recent = path.join(snapshots, "recent.png");
+  const source = path.join(directory, "original.png");
+  for (const file of [saved, orphan, recent, source]) await fs.writeFile(file, "image");
+  const old = new Date(Date.now() - 48 * 60 * 60 * 1_000);
+  for (const file of [saved, orphan, source]) await fs.utimes(file, old, old);
+  const helpers = loadSource("lib/clipboard-images.ts", {
+    "@raycast/api": { environment: { supportPath: directory } },
+    "@raycast/utils": {},
+  });
+  await helpers.cleanupUnusedClipboardImages([saved]);
+  assert.deepEqual((await fs.readdir(snapshots)).sort(), ["recent.png", "saved.png"]);
+  assert.equal(await fs.readFile(source, "utf8"), "image");
+
+  // Discarding the saved draft makes its old snapshot eligible on the next launch.
+  await helpers.cleanupUnusedClipboardImages([]);
+  assert.deepEqual(await fs.readdir(snapshots), ["recent.png"]);
+});
+
+for (const preserveDrafts of [false, true]) {
+  test(`leaving a ${preserveDrafts ? "top-level" : "nested"} form ${preserveDrafts ? "preserves" : "removes"} clipboard snapshots`, async (t) => {
+    const directory = await temporaryDirectory(t);
+    const source = path.join(directory, "original.png");
+    await fs.writeFile(source, "image");
+    const helpers = loadSource("lib/clipboard-images.ts", {
+      "@raycast/api": {
+        Clipboard: { read: async () => ({ file: source }) },
+        environment: { supportPath: directory },
+      },
+      "@raycast/utils": {},
+    });
+    const previousSnapshot = await helpers.readClipboardImage();
+    const pendingCleanup = [];
+    let unmount;
+    const { useClipboardImages } = loadSource("lib/use-clipboard-images.ts", {
+      react: {
+        useRef: (initial) => ({ current: initial }),
+        useEffect: (effect) => { unmount = effect(); },
+      },
+      "./clipboard-images": {
+        ...helpers,
+        cleanupUnusedClipboardImages: (images) => {
+          assert.equal(preserveDrafts, true);
+          assert.deepEqual(images, [previousSnapshot, source]);
+          const pending = helpers.cleanupUnusedClipboardImages(images);
+          pendingCleanup.push(pending);
+          return pending;
+        },
+        removeClipboardImages: (images) => {
+          const pending = helpers.removeClipboardImages(images);
+          pendingCleanup.push(pending);
+          return pending;
+        },
+      },
+    });
+    const attach = useClipboardImages([previousSnapshot, source], preserveDrafts);
+    const addedSnapshot = await attach();
+    unmount();
+    await Promise.all(pendingCleanup);
+    assert.equal(await fs.readFile(source, "utf8"), "image");
+    for (const file of [previousSnapshot, addedSnapshot]) {
+      if (preserveDrafts) assert.equal(await fs.readFile(file, "utf8"), "image");
+      else await assert.rejects(fs.stat(file), { code: "ENOENT" });
+    }
+  });
+
+  test(`clipboard reads completing after a ${preserveDrafts ? "top-level" : "nested"} form closes are cleaned up`, async () => {
+    let unmount;
+    let finishRead;
+    const removed = [];
+    const { useClipboardImages } = loadSource("lib/use-clipboard-images.ts", {
+      react: {
+        useRef: (initial) => ({ current: initial }),
+        useEffect: (effect) => { unmount = effect(); },
+      },
+      "./clipboard-images": {
+        cleanupUnusedClipboardImages: async () => {},
+        readClipboardImage: () => new Promise((resolve) => { finishRead = resolve; }),
+        removeClipboardImages: async (images) => { removed.push(...images); },
+      },
+    });
+    const attach = useClipboardImages([], preserveDrafts);
+    const pending = attach();
+    unmount();
+    finishRead("late-screenshot.png");
+    assert.equal(await pending, undefined);
+    assert.deepEqual(removed, ["late-screenshot.png"]);
+  });
+}
+
 test(
   "native macOS reader handles raw PNG, TIFF screenshots, and an empty clipboard",
   { skip: process.platform !== "darwin" },
@@ -233,16 +331,20 @@ test(
         "base64",
       ),
     );
-    const clipboardExec = () => {};
-    clipboardExec[promisify.custom] = (command, args, options) => {
-      const rewritten = args.map((arg) =>
-        arg.replace("$.NSPasteboard.generalPasteboard", `$.NSPasteboard.pasteboardWithName(${JSON.stringify(board)})`),
-      );
-      return execute(command, rewritten, options);
-    };
     const helpers = loadSource("lib/clipboard-images.ts", {
       "@raycast/api": { Clipboard: { read: async () => ({}) }, environment: { supportPath: directory } },
-      "node:child_process": { execFile: clipboardExec },
+      "@raycast/utils": {
+        runAppleScript: async (script, args, options) => {
+          assert.equal(options.language, "JavaScript");
+          assert.equal(options.timeout, 10_000);
+          const rewritten = script.replace(
+            "$.NSPasteboard.generalPasteboard",
+            `$.NSPasteboard.pasteboardWithName(${JSON.stringify(board)})`,
+          );
+          const { stdout } = await execute("/usr/bin/osascript", ["-l", options.language, "-e", rewritten, ...args], options);
+          return stdout.trim();
+        },
+      },
     });
     async function setClipboard(file, type) {
       await execute("/usr/bin/osascript", [

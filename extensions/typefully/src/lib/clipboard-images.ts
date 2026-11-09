@@ -1,7 +1,8 @@
 import { Clipboard, environment } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { copyFile, mkdir, rm, stat } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -9,6 +10,7 @@ import { promisify } from "node:util";
 const execute = promisify(execFile);
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 const clipboardDirectory = join(environment.supportPath, "draft-images");
+const ORPHAN_MAX_AGE_MS = 24 * 60 * 60 * 1_000;
 
 // Screenshots and copied browser images may contain pixels without a file URL.
 const READ_MAC_IMAGE = `
@@ -75,9 +77,10 @@ export async function readClipboardImage(): Promise<string> {
     } else {
       let stdout = "";
       if (process.platform === "darwin") {
-        ({ stdout } = await execute("/usr/bin/osascript", ["-l", "JavaScript", "-e", READ_MAC_IMAGE, destination], {
+        stdout = await runAppleScript(READ_MAC_IMAGE, [destination], {
+          language: "JavaScript",
           timeout: 10_000,
-        }));
+        });
       } else if (process.platform === "win32") {
         ({ stdout } = await execute(
           "powershell.exe",
@@ -107,5 +110,19 @@ export async function removeClipboardImages(paths: string[]) {
     paths
       .filter((path) => dirname(resolve(path)) === resolve(clipboardDirectory))
       .map((path) => rm(path, { force: true }).catch(() => {})),
+  );
+}
+
+export async function cleanupUnusedClipboardImages(savedImages: string[]) {
+  const retained = new Set(savedImages.map((image) => resolve(image)));
+  const cutoff = Date.now() - ORPHAN_MAX_AGE_MS;
+  const entries = await readdir(clipboardDirectory, { withFileTypes: true }).catch(() => []);
+  await Promise.all(
+    entries.map(async (entry) => {
+      const image = join(clipboardDirectory, entry.name);
+      if (!entry.isFile() || retained.has(resolve(image))) return;
+      const file = await stat(image).catch(() => undefined);
+      if (file && file.mtimeMs < cutoff) await removeClipboardImages([image]);
+    }),
   );
 }

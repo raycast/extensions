@@ -37,9 +37,3 @@ This extension includes AI tools for Raycast AI Chat:
 - Use `---` on its own line to split content into a thread
 - Set a default social set via **Search Social Sets** to skip the picker when creating drafts
 - Platform selections are remembered per social set
-
-## Local development
-
-From `extensions/typefully`, run `npm ci`, then `npm run dev` to load the fork in Raycast. Enter your Typefully API key in the development extension's preferences.
-
-Run `npm test`, `npm run build`, and `npm run lint` to check changes.
