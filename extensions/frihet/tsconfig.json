@@ -1,4 +1,6 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
@@ -6,14 +8,10 @@
     "lib": ["ES2022", "DOM"],
     "jsx": "react-jsx",
     "strict": true,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src/**/*", "raycast-env.d.ts"],
-  "exclude": ["node_modules", "dist"]
+    "resolveJsonModule": true
+  }
 }
