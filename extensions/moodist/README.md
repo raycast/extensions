@@ -24,23 +24,26 @@ Moodist is a Raycast extension that layers nature, rain, city, and noise sounds 
 
 ## Mix Sounds
 
-Sounds that still need to be fetched show a download icon. Playing sounds show their volume in green, and paused sounds in orange.
+Each sound has its own icon. In both layouts, the accessory shows a download icon until the sound is cached, a green speaker while playing, or an orange pause icon while paused. Cached sounds outside the mix have no status accessory. The grid shows volume below the sound name.
+
+Use **Toggle Layout** (⌘L on macOS, Ctrl+L on Windows) to switch between list and grid views. The layout is remembered automatically.
 
 <img src="./metadata/moodist-2.png" alt="Actions for River: Play, Play Only This, and Open Moodist Website" width="800" />
 
 <img src="./metadata/moodist-3.png" alt="River playing at 50 percent, with one sound in the mix" width="800" />
 
-| Action                  | Shortcut |
-| ----------------------- | -------- |
-| Play, resume, or stop   | ↵        |
-| Decrease volume         | ⌥←       |
-| Increase volume         | ⌥→       |
-| Set volume              | ⌘V       |
-| Play only this          | ⌘O       |
-| Pause or resume the mix | ⌘⇧P      |
-| Master volume           | ⌘M       |
-| Save mix as preset      | ⌘S       |
-| Stop all                | ⌃⇧X      |
+| Action                  | macOS shortcut    | Windows shortcut    |
+| ----------------------- | ----------------- | ------------------- |
+| Play, resume, or stop   | `↵`               | `↵`                 |
+| Decrease volume         | `⌘` `-`           | `Ctrl` `-`          |
+| Increase volume         | `⌘` `=`           | `Ctrl` `=`          |
+| Set volume              | `⌘` `⇧` `V`       | `Ctrl` `Shift` `V`  |
+| Play only this          | `⌘` `O`           | `Ctrl` `O`          |
+| Pause or resume the mix | `⌘` `⇧` `P`       | `Ctrl` `Shift` `P`  |
+| Master volume           | `⌘` `M`           | `Ctrl` `M`          |
+| Save mix as preset      | `⌘` `S`           | `Ctrl` `S`          |
+| Toggle layout           | `⌘` `L`           | `Ctrl` `L`          |
+| Stop all                | `⌃` `⇧` `X`       | `Ctrl` `Shift` `X`  |
 
 **Play only this** clears the rest of the mix and plays the selected sound.
 

@@ -7,7 +7,6 @@ export function useFavorites() {
   return useCachedPromise(fetchFavorites, [], { onError: onErrorToast({ title: "Couldn't load favorites" }) });
 }
 
-/** Toggle a person or company in the matching private Cosign list. */
 export function FavoriteAction({
   kind,
   id,

@@ -42,13 +42,15 @@ smctl ships a thermal safety guard: if temperatures climb too high while fans ar
 
 | Command | What it does |
 |---|---|
-| **Control Fans** | List of fans with live actual/target RPM, supported range, and control mode. Actions: set manual RPM (per fan or all), quiet profile, full speed, back to auto. |
+| **Control Fans** | List of fans with live actual/target RPM and % of maximum, supported range, and control mode. Actions: set manual RPM (per fan or all), quiet profile, full speed, back to auto. |
 | **Set Fan Speed** | Quick command — type an RPM as argument, applies to all fans. Validates against the hardware range. |
 | **Set Fans to Auto** | One keystroke to return fan control to macOS. |
+| **Toggle Fan Speed** | One keystroke to switch between macOS control and full speed. If any fan is in manual mode it returns to auto; otherwise it applies the profile set in the command preferences (Full Speed by default, or Quiet). Its subtitle in Raycast shows the current state and the next one, e.g. `Auto · 31% → Max`. |
 
 ## Preferences
 
 - **smctl Path** — override the binary location if it's not in `/opt/homebrew/bin` or `/usr/local/bin`.
+- **Manual Profile** (Toggle Fan Speed) — profile the toggle applies when leaving auto: Full Speed (default) or Quiet.
 
 ## Troubleshooting
 

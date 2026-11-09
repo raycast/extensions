@@ -2,7 +2,7 @@ import { executeSQL, runAppleScript, showFailureToast, useCachedPromise, useProm
 import { resolve } from "path";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
 import { getBookmarksTree, type BookmarkDirectory } from "./bookmarks";
 
@@ -27,6 +27,15 @@ export type Tab = {
   url?: string;
   isPinned: boolean;
   isFocused: boolean;
+  /** Name of the Dia space (profile) the tab belongs to, when Dia reports it. */
+  space?: string;
+  /** Whether the tab's space is the one shown in its window. */
+  isActiveSpace: boolean;
+};
+
+export type TabsOptions = {
+  /** Include tabs from every space, not only the space active in each window. */
+  allSpaces?: boolean;
 };
 
 export type Bookmark = {
@@ -222,36 +231,50 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
   return result;
 }
 
-export async function getTabs(): Promise<Tab[]> {
-  // JXA (JavaScript for Automation) is significantly faster than AppleScript
-  // for complex data extraction: native JSON, no O(n^2) string concat.
-  // If JXA fails (e.g. Dia doesn't expose JXA dictionary), fall back to
-  // bulk AppleScript using `properties of every tab` (still 10-14x faster
-  // than the original per-tab property access).
+export async function getTabs(options: TabsOptions = {}): Promise<Tab[]> {
+  // Bulk AppleScript (`properties of every tab`, one Apple Event per window or space) is about twice
+  // as fast as JXA on Dia 1.56, where JXA has to read each tab's properties separately.
+  // JXA stays as a fallback when the AppleScript output can't be parsed.
   try {
-    const { tabs: jxaResult, windowCount } = await getTabsJXA();
-    // When JXA returns 0 tabs but Dia has windows (JXA bug in some versions), try AppleScript
-    if (jxaResult.length === 0 && windowCount > 0) {
-      try {
-        const asResult = await getTabsBulkAppleScript();
-        if (asResult.length > 0) return asResult;
-      } catch {
-        // ignore, return []
-      }
-    }
-    return jxaResult;
+    return await getTabsBulkAppleScript(options);
   } catch {
     try {
-      return await getTabsBulkAppleScript();
+      return await getTabsJXA(options);
     } catch {
       return [];
     }
   }
 }
 
-async function getTabsJXA(): Promise<{ tabs: Tab[]; windowCount: number }> {
+/** Runs JXA; `args` reach the script's `run(argv)` function, so data never becomes script source. */
+function runJXA(script: string, timeout: number, args: string[] = []): string {
+  return execFileSync("osascript", ["-l", "JavaScript", "-e", script, ...args], {
+    timeout,
+    encoding: "utf-8",
+  }).trim();
+}
+
+/**
+ * Turns empty URLs and space names into undefined, and keeps the first occurrence of each tab:
+ * a space's pinned and favorite tabs can be listed under several windows.
+ */
+function normalizeTabs(tabs: Array<Required<Tab>>): Tab[] {
+  const seen = new Set<string>();
+  return tabs
+    .filter((tab) => {
+      if (seen.has(tab.tabId)) return false;
+      seen.add(tab.tabId);
+      return true;
+    })
+    .map((tab) => ({ ...tab, url: tab.url || undefined, space: tab.space || undefined }));
+}
+
+async function getTabsJXA({ allSpaces = false }: TabsOptions): Promise<Tab[]> {
+  // A window's `tabs` element only holds its active space; each `profile` element holds one space's tabs.
+  // Tab accessors such as isPinned() fail with "Can't convert types", so read everything through properties().
   const jxa = `
     (() => {
+      const allSpaces = ${allSpaces ? "true" : "false"};
       const dia = Application("Dia");
       const wins = dia.windows();
       const tabs = [];
@@ -259,79 +282,49 @@ async function getTabsJXA(): Promise<{ tabs: Tab[]; windowCount: number }> {
         const w = wins[i];
         try {
           const wId = String(w.id());
-          const wTabs = w.tabs();
-          for (let j = 0; j < wTabs.length; j++) {
-            const t = wTabs[j];
-            let url = "";
-            try { url = t.url() || ""; } catch(e) {}
-            tabs.push({
-              windowId: wId,
-              tabId: String(t.id()),
-              title: t.name() || t.title() || "",
-              url: url,
-              isPinned: !!t.isPinned(),
-              isFocused: !!t.isFocused(),
-            });
+          let activeSpace = "";
+          try { activeSpace = w.activeProfile.name() || ""; } catch(e) {}
+          const sources = [];
+          if (allSpaces) {
+            const profiles = w.profiles();
+            for (let p = 0; p < profiles.length; p++) {
+              try { sources.push({ space: profiles[p].name() || "", tabs: profiles[p].tabs() }); } catch(e) {}
+            }
+          } else {
+            sources.push({ space: activeSpace, tabs: w.tabs() });
+          }
+          for (let s = 0; s < sources.length; s++) {
+            const source = sources[s];
+            const isActiveSpace = !allSpaces || source.space === activeSpace;
+            for (let j = 0; j < source.tabs.length; j++) {
+              try {
+                const props = source.tabs[j].properties();
+                tabs.push({
+                  windowId: wId,
+                  tabId: String(props.id),
+                  title: props.title || "",
+                  url: props.url || "",
+                  isPinned: !!props.ispinned,
+                  isFocused: !!props.isfocused,
+                  space: source.space,
+                  isActiveSpace,
+                });
+              } catch(e) {}
+            }
           }
         } catch(e) {}
       }
-      return JSON.stringify({ tabs: tabs, windowCount: wins.length });
+      return JSON.stringify(tabs);
     })()
   `;
 
-  const result = execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
-    timeout: 5000,
-    encoding: "utf-8",
-  }).trim();
-
-  const parsed = JSON.parse(result) as {
-    tabs: Array<{
-      windowId: string;
-      tabId: string;
-      title: string;
-      url: string;
-      isPinned: boolean;
-      isFocused: boolean;
-    }>;
-    windowCount: number;
-  };
-
-  return {
-    tabs: parsed.tabs.map((t) => ({
-      ...t,
-      url: t.url || undefined,
-    })),
-    windowCount: parsed.windowCount,
-  };
+  return normalizeTabs(JSON.parse(runJXA(jxa, 5000)) as Array<Required<Tab>>);
 }
 
-async function getTabsBulkAppleScript(): Promise<Tab[]> {
-  // Bulk fetch using `properties of every tab` — one IPC call per window
+async function getTabsBulkAppleScript({ allSpaces = false }: TabsOptions): Promise<Tab[]> {
+  // Bulk fetch using `properties of every tab` — one IPC call per window (or per space)
   // instead of N calls per tab. 10-14x faster than nested repeat loops.
-  const result = await runAppleScript(
-    `
-      on escape_value(this_text)
-        if this_text is missing value then return ""
-        set this_text to this_text as text
-        set AppleScript's text item delimiters to "\\\\"
-        set the item_list to every text item of this_text
-        set AppleScript's text item delimiters to "\\\\\\\\"
-        set this_text to the item_list as string
-        set AppleScript's text item delimiters to "\\""
-        set the item_list to every text item of this_text
-        set AppleScript's text item delimiters to "\\\\\\""
-        set this_text to the item_list as string
-        set AppleScript's text item delimiters to ""
-        return this_text
-      end escape_value
-
-      set _output to ""
-
-      tell application "Dia"
-        repeat with w in every window
-          try
-            set wId to id of w
-            set allTabs to properties of every tab of w
+  const collectTabs = `
             set tabsCount to count of allTabs
             repeat with i from 1 to tabsCount
               try
@@ -356,11 +349,56 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
                 if _output is not "" then
                   set _output to (_output & ",")
                 end if
-                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & ", \\"space\\": \\"" & _space & "\\", \\"isActiveSpace\\": " & _isActiveSpace & "}")
               on error
                 (* skip this tab, avoid dangling comma *)
               end try
-            end repeat
+            end repeat`;
+
+  const windowBody = allSpaces
+    ? `
+            repeat with p in every profile of w
+              try
+                set _space to my escape_value(get name of p)
+                set _isActiveSpace to (_space is _activeSpace)
+                set allTabs to properties of every tab of p
+                ${collectTabs}
+              end try
+            end repeat`
+    : `
+            set _space to _activeSpace
+            set _isActiveSpace to true
+            set allTabs to properties of every tab of w
+            ${collectTabs}`;
+
+  const result = await runAppleScript(
+    `
+      on escape_value(this_text)
+        if this_text is missing value then return ""
+        set this_text to this_text as text
+        set AppleScript's text item delimiters to "\\\\"
+        set the item_list to every text item of this_text
+        set AppleScript's text item delimiters to "\\\\\\\\"
+        set this_text to the item_list as string
+        set AppleScript's text item delimiters to "\\""
+        set the item_list to every text item of this_text
+        set AppleScript's text item delimiters to "\\\\\\""
+        set this_text to the item_list as string
+        set AppleScript's text item delimiters to ""
+        return this_text
+      end escape_value
+
+      set _output to ""
+
+      tell application "Dia"
+        repeat with w in every window
+          try
+            set wId to id of w
+            set _activeSpace to ""
+            try
+              set _activeSpace to my escape_value(get name of active profile of w)
+            end try
+            ${windowBody}
           on error errMsg number errNum
             (* swallow error for this window so we still return tabs from other windows *)
           end try
@@ -381,19 +419,46 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
   // Escape unescaped " inside string values (e.g. titles with literal ") so JSON.parse succeeds.
   sanitized = fixUnescapedQuotesInJson(sanitized);
 
-  const parsed = JSON.parse(sanitized) as Array<{
-    windowId: string;
-    tabId: string;
-    title: string;
-    url: string;
-    isPinned: boolean;
-    isFocused: boolean;
-  }>;
+  const parsed = JSON.parse(sanitized) as Array<Required<Tab>>;
 
-  return parsed.map((t) => ({
-    ...t,
-    url: t.url || undefined,
-  }));
+  return normalizeTabs(parsed);
+}
+
+export type Spaces = {
+  /** Space names in Dia's sidebar order, including spaces without tabs. */
+  names: string[];
+  /** Space shown in each window, by window ID. */
+  activeByWindow: Record<string, string>;
+};
+
+/** Reads Dia's spaces from the front window, plus the space each window shows. */
+export async function getSpaces(): Promise<Spaces> {
+  // Unit (31) and record (30) separators keep names intact without escaping
+  const result = await runAppleScript(`
+    set _us to character id 31
+    set _rs to character id 30
+    set _names to ""
+    set _active to ""
+    tell application "Dia"
+      if (count of windows) is 0 then return ""
+      repeat with p in every profile of window 1
+        set _names to _names & (name of p) & _us
+      end repeat
+      repeat with w in every window
+        try
+          set _active to _active & (id of w) & _us & (name of active profile of w) & _rs
+        end try
+      end repeat
+    end tell
+    return _names & _rs & _active
+  `);
+  const [namesPart = "", ...activeParts] = result.split("\x1e");
+  const activeByWindow: Record<string, string> = {};
+  for (const record of activeParts) {
+    const [windowId, name] = record.split("\x1f");
+    if (windowId && name) activeByWindow[windowId] = name;
+  }
+  return { names: namesPart.split("\x1f").filter(Boolean), activeByWindow };
 }
 
 /** Returns the focused tab, preferring the frontmost window when several windows report one. */
@@ -405,8 +470,9 @@ export async function getFocusedTab(): Promise<Tab | undefined> {
   return focusedTabs.find((tab) => tab.windowId === frontWindowId) ?? focusedTabs[0];
 }
 
-export function useTabs() {
-  return useCachedPromise(getTabs);
+export function useTabs(options: TabsOptions = {}) {
+  // Pass the option as an argument so each mode keeps its own cache entry
+  return useCachedPromise((allSpaces: boolean) => getTabs({ allSpaces }), [options.allSpaces ?? false]);
 }
 
 export function useBookmarks(searchText?: string) {
@@ -415,54 +481,162 @@ export function useBookmarks(searchText?: string) {
   });
 }
 
-export async function focusTab(tab: Tab) {
-  try {
-    // JXA: direct window/tab lookup by ID (no nested loops)
-    const jxa = `
-      (() => {
-        const dia = Application("Dia");
-        dia.activate();
-        const wins = dia.windows();
-        for (let i = 0; i < wins.length; i++) {
-          if (String(wins[i].id()) === '${tab.windowId.replace(/'/g, "\\'")}') {
-            const tabs = wins[i].tabs();
-            for (let j = 0; j < tabs.length; j++) {
-              if (String(tabs[j].id()) === '${tab.tabId.replace(/'/g, "\\'")}') {
-                tabs[j].focus();
-                return "ok";
-              }
-            }
-          }
+/**
+ * JXA that finds a tab by ID, checking the tab's own window first, then every window.
+ * Each window is searched in its active space (`tabs`) and then in every space (`profiles`), so tabs
+ * from inactive spaces are found too. `onFound` is JXA run with `dia`, `w`, `t`, and `p`
+ * (the space holding the tab, or null when the tab is in the window's active space), and must return a string.
+ * Run it with `findTabArgs(tab)`.
+ */
+function findTabJXA(onFound: string) {
+  return `
+    function run(argv) {
+      const dia = Application("Dia");
+      const windowId = argv[0];
+      const tabId = argv[1];
+      const wins = dia.windows();
+      const ordered = [];
+      for (let i = 0; i < wins.length; i++) {
+        if (String(wins[i].id()) === windowId) ordered.unshift(wins[i]); else ordered.push(wins[i]);
+      }
+      const found = (w, t, p) => { ${onFound} };
+      for (let i = 0; i < ordered.length; i++) {
+        const w = ordered[i];
+        const j = w.tabs.id().map(String).indexOf(tabId);
+        if (j >= 0) return found(w, w.tabs[j], null);
+      }
+      for (let i = 0; i < ordered.length; i++) {
+        const w = ordered[i];
+        const profiles = w.profiles();
+        for (let k = 0; k < profiles.length; k++) {
+          const j = profiles[k].tabs.id().map(String).indexOf(tabId);
+          if (j >= 0) return found(w, profiles[k].tabs[j], profiles[k]);
         }
-        return "not_found";
-      })()
-    `;
-    execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
-      timeout: 3000,
-      encoding: "utf-8",
-    });
-  } catch {
-    // Fallback to AppleScript
-    const escapedWindowId = escapeAppleScriptString(tab.windowId);
-    const escapedTabId = escapeAppleScriptString(tab.tabId);
+      }
+      return "not_found";
+    }
+  `;
+}
 
-    await runAppleScript(
-      `tell application "Dia"
-        activate
+/** Window and tab IDs passed to findTabJXA and findTabAppleScript scripts. */
+function findTabArgs(tab: Tab) {
+  return [tab.windowId, tab.tabId];
+}
+
+/**
+ * AppleScript counterpart of findTabJXA. `onFound` runs inside `tell application "Dia"` with `w`, `t`, and `p` set.
+ * Run it with `findTabArgs(tab)`.
+ */
+function findTabAppleScript(onFound: string) {
+  return `
+  on run argv
+    set _windowId to item 1 of argv
+    set _tabId to item 2 of argv
+    set _result to "not_found"
+    tell application "Dia"
+      set _windows to {}
+      repeat with w in every window
+        if id of w is _windowId then
+          set beginning of _windows to contents of w
+        else
+          set end of _windows to contents of w
+        end if
+      end repeat
+      repeat with w in _windows
+        repeat with t in every tab of w
+          if id of t is _tabId then
+            set p to missing value
+            ${onFound}
+            return _result
+          end if
+        end repeat
+      end repeat
+      repeat with w in _windows
+        repeat with p in every profile of w
+          repeat with t in every tab of p
+            if id of t is _tabId then
+              ${onFound}
+              return _result
+            end if
+          end repeat
+        end repeat
+      end repeat
+    end tell
+    return _result
+  end run
+  `;
+}
+
+/**
+ * Focuses a tab and brings Dia to the front. A tab from an inactive space is focused by switching
+ * its window to that space first.
+ *
+ * @throws TabNotFoundError when no open tab has the tab's ID.
+ */
+export async function focusTab(tab: Tab) {
+  let result: string;
+  try {
+    result = runJXA(
+      findTabJXA(
+        `
+        dia.activate();
+        if (p) {
+          p.focus();
+          const j = w.tabs.id().map(String).indexOf(tabId);
+          if (j >= 0) { w.tabs[j].focus(); return "ok"; }
+        }
+        t.focus();
+        return "ok";
+        `,
+      ),
+      3000,
+      findTabArgs(tab),
+    );
+  } catch {
+    // JXA unavailable — fall back to AppleScript
+    result = (
+      await runAppleScript(
+        findTabAppleScript(
+          `activate
+            if p is not missing value then focus p
+            focus t
+            set _result to "ok"`,
+        ),
+        findTabArgs(tab),
+      )
+    ).trim();
+  }
+
+  if (result !== "ok") {
+    throw new TabNotFoundError();
+  }
+}
+
+/**
+ * Switches a window to a space and brings Dia to the front, like picking the space in Dia's sidebar.
+ * Falls back to the front window when the window is gone.
+ */
+export async function focusSpace(spaceName: string, windowId: string) {
+  await runAppleScript(
+    `
+    on run argv
+      set _spaceName to item 1 of argv
+      set _windowId to item 2 of argv
+      tell application "Dia"
+        set _window to window 1
         repeat with w in every window
-          if id of w is "${escapedWindowId}" then
-            repeat with t in every tab of w
-              if id of t is "${escapedTabId}" then
-                focus t
-                exit repeat
-              end if
-            end repeat
+          if id of w is _windowId then
+            set _window to contents of w
             exit repeat
           end if
         end repeat
-      end tell`,
-    );
-  }
+        activate
+        focus profile _spaceName of _window
+      end tell
+    end run
+  `,
+    [spaceName, windowId],
+  );
 }
 
 /** Thrown when a tab's window/tab IDs no longer match a live tab in Dia (stale cache or already closed). */
@@ -474,54 +648,19 @@ export class TabNotFoundError extends Error {
 }
 
 export async function closeTab(tab: Tab) {
-  const escapedWindowId = escapeAppleScriptString(tab.windowId);
-  const escapedTabId = escapeAppleScriptString(tab.tabId);
-
   let result: string;
   try {
-    // JXA: direct window/tab lookup by ID (no nested loops), no activate
-    const jxa = `
-      (() => {
-        const dia = Application("Dia");
-        const wins = dia.windows();
-        for (let i = 0; i < wins.length; i++) {
-          if (String(wins[i].id()) === '${tab.windowId.replace(/'/g, "\\'")}') {
-            const tabs = wins[i].tabs();
-            for (let j = 0; j < tabs.length; j++) {
-              if (String(tabs[j].id()) === '${tab.tabId.replace(/'/g, "\\'")}') {
-                tabs[j].close();
-                return "ok";
-              }
-            }
-          }
-        }
-        return "not_found";
-      })()
-    `;
-    result = execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
-      timeout: 3000,
-      encoding: "utf-8",
-    }).trim();
+    // No activate: closing a tab leaves Dia in the background
+    result = runJXA(findTabJXA(`t.close(); return "ok";`), 3000, findTabArgs(tab));
   } catch {
     // JXA unavailable — fall back to AppleScript, which reports its own outcome
     result = (
       await runAppleScript(
-        `set _result to "not_found"
-        tell application "Dia"
-          repeat with w in every window
-            if id of w is "${escapedWindowId}" then
-              repeat with t in every tab of w
-                if id of t is "${escapedTabId}" then
-                  close t
-                  set _result to "ok"
-                  exit repeat
-                end if
-              end repeat
-              exit repeat
-            end if
-          end repeat
-        end tell
-        return _result`,
+        findTabAppleScript(
+          `close t
+            set _result to "ok"`,
+        ),
+        findTabArgs(tab),
       )
     ).trim();
   }

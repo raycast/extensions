@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import { Rule } from "../types";
+import { cleanRuleName, countConfigHandlers } from "./parser";
+import { expandTilde } from "./path";
 
 function ruleToHandler(rule: Rule): string {
   const browser = JSON.stringify(rule.browser);
@@ -40,7 +42,7 @@ export function generateFinickyConfig(params: { defaultBrowser: string; rules: R
     .map((r) => {
       const handler = ruleToHandler(r);
       if (!handler) return "";
-      return `// Rule: ${r.name}\n${handler}`;
+      return `// Rule: ${cleanRuleName(r.name) || "Untitled Rule"}\n${handler}`;
     })
     .filter(Boolean)
     .join(",\n\n        ");
@@ -60,4 +62,38 @@ export default {
 
 export async function writeConfigFile(args: { configPath: string; configContents: string }) {
   await fs.writeFile(args.configPath, args.configContents, { encoding: "utf8" });
+}
+
+export class UnimportedRulesError extends Error {}
+
+/**
+ * Regenerates the config file from `rules`.
+ *
+ * Call this before saving `rules` to storage, passing how many rules were stored
+ * before the change. When Raycast has no rules yet but the file already has
+ * handlers, the write is refused: those rules were never imported (a fresh
+ * install, or a development build with its own empty storage), and writing would
+ * replace them. Pass `replaceExisting` only when the file's rules are being
+ * deliberately replaced, as an import does.
+ */
+export async function syncConfigFile(args: {
+  configPath: string;
+  defaultBrowser: string;
+  rules: Rule[];
+  previousRuleCount: number;
+  replaceExisting?: boolean;
+}) {
+  const configPath = expandTilde(args.configPath);
+
+  if (args.previousRuleCount === 0 && !args.replaceExisting) {
+    const existingHandlers = await countConfigHandlers(configPath);
+    if (existingHandlers > 0) {
+      throw new UnimportedRulesError(
+        `${args.configPath} has ${existingHandlers} rule(s) that aren't in Raycast yet. Import them first (Manage Finicky Rules, then Import from Config File) so they aren't overwritten.`,
+      );
+    }
+  }
+
+  const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules: args.rules });
+  await writeConfigFile({ configPath, configContents: contents });
 }

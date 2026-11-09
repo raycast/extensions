@@ -1,6 +1,20 @@
 import { Clipboard, Toast, closeMainWindow, environment, showHUD, showToast } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { constants, copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  constants,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  unlinkSync,
+  utimesSync,
+  writeFileSync,
+} from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -136,6 +150,71 @@ function saveToDownloads(path: string, fileName: string): string {
   throw new Error("Too many files with this name in Downloads");
 }
 
+/** Clipboard shares are staged here: the clipboard holds a path, not pixels, so the file must outlive the call. */
+const SHARE_DIR = join(environment.supportPath, "share");
+/** Past shares kept so "Copy" and Clipboard History pastes still resolve; older ones are pruned. */
+const KEEP_SHARES = 5;
+/** Single reused files written by earlier versions. */
+const LEGACY_SHARE_FILES = ["forecast-share.png", "radar-share.gif"];
+
+/**
+ * Stage a rendered file for the clipboard under a name unique to its content.
+ *
+ * Receiving apps may cache a pasted attachment by its path or file name, so
+ * reusing one name made a second paste show the first image. The name carries
+ * a content hash, so an existing file with that name already holds the same
+ * bytes and is reused rather than overwritten, which also avoids touching a
+ * file a receiving app still has open (Windows locks those). Pruning orders
+ * shares by modification time, so a reused file is re-stamped as the latest.
+ */
+function stageShareFile(source: string, fileName: string): string {
+  mkdirSync(SHARE_DIR, { recursive: true });
+  const bytes = readFileSync(source);
+  const hash = createHash("sha1").update(bytes).digest("hex").slice(0, 8);
+  const safe = safeFileName(fileName);
+  const dot = safe.lastIndexOf(".");
+  const target = join(SHARE_DIR, `${safe.slice(0, dot)}-${hash}${safe.slice(dot)}`);
+  if (existsSync(target)) {
+    try {
+      const now = new Date();
+      utimesSync(target, now, now);
+    } catch {
+      // Locked elsewhere; it keeps its older timestamp.
+    }
+  } else {
+    writeFileSync(target, bytes);
+  }
+  pruneShares(target);
+  return target;
+}
+
+/** Keep `current` plus the newest shares; anything still open elsewhere (Windows) is skipped and retried next time. */
+function pruneShares(current: string): void {
+  let entries: { path: string; mtime: number }[];
+  try {
+    entries = readdirSync(SHARE_DIR).flatMap((name) => {
+      const path = join(SHARE_DIR, name);
+      try {
+        return path === current ? [] : [{ path, mtime: statSync(path).mtimeMs }];
+      } catch {
+        return [];
+      }
+    });
+  } catch {
+    return;
+  }
+  entries.sort((a, b) => b.mtime - a.mtime);
+  const stale = entries.slice(KEEP_SHARES - 1).map((e) => e.path);
+  for (const name of LEGACY_SHARE_FILES) stale.push(join(environment.supportPath, name));
+  for (const path of stale) {
+    try {
+      unlinkSync(path);
+    } catch {
+      // Missing, or locked by the app that is still reading it.
+    }
+  }
+}
+
 /**
  * Copy the file, paste it into the frontmost app, or save it to ~/Downloads.
  * Clipboard modes reference the file by path, so `path` must outlive the call.
@@ -170,13 +249,10 @@ function stamp(): string {
 export async function shareForecastImage(svg: string, mode: ShareMode, baseName: string): Promise<void> {
   const { png, dir } = await rasterize(svg);
   try {
-    let path = png;
-    if (mode !== "save") {
-      // The temp dir is removed below; the clipboard needs a path that survives.
-      path = join(environment.supportPath, "forecast-share.png");
-      copyFileSync(png, path);
-    }
-    await shareFile(path, mode, `${baseName}-${stamp()}.png`, "forecast image");
+    const fileName = `${baseName}-${stamp()}.png`;
+    // The temp dir is removed below; clipboard modes need a path that survives.
+    const path = mode === "save" ? png : stageShareFile(png, fileName);
+    await shareFile(path, mode, fileName, "forecast image");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -184,9 +260,8 @@ export async function shareForecastImage(svg: string, mode: ShareMode, baseName:
 
 /** Copy/paste/save the animated radar GIF. No rasterizer needed, so this works everywhere. */
 export async function shareRadarGif(gifPath: string, mode: ShareMode, baseName: string): Promise<void> {
-  // Panning/zooming deletes superseded GIFs; clipboard file references must
-  // point at a path that survives, so share a stable copy.
-  const stable = join(environment.supportPath, "radar-share.gif");
-  copyFileSync(gifPath, stable);
-  await shareFile(stable, mode, `${baseName}-radar-${stamp()}.gif`, "radar animation");
+  const fileName = `${baseName}-radar-${stamp()}.gif`;
+  // Panning/zooming deletes superseded GIFs; clipboard modes need a path that survives.
+  const path = mode === "save" ? gifPath : stageShareFile(gifPath, fileName);
+  await shareFile(path, mode, fileName, "radar animation");
 }

@@ -42,15 +42,15 @@ Contributor-provided Raycast screenshots with sensitive Jira identifiers, projec
 
 ### Log Time
 
-![Log Time form with the date prefilled](screenshots/log-time.png)
+![Log Time form with the date prefilled](media/log-time.png)
 
 ### View Logged Time
 
-![Logged time entries with daily totals and reminders](screenshots/logged-time.png)
+![Logged time entries with daily totals and reminders](media/logged-time.png)
 
 ### Refresh and Month Navigation
 
-![Refresh and month navigation actions](screenshots/refresh-actions.png)
+![Refresh and month navigation actions](media/refresh-actions.png)
 
 ## Setup
 
@@ -74,6 +74,8 @@ To use this extension, you need to configure the following preferences:
 - Viewing and changing worklogs requires the corresponding Jira project and worklog permissions. A failed fetch is reported instead of displaying a partial total.
 - Editing only the duration or date preserves the original Jira comment. Changing the description replaces it with plain text (formatted as an Atlassian document on Jira Cloud).
 - Durations must use whole hours, minutes, and seconds in that order, for example `2h 30m`, `45m`, or `30s`. Invalid or partial inputs are rejected.
+
+To log time on an older ticket outside your filter, type its full key (for example `APM-12345`) in the Issue dropdown. Exact-key lookup searches Jira directly, including other projects you can access. Ordinary text searches still filter the loaded issues.
 
 ## Development
 

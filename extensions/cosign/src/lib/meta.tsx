@@ -3,19 +3,24 @@ import { Color, Detail, Icon, Image, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 export type MetaItem =
-  | { kind: "label"; title: string; text: string }
+  | { kind: "label"; title: string; text?: string; icon?: Image.ImageLike }
   | { kind: "link"; title: string; text: string; target: string }
   | { kind: "tags"; title: string; tags: string[]; color?: Color.ColorLike }
   | { kind: "separator" };
 
+/** What a person, company, round or role shows in a list sidebar or a pushed Detail. */
+export interface Content {
+  markdown: string;
+  meta: MetaItem[];
+}
+
 type MetaNamespace = typeof Detail.Metadata;
 
-/** One description of the sidebar, rendered into either Detail.Metadata (pushed screen) or List.Item.Detail.Metadata (list pane). */
 function renderItems(M: MetaNamespace, items: MetaItem[]): ReactNode {
   return items.map((item, i) => {
     switch (item.kind) {
       case "label":
-        return <M.Label key={i} title={item.title} text={item.text} />;
+        return <M.Label key={i} title={item.title} text={item.text} icon={item.icon} />;
       case "link":
         return <M.Link key={i} title={item.title} text={item.text} target={item.target} />;
       case "tags":
@@ -46,10 +51,8 @@ export function listDetailMetadata(items: MetaItem[]): ReactNode {
 
 export const host = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-/** The site's favicon as a rounded icon; the globe while it loads or when there is none. */
 export const favicon = (url: string) => getFavicon(url, { fallback: Icon.Globe, mask: Image.Mask.RoundedRectangle });
 
-/** A person's or company's picture, round, with a generic one when Cosign has none. */
 export const avatar = (url: string | null): Image.ImageLike => ({
   source: url ?? Icon.Person,
   mask: Image.Mask.Circle,

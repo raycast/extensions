@@ -31,7 +31,6 @@ export async function fetchOrganization(organizationId: string): Promise<Organiz
   const firm = await callTool<OrganizationDetail | { error: string }>("research_investors", {
     request: { action: "firm_profile", args: { organizationId } },
   });
-  // Neither a company nor a firm: surface Cosign's reason rather than render an empty profile.
   if ("error" in firm) throw new Error(firm.error || company.error);
   return firm;
 }

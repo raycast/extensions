@@ -14,8 +14,7 @@ describe("createSecretFlow + viewSecretFlow roundtrip", () => {
   it("roundtrips plaintext through encrypt → decrypt (no passphrase)", async () => {
     const plaintext = "db_password=hunter2";
     let capturedBody:
-      | { ciphertext: string; iv: string; hasPassphrase: boolean }
-      | undefined;
+      { ciphertext: string; iv: string; hasPassphrase: boolean } | undefined;
     const capturedId = "abc123";
 
     mockFetch.mockImplementation((url: string, init?: RequestInit) => {
@@ -61,8 +60,7 @@ describe("createSecretFlow + viewSecretFlow roundtrip", () => {
     const plaintext = "api-key-secret-value";
     const passphrase = "horse battery staple";
     let capturedBody:
-      | { ciphertext: string; iv: string; hasPassphrase: boolean }
-      | undefined;
+      { ciphertext: string; iv: string; hasPassphrase: boolean } | undefined;
     const capturedId = "xyz";
 
     mockFetch.mockImplementation((url: string, init?: RequestInit) => {

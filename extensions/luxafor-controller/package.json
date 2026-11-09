@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "luxafor-controller",
   "title": "Luxafor Controller",
   "description": "Control your Luxafor LED device directly from Raycast",
@@ -23,16 +23,40 @@
     },
     {
       "name": "luxafor-status",
-      "title": "Luxafor Menu Bar Status",
-      "description": "Show Luxafor device status in menubar",
+      "title": "Luxafor Menu Bar",
+      "description": "View the last API-accepted command and send light changes; physical state is unknown",
       "mode": "menu-bar",
       "interval": "1m"
+    },
+    {
+      "name": "set-busy",
+      "title": "Set Busy",
+      "description": "Send a solid red Luxafor command; suitable for an alias or hotkey",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-available",
+      "title": "Set Available",
+      "description": "Send a solid green Luxafor command; suitable for an alias or hotkey",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn off",
+      "description": "Send custom 000000 to turn Luxafor off; suitable for an alias or hotkey",
+      "mode": "no-view"
+    },
+    {
+      "name": "custom-colour",
+      "title": "Set Custom Color",
+      "description": "Send a validated three- or six-digit hex color to Luxafor",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "userId",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "Luxafor User ID",
       "description": "Your Luxafor User ID from the Webhook tab in Luxafor software",
@@ -44,7 +68,7 @@
       "type": "dropdown",
       "required": true,
       "title": "API Endpoint",
-      "description": "Choose your preferred API endpoint",
+      "description": "Use the documented .com service; .co.uk is retained for existing configurations and is unverified",
       "default": "com",
       "label": "API Endpoint",
       "data": [
@@ -63,12 +87,12 @@
       "type": "dropdown",
       "required": false,
       "title": "Menubar Layout",
-      "description": "Choose between simple toggle or full color control",
+      "description": "Choose Busy/Available actions or all seven base colors",
       "default": "simple",
       "label": "Menubar Layout",
       "data": [
         {
-          "title": "Simple Toggle (Red/Green)",
+          "title": "Busy and Available",
           "value": "simple"
         },
         {
@@ -81,31 +105,33 @@
       "name": "debugMode",
       "type": "checkbox",
       "required": false,
-      "title": "Enable Debug Mode",
-      "description": "Show detailed debug information and logging",
+      "title": "Legacy Debug Mode",
+      "description": "Legacy setting retained; request bodies, responses and identifiers are never logged",
       "default": false,
-      "label": "Debug Mode"
+      "label": "Legacy Debug Mode"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.4",
-    "@raycast/utils": "^2.2.0",
-    "axios": "^1.6.0"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test:api": "node test-api.js",
-    "publish": "npx @raycast/api@latest publish"
+    "typecheck": "tsc --noEmit",
+    "check": "npm run build && npm run typecheck && npm run lint"
+  },
+  "engines": {
+    "node": ">=22.22.2"
   }
 }
