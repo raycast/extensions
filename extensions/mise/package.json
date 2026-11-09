@@ -241,6 +241,6 @@
     "test:integration": "vitest run --project integration",
     "test:all": "vitest run",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "H=$(mktemp -d) && mv .agents \"$H\"/ && trap 'mv \"$H\"/.agents . && rmdir \"$H\"' EXIT INT TERM && npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
