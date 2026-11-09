@@ -1,5 +1,5 @@
 import { FormValidation, getAvatarIcon, useFetch, useForm } from "@raycast/utils";
-import { API_HEADERS, API_URL, parseAtomResponse } from "./atom";
+import { API_HEADERS, API_URL, parseAtomResponse, showError } from "./atom";
 import { AtomContact, AtomContactCreate } from "./types";
 import { Action, ActionPanel, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
 
@@ -46,9 +46,7 @@ function AddNewAddress() {
                 toast.title = "Created";
                 await popToRoot();
             } catch (error) {
-                toast.style=Toast.Style.Failure;
-                toast.title = `${(error as Error).cause}`;
-                toast.message = `${error}`
+                showError(error)
             }
         },
         validation: {
