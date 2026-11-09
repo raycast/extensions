@@ -14,7 +14,8 @@ export async function recentPages(): Promise<Hit[]> {
   }
 }
 
-async function save(pages: Hit[]) {
+/** Puts back a list read before a change, to undo it. */
+export async function save(pages: Hit[]) {
   await LocalStorage.setItem(KEY, JSON.stringify(pages.slice(0, MAX_PAGES)));
 }
 

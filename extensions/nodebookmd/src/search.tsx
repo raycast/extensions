@@ -9,11 +9,13 @@ import {
   LaunchProps,
   List,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { combine, MIN_BODY_QUERY, rankBodies } from "./combine";
-import { clearHistory, forgetPage, recentPages, rememberPage } from "./history";
+import { clearHistory, forgetPage, recentPages, rememberPage, save } from "./history";
 import { match } from "./ranking";
 import { inScope, parseScope } from "./scopes";
 import { nodebookServer } from "./server";
@@ -55,7 +57,7 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
 
   const actions = {
     remember: (hit: Hit) => rememberPage(hit).then(() => history.revalidate()),
-    forget: showsHistory ? (hit: Hit) => forgetPage(hit.path).then(() => history.revalidate()) : undefined,
+    forget: showsHistory ? (hit: Hit) => removeWithUndo(hit, history.revalidate) : undefined,
     clear: recent.length > 0 ? () => confirmClear().then(() => history.revalidate()) : undefined,
   };
   const failure = server.error ?? titleList.error ?? (searchesBodies ? bodySearch.error : undefined);
@@ -178,6 +180,18 @@ async function copyPage(markdownUrl: string): Promise<boolean> {
     await showFailureToast(error, { title: "Could not copy the page" });
     return false;
   }
+}
+
+/** Removes a page from the history, with Undo on the toast in place of a confirmation. */
+async function removeWithUndo(hit: Hit, refresh: () => Promise<unknown>) {
+  const before = await recentPages();
+  await forgetPage(hit.path);
+  await refresh();
+  await showToast({
+    style: Toast.Style.Success,
+    title: `Removed ${hit.title} from History`,
+    primaryAction: { title: "Undo", onAction: () => save(before).then(refresh) },
+  });
 }
 
 async function confirmClear() {
