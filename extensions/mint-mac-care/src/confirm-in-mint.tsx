@@ -13,7 +13,6 @@ import { newProgressToken } from "./use-progress";
 export function NeedsNewerMint({ command }: { command: string }) {
   return (
     <Detail
-      navigationTitle={command}
       markdown={`## Update Mint to use ${command}
 
 ${command} needs Mint 1.2 or later, where Mint asks in its own window before it changes anything. Open Mint and choose **Check for Updates**, then come back.`}

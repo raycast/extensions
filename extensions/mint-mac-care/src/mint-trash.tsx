@@ -53,7 +53,7 @@ function EmptyTrash({ cli }: { cli: string }) {
     : "Looking in the Trash…";
 
   return (
-    <List isLoading={isLoading} navigationTitle="Empty Trash" searchBarPlaceholder={searchBarPlaceholder}>
+    <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Mint could not read the Trash" description={error.message} />
       ) : null}

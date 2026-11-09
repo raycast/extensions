@@ -4,7 +4,7 @@
 // the pure shaping of Mint's answers, so node can test it. The views are in
 // mint-trash, mint-conversations, mint-history, mint-handling and mint-rules.
 
-import { formatBytes, plural, runMintSurface } from "./mint-cli";
+import { formatBytes, formatCompact, plural, runMintSurface } from "./mint-cli";
 import type { MintCLIVersion, MintSurfaceRequest, MintSurfaceResponse } from "./mint-cli";
 
 /**
@@ -167,8 +167,33 @@ export type PictureResult = NotRun & {
   review?: PictureScan;
 };
 
-/** Mint's window reviews at most 100 pictures in one request. */
+/**
+ * Mint's window reviews at most 100 pictures in one request. Removing pictures
+ * saves every unselected one as a Keep choice, so the chooser stops at 100
+ * rather than sending part of what was chosen.
+ */
 export const PICTURES_PER_REQUEST = 100;
+
+/**
+ * How many of the pictures sent Mint changed, read from the fresh review it
+ * answers with: a removed picture is gone from it, a kept one carries the new
+ * choice. Undefined when Mint answered without a review.
+ */
+export function picturesChanged(sent: string[], answer: PictureResult, kept?: boolean): number | undefined {
+  if (!answer.review) return undefined;
+  const listed = new Map(answer.review.items.map((picture) => [picture.id, picture]));
+  return sent.filter((id) => (kept === undefined ? !listed.has(id) : listed.get(id)?.kept === kept)).length;
+}
+
+/** One line for a picture removal, counting only the pictures that went. */
+export function pictureRemovalReceipt(sent: string[], answer: PictureResult): string {
+  const freed = `${formatCompact(answer.physicallyReclaimedBytes ?? answer.savedBytes ?? 0)} freed`;
+  const removed = picturesChanged(sent, answer);
+  if (removed === undefined)
+    return `Pictures removed from ${plural(answer.changedCount ?? 0, "conversation")} · ${freed}`;
+  const left = sent.length - removed;
+  return `${plural(removed, "picture")} removed · ${freed}${left ? ` · ${left} left as they were` : ""}`;
+}
 
 export function pictureRows(scan: PictureScan | undefined): Picture[] {
   return [...(scan?.items ?? [])].sort(

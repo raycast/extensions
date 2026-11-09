@@ -17,7 +17,7 @@ export const MINT_DOWNLOAD_URL = "https://mintstorage.app/r/raycast-download";
 export const MINT_WEBSITE_URL = "https://mintstorage.app/r/raycast";
 const SIGNING_REQUIREMENT = `=anchor apple generic and identifier "mint-cli" and certificate leaf[subject.OU] = "${MINT_TEAM_ID}"`;
 const inFlightSurfaceRequests = new Map<string, Promise<MintSurfaceResponse>>();
-/** The Raycast command or AI tool this process serves (`environment.commandName`). */
+/** The Raycast command or AI tool this process serves (`environment.entryPointName`). */
 let surfaceCommand: string | undefined;
 
 /**

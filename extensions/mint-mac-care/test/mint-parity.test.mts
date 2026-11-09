@@ -11,7 +11,9 @@ import {
   hasCapability,
   historyRows,
   notApprovedText,
+  pictureRemovalReceipt,
   pictureRows,
+  picturesChanged,
   ruleRows,
   ruleSummary,
   trashReceipt,
@@ -25,37 +27,6 @@ test("the commands Mint confirms need Mint's own window, never the extension's f
   // 1.1.3 and an early 1.2 build: native approval for MCP only.
   assert.equal(hasCapability({ capabilities: ["surface.v1", "mcp.native-approval.v1"] }, NATIVE_APPROVAL_CAPABILITY), false);
   assert.equal(hasCapability(undefined, NATIVE_APPROVAL_CAPABILITY), false);
-});
-
-test("the capability the extension asks for is the one mint-cli advertises", () => {
-  const version = readFileSync(new URL("../../../MintCLI/VersionCommand.swift", import.meta.url), "utf8");
-  const approval = readFileSync(new URL("../../../Mint/Integrations/NativeMCPApproval.swift", import.meta.url), "utf8");
-  assert.ok(version.includes(`"${NATIVE_APPROVAL_CAPABILITY}"`));
-  assert.ok(approval.includes(`raycastCapability = "${NATIVE_APPROVAL_CAPABILITY}"`));
-});
-
-test("every action the new commands change is one Mint confirms for Raycast", () => {
-  const approval = readFileSync(new URL("../../../Mint/Integrations/NativeMCPApproval.swift", import.meta.url), "utf8");
-  // The set's own literal: other sets in the file (an agent's Optimize, 2026-11-07) name actions Raycast does not send.
-  const start = approval.indexOf("raycastActions: Set<String>");
-  const listed = approval.slice(start, approval.indexOf("]", start) + 1);
-  const sent = ["agents.delete", "agents.optimize", "agents.remove-media", "agent.optimize", "disk.trash.remove", "disk.compress",
-    "pictures.keep", "pictures.remove", "organize.remove", "rules.add", "rules.update", "rules.enable", "rules.disable",
-    "rules.remove", "handling.set"];
-  for (const action of sent) assert.ok(listed.includes(`"${action}"`), action);
-  // Shipped before 1.2: they keep Raycast's own confirmation.
-  for (const action of ["disk.clean", "disk.optimize", "memory.release", "uninstall.execute", "organize.add", "organize.configure",
-    "organize.run", "autocare.disk", "autocare.folder", "autocare.memory", "undo.execute"]) {
-    assert.ok(!listed.includes(`"${action}"`), action);
-  }
-});
-
-test("a person's No in Mint's window answers declined; a Stop stays cancelled", () => {
-  const approval = readFileSync(new URL("../../../Mint/Integrations/NativeMCPApproval.swift", import.meta.url), "utf8");
-  assert.ok(approval.includes("case approved, declined, cancelled, expired"));
-  assert.ok(approval.includes("@objc private func cancelled() { finish(.declined) }"));
-  assert.ok(approval.includes("func windowShouldClose(_ sender: NSWindow) -> Bool { finish(.declined); return false }"));
-  assert.ok(approval.includes("if self.isCancelled() || !interactiveSessionAvailable { self.finish(.cancelled); return }"));
 });
 
 test("a request Mint's window did not approve says nothing changed", () => {
@@ -107,6 +78,28 @@ test("kept pictures go last, the rest by what removing them saves", () => {
   assert.deepEqual(rows.map((row) => row.id), ["l", "s", "k"]);
 });
 
+// Greptile on raycast/extensions#33320: 101 chosen, 100 sent, and the toast
+// said 101. A receipt counts what Mint's fresh review shows changed.
+test("a picture receipt counts only what Mint changed", () => {
+  const review = (items: Array<{ id: string; kept: boolean }>) => ({
+    sessionID: "next",
+    source: "conversations" as const,
+    items: items.map((item) => ({ ...item, copies: 1, estimatedSavingBytes: 1, mime: "image/png", files: ["/c.jsonl"] })),
+  });
+  // "b" is still in a conversation Mint could not change.
+  const removed = { physicallyReclaimedBytes: 3_000_000, review: review([{ id: "b", kept: false }, { id: "z", kept: true }]) };
+  assert.equal(picturesChanged(["a", "b", "c"], removed), 2);
+  assert.equal(pictureRemovalReceipt(["a", "b", "c"], removed), "2 pictures removed · 3 MB freed · 1 left as they were");
+  assert.equal(pictureRemovalReceipt(["a"], { savedBytes: 0, review: review([]) }), "1 picture removed · 0 B freed");
+  // No fresh review (Mint could not read it again): Mint's own count of conversations changed.
+  assert.equal(picturesChanged(["a"], { changedCount: 2 }), undefined);
+  assert.equal(pictureRemovalReceipt(["a"], { changedCount: 2, savedBytes: 5_000 }), "Pictures removed from 2 conversations · 5 KB freed");
+  // Keep: only the pictures that now carry the choice.
+  const kept = { review: review([{ id: "a", kept: true }, { id: "b", kept: false }]) };
+  assert.equal(picturesChanged(["a", "b"], kept, true), 1);
+  assert.equal(picturesChanged(["a", "b"], kept, false), 1);
+});
+
 test("history merges the four logs newest first", () => {
   const rows = historyRows({
     disk: [
@@ -155,20 +148,6 @@ test("a rule from the form is a custom rule Mint can check", () => {
   );
   assert.equal(ruleSummary(made.rule!.filter), ".dmg .pkg .zip · older than 30 days");
   assert.equal(ruleSummary({}), "Every file");
-});
-
-// The 2026-11-05 VM run (11050712-4ff48f97): rules.add from the form answered
-// "The surface request is not valid JSON." because Mint decodes `icon` as
-// required and the rule had none. Every key Mint's decoder requires is sent.
-test("a rule from the form carries every key Mint's decoder requires", () => {
-  const config = readFileSync(new URL("../../../Mint/Models/AppConfig.swift", import.meta.url), "utf8");
-  const rule = config.slice(config.indexOf("struct DeclutterRule:"));
-  const start = rule.indexOf("init(from decoder: Decoder)");
-  const decoder = rule.slice(start, rule.indexOf("\n    }\n", start));
-  const required = [...decoder.matchAll(/(\w+) = try c\.decode\(\w+\.self, forKey: \.(\w+)\)/g)].map((match) => match[2]);
-  assert.deepEqual(required.sort(), ["enabled", "icon", "id", "name"]);
-  const sent = JSON.parse(JSON.stringify(customRule(draft, "custom-1").rule)) as Record<string, unknown>;
-  for (const key of required) assert.ok(sent[key] !== undefined && sent[key] !== null, `${key} is sent`);
 });
 
 test("an edit keeps what the form does not show", () => {

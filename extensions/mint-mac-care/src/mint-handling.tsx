@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { openMint, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
 import { NeedsNewerMint, runConfirmedInMint } from "./confirm-in-mint";
@@ -29,21 +29,20 @@ function Handling({ cli }: { cli: string }) {
   );
   const rows = handlingRows(data);
 
-  async function set(path: string, level: Level) {
+  /** True once Mint saved it; false when Mint refused, failed or the person said no in Mint's window. */
+  async function set(path: string, level: Level): Promise<boolean> {
+    let saved = false;
     if (level === "protect") {
       // Protecting only narrows what Mint may do: no window, as in MCP.
       try {
         await runParity(cli, { action: "handling.set", path, level, confirmed: true });
         await showToast({ style: Toast.Style.Success, title: `Protected ${shortPath(path)}` });
+        saved = true;
       } catch (setError) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Mint could not save it",
-          message: setError instanceof Error ? setError.message : String(setError),
-        });
+        await showFailureToast(setError, { title: "Mint could not save it" });
       }
     } else {
-      await runConfirmedInMint(
+      const answer = await runConfirmedInMint(
         cli,
         { action: "handling.set", path, level },
         {
@@ -52,8 +51,10 @@ function Handling({ cli }: { cli: string }) {
           failed: "Mint could not save it",
         },
       );
+      saved = answer !== undefined;
     }
     revalidate();
+    return saved;
   }
 
   const add = (
@@ -66,7 +67,7 @@ function Handling({ cli }: { cli: string }) {
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle="File Handling" searchBarPlaceholder="Search protected locations">
+    <List isLoading={isLoading} searchBarPlaceholder="Search protected locations">
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Mint could not read its settings" description={error.message} />
       ) : null}
@@ -118,7 +119,7 @@ function Handling({ cli }: { cli: string }) {
   );
 }
 
-function AddLocation({ onSet }: { onSet: (path: string, level: Level) => Promise<void> }) {
+function AddLocation({ onSet }: { onSet: (path: string, level: Level) => Promise<boolean> }) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -134,8 +135,8 @@ function AddLocation({ onSet }: { onSet: (path: string, level: Level) => Promise
                 await showToast({ style: Toast.Style.Failure, title: "Choose a file or folder" });
                 return;
               }
-              pop();
-              await onSet(path, values.level);
+              // The form stays open with its choice until Mint has saved it.
+              if (await onSet(path, values.level)) pop();
             }}
           />
         </ActionPanel>

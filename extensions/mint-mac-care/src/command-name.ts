@@ -5,4 +5,4 @@ import { nameSurfaceCommand } from "./mint-cli";
 // request says which one (Mint 1.2, `surface_request`). Imported for its effect
 // by the hook every command uses and by the AI tool that asks Mint; never by the
 // tests, which run outside Raycast.
-nameSurfaceCommand(environment.commandName);
+nameSurfaceCommand(environment.entryPointName);

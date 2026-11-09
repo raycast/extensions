@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, LaunchType, launchCommand } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { AutoCareLaunch } from "./mint-care";
 import { openMint } from "./mint-cli";
 
@@ -24,7 +25,14 @@ export function AutoCareAction({ context }: { context: AutoCareLaunch }) {
       title="Auto Care…"
       icon={Icon.Clock}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-      onAction={() => launchCommand({ name: "mint-autocare", type: LaunchType.UserInitiated, context })}
+      onAction={async () => {
+        try {
+          await launchCommand({ name: "mint-autocare", type: LaunchType.UserInitiated, context });
+        } catch (error) {
+          // Raycast refuses when the Auto Care command is turned off in its settings.
+          await showFailureToast(error, { title: "Could not open Auto Care" });
+        }
+      }}
     />
   );
 }

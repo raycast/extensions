@@ -33,7 +33,7 @@ function History({ cli }: { cli: string }) {
   );
   const rows = historyRows(data);
   return (
-    <List isLoading={isLoading} navigationTitle="Mint History" searchBarPlaceholder="Search what Mint did">
+    <List isLoading={isLoading} searchBarPlaceholder="Search what Mint did">
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Mint could not read its history" description={error.message} />
       ) : null}

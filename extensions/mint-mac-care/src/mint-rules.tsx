@@ -55,7 +55,7 @@ function Rules({ cli }: { cli: string }) {
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle="Cleanup Rules" searchBarPlaceholder="Search rules">
+    <List isLoading={isLoading} searchBarPlaceholder="Search rules">
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Mint could not read its rules" description={error.message} />
       ) : null}
@@ -156,16 +156,23 @@ function RuleForm({ cli, rule, onSaved }: { cli: string; rule?: Rule; onSaved: (
         defaultValue={filter.extensions?.join(", ") ?? ""}
         placeholder="dmg, pkg, zip"
       />
-      <Form.TextField id="nameKeyword" title="Name contains" defaultValue={filter.nameKeyword ?? ""} />
+      <Form.TextField
+        id="nameKeyword"
+        title="Name contains"
+        defaultValue={filter.nameKeyword ?? ""}
+        placeholder="installer"
+      />
       <Form.TextField
         id="olderThanDays"
         title="Older than (days)"
         defaultValue={filter.olderThanDays ? String(filter.olderThanDays) : ""}
+        placeholder="30"
       />
       <Form.TextField
         id="minSizeMB"
         title="At least (MB)"
         defaultValue={filter.minSizeMB ? String(filter.minSizeMB) : ""}
+        placeholder="100"
       />
       <Form.Dropdown id="action" title="Then" defaultValue={rule?.preferredAction ?? "trash"}>
         {ACTIONS.map((action) => (

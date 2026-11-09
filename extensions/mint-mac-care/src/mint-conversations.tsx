@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, Keyboard, List, Toast, environment, showToast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCompact, openMint, plural, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
 import { NeedsNewerMint, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
@@ -12,7 +12,9 @@ import {
   conversationReceipt,
   conversationRows,
   hasCapability,
+  pictureRemovalReceipt,
   pictureRows,
+  picturesChanged,
   runParity,
   transcriptReceipt,
 } from "./mint-parity";
@@ -43,6 +45,25 @@ type Archive = { id: string; title: string; path: string; sizeBytes: number; est
 type ArchiveScan = { sessionID: string; agentArchives?: { complete: boolean; candidates: Archive[] } };
 type ArchiveResult = { optimizedCount?: number; savedBytes?: number; quotaBlockedCount?: number; failures?: unknown[] };
 
+/** Where a picture's preview is written for Raycast to draw: copies of the person's pictures. */
+function previewFolder(): string {
+  return join(environment.supportPath, "pictures");
+}
+
+/**
+ * Previews live only while a picture review is open: cleared when a review
+ * opens and closes, after pictures are removed, and when the command opens
+ * (a review Raycast closed without unmounting it). Best effort: the next of
+ * those clears what this one could not.
+ */
+function clearPreviews(): void {
+  try {
+    rmSync(previewFolder(), { recursive: true, force: true });
+  } catch {
+    // Left for the next clear; nothing the person did depends on it.
+  }
+}
+
 /**
  * The conversations AI tools keep, as Mint's Disk page lists them: Codex's,
  * family by family (a conversation and its linked copies go together), and
@@ -51,6 +72,7 @@ type ArchiveResult = { optimizedCount?: number; savedBytes?: number; quotaBlocke
  * conversations Mint can store smaller are found on request (a full Scan).
  */
 function Conversations({ cli }: { cli: string }) {
+  useEffect(clearPreviews, []);
   const codex = usePromise(
     async (path: string) => runParity<ConversationScan>(path, { action: "agents.scan" }, 10 * 60_000),
     [cli],
@@ -145,7 +167,6 @@ function Conversations({ cli }: { cli: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="AI Conversations"
       searchBarPlaceholder={
         isLoading && !total ? "Reading AI conversations…" : `${formatCompact(total)} in AI conversations`
       }
@@ -156,6 +177,7 @@ function Conversations({ cli }: { cli: string }) {
             icon={Icon.Warning}
             title="Mint could not read Codex's conversations"
             subtitle={codex.error.message}
+            actions={<RetryActions onRetry={codex.revalidate} />}
           />
         </List.Section>
       ) : null}
@@ -206,7 +228,7 @@ function Conversations({ cli }: { cli: string }) {
                   <Action
                     title={`Remove Pictures${many ? ` from${many}` : ""}…`}
                     icon={Icon.EyeDisabled}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => onFamilies("agents.remove-media", rows)}
                   />
                   <Action
@@ -224,6 +246,16 @@ function Conversations({ cli }: { cli: string }) {
           );
         })}
       </List.Section>
+      {claude.error ? (
+        <List.Section title="Claude Code">
+          <List.Item
+            icon={Icon.Warning}
+            title="Mint could not read Claude Code's conversations"
+            subtitle={claude.error.message}
+            actions={<RetryActions onRetry={claude.revalidate} />}
+          />
+        </List.Section>
+      ) : null}
       <List.Section title="Claude Code" subtitle={transcripts.length ? "Conversations with pictures" : undefined}>
         {transcripts.map((transcript) => {
           const isChosen = chosen.has(transcript.id);
@@ -258,7 +290,7 @@ function Conversations({ cli }: { cli: string }) {
                   <Action
                     title={`Remove Pictures${many}…`}
                     icon={Icon.EyeDisabled}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => onTranscripts(rows)}
                   />
                   <Action.ShowInFinder path={transcript.path} />
@@ -272,7 +304,12 @@ function Conversations({ cli }: { cli: string }) {
       {archivesAsked ? (
         <List.Section title="Codex archives Mint can store smaller">
           {archives.error ? (
-            <List.Item icon={Icon.Warning} title="Mint could not look" subtitle={archives.error.message} />
+            <List.Item
+              icon={Icon.Warning}
+              title="Mint could not look"
+              subtitle={archives.error.message}
+              actions={<RetryActions onRetry={archives.revalidate} />}
+            />
           ) : null}
           {archiveRows.map((archive) => {
             const isChosen = chosen.has(archive.id);
@@ -309,10 +346,21 @@ function Conversations({ cli }: { cli: string }) {
   );
 }
 
+/** A source Mint could not read: look again, or open Mint. */
+function RetryActions({ onRetry }: { onRetry: () => void }) {
+  return (
+    <ActionPanel>
+      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+      <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+    </ActionPanel>
+  );
+}
+
 /**
  * The pictures inside the chosen conversations, one by one, with a preview on
  * the right. Keep spares a picture from later picture removal; Remove takes
- * only the ticked ones (unticked ones are kept, as the app's drawer does).
+ * only the ticked ones (unticked ones are kept, as the app's drawer does), at
+ * most PICTURES_PER_REQUEST at a time.
  */
 function Pictures({
   cli,
@@ -326,6 +374,10 @@ function Pictures({
   itemIDs: string[];
 }) {
   const { pop } = useNavigation();
+  useEffect(() => {
+    clearPreviews();
+    return clearPreviews;
+  }, []);
   const [review, setReview] = useState<PictureScan | undefined>();
   const scan = usePromise(
     async (path: string) =>
@@ -344,64 +396,70 @@ function Pictures({
         { action: "pictures.preview", sessionID: session, itemID: id },
         60_000,
       );
-      const folder = join(environment.supportPath, "pictures");
+      const folder = previewFolder();
       mkdirSync(folder, { recursive: true });
       const file = join(folder, `${id.replace(/[^A-Za-z0-9]/g, "")}.png`);
       writeFileSync(file, Buffer.from(answer.previewImage.data, "base64"));
-      return file;
+      return { id, file };
     },
     [cli, review?.sessionID ?? "", selected ?? ""],
     { execute: Boolean(review?.sessionID && selected) },
   );
 
+  /** Ticks one more picture, up to what one request to Mint takes. */
+  function choose(id: string) {
+    if (!chosen.has(id) && picked.length >= PICTURES_PER_REQUEST) {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: `Choose up to ${PICTURES_PER_REQUEST} pictures at a time`,
+        message: "Remove or keep these, then choose more.",
+      });
+      return;
+    }
+    toggle(id);
+  }
+
   async function keep(pictures: Picture[], kept: boolean) {
     if (!review || pictures.length === 0) return;
-    const request = {
-      action: "pictures.keep",
-      sessionID: review.sessionID,
-      itemIDs: pictures.slice(0, PICTURES_PER_REQUEST).map((picture) => picture.id),
-      kept,
-    };
+    const itemIDs = pictures.slice(0, PICTURES_PER_REQUEST).map((picture) => picture.id);
+    const request = { action: "pictures.keep", sessionID: review.sessionID, itemIDs, kept };
+    // What Mint says it changed, never what was asked (Mint's own count without a fresh review).
+    const changed = (answer: PictureResult) =>
+      picturesChanged(itemIDs, answer, kept) ?? answer.updatedPictureCount ?? 0;
     let result: PictureResult | undefined;
     if (kept) {
       // Keeping only spares pictures: Mint saves it without its window, as in MCP.
       try {
         result = await runParity<PictureResult>(cli, { ...request, confirmed: true });
-        await showToast({ style: Toast.Style.Success, title: `Keeping ${plural(pictures.length, "picture")}` });
+        await showToast({ style: Toast.Style.Success, title: `Keeping ${plural(changed(result), "picture")}` });
       } catch (keepError) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Mint could not save the Keep choice",
-          message: keepError instanceof Error ? keepError.message : String(keepError),
-        });
+        await showFailureToast(keepError, { title: "Mint could not save the Keep choice" });
       }
     } else {
       result = await runConfirmedInMint<PictureResult>(cli, request, {
-        done: () => `${plural(pictures.length, "picture")} no longer kept`,
+        done: (answer) => `${plural(changed(answer), "picture")} no longer kept`,
         failed: "Mint could not save the Keep choice",
       });
     }
-    clear();
+    // The choice stays ticked when nothing was saved, to try again.
+    if (result) clear();
     if (result?.review) setReview(result.review);
     else scan.revalidate();
   }
 
   async function remove(pictures: Picture[]) {
     if (!review || pictures.length === 0) return;
+    const itemIDs = pictures.slice(0, PICTURES_PER_REQUEST).map((picture) => picture.id);
     const result = await runConfirmedInMint<PictureResult>(
       cli,
-      {
-        action: "pictures.remove",
-        sessionID: review.sessionID,
-        itemIDs: pictures.slice(0, PICTURES_PER_REQUEST).map((p) => p.id),
-      },
-      {
-        done: (answer) =>
-          `${plural(pictures.length, "picture")} removed · ${formatCompact(answer.physicallyReclaimedBytes ?? answer.savedBytes ?? 0)} freed`,
-        failed: "Mint could not remove these pictures",
-      },
+      { action: "pictures.remove", sessionID: review.sessionID, itemIDs },
+      { done: (answer) => pictureRemovalReceipt(itemIDs, answer), failed: "Mint could not remove these pictures" },
     );
-    clear();
+    if (result) {
+      clear();
+      // The removed pictures' previews go with them.
+      clearPreviews();
+    }
     if (result?.review) setReview(result.review);
     else if (result) pop();
     else scan.revalidate();
@@ -413,16 +471,23 @@ function Pictures({
       isShowingDetail={rows.length > 0}
       navigationTitle={picked.length ? `${plural(picked.length, "picture")} chosen` : "Pictures"}
       onSelectionChange={(id) => setSelected(id ?? undefined)}
-      searchBarPlaceholder={review ? plural(rows.length, "picture") : "Reading the pictures…"}
+      searchBarPlaceholder={
+        review
+          ? rows.length > PICTURES_PER_REQUEST
+            ? `${plural(rows.length, "picture")} · choose up to ${PICTURES_PER_REQUEST} at a time`
+            : plural(rows.length, "picture")
+          : "Reading the pictures…"
+      }
     >
       {scan.error ? (
         <List.EmptyView icon={Icon.Warning} title="Mint could not read the pictures" description={scan.error.message} />
       ) : null}
       {rows.map((picture) => {
         const isChosen = chosen.has(picture.id);
+        // Only this picture's own preview: the one before stays in `data` while the next loads.
         const markdown =
-          selected === picture.id && preview.data
-            ? `![](${encodeURI(`file://${preview.data}`)}?raycast-height=350)`
+          selected === picture.id && preview.data?.id === picture.id
+            ? `![](${encodeURI(`file://${preview.data.file}`)}?raycast-height=350)`
             : "";
         return (
           <List.Item
@@ -438,15 +503,11 @@ function Pictures({
                 <Action
                   title={isChosen ? "Unchoose" : "Choose"}
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
-                  onAction={() => toggle(picture.id)}
+                  onAction={() => choose(picture.id)}
                 />
-                <Action
-                  title={picked.length ? `Remove ${plural(picked.length, "Chosen Picture")}…` : "Remove This Picture…"}
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  onAction={() => remove(picked.length ? picked : [picture])}
-                />
+                {picture.files[0] ? (
+                  <Action.ShowInFinder title="Show Conversation in Finder" path={picture.files[0]} />
+                ) : null}
                 {picture.kept ? (
                   <Action title="Stop Keeping…" icon={Icon.PinDisabled} onAction={() => keep([picture], false)} />
                 ) : (
@@ -457,6 +518,13 @@ function Pictures({
                     onAction={() => keep(picked.length ? picked : [picture], true)}
                   />
                 )}
+                <Action
+                  title={picked.length ? `Remove ${plural(picked.length, "Chosen Picture")}…` : "Remove This Picture…"}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() => remove(picked.length ? picked : [picture])}
+                />
               </ActionPanel>
             }
           />

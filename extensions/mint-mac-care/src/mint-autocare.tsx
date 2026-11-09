@@ -68,7 +68,6 @@ export default function Command(props: LaunchProps<{ launchContext?: AutoCareLau
 function NeedsUpdate({ version }: { version?: string }) {
   return (
     <Detail
-      navigationTitle="Auto Care"
       markdown={`## Auto Care needs Mint ${AUTOCARE_MINIMUM_VERSION}
 
 ${version ? `This Mac has Mint ${version}. ` : ""}Open Mint and choose **Check for Updates**, then come back. Until then, Auto Care is set in Mint.`}
@@ -111,8 +110,11 @@ function AutoCareList({ cli, launch }: { cli: string; launch?: AutoCareLaunch })
       ? `folder:${folders[0].path}`
       : launchSelection(launch);
 
-  /** One write, then Mint's own answer read again: the rows say what Mint saved, never what was asked. */
-  async function write(title: string, request: Parameters<typeof runMintSurface>[1]) {
+  /**
+   * One write, then Mint's own answer read again: the rows say what Mint saved,
+   * never what was asked. True once Mint saved it.
+   */
+  async function write(title: string, request: Parameters<typeof runMintSurface>[1]): Promise<boolean> {
     setBusy(true);
     const toast = await showToast({ style: Toast.Style.Animated, title });
     try {
@@ -120,12 +122,14 @@ function AutoCareList({ cli, launch }: { cli: string; launch?: AutoCareLaunch })
       await care.revalidate();
       toast.style = Toast.Style.Success;
       toast.title = "Saved in Mint";
+      return true;
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Mint did not change Auto Care";
       toast.message = error instanceof Error ? error.message : String(error);
       // The extension's one way to Mint's plans and account: the app itself.
       toast.primaryAction = { title: "Open Mint", onAction: openMint };
+      return false;
     } finally {
       setBusy(false);
     }
@@ -147,25 +151,42 @@ function AutoCareList({ cli, launch }: { cli: string; launch?: AutoCareLaunch })
     />
   );
 
+  // No switch before Mint's plans are read: a row drawn from nothing looks off with no saved
+  // scope, and turning it on would replace a narrower plan Mint already has.
+  if (care.error || !data) {
+    return (
+      <List isLoading={care.isLoading} searchBarPlaceholder="Filter Auto Care">
+        {care.error ? (
+          <List.EmptyView
+            icon={Icon.Warning}
+            title="Mint could not read Auto Care"
+            description={care.error.message}
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={care.revalidate} />
+                <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+              </ActionPanel>
+            }
+          />
+        ) : null}
+      </List>
+    );
+  }
+
   return (
-    <List
-      isLoading={care.isLoading || busy}
-      navigationTitle="Auto Care"
-      searchBarPlaceholder="Filter Auto Care"
-      selectedItemId={care.data ? selection : undefined}
-    >
-      <List.Section title="Disk" subtitle={data ? (diskOn ? "Hourly when idle" : "Off") : undefined}>
+    <List isLoading={care.isLoading || busy} searchBarPlaceholder="Filter Auto Care" selectedItemId={selection}>
+      <List.Section title="Disk" subtitle={diskOn ? "Hourly when idle" : "Off"}>
         {rows.map((row) => (
           <DiskItem
             key={row.bucket}
             row={row}
             listed={listedTypes.data}
-            locked={data?.automationAllowed === false}
+            locked={data.automationAllowed === false}
             write={write}
             refresh={refresh}
           />
         ))}
-        {data && !diskOn && level.data ? (
+        {!diskOn && level.data ? (
           <List.Item
             id="disk:notify"
             icon={Icon.Bell}
@@ -196,7 +217,7 @@ function AutoCareList({ cli, launch }: { cli: string; launch?: AutoCareLaunch })
   );
 }
 
-type Write = (title: string, request: Parameters<typeof runMintSurface>[1]) => Promise<void>;
+type Write = (title: string, request: Parameters<typeof runMintSurface>[1]) => Promise<boolean>;
 
 function onOff(on: boolean): List.Item.Accessory {
   return on ? { tag: { value: "On", color: Color.Green } } : { text: "Off" };
@@ -217,7 +238,8 @@ function DiskItem({
 }) {
   const yours = row.bucket === "clutter";
 
-  async function turnOn(scope?: DiskCareScope) {
+  /** True once Mint saved it; false when the person said no or Mint did not save it. */
+  async function turnOn(scope?: DiskCareScope): Promise<boolean> {
     const used = scope ?? row.savedScope;
     // Optimizable changes no file's contents; the other two remove files, so they ask first.
     if (row.bucket !== "optimizable") {
@@ -231,9 +253,9 @@ function DiskItem({
             : `Mint takes your files of these types (${takes}), ${WHEN}. ${yoursConsequence(used)}`,
         primaryAction: { title: "Turn On", style: Alert.ActionStyle.Destructive },
       });
-      if (!accepted) return;
+      if (!accepted) return false;
     }
-    await write(`Turning on ${row.title}…`, diskRequest(row, true, scope));
+    return write(`Turning on ${row.title}…`, diskRequest(row, true, scope));
   }
 
   const chooser = (
@@ -290,7 +312,7 @@ function YoursTypes({
 }: {
   row: DiskRow;
   listed?: string[];
-  onSave: (scope: DiskCareScope) => Promise<void>;
+  onSave: (scope: DiskCareScope) => Promise<boolean>;
 }) {
   const { pop } = useNavigation();
   const saved = row.savedScope;
@@ -321,8 +343,8 @@ function YoursTypes({
                 await showToast({ style: Toast.Style.Failure, title: "Choose what it may take" });
                 return;
               }
-              await onSave(scope);
-              pop();
+              // The form keeps its choices until Mint has saved them.
+              if (await onSave(scope)) pop();
             }}
           />
         </ActionPanel>
