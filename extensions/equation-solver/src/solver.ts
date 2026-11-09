@@ -303,6 +303,14 @@ interface Rat {
    * the exactly-computed x coefficient and erase it.
    */
   err: Poly;
+  /**
+   * The same per-coefficient error bounds for den. Division moves a
+   * value's numerator into a denominator (1/(10000.1 - 10000)), and its
+   * error must travel with it — otherwise a later cross-multiplication
+   * reintroduces that error into a numerator with no bound attached,
+   * and a rounding leftover is mistaken for a genuine term.
+   */
+  denErr: Poly;
 }
 
 /** |p| elementwise. */
@@ -336,11 +344,30 @@ function scaleVec(a: Poly, s: number): Poly {
   return a.map((c) => c * s);
 }
 
-/** A Rat's error bounds, padded to its numerator's length with zeros. */
+/** A Rat's numerator error bounds, padded to num's length with zeros. */
 function errVec(r: Rat): Poly {
   const out = new Array<number>(r.num.length).fill(0);
   for (let i = 0; i < Math.min(r.err.length, out.length); i++) out[i] = r.err[i];
   return out;
+}
+
+/** A Rat's denominator error bounds, padded to den's length with zeros. */
+function denErrVec(r: Rat): Poly {
+  const out = new Array<number>(r.den.length).fill(0);
+  for (let i = 0; i < Math.min(r.denErr.length, out.length); i++) out[i] = r.denErr[i];
+  return out;
+}
+
+/**
+ * Error bounds for a product of two polynomials whose own bounds are
+ * known: each factor's error is amplified by the other factor's
+ * magnitudes, plus one rounding allowance for the new products.
+ */
+function mulErr(aErr: Poly, aVal: Poly, bErr: Poly, bVal: Poly): Poly {
+  return addVec(
+    addVec(convAbs(aErr, absPoly(bVal)), convAbs(bErr, absPoly(aVal))),
+    scaleVec(convAbs(absPoly(aVal), absPoly(bVal)), Number.EPSILON),
+  );
 }
 
 /** Restrictions a value carries: its recorded exclusions plus its current denominator. */
@@ -376,10 +403,11 @@ function gcdInt(a: number, b: number): number {
   return a;
 }
 
-function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err: Poly = []): Rat {
+function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err: Poly = [], denErr: Poly = []): Rat {
   let n = trimPoly(num);
   let d = trimPoly(den);
   let e = err;
+  let de = denErr;
   if (isZeroPoly(d)) throw new Error("Division by zero.");
   // Cancel a common whole-number factor so steps stay tidy:
   // (-125Va + 1250) / 250 displays as (-Va + 10) / 2.
@@ -391,6 +419,7 @@ function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err: Poly = []):
       n = n.map((c) => c / g);
       d = d.map((c) => c / g);
       e = e.map((v) => v / g);
+      de = de.map((v) => v / g);
     }
   }
   // Note: the denominator is kept even when the numerator is 0 — the
@@ -399,9 +428,9 @@ function makeRat(num: Poly, den: Poly = [1], excl: Poly[] = [], err: Poly = []):
   // for every x except 2).
   // Keep the denominator's leading coefficient positive, for tidy display.
   if (d[d.length - 1] < 0) {
-    return { num: n.map((c) => -c), den: d.map((c) => -c), excl, err: e };
+    return { num: n.map((c) => -c), den: d.map((c) => -c), excl, err: e, denErr: de };
   }
-  return { num: n, den: d, excl, err: e };
+  return { num: n, den: d, excl, err: e, denErr: de };
 }
 
 function negRat(a: Rat): Rat {
@@ -410,17 +439,22 @@ function negRat(a: Rat): Rat {
     a.den,
     a.excl,
     a.err,
+    a.denErr,
   );
 }
 
-/** Error bounds for a cross-multiplied sum a.num·b.den ± b.num·a.den. */
+/**
+ * Error bounds for a cross-multiplied sum a.num·b.den ± b.num·a.den.
+ * Both products mix numerators with denominators, so numerator and
+ * denominator bounds both feed in.
+ */
 function crossErr(a: Rat, b: Rat): Poly {
-  const carried = addVec(convAbs(errVec(a), absPoly(b.den)), convAbs(errVec(b), absPoly(a.den)));
-  const fresh = scaleVec(
-    addVec(convAbs(absPoly(a.num), absPoly(b.den)), convAbs(absPoly(b.num), absPoly(a.den))),
-    Number.EPSILON,
-  );
-  return addVec(carried, fresh);
+  return addVec(mulErr(errVec(a), a.num, denErrVec(b), b.den), mulErr(errVec(b), b.num, denErrVec(a), a.den));
+}
+
+/** Error bounds for a combined denominator a.den·b.den. */
+function denMulErr(a: Rat, b: Rat): Poly {
+  return mulErr(denErrVec(a), a.den, denErrVec(b), b.den);
 }
 
 function addRat(a: Rat, b: Rat): Rat {
@@ -429,6 +463,7 @@ function addRat(a: Rat, b: Rat): Rat {
     mulPoly(a.den, b.den),
     mergeExcl(domainOf(a), domainOf(b)),
     crossErr(a, b),
+    denMulErr(a, b),
   );
 }
 
@@ -438,27 +473,33 @@ function subRat(a: Rat, b: Rat): Rat {
     mulPoly(a.den, b.den),
     mergeExcl(domainOf(a), domainOf(b)),
     crossErr(a, b),
+    denMulErr(a, b),
   );
 }
 
 function mulRat(a: Rat, b: Rat): Rat {
-  const err = addVec(
-    addVec(convAbs(errVec(a), absPoly(b.num)), convAbs(errVec(b), absPoly(a.num))),
-    scaleVec(convAbs(absPoly(a.num), absPoly(b.num)), Number.EPSILON),
+  return makeRat(
+    mulPoly(a.num, b.num),
+    mulPoly(a.den, b.den),
+    mergeExcl(domainOf(a), domainOf(b)),
+    mulErr(errVec(a), a.num, errVec(b), b.num),
+    denMulErr(a, b),
   );
-  return makeRat(mulPoly(a.num, b.num), mulPoly(a.den, b.den), mergeExcl(domainOf(a), domainOf(b)), err);
 }
 
 function divRat(a: Rat, b: Rat): Rat {
   if (isZeroPoly(b.num)) throw new Error("Division by zero.");
   // Dividing by b also requires b ≠ 0, so b's numerator joins the exclusions.
-  // The new numerator is a.num·b.den; b.den's own error is not tracked
-  // (denominators are rebuilt from numerators, whose bounds are).
-  const err = addVec(
-    convAbs(errVec(a), absPoly(b.den)),
-    scaleVec(convAbs(absPoly(a.num), absPoly(b.den)), Number.EPSILON),
+  // The new numerator is a.num·b.den and the new denominator is
+  // a.den·b.num — each side's bounds follow its own factors, so the
+  // divisor's error is carried into the denominator, not dropped.
+  return makeRat(
+    mulPoly(a.num, b.den),
+    mulPoly(a.den, b.num),
+    mergeExcl(domainOf(a), domainOf(b), [b.num]),
+    mulErr(errVec(a), a.num, denErrVec(b), b.den),
+    mulErr(denErrVec(a), a.den, errVec(b), b.num),
   );
-  return makeRat(mulPoly(a.num, b.den), mulPoly(a.den, b.num), mergeExcl(domainOf(a), domainOf(b), [b.num]), err);
 }
 
 function powRat(base: Rat, exponent: Rat): Rat {
@@ -496,18 +537,19 @@ function powRat(base: Rat, exponent: Rat): Rat {
       powPoly(base.den, e),
       mergeExcl(domainOf(base)),
       powErr(errVec(base), base.num, e),
+      powErr(denErrVec(base), base.den, e),
     );
   }
   if (isZeroPoly(base.num)) throw new Error("Division by zero.");
-  // A negative power moves the base's numerator into a denominator,
-  // so the base must also be nonzero. The new numerator is a power of
-  // the base's denominator, whose own error is untracked — propagate
-  // rounding allowances only.
+  // A negative power swaps numerator and denominator, so their error
+  // bounds swap too: the new numerator is a power of the base's
+  // denominator and carries the denominator's bounds.
   return makeRat(
     powPoly(base.den, -e),
     powPoly(base.num, -e),
     mergeExcl(domainOf(base), [base.num]),
-    powErr(new Array(base.den.length).fill(0), base.den, -e),
+    powErr(denErrVec(base), base.den, -e),
+    powErr(errVec(base), base.num, -e),
   );
 }
 
@@ -877,7 +919,7 @@ function solveUnsafe(rawInput: string): SolveResult {
     num = trimPoly(num.map((c) => c / leadCoeff));
     err = rawDiff.err.map((v) => v / Math.abs(leadCoeff));
   }
-  const diff: Rat = { num, den: rawDiff.den, excl: rawDiff.excl, err };
+  const diff: Rat = { num, den: rawDiff.den, excl: rawDiff.excl, err, denErr: rawDiff.denErr };
 
   const hasDenominator = !isConstantOne(diff.den);
   const standardForm = `${ratToString(diff, variable)} = 0`;
