@@ -10,11 +10,6 @@ import {
   resize,
 } from "../lib/resize";
 
-type ResizeArguments = {
-  original: string;
-  newSize?: string;
-};
-
 function ResizeActions(props: { result: ResizeResult; ratio: string }) {
   const { result, ratio } = props;
   const full = formatDimensions(result);
@@ -70,7 +65,7 @@ function RatioItem(props: { original: Dimensions; ratio: string; hint: string })
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: ResizeArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ResizeFromDimensions }>) {
   const { original: originalArgument = "", newSize: newSizeArgument = "" } = props.arguments;
   const [searchText, setSearchText] = useState(newSizeArgument.trim());
 
@@ -78,7 +73,6 @@ export default function Command(props: LaunchProps<{ arguments: ResizeArguments 
 
   return (
     <List
-      navigationTitle="Resize From Dimensions"
       searchBarPlaceholder="New size, e.g. 1000 (or 1200x900 600 to change the original)"
       searchText={searchText}
       onSearchTextChange={setSearchText}
