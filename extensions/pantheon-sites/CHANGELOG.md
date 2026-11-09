@@ -5,7 +5,6 @@
 ### Fixed
 
 - `terminus site:list` no longer times out after 10s on accounts with many sites
-- Crash when a site has no framework (uninitialized site)
 
 ### Added
 
