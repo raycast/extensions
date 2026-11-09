@@ -6,7 +6,7 @@ import {
   CleftNote,
   DateGroup,
   dateGroup,
-  matchSnippet,
+  noteSnippet,
   searchNotes,
 } from "./lib/notes";
 import { useLibrary } from "./lib/use-library";
@@ -34,6 +34,15 @@ export default function Command() {
   const tags = Array.from(new Set(notes.flatMap((note) => note.tags))).sort(
     (a, b) => a.localeCompare(b),
   );
+  const incomplete =
+    library?.skipped || library?.limited
+      ? `Some files were not read (${[
+          library.skipped ? `${library.skipped} unreadable or oversized` : "",
+          library.limited ? "folder exceeds search limits" : "",
+        ]
+          .filter(Boolean)
+          .join("; ")}), so matching notes may be missing.`
+      : "";
   const subtitle = `${matches.length} matches${matches.length > 200 ? "; showing first 200, refine your search" : ""}${library?.skipped ? `; ${library.skipped} unreadable or oversized files skipped` : ""}${library?.limited ? "; folder exceeds search limits" : ""}`;
   return (
     <List
@@ -56,7 +65,7 @@ export default function Command() {
         title={notes.length ? "No Matching Notes" : "No Cleft Exports Found"}
         description={
           notes.length
-            ? "Try a shorter phrase or another tag."
+            ? `Try a shorter phrase or another tag.${incomplete ? ` ${incomplete}` : ""}`
             : "Use Save existing notes as files in Cleft Local Sync settings, then refresh."
         }
         actions={
@@ -125,9 +134,8 @@ function NoteItem({
   toggleDetail: () => void;
   refresh: () => void;
 }) {
-  const snippet = query.trim()
-    ? matchSnippet(`${note.summary}\n${note.transcript}`, query)
-    : undefined;
+  // Only build an excerpt when the preview is visible.
+  const snippet = showDetail ? noteSnippet(note, query) : undefined;
   const markdown = [
     `## ${note.title}`,
     snippet ? `> 🔎 ${snippet}` : "",

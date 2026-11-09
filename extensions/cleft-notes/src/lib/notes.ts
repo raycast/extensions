@@ -233,16 +233,11 @@ export function searchNotes(
   });
 }
 
-/** A short excerpt around the first match of any query term, for previews. */
-export function matchSnippet(
-  text: string,
-  query: string,
-  radius = 90,
-): string | undefined {
-  const terms = normalize(query).split(/\s+/).filter(Boolean);
-  if (!terms.length || !text) return undefined;
-  // Normalize per character, remembering where each normalized character came
-  // from, so matches use searchNotes' rules but excerpts keep the original text.
+type Folded = { text: string; normalized: string; origin: number[] };
+
+/** Normalize per character, remembering where each normalized character came from,
+ * so matches use searchNotes' rules but excerpts keep the original text. */
+function fold(text: string): Folded {
   let normalized = "";
   const origin: number[] = [];
   for (let i = 0; i < text.length;) {
@@ -252,6 +247,16 @@ export function matchSnippet(
     for (let j = 0; j < folded.length; j++) origin.push(i);
     i += char.length;
   }
+  return { text, normalized, origin };
+}
+
+function snippetFrom(
+  { text, normalized, origin }: Folded,
+  query: string,
+  radius: number,
+): string | undefined {
+  const terms = normalize(query).split(/\s+/).filter(Boolean);
+  if (!terms.length || !text) return undefined;
   let found = -1;
   for (const term of terms) {
     const at = normalized.indexOf(term);
@@ -262,6 +267,34 @@ export function matchSnippet(
   const start = Math.max(0, index - radius);
   const end = Math.min(text.length, index + radius);
   return `${start > 0 ? "…" : ""}${text.slice(start, end).replace(/\s+/g, " ").trim()}${end < text.length ? "…" : ""}`;
+}
+
+/** A short excerpt around the first match of any query term, for previews. */
+export function matchSnippet(
+  text: string,
+  query: string,
+  radius = 90,
+): string | undefined {
+  if (!text || !normalize(query).trim()) return undefined;
+  return snippetFrom(fold(text), query, radius);
+}
+
+// Folding is done once per loaded note; each keystroke then only runs indexOf.
+const foldedNotes = new WeakMap<CleftNote, Folded>();
+
+/** matchSnippet over a note's summary and transcript, with the folded text cached per note. */
+export function noteSnippet(
+  note: CleftNote,
+  query: string,
+  radius = 90,
+): string | undefined {
+  if (!normalize(query).trim()) return undefined;
+  let folded = foldedNotes.get(note);
+  if (!folded) {
+    folded = fold(`${note.summary}\n${note.transcript}`);
+    foldedNotes.set(note, folded);
+  }
+  return snippetFrom(folded, query, radius);
 }
 
 export type DateGroup =
