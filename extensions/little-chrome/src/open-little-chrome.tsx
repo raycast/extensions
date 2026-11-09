@@ -43,9 +43,9 @@ async function isChromeRunning(): Promise<boolean> {
 
 const bareHost = (url: string) => hostOf(url)?.replace(/^www\./, "");
 
-// Finds the app window this launch created among windows that did not exist before. Prefer a
-// single-tab window on the requested host; after a second, accept the only new single-tab window
-// (the page may have redirected to another host). Ambiguous cases are left alone.
+// Finds the app window this launch created: a window that did not exist before, with a single tab
+// on the requested host. Anything else (e.g. a redirect to another host) is left alone rather than
+// risk recording a window the user opened.
 async function findLaunchedWindow(before: Set<string>, url: string): Promise<string | undefined> {
   const host = bareHost(url);
   for (let i = 0; i < 40; i++) {
@@ -59,7 +59,6 @@ async function findLaunchedWindow(before: Set<string>, url: string): Promise<str
     }
     const match = candidates.find((c) => host && c.host === host);
     if (match) return match.id;
-    if (i >= 13 && candidates.length === 1) return candidates[0].id;
   }
   return undefined;
 }
@@ -289,7 +288,8 @@ export default function Command(props: LaunchProps) {
   }, [db, searchText, blocklist, cacheKey]);
 
   const typed = searchText.trim();
-  const visible = blocklist ? items.filter((item) => !isBlocked(item.url, blocklist)) : items;
+  // Wait for the blocklist so cached rows never show a page hidden since they were saved.
+  const visible = blocklist ? items.filter((item) => !isBlocked(item.url, blocklist)) : [];
 
   // Also offered on the typed row and the empty view, so it stays reachable after hiding everything.
   const manageAction = blocklist && (blocklist.urls.length > 0 || blocklist.hosts.length > 0) && (
