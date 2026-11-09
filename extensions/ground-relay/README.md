@@ -82,6 +82,24 @@ npm run build
 npx ray evals
 ```
 
-The included eval suite covers all three AI routes: non-persistent drafting, one-question context-gap selection, and explicitly requested local save. Mock outputs prevent eval runs from mutating the local ledger.
+The eval suite covers drafting, gap finding, explicit save, saved-record listing and retrieval, empty-ledger warnings, and instructions embedded in stored data. Mock outputs prevent eval runs from mutating the local ledger.
 
 See [SECURITY.md](SECURITY.md) for the bounded upstream development-dependency advisory.
+
+## Saved records and the paired extension
+
+AI can now list/search saved records and retrieve an exact version by ID. Listings default to the latest version of each lineage; `includeHistory` exposes older versions. `offset` and `limit` paginate results (1–100 per page). Search includes evidence and source references. Tools read only this installation's ledger. Development, private-organization, and public Store installations can have separate storage; these are never silently merged.
+
+Open a saved record and choose **Review in the paired extension**. Raycast launches its **Review Handoff** command using the supported cross-extension API. The form is prefilled for review; opening it does not save or analyze anything. **Copy Structured Handoff** and pasting into **Review Handoff** provide a fallback if the paired extension is unavailable or its owner differs. Set **Paired Extension Owner** to `prmptd` for the private organization copy, or the paired extension's actual Store author/owner. The companion is optional.
+
+The new record retains the source ID, root, version, exact JSON snapshot, and SHA-256 digest in `draft.handoff`. This is a new derived record, not an overwrite or automatic correction of the source. A digest identifies bytes; it does not verify claims, currentness, or authority. Handoffs never silently read the other extension's private storage. Submitting the Lawful Splat creation/review form sends its displayed context to Raycast AI when available; opening the form alone does not.
+
+## Ledger recovery
+
+Unreadable records produce visible warnings instead of masquerading as an empty ledger. Valid records remain available. Corrections stop if unreadable records could obscure the latest version. Writes cannot replace an existing record ID; competing corrections are serialized and stale forms rejected. Deleted versions use system Trash.
+
+A correction lock is never reclaimed merely because it is old. If Raycast crashes while holding a lock, a later correction reports its exact path. Confirm no correction is active and preserve the ledger before removing that lock; never delete the record JSON files as a lock-recovery step.
+
+## External-volume development
+
+On exFAT, macOS creates `._*` sidecars. Tests and ESLint ignore them, but Raycast's metadata validator treats PNG sidecars as images. Make a clean local release staging copy excluding `.git`, `node_modules`, `._*`, `.DS_Store`, and generated outputs; install/link the existing dependencies there, then run validation and publication from that copy. Do not submit sidecars to Git or the Store. CLI evals also require `node_modules/.bin` on PATH (as in `npm exec -- ray evals`); check the per-case scores because this CLI can exit zero after an evaluation error.

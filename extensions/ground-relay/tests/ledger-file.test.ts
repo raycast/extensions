@@ -13,9 +13,15 @@ import {
 describe("ground packet ledger", () => {
   it("appends, lists, and deletes independent versions", async () => {
     const directory = await mkdtemp(join(tmpdir(), "ground-relay-"));
-    const root = createGroundPacket(draftFromInput({ situation: "Initial state" }));
+    const root = createGroundPacket(
+      draftFromInput({ situation: "Initial state" }),
+    );
     const correction = createGroundPacket(
-      { ...root.draft, situation: "Corrected state", correctionReason: "New receipt" },
+      {
+        ...root.draft,
+        situation: "Corrected state",
+        correctionReason: "New receipt",
+      },
       { rootId: root.rootId, version: 2, supersedesId: root.id },
     );
     await appendGroundPacketInDirectory(directory, root);
@@ -27,23 +33,33 @@ describe("ground packet ledger", () => {
       correction.id,
       async (path) => rename(path, trashedPath),
     );
-    expect((await listGroundPacketsInDirectory(directory))[0]!.id).toBe(root.id);
-    expect(
-      JSON.parse(await readFile(trashedPath, "utf8")).id,
-    ).toBe(correction.id);
+    expect((await listGroundPacketsInDirectory(directory))[0]!.id).toBe(
+      root.id,
+    );
+    expect(JSON.parse(await readFile(trashedPath, "utf8")).id).toBe(
+      correction.id,
+    );
   });
 
   it("ignores malformed files", async () => {
     const directory = await mkdtemp(join(tmpdir(), "ground-relay-"));
-    await writeFile(join(directory, "00000000-0000-0000-0000-000000000000.json"), "not json");
+    await writeFile(
+      join(directory, "00000000-0000-0000-0000-000000000000.json"),
+      "not json",
+    );
     expect(await listGroundPacketsInDirectory(directory)).toEqual([]);
   });
 
   it("writes a readable JSON record", async () => {
     const directory = await mkdtemp(join(tmpdir(), "ground-relay-"));
-    const record = createGroundPacket(draftFromInput({ situation: "Portable state" }));
+    const record = createGroundPacket(
+      draftFromInput({ situation: "Portable state" }),
+    );
     await appendGroundPacketInDirectory(directory, record);
-    expect(JSON.parse(await readFile(join(directory, `${record.id}.json`), "utf8")).id).toBe(record.id);
+    expect(
+      JSON.parse(await readFile(join(directory, `${record.id}.json`), "utf8"))
+        .id,
+    ).toBe(record.id);
   });
 
   it("rejects a stale parallel correction instead of forking a lineage", async () => {
@@ -66,7 +82,9 @@ describe("ground packet ledger", () => {
       }),
     ]);
 
-    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(
+      results.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
     const rejection = results.find((result) => result.status === "rejected");
     expect(rejection).toMatchObject({
       status: "rejected",

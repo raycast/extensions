@@ -1,20 +1,43 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  Toast,
+  showToast,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GroundPacketDetail } from "./components/GroundPacketDetail";
 import type { CarrierType, GroundPacketRecord } from "./domain/types";
-import { listGroundPackets } from "./services/ledger";
+import { inspectGroundPackets } from "./services/ledger";
 
 type TypeFilter = "all" | CarrierType;
 
 export default function BrowseGroundPacketsCommand() {
   const [records, setRecords] = useState<GroundPacketRecord[]>([]);
+  const [readError, setReadError] = useState<string>();
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [type, setType] = useState<TypeFilter>("all");
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    setRecords(await listGroundPackets());
-    setIsLoading(false);
+    try {
+      const result = await inspectGroundPackets();
+      setRecords(result.records);
+      setWarnings(result.warnings);
+      setReadError(undefined);
+      if (result.warnings.length)
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Some records could not be read",
+          message: `${result.warnings.length} warning(s). Use Show Ledger Warnings.`,
+        });
+    } catch (error) {
+      setReadError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -31,6 +54,13 @@ export default function BrowseGroundPacketsCommand() {
 
   return (
     <List
+      navigationTitle={
+        readError
+          ? "Ledger unavailable — refresh to retry"
+          : warnings.length
+            ? `${warnings.length} ledger warning(s)`
+            : "Local Ledger"
+      }
       isLoading={isLoading}
       searchBarPlaceholder="Search packets, intent, boundaries, or evidence"
       searchBarAccessory={
@@ -51,10 +81,21 @@ export default function BrowseGroundPacketsCommand() {
       {visible.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Document}
-          title="No ground packets yet"
-          description="Create a packet or change the context filter."
+          title={readError ? "Ledger unavailable" : "No ground packets match"}
+          description={
+            readError ??
+            (warnings.length
+              ? "Some records are unreadable. Review ledger warnings."
+              : "Create a packet or change the context filter.")
+          }
           actions={
             <ActionPanel>
+              {warnings.length > 0 && (
+                <Action.CopyToClipboard
+                  title="Show Ledger Warnings"
+                  content={warnings.join("\n")}
+                />
+              )}
               <Action
                 title="Refresh Ledger"
                 icon={Icon.ArrowClockwise}
@@ -75,6 +116,13 @@ export default function BrowseGroundPacketsCommand() {
             record.draft.authorityBoundary,
             ...record.draft.explicitRefusals,
             ...record.draft.constraints,
+            record.draft.sourceContext,
+            record.draft.scopeBoundary,
+            ...record.draft.evidence.flatMap((e) => [
+              e.claim,
+              e.sourceRef ?? "",
+              e.observedAt ?? "",
+            ]),
           ]}
           accessories={[
             { tag: record.draft.carrierType },
@@ -85,6 +133,12 @@ export default function BrowseGroundPacketsCommand() {
           ]}
           actions={
             <ActionPanel>
+              {warnings.length > 0 && (
+                <Action.CopyToClipboard
+                  title="Show Ledger Warnings"
+                  content={warnings.join("\n")}
+                />
+              )}
               <Action.Push
                 title="Inspect Ground Packet"
                 icon={Icon.Eye}

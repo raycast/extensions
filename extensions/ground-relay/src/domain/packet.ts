@@ -210,3 +210,26 @@ export function findContextGap(draft: GroundPacketDraft): ContextGap {
     }
   );
 }
+
+export function evidenceToInput(evidence: EvidenceItem[]): string {
+  return evidence
+    .map((e) => [e.claim, e.sourceRef ?? "", e.observedAt ?? ""].join(" || "))
+    .join("\n");
+}
+export function retainEvidenceIds(
+  next: EvidenceItem[],
+  previous: EvidenceItem[],
+): EvidenceItem[] {
+  const remaining = [...previous];
+  return next.map((item) => {
+    const index = remaining.findIndex(
+      (p) =>
+        p.claim === item.claim &&
+        p.sourceRef === item.sourceRef &&
+        p.observedAt === item.observedAt,
+    );
+    return index < 0
+      ? item
+      : { ...item, id: remaining.splice(index, 1)[0]!.id };
+  });
+}

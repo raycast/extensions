@@ -2,6 +2,12 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Add read-only AI listing/search and exact-record retrieval with pagination and history.
+- Add explicit paired-extension handoff review with source identity and snapshot digest.
+- Validate full ledger shapes, report unreadable records, and prevent ID overwrites.
+- Add regression coverage for corruption, concurrency, retrieval, and handoff tampering.
+- Preserve empty evidence columns and unchanged evidence IDs during correction.
+
 - Add portable local Ground Packet creation, browsing, correction, and export.
 - Add non-persistent drafting and one-question context-gap AI tools.
 - Add a human-confirmed local-save AI tool.

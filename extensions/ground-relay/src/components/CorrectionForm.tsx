@@ -7,7 +7,11 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
-import { draftFromForm } from "../domain/packet";
+import {
+  draftFromForm,
+  evidenceToInput,
+  retainEvidenceIds,
+} from "../domain/packet";
 import {
   CARRIER_TYPES,
   type CorrectionFormValues,
@@ -22,16 +26,6 @@ interface Props {
 
 function joined(values: string[]): string {
   return values.join("\n");
-}
-
-function evidence(base: GroundPacketRecord): string {
-  return base.draft.evidence
-    .map((item) =>
-      [item.claim, item.sourceRef, item.observedAt]
-        .filter(Boolean)
-        .join(" || "),
-    )
-    .join("\n");
 }
 
 function uncertainties(base: GroundPacketRecord): string {
@@ -52,6 +46,8 @@ export function CorrectionForm({ base, onComplete }: Props) {
     });
     try {
       const draft = draftFromForm(values);
+      draft.evidence = retainEvidenceIds(draft.evidence, base.draft.evidence);
+      if (base.draft.handoff) draft.handoff = base.draft.handoff;
       draft.correctionReason = values.correctionReason.trim();
       const record = await appendCorrection(base, draft);
       await onComplete(record);
@@ -134,7 +130,7 @@ export function CorrectionForm({ base, onComplete }: Props) {
       <Form.TextArea
         id="evidence"
         title="Evidence"
-        defaultValue={evidence(base)}
+        defaultValue={evidenceToInput(base.draft.evidence)}
       />
       <Form.TextArea
         id="uncertainties"

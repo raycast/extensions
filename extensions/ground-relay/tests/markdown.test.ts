@@ -14,6 +14,8 @@ describe("portable markdown", () => {
     const markdown = renderGroundPacketMarkdown(record);
     expect(markdown).toContain("# Release handoff");
     expect(markdown).toContain("candidate-compatible-not-admitted");
-    expect(markdown).toContain("does not mean admission, verification, authority, or onboarding");
+    expect(markdown).toContain(
+      "does not mean admission, verification, authority, or onboarding",
+    );
   });
 });

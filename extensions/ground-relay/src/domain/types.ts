@@ -1,3 +1,4 @@
+import type { Handoff } from "./handoff";
 export const CARRIER_TYPES = [
   "project",
   "person",
@@ -37,6 +38,7 @@ export interface GroundPacketDraft {
   nextMoveRequirements: string[];
   sourceContext: string;
   correctionReason?: string;
+  handoff?: Handoff;
 }
 
 export interface GroundPacketRecord {

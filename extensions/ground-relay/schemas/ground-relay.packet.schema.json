@@ -19,17 +19,47 @@
     "draft"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "format": { "const": "ground-relay.packet" },
-    "formatVersion": { "const": "1.0" },
-    "ubiquityCompatibility": { "const": "candidate-compatible-not-admitted" },
-    "id": { "type": "string", "format": "uuid" },
-    "rootId": { "type": "string", "format": "uuid" },
-    "version": { "type": "integer", "minimum": 1 },
-    "createdAt": { "type": "string", "format": "date-time" },
-    "supersedesId": { "type": "string", "format": "uuid" },
-    "status": { "enum": ["user-authored", "ai-candidate"] },
-    "authorityStatus": { "const": "advisory-no-authority-grant" },
+    "schemaVersion": {
+      "const": 1
+    },
+    "format": {
+      "const": "ground-relay.packet"
+    },
+    "formatVersion": {
+      "const": "1.0"
+    },
+    "ubiquityCompatibility": {
+      "const": "candidate-compatible-not-admitted"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "rootId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "supersedesId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "enum": [
+        "user-authored",
+        "ai-candidate"
+      ]
+    },
+    "authorityStatus": {
+      "const": "advisory-no-authority-grant"
+    },
     "draft": {
       "type": "object",
       "additionalProperties": false,
@@ -49,26 +79,68 @@
         "sourceContext"
       ],
       "properties": {
-        "title": { "type": "string" },
-        "carrierType": { "enum": ["project", "person", "team", "organization", "other"] },
-        "situation": { "type": "string" },
-        "operativeIntent": { "type": "string" },
-        "explicitRefusals": { "type": "array", "items": { "type": "string" } },
-        "constraints": { "type": "array", "items": { "type": "string" } },
-        "authorityBoundary": { "type": "string" },
-        "scopeBoundary": { "type": "string" },
+        "title": {
+          "type": "string"
+        },
+        "carrierType": {
+          "enum": [
+            "project",
+            "person",
+            "team",
+            "organization",
+            "other"
+          ]
+        },
+        "situation": {
+          "type": "string"
+        },
+        "operativeIntent": {
+          "type": "string"
+        },
+        "explicitRefusals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authorityBoundary": {
+          "type": "string"
+        },
+        "scopeBoundary": {
+          "type": "string"
+        },
         "evidence": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["id", "claim", "receiptBearing"],
+            "required": [
+              "id",
+              "claim",
+              "receiptBearing"
+            ],
             "properties": {
-              "id": { "type": "string" },
-              "claim": { "type": "string" },
-              "sourceRef": { "type": "string" },
-              "observedAt": { "type": "string" },
-              "receiptBearing": { "type": "boolean" }
+              "id": {
+                "type": "string"
+              },
+              "claim": {
+                "type": "string"
+              },
+              "sourceRef": {
+                "type": "string"
+              },
+              "observedAt": {
+                "type": "string"
+              },
+              "receiptBearing": {
+                "type": "boolean"
+              }
             }
           }
         },
@@ -77,17 +149,83 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["statement", "classification"],
+            "required": [
+              "statement",
+              "classification"
+            ],
             "properties": {
-              "statement": { "type": "string" },
-              "classification": { "enum": ["solid", "inferential", "unknown"] }
+              "statement": {
+                "type": "string"
+              },
+              "classification": {
+                "enum": [
+                  "solid",
+                  "inferential",
+                  "unknown"
+                ]
+              }
             }
           }
         },
-        "nextMove": { "type": "string" },
-        "nextMoveRequirements": { "type": "array", "items": { "type": "string" } },
-        "sourceContext": { "type": "string" },
-        "correctionReason": { "type": "string" }
+        "nextMove": {
+          "type": "string"
+        },
+        "nextMoveRequirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sourceContext": {
+          "type": "string"
+        },
+        "correctionReason": {
+          "type": "string"
+        },
+        "handoff": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "sender",
+            "id",
+            "rootId",
+            "version",
+            "sha256",
+            "recordJson"
+          ],
+          "properties": {
+            "format": {
+              "const": "context-handoff.v1"
+            },
+            "sender": {
+              "enum": [
+                "ground-relay",
+                "lawful-splat"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "rootId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "recordJson": {
+              "type": "string",
+              "description": "Exact serialized source snapshot; digest identifies bytes, not verification or authority."
+            }
+          }
+        }
       }
     }
   }

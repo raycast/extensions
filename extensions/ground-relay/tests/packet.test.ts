@@ -19,7 +19,9 @@ describe("ground packet", () => {
   });
 
   it("types uncertainty without promoting untyped claims", () => {
-    expect(parseUncertainties(["[solid] Repo exists", "Maybe the API works"])).toEqual([
+    expect(
+      parseUncertainties(["[solid] Repo exists", "Maybe the API works"]),
+    ).toEqual([
       { classification: "solid", statement: "Repo exists" },
       { classification: "unknown", statement: "Maybe the API works" },
     ]);
@@ -31,7 +33,9 @@ describe("ground packet", () => {
       { status: "ai-candidate" },
     );
     expect(record.format).toBe("ground-relay.packet");
-    expect(record.ubiquityCompatibility).toBe("candidate-compatible-not-admitted");
+    expect(record.ubiquityCompatibility).toBe(
+      "candidate-compatible-not-admitted",
+    );
     expect(record.authorityStatus).toBe("advisory-no-authority-grant");
     expect(record.rootId).toBe(record.id);
   });
@@ -39,7 +43,9 @@ describe("ground packet", () => {
 
 describe("context gap", () => {
   it("asks for operative intent before later fields", () => {
-    const gap = findContextGap(draftFromInput({ situation: "Current state is known." }));
+    const gap = findContextGap(
+      draftFromInput({ situation: "Current state is known." }),
+    );
     expect(gap.field).toBe("operativeIntent");
   });
 

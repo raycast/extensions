@@ -84,5 +84,16 @@ ${draft.correctionReason ? `\n## Correction Pressure\n\n${draft.correctionReason
 - Version: ${record.version}
 ${record.supersedesId ? `- Supersedes: \`${record.supersedesId}\`` : "- Supersedes: none"}
 - Created: ${record.createdAt}
+${
+  draft.handoff
+    ? `
+## Paired Handoff
+
+- Source: ${draft.handoff.sender} ${draft.handoff.id} v${draft.handoff.version}
+- Snapshot SHA-256: ${draft.handoff.sha256}
+- The exact snapshot is preserved in JSON. Its digest establishes byte identity, not truth, currentness, or authority.
+`
+    : ""
+}
 `;
 }

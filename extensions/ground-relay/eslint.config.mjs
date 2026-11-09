@@ -1,3 +1,3 @@
 import raycastConfig from "@raycast/eslint-config";
 
-export default [...raycastConfig];
+export default [{ ignores: ["**/._*"] }, ...raycastConfig];

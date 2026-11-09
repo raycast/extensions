@@ -1,3 +1,5 @@
+import { launchCommand, LaunchType, getPreferenceValues } from "@raycast/api";
+import { makeHandoff } from "../domain/handoff";
 import {
   Action,
   ActionPanel,
@@ -71,6 +73,39 @@ export function GroundPacketDetail({ record, onChanged, onDeleted }: Props) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Portable Export">
+            <Action
+              title="Review in Lawful Splat"
+              icon={Icon.ArrowRight}
+              onAction={async () => {
+                try {
+                  await launchCommand({
+                    extensionName: "lawful-splat",
+                    ownerOrAuthorName:
+                      getPreferenceValues<{ pairedExtensionOwner?: string }>()
+                        .pairedExtensionOwner || "prmptd",
+                    name: "receive-handoff",
+                    type: LaunchType.UserInitiated,
+                    context: {
+                      handoff: makeHandoff("ground-relay", displayRecord),
+                    },
+                  });
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Could not open Lawful Splat",
+                    message: `Check the paired extension owner in preferences, or copy the handoff and paste it into Review Handoff. ${error instanceof Error ? error.message : String(error)}`,
+                  });
+                }
+              }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Structured Handoff"
+              content={JSON.stringify(
+                makeHandoff("ground-relay", displayRecord),
+                null,
+                2,
+              )}
+            />
             <Action.CopyToClipboard
               title="Copy as Markdown"
               content={markdown}
@@ -92,7 +127,18 @@ export function GroundPacketDetail({ record, onChanged, onDeleted }: Props) {
               title="Move This Version to Trash"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              onAction={handleDelete}
+              onAction={async () => {
+                try {
+                  await handleDelete();
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Could not move record to Trash",
+                    message:
+                      error instanceof Error ? error.message : String(error),
+                  });
+                }
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

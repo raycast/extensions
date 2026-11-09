@@ -7,6 +7,7 @@ import {
   appendGroundPacketInDirectory,
   deleteGroundPacketInDirectory,
   listGroundPacketsInDirectory,
+  inspectGroundPacketsInDirectory,
 } from "./ledger-file";
 
 function directory(): string {
@@ -30,4 +31,8 @@ export function appendCorrection(
 
 export function deleteGroundPacket(id: string): Promise<void> {
   return deleteGroundPacketInDirectory(directory(), id, trash);
+}
+
+export function inspectGroundPackets() {
+  return inspectGroundPacketsInDirectory(directory());
 }
