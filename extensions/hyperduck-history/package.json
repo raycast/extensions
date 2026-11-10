@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hyperduck-history",
+  "title": "Hyperduck History",
+  "description": "Search and reopen the links sent to this Mac with Hyperduck",
+  "icon": "hyperduck-history-icon-simple.png",
+  "author": "0xAdriaTorralba",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "hyperduck-history",
+      "title": "Hyperduck History",
+      "subtitle": "Hyperduck",
+      "description": "List the links sent to this Mac with Hyperduck",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mjs",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you want to publish it to the Raycast Store instead, use the \\'npm run publish\\' command.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
