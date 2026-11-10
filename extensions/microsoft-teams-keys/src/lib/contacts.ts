@@ -45,7 +45,8 @@ export function isEmail(value: string): boolean {
   return /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(value.trim());
 }
 
-export type Resolved = { kind: "email"; email: string; label: string } | { kind: "search"; query: string };
+export type Resolved =
+  { kind: "email"; email: string; label: string } | { kind: "search"; query: string; reason: "unknown" | "ambiguous" };
 
 /**
  * Turns what the user typed into an address Teams can open directly.
@@ -65,7 +66,7 @@ export async function resolvePerson(input: string): Promise<Resolved> {
   const partial = contacts.filter(
     (c) => c.name.toLocaleLowerCase().includes(needle) || c.email.toLocaleLowerCase().startsWith(needle),
   );
-  const match = [exact, prefix, partial].find((list) => list.length === 1)?.[0];
-  if (match) return { kind: "email", email: match.email, label: match.name };
-  return { kind: "search", query: text };
+  const matches = [exact, prefix, partial].find((list) => list.length > 0) ?? [];
+  if (matches.length === 1) return { kind: "email", email: matches[0].email, label: matches[0].name };
+  return { kind: "search", query: text, reason: matches.length > 1 ? "ambiguous" : "unknown" };
 }

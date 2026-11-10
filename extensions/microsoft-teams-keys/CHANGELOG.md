@@ -2,8 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Open a Teams chat by email, saved contact or name, with an optional message left as a draft or sent
-- Send Teams Message for one-step messages
+- Open a Teams chat by email, saved contact or name, with an optional message. Teams search results always leave a draft for you to check the recipient
+- Send Teams Message for one-step messages to email addresses and saved contacts
 - Teams Contacts: short names for the people you message most, with chat, message, call and video call actions
 - Meeting controls from the keyboard: microphone, camera, raise hand, share content, admit from lobby, leave call – each its own command for a hotkey
 - Bring Current Teams Call to Front finds the call window, also when it is minimised

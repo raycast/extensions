@@ -11,8 +11,7 @@ export interface ChatRequest {
 /** What happened, for the HUD. */
 export interface ChatResult {
   label: string;
-  sent: boolean;
-  typed: boolean;
+  outcome: "sent" | "draft" | "search-draft" | "opened" | "search-opened";
 }
 
 function chatLink(email: string, message?: string): string {
@@ -55,10 +54,10 @@ export async function openChat(request: ChatRequest): Promise<ChatResult> {
     if (message && request.send) {
       await activateTeams();
       // The chat opens a little after Teams comes to the front.
-      await pause(1800);
+      await pause(1800, "search");
       await press(RETURN);
     }
-    return { label: target.label, sent: Boolean(message && request.send), typed: Boolean(message) };
+    return { label: target.label, outcome: message ? (request.send ? "sent" : "draft") : "opened" };
   }
 
   const { searchUnknownNames } = getPreferenceValues<Preferences>();
@@ -70,16 +69,14 @@ export async function openChat(request: ChatRequest): Promise<ChatResult> {
   await openThroughSearch(target.query);
   if (message) {
     await typeText(message);
-    if (request.send) {
-      await pause(300);
-      await press(RETURN);
-    }
   }
-  return { label: target.query, sent: Boolean(message && request.send), typed: Boolean(message) };
+  return { label: target.query, outcome: message ? "search-draft" : "search-opened" };
 }
 
 export function chatHud(result: ChatResult): string {
-  if (result.sent) return `Sent to ${result.label}`;
-  if (result.typed) return `Message for ${result.label} is ready – press Return to send`;
+  if (result.outcome === "sent") return `Sent to ${result.label}`;
+  if (result.outcome === "search-draft") return "Draft ready in Teams. Check the recipient before sending.";
+  if (result.outcome === "search-opened") return `Opened a search result for ${result.label}. Check the recipient.`;
+  if (result.outcome === "draft") return `Message for ${result.label} is ready – press Return to send`;
   return `Opened the chat with ${result.label}`;
 }

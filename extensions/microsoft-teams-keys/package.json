@@ -50,7 +50,7 @@
         {
           "name": "afterTyping",
           "title": "After Typing the Message",
-          "description": "Whether Open Teams Chat leaves the message for you to check or sends it right away. Send Teams Message always sends.",
+          "description": "Whether Open Teams Chat leaves the message as a draft or sends it right away. Messages opened through Teams search always stay as drafts so you can check the recipient.",
           "type": "dropdown",
           "required": false,
           "default": "draft",
@@ -70,7 +70,7 @@
     {
       "name": "send-message",
       "title": "Send Teams Message",
-      "description": "Opens the chat with a person and sends the message right away.",
+      "description": "Sends a message to an email address or saved contact. Names looked up through Teams search leave a draft for you to check.",
       "mode": "no-view",
       "arguments": [
         {
@@ -398,7 +398,7 @@
       "name": "searchUnknownNames",
       "title": "Unknown Names",
       "label": "Look up names that are not saved contacts with Teams search",
-      "description": "Names that are neither an email address nor a saved contact are typed into the Teams search and the first result is opened.",
+      "description": "Unresolved names are typed into Teams search and the first result is opened. Messages always stay as drafts so you can check the recipient.",
       "type": "checkbox",
       "required": false,
       "default": true
@@ -457,7 +457,7 @@
     {
       "name": "searchTiming",
       "title": "Search Timing",
-      "description": "How long chats, messages and status changes wait for Teams. They go through the Teams search, which first has to find the person or command, so they need more time than shortcuts. Normal is recommended; pick a slower one if Teams misses keystrokes.",
+      "description": "How long chats, messages and status changes wait for Teams, including opening a chat from an email address before sending. Normal is recommended; pick a slower one if Teams misses keystrokes.",
       "type": "dropdown",
       "required": false,
       "default": "normal",
@@ -519,6 +519,7 @@
     "typescript": "^5.9.2"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

@@ -67,9 +67,11 @@ function ContactForm(props: { contact?: Contact; onSaved: () => void }) {
 }
 
 function MessageForm(props: { contact: Contact; send: boolean }) {
+  const [messageError, setMessageError] = useState<string | undefined>();
+
   async function submit(values: { message: string }) {
     if (!values.message.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "Enter a message" });
+      setMessageError("Enter a message");
       return;
     }
     await closeMainWindow();
@@ -94,7 +96,13 @@ function MessageForm(props: { contact: Contact; send: boolean }) {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="message" title="Message" placeholder={`Message for ${props.contact.name}`} />
+      <Form.TextArea
+        id="message"
+        title="Message"
+        placeholder={`Message for ${props.contact.name}`}
+        error={messageError}
+        onChange={() => setMessageError(undefined)}
+      />
     </Form>
   );
 }

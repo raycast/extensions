@@ -43,7 +43,11 @@ export default function Command() {
     for (const name of names) {
       const target = await resolvePerson(name);
       if (target.kind !== "email") {
-        setAttendeeError(`"${name}" is neither an email address nor a saved contact`);
+        setAttendeeError(
+          target.reason === "ambiguous"
+            ? `"${name}" matches several saved contacts. Use the email address.`
+            : `"${name}" is neither an email address nor a saved contact`,
+        );
         return;
       }
       emails.push(target.email);

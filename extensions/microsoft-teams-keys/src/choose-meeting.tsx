@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Clipboard, Icon, List, Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { failedCalendarsText, teamsMeetings } from "./lib/calendar";
 import { findMeetingLink } from "./lib/links";
@@ -35,10 +35,8 @@ export default function Command() {
     // Long meetings that started hours ago still count, so look back a day.
     const { meetings, failedCalendars } = await teamsMeetings(new Date(now.getTime() - 86_400_000), endOfTomorrow);
     if (failedCalendars.length > 0) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(failedCalendarsText(failedCalendars)), {
         title: "Some calendars are missing",
-        message: failedCalendarsText(failedCalendars),
       });
     }
     return { meetings: meetings.filter((m) => m.end > now) };
