@@ -1,6 +1,35 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { getInitialSettings } from "./generator-defaults";
+
+type Manifest = {
+  commands: {
+    name: string;
+    preferences?: { name: string; type: string; title?: string; label?: string; default?: unknown }[];
+  }[];
+};
+
+test("every Generate Password preference says which type it's for, and keeps its saved name and default", () => {
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as Manifest;
+  const preferences = manifest.commands.find((command) => command.name === "generate-password")?.preferences ?? [];
+  // A checkbox shows its label next to the box; its title is only a heading above it.
+  assert.deepEqual(
+    preferences.map(({ name, type, default: value, title, label }) => [name, type, value, label ?? title]),
+    [
+      ["defaultPasswordType", "dropdown", "random", "Password Type"],
+      ["defaultPasswordLength", "textfield", "20", "Random: Length"],
+      ["includeUppercase", "checkbox", true, "Random: Uppercase letters"],
+      ["includeSymbols", "checkbox", true, "Random: Symbols"],
+      ["includeNumbers", "checkbox", true, "Random: Numbers"],
+      ["defaultPassphraseWords", "dropdown", "4", "Passphrase: Words"],
+      ["passphraseSeparator", "dropdown", "hyphens", "Passphrase: Separator"],
+      ["capitalizeWords", "checkbox", true, "Passphrase: Capitalize words"],
+      ["passphraseNumbers", "checkbox", true, "Passphrase: Numbers"],
+    ],
+  );
+});
 
 test("starts with the usual defaults when nothing is set", () => {
   assert.deepEqual(getInitialSettings({}), {
