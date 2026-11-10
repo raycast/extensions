@@ -130,7 +130,7 @@
     {
       "name": "make-sidebar",
       "title": "Make Sidebar",
-      "description": "Pin the focused window full height down the right of the screen, whatever app it is. It stays the sidebar until you unpin it with Toggle Sidebar.",
+      "description": "Pin the focused window full height down the right of the screen, whatever app it is. It stays the sidebar until you unpin it with Toggle Sidebar, drag it away or close it.",
       "mode": "no-view",
       "icon": "make-sidebar.png",
       "keywords": [

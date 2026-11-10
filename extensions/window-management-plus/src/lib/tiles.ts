@@ -104,24 +104,31 @@ function sidebarIs(pinned: string): (w: { id: string; title?: string }) => boole
 }
 
 /**
- * The state as it stands. Dragging the sidebar away unpins it, and nothing tells an extension when a
- * window moves, so this is where that is noticed: a sidebar that isn't where it was last put is an
- * ordinary window again. It is compared with where it was put, not with the edge of the screen, so
- * changing a gap setting isn't mistaken for a drag.
+ * The state as it stands. Closing the sidebar's window unpins it, and so does dragging it away. Nothing
+ * tells an extension when either happens, so this is where it is noticed: a sidebar that has closed is
+ * not opened again, and one that isn't where it was last put is an ordinary window again. It is compared
+ * with where it was put, not with the edge of the screen, so changing a gap setting isn't mistaken for
+ * a drag.
  */
 async function current(): Promise<State> {
   const state = read();
+  if (!state.sidebar) return state;
+  // If the windows can't be read, nothing is concluded, and the command itself will say why
+  const now = await whereIs(sidebarIs(state.pinned)).then(
+    (where) => where ?? "closed",
+    () => "unknown" as const,
+  );
+  if (now === "unknown") return state;
+  // Unpinned for this command. It is saved with the rest once windows have been arranged.
+  const unpinned = { ...state, sidebar: false };
+  if (now === "closed") return unpinned;
   const put = JSON.parse(cache.get(SIDEBAR_AT) ?? "null") as { screen: number; right: number; y: number } | null;
-  if (!state.sidebar || !put) return state;
-  // If the windows can't be read, the command itself will say why
-  const now = await whereIs(sidebarIs(state.pinned)).catch(() => undefined);
-  if (!now) return state;
+  if (!put) return state;
   const moved =
     now.screen !== put.screen ||
     Math.abs(now.frame.x + now.frame.width - put.right) > DRAG ||
     Math.abs(now.frame.y - put.y) > DRAG;
-  // Unpinned for this command. It is saved with the rest once windows have been arranged.
-  return moved ? { ...state, sidebar: false } : state;
+  return moved ? unpinned : state;
 }
 
 type Built = {
@@ -196,24 +203,14 @@ function beside(layout: Layout, state: State): Omit<Built, "save"> {
     const title = async () => panelTitle(what);
     return { layout: side(pinned), pinned, panel: what, locate: title, open: () => openPanel(what) };
   }
-  // A window made the sidebar. If it has closed, another window of its app takes its place.
+  // A window made the sidebar, found by its id
   const made = madeSidebar(what);
   const pinned = (i: Item) => i.id === made.id;
-  const locate = async () => {
-    const { windows } = await listWindows();
-    const stand = !windows.some((w) => w.id === made.id) && made.app && windows.find((w) => w.bundleId === made.app);
-    if (stand) {
-      made.id = stand.id;
-      // Saved with the rest of the state, once windows have been arranged
-      state.pinned = JSON.stringify(made);
-    }
-    return undefined;
-  };
-  return { layout: side(pinned), pinned, locate };
+  return { layout: side(pinned), pinned };
 }
 
 /** The window Make Sidebar pinned. An older version stored only its id. */
-function madeSidebar(stored: string): { id: string; app?: string } {
+function madeSidebar(stored: string): { id: string } {
   try {
     const made = JSON.parse(stored);
     if (made && typeof made.id === "string") return made;
@@ -250,12 +247,14 @@ function layoutFor(state: State, lead: "focused" | "kept" = "kept", name = state
  */
 export async function runTile(name: TileName, done?: string) {
   const state = { ...(await current()), last: name, hasTiled: true };
-  const { layout, open, locate, save } = build(state, "focused");
-  return tile(layout, open ?? locate, false, done, save);
+  const { layout, locate, save } = build(state, "focused");
+  // The sidebar is open, or it would have been unpinned. Only Toggle Sidebar opens it.
+  return tile(layout, locate, false, done, save);
 }
 
 /**
- * Pins the sidebar, or lets it go, and tiles again in the layout already in use. While it is pinned,
+ * Pins the sidebar, or lets it go, and tiles again in the layout already in use. It is the only command
+ * that opens the sidebar's window: the others leave a closed sidebar closed. While it is pinned,
  * every layout arranges the other windows beside it. It pins the Default Sidebar App, Raycast Notes or
  * AI Chat, opening it if needed.
  */
@@ -264,7 +263,7 @@ export async function toggleSidebar() {
   const on = !was.sidebar;
   const state = { ...was, sidebar: on, pinned: on ? prefs().sidebar : was.pinned };
   const { layout, open, locate, save } = build(state);
-  return tile(layout, open ?? locate, false, on ? "Sidebar pinned" : "Sidebar unpinned", save);
+  return tile(layout, on ? open : locate, false, on ? "Sidebar pinned" : "Sidebar unpinned", save);
 }
 
 /**
@@ -280,7 +279,7 @@ export async function makeSidebar() {
       throw new Error("Click into the window you want as the sidebar, then run Make Sidebar again.");
     });
   }
-  const pinned = JSON.stringify({ id: focused.id, app: focused.bundleId });
+  const pinned = JSON.stringify({ id: focused.id });
   const { layout, locate, save } = build({ ...(await current()), sidebar: true, pinned });
   return tile(layout, locate, false, `${focused.app} is the sidebar`, save);
 }

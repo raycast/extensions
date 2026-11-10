@@ -9,7 +9,7 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 | Auto Tile                                   | Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.                                                                                                                          |
 | Pivot Layout                                | Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.                                                                       |
 | Toggle Sidebar                              | Open the window chosen as the Default Sidebar App and pin it full height down the right of the screen. Run it again to unpin. While a sidebar is pinned, every other command arranges the remaining windows beside it.       |
-| Make Sidebar                                | Pin the focused window full height down the right of the screen, whatever app it is. It stays the sidebar until you unpin it with Toggle Sidebar.                                                                            |
+| Make Sidebar                                | Pin the focused window full height down the right of the screen, whatever app it is. It stays the sidebar until you unpin it with Toggle Sidebar, drag it away or close it.                                                  |
 | Smart Arrange                               | Arrange windows by what each app is for. The focused window leads your largest display with related work beside it. Chat, mail and music go to your other display.                                                           |
 | Master Left / Right                         | Make the focused window the master on one side, with every other window stacked on the other.                                                                                                                                |
 | Master Center                               | Make the focused window the master in the middle, with the other windows stacked on both sides. Best on wide displays.                                                                                                       |
@@ -47,7 +47,7 @@ In Raycast AI, mention `@window-management-plus` and say what you want, like "ar
 
 Toggle Sidebar pins Raycast Notes or Raycast AI Chat down the right of the screen, as thin as the app allows and full height. Make Sidebar does the same with whichever window you are in. While a sidebar is pinned, every other command arranges the remaining windows beside it.
 
-To unpin it, run Toggle Sidebar again, or just drag the sidebar somewhere else. The next command you run tiles it with the other windows.
+To unpin it, run Toggle Sidebar again, drag the sidebar somewhere else, or close its window. The next command you run tiles the other windows without it. Only Toggle Sidebar opens the sidebar's window.
 
 ## Preferences
 
