@@ -2,10 +2,19 @@ import { showError } from "@chrismessina/raycast-kit";
 import { isWindows } from "../util/platform";
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Keyboard } from "@raycast/api";
-import { closeTab, executeJavascript, openNewTab, setActiveTab, openAllBookmarksInFolder } from "../actions";
+import {
+  closeTabs,
+  deduplicateTabs,
+  executeJavascript,
+  openNewTab,
+  setActiveTab,
+  openAllBookmarksInFolder,
+} from "../actions";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
+import { SHORTCUTS } from "../shortcuts";
+import { launchBrowserCommand } from "../util/launch-browser-command";
 
 export class BraveActions {
   public static NewTab = NewTabActions;
@@ -49,35 +58,115 @@ function NewTabActions({ query, incognito }: { query?: string; incognito?: boole
   );
 }
 
-function TabListItemActions({ tab }: { tab: Tab }) {
+function TabListItemActions({ tab, revalidate }: { tab: Tab; revalidate: () => Promise<void> }) {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
 
+  async function updateTabs(action: () => Promise<void>, errorTitle: string) {
+    try {
+      await action();
+    } catch (error) {
+      await showError(error, { title: errorTitle });
+    } finally {
+      try {
+        await revalidate();
+      } catch (error) {
+        await showError(error, { title: "Could Not Reload Tabs" });
+      }
+    }
+  }
+
   return (
     <ActionPanel title={tab.title}>
-      <GoToTab tab={tab} />
-      {!isWindows && (
-        <>
+      <ActionPanel.Section>
+        <GoToTab tab={tab} />
+        <Action
+          title="Open New Tab"
+          icon={Icon.PlusCircle}
+          shortcut={Keyboard.Shortcut.Common.New}
+          onAction={() => launchBrowserCommand()}
+        />
+        {!isWindows && (
+          <>
+            <Action
+              title="Move to New Window"
+              icon={Icon.Window}
+              onAction={() =>
+                updateTabs(async () => {
+                  await closeTabs([tab]);
+                  await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, newWindow: true });
+                }, "Could Not Move Tab")
+              }
+            />
+            <Action
+              title="Move to Private Window"
+              icon={Icon.EyeDisabled}
+              onAction={() =>
+                updateTabs(async () => {
+                  await closeTabs([tab]);
+                  await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, incognito: true });
+                }, "Could Not Move Tab")
+              }
+            />
+          </>
+        )}
+        {!isWindows && (
           <Action
-            title="Move to New Window"
-            icon={Icon.Window}
-            onAction={async () => {
-              await closeTab(tab.tabIndex);
-              await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, newWindow: true });
-            }}
+            title="Close Tab"
+            icon={Icon.XMarkCircle}
+            shortcut={SHORTCUTS.closeTab}
+            onAction={() => updateTabs(() => closeTabs([tab]), "Could Not Close Tab")}
           />
+        )}
+        <OpenInNewTabAction onAction={() => openNewTab({ url: tab.url, profileCurrent, openTabInProfile })} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CopyToClipboard title="Copy URL" content={tab.url} shortcut={Keyboard.Shortcut.Common.Copy} />
+        <Action.CopyToClipboard title="Copy Title" content={tab.title} shortcut={Keyboard.Shortcut.Common.CopyName} />
+        <CreateQuicklinkAction url={tab.url} title={tab.title} />
+        {!isWindows && (
           <Action
-            title="Move to Private Window"
-            icon={Icon.EyeDisabled}
-            onAction={async () => {
-              await closeTab(tab.tabIndex);
-              await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, incognito: true });
-            }}
+            title="Deduplicate Tabs"
+            icon={Icon.Filter}
+            shortcut={SHORTCUTS.deduplicateTabs}
+            onAction={() => updateTabs(deduplicateTabs, "Could Not Deduplicate Tabs")}
           />
-        </>
-      )}
-      <Action.CopyToClipboard title="Copy URL" content={tab.url} shortcut={Keyboard.Shortcut.Common.Copy} />
+        )}
+        <Action
+          title="Reload Tabs"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={async () => {
+            try {
+              await revalidate();
+            } catch (error) {
+              await showError(error, { title: "Could Not Reload Tabs" });
+            }
+          }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
+  );
+}
+
+function OpenInNewTabAction({ onAction }: { onAction: () => Promise<unknown> }) {
+  return (
+    <Action
+      title="Open in New Tab"
+      icon={Icon.PlusSquare}
+      shortcut={Keyboard.Shortcut.Common.Open}
+      onAction={onAction}
+    />
+  );
+}
+
+function CreateQuicklinkAction({ url, title }: { url: string; title: string }) {
+  return (
+    <Action.CreateQuicklink
+      icon={Icon.Quicklink}
+      shortcut={SHORTCUTS.createQuicklink}
+      quicklink={{ link: url, name: title || "Untitled" }}
+    />
   );
 }
 
@@ -85,10 +174,12 @@ function HistoryItemActions({
   title,
   url,
   profile: profileOriginal,
+  isBookmark,
 }: {
   title: string;
   url: string;
   profile: string;
+  isBookmark: boolean;
 }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
@@ -105,11 +196,15 @@ function HistoryItemActions({
 
   return (
     <ActionPanel title={title}>
-      <Action
-        onAction={async () => await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })}
-        icon={Icon.Globe}
-        title="Open"
-      />
+      {isBookmark ? (
+        <OpenInNewTabAction onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })} />
+      ) : (
+        <Action
+          onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })}
+          icon={Icon.Globe}
+          title="Open"
+        />
+      )}
       <Action
         title="Open in New Window"
         icon={Icon.Window}
@@ -156,6 +251,7 @@ function HistoryItemActions({
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
+      {isBookmark && <CreateQuicklinkAction url={url} title={title} />}
     </ActionPanel>
   );
 }
@@ -170,5 +266,5 @@ function GoToTab(props: { tab: Tab }) {
     }
   }
 
-  return <Action title="Switch to Tab" icon={{ source: Icon.Switch }} onAction={handleAction} />;
+  return <Action title="Switch to Tab" icon={Icon.ArrowRight} onAction={handleAction} />;
 }

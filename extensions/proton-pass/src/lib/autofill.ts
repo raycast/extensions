@@ -23,17 +23,16 @@ export interface TargetApp {
 }
 
 /**
- * Captures the external app before closing Raycast or loading any item or code.
- * Never guess a target after focus changes; keep checking this same app while filling.
+ * Captures the external app before loading any item or code. Raycast stays open meanwhile, so that its toast shows
+ * the loading, and closes once there's something to fill. Never guess a target after focus changes; keep checking
+ * this same app while filling.
  */
 export async function getTargetApp(): Promise<TargetApp> {
   const app = await getFrontmostApplication().catch(() => undefined);
   if (!app || !isBundleId(app.bundleId) || /^com\.raycast\./i.test(app.bundleId)) {
     throw new TargetAppError("Couldn't find the app to fill");
   }
-  const target = { name: app.name, bundleId: app.bundleId };
-  await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Suspended });
-  return target;
+  return { name: app.name, bundleId: app.bundleId };
 }
 
 function notInFront(app: TargetApp): TargetAppError {

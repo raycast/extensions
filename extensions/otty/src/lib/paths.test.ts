@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { classifyPaths, findFiles, findRepos, relativeParent } from "./paths";
+import { basename, classifyPaths, findFiles, findRepos, relativeParent } from "./paths";
 
 let root: string;
 
@@ -19,7 +19,6 @@ beforeAll(() => {
     "recipes/team",
   ];
   for (const dir of dirs) mkdirSync(join(root, dir), { recursive: true });
-  // A worktree or submodule marks itself with a .git FILE, not a directory.
   mkdirSync(join(root, "owner/worktree"), { recursive: true });
   writeFileSync(join(root, "owner/worktree/.git"), "gitdir: /elsewhere");
   writeFileSync(join(root, "alpha/readme.md"), "hi");
@@ -75,5 +74,12 @@ describe("relativeParent", () => {
     expect(relativeParent("/r/owner/repo", "/r")).toBe("owner");
     expect(relativeParent("/r/a/b/repo", "/r/")).toBe("a/b");
     expect(relativeParent("/r/repo", "/r")).toBeUndefined();
+  });
+});
+
+describe("basename", () => {
+  it("keeps the root as `/`, unlike node:path, and ignores a trailing slash", () => {
+    expect(basename("/")).toBe("/");
+    expect(basename("/Users/me/repo/")).toBe("repo");
   });
 });

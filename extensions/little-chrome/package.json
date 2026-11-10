@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "little-chrome",
+  "title": "Little Chrome",
+  "description": "Open a URL or Google search in a minimal Chrome app window, like Little Arc.",
+  "icon": "icon.png",
+  "author": "tompenguin",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open-little-chrome",
+      "title": "Open Little Chrome",
+      "description": "Open a URL or search keyword in a small Chrome window",
+      "mode": "view"
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL in Little Chrome",
+      "description": "Open a URL or search keyword in a small Chrome window without showing suggestions",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL or search",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "copy-url",
+      "title": "Copy Chrome URL",
+      "description": "Copy the URL of the focused Chrome window (including Little Chrome windows)",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-in-tab",
+      "title": "Open Little Chrome in Tab",
+      "description": "Move the focused Little Chrome window into a tab of a normal Chrome window",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-hidden",
+      "title": "Manage Hidden Suggestions",
+      "description": "List suggestions hidden from Open Little Chrome and unhide them",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "width",
+      "title": "Window Width",
+      "description": "Initial window width in pixels",
+      "type": "textfield",
+      "required": false,
+      "default": "900",
+      "placeholder": "900"
+    },
+    {
+      "name": "height",
+      "title": "Window Height",
+      "description": "Initial window height in pixels",
+      "type": "textfield",
+      "required": false,
+      "default": "700",
+      "placeholder": "700"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -7,6 +7,72 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "model-salt",
+    title: "Model Salt",
+    description:
+      "Outside randomness for creative requests, so the same prompt gives different answers that still do what was asked. One tool: before a creative task the model calls it and gets back a few choices to settle this time (a palette, a name, an opening line), drawn from randomness outside the model, then does the request as asked. Open source (MIT). Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/modelsalt/model-salt/main/mcpb/icon.png",
+    homepage: "https://modelsalt.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://modelsalt.com/mcp"],
+    },
+    remoteUrl: "https://modelsalt.com/mcp",
+  },
+  {
+    name: "roomlab",
+    title: "RoomLab.app",
+    description:
+      "AI photo and video editing for rooms and properties: Virtual Staging furnishes an empty room, Change Style restyles a furnished one, Declutter Room and Empty Room clear it, Replace Furniture and Replace Material swap a piece or a surface from a reference photo, and Wall Colors compares paint colors. Also Interior and Exterior Architectural Render, exterior touch-ups (blue sky, clean pool, clean garden, greener grass), Upscale Image to 4K, and Video Walkthrough, Video Transition and House Tour videos from photos. 19 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a RoomLab.app account is required.",
+    icon: "https://roomlab.app/favicon-512x512.png",
+    homepage: "https://roomlab.app/en/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.roomlab.app/mcp"],
+    },
+    remoteUrl: "https://mcp.roomlab.app/mcp",
+  },
+  {
+    name: "folklore",
+    title: "Folklore Clinical Variant Interpretation MCP",
+    description:
+      "Folklore MCP 2.0.0 provides ACMG/AMP germline variant classification, gene profiles, ClinGen gene-disease associations and scientific literature through 11 public tools without an API key. Clients configured with a Folklore Bearer API key can access 18 additional tools at the same endpoint for case analysis, approved source files and report retrieval. Public variant classification accepts GRCh38 nuclear germline SNVs and simple indels under 50 bp. Results require qualified professional review. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://folklore.helena.bio/images/logos/folklore.png",
+    homepage: "https://folklore.helena.bio/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.helena.bio/folklore/v1/mcp"],
+    },
+    remoteUrl: "https://api.helena.bio/folklore/v1/mcp",
+  },
+  {
+    name: "postel",
+    title: "Postel",
+    description:
+      "Find posts that went viral in your niche, write your version in your own voice, and save, schedule or publish it to X, LinkedIn, Bluesky and Mastodon through your Postel account. 17 tools: viral post research (works without an account), drafts and X threads in your saved voice, media from URLs, LinkedIn first comments, scheduling and publishing after you approve. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Postel API key as a Bearer token.",
+    icon: "https://raw.githubusercontent.com/robinfaraj/postel-mcp/main/assets/icon-400.png",
+    homepage:
+      "https://www.postel.app/postel-mcp-server?utm_source=raycast&utm_medium=listing&utm_campaign=agent-distribution",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.postel.app/api/mcp"],
+    },
+    remoteUrl: "https://www.postel.app/api/mcp",
+  },
+  {
+    name: "video-dept-ai",
+    title: "Video Dept. AI",
+    description:
+      "Plan a corporate or event video with VIDEO DEPT., a Fort Lauderdale studio: see posted prices, draft a script, send a brief and your brand guidelines, and book a free call with Nikita.",
+    icon: "https://agents.videodepartment.org/favicon.png",
+    homepage: "https://videodepartment.org/ai-assistant",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://agents.videodepartment.org/mcp"],
+    },
+    remoteUrl: "https://agents.videodepartment.org/mcp",
+  },
+  {
     name: "sofya",
     title: "Sofya",
     description:
@@ -212,6 +278,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://www.affix-io.com/mcp/"],
     },
     remoteUrl: "https://www.affix-io.com/mcp/",
+  },
+  {
+    name: "agent-outbox",
+    title: "Agent Outbox",
+    description:
+      "Let your AI assistant post to your Telegram private chat, groups and channels through the Agent Outbox bot: summaries, alerts, drafts and job-done notifications from chats, routines and coding agents. Pick a destination by name or use your default; Markdown is converted to Telegram formatting and long text is split into up to 10 messages. Posting rights are re-checked before every send, and message text is relayed, not stored. 3 tools (send_to_telegram, list_destinations, get_usage). Hosted remote Streamable HTTP server at https://outbox.roxinbox.io/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a 6-digit code from @agentoutbox_bot, no bot token or API key. Free plan: 50 messages a day. Not affiliated with Telegram.",
+    icon: "https://outbox.roxinbox.io/icon.png",
+    homepage: "https://outbox.roxinbox.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://outbox.roxinbox.io/mcp"],
+    },
+    remoteUrl: "https://outbox.roxinbox.io/mcp",
   },
   {
     name: "agenticwebscore",
@@ -538,6 +617,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://carbonforge.dev/api/mcp",
   },
   {
+    name: "chefbear",
+    title: "ChefBear",
+    description:
+      "Save, find, read and share your ChefBear restaurant menus from your AI assistant and pick dishes that suit your tastes. ChefBear is an iPhone menu scanner: save a menu your assistant has read from a photo, link or text to your ChefBear account, import 1 to 5 menu photos for ChefBear to recognize, list and read your saved menus, read a ChefBear share link, create or turn off a public link for a menu, and, in Claude, rank a menu's dishes against the taste profile you let it read. 12 tools. Not related to the Bear notes app. Hosted remote Streamable HTTP server at https://chef-bear.com/api/menu-sharing/mcp through `mcp-remote`; OAuth 2.1 sign-in with PKCE and dynamic client registration, no API key to paste, and you approve each new connection in the ChefBear iPhone app with a 3-digit code. Free ChefBear account; accounts in the mainland-China service region can't connect.",
+    icon: "https://chef-bear.com/images/app-icon-512.png",
+    homepage: "https://www.chef-bear.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://chef-bear.com/api/menu-sharing/mcp"],
+    },
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
@@ -647,6 +738,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://codex-reset.com/mcp"],
     },
+  },
+  {
+    name: "comunicate-eu",
+    title: "Comunicate.eu",
+    description:
+      "Plan and publish press releases, advertorials and SEO articles on 3,800+ news sites in Romania and other European markets. Without an account: search the catalog, compare prices per campaign type, read each publication's rules and build budget plans by niche, topic and city. With an account: read the balance, write and check drafts, prepare editorial plans and track publications. Orders stay off until the organization turns them on, and each order needs confirmation. 27 tools. Hosted remote Streamable HTTP server at https://app.comunicate.eu/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; catalog tools need no sign-in, account tools use OAuth 2.1 sign-in with dynamic client registration and PKCE.",
+    icon: "https://comunicate.eu/icoane/icon-512.png",
+    homepage: "https://comunicate.eu/en/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.comunicate.eu/mcp"],
+    },
+    remoteUrl: "https://app.comunicate.eu/mcp",
   },
   {
     name: "connectmachine",
@@ -781,6 +885,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://heydeacon.com/mcp"],
     },
     remoteUrl: "https://heydeacon.com/mcp",
+  },
+  {
+    name: "deapi",
+    title: "deAPI",
+    description:
+      "Image, video, audio and transcription tools on open-source models, billed per use to your deAPI balance: generate and edit images, remove backgrounds, upscale images and videos, read text from images (OCR), turn text, images or audio into video, text to speech, music, transcribe audio and video files or YouTube, X, TikTok, Twitch and Kick links, describe videos and create embeddings. Each generation tool has a matching price tool, plus balance, model list and job status. 39 tools. Hosted remote Streamable HTTP server through `mcp-remote`; deAPI API key (app.deapi.ai) as an `Authorization: Bearer` header. Replace YOUR_DEAPI_API_KEY in DEAPI_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://raw.githubusercontent.com/deapi-ai/ai-provider-for-deapi/main/.wordpress-org/icon-256x256.png",
+    homepage: "https://docs.deapi.ai/execution-modes-and-integrations/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.deapi.ai/mcp", "--header", "Authorization:${DEAPI_AUTH_HEADER}"],
+      env: {
+        DEAPI_AUTH_HEADER: "Bearer YOUR_DEAPI_API_KEY",
+      },
+    },
   },
   {
     name: "deed-page",
@@ -947,6 +1066,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "embers",
+    title: "Embers",
+    description:
+      "Work the warm leads Embers finds in LinkedIn engagement (your posts and comments, profiles you watch and keywords you track) from your AI agent: today's queue, lead search and full lead details, opener drafts grounded in what the person wrote, status, notes and follow-up dates, ICP changes with a preview and undo, watched profiles and tracked keywords, post performance, and sending leads to Slack, HubSpot, Salesforce, Pipedrive, Attio, Notion, Google Sheets or a connected outreach tool. Embers never posts, messages or connects on LinkedIn, and every action that spends credits or affects other leads asks first. 19 tools. Hosted remote Streamable HTTP server at https://mcp.useembers.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a paid Embers plan.",
+    icon: "https://useembers.com/web-app-manifest-512x512.png",
+    homepage: "https://useembers.com/help/integrations/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.useembers.com/mcp"],
+    },
+    remoteUrl: "https://mcp.useembers.com/mcp",
+  },
+  {
     name: "eventsend",
     title: "EventSend",
     description:
@@ -987,6 +1119,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         EXA_API_KEY: "YOUR_API_KEY_HERE",
       },
     },
+  },
+  {
+    name: "favicon-generator",
+    title: "Favicon Generator",
+    description:
+      "Free favicons for any website. Generate a text or emoji favicon, search an open-source icon library (Feather, Lucide, Tabler, Heroicons) and get any icon as a favicon SVG, plus the HTML head tags, a site.webmanifest and install steps for WordPress, Webflow, Wix, Shopify, Squarespace, Next.js, static HTML and PWAs. 5 read-only tools. Returns SVG and conversion commands; it does not render PNG or ICO files. Hosted remote Streamable HTTP server at https://favicongenerator.io/mcp; no sign-in, no API key.",
+    icon: "https://favicongenerator.io/icon-512.png",
+    homepage: "https://favicongenerator.io/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://favicongenerator.io/mcp"],
+    },
+    remoteUrl: "https://favicongenerator.io/mcp",
   },
   {
     name: "fictura",
@@ -1116,6 +1261,45 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "hermoso-ads-manager",
+    title: "Hermoso: Ads Manager",
+    description:
+      "The paid ads app of Hermoso, an AI marketing agent. Build, launch and report campaigns on Meta, Google, Microsoft, TikTok, LinkedIn, Pinterest, Reddit, Snapchat, X, Apple and ChatGPT ads, manage audiences, conversion tracking and lead forms, and read Google Analytics, Search Console, Bing Webmaster, Tag Manager, PostHog, Mixpanel, Amplitude, Merchant Center, Stripe and HubSpot reports. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast"],
+    },
+    remoteUrl: "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast",
+  },
+  {
+    name: "hermoso-ai-ad-generator",
+    title: "Hermoso: AI Ad Generator",
+    description:
+      "The creation app of Hermoso, an AI ad generator. Make on-brand image and video ads, UGC style ads, product photos and thumbnails for your brand, and research the ads competitors run in the Meta, Google and LinkedIn ad libraries. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-create&src=raycast"],
+    },
+    remoteUrl: "https://app.hermoso.ai/mcp?tools=app-create&src=raycast",
+  },
+  {
+    name: "hermoso-social-media-manager",
+    title: "Hermoso: Social Media Manager",
+    description:
+      "The social app of Hermoso, an AI marketing agent. Post and schedule to Instagram, Facebook, Threads, TikTok, YouTube, LinkedIn, X, Pinterest, Bluesky, Telegram, Google Business Profile, WordPress, Discord, Slack and Whop, send Mailchimp and Klaviyo email, answer comments, DMs, reviews, WhatsApp and Intercom from one inbox, and read account and post insights. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-social&src=raycast"],
+    },
+    remoteUrl: "https://app.hermoso.ai/mcp?tools=app-social&src=raycast",
+  },
+  {
     name: "house-ai",
     title: "House AI",
     description:
@@ -1207,6 +1391,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.keeploop.app/mcp"],
+    },
+  },
+  {
+    name: "kilobat-cli",
+    title: "Kilobat CLI",
+    description:
+      "Local macOS network diagnostics: check connections, Wi-Fi and traffic, and keep the Mac awake. Requires macOS 14+ and the separately installed free GPL-3.0-only Kilobat CLI. Some tools change settings or need macOS permissions or the separately distributed proprietary Kilobat desktop app. Connected AI clients can receive diagnostic data; clients control tool approval.",
+    homepage: "https://github.com/seifip/kilobat-cli",
+    configuration: {
+      command: "kilobat",
+      args: ["mcp"],
     },
   },
   {
@@ -1863,6 +2058,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "rinhelp",
+    title: "Rinhelp",
+    description:
+      "Help desk for small teams and AI agents. Acts as the teammate who connected it, with their role: reply to, note, assign, triage, close and reopen conversations, search knowledge, write and publish help center articles, manage saved replies, and find Shopify orders and Stripe customers. Refunds, cancellations and anything that moves money or can't be undone wait for a teammate's approval. About 80 tools. Hosted remote Streamable HTTP server through `mcp-remote`; Rinhelp API key as an `Authorization: Bearer` header (Settings -> AI agents -> API keys). Free plan for up to 3 teammates. Replace YOUR_RINHELP_API_KEY in RINHELP_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://rinhelp.com/rinhelp-app-icon-512.png",
+    homepage: "https://docs.rinhelp.com/articles/98a0def1-a07d-4c34-9f19-4d168626b40c-connect-your-ai-agent",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rinhelp.com/mcp", "--header", "Authorization:${RINHELP_AUTH_HEADER}"],
+      env: {
+        RINHELP_AUTH_HEADER: "Bearer YOUR_RINHELP_API_KEY",
+      },
+    },
+  },
+  {
     name: "Rube",
     title: "Rube - by Composio",
     description:
@@ -1987,6 +2197,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://send21.io/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
+  },
+  {
+    name: "send4",
+    title: "Send4",
+    description:
+      "AI SMS and email for sales and support teams. Read and change the flows, campaigns, conversations, leads and meetings in your Send4 workspace as the signed-in person; launching a campaign, switching a flow on or texting a typed number is shown as a preview first and runs only after you confirm. 64 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste. A Send4 workspace with AI assistants switched on is required.",
+    icon: "https://raw.githubusercontent.com/send4ai/send4-mcp-server/main/assets/send4-mark.svg",
+    homepage: "https://send4.ai/support/ai-assistant-tools/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.send4.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.send4.ai/mcp",
   },
   {
     name: "sentry",
@@ -2247,7 +2470,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "terminal-tax",
     title: "Terminal Tax",
     description:
-      "E-file a 2025 US federal Form 1040 from your AI assistant. Nothing to install or connect to file: any assistant that can run a shell command or make an HTTPS request sends JSON-RPC POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly, with no account, API key or OAuth. Three tools (create_filing_session, get_packet_schema, continue_filing_session) start a filing session, return the packet schema, and check the prepared packet, returning either the problems to correct or one link to a private filing page, where you review the complete return, sign it and authorize payment; Terminal Tax then e-files it with the IRS. $19.99 per federal return, charged only if the IRS accepts it. Federal only.",
+      "Let your AI agent file your taxes directly with the IRS. Tax software: your AI agent sends the return, you review and sign it, we e-file. Nothing to install: any agent that can make an HTTPS request sends JSON-RPC POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly, with no account, API key or OAuth.",
     icon: "https://raw.githubusercontent.com/terminaltax/terminal-tax-mcp-server/main/logo.png",
     homepage: "https://terminal.tax",
     configuration: {
@@ -3198,6 +3421,45 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
     },
   },
+  {
+    name: "holos33",
+    title: "Holos33 MCP",
+    description:
+      "Search sourced public Holos33 information about its six wellbeing modules, access, privacy, research and contact details through 11 read-only tools. Hosted remote Streamable HTTP server; no sign-in, API key or write actions.",
+    icon: "https://raw.githubusercontent.com/aiagentcycle/holos33-mcp/main/holos33_mcp/static/icon-512.png",
+    homepage: "https://holos33.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.holos33.com/mcp"],
+    },
+    remoteUrl: "https://mcp.holos33.com/mcp",
+  },
+  {
+    name: "ecommerce-leads",
+    title: "Ecommerce Leads",
+    description:
+      "Ecommerce store data by domain: estimated revenue, marketing budget, traffic, Google and Meta ad spend, ad counts, a Conversion Rate Score, buying signals and social links. lookupStore works without an account. Sign in to search 600,000+ stores, reveal decision-maker contacts (spends paid account credits after confirmation), and manage signal sets, watchlists and CSV exports. Hosted remote Streamable HTTP server at https://getecommerceleads.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/matosdfm/ecommerce-leads-mcp/main/assets/logo.png",
+    homepage: "https://getecommerceleads.com/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://getecommerceleads.com/api/mcp"],
+    },
+    remoteUrl: "https://getecommerceleads.com/api/mcp",
+  },
+  {
+    name: "arca-life-sciences",
+    title: "Arca Life Sciences",
+    description:
+      "Free search of public life-sciences records: ranked PubMed literature with OpenAlex citation counts and open-access filters, FDA drug and device records (labels, approvals, warning letters, Form 483s, 510(k)/PMA, MAUDE), ClinicalTrials.gov, VAERS, CDC data and EU/PMDA device vigilance. Every result cites its source URL. 4 tools, read-only. Hosted Streamable HTTP server; no account or API key.",
+    icon: "https://www.arca.inc/apple-icon.png",
+    homepage: "https://www.arca.inc/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.arca.inc/api/public/mcp"],
+    },
+    remoteUrl: "https://app.arca.inc/api/public/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -3356,6 +3618,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "doc2md-lite",
+    title: "doc2md-lite",
+    description:
+      "Turn a local text PDF or saved web page (.html) into clean Markdown, with tables kept as real Markdown tables. One tool, convert_to_markdown, which returns the Markdown or saves it to a file. Local stdio server `doc2md-lite` (MIT) from PyPI through `uvx`; free, no API key, and your files stay on your computer. Scanned PDFs need OCR first.",
+    icon: Icon.Document,
+    homepage: "https://github.com/tidybytetools/doc2md-lite",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "doc2md-lite", "doc2md-lite-mcp"],
+    },
+  },
+  {
     name: "engine-dj",
     title: "Engine DJ",
     description:
@@ -3467,6 +3741,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         LIGHTDASH_API_KEY: "YOUR_API_KEY_HERE",
         LIGHTDASH_API_URL: "https://<your base url>",
       },
+    },
+  },
+  {
+    name: "link-check-lite",
+    title: "link-check-lite",
+    description:
+      "Check a list of web links: which ones work, which are broken, and where redirects end up. One tool, check_links, for up to 200 links, returning the status code, final URL, redirect chain and error for each. Local stdio server `link-check-lite` (MIT) from PyPI through `uvx`; free and no API key. It only visits the links you give it.",
+    icon: Icon.Link,
+    homepage: "https://github.com/tidybytetools/link-check-lite",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "link-check-lite", "link-check-lite-mcp"],
     },
   },
   {
@@ -3599,6 +3885,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "pdf-table-pull-lite",
+    title: "pdf-table-pull-lite",
+    description:
+      "Pull the tables out of a local text PDF as CSV. One tool, extract_pdf_tables, with page selection and a choice of table-finding strategy; it returns the tables and can save CSV files. Local stdio server `pdf-table-pull-lite` (MIT) from PyPI through `uvx`; free, no API key, and your PDFs stay on your computer. Scanned PDFs need OCR first.",
+    icon: Icon.AppWindowGrid3x3,
+    homepage: "https://github.com/tidybytetools/pdf-table-pull-lite",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "pdf-table-pull-lite", "pdf-table-pull-lite-mcp"],
     },
   },
   {

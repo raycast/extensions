@@ -88,12 +88,16 @@ function copyLogs(logs: string | undefined): Toast.ActionOptions | undefined {
 
 // A no-view command exits as soon as this returns, taking its toast with it; the Brew extension's
 // clean-up holds a failure toast for 3s so its Copy Logs action can be used, and so does this.
-export async function runOperationWithoutView(op: MiseOperation, onSuccess?: () => void): Promise<void> {
+// `op` is built from the resolved location, since flags such as --global depend on the mise version.
+export async function runOperationWithoutView(
+  op: (location: MiseLocation) => MiseOperation,
+  onSuccess?: () => void,
+): Promise<void> {
   const mise = await resolveMiseFromRaycast();
   if (!("path" in mise)) {
     await showHUD("mise not found — set Mise Path in preferences");
     return;
   }
-  const result = await runOperation(mise, op, onSuccess);
+  const result = await runOperation(mise, op(mise), onSuccess);
   if (result?.code !== 0) await setTimeout(3000);
 }
