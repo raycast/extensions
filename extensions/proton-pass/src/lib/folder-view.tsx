@@ -1,15 +1,19 @@
 import { Icon } from "@raycast/api";
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
-import { FolderEntry, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
+import { renderErrorView } from "./error-views";
+import { FolderEntry, folderEntryValue, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
 import { ItemList } from "./item-list";
+import { NotLoggedInView } from "./login-view";
 import { SortOrder } from "./sort";
-import { Item } from "./types";
+import { Item, PassCliErrorType } from "./types";
 
 /** What the folders opened from an item list show: that list's items and folders, as it loads them. */
 export interface FolderContents {
   items: Item[];
   folders: FolderEntry[];
   isLoading: boolean;
+  /** What that list shows instead of its items, e.g. the login screen once the session has ended. */
+  error?: { type: PassCliErrorType; message?: string } | null;
 }
 
 /** Hands an item list's latest items and folders to the folders opened from it, which stay open on top of it. */
@@ -49,20 +53,33 @@ interface FolderViewProps {
 export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }: FolderViewProps) {
   const [contents, setContents] = useState(source.get);
   useEffect(() => source.subscribe(() => setContents(source.get())), [source]);
-  const items = useMemo(
-    () => contents.items.filter((item) => isDirectlyIn(item, folder.shareId, folder)),
-    [contents.items, folder],
+  // The folder as the list underneath knows it now: moved in Proton Pass meanwhile, it has another path.
+  const current = useMemo(
+    () => contents.folders.find((entry) => folderEntryValue(entry) === folderEntryValue(folder)) ?? folder,
+    [contents.folders, folder],
   );
-  const folders = useMemo(() => subfolders(contents.folders, folder.shareId, folder), [contents.folders, folder]);
+  const items = useMemo(
+    () => contents.items.filter((item) => isDirectlyIn(item, current.shareId, current)),
+    [contents.items, current],
+  );
+  const folders = useMemo(() => subfolders(contents.folders, current.shareId, current), [contents.folders, current]);
   const inside = useMemo(
     () => insideFolders(contents.folders, contents.items, folders),
     [contents.folders, contents.items, folders],
   );
 
+  // An opened folder shows the same login screen or error as the list underneath, rather than looking empty, and its
+  // contents again once they're fixed.
+  if (contents.error?.type === "not_authenticated") return <NotLoggedInView reload={onRefresh} />;
+  const errorView = renderErrorView(contents.error?.type ?? null, onRefresh, "Load Items", contents.error?.message);
+  if (errorView) return errorView;
+
   return (
     <ItemList
-      navigationTitle={[vaultName, ...folder.path.map(({ name }) => name)].join(PATH_SEPARATOR)}
+      navigationTitle={[vaultName, ...current.path.map(({ name }) => name)].join(PATH_SEPARATOR)}
       sortChoice={sortChoice}
+      // The search bar has no vault menu here: Sort by takes its place, as in the vault list.
+      sortInSearchBar
       items={items}
       folders={folders}
       insideFolders={inside}

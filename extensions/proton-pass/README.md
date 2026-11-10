@@ -42,7 +42,7 @@ pass-cli vault list
 
 Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
 
-A vault, opened from the vault list or the vault menu, shows its Proton Pass folders first, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. The search finds what's on screen: an item in a folder shows once its folder is open, or in All Vaults. The item details say which folder an item is in, under Vault.
+A vault, opened from the vault list or the vault menu, shows its Proton Pass folders first, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. An opened folder has Sort by in its search bar, where a vault has its vault menu. The search finds what's on screen: an item in a folder shows once its folder is open, or in All Vaults. The item details say which folder an item is in, under Vault.
 
 The item details show what each type of item holds: a login's username, email, password and TOTP code; a card's cardholder name, number, expiration date, security code and PIN; an identity's name, email, phone number and address, then its other fields that are filled; an alias's address; an SSH key's public and private keys; a Wi-Fi network's name, password and security. Secrets are masked, a card's number showing its last 4 digits only, and every field has a Copy action. Custom fields come last, by section, and custom items show them first.
 

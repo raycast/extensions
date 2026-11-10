@@ -3203,6 +3203,8 @@ test("an opened folder shows its subfolders, then the items right inside it, and
     react: harness.react,
     "@raycast/api": { Icon: {} },
     "./item-list": {},
+    "./login-view": {},
+    "./error-views": { renderErrorView: () => null },
   }) as unknown as {
     createFolderSource: () => { set(contents: unknown): void };
     FolderView: Component;
@@ -3216,6 +3218,8 @@ test("an opened folder shows its subfolders, then the items right inside it, and
   assert.equal(list.props.navigationTitle, "Personal › Banking");
   assert.equal(ids(list.props.items), "bank");
   assert.equal(paths(list.props.folders), "Banking › Cards:1");
+  // No vault menu here: Sort by takes the search bar.
+  assert.equal(list.props.sortInSearchBar, true);
   const sub = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
   assert.equal(folders.folderPathLabel((sub.props.folder as folders.FolderEntry).path), "Banking › Cards");
 
@@ -3275,4 +3279,283 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     ["Cards: 1 item", "Alpha: alice", "Example: test@example.com", "Visa: •••• 4242", "Zeta: undefined"],
   );
   assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
+});
+
+// As pass-cli lists them when their vault's folders couldn't be listed: in a folder, without its path.
+const pathless = (entry: Item) => ({ ...entry, folderPath: undefined });
+
+test("a vault whose folders couldn't be listed keeps its items in the folders known before", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  let savedItems: Item[] = [];
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: async () => [],
+      listVaultsAndItems: async () => ({
+        vaults: [personal],
+        items: [unfiled, inBanking, inCards].map(pathless),
+        failedVaults: [],
+        folders: { shareIds: [], folders: [] },
+      }),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking, inCards], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({ data: [personal], isStale: false }),
+      setCachedItems: async (items: Item[]) => {
+        savedItems = items;
+      },
+      setCachedVaults: async () => undefined,
+      setCachedFolders: async () => undefined,
+    },
+  });
+  const render = () => harness.render(SearchItemsView, { initialVault: personal, sessionConfirmed: true });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  const list = render();
+  assert.equal(list.props.isLoading, false);
+  assert.equal(ids(list.props.items), "unfiled");
+  assert.equal(paths(list.props.folders), "Banking:2,Travel:0");
+  assert.equal(ids(savedItems.filter((entry) => entry.folderPath)), "bank,visa");
+
+  // The vault list saves them in their folders too, for the item list opened next.
+  let savedByVaultList: Item[] = [];
+  const vaultsHarness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: vaultsHarness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [personal],
+        items: [unfiled, inBanking, inCards].map(pathless),
+        failedVaults: [],
+        folders: { shareIds: [], folders: [] },
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking, inCards], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({ data: [personal], isStale: false }),
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async (items: Item[]) => {
+        savedByVaultList = items;
+      },
+      setCachedFolders: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  vaultsHarness.render(VaultsView, { startOnItems: false });
+  vaultsHarness.effects[0]();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(ids(savedByVaultList.filter((entry) => entry.folderPath)), "bank,visa");
+});
+
+test("an opened folder moved in Proton Pass meanwhile follows its new place", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+    "./login-view": {},
+    "./error-views": { renderErrorView: () => null },
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([inBanking, inCards], PERSONAL_FOLDERS);
+  source.set({ items: [inBanking, inCards], folders: known, isLoading: false });
+  const cards = known.find((entry) => entry.path.length === 2)!;
+  const render = () =>
+    harness.render(view.FolderView, { source, vaultName: "Personal", folder: cards, onRefresh: () => undefined });
+  render();
+  harness.effects.forEach((effect) => effect());
+
+  // Cards moved to the vault's root, with a new subfolder, and the list underneath refreshed.
+  const GOLD = { id: "gold", name: "Gold" };
+  const moved = [
+    { shareId: "vault", path: [BANKING] },
+    { shareId: "vault", path: [CARDS] },
+    { shareId: "vault", path: [CARDS, GOLD] },
+  ];
+  const visa = { ...inCards, folderPath: [CARDS] };
+  source.set({ items: [inBanking, visa], folders: folders.folderEntries([inBanking, visa], moved), isLoading: false });
+  const list = render();
+  assert.equal(list.props.navigationTitle, "Personal › Cards");
+  assert.equal(ids(list.props.items), "visa");
+  assert.equal(paths(list.props.folders), "Cards › Gold:0");
+});
+
+test("an empty vault or folder can still be refreshed", () => {
+  const { render } = loadItemList();
+  let refreshes = 0;
+  const empty = render([], [], { onRefresh: () => refreshes++ });
+  const refreshAction = actions((empty.props.children as Element).props.actions).find(
+    (props) => props.title === "Refresh Items",
+  );
+  (refreshAction?.onAction as () => void)();
+  assert.equal(refreshes, 1);
+  // A failed listing offers Retry instead.
+  const failed = render([], [], { onRefresh: () => refreshes++, emptyView: { onRetry: () => undefined } });
+  const titles = actions((failed.props.children as Element).props.actions).map((props) => props.title);
+  assert.deepEqual(titles.filter(Boolean), ["Retry"]);
+});
+
+test("an opened folder shows the login screen once the session has ended, and its contents again after logging in", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+    "./login-view": {},
+    "./error-views": {
+      renderErrorView: (type: unknown, onRetry: unknown) => (type ? { props: { error: type, onRetry } } : null),
+    },
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([inBanking], PERSONAL_FOLDERS);
+  source.set({ items: [inBanking], folders: known, isLoading: false });
+  const onRefresh = () => undefined;
+  const render = () => harness.render(view.FolderView, { source, vaultName: "Personal", folder: known[0], onRefresh });
+  render();
+  harness.effects.forEach((effect) => effect());
+
+  // The list underneath lost its items with the session: the folder doesn't say it's empty.
+  source.set({ items: [], folders: [], isLoading: false, error: { type: "not_authenticated" } });
+  const login = render();
+  assert.equal(login.props.reload, onRefresh);
+  assert.equal(login.props.navigationTitle, undefined);
+  source.set({ items: [], folders: [], isLoading: false, error: { type: "not_installed", message: "Not found" } });
+  assert.equal(render().props.error, "not_installed");
+
+  source.set({ items: [inBanking], folders: known, isLoading: false, error: null });
+  const list = render();
+  assert.equal(list.props.navigationTitle, "Personal › Banking");
+  assert.equal(ids(list.props.items), "bank");
+});
+
+test("the folders opened from Browse Items learn that the session has ended", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  const harness = hookHarness();
+  // The effects of the latest render, which the harness otherwise runs once.
+  let rendered: (() => void)[] = [];
+  const react = {
+    ...harness.react,
+    useEffect: (effect: () => void) => {
+      harness.react.useEffect(effect);
+      rendered.push(effect);
+    },
+  };
+  const sent: { items: Item[]; error?: { type: string } | null }[] = [];
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./types": { PassCliError },
+    "./error-views": { renderErrorView: () => null },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+    "./item-counts": itemCounts,
+    "./folder-view": {
+      createFolderSource: () => ({ set: (contents: (typeof sent)[number]) => sent.push(contents) }),
+      FolderView: () => null,
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        throw new PassCliError("Not authenticated.", "not_authenticated");
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [unfiled, inBanking], isStale: false }),
+      getCachedFolders: async () => ({ data: PERSONAL_FOLDERS, isStale: false }),
+      getCachedVaults: async () => ({ data: [personal], isStale: false }),
+    },
+  });
+  const render = () => {
+    rendered = [];
+    return harness.render(SearchItemsView, { initialVault: personal, sessionConfirmed: true });
+  };
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  // The list underneath shows the login screen, and hands its state to the folders open on top of it.
+  assert.equal(typeof render().props.reload, "function");
+  rendered[rendered.length - 1]();
+  const last = sent[sent.length - 1];
+  assert.equal(last.items.length, 0);
+  assert.equal(last.error?.type, "not_authenticated");
+});
+
+test("an item list with no other search bar menu shows Sort by there, which ⌘⇧S follows", () => {
+  const { render } = loadItemList();
+  const sortChoice = { current: "mostUsed" };
+  let list = render([item], [], { sortInSearchBar: true, sortChoice });
+  const menu = () => list.props.searchBarAccessory as Element;
+  assert.equal(menu().props.value, "mostUsed");
+  (menu().props.onChange as (order: string) => void)("name");
+  assert.equal(sortChoice.current, "name");
+  list = render([item], [], { sortInSearchBar: true, sortChoice });
+  assert.equal(menu().props.value, "name");
+  // Sort by in the item's actions (⌘⇧S) shows the same order.
+  const row = actions(list).find((props) => props.id === format.itemKey(item));
+  assert.equal((row?.actions as Element).props.sortOrder, "name");
+  // A list with its own menu, such as the vault menu, keeps it; others get none.
+  assert.equal(
+    render([item], [], { sortInSearchBar: true, searchBarAccessory: "vault menu" }).props.searchBarAccessory,
+    "vault menu",
+  );
+  assert.equal(render([item]).props.searchBarAccessory, undefined);
+
+  // The menu offers the orders of the Sort items by preference.
+  let chosen = "";
+  const sortModule = loadView("sort.tsx", {
+    "@raycast/api": { Icon: {}, List: { Dropdown: { Item: {} } }, getPreferenceValues: () => ({}) },
+    "@raycast/utils": { useFrecencySorting: (data: unknown[]) => ({ data, visitItem: () => undefined }) },
+    "./shortcuts": shortcuts,
+  });
+  const dropdown = sortModule.SortItemsByDropdown({ value: "name", onChange: (order: string) => (chosen = order) });
+  assert.deepEqual(
+    actions(dropdown)
+      .slice(1)
+      .map((props) => props.value),
+    ["mostUsed", "name", "modified", "created"],
+  );
+  (dropdown.props.onChange as (order: string) => void)("created");
+  assert.equal(chosen, "created");
 });

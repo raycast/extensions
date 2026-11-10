@@ -82,6 +82,18 @@ export function SortByMenu({ value, onChange }: { value: SortOrder; onChange: (o
   );
 }
 
+/** As SortByMenu, in the search bar of an item list that has no other menu there, e.g. an opened folder. */
+export function SortItemsByDropdown({ value, onChange }: { value: SortOrder; onChange: (order: SortOrder) => void }) {
+  return (
+    <List.Dropdown tooltip="Sort Items" value={value} onChange={(order) => onChange(order as SortOrder)}>
+      <List.Dropdown.Item title="Sort by Most Used" value="mostUsed" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Name" value="name" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Last Modified" value="modified" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Date Created" value="created" icon={Icon.NumberList} />
+    </List.Dropdown>
+  );
+}
+
 /** List Vaults' search bar menu, which the vault list has free since it shows every vault. */
 export function SortVaultsByDropdown({
   value,

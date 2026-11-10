@@ -9,7 +9,7 @@ import { ItemDetailStore, useItemDetail } from "./item-detail-store";
 import { getListIcon } from "./item-icon";
 import { formatItemCount } from "./item-counts";
 import { platformShortcut } from "./shortcuts";
-import { SortOrder, compareNames, preferredSortOrder, sortItems } from "./sort";
+import { SortItemsByDropdown, SortOrder, compareNames, preferredSortOrder, sortItems } from "./sort";
 import { Item } from "./types";
 import { getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
 
@@ -50,7 +50,10 @@ export interface ItemListProps {
   suggestedItems?: Item[];
   suggestionsTitle?: string;
   isLoading: boolean;
+  /** A menu in the search bar. Without one, `sortInSearchBar` puts Sort by there. */
   searchBarAccessory?: List.Props["searchBarAccessory"];
+  /** Sort by in the search bar too, for a list with no other menu there, e.g. an opened folder. */
+  sortInSearchBar?: boolean;
   emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
   /** The order chosen with Sort by, kept for the other lists opened from the same window. */
@@ -67,6 +70,7 @@ export function ItemList({
   suggestionsTitle = "Suggested",
   isLoading,
   searchBarAccessory,
+  sortInSearchBar = false,
   emptyView,
   onRefresh,
   sortChoice,
@@ -274,7 +278,10 @@ export function ItemList({
       filtering={true}
       selectedItemId={isInitialSelectionApplied ? undefined : (initialSelection.current ?? undefined)}
       onSelectionChange={onSelectionChange}
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={
+        searchBarAccessory ??
+        (sortInSearchBar ? <SortItemsByDropdown value={sortOrder} onChange={onSortOrderChange} /> : undefined)
+      }
     >
       {items.length === 0 && folders.length === 0 && !isLoading ? (
         <List.EmptyView
@@ -285,6 +292,16 @@ export function ItemList({
             emptyView.onRetry ? (
               <ActionPanel>
                 <Action title="Retry" icon={Icon.ArrowClockwise} onAction={emptyView.onRetry} />
+              </ActionPanel>
+            ) : onRefresh ? (
+              // An empty vault or folder can still be refreshed, as its rows would be.
+              <ActionPanel>
+                <Action
+                  title="Refresh Items"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={onRefresh}
+                />
               </ActionPanel>
             ) : undefined
           }

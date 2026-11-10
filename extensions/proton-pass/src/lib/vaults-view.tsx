@@ -28,7 +28,7 @@ import {
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
-import { refreshVaultFolders, VaultFolder } from "./folders";
+import { refreshVaultFolders, VaultFolder, withFolderPaths } from "./folders";
 
 /** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
@@ -116,14 +116,21 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       const sharingListing = sharingSaves.start();
       // Sharing only adds an icon: don't hold up the vaults or items while its member commands run.
       const freshSharing = listVaultSharing().catch(() => undefined);
-      const { vaults: freshVaults, items, failedVaults, folders: listedFolders } = await listVaultsAndItems();
+      const {
+        vaults: freshVaults,
+        items: listedItems,
+        failedVaults,
+        folders: listedFolders,
+      } = await listVaultsAndItems();
       if (!isLatest()) return;
       setVaults(withSharing(freshVaults, cachedSharing?.data ?? {}));
       setError(null);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
-      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
+      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, listedItems, failed));
       const nextFolders = refreshVaultFolders(knownFolders.current, freshVaults, listedFolders);
       knownFolders.current = nextFolders;
+      // A vault whose folders couldn't be listed this time keeps its items in the folders known before.
+      const items = withFolderPaths(listedItems, nextFolders);
       // Add and save optional sharing when ready, only if this is still the latest load.
       void freshSharing
         .then(async (fresh) => {
