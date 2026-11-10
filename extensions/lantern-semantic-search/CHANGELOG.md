@@ -1,6 +1,6 @@
 # Lantern Changelog
 
-## [New Icon] - {PR_MERGE_DATE}
+## [New Icon] - 2026-11-10
 
 - New icon: a lantern with its flame lit, matching the Lantern app's new icon (the magnifier looked too much like
   macOS's own Magnifier app).
