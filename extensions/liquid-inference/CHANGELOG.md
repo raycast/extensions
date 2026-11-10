@@ -1,6 +1,6 @@
 # Liquid Inference Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add Liquid models to the Raycast model picker.
 - Read model capabilities and context limits from the live catalog.

@@ -2,6 +2,7 @@
 
 Use Liquid Inference models in Raycast AI Chat, Quick AI, and AI Commands.
 Liquid compares provider offers for each request and charges for the tokens used.
+You need Raycast Pro and a Liquid account with available credits.
 
 ## Setup
 
@@ -55,18 +56,3 @@ The extension adds no analytics and stores no conversation history of its own.
 Automatic request retries are off because another request can create another paid job.
 
 See [Liquid prompt cache documentation](https://liquidinference.ai/docs/caching) for cache behavior and buyer isolation.
-
-## Development
-
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run dev
-```
-
-The tests use controlled HTTP responses. They do not spend Liquid credits.
-Before submission, test the distribution build in Raycast with a Liquid key and a Raycast Pro account.
-Check model discovery, a text reply, an image attachment, and an AI Extension tool call.

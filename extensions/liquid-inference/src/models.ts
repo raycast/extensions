@@ -2,7 +2,7 @@ import { getPreferenceValues, type AI } from "@raycast/api";
 import { createModelProvider } from "./model-provider";
 
 function getProvider() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return createModelProvider({ apiKey });
 }
 
