@@ -16,12 +16,20 @@ export const SKILL_ICON: Record<SkillId, Icon> = {
   foraging: Icon.Leaf,
   cooking: Icon.MugSteam,
   engineering: Icon.Gear,
+  fabrication: Icon.WrenchScrewdriver,
   combat: Icon.Shield,
   hydroponics: Icon.Raindrop,
   xenochemistry: Icon.Pill,
+  xenofishing: Icon.Waveform,
+  smelting: Icon.Bolt,
+  hacking: Icon.Terminal,
+  exploration: Icon.Map,
+  companions: Icon.Heart,
+  stargazing: Icon.Stars,
 };
 
-export type Place = "base" | "equipment" | "trade" | "bounties" | "shop" | "inventory" | "stats";
+export type Place =
+  "base" | "equipment" | "trade" | "bounties" | "shop" | "inventory" | "voyage" | "stats" | "collection" | "settings";
 
 /** The screens besides the skills, as they are listed on the main menu. */
 export const PLACES: { id: Place; title: string; icon: Icon; blurb: string }[] = [
@@ -46,5 +54,23 @@ export const PLACES: { id: Place; title: string; icon: Icon; blurb: string }[] =
     icon: Icon.Box,
     blurb: "Eat, wear, drink and sell what you carry.",
   },
+  {
+    id: "voyage",
+    title: "Voyage",
+    icon: Icon.Rocket,
+    blurb: "Launch the Rescue Ship and spend Starlight on perks.",
+  },
   { id: "stats", title: "Stats", icon: Icon.BarChart, blurb: "Lifetime numbers." },
+  {
+    id: "collection",
+    title: "Collection Log",
+    icon: Icon.Trophy,
+    blurb: "Achievements, pets, and everything you have found.",
+  },
+  {
+    id: "settings",
+    title: "Settings",
+    icon: Icon.Gear,
+    blurb: "Number format, notifications and save backup.",
+  },
 ];
