@@ -1,6 +1,6 @@
 # Tuple Changelog
 
-## [CLI Compatibility and Voice Notes] - {PR_MERGE_DATE}
+## [CLI Compatibility and Voice Notes] - 2026-11-10
 
 - Fix starting calls to contacts and connected machines with the current Tuple CLI.
 - Allow calls to finish ringing before the extension times out.
