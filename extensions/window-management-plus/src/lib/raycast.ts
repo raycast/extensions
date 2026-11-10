@@ -203,7 +203,10 @@ export type OpenWindow = {
   id: string;
   app: string;
   bundleId?: string;
+  /** The window's own title, which any document can share. */
   title?: string;
+  /** Which of Raycast's own windows this is, like "Notes". Only ever set for Raycast's windows. */
+  raycastWindow?: string;
   /** The part it plays: what you make, what you read, people, or what runs alongside. */
   role: Role;
   display: number;
@@ -278,6 +281,7 @@ export async function listWindows(): Promise<{
       app: w.name ?? "Unknown",
       bundleId: w.bundleId,
       title: w.label ?? w.title,
+      raycastWindow: w.title,
       role: roleOf({ bundleId: w.bundleId, category: w.appPath && categories[w.appPath], title: w.title }),
       display: w.screen,
       focused: !!w.active,

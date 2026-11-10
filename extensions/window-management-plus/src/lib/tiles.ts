@@ -99,9 +99,24 @@ function read(): State {
   };
 }
 
-/** Picks out the sidebar's window: by title for Raycast Notes or AI Chat, by id for one made the sidebar. */
+/** Raycast Notes has no window id of its own, so it goes by this, with its title after it. */
+const RAYCAST_ID = "raycast:";
+
+/**
+ * What the sidebar's window is: one of Raycast's own, known by its title, or any other, known by its id.
+ * Raycast Notes or AI Chat can be pinned from the setting or with Make Sidebar, and either way it is one
+ * of Raycast's own.
+ */
+function sidebarWindow(pinned: string): { title: string } | { id: string } {
+  if (isPanel(pinned)) return { title: panelTitle(pinned) };
+  const { id } = madeSidebar(pinned);
+  return id.startsWith(RAYCAST_ID) ? { title: id.slice(RAYCAST_ID.length) } : { id };
+}
+
+/** Picks out the sidebar's window among those to arrange, where only Raycast's own windows have a title. */
 function sidebarIs(pinned: string): (w: { id: string; title?: string }) => boolean {
-  return isPanel(pinned) ? (w) => w.title === panelTitle(pinned) : (w) => w.id === madeSidebar(pinned).id;
+  const what = sidebarWindow(pinned);
+  return "title" in what ? (w) => w.title === what.title : (w) => w.id === what.id;
 }
 
 /**
@@ -126,8 +141,7 @@ async function current(): Promise<State> {
   if (now === "closed") {
     // Not in view isn't the same as closed: it may be on another desktop, or minimized. Then it stays
     // pinned, and this desktop is simply tiled without it.
-    const what = isPanel(state.pinned) ? { title: panelTitle(state.pinned) } : { id: madeSidebar(state.pinned).id };
-    const exists = await stillOpen(what).catch(() => true);
+    const exists = await stillOpen(sidebarWindow(state.pinned)).catch(() => true);
     return exists ? state : unpinned;
   }
   const put = JSON.parse(cache.get(SIDEBAR_AT) ?? "null") as { screen: number; right: number; y: number } | null;
@@ -341,7 +355,11 @@ export async function resizeMaster(delta: number) {
     const focused = windows.find((w) => w.focused);
     const display = displays.find((d) => d.index === focused?.display);
     const here = windows.filter((w) => w.display === focused?.display);
-    const side = state.sidebar ? here.find(sidebarIs(state.pinned)) : undefined;
+    // Found by what it is to Raycast, not by its title, which a document in any app could share
+    const pinned = sidebarWindow(state.pinned);
+    const isSide = (w: (typeof here)[number]) =>
+      "title" in pinned ? w.raycastWindow === pinned.title : w.id === pinned.id;
+    const side = state.sidebar ? here.find(isSide) : undefined;
     const tiled = here.filter((w) => w !== side);
     const size = (w: { frame: { width: number; height: number } }) => w.frame.width * w.frame.height;
     const main = tiled.find((w) => state.masters.includes(w.id)) ?? [...tiled].sort((a, b) => size(b) - size(a))[0];
