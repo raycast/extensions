@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Group Menu Bar Notifications] - {PR_MERGE_DATE}
+
+- Add **Group notifications like Linear** to the menu bar preferences. When enabled, related notifications appear as one entry and are marked read together.
+
 ## [Primary Action Preference] - 2026-10-29
 
 - Add a **Primary Action** preference to choose whether pressing Enter on an issue, project, document, or view shows its details or opens it in Linear.

@@ -13,6 +13,7 @@ import {
 import React from "react";
 
 import { NotificationResult } from "./api/getNotifications";
+import { markInboxNotificationAsRead } from "./api/inboxNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
 import { getNotificationMenuBarTitle, getNotificationURL } from "./helpers/notifications";
@@ -22,17 +23,25 @@ import useNotifications from "./hooks/useNotifications";
 const preferences = getPreferenceValues<Preferences.UnreadNotifications>();
 
 function UnreadNotifications() {
-  const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
+  const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications(
+    preferences.groupNotifications,
+  );
+
+  function markAsRead(id: string, readAt: Date) {
+    return preferences.groupNotifications ? markInboxNotificationAsRead(id) : updateNotification({ id, readAt });
+  }
 
   async function markNotificationAsRead(notification: NotificationResult) {
-    await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
+    await mutateNotifications(markAsRead(notification.id, new Date()), {
       optimisticUpdate(data) {
         if (!data) {
           return data;
         }
         return {
           ...data,
-          notifications: data?.notifications?.map((x) => (x.id === notification.id ? { ...x, readAt: new Date() } : x)),
+          notifications: preferences.groupNotifications
+            ? data.notifications?.filter((x) => x.id !== notification.id)
+            : data.notifications?.map((x) => (x.id === notification.id ? { ...x, readAt: new Date() } : x)),
         };
       },
       shouldRevalidateAfter: true,
@@ -65,7 +74,7 @@ function UnreadNotifications() {
     const readAt = new Date();
 
     await mutateNotifications(
-      Promise.all(unreadNotifications.map((notification) => updateNotification({ id: notification.id, readAt }))),
+      Promise.all(unreadNotifications.map((notification) => markAsRead(notification.id, readAt))),
       {
         optimisticUpdate(data) {
           if (!data) {
@@ -73,7 +82,9 @@ function UnreadNotifications() {
           }
           return {
             ...data,
-            notifications: data?.notifications?.map((x) => (x.readAt ? x : { ...x, readAt })),
+            notifications: preferences.groupNotifications
+              ? []
+              : data.notifications?.map((x) => (x.readAt ? x : { ...x, readAt })),
           };
         },
         shouldRevalidateAfter: true,
