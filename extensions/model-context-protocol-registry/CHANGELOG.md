@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Glypse MCP Server] - {PR_MERGE_DATE}
+## [Add Glypse MCP Server] - 2026-11-10
 
 - Add Glypse’s official prediction market MCP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A free Glypse account and OAuth sign-in are required.
 
