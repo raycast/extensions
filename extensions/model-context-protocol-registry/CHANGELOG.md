@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Hermoso Ads Manager, Social Media Manager and AI Ad Generator MCP Servers] - 2026-11-10
+
+- Add three focused apps of Hermoso as their own hosted Streamable HTTP servers, each a smaller tool set from the same server with OAuth sign-in: Hermoso: Ads Manager (paid campaigns on 11 ad networks plus web and business analytics), Hermoso: Social Media Manager (posting, scheduling and one inbox across 15 channels) and Hermoso: AI Ad Generator (image and video ads plus competitor ad research). The full Hermoso entry is unchanged.
+
 ## [Add ChefBear MCP Server] - 2026-11-10
 
 - Add ChefBear to the official registry: save, find, read and share your ChefBear restaurant menus and pick dishes that suit your tastes. 12 tools. Hosted Streamable HTTP server at https://chef-bear.com/api/menu-sharing/mcp through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE) and each new connection approved in the ChefBear iPhone app.

@@ -1246,6 +1246,45 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "hermoso-ads-manager",
+    title: "Hermoso: Ads Manager",
+    description:
+      "The paid ads app of Hermoso, an AI marketing agent. Build, launch and report campaigns on Meta, Google, Microsoft, TikTok, LinkedIn, Pinterest, Reddit, Snapchat, X, Apple and ChatGPT ads, manage audiences, conversion tracking and lead forms, and read Google Analytics, Search Console, Bing Webmaster, Tag Manager, PostHog, Mixpanel, Amplitude, Merchant Center, Stripe and HubSpot reports. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast"],
+    },
+    remoteUrl: "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast",
+  },
+  {
+    name: "hermoso-ai-ad-generator",
+    title: "Hermoso: AI Ad Generator",
+    description:
+      "The creation app of Hermoso, an AI ad generator. Make on-brand image and video ads, UGC style ads, product photos and thumbnails for your brand, and research the ads competitors run in the Meta, Google and LinkedIn ad libraries. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-create&src=raycast"],
+    },
+    remoteUrl: "https://app.hermoso.ai/mcp?tools=app-create&src=raycast",
+  },
+  {
+    name: "hermoso-social-media-manager",
+    title: "Hermoso: Social Media Manager",
+    description:
+      "The social app of Hermoso, an AI marketing agent. Post and schedule to Instagram, Facebook, Threads, TikTok, YouTube, LinkedIn, X, Pinterest, Bluesky, Telegram, Google Business Profile, WordPress, Discord, Slack and Whop, send Mailchimp and Klaviyo email, answer comments, DMs, reviews, WhatsApp and Intercom from one inbox, and read account and post insights. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-social&src=raycast"],
+    },
+    remoteUrl: "https://app.hermoso.ai/mcp?tools=app-social&src=raycast",
+  },
+  {
     name: "house-ai",
     title: "House AI",
     description:
