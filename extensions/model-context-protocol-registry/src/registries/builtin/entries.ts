@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "glypse",
+    title: "Glypse",
+    description:
+      "Glypse's MCP server gives your AI agent a bird’s-eye view of prediction markets. It helps your agent scan thousands of markets and draw on millions of analyzed posts, so you don’t have to piece it all together one post at a time. Create a free Glypse account before connecting, then sign in through OAuth.",
+    icon: "https://glypse.ai/logo.png",
+    homepage: "https://glypse.ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.glypse.ai"],
+    },
+    remoteUrl: "https://mcp.glypse.ai",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
