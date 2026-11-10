@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import ScreenshotResult from "./components/ScreenshotResult";
 import { Device, ImageFormat, SnapRenderError, normalizeUrl } from "./lib/api";
 import { DEVICE_TITLES, FORMAT_TITLES } from "./lib/labels";
@@ -18,21 +19,12 @@ export default function Command() {
   const defaults = getDefaults();
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    getActiveTabUrl()
-      .then((tabUrl) => {
-        if (!cancelled && tabUrl) setUrl((current) => current || tabUrl);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Prefill with the open browser tab, but never replace a URL the user has already typed.
+  const { isLoading } = usePromise(getActiveTabUrl, [], {
+    onData: (tabUrl) => {
+      if (tabUrl) setUrl((current) => current || tabUrl);
+    },
+  });
 
   function handleSubmit(values: FormValues) {
     let normalized: string;

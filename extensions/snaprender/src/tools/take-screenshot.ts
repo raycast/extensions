@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { Device } from "../lib/api";
 import { getClient, screenshotFileName, writeToDownloads } from "../lib/raycast";
 
@@ -10,6 +11,20 @@ type Input = {
   fullPage?: boolean;
   /** Ask the page to render its dark color scheme. */
   darkMode?: boolean;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  return {
+    message: `Capture a screenshot of ${input.url}?`,
+    info: [
+      { name: "Page", value: input.url },
+      { name: "Saves to", value: "A new PNG file in your Downloads folder" },
+      { name: "Cost", value: "Uses 1 capture from your monthly SnapRender allowance" },
+      ...(input.device ? [{ name: "Device", value: input.device }] : []),
+      ...(input.fullPage ? [{ name: "Full page", value: "Yes" }] : []),
+      ...(input.darkMode ? [{ name: "Dark mode", value: "Yes" }] : []),
+    ],
+  };
 };
 
 /**

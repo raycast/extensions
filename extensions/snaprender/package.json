@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snaprender",
   "title": "SnapRender",
-  "description": "Capture website screenshots and read pages as Markdown with the SnapRender API.",
+  "description": "Capture website screenshots and read pages as Markdown. Requires a SnapRender account and API key (a free plan is available).",
   "icon": "icon.png",
   "author": "snaprender",
   "platforms": [
@@ -77,7 +77,97 @@
     }
   ],
   "ai": {
-    "instructions": "SnapRender renders public web pages. It cannot reach localhost, private networks or pages behind a login. Use read-page to read text and take-screenshot only when the user wants an image. When a result says the monthly captures are used up, do not retry: tell the user the reset date."
+    "instructions": "SnapRender renders public web pages. It cannot reach localhost, private networks or pages behind a login. Use read-page to read text and take-screenshot only when the user wants an image. When a result says the monthly captures are used up, do not retry: tell the user the reset date.",
+    "evals": [
+      {
+        "input": "@snaprender read https://example.com and summarize it in one sentence",
+        "mocks": {
+          "read-page": {
+            "url": "https://example.com/",
+            "wordCount": 28,
+            "truncated": false,
+            "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "read-page",
+              "arguments": {
+                "url": {
+                  "includes": "example.com"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "take-screenshot"
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes the page as a domain meant for illustrative examples"
+          }
+        ]
+      },
+      {
+        "input": "@snaprender take a full page screenshot of https://example.com on an iPhone",
+        "mocks": {
+          "take-screenshot": {
+            "filePath": "/Users/me/Downloads/snaprender-example.com-2026-01-15-10-00-00-a1b2c3.png",
+            "url": "https://example.com",
+            "format": "png",
+            "sizeBytes": 48213,
+            "capturesLeft": 187,
+            "image": "![Screenshot of https://example.com](file:///Users/me/Downloads/snaprender-example.com-2026-01-15-10-00-00-a1b2c3.png)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "take-screenshot",
+              "arguments": {
+                "url": {
+                  "includes": "example.com"
+                },
+                "fullPage": true,
+                "device": {
+                  "or": [
+                    "iphone_15_pro",
+                    "iphone_14"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "includes": "Downloads"
+          }
+        ]
+      },
+      {
+        "input": "@snaprender how many captures do I have left this month",
+        "mocks": {
+          "get-usage": {
+            "plan": "free",
+            "capturesUsed": 13,
+            "capturesLimit": 200,
+            "capturesLeft": 187,
+            "extraCredits": 0,
+            "periodStart": "2026-01-01",
+            "resetsAt": "2026-02-01"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-usage"
+          },
+          {
+            "includes": "187"
+          }
+        ]
+      }
+    ]
   },
   "preferences": [
     {

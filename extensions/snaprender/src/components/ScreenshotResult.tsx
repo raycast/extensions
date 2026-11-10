@@ -62,9 +62,8 @@ export default function ScreenshotResult({ options }: { options: ScreenshotOptio
       toast.title = "Signed URL copied";
       toast.message = `Valid until ${new Date(signed.expires_at).toLocaleString()}. Each open renders a new capture.`;
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not create signed URL";
-      toast.message = errorMessage(err);
+      await toast.hide();
+      await showError("Could not create signed URL", err);
     }
   };
 
@@ -121,7 +120,6 @@ export default function ScreenshotResult({ options }: { options: ScreenshotOptio
                 <Action
                   title="Save to Downloads"
                   icon={Icon.Download}
-                  shortcut={Keyboard.Shortcut.Common.Save}
                   onAction={() => saveToDownloads(data.filePath)}
                 />
                 <Action.Open

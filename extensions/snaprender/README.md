@@ -1,6 +1,6 @@
 # SnapRender
 
-Capture website screenshots and read web pages as Markdown from Raycast, using the [SnapRender](https://snap-render.com) screenshot API. Pages render on SnapRender's servers, so nothing needs to be installed on your Mac.
+Capture website screenshots and read web pages as Markdown from Raycast, using the [SnapRender](https://snap-render.com) screenshot API. Pages render on SnapRender's servers, so nothing needs to be installed on your Mac. A SnapRender account and API key are required (the free plan is enough to start).
 
 ## Setup
 

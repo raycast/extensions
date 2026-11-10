@@ -1,14 +1,13 @@
 import {
   BrowserExtension,
-  Toast,
   environment,
   getFrontmostApplication,
   getPreferenceValues,
   openExtensionPreferences,
-  showToast,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
-import { existsSync } from "node:fs";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { randomBytes } from "node:crypto";
+import { constants } from "node:fs";
 import { copyFile, mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
@@ -94,8 +93,9 @@ function timestamp(): string {
   return new Date().toISOString().replace(/[:T]/g, "-").replace(/\..+$/, "");
 }
 
+/** A file name that is unique per capture: host, time to the second and a random suffix. */
 export function screenshotFileName(url: string, format: ImageFormat): string {
-  return `snaprender-${slugFor(url)}-${timestamp()}.${fileExtension(format)}`;
+  return `snaprender-${slugFor(url)}-${timestamp()}-${randomBytes(3).toString("hex")}.${fileExtension(format)}`;
 }
 
 /** Writes the screenshot to the extension's support folder, keeping only the most recent files. */
@@ -103,7 +103,7 @@ export async function saveToSupport(url: string, shot: Screenshot): Promise<stri
   const dir = path.join(environment.supportPath, "screenshots");
   await mkdir(dir, { recursive: true });
   const filePath = path.join(dir, screenshotFileName(url, shot.format));
-  await writeFile(filePath, shot.data);
+  await writeFile(filePath, shot.data, { flag: "wx" });
   await pruneOldFiles(dir);
   return filePath;
 }
@@ -121,28 +121,38 @@ async function pruneOldFiles(dir: string): Promise<void> {
   }
 }
 
-/** Copies a file into ~/Downloads without overwriting an existing file. Returns the new path. */
-export async function copyToDownloads(filePath: string): Promise<string> {
-  const downloads = path.join(homedir(), "Downloads");
-  await mkdir(downloads, { recursive: true });
-  const ext = path.extname(filePath);
-  const base = path.basename(filePath, ext);
-  let target = path.join(downloads, `${base}${ext}`);
-  for (let i = 2; existsSync(target); i++) target = path.join(downloads, `${base}-${i}${ext}`);
-  await copyFile(filePath, target);
-  return target;
-}
+/** Number of numbered names to try before giving up on a crowded Downloads folder. */
+const MAX_NAME_ATTEMPTS = 1000;
 
-/** Writes raw bytes to ~/Downloads without overwriting an existing file. Returns the new path. */
-export async function writeToDownloads(fileName: string, data: Buffer): Promise<string> {
+/**
+ * Reserves a free name in ~/Downloads by creating the file exclusively, so two saves that overlap can never pick the
+ * same name. `create` receives the candidate path and must fail with EEXIST when the file is already there.
+ */
+async function createInDownloads(fileName: string, create: (target: string) => Promise<void>): Promise<string> {
   const downloads = path.join(homedir(), "Downloads");
   await mkdir(downloads, { recursive: true });
   const ext = path.extname(fileName);
   const base = path.basename(fileName, ext);
-  let target = path.join(downloads, fileName);
-  for (let i = 2; existsSync(target); i++) target = path.join(downloads, `${base}-${i}${ext}`);
-  await writeFile(target, data);
-  return target;
+  for (let i = 1; i <= MAX_NAME_ATTEMPTS; i++) {
+    const target = path.join(downloads, i === 1 ? fileName : `${base}-${i}${ext}`);
+    try {
+      await create(target);
+      return target;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+  }
+  throw new Error("Could not find a free file name in Downloads");
+}
+
+/** Copies a file into ~/Downloads without overwriting an existing file. Returns the new path. */
+export async function copyToDownloads(filePath: string): Promise<string> {
+  return createInDownloads(path.basename(filePath), (target) => copyFile(filePath, target, constants.COPYFILE_EXCL));
+}
+
+/** Writes raw bytes to ~/Downloads without overwriting an existing file. Returns the new path. */
+export async function writeToDownloads(fileName: string, data: Buffer): Promise<string> {
+  return createInDownloads(fileName, (target) => writeFile(target, data, { flag: "wx" }));
 }
 
 export function errorMessage(error: unknown): string {
@@ -154,8 +164,7 @@ export function errorMessage(error: unknown): string {
 /** Shows a failure toast. Auth errors get an action that opens the extension preferences. */
 export async function showError(title: string, error: unknown): Promise<void> {
   const isAuth = error instanceof SnapRenderError && error.isAuthError;
-  await showToast({
-    style: Toast.Style.Failure,
+  await showFailureToast(error, {
     title,
     message: errorMessage(error),
     primaryAction: isAuth
