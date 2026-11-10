@@ -1,5 +1,11 @@
 # Drafts Changelog
 
+## [Fix Draft Search] - {PR_MERGE_DATE}
+
+- Fix searching drafts for text with an apostrophe, which failed with an SQL error
+- Fix title-only search missing drafts that are a single line
+- `%` and `_` in a search now match literally
+
 ## [Node 22 and Node 26 preparation] - {PR_MERGE_DATE}
 
 - Remove unused native dependencies so installation does not require unrelated native binaries.

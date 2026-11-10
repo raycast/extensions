@@ -18,11 +18,19 @@ const DRAFTS_DB = DataBasePath.replace("~", homedir());
 
 export async function getDrafts(filterString?: string, filterTitleOnly?: boolean) {
   filterString = filterString || "";
+  // Escape quotes for the SQL string and %, _ and \ for LIKE, so they match literally.
+  const likeTerm = filterString
+    .toLowerCase()
+    .replace(/'/g, "''")
+    .replace(/[\\%_]/g, "\\$&");
+  // The first line of the draft; a draft without a line break is all first line.
+  const titleColumn =
+    "CASE WHEN INSTR(ZCONTENT, CHAR(10)) > 0 THEN SUBSTR(ZCONTENT, 1, INSTR(ZCONTENT, CHAR(10)) - 1) ELSE ZCONTENT END";
   let conditionString = "";
   if (filterString !== "" && filterTitleOnly) {
-    conditionString = `AND LOWER(SUBSTR(ZCONTENT, 1, INSTR(ZCONTENT, CHAR(10)) - 1)) LIKE '%${filterString}%'`;
+    conditionString = `AND LOWER(${titleColumn}) LIKE '%${likeTerm}%' ESCAPE '\\'`;
   } else if (filterString !== "" && !filterTitleOnly) {
-    conditionString = `AND LOWER(ZCONTENT) LIKE '%${filterString}%'`;
+    conditionString = `AND LOWER(ZCONTENT) LIKE '%${likeTerm}%' ESCAPE '\\'`;
   } else {
     conditionString = "";
   }
