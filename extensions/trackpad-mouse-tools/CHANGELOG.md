@@ -1,6 +1,6 @@
 # Trackpad & Mouse Tools Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-10
 
 - Toggle secondary click between two fingers and the bottom right or bottom left corner with one hotkey
 - Fixed commands for each secondary click mode
