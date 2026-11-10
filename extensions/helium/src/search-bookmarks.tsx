@@ -5,7 +5,6 @@ import { getBookmarks } from "./utils/bookmarks";
 import {
   OpenBookmarkAction,
   OpenBookmarkInNewTabAction,
-  OpenNewTabAction,
   CopyBookmarkUrlAction,
   CopyBookmarkTitleAction,
   CopyBookmarkAsMarkdownAction,
@@ -85,7 +84,6 @@ function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revali
           <ActionPanel.Section>
             <OpenBookmarkAction bookmark={bookmark} />
             <OpenBookmarkInNewTabAction bookmark={bookmark} />
-            <OpenNewTabAction />
           </ActionPanel.Section>
           <CopyBookmarkUrlAction bookmark={bookmark} />
           <CopyBookmarkTitleAction bookmark={bookmark} />

@@ -1,5 +1,26 @@
 # Brew Changelog
 
+## [CLI search keywords] - {PR_MERGE_DATE}
+
+- Fixed: Show Upgrades answers to "outdated" again. The keyword was removed by accident and is restored
+- New: root search finds Show Installed with "list", Manage Taps with "untap" or "trust", and Clean up with "cleanup"
+- New: "homebrew" is on every command, so search finds the whole extension
+- Improved: the Adopt Apps subtitle changed from Homebrew to Brew
+
+## [Show unscanned formulae in Show Vulnerabilities] - 2026-11-06
+
+- Fixed: Show Vulnerabilities lists the formulae `brew vulns` didn't scan, such as ones from untrusted taps, and why
+- Fixed: Show Vulnerabilities lists the formulae brew checked against a newer version than the one installed, instead of saying "No known vulnerabilities"
+
+## [Adopt Apps reads brew.env] - 2026-11-06
+
+- Fixed: Adopt Apps now looks in the install folder set in `brew.env`, `/Applications` and `~/Applications`
+- Improved: the README says Raycast doesn't get `XDG_CONFIG_HOME`, and which `brew.env` file to use
+
+## [Homebrew options] - 2026-11-05
+
+- Improved: the README explains how to set Homebrew options, such as where casks install, so installs from the extension use them too
+
 ## [Run in Terminal after a finished command] - 2026-11-03
 
 - Fixed: with Terminal as the terminal application, a Run in Terminal action did nothing once an earlier command had finished and its window still showed "[Process completed]". Run in Terminal now opens a new window, so it also no longer ends the shell in your front tab

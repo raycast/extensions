@@ -1,5 +1,11 @@
 # Dev Servers Changelog
 
+## [Start projects at login] - 2026-11-06
+
+- **Pick projects to start when your Mac starts.** Choose **Start at Login** (`⌘⇧L`) on a project in the dashboard or the Start picker, and after the next restart its dev server starts on its own, installing dependencies first if they are missing. The menu bar item does the starting on its first refresh after a restart, so it needs to be enabled. A project already running, or whose folder is gone, is skipped.
+- **One place to see what starts at login.** **Start Dev Server** has a **Start at Login** section below the recent projects, listing every such project, whether it is running, and an action to start it now or turn it off. Rows for these projects in the dashboard and the recents carry a power icon.
+- A start at login that fails shows up in the dashboard as a failed row, with the cause and the startup log, like any other start.
+
 ## [Raycast 2 crash fix, recents that keep up, dev servers outside the JS world] - 2026-11-04
 
 - **Fixed: starting a project crashed the dashboard on Raycast 2.** A few seconds into any start or restart, the dashboard was replaced by "Minified React error #185". The "Starting…" row animated its spinner by swapping the icon about 20 times a second, and Raycast 2's new renderer cannot keep up with that. The row now shows a still icon, and the list's own loading bar moves while anything is starting.

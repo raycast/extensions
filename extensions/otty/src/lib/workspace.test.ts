@@ -1,25 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { parseOttyJson } from "./otty-core";
+import { abbreviateHome, expandHome } from "./paths";
+import { activeRowId, cleanCapture, fenceText, previewMarkdown, sidebarToggles } from "./preview";
 import {
-  activeRowId,
-  previewMarkdown,
-  abbreviateHome,
-  expandHome,
   agentStatus,
-  buildCaptureArgs,
-  buildFocusPaneArgs,
-  buildListArgs,
-  buildPaneLinkArgs,
   buildSections,
-  buildSendTextArgs,
-  cleanCapture,
-  sidebarToggles,
+  menuLabel,
+  mostUrgentState,
+  paneTitle,
+  tabTitle,
   pushRecent,
   withRecent,
-  menuLabel,
-  fenceText,
-  mostUrgentState,
-  parseOttyJson,
-  paneTitle,
   type OttyPane,
   type OttyTab,
   type OttyWindow,
@@ -127,39 +118,6 @@ const panes: OttyPane[] = [
   }),
 ];
 
-describe("workspace CLI args", () => {
-  it("lists windows, tabs, and panes as JSON", () => {
-    expect(buildListArgs("window")).toEqual(["window", "list", "--json"]);
-    expect(buildListArgs("tab")).toEqual(["tab", "list", "--json"]);
-    expect(buildListArgs("pane")).toEqual(["pane", "list", "--json"]);
-  });
-
-  it("focuses a pane by id", () => {
-    expect(buildFocusPaneArgs("p_1")).toEqual(["pane", "focus", "p_1"]);
-  });
-
-  it("asks Otty for a pane's deeplink", () => {
-    expect(buildPaneLinkArgs("p_1")).toEqual(["pane", "link", "--pane", "p_1"]);
-  });
-
-  it("captures the last lines of a pane, trimmed", () => {
-    expect(buildCaptureArgs("p_1", 30)).toEqual(["pane", "capture", "--pane", "p_1", "--lines", "30", "--trim"]);
-  });
-
-  it("queues text verbatim, even when it looks like a flag", () => {
-    expect(buildSendTextArgs("p_1", "--help \\n")).toEqual([
-      "pane",
-      "send-text",
-      "--pane",
-      "p_1",
-      "--no-escape",
-      "--submit",
-      "--",
-      "--help \\n",
-    ]);
-  });
-});
-
 describe("parseOttyJson", () => {
   it("returns the data field of a successful envelope", () => {
     expect(parseOttyJson<number[]>('{"command":"tab list","data":[1,2],"ok":true}')).toEqual([1, 2]);
@@ -209,8 +167,21 @@ describe("paneTitle", () => {
     expect(paneTitle(pane({ process: "" }), tabs[1])).toBe("web");
   });
 
-  it("falls back to a generic title when the tab is unknown", () => {
-    expect(paneTitle(pane({ process: "" }), undefined)).toBe("Shell");
+  it("falls back to the pane's folder when the tab is unknown or untitled", () => {
+    expect(paneTitle(pane({ process: "" }), undefined)).toBe("web");
+    expect(paneTitle(pane({ process: "", agent: "Claude Code" }), { ...tabs[1], title: "" })).toBe("web");
+  });
+
+  it("falls back to a generic title with no folder either", () => {
+    expect(paneTitle(pane({ process: "", cwd: "" }), undefined)).toBe("Shell");
+  });
+});
+
+describe("tabTitle", () => {
+  it("names an untitled tab by its folder", () => {
+    expect(tabTitle({ ...tabs[1], title: "", cwd: "/Users/alex/code/brew" })).toBe("brew");
+    expect(tabTitle({ ...tabs[1], title: "  ", cwd: "" })).toBe("Tab");
+    expect(tabTitle(tabs[1])).toBe(tabs[1].title);
   });
 });
 
@@ -338,6 +309,18 @@ describe("buildSections: tabs", () => {
     expect(api.label).toBe("(2)");
     expect(api.labelTooltip).toBe("2 panes");
     expect(sections[0].rows[0].label).toBeUndefined();
+  });
+
+  it("names untitled tabs and windows by folder, as Otty's sidebar does", () => {
+    const untitled = buildSections(
+      "tabs",
+      windows.map((w) => ({ ...w, title: "" })),
+      tabs.map((t) => ({ ...t, title: "" })),
+      panes,
+      HOME,
+    );
+    expect(untitled[0].rows.map((r) => r.title)).toEqual(["web", "api"]);
+    expect(untitled.map((s) => s.title)).toEqual(["api", "tmp"]);
   });
 
   it("rolls up the most urgent agent state across the tab's panes", () => {

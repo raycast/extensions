@@ -1,6 +1,6 @@
-import { context as Context, getOctokit } from "@actions/github";
-import * as Core from "@actions/core";
-import { PullRequestEvent } from "@octokit/webhooks-types";
+import type { context as Context, getOctokit } from "@actions/github";
+import type * as Core from "@actions/core";
+import type { PullRequestEvent } from "@octokit/webhooks-types";
 
 type API = {
   github: ReturnType<typeof getOctokit>;

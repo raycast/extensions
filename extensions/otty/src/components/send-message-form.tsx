@@ -1,24 +1,21 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
 import { runOtty, showFailure } from "../lib/otty";
-import { buildSendTextArgs } from "../lib/workspace";
+import { buildSendTextArgs } from "../lib/otty-core";
 
-/** Queue a message on a pane's Prompt Queue, the way Otty's own composer does. */
 export function SendMessageForm({ paneId, title }: { paneId: string; title: string }) {
   const { pop } = useNavigation();
   const [messageError, setMessageError] = useState<string>();
-  // Set before the first await, so a second ⌘↵ during the request is ignored
-  // instead of queuing the message twice.
-  const sending = useRef(false);
+  const submitInFlight = useRef(false);
   const [isSending, setIsSending] = useState(false);
 
   async function send(values: { message: string }) {
-    if (sending.current) return;
+    if (submitInFlight.current) return;
     if (!values.message.trim()) {
       setMessageError("Type a message to send");
       return;
     }
-    sending.current = true;
+    submitInFlight.current = true;
     setIsSending(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -30,7 +27,7 @@ export function SendMessageForm({ paneId, title }: { paneId: string; title: stri
       toast.title = `Queued for ${title}`;
       pop();
     } catch (error) {
-      sending.current = false;
+      submitInFlight.current = false;
       setIsSending(false);
       await showFailure(`Could not send to ${title}`, error);
     }

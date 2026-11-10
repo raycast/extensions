@@ -1,5 +1,13 @@
 # Cheatsheets Remastered Changelog
 
+## [Metadata and Markdown Import] - 2026-11-05
+
+- Read titles, descriptions and tags from repository Markdown frontmatter, including saved sheets offline.
+- Search repository metadata, see tags in lists and read full descriptions in sheet details.
+- Import a local Markdown file as an editable personal copy from Manage Custom Cheatsheets; skip identical saved content.
+- Handle invalid metadata safely and preserve original Markdown, existing sheets and saved state.
+- Update the Raycast API for compatibility with the current release.
+
 ## [Markdown and Sync Reliability] - 2026-11-04
 
 - Preserve original Markdown for copying and improve display of frontmatter, Unicode, tables and code examples.
