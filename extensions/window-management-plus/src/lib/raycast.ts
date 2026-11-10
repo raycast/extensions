@@ -21,7 +21,7 @@ import {
   type System,
   type Win,
 } from "./arrange";
-import { carry, crowded, ranked, type Frame, type Layout } from "./layouts";
+import { carry, crowded, leading, ranked, type Frame, type Layout, type Placement } from "./layouts";
 import { roleOf, type Role } from "./roles";
 
 const jxa = (script: string) => runAppleScript(script, { language: "JavaScript" });
@@ -157,7 +157,9 @@ async function relocate(
       return { ...item, frame: after(area, arriving.indexOf(w)) };
     });
     if (!items.length) return [];
-    const frames = landing ? landing.layout(items, area, to) : items.map((i) => ({ id: i.id, frame: i.frame }));
+    const frames: Placement[] = landing
+      ? landing.layout(items, area, to)
+      : items.map((i) => ({ id: i.id, frame: i.frame }));
     return frames.map((p) => ({ ...p, screen: to }));
   });
 
@@ -182,10 +184,15 @@ async function relocate(
   const stuck = retry.length ? await astray() : [];
 
   // Apps that wouldn't take the size they were given get one more pass, the same as tiling
-  const settled = landing ? await settle(landing.layout, 4, landing.include, false, landing.onPlaced) : undefined;
+  // The masters the layout has just chosen stay the masters in that pass, whatever their sizes
+  const masters = new Set(placements.filter((p) => p.master).map((p) => p.id));
+  const settled = landing
+    ? await settle(leading(landing.layout, masters), 4, landing.include, false, landing.onPlaced)
+    : undefined;
   const astrayNames = stuck.map((p) => windows.find((w) => w.id === p.id)?.name ?? "a window");
-  // Everything that didn't end up where it was meant to, whichever step it failed at
-  return [...new Set([...unmoved.values(), ...astrayNames, ...(settled?.failed ?? [])])];
+  // That pass moves anything still out of place, so what it couldn't move is the last word on those.
+  // Without it, the moves above are.
+  return [...new Set([...astrayNames, ...(settled ? settled.failed : unmoved.values())])];
 }
 
 /** A window as the AI tools describe it. */
@@ -476,10 +483,21 @@ export const panelTitle = (panel: Panel) => PANELS[panel].title;
 const raycastProcess = `Application("System Events").processes.byName("Raycast")`;
 
 /** Raycast's API has no window titles and doesn't list Notes at all. System Events has both, in global coordinates. */
-const raycastWindows = async (): Promise<(Frame & { title: string })[]> => {
+type RaycastWindows = {
+  windows: (Frame & { title: string })[];
+  /** The title of Raycast's focused window, when Raycast is the app in front. */
+  focused?: string;
+};
+
+const raycastWindows = async (): Promise<RaycastWindows> => {
   try {
-    return await jxaJSON(`JSON.stringify(${raycastProcess}.windows().map((w) => ({
-  title: w.name(), x: w.position()[0], y: w.position()[1], width: w.size()[0], height: w.size()[1] })))`);
+    return await jxaJSON(`const p = ${raycastProcess}
+let focused
+if (p.frontmost()) {
+  try { focused = p.attributes.byName("AXFocusedWindow").value().name() } catch (e) {}
+}
+JSON.stringify({ focused, windows: p.windows().map((w) => ({
+  title: w.name(), x: w.position()[0], y: w.position()[1], width: w.size()[0], height: w.size()[1] })) })`);
   } catch (error) {
     throw new Error(
       "Could not read Raycast's windows. Allow Raycast to control System Events in System Settings › Privacy & Security › Automation.",
@@ -517,7 +535,7 @@ w.position = ${position}`);
 /** Opens Raycast Notes or AI Chat when it isn't open yet. Returns its window title. */
 export async function openPanel(panel: Panel): Promise<string> {
   const { title, extensionName, name } = PANELS[panel];
-  const isOpen = async () => (await raycastWindows()).some((w) => w.title === title);
+  const isOpen = async () => (await raycastWindows()).windows.some((w) => w.title === title);
   if (await isOpen()) return title;
   await launchCommand({ ownerOrAuthorName: "raycast", extensionName, name, type: LaunchType.UserInitiated });
   for (let i = 0; i < 40; i++) {
@@ -582,7 +600,7 @@ function raycastSystem(include?: string): System {
       // the frontmost one that can be arranged is the one being worked in.
       if (!known(focused)) focused = Object.keys(onScreen.frames).find(known);
       desktops = allDesktops;
-      const titled = raycast.map((w) => {
+      const titled = raycast.windows.map((w) => {
         const screen = Math.max(
           0,
           all.findIndex((s) => holdsCentre(s.frame, w)),
@@ -650,6 +668,10 @@ function raycastSystem(include?: string): System {
           });
         }
       }
+      // When one of Raycast's own windows has focus, like Notes, it is the focused window. The API never
+      // says so, and guessing the frontmost other window would pick out the wrong one.
+      const own = raycast.focused && [...listed.values()].find((l) => l.win.title === raycast.focused);
+      if (own) for (const l of listed.values()) l.win.active = l === own;
       return [...listed.values()].map((l) => l.win);
     },
 

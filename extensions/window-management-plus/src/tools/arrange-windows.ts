@@ -1,4 +1,5 @@
 import type { Tool } from "@raycast/api";
+import { listWindows } from "../lib/raycast";
 import { arrangePlan } from "../lib/tiles";
 
 type Input = {
@@ -27,15 +28,27 @@ export default async function tool(input: Input) {
   return arrangePlan(input.displays);
 }
 
-/** Asks before any window is moved, saying how many windows and displays the plan covers. */
+/**
+ * Asks before any window is moved. Every open window is arranged, not only the ones the plan names:
+ * the rest stay on their display and are tiled after them. So the confirmation counts them all.
+ */
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const windows = input.displays.reduce((count, d) => count + d.windows.length, 0);
-  const displays = input.displays.length;
+  const plural = (n: number, word: string) => `${n} ${n === 1 ? word : word + "s"}`;
+  const planned = input.displays.reduce((count, d) => count + d.windows.length, 0);
+  // If the windows can't be read, the plan's own count is the best there is, and the tool will say why
+  const open = await listWindows().catch(() => undefined);
+  const windows = open ? open.windows.length : planned;
+  const displays = open ? open.displays.length : input.displays.length;
   return {
-    message: `Move and resize ${windows} ${windows === 1 ? "window" : "windows"} across ${displays} ${displays === 1 ? "display" : "displays"}?`,
-    info: input.displays.map((d) => ({
-      name: `Display ${d.display + 1}`,
-      value: `${d.windows.length} ${d.windows.length === 1 ? "window" : "windows"}, ${d.layout ?? "current layout"}`,
-    })),
+    message: `Move and resize all ${plural(windows, "open window")} across ${plural(displays, "display")}?`,
+    info: [
+      ...input.displays.map((d) => ({
+        name: `Display ${d.display + 1}`,
+        value: `${plural(d.windows.length, "window")} placed in order, ${d.layout ?? "current layout"}`,
+      })),
+      ...(windows > planned
+        ? [{ name: "Other windows", value: `${plural(windows - planned, "window")} tiled after those` }]
+        : []),
+    ],
   };
 };

@@ -557,12 +557,15 @@ export function nextPivot(now: Pivot, count: number): Pivot {
   return sideBySide;
 }
 
-/** `layout`, told which windows are masters, so it keeps them however their sizes compare. */
+/**
+ * `layout`, told which windows are masters, so it keeps them however their sizes compare. A window
+ * already marked one way or the other keeps that: a swap or rotation has just chosen the master.
+ */
 export const leading =
   (layout: Layout, masters: Set<string>): Layout =>
   (items, box, screen) =>
     layout(
-      items.map((i) => ({ ...i, lead: masters.has(i.id) })),
+      items.map((i) => ({ ...i, lead: i.lead ?? masters.has(i.id) })),
       box,
       screen,
     );

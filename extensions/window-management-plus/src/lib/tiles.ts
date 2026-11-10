@@ -120,9 +120,8 @@ async function current(): Promise<State> {
     now.screen !== put.screen ||
     Math.abs(now.frame.x + now.frame.width - put.right) > DRAG ||
     Math.abs(now.frame.y - put.y) > DRAG;
-  if (!moved) return state;
-  cache.set(SIDEBAR, "off");
-  return { ...state, sidebar: false };
+  // Unpinned for this command. It is saved with the rest once windows have been arranged.
+  return moved ? { ...state, sidebar: false } : state;
 }
 
 type Built = {

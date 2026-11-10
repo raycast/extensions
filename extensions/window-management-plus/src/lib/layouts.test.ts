@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   carry,
+  leading,
   master,
   nextPivot,
   ranked,
@@ -511,4 +512,32 @@ test("pivot goes round side by side, two rows, two columns, and back", () => {
   // Two windows can only be side by side or stacked
   assert.deepEqual(nextPivot(line, 2), { shape: "line", sideways: true });
   assert.deepEqual(nextPivot({ shape: "line", sideways: true }, 2), line);
+});
+
+test("swap with master changes the master even when the old one is remembered", () => {
+  const items = [item("old", 900, 700), { ...item("new"), active: true }, item("other")];
+  // The layout remembers "old" as its master, as it does between commands
+  const layout = leading(master({ side: "left" }), new Set(["old"]));
+  const tiled = layout(items, box);
+  assert.equal(tiled.find((p) => p.master)?.id, "old");
+  const out = withMaster(layout)(items, box);
+  assert.equal(out.find((p) => p.master)?.id, "new");
+  assert.deepEqual(frameOf(out, "new"), frameOf(tiled, "old"));
+});
+
+test("with two windows, swap and rotate still trade them when the master is remembered", () => {
+  const items = [item("a", 900, 700), { ...item("b"), active: true }];
+  const layout = leading(master({ side: "left" }), new Set(["a"]));
+  const tiled = layout(items, box);
+  for (const moved of [swappedNext(layout)(items, box), rotated(layout, 1)(items, box)]) {
+    assert.deepEqual(frameOf(moved, "b"), frameOf(tiled, "a"));
+    assert.deepEqual(frameOf(moved, "a"), frameOf(tiled, "b"));
+  }
+});
+
+test("a remembered master stays the master when it is the smaller window", () => {
+  const items = [item("big", 900, 700), item("small")];
+  const out = leading(master({ side: "left", ratio: 0.3 }), new Set(["small"]))(items, box);
+  assert.equal(frameOf(out, "small").x, 0);
+  assert.equal(frameOf(out, "small").width, 360);
 });
