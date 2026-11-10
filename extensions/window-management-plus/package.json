@@ -20,47 +20,31 @@
       "required": false,
       "default": "0",
       "title": "Window Gap",
-      "description": "Gap between windows.",
+      "description": "Gap between windows",
       "data": [
         {
           "title": "None",
           "value": "0"
         },
         {
-          "title": "2 pt",
-          "value": "2"
-        },
-        {
-          "title": "4 pt",
-          "value": "4"
-        },
-        {
-          "title": "6 pt",
-          "value": "6"
-        },
-        {
-          "title": "8 pt",
+          "title": "Tiny (8px)",
           "value": "8"
         },
         {
-          "title": "10 pt",
-          "value": "10"
-        },
-        {
-          "title": "12 pt",
-          "value": "12"
-        },
-        {
-          "title": "16 pt",
+          "title": "Small (16px)",
           "value": "16"
         },
         {
-          "title": "20 pt",
-          "value": "20"
+          "title": "Medium (32px)",
+          "value": "32"
         },
         {
-          "title": "24 pt",
-          "value": "24"
+          "title": "Large (64px)",
+          "value": "64"
+        },
+        {
+          "title": "Extra Large (128px)",
+          "value": "128"
         }
       ]
     },
@@ -70,47 +54,31 @@
       "required": false,
       "default": "0",
       "title": "Screen Gap",
-      "description": "Gap from windows to the screen edge.",
+      "description": "Gap from windows to the screen edge",
       "data": [
         {
           "title": "None",
           "value": "0"
         },
         {
-          "title": "2 pt",
-          "value": "2"
-        },
-        {
-          "title": "4 pt",
-          "value": "4"
-        },
-        {
-          "title": "6 pt",
-          "value": "6"
-        },
-        {
-          "title": "8 pt",
+          "title": "Tiny (8px)",
           "value": "8"
         },
         {
-          "title": "10 pt",
-          "value": "10"
-        },
-        {
-          "title": "12 pt",
-          "value": "12"
-        },
-        {
-          "title": "16 pt",
+          "title": "Small (16px)",
           "value": "16"
         },
         {
-          "title": "20 pt",
-          "value": "20"
+          "title": "Medium (32px)",
+          "value": "32"
         },
         {
-          "title": "24 pt",
-          "value": "24"
+          "title": "Large (64px)",
+          "value": "64"
+        },
+        {
+          "title": "Extra Large (128px)",
+          "value": "128"
         }
       ]
     },
@@ -120,7 +88,7 @@
       "required": false,
       "default": "notes",
       "title": "Sidebar",
-      "description": "What Toggle Sidebar pins down the right. Focused Window pins whichever window you are in when you run it, so any app can be the sidebar.",
+      "description": "Window pinned by Toggle Sidebar",
       "data": [
         {
           "title": "Raycast Notes",

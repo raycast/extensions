@@ -44,11 +44,11 @@ In Raycast AI, mention `@window-management-plus` and say what you want, like "ar
 
 ## Preferences
 
-- **Window Gap**: the gap between windows, from none to 24 points.
+- **Window Gap**: the gap between windows.
 - **Screen Gap**: the gap from windows to the screen edge.
 - **Sidebar**: what Toggle Sidebar pins. Raycast Notes (the default) and AI Chat are opened if they aren't already. Focused Window pins whichever window you are in when you run it, so any app can be the sidebar.
 
-Window Gap and Screen Gap are named after the same settings in Raycast's own Window Management. An extension can't read those, so set them here too if you want them to match.
+Window Gap and Screen Gap have the same names and sizes as the settings in Raycast's own Window Management: None, Tiny, Small, Medium, Large and Extra Large. An extension can't read Raycast's settings, so choose the same sizes here if you want them to match.
 
 ## Screens
 
