@@ -88,7 +88,7 @@
       "required": false,
       "default": "notes",
       "title": "Sidebar",
-      "description": "Window pinned by Toggle Sidebar",
+      "description": "Opens the selected window and pins it to the screen",
       "data": [
         {
           "title": "Raycast Notes",
@@ -120,7 +120,7 @@
     {
       "name": "toggle-sidebar",
       "title": "Toggle Sidebar",
-      "description": "Pin one window full height down the right edge, or unpin it. While it is pinned, every other command arranges the remaining windows beside it.",
+      "description": "Open the window chosen in the Sidebar setting and pin it full height down the right of the screen. Run it again to unpin. While it is pinned, every other command arranges the remaining windows beside it.",
       "mode": "no-view",
       "icon": "toggle-sidebar.png",
       "keywords": [
