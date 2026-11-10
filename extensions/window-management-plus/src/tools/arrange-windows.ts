@@ -25,7 +25,8 @@ type Input = {
 
 /** Moves windows onto the displays given, in the order given, and tiles each display. */
 export default async function tool(input: Input) {
-  return arrangePlan(input.displays);
+  // Nothing comes back when every window was arranged. Otherwise it says what couldn't be done.
+  return (await arrangePlan(input.displays)) ?? "Arranged the windows as planned";
 }
 
 /**

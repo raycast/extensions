@@ -41,7 +41,7 @@ export const prefs = () => {
  * Runs a command's work after the launcher closes. Without Raycast Pro the WindowManagement API is off,
  * so say that instead of failing. Any other error is shown rather than swallowed.
  */
-export async function run(work: () => Promise<string>) {
+export async function run(work: () => Promise<string | undefined>) {
   await closeMainWindow();
   if (!environment.canAccess(WindowManagement)) {
     await showFailureToast("Window Management+ needs Raycast Pro to move windows.", {
@@ -50,7 +50,10 @@ export async function run(work: () => Promise<string>) {
     return;
   }
   try {
-    await showHUD(await work());
+    // Like Raycast's own window commands, a command that works says nothing. A message means it
+    // couldn't do what was asked, or only did part of it.
+    const message = await work();
+    if (message) await showHUD(message);
   } catch (error) {
     await showFailureToast(error, { title: "Could not arrange windows" });
   }
@@ -95,7 +98,7 @@ const LOCK = "running-since";
 const LOCK_MS = 15_000;
 
 /** Runs `work` unless another run is still going. */
-async function alone(work: () => Promise<string>) {
+async function alone(work: () => Promise<string | undefined>) {
   const since = Number(cache.get(LOCK));
   if (since && Date.now() - since < LOCK_MS) return "Already arranging";
   cache.set(LOCK, String(Date.now()));
@@ -115,9 +118,9 @@ const apply = (
   onPlaced?: OnPlaced,
 ) => alone(() => arrangeAll(layout, passes, include, activeOnly, done, onPlaced));
 
-/** What to tell the user once windows have moved. */
+/** What to tell the user once windows have moved: nothing if they all did, or which ones didn't. */
 function report(count: number, failed: string[], done: string) {
-  if (!failed.length) return done;
+  if (!failed.length) return undefined;
   if (failed.length === count) throw new Error(`No window could be moved (${failed.join(", ")}).`);
   return `${done}, but could not move ${failed.join(", ")}`;
 }
