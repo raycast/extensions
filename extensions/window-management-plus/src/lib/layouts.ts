@@ -217,10 +217,10 @@ export const master =
     // The master takes its share unless the stack needs more, and never more than its app allows.
     // What it can't use goes to the stack, so no gap is left.
     const mainW = fit(main, "width", Math.min(free * (opts.ratio ?? MASTER_RATIO), free - sum(sideNeed)));
-    // Each side gets an even share of what the master leaves, but never less than it needs
-    const even = (free - mainW) / sides.length;
-    const sideW = sides.length === 2 ? [Math.max(even, sideNeed[0]), 0] : [free - mainW];
-    if (sides.length === 2) sideW[1] = free - mainW - sideW[0];
+    // Each side gets what it needs first, then an even share of whatever the master leaves beyond that.
+    // Splitting evenly from the start would shortchange the side that needs more.
+    const spare = (free - mainW - sum(sideNeed)) / sides.length;
+    const sideW = sideNeed.map((need) => need + spare);
 
     const placeSide = (k: number, x: number) => {
       const extra = (sideW[k] - sideNeed[k]) / cols[k].length;

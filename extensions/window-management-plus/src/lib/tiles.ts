@@ -30,6 +30,7 @@ import {
   placeWindows,
   prefs,
   run,
+  stillOpen,
   whereIs,
   type OnPlaced,
   swapDisplays,
@@ -106,7 +107,8 @@ function sidebarIs(pinned: string): (w: { id: string; title?: string }) => boole
 /**
  * The state as it stands. Closing the sidebar's window unpins it, and so does dragging it away. Nothing
  * tells an extension when either happens, so this is where it is noticed: a sidebar that has closed is
- * not opened again, and one that isn't where it was last put is an ordinary window again. It is compared
+ * not opened again, and one that isn't where it was last put is an ordinary window again. A sidebar that
+ * is only out of view, on another desktop or minimized, stays pinned. It is compared
  * with where it was put, not with the edge of the screen, so changing a gap setting isn't mistaken for
  * a drag.
  */
@@ -121,7 +123,13 @@ async function current(): Promise<State> {
   if (now === "unknown") return state;
   // Unpinned for this command. It is saved with the rest once windows have been arranged.
   const unpinned = { ...state, sidebar: false };
-  if (now === "closed") return unpinned;
+  if (now === "closed") {
+    // Not in view isn't the same as closed: it may be on another desktop, or minimized. Then it stays
+    // pinned, and this desktop is simply tiled without it.
+    const what = isPanel(state.pinned) ? { title: panelTitle(state.pinned) } : { id: madeSidebar(state.pinned).id };
+    const exists = await stillOpen(what).catch(() => true);
+    return exists ? state : unpinned;
+  }
   const put = JSON.parse(cache.get(SIDEBAR_AT) ?? "null") as { screen: number; right: number; y: number } | null;
   if (!put) return state;
   const moved =
@@ -333,9 +341,17 @@ export async function resizeMaster(delta: number) {
     const focused = windows.find((w) => w.focused);
     const display = displays.find((d) => d.index === focused?.display);
     const here = windows.filter((w) => w.display === focused?.display);
+    const side = state.sidebar ? here.find(sidebarIs(state.pinned)) : undefined;
+    const tiled = here.filter((w) => w !== side);
     const size = (w: { frame: { width: number; height: number } }) => w.frame.width * w.frame.height;
-    const main = here.find((w) => state.masters.includes(w.id)) ?? [...here].sort((a, b) => size(b) - size(a))[0];
-    const share = main && display ? main.frame.width / display.width : state.ratio;
+    const main = tiled.find((w) => state.masters.includes(w.id)) ?? [...tiled].sort((a, b) => size(b) - size(a))[0];
+    if (!main || !display) return state;
+    // The share is of the width the layout has to work with: the display, less the sidebar and the gaps
+    // between the master and the stack on each side of it
+    const { gap } = prefs();
+    const sides = state.last === "master-center" && tiled.length > 2 ? 2 : 1;
+    const room = display.width - (side ? side.frame.width + gap : 0) - gap * sides;
+    const share = main.frame.width / room;
     return { ...state, ratio: Math.min(0.95, Math.max(0.15, Math.round((share + delta) * 100) / 100)) };
   });
 }

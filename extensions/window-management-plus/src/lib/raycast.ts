@@ -232,6 +232,24 @@ export async function whereIs(
   return w && { screen: w.screen, frame: w.frame };
 }
 
+/**
+ * Whether a window still exists at all, on any desktop and whether or not it is minimized. A window that
+ * isn't on the desktop in view hasn't been closed. `what` is the title of one of Raycast's own windows,
+ * or the id of any other.
+ */
+export async function stillOpen(what: { title: string } | { id: string }): Promise<boolean> {
+  // System Events lists Raycast's windows wherever they are
+  if ("title" in what) return (await raycastWindows()).windows.some((w) => w.title === what.title);
+  return jxaJSON<boolean>(`ObjC.import("CoreGraphics")
+const list = ObjC.castRefToObject($.CGWindowListCopyWindowInfo(0, 0)) // 0: every window, on screen or not
+let found = false
+for (let i = 0; i < list.count && !found; i++) {
+  const d = list.objectAtIndex(i)
+  found = ObjC.unwrap(d.objectForKey("kCGWindowOwnerPID")) + "_" + ObjC.unwrap(d.objectForKey("kCGWindowNumber")) === ${JSON.stringify(what.id)}
+}
+JSON.stringify(found)`);
+}
+
 /** Every display and every window worth arranging, for the AI tools. */
 export async function listWindows(): Promise<{
   displays: (Frame & { index: number })[];
@@ -259,7 +277,7 @@ export async function listWindows(): Promise<{
       id: w.id,
       app: w.name ?? "Unknown",
       bundleId: w.bundleId,
-      title: w.label,
+      title: w.label ?? w.title,
       role: roleOf({ bundleId: w.bundleId, category: w.appPath && categories[w.appPath], title: w.title }),
       display: w.screen,
       focused: !!w.active,

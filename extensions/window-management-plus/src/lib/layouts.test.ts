@@ -550,3 +550,23 @@ test("a remembered master stays the master when it is the smaller window", () =>
   assert.equal(frameOf(out, "small").x, 0);
   assert.equal(frameOf(out, "small").width, 360);
 });
+
+test("master in the center gives each side what it needs before sharing out the rest", () => {
+  const wide = { x: 0, y: 0, width: 2400, height: 1000 };
+  const at = (id: string, x: number, min?: number): Item => ({
+    ...item(id),
+    min: min ? { width: min } : undefined,
+    frame: { x, y: 0, width: 100, height: 100 },
+  });
+  const items = [
+    { ...at("main", 1000), frame: { x: 1000, y: 0, width: 900, height: 900 } },
+    at("left", 0),
+    at("right", 2300, 400),
+  ];
+  const out = master({ side: "center" })(items, wide);
+  // 240 on the left, 400 on the right, and the master between them: nothing spills off the screen
+  assert.deepEqual(frameOf(out, "left"), { x: 0, y: 0, width: 240, height: 1000 });
+  assert.deepEqual(frameOf(out, "main"), { x: 240, y: 0, width: 1760, height: 1000 });
+  assert.deepEqual(frameOf(out, "right"), { x: 2000, y: 0, width: 400, height: 1000 });
+  assert.deepEqual(stacking(master({ side: "center" }))(items, wide), out);
+});
