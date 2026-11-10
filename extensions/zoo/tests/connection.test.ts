@@ -79,3 +79,26 @@ test("A Google HTTP 400 key failure survives SDK parsing as a safe, specific dia
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
+
+for (const provider of ["gemini", "anthropic"] as const) {
+  test(`${provider} connection checks can be cancelled while the model response is incomplete.`, async () => {
+    const controller = new AbortController();
+    const server = createServer((_request, response) => {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.write('{"data":[');
+      controller.abort();
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    try {
+      const settings = {
+        ...resolveSettings({ provider }),
+        baseURL: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,
+      };
+      await assert.rejects(checkConnection(settings, "zoo-test-placeholder", controller.signal), /abort/i);
+      assert.equal(controller.signal.aborted, true);
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
+}

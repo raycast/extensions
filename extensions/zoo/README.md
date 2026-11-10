@@ -99,7 +99,6 @@ Zoo displays token counts when the provider reports them. To show a cost estimat
 - If you reach a quota or rate limit, check the provider's API balance and usage limits before retrying.
 - If Gist content fails to load, use **Retry Loading Gist** before running the prompt.
 - If selected text cannot be read, enter the text in Zoo or check Raycast's macOS Accessibility permission.
-- If a local copy reports "Missing executable", run `npm run build:local` in Zoo's extension directory and reopen the command.
 
 ## Credits
 

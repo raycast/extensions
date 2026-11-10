@@ -176,7 +176,6 @@
     "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.3.3",
     "js-base64": "^3.7.2",
-    "node-fetch": "^2.7.0",
     "openai": "^7.55.0"
   },
   "preferences": [
@@ -307,7 +306,6 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^26.6.6",
-    "@types/node-fetch": "^2.6.11",
     "@types/react": "^19.3.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
