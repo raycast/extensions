@@ -88,7 +88,7 @@
       "required": false,
       "default": "notes",
       "title": "Sidebar",
-      "description": "Opens the selected window and pins it to the screen",
+      "description": "Opened and pinned to the screen by Toggle Sidebar",
       "data": [
         {
           "title": "Raycast Notes",
@@ -97,10 +97,6 @@
         {
           "title": "Raycast AI Chat",
           "value": "ai"
-        },
-        {
-          "title": "Focused Window",
-          "value": "focused"
         }
       ]
     }
@@ -120,7 +116,7 @@
     {
       "name": "toggle-sidebar",
       "title": "Toggle Sidebar",
-      "description": "Open the window chosen in the Sidebar setting and pin it full height down the right of the screen. Run it again to unpin. While it is pinned, every other command arranges the remaining windows beside it.",
+      "description": "Open the window chosen in the Sidebar setting and pin it full height down the right of the screen. Run it again to unpin. While a sidebar is pinned, every other command arranges the remaining windows beside it.",
       "mode": "no-view",
       "icon": "toggle-sidebar.png",
       "keywords": [
@@ -129,6 +125,19 @@
         "notes",
         "ai chat",
         "auto tile with sidebar"
+      ]
+    },
+    {
+      "name": "make-sidebar",
+      "title": "Make Sidebar",
+      "description": "Pin the focused window full height down the right of the screen, whatever app it is. It stays the sidebar until you unpin it with Toggle Sidebar.",
+      "mode": "no-view",
+      "icon": "make-sidebar.png",
+      "keywords": [
+        "sidebar",
+        "pin",
+        "promote",
+        "focused window"
       ]
     },
     {

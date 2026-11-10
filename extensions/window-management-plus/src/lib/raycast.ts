@@ -23,7 +23,9 @@ export const isPanel = (value: unknown): value is Panel => value === "notes" || 
 
 export const prefs = () => {
   const p = getPreferenceValues<Preferences>();
-  return { gap: Number(p.gap) || 0, screenGap: Number(p.screenGap) || 0, sidebar: p.sidebar ?? "notes" };
+  // "ai" or Raycast Notes. An older version also had "focused", which Make Sidebar replaced.
+  const sidebar: Panel = p.sidebar === "ai" ? "ai" : "notes";
+  return { gap: Number(p.gap) || 0, screenGap: Number(p.screenGap) || 0, sidebar };
 };
 
 /**
@@ -155,6 +157,7 @@ async function relocate(
 export type OpenWindow = {
   id: string;
   app: string;
+  bundleId?: string;
   title?: string;
   /** The part it plays: what you make, what you read, people, or what runs alongside. */
   role: Role;
@@ -202,6 +205,7 @@ export async function listWindows(): Promise<{
     windows: windows.map((w) => ({
       id: w.id,
       app: w.name ?? "Unknown",
+      bundleId: w.bundleId,
       title: w.label,
       role: roleOf({ bundleId: w.bundleId, category: w.appPath && categories[w.appPath], title: w.title }),
       display: w.screen,

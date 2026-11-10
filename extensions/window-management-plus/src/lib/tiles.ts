@@ -43,7 +43,7 @@ const SIDEBAR_WIDTH = 400; // asked for. An app that needs more keeps its real m
 
 const LAST = "last-tile";
 const SIDEBAR = "sidebar"; // "on" while a sidebar is pinned. Layouts then arrange the rest around it.
-const PINNED = "sidebar-window"; // what is pinned: "notes", "ai", or the id of a window
+const PINNED = "sidebar-window"; // what is pinned: "notes", "ai", or a window made the sidebar, as JSON
 /** What `last-tile` held when the sidebar was a layout of its own. */
 const OLD_SIDEBAR_LAYOUT = "auto-tile-sidebar";
 const SPLIT = "split"; // "columns" when Pivot has turned Auto Tile on its side
@@ -64,7 +64,9 @@ type Built = {
   pinned?: (i: Item) => boolean;
   /** The Raycast window pinned as the sidebar, if it is one. */
   panel?: Panel;
-  /** Opens the sidebar's window if it isn't open. Resolves to a Raycast window's title, to find it by. */
+  /** Finds the sidebar's window. Resolves to a Raycast window's title, when that is what to find it by. */
+  locate?: () => Promise<string | undefined>;
+  /** The same, opening the window first if it isn't open. */
   open?: () => Promise<string | undefined>;
 };
 
@@ -81,10 +83,37 @@ function build(name: TileName, lead: "focused" | "largest" = "largest", withSide
 function beside(layout: Layout): Built {
   const { gap } = prefs();
   const what = cache.get(PINNED) ?? "notes";
-  // Raycast Notes or AI Chat, found by title, or the one window that was focused when it was pinned
-  const pinned = (i: Item) => (isPanel(what) ? i.title === panelTitle(what) : i.id === what);
-  const built: Built = { layout: sidebar(pinned, SIDEBAR_WIDTH, layout, gap), pinned };
-  return isPanel(what) ? { ...built, panel: what, open: () => openPanel(what) } : built;
+  const side = (pinned: (i: Item) => boolean) => sidebar(pinned, SIDEBAR_WIDTH, layout, gap);
+  // Raycast Notes or AI Chat, found by title
+  if (isPanel(what)) {
+    const pinned = (i: Item) => i.title === panelTitle(what);
+    const title = async () => panelTitle(what);
+    return { layout: side(pinned), pinned, panel: what, locate: title, open: () => openPanel(what) };
+  }
+  // A window made the sidebar. If it has closed, another window of its app takes its place.
+  const made = madeSidebar(what);
+  const pinned = (i: Item) => i.id === made.id;
+  const locate = async () => {
+    const { windows } = await listWindows();
+    const stand = !windows.some((w) => w.id === made.id) && made.app && windows.find((w) => w.bundleId === made.app);
+    if (stand) {
+      made.id = stand.id;
+      cache.set(PINNED, JSON.stringify(made));
+    }
+    return undefined;
+  };
+  return { layout: side(pinned), pinned, locate };
+}
+
+/** The window Make Sidebar pinned. An older version stored only its id. */
+function madeSidebar(stored: string): { id: string; app?: string } {
+  try {
+    const made = JSON.parse(stored);
+    if (made && typeof made.id === "string") return made;
+  } catch {
+    // Not JSON: a bare window id
+  }
+  return { id: stored };
 }
 
 /** The layout on its own, without a sidebar or stacking. */
@@ -115,37 +144,41 @@ export function runTile(name: TileName, done?: string) {
   // Settled before `last-tile` changes, which is where an older version kept it
   cache.set(SIDEBAR, sidebarOn() ? "on" : "off");
   cache.set(LAST, name);
-  const { layout, open } = build(name, "focused");
-  return tile(layout, open, false, done);
+  const { layout, open, locate } = build(name, "focused");
+  return tile(layout, open ?? locate, false, done);
 }
 
 /**
  * Pins the sidebar, or lets it go, and tiles again in the layout already in use. While it is pinned,
- * every layout arranges the other windows beside it. What gets pinned is the Sidebar preference:
- * Raycast Notes or AI Chat, opened if needed, or the window that has focus right now.
+ * every layout arranges the other windows beside it. It pins the window in the Sidebar preference,
+ * Raycast Notes or AI Chat, opening it if needed.
  */
-export async function toggleSidebar() {
+export function toggleSidebar() {
   const on = !sidebarOn();
-  if (on) {
-    const choice = prefs().sidebar;
-    if (isPanel(choice)) {
-      cache.set(PINNED, choice);
-    } else {
-      // Focus is on Raycast until its window closes
-      await closeMainWindow();
-      const focused = (await listWindows().catch(() => ({ windows: [] }))).windows.find((w) => w.focused);
-      if (!focused) {
-        return run(async () => {
-          throw new Error("Click into the window you want as the sidebar, then run Toggle Sidebar again.");
-        });
-      }
-      cache.set(PINNED, focused.id);
-    }
-  }
+  if (on) cache.set(PINNED, prefs().sidebar);
   cache.set(SIDEBAR, on ? "on" : "off");
   // Whichever window is master stays master
   const { layout, open } = build(last());
   return tile(layout, open, false, on ? "Sidebar pinned" : "Sidebar unpinned");
+}
+
+/**
+ * Makes the focused window the sidebar, whatever app it belongs to. It stays the sidebar until
+ * Toggle Sidebar lets it go.
+ */
+export async function makeSidebar() {
+  // Focus is on Raycast until its window closes
+  await closeMainWindow();
+  const focused = (await listWindows().catch(() => ({ windows: [] }))).windows.find((w) => w.focused);
+  if (!focused) {
+    return run(async () => {
+      throw new Error("Click into the window you want as the sidebar, then run Make Sidebar again.");
+    });
+  }
+  cache.set(PINNED, JSON.stringify({ id: focused.id, app: focused.bundleId }));
+  cache.set(SIDEBAR, "on");
+  const { layout, locate } = build(last());
+  return tile(layout, locate, false, `${focused.app} is the sidebar`);
 }
 
 /** The sides Cycle Master Layout steps through, with what to call each. */
@@ -168,8 +201,8 @@ export function cycleMaster() {
  * The sidebar stays pinned.
  */
 function retile(change: (layout: Layout, pinned?: (i: Item) => boolean) => Layout, name = last()) {
-  const { layout, pinned, panel } = build(name);
-  return tile(change(layout, pinned), panel && (async () => panelTitle(panel)), true);
+  const { layout, pinned, locate } = build(name);
+  return tile(change(layout, pinned), locate, true);
 }
 
 /** Every window one slot clockwise (1) or counterclockwise (-1). Hyprland's rollnext and rollprev. */
