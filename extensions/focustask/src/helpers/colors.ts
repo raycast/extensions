@@ -28,9 +28,9 @@ const colorFromClassName = (name: string | undefined) => {
 
   if (!color || !value) return
 
-  const tailwindColors = colors as any
+  const tailwindColors = colors
 
-  const group = tailwindColors[color]
+  const group = tailwindColors[color as keyof typeof tailwindColors]
 
-  return group?.[value]
+  return group?.[value as keyof typeof group] as string
 }

@@ -3,7 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { getFirstChar, getPreferences, projectDropdownTitle, projectIconUrl } from "../utils";
+import { getFirstChar, getInstance, getPreferences, projectDropdownTitle, projectIconUrl } from "../utils";
 import { useAvatars } from "../hooks";
 import {
   CloneProjectInGitPod,
@@ -29,9 +29,19 @@ import { GitLabIcons, getTextIcon } from "../icons";
 export enum ProjectScope {
   membership = "membership",
   all = "all",
+  pinned = "pinned",
 }
 
-export function ProjectListItem(props: { project: Project; nameOnly?: boolean; showCreateQuickLink?: boolean }) {
+export function usePinnedProjects() {
+  return useCachedState<Project[]>(`project-search-pinned_${getInstance()}`, []);
+}
+
+export function ProjectListItem(props: {
+  project: Project;
+  nameOnly?: boolean;
+  showCreateQuickLink?: boolean;
+  pinActions?: React.ReactNode;
+}) {
   const avatarSources = useAvatars([projectIconUrl(props.project)]);
   const accessories = [];
   if (props.project.archived) {
@@ -59,6 +69,7 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean; s
           <ActionPanel.Section title={props.project.name_with_namespace}>
             <ProjectDefaultActions project={props.project} />
           </ActionPanel.Section>
+          {props.pinActions && <ActionPanel.Section>{props.pinActions}</ActionPanel.Section>}
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Project ID" content={props.project.id} />
             <Action.CopyToClipboard title="Copy Project URL" content={props.project.web_url} />
@@ -166,38 +177,50 @@ export function MyProjectsDropdown(props: {
   includeAllItem?: boolean;
 }): React.ReactNode {
   const { projects: myprojects, isLoading } = useMyProjects();
-  // the selected project can be outside the member projects (e.g. opened from "All" in Search Projects),
-  // so it is fetched by ID and pinned to keep the selection
+  const [pinnedProjects] = usePinnedProjects();
+  // the selected project can be outside the member and pinned projects (e.g. opened from "All" in Search Projects),
+  // so it is fetched by ID to keep the selection
   const { data: selectedProject } = useCachedPromise(
     async (id: string): Promise<Project> => gitlab.getProject(Number(id)),
     [props.value ?? ""],
     {
-      execute: !!props.value && props.value !== "-" && !myprojects.some((project) => `${project.id}` === props.value),
+      execute:
+        !!props.value &&
+        props.value !== "-" &&
+        ![...pinnedProjects, ...myprojects].some((project) => `${project.id}` === props.value),
     },
   );
-  const dropdownProjects = useMemo(
-    () =>
-      selectedProject && !myprojects.some((project) => project.id === selectedProject.id)
-        ? [selectedProject, ...myprojects]
-        : myprojects,
-    [myprojects, selectedProject],
-  );
+  // pinned projects can also be outside the member projects, so they are merged in for selection and avatars
+  const dropdownProjects = useMemo(() => {
+    const knownIds = new Set(myprojects.map((project) => project.id));
+    const extraProjects = [...pinnedProjects, ...(selectedProject ? [selectedProject] : [])].filter((project) => {
+      if (knownIds.has(project.id)) {
+        return false;
+      }
+      knownIds.add(project.id);
+      return true;
+    });
+    return [...extraProjects, ...myprojects];
+  }, [myprojects, pinnedProjects, selectedProject]);
   const avatarSources = useAvatars(dropdownProjects.map(projectIconUrl));
   const [recentProjectIds, setRecentProjectIds] = useCachedState<number[]>("my-projects-dropdown-recent", []);
   const includeAllItem = props.includeAllItem !== false;
 
-  // "Recent" shows the last selected projects (current one first); the remaining projects are grouped
-  // by top-level group, or by the first subgroup when the top-level group is hidden from titles.
+  // "Pinned" keeps the order from Search Projects; "Recent" shows the last selected unpinned projects
+  // (current one first); the remaining projects are grouped by top-level group, or by the first subgroup
+  // when the top-level group is hidden from titles.
   const { recentProjects, groupSections } = useMemo(() => {
+    const pinnedIds = new Set(pinnedProjects.map((project) => project.id));
     const currentProjectId = props.value && props.value !== "-" ? [Number(props.value)] : [];
     const recentProjects = [...new Set([...currentProjectId, ...recentProjectIds])]
+      .filter((id) => !pinnedIds.has(id))
       .map((id) => dropdownProjects.find((project) => project.id === id))
       .filter((project): project is Project => !!project)
       .slice(0, RECENT_PROJECTS_COUNT);
     const showRepositoryGroupName = getPreferences().showRepositoryGroupName;
     const groups = new Map<string, Project[]>();
     for (const project of myprojects) {
-      if (recentProjects.includes(project)) {
+      if (pinnedIds.has(project.id) || recentProjects.includes(project)) {
         continue;
       }
       const namespaces = project.name_with_namespace.split(" / ").slice(0, -1);
@@ -208,7 +231,7 @@ export function MyProjectsDropdown(props: {
       recentProjects,
       groupSections: [...groups].sort(([first], [second]) => first.localeCompare(second)),
     };
-  }, [dropdownProjects, myprojects, props.value, recentProjectIds]);
+  }, [dropdownProjects, myprojects, pinnedProjects, props.value, recentProjectIds]);
 
   return (
     <List.Dropdown
@@ -234,6 +257,17 @@ export function MyProjectsDropdown(props: {
       {includeAllItem && (
         <List.Dropdown.Section>
           <List.Dropdown.Item title="All Projects" value="-" />
+        </List.Dropdown.Section>
+      )}
+      {pinnedProjects.length > 0 && (
+        <List.Dropdown.Section title="Pinned">
+          {pinnedProjects.map((project) => (
+            <MyProjectsDropdownItem
+              key={project.id}
+              project={project}
+              avatarSource={avatarSources[projectIconUrl(project) ?? ""]}
+            />
+          ))}
         </List.Dropdown.Section>
       )}
       {recentProjects.length > 0 && (

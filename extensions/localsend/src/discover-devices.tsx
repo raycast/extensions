@@ -51,12 +51,12 @@ export default function Command() {
 
   const refreshDevice = async (device: LocalSendDevice) => {
     try {
-      const info = await getDeviceInfoHTTP(device.ip, device.port);
+      const info = await getDeviceInfoHTTP(device.ip, device.port, device.protocol);
       if (info) {
         const isFav = await isFavoriteDevice(device.fingerprint);
         setDevices((prev) =>
           prev.map((d) =>
-            d.ip === device.ip ? { ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
+            d.ip === device.ip ? { ...d, ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
           ),
         );
         await showToast({

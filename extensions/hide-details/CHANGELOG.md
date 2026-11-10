@@ -1,12 +1,25 @@
 # Hide Details Changelog
 
+## [Windows Scan Fix and Face Blur] - 2026-10-22
+
+- Fix a PowerShell parsing error that prevented Windows scans and clipboard operations from starting.
+- Add a **Blur Faces** preference on macOS and Windows to blur detected faces while keeping the selected redaction style for text. It is off by default and requires **Faces** to be enabled in **What to Hide**.
+- Keep overlapping text masks covered when face blur is enabled.
+
+## [Windows Support and Clipboard History] - 2026-10-19
+
+- Add Windows support with on-device Windows OCR and face detection.
+- Add **Redact Image File from History** to pick a recently copied image file, then review it or copy a redacted version.
+- When the clipboard has no image, use the newest copied image file in recent history. Screenshot images stored only in history are unavailable.
+- Keep Windows text masks aligned with rotated text and resized OCR images.
+
 ## [Review Controls] - 2026-10-12
 
 - Add per-detection Don't Redact / Redact actions and restore-all control, with scan-specific selections and synchronized preview/copy output.
 - Configure What to Hide with checkboxes shared by both commands, preserving legacy category preferences and offering a reversible migration.
 - Retain an encrypted temporary snapshot during review so exclusions can be reversed without rereading the clipboard; remove it when the scan closes.
 
-## Initial Version - 2026-10-08
+## [Initial Version] - 2026-10-08
 
 - Redact sensitive details in clipboard images using on-device text and face detection.
 - Preview the redacted image and detections, copy from any row, or redact immediately with a hotkey.

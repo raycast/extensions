@@ -1,18 +1,20 @@
 import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { getBobAppName } from "./lib/bob";
 
 const makeNewWindow = async () => {
+  const appName = getBobAppName();
   await runAppleScript(`
-    tell application "IBM Bob"
+    tell application "${appName}"
      activate
     end tell
     delay(0.5)
-    tell application "IBM Bob"
+    tell application "${appName}"
      activate
     end tell
 
     tell application "System Events"
-     tell process "IBM Bob"
+     tell process "${appName}"
       click menu item "New Window" of menu "File" of menu bar 1
      end tell
     end tell

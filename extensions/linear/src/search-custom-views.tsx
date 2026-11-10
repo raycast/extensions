@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 
 import IssueListItem from "./components/IssueListItem";
+import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
 import { getIcon } from "./helpers/icons";
 import { useCustomViews, useCustomViewIssues } from "./hooks/useCustomViews";
@@ -38,6 +39,7 @@ function CustomViewIssues({ viewId, viewName }: { viewId: string; viewName: stri
 
 function CustomViewList() {
   const { customViews, customViewsError, isLoadingCustomViews } = useCustomViews();
+  const { primaryAction } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     if (customViewsError) {
@@ -70,11 +72,13 @@ function CustomViewList() {
             accessories={accessories}
             actions={
               <ActionPanel>
+                {primaryAction === "openInLinear" ? <OpenInLinear title="Open View" url={view.url} /> : null}
                 <Action.Push
                   title="Show Issues"
                   icon={Icon.List}
                   target={<CustomViewIssues viewId={view.id} viewName={view.name} />}
                 />
+                {primaryAction === "openInLinear" ? null : <OpenInLinear title="Open View" url={view.url} />}
               </ActionPanel>
             }
           />

@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Clipboard } from "@raycast/api";
 import { useArticleReader } from "./hooks/useArticleReader";
-import { ArticleReaderView } from "./views/ArticleReaderView";
-import { findUrl } from "./utils/url-resolver";
 import { withTimeout } from "./utils/host-api";
 import { urlLog } from "./utils/logger";
+import { findUrl } from "./utils/url-resolver";
+import { ArticleReaderView } from "./views/ArticleReaderView";
 
 async function resolveClipboardUrl(): Promise<{ url: string; source: string } | null> {
   urlLog.log("resolve:start", { source: "clipboard-command" });

@@ -73,6 +73,7 @@ All access is read-only. The extension never creates, copies, edits, repairs, or
 - URLs, hostnames, history, bookmarks, and search text are not transmitted.
 - Result icons stay local: cached website favicons are read directly from Ego Lite, with a generated domain avatar as fallback. The extension intentionally does not use a remote favicon provider.
 - If the favicon database is unavailable or has no matching entry, bookmark search continues normally.
+- Favicon loading streams metadata and reads only images needed for the search results. Shared bitmaps are reused, individual images are limited to 64 KiB, and retained image sources are limited to 4 MiB. Results use generated domain avatars when these limits are reached.
 - The extension does not invoke `ego-browser` and does not enumerate, claim, select, or interrupt AI Task Spaces.
 
 ## Troubleshooting

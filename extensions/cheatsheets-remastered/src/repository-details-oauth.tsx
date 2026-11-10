@@ -1,3 +1,5 @@
+import { shortcut } from "./shortcuts";
+import { Keyboard } from "@raycast/api";
 import React from "react";
 import { Detail, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
@@ -5,14 +7,23 @@ import { withAccessToken, getAccessToken, showFailureToast } from "@raycast/util
 import Service, { UserRepository, RepositoryCheatsheet } from "./service";
 import { githubOAuth } from "./github-oauth";
 
-function RepositoryDetailsComponent({ repo, onUpdated }: { repo: UserRepository; onUpdated?: () => void }) {
+function RepositoryDetailsComponent({
+  repo: initialRepo,
+  onUpdated,
+}: {
+  repo: UserRepository;
+  onUpdated?: () => void;
+}) {
+  const { token } = getAccessToken();
+  const [repo, setRepo] = useState(initialRepo);
   const [isLoading, setIsLoading] = useState(false);
   const [cheatsheets, setCheatsheets] = useState<RepositoryCheatsheet[]>([]);
-  const { token } = getAccessToken();
 
   useEffect(() => {
     // Record access when component mounts
-    Service.recordRepositoryAccess(repo.id);
+    Service.recordRepositoryAccess(repo.id).catch((error) =>
+      showFailureToast(error, { title: "Could Not Save Access History" }),
+    );
 
     // Load cheatsheets for this repository immediately
     loadCheatsheets();
@@ -22,9 +33,10 @@ function RepositoryDetailsComponent({ repo, onUpdated }: { repo: UserRepository;
     try {
       const sheets = await Service.getRepositoryCheatsheets(repo.id);
       setCheatsheets(sheets);
+      const updated = await Service.getUserRepository(repo.id);
+      if (updated) setRepo(updated);
     } catch (error) {
-      console.error("Failed to load cheatsheets:", error);
-      setCheatsheets([]);
+      showFailureToast(error, { title: "Could Not Load Cached Sheets" });
     }
   };
 
@@ -53,6 +65,7 @@ function RepositoryDetailsComponent({ repo, onUpdated }: { repo: UserRepository;
   };
 
   const handleSync = async () => {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       await Service.syncRepositoryFiles(repo, token);
@@ -90,11 +103,7 @@ No cheatsheets found. Use the **Sync Repository** action to fetch cheatsheet fil
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Repository" text={repo.name} />
-          <Detail.Metadata.Label
-            title="Owner"
-            text={repo.owner}
-            icon={{ source: `https://github.com/${repo.owner}.png`, fallback: Icon.Person }}
-          />
+          <Detail.Metadata.Label title="Owner" text={repo.owner} icon={Icon.Person} />
           {repo.description && <Detail.Metadata.Label title="Description" text={repo.description} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="URL" target={repo.url} text={repo.url} />
@@ -126,46 +135,34 @@ No cheatsheets found. Use the **Sync Repository** action to fetch cheatsheet fil
               title="Open in Browser"
               url={repo.url}
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
 
             <Action.CopyToClipboard
               title="Copy URL"
               content={repo.url}
               icon={Icon.CopyClipboard}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action.CopyToClipboard
               title="Copy Clone URL"
               content={`git clone ${repo.url}.git`}
               icon={Icon.Terminal}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={shortcut("c", true)}
             />
             <Action
               title="Sync Repository"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={handleSync}
             />
           </ActionPanel.Section>
           {cheatsheets.length > 0 && (
             <ActionPanel.Section title="Cheatsheets">
-              <Action
-                title="View All Cheatsheets"
-                icon={Icon.List}
-                shortcut={{ modifiers: ["cmd"], key: "l" }}
-                onAction={() => {
-                  showToast({
-                    style: Toast.Style.Animated,
-                    title: "Coming Soon",
-                    message: "Cheatsheet viewer will be available soon",
-                  });
-                }}
-              />
               <Action.CopyToClipboard
                 title="Copy Cheatsheet List"
                 icon={Icon.CopyClipboard}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                shortcut={shortcut("l", true)}
                 content={cheatsheets.map((sheet) => `- ${sheet.title} (${sheet.filePath})`).join("\n")}
                 onCopy={() => {
                   showToast({
@@ -181,8 +178,16 @@ No cheatsheets found. Use the **Sync Repository** action to fetch cheatsheet fil
             <Action.Push
               title="Edit Repository"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-              target={<EditRepositoryForm repo={repo} onUpdated={onUpdated} />}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              target={
+                <EditRepositoryForm
+                  repo={repo}
+                  onUpdated={() => {
+                    void loadCheatsheets();
+                    onUpdated?.();
+                  }}
+                />
+              }
             />
             <Action
               title="Refresh Details"
@@ -193,6 +198,7 @@ No cheatsheets found. Use the **Sync Repository** action to fetch cheatsheet fil
                   await loadCheatsheets();
                   const updatedRepo = await Service.getUserRepository(repo.id);
                   if (updatedRepo) {
+                    setRepo(updatedRepo);
                     showToast({
                       style: Toast.Style.Success,
                       title: "Refreshed",
@@ -216,5 +222,5 @@ No cheatsheets found. Use the **Sync Repository** action to fetch cheatsheet fil
 // Import the components we need
 import { EditRepositoryForm } from "./edit-repository-form";
 
-// Export the OAuth-wrapped component
+// Keep the published OAuth entry boundary.
 export const RepositoryDetailsWithAuth = withAccessToken(githubOAuth)(RepositoryDetailsComponent);

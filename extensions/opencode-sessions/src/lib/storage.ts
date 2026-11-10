@@ -37,7 +37,7 @@ export async function checkDatabase(): Promise<string | null> {
   try {
     const rows = await executeSQL<{ name: string }>(
       dbPath,
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='session'",
+      "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('session', 'session_v2')",
     );
 
     if (rows.length === 0) {
@@ -52,6 +52,14 @@ export async function checkDatabase(): Promise<string | null> {
 
     return "Could not open OpenCode database.";
   }
+}
+
+async function getSessionTableNames(): Promise<string[]> {
+  const rows = await executeSQL<{ name: string }>(
+    getDbPath(),
+    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('session', 'session_v2') ORDER BY name",
+  );
+  return rows.map((r) => r.name);
 }
 
 interface ProjectRow {
@@ -201,16 +209,19 @@ export async function loadProjects(): Promise<Project[]> {
 }
 
 export async function loadSessions(): Promise<Session[]> {
-  const rows = await executeSQL<SessionRow>(
-    getDbPath(),
-    `SELECT id, project_id, parent_id, slug, directory, title, version,
-            share_url, summary_additions, summary_deletions, summary_files,
-            time_created, time_updated, time_compacting, time_archived
-     FROM session
-     WHERE parent_id IS NULL
-     ORDER BY time_updated DESC`,
-  );
+  const tables = await getSessionTableNames();
+  if (tables.length === 0) return [];
 
+  const cols = `id, project_id, parent_id, slug, directory, title, version,
+            share_url, summary_additions, summary_deletions, summary_files,
+            time_created, time_updated, time_compacting, time_archived`;
+  const parts = tables.map((tbl) => `SELECT ${cols} FROM ${tbl} WHERE parent_id IS NULL`);
+  const sql =
+    parts.length === 1
+      ? `${parts[0]} ORDER BY time_updated DESC`
+      : `${parts.join(" UNION ALL ")} ORDER BY time_updated DESC`;
+
+  const rows = await executeSQL<SessionRow>(getDbPath(), sql);
   return rows.map(toSession);
 }
 
@@ -283,21 +294,33 @@ function runSql(query: string): void {
 
 export async function deleteSession(session: Session): Promise<void> {
   const sid = escapeSql(session.id);
+  const tables = await getSessionTableNames();
 
-  runSql(
-    `WITH RECURSIVE descendants(id) AS (` +
-      `SELECT id FROM session WHERE id = '${sid}' ` +
-      `UNION ALL ` +
-      `SELECT s.id FROM session s JOIN descendants d ON s.parent_id = d.id` +
-      `) ` +
-      `DELETE FROM session WHERE id IN (SELECT id FROM descendants);`,
-  );
+  const statements = tables
+    .map(
+      (tbl) =>
+        `WITH RECURSIVE descendants(id) AS (` +
+        `SELECT id FROM ${tbl} WHERE id = '${sid}' ` +
+        `UNION ALL ` +
+        `SELECT s.id FROM ${tbl} s JOIN descendants d ON s.parent_id = d.id` +
+        `) ` +
+        `DELETE FROM ${tbl} WHERE id IN (SELECT id FROM descendants);`,
+    )
+    .join("\n");
+
+  runSql(statements);
 }
 
 export async function deleteAllProjectSessions(projectID: string): Promise<void> {
   const pid = escapeSql(projectID);
+  const tables = await getSessionTableNames();
 
-  runSql(`DELETE FROM session WHERE project_id = '${pid}'; DELETE FROM project WHERE id = '${pid}';`);
+  const statements = tables
+    .map((tbl) => `DELETE FROM ${tbl} WHERE project_id = '${pid}';`)
+    .concat([`DELETE FROM project WHERE id = '${pid}';`])
+    .join("\n");
+
+  runSql(statements);
 }
 
 function escLike(str: string): string {
@@ -311,16 +334,35 @@ async function querySessionRows(sql: string): Promise<Session[]> {
 
 /**
  * Multi-word scored search across session titles and message content.
+ * Title search covers both session (v1) and session_v2 (v2) tables.
+ * Content search is v1-only (v2 uses a different message format).
  */
 export async function searchSessions(keyword: string, limit = 30): Promise<Session[]> {
   const escaped = escLike(keyword.toLowerCase().trim());
   if (!escaped) return [];
 
+  const tables = await getSessionTableNames();
+  if (tables.length === 0) return [];
+
   const words = escaped.split(/\s+/).filter((w) => w.length >= 2);
-  const base =
-    "SELECT id, project_id, parent_id, slug, directory, title, version, share_url, summary_additions, summary_deletions, summary_files, time_created, time_updated, time_compacting, time_archived FROM session WHERE time_archived IS NULL AND parent_id IS NULL";
+  const cols =
+    "id, project_id, parent_id, slug, directory, title, version, share_url, summary_additions, summary_deletions, summary_files, time_created, time_updated, time_compacting, time_archived";
+
+  // Build a title-search base that covers all available session tables.
+  function titleBase(like: string) {
+    const perTable = tables.map(
+      (tbl) =>
+        `SELECT ${cols} FROM ${tbl} WHERE time_archived IS NULL AND parent_id IS NULL AND lower(title) LIKE '%${like}%' ESCAPE '\\'`,
+    );
+    return perTable.length === 1
+      ? `${perTable[0]} ORDER BY time_updated DESC LIMIT ${limit}`
+      : `${perTable.join(" UNION ALL ")} ORDER BY time_updated DESC LIMIT ${limit}`;
+  }
+
+  // Content base only works for v1 sessions (part/message tables).
   const contentBase =
     "SELECT DISTINCT s.id, s.project_id, s.parent_id, s.slug, s.directory, s.title, s.version, s.share_url, s.summary_additions, s.summary_deletions, s.summary_files, s.time_created, s.time_updated, s.time_compacting, s.time_archived FROM part p JOIN message m ON p.message_id = m.id JOIN session s ON m.session_id = s.id WHERE s.time_archived IS NULL AND s.parent_id IS NULL";
+  const hasV1 = tables.includes("session");
 
   const scores = new Map<string, { session: Session; score: number }>();
 
@@ -336,36 +378,30 @@ export async function searchSessions(keyword: string, limit = 30): Promise<Sessi
   }
 
   // 1. Exact phrase in title (score: 10)
-  addResults(
-    await querySessionRows(
-      `${base} AND lower(title) LIKE '%${escaped}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
-    ),
-    10,
-  );
+  addResults(await querySessionRows(titleBase(escaped)), 10);
 
-  // 2. Exact phrase in content (score: 5)
-  addResults(
-    await querySessionRows(
-      `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
-    ),
-    5,
-  );
+  // 2. Exact phrase in content — v1 only (score: 5)
+  if (hasV1) {
+    addResults(
+      await querySessionRows(
+        `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
+      ),
+      5,
+    );
+  }
 
   // 3. Individual words — only if multi-word query
   if (words.length > 1) {
     for (const word of words) {
-      addResults(
-        await querySessionRows(
-          `${base} AND lower(title) LIKE '%${word}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
-        ),
-        3,
-      );
-      addResults(
-        await querySessionRows(
-          `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${word}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${word}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
-        ),
-        1,
-      );
+      addResults(await querySessionRows(titleBase(word)), 3);
+      if (hasV1) {
+        addResults(
+          await querySessionRows(
+            `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${word}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${word}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
+          ),
+          1,
+        );
+      }
     }
   }
 

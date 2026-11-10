@@ -1,4 +1,4 @@
-import { BaseExtractor, ExtractorResult, ExtractorDocument } from "./_base";
+import { BaseExtractor, ExtractorDocument, ExtractorResult } from "./_base";
 
 /**
  * Extractor for Reddit (reddit.com, old.reddit.com)

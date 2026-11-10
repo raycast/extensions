@@ -35,6 +35,25 @@ const adjustVolume = (delta: number): TE.TaskEither<ScriptError, number> =>
     ),
     TE.map(Number),
   );
+// Nudge playback by `seconds` (negative rewinds). Reads, clamps and writes
+// the position in one bounded Music call so a stale read can't overshoot.
+const seek = (seconds: number): TE.TaskEither<ScriptError, number> =>
+  pipe(
+    runScript(
+      `tell application "Music"
+        if player state is stopped then error "Nothing is playing."
+        set trackDuration to duration of current track
+        set nextPosition to (player position) + (${seconds})
+        if nextPosition < 0 then set nextPosition to 0
+        if nextPosition > trackDuration then set nextPosition to trackDuration
+        set player position to nextPosition
+        return player position
+      end tell`,
+      5_000,
+    ),
+    TE.map(Number),
+  );
+
 const getShuffleStatus = pipe(
   tell("Music", "get shuffle enabled"),
   TE.map((s) => s === "true"),
@@ -73,6 +92,11 @@ export const volume = {
   get: getVolume,
   decrease: (step = 10) => adjustVolume(-step),
   increase: (step = 10) => adjustVolume(step),
+};
+
+export const position = {
+  rewind: (seconds = 15) => seek(-seconds),
+  fastForward: (seconds = 15) => seek(seconds),
 };
 
 export const getPlayerState = pipe(

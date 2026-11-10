@@ -12,3 +12,5 @@ export const CHROMIUM_BROWSERS = [
 export const SAFARI_BROWSERS = ["com.apple.Safari", "com.apple.SafariTechPreview"];
 
 export const ARC_BROWSERS = ["company.thebrowser.Browser"];
+
+export const DIA_BROWSERS = ["company.thebrowser.dia"];

@@ -162,7 +162,7 @@
     "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.16.2",
     "js-base64": "^3.7.2",
-    "openai": "^4.77.0",
+    "openai": "^7.53.0",
     "run-applescript": "^7.0.0"
   },
   "preferences": [
@@ -271,5 +271,8 @@
   },
   "overrides": {
     "brace-expansion": "5.0.9"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

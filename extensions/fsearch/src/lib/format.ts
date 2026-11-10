@@ -20,6 +20,11 @@ export function fileName(path: string) {
   return basename(path) || path;
 }
 
+/** Quote one shell argument, closing the quotes around each literal apostrophe. */
+export function quoteShellPath(path: string) {
+  return `'${path.replaceAll("'", "'\\''")}'`;
+}
+
 export function folderOf(path: string) {
   return tildify(dirname(path));
 }

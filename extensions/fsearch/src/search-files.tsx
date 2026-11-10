@@ -17,6 +17,7 @@ import {
 } from "./lib/format";
 import { filtersFor, KINDS } from "./lib/kinds";
 import { useFSearch } from "./lib/use-fsearch";
+import { useTrashedPaths } from "./lib/use-trashed-paths";
 
 const LIMIT = 60;
 
@@ -25,6 +26,7 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
   const [kind, setKind] = useState<string>(args.kind || "all");
   const [scope, setScope] = useState<string | undefined>(args.folder?.trim() ? expandHome(args.folder) : undefined);
   const [isShowingDetail, setShowingDetail] = useCachedState("show-detail", false);
+  const { onTrash, isVisible } = useTrashedPaths();
 
   // A kind or folder is enough to list something, even with no words.
   const query = text.trim();
@@ -37,7 +39,7 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
     execute,
   );
 
-  const hits = execute && !error ? (data?.hits ?? []) : [];
+  const hits = execute && !error ? (data?.hits ?? []).filter((hit) => isVisible(hit.path)) : [];
   const timing = execute && !error && data ? formatDuration(data.tookMicros) : undefined;
   const scopeLabel = scope ? tildify(scope) : undefined;
   const toggleDetail = () => setShowingDetail((shown) => !shown);
@@ -95,6 +97,7 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
               <HitItem
                 key={hit.path}
                 hit={hit}
+                onTrash={onTrash}
                 isShowingDetail={isShowingDetail}
                 onToggleDetail={toggleDetail}
                 onSearchIn={setScope}
@@ -111,6 +114,7 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
 
 interface HitItemProps {
   hit: Hit;
+  onTrash: (path: string) => void;
   isShowingDetail: boolean;
   onToggleDetail: () => void;
   onSearchIn: (folder: string) => void;
@@ -118,7 +122,7 @@ interface HitItemProps {
   onClearScope: () => void;
 }
 
-function HitItem({ hit, isShowingDetail, onToggleDetail, onSearchIn, scope, onClearScope }: HitItemProps) {
+function HitItem({ hit, onTrash, isShowingDetail, onToggleDetail, onSearchIn, scope, onClearScope }: HitItemProps) {
   const name = fileName(hit.path);
   const modified = modifiedDate(hit.mtime);
   return (
@@ -136,6 +140,7 @@ function HitItem({ hit, isShowingDetail, onToggleDetail, onSearchIn, scope, onCl
       actions={
         <FileActions
           path={hit.path}
+          onTrash={onTrash}
           isFolder={hit.kind === "dir" && !hit.path.endsWith(".app")}
           onSearchIn={onSearchIn}
           onToggleDetail={onToggleDetail}

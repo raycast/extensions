@@ -1,0 +1,36 @@
+{
+  "prev": [
+    {
+      "firstLine": "Le direct",
+      "secondLine": "La webradio préférée des Francophiles et Anglophobes !",
+      "thirdLine": "Sacré français !",
+      "songUuid": null,
+      "cover": "1641a25c-e8c8-49f8-b5e1-cffd8b722231",
+      "startTime": null,
+      "endTime": null
+    }
+  ],
+  "now": {
+    "firstLine": "Le direct",
+    "secondLine": "La webradio préférée des Francophiles et Anglophobes !",
+    "thirdLine": "Sacré français !",
+    "songUuid": null,
+    "cover": "1641a25c-e8c8-49f8-b5e1-cffd8b722231",
+    "startTime": null,
+    "endTime": null
+  },
+  "next": [
+    {
+      "firstLine": "Hématome",
+      "firstLineSongUuid": "b02b5001-3135-4b51-92cc-5d1b0bd8a018",
+      "secondLine": "L'Imperatrice",
+      "secondLineSongUuid": "b02b5001-3135-4b51-92cc-5d1b0bd8a018",
+      "thirdLine": "Sacré français !",
+      "songUuid": "b02b5001-3135-4b51-92cc-5d1b0bd8a018",
+      "cover": "98da55fd-aca7-4bfc-9ff5-c0ad4f0bda10",
+      "startTime": 1792675006,
+      "endTime": 1792675219
+    }
+  ],
+  "delayToRefresh": 10000
+}

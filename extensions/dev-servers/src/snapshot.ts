@@ -31,6 +31,8 @@ export function readSnapshot(): DevServer[] | null {
       if (Number.isNaN(startedAt.getTime())) throw new Error("Bad snapshot");
       return {
         ...server,
+        // Absent in snapshots written before workers were tracked.
+        workerPids: server.workerPids ?? [],
         startedAt,
       };
     });

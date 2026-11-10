@@ -22,7 +22,7 @@ export const EntriesEmptyView = ({ selectedLanguages }: EntriesEmptyViewProps) =
     <List.EmptyView
       title={`It is pretty empty around here`}
       description={`Start playing or change the filter settings to see some entries.`}
-      icon={{ source: "oops-face.png" }}
+      icon={{ source: { light: "empty-board-light.svg", dark: "empty-board-dark.svg" } }}
       actions={
         <ActionPanel>
           {languageOptions

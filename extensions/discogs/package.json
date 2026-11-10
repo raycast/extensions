@@ -5,6 +5,7 @@
   "description": "It will search discogs.com for a music release information specified by Label ID, Barcode, Artist or Album name",
   "icon": "command-icon.png",
   "author": "vigosan",
+  "contributors": ["FL0R1AN"],
   "categories": [
     "Media"
   ],
@@ -38,13 +39,20 @@
       "title": "Search by Barcode",
       "description": "Search Discogs releases by barcode",
       "mode": "view"
+    },
+    {
+      "name": "search-current-track",
+      "title": "Search Current Music Track",
+      "description": "Search Discogs for the track currently playing in Apple Music",
+      "mode": "no-view",
+      "platforms": ["macOS"]
     }
   ],
   "preferences": [
     {
       "name": "token",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Personal Access Token",
       "description": "Your Discogs Personal Access Token. You can generate one at https://www.discogs.com/settings/developers",
       "placeholder": "a1b2...c3d4"

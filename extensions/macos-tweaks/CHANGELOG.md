@@ -1,5 +1,19 @@
 # macOS Tweaks Changelog
 
+## [Dock Spacers] - 2026-10-19
+
+### New Command
+
+- **Add Dock Spacer**: adds an empty tile to the Dock to split your apps into groups — small or regular, among the apps or on the documents side next to the Trash
+  - A new spacer goes in at the end of its side: drag it where you want it, and drag it out of the Dock to remove it
+  - Run it bare for a small spacer among the apps, or pick the size and side from its arguments
+
+### Improved
+
+- **Browse Tweaks** has a **Dock Spacers** item in the Dock section: it shows how many spacers the Dock holds, adds any of the four kinds, and removes them all at once without touching your apps and folders
+
+Thanks to Sergey Filkov for the tip.
+
 ## [Dim Hidden Apps] - 2026-10-16
 
 ### New Tweak

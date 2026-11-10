@@ -14,6 +14,7 @@ import {
   getPreferenceValues,
   getSelectedFinderItems,
   launchCommand,
+  Keyboard,
 } from "@raycast/api";
 import {
   showFailureToast,
@@ -27,17 +28,27 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { promisify } from "node:util";
 import { DEFAULT_TERMINAL } from "./constants";
 import {
+  LOGIN_KEY,
+  LoginProject,
+  NO_LOGIN_PROJECTS,
+  toggleStartAtLogin,
+} from "./loginStarts";
+import {
   RecentProject,
   STORAGE_KEY,
   recordSeenBatch,
   removeRecent,
 } from "./recents";
 import {
+  canPlanStart,
+  canonicalCwd,
   directoryExists,
   fetchServers,
   findProjectRoot,
   isShopifyAppRoot,
   isShopifyThemeRoot,
+  missingDependencies,
+  tildePath,
 } from "./servers";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
@@ -266,18 +277,26 @@ async function chooseFolderAndStart(options: {
 interface RowProps {
   recent: RecentProject;
   framework?: string;
+  // No node_modules: starting will offer to install first.
+  needsInstall: boolean;
   terminalApp: Application;
   editorApp?: Application;
   autoOpen: boolean;
+  // Marked to start when the Mac starts.
+  atLogin: boolean;
+  onToggleLogin: () => void;
   onRemove: (cwd: string) => Promise<void>;
 }
 
 function RecentRow({
   recent,
   framework,
+  needsInstall,
   terminalApp,
   editorApp,
   autoOpen,
+  atLogin,
+  onToggleLogin,
   onRemove,
 }: RowProps) {
   async function start() {
@@ -302,6 +321,20 @@ function RecentRow({
   }
 
   const accessories: List.Item.Accessory[] = [
+    // Also on the dashboard's running rows. The Start at Login section below
+    // lists them all.
+    ...(atLogin ? [{ icon: Icon.Power, tooltip: "Starts at login" }] : []),
+    // Said here, before the start, so a project whose node_modules was
+    // cleaned away is not a surprise: starting it asks to install first.
+    ...(needsInstall
+      ? [
+          {
+            tag: { value: "Not installed", color: Color.Orange },
+            tooltip:
+              "No node_modules folder. Starting will offer to install dependencies first.",
+          },
+        ]
+      : []),
     {
       text: formatLastSeen(recent.lastSeen),
       tooltip: `Last seen ${new Date(recent.lastSeen).toLocaleString()}`,
@@ -346,7 +379,7 @@ function RecentRow({
                 icon={Icon.Code}
                 target={recent.cwd}
                 application={editorApp}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
               />
             )}
             <Action.Open
@@ -367,12 +400,117 @@ function RecentRow({
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            {/* Below the open actions so it never lands on ⌘↵, which Raycast
+                binds to the second action. */}
+            <Action
+              title={atLogin ? "Don't Start at Login" : "Start at Login"}
+              icon={Icon.Power}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={onToggleLogin}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action
               title="Remove from Recents"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={remove}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+// A row in the Start at Login section: the project, and whether it is up.
+// Unlike the recents, running and missing projects stay listed here, so the
+// section answers "what comes up when I restart?" in full.
+function LoginRow({
+  project,
+  running,
+  autoOpen,
+  onRemove,
+}: {
+  project: LoginProject;
+  running: boolean;
+  autoOpen: boolean;
+  onRemove: () => void;
+}) {
+  const exists = directoryExists(project.cwd);
+  // A folder with nothing the extension knows how to run (its dev script
+  // renamed, say) is skipped at login just like a missing one, so it is
+  // named here rather than passing for "Not running".
+  const startable = exists && canPlanStart(project.cwd);
+  const status: List.Item.Accessory = running
+    ? { tag: { value: "Running", color: Color.Green } }
+    : !exists
+      ? {
+          tag: { value: "Folder missing", color: Color.Red },
+          tooltip: "Skipped at login until the folder is back",
+        }
+      : !startable
+        ? {
+            tag: { value: "Can't start", color: Color.Orange },
+            tooltip:
+              "No dev, start or develop script, so it is skipped at login",
+          }
+        : { text: "Not running" };
+  async function start() {
+    await launchSpawn([{ cwd: project.cwd, name: project.projectName }], {
+      autoOpen,
+      confirmMulti: false,
+    });
+  }
+  return (
+    <List.Item
+      id={`login:${project.cwd}`}
+      icon={Icon.Power}
+      title={project.projectName}
+      subtitle={{ value: tildePath(project.cwd), tooltip: project.cwd }}
+      keywords={[project.cwd]}
+      accessories={[status]}
+      actions={
+        <ActionPanel>
+          {!running && startable && (
+            <Action
+              title="Start Dev Server"
+              icon={Icon.Play}
+              onAction={start}
+            />
+          )}
+          <ActionPanel.Section>
+            {exists && (
+              <Action.ShowInFinder
+                path={project.cwd}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              />
+            )}
+            {/* Kept for a missing folder too, and joined there by Copy Name,
+                so that row still has two harmless actions for ↵ and ⌘↵:
+                Raycast binds ⌘↵ to the second action whatever its section,
+                and the toggle below must never be one of them. */}
+            <Action.CopyToClipboard
+              title="Copy Path"
+              content={project.cwd}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            {!exists && (
+              <Action.CopyToClipboard
+                title="Copy Name"
+                content={project.projectName}
+              />
+            )}
+          </ActionPanel.Section>
+          {/* Last, and always third or later, so neither ↵ nor ⌘↵ can turn
+              it off by accident. */}
+          <ActionPanel.Section>
+            <Action
+              title="Don't Start at Login"
+              icon={Icon.Power}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={onRemove}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -487,7 +625,10 @@ function PickerView({
 
   const runningByCwd = useMemo(() => {
     const m = new Map<string, DevServer>();
-    for (const s of running) m.set(s.cwd, s);
+    // Canonical on both sides: recents are stored canonical, and a server's
+    // cwd is whatever lsof reported, so a symlinked path would otherwise keep
+    // a running project in the list of things to start.
+    for (const s of running) m.set(canonicalCwd(s.cwd), s);
     return m;
   }, [running]);
 
@@ -514,6 +655,19 @@ function PickerView({
     { keepPreviousData: true, initialData: {} },
   );
 
+  // Which recents have no installed dependencies. Off the render path for the
+  // same reason as the framework tags: it reads each package.json.
+  const { data: needsInstallList } = useCachedPromise(
+    async (cwds: string[]): Promise<string[]> =>
+      cwds.filter((cwd) => missingDependencies(cwd) !== null),
+    [recentCwds],
+    { keepPreviousData: true, initialData: [] },
+  );
+  const needsInstall = useMemo(
+    () => new Set(needsInstallList),
+    [needsInstallList],
+  );
+
   // Hide entries that are currently running (the dashboard owns them) or
   // whose folder no longer exists on disk. We keep them in storage so a
   // remounted external drive or stopped server reappears.
@@ -528,7 +682,9 @@ function PickerView({
   // favors no flash over shaving microseconds.
   const visible = useMemo(() => {
     return (recents ?? [])
-      .filter((r) => !runningByCwd.has(r.cwd) && directoryExists(r.cwd))
+      .filter(
+        (r) => !runningByCwd.has(canonicalCwd(r.cwd)) && directoryExists(r.cwd),
+      )
       .sort((a, b) => b.lastSeen - a.lastSeen);
   }, [recents, runningByCwd]);
 
@@ -544,13 +700,22 @@ function PickerView({
     await setRecents(await removeRecent(targetCwd));
   }
 
+  const {
+    value: loginProjects = NO_LOGIN_PROJECTS,
+    setValue: setLoginProjects,
+  } = useLocalStorage<LoginProject[]>(LOGIN_KEY, NO_LOGIN_PROJECTS);
+  const loginCwds = useMemo(
+    () => new Set(loginProjects.map((p) => canonicalCwd(p.cwd))),
+    [loginProjects],
+  );
+
   const isLoading = isLoadingRecents || isLoadingRunning;
   const hasRecents = visible.length > 0;
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter recent projects..."
+      searchBarPlaceholder="Filter projects..."
       // The Finder section's position is the whole point of it: it is what
       // the user was just looking at, so a search query must not demote it
       // below the recents.
@@ -584,10 +749,41 @@ function PickerView({
               key={r.cwd}
               recent={r}
               framework={frameworkByCwd[r.cwd]}
+              needsInstall={needsInstall.has(r.cwd)}
               terminalApp={terminalApp}
               editorApp={editorApp}
               autoOpen={autoOpen}
+              atLogin={loginCwds.has(canonicalCwd(r.cwd))}
+              onToggleLogin={() =>
+                void toggleStartAtLogin(
+                  { cwd: r.cwd, projectName: r.projectName },
+                  !loginCwds.has(canonicalCwd(r.cwd)),
+                  setLoginProjects,
+                )
+              }
               onRemove={handleRemove}
+            />
+          ))}
+        </List.Section>
+      )}
+      {/* Below the recents rather than merged into them: a marked project
+          keeps its place in the recents (with the power mark), and this
+          section is the whole list, including the running and missing ones
+          the recents hide. */}
+      {loginProjects.length > 0 && (
+        <List.Section
+          title="Start at Login"
+          subtitle={`${loginProjects.length}`}
+        >
+          {loginProjects.map((project) => (
+            <LoginRow
+              key={project.cwd}
+              project={project}
+              running={runningByCwd.has(canonicalCwd(project.cwd))}
+              autoOpen={autoOpen}
+              onRemove={() =>
+                void toggleStartAtLogin(project, false, setLoginProjects)
+              }
             />
           ))}
         </List.Section>

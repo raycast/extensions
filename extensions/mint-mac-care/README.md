@@ -34,13 +34,13 @@ macOS 14 Sonoma or later.
 
 ## Free use and editions
 
-In **Mint Direct 1.0.92 and later**, disk scans and memory release are free and unlimited. Each week includes **1 GB of cleanup and 50 organized files**, and your first manual clean is free regardless of size. Setup does not use either allowance. Cleanup, Optimize and app uninstall share the 1 GB; organizing uses the separate 50-file allowance. Auto Care is included and shares these allowances with manual use, including Raycast. Mint Unlimited removes both limits.
+In **Mint Direct 1.0.96 and later**, disk scans and memory release are free and unlimited. Cleaning, organizing, Optimize and app uninstall share **one free 1 GB each week**. Cleanup, Optimize and app uninstall count the bytes they remove or rewrite; organizing counts the size of the files Mint moves. Setup does not count toward it. Auto Care is included and shares the same 1 GB with manual use, including Raycast. Mint Unlimited removes the limit.
 
 The editions have different features and access. Checked October 12, 2026:
 
 | Edition       | Works with this extension? | Features and access                                                                                                                                                                                                                  |
 | ------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Direct        | Yes                        | Storage care, organizing, Memory, Uninstall, CLI and MCP. Free allowances above apply from 1.0.92; earlier versions have different limits.                                                                                           |
+| Direct        | Yes                        | Storage care, organizing, Memory, Uninstall, CLI and MCP. The free allowance above applies from 1.0.96; earlier versions have different limits.                                                                                      |
 | Mac App Store | No                         | Storage care and organizing; no Memory, Uninstall, CLI or MCP. Public version 1.0.84 has unlimited scans and manual organizing, plus a one-time 1 GB cleanup allowance. Monthly or Lifetime removes the limit and enables Auto Care. |
 | Setapp        | No                         | Storage care, organizing, Memory and Uninstall; no CLI or MCP. Access follows [Setapp's offer for Mint](https://setapp.com/apps/mint), with no Mint in-app cleanup or organizing allowance. Direct's free offer does not apply.      |
 

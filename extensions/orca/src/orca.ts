@@ -1,3 +1,6 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
 /** Shape of one row returned by `orca terminal list --json`. */
 export type OrcaTerminal = {
   handle: string;
@@ -32,6 +35,8 @@ export type OrcaAgent = {
 
 export type OrcaWorktree = {
   path: string;
+  /** Orca's unread dot. It marks the whole worktree, not one pane in it. */
+  unread?: boolean | null;
   agents?: OrcaAgent[];
 };
 
@@ -42,7 +47,14 @@ export type AgentRow = OrcaTerminal & {
   stateStartedAt?: number;
   prompt?: string | null;
   lastAssistantMessage?: string | null;
+  /** Orca still shows its worktree as unread. */
+  unread?: boolean;
 };
+
+/** An agent that finished and has not been looked at since. */
+export function isUnseen(row: AgentRow): boolean {
+  return row.state === "done" && row.unread === true;
+}
 
 /** Which agents the list shows. The dropdown in the list switches it. */
 export type StatusFilter = "waiting" | "stopped" | "all";
@@ -52,6 +64,9 @@ export type StatusFilter = "waiting" | "stopped" | "all";
  * list's own filter: this one is a preference, that one is a dropdown.
  */
 export type SummaryMode = "sessions" | "counts";
+
+/** How the list groups its rows below the waiting ones. */
+export type GroupBy = "project" | "status";
 
 /** Which kind of pane the list shows. */
 export type AgentFilter = "all-agents" | "claude" | "codex" | "everything";
@@ -66,7 +81,9 @@ export function mergeAgents(
   worktrees: OrcaWorktree[],
 ): AgentRow[] {
   const agents = new Map<string, OrcaAgent>();
+  const unread = new Set<string>();
   for (const worktree of worktrees) {
+    if (worktree.unread) unread.add(worktree.path);
     for (const agent of worktree.agents ?? []) {
       agents.set(agent.paneKey, agent);
     }
@@ -74,9 +91,11 @@ export function mergeAgents(
 
   return terminals.map((terminal) => {
     const agent = agents.get(paneKey(terminal));
-    if (!agent) return { ...terminal };
+    const flagged = unread.has(terminal.worktreePath);
+    if (!agent) return { ...terminal, unread: flagged };
     return {
       ...terminal,
+      unread: flagged,
       state: agent.state,
       toolName: agent.toolName,
       stateStartedAt: agent.stateStartedAt,
@@ -105,9 +124,15 @@ export function filterRows(
   });
 }
 
-export type Section =
-  | { kind: "waiting"; key: string; items: AgentRow[] }
-  | { kind: "project"; key: string; items: AgentRow[] };
+/**
+ * A project section groups one worktree's panes; every other kind gathers one
+ * state from all projects, so its rows have to name their project.
+ */
+export type Section = {
+  kind: "waiting" | "unseen" | "working" | "finished" | "other" | "project";
+  key: string;
+  items: AgentRow[];
+};
 
 /** The last path segment — what Orca shows as the project. */
 function folderName(path: string): string {
@@ -141,20 +166,65 @@ export function projectNamer(
       : folderName(worktreePath);
 }
 
-export function buildSections(rows: AgentRow[]): Section[] {
-  const waiting = rows.filter((row) => row.state === "waiting");
-  const rest = rows.filter((row) => row.state !== "waiting");
+const recency = (row: AgentRow) => row.lastOutputAt ?? 0;
+const finishedAt = (row: AgentRow) => row.stateStartedAt ?? 0;
 
-  const sections: Section[] = [];
-  if (waiting.length > 0) {
-    sections.push({
+/** Drops the sections that came out empty. */
+function nonEmpty(sections: Section[]): Section[] {
+  return sections.filter((section) => section.items.length > 0);
+}
+
+/**
+ * Waiting agents lead either way, and the ones that finished unseen follow:
+ * both sit there until you look. Below them the list goes by project, or by
+ * state when grouped by status.
+ */
+export function buildSections(
+  rows: AgentRow[],
+  groupBy: GroupBy = "project",
+): Section[] {
+  const waiting = rows.filter((row) => row.state === "waiting");
+  const unseen = rows.filter(isUnseen);
+  const rest = rows.filter((row) => row.state !== "waiting" && !isUnseen(row));
+
+  const sections: Section[] = [
+    {
       kind: "waiting",
       key: "waiting",
       // The one that has been blocked longest is the one most likely forgotten.
-      items: [...waiting].sort(
-        (a, b) => (a.stateStartedAt ?? 0) - (b.stateStartedAt ?? 0),
-      ),
-    });
+      items: [...waiting].sort((a, b) => finishedAt(a) - finishedAt(b)),
+    },
+    {
+      kind: "unseen",
+      key: "unseen",
+      items: [...unseen].sort((a, b) => finishedAt(b) - finishedAt(a)),
+    },
+  ];
+
+  if (groupBy === "status") {
+    const working = rest.filter((row) => row.state === "working");
+    const finished = rest.filter((row) => row.state === "done");
+    const other = rest.filter(
+      (row) => row.state !== "working" && row.state !== "done",
+    );
+    return nonEmpty([
+      ...sections,
+      {
+        kind: "working",
+        key: "working",
+        items: [...working].sort((a, b) => recency(b) - recency(a)),
+      },
+      {
+        kind: "finished",
+        key: "finished",
+        items: [...finished].sort((a, b) => finishedAt(b) - finishedAt(a)),
+      },
+      {
+        kind: "other",
+        key: "other",
+        items: [...other].sort((a, b) => recency(b) - recency(a)),
+      },
+    ]);
   }
 
   // Keyed by path, not by name: /team-a/app and /team-b/app are two projects
@@ -171,7 +241,6 @@ export function buildSections(rows: AgentRow[]): Section[] {
   // same project gets in the waiting section.
   const projectOf = projectNamer(rows);
 
-  const recency = (row: AgentRow) => row.lastOutputAt ?? 0;
   const projects: Section[] = [...byPath.values()]
     .map((items) => ({
       kind: "project" as const,
@@ -180,7 +249,7 @@ export function buildSections(rows: AgentRow[]): Section[] {
     }))
     .sort((a, b) => recency(b.items[0]) - recency(a.items[0]));
 
-  return [...sections, ...projects];
+  return [...nonEmpty(sections), ...projects];
 }
 
 /** Orca prefixes pane titles with a status glyph; it is noise outside the app. */
@@ -247,9 +316,8 @@ function pickLabel(row: {
 }
 
 /**
- * How a row reads in the list. Rows grouped under a project heading do not
- * repeat it; rows in the waiting section come from everywhere, so they lead
- * with the project — the same shape the root search subtitle uses.
+ * A row's title with its project in front — for rows outside a project section
+ * when the details pane hides the subtitle that otherwise carries the project.
  */
 export function sessionLabel(
   row: Parameters<typeof sessionTitle>[0],
@@ -291,7 +359,7 @@ function joinTruncated(labels: string[], maxLength: number): string | null {
  *
  * In "sessions" mode it lists the blocked sessions by name; when they outgrow
  * the row it degrades to project names, and then to a count, so the line always
- * says at least where to look.
+ * says at least where to look. With nobody blocked it reports the counts.
  */
 export function summarize(
   rows: AgentRow[],
@@ -300,9 +368,9 @@ export function summarize(
 ): string | null {
   const waiting = waitingFirst(rows);
 
-  if (mode === "sessions") {
-    if (waiting.length === 0) return null;
-
+  // With nobody blocked the sessions line would be empty; the counts still
+  // say what is going on.
+  if (mode === "sessions" && waiting.length > 0) {
     // The project stays whatever happens: it is what tells two panes apart.
     const projectOf = projectNamer(waiting);
     const entries = waiting.map((row) => ({ row, project: projectOf(row) }));
@@ -338,9 +406,12 @@ export function summarize(
   }
 
   const working = rows.filter((row) => row.state === "working").length;
+  // Only the unseen ones: a finished agent already looked at is no news.
+  const done = rows.filter(isUnseen).length;
   const parts: string[] = [];
   if (waiting.length > 0) parts.push(`${waiting.length} waiting`);
   if (working > 0) parts.push(`${working} working`);
+  if (done > 0) parts.push(`${done} done`);
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
@@ -350,15 +421,82 @@ type OrcaEnvelope<T> = {
   error?: { code?: string; message?: string };
 };
 
+/** The oldest Orca whose CLI has every command and flag this extension calls. */
+export const MIN_ORCA_VERSION = "1.4.229";
+
+/**
+ * Orca rejects a command or flag it does not know in so many words, and that
+ * only happens when the app is older than this extension.
+ */
+function failure(message?: string): Error {
+  if (message && /^Unknown (command|flag)\b/.test(message)) {
+    return new Error(
+      `Your Orca is too old for this. Update Orca to ${MIN_ORCA_VERSION} or later.`,
+    );
+  }
+  return new Error(message ?? "Orca returned an unsuccessful response");
+}
+
 /** Every Orca command answers with the same envelope; unwrap it or throw what it reported. */
 export function unwrap<T>(stdout: string): T | undefined {
   const envelope = JSON.parse(stdout) as OrcaEnvelope<T>;
-  if (!envelope.ok) {
-    throw new Error(
-      envelope.error?.message ?? "Orca returned an unsuccessful response",
+  if (!envelope.ok) throw failure(envelope.error?.message);
+  return envelope.result;
+}
+
+/**
+ * What a failed CLI call should say. execFile rejects on a non-zero exit before
+ * the envelope is read, and its own message is the whole command line — the
+ * prompt included.
+ */
+export function orcaError(error: unknown): Error {
+  const { code, signal, path, stdout, stderr, message } = error as {
+    code?: number | string | null;
+    signal?: string | null;
+    path?: string;
+    stdout?: string;
+    stderr?: string;
+    message?: string;
+  };
+
+  if (code === "ENOENT") {
+    return new Error(
+      `No Orca CLI at ${path}. Install Orca, or fix the Orca CLI Path preference.`,
     );
   }
-  return envelope.result;
+
+  try {
+    const envelope = JSON.parse(stdout ?? "") as OrcaEnvelope<unknown>;
+    if (envelope.ok === false) return failure(envelope.error?.message);
+  } catch {
+    // Not Orca's envelope: fall through to whatever the process printed.
+  }
+
+  if (stderr?.trim()) return new Error(stderr.trim());
+  if (signal) return new Error(`Orca CLI was stopped by ${signal}`);
+  if (typeof code === "number") {
+    return new Error(`Orca CLI exited with code ${code}`);
+  }
+  // "Command failed: …" is the command line, prompt and all.
+  return new Error(
+    message && !message.startsWith("Command failed")
+      ? message
+      : "Orca CLI failed",
+  );
+}
+
+const execFileAsync = promisify(execFile);
+
+/** Runs the Orca CLI, failing with what Orca said rather than the raw command line. */
+export async function execOrca(
+  orcaPath: string,
+  args: string[],
+): Promise<{ stdout: string }> {
+  try {
+    return await execFileAsync(orcaPath, args);
+  } catch (error) {
+    throw orcaError(error);
+  }
 }
 
 /** Runs one Orca CLI command and unwraps its envelope. */

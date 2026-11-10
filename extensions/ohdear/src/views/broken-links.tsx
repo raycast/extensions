@@ -4,7 +4,7 @@ import { EmptyView } from "../components/empty-view";
 import { BrokenLink, Site } from "../interface";
 import { statusCodeToColor } from "../utils/constants";
 
-export default function BrokenLinksCommand({ item }: { item: Site }): JSX.Element {
+export default function BrokenLinksCommand({ item }: { item: Site }) {
   const { data, isLoading } = getBrokenLinks(item);
 
   return (

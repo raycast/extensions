@@ -1,10 +1,10 @@
 <p align="center">
-    <img src="./assets/extension-icon.png" width="150" height="150" />
+    <img src="./assets/sunflower.png" width="150" height="150" />
 </p>
 
 # Youform
 
-This is a Raycast extension for [Youform](https://youform.com/) - _The most affordable Typeform alternative_. With this extension you can easily view your forms, their blocks and submissions.
+This is a Raycast extension for [Youform](https://youform.com/) - _Beautiful Forms. Unlimited possibilities_. With this extension you can easily view your forms, their blocks and submissions.
 
 ## 🚀 Getting Started
 
@@ -28,6 +28,7 @@ Ans. This depends on the form's "auto_refresh_minutes" setting which is **10 min
 
 ## ➕ More
 
-Looking for more form extensions? Try this:
+Looking for more form extensions? Try these:
 
 <a title="Install jotform Raycast Extension" href="https://www.raycast.com/xmok/jotform"><img src="https://www.raycast.com/xmok/jotform/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install tally Raycast Extension" href="https://www.raycast.com/xmok/tally"><img src="https://www.raycast.com/xmok/tally/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

@@ -1,5 +1,11 @@
 # Threads Changelog
 
+## [Fix Stuck Download Progress] - 2026-10-22
+
+- Fix `Download Threads Media` leaving its progress toast stuck partway (e.g. "Downloading
+  Media 1 of 2 — 66%") after every file had already saved. The toast now always ends on the
+  final result.
+
 ## [Analytics and Giveaway] - 2026-09-28
 
 - Add an **Analytics** command showing account and post metrics for the last 7, 14, 30, or 90 days.

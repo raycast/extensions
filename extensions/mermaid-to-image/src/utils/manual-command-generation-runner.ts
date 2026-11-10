@@ -8,7 +8,6 @@ import {
 import type { ManualDiagramExecutionOptions, ManualGenerationState } from "./manual-command-service";
 import type { ResolvedMermaidInput } from "./mermaid-input";
 import type { ManualCommandSession } from "./manual-command-session";
-import type { Preferences } from "../types";
 
 export interface ManualCommandGenerationRunner {
   run: (
@@ -27,7 +26,7 @@ interface ManualCommandGenerationRunnerServices {
     options: ManualDiagramExecutionOptions,
   ) => Promise<ManualGenerationState>;
   notifyManualGenerationStarted: (source: string) => Promise<void>;
-  notifyManualGenerationSuccess: (source: string, engine: "beautiful" | "mmdc") => Promise<void>;
+  notifyManualGenerationSuccess: (source: string, engine: import("../renderers/types").ResolvedEngine) => Promise<void>;
   notifyManualGenerationFailure: (error: unknown, message: string) => Promise<void>;
   logOperationalError: (event: string, error: unknown, metadata: Record<string, unknown>) => void;
 }

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Icon } from "@raycast/api";
 import { SearchResult } from "../interface/search-result";
 import {
   formatHoursFromMinutes,
@@ -6,8 +6,13 @@ import {
   formatWatchTimeDetailed,
   getTotalMinutes,
 } from "../utils/watch-time";
-
-const FALLBACK_POSTER_URL = "https://placehold.co/960x540/png?text=No+Poster";
+import {
+  CopyUrlAction,
+  CopyWatchTimeAction,
+  OpenInBrowserAction,
+  ToggleDetailAction,
+  ToggleLayoutAction,
+} from "./Actions";
 
 function formatTypeLabel(type: SearchResult["type"]): string {
   return type === "show" ? "TV Show" : "Movie";
@@ -28,10 +33,15 @@ function formatYearLabel(result: SearchResult): string | null {
   return `${fromYear ?? toYear}`;
 }
 
-export function SearchResultListItem(props: { result: SearchResult }) {
-  const { result } = props;
+export function SearchResultListItem(props: {
+  result: SearchResult;
+  isShowingDetail: boolean;
+  setIsShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  layout: string;
+  onToggleLayout: () => void;
+}) {
+  const { result, isShowingDetail, setIsShowingDetail, layout, onToggleLayout } = props;
   const { id, title, url, image, type, watchTime, episodeCount, runtimeMinutes } = result;
-  const posterSource = image ?? FALLBACK_POSTER_URL;
 
   const totalMinutes = getTotalMinutes(watchTime);
   const compactTime = formatWatchTimeCompact(watchTime);
@@ -39,17 +49,16 @@ export function SearchResultListItem(props: { result: SearchResult }) {
   const yearLabel = formatYearLabel(result);
 
   const detailMarkdown = [
-    `![](${posterSource})`,
+    image ? `![](${image})` : "",
     "",
     `# ${title}`,
     "",
-    `**Type:** ${formatTypeLabel(type)}`,
-    ...(yearLabel ? [`**Release:** ${yearLabel}`] : []),
-    ...(type === "show" && episodeCount ? [`**Episodes:** ${episodeCount.toLocaleString()}`] : []),
-    ...(runtimeMinutes ? [`**Runtime (source):** ${runtimeMinutes.toLocaleString()} min`] : []),
+    `> ${detailedTime}`,
     "",
-    "## Total Binge Time",
-    detailedTime,
+    `**Type:** ${formatTypeLabel(type)}`,
+    ...(yearLabel ? [`\n**Release:** ${yearLabel}`] : []),
+    ...(type === "show" && episodeCount ? [`\n**Episodes:** ${episodeCount.toLocaleString()}`] : []),
+    ...(runtimeMinutes ? [`\n**Runtime (source):** ${runtimeMinutes.toLocaleString()} min`] : []),
     "",
     "## Breakdown",
     `- Days: ${watchTime.days ?? 0}`,
@@ -64,31 +73,36 @@ export function SearchResultListItem(props: { result: SearchResult }) {
   return (
     <List.Item
       id={id}
-      title={title}
-      icon={{ source: posterSource }}
-      accessories={[...(yearLabel ? [{ text: yearLabel }] : []), { text: compactTime }]}
+      title={{ value: title, tooltip: title }}
+      subtitle={isShowingDetail ? undefined : compactTime}
+      icon={{ source: image ?? "", fallback: type === "show" ? Icon.Play : Icon.FilmStrip }}
+      accessories={[
+        ...(yearLabel
+          ? [
+              { text: yearLabel },
+              ...(isShowingDetail
+                ? []
+                : [
+                    {
+                      icon: type === "show" ? Icon.Play : Icon.FilmStrip,
+                      tooltip: type === "show" ? "TV Show" : "Movie",
+                    },
+                  ]),
+            ]
+          : []),
+      ]}
       detail={<List.Item.Detail markdown={detailMarkdown} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" icon={{ source: Icon.Globe }} url={url} />
-          <Action.CopyToClipboard
-            title="Copy Watch Time"
-            icon={{ source: Icon.Clock }}
-            content={`${title}: ${detailedTime}`}
-            shortcut={{
-              modifiers: ["cmd"],
-              key: "t",
-            }}
-          />
-          <Action.CopyToClipboard
-            title="Copy URL"
-            icon={{ source: Icon.Clipboard }}
-            content={url}
-            shortcut={{
-              modifiers: ["cmd"],
-              key: "c",
-            }}
-          />
+          <ActionPanel.Section>
+            <OpenInBrowserAction url={url} />
+            <CopyWatchTimeAction title={title} detailedTime={detailedTime} />
+            <CopyUrlAction url={url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ToggleDetailAction isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />
+            <ToggleLayoutAction layout={layout} onToggleLayout={onToggleLayout} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

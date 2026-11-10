@@ -1,31 +1,12 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Form,
-  Icon,
-  LaunchProps,
-  open,
-  PopToRootType,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useRef } from "react";
 import { getDefaultSearchEngine } from "./data/cache";
 import { getSearchEngine } from "./data/search-engines";
 import { getCustomSearchEngines } from "./data/custom-search-engines";
 import type { SearchEngine } from "./types";
-import { isValidUrl } from "./utils";
+import { executeSearch } from "./execute-search";
 import { getEngineTriggerPreference } from "./preferences";
-
-async function safeOpenUrl(url: string): Promise<void> {
-  if (!isValidUrl(url)) {
-    throw new Error(`Invalid URL: ${url}`);
-  }
-  return open(url);
-}
 
 type SearchProps = LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>;
 
@@ -142,33 +123,7 @@ async function runSearch(rawQuery: string) {
       return;
     }
 
-    if (!finalQuery) {
-      const url = new URL(searchEngine.u);
-      await safeOpenUrl(url.origin);
-    } else {
-      const urlsToOpen = searchEngine.urls && searchEngine.urls.length > 1 ? searchEngine.urls : [searchEngine.u];
-
-      for (const urlTemplate of urlsToOpen) {
-        const searchUrl = urlTemplate.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
-
-        if (!isValidUrl(searchUrl)) {
-          throw new Error(`Invalid URL: ${searchUrl}`);
-        }
-
-        await safeOpenUrl(searchUrl);
-      }
-
-      if (urlsToOpen.length > 1) {
-        // A HUD rather than a toast: toasts are rendered inside the main window, so
-        // closing the window would tear the confirmation down before it can be read.
-        await showHUD(`Opened ${urlsToOpen.length} search tabs · ${finalQuery}`, {
-          popToRootType: PopToRootType.Immediate,
-        });
-        return;
-      }
-    }
-
-    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+    await executeSearch(searchEngine, finalQuery);
   } catch (error) {
     await showFailureToast(error);
   }

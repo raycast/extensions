@@ -1,4 +1,4 @@
-import { chartTotal, chartActiveCustomers, overviewDateRange } from "./chart-overview";
+import { chartTotal, chartActiveCustomers, chartCurrentValue, overviewDateRange } from "./chart-overview";
 
 export interface Project {
   id: string;
@@ -26,7 +26,7 @@ const API = "https://api.revenuecat.com/v2";
 export function formatMetric(metric: Metric, currency: string): string {
   if (metric.value === null) return "Unavailable";
   if (metric.unit === "$" || metric.unit === currency) {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(
+    return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(
       metric.value,
     );
   }
@@ -126,6 +126,14 @@ export class RevenueCatClient {
     activeQuery.set("resolution", "4");
     activeQuery.delete("aggregate");
     const crossesYear = range.start.slice(0, 4) !== range.end.slice(0, 4);
+    const currentQuery = new URLSearchParams(query);
+    currentQuery.set("start_date", new Date(Date.parse(range.end) - 86_400_000).toISOString().slice(0, 10));
+    currentQuery.delete("aggregate");
+    const currentMetrics = [
+      { id: "mrr", chart: "mrr", measure: "MRR", unit: "$" },
+      { id: "active_subscriptions", chart: "actives", measure: "Actives", unit: "#" },
+      { id: "active_trials", chart: "trials", measure: "Active Trials", unit: "#" },
+    ];
     const permission = "charts_metrics:charts:read";
     // Isolate both transport and parsing failures to the affected metric.
     const results = await Promise.allSettled([
@@ -138,12 +146,17 @@ export class RevenueCatClient {
       crossesYear
         ? Promise.resolve(null)
         : this.get<unknown>(`${base}customers_active?${activeQuery}`, signal, permission).then(chartActiveCustomers),
+      ...currentMetrics.map(({ chart, measure, unit }) =>
+        this.get<unknown>(`${base}${chart}?${currentQuery}`, signal, permission).then((chartData) =>
+          chartCurrentValue(chartData, measure, unit, data.currency, range.end),
+        ),
+      ),
     ]);
     // User cancellation still cancels the entire load and must not cache a
     // partial result as if requests had genuinely failed.
     signal?.throwIfAborted();
     const values: Record<string, Pick<Metric, "value" | "unavailableReason">> = {};
-    ["revenue", "new_customers", "active_users"].forEach((id, index) => {
+    ["revenue", "new_customers", "active_users", ...currentMetrics.map((metric) => metric.id)].forEach((id, index) => {
       const result = results[index];
       values[id] =
         result.status === "fulfilled"
@@ -163,7 +176,7 @@ export class RevenueCatClient {
         return {
           ...metric,
           ...values[metric.id],
-          period: "P28D",
+          period: currentMetrics.some((current) => current.id === metric.id) ? "P0D" : "P28D",
           last_updated_at: null,
           ...(metric.id === "active_users"
             ? {
