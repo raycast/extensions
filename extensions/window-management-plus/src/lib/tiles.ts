@@ -148,7 +148,7 @@ export async function toggleSidebar() {
   return tile(layout, open, false, on ? "Sidebar pinned" : "Sidebar unpinned");
 }
 
-/** The sides Next Master Layout steps through, with what to call each. */
+/** The sides Cycle Master Layout steps through, with what to call each. */
 const MASTER_CYCLE: [TileName, string][] = [
   ["master-left", "Master Left"],
   ["master-right", "Master Right"],

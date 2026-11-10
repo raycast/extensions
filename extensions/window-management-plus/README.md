@@ -6,13 +6,13 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 
 | Command                                     | What it does                                                                                                                                                       |
 | :------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auto Tile                                   | Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.                                                                |
-| Pivot Layout                                | Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.             |
+| Auto Tile                                   | Arrange every window on every display in an even grid. Use Cycle Tile Layout to change the grid's shape.                                                           |
+| Cycle Tile Layout                           | Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.             |
 | Toggle Sidebar                              | Pin one window full height down the right edge, or unpin it. While it is pinned, every other command arranges the remaining windows beside it.                     |
 | Smart Arrange                               | Arrange windows by what each app is for. The focused window leads your largest display with related work beside it. Chat, mail and music go to your other display. |
 | Master Left / Right                         | Make the focused window the master on one side, with every other window stacked on the other.                                                                      |
 | Master Center                               | Make the focused window the master in the middle, with the other windows stacked on both sides. Best on wide displays.                                             |
-| Next Master Layout                          | Move the master to its next position: left, then right, then center.                                                                                               |
+| Cycle Master Layout                         | Move the master to its next position. Each run steps round: left, then right, then center.                                                                         |
 | Make Master Larger / Smaller                | Give the master window 5% more or less of the screen. The stacked windows take up the difference.                                                                  |
 | Swap with Master                            | Make the focused window the master. It trades places with the current master.                                                                                      |
 | Swap with Next Window                       | Trade places between the focused window and the next one in the layout. With two windows, they simply swap.                                                        |
@@ -23,9 +23,9 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 | Move All to This Display                    | Bring every window from your other displays to the one you are working on.                                                                                         |
 | Toggle Menu Bar Visibility                  | Hide or show the macOS menu bar, to give windows the full height of the screen.                                                                                    |
 
-The names follow Hyprland too, so its users can search for `master`, `swapnext`, `mfact`, `togglesplit` (Pivot Layout) or `rollnext`.
+The names follow Hyprland too, so its users can search for `master`, `swapnext`, `mfact`, `togglesplit` (Cycle Tile Layout) or `rollnext`.
 
-Swap, Rotate, Make Master Larger and Smaller, and Pivot Layout all work on the layout you last tiled with, so you can tile once and then rearrange. They act on the display you are working on. Auto Tile, Smart Arrange and the Master commands tile every display.
+Swap, Rotate, Make Master Larger and Smaller, and Cycle Tile Layout all work on the layout you last tiled with, so you can tile once and then rearrange. They act on the display you are working on. Auto Tile, Smart Arrange and the Master commands tile every display.
 
 When a display has more windows than fit at the sizes their apps allow, the smallest ones share one slot instead of half-covering each other. The active window always gets its own.
 

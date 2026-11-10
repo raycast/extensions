@@ -109,7 +109,7 @@
     {
       "name": "auto-tile",
       "title": "Auto Tile",
-      "description": "Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.",
+      "description": "Arrange every window on every display in an even grid. Use Cycle Tile Layout to change the grid's shape.",
       "mode": "no-view",
       "icon": "tile.png",
       "keywords": [
@@ -133,12 +133,13 @@
     },
     {
       "name": "pivot",
-      "title": "Pivot Layout",
+      "title": "Cycle Tile Layout",
       "description": "Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.",
       "mode": "no-view",
       "icon": "pivot.png",
       "keywords": [
         "pivot",
+        "pivot layout",
         "toggle split",
         "togglesplit",
         "grid",
@@ -211,14 +212,14 @@
     },
     {
       "name": "cycle-master",
-      "title": "Next Master Layout",
-      "description": "Move the master to its next position: left, then right, then center.",
+      "title": "Cycle Master Layout",
+      "description": "Move the master to its next position. Each run steps round: left, then right, then center.",
       "mode": "no-view",
       "icon": "cycle-master.png",
       "keywords": [
-        "cycle master layout",
-        "cycle",
+        "next master layout",
         "next layout",
+        "cycle",
         "switch layout",
         "orientationnext",
         "hyprland"
