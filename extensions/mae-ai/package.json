@@ -1,0 +1,213 @@
+{
+  "name": "mae-ai",
+  "version": "1.3.0",
+  "private": true,
+  "title": "Pocket AI",
+  "description": "Stream chat, define, translate, polish writing, or connect Hermes/OpenClaw with your own provider.",
+  "icon": "pocket-ai-native.png",
+  "author": "edliu_microsoft",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edliuustc/pocket-ai-raycast.git"
+  },
+  "homepage": "https://edliuustc.github.io/pocket-ai-raycast/",
+  "bugs": {
+    "url": "https://github.com/edliuustc/pocket-ai-raycast/issues"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "subtitle": "Pocket AI",
+      "description": "Ask a question and stream the answer from your own provider.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Ask anything...",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "dictionary",
+      "title": "AI Dictionary",
+      "subtitle": "Pocket AI",
+      "description": "Explain a word with pronunciation, definitions, and examples.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Word or phrase to define...",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "translator",
+      "title": "AI Translator",
+      "subtitle": "Pocket AI",
+      "description": "Translate text into your chosen language.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Text to translate...",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "polisher",
+      "title": "AI Polish Text",
+      "subtitle": "Pocket AI",
+      "description": "Improve grammar, clarity, and tone without changing meaning.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Text to polish...",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "remote-agents",
+      "title": "Remote Agents",
+      "subtitle": "Pocket AI",
+      "description": "Choose the Ask AI backend and server URL in the shared settings screen.",
+      "mode": "view"
+    },
+    {
+      "name": "configure-provider",
+      "title": "Configure AI Provider",
+      "subtitle": "Pocket AI",
+      "description": "Set your OpenAI-compatible API endpoint and optional API key. No special command syntax is required.",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-command",
+      "title": "Add New Command",
+      "subtitle": "Pocket AI",
+      "description": "Create your own AI command from an Ask AI, Dictionary, Translator, Polish, or blank template.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tools",
+      "title": "Pocket AI Settings",
+      "subtitle": "Pocket AI",
+      "description": "Select a command to edit its prompt, placeholders, model, and translation language. Add new template-based commands, delete commands, or restore deleted built-ins.",
+      "mode": "view"
+    },
+    {
+      "name": "custom-tool",
+      "title": "Run Custom AI Tool",
+      "subtitle": "Pocket AI",
+      "description": "Run a saved tool, including through a dedicated Quicklink shortcut.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "tool",
+          "type": "text",
+          "placeholder": "Tool ID (optional)",
+          "required": false
+        },
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Your question or text...",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "responseView",
+      "type": "dropdown",
+      "title": "Response View",
+      "description": "Rich Markdown shows formatted replies and image links beside the conversation. Full-width text follows streamed rows. Raycast controls scrolling inside the native Markdown pane. You can also switch views from Actions.",
+      "required": false,
+      "default": "rich",
+      "data": [
+        {
+          "title": "Rich Markdown",
+          "value": "rich"
+        },
+        {
+          "title": "Full-Width Text",
+          "value": "plain"
+        }
+      ]
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "title": "API Endpoint",
+      "description": "Paste your OpenAI-compatible base URL or full /chat/completions URL. The default expects a local VS Code Copilot bridge; configure your own provider if it is not running.",
+      "required": true,
+      "default": "http://127.0.0.1:23333/api/openai/v1"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "API Key",
+      "description": "Paste your provider's key here. Leave empty if your local provider does not require authentication. Do not include the word Bearer.",
+      "required": false
+    },
+    {
+      "name": "hermesKey",
+      "type": "password",
+      "title": "Hermes API Key",
+      "description": "Your Hermes API_SERVER_KEY. Choose the backend and URL in Pocket AI's Remote Agents command. This never inherits the direct-model API key.",
+      "required": false
+    },
+    {
+      "name": "openclawToken",
+      "type": "password",
+      "title": "OpenClaw Gateway Token / Password",
+      "description": "Your gateway shared token or password. Choose the backend and URL in Pocket AI's Remote Agents command. Changing this credential requires pairing a new device identity.",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/stream.test.ts tests/tools.test.ts tests/models.test.ts tests/response-rows.test.ts tests/session.test.ts tests/scroll-policy.test.ts tests/agents.test.ts tests/agent-settings.test.ts tests/agent-presentation.test.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@openclaw/gateway-client": "2026.8.1",
+    "@openclaw/gateway-protocol": "2026.8.1",
+    "@raycast/api": "^2.10.1",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
