@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
@@ -7,9 +7,10 @@ import { FormValidation, useForm } from "@raycast/utils";
 interface CreateProps {
   connectionToEdit?: ISSHConnection;
   connectionToDuplicate?: ISSHConnection;
+  duplicateName?: string;
 }
 
-export default function Main({ connectionToEdit, connectionToDuplicate }: CreateProps) {
+export default function Main({ connectionToEdit, connectionToDuplicate, duplicateName }: CreateProps) {
   const isEditing = !!connectionToEdit;
   const { pop } = useNavigation();
 
@@ -22,12 +23,25 @@ export default function Main({ connectionToEdit, connectionToDuplicate }: Create
     },
     initialValues: connectionToEdit ?? {
       ...connectionToDuplicate,
-      name: connectionToDuplicate ? `${connectionToDuplicate.name}-duplicate` : undefined,
+      name: duplicateName,
     },
   });
 
   async function saveConnection(connection: ISSHConnection) {
     const existingConnections = await getConnections();
+    const nameAlreadyExists = existingConnections.some(
+      (existingConnection) =>
+        existingConnection.name === connection.name && existingConnection.id !== connectionToEdit?.id,
+    );
+
+    if (nameAlreadyExists) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Connection name already exists",
+        message: "Choose a unique connection name.",
+      });
+      return;
+    }
 
     if (isEditing) {
       const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);

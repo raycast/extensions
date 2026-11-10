@@ -532,7 +532,10 @@ export default function Command() {
   }
 
   async function duplicateItem(item: ISSHConnection) {
-    push(<Create connectionToDuplicate={item} />, revalidate);
+    push(
+      <Create connectionToDuplicate={item} duplicateName={getDuplicateName(item.name, connectionsList)} />,
+      revalidate,
+    );
   }
 
   return (
@@ -613,4 +616,18 @@ function getSubtitle(item: ISSHConnection) {
   return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
     item.sshKey ? " SSH Key: " + item.sshKey : ""
   } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
+}
+
+function getDuplicateName(name: string, connections: ISSHConnection[]) {
+  const existingNames = new Set(connections.map((connection) => connection.name));
+  const baseName = `${name}-duplicate`;
+  let duplicateName = baseName;
+  let suffix = 2;
+
+  while (existingNames.has(duplicateName)) {
+    duplicateName = `${baseName}-${suffix}`;
+    suffix += 1;
+  }
+
+  return duplicateName;
 }
