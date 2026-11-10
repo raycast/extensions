@@ -4,6 +4,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import fs from "fs/promises";
 import os from "os";
@@ -112,11 +113,9 @@ export async function launchApp(app: AppItem): Promise<boolean> {
     await openSingleAppPath(app.path);
     await closeMainWindow();
     return true;
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
+  } catch (error) {
+    await showFailureToast(error, {
       title: t.launchFailedTitle,
-      message: t.launchFailedMessage(app.name),
     });
     return false;
   }
