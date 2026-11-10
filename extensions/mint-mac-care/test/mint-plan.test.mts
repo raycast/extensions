@@ -30,7 +30,7 @@ import {
   usableModel,
   worth,
 } from "../src/space-value-model.ts";
-import { ORDER_LABELS, PRICING_PAGE_URL, feedModel, modelValue, purchaseURL } from "../src/mint-plan.ts";
+import { ORDER_LABELS, PRICING_PAGE_URL, feedModel, modelValue, purchaseURL, unlockRows } from "../src/mint-plan.ts";
 
 /** What a picture says, its text in order, tags dropped. */
 const words = (svg: string) =>
@@ -374,4 +374,66 @@ test("on Mint 1.2.0 a press opens the website's checkout handoff, labelled Rayca
     PRICING_PAGE_URL,
   );
   assert.equal(new URL(PRICING_PAGE_URL).searchParams.get("utm_source"), "Raycast");
+});
+
+// --- After the VM's real captures (2026-11-10): no hole when nothing is ready ---
+
+/** Every <text>'s x and its anchor, to keep the words inside the card. */
+const textBoxes = (svg: string) =>
+  [...svg.matchAll(/<text x="([\d.]+)" y="([\d.]+)"[^>]*?(?: font-size="([\d.]+)")?[^>]*>([^<]*)<\/text>/g)].map(
+    (m) => ({
+      x: Number(m[1]),
+      y: Number(m[2]),
+      words: m[4],
+    }),
+  );
+
+test("nothing ready: the page's comparison rows take ready now's place, never a hole", () => {
+  for (const withValue of [true, false]) {
+    for (const appearance of ["dark", "light"] as const) {
+      const { svg } = planWallSVG({
+        ...input(withValue, appearance),
+        status: statusLine({ plan: false, remainingCleanupBytes: 1_000_000_000 }),
+        ready: { bytes: 0, label: WORDS.readyNow, parts: [] },
+        unlocks: unlockRows(),
+      });
+      const said = words(svg);
+      assert.ok(!said.includes("ready now"));
+      for (const phrase of [
+        "1 GB of free care left · Resets next Monday",
+        "Cleanup + Organize",
+        "1 GB/wk",
+        "∞",
+        "Auto Care",
+        "Pauses",
+        "Non-stop",
+        "$39.99",
+        "Pay once",
+      ]) {
+        assert.ok(said.includes(phrase), `${phrase} (${withValue ? "1.2.1" : "1.2.0"}, ${appearance})`);
+      }
+      // The rows sit between the week's line and the plans.
+      const at = (phrase: string) => textBoxes(svg).find((box) => box.words === phrase)?.y ?? -1;
+      assert.ok(at("Cleanup + Organize") > at("Go unlimited") && at("Auto Care") < at("$39.99"));
+    }
+  }
+  // With something ready, the rows stay out: ready now is the page's line there.
+  const { svg } = planWallSVG({ ...input(true), unlocks: unlockRows() });
+  assert.ok(words(svg).includes("ready now") && !words(svg).includes("Cleanup + Organize"));
+});
+
+test("every word of the wall sits inside its picture, ready or not", () => {
+  for (const ready of [true, false]) {
+    for (const withValue of [true, false]) {
+      const base = input(withValue);
+      const { svg, width, height } = planWallSVG({
+        ...base,
+        ready: ready ? base.ready : { bytes: 0, label: WORDS.readyNow, parts: [] },
+        unlocks: unlockRows(),
+      });
+      for (const box of textBoxes(svg)) {
+        assert.ok(box.x >= 0 && box.x <= width && box.y > 0 && box.y < height, `${box.words} at ${box.x},${box.y}`);
+      }
+    }
+  }
 });

@@ -76,6 +76,13 @@ export const WORDS = {
   oneTimeTerms: "Every 1.x update · 30-day refund · plus tax",
   monthlyTerms: (payments: number, total: string) =>
     `${payments} payments, ${total} total · then billing stops · plus tax`,
+  /** DirectPaywallView.comparisonRows: what a plan changes, free → plan */
+  cleanupOrganize: "Cleanup + Organize",
+  perWeek: (size: string) => `${size}/wk`,
+  unlimited: "∞",
+  autoCare: "Auto Care",
+  pauses: "Pauses",
+  nonStop: "Non-stop",
   /** DirectTrialCopy (English): oneTimeAction, monthlyAction */
   buyOneTime: "Buy One-Time",
   startRentToOwn: "Start Rent-to-Own",
@@ -409,4 +416,23 @@ export function purchaseURL(feed: unknown, mode: "one_time" | "rent_to_own"): st
 /** The feed's value model, when it sent one (PlanPricing reads the same field). */
 export function feedModel(feed: unknown): unknown {
   return feed && typeof feed === "object" ? (feed as { space_value?: unknown }).space_value : undefined;
+}
+
+/** The free week's size (LicenseService.freeCleanupByteAllowance), as the page's row writes it. */
+export const FREE_WEEK_BYTES = 1_000_000_000;
+
+/**
+ * The page's two comparison rows (DirectPaywallView.comparisonRows), at its sizes: shown where
+ * ready now would be when nothing is ready, so the column never has a hole.
+ */
+export function unlockRows(): Array<{ name: string; free: string; plan: string; planSize: number }> {
+  return [
+    {
+      name: WORDS.cleanupOrganize,
+      free: WORDS.perWeek(formatBytes(FREE_WEEK_BYTES)),
+      plan: WORDS.unlimited,
+      planSize: 18,
+    },
+    { name: WORDS.autoCare, free: WORDS.pauses, plan: WORDS.nonStop, planSize: 13.5 },
+  ];
 }

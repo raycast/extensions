@@ -34,6 +34,7 @@ import {
   valueFooter,
   heldForWeek,
   refusedForPlan,
+  unlockRows,
 } from "./mint-plan";
 import type { PlanAccess, PlanAnswer, PlanGate, PlanTile } from "./mint-plan";
 import { savedGroups } from "./mint-saved";
@@ -181,6 +182,9 @@ export function PlanWall({
   let markdown = "";
   if (!loading) {
     const { svg, width, height } = planWallSVG({
+      // Read once, as every picture in this extension is: Raycast offers no theme-aware image for
+      // markdown and no appearance-change event, so a wall left open across an Auto appearance change
+      // keeps its colours until it is opened again (View Mac Status's cards do the same).
       appearance: environment.appearance === "light" ? "light" : "dark",
       format: formatBytes,
       title: WORDS.title,
@@ -204,6 +208,7 @@ export function PlanWall({
         : undefined,
       ready: { bytes: ready.bytes, figure: readyFigure, label: WORDS.readyNow, parts: readyParts(ready) },
       plans: tiles,
+      unlocks: unlockRows(),
     });
     markdown = markdownImage(svg, width, height, WORDS.title);
   }

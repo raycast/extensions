@@ -853,6 +853,8 @@ export type PlanWallInput = {
     parts: Array<{ title: string; bytes: number; color: string }>;
   };
   plans: Array<{ price: string; suffix?: string; line: string; terms: string; key: string }>;
+  /** The page's "what a plan changes" rows, shown in ready now's place when nothing is ready. */
+  unlocks?: Array<{ name: string; free: string; plan: string; planSize: number }>;
 };
 
 const PLAN_LEFT = 318;
@@ -973,6 +975,28 @@ function valuePanel(value: PlanWallValue, p: Palette): string {
   ].join("");
 }
 
+/** One of the page's comparison rows: the name, the free side struck through, then the plan's side. */
+function unlockRow(
+  row: NonNullable<PlanWallInput["unlocks"]>[number],
+  x: number,
+  y: number,
+  width: number,
+  p: Palette,
+) {
+  const planWidth = Math.max(66, textWidth(row.plan, row.planSize, 600));
+  const planX = x + width - planWidth;
+  const arrowX = planX - 14;
+  const freeEnd = arrowX - 10;
+  const freeWidth = monoWidth(row.free, 11);
+  return [
+    text(x, y, fitText(row.name, freeEnd - freeWidth - 12 - x, 13.5, 500), p.primary, 13.5, { weight: 500 }),
+    text(freeEnd, y, row.free, p.tertiary, 11, { mono: true, anchor: "end" }),
+    `<line x1="${round(freeEnd - freeWidth)}" y1="${round(y - 3.8)}" x2="${round(freeEnd)}" y2="${round(y - 3.8)}" stroke="${p.tertiary}" stroke-width="0.8"/>`,
+    text(arrowX, y, "→", p.faint, 11, { anchor: "middle" }),
+    text(planX, y + (row.planSize > 14 ? 1.5 : 0), row.plan, p.primary, row.planSize, { weight: 600 }),
+  ].join("");
+}
+
 function offerColumn(input: PlanWallInput, x: number, width: number, p: Palette): string {
   const parts: string[] = [];
   parts.push(text(x, 28, fitText(input.title, width, 22, 600), p.primary, 22, { weight: 600 }));
@@ -996,6 +1020,15 @@ function offerColumn(input: PlanWallInput, x: number, width: number, p: Palette)
       parts.push(`<circle cx="${cx + 1.7}" cy="${155.5}" r="1.7" fill="${part.color}" fill-opacity="${LIT_OPACITY}"/>`);
       parts.push(text(cx + 9, 159, fitText(part.title, cell - 9 - textWidth(value, 12) - 18, 12), p.secondary, 12));
       parts.push(text(cx + cell - 12, 159, value, p.secondary, 12, { anchor: "end" }));
+    });
+  }
+  // Nothing ready (the page hides "ready now" at 0): the page's own rows of what a plan changes,
+  // so the column never has a hole above the plans.
+  if (!ready && input.unlocks?.length) {
+    input.unlocks.slice(0, 2).forEach((row, index) => {
+      const y = 104 + index * 36;
+      parts.push(unlockRow(row, x, y, width, p));
+      if (index === 0) parts.push(hairline(x, y + 17, x + width, y + 17, p));
     });
   }
   // The plans, as the page's tiles: the price leads, then its line and its terms; the key that buys it.
