@@ -1,6 +1,6 @@
 # Zoo Changelog
 
-## [Fix OpenAI client in store builds] - {PR_MERGE_DATE}
+## [Fix OpenAI client in store builds] - 2026-11-10
 
 - Upgrade the `openai` package from v4 to v7. v4 fails to load in store builds
 
