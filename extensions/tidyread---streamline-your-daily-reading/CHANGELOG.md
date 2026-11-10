@@ -1,5 +1,10 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Fix Crash With OpenAI SDK] - {PR_MERGE_DATE}
+
+- Upgrade the OpenAI SDK from v4 to v7. Builds with v4 fail with `Package subpath './_shims/auto/runtime' is not defined by "exports"`.
+- Keep the HTTP proxy preference working: v7 no longer accepts `httpAgent`, so proxied requests go through `node-fetch`.
+
 ## [Maintenance] - 2025-11-03
 
 - Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
