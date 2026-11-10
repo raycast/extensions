@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { attachedClientPid, ENV, focus, PaneRef, tuiosBin } from "./tuios";
@@ -11,8 +12,9 @@ interface Terminal {
   launch: (cmd: string[]) => Promise<unknown>; // open a new window running cmd
 }
 
-const q = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
-const osa = (script: string) => run("/usr/bin/osascript", ["-e", script]);
+// Shell-quote each word. The command reaches AppleScript as an argument, never as script source.
+const shellLine = (c: string[]) => c.map((s) => `'${s.replace(/'/g, `'\\''`)}'`).join(" ");
+const osa = (body: string, c: string[]) => runAppleScript(`on run argv\n${body}\nend run`, [shellLine(c)]);
 const openNew = (app: string, args: string[]) => run("/usr/bin/open", ["-na", app, "--args", ...args], { env: ENV });
 
 export const TERMINALS: Terminal[] = [
@@ -23,13 +25,12 @@ export const TERMINALS: Terminal[] = [
   {
     app: "iTerm",
     match: /iTerm/i,
-    launch: (c) =>
-      osa(`tell application "iTerm" to create window with default profile command "${c.map(q).join(" ")}"`),
+    launch: (c) => osa(`tell application "iTerm" to create window with default profile command (item 1 of argv)`, c),
   },
   {
     app: "Terminal",
     match: /Terminal\.app/i,
-    launch: (c) => osa(`tell application "Terminal"\nactivate\ndo script "${c.map(q).join(" ")}"\nend tell`),
+    launch: (c) => osa(`tell application "Terminal"\nactivate\ndo script (item 1 of argv)\nend tell`, c),
   },
 ];
 

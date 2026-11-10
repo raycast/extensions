@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toas
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { fail, jump, move } from "./actions";
+import { ErrorView } from "./error-view";
 import {
   Agent,
   AgentState,
@@ -53,11 +54,12 @@ export default function Command() {
   const [scope, setScope] = useState<"agents" | "all">("agents");
   const {
     data: agents = [],
+    error,
     isLoading,
     revalidate,
   } = useCachedPromise(listAgents, [scope === "all"], {
     keepPreviousData: true,
-    onError: (e) => fail("tuios is not answering", e),
+    failureToastOptions: { title: "tuios is not answering" },
   });
   const { data: sessions = [] } = useCachedPromise(listSessions, [], { keepPreviousData: true });
   const sessionNames = sessions.map((s) => s.name);
@@ -73,7 +75,6 @@ export default function Command() {
     groups.set(key, [...(groups.get(key) ?? []), a]);
   }
   const order = [...SECTIONS.map((s) => s.state as string), "other"];
-  const waiting = groups.get("needs_input")?.length ?? 0;
 
   return (
     <List
@@ -86,14 +87,17 @@ export default function Command() {
           <List.Dropdown.Item title="All Panes" value="all" />
         </List.Dropdown>
       }
-      navigationTitle={waiting ? `Agents · ${waiting} waiting` : "Agents"}
       onSelectionChange={setSelected}
     >
-      <List.EmptyView
-        icon={Icon.Terminal}
-        title={scope === "all" ? "No panes" : "No agents running"}
-        description="Start one with the Start Agent command, or in any tuios pane."
-      />
+      {error && !agents.length ? (
+        <ErrorView error={error} retry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Terminal}
+          title={scope === "all" ? "No panes" : "No agents running"}
+          description="Start one with the Start Agent command, or in any tuios pane."
+        />
+      )}
       {order.map((key) => {
         const list = groups.get(key);
         if (!list?.length) return null;
@@ -133,10 +137,18 @@ function AgentItem(props: {
   const waiting = a.state === "needs_input";
 
   // Only the selected row reads its pane / prompt, and only while the detail is shown.
-  // `a` is a fresh object on every list poll, so these re-run with it: a live preview.
+  // usePromise compares arguments by value, so re-read on a timer for a live preview.
   const live = selected && showDetail;
   const screen = usePromise((ag: Agent) => capture(ag), [a], { execute: live });
   const prompt = usePromise((ag: Agent) => peekPrompt(ag), [a], { execute: selected && waiting });
+  useEffect(() => {
+    if (!live) return;
+    const t = setInterval(() => {
+      screen.revalidate();
+      if (waiting) prompt.revalidate();
+    }, REFRESH_MS);
+    return () => clearInterval(t);
+  }, [live, waiting, screen.revalidate, prompt.revalidate]);
 
   const accessories: List.Item.Accessory[] = showDetail
     ? []
@@ -253,7 +265,7 @@ function PromptActions({ agent, prompt, done }: { agent: Agent; prompt: Prompt; 
         <Action
           title="Approve"
           icon={{ source: Icon.Check, tintColor: Color.Green }}
-          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+          shortcut={{ modifiers: ["ctrl", "cmd"], key: "y" }}
           onAction={() => answer("Approve", "approve")}
         />
       )}
@@ -261,7 +273,7 @@ function PromptActions({ agent, prompt, done }: { agent: Agent; prompt: Prompt; 
         <Action
           title="Approve Always"
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "y" }}
+          shortcut={{ modifiers: ["ctrl", "cmd", "shift"], key: "y" }}
           onAction={() => answer("Approve always", "approve_always")}
         />
       )}
@@ -270,7 +282,7 @@ function PromptActions({ agent, prompt, done }: { agent: Agent; prompt: Prompt; 
           title="Deny"
           icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           style={Action.Style.Destructive}
-          shortcut={Keyboard.Shortcut.Common.New}
+          shortcut={{ modifiers: ["ctrl", "cmd"], key: "n" }}
           onAction={() => answer("Deny", "deny")}
         />
       )}

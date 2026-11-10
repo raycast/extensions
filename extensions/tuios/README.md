@@ -5,50 +5,41 @@ See every coding agent running in [tuios](https://tuios.dev), jump to the one yo
 ```
 Raycast ─► Search Agents ──► Enter: focus the pane, bring its terminal forward
               │              (Ghostty, WezTerm, kitty, Alacritty, iTerm, Terminal)
-              ├─ ⌘Y / ⌘N    approve or deny the prompt it is waiting on
+              ├─ ⌃⌘Y / ⌃⌘N  approve or deny the prompt it is waiting on
               ├─ ⌘M         leave it a note, or queue its next task
               └─ ⌘⇧M        move the pane to another tuios session
 ```
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| **Search Agents** | Every agent in every tuios session, grouped by state: needs you, errored, working, done, idle. The right side shows the pane's last 60 lines and refreshes every 3 seconds. Switch the dropdown to **All Panes** to include shells. |
-| **Jump to Pane** | Every pane in every session, agent or not: shells, editors, dev servers. Search by pane name, title, running program, folder or session. Grouped by session and tab. Type a word after the command in Raycast's main search (`Jump to Pane  api`) and, if only one pane matches, it jumps at once. |
-| **Jump to Agent Needing Me** | Goes straight to the agent that has waited longest. Give it a hotkey. |
-| **Start Agent** | Three quick pickers, each opening on the likely choice: **project** → **where** (session and tab) → **first prompt** (and which agent). Enter moves on, `⌘Enter` starts at once with the defaults for the steps left. See [Start Agent](#start-agent). |
+| Command                      | What it does                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Search Agents**            | Every agent in every tuios session, grouped by state: needs you, errored, working, done, idle. The right side shows the pane's last 60 lines and refreshes every 3 seconds. Switch the dropdown to **All Panes** to include shells.                                                                |
+| **Jump to Pane**             | Every pane in every session, agent or not: shells, editors, dev servers. Search by pane name, title, running program, folder or session. Grouped by session and tab. Type a word after the command in Raycast's main search (`Jump to Pane  api`) and, if only one pane matches, it jumps at once. |
+| **Jump to Agent Needing Me** | Goes straight to the agent that has waited longest. Give it a hotkey.                                                                                                                                                                                                                              |
+| **Start Agent**              | Three quick pickers, each opening on the likely choice: **project** → **where** (session and tab) → **first prompt** (and which agent). Enter moves on, `⌘Enter` starts at once with the defaults for the steps left. See [Start Agent](#start-agent).                                             |
 
 ### Search Agents shortcuts
 
-| Key | Action |
-| --- | --- |
-| `Enter` | Jump to the pane |
-| `⌘Y` | Approve |
-| `⌘⇧Y` | Approve always |
-| `⌘N` | Deny |
-| `⌘⇧K` | Choose a numbered option |
-| `⌘M` | Send a message (note or next task) |
-| `⌘⇧M` | Move to another session |
-| `⌘D` | Show or hide the pane preview |
-| `⌘R` | Refresh |
-| `⌘O` | Open the pane's folder in Finder |
-| `⌘⇧C` | Copy the pane id |
+| Key     | Action                             |
+| ------- | ---------------------------------- |
+| `Enter` | Jump to the pane                   |
+| `⌃⌘Y`   | Approve                            |
+| `⌃⌘⇧Y`  | Approve always                     |
+| `⌃⌘N`   | Deny                               |
+| `⌘⇧K`   | Choose a numbered option           |
+| `⌘M`    | Send a message (note or next task) |
+| `⌘⇧M`   | Move to another session            |
+| `⌘D`    | Show or hide the pane preview      |
+| `⌘R`    | Refresh                            |
+| `⌘O`    | Open the pane's folder in Finder   |
+| `⌘⇧C`   | Copy the pane id                   |
 
 ## Install
 
 You need macOS, [Raycast](https://raycast.com) and tuios 0.11 or newer (`brew install tuios`).
 
-**From the Raycast Store:** search Store for "tuios" in Raycast, or open [raycast.com/devansh_gulhane/tuios](https://www.raycast.com/devansh_gulhane/tuios).
-
-**From source** (needs Node 22 or newer):
-
-```sh
-git clone https://github.com/devagul93/raycast-tuios
-cd raycast-tuios
-npm install
-npm run dev     # loads it into Raycast; stop with Ctrl+C, it stays installed
-```
+Install it from the Raycast Store: search Store for "tuios" in Raycast. Source code: [github.com/devagul93/raycast-tuios](https://github.com/devagul93/raycast-tuios).
 
 ## Start Agent
 
@@ -74,14 +65,14 @@ indistract         ▸ Tab 1  coordinator, b-481       ▸ Start without a promp
 
 Open Raycast → Extensions → tuios.
 
-| Setting | Default | Notes |
-| --- | --- | --- |
-| Default Agent | `claude` | What Start Agent runs. Any command, with arguments. |
-| Other Agents | `codex, gemini` | Also offered in the prompt step's agent dropdown. |
-| Default Session | empty | Where Start Agent opens agents. Empty: the session you started in last time, else the most recently used session open in a terminal. |
-| Project Folders | `~/Developer, ~/Projects, ~/code, ~/src` | Start Agent lists the git repos directly inside these, plus every folder an agent runs in now. Folders that don't exist are skipped. |
-| Terminal for Detached Sessions | Terminal | Opened with `tuios attach <session>` when you jump to a session no terminal is showing. |
-| tuios Path | found automatically | Looked up in `/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin`, `~/go/bin`. |
+| Setting                        | Default                                  | Notes                                                                                                                                |
+| ------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Default Agent                  | `claude`                                 | What Start Agent runs. Any command, with arguments.                                                                                  |
+| Other Agents                   | `codex, gemini`                          | Also offered in the prompt step's agent dropdown.                                                                                    |
+| Default Session                | empty                                    | Where Start Agent opens agents. Empty: the session you started in last time, else the most recently used session open in a terminal. |
+| Project Folders                | `~/Developer, ~/Projects, ~/code, ~/src` | Start Agent lists the git repos directly inside these, plus every folder an agent runs in now. Folders that don't exist are skipped. |
+| Terminal for Detached Sessions | Terminal                                 | Opened with `tuios attach <session>` when you jump to a session no terminal is showing.                                              |
+| tuios Path                     | found automatically                      | Looked up in `/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin`, `~/go/bin`.                                                      |
 
 ## Approving prompts from Raycast
 
@@ -106,30 +97,16 @@ If no terminal is showing the session, it opens the one in your settings and att
 
 ## Troubleshooting
 
-| You see | Do this |
-| --- | --- |
-| "tuios not found" | Set **tuios Path** in the settings. |
-| "The tuios daemon is not running" | Open a terminal and run `tuios`. |
-| "tuios only takes answers from outside its panes when you allow it" | See [Approving prompts](#approving-prompts-from-raycast). |
-| An agent shows as a shell | tuios didn't recognise it. Run `tuios explain-agent-detect -w <pane>`, or wire its hooks with `tuios integration`. |
-| Start Agent can't find `codex` (or another CLI) | Install it somewhere on the usual paths (Homebrew, `~/.local/bin`, mise, Volta, Bun) or use its full path in **Agent**. |
+| You see                                                             | Do this                                                                                                                 |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| "tuios not found"                                                   | Set **tuios Path** in the settings.                                                                                     |
+| "The tuios daemon is not running"                                   | Open a terminal and run `tuios`.                                                                                        |
+| "tuios only takes answers from outside its panes when you allow it" | See [Approving prompts](#approving-prompts-from-raycast).                                                               |
+| An agent shows as a shell                                           | tuios didn't recognise it. Run `tuios explain-agent-detect -w <pane>`, or wire its hooks with `tuios integration`.      |
+| Start Agent can't find `codex` (or another CLI)                     | Install it somewhere on the usual paths (Homebrew, `~/.local/bin`, mise, Volta, Bun) or use its full path in **Agent**. |
 
 ## Limits
 
 - If one terminal app has several windows open, the jump brings forward the app's last-used window, not a specific one.
 - Detached-session launchers are written for each terminal's documented command-line flags. Terminal and iTerm use AppleScript.
 - Local machine only. tuios panes on other hosts are listed but not started or moved.
-
-## Develop
-
-```sh
-npm run dev     # live reload in Raycast
-npm run build   # type-check and bundle
-npm run lint
-```
-
-Code map: `src/tuios.ts` wraps the tuios CLI, `src/terminal.ts` finds and opens terminals, `src/actions.ts` holds the shared jump and move actions, `src/git.ts` makes worktrees, and each command is `src/<command>.tsx`.
-
-## License
-
-MIT

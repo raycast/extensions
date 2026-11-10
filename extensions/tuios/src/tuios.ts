@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { closeSync, existsSync, openSync, readFileSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
@@ -220,17 +220,51 @@ export interface StartOptions {
 }
 
 /**
- * Start an agent in a new, focused pane. start-agent waits until the agent is at
- * its prompt (seconds, or longer on a trust question), so it runs on its own and
- * we return once the pane exists.
+ * Start an agent in a new, focused pane. Resolves once the pane exists; rejects if tuios refuses.
+ * start-agent itself keeps running until the agent is at its prompt (and types --prompt then), so it
+ * runs detached and outlives Raycast. Its stderr goes to a temp file, not a pipe, so closing Raycast
+ * can't break it.
  */
-export function startAgent(o: StartOptions): void {
+export async function startAgent(o: StartOptions, timeoutMs = 20000): Promise<void> {
+  const before = new Set((await listPanes().catch(() => [])).map((p) => p.window_id));
   const args = ["start-agent", o.agent, "-s", o.session, "--cwd", o.cwd, "--focus"];
   if (o.workspace) args.push("--workspace", String(o.workspace));
   if (o.name) args.push("--name", o.name);
   if (o.prompt) args.push("--prompt", o.prompt);
-  const child = spawn(tuiosBin(), args, { env: ENV, detached: true, stdio: "ignore" });
-  child.unref();
+  const log = join(tmpdir(), `raycast-tuios-start-${process.pid}-${Date.now()}.log`);
+  const fd = openSync(log, "w");
+
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const finish = (err?: Error) => {
+      if (settled) return;
+      settled = true;
+      clearInterval(poll);
+      clearTimeout(timer);
+      if (err) reject(err);
+      else resolve();
+    };
+    const child = spawn(tuiosBin(), args, { env: ENV, detached: true, stdio: ["ignore", "ignore", fd] });
+    closeSync(fd);
+    child.on("error", (e: NodeJS.ErrnoException) =>
+      finish(e.code === "ENOENT" ? new TuiosError("tuios not found. Install it or set its path in settings.") : e),
+    );
+    child.on("exit", (code) => {
+      if (!code) return finish();
+      const out = readFileSync(log, "utf8").trim();
+      const known = Object.keys(FRIENDLY).find((k) => out.includes(k));
+      finish(new TuiosError(known ? FRIENDLY[known] : out.split("\n")[0] || `start-agent failed (exit ${code})`));
+    });
+    child.unref();
+    const poll = setInterval(async () => {
+      const panes = await listPanes().catch(() => []);
+      if (panes.some((p) => p.session === o.session && !before.has(p.window_id))) finish();
+    }, 300);
+    const timer = setTimeout(
+      () => finish(new TuiosError(`No new pane appeared in ${o.session} after ${timeoutMs / 1000} seconds.`)),
+      timeoutMs,
+    );
+  });
 }
 
 export async function attachedClientPid(session: string): Promise<number | undefined> {

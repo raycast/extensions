@@ -12,12 +12,13 @@ import {
   Toast,
   useNavigation,
   Keyboard,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { useEffect, useRef, useState } from "react";
-import { fail } from "./actions";
+import { ErrorView } from "./error-view";
 import { listBranches, makeWorktree } from "./git";
 import { showSession, terminalFor } from "./terminal";
 import {
@@ -122,23 +123,15 @@ async function rememberPrompt(prompt: string) {
   await LocalStorage.setItem(RECENT_PROMPTS, JSON.stringify(list));
 }
 
-async function waitForSession(name: string, ms = 5000) {
-  for (let t = 0; t < ms; t += 250) {
-    if ((await listSessions().catch(() => [])).some((s) => s.name === name)) return;
-    await new Promise((r) => setTimeout(r, 250));
-  }
-}
-
 /** Start the agent, bring its terminal forward and close Raycast. */
 async function launch(o: Launch) {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Starting ${o.agent}…` });
   try {
     const cwd = o.worktreeBranch ? await makeWorktree(o.cwd, o.worktreeBranch) : o.cwd;
-    startAgent({ session: o.where.session, workspace: o.where.workspace, cwd, agent: o.agent, prompt: o.prompt });
+    await startAgent({ session: o.where.session, workspace: o.where.workspace, cwd, agent: o.agent, prompt: o.prompt });
     await LocalStorage.setItem(LAST_SESSION, o.where.session);
     if (o.prompt) await rememberPrompt(o.prompt);
-    await waitForSession(o.where.session);
-    await new Promise((r) => setTimeout(r, 600)); // let the pane open and take focus
+    await new Promise((r) => setTimeout(r, 300)); // let the pane take focus
     const app = await showSession(o.where.session);
     await closeMainWindow({ clearRootSearch: true });
     await showHUD(`${o.agent} · ${basename(cwd)} → ${o.where.label} · ${app}`);
@@ -160,7 +153,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.StartA
   const argPrompt = props.arguments.prompt?.trim() || undefined;
   const { push } = useNavigation();
   const [search, setSearch] = useState(query);
-  const projects = usePromise(loadProjects, [], { onError: (e) => fail("Could not list projects", e) });
+  const projects = usePromise(loadProjects, [], { failureToastOptions: { title: "Could not list projects" } });
 
   // From root search: "Start Agent  api" opens ② for api; "Start Agent  api  fix the tests" starts at once.
   const tried = useRef(false);
@@ -180,20 +173,44 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.StartA
   const typed = expandHome(search.trim());
   const typedDir =
     /^[~/]/.test(search.trim()) && existsSync(typed) && statSync(typed).isDirectory() ? typed : undefined;
-  const items = [...(typedDir ? [typedDir] : []), ...(projects.data ?? []).filter((p) => p !== typedDir)];
+  // Typing filters by folder name or path; every word must match. A typed path shows only itself.
+  const words = typedDir ? [] : search.toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = (projects.data ?? []).filter(
+    (p) => p !== typedDir && words.every((w) => tildify(p).toLowerCase().includes(w)),
+  );
+  shown.sort(
+    (a, b) =>
+      Number(
+        basename(b)
+          .toLowerCase()
+          .includes(words[0] ?? ""),
+      ) -
+      Number(
+        basename(a)
+          .toLowerCase()
+          .includes(words[0] ?? ""),
+      ),
+  );
+  const items = [...(typedDir ? [typedDir] : []), ...shown];
 
   return (
     <List
       isLoading={projects.isLoading}
       searchText={search}
       onSearchTextChange={setSearch}
-      navigationTitle="Start Agent · Project"
+      filtering={false}
       searchBarPlaceholder="Pick a project, or type a folder path…"
     >
+      {projects.error && !projects.data ? <ErrorView error={projects.error} retry={projects.revalidate} /> : null}
       <List.EmptyView
         icon={Icon.Folder}
         title="No project matches"
         description="Type a full folder path (~/code/app), or add project folders in the extension settings."
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
       />
       {items.map((p) => (
         <List.Item
@@ -201,7 +218,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.StartA
           icon={p === typedDir ? Icon.NewFolder : Icon.Folder}
           title={basename(p)}
           subtitle={tildify(p)}
-          keywords={[p]}
           actions={
             <ActionPanel>
               <Action.Push
@@ -283,7 +299,7 @@ async function loadWhere(): Promise<{ blocks: SessionBlock[]; preferred: string 
 
 function WhereStep(props: { cwd: string; prompt?: string }) {
   const [search, setSearch] = useState("");
-  const where = usePromise(loadWhere, [], { onError: (e) => fail("tuios is not answering", e) });
+  const where = usePromise(loadWhere, [], { failureToastOptions: { title: "tuios is not answering" } });
   const project = basename(props.cwd);
   const newName = search.trim();
 
@@ -307,9 +323,11 @@ function WhereStep(props: { cwd: string; prompt?: string }) {
       isLoading={where.isLoading}
       searchText={search}
       onSearchTextChange={setSearch}
+      filtering={true}
       navigationTitle={`Start Agent · ${project} · Where`}
       searchBarPlaceholder="Pick a session and tab, or type a new session name…"
     >
+      {where.error && !where.data && <ErrorView error={where.error} retry={where.revalidate} />}
       {(where.data?.blocks ?? []).map((b) => (
         <List.Section
           key={b.name}

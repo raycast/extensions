@@ -29,7 +29,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "pane",
+          "placeholder": "Pane",
           "type": "text",
           "required": false
         }
@@ -51,13 +51,13 @@
       "arguments": [
         {
           "name": "project",
-          "placeholder": "project",
+          "placeholder": "Project",
           "type": "text",
           "required": false
         },
         {
           "name": "prompt",
-          "placeholder": "first prompt",
+          "placeholder": "First Prompt",
           "type": "text",
           "required": false
         }
@@ -89,7 +89,8 @@
       "description": "The agent command Start Agent uses, as you would type it.",
       "type": "textfield",
       "default": "claude",
-      "required": false
+      "required": false,
+      "placeholder": "claude"
     },
     {
       "name": "agentChoices",
@@ -97,7 +98,8 @@
       "description": "Comma-separated agent commands offered in the prompt step.",
       "type": "textfield",
       "default": "codex, gemini",
-      "required": false
+      "required": false,
+      "placeholder": "codex, gemini"
     },
     {
       "name": "defaultSession",
@@ -105,7 +107,7 @@
       "description": "Where Start Agent opens agents. Empty: the session you used last.",
       "type": "textfield",
       "required": false,
-      "placeholder": "land"
+      "placeholder": "main"
     },
     {
       "name": "projectRoots",
@@ -113,7 +115,8 @@
       "description": "Comma-separated folders whose git repos Start Agent offers.",
       "type": "textfield",
       "default": "~/Developer, ~/Projects, ~/code, ~/src",
-      "required": false
+      "required": false,
+      "placeholder": "~/Projects, ~/code"
     },
     {
       "name": "fallbackTerminal",

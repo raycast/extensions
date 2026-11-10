@@ -13,7 +13,21 @@ export async function makeWorktree(dir: string, branch: string): Promise<string>
     throw new Error(`${tildify(dir)} is not a git repository`);
   });
   const path = join(dirname(top), `${basename(top)}-${branch.replace(/[^\w.-]+/g, "-")}`);
-  if (existsSync(path)) return path;
+  if (existsSync(path)) {
+    // Reuse only a worktree of this repo that is on this branch. feature/foo and feature-foo share a folder name.
+    const there = (...args: string[]) =>
+      run("git", ["-C", path, ...args], { env: ENV }).then(
+        (r) => r.stdout.trim(),
+        () => "",
+      );
+    const [common, ours, head] = await Promise.all([
+      there("rev-parse", "--path-format=absolute", "--git-common-dir"),
+      git("rev-parse", "--path-format=absolute", "--git-common-dir"),
+      there("symbolic-ref", "--quiet", "--short", "HEAD"),
+    ]);
+    if (common && common === ours && head === branch) return path;
+    throw new Error(`${tildify(path)} already exists${head ? ` on branch ${head}` : ""}. Pick another branch name.`);
+  }
   const exists = await git("rev-parse", "--verify", "--quiet", `refs/heads/${branch}`).then(
     () => true,
     () => false,

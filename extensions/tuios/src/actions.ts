@@ -1,9 +1,10 @@
 import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { jumpTo } from "./terminal";
 import { cleanName, movePane, PaneRef } from "./tuios";
 
 export async function fail(title: string, e: unknown) {
-  await showToast({ style: Toast.Style.Failure, title, message: e instanceof Error ? e.message : String(e) });
+  await showFailureToast(e, { title });
 }
 
 /** Focus the pane, bring its terminal forward and close Raycast. */

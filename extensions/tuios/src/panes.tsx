@@ -2,7 +2,8 @@ import { Action, ActionPanel, Color, Icon, Keyboard, LaunchProps, List } from "@
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { useEffect, useRef, useState } from "react";
-import { fail, jump, move } from "./actions";
+import { jump, move } from "./actions";
+import { ErrorView } from "./error-view";
 import { AgentState, capture, cleanName, listPanes, listSessions, Pane, tildify, workspaceNames } from "./tuios";
 
 const STATE: Partial<Record<AgentState, { glyph: string; color: Color; label: string }>> = {
@@ -66,9 +67,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Panes 
   const [search, setSearch] = useState(query);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const { data, isLoading, revalidate } = useCachedPromise(load, [], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(load, [], {
     keepPreviousData: true,
-    onError: (e) => fail("tuios is not answering", e),
+    failureToastOptions: { title: "tuios is not answering" },
   });
 
   // Typed straight from root search: one match means jump without showing the list.
@@ -115,11 +116,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Panes 
       searchBarPlaceholder="Find a pane by name, title, program or folder…"
       onSelectionChange={setSelected}
     >
-      <List.EmptyView
-        icon={Icon.Window}
-        title="No panes match"
-        description="Try a folder name or the program running in it."
-      />
+      {error && !data ? (
+        <ErrorView error={error} retry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Window}
+          title="No panes match"
+          description="Try a folder name or the program running in it."
+        />
+      )}
       {groups.map(([title, list]) => (
         <List.Section key={title} title={title}>
           {list.map((p) => (
