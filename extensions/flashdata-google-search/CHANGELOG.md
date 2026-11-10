@@ -1,6 +1,6 @@
 # FlashData Google Search Changelog
 
-## [Website setup links] - {PR_MERGE_DATE}
+## [Website setup links] - 2026-11-10
 
 - Link new users directly to FlashData signup and identify Raycast referrals in website links.
 
