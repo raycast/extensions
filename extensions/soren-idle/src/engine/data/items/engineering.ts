@@ -57,7 +57,7 @@ export const ENGINEERING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   },
   gyro_stabiliser: {
     id: "gyro_stabiliser",
-    name: "Gyro Stabiliser",
+    name: "Gyro Stabilizer",
     description: "Three rings that spin until the world agrees with them.",
     value: 812,
   },

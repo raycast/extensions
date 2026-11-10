@@ -8,14 +8,19 @@ import { formatBuffs, formatCredits, formatDuration, formatReport, setCompactNum
 import { ripeCount } from "./engine/hydroponics";
 import { notificationFor } from "./engine/notifications";
 import { update } from "./engine/storage";
+import { GameState, Report } from "./engine/types";
 import { notify } from "./notify";
+
+function announce({ state, report }: { state: GameState; report: Report }) {
+  const message = notificationFor(report, state.settings);
+  if (message && getPreferenceValues<Preferences.Ticker>().notifications) notify("Soren Idle", message);
+}
 
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(async () => {
     const result = await update(recordAway);
     setCompactNumbers(result.state.settings.compactNumbers);
-    const message = notificationFor(result.report, result.state.settings);
-    if (message && getPreferenceValues<Preferences.Ticker>().notifications) notify("Soren Idle", message);
+    announce(result);
     return result;
   });
 
@@ -33,11 +38,13 @@ export default function Command() {
 
   async function switchTo(taskId: string) {
     let error: string | undefined;
-    await update((s) => {
-      const result = startTask(s, taskId);
-      error = result.error;
-      return result.state;
+    // The old task is advanced before the switch, so its report has to be kept rather than dropped.
+    const result = await update((s, report) => {
+      const started = startTask(recordAway(s, report), taskId);
+      error = started.error;
+      return started.state;
     });
+    announce(result);
     if (error) await showFailureToast(error, { title: "Could not switch task" });
     revalidate();
   }

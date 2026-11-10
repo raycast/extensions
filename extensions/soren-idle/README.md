@@ -18,7 +18,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
   for permanent perks. Each run is harder and pays better. Pick run modifiers (Brutal Wilds, Slow
   Going, Thin Pickings) for a tougher run that pays extra Starlight.
 - **Collection Log:** every item, creature and building you have found, 18 achievements that pay
-  Credits, and one rare pet per skill (about 1 in 10,000 tasks, +3% XP, sent home on each launch).
+  Credits, and one rare pet for each skill that runs tasks (about 1 in 10,000 tasks, +3% XP, sent home on each launch).
 - **Away report:** per-skill time, tasks, XP per hour and levels gained while you were gone.
 - **Settings:** compact numbers (12.4K), a notification toggle for each event, and save backup.
 - **Combat:** areas, bosses, a damage triangle and gear that only counts while worn.

@@ -9,7 +9,7 @@
 - Combat plays out round by round: every swing can miss, damage varies, and gear raises your hit chance and lowers the creature's. Fights cost materials and ammo, and a defeat leaves you at 1 HP and costs a share of your drops. Some creatures have special drops, and Wraith and Void Stalker cores are a chance. Combat is now a credit sink rather than an earner.
 - The credit economy was retuned and companions can no longer be sold.
 - New survivors are guided from salvaging to mining to their first craft.
-- New Collection Log: every item, creature and building you have found, 18 achievements that pay Credits, and a rare animated pet for each skill (about 1 in 10,000 tasks, +3% XP). Pets go home when you launch the Rescue Ship, so you farm them again each run. Achievements stay.
+- New Collection Log: every item, creature and building you have found, 18 achievements that pay Credits, and a rare animated pet for each skill that runs tasks (about 1 in 10,000 tasks, +3% XP). Pets go home when you launch the Rescue Ship, so you farm them again each run. Achievements stay.
 - New Settings screen: compact numbers (12.4K), a notification toggle for task stopped, run finished, bounty ready and rare find, and save copy and import.
 - The away report shows XP per hour and the levels gained for each skill.
 - The menu bar shows the task's progress, and lets you switch to a recently used task or resume the last one without opening the game.

@@ -66,7 +66,7 @@ export function Voyage(props: {
               ]}
               detail={
                 <List.Item.Detail
-                  markdown={`# ${mod.name}\n${mod.description}\n\nWhen you launch from a run with this on, that launch earns ${Math.round(mod.bonus * 100)}% more Starlight. Picking it now starts your next run with it on.`}
+                  markdown={`# ${mod.name}\n${mod.description}\n\nWhen you launch from a run with this on, that launch earns ${Math.round(mod.bonus * 100)}% more Starlight. Picking it now starts your next run with it on.${state.mods.includes(mod.id) ? "\n\n_On in this run._" : ""}`}
                 />
               }
               actions={
@@ -107,7 +107,7 @@ export function Voyage(props: {
               ]}
               detail={
                 <List.Item.Detail
-                  markdown={`# ${perk.name}\n${perk.description}\n\nLevel ${level} of ${perk.maxLevel}.`}
+                  markdown={`# ${perk.name}\n${perk.description}\n\nLevel ${level} of ${perk.maxLevel}.${maxed ? "" : ` Next level costs **${cost} Starlight**.`}`}
                 />
               }
               actions={

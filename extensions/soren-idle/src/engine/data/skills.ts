@@ -25,7 +25,7 @@ export const SKILLS: SkillDef[] = [
   {
     id: "fabrication",
     name: "Fabrication",
-    blurb: "Shape plates, springs and lenses, then fit them into tools, weapons and armour.",
+    blurb: "Shape plates, springs and lenses, then fit them into tools, weapons and armor.",
   },
   {
     id: "combat",

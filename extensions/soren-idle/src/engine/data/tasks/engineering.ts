@@ -114,7 +114,7 @@ export const ENGINEERING_TASKS: TaskDef[] = [
   {
     id: "craft_gyro",
     skill: "engineering",
-    name: "Gyro Stabiliser",
+    name: "Gyro Stabilizer",
     description: "Keeps a thing level while everything else is not.",
     levelReq: 62,
     durationMs: 7500,

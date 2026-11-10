@@ -40,7 +40,7 @@ export const XENOFISHING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   reef_crab: {
     id: "reef_crab",
     name: "Reef Crab",
-    description: "Pink, armoured and indignant.",
+    description: "Pink, armored and indignant.",
     value: 63,
   },
   thunder_pike: {

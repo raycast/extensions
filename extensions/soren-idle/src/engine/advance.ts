@@ -105,14 +105,15 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
       yieldBonus(s);
   if (task.monster) {
     const damage = fightDamage(s, task, at);
+    if (!canAfford(s, task.inputs)) return `Out of materials for ${task.name}`;
     const wantsFood = () => s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
     // Bosses are fought without a break: no eating until the fight is over.
     for (let food = foodOwned(s); !task.boss && food && wantsFood() && s.hp < maxHp(s); food = foodOwned(s)) {
       s.inventory[food] = count(s, food) - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
-    if (!canAfford(s, task.inputs)) return `Out of materials for ${task.name}`;
-    if (s.hp <= damage) {
+    // Ordinary fights are survived by eating between hits, so only bosses and the unfed need the HP up front.
+    if ((task.boss || !foodOwned(s)) && s.hp <= damage) {
       s.stats.retreats++;
       return `Retreated from ${task.monster.name}: too wounded and out of rations`;
     }

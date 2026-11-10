@@ -14,7 +14,7 @@ export const clearAway = (s: GameState): GameState => (s.unseen ? { ...s, unseen
 const HOUR_MS = 3_600_000;
 const perHour = (xp: number, ms: number) => (ms > 0 ? ` (${num((xp * HOUR_MS) / ms)}/h)` : "");
 
-/** "level 6 → 15" for a skill that levelled up in this report. */
+/** "level 6 → 15" for a skill that leveled up in this report. */
 function levelRange(r: Report, skill: SkillId): string | undefined {
   const levels = r.levelUps.filter((u) => u.skill === skill).map((u) => u.level);
   return levels.length ? `level ${Math.min(...levels) - 1} → ${Math.max(...levels)}` : undefined;

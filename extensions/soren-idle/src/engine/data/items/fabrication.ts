@@ -62,7 +62,7 @@ export const FABRICATION_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   arc_torch: {
     id: "arc_torch",
     name: "Arc Torch",
-    description: "Salvaging takes 35% less time. The beam is a colour that hurts to name.",
+    description: "Salvaging takes 35% less time. The beam is a color that hurts to name.",
     value: 400,
     tool: { skill: "salvaging", speed: 0.65 },
     slot: "salvager",

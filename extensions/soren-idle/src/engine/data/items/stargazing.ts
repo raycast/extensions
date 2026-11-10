@@ -16,7 +16,7 @@ export const STARGAZING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   nebula_gas: {
     id: "nebula_gas",
     name: "Nebula Gas",
-    description: "Bottled colour from the far side of the sky.",
+    description: "Bottled color from the far side of the sky.",
     value: 102,
   },
   pulsar_dust: {
@@ -66,7 +66,7 @@ export const STARGAZING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   aurora_vapor: {
     id: "aurora_vapor",
     name: "Aurora Vapor",
-    description: "It shimmers in the jar and will not stay one colour.",
+    description: "It shimmers in the jar and will not stay one color.",
     value: 399,
   },
   quasar_dust: {

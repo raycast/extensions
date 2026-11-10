@@ -16,7 +16,7 @@ export const FORAGING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   golden_spore: {
     id: "golden_spore",
     name: "Golden Spore",
-    description: "A single spore the colour of old brass. It smells like the inside of a bell.",
+    description: "A single spore the color of old brass. It smells like the inside of a bell.",
     value: 100,
   },
   pale_berry: {

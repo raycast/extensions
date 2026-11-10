@@ -41,7 +41,7 @@ export const HACKING_TASKS: TaskDef[] = [
     id: "hack_warden",
     skill: "hacking",
     name: "Warden Cores",
-    description: "Turn the vault's guardian against its own defences, one subroutine at a time.",
+    description: "Turn the vault's guardian against its own defenses, one subroutine at a time.",
     levelReq: 35,
     durationMs: 7000,
     node: { hp: 15, respawnMs: 15000 },

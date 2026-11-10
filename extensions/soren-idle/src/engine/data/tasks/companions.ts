@@ -38,7 +38,7 @@ export const COMPANIONS_TASKS: TaskDef[] = [
     id: "build_ward",
     skill: "companions",
     name: "Ward Drone",
-    description: "Armoured, loyal and slightly smug.",
+    description: "Armored, loyal and slightly smug.",
     levelReq: 35,
     durationMs: 8000,
     xp: 150,

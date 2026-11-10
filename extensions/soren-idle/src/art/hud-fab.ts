@@ -29,7 +29,7 @@ const PIECES: Record<string, [string, (f: number) => string]> = {
       path("M70 24Q110 40 120 10", "#ffffff", 2, "none"),
   ],
   craft_gyro: [
-    "GYRO STABILISER",
+    "GYRO STABILIZER",
     (f) =>
       [0, 1, 2]
         .map(

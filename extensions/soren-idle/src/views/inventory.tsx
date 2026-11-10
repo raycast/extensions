@@ -43,7 +43,7 @@ export function Inventory(props: {
               ...(isEquipped(state, id) ? [{ tag: { value: "Equipped", color: Color.Green } }] : []),
               ...(keep > 0 && !isGear(id) ? [{ tag: `Keep ${keep}` }] : []),
               {
-                text: `×${Math.floor(count(state, id))}`,
+                text: `×${formatNumber(Math.floor(count(state, id)))}`,
                 tooltip: isGear(id) ? undefined : `Holds up to ${formatNumber(storageCap(state))}`,
               },
             ]}

@@ -22,7 +22,7 @@ export const SALVAGING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
   prism_geode: {
     id: "prism_geode",
     name: "Prism Geode",
-    description: "Crack it open and the light inside splits into colours you have no names for.",
+    description: "Crack it open and the light inside splits into colors you have no names for.",
     value: 120,
   },
   nav_core: {

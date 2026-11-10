@@ -60,7 +60,7 @@ export const SMELTING_TASKS: TaskDef[] = [
     id: "smelt_cobalt",
     skill: "smelting",
     name: "Cobalt Bar",
-    description: "Blue-hot cobalt, poured into a mould and left to settle.",
+    description: "Blue-hot cobalt, poured into a mold and left to settle.",
     levelReq: 30,
     durationMs: 5000,
     xp: 88,

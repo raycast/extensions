@@ -49,7 +49,7 @@ export const STARGAZING_TASKS: TaskDef[] = [
     id: "watch_nebula",
     skill: "stargazing",
     name: "Nebula Gas",
-    description: "The colours do not survive the trip home, but the gas does.",
+    description: "The colors do not survive the trip home, but the gas does.",
     levelReq: 40,
     durationMs: 7000,
     xp: 260,
