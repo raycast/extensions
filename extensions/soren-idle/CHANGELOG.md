@@ -1,6 +1,6 @@
 # Soren Idle Changelog
 
-## [Collection Log Fix] - {PR_MERGE_DATE}
+## [Collection Log Fix] - 2026-11-10
 
 - Fixes a formatting error in the Collection Log that stopped the last update from publishing.
 
