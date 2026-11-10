@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "fal",
+    title: "fal.ai",
+    description:
+      "Generate and edit images, video, audio and 3D with fal. Discover models, inspect schemas and prices, and follow queued jobs. Hosted Streamable HTTP server with browser OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Requires a fal account; generation consumes account credits.",
+    icon: "https://avatars.githubusercontent.com/u/74778219?s=400&v=4",
+    homepage: "https://fal.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.fal.ai/mcp-relay"],
+    },
+    remoteUrl: "https://mcp.fal.ai/mcp-relay",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
