@@ -39,7 +39,8 @@ const NAMES = ["auto-tile", "master-left", "master-right", "master-center"] as c
 export type TileName = (typeof NAMES)[number];
 const isMaster = (name: TileName) => name.startsWith("master-");
 
-const SIDEBAR_WIDTH = 400; // asked for. An app that needs more keeps its real minimum.
+/** The sidebar is as thin as its app allows: it is asked for this, then keeps the minimum its app insists on. */
+const SIDEBAR_WIDTH = 200;
 
 const LAST = "last-tile";
 const SIDEBAR = "sidebar"; // "on" while a sidebar is pinned. Layouts then arrange the rest around it.

@@ -138,7 +138,28 @@ export async function arrange(
     // Windows closed since the first read drop out. The rest keep their original frames.
     windows = first.filter((w) => current.has(w.id));
   }
+  if (windows.length) await keepOnScreen(system, areas, new Set(windows.map((w) => w.id)));
   return { count: windows.length, failed, passes: pass };
+}
+
+/**
+ * No command leaves a window hanging over the edge of its screen, where it would show on the next one.
+ * A window that came out bigger than it was asked to be is slid back inside. One too big for the
+ * screen is lined up with its top-left corner.
+ */
+export async function keepOnScreen(system: System, areas: Frame[], ids: Set<string>): Promise<void> {
+  const inside = (start: number, size: number, from: number, room: number) =>
+    Math.max(from, Math.min(start, from + room - size));
+  const back = (await system.windows()).flatMap((w) => {
+    const area = areas[w.screen];
+    if (!area || !ids.has(w.id)) return [];
+    const x = inside(w.frame.x, w.frame.width, area.x, area.width);
+    const y = inside(w.frame.y, w.frame.height, area.y, area.height);
+    return Math.abs(x - w.frame.x) > 2 || Math.abs(y - w.frame.y) > 2
+      ? [{ id: w.id, frame: { ...w.frame, x, y } }]
+      : [];
+  });
+  if (back.length) await system.place(back);
 }
 
 /** Apps resize asynchronously. Read until two reads in a row agree, so a frame mid-resize isn't taken as final. */

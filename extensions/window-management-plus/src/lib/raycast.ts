@@ -65,7 +65,15 @@ export const tile = (
 /** The one Cache for the extension. Two instances would each rewrite the index and lose the other's keys. */
 export const cache = new Cache();
 const LEARNED = "window-limits-v6";
-const loadLearned = () => freshLimits(new Map<string, Limits>(JSON.parse(cache.get(LEARNED) ?? "[]")));
+/**
+ * Raycast Notes can't go narrower than this, and asked to, it ignores the whole resize, height included.
+ * It is never learned from, so its minimum is given here.
+ */
+const NOTES_MIN_WIDTH = 400;
+const loadLearned = () =>
+  freshLimits(new Map<string, Limits>(JSON.parse(cache.get(LEARNED) ?? "[]"))).set("raycast:Notes", {
+    min: { width: NOTES_MIN_WIDTH },
+  });
 /** Window ids die with their windows, so only the most recently learned are kept. */
 const saveLearned = (learned: Map<string, Limits>) => cache.set(LEARNED, JSON.stringify([...learned].slice(-200)));
 
@@ -429,15 +437,30 @@ const raycastWindows = async (): Promise<(Frame & { title: string })[]> => {
   }
 };
 
-/** Set twice, because a window resized against a screen edge can land short the first time. */
+/**
+ * Moves one of Raycast's own windows. It is resized before it is moved as well as after, because a
+ * resize is dropped while a window hangs over two screens, and one resized against a screen edge can
+ * land short. The size is checked and sent again until it takes or stops changing.
+ */
 const moveRaycastWindow = (title: string, f: Frame) => {
   const position = `[${Math.round(f.x)}, ${Math.round(f.y)}]`;
   const size = `[${Math.round(f.width)}, ${Math.round(f.height)}]`;
   return jxa(`const w = ${raycastProcess}.windows.byName(${JSON.stringify(title)})
-w.position = ${position}
-w.size = ${size}
-w.position = ${position}
-w.size = ${size}`);
+const size = ${size}
+let last = ""
+for (let tries = 0; tries < 4; tries++) {
+  // Resized where it stands first: a resize is dropped while the window hangs over two screens
+  w.size = size
+  w.position = ${position}
+  w.size = size
+  delay(0.12)
+  const got = w.size()
+  if (Math.abs(got[0] - size[0]) < 3 && Math.abs(got[1] - size[1]) < 3) break
+  // The same wrong size twice running is the window's own limit, not a dropped resize
+  if (String(got) === last) break
+  last = String(got)
+}
+w.position = ${position}`);
 };
 
 /** Opens Raycast Notes or AI Chat when it isn't open yet. Returns its window title. */

@@ -55,15 +55,16 @@ test("windows that take the size they are given are placed once", async () => {
   assert.equal(system.calls, 1);
 });
 
-test("one pass moves windows once even when an app clamps", async () => {
+test("one pass lays out once even when an app clamps, then only slides the window back on screen", async () => {
   const at = (x: number) => ({ x, y: 0, width: 600, height: 800 });
   const { system, frame } = fake([
     { id: "a", frame: at(0), minWidth: 700 },
     { id: "b", frame: at(600) },
   ]);
   await arrange(system, rotated(rows(), 1), 1);
-  assert.equal(system.calls, 1);
-  assert.equal(frame("a").x, 600);
+  // One layout pass, and one nudge for "a", which came out wider than its slot and past the edge
+  assert.equal(system.calls, 2);
+  assert.equal(frame("a").x + frame("a").width, 1200);
   assert.equal(frame("b").x, 0);
 });
 
@@ -349,4 +350,22 @@ test("a window that answers unreliably is never learned from", async () => {
   const learned = new Map();
   await arrange(system, rows(2), 3, learned);
   assert.equal(learned.size, 0);
+});
+
+test("a window left hanging over the edge of its screen is slid back inside", async () => {
+  const { system, frame } = fake([
+    { id: "a", frame: { x: 0, y: 0, width: 100, height: 100 } },
+    { id: "tall", frame: { x: 900, y: 0, width: 100, height: 100 } },
+  ]);
+  // "tall" won't go shorter than 700, so in the bottom row it would end 300 past the bottom
+  const place = system.place;
+  system.place = async (p) => {
+    const failed = await place(p);
+    const f = frame("tall");
+    f.height = Math.max(f.height, 700);
+    return failed;
+  };
+  const twoRows = rows(2, 0, 2);
+  await arrange(system, twoRows, 1);
+  assert.equal(frame("tall").y + frame("tall").height, 800);
 });
