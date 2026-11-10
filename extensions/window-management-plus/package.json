@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "window-management-plus",
+  "title": "Window Management+",
+  "description": "Companion to Raycast's Window Management: tile every open window at once, with sidebar, rotate and swap.",
+  "icon": "extension-icon.png",
+  "author": "connorforsyth",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "gap",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "title": "Gap",
+      "description": "Space between windows, in points.",
+      "data": [
+        {
+          "title": "0 pt",
+          "value": "0"
+        },
+        {
+          "title": "2 pt",
+          "value": "2"
+        },
+        {
+          "title": "4 pt",
+          "value": "4"
+        },
+        {
+          "title": "6 pt",
+          "value": "6"
+        },
+        {
+          "title": "8 pt",
+          "value": "8"
+        },
+        {
+          "title": "10 pt",
+          "value": "10"
+        },
+        {
+          "title": "12 pt",
+          "value": "12"
+        },
+        {
+          "title": "16 pt",
+          "value": "16"
+        },
+        {
+          "title": "20 pt",
+          "value": "20"
+        },
+        {
+          "title": "24 pt",
+          "value": "24"
+        }
+      ]
+    },
+    {
+      "name": "sidebar",
+      "type": "dropdown",
+      "required": false,
+      "default": "notes",
+      "title": "Sidebar",
+      "description": "Window pinned full height down the right by Auto Tile with Sidebar.",
+      "data": [
+        {
+          "title": "Raycast Notes",
+          "value": "notes"
+        },
+        {
+          "title": "Raycast AI Chat",
+          "value": "ai"
+        },
+        {
+          "title": "Active Window",
+          "value": "active"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "auto-tile",
+      "title": "Auto Tile",
+      "description": "Arrange every visible window in two even rows.",
+      "mode": "no-view",
+      "icon": "tile.png"
+    },
+    {
+      "name": "auto-tile-sidebar",
+      "title": "Auto Tile with Sidebar",
+      "description": "Pin the sidebar app (Raycast Notes by default) full height down the right and tile every other visible window in two rows.",
+      "mode": "no-view",
+      "icon": "tile-sidebar.png"
+    },
+    {
+      "name": "tile-largest-left",
+      "title": "Tile Largest Window Left",
+      "description": "Largest window fills the left. The rest stack in a column on the right.",
+      "mode": "no-view",
+      "icon": "tile-largest-left.png"
+    },
+    {
+      "name": "tile-largest-right",
+      "title": "Tile Largest Window Right",
+      "description": "Largest window fills the right. The rest stack in a column on the left.",
+      "mode": "no-view",
+      "icon": "tile-largest-right.png"
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate Windows",
+      "description": "Move each window into the next window's position.",
+      "mode": "no-view",
+      "icon": "rotate.png"
+    },
+    {
+      "name": "rotate-backwards",
+      "title": "Rotate Windows Backwards",
+      "description": "Move each window into the previous window's position.",
+      "mode": "no-view",
+      "icon": "rotate-backwards.png"
+    },
+    {
+      "name": "swap-with-largest",
+      "title": "Swap Active Window with Largest",
+      "description": "Trade places between the active window and the largest one.",
+      "mode": "no-view",
+      "icon": "swap-with-largest.png"
+    },
+    {
+      "name": "toggle-menu-bar-visibility",
+      "title": "Toggle Menu Bar Visibility",
+      "description": "Hide or show the menu bar.",
+      "mode": "no-view",
+      "icon": "toggle-menu-bar.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.x",
+    "@types/react": "19.x",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
