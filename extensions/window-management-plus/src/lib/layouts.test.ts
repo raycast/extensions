@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   carry,
   master,
+  nextPivot,
   ranked,
   rotated,
   rows,
@@ -485,4 +486,29 @@ test("on a display that is far too full, as many windows as possible stay tiled 
       const oy = Math.min(p.frame.y + p.frame.height, q.frame.y + q.frame.height) - Math.max(p.frame.y, q.frame.y);
       assert.ok(ox <= 2 || oy <= 2, `${p.id} and ${q.id} half-overlap`);
     }
+});
+
+test("asked for a grid from three windows, rows puts two above and one below", () => {
+  const at = (id: string, x: number): Item => ({ ...item(id), frame: { x, y: 0, width: 100, height: 100 } });
+  const items = [at("a", 0), at("b", 500), at("c", 1000)];
+  // On its own, three windows sit in a line
+  assert.equal(frameOf(rows()(items, box), "c").y, 0);
+  const out = rows(2, 0, 3)(items, box);
+  assert.deepEqual(frameOf(out, "a"), { x: 0, y: 0, width: 600, height: 400 });
+  assert.deepEqual(frameOf(out, "b"), { x: 600, y: 0, width: 600, height: 400 });
+  assert.deepEqual(frameOf(out, "c"), { x: 0, y: 400, width: 1200, height: 400 });
+  // And a line is always a line
+  assert.equal(frameOf(rows(1)([...items, at("d", 1100), at("e", 1150)], box), "e").y, 0);
+});
+
+test("pivot goes round side by side, two rows, two columns, and back", () => {
+  const line = { shape: "line", sideways: false } as const;
+  const rowsGrid = nextPivot(line, 3);
+  const columnsGrid = nextPivot(rowsGrid, 3);
+  assert.deepEqual(rowsGrid, { shape: "grid", sideways: false });
+  assert.deepEqual(columnsGrid, { shape: "grid", sideways: true });
+  assert.deepEqual(nextPivot(columnsGrid, 3), line);
+  // Two windows can only be side by side or stacked
+  assert.deepEqual(nextPivot(line, 2), { shape: "line", sideways: true });
+  assert.deepEqual(nextPivot({ shape: "line", sideways: true }, 2), line);
 });

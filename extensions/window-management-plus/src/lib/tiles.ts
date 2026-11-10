@@ -1,9 +1,10 @@
 // The tiling layouts by name. The last one used is remembered, so Rotate, Swap, Grow Master and
-// Toggle Split rerun it instead of picking a layout of their own.
+// Pivot rerun it instead of picking a layout of their own.
 
 import {
   MASTER_RATIO,
   master,
+  nextPivot,
   rotated,
   rows,
   sidebar,
@@ -38,7 +39,10 @@ const isMaster = (name: TileName) => name.startsWith("master-");
 const SIDEBAR_WIDTH = 200; // asked for, then the app clamps to its real minimum
 
 const LAST = "last-tile";
-const SPLIT = "split"; // "columns" when Toggle Split has turned Auto Tile on its side
+const SPLIT = "split"; // "columns" when Pivot has turned Auto Tile on its side
+const SHAPE = "shape"; // what Pivot chose: "line" or "grid". Unset, Auto Tile decides by window count.
+/** Auto Tile on its own puts up to three windows in a line and more in a grid. */
+const AUTO_GRID_FROM = 4;
 const RATIO = "master-ratio";
 
 const last = (): TileName => {
@@ -64,7 +68,11 @@ function layoutFor(
   lead: "focused" | "largest",
 ): { layout: Layout; pinned?: (i: Item) => boolean; panel?: Panel } {
   const { gap, sidebar: choice } = prefs();
-  const grid = cache.get(SPLIT) === "columns" ? transposed(rows(2, gap)) : rows(2, gap);
+  // Auto Tile is a grid of two rows, or one line of windows. Either can be turned on its side.
+  const shape = cache.get(SHAPE);
+  // Asked for a grid, three windows are enough to make one: two above and one below
+  const flat = shape === "line" ? rows(1, gap) : rows(2, gap, shape === "grid" ? 3 : AUTO_GRID_FROM);
+  const grid = cache.get(SPLIT) === "columns" ? transposed(flat) : flat;
   switch (name) {
     case "auto-tile":
       return { layout: grid };
@@ -120,9 +128,26 @@ export function resizeMaster(delta: number) {
   return retile((layout) => layout, name);
 }
 
-/** Auto Tile flips between rows and columns on the active display. Hyprland's togglesplit. */
-export function toggleSplit() {
-  cache.set(SPLIT, cache.get(SPLIT) === "columns" ? "rows" : "columns");
+/**
+ * Auto Tile turns to its next shape, on the active display: side by side, then a grid of two rows, then
+ * that grid on its side. It starts from what is showing now, so the first press always changes something.
+ */
+export async function pivot() {
+  // Without the window count, Auto Tile's own choice can't be told, so a line is assumed.
+  // retileGrid reports the reason if windows can't be read at all.
+  const { windows } = await listWindows().catch(() => ({ windows: [] }));
+  const display = windows.find((w) => w.focused)?.display ?? 0;
+  const count = windows.filter((w) => w.display === display).length;
+  const shape = cache.get(SHAPE);
+  const showsGrid = shape === "grid" || (shape !== "line" && count >= AUTO_GRID_FROM);
+  const next = nextPivot({ shape: showsGrid ? "grid" : "line", sideways: cache.get(SPLIT) === "columns" }, count);
+  cache.set(SHAPE, next.shape);
+  cache.set(SPLIT, next.sideways ? "columns" : "rows");
+  return retileGrid();
+}
+
+/** Reruns Auto Tile, keeping the sidebar if that was the last layout. */
+function retileGrid() {
   const name = last() === "auto-tile-sidebar" ? "auto-tile-sidebar" : "auto-tile";
   cache.set(LAST, name);
   return retile((layout) => layout, name);

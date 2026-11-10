@@ -6,10 +6,10 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 
 | Command                                     | Result                                                                                                                                                              |
 | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Auto Tile                                   | Arrange every visible window in two even rows, or columns after Toggle Split.                                                                                       |
+| Auto Tile                                   | Arrange every visible window in an even grid. Pivot Layout changes its shape.                                                                                       |
 | Auto Tile with Sidebar                      | Pin the sidebar app full height down the right and tile every other visible window.                                                                                 |
 | Smart Arrange                               | Arrange windows by what each app is for. The focused window leads the largest display with your other work beside it. Chat, mail and music go to the other display. |
-| Toggle Split                                | Switch Auto Tile between rows and columns.                                                                                                                          |
+| Pivot Layout                                | Turn Auto Tile to its next shape: every window side by side, then two small above one large, then two small beside one large.                                       |
 | Master Layout Left / Right                  | The focused window becomes the master on one side. The rest stack on the other. On a display without the focused window, the largest window is the master.          |
 | Master Layout Center                        | The focused window becomes the master in the middle and the rest stack on both sides. Made for wide displays.                                                       |
 | Grow Master / Shrink Master                 | Give the master window more or less of the screen, in steps of 5%.                                                                                                  |
@@ -22,9 +22,9 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 | Move All to This Display                    | Move every window from your other displays to the display with the focused window, tiled with the last layout you used.                                             |
 | Toggle Menu Bar Visibility                  | Hide or show the menu bar.                                                                                                                                          |
 
-The names follow Hyprland too, so its users can search for `master`, `swapnext`, `mfact`, `togglesplit` or `rollnext`.
+The names follow Hyprland too, so its users can search for `master`, `swapnext`, `mfact`, `togglesplit` (Pivot Layout) or `rollnext`.
 
-Swap, Rotate, Grow Master and Toggle Split all work on the last layout you tiled with, so you can tile once and then rearrange.
+Swap, Rotate, Grow Master and Pivot Layout all work on the last layout you tiled with, so you can tile once and then rearrange.
 
 When a display has more windows than fit at the sizes their apps allow, the smallest ones share one slot instead of half-covering each other. The active window always gets its own.
 

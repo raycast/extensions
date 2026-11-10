@@ -100,7 +100,7 @@ function bands(box: Frame, groups: Item[][], gap: number): Frame[] {
 }
 
 export const rows =
-  (count = 2, gap = 0): Layout =>
+  (count = 2, gap = 0, from = 4): Layout =>
   (items, box) => {
     if (!items.length) return [];
     // A window whose app won't go narrower than half the area can't share a row.
@@ -147,10 +147,10 @@ export const rows =
         end -= gap;
       }
       const space = { ...box, x, width: Math.max(0, end - x) };
-      return [...cols, ...(rest.length ? rows(count, gap)(rest, space) : [])];
+      return [...cols, ...(rest.length ? rows(count, gap, from)(rest, space) : [])];
     }
-    // Up to three windows sit side by side. Four or more split into rows.
-    const n = items.length < 4 ? 1 : Math.min(count, items.length);
+    // Fewer than `from` windows sit side by side. More split into rows.
+    const n = items.length < from ? 1 : Math.min(count, items.length);
     const per = Math.ceil(items.length / n);
     // Keep rough positions: higher windows take the top row, then each row runs left to right
     const byY = [...items].sort((a, b) => centre(a).y - centre(b).y);
@@ -522,4 +522,20 @@ export function shares(count: number, sizes: { width: number; height: number }[]
   const byRemainder = exact.map((e, k) => ({ k, left: e - out[k] })).sort((a, b) => b.left - a.left);
   for (let n = count - sum(out), i = 0; n > 0; n--, i++) out[byRemainder[i % byRemainder.length].k]++;
   return out;
+}
+
+/** The shapes Auto Tile can take: windows in one line or a grid, either turned on its side. */
+export type Pivot = { shape: "line" | "grid"; sideways: boolean };
+
+/**
+ * The next shape round for `count` windows. Three or more go from side by side, to two rows, to two
+ * columns, and back. Two can only be side by side or stacked, since a grid of two is a line.
+ */
+export function nextPivot(now: Pivot, count: number): Pivot {
+  const sideBySide: Pivot = { shape: "line", sideways: false };
+  const isSideBySide = now.shape === "line" && !now.sideways;
+  if (count < 3) return isSideBySide ? { shape: "line", sideways: true } : sideBySide;
+  if (isSideBySide) return { shape: "grid", sideways: false };
+  if (now.shape === "grid" && !now.sideways) return { shape: "grid", sideways: true };
+  return sideBySide;
 }

@@ -91,7 +91,7 @@
     {
       "name": "auto-tile",
       "title": "Auto Tile",
-      "description": "Arrange every visible window in two even rows, or columns after Toggle Split.",
+      "description": "Arrange every visible window in an even grid. Pivot Layout changes its shape.",
       "mode": "no-view",
       "icon": "tile.png",
       "keywords": [
@@ -112,6 +112,23 @@
       ]
     },
     {
+      "name": "pivot",
+      "title": "Pivot Layout",
+      "description": "Turn Auto Tile to its next shape: every window side by side, then two small above one large, then two small beside one large.",
+      "mode": "no-view",
+      "icon": "pivot.png",
+      "keywords": [
+        "pivot",
+        "toggle split",
+        "togglesplit",
+        "grid",
+        "columns",
+        "rows",
+        "orientation",
+        "hyprland"
+      ]
+    },
+    {
       "name": "smart-arrange",
       "title": "Smart Arrange",
       "description": "Arrange windows by what each app is for. The focused window leads the largest display with your other work beside it. Chat, mail and music go to the other display.",
@@ -125,20 +142,6 @@
         "roles"
       ],
       "icon": "smart-arrange.png"
-    },
-    {
-      "name": "toggle-split",
-      "title": "Toggle Split",
-      "description": "Switch Auto Tile between rows and columns.",
-      "mode": "no-view",
-      "keywords": [
-        "togglesplit",
-        "rows",
-        "columns",
-        "orientation",
-        "hyprland"
-      ],
-      "icon": "toggle-split.png"
     },
     {
       "name": "master-left",
