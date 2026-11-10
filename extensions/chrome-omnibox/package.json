@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chrome-omnibox",
+  "title": "Chrome Omnibox",
+  "description": "Open any site from your Chrome history (or any Chromium browser) in one keystroke, like the browser address bar.",
+  "icon": "icon.png",
+  "author": "allnightlong",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Open Site",
+      "description": "Type part of a site you visited and press Enter; addresses open directly, anything else is searched on Google.",
+      "mode": "view",
+      "keywords": [
+        "browser",
+        "history",
+        "omnibox",
+        "address bar",
+        "url",
+        "chrome",
+        "edge",
+        "brave",
+        "yandex",
+        "vivaldi",
+        "opera",
+        "chromium"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "dev:win": "HOME=\"$(wslpath \"$(cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\\r')\")\" ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test test/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
