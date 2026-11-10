@@ -167,16 +167,30 @@ fn focus(hwnd: HWND) -> Result<(), String> {
 }
 
 fn title_matches(name: &str, target: &str) -> bool {
-    let name = name.trim();
-    if name.eq_ignore_ascii_case(target.trim()) {
-        return true;
-    }
-    [" - Memory usage - ", " - Inactive tab - "]
+    let mut name = name.trim();
+    let target = target.trim();
+    loop {
+        if name.eq_ignore_ascii_case(target) {
+            return true;
+        }
+        if let Some(title) = [
+            " - Audio playing",
+            " - Audio muted",
+            " - Video playing in picture-in-picture mode",
+        ]
         .iter()
-        .any(|suffix| {
-            name.rsplit_once(suffix)
-                .is_some_and(|(title, _)| title.trim().eq_ignore_ascii_case(target.trim()))
-        })
+        .find_map(|suffix| name.strip_suffix(suffix))
+        .or_else(|| {
+            [" - Memory usage - ", " - Inactive tab - "]
+                .iter()
+                .filter_map(|marker| name.rsplit_once(marker).map(|(title, _)| title))
+                .max_by_key(|title| title.len())
+        }) {
+            name = title.trim();
+        } else {
+            return false;
+        }
+    }
 }
 
 // Frameless mode reveals its sidebar at either client edge. Hovering uses the
@@ -404,6 +418,11 @@ pub fn switch_tab(executable: &str, title: &str) -> Result<(), String> {
     let automation: IUIAutomation =
         unsafe { CoCreateInstance(&CUIAutomation, None, CLSCTX_INPROC_SERVER).map_err(error)? };
     let windows = browser_windows(executable)?;
+    let window_count = windows.len();
+    let mut existing_tab_strips = 0;
+    let mut hover_attempts = 0;
+    let mut blocked_edges = 0;
+    let mut revealed_tab_strips = 0;
     for &hwnd in &windows {
         if unsafe { find_tab(&automation, hwnd, Some(title))? }.is_some() {
             let mut inspection = WindowInspection::begin(hwnd)?;
@@ -424,13 +443,16 @@ pub fn switch_tab(executable: &str, title: &str) -> Result<(), String> {
             return Ok(());
         }
         if unsafe { find_tab(&automation, hwnd, None)? }.is_some() {
+            existing_tab_strips += 1;
             continue;
         }
         focus(hwnd)?;
         for right in [false, true] {
             let Some(hover) = SidebarHover::begin(hwnd, right)? else {
+                blocked_edges += 1;
                 continue;
             };
+            hover_attempts += 1;
             let deadline = Instant::now() + Duration::from_millis(600);
             loop {
                 hover.check()?;
@@ -447,14 +469,14 @@ pub fn switch_tab(executable: &str, title: &str) -> Result<(), String> {
             }
             drop(hover);
             if unsafe { find_tab(&automation, hwnd, None)? }.is_some() {
+                revealed_tab_strips += 1;
                 break;
             }
         }
     }
-    Err(
-        "The tab was not found in the selected Helium installation. Refresh the list; if the sidebar is hidden, show it and try again."
-            .into(),
-    )
+    Err(format!(
+        "The tab was not found in the selected Helium installation. Refresh the list; if the sidebar is hidden, show it and try again. [windows={window_count}; existing tab strips={existing_tab_strips}; hover attempts={hover_attempts}; blocked edges={blocked_edges}; revealed tab strips={revealed_tab_strips}]"
+    ))
 }
 
 pub fn new_tab(executable: &str) -> Result<bool, String> {
@@ -697,6 +719,29 @@ mod tests {
         assert!(!title_matches(
             "Other Google - Memory usage - 45 MB",
             "Google"
+        ));
+    }
+
+    #[test]
+    fn titles_match_playing_tabs_with_accessibility_suffixes() {
+        let title = "Video - YouTube";
+        assert!(title_matches("Video - YouTube - Audio playing", title));
+        assert!(title_matches("Video - YouTube - Audio muted", title));
+        assert!(title_matches(
+            "Video - YouTube - Audio playing - Memory usage - 45 MB",
+            title
+        ));
+        assert!(title_matches(
+            "Video - YouTube - Video playing in picture-in-picture mode",
+            title
+        ));
+        assert!(!title_matches(
+            "Other Video - YouTube - Audio playing",
+            title
+        ));
+        assert!(!title_matches(
+            "Video - YouTube - Audio playing live",
+            title
         ));
     }
     #[test]

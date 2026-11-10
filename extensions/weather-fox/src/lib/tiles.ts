@@ -53,10 +53,25 @@ export function frameWidthKm(latitude: number, zoom = RADAR_ZOOM): number {
   return Math.round((kmPerTile * 840) / TILE_PX);
 }
 
-export function basemapTileUrl(zoom: number, x: number, y: number, dark: boolean): string {
+/**
+ * Clamp grid coordinates to the world. A grid centred near the antimeridian
+ * (or panned across it) has columns below 0 or past the last one; the map
+ * wraps east–west, so those map onto real tiles. It does not wrap north–south:
+ * rows beyond the poles have no tile, and `undefined` tells the fetcher to
+ * leave that cell empty rather than request a URL that cannot exist.
+ */
+export function worldTile(zoom: number, x: number, y: number): { x: number; y: number } | undefined {
+  const n = 2 ** zoom;
+  if (y < 0 || y >= n) return undefined;
+  return { x: ((x % n) + n) % n, y };
+}
+
+export function basemapTileUrl(zoom: number, x: number, y: number, dark: boolean): string | undefined {
+  const tile = worldTile(zoom, x, y);
+  if (!tile) return undefined;
   const layer = dark ? "Canvas/World_Dark_Gray_Base" : "Canvas/World_Light_Gray_Base";
   // Note: Esri tile paths are z/y/x, not z/x/y.
-  return `https://services.arcgisonline.com/arcgis/rest/services/${layer}/MapServer/tile/${zoom}/${y}/${x}`;
+  return `https://services.arcgisonline.com/arcgis/rest/services/${layer}/MapServer/tile/${zoom}/${tile.y}/${tile.x}`;
 }
 
 export interface RainViewerFrame {
@@ -91,8 +106,16 @@ export function isRainViewerMaps(v: unknown): v is RainViewerMaps {
 }
 
 /** Color scheme 4 = classic green→red; options: smoothed, with snow layer. */
-export function radarTileUrl(maps: RainViewerMaps, frame: RainViewerFrame, zoom: number, x: number, y: number): string {
-  return `${maps.host}${frame.path}/${TILE_PX}/${zoom}/${x}/${y}/4/1_1.png`;
+export function radarTileUrl(
+  maps: RainViewerMaps,
+  frame: RainViewerFrame,
+  zoom: number,
+  x: number,
+  y: number,
+): string | undefined {
+  const tile = worldTile(zoom, x, y);
+  if (!tile) return undefined;
+  return `${maps.host}${frame.path}/${TILE_PX}/${zoom}/${tile.x}/${tile.y}/4/1_1.png`;
 }
 
 /**
@@ -172,12 +195,13 @@ async function fetchTile(url: string, signal: AbortSignal | undefined): Promise<
 }
 
 /**
- * Fetch a grid of tiles with bounded concurrency; failed tiles come back with
- * no `buf`. Aborting the signal rejects with the AbortError, so callers can
- * tell "cancelled" from "some tiles missing".
+ * Fetch a grid of tiles with bounded concurrency; failed tiles, and cells for
+ * which `urlFor` has no tile (beyond the poles), come back with no `buf`.
+ * Aborting the signal rejects with the AbortError, so callers can tell
+ * "cancelled" from "some tiles missing".
  */
 export async function fetchTileGrid(
-  urlFor: (x: number, y: number) => string,
+  urlFor: (x: number, y: number) => string | undefined,
   x0: number,
   y0: number,
   cols = GRID,
@@ -194,8 +218,13 @@ export async function fetchTileGrid(
       signal?.throwIfAborted();
       const i = next++;
       const { col, row } = cells[i];
+      const url = urlFor(x0 + col, y0 + row);
+      if (!url) {
+        out[i] = { col, row };
+        continue;
+      }
       try {
-        out[i] = { col, row, buf: await fetchTile(urlFor(x0 + col, y0 + row), signal) };
+        out[i] = { col, row, buf: await fetchTile(url, signal) };
       } catch (error) {
         if (signal?.aborted) throw error;
         out[i] = { col, row };

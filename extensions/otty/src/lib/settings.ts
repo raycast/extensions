@@ -1,5 +1,4 @@
-// Pure helpers for Otty's `config` CLI. No @raycast/api import, so vitest can
-// exercise everything here.
+export const CONFIG_REFERENCE_URL = "https://docs.otty.sh/reference/configuration";
 
 export type SettingType = "boolean" | "number" | "string" | "list" | "object";
 
@@ -10,7 +9,6 @@ export type Setting = {
   type: SettingType;
   /** The value as `config get` prints it; a list is one entry per line. */
   text: string;
-  /** Set explicitly in config.toml, rather than left at Otty's default. */
   customized: boolean;
 };
 
@@ -19,19 +17,6 @@ export type SettingGroup = { title: string; settings: Setting[] };
 /** `config show` reports camelCase keys; `config get`/`set` take kebab-case. */
 export function toKebabKey(key: string): string {
   return key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-}
-
-export function buildConfigGetArgs(key: string): string[] {
-  return ["config", "get", key];
-}
-
-/** `--` keeps a value such as `-1` from being read as a flag. */
-export function buildConfigSetArgs(key: string, value: string): string[] {
-  return ["config", "set", key, "--", value];
-}
-
-export function buildConfigUnsetArgs(key: string): string[] {
-  return ["config", "unset", key];
 }
 
 export function settingType(value: unknown): SettingType {
@@ -53,7 +38,13 @@ export function formatValue(value: unknown): string {
   return String(value);
 }
 
-/** Keys a config.toml assigns explicitly, in file order. */
+/** A `#rgb`, `#rrggbb` or `#rrggbbaa` value as an opaque swatch color; the alpha is dropped. */
+export function colorSwatch(text: string | undefined): string | undefined {
+  const match = text?.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})([0-9a-f]{2})?$/i);
+  if (!match || (match[1].length === 3 && match[2])) return undefined;
+  return `#${match[1]}`;
+}
+
 export function parseCustomizedKeys(toml: string): Set<string> {
   const keys = new Set<string>();
   for (const line of toml.split("\n")) {
@@ -63,40 +54,42 @@ export function parseCustomizedKeys(toml: string): Set<string> {
   return keys;
 }
 
-const ACRONYMS = new Set(["ipc", "ssh", "vt", "ui", "cli"]);
+function addTo<T>(groups: Map<string, T[]>, key: string, ...items: T[]) {
+  const group = groups.get(key);
+  if (group) group.push(...items);
+  else groups.set(key, [...items]);
+}
 
-const titleCase = (word: string) =>
-  ACRONYMS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1);
-
-/** Group by the key's leading word; groups of one fold into "General". */
-export function groupSettings(settings: Setting[]): SettingGroup[] {
-  const byWord = new Map<string, Setting[]>();
-  for (const setting of settings) {
-    const word = setting.key.split("-")[0];
-    byWord.set(word, [...(byWord.get(word) ?? []), setting]);
-  }
-
-  const groups = new Map<string, Setting[]>();
-  for (const [word, members] of byWord) {
-    const title = members.length > 1 ? titleCase(word) : "General";
-    groups.set(title, [...(groups.get(title) ?? []), ...members]);
-  }
-
+function toGroups(groups: Map<string, Setting[]>, compareTitles: (a: string, b: string) => number): SettingGroup[] {
   return [...groups.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareTitles(a, b))
     .map(([title, members]) => ({
       title,
       settings: members.sort((a, b) => a.key.localeCompare(b.key)),
     }));
 }
 
-/** One documented key from Otty's configuration reference. */
+const ACRONYMS = new Set(["ipc", "ssh", "vt", "ui", "cli"]);
+
+const titleCase = (word: string) =>
+  ACRONYMS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1);
+
+export function groupSettings(settings: Setting[]): SettingGroup[] {
+  const byWord = new Map<string, Setting[]>();
+  for (const setting of settings) addTo(byWord, setting.key.split("-")[0], setting);
+
+  const groups = new Map<string, Setting[]>();
+  for (const [word, members] of byWord) {
+    addTo(groups, members.length > 1 ? titleCase(word) : "General", ...members);
+  }
+  return toGroups(groups, (a, b) => a.localeCompare(b));
+}
+
 export type SettingDoc = {
   section: string;
   type: string;
   default: string;
   description: string;
-  /** Allowed values, for an enum whose description lists them. */
   values?: string[];
 };
 
@@ -131,8 +124,8 @@ function allowedValues(descriptionHtml: string): string[] | undefined {
 }
 
 /**
- * Parse https://docs.otty.sh/reference/configuration: an `<h2>` per section,
- * each followed by a Key / Type / Default / Description table.
+ * The reference page has an `<h2>` per section, each followed by a
+ * Key / Type / Default / Description table.
  */
 export function parseConfigReference(html: string): Map<string, SettingDoc> {
   const docs = new Map<string, SettingDoc>();
@@ -157,22 +150,12 @@ export function parseConfigReference(html: string): Map<string, SettingDoc> {
   return docs;
 }
 
-/** Group by documented section, alphabetically; undocumented keys last. */
 export function groupByDocs(settings: Setting[], docs: Map<string, SettingDoc>): SettingGroup[] {
   const groups = new Map<string, Setting[]>();
-  for (const setting of settings) {
-    const title = docs.get(setting.key)?.section || "Other";
-    groups.set(title, [...(groups.get(title) ?? []), setting]);
-  }
-  return [...groups.entries()]
-    .sort(([a], [b]) => (a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)))
-    .map(([title, members]) => ({
-      title,
-      settings: members.sort((a, b) => a.key.localeCompare(b.key)),
-    }));
+  for (const setting of settings) addTo(groups, docs.get(setting.key)?.section || "Other", setting);
+  return toGroups(groups, (a, b) => (a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)));
 }
 
-/** An error message for a value the reference says is invalid, else undefined. */
 export function validateSettingValue(value: string, doc: SettingDoc | undefined): string | undefined {
   if (!doc) return undefined;
   if (doc.type === "integer" && !/^-?\d+$/.test(value)) {
@@ -187,7 +170,25 @@ export function validateSettingValue(value: string, doc: SettingDoc | undefined)
   return undefined;
 }
 
-/** Keys added, removed, and changed between two documentation snapshots. */
+export function choicesFor(setting: Setting, doc: SettingDoc | undefined): string[] | undefined {
+  if (doc?.type !== "enum" || !doc.values) return undefined;
+  return setting.customized && !doc.values.includes(setting.text) ? [setting.text, ...doc.values] : doc.values;
+}
+
+export function validateEdit(
+  value: string,
+  setting: Setting,
+  doc: SettingDoc | undefined,
+  theme?: { names?: string[] },
+): string | undefined {
+  if (!value || value === setting.text) return undefined;
+  if (theme) return theme.names?.includes(value) ? undefined : "Pick one of Otty's themes";
+  const invalid = validateSettingValue(value, doc);
+  if (invalid) return invalid;
+  if (setting.type === "number" && !Number.isFinite(Number(value))) return "Enter a number";
+  return undefined;
+}
+
 export function diffDocs(
   before: Record<string, SettingDoc>,
   after: Record<string, SettingDoc>,

@@ -28,14 +28,64 @@
         "search",
         "vaults"
       ],
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sortBy",
+          "type": "dropdown",
+          "title": "Sort items by",
+          "description": "Order of the items. ⌘⇧S changes it until the window closes.",
+          "default": "mostUsed",
+          "required": false,
+          "data": [
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            },
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Last Modified",
+              "value": "modified"
+            },
+            {
+              "title": "Date Created",
+              "value": "created"
+            }
+          ]
+        },
+        {
+          "name": "sortVaultsBy",
+          "type": "dropdown",
+          "title": "Sort vaults by",
+          "description": "Order of the vaults. ⌘⇧S changes it until the window closes.",
+          "default": "name",
+          "required": false,
+          "data": [
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Item Count",
+              "value": "itemCount"
+            },
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "list-vaults",
       "title": "List Vaults",
       "subtitle": "Proton Pass",
-      "description": "View all your Proton Pass vaults",
-      "mode": "view"
+      "description": "Open Browse Items on your vaults",
+      "mode": "no-view"
     },
     {
       "name": "generate-password",
@@ -65,17 +115,17 @@
         {
           "name": "defaultPasswordLength",
           "type": "textfield",
-          "title": "Password Length",
-          "description": "For random passwords, from 8 to 128.",
+          "title": "Random: Length",
+          "description": "Characters in random passwords, from 8 to 128.",
           "default": "20",
           "required": false
         },
         {
           "name": "includeUppercase",
           "type": "checkbox",
-          "title": "Characters",
+          "title": "Random: Characters",
           "label": "Uppercase letters",
-          "description": "In random passwords.",
+          "description": "Include uppercase letters in random passwords.",
           "default": true,
           "required": false
         },
@@ -84,7 +134,7 @@
           "type": "checkbox",
           "title": "",
           "label": "Symbols",
-          "description": "In random passwords.",
+          "description": "Include symbols in random passwords.",
           "default": true,
           "required": false
         },
@@ -93,14 +143,14 @@
           "type": "checkbox",
           "title": "",
           "label": "Numbers",
-          "description": "In random passwords and passphrases.",
+          "description": "Include numbers in random passwords.",
           "default": true,
           "required": false
         },
         {
           "name": "defaultPassphraseWords",
           "type": "dropdown",
-          "title": "Passphrase Words",
+          "title": "Passphrase: Words",
           "description": "Number of words in passphrases.",
           "default": "4",
           "required": false,
@@ -142,7 +192,7 @@
         {
           "name": "passphraseSeparator",
           "type": "dropdown",
-          "title": "Passphrase Separator",
+          "title": "Passphrase: Separator",
           "description": "Between the words of passphrases.",
           "default": "hyphens",
           "required": false,
@@ -180,9 +230,18 @@
         {
           "name": "capitalizeWords",
           "type": "checkbox",
-          "title": "Capitalization",
+          "title": "Passphrase: Options",
           "label": "Capitalize words",
-          "description": "In passphrases.",
+          "description": "Start each word of passphrases with a capital letter.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "passphraseNumbers",
+          "type": "checkbox",
+          "title": "",
+          "label": "Include numbers",
+          "description": "Include numbers in passphrases.",
           "default": true,
           "required": false
         }
@@ -193,7 +252,44 @@
       "title": "Get TOTP Code",
       "subtitle": "Proton Pass",
       "description": "Get TOTP codes for your accounts",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "hideCodes",
+          "type": "checkbox",
+          "title": "Codes",
+          "label": "Hide codes",
+          "description": "Show dots instead of the codes until Show Codes (⌘H). Copying still works.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "sortBy",
+          "type": "dropdown",
+          "title": "Sort items by",
+          "description": "Order of the codes. ⌘⇧S changes it until the window closes.",
+          "default": "mostUsed",
+          "required": false,
+          "data": [
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            },
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Last Modified",
+              "value": "modified"
+            },
+            {
+              "title": "Date Created",
+              "value": "created"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "login",
@@ -309,7 +405,7 @@
       "type": "checkbox",
       "title": "",
       "label": "Show website icons",
-      "description": "From Raycast's favicon provider, which receives the domains.",
+      "description": "Needs a Favicon Provider in Raycast's settings. It sees the domains.",
       "default": false,
       "required": false
     }

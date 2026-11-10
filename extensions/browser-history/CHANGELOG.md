@@ -1,5 +1,9 @@
 # Browser History Changelog
 
+## [Fix Helium history path] - 2026-11-09
+
+- Fixed Helium browser not being detected: the default profile path used the product name (`Helium`) but the browser stores its data under the bundle ID (`net.imput.helium`).
+
 ## [Add Helium browser support] - 2026-05-27
 
 - Added Helium history search support.
