@@ -11,6 +11,10 @@ The location comes from macOS Location Services (Wi-Fi and GPS), so it is usuall
 | Apple Maps link  | `https://maps.apple.com/?ll=55.75580,37.61730&q=55.75580,37.61730` |
 | Geo URI          | `geo:55.75580,37.61730`                                            |
 
+## Requirements
+
+Copy Location needs macOS 15 or later.
+
 ## Location permission
 
 On first run macOS asks to allow location access for **Raycast Geolocation**, a small helper app that the extension creates in its own data folder. If you denied it, allow it in System Settings → Privacy & Security → Location Services.
