@@ -4,13 +4,16 @@ import { CopyPaletteFormat, SavedPalette } from "../types";
  * Creates CSS header comment block for palette information.
  */
 function createCSSHeader(palette: SavedPalette): string {
+  // A "*/" in user text would close the comment early and break the copied CSS.
+  const escapeComment = (text: string) => text.replace(/\*\//g, "* /");
+
   const lines = [
-    `/* ${palette.name} - ${palette.mode} color palette */`,
+    `/* ${escapeComment(palette.name)} - ${palette.mode} color palette */`,
     `/* Created: ${new Date(palette.createdAt).toISOString().slice(0, 10)} */`,
   ];
 
   if (palette.description) {
-    lines.push(`/* Description: ${palette.description} */`);
+    lines.push(`/* Description: ${escapeComment(palette.description)} */`);
   }
 
   return lines.join("\n") + "\n";

@@ -1,5 +1,15 @@
 # Color Palette Manager Changelog
 
+## [Fix CSS Export and Update Dependencies] - 2026-11-10
+
+### Fixed
+
+- Copy as CSS and Copy as CSS Variables no longer produce broken CSS when a palette name or description contains `*/`.
+
+### Changed
+
+- Updated `@raycast/api` to 2.11.1, `@raycast/utils` to 2.3.3, and the development dependencies.
+
 ## [Reimagined as Color Palette Manager] - 2026-11-09
 
 This extension has been reimagined as **Color Palette Manager** — a library for building and organizing your own color palettes, rather than a one-shot random palette generator. Thanks to [@douglas-pires](https://github.com/douglas-pires), the original creator, for supporting the handover.

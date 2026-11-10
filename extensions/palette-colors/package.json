@@ -93,15 +93,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.3",
-    "@raycast/utils": "^2.3.2"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
-    "eslint": "^10.2.1",
-    "prettier": "^3.8.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
     "typescript": "^6.0.3"
   },
   "scripts": {
