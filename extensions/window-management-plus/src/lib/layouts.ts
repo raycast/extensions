@@ -318,48 +318,29 @@ function reslot(layout: Layout, items: Item[], box: Frame, placed: Placement[], 
   );
 }
 
-export type Direction = "left" | "right" | "up" | "down";
-
-/** The slot nearest `from` in `dir`. Slots level with it come first, then the closest. */
-function neighbour(from: Frame, slots: Placement[], dir: Direction): Placement | undefined {
-  const mid = (f: Frame) => ({ x: f.x + f.width / 2, y: f.y + f.height / 2 });
-  const across = dir === "left" || dir === "right";
-  const sign = dir === "left" || dir === "up" ? -1 : 1;
-  const a = mid(from);
-  const level = (f: Frame) =>
-    across
-      ? f.y < from.y + from.height && from.y < f.y + f.height
-      : f.x < from.x + from.width && from.x < f.x + f.width;
-  const ahead = slots
-    .map((s) => {
-      const b = mid(s.frame);
-      return { s, along: (across ? b.x - a.x : b.y - a.y) * sign, side: Math.abs(across ? b.y - a.y : b.x - a.x) };
-    })
-    .filter((c) => c.along > 1);
-  ahead.sort((p, q) => Number(level(q.s.frame)) - Number(level(p.s.frame)) || p.along - q.along || p.side - q.side);
-  return ahead[0]?.s;
-}
-
-/** Hyprland's swapwindow: the active window trades slots with its neighbour in `dir`. */
-export const swapped =
-  (layout: Layout, dir: Direction, stay: (i: Item) => boolean = () => false): Layout =>
+/**
+ * Hyprland's swapnext: the active window trades slots with the next one round, clockwise, wrapping at the
+ * end. It follows whatever the layout is, so two windows swap whether they sit side by side or stacked.
+ */
+export const swappedNext =
+  (layout: Layout, stay: (i: Item) => boolean = () => false): Layout =>
   (items, box) => {
     const placed = layout(items, box);
-    const slot = new Map(placed.map((p) => [p.id, p.frame]));
-    const active = items.find((i) => i.active && !stay(i));
-    const from = active && slot.get(active.id);
-    if (!active || !from) return placed;
-    const others = placed.filter((p) => p.id !== active.id && !items.some((i) => i.id === p.id && stay(i)));
-    const to = neighbour(from, others, dir);
-    if (!to) return placed;
+    const moving = placed.filter((p) => !items.some((i) => i.id === p.id && stay(i)));
+    const order = clockwise(moving.map((p) => p.frame));
+    moving.sort((a, b) => order(a.frame, b.frame));
+    const at = moving.findIndex((p) => items.some((i) => i.id === p.id && i.active));
+    if (at === -1 || moving.length < 2) return placed;
+    const from = moving[at];
+    const to = moving[(at + 1) % moving.length];
     return reslot(
       layout,
       items,
       box,
       placed,
       new Map([
-        [active.id, to.frame],
-        [to.id, from],
+        [from.id, to.frame],
+        [to.id, from.frame],
       ]),
     );
   };

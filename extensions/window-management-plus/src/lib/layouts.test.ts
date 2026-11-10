@@ -9,7 +9,7 @@ import {
   shares,
   sidebar,
   stacking,
-  swapped,
+  swappedNext,
   transposed,
   withMaster,
   type Item,
@@ -281,33 +281,41 @@ test("carry gives a window at least its minimum and keeps it on the new screen",
   assert.equal(f.x + f.width, 1512);
 });
 
-test("swap window right trades the active window with its neighbour on the right", () => {
+test("swap with next trades two windows whether they sit side by side or stacked", () => {
   const at = (id: string, x: number, active = false): Item => ({
     ...item(id),
     active,
     frame: { x, y: 0, width: 100, height: 100 },
   });
-  const items = [at("a", 0, true), at("b", 500), at("c", 1000)];
-  const tiled = rows()(items, box);
-  const out = swapped(rows(), "right")(items, box);
-  assert.deepEqual(frameOf(out, "a"), frameOf(tiled, "b"));
-  assert.deepEqual(frameOf(out, "b"), frameOf(tiled, "a"));
-  assert.deepEqual(frameOf(out, "c"), frameOf(tiled, "c"));
-  // Nothing to the left: nothing changes
-  assert.deepEqual(swapped(rows(), "left")(items, box), tiled);
+  const items = [at("a", 0, true), at("b", 900)];
+  for (const layout of [rows(), transposed(rows())]) {
+    const tiled = layout(items, box);
+    const out = swappedNext(layout)(items, box);
+    assert.deepEqual(frameOf(out, "a"), frameOf(tiled, "b"));
+    assert.deepEqual(frameOf(out, "b"), frameOf(tiled, "a"));
+  }
 });
 
-test("swap window down picks the window below, not one off to the side", () => {
+test("swap with next goes round clockwise and wraps, leaving the other windows alone", () => {
   const at = (id: string, x: number, y: number, active = false): Item => ({
     ...item(id),
     active,
     frame: { x, y, width: 100, height: 100 },
   });
-  const items = [at("tl", 0, 0, true), at("tr", 600, 0), at("bl", 0, 500), at("br", 600, 500)];
-  const tiled = rows()(items, box);
-  const out = swapped(rows(), "down")(items, box);
-  assert.deepEqual(frameOf(out, "tl"), frameOf(tiled, "bl"));
-  assert.deepEqual(frameOf(out, "tr"), frameOf(tiled, "tr"));
+  const grid = (active: string) => [
+    at("tl", 0, 0, active === "tl"),
+    at("tr", 600, 0, active === "tr"),
+    at("bl", 0, 500, active === "bl"),
+    at("br", 600, 500, active === "br"),
+  ];
+  const tiled = rows()(grid(""), box);
+  const fromTop = swappedNext(rows())(grid("tr"), box);
+  assert.deepEqual(frameOf(fromTop, "tr"), frameOf(tiled, "br"));
+  assert.deepEqual(frameOf(fromTop, "br"), frameOf(tiled, "tr"));
+  assert.deepEqual(frameOf(fromTop, "tl"), frameOf(tiled, "tl"));
+  // The last window round trades with the first
+  const wrapped = swappedNext(rows())(grid("bl"), box);
+  assert.deepEqual(frameOf(wrapped, "bl"), frameOf(tiled, "tl"));
 });
 
 test("toggle split turns rows into columns", () => {

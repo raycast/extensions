@@ -8,10 +8,9 @@ import {
   rows,
   sidebar,
   stacking,
-  swapped,
+  swappedNext,
   transposed,
   withMaster,
-  type Direction,
   type Item,
   type Layout,
 } from "./layouts";
@@ -107,8 +106,8 @@ function retile(change: (layout: Layout, pinned?: (i: Item) => boolean) => Layou
 /** Every window one slot clockwise (1) or counterclockwise (-1). Hyprland's rollnext and rollprev. */
 export const rotateTile = (step: 1 | -1) => retile((layout, pinned) => rotated(layout, step, pinned));
 
-/** The active window trades places with its neighbour. Hyprland's swapwindow. */
-export const swapTile = (dir: Direction) => retile((layout, pinned) => swapped(layout, dir, pinned));
+/** The active window trades places with the next one round. Hyprland's swapnext. */
+export const swapNext = () => retile((layout, pinned) => swappedNext(layout, pinned));
 
 /** The active window trades places with the biggest one. Hyprland's swapwithmaster. */
 export const swapWithMaster = () => retile((layout, pinned) => withMaster(layout, pinned));

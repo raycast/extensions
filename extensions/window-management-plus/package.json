@@ -225,54 +225,21 @@
       ]
     },
     {
-      "name": "swap-window-left",
-      "title": "Swap Window Left",
-      "description": "Trade places between the active window and its neighbour on the left.",
+      "name": "swap-next",
+      "title": "Swap with Next Window",
+      "description": "Trade places between the focused window and the next one round. Two windows simply swap, whether they sit side by side or stacked.",
       "mode": "no-view",
+      "icon": "swap-next.png",
       "keywords": [
-        "swapwindow",
-        "move",
+        "swapnext",
+        "swap windows",
+        "swap left",
+        "swap right",
+        "swap up",
+        "swap down",
+        "switch",
         "hyprland"
-      ],
-      "icon": "swap-window-left.png"
-    },
-    {
-      "name": "swap-window-right",
-      "title": "Swap Window Right",
-      "description": "Trade places between the active window and its neighbour on the right.",
-      "mode": "no-view",
-      "keywords": [
-        "swapwindow",
-        "move",
-        "hyprland"
-      ],
-      "icon": "swap-window-right.png"
-    },
-    {
-      "name": "swap-window-up",
-      "title": "Swap Window Above",
-      "description": "Trade places between the active window and its neighbour above.",
-      "mode": "no-view",
-      "keywords": [
-        "hyprland",
-        "move",
-        "swapwindow",
-        "up"
-      ],
-      "icon": "swap-window-up.png"
-    },
-    {
-      "name": "swap-window-down",
-      "title": "Swap Window Below",
-      "description": "Trade places between the active window and its neighbour below.",
-      "mode": "no-view",
-      "keywords": [
-        "down",
-        "hyprland",
-        "move",
-        "swapwindow"
-      ],
-      "icon": "swap-window-down.png"
+      ]
     },
     {
       "name": "rotate",

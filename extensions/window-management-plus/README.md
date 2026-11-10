@@ -14,7 +14,7 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 | Master Layout Center                        | The focused window becomes the master in the middle and the rest stack on both sides. Made for wide displays.                                                       |
 | Grow Master / Shrink Master                 | Give the master window more or less of the screen, in steps of 5%.                                                                                                  |
 | Swap with Master                            | Trade places between the active window and the master.                                                                                                              |
-| Swap Window Left / Right / Above / Below    | Trade places between the active window and its neighbour.                                                                                                           |
+| Swap with Next Window                       | Trade places between the focused window and the next one round. Two windows simply swap, whether they sit side by side or stacked.                                  |
 | Rotate Windows Clockwise / Counterclockwise | Move every window one slot round, keeping the last layout you tiled with. A pinned sidebar stays put.                                                               |
 | Swap Displays                               | Move every window to the other display, keeping its place and size on the screen. With more than two displays, each display's windows move to the next.             |
 | Distribute Across Displays                  | Spread your windows over every display, a share for each by size and no more than each can fit, then tile each display with the last layout you used.               |
@@ -22,7 +22,7 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 | Move All to This Display                    | Move every window from your other displays to the display with the focused window, tiled with the last layout you used.                                             |
 | Toggle Menu Bar Visibility                  | Hide or show the menu bar.                                                                                                                                          |
 
-The names follow Hyprland too, so its users can search for `master`, `swapwindow`, `mfact`, `togglesplit` or `rollnext`.
+The names follow Hyprland too, so its users can search for `master`, `swapnext`, `mfact`, `togglesplit` or `rollnext`.
 
 Swap, Rotate, Grow Master and Toggle Split all work on the last layout you tiled with, so you can tile once and then rearrange.
 
