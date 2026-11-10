@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-clean",
   "title": "Screen Clean",
-  "description": "Black out every display and optionally lock the keyboard so you can clean your screen and keyboard.",
+  "description": "Clean your screen and keyboard in one uninterrupted session — black out every display and optionally lock the keyboard.",
   "icon": "icon.png",
   "author": "yanggong-zi",
   "platforms": [
@@ -15,6 +15,17 @@
     "System"
   ],
   "license": "MIT",
+  "keywords": [
+    "clean screen",
+    "clean keyboard",
+    "screen cleaning",
+    "keyboard cleaning",
+    "black screen",
+    "blackout",
+    "lock keyboard",
+    "multi-display",
+    "one session"
+  ],
   "preferences": [
     {
       "name": "duration",
