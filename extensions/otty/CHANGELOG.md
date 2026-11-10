@@ -1,6 +1,6 @@
 # Otty Changelog
 
-## [Clearer Loading State and Fixes] - {PR_MERGE_DATE}
+## [Clearer Loading State and Fixes] - 2026-11-10
 
 - Search Otty Tabs now says it is loading on first open, and when Otty doesn't answer it shows "Waiting for Otty" and keeps checking every few seconds instead of reading as a dead end.
 - Untitled tabs and windows in Search Otty Tabs and the Otty Agents menu bar are now named by their folder, as in Otty's own sidebar, instead of showing blank.
