@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-folders",
+  "title": "App Folders",
+  "description": "Group apps into smartphone-like folders and launch them instantly with dedicated shortcuts.",
+  "icon": "icon.png",
+  "author": "infovore28",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "folder-1",
+      "title": "App Folder 1",
+      "description": "Open App Folder 1 directly via dedicated shortcut.",
+      "mode": "view"
+    },
+    {
+      "name": "folder-2",
+      "title": "App Folder 2",
+      "description": "Open App Folder 2 directly via dedicated shortcut.",
+      "mode": "view"
+    },
+    {
+      "name": "folder-3",
+      "title": "App Folder 3",
+      "description": "Open App Folder 3 directly via dedicated shortcut.",
+      "mode": "view"
+    },
+    {
+      "name": "folder-4",
+      "title": "App Folder 4",
+      "description": "Open App Folder 4 directly via dedicated shortcut.",
+      "mode": "view"
+    },
+    {
+      "name": "folder-5",
+      "title": "App Folder 5",
+      "description": "Open App Folder 5 directly via dedicated shortcut.",
+      "mode": "view"
+    },
+    {
+      "name": "open-app-folder",
+      "title": "All App Folders",
+      "description": "Browse and open all app folders in a unified grid.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-folders",
+      "title": "Manage App Folders",
+      "description": "Manage, create, rename, and delete app folders.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showShortcutHints",
+      "type": "checkbox",
+      "required": false,
+      "title": "Shortcuts",
+      "label": "Show ⌘1–⌘9 shortcuts under items",
+      "description": "Displays ⌘1–⌘9 hotkey badges beneath the first 9 folders and apps.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/react-dom": "18.2.14",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
