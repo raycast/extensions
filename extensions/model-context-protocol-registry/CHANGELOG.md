@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ChefBear MCP Server] - 2026-11-10
+
+- Add ChefBear to the official registry: save, find, read and share your ChefBear restaurant menus and pick dishes that suit your tastes. 12 tools. Hosted Streamable HTTP server at https://chef-bear.com/api/menu-sharing/mcp through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE) and each new connection approved in the ChefBear iPhone app.
+
 ## [Add Send4 MCP Server] - 2026-11-09
 
 - Add Send4 to the official registry: AI SMS and email for sales and support teams. Read and change flows, campaigns, conversations, leads and meetings in a Send4 workspace. 64 tools. Hosted Streamable HTTP server at https://mcp.send4.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
