@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add doola MCP Server] - {PR_MERGE_DATE}
+
+- Add doola to the official registry: form a US LLC or C-Corp in any of the 50 states or DC from a conversation (entity type and state, company name, industry, members or officers, ownership, payment and the state filing), plus status on existing doola companies. 12 tools. Hosted Streamable HTTP server at https://mcp.doola.com with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add EL7.AI MCP Server] - 2026-11-10
 
 - Add EL7.AI to the official registry: financial market intelligence (markets news, economic calendar, 8 central banks, COT positioning, stocks, earnings, gold and oil, with sources and dates). 85 read-only tools. Hosted Streamable HTTP server at https://mcp.el7.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a personal EL7 MCP API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Full access requires an EL7 paid membership.

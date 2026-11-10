@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "doola",
+    title: "doola",
+    description:
+      "Form a US LLC or C-Corp in any of the 50 states or DC from a conversation: entity type and state, company name, industry, members or officers, ownership, payment and the state filing, plus status on the companies you already have with doola. 12 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a doola account is required.",
+    icon: "https://raw.githubusercontent.com/doolahq/plugins/main/doola/assets/logo.png",
+    homepage: "https://github.com/doolahq/plugins",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.doola.com"],
+    },
+    remoteUrl: "https://mcp.doola.com",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
