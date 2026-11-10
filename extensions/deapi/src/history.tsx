@@ -29,7 +29,7 @@ const KIND_ICONS: Record<JobKind, Icon> = {
 
 export default function Command() {
   const [kind, setKind] = useState<string>("all");
-  const { data: records = [], isLoading, revalidate } = usePromise(getHistory);
+  const { data: records = [], isLoading, error, revalidate } = usePromise(getHistory);
   const { data: balance } = useCachedPromise(() => getClient().getBalance(), [], {
     onError: () => undefined,
   });
@@ -59,7 +59,6 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail={visible.length > 0}
-      navigationTitle={balanceText ? `Generation History · ${balanceText}` : undefined}
       searchBarPlaceholder="Search prompts and models"
       searchBarAccessory={
         <List.Dropdown tooltip="Type" value={kind} onChange={setKind}>
@@ -70,82 +69,106 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.Stars}
-        title="Nothing here yet"
-        description={`Results from the deAPI commands appear here and are saved to ${outputDirectory()}.${
-          balanceText ? `\n${balanceText}` : ""
-        }`}
-      />
-      {visible.map((record) => (
-        <List.Item
-          key={record.requestId}
-          title={record.input || KIND_TITLES[record.kind]}
-          icon={
-            record.kind && isImageKind(record.kind) && record.filePath
-              ? { source: record.filePath }
-              : KIND_ICONS[record.kind]
-          }
-          keywords={[record.model, KIND_TITLES[record.kind]]}
-          accessories={[statusAccessory(record), { date: new Date(record.createdAt) }]}
-          detail={<List.Item.Detail markdown={detailMarkdown(record)} metadata={<RecordMetadata record={record} />} />}
+      {error ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Could not read the generation history"
+          description={error.message}
           actions={
-            <ResultActions
-              record={record}
-              extra={
-                <ActionPanel.Section>
-                  {record.status === "pending" ? (
-                    <Action.Push
-                      title="Follow Job"
-                      icon={Icon.Clock}
-                      target={<JobView kind={record.kind} model={record.model} input={record.input} record={record} />}
-                      onPop={revalidate}
-                    />
-                  ) : null}
-                  {record.status !== "done" ? (
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Stars}
+          title="Nothing here yet"
+          description={`Results from the deAPI commands appear here and are saved to ${outputDirectory()}.${
+            balanceText ? `\n${balanceText}` : ""
+          }`}
+        />
+      )}
+      <List.Section title="Results" subtitle={balanceText}>
+        {visible.map((record) => (
+          <List.Item
+            key={record.requestId}
+            title={record.input || KIND_TITLES[record.kind]}
+            icon={
+              record.kind && isImageKind(record.kind) && record.filePath
+                ? { source: record.filePath }
+                : KIND_ICONS[record.kind]
+            }
+            keywords={[record.model, KIND_TITLES[record.kind]]}
+            detail={
+              <List.Item.Detail markdown={detailMarkdown(record)} metadata={<RecordMetadata record={record} />} />
+            }
+            actions={
+              <ResultActions
+                record={record}
+                extra={
+                  <ActionPanel.Section>
+                    {record.status === "pending" ? (
+                      <Action.Push
+                        title="Follow Job"
+                        icon={Icon.Clock}
+                        target={
+                          <JobView kind={record.kind} model={record.model} input={record.input} record={record} />
+                        }
+                        onPop={revalidate}
+                      />
+                    ) : null}
+                    {record.status !== "done" ? (
+                      <Action
+                        title="Check Status"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={async () => {
+                          await refresh(record, { quiet: false });
+                          revalidate();
+                        }}
+                      />
+                    ) : null}
+                    <Action.CopyToClipboard title="Copy Request ID" content={record.requestId} />
                     <Action
-                      title="Check Status"
-                      icon={Icon.ArrowClockwise}
-                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      title="Remove from History"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={async () => {
-                        await refresh(record, { quiet: false });
+                        const confirmed = await confirmAlert({
+                          title: "Remove this result from the history?",
+                          message: "The saved file stays on your computer.",
+                          primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                        });
+                        if (!confirmed) return;
+                        await deleteRecord(record.requestId);
                         revalidate();
                       }}
                     />
-                  ) : null}
-                  <Action.CopyToClipboard title="Copy Request ID" content={record.requestId} />
-                  <Action
-                    title="Remove from History"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={async () => {
-                      await deleteRecord(record.requestId);
-                      revalidate();
-                    }}
-                  />
-                  <Action
-                    title="Clear History"
-                    icon={Icon.XMarkCircle}
-                    style={Action.Style.Destructive}
-                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
-                    onAction={async () => {
-                      const confirmed = await confirmAlert({
-                        title: "Clear the generation history?",
-                        message: "Saved files stay on your computer.",
-                        primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
-                      });
-                      if (!confirmed) return;
-                      await clearHistory();
-                      revalidate();
-                    }}
-                  />
-                </ActionPanel.Section>
-              }
-            />
-          }
-        />
-      ))}
+                    <Action
+                      title="Clear History"
+                      icon={Icon.XMarkCircle}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                      onAction={async () => {
+                        const confirmed = await confirmAlert({
+                          title: "Clear the generation history?",
+                          message: "Saved files stay on your computer.",
+                          primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
+                        });
+                        if (!confirmed) return;
+                        await clearHistory();
+                        revalidate();
+                      }}
+                    />
+                  </ActionPanel.Section>
+                }
+              />
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -177,12 +200,11 @@ async function refresh(record: HistoryRecord, options: { quiet: boolean }): Prom
   }
 }
 
-function statusAccessory(record: HistoryRecord): List.Item.Accessory {
-  if (record.status === "pending") return { icon: { source: Icon.Clock, tintColor: Color.Orange }, tooltip: "Running" };
-  if (record.status === "error")
-    return { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: record.error };
-  return { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Done" };
-}
+const STATUS_TAGS: Record<HistoryRecord["status"], { text: string; color: Color }> = {
+  pending: { text: "Running", color: Color.Orange },
+  error: { text: "Failed", color: Color.Red },
+  done: { text: "Done", color: Color.Green },
+};
 
 function detailMarkdown(record: HistoryRecord): string {
   if (record.status === "pending") return "## Still running\n\nPress **Enter** to follow the job.";
@@ -194,6 +216,12 @@ function RecordMetadata(props: { record: HistoryRecord }) {
   const { record } = props;
   return (
     <List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.TagList title="Status">
+        <List.Item.Detail.Metadata.TagList.Item
+          text={STATUS_TAGS[record.status].text}
+          color={STATUS_TAGS[record.status].color}
+        />
+      </List.Item.Detail.Metadata.TagList>
       <List.Item.Detail.Metadata.Label title="Type" text={KIND_TITLES[record.kind]} icon={KIND_ICONS[record.kind]} />
       <List.Item.Detail.Metadata.Label title="Model" text={record.model} />
       {record.width && record.height ? (

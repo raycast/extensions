@@ -4,7 +4,7 @@ import { basename } from "node:path";
 import { getClient } from "../lib/files";
 import { removeBackground, upscaleImage } from "../lib/jobs";
 import { IMAGE_FILE_ERROR, isImageFile, sortModels } from "../lib/models";
-import { findModel, useModels } from "../lib/useModels";
+import { findModel, NO_MODELS_MESSAGE, showNoModelsToast, useModels } from "../lib/useModels";
 import { JobView } from "./JobView";
 
 type Tool = "background" | "upscale";
@@ -32,7 +32,9 @@ interface Values {
 export function ImageToolForm(props: { tool: Tool; initialFile?: string }) {
   const tool = TOOLS[props.tool];
   const { push } = useNavigation();
-  const { models, isLoading } = useModels([tool.inferenceType], (list) => sortModels(list, tool.inferenceType));
+  const { models, isLoading, noModels } = useModels([tool.inferenceType], (list) =>
+    sortModels(list, tool.inferenceType),
+  );
 
   const { handleSubmit, itemProps } = useForm<Values>({
     initialValues: { image: props.initialFile ? [props.initialFile] : [] },
@@ -44,7 +46,10 @@ export function ImageToolForm(props: { tool: Tool; initialFile?: string }) {
     },
     onSubmit: (values) => {
       const model = findModel(models, values.model);
-      if (!model) return;
+      if (!model) {
+        showNoModelsToast();
+        return;
+      }
       const image = values.image[0];
       const submit =
         props.tool === "background"
@@ -63,6 +68,7 @@ export function ImageToolForm(props: { tool: Tool; initialFile?: string }) {
         </ActionPanel>
       }
     >
+      {noModels ? <Form.Description title="Unavailable" text={NO_MODELS_MESSAGE} /> : null}
       <Form.Description text={tool.description} />
       <Form.FilePicker title="Image" allowMultipleSelection={false} canChooseDirectories={false} {...itemProps.image} />
       {models.length > 1 ? (

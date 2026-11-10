@@ -3,7 +3,7 @@ import { useForm } from "@raycast/utils";
 import { getClient } from "../lib/files";
 import { editImage } from "../lib/jobs";
 import { IMAGE_FILE_ERROR, isImageFile, sortModels } from "../lib/models";
-import { findModel, useModels } from "../lib/useModels";
+import { findModel, NO_MODELS_MESSAGE, showNoModelsToast, useModels } from "../lib/useModels";
 import { JobView } from "./JobView";
 
 interface Values {
@@ -17,7 +17,7 @@ const MAX_IMAGES = 3;
 
 export function EditImageForm(props: { initialFile?: string }) {
   const { push } = useNavigation();
-  const { models, isLoading } = useModels(["img2img"], (list) => sortModels(list, "img2img"));
+  const { models, isLoading, noModels } = useModels(["img2img"], (list) => sortModels(list, "img2img"));
 
   const { handleSubmit, itemProps } = useForm<Values>({
     initialValues: { images: props.initialFile ? [props.initialFile] : [], prompt: "", seed: "" },
@@ -32,7 +32,10 @@ export function EditImageForm(props: { initialFile?: string }) {
     },
     onSubmit: (values) => {
       const model = findModel(models, values.model);
-      if (!model) return;
+      if (!model) {
+        showNoModelsToast();
+        return;
+      }
       const prompt = values.prompt.trim();
       push(
         <JobView
@@ -54,6 +57,7 @@ export function EditImageForm(props: { initialFile?: string }) {
         </ActionPanel>
       }
     >
+      {noModels ? <Form.Description title="Unavailable" text={NO_MODELS_MESSAGE} /> : null}
       <Form.FilePicker
         title="Images"
         allowMultipleSelection

@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { downloadResult, getClient } from "../lib/files";
 import { addRecord, updateRecord } from "../lib/history";
 import { generateSpeech } from "../lib/jobs";
@@ -13,6 +14,15 @@ type Input = {
    */
   voice?: string;
 };
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
+  message: "Generate speech with deAPI and save it as an MP3? This request uses deAPI credits.",
+  info: [
+    { name: "Text", value: input.text.length > 200 ? `${input.text.slice(0, 199)}…` : input.text },
+    { name: "Length", value: `${input.text.length.toLocaleString()} characters` },
+    ...(input.voice ? [{ name: "Voice", value: input.voice }] : []),
+  ],
+});
 
 /** Reads text aloud and saves an MP3. Returns the file path. */
 export default async function tool(input: Input) {

@@ -20,7 +20,8 @@ export interface HistoryRecord {
   height?: number;
 }
 
-const HISTORY_KEY = "history";
+/** Each record is stored under its own key, so overlapping writes never drop each other's changes. */
+const RECORD_PREFIX = "job:";
 const MAX_RECORDS = 200;
 
 export const KIND_TITLES: Record<JobKind, string> = {
@@ -37,36 +38,53 @@ export function isImageKind(kind: JobKind): boolean {
   return kind === "image" || kind === "edit" || kind === "background" || kind === "upscale";
 }
 
-export async function getHistory(): Promise<HistoryRecord[]> {
-  const serialized = await LocalStorage.getItem<string>(HISTORY_KEY);
-  if (!serialized) return [];
+function recordKey(requestId: string): string {
+  return `${RECORD_PREFIX}${requestId}`;
+}
+
+function parseRecord(serialized: string): HistoryRecord | undefined {
   try {
-    const records = JSON.parse(serialized);
-    return Array.isArray(records) ? records : [];
+    const record = JSON.parse(serialized);
+    return record && typeof record.requestId === "string" ? record : undefined;
   } catch {
-    return [];
+    return undefined;
   }
 }
 
-async function saveHistory(records: HistoryRecord[]) {
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(records.slice(0, MAX_RECORDS)));
+/** All records, newest first. */
+export async function getHistory(): Promise<HistoryRecord[]> {
+  const items = await LocalStorage.allItems<Record<string, string>>();
+  const records: HistoryRecord[] = [];
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(RECORD_PREFIX)) continue;
+    const record = parseRecord(value);
+    if (record) records.push(record);
+  }
+  return records.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function addRecord(record: HistoryRecord) {
+  await LocalStorage.setItem(recordKey(record.requestId), JSON.stringify(record));
   const records = await getHistory();
-  await saveHistory([record, ...records.filter((entry) => entry.requestId !== record.requestId)]);
+  for (const old of records.slice(MAX_RECORDS)) {
+    await LocalStorage.removeItem(recordKey(old.requestId));
+  }
 }
 
 export async function updateRecord(requestId: string, changes: Partial<HistoryRecord>) {
-  const records = await getHistory();
-  await saveHistory(records.map((record) => (record.requestId === requestId ? { ...record, ...changes } : record)));
+  const serialized = await LocalStorage.getItem<string>(recordKey(requestId));
+  const record = serialized ? parseRecord(serialized) : undefined;
+  if (!record) return;
+  await LocalStorage.setItem(recordKey(requestId), JSON.stringify({ ...record, ...changes, requestId }));
 }
 
 export async function deleteRecord(requestId: string) {
-  const records = await getHistory();
-  await saveHistory(records.filter((record) => record.requestId !== requestId));
+  await LocalStorage.removeItem(recordKey(requestId));
 }
 
 export async function clearHistory() {
-  await LocalStorage.removeItem(HISTORY_KEY);
+  const items = await LocalStorage.allItems<Record<string, string>>();
+  for (const key of Object.keys(items)) {
+    if (key.startsWith(RECORD_PREFIX)) await LocalStorage.removeItem(key);
+  }
 }

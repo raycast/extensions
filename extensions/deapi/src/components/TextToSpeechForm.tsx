@@ -3,7 +3,7 @@ import { showFailureToast, useForm } from "@raycast/utils";
 import { getClient } from "../lib/files";
 import { generateSpeech } from "../lib/jobs";
 import { speechModels, speedRange, voicesFor } from "../lib/models";
-import { findModel, useModels } from "../lib/useModels";
+import { findModel, NO_MODELS_MESSAGE, showNoModelsToast, useModels } from "../lib/useModels";
 import { JobView } from "./JobView";
 
 interface Values {
@@ -17,7 +17,7 @@ const SPEEDS = ["0.5", "0.75", "1", "1.25", "1.5", "2"];
 
 export function TextToSpeechForm(props: { initialText?: string }) {
   const { push } = useNavigation();
-  const { models, isLoading } = useModels(["txt2audio"], speechModels);
+  const { models, isLoading, noModels } = useModels(["txt2audio"], speechModels);
 
   const { handleSubmit, itemProps, values } = useForm<Values>({
     initialValues: { text: props.initialText ?? "", speed: "1" },
@@ -26,7 +26,10 @@ export function TextToSpeechForm(props: { initialText?: string }) {
     },
     onSubmit: (submitted) => {
       const model = findModel(models, submitted.model);
-      if (!model) return;
+      if (!model) {
+        showNoModelsToast();
+        return;
+      }
       const voices = voicesFor(model);
       const voice =
         voices.find((item) => item.id === submitted.voice)?.id ??
@@ -70,6 +73,7 @@ export function TextToSpeechForm(props: { initialText?: string }) {
         </ActionPanel>
       }
     >
+      {noModels ? <Form.Description title="Unavailable" text={NO_MODELS_MESSAGE} /> : null}
       <Form.TextArea title="Text" placeholder="Type or paste the text to read aloud" {...itemProps.text} />
       <Form.Dropdown id="model" title="Model" value={model?.slug ?? ""} onChange={itemProps.model.onChange}>
         {models.map((item) => (

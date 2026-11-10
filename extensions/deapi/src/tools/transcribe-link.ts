@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { getClient } from "../lib/files";
 import { addRecord, updateRecord } from "../lib/history";
 import { transcribe, transcriptionText } from "../lib/jobs";
@@ -7,6 +8,11 @@ type Input = {
   /** The full URL of a public YouTube, X (Twitter), TikTok, Twitch or Kick video. */
   url: string;
 };
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
+  message: "Transcribe this video with deAPI? This request uses deAPI credits, priced by the video's length.",
+  info: [{ name: "Link", value: input.url.trim() }],
+});
 
 /** Transcribes the speech in a video link and returns the text. */
 export default async function tool(input: Input) {

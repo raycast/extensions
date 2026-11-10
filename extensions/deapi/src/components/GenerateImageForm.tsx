@@ -3,7 +3,7 @@ import { useForm } from "@raycast/utils";
 import { getClient } from "../lib/files";
 import { generateImage } from "../lib/jobs";
 import { ASPECT_RATIOS, sizeForAspectRatio, sortModels } from "../lib/models";
-import { findModel, useModels } from "../lib/useModels";
+import { findModel, NO_MODELS_MESSAGE, showNoModelsToast, useModels } from "../lib/useModels";
 import { JobView } from "./JobView";
 
 interface Values {
@@ -15,7 +15,7 @@ interface Values {
 
 export function GenerateImageForm(props: { initialPrompt?: string }) {
   const { push } = useNavigation();
-  const { models, isLoading } = useModels(["txt2img"], (list) => sortModels(list, "txt2img"));
+  const { models, isLoading, noModels } = useModels(["txt2img"], (list) => sortModels(list, "txt2img"));
 
   const { handleSubmit, itemProps, values } = useForm<Values>({
     initialValues: { prompt: props.initialPrompt ?? "", aspectRatio: "1:1", seed: "" },
@@ -25,7 +25,10 @@ export function GenerateImageForm(props: { initialPrompt?: string }) {
     },
     onSubmit: (submitted) => {
       const model = findModel(models, submitted.model);
-      if (!model) return;
+      if (!model) {
+        showNoModelsToast();
+        return;
+      }
       const ratio = ASPECT_RATIOS.find((item) => item.id === submitted.aspectRatio)?.ratio ?? 1;
       const size = sizeForAspectRatio(model, ratio);
       const prompt = submitted.prompt.trim();
@@ -55,6 +58,7 @@ export function GenerateImageForm(props: { initialPrompt?: string }) {
         </ActionPanel>
       }
     >
+      {noModels ? <Form.Description title="Unavailable" text={NO_MODELS_MESSAGE} /> : null}
       <Form.TextArea
         title="Prompt"
         placeholder="A red fox in the snow, golden hour, photorealistic"

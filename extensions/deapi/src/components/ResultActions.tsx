@@ -40,7 +40,6 @@ export function ResultActions(props: { record: HistoryRecord; extra?: React.Reac
           <Action
             title="Copy Image"
             icon={Icon.Clipboard}
-            shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={async () => {
               try {
                 await Clipboard.copy({ file });

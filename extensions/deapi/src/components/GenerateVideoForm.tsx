@@ -11,7 +11,7 @@ import {
   sortModels,
   videoDurations,
 } from "../lib/models";
-import { findModel, useModels } from "../lib/useModels";
+import { findModel, NO_MODELS_MESSAGE, showNoModelsToast, useModels } from "../lib/useModels";
 import { JobView } from "./JobView";
 
 interface Values {
@@ -24,7 +24,11 @@ interface Values {
 
 export function GenerateVideoForm(props: { initialImage?: string; initialPrompt?: string }) {
   const { push } = useNavigation();
-  const { models: allModels, isLoading } = useModels(["txt2video", "img2video"], (list) => sortModels(list, "video"));
+  const {
+    models: allModels,
+    isLoading,
+    noModels,
+  } = useModels(["txt2video", "img2video"], (list) => sortModels(list, "video"));
 
   const { handleSubmit, itemProps, values } = useForm<Values>({
     initialValues: {
@@ -39,7 +43,10 @@ export function GenerateVideoForm(props: { initialImage?: string; initialPrompt?
     onSubmit: (submitted) => {
       const image = submitted.image?.[0];
       const model = findModel(modelsFor(image), submitted.model);
-      if (!model) return;
+      if (!model) {
+        showNoModelsToast();
+        return;
+      }
       const size = sizeForAspectRatio(
         model,
         ASPECT_RATIOS.find((item) => item.id === submitted.aspectRatio)?.ratio ?? 1,
@@ -87,6 +94,7 @@ export function GenerateVideoForm(props: { initialImage?: string; initialPrompt?
         </ActionPanel>
       }
     >
+      {noModels ? <Form.Description title="Unavailable" text={NO_MODELS_MESSAGE} /> : null}
       <Form.TextArea
         title="Prompt"
         placeholder="A paper boat drifting down a rainy street, slow camera pan"

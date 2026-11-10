@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deapi",
   "title": "deAPI",
-  "description": "Generate images, videos and speech, transcribe links and files, and edit, upscale or remove backgrounds from images with open-source models on deAPI.",
+  "description": "Generate images, videos and speech, transcribe links and files, and edit, upscale or remove backgrounds from images with open-source models on deAPI. Requires a deAPI account and paid API credits.",
   "icon": "deapi.png",
   "author": "pietrus-914",
   "license": "MIT",
@@ -80,7 +80,7 @@
       "arguments": [
         {
           "name": "link",
-          "placeholder": "Video link",
+          "placeholder": "Video Link",
           "type": "text",
           "required": false
         }
@@ -155,6 +155,21 @@
             "callsTool": "transcribe-link"
           }
         ]
+      },
+      {
+        "input": "@deapi read this aloud: Welcome to the team, we're glad you're here.",
+        "mocks": {
+          "generate-speech": {
+            "path": "/Users/me/Downloads/deapi-speech-1a2b3c4d.mp3",
+            "model": "Kokoro",
+            "voice": "af_heart"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "generate-speech"
+          }
+        ]
       }
     ]
   },
@@ -164,6 +179,7 @@
       "title": "deAPI API Key",
       "description": "Create one at https://app.deapi.ai/settings/api-keys",
       "type": "password",
+      "placeholder": "Paste Your deAPI API Key",
       "required": true
     },
     {

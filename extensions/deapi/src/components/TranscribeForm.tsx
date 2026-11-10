@@ -4,7 +4,7 @@ import { basename } from "node:path";
 import { getClient } from "../lib/files";
 import { transcribe } from "../lib/jobs";
 import { isSupportedLink, isVideoFile, sortModels } from "../lib/models";
-import { findModel, useModels } from "../lib/useModels";
+import { findModel, NO_MODELS_MESSAGE, showNoModelsToast, useModels } from "../lib/useModels";
 import { JobView } from "./JobView";
 
 interface Values {
@@ -16,7 +16,7 @@ interface Values {
 
 export function TranscribeForm(props: { initialLink?: string }) {
   const { push } = useNavigation();
-  const { models, isLoading } = useModels(["video2text", "audio_file2text"], (list) =>
+  const { models, isLoading, noModels } = useModels(["video2text", "audio_file2text"], (list) =>
     sortModels(list, "transcription"),
   );
 
@@ -36,7 +36,10 @@ export function TranscribeForm(props: { initialLink?: string }) {
         return;
       }
       const model = findModel(models, submitted.model);
-      if (!model) return;
+      if (!model) {
+        showNoModelsToast();
+        return;
+      }
       const source = link || basename(file as string);
       push(
         <JobView
@@ -67,6 +70,7 @@ export function TranscribeForm(props: { initialLink?: string }) {
         </ActionPanel>
       }
     >
+      {noModels ? <Form.Description title="Unavailable" text={NO_MODELS_MESSAGE} /> : null}
       <Form.TextField
         title="Link"
         placeholder="https://www.youtube.com/watch?v=…"

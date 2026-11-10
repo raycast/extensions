@@ -14,9 +14,24 @@ export function getClient(): DeapiClient {
   return new DeapiClient(apiKey.trim());
 }
 
+/** The folder chosen in the preferences, or Downloads when none is set. */
 export function outputDirectory(): string {
   const { outputDirectory } = getPreferenceValues<Preferences>();
-  return outputDirectory && existsSync(outputDirectory) ? outputDirectory : join(homedir(), "Downloads");
+  return outputDirectory?.trim() ? outputDirectory : join(homedir(), "Downloads");
+}
+
+/** Creates the output folder if needed. Fails loudly instead of saving somewhere else. */
+async function ensureOutputDirectory(): Promise<string> {
+  const directory = outputDirectory();
+  try {
+    await mkdir(directory, { recursive: true });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not use the output folder ${directory} (${reason}). Choose another folder in the deAPI extension preferences.`,
+    );
+  }
+  return directory;
 }
 
 const DEFAULT_EXTENSIONS: Record<JobKind, string> = {
@@ -50,8 +65,7 @@ export async function downloadResult(url: string, kind: JobKind, requestId: stri
     EXTENSIONS_BY_TYPE[contentType] ??
     (fromUrl && /^[a-z0-9]{2,4}$/.test(fromUrl) ? fromUrl : DEFAULT_EXTENSIONS[kind]);
 
-  const directory = outputDirectory();
-  await mkdir(directory, { recursive: true });
+  const directory = await ensureOutputDirectory();
   const path = uniquePath(directory, `deapi-${kind}-${requestId.slice(0, 8)}`, extension);
   await pipeline(Readable.fromWeb(response.body as import("node:stream/web").ReadableStream), createWriteStream(path));
   return path;
