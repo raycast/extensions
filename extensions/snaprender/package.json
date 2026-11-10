@@ -4,7 +4,7 @@
   "title": "SnapRender",
   "description": "Capture website screenshots and read pages as Markdown. Requires a SnapRender account and API key (a free plan is available).",
   "icon": "icon.png",
-  "author": "snaprender",
+  "author": "aleksis",
   "platforms": [
     "macOS"
   ],
