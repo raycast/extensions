@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] Recover the session lock after Raycast unloads a command - {PR_MERGE_DATE}
+## [Fix] Recover the session lock after Raycast unloads a command - 2026-11-10
 
 - Recover the session lock within seconds when Raycast unloads a command that holds it, instead of failing every Coffee command until Raycast restarts ([#33234](https://github.com/raycast/extensions/issues/33234)).
 
