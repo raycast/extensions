@@ -26,7 +26,7 @@ describe.runIf(process.platform === "darwin")("readProfilesPlist", () => {
     insert("empty.plist", "firstLaunchDate", "-string", "2026-01-01");
     create("corrupt.plist");
     insert("corrupt.plist", "profiles_v3", "-data", Buffer.from("{not json").toString("base64"));
-    writeFileSync(plist("garbage.plist"), "this is not a property list");
+    writeFileSync(plist("broken.plist"), Buffer.from("bplist00\x00\xff\xffbroken", "latin1"));
   });
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
@@ -39,10 +39,10 @@ describe.runIf(process.platform === "darwin")("readProfilesPlist", () => {
 
   it("reports no profiles when the app has not created any", async () => {
     expect(await readProfilesPlist(plist("empty.plist"))).toEqual({ profiles: undefined, activeProfileId: undefined });
-    expect(await readProfilesPlist(plist("garbage.plist"))).toEqual({
-      profiles: undefined,
-      activeProfileId: undefined,
-    });
+  });
+
+  it("reports a file that cannot be read instead of treating it as empty", async () => {
+    await expect(readProfilesPlist(plist("broken.plist"))).rejects.toThrow("Could not read the Claude Usage preferences");
   });
 
   it("fails when the stored profiles cannot be decoded", async () => {

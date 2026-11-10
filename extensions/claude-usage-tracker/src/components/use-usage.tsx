@@ -44,7 +44,9 @@ export function useUsage(only?: string) {
   async function reload() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Reloading usage" });
     try {
-      const loaded: ProfileUsage[] = (await mutate(loadUsage(), { shouldRevalidateAfter: false })) ?? [];
+      const loaded = await loadUsage();
+      // `mutate` only swaps the data on screen through `optimisticUpdate`.
+      await mutate(undefined, { optimisticUpdate: () => loaded, shouldRevalidateAfter: false });
       const fresh = applyPrefs(loaded, layout.prefs, only);
       const now = new Date();
       const stale = staleProfiles(fresh, now);

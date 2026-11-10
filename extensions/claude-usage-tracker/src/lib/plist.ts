@@ -12,16 +12,25 @@ export class PlistNotFoundError extends Error {
   }
 }
 
-/** Reads one top-level value with `plutil`; `Data` values come back base64-encoded. */
+/** What `plutil` prints when the file is a valid property list that lacks the requested key. */
+const MISSING_KEY = /No value at that key path/i;
+
+/**
+ * Reads one top-level value with `plutil`; `Data` values come back base64-encoded.
+ * Only a missing key yields undefined: an unreadable or corrupt file is an error.
+ */
 async function extract(path: string, key: string): Promise<string | undefined> {
   try {
     const { stdout } = await execFileAsync("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", path], {
       maxBuffer: 16 * 1024 * 1024,
     });
     return stdout.trim() || undefined;
-  } catch {
-    // plutil exits non-zero when the key does not exist.
-    return undefined;
+  } catch (error) {
+    const output = error as { stderr?: string; stdout?: string; message?: string };
+    const details = `${output.stderr ?? ""}${output.stdout ?? ""}`;
+    if (MISSING_KEY.test(details)) return undefined;
+    const reason = details.trim().split("\n").pop()?.replace(`${path}: `, "") || output.message || "unknown error";
+    throw new Error(`Could not read the Claude Usage preferences: ${reason}`);
   }
 }
 

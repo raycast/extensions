@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, LocalStorage, confirmAlert, useNavigation } from "@raycast/api";
 import { createDeeplink, useCachedPromise } from "@raycast/utils";
 import { EMPTY_PREFS, ProfilePrefs, moveProfile, orderedIds, parsePrefs, toggleHidden } from "../lib/profile-prefs";
 
@@ -86,7 +86,8 @@ function ManageProfiles(props: { profiles: ProfileRef[] }) {
                   />
                   <CreateQuicklinkAction {...profile} />
                   <Action
-                    title="Move up"
+                    // eslint-disable-next-line @raycast/prefer-title-case -- the rule lowercases "Up"
+                    title="Move Up"
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                     onAction={() => save(moveProfile(prefs, available, id, -1))}
@@ -101,7 +102,14 @@ function ManageProfiles(props: { profiles: ProfileRef[] }) {
                     title="Reset Layout"
                     icon={Icon.RotateAntiClockwise}
                     style={Action.Style.Destructive}
-                    onAction={() => save(EMPTY_PREFS)}
+                    onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        title: "Reset the profile layout?",
+                        message: "Every profile is shown again, in the order used by Claude Usage.",
+                        primaryAction: { title: "Reset Layout", style: Alert.ActionStyle.Destructive },
+                      });
+                      if (confirmed) await save(EMPTY_PREFS);
+                    }}
                   />
                 </ActionPanel>
               }
