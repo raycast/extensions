@@ -28,6 +28,7 @@ import {
   placeWindows,
   prefs,
   run,
+  sidebarWasMoved,
   swapDisplays,
   tile,
   type Panel,
@@ -106,6 +107,20 @@ function beside(layout: Layout): Built {
   return { layout: side(pinned), pinned, locate };
 }
 
+/**
+ * Dragging the sidebar away unpins it. Nothing tells an extension when a window moves, so each command
+ * checks before it tiles: a sidebar that isn't where it was put is an ordinary window again.
+ */
+async function unpinIfMoved(): Promise<void> {
+  if (!sidebarOn()) return;
+  const what = cache.get(PINNED) ?? "notes";
+  const isSidebar = isPanel(what)
+    ? (w: { title?: string }) => w.title === panelTitle(what)
+    : (w: { id: string }) => w.id === madeSidebar(what).id;
+  // If the windows can't be read, the command itself will say why
+  if (await sidebarWasMoved(isSidebar).catch(() => false)) cache.set(SIDEBAR, "off");
+}
+
 /** The window Make Sidebar pinned. An older version stored only its id. */
 function madeSidebar(stored: string): { id: string; app?: string } {
   try {
@@ -141,7 +156,8 @@ function layoutFor(name: TileName, lead: "focused" | "largest"): Layout {
  * A master layout takes the focused window as its master. Rotate, Swap and Make Master Larger then keep
  * whichever window is master, wherever the focus goes.
  */
-export function runTile(name: TileName, done?: string) {
+export async function runTile(name: TileName, done?: string) {
+  await unpinIfMoved();
   // Settled before `last-tile` changes, which is where an older version kept it
   cache.set(SIDEBAR, sidebarOn() ? "on" : "off");
   cache.set(LAST, name);
@@ -201,7 +217,8 @@ export function cycleMaster() {
  * Reruns the last layout, changed by `change`, on the display with the active window only.
  * The sidebar stays pinned.
  */
-function retile(change: (layout: Layout, pinned?: (i: Item) => boolean) => Layout, name = last()) {
+async function retile(change: (layout: Layout, pinned?: (i: Item) => boolean) => Layout, name = last()) {
+  await unpinIfMoved();
   const { layout, pinned, locate } = build(name);
   return tile(change(layout, pinned), locate, true);
 }
@@ -251,7 +268,8 @@ function retileGrid() {
  * Every window moves to the next display. If you have tiled before, they land in the last layout you used,
  * so they fit the new screen. Otherwise each keeps its place and size relative to the screen.
  */
-export function swapDisplaysTile() {
+export async function swapDisplaysTile() {
+  await unpinIfMoved();
   const name = cache.get(LAST) as TileName | undefined;
   if (!name || !NAMES.includes(name)) return swapDisplays();
   const { layout, panel } = build(name);
@@ -259,7 +277,8 @@ export function swapDisplaysTile() {
 }
 
 /** Spreads every window over every display, then tiles each with the last layout used. */
-export function distributeTile() {
+export async function distributeTile() {
+  await unpinIfMoved();
   const { layout, panel } = build(last());
   return distributeDisplays({ layout, include: panel && panelTitle(panel) }, layoutFor(last(), "largest"));
 }
@@ -300,13 +319,15 @@ export const smartArrange = () =>
   });
 
 /** The focused window keeps its display. The others there move to the next display, in the last layout. */
-export function moveOthersTile() {
+export async function moveOthersTile() {
+  await unpinIfMoved();
   const { layout, panel } = build(last());
   return moveOthers({ layout, include: panel && panelTitle(panel) });
 }
 
 /** Every window on the other displays comes to the focused window's display, in the last layout. */
-export function moveAllTile() {
+export async function moveAllTile() {
+  await unpinIfMoved();
   const { layout, panel } = build(last());
   return moveAll({ layout, include: panel && panelTitle(panel) });
 }

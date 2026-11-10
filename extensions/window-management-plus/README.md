@@ -43,6 +43,12 @@ In Raycast AI, mention `@window-management-plus` and say what you want, like "ar
 - macOS and Raycast Pro. Moving windows uses Raycast's Window Management API, which is part of Pro. Without it, each command says so and leaves your windows alone.
 - The first time you run a command, macOS asks whether Raycast may control System Events. Allow it, or turn it on later in System Settings › Privacy & Security › Automation. It is used to find and move Raycast's own windows, like Notes and AI Chat, and to toggle the menu bar.
 
+## Sidebar
+
+Toggle Sidebar pins Raycast Notes or Raycast AI Chat down the right of the screen, as thin as the app allows and full height. Make Sidebar does the same with whichever window you are in. While a sidebar is pinned, every other command arranges the remaining windows beside it.
+
+To unpin it, run Toggle Sidebar again, or just drag the sidebar somewhere else. The next command you run tiles it with the other windows.
+
 ## Preferences
 
 - **Window Gap**: the gap between windows.

@@ -187,6 +187,23 @@ for (const path of ${JSON.stringify(paths)}) {
 JSON.stringify(out)`);
 }
 
+/**
+ * Whether the sidebar window has been taken out of its place: it is open, but no longer sits against the
+ * top-right of its screen. `isSidebar` picks the window out, by title for one of Raycast's own.
+ */
+export async function sidebarWasMoved(isSidebar: (w: { id: string; title?: string }) => boolean): Promise<boolean> {
+  const system = raycastSystem();
+  const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+  const w = windows.find(isSidebar);
+  const area = w && areas[w.screen];
+  if (!w || !area) return false;
+  // Enough to tell a drag from a pixel of rounding
+  const off = 12;
+  const flushRight = Math.abs(w.frame.x + w.frame.width - (area.x + area.width)) <= off;
+  const atTop = Math.abs(w.frame.y - area.y) <= off;
+  return !flushRight || !atTop;
+}
+
 /** Every display and every window worth arranging, for the AI tools. */
 export async function listWindows(): Promise<{
   displays: (Frame & { index: number })[];
