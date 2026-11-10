@@ -2,9 +2,11 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
+import type { MiseVersion } from "./version";
 
 export type MiseEnv = Record<string, string> & { PATH: string; MISE_YES: "1"; NO_COLOR: "1" };
-export type MiseLocation = { path: string; env: MiseEnv };
+// `version` is read separately (see resolveMiseFromRaycast); undefined means unknown.
+export type MiseLocation = { path: string; env: MiseEnv; version?: MiseVersion };
 export type MiseNotFound = { searched: string[] };
 
 export type MiseStorage = { get(key: string): string | undefined; set(key: string, value: string): void };

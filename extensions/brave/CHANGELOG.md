@@ -1,5 +1,13 @@
 # Brave Changelog
 
+## [Improvements] - 2026-11-08
+
+- **Search Bookmarks**: Create Quicklinks from saved bookmarks
+- **Search Bookmarks**: Clarify the selected bookmark's Open in New Tab action with a dedicated icon
+- **Search Tabs**: Open blank tabs, reopen the selected URL in another tab, copy titles, create Quicklinks, and reload the tab list
+- **Search Tabs**: Match tabs playing audio, muted tabs, and picture-in-picture videos, including labels combined with memory or inactive-tab metadata
+- **Search Tabs**: Restore the macOS-only Move to New Window and Move to Private Window actions
+
 ## [Windows support] - 2026-10-31
 
 ### ✨ New

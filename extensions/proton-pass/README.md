@@ -46,7 +46,7 @@ pass-cli vault list
 
 ## Browse Items
 
-Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list.
+Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
 
 ## Preferences
 
@@ -58,18 +58,28 @@ Browse Items opens on your items. Esc goes back to the vault list, where All Vau
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
-  - Show website icons instead of initials, from Raycast's favicon provider, which receives the domains (off by default)
+  - Show website icons instead of initials, in Browse Items and Get TOTP Code, from the Favicon Provider chosen in Raycast's Advanced settings, which receives the domains (off by default). With no provider chosen there, initials show
+
+### Browse Items
+
+- **Sort items by**: Order of the items: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) changes it until the window closes
+- **Sort vaults by**: Order of the vaults in the vault list and the vault menu: name (default), item count or most used. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes
 
 ### Generate Password
 
 Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
 
 - **Password Type**: Random password or passphrase (default: random)
-- **Password Length**: Characters in random passwords, from 8 to 128 (default: 20)
-- **Characters**: Uppercase letters, symbols and numbers, all on by default (numbers also apply to passphrases)
-- **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
-- **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
-- **Capitalization**: Capitalize passphrase words (on by default)
+- **Random: Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Random: Characters**: Uppercase letters, symbols and numbers, all on by default
+- **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Passphrase: Options**: Capitalize words and include numbers, both on by default
+
+### Get TOTP Code
+
+- **Codes**: Hide codes behind dots, until Show Codes (⌘H) shows them while the command stays open. Copying still works (off by default)
+- **Sort items by**: Order of the codes, as in Browse Items but set apart. The vault menu lists vaults by name
 
 ## Filling Logins (macOS)
 

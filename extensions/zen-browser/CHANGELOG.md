@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix Search With Quotes and Wildcards] - 2026-11-07
+
+- Fixed history and bookmark search failing with an SQL error when the search text contains an apostrophe, and `%` and `_` in the search text now match literally.
+
 ## [Fix New Tab Search and Windows History] - 2026-11-06
 
 - Fixed **New Tab** searches on Windows: a query with several words no longer opens a separate tab for each word, and searching with the **Browser Default** search engine no longer fails with a PowerShell error.

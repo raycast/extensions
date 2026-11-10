@@ -1,6 +1,6 @@
 {
   "source": "https://docs.otty.sh/reference/configuration",
-  "docsVersion": "1.6.2",
+  "docsVersion": "1.6.4",
   "settings": {
     "adjust-cell-height": {
       "section": "Font",
