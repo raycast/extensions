@@ -1,14 +1,18 @@
 import fs from "node:fs";
 import { compose } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
-import { createZstdDecompress } from "node:zlib";
+import zlib from "node:zlib";
 import { zstdFrames } from "./zstd-frames.js";
 
 async function* decompressedChunks(filePath) {
+  // Look the decoder up lazily: older runtimes such as Raycast's Node 22.14 can still read plain logs.
+  if (typeof zlib.createZstdDecompress !== "function") {
+    throw new Error(`Reading compressed session logs requires Node.js 22.15.0 or newer (running ${process.version}): ${filePath}`);
+  }
   const file = await fs.promises.open(filePath, "r");
   try {
     for await (const range of zstdFrames(file)) {
-      const stream = compose(fs.createReadStream(filePath, range), createZstdDecompress());
+      const stream = compose(fs.createReadStream(filePath, range), zlib.createZstdDecompress());
       try {
         yield* stream;
       } finally {

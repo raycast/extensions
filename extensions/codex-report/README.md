@@ -98,6 +98,8 @@ and its legend.
 
 The extension bundles the [codex-report](https://github.com/flkrnr/codex-report)
 CLI and runs it with Raycast's Node runtime; it does not run a separate server.
+Reading compressed Codex logs requires Raycast 1.104.13 or newer, whose runtime
+includes Node.js 22.15 or later.
 Parsed sessions are cached in `~/.codex/cache` and `~/.claude/cache` and shared
 with the CLI (`npx codex-report`), so whichever runs first fills the cache for both.
 Reports only read transcripts that can cover the selected period: without a cache,
@@ -117,27 +119,3 @@ Category costs reuse cached model-token totals without changing the cache format
 Unknown prices are shown as **Unpriced**; mixed priced/unpriced usage is marked
 **partial**. Cost sorting places entirely unpriced entries last. Activity cost bars
 and PNG exports use the same estimates.
-
-## Development
-
-The bundled CLI in `assets` is a copy of the published
-[`codex-report`](https://www.npmjs.com/package/codex-report) npm package, pinned
-as a devDependency. To ship a new CLI release, install it with
-`npm install --save-dev --save-exact codex-report@<version>` and run
-`npm run sync-cli`. `npm run sync-cli-dev` copies unreleased changes from the
-surrounding repository for local testing; `npm test` fails until the assets
-match the pinned release again.
-
-```sh
-npm install
-npm run dev
-```
-
-Validate the extension with:
-
-```sh
-npm run build
-npm run lint
-npm run typecheck
-npm test
-```
