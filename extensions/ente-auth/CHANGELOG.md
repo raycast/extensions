@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Support Ente CLI 0.4+] - 2026-11-10
+## [Support Ente CLI 0.4+] - {PR_MERGE_DATE}
 
 - Fixed the "Ente binary not found" error by checking the CLI with `--version` instead of the removed `version` command
 - Fixed import and export by reading the auth account from `ente account list --json` and exporting with `ente auth export --plaintext`
