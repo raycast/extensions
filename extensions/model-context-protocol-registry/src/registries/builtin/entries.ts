@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "pipefire",
+    title: "Pipefire",
+    description:
+      "Cold email for agencies. Without an account: check a domain's SPF, DKIM, DMARC, MX, BIMI and MTA-STS records with the fix for each, look up blacklists, read email headers, score a cold email or subject line, and build DNS records. With a Pipefire account: see campaigns, results, mailboxes and lead finding, read replies with Pipefire's draft answers and ask for rewrites, draft campaigns, and pause or resume sending. Nothing sends from the chat: launching and approving replies stay in the Pipefire console. 31 tools. Hosted Streamable HTTP server; the deliverability tools need no sign-in, the account tools use OAuth 2.1 sign-in (dynamic client registration and PKCE).",
+    icon: "https://pipefire.ai/brand/pipefire-icon-512.png",
+    homepage: "https://pipefire.ai/mcp-server?utm_source=raycast&utm_medium=listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://pipefire.ai/mcp"],
+    },
+    remoteUrl: "https://pipefire.ai/mcp",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:

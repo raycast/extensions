@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Pipefire MCP Server] - {PR_MERGE_DATE}
+
+- Add Pipefire to the official registry: cold email for agencies. 16 email deliverability tools with no sign-in (SPF, DKIM, DMARC, MX, BIMI, MTA-STS, blacklists, header analysis, cold email and subject line scoring, record generators) and 15 account tools after OAuth 2.1 sign-in (dynamic client registration and PKCE): campaigns, results, mailboxes, lead finding, replies with draft answers, campaign drafts, and pause or resume. Nothing sends from the chat. Hosted Streamable HTTP server at https://pipefire.ai/mcp, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add EL7.AI MCP Server] - 2026-11-10
 
 - Add EL7.AI to the official registry: financial market intelligence (markets news, economic calendar, 8 central banks, COT positioning, stocks, earnings, gold and oil, with sources and dates). 85 read-only tools. Hosted Streamable HTTP server at https://mcp.el7.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a personal EL7 MCP API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Full access requires an EL7 paid membership.
