@@ -10,6 +10,7 @@ import {
   isOttyUnavailable,
   LoadFailureView,
   RefreshAction,
+  openAndClose,
   runAndClose,
   shiftShortcut,
   statusIcon,
@@ -198,7 +199,7 @@ function RowActions({
             title="New Tab Here"
             icon={Icon.Plus}
             shortcut={Keyboard.Shortcut.Common.New}
-            onAction={() => runAndClose("Could not open a new tab", () => openInTab(cwd))}
+            onAction={() => openAndClose("Could not open a new tab", () => openInTab(cwd))}
           />
           <Action.ShowInFinder path={cwd} />
         </ActionPanel.Section>

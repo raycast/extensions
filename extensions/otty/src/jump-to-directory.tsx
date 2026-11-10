@@ -12,11 +12,11 @@ import {
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { homedir } from "node:os";
 import { useState } from "react";
-import { activateOtty, loadJumpEntries, openInTab, runOtty } from "./lib/otty";
+import { loadJumpEntries, openInTab, runOtty } from "./lib/otty";
 import { buildOpenWindowArgs, splitPinned } from "./lib/otty-core";
 import { abbreviateHome, basename, expandHome, findRepos, relativeParent } from "./lib/paths";
 import { loadRepoInfos, sortByRecent, type RepoInfo } from "./lib/repos";
-import { LoadFailureView, runAndClose, useRefreshFailureToast } from "./lib/ui";
+import { LoadFailureView, openAndClose, useRefreshFailureToast } from "./lib/ui";
 
 type Mode = "visited" | "repos";
 type Folder = { path: string; last_seen?: number };
@@ -156,17 +156,12 @@ function JumpActions({ path, isPinned, onTogglePin }: { path: string; isPinned: 
         <Action
           title="Open in New Tab"
           icon={Icon.Plus}
-          onAction={() => runAndClose(`Could not open ${path}`, () => openInTab(path))}
+          onAction={() => openAndClose(`Could not open ${path}`, () => openInTab(path))}
         />
         <Action
           title="Open in New Window"
           icon={Icon.AppWindow}
-          onAction={() =>
-            runAndClose(`Could not open ${path}`, async () => {
-              await runOtty(buildOpenWindowArgs(path));
-              await activateOtty();
-            })
-          }
+          onAction={() => openAndClose(`Could not open ${path}`, () => runOtty(buildOpenWindowArgs(path)))}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>

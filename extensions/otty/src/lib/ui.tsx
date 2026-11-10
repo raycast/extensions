@@ -13,7 +13,14 @@ import {
 } from "@raycast/api";
 import { useCachedState, useLocalStorage } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { OttyCliMissingError, OttyNotRunningError, openNewWindow, showFailure } from "./otty";
+import {
+  activateOtty,
+  OttyCliMissingError,
+  OttyNotRunningError,
+  openNewWindow,
+  showFailure,
+  showStayedInBackground,
+} from "./otty";
 import { errorMessage } from "./otty-core";
 import { agentStatus, type AgentState, type AgentTone } from "./workspace";
 
@@ -63,6 +70,26 @@ export async function runAndClose(failureTitle: string, run: () => Promise<unkno
     await showFailure(failureTitle, error);
     return false;
   }
+}
+
+/** For actions that open something in Otty: bring Otty forward, then close Raycast. */
+export async function openAndClose(failureTitle: string, run: () => Promise<unknown>): Promise<boolean> {
+  try {
+    await run();
+  } catch (error) {
+    await showFailure(failureTitle, error);
+    return false;
+  }
+  const activationError = await activateOtty();
+  if (activationError) {
+    await showStayedInBackground("Opened in Otty", activationError);
+    return false;
+  }
+  await closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
+  return true;
 }
 
 /** Cached rows would otherwise look current, so toast once per distinct failure, not every poll. */

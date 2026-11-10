@@ -145,19 +145,40 @@ export async function showFailure(title: string, error: unknown) {
   });
 }
 
-/** The CLI opens tabs and windows without bringing Otty forward. */
-export async function activateOtty(): Promise<void> {
-  await execFileAsync("/usr/bin/open", buildActivateOttyArgs()).catch(() => undefined);
+/**
+ * The CLI opens tabs and windows without bringing Otty forward. Resolves to the
+ * error when activation fails: the open itself already succeeded, so callers
+ * report it on its own rather than as a failed open (which invites a retry and a
+ * duplicate tab).
+ */
+export async function activateOtty(): Promise<unknown> {
+  try {
+    await execFileAsync("/usr/bin/open", buildActivateOttyArgs());
+    return undefined;
+  } catch (error) {
+    return error ?? new Error("Could not activate Otty.");
+  }
+}
+
+export async function showStayedInBackground(opened: string, error: unknown): Promise<void> {
+  await showFailure(`${opened}, but Otty stayed in the background`, error);
+}
+
+/** Brings Otty forward, then confirms with a HUD, or says it stayed in the background. */
+export async function confirmOpened(title: string): Promise<void> {
+  const activationError = await activateOtty();
+  if (activationError) await showStayedInBackground(title, activationError);
+  else await showHUD(title);
 }
 
 export async function runOttyCommand(label: string, args: string[]): Promise<void> {
   try {
     await runOtty(args);
-    await activateOtty();
-    await showHUD(label);
   } catch (error) {
     await showFailure(`${label} failed`, error);
+    return;
   }
+  await confirmOpened(label);
 }
 
 export async function openOtty(): Promise<void> {
@@ -186,10 +207,9 @@ export async function openOtty(): Promise<void> {
     for (const file of files) {
       await runOtty(buildViewFileArgs(file));
     }
-    if (files.length > 0) await activateOtty();
 
     const only = [...directories, ...files];
-    await showHUD(
+    await confirmOpened(
       only.length === 1
         ? `Opened ${basename(only[0])} in new Otty ${files.length ? "tab" : opened}`
         : `Opened ${countOf(only.length, "item")} in Otty`,
@@ -207,7 +227,6 @@ export async function openInTab(directory?: string): Promise<"tab" | "window"> {
     await runOtty(buildOpenWindowArgs(directory));
     opened = "window";
   }
-  await activateOtty();
   return opened;
 }
 
@@ -218,7 +237,7 @@ export async function openNewWindow(): Promise<void> {
 export async function openNewTab(): Promise<void> {
   try {
     const opened = await openInTab();
-    await showHUD(`Opened new Otty ${opened}`);
+    await confirmOpened(`Opened new Otty ${opened}`);
   } catch (error) {
     await showFailure("Opened new Otty window failed", error);
   }
