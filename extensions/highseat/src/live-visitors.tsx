@@ -1,4 +1,4 @@
-import { environment, Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api"
+import { Color, environment, Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api"
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils"
 import { findSelectedSite, getSiteIcon, SiteOverview } from "./components/site-picker"
 import { formatCount } from "./lib/format"
@@ -40,7 +40,11 @@ export default function LiveVisitors() {
 
   if (data && !data.connected) {
     return (
-      <MenuBarExtra icon={Icon.BarChart} isLoading={isLoading} tooltip="Highseat">
+      <MenuBarExtra
+        icon={{ source: "menu-bar.svg", tintColor: Color.PrimaryText }}
+        isLoading={isLoading}
+        tooltip="Highseat"
+      >
         <MenuBarExtra.Item
           title="Connect Highseat"
           onAction={async () => {
