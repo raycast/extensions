@@ -1,4 +1,5 @@
 import { environment } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import crypto from "crypto";
 import fsSync from "fs";
@@ -17,7 +18,7 @@ const inMemoryFolderPreviewCache = new Map<string, string>();
 const pendingIconPromises = new Map<string, Promise<string | null>>();
 const pendingPreviewPromises = new Map<string, Promise<string | null>>();
 
-// Bounded concurrency queue so background icon extraction never spawns unbounded processes
+// Bounded concurrency queue for app icon extraction
 const MAX_CONCURRENT_TASKS = 2;
 let activeTaskCount = 0;
 const taskQueue: Array<() => void> = [];
@@ -39,6 +40,32 @@ function runWithConcurrencyLimit<T>(fn: () => Promise<T>): Promise<T> {
       execute();
     } else {
       taskQueue.push(execute);
+    }
+  });
+}
+
+// Separate bounded concurrency queue for folder preview compositions
+const MAX_CONCURRENT_PREVIEWS = 2;
+let activePreviewCount = 0;
+const previewTaskQueue: Array<() => void> = [];
+
+function runWithPreviewConcurrencyLimit<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const execute = () => {
+      activePreviewCount += 1;
+      fn()
+        .then(resolve, reject)
+        .finally(() => {
+          activePreviewCount -= 1;
+          const next = previewTaskQueue.shift();
+          if (next) next();
+        });
+    };
+
+    if (activePreviewCount < MAX_CONCURRENT_PREVIEWS) {
+      execute();
+    } else {
+      previewTaskQueue.push(execute);
     }
   });
 }
@@ -187,7 +214,7 @@ export async function getHighResAppIcon(
         }
       }
 
-      // 2. Fallback for Assets.car bundles: pass paths as argv to fixed JXA script
+      // 2. Fallback for Assets.car bundles: pass paths as argv to fixed JXA script via runAppleScript
       const jxaScript = `
 ObjC.import("AppKit");
 function run(argv) {
@@ -202,14 +229,9 @@ function run(argv) {
   png.writeToFileAtomically(outputPng, true);
 }
 `;
-      await execFileAsync("osascript", [
-        "-l",
-        "JavaScript",
-        "-e",
-        jxaScript,
-        appPath,
-        cachedPngPath,
-      ]);
+      await runAppleScript(jxaScript, [appPath, cachedPngPath], {
+        language: "JavaScript",
+      });
       await execFileAsync("sips", [
         "-s",
         "format",
@@ -351,15 +373,11 @@ export async function generateFolderPreviewIcon(
   const pending = pendingPreviewPromises.get(previewPath);
   if (pending) return pending;
 
-  const promise = runWithConcurrencyLimit(async () => {
+  // Resolve/extract high-res app icons first, outside the preview queue lock to prevent deadlock
+  const task = async (): Promise<string | null> => {
     try {
       const recheck = getFolderPreviewIconSync(folder);
       if (recheck) return recheck;
-
-      const previewDir = path.join(environment.supportPath, "folder_previews");
-      await fs.mkdir(previewDir, { recursive: true });
-
-      const bgAssetPath = path.join(environment.assetsPath, "glass_folder.png");
 
       const appIconPaths: string[] = [];
       for (const app of folder.apps.slice(0, 4)) {
@@ -374,7 +392,23 @@ export async function generateFolderPreviewIcon(
 
       if (appIconPaths.length === 0) return null;
 
-      const jxaScript = `
+      // Acquire dedicated preview slot to compose the 2x2 preview icon
+      return await runWithPreviewConcurrencyLimit(async () => {
+        const recheckInside = getFolderPreviewIconSync(folder);
+        if (recheckInside) return recheckInside;
+
+        const previewDir = path.join(
+          environment.supportPath,
+          "folder_previews",
+        );
+        await fs.mkdir(previewDir, { recursive: true });
+
+        const bgAssetPath = path.join(
+          environment.assetsPath,
+          "glass_folder.png",
+        );
+
+        const jxaScript = `
 ObjC.import("AppKit");
 function run(argv) {
   const data = JSON.parse(argv[0]);
@@ -422,29 +456,29 @@ function run(argv) {
 }
 `;
 
-      const inputData = JSON.stringify({
-        glass_path: bgAssetPath,
-        out_path: previewPath,
-        icon_paths: appIconPaths,
+        const inputData = JSON.stringify({
+          glass_path: bgAssetPath,
+          out_path: previewPath,
+          icon_paths: appIconPaths,
+        });
+
+        await runAppleScript(jxaScript, [inputData], {
+          language: "JavaScript",
+        });
+
+        if (fsSync.existsSync(previewPath)) {
+          inMemoryFolderPreviewCache.set(previewPath, previewPath);
+          return previewPath;
+        }
+        return null;
       });
-
-      await execFileAsync("osascript", [
-        "-l",
-        "JavaScript",
-        "-e",
-        jxaScript,
-        inputData,
-      ]);
-
-      if (fsSync.existsSync(previewPath)) {
-        inMemoryFolderPreviewCache.set(previewPath, previewPath);
-        return previewPath;
-      }
     } catch {
       // Fall back to glass_folder.png
+      return null;
     }
-    return null;
-  }).finally(() => {
+  };
+
+  const promise = task().finally(() => {
     pendingPreviewPromises.delete(previewPath);
   });
 

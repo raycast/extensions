@@ -31,7 +31,7 @@ We all have apps we use a few times a week. They aren't used often enough to ear
 | Where | Action | Shortcut |
 | :--- | :--- | :--- |
 | **All App Folders** | Open folder | `Enter` or `⌘1` – `⌘9` |
-| | Open all apps in folder | `⇧⌘↵` |
+| | Open all apps in folder | `⌘↵` |
 | | Toggle `⌘1`–`⌘9` shortcut badges | `⇧⌘H` |
 | | Create a new folder | `⌘N` |
 | | Add or remove apps in folder | `⇧⌘A` |
@@ -39,6 +39,7 @@ We all have apps we use a few times a week. They aren't used often enough to ear
 | | Reorder folder left / right | `⌥←` / `⌥→` |
 | | Delete folder | `⌘⌫` |
 | **Inside a Folder** | Open app | `Enter` or `⌘1` – `⌘9` |
+| | Reveal in Finder | `⌘↵` |
 | | Open all apps in folder | `⇧⌘↵` |
 | | Toggle `⌘1`–`⌘9` shortcut badges | `⇧⌘H` |
 | | Move app to another folder | `⇧⌘M` |

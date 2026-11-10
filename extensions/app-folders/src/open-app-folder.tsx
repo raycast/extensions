@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   confirmAlert,
   Grid,
   Icon,
@@ -42,6 +43,7 @@ export default function Command() {
   const {
     data: dashboardData,
     isLoading,
+    error,
     revalidate,
   } = usePromise(async () => {
     const [folders, showShortcutHints] = await Promise.all([
@@ -145,6 +147,27 @@ export default function Command() {
     return <Grid isLoading={true} />;
   }
 
+  if (error) {
+    return (
+      <Grid searchBarPlaceholder={t.searchFoldersPlaceholder}>
+        <Grid.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={t.loadFoldersErrorTitle}
+          description={error.message || t.loadFoldersError}
+          actions={
+            <ActionPanel>
+              <Action
+                title={t.retry}
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      </Grid>
+    );
+  }
+
   return (
     <Grid
       columns={6}
@@ -207,21 +230,10 @@ export default function Command() {
                           />
                         }
                       />
-                      <Action.Push
-                        title={t.addApp}
-                        icon={Icon.PlusCircle}
-                        target={
-                          <AddAppView folder={folder} onAppAdded={revalidate} />
-                        }
-                      />
                       {folder.apps.length > 0 && (
                         <Action
                           title={t.openAllApps}
                           icon={Icon.Rocket}
-                          shortcut={{
-                            modifiers: ["cmd", "shift"],
-                            key: "return",
-                          }}
                           onAction={() =>
                             launchAllApps(folder.apps, folder.name)
                           }
@@ -256,6 +268,14 @@ export default function Command() {
                         shortcut={Keyboard.Shortcut.Common.New}
                         target={
                           <CreateFolderForm onFolderCreated={revalidate} />
+                        }
+                      />
+                      <Action.Push
+                        title={t.addApp}
+                        icon={Icon.PlusCircle}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                        target={
+                          <AddAppView folder={folder} onAppAdded={revalidate} />
                         }
                       />
                       <Action

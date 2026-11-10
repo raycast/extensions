@@ -22,7 +22,7 @@ export const t = {
   searchFoldersPlaceholder: "Search folders or apps...",
   searchFolderAppsPlaceholder: (name: string) => `Search in ${name}...`,
   emptyFoldersTitle: "No Folders Yet",
-  emptyFoldersDesc: "Press Enter or ⌘N to create your first app folder.",
+  emptyFoldersDesc: "Press Enter to create your first app folder.",
   createFolder: "New Folder",
   openFolder: "Open Folder",
   folderSettings: "Edit Folder",
@@ -32,6 +32,8 @@ export const t = {
     "This only removes the folder from Raycast. Your installed Mac apps won't be affected.",
   delete: "Delete",
   folderDeleted: "Folder Deleted",
+  loadFoldersErrorTitle: "Failed to Load Folders",
+  retry: "Retry",
 
   // Feature 2: Launch All Apps
   openAllApps: "Open All Apps in Folder",
@@ -48,7 +50,7 @@ export const t = {
 
   // Folder Grid View
   emptyFolderTitle: (name: string) => `"${name}" is Empty`,
-  emptyFolderDesc: "Press Enter or ⌘N to add apps to this folder.",
+  emptyFolderDesc: "Press Enter to add apps to this folder.",
   launchApp: (name: string) => `Open ${name}`,
   launchFailedTitle: "Couldn't Open App",
   launchFailedMessage: (name: string) =>
@@ -119,7 +121,7 @@ export const t = {
 
   // Empty Slot
   emptySlotTitle: (slot: number) => `Slot ${slot} is Empty`,
-  emptySlotDesc: "Press Enter or ⌘N to create a folder for this shortcut slot.",
+  emptySlotDesc: "Press Enter to create a folder for this shortcut slot.",
   createSlotFolder: (slot: number) => `Create Folder in Slot ${slot}`,
 
   // Feature 6: Backup & Restore

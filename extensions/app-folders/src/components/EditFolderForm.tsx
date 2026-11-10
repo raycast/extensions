@@ -7,7 +7,12 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import {
+  FormValidation,
+  showFailureToast,
+  useForm,
+  usePromise,
+} from "@raycast/utils";
 import fsSync from "fs";
 import { useState } from "react";
 import { Folder } from "../types";
@@ -23,8 +28,16 @@ interface EditFolderFormProps {
   onUpdated: () => unknown | Promise<unknown>;
 }
 
+interface EditFolderValues {
+  name: string;
+  icon: string;
+  iconFile: string[];
+  previewStyle: string;
+  slot: string;
+}
+
 /**
- * Form component for editing folder settings.
+ * Form component for editing folder settings using useForm and FormValidation.
  */
 export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
   const { pop } = useNavigation();
@@ -35,66 +48,65 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
     fsSync.existsSync(folder.icon),
   );
 
-  const [name, setName] = useState(folder.name);
-  const [icon, setIcon] = useState(
-    hasExistingImageIcon || folder.icon === "📁" ? "" : folder.icon || "",
-  );
-  const [iconFiles, setIconFiles] = useState<string[]>(
-    isAbsoluteExistingFile && folder.icon ? [folder.icon] : [],
-  );
   const [keepBuiltinAsset, setKeepBuiltinAsset] = useState<boolean>(
     Boolean(hasExistingImageIcon && !folder.icon?.startsWith("/")),
   );
-  const [previewStyle, setPreviewStyle] = useState<"auto" | "plain">(
-    folder.previewStyle || "auto",
-  );
-  const [slot, setSlot] = useState(folder.slot ? String(folder.slot) : "none");
-  const [error, setError] = useState<string | undefined>();
+
+  const { handleSubmit, itemProps, setValue } = useForm<EditFolderValues>({
+    async onSubmit(values) {
+      try {
+        const assignedSlot =
+          values.slot === "none" ? null : parseInt(values.slot, 10);
+        const resolvedPreviewStyle =
+          values.previewStyle === "plain" ? "plain" : "auto";
+
+        let finalIcon = "";
+        if (values.iconFile.length > 0 && values.iconFile[0]) {
+          finalIcon = await prepareCustomFolderIcon(values.iconFile[0]);
+        } else if (values.icon.trim()) {
+          finalIcon = values.icon.trim();
+        } else if (keepBuiltinAsset && folder.icon) {
+          finalIcon = folder.icon;
+        }
+
+        await updateFolder(folder.id, {
+          name: values.name,
+          icon: finalIcon,
+          slot: assignedSlot,
+          previewStyle: resolvedPreviewStyle,
+        });
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.folderUpdatedTitle,
+          message: t.folderUpdatedMessage(values.name),
+        });
+        await onUpdated();
+        pop();
+      } catch (err) {
+        await showFailureToast(err, { title: t.errorTitle });
+      }
+    },
+    validation: {
+      name: FormValidation.Required,
+    },
+    initialValues: {
+      name: folder.name,
+      icon:
+        hasExistingImageIcon || folder.icon === "📁" ? "" : folder.icon || "",
+      iconFile: isAbsoluteExistingFile && folder.icon ? [folder.icon] : [],
+      previewStyle: folder.previewStyle || "auto",
+      slot: folder.slot ? String(folder.slot) : "none",
+    },
+  });
 
   const { data: allFolders = [], isLoading } = usePromise(getFolders);
 
-  async function handleSubmit() {
-    if (!name.trim()) {
-      setError(t.nameRequiredError);
-      return;
-    }
-
-    try {
-      const assignedSlot = slot === "none" ? null : parseInt(slot, 10);
-
-      let finalIcon = "";
-      if (iconFiles.length > 0 && iconFiles[0]) {
-        finalIcon = await prepareCustomFolderIcon(iconFiles[0]);
-      } else if (icon.trim()) {
-        finalIcon = icon.trim();
-      } else if (keepBuiltinAsset && folder.icon) {
-        finalIcon = folder.icon;
-      }
-
-      await updateFolder(folder.id, {
-        name,
-        icon: finalIcon,
-        slot: assignedSlot,
-        previewStyle,
-      });
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.folderUpdatedTitle,
-        message: t.folderUpdatedMessage(name),
-      });
-      await onUpdated();
-      pop();
-    } catch (err) {
-      await showFailureToast(err, { title: t.errorTitle });
-    }
-  }
-
   function handleResetIcon() {
-    setIconFiles([]);
-    setIcon("");
+    setValue("iconFile", []);
+    setValue("icon", "");
+    setValue("previewStyle", "auto");
     setKeepBuiltinAsset(false);
-    setPreviewStyle("auto");
     showToast({
       style: Toast.Style.Success,
       title: t.resetToDefaultIcon,
@@ -140,26 +152,19 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
       }
     >
       <Form.TextField
-        id="name"
+        {...itemProps.name}
         title={t.folderName}
         placeholder={t.folderNamePlaceholder}
-        value={name}
-        error={error}
-        onChange={(val) => {
-          setName(val);
-          if (error) setError(undefined);
-        }}
       />
 
       <Form.FilePicker
-        id="iconFile"
+        {...itemProps.iconFile}
         title={t.folderIcon}
         canChooseFiles
         canChooseDirectories={false}
         allowMultipleSelection={false}
-        value={iconFiles}
         onChange={(files) => {
-          setIconFiles(files);
+          setValue("iconFile", files);
           if (files.length > 0) {
             setKeepBuiltinAsset(false);
           }
@@ -167,12 +172,7 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
       />
       <Form.Description text={t.folderIconDesc} />
 
-      <Form.Dropdown
-        id="previewStyle"
-        title={t.folderPreviewStyle}
-        value={previewStyle}
-        onChange={(val) => setPreviewStyle(val as "auto" | "plain")}
-      >
+      <Form.Dropdown {...itemProps.previewStyle} title={t.folderPreviewStyle}>
         <Form.Dropdown.Item
           value="auto"
           title={t.previewStyleAuto}
@@ -187,25 +187,19 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
       <Form.Description text={t.folderPreviewStyleDesc} />
 
       <Form.TextField
-        id="icon"
+        {...itemProps.icon}
         title={t.folderIconEmoji}
-        value={icon}
         placeholder={t.folderIconEmojiPlaceholder}
         info={t.folderIconEmojiInfo}
         onChange={(val) => {
-          setIcon(val);
+          setValue("icon", val);
           if (val.trim()) {
             setKeepBuiltinAsset(false);
           }
         }}
       />
 
-      <Form.Dropdown
-        id="slot"
-        title={t.shortcutSlot}
-        value={slot}
-        onChange={setSlot}
-      >
+      <Form.Dropdown {...itemProps.slot} title={t.shortcutSlot}>
         {slotOptions.map((opt) => (
           <Form.Dropdown.Item
             key={opt.value}

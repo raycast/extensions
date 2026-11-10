@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   confirmAlert,
   Icon,
   Keyboard,
@@ -36,7 +37,12 @@ import {
  */
 export default function ManageFolders() {
   const [, setRenderVersion] = useState(0);
-  const { data: folders = [], isLoading, revalidate } = usePromise(getFolders);
+  const {
+    data: folders = [],
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(getFolders);
 
   useEffect(() => {
     if (folders.length === 0) return;
@@ -109,11 +115,33 @@ export default function ManageFolders() {
     }
   }
 
+  if (isLoading) {
+    return <List isLoading={true} />;
+  }
+
+  if (error) {
+    return (
+      <List searchBarPlaceholder={t.searchFoldersPlaceholder}>
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={t.loadFoldersErrorTitle}
+          description={error.message || t.loadFoldersError}
+          actions={
+            <ActionPanel>
+              <Action
+                title={t.retry}
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={t.searchFoldersPlaceholder}
-    >
+    <List searchBarPlaceholder={t.searchFoldersPlaceholder}>
       {folders.length === 0 ? (
         <List.EmptyView
           icon={{ source: "glass_folder.png" }}
@@ -166,21 +194,10 @@ export default function ManageFolders() {
                           />
                         }
                       />
-                      <Action.Push
-                        title={t.addApp}
-                        icon={Icon.PlusCircle}
-                        target={
-                          <AddAppView folder={folder} onAppAdded={revalidate} />
-                        }
-                      />
                       {folder.apps.length > 0 && (
                         <Action
                           title={t.openAllApps}
                           icon={Icon.Rocket}
-                          shortcut={{
-                            modifiers: ["cmd", "shift"],
-                            key: "return",
-                          }}
                           onAction={() =>
                             launchAllApps(folder.apps, folder.name)
                           }
@@ -195,6 +212,14 @@ export default function ManageFolders() {
                         shortcut={Keyboard.Shortcut.Common.New}
                         target={
                           <CreateFolderForm onFolderCreated={revalidate} />
+                        }
+                      />
+                      <Action.Push
+                        title={t.addApp}
+                        icon={Icon.PlusCircle}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                        target={
+                          <AddAppView folder={folder} onAppAdded={revalidate} />
                         }
                       />
                       <Action

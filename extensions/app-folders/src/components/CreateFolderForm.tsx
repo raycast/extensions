@@ -7,8 +7,12 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import {
+  FormValidation,
+  showFailureToast,
+  useForm,
+  usePromise,
+} from "@raycast/utils";
 import { t } from "../utils/i18n";
 import { prepareCustomFolderIcon } from "../utils/iconExtractor";
 import {
@@ -23,69 +27,76 @@ interface CreateFolderFormProps {
   defaultSlot?: number;
 }
 
+interface CreateFolderValues {
+  name: string;
+  icon: string;
+  iconFile: string[];
+  previewStyle: string;
+  slot: string;
+}
+
 /**
- * Form component for creating a new folder.
+ * Form component for creating a new folder using useForm and FormValidation.
  */
 export function CreateFolderForm({
   onFolderCreated,
   defaultSlot,
 }: CreateFolderFormProps) {
   const { pop } = useNavigation();
-  const [name, setName] = useState("");
-  const [icon, setIcon] = useState("");
-  const [iconFiles, setIconFiles] = useState<string[]>([]);
-  const [previewStyle, setPreviewStyle] = useState<"auto" | "plain">("auto");
-  const [slot, setSlot] = useState<string>(
-    defaultSlot ? String(defaultSlot) : "auto",
-  );
-  const [error, setError] = useState<string | undefined>();
 
-  const { data: allFolders = [], isLoading } = usePromise(getFolders, [], {
-    onData: (folders) => {
-      if (!defaultSlot && slot === "auto") {
-        const firstEmpty = findFirstAvailableSlot(folders);
-        setSlot(firstEmpty ? String(firstEmpty) : "none");
+  const { handleSubmit, itemProps, setValue } = useForm<CreateFolderValues>({
+    async onSubmit(values) {
+      try {
+        let finalIcon = values.icon.trim();
+        if (values.iconFile.length > 0 && values.iconFile[0]) {
+          finalIcon = await prepareCustomFolderIcon(values.iconFile[0]);
+        }
+
+        const preferredSlot =
+          values.slot === "none" ? null : parseInt(values.slot, 10);
+        const resolvedPreviewStyle =
+          values.previewStyle === "plain" ? "plain" : "auto";
+
+        const newFolder = await createFolder(
+          values.name,
+          finalIcon,
+          preferredSlot,
+          resolvedPreviewStyle,
+        );
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.folderCreatedTitle,
+          message: t.folderCreatedMessage(newFolder.name, newFolder.slot),
+        });
+        await onFolderCreated();
+        pop();
+      } catch (err) {
+        await showFailureToast(err, { title: t.errorTitle });
       }
+    },
+    validation: {
+      name: FormValidation.Required,
+    },
+    initialValues: {
+      name: "",
+      icon: "",
+      iconFile: [],
+      previewStyle: "auto",
+      slot: defaultSlot ? String(defaultSlot) : "none",
     },
   });
 
-  async function handleSubmit() {
-    if (!name.trim()) {
-      setError(t.nameRequiredError);
-      return;
-    }
-
-    try {
-      let finalIcon = icon.trim();
-      if (iconFiles.length > 0 && iconFiles[0]) {
-        finalIcon = await prepareCustomFolderIcon(iconFiles[0]);
+  const { data: allFolders = [], isLoading } = usePromise(getFolders, [], {
+    onData: (folders) => {
+      if (!defaultSlot) {
+        const firstEmpty = findFirstAvailableSlot(folders);
+        if (firstEmpty) {
+          setValue("slot", String(firstEmpty));
+        }
       }
-
-      const preferredSlot =
-        slot === "none"
-          ? null
-          : slot === "auto"
-            ? undefined
-            : parseInt(slot, 10);
-
-      const newFolder = await createFolder(
-        name,
-        finalIcon,
-        preferredSlot,
-        previewStyle,
-      );
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.folderCreatedTitle,
-        message: t.folderCreatedMessage(newFolder.name, newFolder.slot),
-      });
-      await onFolderCreated();
-      pop();
-    } catch (err) {
-      await showFailureToast(err, { title: t.errorTitle });
-    }
-  }
+    },
+  });
 
   // Show occupancy status for shortcut slots 1 to 5
   const slotOptions = [
@@ -115,34 +126,21 @@ export function CreateFolderForm({
       }
     >
       <Form.TextField
-        id="name"
+        {...itemProps.name}
         title={t.folderName}
         placeholder={t.folderNamePlaceholder}
-        value={name}
-        error={error}
-        onChange={(val) => {
-          setName(val);
-          if (error) setError(undefined);
-        }}
       />
 
       <Form.FilePicker
-        id="iconFile"
+        {...itemProps.iconFile}
         title={t.folderIcon}
         canChooseFiles
         canChooseDirectories={false}
         allowMultipleSelection={false}
-        value={iconFiles}
-        onChange={setIconFiles}
       />
       <Form.Description text={t.folderIconDesc} />
 
-      <Form.Dropdown
-        id="previewStyle"
-        title={t.folderPreviewStyle}
-        value={previewStyle}
-        onChange={(val) => setPreviewStyle(val as "auto" | "plain")}
-      >
+      <Form.Dropdown {...itemProps.previewStyle} title={t.folderPreviewStyle}>
         <Form.Dropdown.Item
           value="auto"
           title={t.previewStyleAuto}
@@ -157,20 +155,13 @@ export function CreateFolderForm({
       <Form.Description text={t.folderPreviewStyleDesc} />
 
       <Form.TextField
-        id="icon"
+        {...itemProps.icon}
         title={t.folderIconEmoji}
         placeholder={t.folderIconEmojiPlaceholder}
-        value={icon}
         info={t.folderIconEmojiInfo}
-        onChange={setIcon}
       />
 
-      <Form.Dropdown
-        id="slot"
-        title={t.shortcutSlot}
-        value={slot === "auto" ? "none" : slot}
-        onChange={setSlot}
-      >
+      <Form.Dropdown {...itemProps.slot} title={t.shortcutSlot}>
         {slotOptions.map((opt) => (
           <Form.Dropdown.Item
             key={opt.value}
