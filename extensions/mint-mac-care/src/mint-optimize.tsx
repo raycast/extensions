@@ -137,8 +137,8 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
           title: `${plural(failures.length, "file")} left as they were`,
           message: failures[0].reason,
         });
-        // Files left as they were and the week now spent: the week held them.
-        await wall.refused(bytesOf(chosen));
+        // Files left as they were and less of the week left than the run asked: the week held them.
+        await wall.keptBack(bytesOf(chosen));
       }
     } catch (error) {
       strike.end([], () => setRun(undefined));

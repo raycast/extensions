@@ -114,7 +114,11 @@ function Conversations({ cli }: { cli: string }) {
         itemIDs: rows.map((row) => row.id),
         ...(verb === "agents.delete" ? { permanent: true } : {}),
       },
-      { done: (result) => conversationReceipt(verb, result), failed: "Mint could not change these conversations" },
+      {
+        done: (result) => conversationReceipt(verb, result),
+        failed: "Mint could not change these conversations",
+        needed: rows.reduce((sum, row) => sum + row.bytes, 0),
+      },
       wall,
     );
     lookAgain();
@@ -125,7 +129,11 @@ function Conversations({ cli }: { cli: string }) {
     await runConfirmedInMint<TranscriptResult>(
       cli,
       { action: "disk.compress", sessionID: claude.data.sessionID, itemIDs: rows.map((row) => row.id) },
-      { done: transcriptReceipt, failed: "Mint could not remove these pictures" },
+      {
+        done: transcriptReceipt,
+        failed: "Mint could not remove these pictures",
+        needed: rows.reduce((sum, row) => sum + row.sizeBytes, 0),
+      },
       wall,
     );
     lookAgain();
@@ -452,7 +460,11 @@ function Pictures({
     const result = await runConfirmedInMint<PictureResult>(
       cli,
       { action: "pictures.remove", sessionID: review.sessionID, itemIDs },
-      { done: (answer) => pictureRemovalReceipt(itemIDs, answer), failed: "Mint could not remove these pictures" },
+      {
+        done: (answer) => pictureRemovalReceipt(itemIDs, answer),
+        failed: "Mint could not remove these pictures",
+        needed: pictures.slice(0, PICTURES_PER_REQUEST).reduce((sum, picture) => sum + picture.estimatedSavingBytes, 0),
+      },
       wall,
     );
     if (result) {

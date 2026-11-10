@@ -196,6 +196,20 @@ export function refusedForPlan(access: PlanAccess | undefined, gate: PlanGate = 
   return access.allowed === false;
 }
 
+/**
+ * Whether the week held back a run Mint answered with files left as they were.
+ * Mint refuses each file the week cannot cover but keeps its gate open while a
+ * few kilobytes are left (access.check `allowed` stays true), so the run's own
+ * size against what is left decides, in no language. `neededBytes`: what the
+ * run asked of the week.
+ */
+export function heldForWeek(access: PlanAccess | undefined, neededBytes: number): boolean {
+  if (!access || access.plan) return false;
+  if (access.allowed === false) return true;
+  const left = access.remainingCleanupBytes;
+  return typeof left === "number" && neededBytes > 0 && left < neededBytes;
+}
+
 /** Money as the plan page formats it (PlanPricing.formatted): no cents on a whole amount. */
 export function money(amount: number, currency = "USD"): string {
   const whole = Number.isInteger(amount);

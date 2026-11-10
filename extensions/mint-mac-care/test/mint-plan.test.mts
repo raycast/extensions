@@ -13,6 +13,7 @@ import {
   statusLine,
   usableValue,
   valueFooter,
+  heldForWeek,
   refusedForPlan,
   type PlanValue,
 } from "../src/mint-plan.ts";
@@ -88,6 +89,18 @@ test("the wall replaces an error only when it was Mint's plan refusal, read with
   assert.equal(refusedForPlan({ plan: false, automationAllowed: true }, "autocare"), false);
   assert.equal(refusedForPlan({ plan: false, automationAllowed: false }, "autocare"), true);
   assert.equal(refusedForPlan({ plan: true, customRulesAllowed: false }, "rules"), false);
+});
+
+test("a run Mint answered with files left as they were opens the wall when the week could not cover it", () => {
+  // The guest's spent week (2026-11-10): Mint kept its gate open with 64,780 bytes left and refused each file.
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 64_780 }, 92_000_000), true);
+  assert.equal(heldForWeek({ plan: false, allowed: false, remainingCleanupBytes: 0 }, 1), true);
+  // Enough left for the whole run: whatever Mint left was for another reason.
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 400_000_000 }, 92_000_000), false);
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 64_780 }, 0), false);
+  assert.equal(heldForWeek({ plan: true, allowed: true, remainingCleanupBytes: null }, 92_000_000), false);
+  assert.equal(heldForWeek({ plan: false, allowed: true }, 92_000_000), false);
+  assert.equal(heldForWeek(undefined, 92_000_000), false);
 });
 
 test("prices are the feed's, else the app's bundled ones, never $0", () => {

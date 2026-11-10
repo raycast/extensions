@@ -32,6 +32,7 @@ import {
   statusLine,
   usableValue,
   valueFooter,
+  heldForWeek,
   refusedForPlan,
 } from "./mint-plan";
 import type { PlanAccess, PlanAnswer, PlanGate, PlanTile } from "./mint-plan";
@@ -58,11 +59,22 @@ export async function planRefused(cli: string, gate: PlanGate = "week"): Promise
   }
 }
 
+/** Whether the week held back a run Mint answered with files left as they were (`heldForWeek`). */
+export async function planHeld(cli: string, neededBytes: number): Promise<boolean> {
+  try {
+    return heldForWeek(await runMintSurface<PlanAccess>(cli, { action: "access.check" }, 30_000), neededBytes);
+  } catch {
+    return false;
+  }
+}
+
 export type PlanWallPush = {
   /** Mint answered and held part of it back for the week (`refusedBytes`: the selection, when known). */
   held: (refusedBytes?: number) => void;
   /** Mint refused the run: the wall when it was the plan's refusal, and true; false leaves the error to the caller. */
   refused: (refusedBytes?: number, gate?: PlanGate) => Promise<boolean>;
+  /** Mint answered and left files as they were: the wall when the week could not cover the run, and true. */
+  keptBack: (neededBytes: number) => Promise<boolean>;
 };
 
 /** Pushes the wall from a command's own navigation. */
@@ -73,6 +85,11 @@ export function usePlanWall(cli: string): PlanWallPush {
     refused: async (refusedBytes, gate) => {
       if (!(await planRefused(cli, gate))) return false;
       push(<PlanWall cli={cli} refusedBytes={refusedBytes} />);
+      return true;
+    },
+    keptBack: async (neededBytes) => {
+      if (!(await planHeld(cli, neededBytes))) return false;
+      push(<PlanWall cli={cli} refusedBytes={neededBytes} />);
       return true;
     },
   };

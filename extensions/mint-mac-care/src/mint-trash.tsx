@@ -41,7 +41,11 @@ function EmptyTrash({ cli }: { cli: string }) {
         itemIDs: items.map((item) => item.id),
         permanent: true,
       },
-      { done: trashReceipt, failed: "Mint could not empty the Trash" },
+      {
+        done: trashReceipt,
+        failed: "Mint could not empty the Trash",
+        needed: items.reduce((sum, item) => sum + item.bytes, 0),
+      },
       wall,
     );
     clear();

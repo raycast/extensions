@@ -43,6 +43,8 @@ export async function runConfirmedInMint<T extends object>(
     held?: (result: T & NotRun) => boolean;
     /** Which plan refusal this request can meet (default: the week's gate). */
     gate?: PlanGate;
+    /** What the request asks of the week's free allowance: with files left as they were, the wall when less is left. */
+    needed?: number;
   },
   /** The plan wall (2026-11-10): shown when the week held something back or refused the run. */
   wall?: PlanWallPush,
@@ -65,6 +67,7 @@ export async function runConfirmedInMint<T extends object>(
     toast.title = words.done(result);
     toast.message = undefined;
     if (wall && words.held?.(result)) wall.held();
+    else if (wall && words.needed && leftSomething(result)) await wall.keptBack(words.needed);
     return result;
   } catch (error) {
     if (wall && (await wall.refused(undefined, words.gate))) {
@@ -76,6 +79,12 @@ export async function runConfirmedInMint<T extends object>(
     toast.message = error instanceof Error ? error.message : String(error);
     return undefined;
   }
+}
+
+/** Whether Mint's answer left any of the request as it was. */
+function leftSomething(result: object): boolean {
+  const answer = result as { failures?: unknown; failedCount?: number };
+  return (Array.isArray(answer.failures) && answer.failures.length > 0) || (answer.failedCount ?? 0) > 0;
 }
 
 /** For a view whose read failed: look again, or open Mint. */
