@@ -41,8 +41,7 @@ export interface VenueDataset {
   readonly assessments: readonly Assessment[];
 }
 
-export type AssessmentStatus =
-  "assessed" | "not-listed" | "unknown" | "not-applicable";
+export type AssessmentStatus = "assessed" | "not-listed" | "unknown" | "not-applicable";
 
 export interface AssessmentResult {
   readonly source: RankingSource;

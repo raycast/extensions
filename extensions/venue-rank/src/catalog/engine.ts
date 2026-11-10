@@ -22,13 +22,11 @@ export function normalizeVenueQuery(value: string): string {
 }
 
 function assertUnique(values: readonly string[], label: string): void {
-  if (new Set(values).size !== values.length)
-    throw new Error(`Duplicate ${label}`);
+  if (new Set(values).size !== values.length) throw new Error(`Duplicate ${label}`);
 }
 
 export function validateDataset(dataset: VenueDataset): void {
-  if (dataset.schemaVersion !== 1 || !dataset.version.trim())
-    throw new Error("Unsupported or unversioned dataset");
+  if (dataset.schemaVersion !== 1 || !dataset.version.trim()) throw new Error("Unsupported or unversioned dataset");
   assertUnique(
     dataset.venues.map((v) => v.id),
     "venue ID",
@@ -40,14 +38,9 @@ export function validateDataset(dataset: VenueDataset): void {
   const venues = new Map(dataset.venues.map((v) => [v.id, v]));
   const sources = new Map(dataset.sources.map((s) => [s.id, s]));
   for (const venue of dataset.venues) {
-    if (
-      !venue.id.trim() ||
-      !venue.name.trim() ||
-      !["conference", "journal"].includes(venue.type)
-    )
+    if (!venue.id.trim() || !venue.name.trim() || !["conference", "journal"].includes(venue.type))
       throw new Error(`Invalid venue: ${venue.id}`);
-    if (venue.dblp && !isHttpUrl(venue.dblp))
-      throw new Error(`Invalid venue URL: ${venue.id}`);
+    if (venue.dblp && !isHttpUrl(venue.dblp)) throw new Error(`Invalid venue URL: ${venue.id}`);
   }
   for (const source of dataset.sources) {
     if (
@@ -72,22 +65,14 @@ export function validateDataset(dataset: VenueDataset): void {
     const venue = venues.get(assessment.venueId);
     const source = sources.get(assessment.sourceId);
     if (!venue || !source)
-      throw new Error(
-        `Unknown assessment reference: ${assessment.venueId}/${assessment.sourceId}`,
-      );
+      throw new Error(`Unknown assessment reference: ${assessment.venueId}/${assessment.sourceId}`);
     if (
       !source.appliesTo.includes(venue.type) ||
       !source.labels.includes(assessment.value) ||
       !isHttpUrl(assessment.url)
     )
-      throw new Error(
-        `Invalid assessment: ${assessment.venueId}/${assessment.sourceId}`,
-      );
-    const key = JSON.stringify([
-      assessment.venueId,
-      assessment.sourceId,
-      assessment.area ?? "",
-    ]);
+      throw new Error(`Invalid assessment: ${assessment.venueId}/${assessment.sourceId}`);
+    const key = JSON.stringify([assessment.venueId, assessment.sourceId, assessment.area ?? ""]);
     if (seen.has(key)) throw new Error(`Duplicate assessment: ${key}`);
     seen.add(key);
   }
@@ -132,9 +117,7 @@ export function createCatalog(input: VenueDataset): VenueCatalog {
     const venue = byId.get(id);
     if (!venue) return [];
     return dataset.sources.map((source) => {
-      const assessments = (byVenue.get(id) ?? []).filter(
-        (entry) => entry.sourceId === source.id,
-      );
+      const assessments = (byVenue.get(id) ?? []).filter((entry) => entry.sourceId === source.id);
       const status = !source.appliesTo.includes(venue.type)
         ? "not-applicable"
         : assessments.length
@@ -146,60 +129,36 @@ export function createCatalog(input: VenueDataset): VenueCatalog {
     });
   }
   function search(query: string, options: SearchOptions = {}): SearchResult[] {
-    if (options.value && !options.sourceId)
-      throw new Error("A grade filter requires a source ID");
+    if (options.value && !options.sourceId) throw new Error("A grade filter requires a source ID");
     const limit = options.limit ?? 30;
-    if (!Number.isInteger(limit) || limit < 0)
-      throw new Error("Search limit must be a non-negative integer");
+    if (!Number.isInteger(limit) || limit < 0) throw new Error("Search limit must be a non-negative integer");
     const normalized = normalizeVenueQuery(query);
     const allowed = (venue: Venue) =>
       (!options.type || venue.type === options.type) &&
       (!options.sourceId ||
         (byVenue.get(venue.id) ?? []).some(
-          (a) =>
-            a.sourceId === options.sourceId &&
-            (!options.value || a.value === options.value),
+          (a) => a.sourceId === options.sourceId && (!options.value || a.value === options.value),
         ));
     const results = new Map<string, SearchResult>();
     for (const doc of documents) {
       if (!allowed(doc.venue)) continue;
       const terms = [doc.acronym, doc.name, ...doc.aliases].filter(Boolean);
-      if (!normalized)
-        results.set(doc.venue.id, {
-          venue: doc.venue,
-          match: "browse",
-          score: 1,
-        });
-      else if (terms.includes(normalized))
-        results.set(doc.venue.id, {
-          venue: doc.venue,
-          match: "exact",
-          score: 0,
-        });
+      if (!normalized) results.set(doc.venue.id, { venue: doc.venue, match: "browse", score: 1 });
+      else if (terms.includes(normalized)) results.set(doc.venue.id, { venue: doc.venue, match: "exact", score: 0 });
       else if (terms.some((term) => term.startsWith(normalized)))
-        results.set(doc.venue.id, {
-          venue: doc.venue,
-          match: "prefix",
-          score: 0.1,
-        });
+        results.set(doc.venue.id, { venue: doc.venue, match: "prefix", score: 0.1 });
     }
     if (normalized) {
       for (const { item, score } of fuse.search(normalized)) {
         if (allowed(item.venue) && !results.has(item.venue.id))
-          results.set(item.venue.id, {
-            venue: item.venue,
-            match: "fuzzy",
-            score: 0.2 + (score ?? 1),
-          });
+          results.set(item.venue.id, { venue: item.venue, match: "fuzzy", score: 0.2 + (score ?? 1) });
       }
     }
     return [...results.values()]
       .sort(
         (a, b) =>
           a.score - b.score ||
-          (a.venue.acronym || a.venue.name).localeCompare(
-            b.venue.acronym || b.venue.name,
-          ) ||
+          (a.venue.acronym || a.venue.name).localeCompare(b.venue.acronym || b.venue.name) ||
           a.venue.id.localeCompare(b.venue.id),
       )
       .slice(0, limit);

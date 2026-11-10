@@ -34,8 +34,4 @@ The bundled snapshot contains 1,347 venue identities and 1,666 assessments. Its 
 
 The data is bundled with the extension and updates through extension releases. Opening external source links requires an internet connection. The project is independent of the ranking publishers. [NOTICE.md](NOTICE.md) documents the data provenance and third-party attribution.
 
-## Development
-
-Run `npm ci`, then `npm run dev`. Run `npm run lint` and `npm run build` before submitting a change.
-
-The catalog source in `src/catalog` and the Raycast command are exported from the shared Venue Rank project. The extension includes its own copy so the Store build does not depend on an unpublished npm package or a sibling checkout. Updates should regenerate that source from the shared project and include the corresponding dataset version and notices.
+You can also search in your browser at [Venue Rank](https://wgeng.site/venue-rank/). The [project repository](https://github.com/ViGeng/venue-rank) contains the shared library and data sources.

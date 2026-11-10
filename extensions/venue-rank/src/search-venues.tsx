@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  List,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { getDefaultCatalog } from "./catalog";
 import type { AssessmentResult, RankingSource, Venue } from "./catalog";
@@ -18,13 +10,8 @@ interface VenueViewProps {
 }
 
 function assessmentLabel(result: AssessmentResult): string {
-  if (result.status === "assessed")
-    return result.assessments.map((a) => a.value).join(" / ");
-  return {
-    "not-listed": "Not listed",
-    unknown: "Not verified",
-    "not-applicable": "Not applicable",
-  }[result.status];
+  if (result.status === "assessed") return result.assessments.map((a) => a.value).join(" / ");
+  return { "not-listed": "Not listed", unknown: "Not verified", "not-applicable": "Not applicable" }[result.status];
 }
 
 function sourceName(source: RankingSource): string {
@@ -41,40 +28,24 @@ function escapeMarkdown(value: string): string {
 
 function venueSummary(venue: Venue): string {
   const title = escapeMarkdown(venue.acronym || venue.name);
-  return venue.acronym
-    ? `## ${title}\n\n${escapeMarkdown(venue.name)}`
-    : `## ${title}`;
+  return venue.acronym ? `## ${title}\n\n${escapeMarkdown(venue.name)}` : `## ${title}`;
 }
 
-function referenceText({
-  venue,
-  assessments,
-  version,
-}: VenueViewProps): string {
+function referenceText({ venue, assessments, version }: VenueViewProps): string {
   const name = venue.acronym ? `${venue.acronym}\n${venue.name}` : venue.name;
   return (
     `${name}\n\n` +
-    assessments
-      .map(
-        (result) => `${sourceTitle(result.source)}: ${assessmentLabel(result)}`,
-      )
-      .join("\n") +
+    assessments.map((result) => `${sourceTitle(result.source)}: ${assessmentLabel(result)}`).join("\n") +
     `\n\nDataset: ${version}`
   );
 }
 
-function VenueMetadata({
-  venue,
-  assessments,
-}: Pick<VenueViewProps, "venue" | "assessments">) {
+function VenueMetadata({ venue, assessments }: Pick<VenueViewProps, "venue" | "assessments">) {
   return (
     <Detail.Metadata>
       {assessments.map((result) =>
         result.status === "assessed" ? (
-          <Detail.Metadata.TagList
-            key={result.source.id}
-            title={sourceTitle(result.source)}
-          >
+          <Detail.Metadata.TagList key={result.source.id} title={sourceTitle(result.source)}>
             {result.assessments.map((assessment, index) => (
               <Detail.Metadata.TagList.Item
                 key={`${assessment.area ?? ""}-${index}`}
@@ -87,25 +58,13 @@ function VenueMetadata({
           <Detail.Metadata.Label
             key={result.source.id}
             title={sourceTitle(result.source)}
-            text={{
-              value: assessmentLabel(result),
-              color: Color.SecondaryText,
-            }}
+            text={{ value: assessmentLabel(result), color: Color.SecondaryText }}
           />
         ),
       )}
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label
-        title="Type"
-        text={venue.type === "conference" ? "Conference" : "Journal"}
-      />
-      {venue.dblp && (
-        <Detail.Metadata.Link
-          title="DBLP"
-          target={venue.dblp}
-          text="Open venue"
-        />
-      )}
+      <Detail.Metadata.Label title="Type" text={venue.type === "conference" ? "Conference" : "Journal"} />
+      {venue.dblp && <Detail.Metadata.Link title="DBLP" target={venue.dblp} text="Open venue" />}
     </Detail.Metadata>
   );
 }
@@ -123,11 +82,7 @@ function SourceNotes({ venue, assessments, version }: VenueViewProps) {
 }
 
 function VenueActions(
-  props: VenueViewProps & {
-    showDetails?: boolean;
-    showingPreview?: boolean;
-    onTogglePreview?: () => void;
-  },
+  props: VenueViewProps & { showDetails?: boolean; showingPreview?: boolean; onTogglePreview?: () => void },
 ) {
   const { venue, assessments, version } = props;
   const context = { venue, assessments, version };
@@ -135,11 +90,7 @@ function VenueActions(
     <ActionPanel>
       <ActionPanel.Section>
         {props.showDetails && (
-          <Action.Push
-            title="View Details"
-            icon={Icon.Sidebar}
-            target={<VenueDetails {...context} />}
-          />
+          <Action.Push title="View Details" icon={Icon.Sidebar} target={<VenueDetails {...context} />} />
         )}
         <Action.CopyToClipboard
           title="Copy Assessments"
@@ -156,9 +107,7 @@ function VenueActions(
         )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {venue.dblp && (
-          <Action.OpenInBrowser title="Open in DBLP" url={venue.dblp} />
-        )}
+        {venue.dblp && <Action.OpenInBrowser title="Open in DBLP" url={venue.dblp} />}
         <ActionPanel.Submenu title="Open Source" icon={Icon.Link}>
           {assessments.map((result) => (
             <Action.OpenInBrowser
@@ -195,13 +144,9 @@ export default function SearchVenues() {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
   const [showingPreview, setShowingPreview] = useState(false);
-  const results = catalog.search(query, {
-    limit: 100,
-    ...(type === "all" ? {} : { type: type as Venue["type"] }),
-  });
+  const results = catalog.search(query, { limit: 100, ...(type === "all" ? {} : { type: type as Venue["type"] }) });
   return (
     <List
-      navigationTitle="Venue Rank"
       filtering={false}
       isShowingDetail={showingPreview}
       searchText={query}
@@ -224,19 +169,14 @@ export default function SearchVenues() {
         const assessments = catalog.getAssessments(venue.id);
         const props = { venue, assessments, version: catalog.dataset.version };
         const subtitle =
-          !showingPreview && venue.acronym
-            ? { subtitle: { value: venue.name, tooltip: venue.name } }
-            : {};
+          !showingPreview && venue.acronym ? { subtitle: { value: venue.name, tooltip: venue.name } } : {};
         return (
           <List.Item
             key={venue.id}
             id={venue.id}
             title={{ value: venue.acronym || venue.name, tooltip: venue.name }}
             {...subtitle}
-            icon={{
-              source: venue.type === "journal" ? Icon.Book : Icon.Document,
-              tintColor: Color.SecondaryText,
-            }}
+            icon={{ source: venue.type === "journal" ? Icon.Book : Icon.Document, tintColor: Color.SecondaryText }}
             accessories={
               showingPreview
                 ? []
@@ -247,12 +187,7 @@ export default function SearchVenues() {
                       tooltip: `${sourceTitle(result.source)}: ${assessmentLabel(result)}`,
                     }))
             }
-            detail={
-              <List.Item.Detail
-                markdown={venueSummary(venue)}
-                metadata={<VenueMetadata {...props} />}
-              />
-            }
+            detail={<List.Item.Detail markdown={venueSummary(venue)} metadata={<VenueMetadata {...props} />} />}
             actions={
               <VenueActions
                 {...props}

@@ -97,9 +97,7 @@
       "name": "International Conference on Parallel Architectures and Compilation Techniques",
       "acronym": "PACT",
       "type": "conference",
-      "aliases": [
-        "International Conference on Parallel Architecture and Compilation Techniques"
-      ],
+      "aliases": ["International Conference on Parallel Architecture and Compilation Techniques"],
       "dblp": "https://dblp.org/db/conf/IEEEpact/"
     },
     {
@@ -126,9 +124,7 @@
       "name": "AAAI Conference on Artificial Intelligence",
       "acronym": "AAAI",
       "type": "conference",
-      "aliases": [
-        "National Conference of the American Association for Artificial Intelligence"
-      ],
+      "aliases": ["National Conference of the American Association for Artificial Intelligence"],
       "dblp": "https://dblp.org/db/conf/aaai/"
     },
     {
@@ -176,9 +172,7 @@
       "name": "Australasia Conference on Information Security and Privacy",
       "acronym": "ACISP",
       "type": "conference",
-      "aliases": [
-        "Australasian Conference on Information Security and Privacy"
-      ],
+      "aliases": ["Australasian Conference on Information Security and Privacy"],
       "dblp": "https://dblp.org/db/conf/acisp/"
     },
     {
@@ -226,9 +220,7 @@
       "name": "Applied Cryptography and Network Security",
       "acronym": "ACNS",
       "type": "conference",
-      "aliases": [
-        "International Conference on Applied Cryptography and Network Security"
-      ],
+      "aliases": ["International Conference on Applied Cryptography and Network Security"],
       "dblp": "https://dblp.org/db/conf/acns/"
     },
     {
@@ -572,9 +564,7 @@
       "name": "Asia Conference on Computer and Communications Security",
       "acronym": "AsiaCCS",
       "type": "conference",
-      "aliases": [
-        "Asia Conference on Information, Computer and Communications Security"
-      ],
+      "aliases": ["Asia Conference on Information, Computer and Communications Security"],
       "dblp": "https://dblp.org/db/conf/asiaccs/"
     },
     {
@@ -582,9 +572,7 @@
       "name": "Annual International Conference on the Theory and Application of Cryptology and Information Security",
       "acronym": "ASIACRYPT",
       "type": "conference",
-      "aliases": [
-        "International Conference on the Theory and Application of Cryptology and Information Security"
-      ],
+      "aliases": ["International Conference on the Theory and Application of Cryptology and Information Security"],
       "dblp": "https://dblp.org/db/conf/asiacrypt/"
     },
     {
@@ -600,9 +588,7 @@
       "name": "International Conference on Architectural Support for Programming Languages and Operating Systems",
       "acronym": "ASPLOS",
       "type": "conference",
-      "aliases": [
-        "Architectural Support for Programming Languages and Operating Systems"
-      ],
+      "aliases": ["Architectural Support for Programming Languages and Operating Systems"],
       "dblp": "https://dblp.org/db/conf/asplos/"
     },
     {
@@ -610,9 +596,7 @@
       "name": "Automatic Speech Recognition and Understanding Workshop",
       "acronym": "ASRU",
       "type": "conference",
-      "aliases": [
-        "IEEE Automatic Speech Recognition and Understanding Workshop"
-      ],
+      "aliases": ["IEEE Automatic Speech Recognition and Understanding Workshop"],
       "dblp": "https://dblp.org/db/conf/asru/"
     },
     {
@@ -918,9 +902,7 @@
       "name": "International Conference on Compilers, Architectures, and Synthesis for Embedded Systems",
       "acronym": "CASES",
       "type": "conference",
-      "aliases": [
-        "International Conference on Compilers, Architecture, and Synthesis for Embedded Systems"
-      ],
+      "aliases": ["International Conference on Compilers, Architecture, and Synthesis for Embedded Systems"],
       "dblp": "https://dblp.org/db/conf/cases/"
     },
     {
@@ -968,9 +950,7 @@
       "name": "IEEE/ACM International Symposium on Cluster, Cloud and Grid Computing",
       "acronym": "CCGRID",
       "type": "conference",
-      "aliases": [
-        "IEEE International Symposium on Cluster, Cloud and Grid Computing"
-      ],
+      "aliases": ["IEEE International Symposium on Cluster, Cloud and Grid Computing"],
       "dblp": "https://dblp.org/db/conf/ccgrid/"
     },
     {
@@ -1034,9 +1014,7 @@
       "name": "The International Symposium on Code Generation and Optimization",
       "acronym": "CGO",
       "type": "conference",
-      "aliases": [
-        "International Symposium on Code Generation and Optimization"
-      ],
+      "aliases": ["International Symposium on Code Generation and Optimization"],
       "dblp": "https://dblp.org/db/conf/cgo/"
     },
     {
@@ -1052,9 +1030,7 @@
       "name": "ACM Conference on Human Factors in Computing Systems",
       "acronym": "CHI",
       "type": "conference",
-      "aliases": [
-        "International Conference on Human Factors in Computing Systems"
-      ],
+      "aliases": ["International Conference on Human Factors in Computing Systems"],
       "dblp": "https://dblp.org/db/conf/chi/"
     },
     {
@@ -1328,9 +1304,7 @@
       "name": "International Conference on Collaborative Computing: Networking, Applications and Worksharing",
       "acronym": "CollaborateCom",
       "type": "conference",
-      "aliases": [
-        "International Conference on Collaborative Computing: Networks, Applications and Worksharing"
-      ],
+      "aliases": ["International Conference on Collaborative Computing: Networks, Applications and Worksharing"],
       "dblp": "https://dblp.org/db/conf/colcom/"
     },
     {
@@ -1554,10 +1528,7 @@
       "name": "IEEE Computer Security Foundations Workshop",
       "acronym": "CSFW",
       "type": "conference",
-      "aliases": [
-        "CSF",
-        "IEEE Computer Security Foundations Symposium (was CSFW)"
-      ],
+      "aliases": ["CSF", "IEEE Computer Security Foundations Symposium (was CSFW)"],
       "dblp": "https://dblp.org/db/conf/csfw/"
     },
     {
@@ -1765,9 +1736,7 @@
       "name": "International Conference on Database and Expert System Applications",
       "acronym": "DEXA",
       "type": "conference",
-      "aliases": [
-        "International Conference on Database and Expert Systems Applications"
-      ],
+      "aliases": ["International Conference on Database and Expert Systems Applications"],
       "dblp": "https://dblp.org/db/conf/dexa/"
     },
     {
@@ -1807,9 +1776,7 @@
       "name": "Conference on Detection of Intrusions and Malware & Vulnerability Assessment",
       "acronym": "DIMVA",
       "type": "conference",
-      "aliases": [
-        "GI International Conference on Detection of Intrusions and Malware, and Vulnerability Assessment"
-      ],
+      "aliases": ["GI International Conference on Detection of Intrusions and Malware, and Vulnerability Assessment"],
       "dblp": "https://dblp.org/db/conf/dimva/"
     },
     {
@@ -1889,9 +1856,7 @@
       "name": "International Conference on Dependable Systems and Networks",
       "acronym": "DSN",
       "type": "conference",
-      "aliases": [
-        "IEEE/IFIP International Conference on Dependable Systems and Networks"
-      ],
+      "aliases": ["IEEE/IFIP International Conference on Dependable Systems and Networks"],
       "dblp": "https://dblp.org/db/conf/dsn/"
     },
     {
@@ -2254,9 +2219,7 @@
       "name": "Extended Semantic Web Conference",
       "acronym": "ESWC",
       "type": "conference",
-      "aliases": [
-        "Extended Semantic Web Conference (was European Semantic Web Conference)"
-      ],
+      "aliases": ["Extended Semantic Web Conference (was European Semantic Web Conference)"],
       "dblp": "https://dblp.org/db/conf/esws/"
     },
     {
@@ -2312,10 +2275,7 @@
       "name": "International Conference on the Theory and Applications of Cryptographic Techniques",
       "acronym": "EUROCRYPT",
       "type": "conference",
-      "aliases": [
-        "EuroCrypt",
-        "International Conference on the Theory and Application of Cryptographic Techniques"
-      ],
+      "aliases": ["EuroCrypt", "International Conference on the Theory and Application of Cryptographic Techniques"],
       "dblp": "https://dblp.org/db/conf/eurocrypt/"
     },
     {
@@ -2478,9 +2438,7 @@
       "name": "IEEE Symposium on Field-Programmable Custom Computing Machines",
       "acronym": "FCCM",
       "type": "conference",
-      "aliases": [
-        "IEEE Symposium on Field Programmable Custom Computing Machines"
-      ],
+      "aliases": ["IEEE Symposium on Field Programmable Custom Computing Machines"],
       "dblp": "https://dblp.org/db/conf/fccm/"
     },
     {
@@ -2528,9 +2486,7 @@
       "name": "International Conference on Automatic Face and Gesture Recognition",
       "acronym": "FG",
       "type": "conference",
-      "aliases": [
-        "IEEE International Conference on Automatic Face and Gesture Recognition"
-      ],
+      "aliases": ["IEEE International Conference on Automatic Face and Gesture Recognition"],
       "dblp": "https://dblp.org/db/conf/fgr/"
     },
     {
@@ -2562,9 +2518,7 @@
       "name": "International Symposium on Formal Methods",
       "acronym": "FM",
       "type": "conference",
-      "aliases": [
-        "International Symposium on Formal Methods (was Formal Methods Europe FME)"
-      ],
+      "aliases": ["International Symposium on Formal Methods (was Formal Methods Europe FME)"],
       "dblp": "https://dblp.org/db/conf/fm/"
     },
     {
@@ -2748,9 +2702,7 @@
       "name": "ACM Special Interest Group on Spatial Information",
       "acronym": "SIGSPATIAL",
       "type": "conference",
-      "aliases": [
-        "ACM International Conference on Advances in Geographic Information Systems"
-      ],
+      "aliases": ["ACM International Conference on Advances in Geographic Information Systems"],
       "dblp": "https://dblp.org/db/conf/gis/"
     },
     {
@@ -2808,10 +2760,7 @@
       "name": "ACM International Conference on Supporting Group Work",
       "acronym": "GROUP",
       "type": "conference",
-      "aliases": [
-        "ACM Special Interest Group on Supporting Group Work (was SIGGRoup)",
-        "Group"
-      ],
+      "aliases": ["ACM Special Interest Group on Supporting Group Work (was SIGGRoup)", "Group"],
       "dblp": "https://dblp.org/db/conf/group/"
     },
     {
@@ -2931,9 +2880,7 @@
       "name": "IEEE International Symposium on High Performance Computer Architecture",
       "acronym": "HPCA",
       "type": "conference",
-      "aliases": [
-        "International Symposium on High Performance Computer Architecture"
-      ],
+      "aliases": ["International Symposium on High Performance Computer Architecture"],
       "dblp": "https://dblp.org/db/conf/hpca/"
     },
     {
@@ -2957,9 +2904,7 @@
       "name": "The International ACM Symposium on High-Performance Parallel and Distributed Computing",
       "acronym": "HPDC",
       "type": "conference",
-      "aliases": [
-        "ACM International Symposium on High Performance Distributed Computing"
-      ],
+      "aliases": ["ACM International Symposium on High Performance Distributed Computing"],
       "dblp": "https://dblp.org/db/conf/hpdc/"
     },
     {
@@ -3073,9 +3018,7 @@
       "name": "International Colloquium on Automata, Languages and Programming",
       "acronym": "ICALP",
       "type": "conference",
-      "aliases": [
-        "International Colloquium on Automata Languages and Programming"
-      ],
+      "aliases": ["International Colloquium on Automata Languages and Programming"],
       "dblp": "https://dblp.org/db/conf/icalp/"
     },
     {
@@ -3179,9 +3122,7 @@
       "name": "IEEE International Conference on Computer Communications and Networks",
       "acronym": "ICCCN",
       "type": "conference",
-      "aliases": [
-        "International Conference on Computer Communication and Networks"
-      ],
+      "aliases": ["International Conference on Computer Communication and Networks"],
       "dblp": "https://dblp.org/db/conf/icccn/"
     },
     {
@@ -3253,9 +3194,7 @@
       "name": "International Conference on Document Analysis and Recognition",
       "acronym": "ICDAR",
       "type": "conference",
-      "aliases": [
-        "IEEE International Conference on Document Analysis and Recognition"
-      ],
+      "aliases": ["IEEE International Conference on Document Analysis and Recognition"],
       "dblp": "https://dblp.org/db/conf/icdar/"
     },
     {
@@ -3715,9 +3654,7 @@
       "name": "IEEE International Conference on Software Testing, Verification and Validation",
       "acronym": "ICST",
       "type": "conference",
-      "aliases": [
-        "International Conference on Software Testing, Verification and Validation"
-      ],
+      "aliases": ["International Conference on Software Testing, Verification and Validation"],
       "dblp": "https://dblp.org/db/conf/icst/"
     },
     {
@@ -3733,9 +3670,7 @@
       "name": "IEEE International Conference on Tools with Artificial Intelligence",
       "acronym": "ICTAI",
       "type": "conference",
-      "aliases": [
-        "International Conference on Tools with Artificial Intelligence"
-      ],
+      "aliases": ["International Conference on Tools with Artificial Intelligence"],
       "dblp": "https://dblp.org/db/conf/ictai/"
     },
     {
@@ -3999,9 +3934,7 @@
       "name": "IFIP/IEEE International Symposium on Integrated Network Management",
       "acronym": "IM",
       "type": "conference",
-      "aliases": [
-        "IFIP/IEEE International Symposium on Integrated Management (even years sharing with NOMS)"
-      ],
+      "aliases": ["IFIP/IEEE International Symposium on Integrated Management (even years sharing with NOMS)"],
       "dblp": "https://dblp.org/db/conf/im/"
     },
     {
@@ -4089,10 +4022,7 @@
       "name": "International Conference on Human-Computer Interaction of International Federation for Information Processing",
       "acronym": "INTERACT",
       "type": "conference",
-      "aliases": [
-        "IFIP TC13 Conference on Human-Computer Interaction",
-        "Interact"
-      ],
+      "aliases": ["IFIP TC13 Conference on Human-Computer Interaction", "Interact"],
       "dblp": "https://dblp.org/db/conf/interact/"
     },
     {
@@ -4108,10 +4038,7 @@
       "name": "Conference of the International Speech Communication Association",
       "acronym": "INTER-SPEECH",
       "type": "conference",
-      "aliases": [
-        "Interspeech",
-        "Interspeech (combined EuroSpeech and ICSLP in 2000)"
-      ],
+      "aliases": ["Interspeech", "Interspeech (combined EuroSpeech and ICSLP in 2000)"],
       "dblp": "https://dblp.org/db/conf/interspeech/"
     },
     {
@@ -4151,9 +4078,7 @@
       "name": "International Conference on Integer Programming and Combinatorial Optimization",
       "acronym": "IPCO",
       "type": "conference",
-      "aliases": [
-        "Conference on Integer Programming and Combinatorial Optimization"
-      ],
+      "aliases": ["Conference on Integer Programming and Combinatorial Optimization"],
       "dblp": "https://dblp.org/db/conf/ipco/"
     },
     {
@@ -4177,9 +4102,7 @@
       "name": "IEEE International Parallel & Distributed Processing Symposium",
       "acronym": "IPDPS",
       "type": "conference",
-      "aliases": [
-        "IEEE International Parallel and Distributed Processing Symposium (was IPPS and SPDP)"
-      ],
+      "aliases": ["IEEE International Parallel and Distributed Processing Symposium (was IPPS and SPDP)"],
       "dblp": "https://dblp.org/db/conf/ipps/"
     },
     {
@@ -4331,9 +4254,7 @@
       "name": "International Symposium on Low Power Electronics and Design",
       "acronym": "ISLPED",
       "type": "conference",
-      "aliases": [
-        "IEEE/ACM International Symposium on Low Power Electronics and Design"
-      ],
+      "aliases": ["IEEE/ACM International Symposium on Low Power Electronics and Design"],
       "dblp": "https://dblp.org/db/conf/islped/"
     },
     {
@@ -4349,9 +4270,7 @@
       "name": "International Symposium on Mixed and Augmented Reality",
       "acronym": "ISMAR",
       "type": "conference",
-      "aliases": [
-        "IEEE/ACM International Symposium on Mixed and Augmented Reality"
-      ],
+      "aliases": ["IEEE/ACM International Symposium on Mixed and Augmented Reality"],
       "dblp": "https://dblp.org/db/conf/ismar/"
     },
     {
@@ -4447,9 +4366,7 @@
       "name": "International Conference on Software and System Process",
       "acronym": "ICSSP",
       "type": "conference",
-      "aliases": [
-        "International Conference on Software and System Processes (was ICSP prior to 2011)"
-      ],
+      "aliases": ["International Conference on Software and System Processes (was ICSP prior to 2011)"],
       "dblp": "https://dblp.org/db/conf/ispw/"
     },
     {
@@ -4681,9 +4598,7 @@
       "name": "IEEE International Conference on Program Comprehension",
       "acronym": "ICPC",
       "type": "conference",
-      "aliases": [
-        "IEEE International Conference on Program Comprehension (previously IWPC, changed in 2006)"
-      ],
+      "aliases": ["IEEE International Conference on Program Comprehension (previously IWPC, changed in 2006)"],
       "dblp": "https://dblp.org/db/conf/iwpc/"
     },
     {
@@ -4763,10 +4678,7 @@
       "name": "ACM SIGKDD Conference on Knowledge Discovery and Data Mining",
       "acronym": "SIGKDD",
       "type": "conference",
-      "aliases": [
-        "ACM International Conference on Knowledge Discovery and Data Mining",
-        "KDD"
-      ],
+      "aliases": ["ACM International Conference on Knowledge Discovery and Data Mining", "KDD"],
       "dblp": "https://dblp.org/db/conf/kdd/"
     },
     {
@@ -4782,9 +4694,7 @@
       "name": "International Conference on Principles of Knowledge Representation and Reasoning",
       "acronym": "KR",
       "type": "conference",
-      "aliases": [
-        "International Conference on the Principles of Knowledge Representation and Reasoning"
-      ],
+      "aliases": ["International Conference on the Principles of Knowledge Representation and Reasoning"],
       "dblp": "https://dblp.org/db/conf/kr/"
     },
     {
@@ -4792,9 +4702,7 @@
       "name": "International conference on Knowledge Science,Engineering and Management",
       "acronym": "KSEM",
       "type": "conference",
-      "aliases": [
-        "International Conference on Knowledge Science, Engineering and Management"
-      ],
+      "aliases": ["International Conference on Knowledge Science, Engineering and Management"],
       "dblp": "https://dblp.org/db/conf/ksem/"
     },
     {
@@ -4858,9 +4766,7 @@
       "name": "ACM SIGPLAN/SIGBED International Conference on Languages, Compilers and Tools for Embedded Systems",
       "acronym": "LCTES",
       "type": "conference",
-      "aliases": [
-        "ACM SIGPLAN Conference on Languages, Compilers and Tools for Embedded Systems"
-      ],
+      "aliases": ["ACM SIGPLAN Conference on Languages, Compilers and Tools for Embedded Systems"],
       "dblp": "https://dblp.org/db/conf/lctrts/"
     },
     {
@@ -4940,9 +4846,7 @@
       "name": "International Symposium on Modeling, Analysis, and Simulation of Computer and Telecommunication Systems",
       "acronym": "MASCOTS",
       "type": "conference",
-      "aliases": [
-        "Symposium Model Analysis and Simulation of Computer and Telecommunications Systems"
-      ],
+      "aliases": ["Symposium Model Analysis and Simulation of Computer and Telecommunications Systems"],
       "dblp": "https://dblp.org/db/conf/mascots/"
     },
     {
@@ -4950,9 +4854,7 @@
       "name": "IEEE International Conference on Mobile Adhoc and Sensor Systems",
       "acronym": "MASS",
       "type": "conference",
-      "aliases": [
-        "IEEE International Conference on Mobile Ad-hoc and Sensor Systems"
-      ],
+      "aliases": ["IEEE International Conference on Mobile Ad-hoc and Sensor Systems"],
       "dblp": "https://dblp.org/db/conf/mass/"
     },
     {
@@ -5016,9 +4918,7 @@
       "name": "Mathematical Foundations of Computer Science",
       "acronym": "MFCS",
       "type": "conference",
-      "aliases": [
-        "International Symposium on Mathematical Foundations of Computer Science"
-      ],
+      "aliases": ["International Symposium on Mathematical Foundations of Computer Science"],
       "dblp": "https://dblp.org/db/conf/mfcs/"
     },
     {
@@ -5034,9 +4934,7 @@
       "name": "ACM International Conference on Mobile Human-Computer Interaction",
       "acronym": "MobileHCI",
       "type": "conference",
-      "aliases": [
-        "International Conference on Human-Computer Interaction with Mobile Devices and Services"
-      ],
+      "aliases": ["International Conference on Human-Computer Interaction with Mobile Devices and Services"],
       "dblp": "https://dblp.org/db/conf/mhci/"
     },
     {
@@ -5076,9 +4974,7 @@
       "name": "ACM SIGMM International Conference on Multimedia Retrieval",
       "acronym": "ICMR",
       "type": "conference",
-      "aliases": [
-        "International Conference on Multimedia Retrieval (previously MIR)"
-      ],
+      "aliases": ["International Conference on Multimedia Retrieval (previously MIR)"],
       "dblp": "https://dblp.org/db/conf/mir/"
     },
     {
@@ -5126,10 +5022,7 @@
       "name": "ACM Multimedia Asia",
       "acronym": "MMAsia",
       "type": "conference",
-      "aliases": [
-        "ACM International Conference on Multimedia in Asia",
-        "MM_Asia"
-      ],
+      "aliases": ["ACM International Conference on Multimedia in Asia", "MM_Asia"],
       "dblp": "https://dblp.org/db/conf/mmasia/"
     },
     {
@@ -5169,10 +5062,7 @@
       "name": "International Symposium on Theory, Algorithmic Foundations, and Protocol Design for Mobile Networks and Mobile Computing",
       "acronym": "MobiHoc",
       "type": "conference",
-      "aliases": [
-        "ACM Symposium on Mobile Ad Hoc Networking and Computing",
-        "MOBIHOC"
-      ],
+      "aliases": ["ACM Symposium on Mobile Ad Hoc Networking and Computing", "MOBIHOC"],
       "dblp": "https://dblp.org/db/conf/mobihoc/"
     },
     {
@@ -5180,10 +5070,7 @@
       "name": "International Conference on Mobile and Ubiquitous Systems: Computing, Networking and Services",
       "acronym": "MobiQuitous",
       "type": "conference",
-      "aliases": [
-        "International Conference on Mobile and Ubiquitous Systems: Networks and Services",
-        "Mobiquitous"
-      ],
+      "aliases": ["International Conference on Mobile and Ubiquitous Systems: Networks and Services", "Mobiquitous"],
       "dblp": "https://dblp.org/db/conf/mobiquitous/"
     },
     {
@@ -5191,10 +5078,7 @@
       "name": "ACM International Conference on Mobile Systems, Applications, and Services",
       "acronym": "MobiSys",
       "type": "conference",
-      "aliases": [
-        "ACM SIGMOBILE International Conference on Mobile Systems, Applications and Services",
-        "Mobisys"
-      ],
+      "aliases": ["ACM SIGMOBILE International Conference on Mobile Systems, Applications and Services", "Mobisys"],
       "dblp": "https://dblp.org/db/conf/mobisys/"
     },
     {
@@ -5245,9 +5129,7 @@
       "name": "Mining Software Repositories",
       "acronym": "MSR",
       "type": "conference",
-      "aliases": [
-        "IEEE International Working Conference on Mining Software Repositories"
-      ],
+      "aliases": ["IEEE International Working Conference on Mining Software Repositories"],
       "dblp": "https://dblp.org/db/conf/msr/"
     },
     {
@@ -5362,10 +5244,7 @@
       "name": "Conference on Neural Information Processing Systems",
       "acronym": "NeurIPS",
       "type": "conference",
-      "aliases": [
-        "Advances in Neural Information Processing Systems (was NIPS)",
-        "NIPS"
-      ],
+      "aliases": ["Advances in Neural Information Processing Systems (was NIPS)", "NIPS"],
       "dblp": "https://dblp.org/db/conf/nips/"
     },
     {
@@ -5413,9 +5292,7 @@
       "name": "International Workshop on Network and Operating System Support for Digital Audio and Video",
       "acronym": "NOSSDAV",
       "type": "conference",
-      "aliases": [
-        "Network and Operating System Support for Digital Audio and Video"
-      ],
+      "aliases": ["Network and Operating System Support for Digital Audio and Video"],
       "dblp": "https://dblp.org/db/conf/nossdav/"
     },
     {
@@ -5463,9 +5340,7 @@
       "name": "Conference on Object-Oriented Programming Systems, Languages,and Applications",
       "acronym": "OOPSLA",
       "type": "conference",
-      "aliases": [
-        "ACM Conference on Object Oriented Programming Systems Languages and Applications"
-      ],
+      "aliases": ["ACM Conference on Object Oriented Programming Systems Languages and Applications"],
       "dblp": "https://dblp.org/db/conf/oopsla/"
     },
     {
@@ -5481,9 +5356,7 @@
       "name": "USENIX Symposium on Operating Systems Design and Implementation",
       "acronym": "OSDI",
       "type": "conference",
-      "aliases": [
-        "Usenix Symposium on Operating Systems Design and Implementation"
-      ],
+      "aliases": ["Usenix Symposium on Operating Systems Design and Implementation"],
       "dblp": "https://dblp.org/db/conf/osdi/"
     },
     {
@@ -5678,9 +5551,7 @@
       "name": "International Workshop on Practice and Theory in Public Key Cryptography",
       "acronym": "PKC",
       "type": "conference",
-      "aliases": [
-        "International Conference on Practice and Theory in Public Key Cryptography"
-      ],
+      "aliases": ["International Conference on Practice and Theory in Public Key Cryptography"],
       "dblp": "https://dblp.org/db/conf/pkc/"
     },
     {
@@ -5688,9 +5559,7 @@
       "name": "ACM SIGPLAN Conference on Programming Language Design and Implementation",
       "acronym": "PLDI",
       "type": "conference",
-      "aliases": [
-        "ACM-SIGPLAN Conference on Programming Language Design and Implementation"
-      ],
+      "aliases": ["ACM-SIGPLAN Conference on Programming Language Design and Implementation"],
       "dblp": "https://dblp.org/db/conf/pldi/"
     },
     {
@@ -5706,9 +5575,7 @@
       "name": "ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems",
       "acronym": "PODS",
       "type": "conference",
-      "aliases": [
-        "ACM SIGMOD-SIGACT-SIGART Conference on Principles of Database Systems"
-      ],
+      "aliases": ["ACM SIGMOD-SIGACT-SIGART Conference on Principles of Database Systems"],
       "dblp": "https://dblp.org/db/conf/pods/"
     },
     {
@@ -5716,9 +5583,7 @@
       "name": "ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages",
       "acronym": "POPL",
       "type": "conference",
-      "aliases": [
-        "ACM-SIGACT Symposium on Principles of Programming Languages"
-      ],
+      "aliases": ["ACM-SIGACT Symposium on Principles of Programming Languages"],
       "dblp": "https://dblp.org/db/conf/popl/"
     },
     {
@@ -5954,9 +5819,7 @@
       "name": "Annual International Conference on Research in Computational Molecular Biology",
       "acronym": "RECOMB",
       "type": "conference",
-      "aliases": [
-        "International Conference on Computational Molecular Biology"
-      ],
+      "aliases": ["International Conference on Computational Molecular Biology"],
       "dblp": "https://dblp.org/db/conf/recomb/"
     },
     {
@@ -5972,9 +5835,7 @@
       "name": "Requirements Engineering: Foundation for Software Quality",
       "acronym": "REFSQ",
       "type": "conference",
-      "aliases": [
-        "International Workshop on Requirements Engineering: Foundation for Software Quality"
-      ],
+      "aliases": ["International Workshop on Requirements Engineering: Foundation for Software Quality"],
       "dblp": "https://dblp.org/db/conf/refsq/"
     },
     {
@@ -6062,9 +5923,7 @@
       "name": "International Conference on Runtime Verification",
       "acronym": "RV",
       "type": "conference",
-      "aliases": [
-        "International Conference on Runtime Verification (was workshop pre 2010)"
-      ],
+      "aliases": ["International Conference on Runtime Verification (was workshop pre 2010)"],
       "dblp": "https://dblp.org/db/conf/rv/"
     },
     {
@@ -6228,9 +6087,7 @@
       "name": "IEEE International Conference on Sensing, Communication, and Networking",
       "acronym": "SECON",
       "type": "conference",
-      "aliases": [
-        "IEEE International Conference on Sensing, Communication and Networking"
-      ],
+      "aliases": ["IEEE International Conference on Sensing, Communication and Networking"],
       "dblp": "https://dblp.org/db/conf/secon/"
     },
     {
@@ -6246,9 +6103,7 @@
       "name": "International Conference on Security and Privacy in Communication Networks",
       "acronym": "SecureComm",
       "type": "conference",
-      "aliases": [
-        "International Conference on Security and Privacy for Communication Networks"
-      ],
+      "aliases": ["International Conference on Security and Privacy for Communication Networks"],
       "dblp": "https://dblp.org/db/conf/securecomm/"
     },
     {
@@ -6378,9 +6233,7 @@
       "name": "ACM Special Interest Group on Computer Graphics",
       "acronym": "SIGGRAPH",
       "type": "conference",
-      "aliases": [
-        "ACM SIG International Conference on Computer Graphics and Interactive Techniques"
-      ],
+      "aliases": ["ACM SIG International Conference on Computer Graphics and Interactive Techniques"],
       "dblp": "https://dblp.org/db/conf/siggraph/"
     },
     {
@@ -6396,9 +6249,7 @@
       "name": "International ACM SIGIR Conference on Research and Development in Information Retrieval",
       "acronym": "SIGIR",
       "type": "conference",
-      "aliases": [
-        "ACM International Conference on Research and Development in Information Retrieval"
-      ],
+      "aliases": ["ACM International Conference on Research and Development in Information Retrieval"],
       "dblp": "https://dblp.org/db/conf/sigir/"
     },
     {
@@ -6422,9 +6273,7 @@
       "name": "ACM SIGMOD Conference",
       "acronym": "SIGMOD",
       "type": "conference",
-      "aliases": [
-        "ACM Special Interest Group on Management of Data Conference"
-      ],
+      "aliases": ["ACM Special Interest Group on Management of Data Conference"],
       "dblp": "https://dblp.org/db/conf/sigmod/"
     },
     {
@@ -6667,9 +6516,7 @@
       "name": "International Conference on Scientific and Statistical Database Management",
       "acronym": "SSDBM",
       "type": "conference",
-      "aliases": [
-        "International Conference on Scientific and Statistical Data Base Management"
-      ],
+      "aliases": ["International Conference on Scientific and Statistical Data Base Management"],
       "dblp": "https://dblp.org/db/conf/ssdbm/"
     },
     {
@@ -6693,9 +6540,7 @@
       "name": "Symposium on Theoretical Aspects of Computer Science",
       "acronym": "STACS",
       "type": "conference",
-      "aliases": [
-        "International Symposium on Theoretical Aspects of Computer Science"
-      ],
+      "aliases": ["International Symposium on Theoretical Aspects of Computer Science"],
       "dblp": "https://dblp.org/db/conf/stacs/"
     },
     {
@@ -6793,9 +6638,7 @@
       "name": "Theoretical Aspects of Software Engineering Conference",
       "acronym": "TASE",
       "type": "conference",
-      "aliases": [
-        "International Symposium on Theoretical Aspects of Software Engineering"
-      ],
+      "aliases": ["International Symposium on Theoretical Aspects of Software Engineering"],
       "dblp": "https://dblp.org/db/conf/tase/"
     },
     {
@@ -6859,9 +6702,7 @@
       "name": "IEEE International Conference on Trust,Security and Privacy in Computing and Communications",
       "acronym": "TrustCom",
       "type": "conference",
-      "aliases": [
-        "International Conference on Trust, Security and Privacy in Computing and Communications"
-      ],
+      "aliases": ["International Conference on Trust, Security and Privacy in Computing and Communications"],
       "dblp": "https://dblp.org/db/conf/trustcom/"
     },
     {
@@ -6901,9 +6742,7 @@
       "name": "IEEE International Conference on Ubiquitous Intelligence and Computing",
       "acronym": "UIC",
       "type": "conference",
-      "aliases": [
-        "International Conference on Ubiquitous Intelligence and Computing"
-      ],
+      "aliases": ["International Conference on Ubiquitous Intelligence and Computing"],
       "dblp": "https://dblp.org/db/conf/uic/"
     },
     {
@@ -7341,9 +7180,7 @@
       "name": "Web Information Systems and Applications",
       "acronym": "WISA",
       "type": "conference",
-      "aliases": [
-        "International Workshop on Information Security Applications"
-      ],
+      "aliases": ["International Workshop on Information Security Applications"],
       "dblp": "https://dblp.org/db/conf/wisa/"
     },
     {
@@ -7351,9 +7188,7 @@
       "name": "Web Information Systems Engineering Conference",
       "acronym": "WISE",
       "type": "conference",
-      "aliases": [
-        "International Conference on Web Information Systems Engineering"
-      ],
+      "aliases": ["International Conference on Web Information Systems Engineering"],
       "dblp": "https://dblp.org/db/conf/wise/"
     },
     {
