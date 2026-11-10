@@ -78,12 +78,14 @@ export const checkEnteBinary = (): boolean => {
 
 export const exportEnteAuthSecrets = (exportDirPath: string = DEFAULT_EXPORT_DIR_PATH()): boolean => {
 	const exportFilePath = getExportFilePath(exportDirPath);
+	// Export to a temporary file first, so a failed export never removes the previous one.
+	const tempFilePath = `${exportFilePath}.tmp`;
 
 	try {
 		const authAccount = getAuthAccount();
 
-		// The CLI refuses to overwrite an existing file, and this file is the extension's own previous export.
-		fse.removeSync(exportFilePath);
+		// The CLI refuses to overwrite an existing file, so clear any leftover temporary file first.
+		fse.removeSync(tempFilePath);
 
 		runEnteCommand(
 			"auth",
@@ -91,12 +93,16 @@ export const exportEnteAuthSecrets = (exportDirPath: string = DEFAULT_EXPORT_DIR
 			"--plaintext",
 			"--no-input",
 			"--output",
-			exportFilePath,
+			tempFilePath,
 			"--account",
 			authAccount.email as string
 		);
+
+		// Replace the previous export only after the new one has been written successfully.
+		fse.moveSync(tempFilePath, exportFilePath, { overwrite: true });
 		console.log("Export to", exportFilePath);
 	} catch (error) {
+		fse.removeSync(tempFilePath);
 		const reason = error instanceof Error ? error.message : String(error);
 		throw new Error(`Export failed. ${reason}`);
 	}
