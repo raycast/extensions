@@ -1,6 +1,6 @@
 # Zoo Changelog
 
-## [Update AI Providers and Prompt Workflow] - {PR_MERGE_DATE}
+## [Update AI Providers and Prompt Workflow] - 2026-11-10
 
 - Zoo now supports OpenAI, Google Gemini, Anthropic Claude, DeepSeek, and custom OpenAI-compatible services with provider-specific endpoints.
 - The model presets have been refreshed. Provider Default now selects a current model for the chosen service, and Custom Model ID continues to override the preset.
