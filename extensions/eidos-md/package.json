@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "eidos-md",
   "title": "Eidos MD",
-  "description": "Open your Eidos projects in Eidos MD and search inside one: blueprints, docs, drafts, tasks, and the words in them.",
+  "description": "Open your Eidos projects in Eidos MD and search inside one: blueprints, docs, drafts, tasks, and the words in them. Requires Eidos MD 0.22 or later.",
   "icon": "icon.png",
   "author": "iUngerTime",
   "access": "public",
