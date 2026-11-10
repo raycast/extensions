@@ -1,0 +1,44 @@
+{
+  "snapshots": [
+    {
+      "id": "00000000-0000-0000-0000-00000000000a",
+      "provider": "anthropic",
+      "resetType": "sessionReset",
+      "timestamp": 816017422.45,
+      "triggeringResetTime": 816017422.45,
+      "sessionPercentage": 64,
+      "sessionTokensUsed": 0
+    },
+    {
+      "id": "00000000-0000-0000-0000-00000000000b",
+      "provider": "anthropic",
+      "resetType": "weeklyReset",
+      "timestamp": 816017500.1,
+      "triggeringResetTime": 816017500.1,
+      "weeklyPercentage": 81,
+      "weeklyTokensUsed": 810000,
+      "opusWeeklyPercentage": 0,
+      "opusWeeklyTokensUsed": 0,
+      "sonnetWeeklyPercentage": 12,
+      "sonnetWeeklyTokensUsed": 120000
+    },
+    {
+      "id": "00000000-0000-0000-0000-00000000000a",
+      "provider": "anthropic",
+      "resetType": "sessionReset",
+      "timestamp": 816017422.45,
+      "triggeringResetTime": 816017422.45,
+      "sessionPercentage": 64
+    },
+    {
+      "id": "00000000-0000-0000-0000-00000000000c",
+      "provider": "anthropic",
+      "resetType": "sessionReset",
+      "timestamp": 816035500,
+      "triggeringResetTime": 816035500,
+      "sessionPercentage": 20
+    },
+    { "id": "00000000-0000-0000-0000-00000000000d", "resetType": "somethingNew", "timestamp": 816035600 },
+    { "id": "00000000-0000-0000-0000-00000000000e", "resetType": "weeklyReset", "timestamp": 816035700 }
+  ]
+}
