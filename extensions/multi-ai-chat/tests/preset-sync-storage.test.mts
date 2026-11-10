@@ -359,3 +359,111 @@ test("sync-warning callbacks cannot reject a local commit, while local writes st
     preset,
   );
 });
+
+for (const deleted of [false, true]) {
+  test(`an undownloaded cloud ${deleted ? "deletion" : "edit"} blocks publication until it can be read`, async (t) => {
+    const key = presetStorageKey(preset.id);
+    const ctx = await context(t, { [key]: serializeStoredPreset(preset, 100) });
+    const placeholder = join(ctx.directory, `.${preset.id}.json.icloud`);
+    await writeFile(placeholder, "download pending");
+
+    assert.deepEqual(await loadPresets(ctx.storage, ctx.options), [preset]);
+    assert.equal(ctx.errors.length, 1);
+    assert.match(ctx.errors[0].message, /not downloaded|download pending/i);
+    assert.equal(await readFile(placeholder, "utf8"), "download pending");
+    await assert.rejects(readFile(ctx.canonical), { code: "ENOENT" });
+
+    const remoteEdit = { ...preset, name: "Downloaded edit" };
+    await writeFile(
+      ctx.canonical,
+      JSON.stringify(
+        deleted
+          ? { version: 1, id: preset.id, updatedAt: 1_000, deletedAt: 1_000 }
+          : { version: 1, id: preset.id, updatedAt: 1_000, preset: remoteEdit },
+      ),
+    );
+    await rm(placeholder);
+    assert.deepEqual(
+      await loadPresets(ctx.storage, ctx.options),
+      deleted ? [] : [remoteEdit],
+    );
+    const remoteRecord = JSON.parse(await readFile(ctx.canonical, "utf8"));
+    assert.equal(remoteRecord.updatedAt, 1_000);
+    if (deleted) assert.equal(remoteRecord.deletedAt, 1_000);
+    else assert.deepEqual(remoteRecord.preset, remoteEdit);
+  });
+}
+
+test("a placeholder appearing after the cloud scan still prevents publishing stale content", async (t) => {
+  const key = presetStorageKey(preset.id);
+  const ctx = await context(t, {
+    [key]: JSON.stringify(preset),
+    [updatedPresetStorageKey(preset.id)]: 100,
+  });
+  const placeholder = join(ctx.directory, `.${preset.id}.json.icloud`);
+  ctx.storage.beforeSet = async () => {
+    ctx.storage.beforeSet = undefined;
+    await writeFile(placeholder, "download pending");
+  };
+  assert.deepEqual(await loadPresets(ctx.storage, ctx.options), [preset]);
+  assert.equal(ctx.errors.length, 1);
+  assert.match(ctx.errors[0].message, /not downloaded|download pending/i);
+  await assert.rejects(readFile(ctx.canonical), { code: "ENOENT" });
+  assert.equal(await readFile(placeholder, "utf8"), "download pending");
+});
+
+test("an earlier upload failure cannot hide a later remote revision from an offline save", async (t) => {
+  const first = { ...preset, id: "first", name: "First" };
+  const ctx = await context(t, {
+    [presetStorageKey(first.id)]: serializeStoredPreset(first, 100),
+    [presetStorageKey(preset.id)]: serializeStoredPreset(preset, 100),
+  });
+  const blockedUpload = join(ctx.directory, `${first.id}.json`);
+  await mkdir(blockedUpload);
+  await ctx.remote({ ...preset, name: "New remote revision" }, 1_000);
+
+  const edit = { ...preset, name: "Acknowledged offline edit" };
+  await upsertPreset(edit, ctx.storage, ctx.options);
+  assert.deepEqual(
+    deserializePreset(ctx.storage.items.get(presetStorageKey(preset.id))),
+    edit,
+  );
+  assert.equal(
+    storedPresetUpdatedAt(ctx.storage.items.get(presetStorageKey(preset.id))),
+    1_001,
+  );
+  assert.equal(ctx.errors.length, 1);
+
+  await rm(blockedUpload, { recursive: true });
+  assert.deepEqual(await loadPreset(preset.id, ctx.storage, ctx.options), edit);
+  const remoteRecord = JSON.parse(await readFile(ctx.canonical, "utf8"));
+  assert.deepEqual(remoteRecord.preset, edit);
+  assert.equal(remoteRecord.updatedAt, 1_001);
+});
+
+test("an earlier upload failure cannot hide a later remote deletion from a save", async (t) => {
+  const first = { ...preset, id: "first", name: "First" };
+  const ctx = await context(t, {
+    [presetStorageKey(first.id)]: serializeStoredPreset(first, 100),
+    [presetStorageKey(preset.id)]: serializeStoredPreset(preset, 100),
+  });
+  await mkdir(join(ctx.directory, `${first.id}.json`));
+  await writeFile(
+    ctx.canonical,
+    JSON.stringify({
+      version: 1,
+      id: preset.id,
+      updatedAt: 1_000,
+      deletedAt: 1_000,
+    }),
+  );
+  await assert.rejects(
+    upsertPreset({ ...preset, name: "Stale edit" }, ctx.storage, ctx.options),
+    /deleted/,
+  );
+  assert.equal(ctx.storage.items.has(presetStorageKey(preset.id)), false);
+  assert.equal(
+    ctx.storage.items.get(deletedPresetStorageKey(preset.id)),
+    1_000,
+  );
+});

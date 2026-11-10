@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import {
+  access,
   mkdir,
   readFile,
   readdir,
@@ -101,6 +102,8 @@ async function synchronize(storage: SyncStorage, options: SyncOptions) {
 
   for (const record of records.values()) {
     await applyRecord(storage, items, record);
+  }
+  for (const record of records.values()) {
     const published = await writeRecord(directory, record);
     if (published !== record) await applyRecord(storage, items, published);
   }
@@ -169,6 +172,13 @@ async function readRemoteRecords(
 ): Promise<Map<string, SyncRecord>> {
   const records = new Map<string, SyncRecord>();
   const entries = await readdir(directory, { withFileTypes: true });
+  const placeholder = entries.find(
+    (entry) =>
+      entry.isFile() &&
+      entry.name.startsWith(".") &&
+      entry.name.endsWith(".json.icloud"),
+  );
+  if (placeholder) throw pendingDownloadError(placeholder.name);
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
     try {
@@ -252,6 +262,7 @@ async function applyRecordToLocalStorage(
 async function writeRecord(directory: string, record: SyncRecord) {
   const filename = `${encodeURIComponent(record.id)}.json`;
   const destination = join(directory, filename);
+  await assertDownloaded(directory, filename);
   try {
     const current = parseSyncRecord(
       JSON.parse(await readFile(destination, "utf8")),
@@ -272,11 +283,29 @@ async function writeRecord(directory: string, record: SyncRecord) {
       encoding: "utf8",
       mode: 0o600,
     });
+    await assertDownloaded(directory, filename);
     await rename(temporary, destination);
   } finally {
     await rm(temporary, { force: true });
   }
   return record;
+}
+
+async function assertDownloaded(directory: string, filename: string) {
+  const placeholder = `.${filename}.icloud`;
+  try {
+    await access(join(directory, placeholder));
+  } catch (error) {
+    if (isFileNotFoundError(error)) return;
+    throw error;
+  }
+  throw pendingDownloadError(placeholder);
+}
+
+function pendingDownloadError(filename: string) {
+  return new Error(
+    `iCloud prompt is not downloaded yet: ${filename}. Download it in iCloud Drive and try again.`,
+  );
 }
 
 function parseSyncRecord(value: unknown): SyncRecord | undefined {

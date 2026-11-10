@@ -300,7 +300,6 @@ export function RunPresetForm({
           <Action.SubmitForm
             title="Run Saved Prompt"
             icon={Icon.Airplane}
-            shortcut={{ modifiers: [], key: "return" }}
             onSubmit={handleSubmit}
           />
           <Action.Push
