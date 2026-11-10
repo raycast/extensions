@@ -19,10 +19,9 @@ const DRAFTS_DB = DataBasePath.replace("~", homedir());
 export async function getDrafts(filterString?: string, filterTitleOnly?: boolean) {
   filterString = filterString || "";
   // Escape quotes for the SQL string and %, _ and \ for LIKE, so they match literally.
-  const likeTerm = filterString
-    .toLowerCase()
-    .replace(/'/g, "''")
-    .replace(/[\\%_]/g, "\\$&");
+  // The term is not lowercased: SQLite's LIKE already ignores ASCII case, and its
+  // LOWER() leaves non-ASCII letters like "É" alone, so lowercasing them here would miss.
+  const likeTerm = filterString.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
   // The first line of the draft; a draft without a line break is all first line.
   const titleColumn =
     "CASE WHEN INSTR(ZCONTENT, CHAR(10)) > 0 THEN SUBSTR(ZCONTENT, 1, INSTR(ZCONTENT, CHAR(10)) - 1) ELSE ZCONTENT END";
