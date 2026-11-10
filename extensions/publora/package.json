@@ -10,6 +10,9 @@
   ],
   "icon": "publora_512x512.png",
   "author": "anton_shvein",
+  "contributors": [
+    "eugeniya_ivanova"
+  ],
   "license": "MIT",
   "commands": [
     {
