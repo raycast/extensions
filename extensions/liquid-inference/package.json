@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "liquid-inference",
+  "title": "Liquid Inference",
+  "description": "Use Liquid Inference models in Raycast AI Chat, Quick AI, and AI Commands.",
+  "icon": "extension-icon.png",
+  "author": "liquid-inference",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Liquid API Key",
+      "description": "Create a buyer API key at https://inference.ai.exchange. Requests use your Liquid account balance."
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "2.11.1",
+    "@ai-sdk/openai-compatible": "3.0.87",
+    "ai": "7.0.166",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.9"
+  }
+}
