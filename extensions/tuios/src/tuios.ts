@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
-import { closeSync, existsSync, openSync, readFileSync } from "node:fs";
+import { closeSync, existsSync, openSync, readFileSync, realpathSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -227,6 +227,19 @@ export interface StartOptions {
  */
 export async function startAgent(o: StartOptions, timeoutMs = 20000): Promise<void> {
   const before = new Set((await listPanes().catch(() => [])).map((p) => p.window_id));
+  const real = (d: string) => {
+    try {
+      return realpathSync(d);
+    } catch {
+      return d;
+    }
+  };
+  const want = real(o.cwd);
+  // The requested pane: new since we started, in the requested session, running in the requested folder.
+  const opened = async () =>
+    (await listPanes().catch(() => [])).some(
+      (p) => p.session === o.session && !before.has(p.window_id) && real(p.cwd) === want,
+    );
   const args = ["start-agent", o.agent, "-s", o.session, "--cwd", o.cwd, "--focus"];
   if (o.workspace) args.push("--workspace", String(o.workspace));
   if (o.name) args.push("--name", o.name);
@@ -249,19 +262,26 @@ export async function startAgent(o: StartOptions, timeoutMs = 20000): Promise<vo
     child.on("error", (e: NodeJS.ErrnoException) =>
       finish(e.code === "ENOENT" ? new TuiosError("tuios not found. Install it or set its path in settings.") : e),
     );
-    child.on("exit", (code) => {
-      if (!code) return finish();
+    child.on("exit", async (code) => {
+      if (!code) {
+        // A clean exit still has to leave the requested pane behind.
+        return finish(
+          (await opened()) ? undefined : new TuiosError(`tuios exited without opening a pane in ${o.session}.`),
+        );
+      }
       const out = readFileSync(log, "utf8").trim();
       const known = Object.keys(FRIENDLY).find((k) => out.includes(k));
       finish(new TuiosError(known ? FRIENDLY[known] : out.split("\n")[0] || `start-agent failed (exit ${code})`));
     });
     child.unref();
     const poll = setInterval(async () => {
-      const panes = await listPanes().catch(() => []);
-      if (panes.some((p) => p.session === o.session && !before.has(p.window_id))) finish();
+      if (await opened()) finish();
     }, 300);
     const timer = setTimeout(
-      () => finish(new TuiosError(`No new pane appeared in ${o.session} after ${timeoutMs / 1000} seconds.`)),
+      () =>
+        finish(
+          new TuiosError(`No new pane for this folder appeared in ${o.session} after ${timeoutMs / 1000} seconds.`),
+        ),
       timeoutMs,
     );
   });
