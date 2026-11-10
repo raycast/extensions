@@ -1,3 +1,4 @@
+import type { Tool } from "@raycast/api";
 import { arrangePlan } from "../lib/tiles";
 
 type Input = {
@@ -25,3 +26,16 @@ type Input = {
 export default async function tool(input: Input) {
   return arrangePlan(input.displays);
 }
+
+/** Asks before any window is moved, saying how many windows and displays the plan covers. */
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const windows = input.displays.reduce((count, d) => count + d.windows.length, 0);
+  const displays = input.displays.length;
+  return {
+    message: `Move and resize ${windows} ${windows === 1 ? "window" : "windows"} across ${displays} ${displays === 1 ? "display" : "displays"}?`,
+    info: input.displays.map((d) => ({
+      name: `Display ${d.display + 1}`,
+      value: `${d.windows.length} ${d.windows.length === 1 ? "window" : "windows"}, ${d.layout ?? "current layout"}`,
+    })),
+  };
+};

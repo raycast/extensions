@@ -325,7 +325,7 @@
     {
       "name": "swap-displays",
       "title": "Swap Displays",
-      "description": "Send every window to your other display and tile it there. With more than two displays, each display's windows move to the next one.",
+      "description": "Send every window to your other display. They land in the layout you last tiled with, or keep their places on the screen if you haven't tiled yet. With more than two displays, each display's windows move to the next one.",
       "mode": "no-view",
       "keywords": [
         "swap screens",
@@ -404,7 +404,305 @@
     }
   ],
   "ai": {
-    "instructions": "You arrange the user's open windows so they suit what the user is doing.\nAlways call get-windows first, then call arrange-windows once with a plan for every display.\nWork out the task from the apps, window titles and each window's role (work, reference, comms or background). Put the window the user is working in (usually the focused one, or the editor, document or design tool) first on the largest display, and use a master layout when one window clearly matters most.\nKeep related windows together on one display, such as an editor with its terminal and browser preview.\nPut supporting windows such as chat, music, mail, notes and settings on the smaller display, or last in the order.\nA display fits about three windows side by side when it is under 1600 points wide, and about six when it is wider. Do not give a display more than that unless there is nowhere else to put them.\nUse auto-tile when the windows matter equally. Use master-center only on displays wider than 2000 points.\nAfter arranging, say in one or two sentences what you put where and why. Do not list frames or ids."
+    "instructions": "You arrange the user's open windows so they suit what the user is doing.\nAlways call get-windows first, then call arrange-windows once with a plan for every display.\nWork out the task from the apps, window titles and each window's role (work, reference, comms or background). Put the window the user is working in (usually the focused one, or the editor, document or design tool) first on the largest display, and use a master layout when one window clearly matters most.\nKeep related windows together on one display, such as an editor with its terminal and browser preview.\nPut supporting windows such as chat, music, mail, notes and settings on the smaller display, or last in the order.\nA display fits about three windows side by side when it is under 1600 points wide, and about six when it is wider. Do not give a display more than that unless there is nowhere else to put them.\nUse auto-tile when the windows matter equally. Use master-center only on displays wider than 2000 points.\nAfter arranging, say in one or two sentences what you put where and why. Do not list frames or ids.",
+    "evals": [
+      {
+        "input": "@window-management-plus arrange my windows for coding",
+        "mocks": {
+          "get-windows": {
+            "displays": [
+              {
+                "index": 0,
+                "x": 0,
+                "y": 0,
+                "width": 2560,
+                "height": 1440
+              },
+              {
+                "index": 1,
+                "x": 0,
+                "y": 32,
+                "width": 1512,
+                "height": 950
+              }
+            ],
+            "windows": [
+              {
+                "id": "101_1",
+                "app": "Cursor",
+                "title": "main.ts",
+                "role": "work",
+                "display": 1,
+                "focused": true,
+                "frame": {
+                  "x": 0,
+                  "y": 32,
+                  "width": 756,
+                  "height": 950
+                }
+              },
+              {
+                "id": "102_2",
+                "app": "Safari",
+                "title": "TypeScript Handbook",
+                "role": "reference",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 1440
+                }
+              },
+              {
+                "id": "103_3",
+                "app": "Slack",
+                "title": "general",
+                "role": "comms",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                }
+              },
+              {
+                "id": "104_4",
+                "app": "Spotify",
+                "title": "Spotify",
+                "role": "background",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 720,
+                  "width": 1280,
+                  "height": 720
+                }
+              }
+            ]
+          },
+          "arrange-windows": "Arranged 4 windows"
+        },
+        "expected": [
+          {
+            "callsTool": "get-windows"
+          },
+          {
+            "callsTool": {
+              "name": "arrange-windows",
+              "arguments": {
+                "displays": [
+                  {
+                    "display": 0,
+                    "windows": {
+                      "includes": "101_1"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@window-management-plus what windows do I have open, and which display is each on?",
+        "mocks": {
+          "get-windows": {
+            "displays": [
+              {
+                "index": 0,
+                "x": 0,
+                "y": 0,
+                "width": 2560,
+                "height": 1440
+              },
+              {
+                "index": 1,
+                "x": 0,
+                "y": 32,
+                "width": 1512,
+                "height": 950
+              }
+            ],
+            "windows": [
+              {
+                "id": "101_1",
+                "app": "Cursor",
+                "title": "main.ts",
+                "role": "work",
+                "display": 1,
+                "focused": true,
+                "frame": {
+                  "x": 0,
+                  "y": 32,
+                  "width": 756,
+                  "height": 950
+                }
+              },
+              {
+                "id": "102_2",
+                "app": "Safari",
+                "title": "TypeScript Handbook",
+                "role": "reference",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 1440
+                }
+              },
+              {
+                "id": "103_3",
+                "app": "Slack",
+                "title": "general",
+                "role": "comms",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                }
+              },
+              {
+                "id": "104_4",
+                "app": "Spotify",
+                "title": "Spotify",
+                "role": "background",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 720,
+                  "width": 1280,
+                  "height": 720
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-windows"
+          },
+          {
+            "includes": "Cursor"
+          },
+          {
+            "includes": "Slack"
+          }
+        ]
+      },
+      {
+        "input": "@window-management-plus put Slack and Spotify on my laptop screen and everything else on the big display",
+        "mocks": {
+          "get-windows": {
+            "displays": [
+              {
+                "index": 0,
+                "x": 0,
+                "y": 0,
+                "width": 2560,
+                "height": 1440
+              },
+              {
+                "index": 1,
+                "x": 0,
+                "y": 32,
+                "width": 1512,
+                "height": 950
+              }
+            ],
+            "windows": [
+              {
+                "id": "101_1",
+                "app": "Cursor",
+                "title": "main.ts",
+                "role": "work",
+                "display": 1,
+                "focused": true,
+                "frame": {
+                  "x": 0,
+                  "y": 32,
+                  "width": 756,
+                  "height": 950
+                }
+              },
+              {
+                "id": "102_2",
+                "app": "Safari",
+                "title": "TypeScript Handbook",
+                "role": "reference",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 1440
+                }
+              },
+              {
+                "id": "103_3",
+                "app": "Slack",
+                "title": "general",
+                "role": "comms",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                }
+              },
+              {
+                "id": "104_4",
+                "app": "Spotify",
+                "title": "Spotify",
+                "role": "background",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 720,
+                  "width": 1280,
+                  "height": 720
+                }
+              }
+            ]
+          },
+          "arrange-windows": "Arranged 4 windows"
+        },
+        "expected": [
+          {
+            "callsTool": "get-windows"
+          },
+          {
+            "callsTool": {
+              "name": "arrange-windows",
+              "arguments": {
+                "displays": [
+                  {
+                    "display": 1,
+                    "windows": {
+                      "includes": "103_3"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
   },
   "dependencies": {
     "@raycast/api": "^2.11.1",

@@ -15,11 +15,14 @@ export type Item = {
   max?: Partial<Size>;
   active?: boolean;
   title?: string;
+  /** Marks the master, for a master layout, when it is known. Otherwise the layout picks one. */
+  lead?: boolean;
 };
 
 /** Where a window goes. `screen` moves it to another screen, with `frame` in that screen's coordinates. */
-export type Placement = { id: string; frame: Frame; screen?: number };
-export type Layout = (items: Item[], area: Frame) => Placement[];
+export type Placement = { id: string; frame: Frame; screen?: number; master?: boolean };
+/** Lays items out in an area. `screen` says which screen it is, for a layout that differs between them. */
+export type Layout = (items: Item[], area: Frame, screen?: number) => Placement[];
 
 /** Asked for first. Each app then clamps to the narrowest it allows. */
 const SMALL_WIDTH = 240;
@@ -194,10 +197,10 @@ export const master =
   (items, box) => {
     if (items.length < 2) return monocle(items, box);
     const gap = opts.gap ?? 0;
-    // The master is the focused window when asked, so you can pick it by working in it. Otherwise, and on
-    // a display without the focused window, it is the largest, which is whichever was master last time.
+    // The master is the focused window when asked, so you can pick it by working in it. Otherwise it is
+    // the window marked as the master, and failing that the largest.
     const largest = [...items].sort(bySize);
-    const main = (opts.lead === "focused" && items.find((i) => i.active)) || largest[0];
+    const main = (opts.lead === "focused" && items.find((i) => i.active)) || items.find((i) => i.lead) || largest[0];
     const stack = largest.filter((i) => i !== main);
     // Column by column, then top to bottom, so running the layout on its own result changes nothing
     stack.sort(columnOrder);
@@ -224,7 +227,11 @@ export const master =
         return out;
       });
     };
-    const mainAt = (x: number) => ({ id: main.id, frame: { x, y: box.y, width: mainW, height: box.height } });
+    const mainAt = (x: number): Placement => ({
+      id: main.id,
+      master: true,
+      frame: { x, y: box.y, width: mainW, height: box.height },
+    });
     switch (opts.side) {
       case "left":
         return [mainAt(box.x), ...placeSide(0, box.x + mainW + gap)];
@@ -312,8 +319,18 @@ export const rotated =
  */
 function reslot(layout: Layout, items: Item[], box: Frame, placed: Placement[], moves: Map<string, Frame>) {
   const slot = new Map(placed.map((p) => [p.id, p.frame]));
+  // In a master layout, whichever window is moved into the master's slot is the master from then on.
+  // It is told so, since its size alone may not say it: a master can be the smaller window.
+  const master = placed.find((p) => p.master);
+  const sameFrame = (a: Frame, b: Frame) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+  const taker = master && [...moves].find(([, frame]) => sameFrame(frame, master.frame))?.[0];
+  const lead = master && (taker ?? master.id);
   return layout(
-    items.map((i) => ({ ...i, frame: moves.get(i.id) ?? slot.get(i.id) ?? i.frame })),
+    items.map((i) => ({
+      ...i,
+      frame: moves.get(i.id) ?? slot.get(i.id) ?? i.frame,
+      lead: lead ? i.id === lead : i.lead,
+    })),
     box,
   );
 }
@@ -352,9 +369,9 @@ export const withMaster =
     const placed = layout(items, box);
     const active = items.find((i) => i.active && !stay(i));
     const from = placed.find((p) => p.id === active?.id)?.frame;
-    const [top] = placed
-      .filter((p) => !items.some((i) => i.id === p.id && stay(i)))
-      .sort((a, b) => area(b.frame) - area(a.frame));
+    // The master as the layout marks it. A layout without one counts its biggest slot as the master.
+    const free = placed.filter((p) => !items.some((i) => i.id === p.id && stay(i)));
+    const top = free.find((p) => p.master) ?? [...free].sort((a, b) => area(b.frame) - area(a.frame))[0];
     if (!active || !from || !top || top.id === active.id) return placed;
     return reslot(
       layout,
@@ -539,3 +556,13 @@ export function nextPivot(now: Pivot, count: number): Pivot {
   if (now.shape === "grid" && !now.sideways) return { shape: "grid", sideways: true };
   return sideBySide;
 }
+
+/** `layout`, told which windows are masters, so it keeps them however their sizes compare. */
+export const leading =
+  (layout: Layout, masters: Set<string>): Layout =>
+  (items, box, screen) =>
+    layout(
+      items.map((i) => ({ ...i, lead: masters.has(i.id) })),
+      box,
+      screen,
+    );

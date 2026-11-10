@@ -39,12 +39,20 @@ const MAX_MINIMUM = 0.75;
 /** How long a slow app gets to finish resizing before its size is taken as a limit. */
 const SLOW_APP_MS = 300;
 
+/** Where a layout put a window, and on which screen. */
+export type Placed = Placement & { screen: number };
+
 /** A window that could not be moved, with a name to show the user. */
 export type Failure = { id: string; name: string };
 
 export type System = {
   /** The usable area of each screen, in that screen's own coordinates. */
   areas(): Promise<Frame[]>;
+  /**
+   * Each screen's whole usable area, when `areas()` is smaller than it, as with a gap kept round the edge.
+   * A window's minimum is judged against this, since the window itself isn't bound by the gap.
+   */
+  bounds?(): Promise<Frame[]>;
   /** Where each screen's coordinates start, in coordinates shared by all screens. Only needed to compare screens. */
   origins?(): Promise<{ x: number; y: number }[]>;
   /** Every window worth arranging. `screen` indexes into `areas()`. */
@@ -62,8 +70,10 @@ export type System = {
  * that have to make room move again.
  * `learned` holds the minimum and maximum sizes apps insisted on. Pass in what earlier runs learned and a
  * run can finish in one pass. It is updated in place. A limit is dropped once its window is seen past it.
- * With `activeOnly`, only the screen holding the active window is laid out.
- * Returns how many windows there were to arrange, and which of them could not be moved on the last pass.
+ * With `activeOnly`, only the screen holding the active window is laid out. If no window there has
+ * focus, nothing is touched and `noFocus` is set.
+ * Returns how many windows there were to arrange, which of them could not be moved on the last pass, and
+ * where the last pass put each one.
  */
 export async function arrange(
   system: System,
@@ -71,13 +81,21 @@ export async function arrange(
   passes = 3,
   learned = new Map<string, Limits>(),
   activeOnly = false,
-): Promise<{ count: number; failed: Failure[]; passes: number }> {
+): Promise<{ count: number; failed: Failure[]; passes: number; placed: Placed[]; noFocus?: boolean }> {
   const areas = await system.areas();
+  const whole = (await system.bounds?.()) ?? areas;
   const all = await system.windows();
   // Rearranging commands, like Hyprland's, only touch the display you're working on
   const only = activeOnly ? all.find((w) => w.active)?.screen : undefined;
+  // The focused window may be one that can't be arranged, like a fullscreen one. Then there is no display
+  // to work on, and rearranging every display instead would be a surprise.
+  if (activeOnly && only === undefined) return { count: 0, failed: [], passes: 0, placed: [], noFocus: true };
   const first = only === undefined ? all : all.filter((w) => w.screen === only);
   forgetWrongLimits(learned, first);
+  // Sizes taken by windows too unreliable to remember: used to make room in this run, then forgotten
+  const seen = new Map<string, Limits>();
+  const limitsOf = (id: string) => seen.get(id) ?? learned.get(id);
+  let placed: Placed[] = [];
   let windows = first;
   let failed: Failure[] = [];
   // Windows already where the layout wants them are left alone, so running a layout twice moves nothing
@@ -85,10 +103,11 @@ export async function arrange(
   let pass = 1;
 
   for (; windows.length; pass++) {
-    const placements = areas.flatMap((area, k) => {
-      const items = windows.filter((w) => w.screen === k).map((w) => toItem(w, learned.get(w.id)));
-      return items.length ? layout(items, area) : [];
+    placed = areas.flatMap((area, k) => {
+      const items = windows.filter((w) => w.screen === k).map((w) => toItem(w, limitsOf(w.id)));
+      return items.length ? layout(items, area, k).map((p) => ({ ...p, screen: k })) : [];
     });
+    const placements = placed;
     const moves = placements.filter(({ id, frame }) => {
       const now = current.get(id);
       return !now || !near(now, frame);
@@ -114,22 +133,23 @@ export async function arrange(
     for (const { id, frame } of placements) {
       const now = after.find((w) => w.id === id);
       // A window that didn't move tells us nothing about its app's limits
-      if (!now?.resizable || now.learns === false || failed.some((f) => f.id === id)) continue;
+      if (!now?.resizable || failed.some((f) => f.id === id)) continue;
+      const kept = now.learns === false ? seen : learned;
       // Bigger than asked means the app has a minimum, smaller a maximum. Frames are read once they settle,
       // so a window still mid-resize isn't mistaken for either.
-      const limits = learned.get(id) ?? {};
+      const limits = limitsOf(id) ?? {};
       const min = { ...limits.min };
       const max = { ...limits.max };
       // No app needs most of a screen. A "minimum" that big is a window that hadn't resized yet, and
       // believing it would leave no room for anything else.
-      const area = areas[now.screen] ?? now.frame;
+      const area = whole[now.screen] ?? now.frame;
       const fits = { width: area.width * MAX_MINIMUM, height: area.height * MAX_MINIMUM };
       if (now.frame.width - frame.width > 2 && now.frame.width <= fits.width) min.width = now.frame.width;
       if (frame.width - now.frame.width > 2) max.width = now.frame.width;
       if (now.frame.height - frame.height > 2 && now.frame.height <= fits.height) min.height = now.frame.height;
       if (frame.height - now.frame.height > 2) max.height = now.frame.height;
       if (changed(limits.min, min) || changed(limits.max, max)) {
-        learned.set(id, { min, max, at: Date.now() });
+        kept.set(id, { min, max, at: Date.now() });
         clamped = true;
       }
     }
@@ -139,7 +159,7 @@ export async function arrange(
     windows = first.filter((w) => current.has(w.id));
   }
   if (windows.length) await keepOnScreen(system, areas, new Set(windows.map((w) => w.id)));
-  return { count: windows.length, failed, passes: pass };
+  return { count: windows.length, failed, passes: pass, placed };
 }
 
 /**

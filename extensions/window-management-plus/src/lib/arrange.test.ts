@@ -5,6 +5,9 @@ import { master, rotated, rows, sidebar } from "./layouts.ts";
 
 const screen = { x: 0, y: 0, width: 1200, height: 800 };
 
+/** What a run reports, without where it put each window. */
+const summary = ({ count, failed, passes }: Awaited<ReturnType<typeof arrange>>) => ({ count, failed, passes });
+
 type FakeWin = Partial<Win> & { id: string; minWidth?: number; stuck?: boolean };
 
 /** An in-memory window system. Windows refuse to go narrower than `minWidth`, like real apps do. `stuck` ones can't be moved. */
@@ -51,7 +54,7 @@ test("an app that clamps its width keeps it, and the neighbour takes what is lef
 
 test("windows that take the size they are given are placed once", async () => {
   const { system } = fake([{ id: "a" }, { id: "b" }]);
-  assert.deepEqual(await arrange(system, rows(2)), { count: 2, failed: [], passes: 1 });
+  assert.deepEqual(summary(await arrange(system, rows(2))), { count: 2, failed: [], passes: 1 });
   assert.equal(system.calls, 1);
 });
 
@@ -102,13 +105,13 @@ test("a sidebar that clamps wider than asked still ends flush with the right edg
 
 test("nothing is placed when there are no windows", async () => {
   const { system } = fake([]);
-  assert.deepEqual(await arrange(system, rows(2)), { count: 0, failed: [], passes: 1 });
+  assert.deepEqual(summary(await arrange(system, rows(2))), { count: 0, failed: [], passes: 1 });
   assert.equal(system.calls, 0);
 });
 
 test("windows that can't be moved are reported", async () => {
   const { system } = fake([{ id: "a" }, { id: "b", stuck: true }]);
-  assert.deepEqual(await arrange(system, rows(2)), { count: 2, failed: [{ id: "b", name: "b" }], passes: 1 });
+  assert.deepEqual(summary(await arrange(system, rows(2))), { count: 2, failed: [{ id: "b", name: "b" }], passes: 1 });
 });
 
 test("master keeps the window it picked first as the master when an app clamps", async () => {
@@ -368,4 +371,38 @@ test("a window left hanging over the edge of its screen is slid back inside", as
   const twoRows = rows(2, 0, 2);
   await arrange(system, twoRows, 1);
   assert.equal(frame("tall").y + frame("tall").height, 800);
+});
+
+test("a command for the focused display does nothing when no window there has focus", async () => {
+  const { system } = fake([{ id: "a" }, { id: "b", screen: 1 }], [screen, screen]);
+  const result = await arrange(system, rows(2), 3, new Map(), true);
+  assert.equal(result.noFocus, true);
+  assert.equal(system.calls, 0);
+});
+
+test("a window too unreliable to remember still gets the room it takes in this run", async () => {
+  const { system, frame } = fake([
+    { id: "notes", learns: false, minWidth: 700 },
+    { id: "b", frame: { x: 900, y: 0, width: 100, height: 100 } },
+  ]);
+  const learned = new Map();
+  await arrange(system, rows(2), 3, learned);
+  assert.equal(learned.size, 0);
+  assert.deepEqual(frame("b"), { x: 700, y: 0, width: 500, height: 800 });
+});
+
+test("a minimum is judged against the whole screen, not the area left inside a gap", async () => {
+  const inner = { x: 100, y: 100, width: 1000, height: 600 };
+  const { system } = fake(
+    [
+      { id: "a", frame: { x: 100, y: 100, width: 100, height: 100 }, minWidth: 800 },
+      { id: "b", frame: { x: 900, y: 100, width: 100, height: 100 } },
+    ],
+    [inner],
+  );
+  // 800 is more than three quarters of the 1000 inside the gap, but not of the 1200 the screen has
+  system.bounds = async () => [screen];
+  const learned = new Map();
+  await arrange(system, rows(2), 3, learned);
+  assert.equal(learned.get("a")?.min?.width, 800);
 });
