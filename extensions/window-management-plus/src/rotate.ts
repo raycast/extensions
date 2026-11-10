@@ -1,4 +1,3 @@
-import { rotate } from "./lib/layouts";
-import { permute } from "./lib/raycast";
+import { rotateTile } from "./lib/tiles";
 
-export default () => permute(rotate(1));
+export default () => rotateTile(1);

@@ -1,4 +1,3 @@
-import { rows } from "./lib/layouts";
-import { prefs, tile } from "./lib/raycast";
+import { runTile } from "./lib/tiles";
 
-export default () => tile(rows(2, prefs().gap));
+export default () => runTile("auto-tile");

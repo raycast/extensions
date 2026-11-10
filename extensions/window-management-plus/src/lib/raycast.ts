@@ -1,6 +1,7 @@
 // The Raycast and macOS side: reads and moves real windows. Every coordinate conversion lives here.
 
 import {
+  Cache,
   LaunchType,
   WindowManagement,
   closeMainWindow,
@@ -10,13 +11,14 @@ import {
   showHUD,
 } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { arrange, type System, type Win } from "./arrange";
-import type { Frame, Layout } from "./layouts";
+import { arrange, assignDisplays, freshLimits, toItem, type Limits, type System, type Win } from "./arrange";
+import { carry, crowded, ranked, type Frame, type Layout } from "./layouts";
+import { roleOf, type Role } from "./roles";
 
 const jxa = (script: string) => runAppleScript(script, { language: "JavaScript" });
 const jxaJSON = async <T>(script: string): Promise<T> => JSON.parse(await jxa(script));
 
-type Panel = "notes" | "ai";
+export type Panel = "notes" | "ai";
 
 export const prefs = () => {
   const p = getPreferenceValues<Preferences>();
@@ -42,19 +44,292 @@ export async function run(work: () => Promise<string>) {
   }
 }
 
-/** Arrange every window, running the layout again when an app clamps the size it was given. */
-export const tile = (layout: Layout, include?: () => Promise<string>) =>
-  run(async () => apply(layout, 3, await include?.()));
+/**
+ * Arrange every window, running the layout again when an app clamps the size it was given.
+ * With `activeOnly`, only the display holding the active window is touched.
+ */
+export const tile = (layout: Layout, include?: () => Promise<string>, activeOnly = false) =>
+  run(async () => apply(layout, 4, await include?.(), activeOnly));
 
-/** For layouts that build on the current frames, like rotate and swap. Runs exactly once. */
-export const permute = (layout: Layout) => run(() => apply(layout, 1));
+/**
+ * Minimum and maximum sizes apps insisted on, by window id, kept between runs. Without them every run would ask first,
+ * find out, and move the neighbours a second time.
+ */
+/** The one Cache for the extension. Two instances would each rewrite the index and lose the other's keys. */
+export const cache = new Cache();
+const LEARNED = "window-limits-v5";
+const loadLearned = () => freshLimits(new Map<string, Limits>(JSON.parse(cache.get(LEARNED) ?? "[]")));
+/** Window ids die with their windows, so only the most recently learned are kept. */
+const saveLearned = (learned: Map<string, Limits>) => cache.set(LEARNED, JSON.stringify([...learned].slice(-200)));
 
-async function apply(layout: Layout, passes: number, include?: string) {
-  const { count, failed } = await arrange(raycastSystem(include), layout, passes);
-  if (!count) return "No windows to arrange";
-  if (!failed.length) return "Arranged";
+/** Two runs at once would each read the other's moves as app limits. A lock older than this is stale. */
+const LOCK = "running-since";
+const LOCK_MS = 15_000;
+
+/** Runs `work` unless another run is still going. */
+async function alone(work: () => Promise<string>) {
+  const since = Number(cache.get(LOCK));
+  if (since && Date.now() - since < LOCK_MS) return "Already arranging";
+  cache.set(LOCK, String(Date.now()));
+  try {
+    return await work();
+  } finally {
+    cache.remove(LOCK);
+  }
+}
+
+const apply = (layout: Layout, passes: number, include?: string, activeOnly = false) =>
+  alone(() => arrangeAll(layout, passes, include, activeOnly));
+
+/** What to tell the user once windows have moved. */
+function report(count: number, failed: string[], done: string) {
+  if (!failed.length) return done;
   if (failed.length === count) throw new Error(`No window could be moved (${failed.join(", ")}).`);
-  return `Arranged, but could not move ${failed.join(", ")}`;
+  return `${done}, but could not move ${failed.join(", ")}`;
+}
+
+/** What happens once windows land on another display: lay them out again, or keep their relative frames. */
+export type Landing = { layout: Layout; include?: string };
+
+/**
+ * Moves every window to the display `assign` gives it. Given a landing layout, windows go straight into
+ * its slots on their display. Otherwise each keeps its place and size relative to the screen. Moves go
+ * one at a time, are checked, and are tried once more if a window didn't arrive. Returns the windows
+ * that never did.
+ */
+async function relocate(
+  system: System,
+  areas: Frame[],
+  windows: Win[],
+  assign: Map<string, number>,
+  landing?: Landing,
+  order?: Map<string, number>,
+): Promise<string[]> {
+  const learned = loadLearned();
+  // Top row first, then left to right
+  const reading = (a: Win, b: Win) =>
+    a.screen - b.screen || (Math.abs(a.frame.y - b.frame.y) > 40 ? a.frame.y - b.frame.y : a.frame.x - b.frame.x);
+  const placements = areas.flatMap((area, to) => {
+    const here = windows.filter((w) => assign.get(w.id) === to);
+    const staying = here.some((w) => w.screen === to);
+    const arriving = here.filter((w) => w.screen !== to).sort(reading);
+    const items = here.map((w) => {
+      const item = toItem(w, learned.get(w.id));
+      const rank = order?.get(w.id);
+      if (rank !== undefined) return { ...item, frame: ranked(rank) };
+      // Windows already here keep their places. Ones arriving join after them, in the order they
+      // were in. On a display nobody is staying on, they keep their places relative to the screen.
+      if (w.screen === to || !staying) return { ...item, frame: carry(item, areas[w.screen], area) };
+      return { ...item, frame: after(area, arriving.indexOf(w)) };
+    });
+    if (!items.length) return [];
+    const frames = landing ? landing.layout(items, area) : items.map((i) => ({ id: i.id, frame: i.frame }));
+    return frames.map((p) => ({ ...p, screen: to }));
+  });
+
+  // One at a time: several windows crossing displays at once is where moves get dropped
+  const moveAll = async (list: typeof placements) => {
+    for (const p of list) await system.place([p]);
+  };
+  const astray = async () => {
+    await new Promise((r) => setTimeout(r, 150));
+    const now = await system.windows();
+    return placements.filter((p) => now.find((w) => w.id === p.id)?.screen !== p.screen);
+  };
+  await moveAll(placements);
+  const retry = await astray();
+  if (retry.length) await moveAll(retry);
+  const stuck = retry.length ? await astray() : [];
+
+  // Apps that wouldn't take the size they were given get one more pass, the same as tiling
+  if (landing) await arrangeAll(landing.layout, 4, landing.include);
+  return stuck.map((p) => windows.find((w) => w.id === p.id)?.name ?? "a window");
+}
+
+/** A window as the AI tools describe it. */
+export type OpenWindow = {
+  id: string;
+  app: string;
+  title?: string;
+  /** The part it plays: what you make, what you read, people, or what runs alongside. */
+  role: Role;
+  display: number;
+  focused: boolean;
+  frame: Frame;
+};
+
+/** The category each app declares, by app path. Apps that declare none are left out. */
+async function appCategories(paths: string[]): Promise<Record<string, string>> {
+  if (!paths.length) return {};
+  return jxaJSON(`ObjC.import("Foundation")
+const out = {}
+for (const path of ${JSON.stringify(paths)}) {
+  const info = $.NSBundle.bundleWithPath(path)?.infoDictionary
+  const category = info && ObjC.unwrap(info.objectForKey("LSApplicationCategoryType"))
+  if (category) out[path] = category
+}
+JSON.stringify(out)`);
+}
+
+/** Every display and every window worth arranging, for the AI tools. */
+export async function listWindows(): Promise<{
+  displays: (Frame & { index: number })[];
+  windows: OpenWindow[];
+  /** Whether these windows, in this order, fit on a display in `layout` at sizes their apps accept. */
+  fits: (display: number, ids: string[], layout: Layout) => boolean;
+}> {
+  const system = raycastSystem();
+  const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+  const paths = [...new Set(windows.flatMap((w) => (w.appPath ? [w.appPath] : [])))];
+  // A category that can't be read only costs a less tailored layout
+  const categories = await appCategories(paths).catch(() => ({}) as Record<string, string>);
+  const learned = loadLearned();
+  const fits = (display: number, ids: string[], layout: Layout) => {
+    const items = ids.flatMap((id, rank) => {
+      const w = windows.find((x) => x.id === id);
+      return w ? [{ ...toItem(w, learned.get(id)), frame: ranked(rank) }] : [];
+    });
+    return !crowded(layout(items, areas[display]), areas[display]);
+  };
+  return {
+    fits,
+    displays: areas.map((a, index) => ({ index, ...a })),
+    windows: windows.map((w) => ({
+      id: w.id,
+      app: w.name ?? "Unknown",
+      title: w.label,
+      role: roleOf({ bundleId: w.bundleId, category: w.appPath && categories[w.appPath], title: w.title }),
+      display: w.screen,
+      focused: !!w.active,
+      frame: w.frame,
+    })),
+  };
+}
+
+/**
+ * Puts each planned window on its display in the order given, tiled with `layoutOf` that display.
+ * Windows left out of the plan stay on their display, after the planned ones. For the AI tools, so it
+ * returns its message instead of showing it.
+ */
+export function placeWindows(
+  plan: Map<string, { display: number; rank: number }>,
+  layoutOf: (display: number) => Layout,
+) {
+  if (!environment.canAccess(WindowManagement))
+    throw new Error("Window Management+ needs Raycast Pro to move windows.");
+  return alone(async () => {
+    const system = raycastSystem();
+    const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+    if (!windows.length) return "No windows to arrange";
+    const display = (w: Win) => {
+      const to = plan.get(w.id)?.display;
+      return to !== undefined && areas[to] ? to : w.screen;
+    };
+    const assign = new Map(windows.map((w) => [w.id, display(w)]));
+    const order = new Map(windows.map((w, k) => [w.id, plan.get(w.id)?.rank ?? 50 + k]));
+    // One layout that picks by the area it is handed, so each display can have its own
+    // matched by value, because each pass reads the areas afresh
+    const same = (a: Frame, b: Frame) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+    const layout: Layout = (items, box) =>
+      layoutOf(
+        Math.max(
+          0,
+          areas.findIndex((a) => same(a, box)),
+        ),
+      )(items, box);
+    const stuck = await relocate(system, areas, windows, assign, { layout }, order);
+    return report(windows.length, stuck, `Arranged ${windows.length} windows`);
+  });
+}
+
+/**
+ * A stand-in frame past the bottom-right of an area, so layouts place a window after everything already
+ * there: `nth` among the ones arriving. It is tiny, so it is never picked as the master.
+ */
+function after(area: Frame, nth: number): Frame {
+  return { x: area.x + area.width + 200 * (nth + 1), y: area.y + area.height + 200, width: 1, height: 1 };
+}
+
+/** Every window moves to the next display. With two displays they swap. */
+export const swapDisplays = (landing?: Landing) =>
+  run(() =>
+    alone(async () => {
+      const system = raycastSystem(landing?.include);
+      const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+      if (areas.length < 2) return "Only one display";
+      if (!windows.length) return "No windows to swap";
+      const next = new Map(windows.map((w) => [w.id, (w.screen + 1) % areas.length]));
+      const stuck = await relocate(system, areas, windows, next, landing);
+      return report(windows.length, stuck, "Swapped displays");
+    }),
+  );
+
+/**
+ * The focused window keeps its display to itself. Every other window there moves to the next display
+ * and is tiled with what is already on it.
+ */
+export const moveOthers = (landing: Landing) =>
+  run(() =>
+    alone(async () => {
+      const system = raycastSystem(landing.include);
+      const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+      if (areas.length < 2) return "Only one display";
+      const focused = windows.find((w) => w.active);
+      if (!focused) return "No focused window";
+      const next = (focused.screen + 1) % areas.length;
+      const moving = windows.filter((w) => w.screen === focused.screen && w !== focused);
+      if (!moving.length) return "No other windows to move";
+      const assign = new Map(windows.map((w) => [w.id, moving.includes(w) ? next : w.screen]));
+      const stuck = await relocate(system, areas, windows, assign, landing);
+      return report(moving.length, stuck, `Moved ${moving.length} ${moving.length === 1 ? "window" : "windows"}`);
+    }),
+  );
+
+/** Every window on the other displays comes to the display with the focused window, and is tiled with it. */
+export const moveAll = (landing: Landing) =>
+  run(() =>
+    alone(async () => {
+      const system = raycastSystem(landing.include);
+      const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+      if (areas.length < 2) return "Only one display";
+      const focused = windows.find((w) => w.active);
+      if (!focused) return "No focused window";
+      const coming = windows.filter((w) => w.screen !== focused.screen);
+      if (!coming.length) return "No windows on other displays";
+      const assign = new Map(windows.map((w) => [w.id, focused.screen]));
+      const stuck = await relocate(system, areas, windows, assign, landing);
+      return report(coming.length, stuck, `Moved ${coming.length} ${coming.length === 1 ? "window" : "windows"}`);
+    }),
+  );
+
+/**
+ * Spreads every window over every display, a share for each by size and no more than each can fit,
+ * then tiles each display with `landing`'s layout. The active window stays where it is.
+ */
+export const distributeDisplays = (landing: Landing, fitting: Layout = landing.layout) =>
+  run(() =>
+    alone(async () => {
+      const system = raycastSystem(landing.include);
+      const [areas, windows] = await Promise.all([system.areas(), system.windows()]);
+      if (areas.length < 2) return "Only one display";
+      if (!windows.length) return "No windows to distribute";
+      // `fitting` is the layout without stacking, which would hide a display that is too full
+      const assign = assignDisplays(windows, areas, fitting, loadLearned(), await system.origins?.());
+      const stuck = await relocate(system, areas, windows, assign, landing);
+      return report(windows.length, stuck, "Distributed windows");
+    }),
+  );
+
+async function arrangeAll(layout: Layout, passes: number, include?: string, activeOnly = false) {
+  const learned = loadLearned();
+  const result = await arrange(raycastSystem(include), layout, passes, learned, activeOnly);
+  saveLearned(learned);
+  if (!result.count) return "No windows to arrange";
+  return report(
+    result.count,
+    result.failed.map((f) => f.name),
+    "Arranged",
+  );
 }
 
 // Screens
@@ -88,11 +363,35 @@ const toLocal = (f: Frame, s: Screen): Frame => ({
   x: f.x - s.frame.x,
   y: f.y - s.frame.y,
 });
+/**
+ * Raycast's API measures from the top-left of each screen's usable area, below a notch or menu bar, not
+ * of the screen itself. Without this, windows on a notched display land that much lower than asked.
+ */
+const inset = (s: Screen) => ({ x: s.visible.x - s.frame.x, y: s.visible.y - s.frame.y });
+const toApi = (f: Frame, s: Screen) => ({ x: f.x - inset(s).x, y: f.y - inset(s).y });
+const fromApi = (f: Frame, s: Screen): Frame => ({ ...f, x: f.x + inset(s).x, y: f.y + inset(s).y });
+
 const toGlobal = (f: Frame, s: Screen): Frame => ({
   ...f,
   x: f.x + s.frame.x,
   y: f.y + s.frame.y,
 });
+
+/**
+ * Where every on-screen window really is, keyed like the Raycast API's ids (`pid_windowNumber`), in global
+ * coordinates. The API's own bounds can lag well behind a move, so they are only a fallback.
+ */
+const boundsScript = `ObjC.import("CoreGraphics")
+const list = ObjC.castRefToObject($.CGWindowListCopyWindowInfo(1, 0)) // 1: on-screen windows only
+const out = {}
+for (let i = 0; i < list.count; i++) {
+  const d = list.objectAtIndex(i)
+  if (ObjC.unwrap(d.objectForKey("kCGWindowLayer")) !== 0) continue
+  const b = ObjC.deepUnwrap(d.objectForKey("kCGWindowBounds"))
+  out[ObjC.unwrap(d.objectForKey("kCGWindowOwnerPID")) + "_" + ObjC.unwrap(d.objectForKey("kCGWindowNumber"))] =
+    { x: b.X, y: b.Y, width: b.Width, height: b.Height, label: ObjC.unwrap(d.objectForKey("kCGWindowName")) || undefined }
+}
+JSON.stringify(out)`;
 
 // Raycast's own windows, through System Events
 
@@ -100,7 +399,8 @@ const RAYCAST = "com.raycast.macos";
 const LAUNCHER = "Main Window";
 const PANELS: Record<Panel, { title: string; extensionName: string; name: string }> = {
   notes: { title: "Notes", extensionName: "raycast-notes", name: "raycast-notes" },
-  ai: { title: "AI Chat", extensionName: "raycast-ai", name: "ai-chat" },
+  // Built-in extensions are named after their titles: "Raycast Notes" and "AI".
+  ai: { title: "AI Chat", extensionName: "ai", name: "ai-chat" },
 };
 
 export const panelTitle = (panel: Panel) => PANELS[panel].title;
@@ -137,7 +437,7 @@ export async function openPanel(panel: Panel): Promise<string> {
   const isOpen = async () => (await raycastWindows()).some((w) => w.title === title);
   if (await isOpen()) return title;
   await launchCommand({ ownerOrAuthorName: "raycast", extensionName, name, type: LaunchType.UserInitiated });
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 40; i++) {
     await new Promise((r) => setTimeout(r, 150));
     if (await isOpen()) return title;
   }
@@ -155,17 +455,39 @@ const near = (a: Frame, b: Frame) => (["x", "y", "width", "height"] as const).ev
 function raycastSystem(include?: string): System {
   const screens = jxaJSON<Screen[]>(screensScript);
   const listed = new Map<string, { win: Win; api?: WindowManagement.Window }>();
+  let desktops: WindowManagement.Desktop[] = [];
+  let waitedForFocus = false;
+  const focusedId = () =>
+    WindowManagement.getActiveWindow().then(
+      (w) => w.id,
+      () => undefined,
+    );
 
   return {
     areas: async () => (await screens).map((s) => toLocal(s.visible, s)),
+    origins: async () => (await screens).map((s) => ({ x: s.frame.x, y: s.frame.y })),
 
     async windows() {
       const all = await screens;
-      const [windows, desktops, raycast] = await Promise.all([
+      const [windows, allDesktops, raycast, bounds, focusedNow] = await Promise.all([
         WindowManagement.getWindowsOnActiveDesktop(),
         WindowManagement.getDesktops(),
         raycastWindows(),
+        jxaJSON<Record<string, Frame & { label?: string }>>(boundsScript),
+        // Each window's own `active` flag is true for all of them, so ask which one has focus.
+        // It rejects when no window does.
+        focusedId(),
       ]);
+      // Launched from Raycast, a command can start before focus is back on the app underneath: the
+      // focused window is then missing, or is Raycast's launcher. Give it a moment, the first time only.
+      let focused = focusedNow;
+      const known = (id?: string) => !!id && windows.some((w) => w.id === id);
+      for (let tries = 0; !waitedForFocus && !known(focused) && tries < 6; tries++) {
+        await new Promise((r) => setTimeout(r, 120));
+        focused = await focusedId();
+      }
+      waitedForFocus = true;
+      desktops = allDesktops;
       const titled = raycast.map((w) => {
         const screen = Math.max(
           0,
@@ -177,21 +499,29 @@ function raycastSystem(include?: string): System {
       listed.clear();
       for (const api of windows) {
         if (!api.positionable || api.bounds === "fullscreen") continue;
-        const { position, size } = api.bounds;
-        const frame = {
-          x: position.x,
-          y: position.y,
-          width: size.width,
-          height: size.height,
-        };
+        let screen: number;
+        let frame: Frame;
+        const real = bounds[api.id];
+        if (real) {
+          screen = all.findIndex((s) => holdsCentre(s.frame, real));
+          if (screen === -1) continue; // parked off every screen
+          frame = toLocal({ x: real.x, y: real.y, width: real.width, height: real.height }, all[screen]);
+        } else {
+          const { position, size } = api.bounds;
+          // Desktops are matched to a screen by name
+          const name = desktops.find((d) => d.id === api.desktopId)?.screenId;
+          screen = all.length === 1 ? 0 : all.findIndex((s) => s.name === name);
+          if (screen === -1) continue;
+          frame = fromApi({ x: position.x, y: position.y, width: size.width, height: size.height }, all[screen]);
+          if (!holdsCentre(toLocal(all[screen].frame, all[screen]), frame)) continue;
+        }
 
-        // Desktops are matched to a screen by name
-        const name = desktops.find((d) => d.id === api.desktopId)?.screenId;
-        const screen = all.length === 1 ? 0 : all.findIndex((s) => s.name === name);
-        if (screen === -1 || !holdsCentre(toLocal(all[screen].frame, all[screen]), frame)) continue;
-
+        // Raycast's own windows are told apart by title. macOS gives it by window id, which still works
+        // when two of them sit in exactly the same place. Matching by frame is the fallback.
         const title =
-          api.application?.bundleId === RAYCAST ? titled.find((t) => near(t.frame, frame))?.title : undefined;
+          api.application?.bundleId === RAYCAST
+            ? (real?.label ?? titled.find((t) => near(t.frame, frame))?.title)
+            : undefined;
         if (title === LAUNCHER) continue;
         listed.set(api.id, {
           win: {
@@ -199,8 +529,12 @@ function raycastSystem(include?: string): System {
             screen,
             frame,
             resizable: api.resizable,
-            active: api.active,
+            active: api.id === focused,
             title,
+            name: title ? `Raycast ${title}` : api.application?.name,
+            label: real?.label,
+            bundleId: api.application?.bundleId,
+            appPath: api.application?.path,
           },
           api,
         });
@@ -209,7 +543,7 @@ function raycastSystem(include?: string): System {
       const hidden = include && titled.find((t) => t.title === include);
       if (hidden && ![...listed.values()].some((l) => l.win.title === include)) {
         listed.set(`raycast:${include}`, {
-          win: { id: `raycast:${include}`, ...hidden, resizable: true },
+          win: { id: `raycast:${include}`, ...hidden, resizable: true, name: `Raycast ${include}` },
         });
       }
       return [...listed.values()].map((l) => l.win);
@@ -217,31 +551,43 @@ function raycastSystem(include?: string): System {
 
     async place(placements) {
       const all = await screens;
+      /**
+       * The active desktop on a screen. A window's own desktop id can lag behind a move to another display,
+       * so it comes from the desktop list. Two identical displays share a name, so then it comes from a
+       * window already on that screen.
+       */
+      const desktopOf = (screen: number) => {
+        const named = desktops.filter((d) => d.active && d.screenId === all[screen].name);
+        if (named.length === 1) return named[0].id;
+        return [...listed.values()].find((l) => l.win.screen === screen && l.api)?.api?.desktopId;
+      };
       const failed = await Promise.all(
-        placements.map(async ({ id, frame }) => {
+        placements.map(async ({ id, frame, screen = -1 }) => {
           const target = listed.get(id);
           if (!target) return undefined;
           const { win, api } = target;
+          const onto = screen === -1 ? win.screen : screen;
+          const desktopId = desktopOf(onto);
           try {
             await (api
               ? WindowManagement.setWindowBounds({
                   id,
-                  desktopId: api.desktopId,
+                  desktopId,
                   bounds: {
-                    position: { x: frame.x, y: frame.y },
+                    position: toApi(frame, all[onto]),
                     ...(api.resizable ? { size: { width: frame.width, height: frame.height } } : {}),
                   },
                 })
-              : moveRaycastWindow(win.title!, toGlobal(frame, all[win.screen])));
+              : moveRaycastWindow(win.title!, toGlobal(frame, all[onto])));
             return undefined;
           } catch (error) {
             const name = api?.application?.name ?? win.title ?? id;
             console.error("move", name, String(error));
-            return name;
+            return { id, name };
           }
         }),
       );
-      return failed.filter((name): name is string => name !== undefined);
+      return failed.filter((f) => f !== undefined);
     },
   };
 }

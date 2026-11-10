@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "window-management-plus",
   "title": "Window Management+",
-  "description": "Companion to Raycast's Window Management: tile every open window at once, with sidebar, rotate and swap. Requires Raycast Pro.",
+  "description": "Companion to Raycast's Window Management, inspired by Hyprland. Tile every open window at once with master and grid layouts, swap, rotate, and move windows between displays. Requires Raycast Pro.",
   "icon": "extension-icon.png",
   "author": "connorforsyth",
   "license": "MIT",
@@ -91,51 +91,262 @@
     {
       "name": "auto-tile",
       "title": "Auto Tile",
-      "description": "Arrange every visible window in two even rows.",
+      "description": "Arrange every visible window in two even rows, or columns after Toggle Split.",
       "mode": "no-view",
-      "icon": "tile.png"
+      "icon": "tile.png",
+      "keywords": [
+        "tile",
+        "grid"
+      ]
     },
     {
       "name": "auto-tile-sidebar",
       "title": "Auto Tile with Sidebar",
-      "description": "Pin the sidebar app (Raycast Notes by default) full height down the right and tile every other visible window in two rows.",
+      "description": "Pin the sidebar app (Raycast Notes by default) full height down the right and tile every other visible window.",
       "mode": "no-view",
-      "icon": "tile-sidebar.png"
+      "icon": "tile-sidebar.png",
+      "keywords": [
+        "sidebar",
+        "notes",
+        "ai chat"
+      ]
     },
     {
-      "name": "tile-largest-left",
-      "title": "Tile Largest Window Left",
-      "description": "Largest window fills the left. The rest stack in a column on the right.",
+      "name": "smart-arrange",
+      "title": "Smart Arrange",
+      "description": "Arrange windows by what each app is for. The focused window leads the largest display with your other work beside it. Chat, mail and music go to the other display.",
       "mode": "no-view",
-      "icon": "tile-largest-left.png"
+      "keywords": [
+        "smart",
+        "auto",
+        "organize",
+        "organise",
+        "categories",
+        "roles"
+      ]
     },
     {
-      "name": "tile-largest-right",
-      "title": "Tile Largest Window Right",
-      "description": "Largest window fills the right. The rest stack in a column on the left.",
+      "name": "toggle-split",
+      "title": "Toggle Split",
+      "description": "Switch Auto Tile between rows and columns.",
       "mode": "no-view",
-      "icon": "tile-largest-right.png"
+      "keywords": [
+        "togglesplit",
+        "rows",
+        "columns",
+        "orientation",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "master-left",
+      "title": "Master Layout Left",
+      "description": "The focused window becomes the master on the left. The rest stack on the right.",
+      "mode": "no-view",
+      "icon": "tile-largest-left.png",
+      "keywords": [
+        "master",
+        "largest",
+        "main",
+        "orientationleft",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "master-right",
+      "title": "Master Layout Right",
+      "description": "The focused window becomes the master on the right. The rest stack on the left.",
+      "mode": "no-view",
+      "icon": "tile-largest-right.png",
+      "keywords": [
+        "master",
+        "largest",
+        "main",
+        "orientationright",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "master-center",
+      "title": "Master Layout Center",
+      "description": "The focused window becomes the master in the middle. The rest stack on both sides. Made for wide displays.",
+      "mode": "no-view",
+      "keywords": [
+        "master",
+        "largest",
+        "main",
+        "orientationcenter",
+        "ultrawide",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "grow-master",
+      "title": "Grow Master",
+      "description": "Give the master window more of the screen, in steps of 5%.",
+      "mode": "no-view",
+      "keywords": [
+        "mfact",
+        "bigger",
+        "resize",
+        "main",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "shrink-master",
+      "title": "Shrink Master",
+      "description": "Give the master window less of the screen, in steps of 5%.",
+      "mode": "no-view",
+      "keywords": [
+        "mfact",
+        "smaller",
+        "resize",
+        "main",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "swap-with-master",
+      "title": "Swap with Master",
+      "description": "Trade places between the active window and the master, the biggest window in the layout.",
+      "mode": "no-view",
+      "icon": "swap-with-largest.png",
+      "keywords": [
+        "swapwithmaster",
+        "largest",
+        "main",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "swap-window-left",
+      "title": "Swap Window Left",
+      "description": "Trade places between the active window and its neighbour on the left.",
+      "mode": "no-view",
+      "keywords": [
+        "swapwindow",
+        "move",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "swap-window-right",
+      "title": "Swap Window Right",
+      "description": "Trade places between the active window and its neighbour on the right.",
+      "mode": "no-view",
+      "keywords": [
+        "swapwindow",
+        "move",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "swap-window-up",
+      "title": "Swap Window Above",
+      "description": "Trade places between the active window and its neighbour above.",
+      "mode": "no-view",
+      "keywords": [
+        "hyprland",
+        "move",
+        "swapwindow",
+        "up"
+      ]
+    },
+    {
+      "name": "swap-window-down",
+      "title": "Swap Window Below",
+      "description": "Trade places between the active window and its neighbour below.",
+      "mode": "no-view",
+      "keywords": [
+        "down",
+        "hyprland",
+        "move",
+        "swapwindow"
+      ]
     },
     {
       "name": "rotate",
-      "title": "Rotate Windows",
-      "description": "Move each window into the next window's position.",
+      "title": "Rotate Windows Clockwise",
+      "description": "Move every window one slot clockwise, keeping the last layout you tiled with.",
       "mode": "no-view",
-      "icon": "rotate.png"
+      "icon": "rotate.png",
+      "keywords": [
+        "rollnext",
+        "roll next",
+        "cycle",
+        "hyprland"
+      ]
     },
     {
       "name": "rotate-backwards",
-      "title": "Rotate Windows Backwards",
-      "description": "Move each window into the previous window's position.",
+      "title": "Rotate Windows Counterclockwise",
+      "description": "Move every window one slot counterclockwise, keeping the last layout you tiled with.",
       "mode": "no-view",
-      "icon": "rotate-backwards.png"
+      "icon": "rotate-backwards.png",
+      "keywords": [
+        "rollprev",
+        "roll prev",
+        "cycle",
+        "hyprland"
+      ]
     },
     {
-      "name": "swap-with-largest",
-      "title": "Swap Active Window with Largest",
-      "description": "Trade places between the active window and the largest one.",
+      "name": "swap-displays",
+      "title": "Swap Displays",
+      "description": "Move every window to the other display. They land in the last layout you tiled with, or keep their place on the screen if you haven't tiled. With more than two displays, each display's windows move to the next.",
       "mode": "no-view",
-      "icon": "swap-with-largest.png"
+      "keywords": [
+        "swap screens",
+        "swap monitors",
+        "swapactiveworkspaces",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "distribute-displays",
+      "title": "Distribute Across Displays",
+      "description": "Spread your windows over every display, a share for each by size and no more than each can fit, then tile each display with the last layout you used.",
+      "mode": "no-view",
+      "keywords": [
+        "spread",
+        "balance",
+        "monitors",
+        "screens",
+        "displays"
+      ]
+    },
+    {
+      "name": "move-others",
+      "title": "Move Others to Next Display",
+      "description": "Keep the focused window on its display and move every other window there to the next display, tiled with the last layout you used.",
+      "mode": "no-view",
+      "keywords": [
+        "push others",
+        "solo",
+        "isolate",
+        "clear",
+        "hide others",
+        "monitors",
+        "screens",
+        "displays"
+      ]
+    },
+    {
+      "name": "move-all",
+      "title": "Move All to This Display",
+      "description": "Move every window from your other displays to the display with the focused window, tiled with the last layout you used.",
+      "mode": "no-view",
+      "keywords": [
+        "pull all",
+        "pull others",
+        "bring all",
+        "gather",
+        "collect",
+        "monitors",
+        "screens",
+        "displays"
+      ]
     },
     {
       "name": "toggle-menu-bar-visibility",
@@ -145,6 +356,21 @@
       "icon": "toggle-menu-bar.png"
     }
   ],
+  "tools": [
+    {
+      "name": "get-windows",
+      "title": "Get Windows",
+      "description": "List every display and every open window on the current desktop, with its app, title, display and frame."
+    },
+    {
+      "name": "arrange-windows",
+      "title": "Arrange Windows",
+      "description": "Move windows onto chosen displays in a chosen order and tile each display with a chosen layout."
+    }
+  ],
+  "ai": {
+    "instructions": "You arrange the user's open windows so they suit what the user is doing.\nAlways call get-windows first, then call arrange-windows once with a plan for every display.\nWork out the task from the apps, window titles and each window's role (work, reference, comms or background). Put the window the user is working in (usually the focused one, or the editor, document or design tool) first on the largest display, and use a master layout when one window clearly matters most.\nKeep related windows together on one display, such as an editor with its terminal and browser preview.\nPut supporting windows such as chat, music, mail, notes and settings on the smaller display, or last in the order.\nA display fits about three windows side by side when it is under 1600 points wide, and about six when it is wider. Do not give a display more than that unless there is nowhere else to put them.\nUse auto-tile when the windows matter equally. Use master-center only on displays wider than 2000 points.\nAfter arranging, say in one or two sentences what you put where and why. Do not list frames or ids."
+  },
   "dependencies": {
     "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.3.3"
