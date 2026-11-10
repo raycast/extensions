@@ -1,6 +1,6 @@
-import { ActionPanel, Application, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Application, Color, Icon, List } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { ReactElement, useMemo, useState } from "react";
 import { getGitHubClient } from "../api/oauth";
 import { useFrontmostApp } from "../hooks/useFrontmostApp";
 import { perPage, rememberTag, showDetail } from "../types/preferences";
@@ -16,7 +16,7 @@ interface GistListProps {
     tag: GithubGistTag;
     gistMutate: MutatePromise<Gist[]>;
     frontmostApp: Application;
-  }) => JSX.Element;
+  }) => ReactElement;
 }
 
 export function GistList({ searchPlaceholder, renderActions }: GistListProps) {
@@ -33,22 +33,24 @@ export function GistList({ searchPlaceholder, renderActions }: GistListProps) {
     pagination,
   } = useCachedPromise(
     (t: string) => async (options) => {
-      const data = await client.requestGist(t, options.page + 1, parseInt(perPage));
-      const hasMore = data[data.length - 1] != options.lastItem && options.page < 50;
-      return { data, hasMore };
+      return client.requestGist(t, options.page + 1, parseInt(perPage || "30"));
     },
     [tag],
     { keepPreviousData: true, failureToastOptions: { title: "Failed to load gists" } },
   );
 
-  const { data: gistContentData, isLoading: gistContentLoading } = useCachedPromise(
-    (rawUrl: string) => {
-      return client.octokit.request(`${rawUrl}`).then((response) => {
-        return response.data;
-      }) as Promise<string>;
+  const {
+    data: gistContentData,
+    isLoading: gistContentLoading,
+    error: gistContentError,
+    revalidate: reloadGistContent,
+  } = useCachedPromise(
+    async (rawUrl: string) => {
+      const response = await client.octokit.request(rawUrl);
+      return { rawUrl, content: String(response.data) };
     },
     [gistId],
-    { failureToastOptions: { title: "Failed to load gist content" } },
+    { execute: Boolean(gistId), failureToastOptions: { title: "Failed to load gist content" } },
   );
 
   const frontmostApp = useMemo(() => {
@@ -63,23 +65,20 @@ export function GistList({ searchPlaceholder, renderActions }: GistListProps) {
   }, [gistsData]);
 
   const gistContent = useMemo(() => {
-    if (!gistContentData) {
+    if (!gistContentData || gistContentData.rawUrl !== gistId || gistContentLoading) {
       return "";
     }
-    return gistContentData.toString();
-  }, [gistContentData]);
+    return gistContentData.content;
+  }, [gistContentData, gistId, gistContentLoading]);
 
   return (
     <List
       isShowingDetail={showDetail}
-      isLoading={gistsLoading}
+      isLoading={gistsLoading || gistContentLoading}
       pagination={pagination}
       searchBarPlaceholder={searchPlaceholder}
       onSelectionChange={(id) => {
-        if (id) {
-          const { url } = JSON.parse(id);
-          setGistId(url);
-        }
+        setGistId(id ? JSON.parse(id).url : "");
       }}
       searchBarAccessory={
         <List.Dropdown
@@ -124,19 +123,25 @@ Size: ${gistFile.size}`,
                   detail={
                     <List.Item.Detail
                       isLoading={gistContentLoading}
-                      markdown={formatGistContentDetail(gistFile, gistContent)}
+                      markdown={formatGistContentDetail(gistFile, gistFile.raw_url === gistId ? gistContent : "")}
                     />
                   }
                   actions={
                     <ActionPanel>
-                      {renderActions({
-                        gist,
-                        gistFileName: gistFile.filename,
-                        gistFileContent: gistContent,
-                        tag,
-                        gistMutate,
-                        frontmostApp,
-                      })}
+                      {!gistContentLoading && !gistContentError && gistContentData?.rawUrl === gistFile.raw_url ? (
+                        renderActions({
+                          gist,
+                          gistFileName: gistFile.filename,
+                          gistFileContent: gistContentData.content,
+                          tag,
+                          gistMutate,
+                          frontmostApp,
+                        })
+                      ) : gistContentError ? (
+                        <Action title="Retry Loading Gist" icon={Icon.Repeat} onAction={reloadGistContent} />
+                      ) : (
+                        <Action title="Loading Gist Content" icon={Icon.Clock} onAction={() => undefined} />
+                      )}
                     </ActionPanel>
                   }
                 />
