@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "snippet",
+    title: "Snippet",
+    description:
+      "Manage creator brand deals, sponsorship rates, brand emails, decisions and contract reviews through a connected Snippet account. 13 tools after sign-in. Hosted Streamable HTTP server at https://usesnippet.app/api/mcp with Snippet OAuth (authorization code and PKCE). A Snippet account is required; some actions require an active plan and available allowances. Direct HTTP in Raycast; mcp-remote fallback for other clients requires Node.js.",
+    icon: "https://usesnippet.app/assets/snippet-mcp-icon-512.png",
+    homepage: "https://usesnippet.app/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://usesnippet.app/api/mcp"],
+    },
+    remoteUrl: "https://usesnippet.app/api/mcp",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
