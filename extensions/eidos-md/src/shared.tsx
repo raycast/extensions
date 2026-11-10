@@ -1,17 +1,11 @@
 // What both commands share: the preferences, the projects list, a project's actions, and the view shown when there is
 // no Eidos on this machine (Raycast Extension REQ14).
-import { Action, getPreferenceValues, Icon, Keyboard, List, open, showToast, Toast } from "@raycast/api";
-import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { Action, getPreferenceValues, Icon, Keyboard, List, open } from "@raycast/api";
+import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { spawn } from "node:child_process";
 import { appBinary, EidosError } from "./lib/eidos";
 import { DOWNLOAD_URL, openLink } from "./lib/links";
 import { knownProjects, type Project } from "./lib/projects";
-
-export interface Preferences {
-  includeRecent?: boolean;
-  editor?: { path: string; name: string; bundleId?: string };
-  eidosPath?: string;
-}
 
 export function preferences(): Preferences {
   return getPreferenceValues<Preferences>();
@@ -52,11 +46,7 @@ export async function openProject(root: string): Promise<void> {
     }
     await open(openLink(root));
   } catch (cause) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Eidos MD did not open",
-      message: cause instanceof Error ? cause.message : String(cause),
-    });
+    await showFailureToast(cause, { title: "Eidos MD did not open" });
   }
 }
 
@@ -64,11 +54,7 @@ export async function openPage(root: string, route: string): Promise<void> {
   try {
     await open(openLink(root, route));
   } catch (cause) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Eidos MD did not open",
-      message: cause instanceof Error ? cause.message : String(cause),
-    });
+    await showFailureToast(cause, { title: "Eidos MD did not open" });
   }
 }
 

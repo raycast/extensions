@@ -19,7 +19,7 @@ export default function OpenProject() {
               <Action.Push
                 title="Add Project Folders"
                 icon={Icon.Folder}
-                target={<ProjectFolders />}
+                target={<ProjectFolders navigationTitle="Project Folders" />}
                 onPop={revalidate}
               />
             </ActionPanel>
@@ -46,7 +46,6 @@ export default function OpenProject() {
                   title="Search in Project"
                   icon={Icon.MagnifyingGlass}
                   target={<SearchProject initialRoot={project.root} />}
-                  shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -58,7 +57,7 @@ export default function OpenProject() {
                 <Action.Push
                   title="Manage Project Folders"
                   icon={Icon.Folder}
-                  target={<ProjectFolders />}
+                  target={<ProjectFolders navigationTitle="Project Folders" />}
                   onPop={revalidate}
                   shortcut={{
                     macOS: { modifiers: ["cmd", "shift"], key: "m" },

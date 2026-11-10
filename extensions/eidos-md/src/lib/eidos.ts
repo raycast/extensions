@@ -1,7 +1,7 @@
 // The eidos CLI, the only way the extension reads a project (Raycast Extension REQ11): the eidos the person's login
 // shell finds, else the CLI inside Eidos MD, run on the app's own Node the way the app's PATH shim runs it.
 import { execFile } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -13,8 +13,6 @@ export interface Runner {
   // what comes before the command's own arguments: the shim's script when the app's binary runs the CLI
   lead: string[];
   env: NodeJS.ProcessEnv;
-  // a Windows .cmd or .bat runs through the shell
-  shell: boolean;
 }
 
 // The CLI could not be found or could not run; `missing` says the person has neither the app nor the CLI.
@@ -32,11 +30,29 @@ const SHIM =
   "const p=require('path'),u=require('url');const r=process.platform==='darwin'?p.join(p.dirname(process.execPath),'..','Resources'):p.join(p.dirname(process.execPath),'resources');const c=p.join(r,'app.asar','node_modules','eidosmd','dist','src','cli.js');process.argv.splice(1,0,c);import(u.pathToFileURL(c).href)";
 
 function appRunner(binary: string): Runner {
-  return { file: binary, lead: ["-e", SHIM, "--"], env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" }, shell: false };
+  return { file: binary, lead: ["-e", SHIM, "--"], env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" } };
 }
 
-function plainRunner(file: string, env: NodeJS.ProcessEnv = process.env): Runner {
-  return { file, lead: [], env, shell: process.platform === "win32" && /\.(cmd|bat)$/i.test(file) };
+// A Windows .cmd only runs through cmd.exe, which expands %NAME% in the words searched for, so the extension never runs
+// one: it reads the script and runs what the script would. Two scripts put eidos on a Windows PATH: the one Eidos MD
+// writes runs the app's binary on the CLI inside it, and the one npm writes runs Node on the package's cli.js.
+export function scriptRunner(file: string, text: string, env: NodeJS.ProcessEnv = process.env): Runner | null {
+  const launcher = /^"([^"]+\.exe)" -e /im.exec(text)?.[1];
+  if (launcher) return { ...appRunner(launcher), env: { ...env, ELECTRON_RUN_AS_NODE: "1" } };
+  const script = /"%~?dp0%?\\?([^"%]*cli\.js)"/i.exec(text)?.[1];
+  if (script) {
+    return { file: process.execPath, lead: [path.join(path.dirname(file), ...script.split("\\"))], env };
+  }
+  return null;
+}
+
+function plainRunner(file: string, env: NodeJS.ProcessEnv = process.env): Runner | null {
+  if (!/\.(cmd|bat)$/i.test(file)) return { file, lead: [], env };
+  try {
+    return scriptRunner(file, readFileSync(file, "utf8"), env);
+  } catch {
+    return null;
+  }
 }
 
 // The PATH a login shell sets up, which an app started from the Dock does not inherit.
@@ -106,10 +122,17 @@ let found: Promise<Runner> | null = null;
 export function findEidos(preferred?: string): Promise<Runner> {
   if (found) return found;
   found = (async () => {
-    if (preferred && existsSync(preferred)) return plainRunner(preferred);
+    if (preferred && existsSync(preferred)) {
+      const chosen = plainRunner(preferred);
+      if (chosen) return chosen;
+      throw new EidosError(
+        `${preferred} is a script the extension cannot run. Choose eidos's .exe or Eidos MD's own eidos.cmd.`,
+      );
+    }
     const env = process.platform === "win32" ? process.env : await loginShellEnv();
     const command = await onPath(env);
-    if (command) return plainRunner(command, env);
+    const onPathRunner = command ? plainRunner(command, env) : null;
+    if (onPathRunner) return onPathRunner;
     const binary = await appBinary();
     if (binary) return appRunner(binary);
     throw new EidosError("Eidos MD is not installed, and eidos is not on your PATH.", true);
@@ -120,27 +143,17 @@ export function findEidos(preferred?: string): Promise<Runner> {
   return found;
 }
 
-// A Windows shell takes one command line: each argument quoted, its own quotes doubled.
-function quoted(argument: string): string {
-  return `"${argument.replace(/"/g, '""')}"`;
-}
-
 // One eidos command in a project, its --json output parsed.
 export async function eidosJson<T>(runner: Runner, root: string, args: string[]): Promise<T> {
   const all = [...runner.lead, ...args, "--project", root, "--json"];
   try {
-    const { stdout } = await run(
-      runner.shell ? quoted(runner.file) : runner.file,
-      runner.shell ? all.map(quoted) : all,
-      {
-        cwd: root,
-        env: runner.env,
-        maxBuffer: 256 * 1024 * 1024,
-        timeout: 30_000,
-        shell: runner.shell,
-        windowsHide: true,
-      },
-    );
+    const { stdout } = await run(runner.file, all, {
+      cwd: root,
+      env: runner.env,
+      maxBuffer: 256 * 1024 * 1024,
+      timeout: 30_000,
+      windowsHide: true,
+    });
     return JSON.parse(stdout) as T;
   } catch (cause) {
     const stderr = (cause as { stderr?: unknown }).stderr;
@@ -159,12 +172,7 @@ export function hasCommand(runner: Runner, command: string): Promise<boolean> {
   const held = known.get(key);
   if (held) return held;
   const all = [...runner.lead, "help", command];
-  const asked = run(runner.shell ? quoted(runner.file) : runner.file, runner.shell ? all.map(quoted) : all, {
-    env: runner.env,
-    timeout: 15_000,
-    shell: runner.shell,
-    windowsHide: true,
-  }).then(
+  const asked = run(runner.file, all, { env: runner.env, timeout: 15_000, windowsHide: true }).then(
     () => true,
     () => false,
   );

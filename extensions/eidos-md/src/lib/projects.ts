@@ -1,6 +1,7 @@
 // The Eidos projects this machine knows (Raycast Extension REQ1): the ones Eidos MD opened lately, from its own
 // state.json (REQ10), the ones in the projects folder, and the folders named in the extension's preferences.
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { readdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
@@ -66,28 +67,28 @@ export function projectsFolder(dataDir: string, home: string = homedir()): strin
 
 // The projects in and beneath a folder, to `depth` levels; a project's own folders are not searched further, and
 // node_modules, dist, and dot-folders never are.
-export function projectsBeneath(folder: string, depth: number): string[] {
+export async function projectsBeneath(folder: string, depth: number): Promise<string[]> {
   if (isProject(folder)) return [folder];
   if (depth === 0) return [];
   let names: string[];
   try {
-    names = readdirSync(folder);
+    names = await readdir(folder);
   } catch {
     return [];
   }
-  const found: string[] = [];
-  for (const name of names) {
-    if (name.startsWith(".") || SKIPPED.has(name)) continue;
-    const child = path.join(folder, name);
-    let isFolder = false;
-    try {
-      isFolder = statSync(child).isDirectory();
-    } catch {
-      isFolder = false;
-    }
-    if (isFolder) found.push(...projectsBeneath(child, depth - 1));
-  }
-  return found;
+  const children = names
+    .filter((name) => !name.startsWith(".") && !SKIPPED.has(name))
+    .map((name) => path.join(folder, name));
+  const found = await Promise.all(
+    children.map(async (child) => {
+      const isFolder = await stat(child).then(
+        (info) => info.isDirectory(),
+        () => false,
+      );
+      return isFolder ? projectsBeneath(child, depth - 1) : [];
+    }),
+  );
+  return found.flat();
 }
 
 // The person's Project Folders, as kept: each folder once, by its whole path, in the order added.
@@ -145,9 +146,9 @@ export function distinctNames(projects: Project[]): Project[] {
 
 // Every project this machine knows, each once: the app's recent ones first, newest first, then the rest by name.
 // A project that has moved or been deleted is left out.
-export function knownProjects(
+export async function knownProjects(
   options: { dataDir?: string; extraFolders?: string[]; includeRecent?: boolean } = {},
-): Project[] {
+): Promise<Project[]> {
   const dataDir = options.dataDir ?? appDataDir();
   const seen = new Set<string>();
   const out: Project[] = [];
@@ -158,11 +159,13 @@ export function knownProjects(
     seen.add(key);
     out.push({ root: key, name: projectName(key), opened });
   }
-  const found = [
-    // the projects folder holds groups and subgroups as folders, so it is searched deeper than a folder named here
-    ...projectsBeneath(projectsFolder(dataDir), 4),
-    ...(options.extraFolders ?? []).flatMap((folder) => projectsBeneath(folder, 2)),
-  ];
+  const found = (
+    await Promise.all([
+      // the projects folder holds groups and subgroups as folders, so it is searched deeper than a folder named here
+      projectsBeneath(projectsFolder(dataDir), 4),
+      ...(options.extraFolders ?? []).map((folder) => projectsBeneath(folder, 2)),
+    ])
+  ).flat();
   const rest: Project[] = [];
   for (const root of found) {
     const key = path.resolve(root);

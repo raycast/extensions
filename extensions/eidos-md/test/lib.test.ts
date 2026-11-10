@@ -6,17 +6,30 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { blueprintEntry, docEntries, markedSnippet, matches, taskEntry } from "../src/lib/index";
+import { scriptRunner } from "../src/lib/eidos";
 import { markdownLink, openLink } from "../src/lib/links";
-import { distinctNames, knownProjects, projectName, projectsFolder, recentProjects, shownFolder, withFolders } from "../src/lib/projects";
+import {
+  distinctNames,
+  knownProjects,
+  projectName,
+  projectsFolder,
+  recentProjects,
+  shownFolder,
+  withFolders,
+} from "../src/lib/projects";
 
 function project(folder: string, product?: string): string {
   mkdirSync(path.join(folder, ".eidos", "plugins", "eidosmd"), { recursive: true });
   writeFileSync(path.join(folder, ".eidos", "Framework.yaml"), "eidos_version: 5.10.0\n");
-  if (product) writeFileSync(path.join(folder, ".eidos", "plugins", "eidosmd", "settings.yaml"), `# a comment\nproduct: ${product}\n`);
+  if (product)
+    writeFileSync(
+      path.join(folder, ".eidos", "plugins", "eidosmd", "settings.yaml"),
+      `# a comment\nproduct: ${product}\n`,
+    );
   return folder;
 }
 
-test("the projects are the app's recent ones, newest first, then the projects folder's and the named folders', each once", () => {
+test("the projects are the app's recent ones, newest first, then the projects folder's and the named folders', each once", async () => {
   const home = mkdtempSync(path.join(tmpdir(), "eidos-raycast-"));
   const data = path.join(home, "data");
   mkdirSync(data);
@@ -40,7 +53,7 @@ test("the projects are the app's recent ones, newest first, then the projects fo
       zoom: 0,
     }),
   );
-  const found = knownProjects({ dataDir: data, extraFolders: [path.join(home, "side")] });
+  const found = await knownProjects({ dataDir: data, extraFolders: [path.join(home, "side")] });
   assert.deepEqual(
     found.map((entry) => [entry.name, entry.root, entry.opened !== null]),
     [
@@ -51,7 +64,9 @@ test("the projects are the app's recent ones, newest first, then the projects fo
     "a moved project is left out, one listed twice is listed once, and node_modules is never searched",
   );
   assert.deepEqual(
-    knownProjects({ dataDir: data, extraFolders: [path.join(home, "side")], includeRecent: false }).map((entry) => entry.name),
+    (await knownProjects({ dataDir: data, extraFolders: [path.join(home, "side")], includeRecent: false })).map(
+      (entry) => entry.name,
+    ),
     ["idea", "Northwind"],
     "without the recent list, only the folders' projects, by name",
   );
@@ -62,7 +77,10 @@ test("the recent list is read from its `recent` entries alone, and a missing or 
   assert.deepEqual(recentProjects(data), []);
   writeFileSync(path.join(data, "state.json"), "{ not json");
   assert.deepEqual(recentProjects(data), []);
-  writeFileSync(path.join(data, "state.json"), JSON.stringify({ recent: [{ root: "/a", opened: "x" }, { root: 3 }, null] }));
+  writeFileSync(
+    path.join(data, "state.json"),
+    JSON.stringify({ recent: [{ root: "/a", opened: "x" }, { root: 3 }, null] }),
+  );
   assert.deepEqual(recentProjects(data), [{ root: "/a", opened: "x" }]);
 });
 
@@ -102,7 +120,12 @@ test("a row is found by every typed word, in any case, in its id, title, summary
 });
 
 test("a top-level doc opens at its own page, and a task at the route the CLI gives it", () => {
-  const docs = docEntries({ top_level: [{ title: "Orientation", path: "../orientation.md" }, { title: "Odd", path: "elsewhere.md" }] });
+  const docs = docEntries({
+    top_level: [
+      { title: "Orientation", path: "../orientation.md" },
+      { title: "Odd", path: "elsewhere.md" },
+    ],
+  });
   assert.deepEqual(
     docs.map((doc) => [doc.title, doc.file, doc.route]),
     [["Orientation", "orientation.md", "/doc/orientation.md"]],
@@ -129,7 +152,10 @@ test("the links name the project and the page, and a copied link is relative to 
   assert.equal(openLink("C:\\p", "/b/specs/login.md"), "eidosmd://open?project=C%3A%5Cp&to=%2Fb%2Fspecs%2Flogin.md");
   assert.equal(markdownLink("Login [beta]", "specs/log in.md"), "[Login \\[beta\\]](specs/log%20in.md)");
   assert.equal(markedSnippet("…the [Passke]ys…"), "…the **Passke**ys…");
-  assert.equal(markedSnippet("… The Format _[What] a [course] is made of_, video…"), "… The Format **What** a **course** is made of, video…");
+  assert.equal(
+    markedSnippet("… The Format _[What] a [course] is made of_, video…"),
+    "… The Format **What** a **course** is made of, video…",
+  );
   assert.equal(markedSnippet("…## [How] They Compete…"), "…**How** They Compete…");
   assert.equal(markedSnippet("set the [snake]_case flag"), "set the **snake**_case flag");
 });
@@ -154,5 +180,26 @@ test("projects that share a name are told apart by where each sits in its reposi
       { root: solo, name: projectName(solo), opened: null },
     ]).map((entry) => entry.name),
     ["examples · academy", "examples · world", "Solo"],
+  );
+});
+
+test("a Windows script is never run through the shell: the extension runs what Eidos MD's or npm's script would", () => {
+  const app = scriptRunner(
+    "C:\\Users\\ana\\AppData\\Local\\eidosmd\\bin\\eidos.cmd",
+    '@echo off\r\nsetlocal\r\nset ELECTRON_RUN_AS_NODE=1\r\n"C:\\Program Files\\Eidos MD\\Eidos MD.exe" -e "const p=require(\'path\')" -- %*\r\n',
+  );
+  assert.equal(app?.file, "C:\\Program Files\\Eidos MD\\Eidos MD.exe");
+  assert.equal(app?.lead[0], "-e");
+  assert.equal(app?.env.ELECTRON_RUN_AS_NODE, "1");
+  const npm = scriptRunner(
+    "/npm/eidos.cmd",
+    '@ECHO off\r\nGOTO start\r\n:find_dp0\r\nSET dp0=%~dp0\r\n"%_prog%"  "%dp0%\\node_modules\\eidosmd\\dist\\src\\cli.js" %*\r\n',
+  );
+  assert.equal(npm?.file, process.execPath);
+  assert.deepEqual(npm?.lead, [path.join("/npm", "node_modules", "eidosmd", "dist", "src", "cli.js")]);
+  assert.equal(
+    scriptRunner("/x/other.cmd", "@echo off\r\nsomething %*\r\n"),
+    null,
+    "a script it cannot read is not run",
   );
 });

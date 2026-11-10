@@ -96,6 +96,7 @@ export default function SearchProject(props: { initialRoot?: string }) {
       drafts: keep(held.drafts),
       // with nothing typed, the tasks still open; a search finds closed ones too
       tasks: query === "" ? held.tasks.filter((task) => task.task?.open !== false) : keep(held.tasks),
+      unread: held.unread,
     };
   }, [index.data, query]);
 
@@ -159,6 +160,21 @@ export default function SearchProject(props: { initialRoot?: string }) {
             description={others.length > 0 ? "Search another project from the menu beside the search bar." : undefined}
             actions={switcher ? <ActionPanel>{switcher}</ActionPanel> : undefined}
           />
+          {shown.unread.length > 0 ? (
+            <List.Section>
+              <NoticeItem
+                title={`Part of ${project.name} could not be read`}
+                markdown={shown.unread.map((one) => `**${one.part}:** ${one.message}`).join("\n\n")}
+                detail={showingDetail}
+                actions={
+                  <Action.CopyToClipboard
+                    title="Copy Error"
+                    content={shown.unread.map((one) => `${one.part}: ${one.message}`).join("\n")}
+                  />
+                }
+              />
+            </List.Section>
+          ) : null}
           <EntrySection
             title="Top-Level Docs"
             entries={shown.docs}
@@ -266,7 +282,7 @@ function EntryItem(props: ItemProps & { entry: Entry }) {
       icon={KIND_ICON[entry.kind]}
       title={entry.title}
       subtitle={entry.id ?? undefined}
-      accessories={accessories}
+      accessories={props.detail ? undefined : accessories}
       detail={props.detail ? <EntryDetail entry={entry} root={project.root} /> : undefined}
       actions={
         <EntryActions entry={entry} project={project} onToggleDetail={props.onToggleDetail} switcher={props.switcher} />
@@ -398,6 +414,12 @@ function EntryDetail(props: { entry: Entry; root: string; snippet?: string }) {
           {entry.place ? (
             <List.Item.Detail.Metadata.Label title={entry.kind === "task" ? "Status" : "Where"} text={entry.place} />
           ) : null}
+          {entry.task?.assignee.length ? (
+            <List.Item.Detail.Metadata.Label
+              title={entry.task.assignee.length === 1 ? "Assignee" : "Assignees"}
+              text={entry.task.assignee.map((alias) => `@${alias}`).join(", ")}
+            />
+          ) : null}
           {entry.summary && entry.kind === "blueprint" ? (
             <List.Item.Detail.Metadata.Label title="Summary" text={entry.summary} />
           ) : null}
@@ -421,17 +443,13 @@ function EntryDetail(props: { entry: Entry; root: string; snippet?: string }) {
   );
 }
 
-function NoticeItem(props: { title: string; markdown: string; detail: boolean }) {
+function NoticeItem(props: { title: string; markdown: string; detail: boolean; actions?: ReactNode }) {
   return (
     <List.Item
       icon={{ source: Icon.Info, tintColor: Color.Orange }}
       title={props.title}
       detail={props.detail ? <List.Item.Detail markdown={`## ${props.title}\n\n${props.markdown}`} /> : undefined}
-      actions={
-        <ActionPanel>
-          <DownloadAction />
-        </ActionPanel>
-      }
+      actions={<ActionPanel>{props.actions ?? <DownloadAction />}</ActionPanel>}
     />
   );
 }

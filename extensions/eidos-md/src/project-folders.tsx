@@ -13,11 +13,22 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { projectsBeneath, shownFolder, withFolders } from "./lib/projects";
 import { useProjectFolders } from "./shared";
 
-export default function ProjectFolders() {
+// Raycast titles the command's own view; a screen pushed from Open Project names itself.
+export default function ProjectFolders(props: { navigationTitle?: string }) {
   const { folders, setFolders, isLoading } = useProjectFolders();
+  // counted off the render, since a folder on a slow drive takes a while to walk
+  const counts = usePromise(
+    async (held: string[]) =>
+      new Map(
+        await Promise.all(held.map(async (folder) => [folder, (await projectsBeneath(folder, 2)).length] as const)),
+      ),
+    [folders],
+    { execute: !isLoading },
+  );
 
   async function remove(folder: string) {
     const sure = await confirmAlert({
@@ -33,7 +44,11 @@ export default function ProjectFolders() {
 
   const add = <AddFolders folders={folders} onAdd={setFolders} />;
   return (
-    <List isLoading={isLoading} navigationTitle="Project Folders" searchBarPlaceholder="Filter project folders">
+    <List
+      isLoading={isLoading || counts.isLoading}
+      navigationTitle={props.navigationTitle}
+      searchBarPlaceholder="Filter project folders"
+    >
       <List.EmptyView
         icon={Icon.Folder}
         title="No project folders"
@@ -45,13 +60,13 @@ export default function ProjectFolders() {
         }
       />
       {folders.map((folder) => {
-        const found = projectsBeneath(folder, 2).length;
+        const found = counts.data?.get(folder);
         return (
           <List.Item
             key={folder}
             icon={Icon.Folder}
             title={shownFolder(folder)}
-            accessories={[{ text: found === 1 ? "1 project" : `${found} projects` }]}
+            accessories={found === undefined ? [] : [{ text: found === 1 ? "1 project" : `${found} projects` }]}
             actions={
               <ActionPanel>
                 <Action.Push title="Add Folder" icon={Icon.Plus} target={add} shortcut={Keyboard.Shortcut.Common.New} />

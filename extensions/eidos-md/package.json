@@ -5,7 +5,6 @@
   "description": "Open your Eidos projects in Eidos MD and search inside one: blueprints, docs, drafts, tasks, and the words in them.",
   "icon": "icon.png",
   "author": "iUngerTime",
-  "owner": "tvp",
   "access": "public",
   "categories": [
     "Productivity",

@@ -180,29 +180,45 @@ export interface ProjectIndex {
   docs: Entry[];
   drafts: Entry[];
   tasks: Entry[];
+  // the parts that could not be read, shown beside what could
+  unread: Array<{ part: string; message: string }>;
 }
 
-// A plugin that is off (the Backlog, the drafts) gives nothing rather than failing the whole search.
-async function orNothing<T>(read: Promise<T>, empty: T): Promise<T> {
-  try {
-    return await read;
-  } catch {
-    return empty;
-  }
+interface PluginRow {
+  name: string;
+  enabled: boolean;
 }
 
 export async function loadIndex(runner: Runner, root: string): Promise<ProjectIndex> {
+  const unread: ProjectIndex["unread"] = [];
+  async function part<T>(name: string, read: Promise<T>, empty: T): Promise<T> {
+    try {
+      return await read;
+    } catch (cause) {
+      unread.push({ part: name, message: cause instanceof Error ? cause.message : String(cause) });
+      return empty;
+    }
+  }
+  // the Backlog is a plugin a project may leave off, which is no failure; an eidos too old to list its plugins is
+  // asked for the tasks anyway
+  const backlogOn = eidosJson<PluginRow[]>(runner, root, ["plugin"]).then(
+    (plugins) => plugins.some((plugin) => plugin.name === "backlog" && plugin.enabled),
+    () => true,
+  );
   const [list, framework, drafts, backlog] = await Promise.all([
     eidosJson<ListRow[]>(runner, root, ["list"]),
-    orNothing(eidosJson<FrameworkJson>(runner, root, ["framework"]), {}),
-    orNothing(eidosJson<{ drafts: DraftRow[] }>(runner, root, ["drafts"]), { drafts: [] }),
-    orNothing(eidosJson<{ tasks: TaskRow[] }>(runner, root, ["backlog"]), { tasks: [] }),
+    part("The top-level docs", eidosJson<FrameworkJson>(runner, root, ["framework"]), {}),
+    part("The drafts", eidosJson<{ drafts: DraftRow[] }>(runner, root, ["drafts"]), { drafts: [] }),
+    backlogOn.then((on) =>
+      on ? part("The tasks", eidosJson<{ tasks: TaskRow[] }>(runner, root, ["backlog"]), { tasks: [] }) : { tasks: [] },
+    ),
   ]);
   return {
     blueprints: list.map(blueprintEntry),
     docs: docEntries(framework),
     drafts: drafts.drafts.map(draftEntry),
     tasks: backlog.tasks.map(taskEntry),
+    unread,
   };
 }
 
