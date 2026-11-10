@@ -15,8 +15,6 @@ export type Item = {
   max?: Partial<Size>;
   active?: boolean;
   title?: string;
-  /** The bundle id of the app it belongs to. */
-  app?: string;
 };
 
 /** Where a window goes. `screen` moves it to another screen, with `frame` in that screen's coordinates. */

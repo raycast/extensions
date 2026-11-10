@@ -1,6 +1,7 @@
 // The tiling layouts by name. The last one used is remembered, so Rotate, Swap, Grow Master and
 // Pivot rerun it instead of picking a layout of their own.
 
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import {
   MASTER_RATIO,
   master,
@@ -20,8 +21,8 @@ import {
   distributeDisplays,
   listWindows,
   moveAll,
+  isPanel,
   moveOthers,
-  openApp,
   openPanel,
   panelTitle,
   placeWindows,
@@ -42,6 +43,7 @@ const SIDEBAR_WIDTH = 400; // asked for. An app that needs more keeps its real m
 
 const LAST = "last-tile";
 const SIDEBAR = "sidebar"; // "on" while a sidebar is pinned. Layouts then arrange the rest around it.
+const PINNED = "sidebar-window"; // what is pinned: "notes", "ai", or the id of a window
 /** What `last-tile` held when the sidebar was a layout of its own. */
 const OLD_SIDEBAR_LAYOUT = "auto-tile-sidebar";
 const SPLIT = "split"; // "columns" when Pivot has turned Auto Tile on its side
@@ -77,19 +79,12 @@ function build(name: TileName, lead: "focused" | "largest" = "largest", withSide
 
 /** `layout` with the sidebar pinned down the right of it. */
 function beside(layout: Layout): Built {
-  const { gap, sidebar: choice, sidebarApp: app } = prefs();
-  const side = (pinned: (i: Item) => boolean) => sidebar(pinned, SIDEBAR_WIDTH, layout, gap);
-  if (choice === "notes" || choice === "ai") {
-    const pinned = (i: Item) => i.title === panelTitle(choice);
-    return { layout: side(pinned), pinned, panel: choice, open: () => openPanel(choice) };
-  }
-  if (choice === "app" && app?.bundleId) {
-    const pinned = (i: Item) => i.app === app.bundleId;
-    return { layout: side(pinned), pinned, open: () => openApp(app).then(() => undefined) };
-  }
-  // Whichever window is active. Also when An App is chosen but no app is picked yet.
-  const pinned = (i: Item) => !!i.active;
-  return { layout: side(pinned), pinned };
+  const { gap } = prefs();
+  const what = cache.get(PINNED) ?? "notes";
+  // Raycast Notes or AI Chat, found by title, or the one window that was focused when it was pinned
+  const pinned = (i: Item) => (isPanel(what) ? i.title === panelTitle(what) : i.id === what);
+  const built: Built = { layout: sidebar(pinned, SIDEBAR_WIDTH, layout, gap), pinned };
+  return isPanel(what) ? { ...built, panel: what, open: () => openPanel(what) } : built;
 }
 
 /** The layout on its own, without a sidebar or stacking. */
@@ -126,10 +121,27 @@ export function runTile(name: TileName, done?: string) {
 
 /**
  * Pins the sidebar, or lets it go, and tiles again in the layout already in use. While it is pinned,
- * every layout arranges the other windows beside it. Opens the sidebar's Raycast window if needed.
+ * every layout arranges the other windows beside it. What gets pinned is Toggle Sidebar's own preference:
+ * Raycast Notes or AI Chat, opened if needed, or the window that has focus right now.
  */
-export function toggleSidebar() {
+export async function toggleSidebar() {
   const on = !sidebarOn();
+  if (on) {
+    const choice = getPreferenceValues<Preferences.ToggleSidebar>().sidebar ?? "notes";
+    if (isPanel(choice)) {
+      cache.set(PINNED, choice);
+    } else {
+      // Focus is on Raycast until its window closes
+      await closeMainWindow();
+      const focused = (await listWindows().catch(() => ({ windows: [] }))).windows.find((w) => w.focused);
+      if (!focused) {
+        return run(async () => {
+          throw new Error("Click into the window you want as the sidebar, then run Toggle Sidebar again.");
+        });
+      }
+      cache.set(PINNED, focused.id);
+    }
+  }
   cache.set(SIDEBAR, on ? "on" : "off");
   // Whichever window is master stays master
   const { layout, open } = build(last());

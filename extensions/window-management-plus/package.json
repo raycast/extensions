@@ -63,39 +63,6 @@
           "value": "24"
         }
       ]
-    },
-    {
-      "name": "sidebar",
-      "type": "dropdown",
-      "required": false,
-      "default": "notes",
-      "title": "Sidebar",
-      "description": "Window pinned full height down the right by Toggle Sidebar.",
-      "data": [
-        {
-          "title": "Raycast Notes",
-          "value": "notes"
-        },
-        {
-          "title": "Raycast AI Chat",
-          "value": "ai"
-        },
-        {
-          "title": "An App",
-          "value": "app"
-        },
-        {
-          "title": "Active Window",
-          "value": "active"
-        }
-      ]
-    },
-    {
-      "name": "sidebarApp",
-      "type": "appPicker",
-      "required": false,
-      "title": "Sidebar App",
-      "description": "The app pinned as the sidebar when Sidebar is set to An App. It is opened if it isn't running."
     }
   ],
   "commands": [
@@ -113,7 +80,7 @@
     {
       "name": "toggle-sidebar",
       "title": "Toggle Sidebar",
-      "description": "Pin the sidebar app (Raycast Notes by default) full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.",
+      "description": "Pin a window full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.",
       "mode": "no-view",
       "icon": "toggle-sidebar.png",
       "keywords": [
@@ -122,6 +89,30 @@
         "notes",
         "ai chat",
         "auto tile with sidebar"
+      ],
+      "preferences": [
+        {
+          "name": "sidebar",
+          "type": "dropdown",
+          "required": false,
+          "default": "notes",
+          "title": "Sidebar",
+          "description": "What Toggle Sidebar pins. Focused Window pins whichever window you are in when you run it, so any app can be the sidebar.",
+          "data": [
+            {
+              "title": "Raycast Notes",
+              "value": "notes"
+            },
+            {
+              "title": "Raycast AI Chat",
+              "value": "ai"
+            },
+            {
+              "title": "Focused Window",
+              "value": "focused"
+            }
+          ]
+        }
       ]
     },
     {

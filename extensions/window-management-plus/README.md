@@ -7,7 +7,7 @@ Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux:
 | Command                                     | Result                                                                                                                                                              |
 | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Auto Tile                                   | Arrange every visible window in an even grid. Pivot Layout changes its shape.                                                                                       |
-| Toggle Sidebar                              | Pin the sidebar app full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.                                |
+| Toggle Sidebar                              | Pin a window full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.                                       |
 | Smart Arrange                               | Arrange windows by what each app is for. The focused window leads the largest display with your other work beside it. Chat, mail and music go to the other display. |
 | Pivot Layout                                | Turn Auto Tile to its next shape: every window side by side, then two small above one large, then two small beside one large.                                       |
 | Master Layout Left / Right                  | The focused window becomes the master on one side. The rest stack on the other. On a display without the focused window, the largest window is the master.          |
@@ -45,7 +45,7 @@ In Raycast AI, mention `@window-management-plus` and say what you want, like "ar
 ## Preferences
 
 - **Gap**: space between windows, from 0 to 24 points.
-- **Sidebar**: the window Toggle Sidebar pins down the right. Raycast Notes (the default) or AI Chat, any app you pick under **Sidebar App**, or whichever window has focus. Notes, AI Chat and a picked app are opened if they aren't already.
+- **Sidebar**, under the Toggle Sidebar command: what it pins. Raycast Notes (the default) and AI Chat are opened if they aren't already. Focused Window pins whichever window you are in when you run it, so any app can be the sidebar.
 
 ## Screens
 

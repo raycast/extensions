@@ -8,9 +8,7 @@ import {
   environment,
   getPreferenceValues,
   launchCommand,
-  open,
   showHUD,
-  type Application,
 } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { arrange, assignDisplays, freshLimits, toItem, type Limits, type System, type Win } from "./arrange";
@@ -21,10 +19,11 @@ const jxa = (script: string) => runAppleScript(script, { language: "JavaScript" 
 const jxaJSON = async <T>(script: string): Promise<T> => JSON.parse(await jxa(script));
 
 export type Panel = "notes" | "ai";
+export const isPanel = (value: unknown): value is Panel => value === "notes" || value === "ai";
 
 export const prefs = () => {
   const p = getPreferenceValues<Preferences>();
-  return { gap: Number(p.gap) || 0, sidebar: p.sidebar ?? "notes", sidebarApp: p.sidebarApp };
+  return { gap: Number(p.gap) || 0 };
 };
 
 /**
@@ -436,19 +435,6 @@ w.size = ${size}
 w.position = ${position}
 w.size = ${size}`);
 };
-
-/** Opens an app when it has no window on this desktop yet, and waits for one. */
-export async function openApp(app: Application): Promise<void> {
-  const hasWindow = async () =>
-    (await WindowManagement.getWindowsOnActiveDesktop()).some((w) => w.application?.bundleId === app.bundleId);
-  if (await hasWindow()) return;
-  await open(app.path);
-  for (let i = 0; i < 30; i++) {
-    await new Promise((r) => setTimeout(r, 200));
-    if (await hasWindow()) return;
-  }
-  throw new Error(`${app.name} did not open a window.`);
-}
 
 /** Opens Raycast Notes or AI Chat when it isn't open yet. Returns its window title. */
 export async function openPanel(panel: Panel): Promise<string> {

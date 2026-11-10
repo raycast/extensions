@@ -330,17 +330,3 @@ test("learned limits expire, so one bad reading can't stick", () => {
   ]);
   assert.deepEqual([...freshLimits(learned, now).keys()], ["fresh"]);
 });
-
-test("a window carries its app, so a sidebar can pin any app", async () => {
-  const { system, frame } = fake([
-    { id: "a" },
-    { id: "b", frame: { x: 500, y: 0, width: 100, height: 100 } },
-    { id: "slack", bundleId: "com.tinyspeck.slackmacgap", frame: { x: 0, y: 500, width: 100, height: 100 } },
-  ]);
-  await arrange(
-    system,
-    sidebar((i) => i.app === "com.tinyspeck.slackmacgap", 400, rows(2)),
-  );
-  assert.deepEqual(frame("slack"), { x: 800, y: 0, width: 400, height: 800 });
-  assert.equal(frame("a").width, 400);
-});
