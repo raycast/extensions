@@ -113,11 +113,11 @@ test("windows that can't be moved are reported", async () => {
 test("master keeps the window it picked first as the master when an app clamps", async () => {
   const { system, frame } = fake([
     { id: "big", frame: { x: 0, y: 0, width: 900, height: 700 } },
-    { id: "wide", frame: { x: 0, y: 0, width: 1000, height: 400 }, minWidth: 1000 },
+    { id: "wide", frame: { x: 0, y: 0, width: 850, height: 400 }, minWidth: 850 },
   ]);
   await arrange(system, master({ side: "left" }));
-  assert.deepEqual(frame("big"), { x: 0, y: 0, width: 200, height: 800 });
-  assert.equal(frame("wide").x, 200);
+  assert.deepEqual(frame("big"), { x: 0, y: 0, width: 350, height: 800 });
+  assert.equal(frame("wide").x, 350);
 });
 
 test("sizes learned on an earlier run are used straight away, so windows move once", async () => {
@@ -329,4 +329,24 @@ test("learned limits expire, so one bad reading can't stick", () => {
     ["undated", { min: { width: 900 } }],
   ]);
   assert.deepEqual([...freshLimits(learned, now).keys()], ["fresh"]);
+});
+
+test("a window that seems to need most of the screen isn't believed", async () => {
+  const { system } = fake([
+    { id: "a", frame: { x: 0, y: 0, width: 1200, height: 800 }, minWidth: 1000 },
+    { id: "b", frame: { x: 900, y: 0, width: 100, height: 100 } },
+  ]);
+  const learned = new Map();
+  await arrange(system, rows(2), 3, learned);
+  assert.equal(learned.get("a")?.min?.width, undefined);
+});
+
+test("a window that answers unreliably is never learned from", async () => {
+  const { system } = fake([
+    { id: "notes", learns: false, minWidth: 700 },
+    { id: "b", frame: { x: 900, y: 0, width: 100, height: 100 } },
+  ]);
+  const learned = new Map();
+  await arrange(system, rows(2), 3, learned);
+  assert.equal(learned.size, 0);
 });

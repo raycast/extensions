@@ -6,6 +6,8 @@ import { carry, crowded, shares, type Frame, type Item, type Layout, type Placem
 export type Win = Pick<Item, "id" | "frame" | "active" | "title"> & {
   screen: number;
   resizable: boolean;
+  /** False when the window answers too unreliably for its size to be read as a limit. */
+  learns?: boolean;
   /** What to call the window in a message, like its app's name. */
   name?: string;
   /** The window's own title, when macOS gives it. */
@@ -30,6 +32,9 @@ export const LIMIT_TTL_MS = 10 * 60 * 1000;
 export function freshLimits(learned: Map<string, Limits>, now = Date.now()): Map<string, Limits> {
   return new Map([...learned].filter(([, l]) => l.at !== undefined && now - l.at < LIMIT_TTL_MS));
 }
+
+/** The most of a screen's width or height that a learned minimum can claim. */
+const MAX_MINIMUM = 0.75;
 
 /** How long a slow app gets to finish resizing before its size is taken as a limit. */
 const SLOW_APP_MS = 300;
@@ -109,14 +114,16 @@ export async function arrange(
     for (const { id, frame } of placements) {
       const now = after.find((w) => w.id === id);
       // A window that didn't move tells us nothing about its app's limits
-      if (!now?.resizable || failed.some((f) => f.id === id)) continue;
+      if (!now?.resizable || now.learns === false || failed.some((f) => f.id === id)) continue;
       // Bigger than asked means the app has a minimum, smaller a maximum. Frames are read once they settle,
       // so a window still mid-resize isn't mistaken for either.
       const limits = learned.get(id) ?? {};
       const min = { ...limits.min };
       const max = { ...limits.max };
-      // A minimum bigger than the screen is a misread, not a limit
-      const fits = areas[now.screen] ?? now.frame;
+      // No app needs most of a screen. A "minimum" that big is a window that hadn't resized yet, and
+      // believing it would leave no room for anything else.
+      const area = areas[now.screen] ?? now.frame;
+      const fits = { width: area.width * MAX_MINIMUM, height: area.height * MAX_MINIMUM };
       if (now.frame.width - frame.width > 2 && now.frame.width <= fits.width) min.width = now.frame.width;
       if (frame.width - now.frame.width > 2) max.width = now.frame.width;
       if (now.frame.height - frame.height > 2 && now.frame.height <= fits.height) min.height = now.frame.height;

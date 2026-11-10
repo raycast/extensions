@@ -62,7 +62,7 @@ export const tile = (
  */
 /** The one Cache for the extension. Two instances would each rewrite the index and lose the other's keys. */
 export const cache = new Cache();
-const LEARNED = "window-limits-v5";
+const LEARNED = "window-limits-v6";
 const loadLearned = () => freshLimits(new Map<string, Limits>(JSON.parse(cache.get(LEARNED) ?? "[]")));
 /** Window ids die with their windows, so only the most recently learned are kept. */
 const saveLearned = (learned: Map<string, Limits>) => cache.set(LEARNED, JSON.stringify([...learned].slice(-200)));
@@ -535,6 +535,10 @@ function raycastSystem(include?: string): System {
             ? (real?.label ?? titled.find((t) => near(t.frame, frame))?.title)
             : undefined;
         if (title === LAUNCHER) continue;
+        // A window that can't be resized and covers the whole screen is an overlay, like a screenshot
+        // tool's capture layer. Tiled, it would take the screen and leave nothing for the rest.
+        const usable = all[screen].visible;
+        if (!api.resizable && frame.width >= usable.width - 2 && frame.height >= usable.height - 2) continue;
         listed.set(api.id, {
           win: {
             id: api.id,
@@ -552,11 +556,16 @@ function raycastSystem(include?: string): System {
         });
       }
 
-      const hidden = include && titled.find((t) => t.title === include);
-      if (hidden && ![...listed.values()].some((l) => l.win.title === include)) {
-        listed.set(`raycast:${include}`, {
-          win: { id: `raycast:${include}`, ...hidden, resizable: true, name: `Raycast ${include}` },
-        });
+      // Raycast Notes is a window like any other, but the API never lists it. It is always added, so it
+      // is tiled whether or not it is the sidebar, along with the window asked for.
+      for (const name of new Set([PANELS.notes.title, ...(include ? [include] : [])])) {
+        const hidden = titled.find((t) => t.title === name);
+        if (hidden && ![...listed.values()].some((l) => l.win.title === name)) {
+          listed.set(`raycast:${name}`, {
+            // Moved through System Events, which answers too unevenly to learn its limits from
+            win: { id: `raycast:${name}`, ...hidden, resizable: true, learns: false, name: `Raycast ${name}` },
+          });
+        }
       }
       return [...listed.values()].map((l) => l.win);
     },
