@@ -5,19 +5,19 @@ mouse buttons from the keyboard – no System Settings, no logging out.
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| **Toggle Secondary Click** | Two fingers ↔ corner (corner chosen in the command preferences) |
-| **Secondary Click with Two Fingers / in Bottom Right Corner / in Bottom Left Corner** | Sets one mode directly |
-| **Toggle Tap to Click** | Tap to click on or off |
-| **Toggle Natural Scrolling** | Scroll direction on or off (macOS applies it to trackpad and mouse) |
-| **Toggle Three Finger Drag** | Three finger drag on or off; swipes move to four fingers, like in macOS |
-| **Set Mouse Speed / Set Trackpad Speed** | Pick a level from 1 to 10 |
-| **Increase / Decrease Mouse Speed** | One step faster or slower |
-| **Left Click / Right Click / Middle Click** | Click at the pointer |
-| **Hold Left / Right / Middle Button** | Keep a button pressed (see below) |
-| **Release Mouse Buttons** | Lets go of every button this extension holds |
-| **Trackpad & Mouse Settings** | Every option from System Settings in one searchable list |
+| Command                                                                               | What it does                                                            |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Toggle Secondary Click**                                                            | Two fingers ↔ corner (corner chosen in the command preferences)         |
+| **Secondary Click with Two Fingers / in Bottom Right Corner / in Bottom Left Corner** | Sets one mode directly                                                  |
+| **Toggle Tap to Click**                                                               | Tap to click on or off                                                  |
+| **Toggle Natural Scrolling**                                                          | Scroll direction on or off (macOS applies it to trackpad and mouse)     |
+| **Toggle Three Finger Drag**                                                          | Three finger drag on or off; swipes move to four fingers, like in macOS |
+| **Set Mouse Speed / Set Trackpad Speed**                                              | Pick a level from 1 to 10                                               |
+| **Increase / Decrease Mouse Speed**                                                   | One step faster or slower                                               |
+| **Left Click / Right Click / Middle Click**                                           | Click at the pointer                                                    |
+| **Hold Left / Right / Middle Button**                                                 | Keep a button pressed (see below)                                       |
+| **Release Mouse Buttons**                                                             | Lets go of every button this extension holds                            |
+| **Trackpad & Mouse Settings**                                                         | Every option from System Settings in one searchable list                |
 
 Give the commands you use most a hotkey: select the command in Raycast, press `⌘K` → **Configure Command**.
 

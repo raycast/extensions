@@ -188,7 +188,7 @@ export default function Command() {
 
   const sections = Object.keys(SECTION_TITLES) as SectionId[];
   return (
-    <List isLoading={loading} navigationTitle="Trackpad & Mouse" searchBarPlaceholder="Search settings…">
+    <List isLoading={loading} searchBarPlaceholder="Search settings…">
       {sections.map((sec) => (
         <List.Section key={sec} title={SECTION_TITLES[sec]}>
           {SETTINGS.filter((s) => s.section === sec).map((s) => (

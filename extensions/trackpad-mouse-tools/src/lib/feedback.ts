@@ -1,4 +1,5 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const RELOGIN_HINT = "May need a log out and back in to take effect";
 
@@ -16,7 +17,10 @@ export async function confirmChange(message: string, applied: boolean, hud = fal
 }
 
 export async function reportError(error: unknown, hud = false) {
-  const msg = error instanceof Error ? error.message : String(error);
-  if (hud) await showHUD(`Could not change setting: ${msg}`);
-  else await showToast({ style: Toast.Style.Failure, title: "Could not change setting", message: msg });
+  if (hud) {
+    const msg = error instanceof Error ? error.message : String(error);
+    await showHUD(`Could not change setting: ${msg}`);
+  } else {
+    await showFailureToast(error, { title: "Could not change setting" });
+  }
 }

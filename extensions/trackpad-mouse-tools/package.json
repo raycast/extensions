@@ -31,6 +31,7 @@
     {
       "name": "toggle-right-click",
       "title": "Toggle Secondary Click",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Switches secondary click between two fingers and the corner chosen in the preferences.",
       "mode": "no-view",
       "preferences": [
@@ -58,6 +59,7 @@
     {
       "name": "right-click-two-finger",
       "title": "Secondary Click with Two Fingers",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Sets secondary click to click or tap with two fingers.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -65,6 +67,7 @@
     {
       "name": "right-click-bottom-right",
       "title": "Secondary Click in Bottom Right Corner",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Sets secondary click to the bottom right corner.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -72,6 +75,7 @@
     {
       "name": "right-click-bottom-left",
       "title": "Secondary Click in Bottom Left Corner",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Sets secondary click to the bottom left corner.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -79,6 +83,7 @@
     {
       "name": "toggle-tap-to-click",
       "title": "Toggle Tap to Click",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Turns tap to click on or off.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -86,6 +91,7 @@
     {
       "name": "toggle-natural-scrolling",
       "title": "Toggle Natural Scrolling",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Turns natural scrolling on or off.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -93,6 +99,7 @@
     {
       "name": "toggle-three-finger-drag",
       "title": "Toggle Three Finger Drag",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Turns three finger drag on or off. Three finger swipes move to four fingers while it is on, like in macOS.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -100,6 +107,7 @@
     {
       "name": "set-mouse-speed",
       "title": "Set Mouse Speed",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Sets mouse tracking speed to a level from 1 (slowest) to 10 (fastest).",
       "mode": "no-view",
       "arguments": [
@@ -157,6 +165,7 @@
     {
       "name": "set-trackpad-speed",
       "title": "Set Trackpad Speed",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Sets trackpad tracking speed to a level from 1 (slowest) to 10 (fastest).",
       "mode": "no-view",
       "arguments": [
@@ -214,6 +223,7 @@
     {
       "name": "increase-mouse-speed",
       "title": "Increase Mouse Speed",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Moves mouse tracking speed one step faster.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -221,6 +231,7 @@
     {
       "name": "decrease-mouse-speed",
       "title": "Decrease Mouse Speed",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Moves mouse tracking speed one step slower.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -228,6 +239,7 @@
     {
       "name": "left-click",
       "title": "Left Click",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Left clicks at the pointer position. Give it a hotkey to click without pressing the trackpad.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -235,6 +247,7 @@
     {
       "name": "right-click",
       "title": "Right Click",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Right clicks at the pointer position, independent of your secondary click setting.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -242,6 +255,7 @@
     {
       "name": "middle-click",
       "title": "Middle Click",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Middle clicks at the pointer position. Give it a hotkey to open links in a new tab, close tabs or paste the selection without a middle mouse button.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -249,6 +263,7 @@
     {
       "name": "hold-left-click",
       "title": "Hold Left Button",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Presses the left button and keeps it down until you run the command again, click, or a few seconds pass (set in the command preferences), for dragging with the trackpad.",
       "mode": "no-view",
       "icon": "icon.png",
@@ -289,6 +304,7 @@
     {
       "name": "hold-right-click",
       "title": "Hold Right Button",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Presses the right button and keeps it down until you run the command again, click, or a few seconds pass (set in the command preferences).",
       "mode": "no-view",
       "icon": "icon.png",
@@ -329,6 +345,7 @@
     {
       "name": "hold-middle-click",
       "title": "Hold Middle Button",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Presses the middle button and keeps it down until you run the command again, click, or a few seconds pass (set in the command preferences), e.g. to orbit in 3D apps.",
       "mode": "no-view",
       "icon": "icon.png",
@@ -369,6 +386,7 @@
     {
       "name": "release-mouse-buttons",
       "title": "Release Mouse Buttons",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Releases every mouse button held by this extension.",
       "mode": "no-view",
       "icon": "icon.png"
@@ -376,13 +394,15 @@
     {
       "name": "settings",
       "title": "Trackpad & Mouse Settings",
+      "subtitle": "Trackpad & Mouse Tools",
       "description": "Browse and change every trackpad and mouse setting: secondary click, tap to click, look up, click pressure, tracking and scrolling speed, double-click speed, pointer acceleration, zoom and swipe gestures, and dragging style.",
       "mode": "view",
       "icon": "icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.3"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
