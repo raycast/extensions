@@ -20,6 +20,7 @@ import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 import { AutoCareAction } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { RetryActions } from "./confirm-in-mint";
 import { MemoryApp as App, MemoryScan, Pile, PileKey, everyPile, pilePicture, pilesOf } from "./mint-panes";
 import { useStrike } from "./use-strike";
 
@@ -139,7 +140,12 @@ function FreeMemory({ cli }: { cli: string }) {
       }
     >
       {scan.error && !scan.data ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read memory" description={scan.error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read memory"
+          description={scan.error.message}
+          actions={<RetryActions onRetry={scan.revalidate} />}
+        />
       ) : null}
       {scan.data?.detailsUnavailable ? (
         <List.EmptyView

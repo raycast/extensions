@@ -554,6 +554,14 @@ test("discovery fits a long or localized location and checked count on one quiet
   }
 });
 
+test("Mint 1.2's idle-file stages read as Mint's own words, never their raw names", () => {
+  for (const phase of ["selectingCompression", "measuringCompression"]) {
+    const picture = scanProgressSVG({ appearance: "dark", title: "Optimizable", phase, estimate: 0.98 });
+    assert.match(picture.svg, /Checking idle files…/);
+    assert.doesNotMatch(picture.svg, /Compression/);
+  }
+});
+
 test("Optimizable keeps its observed count and readable phase below the forecast", () => {
   const picture = scanProgressSVG({
     appearance: "dark",

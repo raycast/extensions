@@ -91,6 +91,11 @@ test("a picture receipt counts only what Mint changed", () => {
   assert.equal(picturesChanged(["a", "b", "c"], removed), 2);
   assert.equal(pictureRemovalReceipt(["a", "b", "c"], removed), "2 pictures removed · 3 MB freed · 1 left as they were");
   assert.equal(pictureRemovalReceipt(["a"], { savedBytes: 0, review: review([]) }), "1 picture removed · 0 B freed");
+  // Mint did not remove them: its own reason follows, a sentence or a `{ reason }` row.
+  const refused = { failures: ["Your free cleanup is used up."], review: review([{ id: "a", kept: false }, { id: "b", kept: false }]) };
+  assert.equal(pictureRemovalReceipt(["a", "b"], refused), "0 pictures removed · 0 B freed · 2 left as they were: Your free cleanup is used up.");
+  assert.equal(pictureRemovalReceipt(["a", "b"], { ...refused, failures: [{ path: "/c.jsonl", reason: "File changed." }] }), "0 pictures removed · 0 B freed · 2 left as they were: File changed.");
+  assert.equal(pictureRemovalReceipt(["a", "b", "c"], { ...removed, failures: ["Not used: all but one went."] }), "2 pictures removed · 3 MB freed · 1 left as they were: Not used: all but one went.");
   // No fresh review (Mint could not read it again): Mint's own count of conversations changed.
   assert.equal(picturesChanged(["a"], { changedCount: 2 }), undefined);
   assert.equal(pictureRemovalReceipt(["a"], { changedCount: 2, savedBytes: 5_000 }), "Pictures removed from 2 conversations · 5 KB freed");

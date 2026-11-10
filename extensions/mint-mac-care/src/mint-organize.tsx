@@ -72,7 +72,20 @@ function FolderList({ cli, canStop }: { cli: string; canStop: boolean }) {
       searchBarPlaceholder="Filter folders"
       onSelectionChange={(id) => setSelected(id ?? undefined)}
     >
-      {!folders.isLoading && (folders.data?.folders.length ?? 0) === 0 ? (
+      {folders.error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not list its folders"
+          description={folders.error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={folders.revalidate} />
+              <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+              {addFolder}
+            </ActionPanel>
+          }
+        />
+      ) : !folders.isLoading && (folders.data?.folders.length ?? 0) === 0 ? (
         <List.EmptyView
           icon={Icon.Folder}
           title="No folders yet"

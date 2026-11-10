@@ -21,6 +21,7 @@ import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { RetryActions } from "./confirm-in-mint";
 import {
   Remnant,
   UninstallScan as UninstallScanResponse,
@@ -254,7 +255,12 @@ function InstalledApps({ cli }: { cli: string }) {
       onSelectionChange={(id) => setSelected(id ?? undefined)}
     >
       {error ? (
-        <List.EmptyView title="Mint could not list your apps" description={error.message} icon={Icon.Warning} />
+        <List.EmptyView
+          title="Mint could not list your apps"
+          description={error.message}
+          icon={Icon.Warning}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {apps.map((app) => {
         const left = stayed[app.id];

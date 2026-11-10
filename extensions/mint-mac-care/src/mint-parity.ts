@@ -161,6 +161,8 @@ export type PictureScan = { sessionID: string; source: "conversations" | "compre
 export type PicturePreview = { pictureID: string; previewImage: { mimeType: string; data: string } };
 export type PictureResult = NotRun & {
   changedCount?: number;
+  /** Mint's reasons, for a removal it did not do in full (the free allowance, a file that changed). */
+  failures?: unknown[];
   savedBytes?: number;
   physicallyReclaimedBytes?: number;
   updatedPictureCount?: number;
@@ -192,7 +194,17 @@ export function pictureRemovalReceipt(sent: string[], answer: PictureResult): st
   if (removed === undefined)
     return `Pictures removed from ${plural(answer.changedCount ?? 0, "conversation")} · ${freed}`;
   const left = sent.length - removed;
-  return `${plural(removed, "picture")} removed · ${freed}${left ? ` · ${left} left as they were` : ""}`;
+  const why = left ? firstReason(answer.failures) : undefined;
+  return `${plural(removed, "picture")} removed · ${freed}${left ? ` · ${left} left as they were` : ""}${why ? `: ${why}` : ""}`;
+}
+
+/** Mint's first reason, as it wrote it: a sentence, or a `{ reason }` / `{ path, reason }` row. */
+function firstReason(failures: unknown[] | undefined): string | undefined {
+  const first = failures?.[0];
+  if (typeof first === "string") return first.trim() || undefined;
+  if (first && typeof first === "object" && "reason" in first && typeof first.reason === "string")
+    return first.reason.trim() || undefined;
+  return undefined;
 }
 
 export function pictureRows(scan: PictureScan | undefined): Picture[] {

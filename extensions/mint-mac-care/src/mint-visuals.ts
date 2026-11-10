@@ -626,6 +626,9 @@ export function scanProgressSVG(input: {
     fingerprinting: "Comparing file contents…",
     hashing: "Comparing file contents…",
     checkingUse: "Checking files in use…",
+    // Optimizable's idle-file stages, in Mint's own words (CloneDedupeStore.scanLabel).
+    selectingCompression: "Checking idle files…",
+    measuringCompression: "Checking idle files…",
   };
   const location = copyPhases[phase] ?? phase.split("…", 1)[0].trim();
   // These counters are observations already supplied by Mint, not a new

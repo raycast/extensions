@@ -255,7 +255,11 @@ export function runMintSurface<T extends object>(
           }
           return;
         }
-        const detail = stderr?.trim() || error?.message || "Mint returned an invalid surface response.";
+        // Mint's own words when it wrote any. Node's message for a killed or failed run repeats the whole command
+        // line, the request's base64 included, so a person sees the generic sentence instead.
+        const detail =
+          stderr?.trim() ||
+          (error ? "Mint could not complete this action." : "Mint returned an invalid surface response.");
         reject(new Error(detail));
       },
     );
