@@ -18,7 +18,8 @@ instructions: |
   Use get-spaces for questions about which spaces exist or which one is active, and switch-space to switch to a space, passing its name as the user said it. If switch-space reports there is no space with that name, tell the user which spaces exist instead of guessing.
   # dia-ai-extensions
   Raycast can't install, uninstall, remove, turn on or turn off Dia extensions. For those requests, call no tool: reply that it can't be done from Raycast and that the user can do it in Dia's extension settings. open-extension only opens an extension to use it.
-  Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space. When the user means the space they are in, take the active space from get-spaces.
+  Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). Pass a space to open-extension only when the user names one or open-extension asks for it; without a space, it opens the extension in the space the user is in. If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space. When the user means the space they are in, take the active space from get-spaces.
+  A get-extensions group with availableInAllSpaces: true (and space: null) holds extensions that every space shares. Describe them as available in all spaces, never under a space name. Only name a space for a group that has one.
   If open-extension reports that Raycast needs Accessibility access, relay its System Settings instructions instead of retrying or claiming the extension opened.
 
 evals:
@@ -493,6 +494,104 @@ evals:
       - callsTool: get-extensions
       - includes: "1Password"
       - includes: "uBlock"
+  - input: "@dia what extensions do I have?"
+    mocks:
+      get-spaces:
+        - name: "Soundraw"
+          isActive: false
+          windowIds: []
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Worthwhile"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: null
+          availableInAllSpaces: true
+          extensions:
+            - id: "nngceckbapebfimnlniiiahkandclblb"
+              name: "Bitwarden Password Manager"
+              description: "At home, at work, or on the go, Bitwarden easily secures all your passwords, passkeys, and sensitive information."
+              enabled: true
+              pinned: true
+              builtIn: false
+              hasPopup: true
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              description: "A permission-less content blocker."
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+    expected:
+      - callsTool: get-extensions
+      - includes: "Bitwarden"
+      - includes: "uBlock"
+      - matches: "([Aa]ll|[Ee]very)( of)?( your)?( Dia)? [Ss]paces?"
+      - not:
+          matches: "\\bWork\\b"
+  - input: "@dia open bitwarden"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Soundraw"
+          isActive: false
+          windowIds: []
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Worthwhile"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: null
+          availableInAllSpaces: true
+          extensions:
+            - id: "nngceckbapebfimnlniiiahkandclblb"
+              name: "Bitwarden Password Manager"
+              description: "At home, at work, or on the go, Bitwarden easily secures all your passwords, passkeys, and sensitive information."
+              enabled: true
+              pinned: true
+              builtIn: false
+              hasPopup: true
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              description: "A permission-less content blocker."
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+      open-extension:
+        opened: "Bitwarden Password Manager"
+        extensionId: "nngceckbapebfimnlniiiahkandclblb"
+        space: null
+        openedVia: "menu"
+    expected:
+      - or:
+          - callsTool:
+              name: open-extension
+              arguments:
+                query:
+                  includes: "bitwarden"
+          - callsTool:
+              name: open-extension
+              arguments:
+                extensionId: "nngceckbapebfimnlniiiahkandclblb"
+      - not:
+          callsTool:
+            name: open-extension
+            arguments:
+              space:
+                or:
+                  - "Soundraw"
+                  - "Personal"
+                  - "Worthwhile"
+                  - "Work"
+      - not:
+          callsTool: switch-space
+      - not:
+          matches: "\\bWork\\b"
   - input: "@dia open 1Password"
     mocks:
       get-spaces:
@@ -527,6 +626,25 @@ evals:
         - name: "Work"
           isActive: false
           windowIds: []
+      get-extensions:
+        - space: "Personal"
+          isActive: true
+          extensions:
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+        - space: "Work"
+          isActive: false
+          extensions:
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
       open-extension:
         opened: "uBlock Origin Lite"
         extensionId: "ddkjiahejlhfcafbddmgiahcphecmpfh"

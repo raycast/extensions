@@ -12,7 +12,7 @@ Use a single unified search command. Use this to search for pinned tabs, open ta
 
 - Use the Search History command to browse your previously visited websites
 - Use the Search Tabs command to search and switch between open and pinned tabs from every Dia space. Tabs are grouped by space with the space name or a dot in its color on every row (choose in the Space Label preference), ⌘P filters by space, and ⌘K offers "Switch to Space" actions
-- Use the Search Extensions command to search the extensions of every Dia profile and open them. It picks the extension from Dia's Extensions menu (Raycast needs Accessibility access) and falls back to opening the extension's popup in a tab
+- Use the Search Extensions command to search Dia's extensions and open them in the current space. It picks the extension from Dia's Extensions menu (Raycast needs Accessibility access) and falls back to opening the extension's popup in a tab
 - Copy websites in different formats such as URL or Markdown to quickly share them
 - Create new regular and incognito windows
 

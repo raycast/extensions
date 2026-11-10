@@ -122,7 +122,7 @@
       "name": "search-extensions",
       "title": "Search Extensions",
       "subtitle": "Dia",
-      "description": "Search the browser extensions installed in each Dia profile and open them",
+      "description": "Search the browser extensions installed in Dia and open them",
       "mode": "view",
       "preferences": [
         {

@@ -1,6 +1,7 @@
 import { Tool } from "@raycast/api";
-import { getExtensionProfiles, needsAccessibility, openExtension } from "../extensions";
+import { loadExtensionProfiles, needsAccessibility, openExtension, spaceLabel } from "../extensions";
 import { toAutomationError } from "../find-tab";
+import { findSpaceName } from "../spaces";
 
 const ACCESSIBILITY_MESSAGE =
   "Raycast needs Accessibility access to open Dia extensions. Enable Raycast in System Settings → Privacy & Security → Accessibility, then try again.";
@@ -20,29 +21,34 @@ type Input = {
   query?: string;
 
   /**
-   * Name of the Dia space (profile) to open the extension in, e.g. "Work" (case-insensitive).
+   * Name of the Dia space to open the extension in, e.g. "Work" (case-insensitive).
    *
    * @remarks
-   * Required when the extension is installed in more than one space.
+   * Omit it to open the extension in the space the front window shows. Only needed when the user names a space,
+   * or when the extension is installed separately in more than one space.
    */
   space?: string;
 };
 
-/** Resolves the input to one installed extension and its space, or throws a message the AI can act on. */
+/**
+ * Resolves the input to one installed extension and the space to open it in (undefined: the front window's current
+ * space), or throws a message the AI can act on.
+ */
 async function resolveExtension(input: Input) {
   const query = input.query?.trim().toLowerCase();
   if (!input.extensionId && !query) throw new Error("Pass the extension's extensionId or a query matching its name.");
 
-  const space = input.space?.trim().toLowerCase();
-  const profiles = await getExtensionProfiles();
-  const inSpace = space ? profiles.filter((profile) => profile.name.toLowerCase() === space) : profiles;
-  if (space && inSpace.length === 0) {
-    throw new Error(
-      `No Dia space is named "${input.space?.trim()}". The spaces are: ${profiles.map((p) => p.name).join(", ")}.`,
-    );
+  const { profiles, spaces } = await loadExtensionProfiles();
+  let space: string | undefined;
+  if (input.space?.trim()) {
+    const names = spaces?.names.length ? spaces.names : profiles.flatMap((profile) => profile.space ?? []);
+    if (names.length === 0) throw new Error("Couldn't read Dia's spaces. Open a Dia window and try again.");
+    space = findSpaceName(names, input.space);
   }
+  // A profile shared by all spaces counts for every space
+  const inSpace = space ? profiles.filter((profile) => !profile.space || profile.space === space) : profiles;
 
-  // Every installation that matches, one per space
+  // Every installation that matches, one per Chromium profile
   const matches = inSpace.flatMap((profile) =>
     profile.extensions
       .filter((extension) =>
@@ -55,11 +61,11 @@ async function resolveExtension(input: Input) {
     const unreadable = inSpace.filter((profile) => profile.error);
     if (unreadable.length > 0) {
       throw new Error(
-        `Couldn't read the extensions of ${unreadable.map((profile) => `${profile.name} (${profile.error})`).join(", ")}. Nothing was opened.`,
+        `Couldn't read the extensions of ${unreadable.map((profile) => `${spaceLabel(profile)} (${profile.error})`).join(", ")}. Nothing was opened.`,
       );
     }
     const target = input.extensionId ? `with the ID "${input.extensionId}"` : `matching "${input.query?.trim()}"`;
-    throw new Error(`No Dia extension ${target} is installed${input.space ? ` in ${input.space.trim()}` : ""}.`);
+    throw new Error(`No Dia extension ${target} is installed${space ? ` in ${space}` : ""}.`);
   }
 
   // Several extensions match: let the user pick, unless one name matches exactly
@@ -79,52 +85,57 @@ async function resolveExtension(input: Input) {
     candidates = exact;
   }
 
-  // The same extension in several spaces: require the space, so the space shown in the confirmation is the one opened
-  if (candidates.length > 1) {
-    const spaces = candidates.map(({ profile }) => profile.name).join(", ");
+  // An installation shared by all spaces opens in the requested space, or else in the current one
+  const shared = candidates.find(({ profile }) => !profile.space);
+  // The same extension installed separately in several spaces: require the space, so the confirmation shows it
+  if (!shared && candidates.length > 1) {
+    const names = candidates.map(({ profile }) => profile.space).join(", ");
     throw new Error(
-      `${candidates[0].extension.name} is installed in several spaces (${spaces}). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space.`,
+      `${candidates[0].extension.name} is installed in several spaces (${names}). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space.`,
     );
   }
-  const chosen = candidates[0];
+  const { extension, profile } = shared ?? candidates[0];
 
-  if (!chosen.extension.enabled) {
+  if (!extension.enabled) {
     throw new Error(
-      `${chosen.extension.name} is turned off in ${chosen.profile.name}. Turn it on in Dia's extension settings first.`,
+      `${extension.name} is turned off${profile.space ? ` in ${profile.space}` : ""}. Turn it on in Dia's extension settings first.`,
     );
   }
-  return chosen;
+  return { extension, space: space ?? profile.space };
 }
 
 /**
- * Opens a Dia browser extension so the user can use it, like clicking its toolbar button: switches the front Dia
- * window to the extension's space, then picks it from Dia's Extensions menu. When the menu has no item for it, its
- * popup opens in a new tab instead.
+ * Opens a Dia browser extension so the user can use it, like clicking its toolbar button: picks it from Dia's
+ * Extensions menu in the front window. It stays in the current space, unless a space is passed or the extension is
+ * installed only in another space; then the window switches to that space first. When the menu has no item for it,
+ * its popup opens in a new tab instead. The result's `space` is null when it opened in the current space.
  *
  * Only for using an extension. Don't call it to install, remove, uninstall, turn on or turn off an extension:
  * this can't be done from Raycast, so tell the user to do it in Dia's extension settings instead.
  */
 export default async function tool(input: Input) {
-  const { extension, profile } = await resolveExtension(input);
+  const { extension, space } = await resolveExtension(input);
 
   let openedVia: Awaited<ReturnType<typeof openExtension>>;
   try {
-    openedVia = await openExtension(extension, profile);
+    openedVia = await openExtension(extension, space);
   } catch (error) {
     if (needsAccessibility(error)) throw new Error(ACCESSIBILITY_MESSAGE);
     throw toAutomationError(error);
   }
-  return { opened: extension.name, extensionId: extension.id, space: profile.name, openedVia };
+  return { opened: extension.name, extensionId: extension.id, space: space ?? null, openedVia };
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   // Throw rather than skip the dialog: an extension that can't be resolved must not be opened
-  const { extension, profile } = await resolveExtension(input);
+  const { extension, space } = await resolveExtension(input);
   return {
-    message: `Open ${extension.name} in the ${profile.name} space? The front Dia window switches to this space.`,
+    message: space
+      ? `Open ${extension.name} in the ${space} space? The front Dia window switches to this space.`
+      : `Open ${extension.name} in the current space?`,
     info: [
       { name: "Extension", value: extension.name },
-      { name: "Space", value: profile.name },
+      { name: "Space", value: space ?? "Current space" },
     ],
   };
 };

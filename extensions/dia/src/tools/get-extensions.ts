@@ -1,4 +1,5 @@
-import { getExtensionProfiles } from "../extensions";
+import { loadExtensionProfiles } from "../extensions";
+import { findSpaceName } from "../spaces";
 
 type Input = {
   /**
@@ -10,10 +11,10 @@ type Input = {
   query?: string;
 
   /**
-   * Name of a Dia space (profile) to return extensions from, e.g. "Work" (case-insensitive).
+   * Name of a Dia space to return the extensions of, e.g. "Work" (case-insensitive).
    *
    * @remarks
-   * Omit it to return extensions from every space.
+   * Omit it to return every extension. Extensions available in all spaces are always included.
    */
   space?: string;
 
@@ -26,25 +27,26 @@ type Input = {
 };
 
 /**
- * Returns the browser extensions installed in Dia, grouped by space (profile) in Dia's order.
- * Each space says whether a window is showing it; each extension has its ID, name, description,
- * and whether it is enabled, pinned to the toolbar, built into Dia, or has a popup.
+ * Returns the browser extensions installed in Dia, in groups. A group with `availableInAllSpaces: true` and
+ * `space: null` holds extensions that every space shares; this is the usual case. A group with a space name holds
+ * extensions installed only in that space, and says whether a window shows it. Each extension has its ID, name,
+ * description, and whether it is enabled, pinned to the toolbar, built into Dia, or has a popup.
  */
 export default async function tool(input: Input) {
   const query = input.query?.trim().toLowerCase();
-  const space = input.space?.trim().toLowerCase();
-  const profiles = await getExtensionProfiles();
-  const matching = space ? profiles.filter((profile) => profile.name.toLowerCase() === space) : profiles;
-  if (space && matching.length === 0) {
-    throw new Error(
-      `No Dia space is named "${input.space?.trim()}". The spaces are: ${profiles.map((p) => p.name).join(", ")}.`,
-    );
+  const { profiles, spaces } = await loadExtensionProfiles();
+  let space: string | undefined;
+  if (input.space?.trim()) {
+    const names = spaces?.names.length ? spaces.names : profiles.flatMap((profile) => profile.space ?? []);
+    if (names.length === 0) throw new Error("Couldn't read Dia's spaces. Open a Dia window and try again.");
+    space = findSpaceName(names, input.space);
   }
+  const matching = space ? profiles.filter((profile) => !profile.space || profile.space === space) : profiles;
 
   return matching.map((profile) => ({
-    space: profile.name,
-    isActive: profile.isActive,
-    ...(profile.error ? { error: `Couldn't read this space's extensions: ${profile.error}` } : {}),
+    space: profile.space ?? null,
+    ...(profile.space ? { isActive: profile.isActive } : { availableInAllSpaces: true }),
+    ...(profile.error ? { error: `Couldn't read these extensions: ${profile.error}` } : {}),
     extensions: profile.extensions
       .filter((extension) => input.includeBuiltIn || !extension.builtIn)
       .filter(
