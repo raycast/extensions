@@ -166,6 +166,47 @@ test("memory piles add up to no more than macOS reports in use", () => {
   assert.ok(piles.reduce((sum, pile) => sum + pile.bytes, 0) <= 600);
 });
 
+test("Idle is Mint's own pile when Mint names it (1.2.1), else what Mint ticks by itself (1.2.0)", () => {
+  const app = (id: string, extra: Partial<MemoryScan["items"][number]>): MemoryScan["items"][number] => ({
+    id,
+    name: id,
+    bytes: 100,
+    processCount: 1,
+    selectable: true,
+    advanced: false,
+    needsReview: false,
+    defaultSelected: false,
+    ...extra,
+  });
+  const keys = (items: MemoryScan["items"]) =>
+    Object.fromEntries(
+      pilesOf({ sessionID: "m", detailsUnavailable: false, usedBytes: 1000, items }).flatMap((pile) =>
+        pile.apps.map((one) => [one.id, pile.key]),
+      ),
+    );
+  // Mint 1.2.1: the page's piles, whatever defaultSelected says (an idle app under 500 MB is not ticked by itself;
+  // a large app in use is).
+  assert.deepEqual(
+    keys([
+      app("idle-small", { pile: "idle", defaultSelected: false }),
+      app("in-use-large", { pile: "inUse", defaultSelected: true }),
+      app("keep", { pile: "keep" }),
+      app("forced", { pile: "inUse", advanced: true }),
+      app("no-pile", { pile: null }),
+    ]),
+    { "idle-small": "idle", "in-use-large": "inUse", keep: "askFirst", forced: "askFirst", "no-pile": "inUse" },
+  );
+  // Mint 1.2.0 sends no pile: nothing changes.
+  assert.deepEqual(
+    keys([app("ticked", { defaultSelected: true }), app("other", {}), app("asks", { needsReview: true })]),
+    {
+      ticked: "idle",
+      other: "inUse",
+      asks: "askFirst",
+    },
+  );
+});
+
 test("uninstalling takes the app and its leftovers, never what is on the Ignore list", () => {
   const remnant = (id: string, boundary: "ordinary" | "needs-review" | "protected", category = "caches") => ({
     id,
@@ -242,14 +283,44 @@ const bothHalves: OptimizeScan = {
   sessionID: "o",
   includesCompressions: true,
   items: [
-    { id: "c1", kind: "copy", reason: "Identical copy", path: "/Users/x/Documents/a 2.png", keeper: "/Users/x/Documents/a.png", estimatedSavingBytes: 100 },
-    { id: "c2", kind: "copy", reason: "Identical copy", path: "/Users/x/Downloads/old/b 2.zip", keeper: "/Users/x/Downloads/old/b.zip", estimatedSavingBytes: 700 },
-    { id: "z1", kind: "compression", reason: "Idle file", path: "/Users/x/.codex/sessions/r.jsonl", estimatedSavingBytes: 300 },
-    { id: "z2", kind: "compression", reason: "Idle file", path: "/Users/x/Documents/notes.txt", estimatedSavingBytes: 50 },
+    {
+      id: "c1",
+      kind: "copy",
+      reason: "Identical copy",
+      path: "/Users/x/Documents/a 2.png",
+      keeper: "/Users/x/Documents/a.png",
+      estimatedSavingBytes: 100,
+    },
+    {
+      id: "c2",
+      kind: "copy",
+      reason: "Identical copy",
+      path: "/Users/x/Downloads/old/b 2.zip",
+      keeper: "/Users/x/Downloads/old/b.zip",
+      estimatedSavingBytes: 700,
+    },
+    {
+      id: "z1",
+      kind: "compression",
+      reason: "Idle file",
+      path: "/Users/x/.codex/sessions/r.jsonl",
+      estimatedSavingBytes: 300,
+    },
+    {
+      id: "z2",
+      kind: "compression",
+      reason: "Idle file",
+      path: "/Users/x/Documents/notes.txt",
+      estimatedSavingBytes: 50,
+    },
   ],
 };
 const said = (markdown: string) =>
-  [...Buffer.from(markdown.match(/base64,([^)?]+)/)![1], "base64").toString().matchAll(/<text[^>]*>([^<]*)<\/text>/g)]
+  [
+    ...Buffer.from(markdown.match(/base64,([^)?]+)/)![1], "base64")
+      .toString()
+      .matchAll(/<text[^>]*>([^<]*)<\/text>/g),
+  ]
     .map((m) => m[1])
     .join(" ");
 
@@ -279,7 +350,10 @@ test("Optimize lists identical copies and idle files, each in the app's words, b
   const codex = said(sourcePicture(sources[0], sources, "dark", {}, true));
   assert.match(codex, /1 idle file stored compressed · nothing deleted/);
   // An empty source with this Mint says nothing to optimize, not only no copies.
-  assert.match(said(sourcePicture({ key: "tmp", groups: [], bytes: 0 }, sources, "dark", {}, true)), /Nothing to optimize here/);
+  assert.match(
+    said(sourcePicture({ key: "tmp", groups: [], bytes: 0 }, sources, "dark", {}, true)),
+    /Nothing to optimize here/,
+  );
   assert.match(said(sourcePicture({ key: "tmp", groups: [], bytes: 0 }, sources, "dark")), /No identical copies here/);
 });
 
@@ -292,7 +366,9 @@ test("Optimize sends both kinds: every id of the review, copies and idle files",
 test("with Mint 1.1.2 Optimize lists copies only and claims nothing about compression", () => {
   const older: OptimizeScan = {
     sessionID: "o",
-    items: [{ id: "1", path: "/Users/x/Documents/a 2.png", keeper: "/Users/x/Documents/a.png", estimatedSavingBytes: 10 }],
+    items: [
+      { id: "1", path: "/Users/x/Documents/a 2.png", keeper: "/Users/x/Documents/a.png", estimatedSavingBytes: 10 },
+    ],
   };
   const sources = sourcesOf(groupCopies(older.items, "/Users/x"));
   const words = said(sourcePicture(sources[0], sources, "dark"));
@@ -300,7 +376,10 @@ test("with Mint 1.1.2 Optimize lists copies only and claims nothing about compre
   assert.doesNotMatch(words, /compress|idle/i);
   const [optimizable] = bucketsOf(undefined, older, true);
   assert.equal(optimizable.bothHalves, undefined);
-  assert.match(said(bucketPicture({ ...optimizable, entries: [], bytes: 0 }, [optimizable], "dark")), /No identical copies/);
+  assert.match(
+    said(bucketPicture({ ...optimizable, entries: [], bytes: 0 }, [optimizable], "dark")),
+    /No identical copies/,
+  );
 });
 
 const yoursRow: DiskScan = {
@@ -320,7 +399,10 @@ const headline = (buckets: ReturnType<typeof bucketsOf>) => buckets.reduce((sum,
 
 test("Free Disk's headline counts no byte twice: Mint 1.1.3 says what the Disk page offers", () => {
   // The copy inside the Yours folder is that folder's; Mint's present says so.
-  const buckets = bucketsOf(yoursRow, bothHalves, true, { offeredItemIDs: ["c1", "z1", "z2"], supersededDiskItemIDs: [] });
+  const buckets = bucketsOf(yoursRow, bothHalves, true, {
+    offeredItemIDs: ["c1", "z1", "z2"],
+    supersededDiskItemIDs: [],
+  });
   assert.deepEqual(
     buckets.map((bucket) => [bucket.key, bucket.bytes]),
     [
@@ -346,19 +428,35 @@ test("Free Disk's headline counts no byte twice: Mint 1.1.3 says what the Disk p
     offeredItemIDs: ["c1", "c2", "z1", "z2"],
     supersededDiskItemIDs: ["old"],
   });
-  assert.deepEqual(swapped.map((bucket) => bucket.bytes), [1_150, 200, 0]);
+  assert.deepEqual(
+    swapped.map((bucket) => bucket.bytes),
+    [1_150, 200, 0],
+  );
   assert.equal(headline(swapped), 1_350);
 });
 
 test("before Mint has answered, or with Mint 1.1.2, a copy under a listed row is that row's", () => {
   const buckets = bucketsOf(yoursRow, bothHalves, true);
-  assert.deepEqual(buckets.map((bucket) => bucket.bytes), [450, 200, 5_000]);
-  const older = bucketsOf(yoursRow, { sessionID: "o", items: bothHalves.items.filter((copy) => copy.kind === "copy") }, true);
-  assert.deepEqual(older.map((bucket) => bucket.bytes), [100, 200, 5_000]);
+  assert.deepEqual(
+    buckets.map((bucket) => bucket.bytes),
+    [450, 200, 5_000],
+  );
+  const older = bucketsOf(
+    yoursRow,
+    { sessionID: "o", items: bothHalves.items.filter((copy) => copy.kind === "copy") },
+    true,
+  );
+  assert.deepEqual(
+    older.map((bucket) => bucket.bytes),
+    [100, 200, 5_000],
+  );
   // A sibling whose name only starts like the folder stays Optimizable's.
   const sibling = bucketsOf(
     yoursRow,
-    { sessionID: "o", items: [{ id: "s", path: "/Users/x/Downloads/older/c 2.bin", keeper: "/Users/x/c.bin", estimatedSavingBytes: 9 }] },
+    {
+      sessionID: "o",
+      items: [{ id: "s", path: "/Users/x/Downloads/older/c 2.bin", keeper: "/Users/x/c.bin", estimatedSavingBytes: 9 }],
+    },
     true,
   );
   assert.equal(sibling[0].bytes, 9);

@@ -434,6 +434,11 @@ export type MemoryItem = {
   advanced: boolean;
   needsReview: boolean;
   defaultSelected: boolean;
+  /**
+   * The Memory page's own pile for this app (Mint 1.2.1, `MemoryTabView.partition`); absent from Mint 1.2.0, and
+   * null for a row the page shows in no pile.
+   */
+  pile?: "idle" | "inUse" | "keep" | null;
 };
 export type MemoryScan = {
   sessionID: string;
@@ -455,8 +460,22 @@ const PILES: Array<{ key: PileKey; title: string; color: string }> = [
 ];
 
 /**
- * The apps Mint can quit, in the Memory page's piles: Idle is what Mint ticks
- * by itself; Ask first needs a forced quit or is on the Ignore list. Sizes are
+ * Which pile an app is in. Mint 1.2.1 names the Memory page's own pile, so
+ * Idle is exactly the page's Idle (what the island and the dropdown quit);
+ * Mint 1.2.0 does not, and Idle is what it ticks by itself (`defaultSelected`).
+ * Ask first needs a forced quit, is on the Ignore list, or is the page's Keep.
+ */
+export function pileKey(item: MemoryItem): PileKey {
+  if (item.pile !== undefined) {
+    if (item.pile === "idle") return "idle";
+    if (item.pile === "keep") return "askFirst";
+    return item.advanced || item.needsReview ? "askFirst" : "inUse";
+  }
+  return item.defaultSelected ? "idle" : item.advanced || item.needsReview ? "askFirst" : "inUse";
+}
+
+/**
+ * The apps Mint can quit, in the Memory page's piles (`pileKey`). Sizes are
  * attributed over everything running, so they add up to what quitting gives back.
  */
 export function pilesOf(scan: MemoryScan | undefined): Pile[] {
@@ -468,8 +487,7 @@ export function pilesOf(scan: MemoryScan | undefined): Pile[] {
   const apps: Record<PileKey, MemoryApp[]> = { idle: [], inUse: [], askFirst: [] };
   for (const item of items) {
     if (!item.selectable) continue;
-    const key: PileKey = item.defaultSelected ? "idle" : item.advanced || item.needsReview ? "askFirst" : "inUse";
-    apps[key].push({ ...item, size: attributed(item.bytes, scale) });
+    apps[pileKey(item)].push({ ...item, size: attributed(item.bytes, scale) });
   }
   return PILES.map((pile) => {
     const rows = apps[pile.key].sort((a, b) => b.size - a.size);
