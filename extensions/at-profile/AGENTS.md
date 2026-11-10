@@ -16,18 +16,20 @@ npm run evals    # AI tool evals in ai.yaml
 
 ## Layout
 
-| Path                                            | What it holds                                                                                                                |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `src/*.tsx`, `src/*.ts`                         | One file per command in `package.json`: `open-profile`, `quick-open`, `manage-apps`, `history`, `import-apps`, `export-apps` |
-| `src/tools/`                                    | AI tools `open` and `history`. Their instructions and evals are in `ai.yaml`                                                 |
-| `src/helpers/storage.ts`                        | The only module that reads or writes `LocalStorage` for extension data                                                       |
-| `src/helpers/file-lock.ts`                      | Cross-process lock used by `withStorageLock`                                                                                 |
-| `src/helpers/apps.ts`, `src/helpers/history.ts` | App list and History logic. Every write goes through `withStorageLock`                                                       |
-| `src/helpers/url.ts`                            | Builds profile URLs, validates URL templates, and generates custom app IDs                                                   |
-| `src/yaml-settings.ts`                          | YAML export and import                                                                                                       |
-| `src/hooks/`                                    | `useApps` and `useHistory`, shared by every view and reloaded after writes                                                   |
-| `src/utils/default-apps.ts`                     | The built-in apps                                                                                                            |
-| `test/`                                         | Vitest suites; `test/stubs/` stands in for the Raycast packages                                                              |
+| Path                                             | What it holds                                                                                                                   |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `src/*.tsx`, `src/*.ts`                          | One file per command in `package.json`: `open-profile`, `quick-open`, `manage-apps`, `history`, `import-apps`, `export-apps`    |
+| `src/tools/`                                     | AI tools `open`, `history` and `find-profiles`. Their instructions and evals are in `ai.yaml`                                   |
+| `src/helpers/storage.ts`                         | The only module that reads or writes `LocalStorage` for extension data                                                          |
+| `src/helpers/file-lock.ts`                       | Cross-process lock used by `withStorageLock`                                                                                    |
+| `src/helpers/apps.ts`, `src/helpers/history.ts`  | App list and History logic. Every write goes through `withStorageLock`                                                          |
+| `src/helpers/url.ts`                             | Builds profile URLs, validates URL templates, and generates custom app IDs                                                      |
+| `src/yaml-settings.ts`                           | YAML export and import                                                                                                          |
+| `src/hooks/`                                     | `useApps` and `useHistory`, shared by every view and reloaded after writes                                                      |
+| `src/utils/default-apps.ts`                      | The built-in apps                                                                                                               |
+| `src/catalog/`                                   | Sherlock's sites (`sherlock.json`, from `npm run sync-catalog`), platform families, default Find Profile sites, built-in checks |
+| `src/helpers/detect.ts`, `src/helpers/search.ts` | One profile check (Sherlock's rules), and Find Profile's search list and runner                                                 |
+| `test/`                                          | Vitest suites; `test/stubs/` stands in for the Raycast packages                                                                 |
 
 ## Rules that aren't obvious from the code
 
@@ -52,3 +54,21 @@ npm run evals    # AI tool evals in ai.yaml
   because a HUD closes Raycast and drops the toast's actions.
 - **Toasts use `@chrismessina/raycast-kit`** (`showError`, `failToast`), so every failure toast has Copy Error.
 - **The Quick Open dropdown in `package.json` must list the built-in apps.** `test/manifest.test.ts` checks it.
+- **A catalog site's ID is `catalog-<slug>` and is also its app ID.** Opening a profile on a site that isn't in My Apps
+  records it in History under that ID, and Add to My Apps keeps it, so the History stays attached.
+- **A site's check is graded before it's trusted.** `npm run sync-catalog` probes every site with its known username
+  and a nonsense one that fits the site's username rules, and records `reliability`. An `unreliable` site (it gave a
+  wrong answer) is never checked, even after it's added to My Apps (`appCheck`). The extra sites Search Everywhere
+  adds must be `works`; the user's apps and the default sites are checked when `works` or `unverified`. Run the sync
+  from a normal connection: under a sandbox or a throttled network most sites come back `unverified`.
+- **Favicons come from files first** (`src/helpers/favicons.ts`): `assets/favicons/`, listed in
+  `src/catalog/favicons.json` and written by `npm run sync-favicons` (also run by `sync-catalog`), then
+  `supportPath/favicons/` for apps the user added, then the network.
+- **The catalog can be replaced at runtime.** `src/catalog/sync.ts` builds it (download, convert, recognize
+  platforms, probe); `npm run sync-catalog` writes the bundled `sherlock.json`, and Update Catalog writes
+  `supportPath/catalog.json`, which `src/catalog/index.ts` prefers when it's valid. Read sites through
+  `catalogSites()`, never by importing the JSON. Sites the extension adds itself (`EXTRA_SITES`) are kept either way.
+- **A bare name on an ATProto app is completed with the app's `handleDomain`** (`completeHandle` in
+  `src/helpers/url.ts`) before it's checked, opened or recorded. Build an app's profile URL with `buildAppProfileUrl`.
+- **Profile checks go through `siteFetch` (undici), not the global fetch.** Node's fetch caps response headers at
+  16 KB and fails on YouTube.
