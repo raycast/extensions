@@ -19,20 +19,42 @@ export default function Command() {
     "https://naas.isalman.dev/no",
     {
       keepPreviousData: true,
+      onError: (fetchError) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not fetch 'No' reason",
+          message: fetchError.message,
+          primaryAction: {
+            title: "Try Again",
+            onAction: (toast) => {
+              toast.hide();
+              revalidate();
+            },
+          },
+        });
+      },
     },
   );
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Could not fetch 'No' reason",
-      message: error.message,
-    });
+  const reason = data?.reason;
+
+  let markdown: string;
+  if (reason) {
+    markdown = `## ${reason}`;
+  } else if (error) {
+    markdown = `## Could not fetch a reason\n\n${error.message}\n\nPress Enter to try again.`;
+  } else {
+    markdown = "Fetching a great reason to say no...";
   }
 
-  const markdown = isLoading
-    ? "Fetching a great reason to say no..."
-    : `## ${data?.reason || "No."}`;
+  const getAnother = (
+    <Action
+      title="Get Another No"
+      icon={Icon.ArrowClockwise}
+      onAction={() => revalidate()}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+    />
+  );
 
   return (
     <Detail
@@ -40,16 +62,15 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Reason"
-            content={data?.reason || ""}
-          />
-          <Action
-            title="Get Another No"
-            icon={Icon.ArrowClockwise}
-            onAction={() => revalidate()}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-          />
+          {reason ? (
+            <>
+              <Action.CopyToClipboard title="Copy Reason" content={reason} />
+              <Action.Paste title="Paste Reason" content={reason} />
+              {getAnother}
+            </>
+          ) : (
+            getAnother
+          )}
         </ActionPanel>
       }
     />
