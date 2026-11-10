@@ -1,12 +1,4 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  Keyboard,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface NaasResponse {
@@ -19,19 +11,8 @@ export default function Command() {
     "https://naas.isalman.dev/no",
     {
       keepPreviousData: true,
-      onError: (fetchError) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not fetch 'No' reason",
-          message: fetchError.message,
-          primaryAction: {
-            title: "Try Again",
-            onAction: (toast) => {
-              toast.hide();
-              revalidate();
-            },
-          },
-        });
+      failureToastOptions: {
+        title: "Could not fetch 'No' reason",
       },
     },
   );
