@@ -1,6 +1,6 @@
 # No as a Service Changelog
 
-## [Paste Reason and Raycast 2 Update] - {PR_MERGE_DATE}
+## [Paste Reason and Raycast 2 Update] - 2026-11-10
 - Added a "Paste Reason" action that pastes the reason into the frontmost app.
 - Show the fetch error once as a toast with a "Retry" action, instead of on every render.
 - Show a clear error message instead of "No." when the reason cannot be fetched.
