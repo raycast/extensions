@@ -105,7 +105,7 @@
     {
       "name": "auto-tile",
       "title": "Auto Tile",
-      "description": "Arrange every window on every display in an even grid. Use Cycle Tile Layout to change the grid's shape.",
+      "description": "Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.",
       "mode": "no-view",
       "icon": "tile.png",
       "keywords": [
@@ -142,13 +142,13 @@
     },
     {
       "name": "pivot",
-      "title": "Cycle Tile Layout",
+      "title": "Pivot Layout",
       "description": "Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.",
       "mode": "no-view",
       "icon": "pivot.png",
       "keywords": [
-        "pivot",
-        "pivot layout",
+        "cycle tile layout",
+        "cycle layout",
         "toggle split",
         "togglesplit",
         "grid",
