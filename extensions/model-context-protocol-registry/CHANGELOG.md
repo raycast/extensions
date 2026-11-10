@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Snippet MCP Server] - {PR_MERGE_DATE}
+
+- Add Snippet to the official registry: manage creator brand deals, sponsorship rates, brand emails, decisions and contract reviews through a connected Snippet account. 13 tools after sign-in. Hosted Streamable HTTP server at https://usesnippet.app/api/mcp with Snippet OAuth (authorization code and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Snippet account is required; some actions require an active plan and available allowances.
+
 ## [Add ChefBear MCP Server] - 2026-11-10
 
 - Add ChefBear to the official registry: save, find, read and share your ChefBear restaurant menus and pick dishes that suit your tastes. 12 tools. Hosted Streamable HTTP server at https://chef-bear.com/api/menu-sharing/mcp through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE) and each new connection approved in the ChefBear iPhone app.
