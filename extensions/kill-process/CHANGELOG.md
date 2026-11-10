@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-10
 
 - App and process names with non-ASCII characters (e.g. `企业微信.app`) no longer show as escaped text such as `M-dM-<M^A...` on macOS (fixes #25334)
 
