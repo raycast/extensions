@@ -85,16 +85,30 @@ async function resolveExtension(input: Input) {
     candidates = exact;
   }
 
-  // An installation shared by all spaces opens in the requested space, or else in the current one
-  const shared = candidates.find(({ profile }) => !profile.space);
-  // The same extension installed separately in several spaces: require the space, so the confirmation shows it
-  if (!shared && candidates.length > 1) {
-    const names = candidates.map(({ profile }) => profile.space).join(", ");
-    throw new Error(
-      `${candidates[0].extension.name} is installed in several spaces (${names}). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space.`,
-    );
+  // One extension can have several copies: one shared by all spaces, and one in each space with its own profile
+  const shared = candidates.filter(({ profile }) => !profile.space);
+  const own = candidates.filter(({ profile }) => profile.space);
+  const isEnabled = ({ extension }: (typeof candidates)[number]) => extension.enabled;
+  let chosen: (typeof candidates)[number];
+  if (space) {
+    // Prefer the requested space's own copy, then the shared copy; a turned-off copy never hides an enabled one
+    const ordered = [...own, ...shared];
+    chosen = ordered.find(isEnabled) ?? ordered[0];
+  } else {
+    // The shared copy opens in the current space. Without one, a copy in a single space opens in that space
+    const enabledOwn = own.filter(isEnabled);
+    const pool = enabledOwn.length > 0 ? enabledOwn : own;
+    const enabledShared = shared.find(isEnabled);
+    // Several spaces to pick from: require the space, so the confirmation shows the space that opens
+    if (!enabledShared && pool.length > 1) {
+      const names = pool.map(({ profile }) => profile.space).join(", ");
+      throw new Error(
+        `${pool[0].extension.name} is installed in several spaces (${names}). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space.`,
+      );
+    }
+    chosen = enabledShared ?? (enabledOwn.length > 0 ? enabledOwn[0] : (shared[0] ?? own[0]));
   }
-  const { extension, profile } = shared ?? candidates[0];
+  const { extension, profile } = chosen;
 
   if (!extension.enabled) {
     throw new Error(
