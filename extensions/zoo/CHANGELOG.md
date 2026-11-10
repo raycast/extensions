@@ -13,6 +13,10 @@
 - Token counts now use provider-reported usage. Cost estimates use explicitly configured prices in USD per million tokens, replacing the previous built-in estimates.
 - The README now explains the bring-your-own-key workflow, provider setup, prompt examples, and API costs.
 
+## [Fix OpenAI client in store builds] - 2026-11-10
+
+- Upgrade the `openai` package from v4 to v7. v4 fails to load in store builds
+
 ## [New Feature] - 2025-02-27
 
 - 🍮 Support custom models
