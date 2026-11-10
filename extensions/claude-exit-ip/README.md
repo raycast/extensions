@@ -18,12 +18,4 @@ npm test
 npm run build
 ```
 
-To inspect each card state manually, run `npm run dev` and make one temporary edit at a time. Revert the edit after you look.
-
-| Card state              | Temporary edit                                                                               |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `geo-failed`            | In `src/lib/fetchGeo.ts`, set `GEO_URL` to a host name that does not resolve.                |
-| `blocked` (non-2xx)     | In `src/lib/fetchTrace.ts`, set `TRACE_URL` to a URL that returns 404.                       |
-| `blocked` (not a trace) | In `src/lib/fetchTrace.ts`, set `TRACE_URL` to `https://example.com`.                        |
-| `unreachable`           | Turn Wi-Fi off. No edit is necessary.                                                        |
-| `loading` and `ip-only` | Add `await new Promise((r) => setTimeout(r, 2000));` before the geo call in `src/index.tsx`. |
+To inspect failure cards manually, run `npm run dev`.
