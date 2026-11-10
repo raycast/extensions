@@ -1,5 +1,5 @@
 import { environment } from "@raycast/api";
-import { exec, execFile, execSync } from "child_process";
+import { execFile } from "child_process";
 import crypto from "crypto";
 import fsSync from "fs";
 import fs from "fs/promises";
@@ -7,12 +7,41 @@ import path from "path";
 import { promisify } from "util";
 import { Folder } from "../types";
 
-const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 
 // In-memory icon caches (0ms diskless lookups during the active session)
 const inMemoryIconCache = new Map<string, string>();
 const inMemoryFolderPreviewCache = new Map<string, string>();
+
+// Deduplication maps for in-flight async icon extraction and preview generation
+const pendingIconPromises = new Map<string, Promise<string | null>>();
+const pendingPreviewPromises = new Map<string, Promise<string | null>>();
+
+// Bounded concurrency queue so background icon extraction never spawns unbounded processes
+const MAX_CONCURRENT_TASKS = 2;
+let activeTaskCount = 0;
+const taskQueue: Array<() => void> = [];
+
+function runWithConcurrencyLimit<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const execute = () => {
+      activeTaskCount += 1;
+      fn()
+        .then(resolve, reject)
+        .finally(() => {
+          activeTaskCount -= 1;
+          const next = taskQueue.shift();
+          if (next) next();
+        });
+    };
+
+    if (activeTaskCount < MAX_CONCURRENT_TASKS) {
+      execute();
+    } else {
+      taskQueue.push(execute);
+    }
+  });
+}
 
 // Built-in asset icons
 const BUILTIN_ASSET_ICONS = new Set([
@@ -43,19 +72,22 @@ function getCachedPngPath(appPath: string): string {
 }
 
 /**
- * Synchronously discovers the .icns file inside an .app bundle.
+ * Asynchronously discovers the .icns file inside an .app bundle without shell interpolation.
  */
-function findAppIcnsSync(appPath: string): string | null {
+async function findAppIcnsAsync(appPath: string): Promise<string | null> {
   const resourcesDir = path.join(appPath, "Contents", "Resources");
   if (!fsSync.existsSync(resourcesDir)) return null;
 
   const plistPath = path.join(appPath, "Contents", "Info.plist");
   try {
     if (fsSync.existsSync(plistPath)) {
-      const iconName = execSync(
-        `plutil -extract CFBundleIconFile raw "${plistPath}" 2>/dev/null || true`,
-        { encoding: "utf8" },
-      ).trim();
+      const { stdout } = await execFileAsync("plutil", [
+        "-extract",
+        "CFBundleIconFile",
+        "raw",
+        plistPath,
+      ]);
+      const iconName = stdout.trim();
       if (iconName) {
         const fullIconName = iconName.endsWith(".icns")
           ? iconName
@@ -71,7 +103,7 @@ function findAppIcnsSync(appPath: string): string | null {
   }
 
   try {
-    const files = fsSync.readdirSync(resourcesDir);
+    const files = await fs.readdir(resourcesDir);
     const firstIcns = files.find((f) => f.endsWith(".icns"));
     if (firstIcns) {
       return path.join(resourcesDir, firstIcns);
@@ -84,12 +116,15 @@ function findAppIcnsSync(appPath: string): string | null {
 }
 
 /**
- * Returns a high-res (512x512) cached app icon synchronously.
- * If not cached, performs synchronous extraction so the first frame renders without layout jitter.
+ * Returns a high-res (512x512) cached app icon synchronously if already cached on disk.
+ * Never spawns child processes during render to keep UI responsive.
  */
 export function getHighResAppIconSync(appPath: string): string | null {
   if (inMemoryIconCache.has(appPath)) {
-    return inMemoryIconCache.get(appPath)!;
+    const mem = inMemoryIconCache.get(appPath)!;
+    if (fsSync.existsSync(mem)) {
+      return mem;
+    }
   }
 
   const cachedPngPath = getCachedPngPath(appPath);
@@ -98,29 +133,15 @@ export function getHighResAppIconSync(appPath: string): string | null {
       inMemoryIconCache.set(appPath, cachedPngPath);
       return cachedPngPath;
     }
-
-    const cacheDir = path.join(environment.supportPath, "cached_app_icons");
-    fsSync.mkdirSync(cacheDir, { recursive: true });
-
-    const icnsPath = findAppIcnsSync(appPath);
-    if (icnsPath) {
-      execSync(
-        `sips -s format png -z 512 512 "${icnsPath}" --out "${cachedPngPath}" >/dev/null 2>&1`,
-      );
-      if (fsSync.existsSync(cachedPngPath)) {
-        inMemoryIconCache.set(appPath, cachedPngPath);
-        return cachedPngPath;
-      }
-    }
   } catch {
-    // Fall back to async NSWorkspace extraction
+    // Ignore read error
   }
   return null;
 }
 
 /**
- * Extracts and caches a 512x512 PNG icon from an .app bundle.
- * Handles both .icns apps and Assets.car apps via NSWorkspace fallback.
+ * Extracts and caches a 512x512 PNG icon from an .app bundle asynchronously.
+ * Deduplicates concurrent requests for the same appPath and limits process concurrency.
  */
 export async function getHighResAppIcon(
   appPath: string,
@@ -128,40 +149,106 @@ export async function getHighResAppIcon(
   const syncCached = getHighResAppIconSync(appPath);
   if (syncCached) return syncCached;
 
-  try {
-    const cacheDir = path.join(environment.supportPath, "cached_app_icons");
-    await fs.mkdir(cacheDir, { recursive: true });
-    const cachedPngPath = getCachedPngPath(appPath);
+  const existingPromise = pendingIconPromises.get(appPath);
+  if (existingPromise) return existingPromise;
 
-    const escapedApp = appPath.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    const escapedOut = cachedPngPath
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"');
-    const jxaScript = `
-      ObjC.import("AppKit");
-      const ws = $.NSWorkspace.sharedWorkspace;
-      const icon = ws.iconForFile("${escapedApp}");
-      icon.setSize($.NSMakeSize(512, 512));
-      const tiff = icon.TIFFRepresentation;
-      const rep = $.NSBitmapImageRep.imageRepWithData(tiff);
-      const png = rep.representationUsingTypeProperties($.NSBitmapImageFileTypePNG, $({}));
-      png.writeToFileAtomically("${escapedOut}", true);
-    `;
-    await execAsync(
-      `osascript -l JavaScript -e '${jxaScript}' >/dev/null 2>&1`,
-    );
-    await execAsync(
-      `sips -s format png -z 512 512 "${cachedPngPath}" --out "${cachedPngPath}" >/dev/null 2>&1`,
-    );
+  const promise = runWithConcurrencyLimit(async () => {
+    try {
+      const recheck = getHighResAppIconSync(appPath);
+      if (recheck) return recheck;
 
-    if (fsSync.existsSync(cachedPngPath)) {
-      inMemoryIconCache.set(appPath, cachedPngPath);
-      return cachedPngPath;
+      if (!fsSync.existsSync(appPath)) return null;
+
+      const cacheDir = path.join(environment.supportPath, "cached_app_icons");
+      await fs.mkdir(cacheDir, { recursive: true });
+      const cachedPngPath = getCachedPngPath(appPath);
+
+      // 1. Fast path: convert .icns directly via sips using argument array
+      const icnsPath = await findAppIcnsAsync(appPath);
+      if (icnsPath) {
+        try {
+          await execFileAsync("sips", [
+            "-s",
+            "format",
+            "png",
+            "-z",
+            "512",
+            "512",
+            icnsPath,
+            "--out",
+            cachedPngPath,
+          ]);
+          if (fsSync.existsSync(cachedPngPath)) {
+            inMemoryIconCache.set(appPath, cachedPngPath);
+            return cachedPngPath;
+          }
+        } catch {
+          // Fall through to NSWorkspace extraction
+        }
+      }
+
+      // 2. Fallback for Assets.car bundles: pass paths as argv to fixed JXA script
+      const jxaScript = `
+ObjC.import("AppKit");
+function run(argv) {
+  const targetApp = argv[0];
+  const outputPng = argv[1];
+  const ws = $.NSWorkspace.sharedWorkspace;
+  const icon = ws.iconForFile(targetApp);
+  icon.setSize($.NSMakeSize(512, 512));
+  const tiff = icon.TIFFRepresentation;
+  const rep = $.NSBitmapImageRep.imageRepWithData(tiff);
+  const png = rep.representationUsingTypeProperties($.NSBitmapImageFileTypePNG, $({}));
+  png.writeToFileAtomically(outputPng, true);
+}
+`;
+      await execFileAsync("osascript", [
+        "-l",
+        "JavaScript",
+        "-e",
+        jxaScript,
+        appPath,
+        cachedPngPath,
+      ]);
+      await execFileAsync("sips", [
+        "-s",
+        "format",
+        "png",
+        "-z",
+        "512",
+        "512",
+        cachedPngPath,
+        "--out",
+        cachedPngPath,
+      ]);
+
+      if (fsSync.existsSync(cachedPngPath)) {
+        inMemoryIconCache.set(appPath, cachedPngPath);
+        return cachedPngPath;
+      }
+    } catch {
+      // Return null on failure
     }
-  } catch {
-    // Return null on failure
-  }
-  return null;
+    return null;
+  }).finally(() => {
+    pendingIconPromises.delete(appPath);
+  });
+
+  pendingIconPromises.set(appPath, promise);
+  return promise;
+}
+
+/**
+ * Computes the deterministic converted PNG path for a custom folder icon file.
+ */
+function getCustomFolderIconCachePath(
+  filePath: string,
+  mtimeMs?: number,
+): string {
+  const cacheDir = path.join(environment.supportPath, "custom_folder_icons");
+  const hashInput = mtimeMs !== undefined ? `${filePath}_${mtimeMs}` : filePath;
+  const fileHash = crypto.createHash("md5").update(hashInput).digest("hex");
+  return path.join(cacheDir, `folder_icon_${fileHash}.png`);
 }
 
 /**
@@ -180,17 +267,23 @@ export async function prepareCustomFolderIcon(
     await fs.mkdir(cacheDir, { recursive: true });
 
     const stat = await fs.stat(filePath);
-    const hashInput = `${filePath}_${stat.mtimeMs}`;
-    const fileHash = crypto.createHash("md5").update(hashInput).digest("hex");
-    const destPngPath = path.join(cacheDir, `folder_icon_${fileHash}.png`);
+    const destPngPath = getCustomFolderIconCachePath(filePath, stat.mtimeMs);
 
     if (fsSync.existsSync(destPngPath)) {
       return destPngPath;
     }
 
-    await execAsync(
-      `sips -s format png -z 512 512 "${filePath}" --out "${destPngPath}" >/dev/null 2>&1`,
-    );
+    await execFileAsync("sips", [
+      "-s",
+      "format",
+      "png",
+      "-z",
+      "512",
+      "512",
+      filePath,
+      "--out",
+      destPngPath,
+    ]);
 
     if (fsSync.existsSync(destPngPath)) {
       return destPngPath;
@@ -221,18 +314,20 @@ function getFolderPreviewPath(folder: Folder): string {
 }
 
 /**
- * Synchronously checks if a 2x2 folder thumbnail is already cached on disk.
+ * Synchronously checks if the current 2x2 folder thumbnail is already cached on disk.
+ * Keyed by the full previewPath so changes to the folder's apps immediately invalidate old previews.
  */
 export function getFolderPreviewIconSync(folder: Folder): string | null {
-  if (inMemoryFolderPreviewCache.has(folder.id)) {
-    const cached = inMemoryFolderPreviewCache.get(folder.id)!;
+  const previewPath = getFolderPreviewPath(folder);
+
+  if (inMemoryFolderPreviewCache.has(previewPath)) {
+    const cached = inMemoryFolderPreviewCache.get(previewPath)!;
     if (fsSync.existsSync(cached)) return cached;
   }
 
-  const previewPath = getFolderPreviewPath(folder);
   try {
     if (fsSync.existsSync(previewPath)) {
-      inMemoryFolderPreviewCache.set(folder.id, previewPath);
+      inMemoryFolderPreviewCache.set(previewPath, previewPath);
       return previewPath;
     }
   } catch {
@@ -252,27 +347,34 @@ export async function generateFolderPreviewIcon(
   const existing = getFolderPreviewIconSync(folder);
   if (existing) return existing;
 
-  try {
-    const previewDir = path.join(environment.supportPath, "folder_previews");
-    await fs.mkdir(previewDir, { recursive: true });
-    const previewPath = getFolderPreviewPath(folder);
+  const previewPath = getFolderPreviewPath(folder);
+  const pending = pendingPreviewPromises.get(previewPath);
+  if (pending) return pending;
 
-    const bgAssetPath = path.join(environment.assetsPath, "glass_folder.png");
+  const promise = runWithConcurrencyLimit(async () => {
+    try {
+      const recheck = getFolderPreviewIconSync(folder);
+      if (recheck) return recheck;
 
-    const appIconPaths: string[] = [];
-    for (const app of folder.apps.slice(0, 4)) {
-      let iconP = getHighResAppIconSync(app.path);
-      if (!iconP) {
-        iconP = await getHighResAppIcon(app.path);
+      const previewDir = path.join(environment.supportPath, "folder_previews");
+      await fs.mkdir(previewDir, { recursive: true });
+
+      const bgAssetPath = path.join(environment.assetsPath, "glass_folder.png");
+
+      const appIconPaths: string[] = [];
+      for (const app of folder.apps.slice(0, 4)) {
+        let iconP = getHighResAppIconSync(app.path);
+        if (!iconP) {
+          iconP = await getHighResAppIcon(app.path);
+        }
+        if (iconP && fsSync.existsSync(iconP)) {
+          appIconPaths.push(iconP);
+        }
       }
-      if (iconP && fsSync.existsSync(iconP)) {
-        appIconPaths.push(iconP);
-      }
-    }
 
-    if (appIconPaths.length === 0) return null;
+      if (appIconPaths.length === 0) return null;
 
-    const jxaScript = `
+      const jxaScript = `
 ObjC.import("AppKit");
 function run(argv) {
   const data = JSON.parse(argv[0]);
@@ -320,32 +422,82 @@ function run(argv) {
 }
 `;
 
-    const inputData = JSON.stringify({
-      glass_path: bgAssetPath,
-      out_path: previewPath,
-      icon_paths: appIconPaths,
-    });
+      const inputData = JSON.stringify({
+        glass_path: bgAssetPath,
+        out_path: previewPath,
+        icon_paths: appIconPaths,
+      });
 
-    await execFileAsync("osascript", [
-      "-l",
-      "JavaScript",
-      "-e",
-      jxaScript,
-      inputData,
-    ]);
+      await execFileAsync("osascript", [
+        "-l",
+        "JavaScript",
+        "-e",
+        jxaScript,
+        inputData,
+      ]);
 
-    if (fsSync.existsSync(previewPath)) {
-      inMemoryFolderPreviewCache.set(folder.id, previewPath);
-      return previewPath;
+      if (fsSync.existsSync(previewPath)) {
+        inMemoryFolderPreviewCache.set(previewPath, previewPath);
+        return previewPath;
+      }
+    } catch {
+      // Fall back to glass_folder.png
     }
-  } catch {
-    // Fall back to glass_folder.png
-  }
-  return null;
+    return null;
+  }).finally(() => {
+    pendingPreviewPromises.delete(previewPath);
+  });
+
+  pendingPreviewPromises.set(previewPath, promise);
+  return promise;
 }
 
 /**
- * Resolves a single icon string to a Raycast image source.
+ * Shared bounded warm-up helper for folders and their contained apps.
+ * Deduplicates app paths and runs through the bounded concurrency queue.
+ */
+export async function prewarmFoldersIcons(folders: Folder[]): Promise<boolean> {
+  let anyUpdated = false;
+  const uniqueAppPaths = new Set<string>();
+
+  for (const folder of folders) {
+    for (const app of folder.apps) {
+      if (!getHighResAppIconSync(app.path)) {
+        uniqueAppPaths.add(app.path);
+      }
+    }
+  }
+
+  if (uniqueAppPaths.size > 0) {
+    const results = await Promise.all(
+      Array.from(uniqueAppPaths).map((appPath) => getHighResAppIcon(appPath)),
+    );
+    if (results.some(Boolean)) {
+      anyUpdated = true;
+    }
+  }
+
+  for (const folder of folders) {
+    if (
+      folder.previewStyle !== "plain" &&
+      (!folder.icon || !isCustomIconFile(folder.icon)) &&
+      folder.apps &&
+      folder.apps.length > 0
+    ) {
+      if (!getFolderPreviewIconSync(folder)) {
+        const preview = await generateFolderPreviewIcon(folder);
+        if (preview) {
+          anyUpdated = true;
+        }
+      }
+    }
+  }
+
+  return anyUpdated;
+}
+
+/**
+ * Resolves a single icon string to a Raycast image source without blocking render.
  */
 function resolveSingleIconSource(iconValue?: string): { source: string } {
   if (!iconValue || !isCustomIconFile(iconValue)) {
@@ -362,31 +514,22 @@ function resolveSingleIconSource(iconValue?: string): { source: string } {
     }
 
     if (/\.(ico|icns)$/i.test(iconValue)) {
-      try {
-        const cacheDir = path.join(
-          environment.supportPath,
-          "custom_folder_icons",
-        );
-        fsSync.mkdirSync(cacheDir, { recursive: true });
-        const fileHash = crypto
-          .createHash("md5")
-          .update(iconValue)
-          .digest("hex");
-        const convertedPath = path.join(
-          cacheDir,
-          `folder_icon_${fileHash}.png`,
-        );
-        if (!fsSync.existsSync(convertedPath)) {
-          execSync(
-            `sips -s format png -z 512 512 "${iconValue}" --out "${convertedPath}" >/dev/null 2>&1`,
-          );
-        }
-        if (fsSync.existsSync(convertedPath)) {
-          return { source: convertedPath };
-        }
-      } catch {
-        return { source: "glass_folder.png" };
+      const convertedPath = getCustomFolderIconCachePath(iconValue);
+      if (fsSync.existsSync(convertedPath)) {
+        return { source: convertedPath };
       }
+      // Convert asynchronously in background without blocking render
+      void execFileAsync("sips", [
+        "-s",
+        "format",
+        "png",
+        "-z",
+        "512",
+        "512",
+        iconValue,
+        "--out",
+        convertedPath,
+      ]).catch(() => {});
     }
 
     return { source: iconValue };
@@ -437,6 +580,6 @@ export function getFolderIconSource(folderOrIcon?: Folder | string): {
   }
 
   // Generate in background on first frame while showing glass_folder.png
-  generateFolderPreviewIcon(folder);
+  void generateFolderPreviewIcon(folder);
   return { source: "glass_folder.png" };
 }

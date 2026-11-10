@@ -24,7 +24,7 @@ We all have apps we use a few times a week. They aren't used often enough to ear
 - **Make It Yours**: Enjoy modern translucent squircle boxes, classic macOS folders, or pick your own custom `.png`, `.ico`, or `.icns` icon.
 - **Add Multiple Apps at Once**: Press `⌘N` inside any folder, search your installed apps, and hit `Enter` to check off as many apps as you want without the list closing on you.
 - **Search Apps Across Folders**: Forgot which folder you put an app in? Just type the app's name on the main **All App Folders** screen and it will filter right to the folder that holds it.
-- **JSON Backup & Restore**: Export your entire folder configuration to clipboard and restore it anytime on any Mac.
+- **JSON Backup & Restore**: Export your folder configuration to clipboard and restore it anytime (note: local custom icon files reference file paths and should be re-selected when moving to another Mac).
 
 ### Keyboard Shortcuts
 

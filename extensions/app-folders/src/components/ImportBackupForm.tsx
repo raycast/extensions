@@ -7,12 +7,13 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { t } from "../utils/i18n";
 import { importFoldersJSON } from "../utils/storage";
 
 interface ImportBackupFormProps {
-  onImported: () => void | Promise<void>;
+  onImported: () => unknown | Promise<unknown>;
 }
 
 /**
@@ -31,28 +32,16 @@ export function ImportBackupForm({ onImported }: ImportBackupFormProps) {
     }
 
     try {
-      const result = await importFoldersJSON(jsonText, mode);
-      if (result.success) {
-        await showToast({
-          style: Toast.Style.Success,
-          title: t.importSuccessTitle,
-          message: t.importSuccessMessage(result.count),
-        });
-        await onImported();
-        pop();
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: t.errorTitle,
-          message: result.error || t.importErrorInvalidJson,
-        });
-      }
-    } catch {
+      const importedCount = await importFoldersJSON(jsonText, mode);
       await showToast({
-        style: Toast.Style.Failure,
-        title: t.errorTitle,
-        message: t.importErrorInvalidJson,
+        style: Toast.Style.Success,
+        title: t.importSuccessTitle,
+        message: t.importSuccessMessage(importedCount),
       });
+      await onImported();
+      pop();
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 

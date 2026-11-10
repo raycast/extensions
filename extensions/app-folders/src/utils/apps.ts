@@ -4,7 +4,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
@@ -12,7 +12,7 @@ import { promisify } from "util";
 import { AppItem } from "../types";
 import { t } from "./i18n";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // Standard directories where applications are installed on macOS
 const SCAN_DIRECTORIES = [
@@ -93,33 +93,37 @@ export async function scanInstalledApps(): Promise<AppItem[]> {
 }
 
 /**
- * Launches the selected app and closes the Raycast window.
- * 1. Raycast native open API
- * 2. Fallback to macOS `open` shell command
+ * Opens a single app path via Raycast API or macOS `open` command without shell interpolation.
  */
-export async function launchApp(app: AppItem): Promise<boolean> {
+async function openSingleAppPath(appPath: string): Promise<void> {
+  await fs.access(appPath);
   try {
-    await closeMainWindow();
-    await raycastOpen(app.path);
-    return true;
+    await raycastOpen(appPath);
   } catch {
-    try {
-      await execAsync(`open "${app.path}"`);
-      await closeMainWindow();
-      return true;
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.launchFailedTitle,
-        message: t.launchFailedMessage(app.name),
-      });
-      return false;
-    }
+    await execFileAsync("open", [appPath]);
   }
 }
 
 /**
- * Launches all apps in a folder at once and closes Raycast.
+ * Launches the selected app and closes the Raycast window.
+ */
+export async function launchApp(app: AppItem): Promise<boolean> {
+  try {
+    await openSingleAppPath(app.path);
+    await closeMainWindow();
+    return true;
+  } catch {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: t.launchFailedTitle,
+      message: t.launchFailedMessage(app.name),
+    });
+    return false;
+  }
+}
+
+/**
+ * Launches all apps in a folder at once and reports accurate launch results.
  */
 export async function launchAllApps(
   apps: AppItem[],
@@ -133,19 +137,44 @@ export async function launchAllApps(
     return false;
   }
 
-  await closeMainWindow();
+  let openedCount = 0;
+  const failedApps: string[] = [];
+
   for (const app of apps) {
     try {
-      await raycastOpen(app.path);
+      await openSingleAppPath(app.path);
+      openedCount += 1;
     } catch {
-      await execAsync(`open "${app.path}"`).catch(() => {});
+      failedApps.push(app.name);
     }
+  }
+
+  if (openedCount > 0) {
+    await closeMainWindow();
+  }
+
+  if (openedCount === 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: t.launchAllFailedTitle,
+      message: t.launchAllFailedMessage(failedApps),
+    });
+    return false;
+  }
+
+  if (failedApps.length > 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: t.launchAllPartialTitle,
+      message: t.launchAllPartialMessage(openedCount, failedApps),
+    });
+    return false;
   }
 
   await showToast({
     style: Toast.Style.Success,
     title: t.launchAllSuccessTitle,
-    message: t.launchAllSuccessMessage(apps.length, folderName),
+    message: t.launchAllSuccessMessage(openedCount, folderName),
   });
   return true;
 }

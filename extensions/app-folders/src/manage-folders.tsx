@@ -4,10 +4,12 @@ import {
   Alert,
   confirmAlert,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { AddAppView } from "./components/AddAppView";
 import { AppGrid } from "./components/AppGrid";
@@ -18,11 +20,8 @@ import { Folder } from "./types";
 import { launchAllApps } from "./utils/apps";
 import { t } from "./utils/i18n";
 import {
-  generateFolderPreviewIcon,
   getFolderIconSource,
-  getFolderPreviewIconSync,
-  getHighResAppIcon,
-  getHighResAppIconSync,
+  prewarmFoldersIcons,
 } from "./utils/iconExtractor";
 import {
   deleteFolder,
@@ -36,51 +35,17 @@ import {
  * Command for managing, reordering, and configuring app folders.
  */
 export default function ManageFolders() {
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [, setRenderVersion] = useState(0);
-
-  async function loadData() {
-    try {
-      const data = await getFolders();
-      setFolders(data);
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.errorTitle,
-        message: t.loadFoldersError,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const { data: folders = [], isLoading, revalidate } = usePromise(getFolders);
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
+    if (folders.length === 0) return;
     let isMounted = true;
-    const prewarm = async () => {
-      let anyGenerated = false;
-      for (const f of folders) {
-        for (const app of f.apps) {
-          getHighResAppIconSync(app.path);
-          getHighResAppIcon(app.path);
-        }
-        if (f.previewStyle !== "plain" && f.apps && f.apps.length > 0) {
-          const cached = getFolderPreviewIconSync(f);
-          if (!cached) {
-            const res = await generateFolderPreviewIcon(f);
-            if (res) anyGenerated = true;
-          }
-        }
-      }
+    prewarmFoldersIcons(folders).then((anyGenerated) => {
       if (anyGenerated && isMounted) {
         setRenderVersion((v) => v + 1);
       }
-    };
-    prewarm();
+    });
     return () => {
       isMounted = false;
     };
@@ -97,19 +62,27 @@ export default function ManageFolders() {
     });
 
     if (confirmed) {
-      await deleteFolder(folder.id);
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.folderDeleted,
-        message: `'${folder.name}'`,
-      });
-      loadData();
+      try {
+        await deleteFolder(folder.id);
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.folderDeleted,
+          message: `'${folder.name}'`,
+        });
+        await revalidate();
+      } catch (err) {
+        await showFailureToast(err, { title: t.errorTitle });
+      }
     }
   }
 
   async function handleMoveFolder(folder: Folder, direction: "left" | "right") {
-    const updated = await moveFolder(folder.id, direction);
-    setFolders(updated);
+    try {
+      await moveFolder(folder.id, direction);
+      await revalidate();
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
+    }
   }
 
   async function handleResetFolders() {
@@ -123,12 +96,16 @@ export default function ManageFolders() {
     });
 
     if (confirmed) {
-      await resetToDefaultFolders();
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.resetFoldersSuccessToast,
-      });
-      loadData();
+      try {
+        await resetToDefaultFolders();
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.resetFoldersSuccessToast,
+        });
+        await revalidate();
+      } catch (err) {
+        await showFailureToast(err, { title: t.errorTitle });
+      }
     }
   }
 
@@ -147,13 +124,12 @@ export default function ManageFolders() {
               <Action.Push
                 title={t.createFolder}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateFolderForm onFolderCreated={loadData} />}
+                target={<CreateFolderForm onFolderCreated={revalidate} />}
               />
               <Action.Push
                 title={t.importBackup}
                 icon={Icon.Upload}
-                target={<ImportBackupForm onImported={loadData} />}
+                target={<ImportBackupForm onImported={revalidate} />}
               />
             </ActionPanel>
           }
@@ -184,7 +160,17 @@ export default function ManageFolders() {
                         title={t.openFolder}
                         icon={Icon.ArrowRight}
                         target={
-                          <AppGrid folder={folder} onUpdateFolder={loadData} />
+                          <AppGrid
+                            folder={folder}
+                            onUpdateFolder={revalidate}
+                          />
+                        }
+                      />
+                      <Action.Push
+                        title={t.addApp}
+                        icon={Icon.PlusCircle}
+                        target={
+                          <AddAppView folder={folder} onAppAdded={revalidate} />
                         }
                       />
                       {folder.apps.length > 0 && (
@@ -206,15 +192,9 @@ export default function ManageFolders() {
                       <Action.Push
                         title={t.createFolder}
                         icon={Icon.Plus}
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
-                        target={<CreateFolderForm onFolderCreated={loadData} />}
-                      />
-                      <Action.Push
-                        title={t.addApp}
-                        icon={Icon.PlusCircle}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                        shortcut={Keyboard.Shortcut.Common.New}
                         target={
-                          <AddAppView folder={folder} onAppAdded={loadData} />
+                          <CreateFolderForm onFolderCreated={revalidate} />
                         }
                       />
                       <Action
@@ -232,11 +212,11 @@ export default function ManageFolders() {
                       <Action.Push
                         title={t.folderSettings}
                         icon={Icon.Pencil}
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                         target={
                           <EditFolderForm
                             folder={folder}
-                            onUpdated={loadData}
+                            onUpdated={revalidate}
                           />
                         }
                       />
@@ -244,7 +224,7 @@ export default function ManageFolders() {
                         title={t.deleteFolder}
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={() => handleDelete(folder)}
                       />
                     </ActionPanel.Section>
@@ -265,7 +245,7 @@ export default function ManageFolders() {
                       <Action.Push
                         title={t.importBackup}
                         icon={Icon.Upload}
-                        target={<ImportBackupForm onImported={loadData} />}
+                        target={<ImportBackupForm onImported={revalidate} />}
                       />
                       <Action
                         title={t.resetFoldersAction}

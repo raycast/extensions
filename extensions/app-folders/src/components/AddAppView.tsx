@@ -8,19 +8,17 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { AppItem, Folder } from "../types";
 import { scanInstalledApps } from "../utils/apps";
 import { t } from "../utils/i18n";
-import {
-  getHighResAppIcon,
-  getHighResAppIconSync,
-} from "../utils/iconExtractor";
+import { getHighResAppIcon } from "../utils/iconExtractor";
 import { addAppToFolder, removeAppFromFolder } from "../utils/storage";
 
 interface AddAppViewProps {
   folder: Folder;
-  onAppAdded: () => void | Promise<void>;
+  onAppAdded: () => unknown | Promise<unknown>;
 }
 
 /**
@@ -30,70 +28,54 @@ interface AddAppViewProps {
  */
 export function AddAppView({ folder, onAppAdded }: AddAppViewProps) {
   const { pop } = useNavigation();
-  const [allApps, setAllApps] = useState<AppItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: allApps = [], isLoading } = usePromise(scanInstalledApps);
   const [addedPaths, setAddedPaths] = useState<Set<string>>(
     () => new Set(folder.apps.map((a) => a.path)),
   );
 
-  useEffect(() => {
-    async function fetchApps() {
-      try {
-        const apps = await scanInstalledApps();
-        setAllApps(apps);
-      } catch {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: t.errorTitle,
-          message: t.scanAppsError,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchApps();
-  }, []);
-
   async function handleToggleApp(app: AppItem, closeAfter = false) {
-    const isAlreadyInFolder = addedPaths.has(app.path);
+    try {
+      const isAlreadyInFolder = addedPaths.has(app.path);
 
-    if (isAlreadyInFolder && !closeAfter) {
-      await removeAppFromFolder(folder.id, app.path);
-      setAddedPaths((prev) => {
-        const next = new Set(prev);
-        next.delete(app.path);
-        return next;
-      });
-      await onAppAdded();
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.appRemovedTitle,
-        message: t.appRemovedMessage(app.name),
-      });
-      return;
-    }
+      if (isAlreadyInFolder && !closeAfter) {
+        await removeAppFromFolder(folder.id, app.path);
+        setAddedPaths((prev) => {
+          const next = new Set(prev);
+          next.delete(app.path);
+          return next;
+        });
+        await onAppAdded();
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.appRemovedTitle,
+          message: t.appRemovedMessage(app.name),
+        });
+        return;
+      }
 
-    if (!isAlreadyInFolder) {
-      // Cache high-res icon immediately to prevent flicker on return
-      getHighResAppIconSync(app.path);
-      getHighResAppIcon(app.path);
+      if (!isAlreadyInFolder) {
+        // Queue background high-res icon extraction
+        void getHighResAppIcon(app.path);
 
-      await addAppToFolder(folder.id, app);
-      setAddedPaths((prev) => {
-        const next = new Set(prev);
-        next.add(app.path);
-        return next;
-      });
-      await onAppAdded();
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.appAddedTitle,
-        message: t.appAddedMessage(app.name, folder.name),
-      });
-    }
+        await addAppToFolder(folder.id, app);
+        setAddedPaths((prev) => {
+          const next = new Set(prev);
+          next.add(app.path);
+          return next;
+        });
+        await onAppAdded();
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.appAddedTitle,
+          message: t.appAddedMessage(app.name, folder.name),
+        });
+      }
 
-    if (closeAfter) {
-      pop();
+      if (closeAfter) {
+        pop();
+      }
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 
@@ -149,7 +131,6 @@ export function AddAppView({ folder, onAppAdded }: AddAppViewProps) {
                       isAlreadyInFolder ? t.doneReturnToFolder : t.addAndReturn
                     }
                     icon={Icon.Check}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={() => handleToggleApp(app, true)}
                   />
                   <Action

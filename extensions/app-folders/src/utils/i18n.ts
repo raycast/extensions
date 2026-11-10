@@ -38,6 +38,12 @@ export const t = {
   launchAllSuccessTitle: "All Apps Opened",
   launchAllSuccessMessage: (count: number, name: string) =>
     `Opened ${count} ${count === 1 ? "app" : "apps"} from "${name}".`,
+  launchAllPartialTitle: "Some Apps Couldn't Be Opened",
+  launchAllPartialMessage: (opened: number, failedNames: string[]) =>
+    `Opened ${opened} ${opened === 1 ? "app" : "apps"}. Failed: ${failedNames.join(", ")}.`,
+  launchAllFailedTitle: "Couldn't Open Apps",
+  launchAllFailedMessage: (failedNames: string[]) =>
+    `Make sure ${failedNames.join(", ")} ${failedNames.length === 1 ? "is" : "are"} still installed on your Mac.`,
   noAppsToLaunch: "This folder has no apps to open.",
 
   // Folder Grid View

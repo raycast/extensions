@@ -7,8 +7,8 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Folder } from "../types";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { t } from "../utils/i18n";
 import { prepareCustomFolderIcon } from "../utils/iconExtractor";
 import {
@@ -19,7 +19,7 @@ import {
 } from "../utils/storage";
 
 interface CreateFolderFormProps {
-  onFolderCreated: () => void;
+  onFolderCreated: () => unknown | Promise<unknown>;
   defaultSlot?: number;
 }
 
@@ -38,20 +38,16 @@ export function CreateFolderForm({
   const [slot, setSlot] = useState<string>(
     defaultSlot ? String(defaultSlot) : "auto",
   );
-  const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const [error, setError] = useState<string | undefined>();
 
-  useEffect(() => {
-    async function loadExistingFolders() {
-      const folders = await getFolders();
-      setAllFolders(folders);
-      if (!defaultSlot) {
+  const { data: allFolders = [], isLoading } = usePromise(getFolders, [], {
+    onData: (folders) => {
+      if (!defaultSlot && slot === "auto") {
         const firstEmpty = findFirstAvailableSlot(folders);
         setSlot(firstEmpty ? String(firstEmpty) : "none");
       }
-    }
-    loadExistingFolders();
-  }, [defaultSlot]);
+    },
+  });
 
   async function handleSubmit() {
     if (!name.trim()) {
@@ -84,14 +80,10 @@ export function CreateFolderForm({
         title: t.folderCreatedTitle,
         message: t.folderCreatedMessage(newFolder.name, newFolder.slot),
       });
-      onFolderCreated();
+      await onFolderCreated();
       pop();
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.errorTitle,
-        message: t.saveFolderError,
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 
@@ -112,6 +104,7 @@ export function CreateFolderForm({
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm

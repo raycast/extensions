@@ -1,13 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Grid,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Folder } from "../types";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { t } from "../utils/i18n";
 import { getFolderBySlot } from "../utils/storage";
 import { AppGrid } from "./AppGrid";
@@ -21,27 +13,11 @@ interface SlotFolderCommandProps {
  * Component for opening an app folder assigned to a specific shortcut slot.
  */
 export function SlotFolderCommand({ slot }: SlotFolderCommandProps) {
-  const [folder, setFolder] = useState<Folder | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  async function loadData() {
-    try {
-      const data = await getFolderBySlot(slot);
-      setFolder(data || null);
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.errorTitle,
-        message: t.loadFoldersError,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadData();
-  }, [slot]);
+  const {
+    data: folder,
+    isLoading,
+    revalidate,
+  } = usePromise((targetSlot: number) => getFolderBySlot(targetSlot), [slot]);
 
   if (isLoading) {
     return <Grid isLoading={true} />;
@@ -59,10 +35,9 @@ export function SlotFolderCommand({ slot }: SlotFolderCommandProps) {
               <Action.Push
                 title={t.createSlotFolder(slot)}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={
                   <CreateFolderForm
-                    onFolderCreated={loadData}
+                    onFolderCreated={revalidate}
                     defaultSlot={slot}
                   />
                 }
@@ -74,5 +49,5 @@ export function SlotFolderCommand({ slot }: SlotFolderCommandProps) {
     );
   }
 
-  return <AppGrid folder={folder} onUpdateFolder={loadData} />;
+  return <AppGrid folder={folder} onUpdateFolder={revalidate} />;
 }

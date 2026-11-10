@@ -8,6 +8,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { AppItem, Folder } from "../types";
 import { launchAllApps, launchApp } from "../utils/apps";
@@ -32,7 +33,7 @@ import { EditFolderForm } from "./EditFolderForm";
 
 interface AppGridProps {
   folder: Folder;
-  onUpdateFolder?: () => void;
+  onUpdateFolder?: () => unknown | Promise<unknown>;
 }
 
 /**
@@ -41,30 +42,45 @@ interface AppGridProps {
 export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
   const { pop } = useNavigation();
   const [currentFolder, setCurrentFolder] = useState<Folder>(folder);
-  const [allFolders, setAllFolders] = useState<Folder[]>([]);
-  const [showShortcutHints, setShowShortcutHintsState] = useState(true);
   const [asyncFallbackIcons, setAsyncFallbackIcons] = useState<
     Record<string, string>
   >({});
 
+  const { data: gridContext, revalidate: revalidateContext } = usePromise(
+    async () => {
+      const [allFolders, showShortcutHints] = await Promise.all([
+        getFolders(),
+        getShowShortcutHints(),
+      ]);
+      return { allFolders, showShortcutHints };
+    },
+  );
+
+  const allFolders = gridContext?.allFolders ?? [];
+  const showShortcutHints = gridContext?.showShortcutHints ?? true;
+
   // Sync local state when parent folder prop updates
   useEffect(() => {
     setCurrentFolder(folder);
-    getFolders().then(setAllFolders);
-    getShowShortcutHints().then(setShowShortcutHintsState);
   }, [folder]);
 
   async function handleToggleShortcutHints() {
-    const next = !showShortcutHints;
-    setShowShortcutHintsState(next);
-    await setShowShortcutHints(next);
-    await showToast({
-      style: Toast.Style.Success,
-      title: next ? t.shortcutHintsEnabledToast : t.shortcutHintsDisabledToast,
-    });
+    try {
+      const next = !showShortcutHints;
+      await setShowShortcutHints(next);
+      await revalidateContext();
+      await showToast({
+        style: Toast.Style.Success,
+        title: next
+          ? t.shortcutHintsEnabledToast
+          : t.shortcutHintsDisabledToast,
+      });
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
+    }
   }
 
-  // Fallback to async NSWorkspace extraction for apps without .icns (Assets.car only)
+  // Extract missing icons asynchronously in the background via bounded queue
   useEffect(() => {
     let isMounted = true;
     async function loadFallbackIcons() {
@@ -104,14 +120,18 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
    * Refreshes folder state from LocalStorage when children views update data.
    */
   async function handleDataChanged() {
-    const freshFolders = await getFolders();
-    setAllFolders(freshFolders);
-    const refreshed = freshFolders.find((f) => f.id === currentFolder.id);
-    if (refreshed) {
-      setCurrentFolder(refreshed);
-    }
-    if (onUpdateFolder) {
-      onUpdateFolder();
+    try {
+      const freshFolders = await getFolders();
+      const refreshed = freshFolders.find((f) => f.id === currentFolder.id);
+      if (refreshed) {
+        setCurrentFolder(refreshed);
+      }
+      await revalidateContext();
+      if (onUpdateFolder) {
+        await onUpdateFolder();
+      }
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 
@@ -120,44 +140,62 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
     targetFolderId: string,
     targetFolderName: string,
   ) {
-    const result = await moveAppToAnotherFolder(
-      currentFolder.id,
-      targetFolderId,
-      app.path,
-    );
-    if (result.success) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: t.appMovedTitle,
-        message: t.appMovedMessage(app.name, targetFolderName),
-      });
-      await handleDataChanged();
+    try {
+      const result = await moveAppToAnotherFolder(
+        currentFolder.id,
+        targetFolderId,
+        app.path,
+      );
+      if (result.success) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: t.appMovedTitle,
+          message: t.appMovedMessage(app.name, targetFolderName),
+        });
+        await handleDataChanged();
+      }
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 
   async function handleRemoveApp(app: AppItem) {
-    await removeAppFromFolder(currentFolder.id, app.path);
-    setCurrentFolder((prev) => ({
-      ...prev,
-      apps: prev.apps.filter((a) => a.path !== app.path),
-    }));
-    await showToast({
-      style: Toast.Style.Success,
-      title: t.appRemovedTitle,
-      message: t.appRemovedMessage(app.name),
-    });
-    if (onUpdateFolder) onUpdateFolder();
+    try {
+      await removeAppFromFolder(currentFolder.id, app.path);
+      setCurrentFolder((prev) => ({
+        ...prev,
+        apps: prev.apps.filter((a) => a.path !== app.path),
+      }));
+      await showToast({
+        style: Toast.Style.Success,
+        title: t.appRemovedTitle,
+        message: t.appRemovedMessage(app.name),
+      });
+      await revalidateContext();
+      if (onUpdateFolder) {
+        await onUpdateFolder();
+      }
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
+    }
   }
 
   async function handleMoveApp(app: AppItem, direction: "left" | "right") {
-    const updated = await moveAppInFolder(
-      currentFolder.id,
-      app.path,
-      direction,
-    );
-    if (updated) {
-      setCurrentFolder(updated);
-      if (onUpdateFolder) onUpdateFolder();
+    try {
+      const updated = await moveAppInFolder(
+        currentFolder.id,
+        app.path,
+        direction,
+      );
+      if (updated) {
+        setCurrentFolder(updated);
+        await revalidateContext();
+        if (onUpdateFolder) {
+          await onUpdateFolder();
+        }
+      }
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 
@@ -181,7 +219,6 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
               <Action.Push
                 title={t.addApp}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={
                   <AddAppView
                     folder={currentFolder}
@@ -192,7 +229,6 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
               <Action.Push
                 title={t.folderSettings}
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
                 target={
                   <EditFolderForm
                     folder={currentFolder}
@@ -210,7 +246,6 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
           subtitle={t.appsCount(currentFolder.apps.length)}
         >
           {currentFolder.apps.map((app, index) => {
-            // Return synchronous 512x512 cached icon from frame 0 to eliminate layout shifts
             const resolvedIconPath =
               getHighResAppIconSync(app.path) || asyncFallbackIcons[app.path];
             const iconContent = resolvedIconPath
@@ -234,6 +269,7 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                         icon={Icon.Play}
                         onAction={() => launchApp(app)}
                       />
+                      <Action.ShowInFinder path={app.path} />
                       {currentFolder.apps.length > 1 && (
                         <Action
                           title={t.openAllApps}
@@ -271,7 +307,7 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                       <Action.Push
                         title={t.addApp}
                         icon={Icon.Plus}
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        shortcut={Keyboard.Shortcut.Common.New}
                         target={
                           <AddAppView
                             folder={currentFolder}
@@ -320,7 +356,7 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                         title={t.removeApp}
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={() => handleRemoveApp(app)}
                       />
                     </ActionPanel.Section>
@@ -339,7 +375,7 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                       <Action.Push
                         title={t.folderSettings}
                         icon={Icon.Pencil}
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                         target={
                           <EditFolderForm
                             folder={currentFolder}
@@ -347,11 +383,9 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                           />
                         }
                       />
-                      <Action.ShowInFinder path={app.path} />
                       <Action
                         title={t.back}
                         icon={Icon.ArrowLeft}
-                        shortcut={{ modifiers: ["cmd"], key: "escape" }}
                         onAction={pop}
                       />
                     </ActionPanel.Section>

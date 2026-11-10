@@ -1,6 +1,6 @@
 # App Folders Changelog
 
-## [Initial Version] - 2026-11-10
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of App Folders extension for Raycast
 - Smartphone-style app grouping in a unified 6-column grid view

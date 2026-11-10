@@ -7,8 +7,9 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import fsSync from "fs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Folder } from "../types";
 import { t } from "../utils/i18n";
 import {
@@ -19,7 +20,7 @@ import { getFolders, MAX_SHORTCUT_SLOTS, updateFolder } from "../utils/storage";
 
 interface EditFolderFormProps {
   folder: Folder;
-  onUpdated: () => void;
+  onUpdated: () => unknown | Promise<unknown>;
 }
 
 /**
@@ -48,12 +49,9 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
     folder.previewStyle || "auto",
   );
   const [slot, setSlot] = useState(folder.slot ? String(folder.slot) : "none");
-  const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const [error, setError] = useState<string | undefined>();
 
-  useEffect(() => {
-    getFolders().then(setAllFolders);
-  }, []);
+  const { data: allFolders = [], isLoading } = usePromise(getFolders);
 
   async function handleSubmit() {
     if (!name.trim()) {
@@ -85,14 +83,10 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
         title: t.folderUpdatedTitle,
         message: t.folderUpdatedMessage(name),
       });
-      onUpdated();
+      await onUpdated();
       pop();
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.errorTitle,
-        message: t.saveFolderError,
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
     }
   }
 
@@ -129,6 +123,7 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -139,7 +134,6 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
           <Action
             title={t.resetToDefaultIcon}
             icon={Icon.RotateAntiClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={handleResetIcon}
           />
         </ActionPanel>

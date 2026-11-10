@@ -3,6 +3,7 @@ node_modules/
 
 # Production build outputs
 dist/
+raycast-env.d.ts
 
 # OS generated files
 .DS_Store
