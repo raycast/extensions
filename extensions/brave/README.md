@@ -9,7 +9,7 @@
 
 Opening a tab in a different profile creates a new profile window. You can customize the default tab opening behaviour in preferences. In `Default` mode, tabs open in the topmost window when multiple profiles are open, due to limitations in the Brave Browser API.
 
-Moving existing tabs to another window, running bookmarklets, and extracting page favicons through Apple Events are available on macOS only.
+Moving existing tabs to a new or private window, running bookmarklets, and extracting page favicons through Apple Events are available on macOS only.
 
 ## Windows
 

@@ -6,6 +6,8 @@ const ACTIONS = {
 } as const;
 
 export const COSIGN_ORIGIN = "https://cosign.co";
+export const OPEN_REQUESTS_URL = `${COSIGN_ORIGIN}/signals?view=open`;
+export const searchUrl = (query: string) => `${COSIGN_ORIGIN}/search?q=${encodeURIComponent(query)}`;
 
 /** Resolve a server-supplied link against Cosign's origin. Anything that isn't plain https on cosign.co becomes the home page. */
 export function absolute(link: string): string {
@@ -26,7 +28,6 @@ const escapeSyntax = (text: string) =>
     c === "[" ? "&#91;" : c === "]" ? "&#93;" : c === "(" || c === ")" ? c : `\\${c}`,
   );
 
-/** Server text is data: collapse it to one line and neutralize all Markdown syntax before interpolating it. */
 export const escapeMd = (text: string) => escapeSyntax(text.replace(/\s+/g, " ").trim());
 
 /**
@@ -43,10 +44,16 @@ export const quote = (text: string) =>
 /** "/profile/nominee/<id>" -> "<id>"; undefined for any other path (organizations, for instance). */
 export const nomineeIdFromPath = (profileUrl: string) => /\/profile\/nominee\/([^/?#]+)/.exec(profileUrl)?.[1];
 
-/** The inverse: a person's Cosign page. Person lookups now return an x.com profileUrl, so build the Cosign one. */
 export const nomineeUrl = (nomineeId: string) => `${COSIGN_ORIGIN}/profile/nominee/${encodeURIComponent(nomineeId)}`;
 
-/** An X profile link from a handle, with or without its "@". */
+/** A person's page: on Cosign when they're on it, else their X profile. Never the raw server `profileUrl`. */
+export const personUrl = (nomineeId: string | null, handle: string) =>
+  nomineeId ? nomineeUrl(nomineeId) : xProfile(handle).url;
+
+/** A company's logo. List entries give companies a `kind=person` image URL, which serves a blank square. */
+export const organizationImage = (organizationId: string) =>
+  `${COSIGN_ORIGIN}/api/profile-image?kind=organization&id=${encodeURIComponent(organizationId)}&size=128`;
+
 export const xProfile = (handle: string) => {
   const name = handle.replace(/^@/, "");
   return { label: `@${name}`, url: `https://x.com/${encodeURIComponent(name)}` };
@@ -54,6 +61,28 @@ export const xProfile = (handle: string) => {
 
 export const unreadCount = (conversations: Conversation[] = [], requests: NetworkRequest[] = []) =>
   conversations.filter((c) => c.unread).length + requests.filter((r) => !r.closed).length;
+
+/**
+ * A request's one-line summary for the menu bar. People write their taglines like LinkedIn headlines, as segments
+ * split by " | ", so only the first is kept. Someone with no tagline gets their first current role instead.
+ */
+export function requestSubtitle({
+  tagline,
+  experiences,
+}: Pick<NetworkRequest, "tagline" | "experiences">): string | undefined {
+  const line = tagline?.trim();
+  if (line) return line.split(/\s\|(?:\s|$)/)[0].trim();
+  const role = experiences.find((e) => /\bPresent$/.test(e.dateRange ?? ""));
+  return role ? `${role.title} at ${role.organizationName}` : undefined;
+}
+
+export function profilePhoto(imageUrl?: string | null): string | null {
+  const url = URL.parse(imageUrl ?? "");
+  if (url?.protocol !== "https:") return null;
+  url.searchParams.set("raycast-width", "96");
+  url.searchParams.set("raycast-height", "96");
+  return `![](${url.href.replace(/\(/g, "%28").replace(/\)/g, "%29")})`;
+}
 
 const stamp = (ms: number) =>
   new Date(ms).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -95,10 +124,6 @@ const list = (parts: string[]) =>
   parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : (parts[0] ?? "");
 const KNOWN = ["meet", "work_with"] as const;
 
-/**
- * Plain-language version of a signal exchange, e.g. "You both would meet each other and work together."
- * Falls back to Cosign's own wording when the exchange is missing or holds a kind we don't recognize.
- */
 export function connectionSentence(c: Conversation): string | null {
   const them = c.signalExchange?.find((e) => e.from.userId === c.counterpart.userId)?.signalKinds;
   const me = c.signalExchange?.find((e) => e.to.userId === c.counterpart.userId)?.signalKinds;

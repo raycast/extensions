@@ -24,7 +24,8 @@
     "chrismessina",
     "clins1994",
     "alexi.build",
-    "beru"
+    "beru",
+    "raulg"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -34,7 +35,8 @@
       "title": "Show Installed",
       "subtitle": "Brew",
       "description": "List installed brew formulae & casks",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["list", "homebrew"]
     },
     {
       "name": "search",
@@ -42,6 +44,7 @@
       "subtitle": "Brew",
       "description": "Search brew formulae & casks",
       "mode": "view",
+      "keywords": ["homebrew"],
       "arguments": [
         {
           "name": "search",
@@ -67,7 +70,8 @@
       "title": "Show Upgrades",
       "subtitle": "Brew",
       "description": "Review available upgrades, choose which to apply, and run it",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["outdated", "homebrew"]
     },
     {
       "name": "show-vulnerabilities",
@@ -80,7 +84,8 @@
         "vulns",
         "vulnerabilities",
         "cve",
-        "osv"
+        "osv",
+        "homebrew"
       ]
     },
     {
@@ -94,29 +99,33 @@
         "diagnose",
         "health",
         "check",
-        "problems"
+        "problems",
+        "homebrew"
       ]
     },
     {
       "name": "adopt-apps",
       "title": "Adopt Apps",
-      "subtitle": "Homebrew",
+      "subtitle": "Brew",
       "description": "Find applications already on your Mac that Homebrew can manage, and adopt them into a cask.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["homebrew"]
     },
     {
       "name": "upgrade",
       "title": "Upgrade All",
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["homebrew"]
     },
     {
       "name": "manage-services",
       "title": "Manage Services",
       "subtitle": "Brew",
       "description": "Start, stop & restart Homebrew services",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["homebrew"]
     },
     {
       "name": "manage-taps",
@@ -124,6 +133,7 @@
       "subtitle": "Brew",
       "description": "Add, trust & remove third-party Homebrew taps, and explore what they provide",
       "mode": "view",
+      "keywords": ["untap", "trust", "homebrew"],
       "arguments": [
         {
           "name": "tap",
@@ -139,7 +149,8 @@
       "subtitle": "Brew",
       "description": "Control Homebrew services from the menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "keywords": ["homebrew"]
     },
     {
       "name": "clean-up",
@@ -147,6 +158,7 @@
       "subtitle": "Brew",
       "description": "Clean files and packages from the cache that are older than 120 days",
       "mode": "no-view",
+      "keywords": ["cleanup", "homebrew"],
       "preferences": [
         {
           "name": "withoutThreshold",
@@ -165,6 +177,7 @@
       "subtitle": "Brew",
       "description": "Clear the cached Formulae, Casks, and installed packages files",
       "mode": "no-view",
+      "keywords": ["homebrew"],
       "disabledByDefault": true
     }
   ],

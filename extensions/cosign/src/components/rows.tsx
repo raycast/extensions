@@ -2,7 +2,6 @@ import type { ComponentProps } from "react";
 import { Color, Icon, Image, List } from "@raycast/api";
 import type { FavoriteKind } from "../lib/favorites";
 
-/** Row appearance shared by every list that shows a person or company, so they always look alike. */
 export interface EntityRowProps {
   kind: FavoriteKind;
   id: string;

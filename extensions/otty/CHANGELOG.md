@@ -1,5 +1,13 @@
 # Otty Changelog
 
+## [Clearer Loading State and Fixes] - 2026-11-10
+
+- Search Otty Tabs now says it is loading on first open, and when Otty doesn't answer it shows "Waiting for Otty" and keeps checking every few seconds instead of reading as a dead end.
+- Untitled tabs and windows in Search Otty Tabs and the Otty Agents menu bar are now named by their folder, as in Otty's own sidebar, instead of showing blank.
+- Jump to Directory's Most Visited list now favors folders you've visited lately, so a folder that was busy months ago no longer stays on top.
+- New Tab, New Window, Open in Otty, and the other commands that open something in Otty now bring Otty to the front.
+- Otty Settings shows a swatch beside color values.
+
 ## [Search Otty Tabs, Agents, Settings, Themes, and Recipes] - 2026-10-24
 
 - Add Search Otty Tabs: browse Otty by tab, pane, or window, see which coding agents are working or need input, and press Enter to jump straight there; tabs you visit from Raycast come first.

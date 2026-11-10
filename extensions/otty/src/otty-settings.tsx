@@ -6,37 +6,38 @@ import {
   confirmAlert,
   Form,
   Icon,
+  Image,
   Keyboard,
   List,
-  showToast,
-  Toast,
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import configDocs from "./lib/config-docs.json";
+import { applySetting, getConfigPath, loadConfigDocs, loadSettings, loadThemeState } from "./lib/otty-config";
+import { buildConfigSetArgs, buildConfigUnsetArgs } from "./lib/otty-core";
 import {
-  changeSetting,
+  choicesFor,
+  colorSwatch,
   CONFIG_REFERENCE_URL,
-  getConfigPath,
-  loadConfigDocs,
-  loadSettings,
-  loadThemeState,
-  showFailure,
-} from "./lib/otty";
-import {
-  buildConfigSetArgs,
-  buildConfigUnsetArgs,
   formatValue,
   groupByDocs,
   groupSettings,
-  validateSettingValue,
+  validateEdit,
   type Setting,
   type SettingDoc,
 } from "./lib/settings";
-import { LoadFailureView, ToggleSidebarAction, usePersistentState, useRefreshFailureToast } from "./lib/ui";
+import { THEME_KEYS } from "./lib/themes";
+import {
+  LoadFailureView,
+  RefreshAction,
+  shiftShortcut,
+  ToggleSidebarAction,
+  usePersistentState,
+  useRefreshFailureToast,
+} from "./lib/ui";
 
-const THEME_KEYS = new Set(["theme", "theme-dark"]);
+const THEME_SETTING_KEYS = new Set(Object.values(THEME_KEYS));
 
 /** Snapshot of Otty's configuration reference, refreshed by `npm run publish`. */
 const CONFIG_DOCS_SNAPSHOT = configDocs as {
@@ -54,14 +55,10 @@ export default function Command() {
     onError: () => {},
   });
   useRefreshFailureToast(error, Boolean(data), "Could not refresh Otty settings");
-  // Descriptions, defaults, and allowed values come from Otty's online
-  // reference.
   const { data: liveDocs } = useCachedPromise(loadConfigDocs, [], {
     keepPreviousData: true,
     onError: () => {},
   });
-  // The bundled snapshot covers the first open and offline use; the live page
-  // replaces it as soon as it loads.
   const docRecord = liveDocs ?? CONFIG_DOCS_SNAPSHOT.settings;
   const { data: configPath } = useCachedPromise(getConfigPath, [], {
     onError: () => {},
@@ -71,7 +68,6 @@ export default function Command() {
   const groupFor = (settings: Setting[]) => (docs.size > 0 ? groupByDocs(settings, docs) : groupSettings(settings));
 
   const allGroups = useMemo(() => groupFor(data ?? []), [data, docs]);
-  // A stored group that no longer exists falls back to showing everything.
   const activeGroup = allGroups.some((g) => g.title === group) ? group : ALL_GROUPS;
   const groups = useMemo(
     () =>
@@ -173,7 +169,7 @@ function SettingItem({
             color: setting.value ? Color.Green : Color.SecondaryText,
           },
         }
-      : { text: formatValue(setting.value), tooltip: setting.text },
+      : { text: formatValue(setting.value), tooltip: setting.text, icon: swatchIcon(setting.text) },
   );
 
   return (
@@ -242,23 +238,20 @@ function SettingItem({
             <Action
               title={onlyCustomized ? "Show All Settings" : "Show Only Customized"}
               icon={Icon.Filter}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "f" },
-                Windows: { modifiers: ["ctrl", "shift"], key: "f" },
-              }}
+              shortcut={shiftShortcut("f")}
               onAction={onToggleCustomized}
             />
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={onChange}
-            />
+            <RefreshAction onRefresh={onChange} />
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
+}
+
+function swatchIcon(text: string | undefined): Image.ImageLike | undefined {
+  const color = colorSwatch(text);
+  return color ? { source: Icon.CircleFilled, tintColor: color } : undefined;
 }
 
 function SettingDetail({ setting, doc }: { setting: Setting; doc?: SettingDoc }) {
@@ -270,9 +263,14 @@ function SettingDetail({ setting, doc }: { setting: Setting; doc?: SettingDoc })
           <List.Item.Detail.Metadata.Label
             title="Current"
             text={formatValue(setting.value)}
-            icon={setting.customized ? { source: Icon.Pencil, tintColor: Color.SecondaryText } : undefined}
+            icon={
+              swatchIcon(setting.text) ??
+              (setting.customized ? { source: Icon.Pencil, tintColor: Color.SecondaryText } : undefined)
+            }
           />
-          {doc ? <List.Item.Detail.Metadata.Label title="Default" text={doc.default} /> : null}
+          {doc ? (
+            <List.Item.Detail.Metadata.Label title="Default" text={doc.default} icon={swatchIcon(doc.default)} />
+          ) : null}
           {doc?.values ? (
             <List.Item.Detail.Metadata.TagList title="Allowed Values">
               {doc.values.map((value) => (
@@ -299,15 +297,8 @@ function SettingDetail({ setting, doc }: { setting: Setting; doc?: SettingDoc })
 function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: SettingDoc; onSaved: () => void }) {
   const { pop } = useNavigation();
   const [valueError, setValueError] = useState<string>();
-  const isTheme = THEME_KEYS.has(setting.key);
-  // Keep a customized value the reference doesn't list (an alias, say), so
-  // saving without touching the picker can never silently reset it.
-  const choices =
-    doc?.type === "enum" && doc.values
-      ? setting.customized && !doc.values.includes(setting.text)
-        ? [setting.text, ...doc.values]
-        : doc.values
-      : undefined;
+  const isTheme = THEME_SETTING_KEYS.has(setting.key);
+  const choices = choicesFor(setting, doc);
   const { data: themeState, isLoading } = useCachedPromise(loadThemeState, [], {
     execute: isTheme,
     onError: () => {},
@@ -316,27 +307,17 @@ function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: Se
 
   async function save(values: { value: string }) {
     const value = values.value.trim();
-    // Saving the current value unchanged is always allowed: it may be an alias
-    // the reference doesn't list. Themes must be names Otty actually has.
-    const invalid =
-      !value || value === setting.text
-        ? undefined
-        : isTheme
-          ? themes?.includes(value)
-            ? undefined
-            : "Pick one of Otty's themes"
-          : (validateSettingValue(value, doc) ??
-            (setting.type === "number" && !Number.isFinite(Number(value)) ? "Enter a number" : undefined));
+    const invalid = validateEdit(value, setting, doc, isTheme ? { names: themes } : undefined);
     if (invalid) {
       setValueError(invalid);
       return;
     }
-    // An empty value means "back to Otty's default".
     const args = value ? buildConfigSetArgs(setting.key, value) : buildConfigUnsetArgs(setting.key);
     if (await apply(args, `Updated ${setting.key}`, onSaved)) pop();
   }
 
   const defaultLabel = `Otty's Default${doc?.default ? ` (${doc.default})` : ""}`;
+  const errorProps = { error: valueError, onChange: () => setValueError(undefined) };
 
   return (
     <Form
@@ -350,13 +331,7 @@ function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: Se
       }
     >
       {isTheme && themes ? (
-        <Form.Dropdown
-          id="value"
-          title="Theme"
-          defaultValue={setting.text}
-          error={valueError}
-          onChange={() => setValueError(undefined)}
-        >
+        <Form.Dropdown id="value" title="Theme" defaultValue={setting.text} {...errorProps}>
           {themes.map((name) => (
             <Form.Dropdown.Item key={name} title={name} value={name} />
           ))}
@@ -367,8 +342,7 @@ function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: Se
           title="Value"
           defaultValue={setting.customized ? setting.text : ""}
           info={doc?.description}
-          error={valueError}
-          onChange={() => setValueError(undefined)}
+          {...errorProps}
         >
           <Form.Dropdown.Item title={defaultLabel} value="" />
           <Form.Dropdown.Section>
@@ -385,30 +359,15 @@ function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: Se
           info={doc?.description ?? "One entry per line."}
         />
       ) : (
-        <Form.TextField
-          id="value"
-          title="Value"
-          defaultValue={setting.text}
-          info={doc?.description}
-          error={valueError}
-          onChange={() => setValueError(undefined)}
-        />
+        <Form.TextField id="value" title="Value" defaultValue={setting.text} info={doc?.description} {...errorProps} />
       )}
       {choices ? null : <Form.Description text="Leave it empty to go back to Otty's default." />}
     </Form>
   );
 }
 
-async function apply(args: string[], successTitle: string, onChange: () => void): Promise<boolean> {
-  try {
-    await changeSetting(args);
-    await showToast({ style: Toast.Style.Success, title: successTitle });
-    onChange();
-    return true;
-  } catch (error) {
-    await showFailure("Could not change setting", error);
-    return false;
-  }
+function apply(args: string[], successTitle: string, onChange: () => void): Promise<boolean> {
+  return applySetting(args, { title: successTitle }, "Could not change setting", onChange);
 }
 
 async function resetSetting(setting: Setting, doc: SettingDoc | undefined, onChange: () => void) {
