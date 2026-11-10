@@ -1,6 +1,6 @@
 # WiiM Changelog
 
-## [Device, Dependencies and Vitest] - {PR_MERGE_DATE}
+## [Device, Dependencies and Vitest] - 2026-11-10
 
 - Show selected device
 - Updates dependencies
