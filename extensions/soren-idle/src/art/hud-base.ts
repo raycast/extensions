@@ -372,6 +372,55 @@ const beacon: Site = {
   },
 };
 
+const rescueShip: Site = {
+  tag: [370, 150],
+  draw: (f) => {
+    let out =
+      hull(
+        [
+          [300, 60],
+          [340, 150],
+          [340, 250],
+          [260, 250],
+          [260, 150],
+        ],
+        BLUE.pale,
+        1.8,
+      ) +
+      hull(
+        [
+          [260, 200],
+          [214, 270],
+          [260, 250],
+        ],
+        BLUE.pale,
+      ) +
+      hull(
+        [
+          [340, 200],
+          [386, 270],
+          [340, 250],
+        ],
+        BLUE.pale,
+      ) +
+      circle([300, 130], 12, BLUE.pale, 1.6, "url(#crystal)") +
+      line([300, 150], [300, 250], BLUE.mid, 1.2) +
+      rect(220, BASE - 20, 160, 20, 4);
+    const flame = 24 + (f % 3) * 10;
+    out += poly(
+      [
+        [276, 250],
+        [300, 250 + flame],
+        [324, 250],
+      ],
+      "url(#flare)",
+      "#ffffff",
+      1,
+    );
+    return out;
+  },
+};
+
 const SITES: Record<BuildingId, Site> = {
   shelter,
   generator,
@@ -386,6 +435,7 @@ const SITES: Record<BuildingId, Site> = {
   stasis_pod: stasisPod,
   bounty_board: bountyBoard,
   beacon,
+  rescue_ship: rescueShip,
 };
 
 export const BUILDING_ART_IDS = Object.keys(SITES) as BuildingId[];
