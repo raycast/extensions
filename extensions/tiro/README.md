@@ -41,4 +41,4 @@ A request being sent does not confirm recording, document generation, or upload 
 
 
 ## Security
-This is a public PKCE client. Its OAuth client ID and service URLs are public configuration, not credentials. Raycast manages user tokens and password preferences. Token response bodies are not included in sign-in error messages. See SECURITY.md for the release checks and server authorization boundary.
+This is a public PKCE client. Its OAuth client ID and service URLs are public configuration, not credentials. Raycast manages user tokens and password preferences. Token response bodies are not included in sign-in error messages.

@@ -27,6 +27,7 @@ for (const action of RECORDING_ACTIONS) {
   const calls = [];
   const notices = [];
   let shouldFail = false;
+  const launchError = new Error("launch failed");
   const api = {
     closeMainWindow: async () => {},
     showToast: async (toast) => notices.push(toast),
@@ -38,13 +39,15 @@ for (const action of RECORDING_ACTIONS) {
     exports: mod.exports,
     require: (name) => {
       if (name === "@raycast/api") return api;
+      if (name === "@raycast/utils")
+        return { showFailureToast: async (error, options) => notices.push({ style: "failure", error, ...options }) };
       if (name === "./recording-links") return { recordingUrl };
       if (name === "node:util") return { promisify };
       if (name === "node:child_process")
         return {
           execFile(file, args, callback) {
             calls.push({ file, args: Array.from(args) });
-            callback(shouldFail ? new Error("launch failed") : null, "", "");
+            callback(shouldFail ? launchError : null, "", "");
           },
         };
       throw new Error(`Unexpected import: ${name}`);
@@ -57,5 +60,7 @@ for (const action of RECORDING_ACTIONS) {
   await mod.exports.requestRecording(action);
   assert.equal(calls.length, 2); // One attempt per request, no activating fallback.
   assert.equal(notices.at(-1).style, "failure");
+  assert.equal(notices.at(-1).error, launchError); // Keep the original failure available to Raycast.
+  assert.match(notices.at(-1).message, /Install the Tiro desktop app and sign in/);
 }
 console.log("4 non-activating launch + failure regression cases passed");

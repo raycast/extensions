@@ -3,9 +3,10 @@ import { Note } from "./api";
 
 export function formatDuration(seconds: number): string | undefined {
   if (!seconds) return undefined;
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.round((seconds % 3600) / 60);
-  if (hours === 0) return `${Math.max(minutes, 1)}m`;
+  const totalMinutes = Math.max(Math.round(seconds / 60), 1);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
   return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
 }
 

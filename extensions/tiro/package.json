@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tiro",
   "title": "Tiro",
-  "description": "Search Tiro notes and control desktop recordings from your keyboard.",
+  "description": "Search notes with a Tiro account and control recordings in the separately installed Tiro desktop app (4.12.1+).",
   "icon": "tiro-icon.png",
   "author": "paul-theplato",
   "owner": "theplato",
@@ -77,6 +77,7 @@
       "title": "API Key",
       "description": "Optional. Paste an account API key from tiro.ooo/platform/me/api-keys to use it instead of signing in.",
       "type": "password",
+      "placeholder": "Optional account API key",
       "required": false
     }
   ],
@@ -99,9 +100,7 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node scripts/test-recording-links.mjs",
-    "security:package": "node scripts/check-package.mjs",
-    "package:secure": "npm run build && node scripts/package-release.mjs"
+    "test": "node scripts/test-recording-links.mjs && node scripts/test-format.mjs && node scripts/test-note-actions.mjs"
   },
   "access": "public",
   "overrides": {

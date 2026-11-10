@@ -16,7 +16,7 @@ export function NoteActions({ note, current }: { note: Note; current?: "summary"
           <Action.Push
             title="Show Transcript"
             icon={Icon.Text}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={current === "summary" ? undefined : { modifiers: ["cmd"], key: "t" }}
             target={<NoteDetail note={note} view="transcript" />}
           />
         )}
