@@ -1,6 +1,6 @@
 # Color Palette Manager Changelog
 
-## [Fix CSS Export and Update Dependencies] - {PR_MERGE_DATE}
+## [Fix CSS Export and Update Dependencies] - 2026-11-10
 
 ### Fixed
 
