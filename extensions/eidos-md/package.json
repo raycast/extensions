@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "eidos-md",
+  "title": "Eidos MD",
+  "description": "Open your Eidos projects in Eidos MD and search inside one: blueprints, docs, drafts, tasks, and the words in them.",
+  "icon": "icon.png",
+  "author": "iUngerTime",
+  "owner": "tvp",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "keywords": [
+    "eidos",
+    "blueprints",
+    "specs",
+    "backlog",
+    "markdown"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "subtitle": "Eidos MD",
+      "description": "The Eidos projects on this machine, opened in Eidos MD.",
+      "mode": "view"
+    },
+    {
+      "name": "project-folders",
+      "title": "Project Folders",
+      "subtitle": "Eidos MD",
+      "description": "The folders that hold your Eidos projects, beside the ones Eidos MD opened lately. Each is searched two levels down.",
+      "mode": "view"
+    },
+    {
+      "name": "search-project",
+      "title": "Search Project",
+      "subtitle": "Eidos MD",
+      "description": "Find a blueprint, doc, draft, or task in an Eidos project by its id, its title, or the words in it.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "includeRecent",
+      "title": "Recent Projects",
+      "label": "Include projects Eidos MD opened lately",
+      "description": "Off, only your Project Folders and projects folder are listed: for screenshots, or sharing your screen.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "editor",
+      "title": "Editor",
+      "description": "The app Open in Editor uses. Left empty, you pick one each time.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "eidosPath",
+      "title": "eidos Command",
+      "description": "Where the eidos command is, if it is neither on your PATH nor inside Eidos MD.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsc -p tsconfig.test.json && node --test \"dist-test/test/**/*.test.js\"",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
