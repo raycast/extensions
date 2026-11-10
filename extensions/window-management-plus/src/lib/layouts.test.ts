@@ -42,16 +42,25 @@ test("a fixed window keeps its size and the others share the rest", () => {
   assert.equal(b.frame.height, 300);
 });
 
-test("master gives the largest window its share on the left, Hyprland's 55% by default", () => {
+test("the master takes all the stack can spare, so the other windows are as narrow as they go", () => {
   const out = master({ side: "left" })([item("s1"), item("big", 900, 700), item("s2")], box);
   const big = out.find((p) => p.id === "big")!;
-  assert.deepEqual(big.frame, { x: 0, y: 0, width: 660, height: 800 });
-  assert.equal(out.find((p) => p.id === "s1")!.frame.x, 660);
+  assert.deepEqual(big.frame, { x: 0, y: 0, width: 960, height: 800 });
+  assert.deepEqual(frameOf(out, "s1"), { x: 960, y: 0, width: 240, height: 400 });
 });
 
-test("a bigger ratio grows the master", () => {
+test("a stack window keeps the minimum width its app insists on, and the master takes the rest", () => {
+  const wide = { ...item("s1"), min: { width: 500 } };
+  const out = master({ side: "left" })([wide, item("big", 900, 700), item("s2")], box);
+  assert.equal(frameOf(out, "big").width, 700);
+  assert.equal(frameOf(out, "s1").width, 500);
+  assert.equal(frameOf(out, "s2").width, 500);
+});
+
+test("a smaller share shrinks the master and widens the stack", () => {
   const out = master({ side: "left", ratio: 0.7 })([item("s1"), item("big", 900, 700)], box);
-  assert.equal(out.find((p) => p.id === "big")!.frame.width, 840);
+  assert.equal(frameOf(out, "big").width, 840);
+  assert.equal(frameOf(out, "s1").width, 360);
 });
 
 test("master in the center splits the stack across both sides", () => {
@@ -126,7 +135,7 @@ test("master wraps the stack into more columns when minimum heights don't fit", 
   const a = out.find((p) => p.id === "a")!.frame;
   const b = out.find((p) => p.id === "b")!.frame;
   assert.notEqual(a.x, b.x);
-  assert.equal(out.find((p) => p.id === "big")!.frame.width, 660);
+  assert.equal(out.find((p) => p.id === "big")!.frame.width, 720);
 });
 
 test("sidebar keeps the width its app insists on", () => {
@@ -436,7 +445,7 @@ test("a set-aside window too wide for the others' slots shares the active window
 test("asked to lead with the focused window, master takes it even when another is larger", () => {
   const items = [item("big", 900, 700), { ...item("small"), active: true }, item("other")];
   const out = master({ side: "left", lead: "focused" })(items, box);
-  assert.deepEqual(frameOf(out, "small"), { x: 0, y: 0, width: 660, height: 800 });
+  assert.deepEqual(frameOf(out, "small"), { x: 0, y: 0, width: 960, height: 800 });
   // Without the focused window on this display, the largest leads
   const unfocused = items.map((i) => ({ ...i, active: false }));
   assert.equal(frameOf(master({ side: "left", lead: "focused" })(unfocused, box), "big").x, 0);

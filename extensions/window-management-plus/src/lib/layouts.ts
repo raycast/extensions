@@ -166,8 +166,12 @@ export const rows =
 /** Every window fills the area. A window that can't resize is centred instead. */
 const monocle: Layout = (items, box) => items.flatMap((i) => row([i], box, 0));
 
-/** Hyprland's default share of the width for the master window. */
-export const MASTER_RATIO = 0.55;
+/**
+ * The most of the width the master may take. By default that is all of it, so the master gets everything
+ * the stack can spare: the stack's windows are as narrow as their apps allow. Make Master Smaller
+ * lowers it.
+ */
+export const MASTER_RATIO = 1;
 
 /** Split a stack into columns, starting a new one when the minimum heights don't fit. */
 function wrap(stack: Item[], height: number, gap: number): Item[][] {
@@ -188,7 +192,7 @@ function wrap(stack: Item[], height: number, gap: number): Item[][] {
 }
 
 /**
- * Hyprland's master layout. The master is the focused window or the largest, and takes `ratio` of the width, on the left,
+ * Hyprland's master layout. The master is the focused window or the largest, and takes up to `ratio` of the width, on the left,
  * the right or in the middle. The rest stack in columns beside it: on the other side, or split across both
  * sides for "center". A stack that needs more room than its share gets it, and the master gives way.
  */

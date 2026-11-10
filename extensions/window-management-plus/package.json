@@ -176,7 +176,7 @@
     {
       "name": "master-left",
       "title": "Master Left",
-      "description": "Make the focused window the master on the left, with every other window stacked on the right.",
+      "description": "Make the focused window the master on the left, as wide as the others allow. Every other window is stacked on the right, as narrow as its app goes.",
       "mode": "no-view",
       "icon": "master-left.png",
       "keywords": [
@@ -191,7 +191,7 @@
     {
       "name": "master-right",
       "title": "Master Right",
-      "description": "Make the focused window the master on the right, with every other window stacked on the left.",
+      "description": "Make the focused window the master on the right, as wide as the others allow. Every other window is stacked on the left, as narrow as its app goes.",
       "mode": "no-view",
       "icon": "master-right.png",
       "keywords": [
@@ -206,7 +206,7 @@
     {
       "name": "master-center",
       "title": "Master Center",
-      "description": "Make the focused window the master in the middle, with the other windows stacked on both sides. Best on wide displays.",
+      "description": "Make the focused window the master in the middle, as wide as the others allow. The other windows are stacked on both sides. Best on wide displays.",
       "mode": "no-view",
       "keywords": [
         "master layout center",

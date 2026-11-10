@@ -58,7 +58,7 @@ const PINNED = "sidebar-window"; // what is pinned: "notes", "ai", or a window m
 const SIDEBAR_AT = "sidebar-at"; // where the sidebar was last put, to tell when it has been dragged away
 const SPLIT = "split"; // "columns" when Pivot has turned Auto Tile on its side
 const SHAPE = "shape"; // what Pivot chose: "line" or "grid". Unset, Auto Tile decides by window count.
-const RATIO = "master-ratio";
+const RATIO = "master-share"; // the most of the width the master may take. Unset, all the stack can spare.
 const MASTERS = "masters"; // the window that is master on each display, so its size needn't say so
 /** What `last-tile` held when the sidebar was a layout of its own. */
 const OLD_SIDEBAR_LAYOUT = "auto-tile-sidebar";
@@ -320,14 +320,25 @@ export const swapNext = () => retile((layout, pinned) => swappedNext(layout, pin
 /** The active window trades places with the master. Hyprland's swapwithmaster. */
 export const swapWithMaster = () => retile((layout, pinned) => withMaster(layout, pinned));
 
-/** The master takes a bigger or smaller share. Hyprland's mfact. Switches to Master Left if needed. */
-export const resizeMaster = (delta: number) =>
-  retile(undefined, (state) => ({
-    ...state,
-    ratio: Math.min(0.85, Math.max(0.15, Math.round((state.ratio + delta) * 100) / 100)),
-    last: isMaster(state.last) ? state.last : "master-left",
-    hasTiled: true,
-  }));
+/**
+ * The master takes a bigger or smaller share of the width. Hyprland's mfact. It steps from the share the
+ * master has on screen now, so the first press always changes something, even when the master had as
+ * much as the stack could spare. Switches to Master Left if no master layout is in use.
+ */
+export async function resizeMaster(delta: number) {
+  // If the windows can't be read, the retile says why
+  const { windows, displays } = await listWindows().catch(() => ({ windows: [], displays: [] }));
+  return retile(undefined, (state) => {
+    if (!isMaster(state.last)) return { ...state, last: "master-left", hasTiled: true };
+    const focused = windows.find((w) => w.focused);
+    const display = displays.find((d) => d.index === focused?.display);
+    const here = windows.filter((w) => w.display === focused?.display);
+    const size = (w: { frame: { width: number; height: number } }) => w.frame.width * w.frame.height;
+    const main = here.find((w) => state.masters.includes(w.id)) ?? [...here].sort((a, b) => size(b) - size(a))[0];
+    const share = main && display ? main.frame.width / display.width : state.ratio;
+    return { ...state, ratio: Math.min(0.95, Math.max(0.15, Math.round((share + delta) * 100) / 100)) };
+  });
+}
 
 /**
  * Auto Tile turns to its next shape, on the active display: side by side, then a grid of two rows, then
