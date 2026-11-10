@@ -485,12 +485,13 @@ function ChooseItems({
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(entry.id)}
                 />
+                <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
                 {picked.length ? (
                   bucket.key === "safeToClean" ? (
                     <Action
                       title="Clean Chosen"
                       icon={Icon.Trash}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={go(true)}
                     />
                   ) : (
@@ -498,7 +499,7 @@ function ChooseItems({
                       <Action
                         title="Move Chosen to Trash"
                         icon={Icon.Trash}
-                        shortcut={{ modifiers: ["cmd"], key: "return" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={go(false)}
                       />
                       <Action
@@ -511,7 +512,6 @@ function ChooseItems({
                     </>
                   )
                 ) : null}
-                <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
               </ActionPanel>
             }
           />

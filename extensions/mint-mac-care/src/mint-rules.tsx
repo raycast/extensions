@@ -265,15 +265,15 @@ function RulePreview({ cli, rule }: { cli: string; rule: Rule }) {
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(row.id)}
                 />
+                <Action.ShowInFinder path={row.path} />
                 {picked.length ? (
                   <Action
                     title={`Move ${plural(picked.length, "Chosen File")} to the Trash`}
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={trash}
                   />
                 ) : null}
-                <Action.ShowInFinder path={row.path} />
               </ActionPanel>
             }
           />

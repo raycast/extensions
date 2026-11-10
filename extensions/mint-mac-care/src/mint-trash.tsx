@@ -99,12 +99,14 @@ function EmptyTrash({ cli }: { cli: string }) {
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(item.id)}
                 />
+                {/* Second (⌘↵) reads only; what deletes has its own key (Raycast's rule for the secondary slot). */}
+                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
                 {picked.length ? (
                   <Action
                     title={`Delete ${plural(picked.length, "Chosen Item")}…`}
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => remove(picked)}
                   />
                 ) : null}
@@ -112,10 +114,9 @@ function EmptyTrash({ cli }: { cli: string }) {
                   title="Empty the Whole Trash…"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   onAction={() => remove(rows)}
                 />
-                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
                 <ActionPanel.Section>
                   <Action
                     title="Look Again"

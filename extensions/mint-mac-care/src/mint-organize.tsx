@@ -278,6 +278,7 @@ function FolderRow({
             shortcut={Keyboard.Shortcut.Common.Open}
             target={<OrganizePreview cli={cli} folder={folder} onOrganize={organize} />}
           />
+          <Action.ShowInFinder path={folder.path} />
           <ActionPanel.Submenu
             title="Change Template"
             icon={Icon.AppWindowGrid2x2}
@@ -294,7 +295,6 @@ function FolderRow({
           </ActionPanel.Submenu>
           {addFolder}
           <ActionPanel.Section>
-            <Action.ShowInFinder path={folder.path} />
             <Action
               title="Preview Again"
               icon={Icon.ArrowClockwise}

@@ -357,10 +357,11 @@ function Conversations({ cli }: { cli: string }) {
                       icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                       onAction={() => toggle(archive.id)}
                     />
+                    <Action.ShowInFinder path={archive.path} />
                     <Action
                       title={rows.length > 1 ? `Optimize ${plural(rows.length, "Archive")}…` : "Optimize Archive…"}
                       icon={Icon.Stars}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
                       onAction={() => onArchives(rows)}
                     />
                     {common}

@@ -495,16 +495,16 @@ function UninstallReview({
                     onAction={() => toggle(item)}
                   />
                 ) : null}
-                {picked.length ? (
+                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                {item.selectable && picked.length ? (
                   <Action
                     title="Move Chosen to Trash"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => onRemove(picked)}
                   />
                 ) : null}
-                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
               </ActionPanel>
             }
           />

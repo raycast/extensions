@@ -426,6 +426,7 @@ function MemoryItem({
               await write(on ? "Turning off Memory…" : "Turning on Memory…", memoryRequest(care, { enabled: !on }));
             }}
           />
+          <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           <ActionPanel.Submenu title="Starts at…" icon={Icon.Gauge} shortcut={{ modifiers: ["cmd"], key: "t" }}>
             {MEMORY_THRESHOLDS.map((value) => (
               <Action
@@ -436,7 +437,6 @@ function MemoryItem({
               />
             ))}
           </ActionPanel.Submenu>
-          <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           {refresh}
         </ActionPanel>
       }
@@ -499,13 +499,23 @@ function FolderItem({
               />
             ))}
           </ActionPanel.Submenu>
+          <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           {mode !== "onArrival" ? (
-            <Action title="As Files Arrive" icon={Icon.Download} onAction={() => set("onArrival")} />
+            <Action
+              title="As Files Arrive"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              onAction={() => set("onArrival")}
+            />
           ) : null}
           {mode !== "manual" ? (
-            <Action title="Turn off Auto Care" icon={Icon.XMarkCircle} onAction={() => set("manual")} />
+            <Action
+              title="Turn off Auto Care"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+              onAction={() => set("manual")}
+            />
           ) : null}
-          <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           {refresh}
         </ActionPanel>
       }

@@ -105,13 +105,14 @@ function Handling({ cli }: { cli: string }) {
                     ) : (
                       <Action title="Protect" icon={Icon.Lock} onAction={() => set(row.path, "protect")} />
                     )}
+                    <Action.ShowInFinder path={row.path} />
                     <Action
                       title="Treat as Usual…"
                       icon={Icon.LockUnlocked}
                       style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => set(row.path, "ordinary")}
                     />
-                    <Action.ShowInFinder path={row.path} />
                     {add}
                     <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                   </ActionPanel>

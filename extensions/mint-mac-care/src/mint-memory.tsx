@@ -296,16 +296,18 @@ function ChooseApps({
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(app.id)}
                 />
+                {app.bundlePath ? (
+                  <Action.ShowInFinder path={app.bundlePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                ) : (
+                  <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+                )}
                 {picked.length ? (
                   <Action
                     title={`Quit ${plural(picked.length, "App")}`}
                     icon={Icon.MemoryChip}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                     onAction={quit}
                   />
-                ) : null}
-                {app.bundlePath ? (
-                  <Action.ShowInFinder path={app.bundlePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
                 ) : null}
               </ActionPanel>
             }

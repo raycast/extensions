@@ -263,17 +263,7 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
                     <Action title="Look Again to Optimize" icon={Icon.ArrowClockwise} onAction={rescan} />
                   ) : null}
                   {!scan.isLoading && !busy && spent !== scan.data?.sessionID && total > 0 ? (
-                    <>
-                      <Action title="Optimize All" icon={Icon.Stars} onAction={() => optimize(sources)} />
-                      {remaining > 0 ? (
-                        <Action
-                          title={`Optimize ${sourceTitle(source.key)} Only`}
-                          icon={Icon.Stars}
-                          shortcut={{ modifiers: ["cmd"], key: "return" }}
-                          onAction={() => optimize([source])}
-                        />
-                      ) : null}
-                    </>
+                    <Action title="Optimize All" icon={Icon.Stars} onAction={() => optimize(sources)} />
                   ) : null}
                   {source.groups.length ? (
                     <Action.Push
@@ -281,6 +271,19 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
                       icon={Icon.List}
                       shortcut={Keyboard.Shortcut.Common.Open}
                       target={<CopyList source={source} />}
+                    />
+                  ) : null}
+                  {!scan.isLoading &&
+                  !busy &&
+                  spent !== scan.data?.sessionID &&
+                  total > 0 &&
+                  remaining > 0 &&
+                  source.groups.length ? (
+                    <Action
+                      title={`Optimize ${sourceTitle(source.key)} Only`}
+                      icon={Icon.Stars}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
+                      onAction={() => optimize([source])}
                     />
                   ) : null}
                   <ActionPanel.Section>
