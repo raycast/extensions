@@ -1,8 +1,5 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
-import { execFile, ExecFileException } from "child_process";
-import { promisify } from "util";
-
-const executeFile = promisify(execFile);
+import { showHUD } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const menuItems = {
   play: ["Play", "播放"],
@@ -91,20 +88,20 @@ export async function controlMusic(command: MusicCommand | MusicCommand[]) {
   try {
     // Startup and macOS permission prompts can take longer than the old controller's one-second limit.
     for (const action of commands) {
-      await executeFile("/usr/bin/osascript", ["-e", controlScript, action, ...menuItems[action]], { timeout: 30000 });
+      await runAppleScript(controlScript, [action, ...menuItems[action]], { timeout: 30000 });
     }
     await showHUD(`${commands.map((action) => commandTitles[action]).join(" & ")} command completed.`);
   } catch (error) {
-    const executionError = error as ExecFileException & { stderr?: string };
+    const executionError = error as { stderr?: string; timedOut?: boolean };
     const message = executionError?.stderr?.trim() || (error instanceof Error ? error.message : String(error));
     let description = message;
     if (message.includes("-1743") || message.includes("-25211") || message.includes("1002")) {
       description =
         "Allow Raycast in System Settings > Privacy & Security > Accessibility and Automation, then try again.";
-    } else if (error instanceof Error && (error as ExecFileException).killed) {
+    } else if (executionError?.timedOut) {
       description =
         "NeteaseMusic took too long to respond. Check the app and any macOS permission prompts, then try again.";
     }
-    await showToast({ style: Toast.Style.Failure, title: "Could not control NeteaseMusic.", message: description });
+    await showFailureToast(new Error(description), { title: "Could not control NeteaseMusic." });
   }
 }

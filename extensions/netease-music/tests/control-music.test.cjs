@@ -9,8 +9,14 @@ function loadCommand(name, executionError) {
   const calls = { executions: [], hud: [], toast: [] };
   const api = {
     showHUD: async (message) => calls.hud.push(message),
-    showToast: async (toast) => calls.toast.push(toast),
-    Toast: { Style: { Failure: "failure" } },
+  };
+  const utils = {
+    async runAppleScript(script, args, options) {
+      calls.executions.push({ script, args: Array.from(args), options });
+      if (executionError) throw executionError;
+      return "";
+    },
+    showFailureToast: async (error, options) => calls.toast.push({ message: error.message, ...options }),
   };
   function load(file) {
     const module = { exports: {} };
@@ -23,15 +29,8 @@ function loadCommand(name, executionError) {
       Error,
       require(id) {
         if (id === "@raycast/api") return api;
+        if (id === "@raycast/utils") return utils;
         if (id === "./util") return load("util.tsx");
-        if (id === "child_process") {
-          return {
-            execFile(file, args, options, callback) {
-              calls.executions.push({ file, args: Array.from(args), options });
-              callback(executionError, "", "");
-            },
-          };
-        }
         return require(id);
       },
     });
@@ -44,9 +43,8 @@ test("Play executes through the shared runner with time for app startup", async 
   const { command, calls } = loadCommand("play");
   await command();
   assert.equal(calls.executions.length, 1);
-  assert.equal(calls.executions[0].file, "/usr/bin/osascript");
   assert.equal(calls.executions[0].options.timeout, 30000);
-  assert.deepEqual(calls.executions[0].args.slice(2), ["play", "Play", "播放"]);
+  assert.deepEqual(calls.executions[0].args, ["play", "Play", "播放"]);
   assert.deepEqual(calls.hud, ["Play command completed."]);
   assert.equal(calls.toast.length, 0);
 });
@@ -60,7 +58,7 @@ test("Toggle Play/Pause handles unavailable controls without rejecting the comma
 });
 
 test("Next Track explains a timeout without reporting success or retrying the action", async () => {
-  const error = Object.assign(new Error("Command failed."), { killed: true });
+  const error = Object.assign(new Error("Command failed."), { timedOut: true });
   const { command, calls } = loadCommand("next-track", error);
   await assert.doesNotReject(command);
   assert.equal(calls.executions.length, 1);
@@ -91,7 +89,7 @@ test("Dislike Track & Next Track runs both actions in order and reports one comp
   const { command, calls } = loadCommand("dislike-and-next");
   await command();
   assert.deepEqual(
-    calls.executions.map(({ args }) => args[2]),
+    calls.executions.map(({ args }) => args[0]),
     ["dislike", "next"]
   );
   assert.deepEqual(calls.hud, ["Dislike Track & Next Track command completed."]);
@@ -102,7 +100,7 @@ test("Dislike Track & Next Track stops after a failed first action", async () =>
   const { command, calls } = loadCommand("dislike-and-next", new Error("The control is unavailable."));
   await assert.doesNotReject(command);
   assert.equal(calls.executions.length, 1);
-  assert.equal(calls.executions[0].args[2], "dislike");
+  assert.equal(calls.executions[0].args[0], "dislike");
   assert.equal(calls.hud.length, 0);
   assert.equal(calls.toast.length, 1);
 });
