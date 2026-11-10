@@ -1,6 +1,6 @@
 # Microsoft Teams Keys Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-10
 
 - Open a Teams chat by email, saved contact or name, with an optional message. Teams search results always leave a draft for you to check the recipient
 - Send Teams Message for one-step messages to email addresses and saved contacts
