@@ -20,12 +20,50 @@ const client = new OAuth.PKCEClient({
   description: "Connect your Highseat account",
 })
 
-export const highseat = new OAuthService({
+const CLIENT_ID = "https://api.highseat.com/.well-known/oauth-client-metadata/raycast.json"
+const TOKEN_URL = `${APP_URL}/api/auth/oauth2/token`
+
+let refreshing: Promise<void> | undefined
+
+/**
+ * Refreshes an expired token before `OAuthService` sees it. `OAuthService` signs the person out
+ * after any failed refresh, so a server error or a network blip while the Mac wakes would ask
+ * them to connect again. Here only `invalid_grant`, a login the server refused, reaches it.
+ */
+async function refreshExpiredTokens() {
+  const tokens = await client.getTokens()
+  if (!tokens?.refreshToken || !tokens.isExpired()) return
+
+  const response = await fetch(TOKEN_URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      client_id: CLIENT_ID,
+      refresh_token: tokens.refreshToken,
+      grant_type: "refresh_token",
+    }),
+  })
+  const body = (await response.json().catch(() => ({}))) as OAuth.TokenResponse & { error?: string }
+
+  if (response.ok) return client.setTokens(body)
+  if (body.error === "invalid_grant") return
+
+  throw new Error(`Highseat could not refresh the connection (${response.status}). Try again in a moment.`)
+}
+
+class HighseatOAuthService extends OAuthService {
+  async authorize() {
+    refreshing ??= refreshExpiredTokens().finally(() => (refreshing = undefined))
+    await refreshing
+    return super.authorize()
+  }
+}
+
+export const highseat = new HighseatOAuthService({
   client,
-  clientId: "https://api.highseat.com/.well-known/oauth-client-metadata/raycast.json",
+  clientId: CLIENT_ID,
   scope: "read offline_access",
   authorizeUrl: `${APP_URL}/api/auth/oauth2/authorize`,
-  tokenUrl: `${APP_URL}/api/auth/oauth2/token`,
+  tokenUrl: TOKEN_URL,
   bodyEncoding: "url-encoded",
 })
 
