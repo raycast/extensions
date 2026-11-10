@@ -3164,6 +3164,8 @@ test("an opened folder shows its subfolders, then the items right inside it, and
   assert.equal(list.props.navigationTitle, "Personal › Banking");
   assert.equal(ids(list.props.items), "bank");
   assert.equal(paths(list.props.folders), "Banking › Cards:1");
+  // No vault menu here: Sort by takes the search bar.
+  assert.equal(list.props.sortInSearchBar, true);
   const sub = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
   assert.equal(folders.folderPathLabel((sub.props.folder as folders.FolderEntry).path), "Banking › Cards");
 
@@ -3459,4 +3461,42 @@ test("the folders opened from Browse Items learn that the session has ended", as
   const last = sent[sent.length - 1];
   assert.equal(last.items.length, 0);
   assert.equal(last.error?.type, "not_authenticated");
+});
+
+test("an item list with no other search bar menu shows Sort by there, which ⌘⇧S follows", () => {
+  const { render } = loadItemList();
+  const sortChoice = { current: "mostUsed" };
+  let list = render([item], [], { sortInSearchBar: true, sortChoice });
+  const menu = () => list.props.searchBarAccessory as Element;
+  assert.equal(menu().props.value, "mostUsed");
+  (menu().props.onChange as (order: string) => void)("name");
+  assert.equal(sortChoice.current, "name");
+  list = render([item], [], { sortInSearchBar: true, sortChoice });
+  assert.equal(menu().props.value, "name");
+  // Sort by in the item's actions (⌘⇧S) shows the same order.
+  const row = actions(list).find((props) => props.id === format.itemKey(item));
+  assert.equal((row?.actions as Element).props.sortOrder, "name");
+  // A list with its own menu, such as the vault menu, keeps it; others get none.
+  assert.equal(
+    render([item], [], { sortInSearchBar: true, searchBarAccessory: "vault menu" }).props.searchBarAccessory,
+    "vault menu",
+  );
+  assert.equal(render([item]).props.searchBarAccessory, undefined);
+
+  // The menu offers the orders of the Sort items by preference.
+  let chosen = "";
+  const sortModule = loadView("sort.tsx", {
+    "@raycast/api": { Icon: {}, List: { Dropdown: { Item: {} } }, getPreferenceValues: () => ({}) },
+    "@raycast/utils": { useFrecencySorting: (data: unknown[]) => ({ data, visitItem: () => undefined }) },
+    "./shortcuts": shortcuts,
+  });
+  const dropdown = sortModule.SortItemsByDropdown({ value: "name", onChange: (order: string) => (chosen = order) });
+  assert.deepEqual(
+    actions(dropdown)
+      .slice(1)
+      .map((props) => props.value),
+    ["mostUsed", "name", "modified", "created"],
+  );
+  (dropdown.props.onChange as (order: string) => void)("created");
+  assert.equal(chosen, "created");
 });

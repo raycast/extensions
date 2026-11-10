@@ -2,7 +2,7 @@
 
 ## [Folders and Proton Pass CLI 2.5.1] - {PR_MERGE_DATE}
 
-- Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. All Vaults still shows every item
+- Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, with Sort by in its search bar, and Esc goes back up. All Vaults still shows every item
 - The item details have a Folder row under Vault
 - Vaults have a box icon instead of a folder, now that folders have it
 - The folders come from one more pass-cli command per vault, run along with the vault's items, and are saved with them so that they show at once next time

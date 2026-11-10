@@ -78,6 +78,8 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
     <ItemList
       navigationTitle={[vaultName, ...current.path.map(({ name }) => name)].join(PATH_SEPARATOR)}
       sortChoice={sortChoice}
+      // The search bar has no vault menu here: Sort by takes its place, as in the vault list.
+      sortInSearchBar
       items={items}
       folders={folders}
       insideFolders={inside}
