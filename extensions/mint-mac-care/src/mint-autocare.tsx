@@ -270,7 +270,6 @@ function DiskItem({
     <Action.Push
       title={row.on ? "Change Types…" : "Choose Types…"}
       icon={Icon.CheckList}
-      shortcut={{ modifiers: ["cmd"], key: "t" }}
       target={<YoursTypes row={row} listed={listed} onSave={turnOn} />}
     />
   );

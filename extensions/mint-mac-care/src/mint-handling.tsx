@@ -81,7 +81,11 @@ function Handling({ cli }: { cli: string }) {
           icon={Icon.Lock}
           title="Nothing protected yet"
           description="Mint never touches a Protected location and asks before acting in a Needs Review one."
-          actions={<ActionPanel>{add}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Add a Location…" icon={Icon.Plus} target={<AddLocation onSet={set} />} />
+            </ActionPanel>
+          }
         />
       ) : null}
       {(["protect", "needs_review"] as const).map((level) => (

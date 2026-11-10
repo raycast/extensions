@@ -100,7 +100,7 @@ function EmptyTrash({ cli }: { cli: string }) {
                   onAction={() => toggle(item.id)}
                 />
                 {/* Second (⌘↵) reads only; what deletes has its own key (Raycast's rule for the secondary slot). */}
-                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.ShowInFinder path={item.path} />
                 {picked.length ? (
                   <Action
                     title={`Delete ${plural(picked.length, "Chosen Item")}…`}

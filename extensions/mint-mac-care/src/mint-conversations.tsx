@@ -248,7 +248,7 @@ function Conversations({ cli }: { cli: string }) {
                     <Action
                       title={`Optimize${many}…`}
                       icon={Icon.Stars}
-                      shortcut={Keyboard.Shortcut.Common.OpenWith}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                       onAction={() => onFamilies("agents.optimize", rows)}
                     />
                   ) : null}
@@ -361,7 +361,7 @@ function Conversations({ cli }: { cli: string }) {
                     <Action
                       title={rows.length > 1 ? `Optimize ${plural(rows.length, "Archive")}…` : "Optimize Archive…"}
                       icon={Icon.Stars}
-                      shortcut={Keyboard.Shortcut.Common.OpenWith}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                       onAction={() => onArchives(rows)}
                     />
                     {common}

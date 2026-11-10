@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { openMint } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
@@ -61,7 +61,7 @@ function History({ cli }: { cli: string }) {
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
+
                 onAction={revalidate}
               />
             </ActionPanel>

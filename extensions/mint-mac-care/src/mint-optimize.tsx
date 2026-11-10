@@ -28,6 +28,7 @@ import {
 import { savedSourceKeys } from "./mint-saved";
 import { useStrike } from "./use-strike";
 import { keptSizes } from "./mint-plan";
+import { ownKey } from "./mint-actions";
 
 type OptimizeResult = {
   sharedFiles: number;
@@ -197,6 +198,13 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
                 : group.bytes),
             0,
           );
+          // How many actions come before the Section below (`ownKey`).
+          const ready = !scan.isLoading && !busy;
+          const offered =
+            (ready && spent === scan.data?.sessionID && remaining > 0 ? 1 : 0) +
+            (ready && spent !== scan.data?.sessionID && total > 0 ? 1 : 0) +
+            (source.groups.length ? 1 : 0) +
+            (ready && spent !== scan.data?.sessionID && total > 0 && remaining > 0 && source.groups.length ? 1 : 0);
           const mine = run?.keys.includes(source.key);
           const finished = receipt?.keys.includes(source.key) && !busy;
           const shared = sourceIDs.filter((id) => strike.struck.has(id)).length;
@@ -269,7 +277,6 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
                     <Action.Push
                       title={bothHalves ? "Show Every File" : "Show Every Copy"}
                       icon={Icon.List}
-                      shortcut={Keyboard.Shortcut.Common.Open}
                       target={<CopyList source={source} />}
                     />
                   ) : null}
@@ -282,7 +289,7 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
                     <Action
                       title={`Optimize ${sourceTitle(source.key)} Only`}
                       icon={Icon.Stars}
-                      shortcut={Keyboard.Shortcut.Common.OpenWith}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                       onAction={() => optimize([source])}
                     />
                   ) : null}
@@ -291,7 +298,7 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
                       <Action
                         title="Look Again"
                         icon={Icon.ArrowClockwise}
-                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        shortcut={ownKey(offered, Keyboard.Shortcut.Common.Refresh)}
                         onAction={rescan}
                       />
                     ) : null}

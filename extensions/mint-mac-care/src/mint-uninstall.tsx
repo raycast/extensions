@@ -23,6 +23,7 @@ import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
 import { RetryActions } from "./confirm-in-mint";
 import { usePlanWall } from "./plan-wall";
+import { ownKey } from "./mint-actions";
 import {
   Remnant,
   UninstallScan as UninstallScanResponse,
@@ -298,6 +299,8 @@ function InstalledApps({ cli }: { cli: string }) {
         const scan = result?.scan;
         const plan = scan ? uninstallPlan(scan) : undefined;
         const here = run?.appID === app.id ? run : undefined;
+        // How many actions come before Show in Finder (`ownKey`).
+        const offered = (!busy ? 1 : 0) + (scan && !busy ? 1 : 0);
         return (
           <List.Item
             key={app.id}
@@ -337,7 +340,6 @@ function InstalledApps({ cli }: { cli: string }) {
                   <Action
                     title="Choose What to Remove"
                     icon={Icon.List}
-                    shortcut={Keyboard.Shortcut.Common.Open}
                     onAction={() =>
                       push(
                         <UninstallReview
@@ -352,12 +354,15 @@ function InstalledApps({ cli }: { cli: string }) {
                     }
                   />
                 ) : null}
-                <Action.ShowInFinder path={app.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.ShowInFinder
+                  path={app.path}
+                  shortcut={ownKey(offered, { modifiers: ["cmd", "shift"], key: "f" })}
+                />
                 <ActionPanel.Section>
                   <Action
                     title="Look Again"
                     icon={Icon.ArrowClockwise}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    shortcut={ownKey(offered + 1, Keyboard.Shortcut.Common.Refresh)}
                     onAction={() => {
                       forget(app.id);
                       revalidate();
@@ -495,7 +500,7 @@ function UninstallReview({
                     onAction={() => toggle(item)}
                   />
                 ) : null}
-                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.ShowInFinder path={item.path} />
                 {item.selectable && picked.length ? (
                   <Action
                     title="Move Chosen to Trash"

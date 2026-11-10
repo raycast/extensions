@@ -30,7 +30,7 @@ import {
   finishedRows,
   isDone,
 } from "./mint-panes";
-import { AutoCareAction } from "./mint-actions";
+import { AutoCareAction, ownKey } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
 import { progressMarkdown } from "./progress-row";
 import { useMintCLI } from "./use-mint-cli";
@@ -332,6 +332,17 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                   receipt,
                 });
           const busy = Boolean(run) || strike.active;
+          // How many actions come before the Section below (`ownKey`).
+          const offered =
+            !loading && !busy && left.length
+              ? optimizable
+                ? copiesSpent === copies.data?.sessionID
+                  ? 1
+                  : 2
+                : diskSession && bucket.key === "safeToClean"
+                  ? 2
+                  : 1
+              : 0;
           return (
             <List.Item
               key={bucket.key}
@@ -356,7 +367,6 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                           <Action
                             title="See by Source"
                             icon={Icon.List}
-                            shortcut={Keyboard.Shortcut.Common.Open}
                             onAction={() => launchCommand({ name: "mint-optimize", type: LaunchType.UserInitiated })}
                           />
                         </>
@@ -368,7 +378,6 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                           <Action.Push
                             title="Choose Items"
                             icon={Icon.List}
-                            shortcut={Keyboard.Shortcut.Common.Open}
                             target={
                               <ChooseItems
                                 bucket={bucket}
@@ -402,11 +411,12 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                       <Action
                         title="Scan Again"
                         icon={Icon.ArrowClockwise}
-                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        shortcut={ownKey(offered, Keyboard.Shortcut.Common.Refresh)}
                         onAction={rescan}
                       />
                     ) : null}
                     <AutoCareAction
+                      before={offered + (!loading && !busy ? 1 : 0)}
                       context={{
                         section: "disk",
                         bucket:
@@ -485,7 +495,7 @@ function ChooseItems({
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(entry.id)}
                 />
-                <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.ShowInFinder path={entry.path} />
                 {picked.length ? (
                   bucket.key === "safeToClean" ? (
                     <Action

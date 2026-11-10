@@ -38,3 +38,47 @@ test("in each chooser and list that changes something, a read-only action comes 
     assert.ok(readAt > 0, `${file}: ${reads} must come before ${changes}`);
   }
 });
+
+test("an action in a panel's first two places declares no key of its own (Raycast shows ↵ and ⌘↵ there)", () => {
+  // [file, where the action's element starts or its title]
+  const firstTwo: Array<[string, string]> = [
+    ["mint-trash.tsx", "<Action.ShowInFinder path={item.path}"],
+    ["mint-uninstall.tsx", "<Action.ShowInFinder path={item.path}"],
+    ["mint-scan.tsx", "<Action.ShowInFinder path={entry.path}"],
+    ["mint-memory.tsx", "<Action.ShowInFinder path={app.bundlePath}"],
+    ["mint-scan.tsx", 'title="See by Source"'],
+    ["mint-scan.tsx", 'title="Choose Items"'],
+    ["mint-optimize.tsx", 'title={bothHalves ? "Show Every File" : "Show Every Copy"}'],
+    ["mint-organize.tsx", 'title="See Every File"'],
+    ["mint-memory.tsx", 'title="Choose Apps"'],
+    ["mint-uninstall.tsx", 'title="Choose What to Remove"'],
+    ["mint-autocare.tsx", 'title={row.on ? "Change Types…" : "Choose Types…"}'],
+    ["mint-history.tsx", 'title="Refresh"'],
+    ["mint-actions.tsx", '<Action title="Refresh"'],
+  ];
+  for (const [file, marker] of firstTwo) {
+    const text = read(file);
+    const at = text.indexOf(marker);
+    assert.ok(at > 0, `${file}: ${marker} not found`);
+    const start = text.lastIndexOf("<Action", at);
+    const ends = ["target=", "onAction=", "/>"].map((end) => text.indexOf(end, at)).filter((index) => index > 0);
+    assert.doesNotMatch(text.slice(start, Math.min(...ends)), /shortcut=/, `${file}: ${marker}`);
+  }
+});
+
+test("an action whose place depends on what the panel shows takes its key through ownKey", () => {
+  assert.match(read("mint-actions.tsx"), /return before >= 2 \? shortcut : undefined;/);
+  for (const file of [
+    "mint-scan.tsx",
+    "mint-memory.tsx",
+    "mint-optimize.tsx",
+    "mint-uninstall.tsx",
+    "mint-organize.tsx",
+  ]) {
+    assert.match(read(file), /shortcut=\{ownKey\(/, file);
+  }
+  // An optimize action has its own key, never one of Raycast's common shortcuts meant for another action.
+  for (const file of readdirSync(src).filter((name) => name.endsWith(".tsx"))) {
+    assert.doesNotMatch(read(file), /Keyboard\.Shortcut\.Common\.OpenWith/, file);
+  }
+});

@@ -17,7 +17,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 
-import { AutoCareAction } from "./mint-actions";
+import { AutoCareAction, ownKey } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
 import { RetryActions } from "./confirm-in-mint";
@@ -167,6 +167,8 @@ function FreeMemory({ cli }: { cli: string }) {
             const left = pile.apps.filter((app) => !strike.struck.has(app.id));
             const here = run?.key === pile.key ? run : undefined;
             const done = receipt?.key === pile.key && !busy ? receipt : undefined;
+            // How many actions come before the Section below (`ownKey`).
+            const offered = fresh && left.length ? (pile.key === "idle" ? 2 : 1) : 0;
             return (
               <List.Item
                 key={pile.key}
@@ -209,7 +211,6 @@ function FreeMemory({ cli }: { cli: string }) {
                         <Action.Push
                           title="Choose Apps"
                           icon={Icon.List}
-                          shortcut={Keyboard.Shortcut.Common.Open}
                           target={<ChooseApps pile={pile} preselected onQuit={(apps) => release(pile, apps)} />}
                         />
                       </>
@@ -225,11 +226,11 @@ function FreeMemory({ cli }: { cli: string }) {
                         <Action
                           title="Look Again"
                           icon={Icon.ArrowClockwise}
-                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          shortcut={ownKey(offered, Keyboard.Shortcut.Common.Refresh)}
                           onAction={lookAgain}
                         />
                       ) : null}
-                      <AutoCareAction context={{ section: "memory" }} />
+                      <AutoCareAction context={{ section: "memory" }} before={offered + (busy ? 0 : 1)} />
                       <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -297,7 +298,7 @@ function ChooseApps({
                   onAction={() => toggle(app.id)}
                 />
                 {app.bundlePath ? (
-                  <Action.ShowInFinder path={app.bundlePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                  <Action.ShowInFinder path={app.bundlePath} />
                 ) : (
                   <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                 )}

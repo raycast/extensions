@@ -17,7 +17,7 @@ import { openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { AutoCareJSON, folderCare, folderStatus } from "./mint-model";
 import { savedFolderProgress } from "./mint-saved";
 
-import { AutoCareAction } from "./mint-actions";
+import { AutoCareAction, ownKey } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
 import { runConfirmedInMint } from "./confirm-in-mint";
 import { NATIVE_APPROVAL_CAPABILITY, hasCapability } from "./mint-parity";
@@ -64,6 +64,14 @@ function FolderList({ cli, canStop }: { cli: string; canStop: boolean }) {
       target={<AddFolder cli={cli} onAdded={folders.revalidate} />}
     />
   );
+  // The same, where it is the panel's first action (↵): no key of its own (`ownKey`).
+  const addFolderFirst = (
+    <Action.Push
+      title="Add a Folder…"
+      icon={Icon.NewFolder}
+      target={<AddFolder cli={cli} onAdded={folders.revalidate} />}
+    />
+  );
 
   return (
     <List
@@ -91,7 +99,7 @@ function FolderList({ cli, canStop }: { cli: string; canStop: boolean }) {
           icon={Icon.Folder}
           title="No folders yet"
           description="Add Desktop, Downloads or any folder, pick a template, and Mint sorts its loose files."
-          actions={<ActionPanel>{addFolder}</ActionPanel>}
+          actions={<ActionPanel>{addFolderFirst}</ActionPanel>}
         />
       ) : null}
       {folders.data?.folders.map((folder) => (
@@ -275,7 +283,6 @@ function FolderRow({
           <Action.Push
             title="See Every File"
             icon={Icon.List}
-            shortcut={Keyboard.Shortcut.Common.Open}
             target={<OrganizePreview cli={cli} folder={folder} onOrganize={organize} />}
           />
           <Action.ShowInFinder path={folder.path} />
@@ -358,7 +365,7 @@ function OrganizePreview({ cli, folder, onOrganize }: { cli: string; folder: Fol
       <Action
         title="Preview Again"
         icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
+        shortcut={ownKey(result && result.filesMoved > 0 ? 2 : 1, Keyboard.Shortcut.Common.Refresh)}
         onAction={preview.revalidate}
       />
     </ActionPanel>
