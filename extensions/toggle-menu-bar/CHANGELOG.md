@@ -1,6 +1,6 @@
 # Toggle Menu Bar Changelog
 
-## [Native menu bar controls and mode picker] - {PR_MERGE_DATE}
+## [Native menu bar controls and mode picker] - 2026-11-10
 
 - Apply menu bar modes directly with a Swift helper, without AppleScript or Automation permission.
 - Add a picker with current-mode highlighting and read-only background status updates.
