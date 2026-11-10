@@ -69,7 +69,7 @@
     {
       "name": "auto-tile",
       "title": "Auto Tile",
-      "description": "Arrange every visible window in an even grid. Pivot Layout changes its shape.",
+      "description": "Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.",
       "mode": "no-view",
       "icon": "tile.png",
       "keywords": [
@@ -80,7 +80,7 @@
     {
       "name": "toggle-sidebar",
       "title": "Toggle Sidebar",
-      "description": "Pin a window full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.",
+      "description": "Pin one window full height down the right edge, or unpin it. While it is pinned, every other command arranges the remaining windows beside it.",
       "mode": "no-view",
       "icon": "toggle-sidebar.png",
       "keywords": [
@@ -118,7 +118,7 @@
     {
       "name": "pivot",
       "title": "Pivot Layout",
-      "description": "Turn Auto Tile to its next shape: every window side by side, then two small above one large, then two small beside one large.",
+      "description": "Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.",
       "mode": "no-view",
       "icon": "pivot.png",
       "keywords": [
@@ -135,7 +135,7 @@
     {
       "name": "smart-arrange",
       "title": "Smart Arrange",
-      "description": "Arrange windows by what each app is for. The focused window leads the largest display with your other work beside it. Chat, mail and music go to the other display.",
+      "description": "Arrange windows by what each app is for. The focused window leads your largest display with related work beside it. Chat, mail and music go to your other display.",
       "mode": "no-view",
       "keywords": [
         "smart",
@@ -149,11 +149,12 @@
     },
     {
       "name": "master-left",
-      "title": "Master Layout Left",
-      "description": "The focused window becomes the master on the left. The rest stack on the right.",
+      "title": "Master Left",
+      "description": "Make the focused window the master on the left, with every other window stacked on the right.",
       "mode": "no-view",
       "icon": "master-left.png",
       "keywords": [
+        "master layout left",
         "master",
         "largest",
         "main",
@@ -163,11 +164,12 @@
     },
     {
       "name": "master-right",
-      "title": "Master Layout Right",
-      "description": "The focused window becomes the master on the right. The rest stack on the left.",
+      "title": "Master Right",
+      "description": "Make the focused window the master on the right, with every other window stacked on the left.",
       "mode": "no-view",
       "icon": "master-right.png",
       "keywords": [
+        "master layout right",
         "master",
         "largest",
         "main",
@@ -177,10 +179,11 @@
     },
     {
       "name": "master-center",
-      "title": "Master Layout Center",
-      "description": "The focused window becomes the master in the middle. The rest stack on both sides. Made for wide displays.",
+      "title": "Master Center",
+      "description": "Make the focused window the master in the middle, with the other windows stacked on both sides. Best on wide displays.",
       "mode": "no-view",
       "keywords": [
+        "master layout center",
         "master",
         "largest",
         "main",
@@ -192,11 +195,12 @@
     },
     {
       "name": "cycle-master",
-      "title": "Cycle Master Layout",
-      "description": "Move the master to the next side round: left, then right, then center. The focused window becomes the master.",
+      "title": "Next Master Layout",
+      "description": "Move the master to its next position: left, then right, then center.",
       "mode": "no-view",
       "icon": "cycle-master.png",
       "keywords": [
+        "cycle master layout",
         "cycle",
         "next layout",
         "switch layout",
@@ -206,10 +210,12 @@
     },
     {
       "name": "grow-master",
-      "title": "Grow Master",
-      "description": "Give the master window more of the screen, in steps of 5%.",
+      "title": "Make Master Larger",
+      "description": "Give the master window 5% more of the screen. The stacked windows shrink to make room.",
       "mode": "no-view",
       "keywords": [
+        "grow master",
+        "grow",
         "mfact",
         "bigger",
         "resize",
@@ -220,10 +226,12 @@
     },
     {
       "name": "shrink-master",
-      "title": "Shrink Master",
-      "description": "Give the master window less of the screen, in steps of 5%.",
+      "title": "Make Master Smaller",
+      "description": "Give the master window 5% less of the screen. The stacked windows grow to fill the space.",
       "mode": "no-view",
       "keywords": [
+        "shrink master",
+        "shrink",
         "mfact",
         "smaller",
         "resize",
@@ -235,7 +243,7 @@
     {
       "name": "swap-with-master",
       "title": "Swap with Master",
-      "description": "Trade places between the active window and the master, the biggest window in the layout.",
+      "description": "Make the focused window the master. It trades places with the current master.",
       "mode": "no-view",
       "icon": "swap-with-master.png",
       "keywords": [
@@ -248,7 +256,7 @@
     {
       "name": "swap-next",
       "title": "Swap with Next Window",
-      "description": "Trade places between the focused window and the next one round. Two windows simply swap, whether they sit side by side or stacked.",
+      "description": "Trade places between the focused window and the next one in the layout. With two windows, they simply swap.",
       "mode": "no-view",
       "icon": "swap-next.png",
       "keywords": [
@@ -265,7 +273,7 @@
     {
       "name": "rotate",
       "title": "Rotate Windows Clockwise",
-      "description": "Move every window one slot clockwise, keeping the last layout you tiled with.",
+      "description": "Move every window one position clockwise in the current layout. A pinned sidebar stays where it is.",
       "mode": "no-view",
       "icon": "rotate.png",
       "keywords": [
@@ -278,7 +286,7 @@
     {
       "name": "rotate-backwards",
       "title": "Rotate Windows Counterclockwise",
-      "description": "Move every window one slot counterclockwise, keeping the last layout you tiled with.",
+      "description": "Move every window one position counterclockwise in the current layout. A pinned sidebar stays where it is.",
       "mode": "no-view",
       "icon": "rotate-backwards.png",
       "keywords": [
@@ -291,7 +299,7 @@
     {
       "name": "swap-displays",
       "title": "Swap Displays",
-      "description": "Move every window to the other display. They land in the last layout you tiled with, or keep their place on the screen if you haven't tiled. With more than two displays, each display's windows move to the next.",
+      "description": "Send every window to your other display and tile it there. With more than two displays, each display's windows move to the next one.",
       "mode": "no-view",
       "keywords": [
         "swap screens",
@@ -304,7 +312,7 @@
     {
       "name": "distribute-displays",
       "title": "Distribute Across Displays",
-      "description": "Spread your windows over every display, a share for each by size and no more than each can fit, then tile each display with the last layout you used.",
+      "description": "Spread windows over all your displays in proportion to their size, so no display is crowded while another sits empty.",
       "mode": "no-view",
       "keywords": [
         "spread",
@@ -318,7 +326,7 @@
     {
       "name": "move-others",
       "title": "Move Others to Next Display",
-      "description": "Keep the focused window on its display and move every other window there to the next display, tiled with the last layout you used.",
+      "description": "Keep only the focused window on this display. Every other window here moves to your next display.",
       "mode": "no-view",
       "keywords": [
         "push others",
@@ -335,7 +343,7 @@
     {
       "name": "move-all",
       "title": "Move All to This Display",
-      "description": "Move every window from your other displays to the display with the focused window, tiled with the last layout you used.",
+      "description": "Bring every window from your other displays to the one you are working on.",
       "mode": "no-view",
       "keywords": [
         "pull all",
@@ -352,7 +360,7 @@
     {
       "name": "toggle-menu-bar-visibility",
       "title": "Toggle Menu Bar Visibility",
-      "description": "Hide or show the menu bar.",
+      "description": "Hide or show the macOS menu bar, to give windows the full height of the screen.",
       "mode": "no-view",
       "icon": "toggle-menu-bar.png"
     }

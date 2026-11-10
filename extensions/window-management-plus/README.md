@@ -4,28 +4,28 @@ A companion to Raycast's built-in Window Management commands. Those place one wi
 
 Inspired by [Hyprland](https://hypr.land/), the tiling window manager for Linux: master layouts, swapping, rotating and resizing the master all work the way they do there, as far as macOS allows.
 
-| Command                                     | Result                                                                                                                                                              |
-| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Auto Tile                                   | Arrange every visible window in an even grid. Pivot Layout changes its shape.                                                                                       |
-| Toggle Sidebar                              | Pin a window full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.                                       |
-| Smart Arrange                               | Arrange windows by what each app is for. The focused window leads the largest display with your other work beside it. Chat, mail and music go to the other display. |
-| Pivot Layout                                | Turn Auto Tile to its next shape: every window side by side, then two small above one large, then two small beside one large.                                       |
-| Master Layout Left / Right                  | The focused window becomes the master on one side. The rest stack on the other. On a display without the focused window, the largest window is the master.          |
-| Master Layout Center                        | The focused window becomes the master in the middle and the rest stack on both sides. Made for wide displays.                                                       |
-| Cycle Master Layout                         | Move the master to the next side round: left, then right, then center.                                                                                              |
-| Grow Master / Shrink Master                 | Give the master window more or less of the screen, in steps of 5%.                                                                                                  |
-| Swap with Master                            | Trade places between the active window and the master.                                                                                                              |
-| Swap with Next Window                       | Trade places between the focused window and the next one round. Two windows simply swap, whether they sit side by side or stacked.                                  |
-| Rotate Windows Clockwise / Counterclockwise | Move every window one slot round, keeping the last layout you tiled with. A pinned sidebar stays put.                                                               |
-| Swap Displays                               | Move every window to the other display, keeping its place and size on the screen. With more than two displays, each display's windows move to the next.             |
-| Distribute Across Displays                  | Spread your windows over every display, a share for each by size and no more than each can fit, then tile each display with the last layout you used.               |
-| Move Others to Next Display                 | Keep the focused window on its display and move every other window there to the next display, tiled with the last layout you used.                                  |
-| Move All to This Display                    | Move every window from your other displays to the display with the focused window, tiled with the last layout you used.                                             |
-| Toggle Menu Bar Visibility                  | Hide or show the menu bar.                                                                                                                                          |
+| Command                                     | What it does                                                                                                                                                       |
+| :------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auto Tile                                   | Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.                                                                |
+| Pivot Layout                                | Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.             |
+| Toggle Sidebar                              | Pin one window full height down the right edge, or unpin it. While it is pinned, every other command arranges the remaining windows beside it.                     |
+| Smart Arrange                               | Arrange windows by what each app is for. The focused window leads your largest display with related work beside it. Chat, mail and music go to your other display. |
+| Master Left / Right                         | Make the focused window the master on one side, with every other window stacked on the other.                                                                      |
+| Master Center                               | Make the focused window the master in the middle, with the other windows stacked on both sides. Best on wide displays.                                             |
+| Next Master Layout                          | Move the master to its next position: left, then right, then center.                                                                                               |
+| Make Master Larger / Smaller                | Give the master window 5% more or less of the screen. The stacked windows take up the difference.                                                                  |
+| Swap with Master                            | Make the focused window the master. It trades places with the current master.                                                                                      |
+| Swap with Next Window                       | Trade places between the focused window and the next one in the layout. With two windows, they simply swap.                                                        |
+| Rotate Windows Clockwise / Counterclockwise | Move every window one position round in the current layout. A pinned sidebar stays where it is.                                                                    |
+| Swap Displays                               | Send every window to your other display and tile it there. With more than two displays, each display's windows move to the next one.                               |
+| Distribute Across Displays                  | Spread windows over all your displays in proportion to their size, so no display is crowded while another sits empty.                                              |
+| Move Others to Next Display                 | Keep only the focused window on this display. Every other window here moves to your next display.                                                                  |
+| Move All to This Display                    | Bring every window from your other displays to the one you are working on.                                                                                         |
+| Toggle Menu Bar Visibility                  | Hide or show the macOS menu bar, to give windows the full height of the screen.                                                                                    |
 
 The names follow Hyprland too, so its users can search for `master`, `swapnext`, `mfact`, `togglesplit` (Pivot Layout) or `rollnext`.
 
-Swap, Rotate, Grow Master and Pivot Layout all work on the last layout you tiled with, so you can tile once and then rearrange.
+Swap, Rotate, Make Master Larger and Smaller, and Pivot Layout all work on the layout you last tiled with, so you can tile once and then rearrange. They act on the display you are working on. Auto Tile, Smart Arrange and the Master commands tile every display.
 
 When a display has more windows than fit at the sizes their apps allow, the smallest ones share one slot instead of half-covering each other. The active window always gets its own.
 

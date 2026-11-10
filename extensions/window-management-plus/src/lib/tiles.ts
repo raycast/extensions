@@ -1,4 +1,4 @@
-// The tiling layouts by name. The last one used is remembered, so Rotate, Swap, Grow Master and
+// The tiling layouts by name. The last one used is remembered, so Rotate, Swap, Make Master Larger and
 // Pivot rerun it instead of picking a layout of their own.
 
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
@@ -108,7 +108,7 @@ function layoutFor(name: TileName, lead: "focused" | "largest"): Layout {
 
 /**
  * Tiles every window and remembers the layout. Opens the sidebar's Raycast window if needed.
- * A master layout takes the focused window as its master. Rotate, Swap and Grow Master then keep
+ * A master layout takes the focused window as its master. Rotate, Swap and Make Master Larger then keep
  * whichever window is master, wherever the focus goes.
  */
 export function runTile(name: TileName, done?: string) {
@@ -148,11 +148,11 @@ export async function toggleSidebar() {
   return tile(layout, open, false, on ? "Sidebar pinned" : "Sidebar unpinned");
 }
 
-/** The sides Cycle Master Layout steps through, with what to call each. */
+/** The sides Next Master Layout steps through, with what to call each. */
 const MASTER_CYCLE: [TileName, string][] = [
-  ["master-left", "Master Layout Left"],
-  ["master-right", "Master Layout Right"],
-  ["master-center", "Master Layout Center"],
+  ["master-left", "Master Left"],
+  ["master-right", "Master Right"],
+  ["master-center", "Master Center"],
 ];
 
 /** Tiles with the master on the next side round, and says which. Hyprland's orientationnext. */
@@ -181,7 +181,7 @@ export const swapNext = () => retile((layout, pinned) => swappedNext(layout, pin
 /** The active window trades places with the biggest one. Hyprland's swapwithmaster. */
 export const swapWithMaster = () => retile((layout, pinned) => withMaster(layout, pinned));
 
-/** The master takes a bigger or smaller share. Hyprland's mfact. Switches to Master Layout Left if needed. */
+/** The master takes a bigger or smaller share. Hyprland's mfact. Switches to Master Left if needed. */
 export function resizeMaster(delta: number) {
   cache.set(RATIO, String(Math.min(0.85, Math.max(0.15, Math.round((ratio() + delta) * 100) / 100))));
   const name = isMaster(last()) ? last() : "master-left";
