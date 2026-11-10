@@ -1,6 +1,6 @@
 # Multi AI Chat Changelog
 
-## [Improve Saved Prompt Reliability] - {PR_MERGE_DATE}
+## [Improve Saved Prompt Reliability] - 2026-11-10
 
 - Prevent concurrent operations on the same Mac from reverting saved prompt edits.
 - Keep prompt content and revisions consistent, including when the system clock moves backwards.
