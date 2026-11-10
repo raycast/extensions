@@ -208,7 +208,7 @@ test("Idle is Mint's own pile when Mint names it (1.2.1), else what Mint ticks b
   );
 });
 
-test("after Quit Chosen, only an app that was asked to quit and did not reads \"kept running\"", () => {
+test('after Quit Chosen, only an app that was asked to quit and did not reads "kept running"', () => {
   const app = (id: string, bytes: number): MemoryScan["items"][number] => ({
     id,
     name: id,
@@ -229,8 +229,13 @@ test("after Quit Chosen, only an app that was asked to quit and did not reads \"
   const inUse = piles.find((pile) => pile.key === "inUse")!;
   const svg = (state: Parameters<typeof pilePicture>[4]) =>
     Buffer.from(pilePicture(inUse, piles, 4000, "dark", state).match(/base64,([^)?]+)/)![1], "base64").toString("utf8");
-  // Discord chosen and quit; Spotify and Obsidian never asked (the VM's 2026-11-10 run read "3 kept running").
-  const quit = svg({ struck: new Set(["Discord"]), receipt: { bytes: 38, text: "freed", asked: ["Discord"] } });
+  // Discord chosen and quit; Spotify and Obsidian never asked (the VM's 2026-11-10 run read "3 kept running"). By the
+  // time the receipt shows, the strike has folded Discord away (`gone`), as a person sees it.
+  const quit = svg({
+    struck: new Set(["Discord"]),
+    gone: new Set(["Discord"]),
+    receipt: { bytes: 38, text: "freed", asked: ["Discord"] },
+  });
   assert.doesNotMatch(quit, /kept running/);
   assert.match(quit, /freed · 1 app quit/);
   // Spotify chosen and still running; Obsidian never asked.

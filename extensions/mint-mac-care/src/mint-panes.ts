@@ -523,6 +523,8 @@ export function pilePicture(
   const remaining = left.reduce((sum, app) => sum + app.size, 0);
   const asked = state.receipt?.asked ? new Set(state.receipt.asked) : undefined;
   const kept = state.receipt ? left.filter((app) => !asked || asked.has(app.id)) : [];
+  // Counted from the whole pile: by the time the receipt shows, the strike has folded the quit apps out of `listed`.
+  const quit = pile.apps.filter((app) => asked?.has(app.id) && struck.has(app.id)).length;
   const shown = listed.slice(0, 10);
   const rows: ListRow[] = shown.map((app) => ({
     title: app.name,
@@ -547,7 +549,7 @@ export function pilePicture(
           ? `${state.receipt.text} · ${plural(pile.apps.length, "app")} quit`
           : kept.length
             ? `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${kept.length} kept running`
-            : `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${plural(listed.length - left.length, "app")} quit`
+            : `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${plural(quit, "app")} quit`
         : pile.apps.length
           ? count
           : EMPTY_PILES[pile.key]),
