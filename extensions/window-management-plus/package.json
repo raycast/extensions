@@ -87,7 +87,7 @@
       "type": "dropdown",
       "required": false,
       "default": "notes",
-      "title": "Sidebar",
+      "title": "Default Sidebar App",
       "description": "Opened and pinned to the screen by Toggle Sidebar",
       "data": [
         {
@@ -116,7 +116,7 @@
     {
       "name": "toggle-sidebar",
       "title": "Toggle Sidebar",
-      "description": "Open the window chosen in the Sidebar setting and pin it full height down the right of the screen. Run it again to unpin. While a sidebar is pinned, every other command arranges the remaining windows beside it.",
+      "description": "Open the window chosen as the Default Sidebar App and pin it full height down the right of the screen. Run it again to unpin. While a sidebar is pinned, every other command arranges the remaining windows beside it.",
       "mode": "no-view",
       "icon": "toggle-sidebar.png",
       "keywords": [
