@@ -1,0 +1,172 @@
+instructions: |
+  Graphite organizes GitHub pull requests into stacks and shows the ones that need the user in the PR inbox. Inbox
+  sections, such as "Needs your review", "Returned to you", "Approved", or the user's own sections, come from the
+  user's Graphite settings; refer to them by their names as given.
+
+  - Refer to pull requests as Markdown links using the title and number, for example
+    [Add billing page (#482)](https://app.graphite.com/github/pr/acme/web/482). Use the graphiteUrl (or url) a tool
+    returned, or githubUrl if the user asks for GitHub. Never make up a link; without a URL, write the title and number.
+  - When the user gives a pull request as owner/repo#number or a URL, pass it straight to the tool they need; don't
+    look it up first. Otherwise, find it with get-inbox (without a section unless the user names one of their
+    sections) and pass its `pullRequest` value (owner/repo#number) to the other tools. If several pull requests match what the user said, ask which one they mean.
+  - Only review or merge when the user explicitly asks. Never approve, request changes, or merge on your own initiative.
+  - When you write a review comment for the user, show it to them before submitting it.
+  - Merging with Graphite also merges every pull request below it in the stack. Say so when the stack has more than
+    one pull request. If merge-pull-request returns merged: false, explain the reason instead of trying again.
+  - If a tool says the Graphite CLI or GitHub CLI isn't set up or signed in, tell the user the command to run.
+evals:
+  - input: "@graphite what needs my review?"
+    mocks:
+      get-inbox:
+        graphiteInboxUrl: https://app.graphite.com
+        sections:
+          - section: Needs your review
+            total: 2
+            countsTowardInbox: true
+            pullRequests:
+              - pullRequest: acme/web#482
+                title: Add usage-based billing page
+                author: mayachen
+                updatedAt: "2026-11-10T09:12:00Z"
+                graphiteUrl: https://app.graphite.com/github/pr/acme/web/482
+                githubUrl: https://github.com/acme/web/pull/482
+                reviewDecision: Review required
+                mergeStatus: Needs approvals
+                unresolvedComments: 0
+                checks: passing
+              - pullRequest: acme/api#1290
+                title: Retry webhook deliveries with backoff
+                author: leopark
+                updatedAt: "2026-11-09T16:40:00Z"
+                graphiteUrl: https://app.graphite.com/github/pr/acme/api/1290
+                githubUrl: https://github.com/acme/api/pull/1290
+                reviewDecision: Review required
+                mergeStatus: Needs approvals
+                unresolvedComments: 2
+                checks: failing
+    expected:
+      - callsTool: get-inbox
+      - includes: "482"
+      - includes: "1290"
+  - input: "@graphite summarize the unresolved comments on acme/api#1290"
+    mocks:
+      get-pull-request:
+        pullRequest: acme/api#1290
+        title: Retry webhook deliveries with backoff
+        state: OPEN
+        author: leopark
+        iAmAuthor: false
+        githubUrl: https://github.com/acme/api/pull/1290
+        graphiteUrl: https://app.graphite.com/github/pr/acme/api/1290
+        reviewDecision: Changes requested
+        mergeStatus: Unresolved comments
+        unresolvedComments:
+          - author: salvarez
+            location: src/webhooks/retry.ts:48
+            body: Cap the backoff at a few minutes, otherwise retries can stall for hours.
+          - author: noahk
+            location: src/webhooks/retry.ts:72
+            body: This needs a test for the max-attempts case.
+        checks:
+          summary: failing
+          failing: [unit-tests]
+          running: []
+          passed: 6
+    expected:
+      - callsTool:
+          name: get-pull-request
+          arguments:
+            pullRequest:
+              includes: "1290"
+      - includes: "backoff"
+      - includes: "test"
+  - input: "@graphite approve acme/web#482"
+    mocks:
+      review-pull-request:
+        submitted: true
+        pullRequest: acme/web#482
+        review: Approve
+        graphiteUrl: https://app.graphite.com/github/pr/acme/web/482
+        githubUrl: https://github.com/acme/web/pull/482
+    expected:
+      - callsTool:
+          name: review-pull-request
+          arguments:
+            pullRequest:
+              includes: "482"
+            action: approve
+      - includes: "app.graphite.com/github/pr/acme/web/482"
+  - input: "@graphite leave a comment on acme/web#482 saying the empty state needs a design pass"
+    mocks:
+      review-pull-request:
+        submitted: true
+        pullRequest: acme/web#482
+        review: Comment
+        graphiteUrl: https://app.graphite.com/github/pr/acme/web/482
+        githubUrl: https://github.com/acme/web/pull/482
+    expected:
+      - callsTool:
+          name: review-pull-request
+          arguments:
+            action: comment
+            body:
+              includes: "empty state"
+  - input: "@graphite merge acme/web#482"
+    mocks:
+      merge-pull-request:
+        merged: true
+        status: Graphite started merging in the background.
+        into: main
+        pullRequests:
+          - number: 481
+            title: Extract pricing table component
+            url: https://app.graphite.com/github/pr/acme/web/481
+          - number: 482
+            title: Add usage-based billing page
+            url: https://app.graphite.com/github/pr/acme/web/482
+    expected:
+      - callsTool:
+          name: merge-pull-request
+          arguments:
+            pullRequest:
+              includes: "482"
+      - includes: "481"
+      - includes: "app.graphite.com/github/pr/acme/web/481"
+  - input: "@graphite merge acme/api#1290"
+    usedAsExample: false
+    mocks:
+      merge-pull-request:
+        merged: false
+        pullRequest: acme/api#1290
+        reason: "Graphite says this pull request isn't ready to merge: Needs approvals."
+    expected:
+      - callsTool: merge-pull-request
+      - not:
+          includes: "has been merged"
+      - includes: "approval"
+  - input: "@graphite what's blocking my pull requests?"
+    usedAsExample: true
+    mocks:
+      get-inbox:
+        graphiteInboxUrl: https://app.graphite.com
+        sections:
+          - section: Returned to you
+            total: 1
+            countsTowardInbox: true
+            pullRequests:
+              - pullRequest: acme/web#470
+                title: Move settings to the new layout
+                author: arivera
+                iAmAuthor: true
+                updatedAt: "2026-11-10T08:00:00Z"
+                graphiteUrl: https://app.graphite.com/github/pr/acme/web/470
+                githubUrl: https://github.com/acme/web/pull/470
+                reviewDecision: Changes requested
+                mergeStatus: Unresolved comments
+                unresolvedComments: 3
+                checks: passing
+    expected:
+      - callsTool: get-inbox
+      - not:
+          callsTool: merge-pull-request
+      - includes: "470"
