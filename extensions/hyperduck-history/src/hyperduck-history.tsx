@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { getFavicon, usePromise } from "@raycast/utils";
 import {
+  createSerialQueue,
   displayTitle,
   HYPERDUCK_PLIST,
   HyperduckError,
@@ -24,6 +25,9 @@ import {
 const ARCHIVE_KEY = "archive";
 const HIDDEN_KEY = "hidden";
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Every read-modify-write of the saved list goes through this queue, so changes never overwrite each other. */
+const withStorage = createSerialQueue();
 
 interface LoadResult {
   enabled: boolean;
@@ -59,16 +63,38 @@ async function loadHidden(): Promise<string[]> {
 }
 
 async function load(): Promise<LoadResult> {
-  const [history, archive, hidden] = await Promise.all([readHyperduckHistory(), loadArchive(), loadHidden()]);
+  const history = await readHyperduckHistory();
   const liveIds = new Set(history.links.map((link) => link.id));
-  const links = mergeLinks(archive, history.links, hidden);
-  // Hidden ids only matter while Hyperduck still lists them.
-  const stillHidden = hidden.filter((id) => liveIds.has(id));
-  await Promise.all([
-    LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(links)),
-    LocalStorage.setItem(HIDDEN_KEY, JSON.stringify(stillHidden)),
-  ]);
-  return { enabled: history.enabled, links, liveIds };
+  return withStorage(async () => {
+    const [archive, hidden] = await Promise.all([loadArchive(), loadHidden()]);
+    const links = mergeLinks(archive, history.links, hidden);
+    // Hidden ids only matter while Hyperduck still lists them.
+    const stillHidden = hidden.filter((id) => liveIds.has(id));
+    await Promise.all([
+      LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(links)),
+      LocalStorage.setItem(HIDDEN_KEY, JSON.stringify(stillHidden)),
+    ]);
+    return { enabled: history.enabled, links, liveIds };
+  });
+}
+
+function removeLink(link: HyperduckLink, isLive: boolean): Promise<void> {
+  return withStorage(async () => {
+    const [archive, hidden] = await Promise.all([loadArchive(), loadHidden()]);
+    await LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive.filter((item) => item.id !== link.id)));
+    if (isLive && !hidden.includes(link.id)) {
+      await LocalStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden, link.id]));
+    }
+  });
+}
+
+function clearLinks(liveIds: Iterable<string>): Promise<void> {
+  return withStorage(async () => {
+    await Promise.all([
+      LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify([])),
+      LocalStorage.setItem(HIDDEN_KEY, JSON.stringify([...liveIds])),
+    ]);
+  });
 }
 
 function sectionTitle(date: number, now: Date): "Today" | "Last 7 Days" | "Older" {
@@ -84,9 +110,16 @@ export default function Command() {
   });
 
   async function hide(link: HyperduckLink) {
-    const [archive, hidden] = await Promise.all([loadArchive(), loadHidden()]);
-    await LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive.filter((item) => item.id !== link.id)));
-    if (data?.liveIds.has(link.id)) await LocalStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden, link.id]));
+    const isLive = data?.liveIds.has(link.id) ?? false;
+    const confirmed = await confirmAlert({
+      title: "Remove this link from the list?",
+      message: isLive
+        ? "The link stays hidden here. Hyperduck's own history does not change."
+        : "Hyperduck no longer has this link, so you cannot get it back.",
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    await removeLink(link, isLive);
     await showToast({ style: Toast.Style.Success, title: "Removed from list" });
     revalidate();
   }
@@ -94,14 +127,12 @@ export default function Command() {
   async function clearAll() {
     const confirmed = await confirmAlert({
       title: "Clear the whole list?",
-      message: "This removes every link from this list. Hyperduck's own history does not change.",
+      message:
+        "This removes every link from this list. Links that Hyperduck no longer has cannot come back. Hyperduck's own history does not change.",
       primaryAction: { title: "Clear", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    await Promise.all([
-      LocalStorage.setItem(ARCHIVE_KEY, JSON.stringify([])),
-      LocalStorage.setItem(HIDDEN_KEY, JSON.stringify([...(data?.liveIds ?? [])])),
-    ]);
+    await clearLinks(data?.liveIds ?? []);
     await showToast({ style: Toast.Style.Success, title: "List cleared" });
     revalidate();
   }
@@ -197,7 +228,7 @@ function LinkItem(props: { link: HyperduckLink; archivedOnly: boolean; onHide: (
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser url={link.url} />
-            <Action.CopyToClipboard title="Copy URL" content={link.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+            <Action.CopyToClipboard title="Copy URL" content={link.url} />
             <Action.Paste title="Paste URL" content={link.url} shortcut={{ modifiers: ["cmd", "shift"], key: "v" }} />
             <Action.OpenWith path={link.url} shortcut={Keyboard.Shortcut.Common.Open} />
           </ActionPanel.Section>
@@ -206,14 +237,14 @@ function LinkItem(props: { link: HyperduckLink; archivedOnly: boolean; onHide: (
               title="Remove from List"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={props.onHide}
             />
             <Action
               title="Clear List"
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
               onAction={props.onClearAll}
             />
           </ActionPanel.Section>

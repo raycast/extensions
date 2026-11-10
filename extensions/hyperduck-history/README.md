@@ -10,7 +10,7 @@ Hyperduck for Mac keeps its link history in its shared preferences file:
 ~/Library/Group Containers/group.com.sindresorhus.Hyperduck.shared/Library/Preferences/group.com.sindresorhus.Hyperduck.shared.plist
 ```
 
-The command reads the `history` and `isHistoryEnabled` keys with `plutil`. It does not use the network and it never writes to Hyperduck's files.
+The command reads the `history` and `isHistoryEnabled` keys with `plutil`, on this Mac. It never writes to Hyperduck's files. The only network use is the site icon of each link: Raycast gets it from your favicon provider (Raycast settings), which receives the site's domain.
 
 Hyperduck keeps only its most recent links (30 in the history checked on 2026-11-10). The extension copies each link into Raycast local storage when the command opens, so older links stay searchable after Hyperduck drops them. Those links show a tray icon.
 
@@ -21,23 +21,13 @@ Hyperduck keeps only its most recent links (30 in the history checked on 2026-11
 
 ## Actions
 
-| Action | Shortcut |
-| --- | --- |
-| Open in browser | ↵ |
-| Copy URL | ⌘C |
-| Paste URL | ⌘⇧V |
-| Open with… | ⌘O |
-| Remove from list | ⌃X |
-| Clear list | ⌃⇧X |
+| Action           | Shortcut |
+| ---------------- | -------- |
+| Open in browser  | ↵        |
+| Copy URL         | ⌘↵       |
+| Paste URL        | ⌘⇧V      |
+| Open with…       | ⌘O       |
+| Remove from list | ⌃X       |
+| Clear list       | ⌃⇧X      |
 
-Remove and Clear change only this extension's list. Hyperduck's own history does not change.
-
-## Development
-
-```bash
-npm install
-npm test        # unit tests (node:test)
-npm run lint
-npm run dev     # load into Raycast
-swift scripts/make-icon.swift /tmp/icon.png && sips -z 512 512 /tmp/icon.png --out assets/hyperduck-history-icon-simple.png   # redraw the icon
-```
+Remove and Clear ask before they change anything. They change only this extension's list, not Hyperduck's own history. A removed link that Hyperduck no longer has cannot come back.

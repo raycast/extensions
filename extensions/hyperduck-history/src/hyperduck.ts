@@ -140,3 +140,16 @@ export async function readHyperduckHistory(path = HYPERDUCK_PLIST): Promise<Hype
   const enabled = enabledRaw === undefined ? true : enabledRaw.trim() !== "false";
   return parseHistory(history, enabled);
 }
+
+/**
+ * Runs async tasks one at a time, in call order. A failed task does not block later tasks.
+ * Used so that reads and writes of the saved list never overlap.
+ */
+export function createSerialQueue() {
+  let tail: Promise<unknown> = Promise.resolve();
+  return function enqueue<T>(task: () => Promise<T>): Promise<T> {
+    const run = tail.then(task, task);
+    tail = run.catch(() => undefined);
+    return run;
+  };
+}

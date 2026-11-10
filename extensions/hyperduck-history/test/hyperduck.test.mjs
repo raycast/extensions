@@ -7,6 +7,7 @@ import { after, describe, it } from "node:test";
 
 import {
   appleSecondsToUnixMs,
+  createSerialQueue,
   displayTitle,
   HyperduckError,
   mergeLinks,
@@ -154,5 +155,37 @@ describe("readHyperduckHistory", () => {
       readHyperduckHistory(path),
       (error) => error instanceof HyperduckError && error.kind === "unreadable",
     );
+  });
+});
+
+describe("createSerialQueue", () => {
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  it("runs tasks one at a time, in call order", async () => {
+    const enqueue = createSerialQueue();
+    const events = [];
+    let running = 0;
+    const task = (name, ms) => async () => {
+      running += 1;
+      assert.equal(running, 1, "tasks overlapped");
+      events.push(`start ${name}`);
+      await sleep(ms);
+      events.push(`end ${name}`);
+      running -= 1;
+      return name;
+    };
+    const results = await Promise.all([enqueue(task("a", 30)), enqueue(task("b", 5)), enqueue(task("c", 1))]);
+    assert.deepEqual(results, ["a", "b", "c"]);
+    assert.deepEqual(events, ["start a", "end a", "start b", "end b", "start c", "end c"]);
+  });
+
+  it("keeps running after a failed task", async () => {
+    const enqueue = createSerialQueue();
+    const failed = enqueue(async () => {
+      throw new Error("boom");
+    });
+    const next = enqueue(async () => "ok");
+    await assert.rejects(failed, /boom/);
+    assert.equal(await next, "ok");
   });
 });
