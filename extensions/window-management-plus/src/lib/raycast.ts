@@ -23,7 +23,7 @@ export const isPanel = (value: unknown): value is Panel => value === "notes" || 
 
 export const prefs = () => {
   const p = getPreferenceValues<Preferences>();
-  return { gap: Number(p.gap) || 0 };
+  return { gap: Number(p.gap) || 0, screenGap: Number(p.screenGap) || 0, sidebar: p.sidebar ?? "notes" };
 };
 
 /**
@@ -469,7 +469,14 @@ function raycastSystem(include?: string): System {
     );
 
   return {
-    areas: async () => (await screens).map((s) => toLocal(s.visible, s)),
+    // The usable area of each screen, less the gap kept clear round its edge
+    areas: async () => {
+      const edge = prefs().screenGap;
+      return (await screens).map((s) => {
+        const area = toLocal(s.visible, s);
+        return { x: area.x + edge, y: area.y + edge, width: area.width - 2 * edge, height: area.height - 2 * edge };
+      });
+    },
     origins: async () => (await screens).map((s) => ({ x: s.frame.x, y: s.frame.y })),
 
     async windows() {

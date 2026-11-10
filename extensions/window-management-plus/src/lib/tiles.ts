@@ -1,7 +1,7 @@
 // The tiling layouts by name. The last one used is remembered, so Rotate, Swap, Make Master Larger and
 // Pivot rerun it instead of picking a layout of their own.
 
-import { closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import {
   MASTER_RATIO,
   master,
@@ -121,13 +121,13 @@ export function runTile(name: TileName, done?: string) {
 
 /**
  * Pins the sidebar, or lets it go, and tiles again in the layout already in use. While it is pinned,
- * every layout arranges the other windows beside it. What gets pinned is Toggle Sidebar's own preference:
+ * every layout arranges the other windows beside it. What gets pinned is the Sidebar preference:
  * Raycast Notes or AI Chat, opened if needed, or the window that has focus right now.
  */
 export async function toggleSidebar() {
   const on = !sidebarOn();
   if (on) {
-    const choice = getPreferenceValues<Preferences.ToggleSidebar>().sidebar ?? "notes";
+    const choice = prefs().sidebar;
     if (isPanel(choice)) {
       cache.set(PINNED, choice);
     } else {
