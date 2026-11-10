@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { formatCompact, openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
 import { NeedsNewerMint, RetryActions, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
+import { usePlanWall } from "./plan-wall";
 import {
   NATIVE_APPROVAL_CAPABILITY,
   customRule,
@@ -29,6 +30,8 @@ export default function Command() {
  * rule on or off, saving or removing one is confirmed in Mint's own window.
  */
 function Rules({ cli }: { cli: string }) {
+  // The plan wall (2026-11-10): custom rules are a plan feature.
+  const wall = usePlanWall(cli);
   const { data, error, isLoading, revalidate } = usePromise(
     async (path: string) => runParity<RulesAnswer>(path, { action: "rules.list" }, 60_000),
     [cli],
@@ -40,7 +43,8 @@ function Rules({ cli }: { cli: string }) {
     await runConfirmedInMint(
       cli,
       { action, ruleID: rule.id },
-      { done: () => `${rule.name} ${words}`, failed: "Mint could not change the rule" },
+      { done: () => `${rule.name} ${words}`, failed: "Mint could not change the rule", gate: "rules" },
+      action === "rules.enable" ? wall : undefined,
     );
     revalidate();
   }
@@ -125,6 +129,7 @@ const ACTIONS: RuleAction[] = ["trash", "review", "protected", "delete"];
 
 function RuleForm({ cli, rule, onSaved }: { cli: string; rule?: Rule; onSaved: () => void }) {
   const { pop } = useNavigation();
+  const wall = usePlanWall(cli);
   const filter = rule?.filter ?? {};
   return (
     <Form
@@ -143,7 +148,8 @@ function RuleForm({ cli, rule, onSaved }: { cli: string; rule?: Rule; onSaved: (
               const saved = await runConfirmedInMint(
                 cli,
                 { action: rule ? "rules.update" : "rules.add", rule: { ...made.rule, enabled: rule?.enabled ?? true } },
-                { done: () => `${made.rule!.name} saved`, failed: "Mint could not save the rule" },
+                { done: () => `${made.rule!.name} saved`, failed: "Mint could not save the rule", gate: "rules" },
+                wall,
               );
               if (saved) {
                 onSaved();

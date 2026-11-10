@@ -10,6 +10,8 @@ import { MissingMint } from "./missing-mint";
 import { allowanceLine } from "./mint-parity";
 import type { AccessAnswer } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
+import { PlanWall } from "./plan-wall";
+import { NEW_WORDS } from "./mint-plan";
 
 type Folder = { path: string; enabled?: boolean; organizeOnArrival?: boolean };
 type Preview = { result?: { filesMoved?: number } };
@@ -145,6 +147,16 @@ export default function Command() {
             <AutoCareAction context={{ section: "disk" }} />
             <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           </ActionPanel.Section>
+          {cli && access.data?.plan === false ? (
+            <ActionPanel.Section>
+              {/* The plan wall (2026-11-10): what Mint did here, what is waiting, and the plans. */}
+              <Action.Push
+                title={NEW_WORDS.goUnlimitedAction}
+                icon={Icon.Stars}
+                target={<PlanWall cli={cli} version={resolution.status === "ready" ? resolution.version : undefined} />}
+              />
+            </ActionPanel.Section>
+          ) : null}
           {nudge ? (
             <ActionPanel.Section>
               {/* Raycast writes no Mint setting: the level is changed in Mint. */}

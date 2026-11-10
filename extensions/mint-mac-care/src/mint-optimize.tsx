@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { useMemo, useRef, useState } from "react";
 import { MintCLIVersion, formatCompact, openMint, plural, runMintSurface, shortPath } from "./mint-cli";
+import { usePlanWall } from "./plan-wall";
 import { TIER_COLORS, sourceTitle } from "./mint-model";
 import { MissingMint } from "./missing-mint";
 import { progressMarkdown, updatingDots } from "./progress-row";
@@ -62,6 +63,9 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
   // Mint's answer is single-use: after an Optimize, the files it kept need a new look.
   const [spent, setSpent] = useState<string | undefined>();
   const strike = useStrike();
+  // The plan wall (2026-11-10): where Mint holds an Optimize back for the week's free allowance.
+  const wall = usePlanWall(cli);
+  const bytesOf = (groups: Array<{ bytes: number }>) => groups.reduce((sum, group) => sum + group.bytes, 0);
   const token = useRef(newProgressToken());
   const expected = useMemo(() => expectedSources(savedSourceKeys()), []);
   const scan = usePromise(
@@ -133,9 +137,12 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
           title: `${plural(failures.length, "file")} left as they were`,
           message: failures[0].reason,
         });
+        // Files left as they were and the week now spent: the week held them.
+        await wall.refused(bytesOf(chosen));
       }
     } catch (error) {
       strike.end([], () => setRun(undefined));
+      if (await wall.refused(bytesOf(chosen))) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Mint could not optimize",

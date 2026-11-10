@@ -814,3 +814,234 @@ ${caption(w, bottom + 18, input.endLabel, p.tertiary, "end")}
 </svg>`;
   return { svg, height };
 }
+
+// ---------------------------------------------------------------------------
+// The plan wall (2026-11-10): a small copy of Mint's plan page. Left, on a
+// surface, what Mint has done here and its 3-year value with the page's own
+// chart (Mint sends both lines' points, PlanPageRoomChart.Geometry.lines);
+// right, the page's title, what is ready now, and the two plans, each with
+// the key that buys it.
+// ---------------------------------------------------------------------------
+
+export type PlanWallValue = {
+  title: string;
+  estimate: string;
+  worthText: string;
+  line: string;
+  /** The page's drawing: points in a `width` × `height` frame, Today at x 0. */
+  chart: { width: number; height: number; axis?: number; mint: number[][]; never: number[][] };
+  gapLabel: string;
+  withMint: string;
+  neverClean: string;
+  today: string;
+  threeYears: string;
+  sentence: string;
+  footer: Array<{ figure: string; label: string }>;
+};
+
+export type PlanWallInput = {
+  appearance: Appearance;
+  format: ByteFormatter;
+  title: string;
+  status?: string;
+  value?: PlanWallValue;
+  /** `figure` is the page's own "6 GB" when Mint sent it; else the bytes are written by `format`. */
+  ready: {
+    bytes: number;
+    figure?: string;
+    label: string;
+    parts: Array<{ title: string; bytes: number; color: string }>;
+  };
+  plans: Array<{ price: string; suffix?: string; line: string; terms: string; key: string }>;
+};
+
+const PLAN_LEFT = 318;
+const PLAN_GUTTER = 24;
+const PLAN_RIGHT = 338;
+const PLAN_HEIGHT = 316;
+
+/** `terms` broken at its " · " into lines that fit `room` at `size`. */
+export function wrapTerms(terms: string, room: number, size: number): string[] {
+  const lines: string[] = [];
+  for (const piece of terms.split(" · ")) {
+    const last = lines[lines.length - 1];
+    if (last !== undefined && textWidth(`${last} · ${piece}`, size) <= room)
+      lines[lines.length - 1] = `${last} · ${piece}`;
+    else lines.push(piece);
+  }
+  return lines;
+}
+
+/** The y of a polyline at x, between its points. */
+function lineYAt(points: number[][], x: number): number {
+  if (x <= points[0][0]) return points[0][1];
+  for (let index = 1; index < points.length; index += 1) {
+    const [x1, y1] = points[index];
+    const [x0, y0] = points[index - 1];
+    if (x <= x1) return x1 === x0 ? y1 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+  }
+  return points[points.length - 1][1];
+}
+
+/**
+ * Where the gap's figure fits between the two lines, from the gap's middle
+ * rightwards, short of the lines' ends (the page's own rule); undefined when
+ * it fits nowhere, and it is then left out, as the page does.
+ */
+export function gapLabelBox(
+  mint: number[][],
+  never: number[][],
+  width: number,
+  label: { width: number; height: number },
+): { x: number; y: number } | undefined {
+  const pad = 3;
+  for (let center = 0.58; center * width + label.width / 2 <= width - 10; center += 0.02) {
+    const left = center * width - label.width / 2;
+    let above = -Infinity;
+    let below = Infinity;
+    for (let x = left; x <= left + label.width; x += 2) {
+      above = Math.max(above, lineYAt(mint, x));
+      below = Math.min(below, lineYAt(never, x));
+    }
+    if (below - above >= label.height + 2 * pad) return { x: center * width, y: (above + below) / 2 };
+  }
+  return undefined;
+}
+
+function roomChart(value: PlanWallValue, x: number, y: number, width: number, height: number, p: Palette): string {
+  const chart = value.chart;
+  const sx = width / chart.width;
+  const sy = height / chart.height;
+  const at = (point: number[]) => `${round(x + point[0] * sx)},${round(y + point[1] * sy)}`;
+  const mint = chart.mint;
+  const never = chart.never;
+  const gap = [...mint, ...[...never].reverse()].map(at).join(" ");
+  const axisY = y + (chart.axis ?? chart.height - 16) * sy;
+  const mintEnd = mint[mint.length - 1];
+  const neverEnd = never[never.length - 1];
+  const parts = [
+    `<polygon points="${gap}" fill="${p.accent}" fill-opacity="0.16"/>`,
+    `<line x1="${x}" y1="${round(axisY)}" x2="${x + width}" y2="${round(axisY)}" stroke="${p.faint}" stroke-width="0.8"/>`,
+    `<polyline points="${never.map(at).join(" ")}" fill="none" stroke="${p.tertiary}" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="0 4.2"/>`,
+    `<polyline points="${mint.map(at).join(" ")}" fill="none" stroke="${p.primary}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`,
+    `<circle cx="${round(x + mintEnd[0] * sx)}" cy="${round(y + mintEnd[1] * sy)}" r="2.4" fill="${p.primary}"/>`,
+    `<circle cx="${round(x + neverEnd[0] * sx)}" cy="${round(y + neverEnd[1] * sy)}" r="2.3" fill="none" stroke="${p.secondary}" stroke-width="1.2"/>`,
+    text(x + width - 8, y + mintEnd[1] * sy - 7, value.withMint, p.secondary, 10, { weight: 500, anchor: "end" }),
+    text(x + width - 8, y + neverEnd[1] * sy + 14, value.neverClean, p.tertiary, 10, { weight: 500, anchor: "end" }),
+    caption(x, y + height - 1, value.today, p.tertiary),
+    caption(x + width, y + height - 1, value.threeYears, p.tertiary, "end"),
+  ];
+  // The figure in the gap, in the page's own units, then drawn at this scale.
+  const size = 12;
+  const box = gapLabelBox(mint, never, chart.width, {
+    width: textWidth(value.gapLabel, size, 700) / sx,
+    height: (size * 0.9) / sy,
+  });
+  if (box) {
+    parts.push(
+      text(x + box.x * sx, y + box.y * sy + size * 0.36, value.gapLabel, p.accent, size, {
+        weight: 700,
+        anchor: "middle",
+      }),
+    );
+  }
+  return parts.join("");
+}
+
+function valuePanel(value: PlanWallValue, p: Palette): string {
+  const w = PLAN_LEFT;
+  const pad = 18;
+  const chipText = value.estimate;
+  const chipWidth = monoWidth(chipText, 9.5) + 14;
+  const footer = value.footer
+    .map((count, index) => {
+      const fx = pad + index * 112;
+      return `${text(fx, 284, count.figure, p.primary, 15)}${caption(fx, 300, count.label, p.tertiary)}`;
+    })
+    .join("");
+  return [
+    surface(0, 0, w, PLAN_HEIGHT, p),
+    text(pad, 30, fitText(value.title, w - 2 * pad - chipWidth - 10, 12.5, 500), p.secondary, 12.5, { weight: 500 }),
+    `<rect x="${round(w - pad - chipWidth)}" y="18" width="${round(chipWidth)}" height="17" rx="8.5" fill="none" stroke="${p.faint}" stroke-width="0.8"/>`,
+    text(w - pad - chipWidth / 2, 30, chipText, p.tertiary, 9.5, { mono: true, anchor: "middle" }),
+    hero(pad, 78, value.worthText, p, 42),
+    text(pad, 100, fitText(value.line, w - 2 * pad, 12), p.secondary, 12),
+    roomChart(value, pad, 116, w - 2 * pad, 112, p),
+    text(pad, 250, fitText(value.sentence, w - 2 * pad, 11), p.tertiary, 11),
+    hairline(pad, 262, w - pad, 262, p),
+    footer,
+  ].join("");
+}
+
+function offerColumn(input: PlanWallInput, x: number, width: number, p: Palette): string {
+  const parts: string[] = [];
+  parts.push(text(x, 28, fitText(input.title, width, 22, 600), p.primary, 22, { weight: 600 }));
+  if (input.status) {
+    parts.push(`<circle cx="${x + 2}" cy="${46.5}" r="2" fill="${p.warn}"/>`);
+    parts.push(text(x + 10, 50, fitText(input.status, width - 10, 12), p.secondary, 12));
+  }
+  // What is ready now: the figure, the page's accent label, the meter in the buckets' colours;
+  // nothing when Mint knows of nothing (the page hides "ready now" at 0).
+  const ready = input.ready.bytes > 0 || Boolean(input.ready.figure);
+  if (ready) {
+    parts.push(hero(x, 100, input.ready.figure ?? input.format(input.ready.bytes), p, 32));
+    parts.push(text(x, 120, input.ready.label, p.accent, 12.5, { weight: 500 }));
+  }
+  if (ready && input.ready.parts.length) {
+    parts.push(dotMeter(x, 138, width, input.ready.parts, p).svg);
+    const cell = width / 2;
+    input.ready.parts.forEach((part, index) => {
+      const cx = x + index * cell;
+      const value = input.format(part.bytes);
+      parts.push(`<circle cx="${cx + 1.7}" cy="${155.5}" r="1.7" fill="${part.color}" fill-opacity="${LIT_OPACITY}"/>`);
+      parts.push(text(cx + 9, 159, fitText(part.title, cell - 9 - textWidth(value, 12) - 18, 12), p.secondary, 12));
+      parts.push(text(cx + cell - 12, 159, value, p.secondary, 12, { anchor: "end" }));
+    });
+  }
+  // The plans, as the page's tiles: the price leads, then its line and its terms; the key that buys it.
+  const gap = 10;
+  const tileWidth = (width - gap) / input.plans.length - (input.plans.length > 1 ? gap / input.plans.length : 0);
+  const top = 180;
+  const tileHeight = 120;
+  input.plans.forEach((plan, index) => {
+    const tx = x + index * (tileWidth + gap);
+    const inner = tileWidth - 28;
+    const keyWidth = monoWidth(plan.key, 10) + 10;
+    const priceWidth = textWidth(plan.price, 24, 300) * 0.93;
+    parts.push(
+      `<rect x="${round(tx + 0.4)}" y="${top + 0.4}" width="${round(tileWidth - 0.8)}" height="${tileHeight - 0.8}" rx="13" fill="${p.surface}" stroke="${index === 0 ? p.faint : p.hairline}" stroke-width="${index === 0 ? 1 : 0.6}"/>`,
+    );
+    parts.push(text(tx + 14, top + 34, plan.price, p.primary, 24, { weight: 300 }));
+    if (plan.suffix)
+      parts.push(text(tx + 14 + priceWidth + 3, top + 34, plan.suffix, p.tertiary, 12.5, { weight: 500 }));
+    parts.push(
+      `<rect x="${round(tx + tileWidth - 12 - keyWidth)}" y="${top + 12}" width="${round(keyWidth)}" height="16" rx="4" fill="none" stroke="${p.faint}" stroke-width="0.8"/>`,
+    );
+    parts.push(
+      text(tx + tileWidth - 12 - keyWidth / 2, top + 23.5, plan.key, p.tertiary, 10, { mono: true, anchor: "middle" }),
+    );
+    parts.push(text(tx + 14, top + 54, fitText(plan.line, inner, 12), p.secondary, 12));
+    wrapTerms(plan.terms, inner, 10.5)
+      .slice(0, 3)
+      .forEach((line, row) =>
+        parts.push(text(tx + 14, top + 76 + row * 14, fitText(line, inner, 10.5), p.tertiary, 10.5)),
+      );
+  });
+  return parts.join("");
+}
+
+/** The plan wall. Returns the SVG and its size; without Mint's value (Mint 1.2.0) only the right column. */
+export function planWallSVG(input: PlanWallInput): { svg: string; width: number; height: number } {
+  const p = palette(input.appearance);
+  if (!input.value) {
+    const width = PLAN_RIGHT + 40;
+    return {
+      svg: `${svgOpen(width, PLAN_HEIGHT)}${offerColumn(input, 0, width, p)}</svg>`,
+      width,
+      height: PLAN_HEIGHT,
+    };
+  }
+  const width = PLAN_LEFT + PLAN_GUTTER + PLAN_RIGHT;
+  const svg = `${svgOpen(width, PLAN_HEIGHT)}${valuePanel(input.value, p)}${offerColumn(input, PLAN_LEFT + PLAN_GUTTER, PLAN_RIGHT, p)}</svg>`;
+  return { svg, width, height: PLAN_HEIGHT };
+}

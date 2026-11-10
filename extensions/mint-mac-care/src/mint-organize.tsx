@@ -22,6 +22,7 @@ import { MissingMint } from "./missing-mint";
 import { runConfirmedInMint } from "./confirm-in-mint";
 import { NATIVE_APPROVAL_CAPABILITY, hasCapability } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
+import { usePlanWall } from "./plan-wall";
 import { Folder, SortResult, TEMPLATES, Template, destinationsPicture, templateTitle } from "./mint-panes";
 import { accent } from "./mint-visuals";
 import { useStrike } from "./use-strike";
@@ -138,6 +139,8 @@ function FolderRow({
   const [run, setRun] = useState<{ categories: string[] } | undefined>();
   const [receipt, setReceipt] = useState<{ text: string } | undefined>();
   const strike = useStrike();
+  // The plan wall (2026-11-10): where the week's free allowance keeps files in place.
+  const wall = usePlanWall(cli);
   const [wanted, setWanted] = useState(active);
   useEffect(() => {
     if (active) setWanted(true);
@@ -183,11 +186,12 @@ function FolderRow({
         .filter(([, count]) => count > 0)
         .map(([category]) => category);
       const folders = landed.length;
+      const held = (response.result.planLimitBlockedCount ?? 0) > 0;
       strike.end(landed, () => {
         setRun(undefined);
         setReceipt({
           text:
-            moved === 0
+            moved === 0 && !held
               ? "already tidy"
               : failed
                 ? `${plural(moved, "file")} sorted · ${failed} could not move`
@@ -196,6 +200,7 @@ function FolderRow({
         setPlan(undefined);
         preview.revalidate();
         onChanged();
+        if (held) wall.held();
       });
       if (failed) {
         await showToast({

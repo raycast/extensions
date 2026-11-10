@@ -52,6 +52,7 @@ import { notifyLevel } from "./mint-nudge";
 import { mintDefault } from "./mint-saved";
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { usePlanWall } from "./plan-wall";
 
 /** The idle and power rule every disk and folder plan waits for (DiskAutoCare.machineIsReady). */
 const WHEN = "every hour, once your Mac has been idle for 10 minutes and is plugged in";
@@ -102,6 +103,8 @@ function AutoCareList({ cli, launch }: { cli: string; launch?: AutoCareLaunch })
   );
   const listedTypes = usePromise(async () => parseListedTypes(await mintDefault("Mint.AutoCare.ListedTypes.V1")));
   const [busy, setBusy] = useState(false);
+  // The plan wall (2026-11-10): when Mint refuses to turn Auto Care on for the plan.
+  const wall = usePlanWall(cli);
 
   const data = care.data?.care;
   const folders = care.data?.folders ?? [];
@@ -124,6 +127,11 @@ function AutoCareList({ cli, launch }: { cli: string; launch?: AutoCareLaunch })
       toast.title = "Saved in Mint";
       return true;
     } catch (error) {
+      // Turning on, refused for the plan: the plan wall, not the error.
+      if ((request as { enabled?: boolean }).enabled !== false && (await wall.refused(undefined, "autocare"))) {
+        await toast.hide();
+        return false;
+      }
       toast.style = Toast.Style.Failure;
       toast.title = "Mint did not change Auto Care";
       toast.message = error instanceof Error ? error.message : String(error);

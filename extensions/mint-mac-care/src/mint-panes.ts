@@ -579,6 +579,8 @@ export type SortResult = {
   errors?: string[];
   organizeFailures?: Array<{ path?: string; message?: string }>;
   handlingReviewBlockedCount?: number;
+  /** Files the week's free allowance kept in place (OrganizerEngine). */
+  planLimitBlockedCount?: number;
 };
 
 export function templateTitle(template: Template | undefined): string {

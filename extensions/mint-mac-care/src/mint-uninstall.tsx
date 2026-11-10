@@ -22,6 +22,7 @@ import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
 import { RetryActions } from "./confirm-in-mint";
+import { usePlanWall } from "./plan-wall";
 import {
   Remnant,
   UninstallScan as UninstallScanResponse,
@@ -86,6 +87,8 @@ function InstalledApps({ cli }: { cli: string }) {
   const pending = useRef<Partial<Record<string, Promise<UninstallScanResponse>>>>({});
   const strike = useStrike();
   const { push, pop } = useNavigation();
+  // The plan wall (2026-11-10): where Mint holds an uninstall back for the week's free allowance.
+  const wall = usePlanWall(cli);
   const appearance = environment.appearance === "light" ? "light" : "dark";
 
   const look = (app: InstalledApp): Promise<UninstallScanResponse> => {
@@ -232,9 +235,11 @@ function InstalledApps({ cli }: { cli: string }) {
               : `${app.name} was not removed`,
           message: problems.length ? problems.join(" · ") : undefined,
         });
+        if (result.quotaBlockedCount) wall.held(bytes);
       });
     } catch (executeError) {
       strike.end([], () => setRun(undefined));
+      if (await wall.refused(bytes)) return;
       await showToast({
         style: Toast.Style.Failure,
         title: `Mint could not uninstall ${app.name}`,

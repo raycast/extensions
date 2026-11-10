@@ -36,6 +36,7 @@ import { progressMarkdown } from "./progress-row";
 import { useMintCLI } from "./use-mint-cli";
 import { newProgressToken, useMintProgress } from "./use-progress";
 import { useStrike } from "./use-strike";
+import { planRefused, usePlanWall } from "./plan-wall";
 import { rememberDuration } from "./use-wait";
 
 type DiskClean = {
@@ -85,6 +86,8 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
   // Mint's answers are single-use: the copies one is spent by an Optimize.
   const [copiesSpent, setCopiesSpent] = useState<string | undefined>();
   const strike = useStrike();
+  // The plan wall (2026-11-10): where Mint holds a run back for the week's free allowance.
+  const wall = usePlanWall(cli);
 
   const scan = usePromise(
     async (path: string, token: string) => {
@@ -158,7 +161,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
     bucket: Bucket,
     entries: Entry[],
     verb: string,
-    request: (token: string) => Promise<{ done: string[]; receipt: Receipt; problem?: string }>,
+    request: (token: string) => Promise<{ done: string[]; receipt: Receipt; problem?: string; held?: boolean }>,
   ) {
     if (run || strike.active) return;
     const ids = entries.flatMap((entry) => entry.ids);
@@ -166,14 +169,16 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
     setRun({ key: bucket.key, verb, ids });
     strike.begin(ids.length, token);
     try {
-      const { done, receipt, problem } = await request(token);
+      const { done, receipt, problem, held } = await request(token);
       strike.end(done, () => {
         setRun(undefined);
         setReceipts((current) => ({ ...current, [bucket.key]: receipt }));
       });
       if (problem) await showToast({ style: Toast.Style.Failure, title: problem });
+      if (held) wall.held(entries.reduce((sum, entry) => sum + entry.bytes, 0));
     } catch (error) {
       strike.end([], () => setRun(undefined));
+      if (await wall.refused(entries.reduce((sum, entry) => sum + entry.bytes, 0))) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Mint could not finish",
@@ -211,6 +216,8 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
         problem: failures.length
           ? `${plural(failures.length, "file")} left as they were: ${failures[0].reason}`
           : undefined,
+        // Files left as they were and the week now spent: the week held them.
+        held: failures.length > 0 && (await planRefused(cli)),
       };
     });
 
@@ -264,6 +271,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
           ? { bytes: result.physicallyReclaimedBytes ?? result.permanentlyDeletedBytes, text: "freed" }
           : { bytes: result.movedToTrashBytes, text: "moved to the Trash" },
         problem: problems.length ? problems.join(" · ") : undefined,
+        held: result.blockedCount > 0,
       };
     });
   };

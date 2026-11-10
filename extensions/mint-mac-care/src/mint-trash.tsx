@@ -3,6 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { formatCompact, openMint, plural, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
 import { NeedsNewerMint, RetryActions, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
+import { usePlanWall } from "./plan-wall";
 import { NATIVE_APPROVAL_CAPABILITY, hasCapability, runParity, trashReceipt, trashRows } from "./mint-parity";
 import type { TrashItem, TrashRemoval, TrashScan } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
@@ -20,6 +21,7 @@ export default function Command() {
  * window. Deleting from the Trash cannot be undone.
  */
 function EmptyTrash({ cli }: { cli: string }) {
+  const wall = usePlanWall(cli);
   const { data, error, isLoading, revalidate } = usePromise(
     async (path: string) => runParity<TrashScan>(path, { action: "disk.trash.scan" }, 5 * 60_000),
     [cli],
@@ -40,6 +42,7 @@ function EmptyTrash({ cli }: { cli: string }) {
         permanent: true,
       },
       { done: trashReceipt, failed: "Mint could not empty the Trash" },
+      wall,
     );
     clear();
     // Mint's answer is single-use: look again whatever the window answered.

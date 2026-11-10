@@ -4,6 +4,8 @@ import { openMint } from "./mint-cli";
 import { notApprovedText, runParity } from "./mint-parity";
 import type { NotRun, ParityRequest } from "./mint-parity";
 import { newProgressToken } from "./use-progress";
+import type { PlanWallPush } from "./plan-wall";
+import type { PlanGate } from "./mint-plan";
 
 /**
  * A Mint too old for a command that Mint confirms in its own window: one line
@@ -34,7 +36,16 @@ ${command} needs Mint 1.2 or later, where Mint asks in its own window before it 
 export async function runConfirmedInMint<T extends object>(
   cli: string,
   request: ParityRequest,
-  words: { done: (result: T & NotRun) => string; failed: string },
+  words: {
+    done: (result: T & NotRun) => string;
+    failed: string;
+    /** Whether Mint held part of this back for the week's free allowance. */
+    held?: (result: T & NotRun) => boolean;
+    /** Which plan refusal this request can meet (default: the week's gate). */
+    gate?: PlanGate;
+  },
+  /** The plan wall (2026-11-10): shown when the week held something back or refused the run. */
+  wall?: PlanWallPush,
 ): Promise<(T & NotRun) | undefined> {
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -53,8 +64,13 @@ export async function runConfirmedInMint<T extends object>(
     toast.style = Toast.Style.Success;
     toast.title = words.done(result);
     toast.message = undefined;
+    if (wall && words.held?.(result)) wall.held();
     return result;
   } catch (error) {
+    if (wall && (await wall.refused(undefined, words.gate))) {
+      await toast.hide();
+      return undefined;
+    }
     toast.style = Toast.Style.Failure;
     toast.title = words.failed;
     toast.message = error instanceof Error ? error.message : String(error);

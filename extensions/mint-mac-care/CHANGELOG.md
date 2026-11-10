@@ -13,6 +13,7 @@
 - **View Mac Status** leads with how much space you can get back, and how much of this week's free 1 GB is left.
 - **Free Disk** finds what Mint's Disk page finds, similar photos included, counts each file once, and its progress bar no longer stalls halfway.
 - **Organize a Folder** can stop managing a folder. Its files stay where they are.
+- When this week's free 1 GB runs out, Raycast shows Mint's plan page: what the space Mint gives back is worth over 3 years, what is ready now, and Buy One-Time or Start Rent-to-Own, right there.
 - Empty Trash, AI Conversations, File Handling and Cleanup Rules confirm in Mint's own window before they delete anything or let Mint do more. Auto Care asks in Raycast before it turns on anything that deletes or moves files or quits apps.
 - A new look to match Mint: fine dots instead of bars and rings, in light and dark.
 - Update to Mint 1.2 to get all of this. With an older Mint, commands that need it ask you to update.

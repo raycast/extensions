@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { formatCompact, openMint, plural, shortPath } from "./mint-cli";
 import { MissingMint } from "./missing-mint";
 import { NeedsNewerMint, RetryActions, chosenAccessory, runConfirmedInMint, useChosen } from "./confirm-in-mint";
+import { usePlanWall } from "./plan-wall";
 import {
   NATIVE_APPROVAL_CAPABILITY,
   PICTURES_PER_REQUEST,
@@ -73,6 +74,7 @@ function clearPreviews(): void {
  */
 function Conversations({ cli }: { cli: string }) {
   useEffect(clearPreviews, []);
+  const wall = usePlanWall(cli);
   const codex = usePromise(
     async (path: string) => runParity<ConversationScan>(path, { action: "agents.scan" }, 10 * 60_000),
     [cli],
@@ -113,6 +115,7 @@ function Conversations({ cli }: { cli: string }) {
         ...(verb === "agents.delete" ? { permanent: true } : {}),
       },
       { done: (result) => conversationReceipt(verb, result), failed: "Mint could not change these conversations" },
+      wall,
     );
     lookAgain();
   }
@@ -123,6 +126,7 @@ function Conversations({ cli }: { cli: string }) {
       cli,
       { action: "disk.compress", sessionID: claude.data.sessionID, itemIDs: rows.map((row) => row.id) },
       { done: transcriptReceipt, failed: "Mint could not remove these pictures" },
+      wall,
     );
     lookAgain();
   }
@@ -136,7 +140,9 @@ function Conversations({ cli }: { cli: string }) {
         done: (result) =>
           `${plural(result.optimizedCount ?? 0, "archive")} optimized · ${formatCompact(result.savedBytes ?? 0)} back`,
         failed: "Mint could not optimize these archives",
+        held: (result) => (result.quotaBlockedCount ?? 0) > 0,
       },
+      wall,
     );
     archives.revalidate();
   }
@@ -366,6 +372,7 @@ function Pictures({
   itemIDs: string[];
 }) {
   const { pop } = useNavigation();
+  const wall = usePlanWall(cli);
   useEffect(() => {
     clearPreviews();
     return clearPreviews;
@@ -446,6 +453,7 @@ function Pictures({
       cli,
       { action: "pictures.remove", sessionID: review.sessionID, itemIDs },
       { done: (answer) => pictureRemovalReceipt(itemIDs, answer), failed: "Mint could not remove these pictures" },
+      wall,
     );
     if (result) {
       clear();
