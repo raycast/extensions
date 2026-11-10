@@ -1,13 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { arrange, type System, type Win } from "./arrange.ts";
-import { rotate, rows, sidebar } from "./layouts.ts";
+import { focus, rotate, rows, sidebar } from "./layouts.ts";
 
 const screen = { x: 0, y: 0, width: 1200, height: 800 };
 
-type FakeWin = Partial<Win> & { id: string; minWidth?: number };
+type FakeWin = Partial<Win> & { id: string; minWidth?: number; stuck?: boolean };
 
-/** An in-memory window system. Windows refuse to go narrower than `minWidth`, like real apps do. */
+/** An in-memory window system. Windows refuse to go narrower than `minWidth`, like real apps do. `stuck` ones can't be moved. */
 const fake = (wins: FakeWin[], areas = [screen]) => {
   const state = wins.map((w) => ({
     screen: 0,
@@ -21,12 +21,18 @@ const fake = (wins: FakeWin[], areas = [screen]) => {
     windows: async () => state.map((w) => ({ ...w })),
     place: async (placements) => {
       system.calls++;
+      const failed: string[] = [];
       for (const { id, frame } of placements) {
         const w = state.find((x) => x.id === id)!;
+        if (w.stuck) {
+          failed.push(id);
+          continue;
+        }
         w.frame = w.resizable
           ? { ...frame, width: Math.max(frame.width, w.minWidth ?? 0) }
           : { ...w.frame, x: frame.x, y: frame.y };
       }
+      return failed;
     },
   };
   const frame = (id: string) => state.find((w) => w.id === id)!.frame;
@@ -45,7 +51,7 @@ test("an app that clamps its width keeps it, and the neighbour takes what is lef
 
 test("windows that take the size they are given are placed once", async () => {
   const { system } = fake([{ id: "a" }, { id: "b" }]);
-  assert.equal(await arrange(system, rows(2)), 2);
+  assert.deepEqual(await arrange(system, rows(2)), { count: 2, failed: [] });
   assert.equal(system.calls, 1);
 });
 
@@ -95,6 +101,21 @@ test("a sidebar that clamps wider than asked still ends flush with the right edg
 
 test("nothing is placed when there are no windows", async () => {
   const { system } = fake([]);
-  assert.equal(await arrange(system, rows(2)), 0);
+  assert.deepEqual(await arrange(system, rows(2)), { count: 0, failed: [] });
   assert.equal(system.calls, 0);
+});
+
+test("windows that can't be moved are reported", async () => {
+  const { system } = fake([{ id: "a" }, { id: "b", stuck: true }]);
+  assert.deepEqual(await arrange(system, rows(2)), { count: 2, failed: ["b"] });
+});
+
+test("focus keeps the window it picked first as the main one when an app clamps", async () => {
+  const { system, frame } = fake([
+    { id: "big", frame: { x: 0, y: 0, width: 900, height: 700 } },
+    { id: "wide", frame: { x: 0, y: 0, width: 1000, height: 400 }, minWidth: 1000 },
+  ]);
+  await arrange(system, focus({ mainOn: "left" }));
+  assert.deepEqual(frame("big"), { x: 0, y: 0, width: 200, height: 800 });
+  assert.equal(frame("wide").x, 200);
 });

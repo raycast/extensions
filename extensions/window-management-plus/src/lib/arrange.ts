@@ -13,27 +13,34 @@ export type System = {
   areas(): Promise<Frame[]>;
   /** Every window worth arranging. `screen` indexes into `areas()`. */
   windows(): Promise<Win[]>;
-  /** Moves windows. An app may refuse the size it was asked for. */
-  place(placements: Placement[]): Promise<void>;
+  /** Moves windows. An app may refuse the size it was asked for. Resolves to the names of windows that could not be moved. */
+  place(placements: Placement[]): Promise<string[]>;
 };
 
 /**
  * Lays out each screen's windows and applies the result. A window that comes back a different size
  * than asked keeps that size, and the layout runs again, up to `passes` times.
- * Layouts that build on the current frames, like rotate, must run with one pass.
- * Returns how many windows there were to arrange.
+ * Every pass lays out the frames read before the first move, so choices like "the largest window"
+ * don't change between passes. Layouts that build on the current frames, like rotate, must run with one pass.
+ * Returns how many windows there were to arrange, and which of them could not be moved on the last pass.
  */
-export async function arrange(system: System, layout: Layout, passes = 3): Promise<number> {
+export async function arrange(
+  system: System,
+  layout: Layout,
+  passes = 3,
+): Promise<{ count: number; failed: string[] }> {
   const areas = await system.areas();
   const learned = new Map<string, Partial<Size>>();
-  let windows = await system.windows();
+  const first = await system.windows();
+  let windows = first;
+  let failed: string[] = [];
 
   for (let pass = 1; windows.length; pass++) {
     const placements = areas.flatMap((area, k) => {
       const items = windows.filter((w) => w.screen === k).map((w) => toItem(w, learned.get(w.id)));
       return items.length ? layout(items, area) : [];
     });
-    await system.place(placements);
+    failed = await system.place(placements);
     if (pass >= passes) break;
 
     // Compare what we asked for with what each app did
@@ -53,9 +60,10 @@ export async function arrange(system: System, layout: Layout, passes = 3): Promi
       }
     }
     if (!clamped) break;
-    windows = after;
+    // Windows closed since the first read drop out. The rest keep their original frames.
+    windows = first.filter((w) => after.some((a) => a.id === w.id));
   }
-  return windows.length;
+  return { count: windows.length, failed };
 }
 
 const toItem = ({ id, frame, active, title, resizable }: Win, min?: Partial<Size>): Item => ({

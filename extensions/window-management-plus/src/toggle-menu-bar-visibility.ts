@@ -1,8 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const run = promisify(execFile);
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const toggle = `tell application "System Events" to tell dock preferences
   set autohide menu bar to not autohide menu bar
@@ -12,6 +9,10 @@ end tell`;
 // Only toggles the menu bar. Windows are left where they are.
 export default async () => {
   await closeMainWindow();
-  const hidden = (await run("osascript", ["-e", toggle])).stdout.trim() === "true";
-  await showHUD(hidden ? "Menu bar hidden" : "Menu bar shown");
+  try {
+    const hidden = (await runAppleScript(toggle)) === "true";
+    await showHUD(hidden ? "Menu bar hidden" : "Menu bar shown");
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not toggle the menu bar" });
+  }
 };

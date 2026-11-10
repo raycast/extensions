@@ -87,6 +87,22 @@ export const rows =
     // It takes a full-height column at its minimum width, and the rest tile in what is left.
     const minW = (i: Item) => i.fixed?.width ?? i.min?.width ?? 0;
     const wide = items.length > 1 ? items.filter((i) => !i.fixed && minW(i) > box.width / 2) : [];
+    // When those columns can't all fit side by side, each wide window takes a full-width row instead,
+    // and the rest share one more row.
+    const columnsW = sum(wide.map(minW)) + gap * Math.max(0, wide.length - 1);
+    if (wide.length && columnsW > box.width) {
+      const rest = items.filter((i) => !wide.includes(i));
+      const groups = [...wide.map((i) => [i]), ...(rest.length ? [rest] : [])].sort(
+        (a, b) => Math.min(...a.map((i) => centre(i).y)) - Math.min(...b.map((i) => centre(i).y)),
+      );
+      return bands(box, groups.length, gap).flatMap((band, k) =>
+        row(
+          [...groups[k]].sort((a, b) => centre(a).x - centre(b).x),
+          band,
+          gap,
+        ),
+      );
+    }
     if (wide.length) {
       const rest = items.filter((i) => !wide.includes(i));
       const mid = box.x + box.width / 2;

@@ -1,32 +1,60 @@
 // The Raycast and macOS side: reads and moves real windows. Every coordinate conversion lives here.
 
-import { WindowManagement, closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import {
+  LaunchType,
+  WindowManagement,
+  closeMainWindow,
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  showHUD,
+} from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { arrange, type System, type Win } from "./arrange";
 import type { Frame, Layout } from "./layouts";
 
-const exec = promisify(execFile);
-const jxa = async <T>(script: string): Promise<T> =>
-  JSON.parse((await exec("osascript", ["-l", "JavaScript", "-e", script])).stdout.trim());
+const jxa = (script: string) => runAppleScript(script, { language: "JavaScript" });
+const jxaJSON = async <T>(script: string): Promise<T> => JSON.parse(await jxa(script));
 
 type Panel = "notes" | "ai";
 
 export const prefs = () => {
-  const p = getPreferenceValues<{ gap?: string; sidebar?: Panel | "active" }>();
+  const p = getPreferenceValues<Preferences>();
   return { gap: Number(p.gap) || 0, sidebar: p.sidebar ?? "notes" };
 };
 
+/**
+ * Runs a command's work after the launcher closes. Without Raycast Pro the WindowManagement API is off,
+ * so say that instead of failing. Any other error is shown rather than swallowed.
+ */
+export async function run(work: () => Promise<string>) {
+  await closeMainWindow();
+  if (!environment.canAccess(WindowManagement)) {
+    await showFailureToast("Window Management+ needs Raycast Pro to move windows.", {
+      title: "Raycast Pro required",
+    });
+    return;
+  }
+  try {
+    await showHUD(await work());
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not arrange windows" });
+  }
+}
+
 /** Arrange every window, running the layout again when an app clamps the size it was given. */
-export const tile = (layout: Layout, include?: string) => apply(layout, 3, include);
+export const tile = (layout: Layout, include?: () => Promise<string>) =>
+  run(async () => apply(layout, 3, await include?.()));
 
 /** For layouts that build on the current frames, like rotate and swap. Runs exactly once. */
-export const permute = (layout: Layout) => apply(layout, 1);
+export const permute = (layout: Layout) => run(() => apply(layout, 1));
 
 async function apply(layout: Layout, passes: number, include?: string) {
-  await closeMainWindow();
-  const count = await arrange(raycastSystem(include), layout, passes);
-  await showHUD(count ? "Arranged" : "No windows to arrange");
+  const { count, failed } = await arrange(raycastSystem(include), layout, passes);
+  if (!count) return "No windows to arrange";
+  if (!failed.length) return "Arranged";
+  if (failed.length === count) throw new Error(`No window could be moved (${failed.join(", ")}).`);
+  return `Arranged, but could not move ${failed.join(", ")}`;
 }
 
 // Screens
@@ -70,26 +98,25 @@ const toGlobal = (f: Frame, s: Screen): Frame => ({
 
 const RAYCAST = "com.raycast.macos";
 const LAUNCHER = "Main Window";
-const PANELS: Record<Panel, { title: string; link: string }> = {
-  notes: {
-    title: "Notes",
-    link: "raycast://extensions/raycast/raycast-notes/raycast-notes",
-  },
-  ai: {
-    title: "AI Chat",
-    link: "raycast://extensions/raycast/raycast-ai/ai-chat",
-  },
+const PANELS: Record<Panel, { title: string; extensionName: string; name: string }> = {
+  notes: { title: "Notes", extensionName: "raycast-notes", name: "raycast-notes" },
+  ai: { title: "AI Chat", extensionName: "raycast-ai", name: "ai-chat" },
 };
+
+export const panelTitle = (panel: Panel) => PANELS[panel].title;
 
 const raycastProcess = `Application("System Events").processes.byName("Raycast")`;
 
 /** Raycast's API has no window titles and doesn't list Notes at all. System Events has both, in global coordinates. */
 const raycastWindows = async (): Promise<(Frame & { title: string })[]> => {
   try {
-    return await jxa(`JSON.stringify(${raycastProcess}.windows().map((w) => ({
+    return await jxaJSON(`JSON.stringify(${raycastProcess}.windows().map((w) => ({
   title: w.name(), x: w.position()[0], y: w.position()[1], width: w.size()[0], height: w.size()[1] })))`);
-  } catch {
-    return [];
+  } catch (error) {
+    throw new Error(
+      "Could not read Raycast's windows. Allow Raycast to control System Events in System Settings › Privacy & Security › Automation.",
+      { cause: error },
+    );
   }
 };
 
@@ -97,29 +124,24 @@ const raycastWindows = async (): Promise<(Frame & { title: string })[]> => {
 const moveRaycastWindow = (title: string, f: Frame) => {
   const position = `[${Math.round(f.x)}, ${Math.round(f.y)}]`;
   const size = `[${Math.round(f.width)}, ${Math.round(f.height)}]`;
-  return exec("osascript", [
-    "-l",
-    "JavaScript",
-    "-e",
-    `const w = ${raycastProcess}.windows.byName(${JSON.stringify(title)})
+  return jxa(`const w = ${raycastProcess}.windows.byName(${JSON.stringify(title)})
 w.position = ${position}
 w.size = ${size}
 w.position = ${position}
-w.size = ${size}`,
-  ]);
+w.size = ${size}`);
 };
 
 /** Opens Raycast Notes or AI Chat when it isn't open yet. Returns its window title. */
 export async function openPanel(panel: Panel): Promise<string> {
-  const { title, link } = PANELS[panel];
+  const { title, extensionName, name } = PANELS[panel];
   const isOpen = async () => (await raycastWindows()).some((w) => w.title === title);
   if (await isOpen()) return title;
-  await exec("open", ["-g", link]);
+  await launchCommand({ ownerOrAuthorName: "raycast", extensionName, name, type: LaunchType.UserInitiated });
   for (let i = 0; i < 20; i++) {
     await new Promise((r) => setTimeout(r, 150));
-    if (await isOpen()) break;
+    if (await isOpen()) return title;
   }
-  return title;
+  throw new Error(`Raycast ${title} did not open.`);
 }
 
 // The window system
@@ -131,7 +153,7 @@ const near = (a: Frame, b: Frame) => (["x", "y", "width", "height"] as const).ev
  * `include` names a Raycast window to arrange even when the API leaves it out. It is moved through System Events.
  */
 function raycastSystem(include?: string): System {
-  const screens = jxa<Screen[]>(screensScript);
+  const screens = jxaJSON<Screen[]>(screensScript);
   const listed = new Map<string, { win: Win; api?: WindowManagement.Window }>();
 
   return {
@@ -195,24 +217,31 @@ function raycastSystem(include?: string): System {
 
     async place(placements) {
       const all = await screens;
-      await Promise.all(
-        placements.map(({ id, frame }) => {
+      const failed = await Promise.all(
+        placements.map(async ({ id, frame }) => {
           const target = listed.get(id);
-          if (!target) return;
+          if (!target) return undefined;
           const { win, api } = target;
-          const moved = api
-            ? WindowManagement.setWindowBounds({
-                id,
-                desktopId: api.desktopId,
-                bounds: {
-                  position: { x: frame.x, y: frame.y },
-                  ...(api.resizable ? { size: { width: frame.width, height: frame.height } } : {}),
-                },
-              })
-            : moveRaycastWindow(win.title!, toGlobal(frame, all[win.screen]));
-          return moved.catch((e) => console.error("move", api?.application?.name ?? win.title, String(e)));
+          try {
+            await (api
+              ? WindowManagement.setWindowBounds({
+                  id,
+                  desktopId: api.desktopId,
+                  bounds: {
+                    position: { x: frame.x, y: frame.y },
+                    ...(api.resizable ? { size: { width: frame.width, height: frame.height } } : {}),
+                  },
+                })
+              : moveRaycastWindow(win.title!, toGlobal(frame, all[win.screen])));
+            return undefined;
+          } catch (error) {
+            const name = api?.application?.name ?? win.title ?? id;
+            console.error("move", name, String(error));
+            return name;
+          }
         }),
       );
+      return failed.filter((name): name is string => name !== undefined);
     },
   };
 }

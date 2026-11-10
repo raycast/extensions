@@ -120,3 +120,18 @@ test("rotate moves along the top row before dropping to the next", () => {
   assert.deepEqual([f("tr").x, f("tr").y], [0, 100]);
   assert.deepEqual([f("br").x, f("br").y], [0, 0]);
 });
+
+test("wide windows that can't fit side by side take a row each instead of overlapping", () => {
+  const box = { x: 0, y: 0, width: 1200, height: 800 };
+  const at = (y: number) => ({ x: 0, y, width: 700, height: 300 });
+  const out = rows(2)(
+    [
+      { id: "a", frame: at(0), min: { width: 700 } },
+      { id: "b", frame: at(400), min: { width: 700 } },
+    ],
+    box,
+  );
+  const [a, b] = ["a", "b"].map((id) => out.find((p) => p.id === id)!.frame);
+  assert.deepEqual(a, { x: 250, y: 0, width: 700, height: 400 });
+  assert.deepEqual(b, { x: 250, y: 400, width: 700, height: 400 });
+});
