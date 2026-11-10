@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Keep default assignee] - {PR_MERGE_DATE}
+## [Keep default assignee] - 2026-11-10
 
 - Fix the "Create Task" assignee resetting to "Unassigned" (e.g. after an extension update); it now remembers your last choice and defaults to you
 
