@@ -197,17 +197,46 @@ export function refusedForPlan(access: PlanAccess | undefined, gate: PlanGate = 
 }
 
 /**
- * Whether the week held back a run Mint answered with files left as they were.
- * Mint refuses each file the week cannot cover but keeps its gate open while a
- * few kilobytes are left (access.check `allowed` stays true), so the run's own
- * size against what is left decides, in no language. `neededBytes`: what the
- * run asked of the week.
+ * Whether the week held back a run Mint answered with files left as they were,
+ * where Mint names no quota count of its own. Mint keeps its gate open while a
+ * few kilobytes are left (access.check `allowed` stays true) and refuses each
+ * file the week cannot cover at that moment. The week only shrinks during a
+ * run, so a file left as it was can be the week's refusal only when it is
+ * larger than what is left now; a file the week still covers was left for
+ * another reason (in use, changed) and keeps its own message. In no language.
+ * `keptBytes`: what each file left as it was asked of the week.
  */
-export function heldForWeek(access: PlanAccess | undefined, neededBytes: number): boolean {
+export function heldForWeek(access: PlanAccess | undefined, keptBytes: number[]): boolean {
   if (!access || access.plan) return false;
   if (access.allowed === false) return true;
   const left = access.remainingCleanupBytes;
-  return typeof left === "number" && neededBytes > 0 && left < neededBytes;
+  return typeof left === "number" && keptBytes.some((bytes) => bytes > left);
+}
+
+/**
+ * What each file Mint left as it was asked of the week: its failures matched
+ * to the request's items by path or name. When Mint does not say which item a
+ * failure is (or names one the request did not hold), every item of the
+ * request counts, since any of them can be the one.
+ */
+export function keptSizes<T>(
+  failures: unknown[] | undefined,
+  items: T[],
+  names: (item: T) => string[],
+  size: (item: T) => number,
+): number[] {
+  if (!failures?.length) return [];
+  const sizes: number[] = [];
+  for (const failure of failures) {
+    const named = failure && typeof failure === "object" ? (failure as { path?: unknown; name?: unknown }) : {};
+    const key = [named.path, named.name].find((value): value is string => typeof value === "string" && value !== "");
+    const match = key
+      ? items.find((item) => names(item).some((name) => name === key || name.split("/").pop() === key))
+      : undefined;
+    if (!match) return items.map(size);
+    sizes.push(size(match));
+  }
+  return sizes;
 }
 
 /** Money as the plan page formats it (PlanPricing.formatted): no cents on a whole amount. */

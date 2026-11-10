@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { statfsSync } from "node:fs";
 import { homedir } from "node:os";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { formatBytes, openMint, runMintSurface } from "./mint-cli";
 import type { MintCLIVersion } from "./mint-cli";
@@ -60,9 +60,10 @@ export async function planRefused(cli: string, gate: PlanGate = "week"): Promise
 }
 
 /** Whether the week held back a run Mint answered with files left as they were (`heldForWeek`). */
-export async function planHeld(cli: string, neededBytes: number): Promise<boolean> {
+export async function planHeld(cli: string, keptBytes: number[]): Promise<boolean> {
+  if (keptBytes.length === 0) return false;
   try {
-    return heldForWeek(await runMintSurface<PlanAccess>(cli, { action: "access.check" }, 30_000), neededBytes);
+    return heldForWeek(await runMintSurface<PlanAccess>(cli, { action: "access.check" }, 30_000), keptBytes);
   } catch {
     return false;
   }
@@ -73,8 +74,8 @@ export type PlanWallPush = {
   held: (refusedBytes?: number) => void;
   /** Mint refused the run: the wall when it was the plan's refusal, and true; false leaves the error to the caller. */
   refused: (refusedBytes?: number, gate?: PlanGate) => Promise<boolean>;
-  /** Mint answered and left files as they were: the wall when the week could not cover the run, and true. */
-  keptBack: (neededBytes: number) => Promise<boolean>;
+  /** Mint answered and left files as they were (`keptBytes`, each): the wall when the week held one, and true. */
+  keptBack: (keptBytes: number[]) => Promise<boolean>;
 };
 
 /** Pushes the wall from a command's own navigation. */
@@ -87,9 +88,9 @@ export function usePlanWall(cli: string): PlanWallPush {
       push(<PlanWall cli={cli} refusedBytes={refusedBytes} />);
       return true;
     },
-    keptBack: async (neededBytes) => {
-      if (!(await planHeld(cli, neededBytes))) return false;
-      push(<PlanWall cli={cli} refusedBytes={neededBytes} />);
+    keptBack: async (keptBytes) => {
+      if (!(await planHeld(cli, keptBytes))) return false;
+      push(<PlanWall cli={cli} refusedBytes={keptBytes.reduce((sum, bytes) => sum + bytes, 0)} />);
       return true;
     },
   };
@@ -219,11 +220,7 @@ export function PlanWall({
           message: NEW_WORDS.checkoutNextSignIn,
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: NEW_WORDS.checkoutFailed,
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast(error, { title: NEW_WORDS.checkoutFailed });
       }
       return;
     }

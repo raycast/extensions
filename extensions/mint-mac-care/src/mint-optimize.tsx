@@ -27,6 +27,7 @@ import {
 } from "./mint-panes";
 import { savedSourceKeys } from "./mint-saved";
 import { useStrike } from "./use-strike";
+import { keptSizes } from "./mint-plan";
 
 type OptimizeResult = {
   sharedFiles: number;
@@ -137,8 +138,15 @@ function Optimize({ cli, version }: { cli: string; version: MintCLIVersion }) {
           title: `${plural(failures.length, "file")} left as they were`,
           message: failures[0].reason,
         });
-        // Files left as they were and less of the week left than the run asked: the week held them.
-        await wall.keptBack(bytesOf(chosen));
+        // Files left as they were, one larger than what is left of the week: the week held it.
+        await wall.keptBack(
+          keptSizes(
+            failures,
+            chosen.flatMap((group) => group.copies),
+            (copy) => [copy.path],
+            (copy) => copy.estimatedSavingBytes,
+          ),
+        );
       }
     } catch (error) {
       strike.end([], () => setRun(undefined));

@@ -33,6 +33,7 @@ import type {
   TranscriptScan,
 } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
+import { keptSizes } from "./mint-plan";
 
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
@@ -117,7 +118,13 @@ function Conversations({ cli }: { cli: string }) {
       {
         done: (result) => conversationReceipt(verb, result),
         failed: "Mint could not change these conversations",
-        needed: rows.reduce((sum, row) => sum + row.bytes, 0),
+        kept: (result) =>
+          keptSizes(
+            result.failures,
+            rows,
+            (row) => row.paths,
+            (row) => row.bytes,
+          ),
       },
       wall,
     );
@@ -132,7 +139,13 @@ function Conversations({ cli }: { cli: string }) {
       {
         done: transcriptReceipt,
         failed: "Mint could not remove these pictures",
-        needed: rows.reduce((sum, row) => sum + row.sizeBytes, 0),
+        kept: (result) =>
+          keptSizes(
+            result.failures,
+            rows,
+            (row) => [row.path],
+            (row) => row.sizeBytes,
+          ),
       },
       wall,
     );
@@ -463,7 +476,13 @@ function Pictures({
       {
         done: (answer) => pictureRemovalReceipt(itemIDs, answer),
         failed: "Mint could not remove these pictures",
-        needed: pictures.slice(0, PICTURES_PER_REQUEST).reduce((sum, picture) => sum + picture.estimatedSavingBytes, 0),
+        kept: (answer) =>
+          keptSizes(
+            answer.failures,
+            pictures.slice(0, PICTURES_PER_REQUEST),
+            (picture) => [picture.id, ...picture.files],
+            (picture) => picture.estimatedSavingBytes,
+          ),
       },
       wall,
     );

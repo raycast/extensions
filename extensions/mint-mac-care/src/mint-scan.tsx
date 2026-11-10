@@ -38,6 +38,7 @@ import { newProgressToken, useMintProgress } from "./use-progress";
 import { useStrike } from "./use-strike";
 import { planHeld, usePlanWall } from "./plan-wall";
 import { rememberDuration } from "./use-wait";
+import { keptSizes } from "./mint-plan";
 
 type DiskClean = {
   cleanedCount: number;
@@ -216,12 +217,17 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
         problem: failures.length
           ? `${plural(failures.length, "file")} left as they were: ${failures[0].reason}`
           : undefined,
-        // Files left as they were and less of the week left than the run asked: the week held them.
+        // Files left as they were, one larger than what is left of the week: the week held it.
         held:
           failures.length > 0 &&
           (await planHeld(
             cli,
-            bucket.entries.reduce((sum, entry) => sum + entry.bytes, 0),
+            keptSizes(
+              failures,
+              (copies.data?.items ?? []).filter((copy) => chosen.has(copy.id)),
+              (copy) => [copy.path],
+              (copy) => copy.estimatedSavingBytes,
+            ),
           )),
       };
     });

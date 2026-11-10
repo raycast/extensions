@@ -14,6 +14,7 @@ import {
   usableValue,
   valueFooter,
   heldForWeek,
+  keptSizes,
   refusedForPlan,
   type PlanValue,
 } from "../src/mint-plan.ts";
@@ -91,16 +92,41 @@ test("the wall replaces an error only when it was Mint's plan refusal, read with
   assert.equal(refusedForPlan({ plan: true, customRulesAllowed: false }, "rules"), false);
 });
 
-test("a run Mint answered with files left as they were opens the wall when the week could not cover it", () => {
+test("a file left as it was opens the wall only when the week could not cover it", () => {
+  const MB = 1_000_000;
   // The guest's spent week (2026-11-10): Mint kept its gate open with 64,780 bytes left and refused each file.
-  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 64_780 }, 92_000_000), true);
-  assert.equal(heldForWeek({ plan: false, allowed: false, remainingCleanupBytes: 0 }, 1), true);
-  // Enough left for the whole run: whatever Mint left was for another reason.
-  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 400_000_000 }, 92_000_000), false);
-  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 64_780 }, 0), false);
-  assert.equal(heldForWeek({ plan: true, allowed: true, remainingCleanupBytes: null }, 92_000_000), false);
-  assert.equal(heldForWeek({ plan: false, allowed: true }, 92_000_000), false);
-  assert.equal(heldForWeek(undefined, 92_000_000), false);
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 64_780 }, [5 * MB, 2 * MB]), true);
+  // Greptile's case: 800 MB asked with 1 GB free, 600 MB done, a 200 MB file left because it was in use. The 400 MB
+  // still free covers it, so the week did not refuse it: no wall, the file keeps its own message.
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 400 * MB }, [200 * MB]), false);
+  // One file of several larger than what is left is enough.
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 50 * MB }, [10 * MB, 80 * MB]), true);
+  // Mint's own gate closed.
+  assert.equal(heldForWeek({ plan: false, allowed: false, remainingCleanupBytes: 0 }, [1]), true);
+  // Nothing left as it was, a plan, or a week Mint did not state.
+  assert.equal(heldForWeek({ plan: false, allowed: true, remainingCleanupBytes: 64_780 }, []), false);
+  assert.equal(heldForWeek({ plan: true, allowed: true, remainingCleanupBytes: null }, [92 * MB]), false);
+  assert.equal(heldForWeek({ plan: false, allowed: true }, [92 * MB]), false);
+  assert.equal(heldForWeek(undefined, [92 * MB]), false);
+});
+
+test("each failure counts what its own item asked; an item Mint does not name counts them all", () => {
+  type Item = { path: string; bytes: number };
+  const items: Item[] = [
+    { path: "/Users/a/Downloads/big.mov", bytes: 300 },
+    { path: "/Users/a/Downloads/small.png", bytes: 20 },
+  ];
+  const names = (item: Item) => [item.path];
+  const size = (item: Item) => item.bytes;
+  assert.deepEqual(keptSizes([{ name: "small.png", reason: "in use" }], items, names, size), [20]);
+  assert.deepEqual(keptSizes([{ path: "/Users/a/Downloads/big.mov", reason: "x" }], items, names, size), [300]);
+  assert.deepEqual(
+    keptSizes(["The remaining cleanup allowance cannot cover this item."], items, names, size),
+    [300, 20],
+  );
+  assert.deepEqual(keptSizes([{ name: "elsewhere.txt" }], items, names, size), [300, 20]);
+  assert.deepEqual(keptSizes([], items, names, size), []);
+  assert.deepEqual(keptSizes(undefined, items, names, size), []);
 });
 
 test("prices are the feed's, else the app's bundled ones, never $0", () => {

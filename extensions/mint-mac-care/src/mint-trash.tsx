@@ -7,6 +7,7 @@ import { usePlanWall } from "./plan-wall";
 import { NATIVE_APPROVAL_CAPABILITY, hasCapability, runParity, trashReceipt, trashRows } from "./mint-parity";
 import type { TrashItem, TrashRemoval, TrashScan } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
+import { keptSizes } from "./mint-plan";
 
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
@@ -44,7 +45,13 @@ function EmptyTrash({ cli }: { cli: string }) {
       {
         done: trashReceipt,
         failed: "Mint could not empty the Trash",
-        needed: items.reduce((sum, item) => sum + item.bytes, 0),
+        kept: (result) =>
+          keptSizes(
+            result.failures,
+            items,
+            (item) => [item.path, item.name],
+            (item) => item.bytes,
+          ),
       },
       wall,
     );
