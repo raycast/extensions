@@ -215,7 +215,10 @@ function Actions(props: {
           <Action
             icon={Icon.List}
             title="Browse Releases"
-            shortcut={Keyboard.Shortcut.Common.Refresh}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "r" },
+              Windows: { modifiers: ["ctrl"], key: "r" },
+            }}
             onAction={() =>
               push(<ReleaseView repository={props.repository} token={props.token} baseUrl={props.baseUrl} />)
             }
@@ -226,7 +229,10 @@ function Actions(props: {
         <Action.CopyToClipboard
           title="Copy Repository URL"
           content={props.repository.url}
-          shortcut={Keyboard.Shortcut.Common.Pin}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "." },
+            Windows: { modifiers: ["ctrl"], key: "." },
+          }}
         />
         <Action.CopyToClipboard
           title="Copy Name with Owner"
@@ -251,6 +257,7 @@ function Actions(props: {
             icon={Icon.Trash}
             title="Remove from Visited Repositories"
             style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={props.onRemove}
           />
           {props.onClear && (
@@ -258,6 +265,7 @@ function Actions(props: {
               icon={Icon.Trash}
               title="Clear All Visited Repositories"
               style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
               onAction={clearVisitedRepositories}
             />
           )}
@@ -296,7 +304,10 @@ function ReleaseView(props: { repository: Repository; token: string; baseUrl?: s
                 {release.description && (
                   <Action.Push
                     title="View Release Detail"
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                     icon={Icon.Eye}
                     target={
                       <Detail
