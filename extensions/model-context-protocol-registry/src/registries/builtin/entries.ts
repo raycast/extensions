@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "tap-giving",
+    title: "NFC Tap Builder by Tap.Giving",
+    description:
+      "A tool first: create print-ready NFC artwork proofs with correct vector art, free to take to any vendor, with no lock-in. Ordering custom discs through Tap.Giving is an optional next step. 12 tools. Hosted remote Streamable HTTP server; discovery, pricing, and quotes need no key, and order placement uses an organization API key.",
+    icon: "https://raw.githubusercontent.com/Tap-Giving/tap-giving-mcp/main/assets/icon-400.png",
+    homepage: "https://tap.giving",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://tap.giving/mcp"],
+    },
+    remoteUrl: "https://tap.giving/mcp",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
