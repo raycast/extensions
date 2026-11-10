@@ -9,6 +9,7 @@ import {
   isDone,
   remainingBytes,
   groupCopies,
+  pilePicture,
   pilesOf,
   sourcesOf,
   uninstallPlan,
@@ -205,6 +206,39 @@ test("Idle is Mint's own pile when Mint names it (1.2.1), else what Mint ticks b
       asks: "askFirst",
     },
   );
+});
+
+test("after Quit Chosen, only an app that was asked to quit and did not reads \"kept running\"", () => {
+  const app = (id: string, bytes: number): MemoryScan["items"][number] => ({
+    id,
+    name: id,
+    bytes,
+    processCount: 1,
+    selectable: true,
+    advanced: false,
+    needsReview: false,
+    defaultSelected: false,
+  });
+  const scan: MemoryScan = {
+    sessionID: "m",
+    detailsUnavailable: false,
+    usedBytes: 4000,
+    items: [app("Spotify", 388), app("Obsidian", 110), app("Discord", 278)],
+  };
+  const piles = pilesOf(scan);
+  const inUse = piles.find((pile) => pile.key === "inUse")!;
+  const svg = (state: Parameters<typeof pilePicture>[4]) =>
+    Buffer.from(pilePicture(inUse, piles, 4000, "dark", state).match(/base64,([^)?]+)/)![1], "base64").toString("utf8");
+  // Discord chosen and quit; Spotify and Obsidian never asked (the VM's 2026-11-10 run read "3 kept running").
+  const quit = svg({ struck: new Set(["Discord"]), receipt: { bytes: 38, text: "freed", asked: ["Discord"] } });
+  assert.doesNotMatch(quit, /kept running/);
+  assert.match(quit, /freed · 1 app quit/);
+  // Spotify chosen and still running; Obsidian never asked.
+  const kept = svg({ receipt: { bytes: 0, text: "freed", asked: ["Spotify"] } });
+  assert.match(kept, /· 1 kept running/);
+  assert.equal(kept.match(/kept running/g)?.length, 2, "the line and Spotify's row, never Obsidian's");
+  // A receipt that does not say which apps were asked keeps the old reading: every app left kept running.
+  assert.match(svg({ receipt: { bytes: 0, text: "freed" } }), /· 3 kept running/);
 });
 
 test("uninstalling takes the app and its leftovers, never what is on the Ignore list", () => {

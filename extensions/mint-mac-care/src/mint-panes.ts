@@ -349,8 +349,9 @@ export type RunState = {
   gone?: ReadonlySet<string>;
   /** The run's words while it goes on ("Cleaning · 12 of 70"). */
   running?: string;
-  /** After the run: what it gave back and how to say it ("freed", "back · nothing deleted"). */
-  receipt?: { bytes: number; text: string };
+  /** After the run: what it gave back and how to say it ("freed", "back · nothing deleted"), and which rows it asked
+   *  for when it was not all of them (Quit Chosen): only those can have "kept running". */
+  receipt?: { bytes: number; text: string; asked?: readonly string[] };
 };
 
 const EMPTY_LABELS: Record<BucketKey, string> = {
@@ -520,11 +521,12 @@ export function pilePicture(
   const listed = pile.apps.filter((app) => !gone.has(app.id));
   const left = listed.filter((app) => !struck.has(app.id));
   const remaining = left.reduce((sum, app) => sum + app.size, 0);
+  const asked = state.receipt?.asked ? new Set(state.receipt.asked) : undefined;
+  const kept = state.receipt ? left.filter((app) => !asked || asked.has(app.id)) : [];
   const shown = listed.slice(0, 10);
   const rows: ListRow[] = shown.map((app) => ({
     title: app.name,
-    detail:
-      state.receipt && !struck.has(app.id) ? "kept running" : app.agentKind ? `running ${app.agentKind}` : undefined,
+    detail: kept.includes(app) ? "kept running" : app.agentKind ? `running ${app.agentKind}` : undefined,
     value: formatCompact(app.size),
     struck: struck.has(app.id),
   }));
@@ -541,9 +543,11 @@ export function pilePicture(
     label:
       state.running ??
       (state.receipt
-        ? left.length
-          ? `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${left.length} kept running`
-          : `${state.receipt.text} · ${plural(pile.apps.length, "app")} quit`
+        ? left.length === 0
+          ? `${state.receipt.text} · ${plural(pile.apps.length, "app")} quit`
+          : kept.length
+            ? `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${kept.length} kept running`
+            : `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${plural(listed.length - left.length, "app")} quit`
         : pile.apps.length
           ? count
           : EMPTY_PILES[pile.key]),

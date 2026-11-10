@@ -45,7 +45,7 @@ export default function Command() {
  */
 function FreeMemory({ cli }: { cli: string }) {
   const [run, setRun] = useState<{ key: PileKey; ids: string[] } | undefined>();
-  const [receipt, setReceipt] = useState<{ key: PileKey; bytes: number; text: string } | undefined>();
+  const [receipt, setReceipt] = useState<{ key: PileKey; bytes: number; text: string; asked: string[] } | undefined>();
   const [spent, setSpent] = useState<string | undefined>();
   const strike = useStrike();
   const scan = useCachedPromise(
@@ -101,7 +101,7 @@ function FreeMemory({ cli }: { cli: string }) {
         .map((app) => app.id);
       strike.end(done, () => {
         setRun(undefined);
-        setReceipt({ key: pile.key, bytes: result.freedBytes, text: "freed" });
+        setReceipt({ key: pile.key, bytes: result.freedBytes, text: "freed", asked: ids });
       });
       const problems = [
         result.survivedNames.length ? `${result.survivedNames.join(", ")} kept running` : undefined,
