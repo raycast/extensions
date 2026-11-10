@@ -20,7 +20,7 @@ export function SlotFolderCommand({ slot }: SlotFolderCommandProps) {
     revalidate,
   } = usePromise((targetSlot: number) => getFolderBySlot(targetSlot), [slot]);
 
-  if (isLoading) {
+  if (isLoading && !folder) {
     return <Grid isLoading={true} />;
   }
 

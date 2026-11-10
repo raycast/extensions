@@ -19,7 +19,7 @@ const SCAN_DIRECTORIES = [
   "/Applications",
   "/System/Applications",
   "/System/Applications/Utilities",
-  "/System/Applications/CoreServices",
+  "/System/Library/CoreServices",
   path.join(os.homedir(), "Applications"),
 ];
 
