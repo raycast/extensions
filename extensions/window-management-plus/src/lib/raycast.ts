@@ -8,7 +8,9 @@ import {
   environment,
   getPreferenceValues,
   launchCommand,
+  open,
   showHUD,
+  type Application,
 } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { arrange, assignDisplays, freshLimits, toItem, type Limits, type System, type Win } from "./arrange";
@@ -22,7 +24,7 @@ export type Panel = "notes" | "ai";
 
 export const prefs = () => {
   const p = getPreferenceValues<Preferences>();
-  return { gap: Number(p.gap) || 0, sidebar: p.sidebar ?? "notes" };
+  return { gap: Number(p.gap) || 0, sidebar: p.sidebar ?? "notes", sidebarApp: p.sidebarApp };
 };
 
 /**
@@ -48,8 +50,12 @@ export async function run(work: () => Promise<string>) {
  * Arrange every window, running the layout again when an app clamps the size it was given.
  * With `activeOnly`, only the display holding the active window is touched.
  */
-export const tile = (layout: Layout, include?: () => Promise<string>, activeOnly = false) =>
-  run(async () => apply(layout, 4, await include?.(), activeOnly));
+export const tile = (
+  layout: Layout,
+  include?: () => Promise<string | undefined>,
+  activeOnly = false,
+  done = "Arranged",
+) => run(async () => apply(layout, 4, await include?.(), activeOnly, done));
 
 /**
  * Minimum and maximum sizes apps insisted on, by window id, kept between runs. Without them every run would ask first,
@@ -78,8 +84,8 @@ async function alone(work: () => Promise<string>) {
   }
 }
 
-const apply = (layout: Layout, passes: number, include?: string, activeOnly = false) =>
-  alone(() => arrangeAll(layout, passes, include, activeOnly));
+const apply = (layout: Layout, passes: number, include?: string, activeOnly = false, done = "Arranged") =>
+  alone(() => arrangeAll(layout, passes, include, activeOnly, done));
 
 /** What to tell the user once windows have moved. */
 function report(count: number, failed: string[], done: string) {
@@ -320,7 +326,7 @@ export const distributeDisplays = (landing: Landing, fitting: Layout = landing.l
     }),
   );
 
-async function arrangeAll(layout: Layout, passes: number, include?: string, activeOnly = false) {
+async function arrangeAll(layout: Layout, passes: number, include?: string, activeOnly = false, done = "Arranged") {
   const learned = loadLearned();
   const result = await arrange(raycastSystem(include), layout, passes, learned, activeOnly);
   saveLearned(learned);
@@ -328,7 +334,7 @@ async function arrangeAll(layout: Layout, passes: number, include?: string, acti
   return report(
     result.count,
     result.failed.map((f) => f.name),
-    "Arranged",
+    done,
   );
 }
 
@@ -430,6 +436,19 @@ w.size = ${size}
 w.position = ${position}
 w.size = ${size}`);
 };
+
+/** Opens an app when it has no window on this desktop yet, and waits for one. */
+export async function openApp(app: Application): Promise<void> {
+  const hasWindow = async () =>
+    (await WindowManagement.getWindowsOnActiveDesktop()).some((w) => w.application?.bundleId === app.bundleId);
+  if (await hasWindow()) return;
+  await open(app.path);
+  for (let i = 0; i < 30; i++) {
+    await new Promise((r) => setTimeout(r, 200));
+    if (await hasWindow()) return;
+  }
+  throw new Error(`${app.name} did not open a window.`);
+}
 
 /** Opens Raycast Notes or AI Chat when it isn't open yet. Returns its window title. */
 export async function openPanel(panel: Panel): Promise<string> {

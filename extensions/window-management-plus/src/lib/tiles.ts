@@ -21,6 +21,7 @@ import {
   listWindows,
   moveAll,
   moveOthers,
+  openApp,
   openPanel,
   panelTitle,
   placeWindows,
@@ -32,13 +33,17 @@ import {
 } from "./raycast";
 import { smartPlan } from "./roles";
 
-const NAMES = ["auto-tile", "auto-tile-sidebar", "master-left", "master-right", "master-center"] as const;
+const NAMES = ["auto-tile", "master-left", "master-right", "master-center"] as const;
+/** A layout for the windows. The sidebar isn't one: it is pinned beside whichever layout is in use. */
 export type TileName = (typeof NAMES)[number];
 const isMaster = (name: TileName) => name.startsWith("master-");
 
-const SIDEBAR_WIDTH = 200; // asked for, then the app clamps to its real minimum
+const SIDEBAR_WIDTH = 400; // asked for. An app that needs more keeps its real minimum.
 
 const LAST = "last-tile";
+const SIDEBAR = "sidebar"; // "on" while a sidebar is pinned. Layouts then arrange the rest around it.
+/** What `last-tile` held when the sidebar was a layout of its own. */
+const OLD_SIDEBAR_LAYOUT = "auto-tile-sidebar";
 const SPLIT = "split"; // "columns" when Pivot has turned Auto Tile on its side
 const SHAPE = "shape"; // what Pivot chose: "line" or "grid". Unset, Auto Tile decides by window count.
 /** Auto Tile on its own puts up to three windows in a line and more in a grid. */
@@ -50,44 +55,59 @@ const last = (): TileName => {
   return name && NAMES.includes(name) ? name : "auto-tile";
 };
 const ratio = () => Number(cache.get(RATIO)) || MASTER_RATIO;
+const sidebarOn = () => cache.get(SIDEBAR) === "on" || (!cache.get(SIDEBAR) && cache.get(LAST) === OLD_SIDEBAR_LAYOUT);
+
+type Built = {
+  layout: Layout;
+  pinned?: (i: Item) => boolean;
+  /** The Raycast window pinned as the sidebar, if it is one. */
+  panel?: Panel;
+  /** Opens the sidebar's window if it isn't open. Resolves to a Raycast window's title, to find it by. */
+  open?: () => Promise<string | undefined>;
+};
 
 /**
- * A tiling layout, the window it pins in place if any, and the Raycast window it pins. When a display has
- * more windows than fit, the smallest share a slot.
+ * A tiling layout, with the sidebar pinned beside it when one is on: the window it pins, and the Raycast
+ * window that is, if any. When a display has more windows than fit, the smallest share a slot.
  */
-function build(
-  name: TileName,
-  lead: "focused" | "largest" = "largest",
-): { layout: Layout; pinned?: (i: Item) => boolean; panel?: Panel } {
-  const tiled = layoutFor(name, lead);
+function build(name: TileName, lead: "focused" | "largest" = "largest", withSidebar = sidebarOn()): Built {
+  const tiled = withSidebar ? beside(layoutFor(name, lead)) : { layout: layoutFor(name, lead) };
   return { ...tiled, layout: stacking(tiled.layout, tiled.pinned) };
 }
 
-function layoutFor(
-  name: TileName,
-  lead: "focused" | "largest",
-): { layout: Layout; pinned?: (i: Item) => boolean; panel?: Panel } {
-  const { gap, sidebar: choice } = prefs();
+/** `layout` with the sidebar pinned down the right of it. */
+function beside(layout: Layout): Built {
+  const { gap, sidebar: choice, sidebarApp: app } = prefs();
+  const side = (pinned: (i: Item) => boolean) => sidebar(pinned, SIDEBAR_WIDTH, layout, gap);
+  if (choice === "notes" || choice === "ai") {
+    const pinned = (i: Item) => i.title === panelTitle(choice);
+    return { layout: side(pinned), pinned, panel: choice, open: () => openPanel(choice) };
+  }
+  if (choice === "app" && app?.bundleId) {
+    const pinned = (i: Item) => i.app === app.bundleId;
+    return { layout: side(pinned), pinned, open: () => openApp(app).then(() => undefined) };
+  }
+  // Whichever window is active. Also when An App is chosen but no app is picked yet.
+  const pinned = (i: Item) => !!i.active;
+  return { layout: side(pinned), pinned };
+}
+
+/** The layout on its own, without a sidebar or stacking. */
+function layoutFor(name: TileName, lead: "focused" | "largest"): Layout {
+  const { gap } = prefs();
   // Auto Tile is a grid of two rows, or one line of windows. Either can be turned on its side.
   const shape = cache.get(SHAPE);
   // Asked for a grid, three windows are enough to make one: two above and one below
   const flat = shape === "line" ? rows(1, gap) : rows(2, gap, shape === "grid" ? 3 : AUTO_GRID_FROM);
-  const grid = cache.get(SPLIT) === "columns" ? transposed(flat) : flat;
   switch (name) {
     case "auto-tile":
-      return { layout: grid };
+      return cache.get(SPLIT) === "columns" ? transposed(flat) : flat;
     case "master-left":
-      return { layout: master({ side: "left", ratio: ratio(), gap, lead }) };
+      return master({ side: "left", ratio: ratio(), gap, lead });
     case "master-right":
-      return { layout: master({ side: "right", ratio: ratio(), gap, lead }) };
+      return master({ side: "right", ratio: ratio(), gap, lead });
     case "master-center":
-      return { layout: master({ side: "center", ratio: ratio(), gap, lead }) };
-    case "auto-tile-sidebar": {
-      // Raycast Notes or AI Chat, or else whichever window is active
-      const panel = choice === "active" ? undefined : choice;
-      const pinned = (i: Item) => (panel ? i.title === panelTitle(panel) : !!i.active);
-      return { layout: sidebar(pinned, SIDEBAR_WIDTH, grid, gap), pinned, panel };
-    }
+      return master({ side: "center", ratio: ratio(), gap, lead });
   }
 }
 
@@ -96,10 +116,39 @@ function layoutFor(
  * A master layout takes the focused window as its master. Rotate, Swap and Grow Master then keep
  * whichever window is master, wherever the focus goes.
  */
-export function runTile(name: TileName) {
+export function runTile(name: TileName, done?: string) {
+  // Settled before `last-tile` changes, which is where an older version kept it
+  cache.set(SIDEBAR, sidebarOn() ? "on" : "off");
   cache.set(LAST, name);
-  const { layout, panel } = build(name, "focused");
-  return tile(layout, panel && (() => openPanel(panel)));
+  const { layout, open } = build(name, "focused");
+  return tile(layout, open, false, done);
+}
+
+/**
+ * Pins the sidebar, or lets it go, and tiles again in the layout already in use. While it is pinned,
+ * every layout arranges the other windows beside it. Opens the sidebar's Raycast window if needed.
+ */
+export function toggleSidebar() {
+  const on = !sidebarOn();
+  cache.set(SIDEBAR, on ? "on" : "off");
+  // Whichever window is master stays master
+  const { layout, open } = build(last());
+  return tile(layout, open, false, on ? "Sidebar pinned" : "Sidebar unpinned");
+}
+
+/** The sides Cycle Master Layout steps through, with what to call each. */
+const MASTER_CYCLE: [TileName, string][] = [
+  ["master-left", "Master Layout Left"],
+  ["master-right", "Master Layout Right"],
+  ["master-center", "Master Layout Center"],
+];
+
+/** Tiles with the master on the next side round, and says which. Hyprland's orientationnext. */
+export function cycleMaster() {
+  // From any other layout it starts on the left
+  const at = MASTER_CYCLE.findIndex(([name]) => name === last());
+  const [name, title] = MASTER_CYCLE[(at + 1) % MASTER_CYCLE.length];
+  return runTile(name, title);
 }
 
 /**
@@ -146,11 +195,10 @@ export async function pivot() {
   return retileGrid();
 }
 
-/** Reruns Auto Tile, keeping the sidebar if that was the last layout. */
+/** Reruns Auto Tile. A pinned sidebar stays. */
 function retileGrid() {
-  const name = last() === "auto-tile-sidebar" ? "auto-tile-sidebar" : "auto-tile";
-  cache.set(LAST, name);
-  return retile((layout) => layout, name);
+  cache.set(LAST, "auto-tile");
+  return retile((layout) => layout, "auto-tile");
 }
 
 /**
@@ -167,12 +215,8 @@ export function swapDisplaysTile() {
 /** Spreads every window over every display, then tiles each with the last layout used. */
 export function distributeTile() {
   const { layout, panel } = build(last());
-  return distributeDisplays({ layout, include: panel && panelTitle(panel) }, layoutFor(last(), "largest").layout);
+  return distributeDisplays({ layout, include: panel && panelTitle(panel) }, layoutFor(last(), "largest"));
 }
-
-/** The layouts the AI can pick for a display. The sidebar layout is left out: it pins by preference. */
-export const AI_LAYOUTS = ["auto-tile", "master-left", "master-right", "master-center"] as const;
-export type AiLayout = (typeof AI_LAYOUTS)[number];
 
 /**
  * Arranges windows the way the AI planned: which display each is on, in what order, in which layout.
@@ -180,14 +224,14 @@ export type AiLayout = (typeof AI_LAYOUTS)[number];
  */
 export function arrangePlan(plan: { display: number; layout?: string; windows: string[] }[]) {
   const layoutName = (display: number): TileName => {
-    const asked = plan.find((p) => p.display === display)?.layout as AiLayout | undefined;
-    if (asked && AI_LAYOUTS.includes(asked)) return asked;
-    // The sidebar layout pins by preference, which a plan can't express
-    return last() === "auto-tile-sidebar" ? "auto-tile" : last();
+    const asked = plan.find((p) => p.display === display)?.layout as TileName | undefined;
+    return asked && NAMES.includes(asked) ? asked : last();
   };
   const placed = new Map(plan.flatMap((p) => p.windows.map((id, rank) => [id, { display: p.display, rank }] as const)));
   if (plan[0]) cache.set(LAST, layoutName(plan[0].display));
-  return placeWindows(placed, (display) => build(layoutName(display)).layout);
+  // A plan says where every window goes, so no sidebar is pinned, now or by what follows
+  cache.set(SIDEBAR, "off");
+  return placeWindows(placed, (display) => build(layoutName(display), "largest", false).layout);
 }
 
 /**
@@ -199,9 +243,7 @@ export const smartArrange = () =>
     const planNow = async () => {
       const { displays, windows, fits } = await listWindows();
       // Checked against the plain layout: stacking would hide a display that is too full
-      return smartPlan(windows, displays, (display, ids, layout) =>
-        fits(display, ids, layoutFor(layout, "largest").layout),
-      );
+      return smartPlan(windows, displays, (display, ids, layout) => fits(display, ids, layoutFor(layout, "largest")));
     };
     const plan = await planNow();
     const result = await arrangePlan(plan);

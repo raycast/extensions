@@ -174,11 +174,12 @@ const sameSize = (a: Frame, b: Frame) => Math.abs(a.width - b.width) <= 2 && Mat
 
 const near = (a: Frame, b: Frame) => (["x", "y", "width", "height"] as const).every((k) => Math.abs(a[k] - b[k]) <= 2);
 
-export const toItem = ({ id, frame, active, title, resizable }: Win, limits?: Limits): Item => ({
+export const toItem = ({ id, frame, active, title, resizable, bundleId }: Win, limits?: Limits): Item => ({
   id,
   frame,
   active,
   title,
+  app: bundleId,
   fixed: resizable ? undefined : { width: frame.width, height: frame.height },
   min: limits?.min,
   max: limits?.max,

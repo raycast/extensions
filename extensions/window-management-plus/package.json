@@ -70,7 +70,7 @@
       "required": false,
       "default": "notes",
       "title": "Sidebar",
-      "description": "Window pinned full height down the right by Auto Tile with Sidebar.",
+      "description": "Window pinned full height down the right by Toggle Sidebar.",
       "data": [
         {
           "title": "Raycast Notes",
@@ -81,10 +81,21 @@
           "value": "ai"
         },
         {
+          "title": "An App",
+          "value": "app"
+        },
+        {
           "title": "Active Window",
           "value": "active"
         }
       ]
+    },
+    {
+      "name": "sidebarApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "Sidebar App",
+      "description": "The app pinned as the sidebar when Sidebar is set to An App. It is opened if it isn't running."
     }
   ],
   "commands": [
@@ -100,15 +111,17 @@
       ]
     },
     {
-      "name": "auto-tile-sidebar",
-      "title": "Auto Tile with Sidebar",
-      "description": "Pin the sidebar app (Raycast Notes by default) full height down the right and tile every other visible window.",
+      "name": "toggle-sidebar",
+      "title": "Toggle Sidebar",
+      "description": "Pin the sidebar app (Raycast Notes by default) full height down the right, or let it go. While it is pinned, every layout arranges the other windows beside it.",
       "mode": "no-view",
-      "icon": "tile-sidebar.png",
+      "icon": "toggle-sidebar.png",
       "keywords": [
         "sidebar",
+        "pin",
         "notes",
-        "ai chat"
+        "ai chat",
+        "auto tile with sidebar"
       ]
     },
     {
@@ -185,6 +198,20 @@
         "hyprland"
       ],
       "icon": "master-center.png"
+    },
+    {
+      "name": "cycle-master",
+      "title": "Cycle Master Layout",
+      "description": "Move the master to the next side round: left, then right, then center. The focused window becomes the master.",
+      "mode": "no-view",
+      "icon": "cycle-master.png",
+      "keywords": [
+        "cycle",
+        "next layout",
+        "switch layout",
+        "orientationnext",
+        "hyprland"
+      ]
     },
     {
       "name": "grow-master",
