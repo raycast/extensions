@@ -8,6 +8,7 @@ export class GithubClient {
 
   public async requestGist(tag: string, page: number, perPage: number) {
     const { octokit } = this;
+    let hasMore = false;
     const response = await (async () => {
       switch (tag) {
         case GithubGistTag.MY_GISTS: {
@@ -22,6 +23,7 @@ export class GithubClient {
         case GithubGistTag.PROMPT: {
           // Get user's gists and filter for prompts
           const response = await octokit.request(`GET /gists`, { page: page, per_page: perPage });
+          hasMore = response.data.length === perPage;
           response.data = response.data.filter((gist) => gist.description?.toLowerCase().includes("prompt"));
           return response;
         }
@@ -30,6 +32,7 @@ export class GithubClient {
         }
       }
     })();
+    if (tag !== GithubGistTag.PROMPT) hasMore = response.data.length === perPage;
 
     const _gists: Gist[] = [];
     response.data.forEach((_data) => {
@@ -52,7 +55,7 @@ export class GithubClient {
       }
       _gists.push(_gist);
     });
-    return _gists;
+    return { data: _gists, hasMore };
   }
 
   public async starGist(gist_id: string) {
