@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { saveMedia } from "../lib/media";
 
 type Input = {
@@ -6,6 +7,11 @@ type Input = {
    */
   post: string;
 };
+
+export const confirmation: Tool.Confirmation<Input> = async ({ post }) => ({
+  message: "Save the photos & videos of this post to your Downloads folder?",
+  info: [{ name: "Post", value: post }],
+});
 
 /**
  * Save the photos and videos of 1 X post to the user's Downloads folder.

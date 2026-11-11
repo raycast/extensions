@@ -7,7 +7,7 @@ export default function Command({ arguments: { post } }: LaunchProps<{ arguments
     <PostArgument
       argument={post}
       title="View Replies"
-      render={(id) => <PostFeedList feed={{ kind: "replies", post: id }} navigationTitle="Replies" />}
+      render={(id) => <PostFeedList feed={{ kind: "replies", post: id }} />}
     />
   );
 }

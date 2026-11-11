@@ -10,7 +10,6 @@ import { uniqueById } from "./lib/feeds";
 import { compactCount, profileLink } from "./lib/format";
 import { Profile } from "./lib/schemas";
 import { fetchUserPage } from "./lib/users";
-import { SHORTCUTS } from "./lib/shortcuts";
 
 const loadUserPage =
   (query: string) =>
@@ -39,7 +38,6 @@ function UserRow({ user, firstAction, query }: { user: Profile; firstAction: Rea
             <Action.Push
               title="View Posts"
               icon={Icon.List}
-              shortcut={SHORTCUTS.posts}
               target={<PostFeedList feed={{ kind: "userPosts", user: username }} navigationTitle={`@${username}`} />}
             />
             <Action.OpenInBrowser url={profileLink(username)} shortcut={Keyboard.Shortcut.Common.Open} />

@@ -34,13 +34,12 @@ export function PostActions({ post, firstAction, lastAction }: PostActionsProps)
     <ActionPanel>
       <ActionPanel.Section>
         {firstAction}
-        <Action.OpenInBrowser url={link} shortcut={Keyboard.Shortcut.Common.Open} />
+        <Action.OpenInBrowser url={link} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.Push
           title="View Replies"
           icon={Icon.Bubble}
-          shortcut={SHORTCUTS.replies}
           target={<PostFeedList feed={{ kind: "replies", post: post.id }} navigationTitle="Replies" />}
         />
         <Action.Push

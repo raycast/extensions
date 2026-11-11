@@ -3,6 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search posts of any date, with sorting & advanced filters.
+- Open any command from root search by 1 letter, such as `s` for Search Posts.
 - Search users & open profiles with counts, links & contact details.
 - List any account's posts & mentions, and any post's replies, quotes & thread.
 - Check whether 1 account follows another.

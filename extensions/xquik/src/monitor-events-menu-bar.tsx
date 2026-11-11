@@ -1,42 +1,24 @@
-import {
-  Icon,
-  Image,
-  launchCommand,
-  LaunchType,
-  MenuBarExtra,
-  open,
-  openExtensionPreferences,
-  Keyboard,
-} from "@raycast/api";
+import { Icon, Image, MenuBarExtra, open, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { SITE_URL } from "./lib/api";
 import { describeError, ErrorFix } from "./lib/errors";
-import { eventLabel, eventPost, fetchEventPage, newestEventDate, unseenEvents } from "./lib/events";
-import { postLink, postTitle } from "./lib/format";
-import { MonitorEvent } from "./lib/schemas";
+import { fetchEventPage, MenuEventRow, menuEventRows, newestEventDate, unseenEvents } from "./lib/events";
+import { postLink } from "./lib/format";
+import { launchXquikCommand } from "./lib/launch";
 
 const SHOWN_EVENTS = 10;
-const TITLE_LENGTH = 48;
-
-const shorten = (text: string) => (text.length > TITLE_LENGTH ? `${text.slice(0, TITLE_LENGTH - 1)}…` : text);
 
 const loadEvents = async () => (await fetchEventPage({})).events;
 
-function openEvents() {
-  return launchCommand({ name: "view-monitor-events", type: LaunchType.UserInitiated });
-}
-
-function EventItem({ event, isNew }: { event: MonitorEvent; isNew: boolean }) {
-  const post = eventPost(event);
-  const source = event.username ? `@${event.username}` : (event.query ?? undefined);
+function EventItem({ row: { post, source, title, subtitle }, isNew }: { row: MenuEventRow; isNew: boolean }) {
   const avatar = post?.author?.profilePicture;
   return (
     <MenuBarExtra.Item
-      title={shorten(post ? postTitle(post.text) : eventLabel(event.type))}
-      subtitle={post ? eventLabel(event.type) : source}
+      title={title}
+      subtitle={subtitle}
       tooltip={source}
       icon={avatar ? { source: avatar, mask: Image.Mask.Circle } : isNew ? Icon.Dot : Icon.Bell}
-      onAction={() => (post ? open(postLink(post)) : openEvents())}
+      onAction={() => (post ? open(postLink(post)) : launchXquikCommand("view-monitor-events"))}
     />
   );
 }
@@ -71,13 +53,13 @@ export default function Command() {
           title="No Events Yet"
           subtitle="Create a Monitor"
           icon={Icon.Plus}
-          onAction={() => launchCommand({ name: "manage-monitors", type: LaunchType.UserInitiated })}
+          onAction={() => launchXquikCommand("manage-monitors")}
         />
       )}
       {events.length > 0 && (
         <MenuBarExtra.Section title={unseen.length ? `${unseen.length} New` : "Latest Events"}>
-          {events.slice(0, SHOWN_EVENTS).map((event) => (
-            <EventItem key={event.id} event={event} isNew={unseen.includes(event)} />
+          {menuEventRows(events.slice(0, SHOWN_EVENTS)).map((row) => (
+            <EventItem key={row.event.id} row={row} isNew={unseen.includes(row.event)} />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -85,10 +67,9 @@ export default function Command() {
         <MenuBarExtra.Item
           title="View All Events"
           icon={Icon.List}
-          shortcut={Keyboard.Shortcut.Common.Edit}
           onAction={async () => {
             await markSeen();
-            await openEvents();
+            await launchXquikCommand("view-monitor-events");
           }}
         />
         {unseen.length > 0 && (
@@ -97,7 +78,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Manage Monitors"
           icon={Icon.Gear}
-          onAction={() => launchCommand({ name: "manage-monitors", type: LaunchType.UserInitiated })}
+          onAction={() => launchXquikCommand("manage-monitors")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

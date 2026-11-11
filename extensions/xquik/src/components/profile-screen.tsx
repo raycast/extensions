@@ -75,11 +75,10 @@ function ProfileActions({ profile }: { profile: Profile }) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={link} shortcut={Keyboard.Shortcut.Common.Open} />
+        <Action.OpenInBrowser url={link} />
         <Action.Push
           title="View Posts"
           icon={Icon.List}
-          shortcut={SHORTCUTS.posts}
           target={<PostFeedList feed={{ kind: "userPosts", user: username }} navigationTitle={`@${username}`} />}
         />
         <Action.Push
