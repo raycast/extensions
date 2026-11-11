@@ -16,7 +16,7 @@ export async function windowIds(): Promise<string[]> {
   return out ? out.split(/,\s*/) : [];
 }
 
-// Returns the id of Chrome's front window, or undefined when Chrome is not the frontmost app.
+// Returns the id of Chrome's frontmost window not showing about:blank (skips Picture-in-Picture), or undefined when Chrome is not the frontmost app.
 // Launched from Raycast's search, Raycast is still frontmost, so hide it and wait for focus to return.
 export async function frontChromeWindowId(): Promise<string | undefined> {
   await closeMainWindow();
@@ -25,7 +25,12 @@ export async function frontChromeWindowId(): Promise<string | undefined> {
       await osascript(`tell application "System Events" to set frontApp to name of first application process whose frontmost is true
       if frontApp is "Raycast" then return "raycast"
       if frontApp is not "${CHROME}" then return ""
-      tell application "${CHROME}" to return id of front window`);
+      tell application "${CHROME}"
+        repeat with w in windows
+          if URL of active tab of w is not "about:blank" then return id of w
+        end repeat
+      end tell
+      return ""`);
     if (out !== "raycast") return out || undefined;
     await new Promise((r) => setTimeout(r, 50));
   }

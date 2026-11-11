@@ -1,9 +1,14 @@
 # Little Chrome Changelog
 
+## [Copy URL Fix] - {PR_MERGE_DATE}
+
+- Copy the right URL while a Google Meet picture-in-picture window is open
+
 ## [Trending Suggestions and Profile Name] - 2026-11-11
 
 - Rank suggestions higher when a page was visited much more often in the last couple of days
 - Show the current Chrome profile name in Open Little Chrome
+- Show suggestions faster while typing
 
 ## [Initial Version] - 2026-11-09
 
