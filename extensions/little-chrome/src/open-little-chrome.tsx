@@ -201,12 +201,14 @@ const largestBitmap = (pageUrl: string) => `(SELECT b.id || '-' || b.last_update
 
 async function faviconFiles(
   db: string,
+  profile: string,
   bitmaps: (string | null)[],
 ): Promise<(bitmap: string | null) => string | undefined> {
-  const file = (b: string) => join(FAVICON_DIR, `${b}.png`);
+  const dir = join(FAVICON_DIR, profile);
+  const file = (b: string) => join(dir, `${b}.png`);
   const missing = [...new Set(bitmaps.filter((b): b is string => !!b))].filter((b) => !existsSync(file(b)));
   if (missing.length) {
-    mkdirSync(FAVICON_DIR, { recursive: true });
+    mkdirSync(dir, { recursive: true });
     const ids = missing.map((b) => parseInt(b, 10)).join(",");
     const images = await sqlite<{ key: string; data: string }>(
       db,
@@ -218,7 +220,12 @@ async function faviconFiles(
 }
 
 // Favicons of the given pages, in one query; pages without one are left out.
-async function lookupFavicons(db: string, urls: string[], signal?: AbortSignal): Promise<Map<string, string>> {
+async function lookupFavicons(
+  db: string,
+  profile: string,
+  urls: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, string>> {
   try {
     const list = join(tmpdir(), "little-chrome-favicon-urls.json");
     writeFileSync(list, JSON.stringify(urls));
@@ -230,6 +237,7 @@ async function lookupFavicons(db: string, urls: string[], signal?: AbortSignal):
     );
     const fileOf = await faviconFiles(
       db,
+      profile,
       rows.map((r) => r.bitmap),
     );
     return new Map(
@@ -246,6 +254,7 @@ async function lookupFavicons(db: string, urls: string[], signal?: AbortSignal):
 
 async function searchHistory(
   db: string,
+  profile: string,
   text: string,
   blocklist: Blocklist,
   limit: number,
@@ -295,6 +304,7 @@ async function searchHistory(
     );
     const fileOf = await faviconFiles(
       db,
+      profile,
       rows.map((r) => r.bitmap),
     );
     return rows.map(({ url, title, bitmap }) => ({ url, title, favicon: fileOf(bitmap) }));
@@ -398,10 +408,11 @@ function LittleChrome(props: LaunchProps & { initialProfile: string }) {
     const empty = !searchText.trim();
     const timer = setTimeout(() => {
       Promise.all([
-        searchHistory(db, searchText, blocklist, HISTORY_LIMIT, abort.signal),
+        searchHistory(db, profile, searchText, blocklist, HISTORY_LIMIT, abort.signal),
         empty && bookmarks.length
           ? searchHistory(
               db,
+              profile,
               "",
               blocklist,
               USED_BOOKMARKS_LIMIT,
@@ -433,7 +444,7 @@ function LittleChrome(props: LaunchProps & { initialProfile: string }) {
       abort.abort();
       clearTimeout(timer);
     };
-  }, [db, searchText, blocklist, cacheKey, bookmarksCacheKey, bookmarks]);
+  }, [db, profile, searchText, blocklist, cacheKey, bookmarksCacheKey, bookmarks]);
 
   const typed = searchText.trim();
   const { bookmarks: shownBookmarks, history: visible } = useMemo(
@@ -442,6 +453,7 @@ function LittleChrome(props: LaunchProps & { initialProfile: string }) {
   );
   const favicons = new Map([...items, ...recentBookmarks].map((item) => [item.url, item.favicon]));
   const bookmarkFavicons = useFavicons(
+    profile,
     db,
     shownBookmarks.map((b) => b.url),
   );
@@ -636,21 +648,22 @@ function HideActions({
 
 const NO_FAVICONS = new Map<string, string>();
 
-// Favicons of the shown pages, looked up once per page and kept until the snapshot changes.
-function useFavicons(db: string | undefined, urls: string[]): Map<string, string> {
-  const cached = useRef<{ db?: string; favicons: Map<string, string>; looked: Set<string> }>({
+// Favicons of the shown pages, looked up once per page and kept until the profile or snapshot changes.
+function useFavicons(profile: string, db: string | undefined, urls: string[]): Map<string, string> {
+  const cached = useRef<{ profile?: string; db?: string; favicons: Map<string, string>; looked: Set<string> }>({
     favicons: new Map(),
     looked: new Set(),
   });
   const [, setVersion] = useState(0);
   const key = urls.join("\n");
   useEffect(() => {
-    if (cached.current.db !== db) cached.current = { db, favicons: new Map(), looked: new Set() };
+    if (cached.current.profile !== profile || cached.current.db !== db)
+      cached.current = { profile, db, favicons: new Map(), looked: new Set() };
     const current = cached.current;
     const missing = key.split("\n").filter((u) => u && !current.looked.has(u));
     if (!db || !missing.length) return;
     const abort = new AbortController();
-    lookupFavicons(db, missing, abort.signal)
+    lookupFavicons(db, profile, missing, abort.signal)
       .then((found) => {
         for (const url of missing) current.looked.add(url);
         for (const [url, favicon] of found) current.favicons.set(url, favicon);
@@ -658,6 +671,6 @@ function useFavicons(db: string | undefined, urls: string[]): Map<string, string
       })
       .catch(() => undefined);
     return () => abort.abort();
-  }, [db, key]);
-  return cached.current.db === db ? cached.current.favicons : NO_FAVICONS;
+  }, [profile, db, key]);
+  return cached.current.profile === profile && cached.current.db === db ? cached.current.favicons : NO_FAVICONS;
 }
