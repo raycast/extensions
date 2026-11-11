@@ -1,0 +1,175 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aria2-download",
+  "title": "Aria2 Download",
+  "description": "One queue for direct URLs, torrents, magnet/BT, and LinkSwift netdisk links. Requires aria2 to be installed separately.",
+  "icon": "icon.png",
+  "author": "1at3ncy",
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "aria2",
+    "download",
+    "torrent",
+    "magnet",
+    "bt",
+    "netdisk",
+    "linkSwift"
+  ],
+  "commands": [
+    {
+      "name": "tasks",
+      "title": "Aria2 Tasks",
+      "subtitle": "Aria2",
+      "description": "Show active, waiting, paused, completed and failed downloads.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Aria2",
+      "subtitle": "Start / stop local aria2 RPC",
+      "description": "Toggle the aria2 RPC daemon; the command subtitle shows the current daemon state.",
+      "mode": "no-view",
+      "interval": "1m",
+      "keywords": [
+        "start",
+        "stop",
+        "daemon",
+        "rpc",
+        "engine",
+        "toggle",
+        "on",
+        "off"
+      ]
+    },
+    {
+      "name": "add-download",
+      "title": "Add Download",
+      "subtitle": "URL, magnet or torrent",
+      "description": "Queue a URL, magnet link, or local .torrent file in one form.",
+      "mode": "view",
+      "keywords": [
+        "url",
+        "magnet",
+        "torrent",
+        "bt",
+        "download"
+      ]
+    },
+    {
+      "name": "configuration",
+      "title": "Aria2 Configuration",
+      "subtitle": "Aria2",
+      "description": "Edit aria2 HTTP, BT, RPC and notification settings.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often the task list and task detail refresh while open.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "1 second",
+          "value": "1"
+        },
+        {
+          "title": "2 seconds",
+          "value": "2"
+        },
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "name": "chunkViz",
+      "title": "Chunk View",
+      "description": "Heatmap is the polished fixed-layout PNG card. Mosaic is the native Raycast color grid fallback.",
+      "type": "dropdown",
+      "required": false,
+      "default": "heatmap",
+      "data": [
+        {
+          "title": "PNG Heatmap",
+          "value": "heatmap"
+        },
+        {
+          "title": "Native Mosaic",
+          "value": "mosaic"
+        }
+      ]
+    },
+    {
+      "name": "chunkColumns",
+      "title": "Fallback Chunk Columns",
+      "description": "Used by the native mosaic fallback, and by the heatmap when its image cannot be rendered.",
+      "type": "dropdown",
+      "required": false,
+      "default": "48",
+      "data": [
+        {
+          "title": "32 columns",
+          "value": "32"
+        },
+        {
+          "title": "40 columns",
+          "value": "40"
+        },
+        {
+          "title": "48 columns",
+          "value": "48"
+        },
+        {
+          "title": "56 columns",
+          "value": "56"
+        }
+      ]
+    },
+    {
+      "name": "showStopped",
+      "title": "Show Stopped Tasks",
+      "label": "Show completed and failed tasks in the list",
+      "description": "Turn off to keep the list focused on active and waiting tasks.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist",
+    "build:install": "ray build -t release",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run lint && npm run build"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  }
+}
