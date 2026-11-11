@@ -1,7 +1,7 @@
 import { environment } from "@raycast/api";
 
 /** Flip to true to replace monobank requests with mock data. Only takes effect in `npm run dev`. */
-const MOCKS_ENABLED = true;
+const MOCKS_ENABLED = false;
 
 /** Store builds aren't development builds, so mocks can't ship even if `MOCKS_ENABLED` is committed as true. */
 export const MOCK_API = MOCKS_ENABLED && environment.isDevelopment;
