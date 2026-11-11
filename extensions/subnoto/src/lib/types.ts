@@ -17,7 +17,7 @@ export interface Envelope {
   creationDate: number;
   updateDate: number;
   sentDate: number | null;
-  status: "uploading" | "draft" | "approving" | "signing" | "complete" | "declined" | "canceled";
+  status: "uploading" | "draft" | "approving" | "signing" | "complete" | "declined" | "canceled" | "expired";
   workspaceUuid: string;
   owner: {
     uuid: string;

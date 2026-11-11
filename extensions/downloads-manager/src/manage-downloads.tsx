@@ -3,6 +3,7 @@ import {
   Action,
   Alert,
   confirmAlert,
+  Form,
   getFrontmostApplication,
   getPreferenceValues,
   Grid,
@@ -12,14 +13,17 @@ import {
   LocalStorage,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
+import { lstatSync } from "fs";
+import { rename } from "fs/promises";
+import { dirname, join } from "path";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   defaultDownloadsLayout,
   downloadsFolder,
-  getDownloads,
-  getQuickLookPreviewDataUrl,
+  getDownloadsAsync,
   getTextFilePreview,
   isImageFile,
   isTextFile,
@@ -31,36 +35,13 @@ import {
   moveToTrash,
 } from "./utils";
 
-function FilePreviewDetail({ download, isSelected }: { download: Download; isSelected: boolean }) {
-  const isDarwin = process.platform === "darwin";
-  const isHiddenFile = download.file.startsWith(".");
-  const isText = !download.isDirectory && isTextFile(download.file);
-  const shouldShowImagePreview =
-    isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile && !isText;
-  const shouldShowTextPreview = showPreview && !download.isDirectory && isSelected && !isHiddenFile && isText;
-
-  const { data, isLoading } = usePromise(
-    async (path: string) => {
-      return await getQuickLookPreviewDataUrl(path);
-    },
-    [download.path],
-    { execute: shouldShowImagePreview },
-  );
-
-  if (!isSelected) {
-    return null;
-  }
-
-  let markdown: string | null = null;
-  if (shouldShowTextPreview) {
-    markdown = getTextFilePreview(download.path);
-  } else if (shouldShowImagePreview) {
-    markdown = isLoading ? "*Loading preview...*" : data ? `![Preview](${data})` : "*No preview available*";
-  }
+function FilePreviewDetail({ download }: { download: Download }) {
+  const shouldShowTextPreview =
+    showPreview && !download.isDirectory && !download.file.startsWith(".") && isTextFile(download.file);
+  const markdown = shouldShowTextPreview ? getTextFilePreview(download.path) : null;
 
   return (
     <List.Item.Detail
-      isLoading={shouldShowImagePreview && isLoading}
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
@@ -98,6 +79,90 @@ function FilePreviewDetail({ download, isSelected }: { download: Download; isSel
 const PAGE_SIZE = 100;
 const MOVE_TO_TRASH_CONFIRMATION_KEY = "manage-downloads-move-to-trash-confirmed";
 
+function entryExists(path: string): boolean {
+  try {
+    // lstat, because existsSync follows links and reports a broken symlink as missing.
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isSameEntry(firstPath: string, secondPath: string): boolean {
+  try {
+    // lstat, not stat: two symlinks can share a target but are still different entries.
+    const first = lstatSync(firstPath);
+    const second = lstatSync(secondPath);
+    return first.dev === second.dev && first.ino === second.ino;
+  } catch {
+    return false;
+  }
+}
+
+function RenameForm({ download, onRenamed }: { download: Download; onRenamed: (path: string, name: string) => void }) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { name: string }) {
+    const nextName = values.name.trim();
+
+    if (nextName === download.file) {
+      pop();
+      return;
+    }
+
+    if (!nextName) {
+      await showFailureToast(new Error("A name can't be empty"), { title: "Invalid Name" });
+      return;
+    }
+
+    const invalidCharacters = process.platform === "win32" ? /[\\/:*?"<>|]/ : /[/:]/;
+    if (invalidCharacters.test(nextName) || nextName === "." || nextName === "..") {
+      await showFailureToast(
+        new Error(`A name can't contain ${process.platform === "win32" ? `/ \\ : * ? " < > |` : "/ or :"}`),
+        { title: "Invalid Name" },
+      );
+      return;
+    }
+
+    const nextPath = join(dirname(download.path), nextName);
+
+    // An existing destination is only fine when it is the same entry, which means
+    // a case-only rename on a case-insensitive volume. On a case-sensitive volume
+    // two names differing in case are different files, and two hard links to one
+    // file are different entries, so both are rejected.
+    const isCaseOnlyRename = nextName.toLowerCase() === download.file.toLowerCase();
+    const isSameFile = isCaseOnlyRename && isSameEntry(download.path, nextPath);
+
+    if (entryExists(nextPath) && !isSameFile) {
+      await showFailureToast(new Error(`"${nextName}" already exists in this folder`), { title: "Rename Failed" });
+      return;
+    }
+
+    try {
+      await rename(download.path, nextPath);
+      await showToast({ style: Toast.Style.Success, title: "Renamed", message: nextName });
+      onRenamed(nextPath, nextName);
+      pop();
+    } catch (error) {
+      await showFailureToast(error, { title: "Rename Failed" });
+    }
+  }
+
+  return (
+    <Form
+      navigationTitle={`Rename ${download.isDirectory ? "Folder" : "File"}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Rename" icon={Icon.Pencil} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Name" defaultValue={download.file} placeholder="New name" />
+    </Form>
+  );
+}
+
 function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: string }) {
   const { primaryAction = "open" } = getPreferenceValues<Preferences.ManageDownloads>();
   const { data: frontmostApplication } = usePromise(async () => {
@@ -116,30 +181,42 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", true);
   const cancelRef = useRef<AbortController | null>(null);
+  const isLoadPendingRef = useRef(false);
+  const loadedCountRef = useRef(0);
 
-  const loadNextPage = useCallback((offset: number) => {
+  const loadNextPage = useCallback(async (offset: number, batchSize = PAGE_SIZE) => {
     setIsLoading(true);
+    isLoadPendingRef.current = true;
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
+    const signal = cancelRef.current.signal;
 
     try {
-      const newDownloads = getDownloads(PAGE_SIZE, offset, currentFolderPath);
-      const hasMoreItems = newDownloads.length === PAGE_SIZE;
+      const newDownloads = await getDownloadsAsync(batchSize, offset, currentFolderPath);
+      const hasMoreItems = newDownloads.length === batchSize;
 
-      if (!cancelRef.current.signal.aborted) {
+      if (!signal.aborted) {
         if (offset === 0) {
           setDownloads(newDownloads);
-          setSelectedItemId(newDownloads[0]?.path ?? null);
+          // A restarted scan keeps the selection, e.g. a file that was just renamed
+          setSelectedItemId((current) =>
+            current && newDownloads.some((download) => download.path === current)
+              ? current
+              : (newDownloads[0]?.path ?? null),
+          );
         } else {
           setDownloads((prev: Download[]) => [...prev, ...newDownloads]);
         }
         setHasMore(hasMoreItems);
-        setNextOffset(offset + PAGE_SIZE);
+        const newOffset = offset + batchSize;
+        setNextOffset(newOffset);
+        loadedCountRef.current = newOffset;
       }
     } catch (error) {
       console.error("Error loading downloads:", error);
     } finally {
-      if (!cancelRef.current.signal.aborted) {
+      if (!signal.aborted) {
+        isLoadPendingRef.current = false;
         setIsLoading(false);
       }
     }
@@ -156,13 +233,34 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
   }, [isLoading, hasMore, nextOffset, loadNextPage]);
 
+  // A scan that started before a file changed can still hold its old path, so
+  // replace it with a new scan instead of letting it overwrite the list.
+  // Reload the full already-displayed range so later pages are not lost.
+  const restartPendingLoad = useCallback(() => {
+    if (isLoadPendingRef.current) {
+      loadNextPage(0, Math.max(loadedCountRef.current, PAGE_SIZE));
+    }
+  }, [loadNextPage]);
+
   function handleTrash(paths: string | string[]) {
+    restartPendingLoad();
     setDownloads((downloads: Download[]) =>
       downloads.filter((download: Download) =>
         Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path,
       ),
     );
   }
+
+  const handleRenamed = useCallback(
+    (oldPath: string, nextPath: string, nextName: string) => {
+      restartPendingLoad();
+      setDownloads((current: Download[]) =>
+        current.map((item: Download) => (item.path === oldPath ? { ...item, path: nextPath, file: nextName } : item)),
+      );
+      setSelectedItemId((current) => (current === oldPath ? nextPath : current));
+    },
+    [restartPendingLoad],
+  );
 
   async function handleMoveToTrash(paths: string | string[]) {
     const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
@@ -305,6 +403,20 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
             style={Action.Style.Destructive}
             onAction={() => handleMoveToTrash(downloads.map((d: Download) => d.path))}
           />
+          <Action.Push
+            title="Rename"
+            icon={Icon.Pencil}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
+            target={
+              <RenameForm
+                download={download}
+                onRenamed={(nextPath, nextName) => handleRenamed(download.path, nextPath, nextName)}
+              />
+            }
+          />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -363,7 +475,9 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
           id={download.path}
           {...getItemProps(download)}
           icon={{ fileIcon: download.path }}
-          detail={<FilePreviewDetail download={download} isSelected={selectedItemId === download.path} />}
+          detail={
+            isShowingDetail && selectedItemId === download.path ? <FilePreviewDetail download={download} /> : undefined
+          }
         />
       ))}
     </List>

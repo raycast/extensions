@@ -55,8 +55,10 @@ export async function loadCached<T>({
   }
 
   const result = await load();
-  if (result !== undefined && isValid(result)) {
-    await LocalStorage.setItem(key, JSON.stringify(result));
-    return result;
+  if (result === undefined || !isValid(result)) {
+    return;
   }
+
+  await LocalStorage.setItem(key, JSON.stringify(result));
+  return result;
 }

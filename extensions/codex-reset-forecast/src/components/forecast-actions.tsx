@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 import { safeSourceUrl } from "../domain/reset-history";
 
-export const WEBSITE_URL = "https://codexreset.org/";
+import { SOURCE_CREDIT, WEBSITE_URL } from "../api/forecast-client";
+export { WEBSITE_URL };
 
 type ForecastActionsProps = {
   sourceUrl?: string | null;
@@ -16,7 +17,7 @@ export function ForecastActions({ sourceUrl, copyContent, copyTitle, onRefresh }
     <ActionPanel>
       <ActionPanel.Section>
         {source ? <Action.OpenInBrowser title="Open Original Source" url={source} /> : null}
-        <Action.OpenInBrowser title="Open Codex Reset Monitor" url={WEBSITE_URL} />
+        <Action.OpenInBrowser title={SOURCE_CREDIT} url={WEBSITE_URL} />
         <Action
           title="View Reset Calendar"
           icon={Icon.Calendar}

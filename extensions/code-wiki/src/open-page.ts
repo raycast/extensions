@@ -1,5 +1,5 @@
 import { BrowserExtension, type LaunchProps, open, showToast, Toast } from "@raycast/api";
-import { stripUrl } from "./lib/strip-url";
+import { repoURL } from "./lib/code-wiki-url";
 
 interface Arguments {
   url?: string;
@@ -27,5 +27,5 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
     urlToOpen = activeTab.url;
   }
 
-  await open(`https://codewiki.google/${stripUrl(urlToOpen)}`);
+  await open(repoURL(urlToOpen));
 }

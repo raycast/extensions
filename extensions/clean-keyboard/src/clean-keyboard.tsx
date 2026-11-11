@@ -51,12 +51,14 @@ const durations: Duration[] = [
 ];
 
 export default function Command(props: LaunchProps<{ launchContext?: { durationSeconds: number } }>) {
-  const { defaultDuration } = getPreferenceValues<Preferences.CleanKeyboard>();
+  const { defaultDuration, lockMouse } = getPreferenceValues<Preferences.CleanKeyboard>();
+  const lockMouseEnabled = isMac && lockMouse;
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
   const savedFnState = useRef<boolean | null>(null);
   const autoLockStarted = useRef(false);
+  const lockInFlight = useRef(false);
 
   // "0" is Forever, matching how the duration list treats a missing `seconds`
   const defaultSeconds = defaultDuration && defaultDuration !== "always-ask" ? Number(defaultDuration) : undefined;
@@ -90,40 +92,47 @@ export default function Command(props: LaunchProps<{ launchContext?: { durationS
   }, [isRunning]);
 
   const lockAction = useCallback(async (duration: Duration) => {
-    let handler: (duration: number | null) => Promise<void>;
-    if (isMac) {
-      const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
-      handler = handlerSwift;
-    } else {
-      const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
-      handler = handlerRust;
-    }
-
-    const { lockFnKeys } = getPreferenceValues<Preferences.CleanKeyboard>();
-    if (lockFnKeys && isTahoe) {
-      try {
-        savedFnState.current = readFnState();
-        setFnState(true);
-      } catch {
-        // keep savedFnState so restore effects can undo any partial defaults write
+    if (lockInFlight.current) return;
+    lockInFlight.current = true;
+    try {
+      const { lockFnKeys, lockMouse } = getPreferenceValues<Preferences.CleanKeyboard>();
+      let handler: (duration: number | null) => Promise<unknown>;
+      if (isMac) {
+        const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
+        handler = (seconds) => handlerSwift(seconds, Boolean(lockMouse));
+      } else {
+        const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
+        handler = handlerRust;
       }
-    }
-
-    const durationSeconds = duration.seconds ?? null;
-    const handlerPromise = handler(durationSeconds);
-
-    handlerPromise.catch(async (err) => {
-      // Roll back UI if hook installation failed
+      if (lockFnKeys && isTahoe) {
+        try {
+          savedFnState.current = readFnState();
+          setFnState(true);
+        } catch {
+          // Keep the saved state so the existing restore effects undo a partial write.
+        }
+      }
+      const durationSeconds = duration.seconds ?? null;
+      setTimeLeft(durationSeconds);
+      setIcon(duration.icon);
+      setIsRunning(true);
+      handler(durationSeconds)
+        .then(() => showToast({ title: "Keyboard unlocked" }))
+        .catch((err) =>
+          showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure }),
+        )
+        .finally(() => {
+          lockInFlight.current = false;
+          setIsRunning(false);
+          setTimeLeft(null);
+          setIcon(null);
+        });
+      await showToast({ title: isMac && lockMouse ? "Keyboard and mouse clicks locked" : "Keyboard locked" });
+    } catch (error) {
+      lockInFlight.current = false;
       setIsRunning(false);
-      setTimeLeft(null);
-      setIcon(null);
-      await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
-    });
-
-    setTimeLeft(durationSeconds);
-    setIcon(duration.icon);
-    setIsRunning(true);
-    await showToast({ title: "Keyboard locked" });
+      await showToast({ title: "Failed to lock keyboard", message: String(error), style: Toast.Style.Failure });
+    }
   }, []);
 
   useEffect(() => {
@@ -155,17 +164,12 @@ export default function Command(props: LaunchProps<{ launchContext?: { durationS
       await showToast({ title: "Failed to unlock keyboard", message: String(err), style: Toast.Style.Failure });
       return;
     }
-    setIsRunning(false);
-    await showToast({ title: "Keyboard unlocked" });
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (isRunning && timeLeft) {
         setTimeLeft(timeLeft - 1);
-        if (timeLeft - 1 === 0) {
-          setIsRunning(false);
-        }
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -176,11 +180,15 @@ export default function Command(props: LaunchProps<{ launchContext?: { durationS
       <List>
         <List.EmptyView
           icon={icon ?? "🧼"}
-          description={`Press ${isMac ? "⌃" : "Ctrl"} + U at any time to unlock the keyboard.`}
+          description={
+            lockMouseEnabled
+              ? "Press ⌃+U or tap Command 3 times for Touch ID. Escape cancels Touch ID. Hold both Command keys for 8 seconds to force unlock."
+              : `Press ${isMac ? "⌃" : "Ctrl"} + U at any time to unlock the keyboard.`
+          }
           title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
-              {timeLeft !== null && <Action title={"Back"} onAction={() => setIsRunning(false)} />}
+              {timeLeft !== null && <Action title={"Back"} onAction={unlockAction} />}
               <Action
                 autoFocus={false}
                 title={"Unlock Keyboard"}

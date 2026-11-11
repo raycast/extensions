@@ -10,6 +10,7 @@ This extension provides quick access to Google's Translate service.
 
 - **Quick Translation**: Translate text quickly and easily.
 - **Language Sets**: Create your own translations sets.
+- **Fresh Selection**: Each invocation of Quick Translate reads your current selection when Autofill Input is enabled, including after dismissing Raycast by clicking outside. Existing Quick Translate hotkeys and aliases continue to work. Quick Translate Results is the result view opened by this command.
 
 ## ⚙️ Configuration
 

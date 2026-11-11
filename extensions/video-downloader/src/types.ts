@@ -9,6 +9,10 @@ export type Format = {
   filesize_approx?: number;
   resolution: string;
   tbr: number | null;
+  fps?: number | null;
+  dynamic_range?: string | null;
+  language?: string | null;
+  format_note?: string;
 };
 
 export type Video = {

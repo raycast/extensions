@@ -9,7 +9,7 @@ export type DocumentResult = Pick<
 > & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
 } & {
-  creator: Pick<User, "displayName" | "avatarUrl" | "email">;
+  creator: Pick<User, "displayName" | "avatarUrl" | "email"> | null;
 } & {
   initiative?: Pick<Initiative, "id" | "name" | "color" | "icon">;
 };

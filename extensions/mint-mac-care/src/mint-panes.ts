@@ -13,21 +13,67 @@ export function baseName(path: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Optimize Storage: identical copies by the source they live in.
+// Optimize Storage: Optimizable's two halves by the source they live in.
 // ---------------------------------------------------------------------------
 
-export type Copy = { id: string; path: string; keeper: string; estimatedSavingBytes: number };
-export type OptimizeScan = { sessionID: string; complete?: boolean; items: Copy[] };
-/** One file and its copies within one source: a copy counts where it lives, as the app counts it. */
-export type CopyGroup = { id: string; keeper: string; source: string; copies: Copy[]; bytes: number };
+/**
+ * One file Optimize changes: an identical copy that shares its kept file's
+ * storage, or (Mint 1.1.3) an idle file stored compressed in place. `reason`
+ * is the app's own word for the row ("Identical copy", "Idle file").
+ */
+export type Copy = {
+  id: string;
+  path: string;
+  /** The file a copy shares its storage with; absent for an idle file. */
+  keeper?: string | null;
+  estimatedSavingBytes: number;
+  kind?: "copy" | "compression";
+  reason?: string;
+  fileKind?: string;
+};
+export type OptimizeScan = { sessionID: string; complete?: boolean; includesCompressions?: boolean; items: Copy[] };
+/**
+ * Mint 1.1.3's `disk.optimize.present`: the review's items the Disk page
+ * offers against a Scan's rows, and the rows the page leaves out because the
+ * same file is offered to share instead.
+ */
+export type OptimizePresent = { offeredItemIDs: string[]; supersededDiskItemIDs: string[] };
+/** One file and its copies within one source, or one idle file: a file counts where it lives, as the app counts it. */
+export type CopyGroup = {
+  id: string;
+  keeper: string;
+  source: string;
+  copies: Copy[];
+  bytes: number;
+  kind: "copy" | "compression";
+};
 export type Source = { key: string; groups: CopyGroup[]; bytes: number };
+
+export const isCompression = (copy: Copy): boolean => copy.kind === "compression";
+
+/** The scan's items the Disk page lists: all of them until Mint has said which. */
+export function presented(scan: OptimizeScan | undefined, present: OptimizePresent | undefined): Copy[] {
+  const items = scan?.items ?? [];
+  if (!present) return items;
+  const offered = new Set(present.offeredItemIDs);
+  return items.filter((item) => offered.has(item.id));
+}
 
 export function groupCopies(copies: Copy[], home = homedir()): CopyGroup[] {
   const byID = new Map<string, CopyGroup>();
   for (const copy of copies) {
     const source = sourceOf(copy.path, home);
-    const id = `${source}\u0000${copy.keeper}`;
-    const group = byID.get(id) ?? { id, keeper: copy.keeper, source, copies: [], bytes: 0 };
+    const compression = isCompression(copy);
+    const keeper = compression ? copy.path : (copy.keeper ?? copy.path);
+    const id = compression ? `${source}\u0000${copy.path}\u0000compression` : `${source}\u0000${keeper}`;
+    const group = byID.get(id) ?? {
+      id,
+      keeper,
+      source,
+      copies: [],
+      bytes: 0,
+      kind: compression ? ("compression" as const) : ("copy" as const),
+    };
     group.copies.push(copy);
     group.bytes += Math.max(0, copy.estimatedSavingBytes);
     byID.set(id, group);
@@ -61,7 +107,30 @@ export function sourcesWithBase(found: Source[]): Source[] {
   return [...found, ...empty].sort((a, b) => sourceOrder(a.key) - sourceOrder(b.key) || b.bytes - a.bytes);
 }
 
-export function sourcePicture(source: Source, all: Source[], appearance: Appearance, state: RunState = {}): string {
+/** How many files a run changes, in the app's words: copies that share, idle files compressed. */
+export function optimizableCount(copies: number, idle: number): string {
+  if (idle === 0)
+    return `${plural(copies, "file")} ${copies === 1 ? "shares its" : "share their"} copies · nothing deleted`;
+  if (copies === 0) return `${plural(idle, "idle file")} stored compressed · nothing deleted`;
+  return `${plural(copies, "copy", "copies")} shared, ${plural(idle, "idle file")} compressed · nothing deleted`;
+}
+
+/** A group's line in a list: its copies, or the app's word for an idle file. */
+export function groupDetail(group: { kind?: "copy" | "compression"; copies: Copy[] }): string {
+  return group.kind === "compression" ? (group.copies[0]?.reason ?? "Idle file") : `${group.copies.length + 1} copies`;
+}
+
+/**
+ * `bothHalves`: this Mint lists idle files too (1.1.3), so an empty source
+ * says nothing to optimize, not only no copies.
+ */
+export function sourcePicture(
+  source: Source,
+  all: Source[],
+  appearance: Appearance,
+  state: RunState = {},
+  bothHalves = false,
+): string {
   const struck = state.struck ?? new Set<string>();
   const gone = state.gone ?? new Set<string>();
   const ids = (group: CopyGroup) => group.copies.map((copy) => copy.id);
@@ -72,10 +141,11 @@ export function sourcePicture(source: Source, all: Source[], appearance: Appeara
   const shown = listed.slice(0, 10);
   const rows: ListRow[] = shown.map((group) => ({
     title: baseName(group.keeper),
-    detail: state.receipt && !isDone(ids(group), struck) ? "kept" : `${group.copies.length + 1} copies`,
+    detail: state.receipt && !isDone(ids(group), struck) ? "kept" : groupDetail(group),
     value: formatCompact(group.bytes),
     struck: isDone(ids(group), struck),
   }));
+  const leftIdle = left.filter((group) => group.kind === "compression").length;
   const label = state.running
     ? state.running
     : state.receipt
@@ -83,8 +153,10 @@ export function sourcePicture(source: Source, all: Source[], appearance: Appeara
         ? `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${left.length} kept`
         : `${state.receipt.text} · ${plural(source.groups.length, "file")}`
       : source.groups.length
-        ? `${plural(left.length, "file")} ${left.length === 1 ? "shares its" : "share their"} copies · nothing deleted`
-        : "No identical copies here right now";
+        ? optimizableCount(left.length - leftIdle, leftIdle)
+        : bothHalves
+          ? "Nothing to optimize here right now"
+          : "No identical copies here right now";
   const value =
     state.receipt && left.length === 0
       ? formatCompact(state.receipt.bytes)
@@ -132,8 +204,18 @@ export type Entry = {
   path: string;
   bytes: number;
   item?: DiskItem;
+  /** Optimizable only: a file and its copies, or one idle file. */
+  kind?: "copy" | "compression";
 };
-export type Bucket = { key: BucketKey; title: string; color: string; entries: Entry[]; bytes: number };
+export type Bucket = {
+  key: BucketKey;
+  title: string;
+  color: string;
+  entries: Entry[];
+  bytes: number;
+  /** Optimizable from a Mint that lists idle files too (1.1.3). */
+  bothHalves?: boolean;
+};
 
 const BUCKETS: Record<BucketKey, { title: string; color: string }> = {
   optimizable: { title: "Optimizable", color: TIER_COLORS.optimizable },
@@ -155,18 +237,37 @@ export function emptyBucket(key: BucketKey): Bucket {
   return { key, ...BUCKETS[key], entries: [], bytes: 0 };
 }
 
+/** Whether `path` is `folder` or inside it. */
+function isAtOrUnder(path: string, folder: string): boolean {
+  const trimmed = folder.replace(/\/+$/, "");
+  return path === trimmed || path.startsWith(`${trimmed}/`);
+}
+
 /**
  * The scan's rows in the Disk page's groups, every group listed even when
  * empty. Mint 1.0.81 states each row's group; an older Mint states only
  * whether it is safe without a look, so its other rows are "Needs a look"
  * rather than guessed into Yours. Keep is left out: nothing in it can go.
+ *
+ * A file is counted in one group only, as the Disk page counts it. Mint
+ * 1.1.3 says which Optimizable files the page offers against these rows
+ * (`present`); until it has, or from an older Mint, a copy at or under a
+ * listed row is that row's and leaves Optimizable, so the headline never
+ * counts its bytes twice.
  */
-export function bucketsOf(scan: DiskScan | undefined, copies: OptimizeScan | undefined, grouped: boolean): Bucket[] {
+export function bucketsOf(
+  scan: DiskScan | undefined,
+  copies: OptimizeScan | undefined,
+  grouped: boolean,
+  present?: OptimizePresent,
+): Bucket[] {
   const items = scan?.sections.flatMap((section) => section.items) ?? [];
   const stated = items.length ? items.some((item) => item.group !== undefined) : grouped;
+  const superseded = new Set(present?.supersededDiskItemIDs ?? []);
   const entries: Record<BucketKey, Entry[]> = { optimizable: [], safeToClean: [], yours: [], look: [] };
   for (const section of scan?.sections ?? []) {
     for (const item of section.items) {
+      if (superseded.has(item.id)) continue;
       const key: BucketKey | undefined = !stated
         ? item.tier === "recommended"
           ? "safeToClean"
@@ -188,24 +289,47 @@ export function bucketsOf(scan: DiskScan | undefined, copies: OptimizeScan | und
       });
     }
   }
+  const claimed = [...entries.safeToClean, ...entries.yours, ...entries.look].map((entry) => entry.path);
+  const offered = present
+    ? presented(copies, present)
+    : (copies?.items ?? []).filter((copy) => !claimed.some((folder) => isAtOrUnder(copy.path, folder)));
   const byKeeper = new Map<string, Entry>();
-  for (const copy of copies?.items ?? []) {
-    const entry = byKeeper.get(copy.keeper) ?? {
-      id: copy.keeper,
+  for (const copy of offered) {
+    if (isCompression(copy)) {
+      entries.optimizable.push({
+        id: copy.id,
+        ids: [copy.id],
+        title: baseName(copy.path),
+        detail: copy.reason ?? "Idle file",
+        path: copy.path,
+        bytes: Math.max(0, copy.estimatedSavingBytes),
+        kind: "compression",
+      });
+      continue;
+    }
+    const keeper = copy.keeper ?? copy.path;
+    const entry = byKeeper.get(keeper) ?? {
+      id: keeper,
       ids: [],
-      title: baseName(copy.keeper),
-      path: copy.keeper,
+      title: baseName(keeper),
+      path: keeper,
       bytes: 0,
+      kind: "copy" as const,
     };
     entry.ids.push(copy.id);
     entry.bytes += Math.max(0, copy.estimatedSavingBytes);
     entry.detail = `${entry.ids.length + 1} copies`;
-    byKeeper.set(copy.keeper, entry);
+    byKeeper.set(keeper, entry);
   }
-  entries.optimizable = [...byKeeper.values()];
+  entries.optimizable.push(...byKeeper.values());
   return bucketKeys(stated).map((key) => {
     const rows = entries[key].sort((a, b) => b.bytes - a.bytes);
-    return { ...emptyBucket(key), entries: rows, bytes: rows.reduce((sum, entry) => sum + entry.bytes, 0) };
+    return {
+      ...emptyBucket(key),
+      entries: rows,
+      bytes: rows.reduce((sum, entry) => sum + entry.bytes, 0),
+      ...(key === "optimizable" && copies?.includesCompressions ? { bothHalves: true } : {}),
+    };
   });
 }
 
@@ -225,8 +349,9 @@ export type RunState = {
   gone?: ReadonlySet<string>;
   /** The run's words while it goes on ("Cleaning · 12 of 70"). */
   running?: string;
-  /** After the run: what it gave back and how to say it ("freed", "back · nothing deleted"). */
-  receipt?: { bytes: number; text: string };
+  /** After the run: what it gave back and how to say it ("freed", "back · nothing deleted"), and which rows it asked
+   *  for when it was not all of them (Quit Chosen): only those can have "kept running". */
+  receipt?: { bytes: number; text: string; asked?: readonly string[] };
 };
 
 const EMPTY_LABELS: Record<BucketKey, string> = {
@@ -249,9 +374,10 @@ export function bucketPicture(bucket: Bucket, all: Bucket[], appearance: Appeara
     value: formatCompact(entry.bytes),
     struck: isDone(entry.ids, struck),
   }));
+  const leftIdle = left.filter((entry) => entry.kind === "compression").length;
   const count =
     bucket.key === "optimizable"
-      ? `${plural(left.length, "file")} ${left.length === 1 ? "shares its" : "share their"} copies · nothing deleted`
+      ? optimizableCount(left.length - leftIdle, leftIdle)
       : bucket.key === "safeToClean"
         ? `${plural(left.length, "item")} your apps make again`
         : `${plural(left.length, "item")} for you to choose`;
@@ -264,7 +390,9 @@ export function bucketPicture(bucket: Bucket, all: Bucket[], appearance: Appeara
         : `${state.receipt.text} · ${plural(bucket.entries.length, gonePlural)}`
       : bucket.entries.length
         ? count
-        : EMPTY_LABELS[bucket.key];
+        : bucket.bothHalves
+          ? "Nothing to optimize right now"
+          : EMPTY_LABELS[bucket.key];
   const value =
     state.receipt && left.length === 0
       ? formatCompact(state.receipt.bytes)
@@ -307,6 +435,11 @@ export type MemoryItem = {
   advanced: boolean;
   needsReview: boolean;
   defaultSelected: boolean;
+  /**
+   * The Memory page's own pile for this app (Mint 1.2.1, `MemoryTabView.partition`); absent from Mint 1.2.0, and
+   * null for a row the page shows in no pile.
+   */
+  pile?: "idle" | "inUse" | "keep" | null;
 };
 export type MemoryScan = {
   sessionID: string;
@@ -328,8 +461,22 @@ const PILES: Array<{ key: PileKey; title: string; color: string }> = [
 ];
 
 /**
- * The apps Mint can quit, in the Memory page's piles: Idle is what Mint ticks
- * by itself; Ask first needs a forced quit or is on the Ignore list. Sizes are
+ * Which pile an app is in. Mint 1.2.1 names the Memory page's own pile, so
+ * Idle is exactly the page's Idle (what the island and the dropdown quit);
+ * Mint 1.2.0 does not, and Idle is what it ticks by itself (`defaultSelected`).
+ * Ask first needs a forced quit, is on the Ignore list, or is the page's Keep.
+ */
+export function pileKey(item: MemoryItem): PileKey {
+  if (item.pile !== undefined) {
+    if (item.pile === "idle") return "idle";
+    if (item.pile === "keep") return "askFirst";
+    return item.advanced || item.needsReview ? "askFirst" : "inUse";
+  }
+  return item.defaultSelected ? "idle" : item.advanced || item.needsReview ? "askFirst" : "inUse";
+}
+
+/**
+ * The apps Mint can quit, in the Memory page's piles (`pileKey`). Sizes are
  * attributed over everything running, so they add up to what quitting gives back.
  */
 export function pilesOf(scan: MemoryScan | undefined): Pile[] {
@@ -341,8 +488,7 @@ export function pilesOf(scan: MemoryScan | undefined): Pile[] {
   const apps: Record<PileKey, MemoryApp[]> = { idle: [], inUse: [], askFirst: [] };
   for (const item of items) {
     if (!item.selectable) continue;
-    const key: PileKey = item.defaultSelected ? "idle" : item.advanced || item.needsReview ? "askFirst" : "inUse";
-    apps[key].push({ ...item, size: attributed(item.bytes, scale) });
+    apps[pileKey(item)].push({ ...item, size: attributed(item.bytes, scale) });
   }
   return PILES.map((pile) => {
     const rows = apps[pile.key].sort((a, b) => b.size - a.size);
@@ -375,11 +521,14 @@ export function pilePicture(
   const listed = pile.apps.filter((app) => !gone.has(app.id));
   const left = listed.filter((app) => !struck.has(app.id));
   const remaining = left.reduce((sum, app) => sum + app.size, 0);
+  const asked = state.receipt?.asked ? new Set(state.receipt.asked) : undefined;
+  const kept = state.receipt ? left.filter((app) => !asked || asked.has(app.id)) : [];
+  // Counted from the whole pile: by the time the receipt shows, the strike has folded the quit apps out of `listed`.
+  const quit = pile.apps.filter((app) => asked?.has(app.id) && struck.has(app.id)).length;
   const shown = listed.slice(0, 10);
   const rows: ListRow[] = shown.map((app) => ({
     title: app.name,
-    detail:
-      state.receipt && !struck.has(app.id) ? "kept running" : app.agentKind ? `running ${app.agentKind}` : undefined,
+    detail: kept.includes(app) ? "kept running" : app.agentKind ? `running ${app.agentKind}` : undefined,
     value: formatCompact(app.size),
     struck: struck.has(app.id),
   }));
@@ -396,9 +545,11 @@ export function pilePicture(
     label:
       state.running ??
       (state.receipt
-        ? left.length
-          ? `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${left.length} kept running`
-          : `${state.receipt.text} · ${plural(pile.apps.length, "app")} quit`
+        ? left.length === 0
+          ? `${state.receipt.text} · ${plural(pile.apps.length, "app")} quit`
+          : kept.length
+            ? `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${kept.length} kept running`
+            : `${formatCompact(state.receipt.bytes)} ${state.receipt.text} · ${plural(quit, "app")} quit`
         : pile.apps.length
           ? count
           : EMPTY_PILES[pile.key]),
@@ -452,6 +603,8 @@ export type SortResult = {
   errors?: string[];
   organizeFailures?: Array<{ path?: string; message?: string }>;
   handlingReviewBlockedCount?: number;
+  /** Files the week's free allowance kept in place (OrganizerEngine). */
+  planLimitBlockedCount?: number;
 };
 
 export function templateTitle(template: Template | undefined): string {

@@ -4,7 +4,7 @@ Browse, launch, and monitor [AWX](https://github.com/ansible/awx) job templates 
 
 ## Commands
 
-- **Search Templates** — Server-side paginated, filterable list of workflows and job templates. Launch a selected template directly, launch it with custom extra variables (survey-aware), or view a workflow's stages.
+- **Search Templates** — Server-side paginated list of workflows and job templates together, searchable across both. Launch a selected template directly, launch it with custom extra variables (survey-aware), or view a workflow's stages.
 - **Running Jobs** — Live view of currently running jobs (pending / waiting / running), auto-refreshing every few seconds. Open a job's output in AWX or cancel it.
 - **Workflow History** — Workflow templates run in the last 7 days, grouped by template, with per-workflow and per-stage timing stats, success rates, and usage breakdowns.
 

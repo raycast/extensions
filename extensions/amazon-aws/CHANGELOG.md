@@ -1,15 +1,24 @@
 # Amazon AWS Changelog
 
+## [Fix AWS command startup] - {PR_MERGE_DATE}
+
+- Rebuild with the updated Raycast CLI to fix AWS commands failing to start because of shared AWS SDK dependencies.
+
+## [Fix AWS client initialization] - 2026-10-16
+
+- Update the AWS SDK to fix a circular dependency that caused commands to fail with `Cannot read properties of undefined (reading 'for')` in Store builds.
+
 ## [Add AWS frontier agents to Console] - 2026-09-10
 
 - Add console links for AWS Security Agent, AWS DevOps Agent, and AWS FinOps Agent
 
 ## [Fix AWS SSO Authentication] - 2026-05-26
+
 - update aws-sdk
 
 ## [Bug fix for Amplify] - 2025-09-30
 
-- Replace '/' in branch name with '-' when building branch url 
+- Replace '/' in branch name with '-' when building branch url
 
 ## [API Gateway, AppSync & Amplify Enhancements] - 2025-08-25
 

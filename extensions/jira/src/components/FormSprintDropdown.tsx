@@ -1,8 +1,8 @@
 import { Form } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { ForwardedRef, forwardRef, useState } from "react";
 
 import { getSprints } from "../api/sprints";
+import { useJiraCachedPromise } from "../hooks/useJiraCache";
 
 type FormSprintDropdownProps = Form.Dropdown.Props & {
   name: string;
@@ -13,7 +13,7 @@ const FormSprintDropdown = forwardRef((props: FormSprintDropdownProps, ref: Forw
   // if there are not any fieldValue given, so let's use sprint as default query
   const [query, setQuery] = useState("sprint");
 
-  const { data: sprints, isLoading } = useCachedPromise(
+  const { data: sprints, isLoading } = useJiraCachedPromise(
     async (query) => getSprints({ fieldName: props.name, fieldValue: query }),
     [query],
   );

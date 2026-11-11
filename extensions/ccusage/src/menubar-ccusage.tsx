@@ -169,6 +169,7 @@ export default function MenuBarccusage() {
   const limitIcon = (utilization: number): string | Icon => (usePies ? (pieIcon(utilization) as string) : Icon.Gauge);
 
   const menuBarTitlePref = getMenuBarTitle();
+  const primaryLimit = effectiveLimitsData?.five_hour ?? effectiveLimitsData?.seven_day ?? null;
   const highestUtilization = limitRows.length > 0 ? Math.max(...limitRows.map((row) => row.utilization)) : null;
   const menuBarTitle = (() => {
     let title: string | undefined;
@@ -183,9 +184,11 @@ export default function MenuBarccusage() {
     else if (menuBarTitlePref === "todayTokens")
       title = todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
     else if (menuBarTitlePref === "fiveHour")
-      title = effectiveLimitsData ? `${displayUtil(effectiveLimitsData.five_hour.utilization).toFixed(0)}%` : undefined;
+      title = primaryLimit ? `${displayUtil(primaryLimit.utilization).toFixed(0)}%` : undefined;
     else if (menuBarTitlePref === "sevenDay")
-      title = effectiveLimitsData ? `${displayUtil(effectiveLimitsData.seven_day.utilization).toFixed(0)}%` : undefined;
+      title = effectiveLimitsData?.seven_day
+        ? `${displayUtil(effectiveLimitsData.seven_day.utilization).toFixed(0)}%`
+        : undefined;
     else if (menuBarTitlePref === "utilization")
       title = highestUtilization !== null ? `${displayUtil(highestUtilization).toFixed(0)}%` : undefined;
     else if (menuBarTitlePref === "blockProjection") {
@@ -198,8 +201,8 @@ export default function MenuBarccusage() {
     }
 
     // Append time remaining to the title when enabled
-    if (showTimeRemaining && effectiveLimitsData) {
-      const timeStr = formatTimeRemainingCustom(effectiveLimitsData.five_hour.resets_at, timeRemainingFormat);
+    if (showTimeRemaining && primaryLimit) {
+      const timeStr = formatTimeRemainingCustom(primaryLimit.resets_at, timeRemainingFormat);
       if (timeStr && title) title = `${title} · ${timeStr}`;
       else if (timeStr) title = timeStr;
     }
@@ -209,8 +212,8 @@ export default function MenuBarccusage() {
 
   // Resolve the menu bar icon: use a pie chart SVG when that style is selected
   const menuBarIcon: Image.Source = (() => {
-    if (iconStyle === "pie" && effectiveLimitsData) {
-      return pieIcon(effectiveLimitsData.five_hour.utilization) as string;
+    if (iconStyle === "pie" && primaryLimit) {
+      return pieIcon(primaryLimit.utilization) as string;
     }
     return getMenuBarIcon();
   })();
@@ -254,7 +257,8 @@ export default function MenuBarccusage() {
               {limitsError && !limitsData && !limitsRateLimited && (
                 <MenuBarExtra.Item
                   title="Unable to fetch limits"
-                  subtitle="Check Claude Code authentication"
+                  subtitle="Open for details"
+                  tooltip={limitsError.message}
                   icon={Icon.ExclamationMark}
                   onAction={() =>
                     open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)

@@ -1,72 +1,43 @@
 # Cheatsheets Remastered
 
-Access a curated collection of [DevHints](https://devhints.io/) cheatsheets plus the ability to create and manage your own custom sheets - all without leaving your keyboard. You can also import Markdown cheatsheets directly from your GitHub repositories and keep them up to date via a built-in Repository Manager. Search is smart and fast, prioritising titles over content so you find what you need instantly.
+Browse bundled [DevHints](https://devhints.io/) references, your own Markdown and saved GitHub cheatsheets in Raycast on macOS. Search titles, content and repository metadata, keep favorites and return to recently opened sheets.
 
-## Key Features
+[Install from the Raycast Store](https://www.raycast.com/smcnab1/cheatsheets-remastered)
 
-* Built-in collection of DevHints cheatsheets (audited; outdated sheets archived)
-* Create and edit your own custom sheets
-* Import `.md` files from your GitHub repositories (optional subdirectory and file/dir exclusions)
-* Organise with tags and favourites (including repo-imported sheets)
-* One list for everything - built-in, custom, and repository sheets together
-* Local storage for offline access; repository sheets can be synced on demand
-* Smarter search with title-first matching
-* Clickable links back to GitHub for repository sheets
-* "Sync All Repositories" action with progress and error reporting
+## Commands
 
-## What Makes It Different
+| Command                   | Use it to                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| Show Cheatsheets          | Search and filter bundled, custom and repository sheets.                         |
+| Create Custom Cheatsheet  | Write Markdown with a description and tags; unfinished drafts are saved locally. |
+| Manage Custom Cheatsheets | View, edit and delete your personal sheets.                                      |
+| Repo Manager              | Add GitHub repositories and sync their Markdown for offline access.              |
 
-Unlike the original Cheatsheets extension, **Cheatsheets Remastered** comes with cheatsheets ready to use out of the box, no internet required. You can fully customise your own sheets with tags, descriptions, and icons - and now bring in Markdown from your own GitHub repos with fine-grained filtering and a simple sync flow. Repository sheets appear alongside your built-in and custom content, with support for favouriting and quick links back to GitHub.
+Open a sheet and use **Search Within Sheet** (`⌘F`) to find headings and text. **Copy Section Markdown** copies a section; **Copy Original Markdown** preserves the complete source, including frontmatter and whitespace.
 
-## Frequently Asked Questions
+## Import a local Markdown file
 
-**Do I need an internet connection?**
+Open **Manage Custom Cheatsheets** and choose **Import Markdown File** from Actions. Select one UTF-8 `.md` file (up to 1 MiB), review its title, tags and description, then import it as a personal copy. The original file stays unchanged; identical saved content is skipped.
 
-No for built-in and custom sheets - they work completely offline. You'll only need internet if you import/sync sheets from GitHub or want to follow links back to GitHub.
+## Add a GitHub repository
 
-**Can I add my own cheatsheets?**
+Bundled and custom sheets work without a GitHub account. To import repository sheets:
 
-Yes. You can create, edit, tag, and favourite custom sheets directly inside Raycast with full Markdown support, custom icons, and descriptions.
+1. Open **Repo Manager** and sign in with GitHub when prompted.
+2. Choose **Add Repository**. Enter **Owner** and **Repository Name** separately.
+3. Enter the actual **Default Branch**; the form starts with `main`. Optionally set a subdirectory and select **Private Repository** for a private source.
+4. Choose **Sync Repository**, then browse the saved sheets in **Show Cheatsheets**.
 
-**Can I import from GitHub? What does it fetch?**
+Sync uses GitHub OAuth with `repo read:org read:user` scopes. The `repo` grant includes write access, although the extension only makes read requests. The optional **GitHub Token** preference does not override OAuth.
 
-Yes. Connect a GitHub token in Preferences and add repositories in the Repository Manager. The extension fetches Markdown (`.md`) files, with optional subdirectory filters and sensible exclusions (e.g. common admin/CI files and folders). You can sync each repo individually or run **Sync All Repositories** from the manager.
+## Offline use and help
 
-**What GitHub permissions are required?**
+Saved content stays in Raycast's local extension storage, without cross-device sync. Downloading updates and opening remote links or images can require a connection. A failed download retains the previous repository snapshot.
 
-Use `public_repo` for public repositories; use `repo` if you need to access private repositories. The token is only used to read files during sync.
+See [repository behavior and recovery](docs/migration.md) for metadata, import limits, sync exclusions and troubleshooting. Back up local data before downgrading; older versions cannot read newer changes. Never include tokens or private sheet content in [issue reports](https://github.com/smcnab1/cheatsheets-remastered/issues).
 
-**Are my custom or imported cheatsheets synced across devices?**
+## Maintenance and credits
 
-All sheets are stored locally in Raycast's storage. Automatic cross-device sync isn't available yet. Repository sheets can be re-fetched on any device via the Repository Manager after you add the repo and token.
+I maintain this extension as Sam McNab ([smcnab1](https://github.com/smcnab1)). Development setup and submission notes are in the [release checklist](https://github.com/smcnab1/cheatsheets-remastered/blob/main/RELEASE_CHECKLIST.md); shipped changes are in the [changelog](CHANGELOG.md).
 
-**How does the search work?**
-
-Search prioritises title matches first, then content matches. This means cheatsheets with your query in the title appear before those with it in the content, making results more relevant.
-
-**Where did the "copy cheatsheet" command go?**
-
-It was removed to simplify the command set and reduce redundancy.
-
-## Troubleshooting
-
-**I can't find a cheatsheet.**
-
-Make sure you haven't filtered to a specific type (e.g. "Custom only"). The list now includes built-in, custom, and repository sheets; set the filter to **All** if needed. You can also filter by **Favourites**.
-
-**My custom or repository sheet isn't showing up.**
-
-For custom: ensure it has a title and saved content.
-For repositories: confirm your token is set, the repository/branch/subdirectory are correct, and that the file isn't excluded by filters. Try syncing the repo (or **Sync All Repositories**) and check the sync result summary.
-
-**Search feels slow.**
-
-Performance is local and should be fast. If it feels sluggish, try reducing very large Markdown files or limiting how many huge repository docs you sync (images and heavy HTML in Markdown can impact rendering).
-
-**I can't see the built-in cheatsheets.**
-
-Ensure you're not filtered to "Custom only" or "Repository only". Built-in cheatsheets appear when the filter is set to **All** (or includes **Default** items).
-
-**Content import isn't working.**
-
-Repository import requires a GitHub token and network access. Common errors such as authentication failures, rate limiting, or missing branches are reported in the sync summary; fix the stated issue and retry.
+The extension is [MIT licensed](LICENSE). Bundled DevHints references are by Rico Sta. Cruz and contributors; see [attribution and licensing notes](ATTRIBUTION.md).

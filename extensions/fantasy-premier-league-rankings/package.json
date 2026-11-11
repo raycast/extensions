@@ -2,54 +2,146 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fantasy-premier-league-rankings",
   "title": "Fantasy Premier League",
-  "description": "See where you rank amongst in your league rivals in Fantasy Premier League within Raycast.",
+  "description": "Your FPL team, gameweek history, fixtures, player stats, price changes and mini-leagues",
   "icon": "icon.png",
   "author": "hwb",
   "contributors": [
-    "niall-maloney"
+    "niall-maloney",
+    "vicjor"
   ],
   "categories": [
-    "Fun"
+    "Fun",
+    "Data"
+  ],
+  "keywords": [
+    "fpl",
+    "fantasy football",
+    "premier league",
+    "football",
+    "soccer"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "rankings",
-      "title": "View My Rankings",
-      "subtitle": "Fantasy Premier League FPL",
-      "description": "View your live ranking across all your leagues in Fantasy Premier League.",
+      "name": "my-team",
+      "title": "My Team",
+      "icon": "my-team.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Your squad with live points, captain, bench, value and rank, as a list or on the pitch",
+      "keywords": [
+        "fpl"
+      ],
       "mode": "view"
+    },
+    {
+      "name": "price-changes",
+      "title": "Price Changes",
+      "icon": "price-changes.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Projected price rises and falls, and tonight's likely movers",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "players",
+      "title": "Search Players",
+      "icon": "players.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Search all players with price, form, ownership and upcoming fixtures",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "fixtures",
+      "title": "Fixtures",
+      "icon": "fixtures.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Fixtures and results by gameweek with difficulty ratings",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Gameweek History",
+      "icon": "history.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Points, rank, transfers and chips for every gameweek this season",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "rankings",
+      "title": "Mini-Leagues",
+      "icon": "leagues.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Your rank and standings in your classic mini-leagues",
+      "keywords": [
+        "fpl",
+        "rankings"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Live Points in Menu Bar",
+      "icon": "my-team.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Your live gameweek points in the menu bar, with every player, your rank and the next deadline",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "open-team",
+      "title": "Open My Team",
+      "icon": "open-team.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Open your team on the FPL website",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "no-view"
     }
   ],
   "preferences": [
     {
       "name": "userTeamId",
-      "title": "Your Team ID",
-      "description": "The ID of your team, found on the URL of your team page. You can get it from the URL of your team page, e.g. https://fantasy.premierleague.com/entry/1234567/event/1",
+      "title": "Team ID",
+      "description": "Found in the URL of your Points page: fantasy.premierleague.com/entry/<Team ID>/event/…. When empty, the commands ask for it.",
       "type": "textfield",
-      "required": true,
-      "placeholder": "Enter your team ID"
+      "required": false,
+      "placeholder": "1234567"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
-    "axios": "^0.30.3"
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.2",
-    "react": "^18.2.0",
-    "typescript": "^4.9.4"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

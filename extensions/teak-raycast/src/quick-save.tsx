@@ -8,7 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
 import { SetApiKeyAction } from "./components/SetApiKeyAction";
 import { SignOutAction } from "./components/SignOutAction";
@@ -17,10 +17,13 @@ import {
   getUserFacingErrorMessage,
   quickSaveCard,
 } from "./lib/api";
+import { parseCaptureExtras, savedToastText } from "./lib/capture";
 import { useTeakAuth } from "./lib/useTeakAuth";
 
 interface FormValues {
   content: string;
+  notes: string;
+  tags: string;
 }
 
 const addSuccessActions = (
@@ -50,7 +53,11 @@ const addSuccessActions = (
 
 export default function QuickSaveCommand() {
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
+  const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  // Set before the first await, so a second ⌘↵ can't save the card twice.
+  const savingRef = useRef<boolean>(false);
 
   const {
     isAuthenticated,
@@ -59,18 +66,15 @@ export default function QuickSaveCommand() {
     refresh: refreshAuth,
   } = useTeakAuth();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: prefill clipboard only once on mount; re-running would clobber user input
   useEffect(() => {
     let isMounted = true;
 
     const loadClipboardText = async () => {
-      try {
-        const clipboardText = await Clipboard.readText();
-        if (isMounted && !content.trim() && clipboardText?.trim()) {
-          setContent(clipboardText);
-        }
-      } catch {
-        // Ignore clipboard prefill failures and keep the form usable.
+      const clipboard = await Clipboard.read().catch(() => undefined);
+      // A copied file reads back as its name; Save Clipboard uploads the file.
+      const clipboardText = clipboard?.file ? undefined : clipboard?.text;
+      if (isMounted && clipboardText?.trim()) {
+        setContent((current) => (current.trim() ? current : clipboardText));
       }
     };
 
@@ -82,6 +86,9 @@ export default function QuickSaveCommand() {
   }, []);
 
   const handleSubmit = async (values: FormValues) => {
+    if (savingRef.current) {
+      return;
+    }
     if (!values.content.trim()) {
       await showToast({
         message: "Enter text or a URL before saving.",
@@ -91,6 +98,7 @@ export default function QuickSaveCommand() {
       return;
     }
 
+    savingRef.current = true;
     setIsSaving(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -98,15 +106,23 @@ export default function QuickSaveCommand() {
     });
 
     try {
-      const result = await quickSaveCard({
-        content: values.content,
-        source: "raycast_quick_save",
-      });
+      const result = await quickSaveCard(
+        {
+          content: values.content,
+          source: "raycast_quick_save",
+          ...parseCaptureExtras(values),
+        },
+        "interactive",
+      );
       addSuccessActions(toast, result);
+      const { message, title } = savedToastText(result);
       toast.style = Toast.Style.Success;
-      toast.title = "Saved to Teak";
+      toast.title = title;
+      toast.message = message;
 
       setContent("");
+      setTags("");
+      setNotes("");
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Save failed";
@@ -115,6 +131,7 @@ export default function QuickSaveCommand() {
         ? `${getUserFacingErrorMessage(error)} ${hint}`
         : getUserFacingErrorMessage(error);
     } finally {
+      savingRef.current = false;
       setIsSaving(false);
     }
   };
@@ -140,6 +157,7 @@ export default function QuickSaveCommand() {
           <SignOutAction onSignedOut={refreshAuth} />
         </ActionPanel>
       }
+      isLoading={isSaving}
       navigationTitle="Quick Save to Teak"
     >
       <Form.TextArea
@@ -148,6 +166,20 @@ export default function QuickSaveCommand() {
         placeholder="Paste or type text, links, or notes..."
         title="Content"
         value={content}
+      />
+      <Form.TextField
+        id="tags"
+        onChange={setTags}
+        placeholder="design, research (optional)"
+        title="Tags"
+        value={tags}
+      />
+      <Form.TextArea
+        id="notes"
+        onChange={setNotes}
+        placeholder="Add a note (optional)"
+        title="Note"
+        value={notes}
       />
     </Form>
   );

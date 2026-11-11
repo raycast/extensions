@@ -38,7 +38,8 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
   }, [resource.id, client]);
 
   // Build markdown content
-  let markdown = `# ${resource.name}\n\n`;
+  const resourceName = resource.name || "Unnamed resource";
+  let markdown = `# ${resourceName}\n\n`;
 
   // Credentials section
   markdown += `## 🔐 Credentials\n\n`;
@@ -84,7 +85,7 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
     <Detail
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={resource.name}
+      navigationTitle={resourceName}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Username" text={resource.username || "—"} icon={Icon.Person} />

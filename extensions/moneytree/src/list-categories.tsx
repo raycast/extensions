@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { CACHE_KEYS, removeCached } from "./lib/cache";
 import { useEffect, useMemo, useState } from "react";
 import {
   getCategoryDisplayIcon,
@@ -99,6 +100,19 @@ export default function Command() {
     loadCategories();
   }, []);
 
+  function refreshCategories() {
+    removeCached(CACHE_KEYS.categories());
+    return loadCategories();
+  }
+  const refreshAction = (
+    <Action
+      title="Refresh Categories"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={refreshCategories}
+    />
+  );
+
   const categoriesById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
   const filteredCategories = useMemo(() => filterCategories(categories, filter), [categories, filter]);
   const groupedCategories = useMemo(
@@ -116,28 +130,30 @@ export default function Command() {
   if (error && categories.length === 0) {
     return (
       <List>
-        <List.EmptyView icon={Icon.ExclamationMark} title="Error Loading Categories" description={error} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Load Categories"
+          description={error}
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
       </List>
     );
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Categories"
-      searchBarAccessory={<CategoryTypeDropdown value={filter} onChange={setFilter} />}
-    >
+    <List isLoading={isLoading} searchBarAccessory={<CategoryTypeDropdown value={filter} onChange={setFilter} />}>
       {groupedCategories.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Tag}
           title="No Categories"
           description="No categories match the selected filter."
           actions={
-            getDefaultParentId(createParentOptions) ? (
-              <ActionPanel>
+            <ActionPanel>
+              {getDefaultParentId(createParentOptions) ? (
                 <Action.Push
                   title="Create Category"
-                  icon={Icon.PlusCircle}
+                  icon={Icon.Plus}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   target={
                     <CreateCategoryForm
                       categories={createParentOptions}
@@ -146,8 +162,9 @@ export default function Command() {
                     />
                   }
                 />
-              </ActionPanel>
-            ) : undefined
+              ) : null}
+              {refreshAction}
+            </ActionPanel>
           }
         />
       ) : (
@@ -162,6 +179,7 @@ export default function Command() {
               return (
                 <List.Item
                   key={category.id}
+                  id={String(category.id)}
                   icon={getCategoryDisplayIcon(category, categoriesById)}
                   title={category.name}
                   subtitle={parentName}
@@ -172,6 +190,7 @@ export default function Command() {
                         <Action.Push
                           title="Edit Category"
                           icon={Icon.Pencil}
+                          shortcut={Keyboard.Shortcut.Common.Edit}
                           target={
                             <CreateCategoryForm
                               categories={createParentOptions}
@@ -185,7 +204,8 @@ export default function Command() {
                       ) : null}
                       <Action.Push
                         title="Create Child Category"
-                        icon={Icon.PlusCircle}
+                        icon={Icon.Plus}
+                        shortcut={Keyboard.Shortcut.Common.New}
                         target={
                           <CreateCategoryForm
                             categories={createParentOptions}
@@ -203,8 +223,10 @@ export default function Command() {
                       <Action.CopyToClipboard
                         title="Copy Category Details"
                         icon={Icon.Clipboard}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
                         content={`${category.name} (#${category.id})${parentName ? ` under ${parentName}` : ""}`}
                       />
+                      {refreshAction}
                     </ActionPanel>
                   }
                 />

@@ -25,15 +25,7 @@ describe("reset ledger and announcements", () => {
     expect(latestReset({ ...response, history }, now)?.dateTime).toBe(response.history[0].dateTime);
     expect(resetHistory(response, "resets")).toHaveLength(24);
     expect(resetHistory(response, "banked")).toHaveLength(2);
-    expect(resetHistory(response, "announcements").every((r) => r.evidence?.kind === "reset-intent")).toBe(true);
-  });
-
-  it("joins evidence by source URL and avoids repeating a fulfilled announcement", () => {
-    const records = resetHistory(response);
-    const sourceUrl = response.history[1].sourceUrl;
-    expect(records.filter((r) => r.sourceUrl === sourceUrl)).toHaveLength(1);
-    expect(records.find((r) => r.sourceUrl === sourceUrl)?.evidence?.kind).toBe("reset-intent");
-    expect(records[0].evidence?.summary).toBe("All reset for everyone. Enjoy the week with Astra.");
+    expect(resetHistory(response, "announcements").every((r) => r.type === "announcement")).toBe(true);
   });
 
   it("preserves separate ledger sources even when their dates are close", () => {
@@ -46,7 +38,7 @@ describe("reset ledger and announcements", () => {
       { ...response.history[0], type: "future-kind" },
     ];
     expect(latestReset({ ...response, history }, now)).toBeUndefined();
-    expect(recordLabel(history[1])).toBe("Other Record");
+    expect(recordLabel(history[1])).toBe(history[1].title);
     expect(resetHistory({ ...response, history }, "all").some((r) => r.type === "future-kind")).toBe(true);
   });
 

@@ -4,12 +4,18 @@ Raycast commands for the locally installed Otty terminal.
 
 ## Commands
 
-- Open in Otty: open the current Finder window directory in a new Otty tab
+- Search Otty Tabs: browse Otty by tab, pane, or window, with coding-agent status, a live pane preview, and Send Message
+- Otty Agents (menu bar): agents that need input, one click away
+- Jump to Directory: Otty's most-visited folders, or git repositories under a folder you choose; pin favorites
+- Otty Settings: search, toggle, and edit Otty's settings
+- Change Otty Theme: a grid of theme previews for light and dark mode
+- Open Otty Recipe: open an exported `.ottyrecipe` file from a folder you choose
+- Open in Otty: open the selected Finder folders as tabs and files in Otty's viewer (or the front Finder window)
 - New Window
 - New Tab
 - Open Directory
 - Run Command
-- SSH
+- SSH (accepts ssh options, e.g. `-p 2222 user@host`)
 
 ## Local Setup
 
@@ -21,10 +27,11 @@ The extension defaults to:
 
 If your Otty CLI lives somewhere else, update the Raycast extension preference `Otty CLI Path`.
 
-`Open in Otty` reads the front Finder window directory through macOS Automation,
-opens it in a new Otty tab, and falls back to a new Otty window if no running
-Otty app can accept tab commands. On first use, macOS may ask you to allow
-Raycast to control Finder.
+`Open in Otty` opens the folders selected in Finder as new Otty tabs and the
+selected files in Otty's viewer. With nothing selected and Finder in front, it
+opens the front Finder window's folder (or the Desktop when no window is open),
+which uses macOS Automation: on first use, macOS may ask you to allow Raycast
+to control Finder. If Otty can't open a tab, a new window opens instead.
 
 ## Development
 

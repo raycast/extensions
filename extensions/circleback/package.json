@@ -63,11 +63,11 @@
     }
   ],
   "dependencies": {
-    "@ai-sdk/react": "4.0.125",
+    "@ai-sdk/react": "4.0.141",
     "@raycast/api": "^1.102.6",
     "@raycast/utils": "^1.17.0",
     "@resvg/resvg-wasm": "2.6.2",
-    "ai": "7.0.122",
+    "ai": "7.0.138",
     "fast-xml-parser": "^5.11.2",
     "zod": "^4.4.3"
   },

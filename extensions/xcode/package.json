@@ -11,7 +11,8 @@
     "oliep",
     "3llomi",
     "ridemountainpig",
-    "jostein_dyrseth"
+    "jostein_dyrseth",
+    "nhojb"
   ],
   "categories": [
     "Developer Tools",
@@ -130,6 +131,14 @@
           "title": "Excluded Xcode Project paths (comma separated)",
           "description": "A comma separated list of directory paths that should be excluded when searching for recent Xcode Projects.",
           "placeholder": "~/Backup,~/Archive/Xcode"
+        },
+        {
+          "name": "showDirectoryTag",
+          "type": "checkbox",
+          "required": false,
+          "description": "Show a tag with the git root directory, or the parent directory, instead of the project path. Hover over the tag to see the full path.",
+          "default": false,
+          "label": "Show directory tag instead of path"
         },
         {
           "name": "terminalApp",
@@ -707,6 +716,7 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9"
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7"
   }
 }

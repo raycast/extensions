@@ -27,16 +27,26 @@ dist/
 # Editor
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 
 # Environment
+# Load-bearing: `ray publish` copies the whole working tree — .gitignore included —
+# and these patterns keep copied local environment files out of the public Store PR.
 .env
+.env.*
+!.env.example
 
 # Raycast
 .raycast/
 
+# Agent tooling
+.agents/
 .claude/
+
+# Keep the tracked source config out of new Raycast Store submissions.
+/.coderabbit.yaml
 
 # Promptfoo local artifacts
 .promptfoo/

@@ -3,6 +3,7 @@ import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
 import path from "path";
+import { getBobAppName, readProductJSON } from "./lib/bob";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
@@ -41,7 +42,10 @@ export function useRecentEntries() {
     }
 
     try {
-      await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
+      await saveEntries(
+        dbPath,
+        parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)),
+      );
       await revalidate();
       showToast(Toast.Style.Success, "Entry removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
     } catch {
@@ -66,7 +70,7 @@ export function useRecentEntries() {
           },
         })
       ) {
-        await saveEntries([]);
+        await saveEntries(dbPath, []);
         await revalidate();
         showToast(Toast.Style.Success, "All entries removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
       }
@@ -83,39 +87,20 @@ function getPath() {
   if (sharedPath && fs.existsSync(sharedPath)) {
     return sharedPath;
   }
-  return path.join(homedir(), "Library", "Application Support", "IBM Bob", "User", "globalStorage", "state.vscdb");
+  const appName = getBobAppName();
+  return path.join(homedir(), "Library", "Application Support", appName, "User", "globalStorage", "state.vscdb");
 }
 
 function getSharedStateDatabasePath(): string | undefined {
-  const sharedDataFolderName = getSharedDataFolderName();
+  const sharedDataFolderName = readProductJSON().sharedDataFolderName;
   if (!sharedDataFolderName) return undefined;
   // sharedDataFolderName (e.g. ".bobide-shared") lives directly in the home directory.
   return path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb");
 }
 
-function getSharedDataFolderName(): string | undefined {
-  const candidates = [
-    "/Applications/IBM Bob.app/Contents/Resources/app/product.json",
-    path.join(homedir(), "Applications", "IBM Bob.app", "Contents", "Resources", "app", "product.json"),
-  ];
-  for (const productJSONPath of candidates) {
-    if (fs.existsSync(productJSONPath)) {
-      try {
-        const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as { sharedDataFolderName?: string };
-        if (productJSON.sharedDataFolderName) {
-          return productJSON.sharedDataFolderName;
-        }
-      } catch {
-        // Ignore malformed product.json.
-      }
-    }
-  }
-  return undefined;
-}
-
-async function saveEntries(entries: EntryLike[]) {
+async function saveEntries(dbPath: string, entries: EntryLike[]) {
   const data = JSON.stringify({ entries });
   const escapedData = data.replace(/'/g, "''");
   const query = `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${escapedData}');`;
-  await execFilePromise("sqlite3", [getPath(), query]);
+  await execFilePromise("sqlite3", [dbPath, query]);
 }

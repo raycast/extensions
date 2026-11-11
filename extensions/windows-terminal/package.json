@@ -65,7 +65,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "build": "ray build",
-    "test": "node --test src/new-tab-menu.test.ts",
+    "test": "node --test src/new-tab-menu.test.ts src/utils/terminal-env.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "author": "lunaris",

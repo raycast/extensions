@@ -1,4 +1,3 @@
-import { open } from "@raycast/api";
 import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
@@ -149,14 +148,6 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
     }
   }
   return false;
-}
-
-export function raycastForBobURI(uri: string) {
-  return `bobide://tonka3000.raycast/${uri}`;
-}
-
-export async function openURIinBob(uri: string) {
-  await open(raycastForBobURI(uri));
 }
 
 export function isValidHexColor(color: string): boolean {

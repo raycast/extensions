@@ -8,11 +8,15 @@ import {
   getChatSources,
   loadSavedMessages,
 } from "../utils/assistant/chat";
+import { reportErrors } from "../utils/error";
+
+const fetchChats = reportErrors(fetchAssistantChats);
+const loadMessages = reportErrors(loadSavedMessages);
 
 export const useAssistantChat = (initialQuestion?: string) => {
   const [newChatId] = useState(() => crypto.randomUUID());
   const [selectedChatId, setSelectedChatId] = useState<string>();
-  const { data: savedChats = [], isLoading: isLoadingChats } = usePromise(fetchAssistantChats);
+  const { data: savedChats = [], isLoading: isLoadingChats } = usePromise(fetchChats);
   const chats =
     initialQuestion === undefined
       ? savedChats
@@ -23,7 +27,7 @@ export const useAssistantChat = (initialQuestion?: string) => {
   const chatId = selectedChatId ?? chats[0]?.id ?? newChatId;
   const chat = getAssistantChat(chatId);
   const { messages, status } = useChat({ chat, experimental_throttle: 50 });
-  const { isLoading: isLoadingMessages, error: loadMessagesError } = usePromise(loadSavedMessages, [chat], {
+  const { isLoading: isLoadingMessages, error: loadMessagesError } = usePromise(loadMessages, [chat], {
     execute: chatId !== newChatId,
     failureToastOptions: { title: "Could not load the chat." },
   });

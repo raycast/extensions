@@ -10,6 +10,12 @@ export function getVolumeStep(): number {
   return Number.isFinite(parsedStep) && parsedStep > 0 ? parsedStep : 10;
 }
 
+/** Seconds that Rewind and Fast Forward move by. Fixed for now; a preference
+ * can plug in here without touching the commands. */
+export function getSeekSeconds(): number {
+  return 15;
+}
+
 export function getHudDisabled(): boolean {
   const { disableHUD: hide = false } = getPreferences();
   return hide;

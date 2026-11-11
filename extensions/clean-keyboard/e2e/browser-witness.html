@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Clean Keyboard input acceptance</title>
+  <style>
+    body {
+      font: 18px system-ui;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 24px;
+      line-height: 1.6;
+    }
+    label,
+    input,
+    button {
+      display: block;
+      margin: 12px 0;
+      font: inherit;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+    }
+    button {
+      padding: 12px 24px;
+    }
+    output {
+      display: block;
+      position: sticky;
+      top: 0;
+      background: white;
+      border: 2px solid #333;
+      padding: 16px;
+      white-space: pre-wrap;
+    }
+    .spacer {
+      height: 1600px;
+      background: linear-gradient(#e5efff, #ffe5e5);
+      padding: 24px;
+    }
+  </style>
+  <h1>Keyboard, clicks, and scrolling</h1>
+  <p>
+    Before locking, focus the input and type a harmless marker. Click the button and scroll once. During a timed lock,
+    attempt the same actions. The input and click count must stay unchanged while scrolling continues. After release,
+    typing and clicking must work again.
+  </p>
+  <label for="marker">Harmless test text</label
+  ><input id="marker" autocomplete="off" />
+  <button id="clicker">Count a click</button>
+  <output id="state" aria-live="polite"></output>
+  <div class="spacer">Scroll down while locked. The scroll count should increase.</div>
+  <p>End of scroll area</p>
+  <script>
+    let clicks = 0,
+      keys = 0,
+      scrolls = 0;
+    const marker = document.querySelector("#marker"),
+      state = document.querySelector("#state");
+    function update() {
+      state.textContent = JSON.stringify(
+        { text: marker.value, clicks, keys, scrolls, scrollY: Math.round(scrollY) },
+        null,
+        2,
+      );
+    }
+    document.querySelector("#clicker").addEventListener("click", () => {
+      clicks++;
+      update();
+    });
+    marker.addEventListener("input", update);
+    window.addEventListener("keydown", () => {
+      keys++;
+      update();
+    });
+    window.addEventListener(
+      "scroll",
+      () => {
+        scrolls++;
+        update();
+      },
+      { passive: true },
+    );
+    update();
+  </script>
+</html>

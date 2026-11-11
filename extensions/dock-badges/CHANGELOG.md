@@ -1,5 +1,11 @@
 # Dock Badges Changelog
 
+## [Native Dock Reading] - 2026-10-17
+
+- The Dock is read through the Accessibility API by a small native helper instead of AppleScript, so each badge is matched to the exact app it belongs to and opens that app
+- Ignored apps are told apart by bundle identifier, so a beta and a release with the same name can be ignored separately; apps ignored in the previous version stay ignored
+- Updated to Raycast API 2.8
+
 ## [Initial Version] - 2026-10-16
 
 - Menu bar item showing the summed notification badge count of every app in your Dock

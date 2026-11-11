@@ -1,5 +1,6 @@
-import { verifyEmail } from "../lib/bouncer";
+import { isSandboxAddress, verifyEmail } from "../lib/bouncer";
 import { isValidEmail, normalizeEmail } from "../lib/email";
+import { saveToHistory } from "../lib/history";
 import { formatFlag, formatReason, formatToxicity, getVerdict } from "../lib/verdict";
 
 type Input = {
@@ -19,10 +20,14 @@ export default async function verifyEmailTool(input: Input) {
   const email = normalizeEmail(input.email);
 
   if (!isValidEmail(email)) {
-    throw new Error(`"${input.email}" is not a valid email address, so it was not sent to Bouncer.`);
+    throw new Error(
+      `"${input.email}" is not a valid email address, so it was not sent to Bouncer and no credit was spent.`,
+    );
   }
 
   const record = await verifyEmail(email);
+  // The credit is spent either way; a history write failing must not hide the result.
+  await saveToHistory({ kind: "email", subject: record.email, record, verifiedAt: Date.now() }).catch(() => undefined);
 
   return {
     email: record.email,
@@ -43,6 +48,8 @@ export default async function verifyEmailTool(input: Input) {
       toxicity: formatToxicity(record.toxicity),
     },
     didYouMean: record.didYouMean,
-    creditsSpent: 1,
+    creditsSpent: isSandboxAddress(record.email) ? 0 : 1,
+    // Sits beside the data so it still applies when a follow-up question reuses this result.
+    note: "Bouncer's findings only. Bouncer makes no send, keep or remove recommendation, and the reply must not add one.",
   };
 }

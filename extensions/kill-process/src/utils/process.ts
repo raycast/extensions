@@ -42,7 +42,8 @@ function executeCommand(command: string): Promise<void> {
 
 function executeCommandWithOutput(command: CommandSpec): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(command.executable, command.args, EXEC_OPTIONS, (error, stdout) => {
+    const options = command.env ? { ...EXEC_OPTIONS, env: { ...process.env, ...command.env } } : EXEC_OPTIONS;
+    execFile(command.executable, command.args, options, (error, stdout) => {
       if (error) {
         reject(error);
         return;

@@ -67,3 +67,38 @@ test("grouped browsing loads notebooks and sections before newer notes while fla
     db.close();
   }
 });
+
+test("timestamp columns are cast to REAL so node:sqlite does not throw for Windows FILETIME values", () => {
+  // Windows FILETIME ticks (100-ns since 1601-01-01) exceed Number.MAX_SAFE_INTEGER.
+  // node:sqlite (Node 22) throws RangeError for such values unless we CAST to REAL.
+  let capturedSql;
+  const state = [0, "", 100];
+  const jsx = (type, props) => ({ type, props });
+  const source = loadSource(
+    "directory",
+    {
+      "./search": loadSource("search", {}),
+      "./types": loadSource("types", {}),
+      "./utils": { getAncestorsStr: () => "", getIcon: () => {}, getParentTitle: () => "", parseDatetime: () => "" },
+      "@raycast/api": { List: { Item: {}, Section: {}, EmptyView: {}, Dropdown: { Section: {}, Item: {} } }, ActionPanel: {}, Action: { Push: {} }, Icon: {}, Detail: {} },
+      "@raycast/utils": {
+        useSQL: (_path, sql) => {
+          capturedSql = sql;
+          return { data: [], isLoading: false };
+        },
+      },
+      react: { useState: () => [state.shift(), () => {}] },
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+    },
+    "tsx"
+  );
+  // Call Directory with no elt so it uses the full LIST_COLUMNS query
+  source.Directory({ databasePath: "/synthetic.db", fullTextIndexed: false });
+  assert.ok(capturedSql, "Directory must call useSQL");
+  assert.ok(capturedSql.includes("CAST(LastModifiedTime AS REAL)"), "LastModifiedTime must be cast to REAL");
+  assert.ok(capturedSql.includes("CAST(RecentTime AS REAL)"), "RecentTime must be cast to REAL");
+  assert.ok(capturedSql.includes("CAST(PinTime AS REAL)"), "PinTime must be cast to REAL");
+  // ORDER BY must use the table-qualified column so SQLite can use the index
+  // rather than sorting the cast alias (which would force a full-table sort).
+  assert.ok(capturedSql.includes("Entities.RecentTime DESC"), "ORDER BY must be table-qualified to use the index");
+});
