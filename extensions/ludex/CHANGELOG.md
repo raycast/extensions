@@ -1,6 +1,6 @@
 # Ludex Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-11
 
 - Lists installed games from Steam, GOG, Epic Games and Xbox / Game Pass, with their save, config and install folders.
 - Shows each game with the artwork its store keeps on disk.
