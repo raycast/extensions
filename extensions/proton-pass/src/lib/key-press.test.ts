@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isBundleId, isPermissionError, KeyCode, keyPressScript, NOT_FRONTMOST_ERROR } from "./key-press";
+import { isBundleId, KeyCode, keyPressScript, missingPermission, NOT_FRONTMOST_ERROR } from "./key-press";
 
 test("presses keys only while the expected app is in front", () => {
   const guard = [
@@ -34,14 +34,18 @@ test("only accepts bundle identifiers that can't break out of the script", () =>
   assert.throws(() => keyPressScript(KeyCode.V, ["command"], 'x" & "y'), /Invalid bundle identifier/);
 });
 
-test("recognizes missing Accessibility or Automation permissions", () => {
+test("tells which permission is missing, Accessibility or Automation", () => {
   assert.equal(
-    isPermissionError("System Events got an error: osascript is not allowed to send keystrokes. (1002)"),
-    true,
+    missingPermission("System Events got an error: osascript is not allowed to send keystrokes. (1002)"),
+    "accessibility",
   );
-  assert.equal(isPermissionError("Not authorized to send Apple events to System Events. (-1743)"), true);
-  assert.equal(isPermissionError("System Events got an error: Can’t get process 1. (-1728)"), false);
-  assert.equal(isPermissionError(`execution error: ${NOT_FRONTMOST_ERROR} (-2700)`), false);
+  assert.equal(
+    missingPermission("System Events got an error: Access for assistive devices is disabled. (-25211)"),
+    "accessibility",
+  );
+  assert.equal(missingPermission("Not authorized to send Apple events to System Events. (-1743)"), "automation");
+  assert.equal(missingPermission("System Events got an error: Can’t get process 1. (-1728)"), undefined);
+  assert.equal(missingPermission(`execution error: ${NOT_FRONTMOST_ERROR} (-2700)`), undefined);
 });
 
 test("AppleScript reads the key press script as written", { skip: process.platform !== "darwin" }, () => {

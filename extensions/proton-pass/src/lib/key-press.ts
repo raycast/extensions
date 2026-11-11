@@ -32,7 +32,23 @@ export function keyPressScript(keyCode: number, modifiers: KeyModifier[], bundle
   ].join("\n");
 }
 
-/** Errors System Events returns when Raycast isn't allowed to control the computer (Accessibility or Automation). */
-export function isPermissionError(message: string): boolean {
-  return /not allowed|not authori[sz]ed|\(-1743\)|\(-25211\)|\(1002\)/i.test(message);
+/**
+ * A permission filling needs, in System Settings › Privacy & Security: Accessibility (named Device Control and Data
+ * Access in recent macOS versions) to press keys, and Automation to control System Events.
+ */
+export type FillPermission = "accessibility" | "automation";
+
+/** The pane of System Settings › Privacy & Security where Raycast gets each permission. */
+export const PERMISSION_SETTINGS_URLS: Record<FillPermission, string> = {
+  accessibility: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+  automation: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation",
+};
+
+/** The permission whose absence made System Events fail with this message, if that's why it failed. */
+export function missingPermission(message: string): FillPermission | undefined {
+  // Raycast may not send Apple events to System Events.
+  if (/not authori[sz]ed|\(-1743\)/i.test(message)) return "automation";
+  // System Events may not press keys for Raycast.
+  if (/not allowed|\(-25211\)|\(1002\)/i.test(message)) return "accessibility";
+  return undefined;
 }

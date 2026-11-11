@@ -1,7 +1,21 @@
-import { Clipboard, PopToRootType, closeMainWindow, getFrontmostApplication, popToRoot, showHUD } from "@raycast/api";
+import {
+  Clipboard,
+  PopToRootType,
+  closeMainWindow,
+  getFrontmostApplication,
+  open,
+  popToRoot,
+  showHUD,
+} from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { FillDriver, FillRequest, TargetAppError, runFill } from "./fill-sequence";
-import { FRONTMOST_BUNDLE_ID_SCRIPT, NOT_FRONTMOST_ERROR, isBundleId, keyPressScript } from "./key-press";
+import {
+  FRONTMOST_BUNDLE_ID_SCRIPT,
+  NOT_FRONTMOST_ERROR,
+  PERMISSION_SETTINGS_URLS,
+  isBundleId,
+  keyPressScript,
+} from "./key-press";
 
 /** Minimum time for the previous app to get the focus back once Raycast closes. */
 const FOCUS_DELAY_MS = 250;
@@ -77,6 +91,7 @@ function createRaycastDriver(target: TargetApp): FillDriver {
       }
     },
     wait,
+    openPermissionSettings: (permission) => open(PERMISSION_SETTINGS_URLS[permission]),
     showHud: (message) => showHUD(message),
     logError: (error) => console.error("Couldn't fill:", error),
     finish: () => popToRoot({ clearSearchBar: true }),

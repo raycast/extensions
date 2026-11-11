@@ -1,13 +1,26 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ClipboardSnapshot, FAILURE_HUD, FillDriver, PERMISSION_HUD, TargetAppError, runFill } from "./fill-sequence";
+import {
+  ClipboardSnapshot,
+  FAILURE_HUD,
+  FillDriver,
+  PERMISSION_FALLBACK_HUD,
+  PERMISSION_HUD,
+  TargetAppError,
+  runFill,
+} from "./fill-sequence";
 import { KeyCode } from "./key-press";
 
 const PREVIOUS: ClipboardSnapshot = { text: "previous clipboard" };
 const NOT_IN_FRONT = "Stopped filling: Example isn't in front";
 
-/** Records what the fill sequence does, optionally failing when returning to the app or on a given key press. */
-function fakeDriver(failures: { onReturn?: Error; onKey?: { keyCode: number; error: Error } } = {}) {
+/**
+ * Records what the fill sequence does, optionally failing when returning to the app, on a given key press or when
+ * opening System Settings.
+ */
+function fakeDriver(
+  failures: { onReturn?: Error; onKey?: { keyCode: number; error: Error }; onOpenSettings?: Error } = {},
+) {
   const calls: string[] = [];
   const driver: FillDriver = {
     readClipboard: async () => {
@@ -30,6 +43,10 @@ function fakeDriver(failures: { onReturn?: Error; onKey?: { keyCode: number; err
     },
     wait: async (ms) => {
       calls.push(`wait ${ms}`);
+    },
+    openPermissionSettings: async (permission) => {
+      if (failures.onOpenSettings) throw failures.onOpenSettings;
+      calls.push(`open ${permission} settings`);
     },
     showHud: async (message) => {
       calls.push(`hud ${message}`);
@@ -106,17 +123,48 @@ test("stops as soon as another app comes in front", async () => {
   assert.deepEqual(calls.slice(-3), ["restore previous clipboard", `hud ${NOT_IN_FRONT}`, "finish"]);
 });
 
-test("restores the clipboard and explains missing permissions when a key press fails", async () => {
-  const denied = fakeDriver({
-    onKey: {
-      keyCode: KeyCode.V,
-      error: new Error("System Events got an error: osascript is not allowed to send keystrokes. (1002)"),
-    },
-  });
-  await runFill(denied.driver, { values: ["secret"] });
-  assert.deepEqual(denied.calls.slice(-3), ["restore previous clipboard", `hud ${PERMISSION_HUD}`, "finish"]);
+const ACCESSIBILITY_DENIED = new Error(
+  "System Events got an error: osascript is not allowed to send keystrokes. (1002)",
+);
+const AUTOMATION_DENIED = new Error("Not authorized to send Apple events to System Events. (-1743)");
 
-  const failed = fakeDriver({ onKey: { keyCode: KeyCode.Tab, error: new Error("something else") } });
-  await runFill(failed.driver, { values: ["alice", "secret"] });
-  assert.deepEqual(failed.calls.slice(-3), ["restore previous clipboard", `hud ${FAILURE_HUD}`, "finish"]);
+test("opens the Accessibility settings when Raycast may not press keys", async () => {
+  const { driver, calls } = fakeDriver({ onKey: { keyCode: KeyCode.V, error: ACCESSIBILITY_DENIED } });
+  await runFill(driver, { values: ["secret"] });
+
+  assert.deepEqual(calls.slice(-4), [
+    "restore previous clipboard",
+    "open accessibility settings",
+    `hud ${PERMISSION_HUD}`,
+    "finish",
+  ]);
+});
+
+test("opens the Automation settings when Raycast may not control System Events", async () => {
+  // Checking which app is in front, before pasting anything, already needs System Events.
+  const { driver, calls } = fakeDriver({ onReturn: AUTOMATION_DENIED });
+  await runFill(driver, { values: ["alice", "secret"] });
+
+  assert.deepEqual(calls, ["read clipboard", "open automation settings", `hud ${PERMISSION_HUD}`, "finish"]);
+});
+
+test("names the place in System Settings when it couldn't be opened", async () => {
+  const { driver, calls } = fakeDriver({
+    onKey: { keyCode: KeyCode.V, error: ACCESSIBILITY_DENIED },
+    onOpenSettings: new Error("couldn't open"),
+  });
+  await runFill(driver, { values: ["secret"] });
+
+  assert.deepEqual(calls.slice(-3), ["restore previous clipboard", `hud ${PERMISSION_FALLBACK_HUD}`, "finish"]);
+});
+
+test("opens nothing when filling fails for another reason", async () => {
+  const { driver, calls } = fakeDriver({ onKey: { keyCode: KeyCode.Tab, error: new Error("something else") } });
+  await runFill(driver, { values: ["alice", "secret"] });
+
+  assert.equal(
+    calls.some((call) => call.endsWith("settings")),
+    false,
+  );
+  assert.deepEqual(calls.slice(-3), ["restore previous clipboard", `hud ${FAILURE_HUD}`, "finish"]);
 });
