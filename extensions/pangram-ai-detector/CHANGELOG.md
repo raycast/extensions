@@ -1,6 +1,6 @@
 # Pangram AI Detector Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-11
 
 - Check selected or copied text using your own Pangram API key and prepaid credits.
 - View the Verdict, Breakdown percentages, and each Segment's label and Pangram's confidence.
