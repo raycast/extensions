@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screen-align",
+  "title": "Screen Align",
+  "description": "Align two displays precisely with on-screen rulers. Nudge the arrangement offset in points or millimeters, snap to tops, bottoms, centers or true physical continuity, and save layouts per display set.",
+  "icon": "command-icon.png",
+  "author": "vitbashy",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "arrange",
+      "title": "Arrange Displays",
+      "subtitle": "Screen Align",
+      "description": "Nudge, align and swap your displays, with a live read-out in points and millimeters.",
+      "mode": "view"
+    },
+    {
+      "name": "rulers",
+      "title": "Show Display Rulers",
+      "subtitle": "Screen Align",
+      "description": "Toggle a millimeter ruler down the facing edge of every screen, with one shared reference line. Run again or press esc to close.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layouts",
+      "title": "Display Layouts",
+      "subtitle": "Screen Align",
+      "description": "Save the current arrangement and restore it later, per set of connected displays.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
