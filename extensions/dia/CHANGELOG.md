@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [History and Bookmarks Across Profiles] - {PR_MERGE_DATE}
+## [History and Bookmarks Across Profiles] - 2026-11-11
 
 - Search History, Search Dia and the history and bookmark AI tools now include every Dia profile (space), not only the last used one.
 - With more than one profile, history results show the profile name and bookmarks are grouped under a folder per profile.
