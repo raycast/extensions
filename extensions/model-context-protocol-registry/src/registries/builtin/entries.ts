@@ -2601,6 +2601,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "toolbox-pod",
+    title: "Toolbox POD",
+    description:
+      "Design custom tees and hoodies, see mockups, and order prints made and shipped from Utah. Describe a design or share a reference image and Toolbox AI draws it print ready, see it on a shirt in the colors you pick, get today's prices or a quick estimate, then prepare a draft order for one US recipient and get a link to check the total and pay on toolboxpod.com, and follow the order to tracking. Tools that change or spend something are marked, so your AI app asks first. US shipping only. Hosted remote Streamable HTTP server at https://mcp.toolboxpod.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Anyone can sign up while connecting; no fee to connect.",
+    icon: "https://toolboxpod.com/site/assets/logo-mark-512.png",
+    homepage: "https://toolboxpod.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.toolboxpod.com/mcp"],
+    },
+    remoteUrl: "https://mcp.toolboxpod.com/mcp",
+  },
+  {
     name: "topxai-models",
     title: "TopxAI Models",
     description:
