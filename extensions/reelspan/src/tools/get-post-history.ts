@@ -21,8 +21,8 @@ export default async function tool(input: Input) {
     platform: h.platform,
     success: h.success,
     url: h.post_url,
-    error: h.error,
-    title: h.title,
+    error: h.error_message,
+    caption: h.post_caption ?? h.post_title,
     request_id: h.request_id,
     at: h.upload_timestamp,
   }));

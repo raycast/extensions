@@ -9,8 +9,9 @@ type Row = {
   platform: string;
   success: boolean;
   post_url?: string;
-  error?: string;
-  title?: string;
+  error_message?: string | null;
+  post_title?: string | null;
+  post_caption?: string | null;
   request_id?: string;
   profile_username?: string;
   upload_timestamp?: string;
@@ -73,7 +74,7 @@ export default function Command() {
                   ? { source: Icon.CheckCircle, tintColor: Color.Green }
                   : { source: Icon.XMarkCircle, tintColor: Color.Red }
               }
-              title={row.title || "(no caption)"}
+              title={row.post_caption || row.post_title || "(no caption)"}
               subtitle={networkName(row.platform)}
               accessories={[
                 { text: row.profile_username },
@@ -87,7 +88,7 @@ export default function Command() {
                   )}
                   {row.post_url && <Action.CopyToClipboard title="Copy Link" content={row.post_url} />}
                   {row.request_id && <Action.CopyToClipboard title="Copy Request ID" content={row.request_id} />}
-                  {row.error && <Action.CopyToClipboard title="Copy Error" content={row.error} />}
+                  {row.error_message && <Action.CopyToClipboard title="Copy Error" content={row.error_message} />}
                   <Action
                     title="Refresh"
                     icon={Icon.RotateClockwise}
