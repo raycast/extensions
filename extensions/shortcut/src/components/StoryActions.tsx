@@ -9,14 +9,20 @@ import {
   useNavigation,
   Clipboard,
 } from "@raycast/api";
-import { Story, StorySlim } from "@useshortcut/client";
+import { Story, StorySlim, StorySearchResult } from "@useshortcut/client";
 import { getMemberName, getStoryColor } from "../helpers/storyHelpers";
 import { useGroups, useIterations, useLabelsMap, useMemberInfo, useMemberMap, useStoryWorkflow } from "../hooks";
 
 import shortcut from "../utils/shortcut";
 import StoryForm from "./StoryForm";
 
-export default function StoryActions({ story, mutate }: { story?: Story | StorySlim; mutate: () => void }) {
+export default function StoryActions({
+  story,
+  mutate,
+}: {
+  story?: Story | StorySlim | StorySearchResult;
+  mutate: () => void;
+}) {
   const { data: memberInfo } = useMemberInfo();
   const { data: iterations } = useIterations();
   const memberMap = useMemberMap();
