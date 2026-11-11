@@ -14,6 +14,7 @@ export const PROVIDER_ICON_NAMES = [
   "kimi",
   "minimax",
   "mimo",
+  "tokenhub",
   "raycast",
 ] as const;
 

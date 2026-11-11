@@ -96,19 +96,8 @@ function detectionCacheKey(text: string): string {
     text,
     preferredLanguages: [myPreferences.language1, myPreferences.language2],
     speedFirst: myPreferences.enableDetectLanguageSpeedFirst,
-    detectors: [
-      myPreferences.enableBaiduLanguageDetect,
-      myPreferences.enableTencentLanguageDetect,
-      myPreferences.enableVolcanoLanguageDetect,
-    ],
-    credentials: [
-      myPreferences.baiduAppId,
-      myPreferences.baiduAppSecret,
-      myPreferences.tencentSecretId,
-      myPreferences.tencentSecretKey,
-      myPreferences.volcanoAccessKeyId,
-      myPreferences.volcanoAccessKeySecret,
-    ],
+    detectors: [myPreferences.enableBaiduLanguageDetect, myPreferences.enableVolcanoLanguageDetect],
+    credentials: [myPreferences.volcanoAccessKeyId, myPreferences.volcanoAccessKeySecret],
   });
 }
 

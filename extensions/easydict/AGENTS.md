@@ -2,11 +2,11 @@
 
 Easydict provides dictionary lookup, translation, language detection, TTS, and audio playback on macOS and Windows. Preserve both platforms; guard platform-specific APIs, paths, and shells.
 
-Use `raycast-extension` for Raycast API/UI, manifest, lifecycle, platform, or Store work. Provider parsing and other ordinary TypeScript changes do not require loading it. Skills are tracked in `skills-lock.json`; synchronize published versions with `npx skills experimental_install`.
+Check new or changed Raycast API usage against the installed `@raycast/api` and `@raycast/utils` types. Consult the [Raycast documentation](https://developers.raycast.com/llms.txt) when platform support, manifest rules, or runtime behavior relevant to the change is unclear.
 
 ## Development and Verification
 
-Use `npm run dev` for native development. For code changes, complete the CI checks on the final implementation:
+Use `npm run dev` for native development. When changes depend on Raycast UI, shortcuts, or lifecycle behavior, verify the affected flow in Raycast on the relevant platforms and report any native checks you could not run. For code changes, complete the CI checks on the final implementation:
 
 ```bash
 npm run lint
@@ -16,7 +16,11 @@ npm run build
 
 `build` includes Raycast type checking. Use focused tests while iterating; after the final checks pass, repeat them only for subsequent changes or unresolved failures. Use `npm run fix-lint` only when automatic fixes are intended. For documentation-only changes, check formatting, links, and `git diff --check`; report skipped code checks.
 
-Add tests for observable behavior, external contracts, real regressions, or important invariants. For regression fixes, demonstrate failure before the fix and success afterward. Test real parsing, caching, and migration logic; mock the Raycast runtime or network boundary instead of reimplementing business rules in mocks. Test names should state the scenario and expected outcome; avoid duplicate or implementation-only coverage.
+For command launch, search input, list selection, or shortcut bugs in Raycast, see [Debugging Raycast behavior](docs/development/debugging-raycast.md).
+
+A test should protect observable behavior, an external contract, or a meaningful invariant. Choose assertions that would fail if that guarantee broke and still pass after a refactor that preserves it. Name each test for the scenario and expected outcome. Avoid duplicate coverage. For regression fixes, demonstrate failure before the fix and success afterward.
+
+Exercise the real parsing, caching, and migration logic. Keep test doubles at the Raycast runtime or network boundary so the test runs the production business rules.
 
 ## Architecture and Invariants
 
@@ -40,7 +44,7 @@ Use these entry points when working on the corresponding area:
 - Favorites read the previous key only when the new key is absent. The first explicit mutation saves the whole converted collection; a present new key stays authoritative, including an empty collection. Preserve the old key, back up invalid data before explicit recovery, and keep unknown future versions read-only. Legacy display types stay inside the favorites compatibility boundary.
 - Keep profile configuration independent of UI hooks; `src/providers/profiles/useAIProviderProfiles.ts` is the explicit shared React entry point for search and management. Keep AI dictionary prompts, parsing, and payload types in `src/providers/dictionary/ai/`; shared translation/dictionary routing uses `providers/profiles/dictionaryCandidate.ts`.
 - Keep result contracts independent of provider payloads, profile configuration, and rendering. Preserve their discriminated unions and stored enum values when changing ownership.
-- Query changes must preserve latest-request ownership of streaming updates, final results, cache writes, and loading cleanup. Clearing cache must prevent requests started before the clear from repopulating it; favorites remain independent of query cache.
+- Query changes must preserve latest-request ownership of streaming updates, final results, cache writes, and loading cleanup. Clearing cache must prevent requests started before the clear from repopulating it; favorites remain independent of query cache. When replacing query helpers or caches, preserve request cancellation, skip provider calls on cache hits, and bypass the cache for explicit requery or regeneration.
 - Static settings and credentials use Raycast Preferences. Dynamic AI profiles, including credentials, use Raycast's encrypted `LocalStorage` through `src/providers/profiles/repository.ts`. Preserve saved profiles and favorites when changing formats or migration behavior.
 - Organize actions by purpose and frequency of use. Preserve existing primary/secondary actions, shortcuts, and root navigation behavior unless the task intentionally changes them; the first two actions receive Raycast's default shortcuts. Place new actions in the appropriate group rather than requiring every addition to go at the end.
 

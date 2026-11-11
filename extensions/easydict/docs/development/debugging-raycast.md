@@ -1,0 +1,6 @@
+# Debugging Raycast behavior
+
+- Reproduce through the reported entry point and record the Raycast, OS, and Easydict versions and whether the extension is a development or Store build. Direct launch, fallback search, selected-text lookup, and OCR can supply different inputs.
+- For delayed input or list selection, check whether Raycast mounted a new view or restored an existing one. Trace which input or query is current when the callback arrives. If an effect appears to skip a request, check when its one-time guard is set and whether a later dependency change can run the effect again.
+- For shortcut conflicts, inspect the rendered action labels on the affected platform. Also check the configured shortcuts for the first two actions because Raycast hides their alternative shortcuts in the panel. See [Action Panel](https://developers.raycast.com/api-reference/user-interface/action-panel.md#actionpanel).
+- For unhandled failures in the Store build, check **View Issues**. For handled failures or empty results, reproduce in a development build when possible and log non-sensitive details such as outcomes, timings, and counts. Keep lookup text, clipboard contents, OCR output, and credentials out of new diagnostics. See [Raycast's debugging guide](https://developers.raycast.com/basics/debug-an-extension.md).

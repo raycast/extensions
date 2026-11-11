@@ -8,6 +8,7 @@ type BuiltinProviderCategory = "dictionary" | "translation";
 export const defaultTypeOrder = [
   DictionaryType.Youdao,
   DictionaryType.Linguee,
+  DictionaryType.Wiktionary,
   DictionaryType.AI,
   TranslationType.OpenAI,
   TranslationType.Gemini,
@@ -17,7 +18,6 @@ export const defaultTypeOrder = [
   TranslationType.Bing,
   TranslationType.Apple,
   TranslationType.Baidu,
-  TranslationType.Tencent,
   TranslationType.Volcano,
   TranslationType.Youdao,
   TranslationType.Caiyun,
@@ -30,9 +30,9 @@ export function getBuiltinProviderKey(category: BuiltinProviderCategory, type: s
 const definitions = [
   { category: "dictionary", type: DictionaryType.Youdao, preference: "enableYoudaoDictionary" },
   { category: "dictionary", type: DictionaryType.Linguee, preference: "enableLingueeDictionary" },
+  { category: "dictionary", type: DictionaryType.Wiktionary, preference: "enableWiktionaryDictionary" },
   { category: "translation", type: TranslationType.Bing, preference: "enableBingTranslate" },
   { category: "translation", type: TranslationType.Baidu, preference: "enableBaiduTranslate" },
-  { category: "translation", type: TranslationType.Tencent, preference: "enableTencentTranslate" },
   { category: "translation", type: TranslationType.Volcano, preference: "enableVolcanoTranslate" },
   { category: "translation", type: TranslationType.Caiyun, preference: "enableCaiyunTranslate" },
   { category: "translation", type: TranslationType.Google, preference: "enableGoogleTranslate" },

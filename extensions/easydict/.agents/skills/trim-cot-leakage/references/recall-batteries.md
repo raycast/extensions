@@ -16,7 +16,6 @@ prose_globs=(
   --glob '!vendor/**' --glob '!**/raycast-env.d.ts'
   --glob '!**/fixtures/**' --glob '!**/__fixtures__/**'
   --glob '!**/__snapshots__/**' --glob '!*.snap'
-  --glob '!.agents/skills/raycast-extension/**'
   --glob '!.agents/skills/review-pr/**'
   --glob '!.agents/skills/dsh-trim-cot-leakage/**'
 )

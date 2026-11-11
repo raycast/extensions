@@ -1,5 +1,7 @@
 # Releasing to the Raycast Store
 
+Check the current Store submission requirements before preparing the Store PR. See [Raycast's Store preparation guide](https://developers.raycast.com/basics/prepare-an-extension-for-store.md).
+
 ## Branch model
 
 Develop on branches that merge into `dev/release`, the development and pre-release branch; `main` only carries released code. The Store receives the extension through a pull request against `raycast/extensions`. Once that PR merges, `dev/release` merges into `main` and a new release is published.

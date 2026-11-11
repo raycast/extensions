@@ -1,24 +1,25 @@
+import { getPreferenceValues } from "@raycast/api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LanguageDetectType } from "@/core/results/kinds";
 import { requestBing } from "@/providers/shared/bing-request";
+import { ProviderConfig } from "@/providers/shared/config";
 import { RequestError } from "@/shared/errors";
 import { timedFetch } from "@/shared/http";
 
 import { BaiduDetectProvider } from "./baidu";
 import { BingDetectProvider } from "./bing";
 import { FrancDetectProvider } from "./franc";
-import { TencentDetectProvider } from "./tencent";
+import { createEnabledDetectors } from "./registry";
 import { VolcanoDetectProvider } from "./volcano";
 
+vi.mock("@raycast/api", () => ({
+  environment: { extensionName: "easydict" },
+  getPreferenceValues: vi.fn(() => ({})),
+}));
 vi.mock("@raycast/utils", () => ({ showFailureToast: vi.fn() }));
-vi.mock("@/consts", () => ({ myPreferences: { enableBaiduLanguageDetect: true } }));
 vi.mock("@/shared/http", () => ({ timedFetch: vi.fn() }));
 vi.mock("@/providers/shared/bing-request", () => ({ requestBing: vi.fn() }));
-vi.mock("@/providers/shared/config", () => ({ hasTencentAppKey: () => true, hasVolcanoAppKey: () => true }));
-vi.mock("@/providers/shared/tencent-sign", () => ({
-  tencentSign: () => ({ url: "https://tencent.test", headers: {} }),
-}));
 vi.mock("@/providers/shared/volcano-sign", () => ({
   genVolcanoSign: () => ({ getUrl: () => "https://volcano.test", getConfig: () => ({ headers: {} }) }),
 }));
@@ -30,6 +31,39 @@ vi.mock("@/shared/logger", () => ({
 }));
 
 beforeEach(() => vi.resetAllMocks());
+
+it.each([
+  {
+    baidu: false,
+    volcano: false,
+    secret: "secret",
+    expected: [LanguageDetectType.Bing, LanguageDetectType.Franc],
+  },
+  {
+    baidu: true,
+    volcano: true,
+    secret: "",
+    expected: [LanguageDetectType.Bing, LanguageDetectType.Baidu, LanguageDetectType.Franc],
+  },
+  {
+    baidu: true,
+    volcano: true,
+    secret: "secret",
+    expected: [LanguageDetectType.Bing, LanguageDetectType.Baidu, LanguageDetectType.Volcano, LanguageDetectType.Franc],
+  },
+])(
+  "uses enabled detectors in order with Baidu=$baidu, Volcano=$volcano and secret='$secret'",
+  ({ baidu, volcano, secret, expected }) => {
+    vi.mocked(getPreferenceValues).mockReturnValue({
+      enableBaiduLanguageDetect: baidu,
+      enableVolcanoLanguageDetect: volcano,
+    });
+    ProviderConfig.volcanoSecretId = "id";
+    ProviderConfig.volcanoSecretKey = secret;
+
+    expect(createEnabledDetectors().map(({ type }) => type)).toEqual(expected);
+  },
+);
 
 const protocols = [
   {
@@ -47,14 +81,6 @@ const protocols = [
     response: { error: 0, lan: "en" },
     malformed: { error: 0, lan: 42 },
     unknown: { error: 0, lan: "future-code" },
-  },
-  {
-    name: "Tencent",
-    provider: TencentDetectProvider,
-    type: LanguageDetectType.Tencent,
-    response: { Response: { Lang: "en" } },
-    malformed: { Response: { Lang: 42 } },
-    unknown: { Response: { Lang: "future-code" } },
   },
   {
     name: "Volcano",
