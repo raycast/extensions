@@ -149,6 +149,12 @@ function AppItem({ app }: { app: AppIcon }) {
             shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={() => void copyImage(app)}
           />
+          <Action.OpenInBrowser
+            title="Open in App Store"
+            url={app.trackViewUrl}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
         </ActionPanel>
       }
     />

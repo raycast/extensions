@@ -1,4 +1,4 @@
-import { artworkUrl } from "./artwork";
+import { artworkUrl, storeViewUrl } from "./artwork";
 import { normalizeCountry } from "./countries";
 
 const SEARCH_LIMIT = "30";
@@ -9,6 +9,7 @@ export interface AppIcon {
   trackName: string;
   artistName: string;
   artworkUrl: string;
+  trackViewUrl: string;
   primaryGenreName?: string;
 }
 
@@ -18,6 +19,7 @@ interface ItunesRow {
   artistName?: unknown;
   artworkUrl512?: unknown;
   artworkUrl100?: unknown;
+  trackViewUrl?: unknown;
   primaryGenreName?: unknown;
   kind?: unknown;
 }
@@ -67,11 +69,15 @@ function normalizeRow(item: unknown): AppIcon | undefined {
   const artwork = artworkUrl(row.artworkUrl512) ?? artworkUrl(row.artworkUrl100);
   if (!artwork) return undefined;
 
+  const viewUrl = storeViewUrl(row.trackViewUrl);
+  if (!viewUrl) return undefined;
+
   return {
     trackId: row.trackId,
     trackName: row.trackName,
     artistName: typeof row.artistName === "string" ? row.artistName : "",
     artworkUrl: artwork,
+    trackViewUrl: viewUrl,
     primaryGenreName: typeof row.primaryGenreName === "string" ? row.primaryGenreName : undefined,
   };
 }
