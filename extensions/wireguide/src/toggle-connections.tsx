@@ -1,24 +1,48 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { connect, disconnect, listConnections } from "./client";
 import { useInterval } from "usehooks-ts";
 import prettyBytes from "pretty-bytes";
 
-export default function Command() {
-    const { isLoading, data, mutate, revalidate } = usePromise(listConnections);
+const searchBarPlaceholder = "Search connections…";
 
-    useInterval(revalidate, 1000);
+export default function Command() {
+    const { isLoading, data, error, mutate, revalidate } = usePromise(listConnections);
+
+    useInterval(revalidate, error ? null : 1000);
+
+    if (error) {
+        return (
+            <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
+                <List.EmptyView
+                    title="Failed to load connections"
+                    description={error.message}
+                    icon={{ source: Icon.Warning, tintColor: Color.Red }}
+                    actions={
+                        <ActionPanel>
+                            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+                            <Action
+                                title="Open Extension Preferences"
+                                icon={Icon.Gear}
+                                onAction={openExtensionPreferences}
+                            />
+                        </ActionPanel>
+                    }
+                />
+            </List>
+        );
+    }
 
     if (data?.length === 0) {
         return (
-            <List>
+            <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
                 <List.EmptyView title="No connections" icon={Icon.Leaf} />
             </List>
         );
     }
 
     return (
-        <List isLoading={isLoading}>
+        <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
             {data?.map((row, index) => (
                 <List.Item
                     key={index}
