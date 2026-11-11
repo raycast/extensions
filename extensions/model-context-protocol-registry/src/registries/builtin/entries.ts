@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "honeyvid",
+    title: "HoneyVid",
+    description:
+      "Make AI videos and images with HoneyVid. Find trending video templates and put a person, pet or character from a photo into them, or generate videos and images with Kling, Veo and Seedance. Every job is quoted in credits first and runs under the cap you set; check your balance and get the finished MP4. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE). Needs a HoneyVid account; generation uses paid credits.",
+    icon: "https://honeyvid.ai/brand/honeypot-icon.png",
+    homepage: "https://honeyvid.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://honeyvid.ai/mcp"],
+    },
+    remoteUrl: "https://honeyvid.ai/mcp",
+  },
+  {
     name: "liquid-inference",
     title: "Liquid Inference",
     description:
