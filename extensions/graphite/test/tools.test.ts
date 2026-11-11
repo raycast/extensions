@@ -2,18 +2,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mergeability = vi.hoisted(() => ({ value: "NEEDS_APPROVALS" as string | undefined }));
 
+const stack = vi.hoisted(() => ({
+  pullRequests: [
+    { number: 481, title: "Extract pricing table", baseRefName: "main" },
+    { number: 482, title: "Add billing page", baseRefName: "pricing" },
+  ],
+}));
+
 vi.mock("../src/lib/merge-plan", () => ({
   mergeabilityOf: vi.fn(async () => mergeability.value),
-  planMerge: vi.fn(async () => ({
-    trunk: "main",
-    pullRequests: [
-      { number: 481, title: "Extract pricing table", baseRefName: "main" },
-      { number: 482, title: "Add billing page", baseRefName: "pricing" },
-    ],
-  })),
+  planMerge: vi.fn(async () => ({ trunk: "main", pullRequests: stack.pullRequests })),
 }));
 vi.mock("../src/lib/api", () => ({
-  CONFETTI_URL: "raycast://confetti",
   mergeWithGraphite: vi.fn(async () => undefined),
   graphiteAppUrl: vi.fn(async () => "https://app.graphite.com"),
   graphitePullRequestUrl: (app: string, owner: string, repo: string, n: number) =>
@@ -62,6 +62,19 @@ describe("merge-pull-request", () => {
     await confirmMerge(input);
     mergeability.value = "FAILING_REQUIRED";
     expect(await mergeTool(input)).toMatchObject({ merged: false, reason: expect.stringMatching(/Failing required/) });
+    expect(mergeWithGraphite).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the stack changed after the confirmation", async () => {
+    mergeability.value = "READY_TO_MERGE";
+    await confirmMerge(input);
+    const confirmed = stack.pullRequests;
+    stack.pullRequests = [{ number: 480, title: "Add pricing API", baseRefName: "main" }, ...confirmed];
+    try {
+      expect(await mergeTool(input)).toMatchObject({ merged: false, reason: expect.stringMatching(/changed/) });
+    } finally {
+      stack.pullRequests = confirmed;
+    }
     expect(mergeWithGraphite).not.toHaveBeenCalled();
   });
 });

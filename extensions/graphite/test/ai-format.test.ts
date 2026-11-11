@@ -78,6 +78,7 @@ describe("detailsForAI", () => {
     labels: [],
     requestedReviewers: ["sofia"],
     reviews: [{ state: "CHANGES_REQUESTED", body: "Cap it", author: { login: "sofia" } }],
+    commentReviews: [{ state: "COMMENTED", body: "Nice test coverage", author: { login: "noah" } }],
     unresolved: [
       { path: "retry.ts", line: 48, isOutdated: false, replies: 0, author: "sofia", body: "Cap the backoff", url: "u" },
     ],

@@ -134,7 +134,7 @@ export function detailsForAI(
     mergeStatus: mergeability ? humanize(mergeability) : "Unknown",
     hasConflicts: details.hasConflicts,
     requestedReviewers: details.requestedReviewers,
-    reviews: details.reviews.map((review) => ({
+    reviews: [...details.reviews, ...details.commentReviews].map((review) => ({
       author: review.author?.login ?? "unknown",
       state: humanize(review.state),
       body: cut(review.body, MAX_COMMENT) || undefined,

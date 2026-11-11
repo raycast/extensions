@@ -65,6 +65,11 @@ function feedbackMarkdown(details: PullRequestDetails): string {
     for (const review of changeRequests)
       parts.push(`**@${review.author?.login ?? "someone"}**\n\n${quote(review.body)}`);
   }
+  if (details.commentReviews.length > 0) {
+    parts.push("## Review comments");
+    for (const review of details.commentReviews)
+      parts.push(`**@${review.author?.login ?? "someone"}**\n\n${quote(review.body)}`);
+  }
   return parts.join("\n\n");
 }
 

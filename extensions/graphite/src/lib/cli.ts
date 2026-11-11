@@ -290,7 +290,8 @@ export async function runGh(args: string[], timeout = 60_000): Promise<ExecResul
     try {
       return await exec(ghExecutable(), args, {
         cwd: homedir(),
-        env: { ...(await commandEnv()), GH_PROMPT_DISABLED: "1", GH_NO_UPDATE_NOTIFIER: "1" },
+        // Graphite only works with GitHub.com, so an enterprise GH_HOST from the shell must not redirect requests.
+        env: { ...(await commandEnv()), GH_HOST: "github.com", GH_PROMPT_DISABLED: "1", GH_NO_UPDATE_NOTIFIER: "1" },
         timeout,
       });
     } catch (error) {

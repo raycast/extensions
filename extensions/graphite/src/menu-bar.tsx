@@ -9,6 +9,7 @@ import {
   MenuBarExtra,
   open,
   openExtensionPreferences,
+  showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSectionSettings } from "./hooks/use-section-settings";
@@ -37,8 +38,12 @@ function truncate(text: string, length: number): string {
   return text.length > length ? `${text.slice(0, length - 1)}…` : text;
 }
 
-function openInboxInRaycast() {
-  return launchCommand({ name: "inbox", type: LaunchType.UserInitiated });
+async function openInboxInRaycast() {
+  try {
+    await launchCommand({ name: "inbox", type: LaunchType.UserInitiated });
+  } catch {
+    await showHUD("Turn on Pull Request Inbox in Raycast Settings → Extensions → Graphite");
+  }
 }
 
 export default function Command() {

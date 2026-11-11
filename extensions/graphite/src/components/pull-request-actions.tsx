@@ -13,7 +13,8 @@ import {
 } from "@raycast/api";
 import type { ReactNode } from "react";
 import { useGt } from "../hooks/use-gt";
-import { CONFETTI_URL, mergeWithGraphite } from "../lib/api";
+import { mergeWithGraphite } from "../lib/api";
+import { celebrate } from "../lib/celebrate";
 import { PullRequestRef, PullRequestStatus, submitReview } from "../lib/github";
 import { isReadyToMerge } from "../lib/indicators";
 import { planMerge } from "../lib/merge-plan";
@@ -61,14 +62,23 @@ export function RefreshAction(props: { onRefresh: () => void }) {
   );
 }
 
-/** Opens the PR in the preferred website first; GitHub is always on ⌘G. */
+/**
+ * Opens the PR in the preferred website first. Raycast gives the first two actions ↵ and ⌘↵ and ignores custom
+ * shortcuts there, so GitHub only gets ⌘G when it's listed on its own as the other website, after those two.
+ */
 export function OpenPullRequestActions(props: { links: PullRequestLinks; which?: "primary" | "secondary" | "both" }) {
   const { links } = props;
+  const githubIsPreferred = links.primary === links.github;
   const graphite = <Action.OpenInBrowser key="graphite" title="Open in Graphite" url={links.graphite} />;
   const github = (
-    <Action.OpenInBrowser key="github" title="Open on GitHub" url={links.github} shortcut={SHORTCUTS.openOnGitHub} />
+    <Action.OpenInBrowser
+      key="github"
+      title="Open on GitHub"
+      url={links.github}
+      shortcut={props.which === "secondary" ? SHORTCUTS.openOnGitHub : undefined}
+    />
   );
-  const [primary, secondary] = links.primary === links.graphite ? [graphite, github] : [github, graphite];
+  const [primary, secondary] = githubIsPreferred ? [github, graphite] : [graphite, github];
   return <>{props.which === "primary" ? primary : props.which === "secondary" ? secondary : [primary, secondary]}</>;
 }
 
@@ -107,7 +117,7 @@ async function merge(pullRequest: PullRequestRef, links: PullRequestLinks, onCha
       message: `${summary}\n\nGraphite merges them in this order into ${trunk}, through the merge queue if the repository uses one.`,
       primaryAction: {
         title: multiple ? `Merge ${pullRequests.length} PRs` : "Merge",
-        style: Alert.ActionStyle.Default,
+        style: Alert.ActionStyle.Destructive,
       },
     });
     if (!confirmed) return;
@@ -125,9 +135,7 @@ async function merge(pullRequest: PullRequestRef, links: PullRequestLinks, onCha
     toast.title = multiple ? `Merging ${pullRequests.length} PRs` : `Merging #${pullRequest.number}`;
     toast.message = "Graphite is merging in the background";
     toast.primaryAction = { title: "Open in Graphite", onAction: () => open(links.graphite) };
-    if (getPreferenceValues<Preferences>().celebrateMerges) {
-      await open(CONFETTI_URL).catch(() => undefined);
-    }
+    if (getPreferenceValues<Preferences>().celebrateMerges) await celebrate();
     onChanged();
   } catch (error) {
     toast.style = Toast.Style.Failure;
@@ -197,6 +205,7 @@ export function PullRequestActionPanel(props: PullRequestActionPanelProps) {
               <Action
                 title="Merge with Graphite"
                 icon={Icon.ArrowRightCircle}
+                style={Action.Style.Destructive}
                 shortcut={SHORTCUTS.merge}
                 onAction={() => merge(pullRequest, links, onChanged)}
               />

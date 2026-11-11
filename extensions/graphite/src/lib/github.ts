@@ -210,6 +210,7 @@ const detailsSchema = z.object({
   headRefName: z.string(),
   author: actorSchema.nullable(),
   labels: z.object({ nodes: z.array(z.object({ name: z.string(), color: z.string() })) }),
+  commentReviews: z.object({ nodes: z.array(reviewSchema) }),
   reviewRequests: z.object({
     nodes: z.array(
       z.object({
@@ -290,6 +291,8 @@ export type PullRequestDetails = PullRequestStatus & {
   labels: { name: string; color: string }[];
   requestedReviewers: string[];
   reviews: Review[];
+  /** Comment-only reviews with a written body. They don't change the review decision, so they're kept apart. */
+  commentReviews: Review[];
   unresolved: ReviewThread[];
   conversationComments: number;
   checkRuns: Check[];
@@ -337,6 +340,7 @@ export async function fetchDetails(ref: PullRequestRef): Promise<PullRequestDeta
         title body url state createdAt updatedAt additions deletions changedFiles baseRefName headRefName
         author { login avatarUrl ... on User { name } }
         labels(first: 20) { nodes { name color } }
+        commentReviews: reviews(last: 20, states: COMMENTED) { nodes { state body author { login avatarUrl } submittedAt } }
         reviewRequests(first: 20) { nodes { requestedReviewer { ... on User { login } ... on Team { name slug } } } }
         reviewThreads(first: 100) {
           nodes {
@@ -386,6 +390,7 @@ export async function fetchDetails(ref: PullRequestRef): Promise<PullRequestDeta
       .map((request) => request.requestedReviewer?.login ?? request.requestedReviewer?.name)
       .filter((name): name is string => Boolean(name)),
     reviews: pr.latestOpinionatedReviews.nodes,
+    commentReviews: pr.commentReviews.nodes.filter((review) => review.body.trim()),
     unresolved: pr.reviewThreads.nodes
       .filter((thread) => !thread.isResolved)
       .map((thread) => ({

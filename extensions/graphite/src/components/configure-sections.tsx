@@ -37,7 +37,7 @@ export function ConfigureSections(props: { sections: InboxSection[]; appUrl: str
                   />
                   {index > 0 ? (
                     <Action
-                      title="Move up"
+                      title="Move Higher"
                       icon={Icon.ArrowUp}
                       shortcut={Keyboard.Shortcut.Common.MoveUp}
                       onAction={() => settings.move(sections, section.sectionId, -1)}
@@ -45,7 +45,7 @@ export function ConfigureSections(props: { sections: InboxSection[]; appUrl: str
                   ) : null}
                   {index < arranged.length - 1 ? (
                     <Action
-                      title="Move Down"
+                      title="Move Lower"
                       icon={Icon.ArrowDown}
                       shortcut={Keyboard.Shortcut.Common.MoveDown}
                       onAction={() => settings.move(sections, section.sectionId, 1)}

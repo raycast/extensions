@@ -12,9 +12,6 @@ import {
  * authenticated with the token that `gt auth` stores. Treat the shapes as unstable and parse defensively.
  */
 
-/** Raycast's built-in confetti, shown after merges when "Celebrate merges" is on. */
-export const CONFETTI_URL = "raycast://extensions/raycast/raycast/confetti";
-
 const USER_AGENT = "raycast-graphite-extension/1.0.0";
 // The server caps every section at 20 pull requests, whatever `first` asks for.
 const PRS_PER_SECTION = 20;

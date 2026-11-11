@@ -35,3 +35,6 @@ export function getPreferenceValues() {
 export const Action = { Style: { Regular: "regular", Destructive: "destructive" } };
 
 export async function open(): Promise<void> {}
+
+export const LaunchType = { UserInitiated: "userInitiated", Background: "background" } as const;
+export const launchCommand = async () => undefined;
