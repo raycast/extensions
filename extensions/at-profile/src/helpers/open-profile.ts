@@ -3,7 +3,7 @@ import { open, showHUD } from "@raycast/api";
 import { App } from "../types";
 import { findApp } from "./apps";
 import { recordProfileOpen } from "./history";
-import { buildProfileUrl, cleanProfile } from "./url";
+import { buildProfileUrl, completeHandle } from "./url";
 
 /**
  * Open a profile on an app and record it in History
@@ -14,7 +14,8 @@ export async function openProfile(profile: string, appValue: string): Promise<{ 
   if (!app) {
     throw new Error(`App "${appValue}" not found`);
   }
-  const clean = cleanProfile(profile);
+  // A bare name on an ATProto app opens, and is recorded, as the full handle
+  const clean = completeHandle(app.handleDomain, profile);
   await open(buildProfileUrl(app.urlTemplate, clean));
 
   await recordOpenBestEffort(clean, app);
