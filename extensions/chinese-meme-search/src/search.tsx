@@ -134,7 +134,7 @@ function Results({ keyword }: { keyword: string }) {
             />
             <Action.OpenInBrowser
               title="查看数据源接入指引"
-              url="https://github.com/talkingape/raycast-extensions/blob/ext/chinese-meme-search/extensions/chinese-meme-search/README.md#获取数据源与申请"
+              url="https://github.com/raycast/extensions/blob/main/extensions/chinese-meme-search/README.md#获取数据源与申请"
             />
             <Action.OpenInBrowser
               title="申请 SOOGIF 官方 API"
