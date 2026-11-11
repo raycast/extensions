@@ -1,23 +1,23 @@
-import { executeSQL, runAppleScript, showFailureToast, useCachedPromise, usePromise, useSQL } from "@raycast/utils";
-import { resolve } from "path";
-import { homedir } from "os";
-import { existsSync, readFileSync } from "fs";
+import { executeSQL, runAppleScript, useCachedPromise, usePromise } from "@raycast/utils";
+import { createElement } from "react";
+import { join } from "path";
+import { existsSync } from "fs";
 import { execFileSync } from "child_process";
 import { escapeAppleScriptString, escapeSQLLikePattern } from "./utils";
 import { getBookmarksTree, type BookmarkDirectory } from "./bookmarks";
-
-type LocalState = {
-  profile: {
-    last_used: string;
-    info_cache: Record<string, { name: string; active_time?: number }>;
-  };
-};
+import { HistoryPermissionView } from "./components/HistoryPermissionView";
+import { getProfiles } from "./profiles";
 
 export type HistoryItem = {
   id: number;
   url: string;
   title?: string;
   lastVisitedAt: string;
+  /** Chromium timestamp in ms since 1601 (µs overflows JS safe integers), used to order visits across profiles. */
+  lastVisitTime: number;
+  /** Profile name, set only when Dia has more than one profile. */
+  profile?: string;
+  profileId?: string;
 };
 
 export type Tab = {
@@ -45,30 +45,10 @@ export type Bookmark = {
   path: string; // Breadcrumb as single string (e.g., "Bookmarks Bar › Work")
 };
 
-function getActiveProfilePath() {
-  const localStatePath = resolve(homedir(), "Library/Application Support/Dia/User Data/Local State");
-
-  try {
-    const fileContent = readFileSync(localStatePath, "utf-8");
-    const localState: LocalState = JSON.parse(fileContent);
-
-    // Get the last used profile
-    const lastUsedProfile = localState.profile.last_used || "Default";
-
-    return resolve(homedir(), `Library/Application Support/Dia/User Data/${lastUsedProfile}`);
-  } catch (error) {
-    console.error("Error reading Local State:", error);
-    // Fallback to Default profile
-    return resolve(homedir(), "Library/Application Support/Dia/User Data/Default");
-  }
-}
-
-function getHistoryPath() {
-  return resolve(getActiveProfilePath(), "History");
-}
-
-export function getBookmarksPath() {
-  return resolve(getActiveProfilePath(), "Bookmarks");
+export async function getProfileFiles(fileName: "History" | "Bookmarks") {
+  return (await getProfiles())
+    .map((profile) => ({ profile, path: join(profile.path, fileName) }))
+    .filter(({ path }) => existsSync(path));
 }
 
 async function searchBookmarks(searchText: string): Promise<Bookmark[]> {
@@ -132,7 +112,8 @@ function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) 
     SELECT id,
           url,
           title,
-          datetime(last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') AS lastVisitedAt
+          datetime(last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') AS lastVisitedAt,
+          last_visit_time / 1000 AS lastVisitTime
     FROM urls
     ${whereClause ? `WHERE ${whereClause}` : ""}
     GROUP BY url
@@ -141,43 +122,76 @@ function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) 
   `;
 }
 
-export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
-  const historyPath = getHistoryPath();
-  // getHistoryQuery now handles escaping internally
-  const historyQuery = getHistoryQuery(searchText, options?.limit);
-
-  const dbExists = existsSync(historyPath);
-  // const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
-  const result = useSQL<HistoryItem>(dbExists ? historyPath : __filename, historyQuery, {
-    permissionPriming: "This extension needs access to read your Dia browser history.",
-    execute: dbExists,
-  });
-
-  if (!dbExists) {
-    const error = new Error("The database does not exist");
-    showFailureToast(error);
-    return { isLoading: false, error, data: [], permissionView: null, revalidate: () => {} };
-  }
-  return result;
-}
-
 export const FULL_DISK_ACCESS_MESSAGE =
   "Raycast needs Full Disk Access to read Dia's data. Enable Raycast in System Settings → Privacy & Security → Full Disk Access, then try again.";
 
-/** Async variant of useSearchHistory for AI tools, where hooks are unavailable. */
-export async function searchHistory(searchText?: string, limit?: number): Promise<HistoryItem[]> {
-  const historyPath = getHistoryPath();
-  if (!existsSync(historyPath)) {
+function isPermissionError(error: unknown) {
+  return error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message));
+}
+
+async function queryAllProfileHistory(
+  searchText: string | undefined,
+  limit: number | undefined,
+  minSearchLength: number,
+): Promise<HistoryItem[]> {
+  const sources = await getProfileFiles("History");
+  if (sources.length === 0) {
     // Without Full Disk Access the file can look missing rather than unreadable, so mention both causes
     throw new Error(
       `Dia's history database was not found. Make sure Dia has been opened at least once. ${FULL_DISK_ACCESS_MESSAGE}`,
     );
   }
 
+  const effectiveLimit = limit ?? 100;
+  const query = getHistoryQuery(searchText, effectiveLimit, minSearchLength);
+  const settled = await Promise.allSettled(
+    sources.map(async ({ profile, path }) => {
+      const rows = await executeSQL<HistoryItem>(path, query);
+      return rows.map((row) => ({
+        ...row,
+        profile: sources.length > 1 ? profile.name : undefined,
+        profileId: profile.directory,
+      }));
+    }),
+  );
+
+  const failures = settled.filter((result): result is PromiseRejectedResult => result.status === "rejected");
+  if (failures.length === settled.length) {
+    throw failures.find((failure) => isPermissionError(failure.reason))?.reason ?? failures[0].reason;
+  }
+
+  const newestByUrl = new Map<string, HistoryItem>();
+  for (const result of settled) {
+    if (result.status !== "fulfilled") continue;
+    for (const row of result.value) {
+      const existing = newestByUrl.get(row.url);
+      if (!existing || row.lastVisitTime > existing.lastVisitTime) newestByUrl.set(row.url, row);
+    }
+  }
+
+  return [...newestByUrl.values()].sort((a, b) => b.lastVisitTime - a.lastVisitTime).slice(0, effectiveLimit);
+}
+
+export function useSearchHistory(searchText?: string, options: { limit?: number } = {}) {
+  const result = useCachedPromise(
+    async (text: string | undefined, limit: number | undefined) => queryAllProfileHistory(text, limit, 2),
+    [searchText, options.limit],
+    { keepPreviousData: true },
+  );
+
+  const permissionView = isPermissionError(result.error)
+    ? createElement(HistoryPermissionView, { message: FULL_DISK_ACCESS_MESSAGE })
+    : null;
+
+  return { ...result, permissionView, error: permissionView ? undefined : result.error };
+}
+
+/** Async variant of useSearchHistory for AI tools, where hooks are unavailable. */
+export async function searchHistory(searchText?: string, limit?: number): Promise<HistoryItem[]> {
   try {
-    return await executeSQL<HistoryItem>(historyPath, getHistoryQuery(searchText, limit, 1));
+    return await queryAllProfileHistory(searchText, limit, 1);
   } catch (error) {
-    if (error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message))) {
+    if (isPermissionError(error)) {
       throw new Error(FULL_DISK_ACCESS_MESSAGE);
     }
     throw error;

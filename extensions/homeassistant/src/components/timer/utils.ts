@@ -1,8 +1,8 @@
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 
-export function isTimerEditable(state: State) {
-  return state.entity_id.startsWith("timer") && state.attributes.editable === true;
+export function isTimer(state: State) {
+  return state.entity_id.startsWith("timer.");
 }
 
 export async function callTimerStartService(state: State) {

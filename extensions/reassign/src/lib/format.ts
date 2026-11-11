@@ -111,6 +111,37 @@ export function formatRange(span: { start: string; end: string }): string {
   return `${start} → ${end}${days > 0 ? ` +${days}` : ""}`;
 }
 
+/**
+ * "All day", or "All day · Day 2 of 3" on one day of a longer event. Null for a
+ * timed span. A read repeats an all-day event on each of its days.
+ */
+export function allDayLabel(span: { allDaySpan?: { days?: unknown; dayIndex?: unknown } }): string | null {
+  const fact = span.allDaySpan;
+  if (!fact || typeof fact !== "object") return null;
+  const { days, dayIndex } = fact;
+  const counted = typeof days === "number" && typeof dayIndex === "number";
+  if (
+    counted &&
+    Number.isInteger(days) &&
+    Number.isInteger(dayIndex) &&
+    days > 1 &&
+    dayIndex >= 1 &&
+    dayIndex <= days
+  ) {
+    return `All day · Day ${dayIndex} of ${days}`;
+  }
+  return "All day";
+}
+
+/** The time text of an event row: the all-day label, else the clock range. */
+export function formatEventTime(span: {
+  start: string;
+  end: string;
+  allDaySpan?: { days?: unknown; dayIndex?: unknown };
+}): string {
+  return allDayLabel(span) ?? formatRange(span);
+}
+
 /** "90m" / "1h" / "1h30". */
 export function humanDuration(minutes: number): string {
   if (minutes < 60) return `${minutes}m`;
