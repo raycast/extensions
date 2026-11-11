@@ -1,6 +1,6 @@
 # Little Chrome Changelog
 
-## [Chrome Profiles and Copy URL Fix] - {PR_MERGE_DATE}
+## [Chrome Profiles and Copy URL Fix] - 2026-11-11
 
 - Suggest Chrome bookmarks in Open Little Chrome
 - Show only history or only bookmarks with ⌘2 and ⌘3
