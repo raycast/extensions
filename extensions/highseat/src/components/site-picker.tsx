@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api"
+import { Action, ActionPanel, Icon } from "@raycast/api"
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils"
 import type { ApiResult } from "highseat/api"
 import { api } from "../lib/highseat"
@@ -40,7 +40,7 @@ interface SwitchSiteActionProps {
 
 export function SwitchSiteAction({ sites, onSelect }: SwitchSiteActionProps) {
   return (
-    <ActionPanel.Submenu title="Switch Site" icon={Icon.Switch} shortcut={Keyboard.Shortcut.Common.Duplicate}>
+    <ActionPanel.Submenu title="Switch Site" icon={Icon.Switch} shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}>
       {sites.map(site => (
         <Action key={site.id} icon={getSiteIcon(site)} title={site.name} onAction={() => onSelect(site.id)} />
       ))}
