@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add own.page MCP Server] - {PR_MERGE_DATE}
+
+- Add own.page to the official registry: build and edit an own.page link-in-bio page by chatting (links become video, music and profile widgets, themes, subpages, stats and a page grader, every change undoable). 20 tools. Hosted Streamable HTTP server at https://mcp.own.page with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An own.page Pro or Business plan or the 7-day free trial is required.
+
 ## [Add Good Nature Vibe Catalog MCP Server] - 2026-11-11
 
 - Add Good Nature Vibe Catalog to the official registry as a hosted Streamable HTTP server with six read-only catalog and public-knowledge tools and no authentication.
