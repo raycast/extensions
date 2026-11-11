@@ -8,6 +8,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "open-window",
+      "title": "Open Sync Window",
+      "description": "Open MacSync's window to review and apply changes from your other Macs",
+      "mode": "no-view"
+    },
+    {
       "name": "sync",
       "title": "Sync Now",
       "description": "Save this Mac's setup and check your other Macs. Changes nothing here.",
@@ -29,6 +35,12 @@
       "name": "status",
       "title": "Show Status",
       "description": "Show each Mac and whether it's in sync",
+      "mode": "no-view"
+    },
+    {
+      "name": "history",
+      "title": "Show History",
+      "description": "Open MacSync's history to go back to before any saved apply",
       "mode": "no-view"
     }
   ],
