@@ -2725,6 +2725,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.wave.co",
   },
   {
+    name: "wavegrain",
+    title: "Wavegrain",
+    description:
+      "Curated TikTok slideshows and Instagram carousels for your brand on autopilot. Read your brands and slideshows, make new slideshows in your brand's voice with your own photos, edit slide text, schedule them on the Wavegrain calendar and export them, as the signed-in person; posting needs a separate permission and waits for your approval. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Wavegrain access key as a Bearer token. A Wavegrain account is required.",
+    icon: "https://wavegrain.com/brand/wavegrain/wavegrain-wave-icon-512.png",
+    homepage: "https://wavegrain.com/mcp?utm_source=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://wavegrain.com/api/mcp"],
+    },
+    remoteUrl: "https://wavegrain.com/api/mcp",
+  },
+  {
     name: "weio-site-check",
     title: "Weio site check",
     description:
