@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Termalin MCP Server] - 2026-11-11
+
+- Add Termalin to the community registry: SSH, SFTP, databases and monitoring for your own Linux servers (23 tools), without handing the agent an SSH key. Hosted Streamable HTTP server at https://termal.in/mcp with direct HTTP in Raycast and OAuth 2.1 sign-in (dynamic client registration), `mcp-remote` fallback for other clients.
+
 ## [Add Glypse MCP Server] - 2026-11-10
 
 - Add Glypse’s official prediction market MCP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A free Glypse account and OAuth sign-in are required.
