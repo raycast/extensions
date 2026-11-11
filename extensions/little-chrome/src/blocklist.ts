@@ -14,6 +14,17 @@ export function currentProfile(): string {
   }
 }
 
+// The name shown in Chrome's profile menu, falling back to the profile directory name.
+export function profileName(profile: string): string {
+  try {
+    return (
+      JSON.parse(readFileSync(join(CHROME_DIR, "Local State"), "utf8")).profile?.info_cache?.[profile]?.name || profile
+    );
+  } catch {
+    return profile;
+  }
+}
+
 // Suggestions the user hid, per Chrome profile. Only filters suggestions; Chrome's history is untouched.
 export type Blocklist = { urls: string[]; hosts: string[] };
 const blocklistKey = (profile: string) => `blocklist:${profile}`;

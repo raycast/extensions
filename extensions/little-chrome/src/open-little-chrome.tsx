@@ -18,7 +18,15 @@ import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Blocklist, CHROME_DIR, currentProfile, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
+import {
+  Blocklist,
+  CHROME_DIR,
+  currentProfile,
+  isBlocked,
+  loadBlocklist,
+  profileName,
+  saveBlocklist,
+} from "./blocklist";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
 import { ManageHiddenSuggestions } from "./manage-hidden";
 
@@ -142,6 +150,7 @@ function snapshotHistory(profile: string): string | undefined {
   try {
     const dest = join(tmpdir(), "little-chrome-history.sqlite");
     copyFileSync(join(CHROME_DIR, profile, "History"), dest);
+    trendTables.delete(dest);
     try {
       copyFileSync(join(CHROME_DIR, profile, "Favicons"), join(tmpdir(), "little-chrome-favicons.sqlite"));
     } catch {
@@ -153,14 +162,43 @@ function snapshotHistory(profile: string): string | undefined {
   }
 }
 
-async function sqlite<T>(db: string, sql: string): Promise<T[]> {
+async function sqlite<T>(db: string, sql: string, signal?: AbortSignal): Promise<T[]> {
   const favicons = join(tmpdir(), "little-chrome-favicons.sqlite");
   const attach = existsSync(favicons) ? ["-cmd", `ATTACH '${favicons.replace(/'/g, "''")}' AS f`] : [];
-  const { stdout } = await exec("sqlite3", [...attach, "-json", db, sql], { maxBuffer: 10 * 1024 * 1024 });
+  const { stdout } = await exec("sqlite3", [...attach, "-json", db, sql], { maxBuffer: 10 * 1024 * 1024, signal });
   return stdout.trim() ? JSON.parse(stdout) : [];
 }
 
-async function searchHistory(db: string, text: string, blocklist: Blocklist): Promise<HistoryItem[]> {
+const CHROME_NOW = `((strftime('%s', 'now') + 11644473600) * 1000000)`;
+const DAY = 86400000000;
+
+// Trending: visits over the last 2 days and the 28 days before, counted once per snapshot and
+// reused by every search. Resolves false when the table can't be made; searches then skip the boost.
+const trendTables = new Map<string, Promise<boolean>>();
+function ensureTrendTable(db: string): Promise<boolean> {
+  let ready = trendTables.get(db);
+  if (!ready) {
+    ready = sqlite(
+      db,
+      `DROP TABLE IF EXISTS little_chrome_trend;
+       CREATE TABLE little_chrome_trend AS SELECT url AS id, SUM(visit_time > ${CHROME_NOW} - 2 * ${DAY}) AS recent,
+         SUM(visit_time <= ${CHROME_NOW} - 2 * ${DAY}) AS prior
+       FROM visits WHERE visit_time > ${CHROME_NOW} - 30 * ${DAY} GROUP BY url;`,
+    ).then(
+      () => true,
+      () => false,
+    );
+    trendTables.set(db, ready);
+  }
+  return ready;
+}
+
+async function searchHistory(
+  db: string,
+  text: string,
+  blocklist: Blocklist,
+  signal?: AbortSignal,
+): Promise<HistoryItem[]> {
   const words = text.trim().split(/\s+/).filter(Boolean);
   const escape = (w: string) => w.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
   const where = words.map((w) => {
@@ -181,10 +219,16 @@ async function searchHistory(db: string, text: string, blocklist: Blocklist): Pr
         .map((p) => `url LIKE '${p}${escape(words[0])}%' ESCAPE '\\'`)
         .join(" OR ")} THEN 3 ELSE 1 END`
     : "1";
-  const days = `((strftime('%s', 'now') + 11644473600) * 1000000 - last_visit_time) / 86400000000.0`;
+  const days = `(${CHROME_NOW} - last_visit_time) / ${DAY}.0`;
   const recency = `CASE WHEN ${days} < 4 THEN 1.0 WHEN ${days} < 14 THEN 0.7 WHEN ${days} < 31 THEN 0.5
     WHEN ${days} < 90 THEN 0.3 ELSE 0.1 END`;
-  const order = `ORDER BY (visit_count + 2 * typed_count) * ${recency} * ${hostMatch} DESC, last_visit_time DESC LIMIT 50`;
+  // Trending: visits per day over the last 2 days against the 28 days before, so pages that suddenly
+  // get visited a lot rise. The +1 keeps a single new visit from spiking; capped at 5x.
+  const hasTrend = await ensureTrendTable(db);
+  const growth = hasTrend ? `MIN(5.0, COALESCE(trend.recent, 0) / 2.0 / (COALESCE(trend.prior, 0) / 28.0 + 1))` : "0";
+  const from = hasTrend ? `FROM urls LEFT JOIN little_chrome_trend AS trend ON trend.id = urls.id` : "FROM urls";
+  const order = `ORDER BY (visit_count + 2 * typed_count) * ${recency} * ${hostMatch} * (1 + ${growth}) DESC,
+    last_visit_time DESC LIMIT 50`;
   try {
     // Largest favicon bitmap per page; files are cached by bitmap id + update time.
     const rows = await sqlite<HistoryItem & { bitmap: string | null }>(
@@ -192,7 +236,8 @@ async function searchHistory(db: string, text: string, blocklist: Blocklist): Pr
       `SELECT url, title, (SELECT b.id || '-' || b.last_updated FROM f.icon_mapping m
          JOIN f.favicon_bitmaps b ON b.icon_id = m.icon_id
          WHERE m.page_url = urls.url ORDER BY b.width DESC LIMIT 1) AS bitmap
-       FROM urls WHERE ${filter} ${order}`,
+       ${from} WHERE ${filter} ${order}`,
+      signal,
     );
     const missing = [...new Set(rows.map((r) => r.bitmap).filter((b): b is string => !!b))].filter(
       (b) => !existsSync(join(FAVICON_DIR, `${b}.png`)),
@@ -212,8 +257,9 @@ async function searchHistory(db: string, text: string, blocklist: Blocklist): Pr
       favicon:
         bitmap && existsSync(join(FAVICON_DIR, `${bitmap}.png`)) ? join(FAVICON_DIR, `${bitmap}.png`) : undefined,
     }));
-  } catch {
-    return sqlite<HistoryItem>(db, `SELECT url, title FROM urls WHERE ${filter} ${order}`);
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    return sqlite<HistoryItem>(db, `SELECT url, title ${from} WHERE ${filter} ${order}`, signal);
   }
 }
 
@@ -223,6 +269,7 @@ const cache = new Cache();
 export default function Command(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const profile = useMemo(currentProfile, []);
+  const profileLabel = useMemo(() => profileName(profile), [profile]);
   const cacheKey = `initial:${profile}`;
   const [items, setItems] = useState<HistoryItem[]>(() => {
     const cached = !props.fallbackText && cache.get(cacheKey);
@@ -265,13 +312,14 @@ export default function Command(props: LaunchProps) {
     if (!blocklist) return;
     if (!db) return setIsLoading(false);
     let cancelled = false;
+    const abort = new AbortController();
     setIsLoading(true);
     // Debounce the query only (not the first one); the typed row follows searchText immediately and
     // stays selected until fresh results arrive, so Enter while typing opens what was typed.
     const delay = firstQuery.current ? 0 : 150;
     firstQuery.current = false;
     const timer = setTimeout(() => {
-      searchHistory(db, searchText, blocklist)
+      searchHistory(db, searchText, blocklist, abort.signal)
         .then((r) => {
           if (cancelled) return;
           setItems(r);
@@ -283,6 +331,7 @@ export default function Command(props: LaunchProps) {
     }, delay);
     return () => {
       cancelled = true;
+      abort.abort();
       clearTimeout(timer);
     };
   }, [db, searchText, blocklist, cacheKey]);
@@ -335,7 +384,7 @@ export default function Command(props: LaunchProps) {
           }
         />
       )}
-      <List.Section title="History">
+      <List.Section title="History" subtitle={profileLabel}>
         {visible.map((item) => (
           <List.Item
             key={`${generation}:${item.url}`}
