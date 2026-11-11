@@ -39,7 +39,7 @@
         "macOS": "/opt/homebrew/bin/wireguide",
         "Windows": "C:\\Program Files\\WireGuide\\wireguide.exe"
       },
-      "title": "WireGuide binary",
+      "title": "WireGuide Binary",
       "required": true
     }
   ],
