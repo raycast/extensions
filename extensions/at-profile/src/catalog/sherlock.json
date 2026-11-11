@@ -2430,7 +2430,7 @@
       "name": "HackenProof (Hackers)",
       "urlTemplate": "https://hackenproof.com/hackers/{profile}",
       "homepage": "https://hackenproof.com/",
-      "usernamePattern": "^[\\w-]{,34}$",
+      "usernamePattern": "^[\\w-]{0,34}$",
       "knownUsername": "blazezaria",
       "nsfw": false,
       "check": {

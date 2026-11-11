@@ -30,12 +30,48 @@ function catalogIdFor(name: string): string {
   return `catalog-${slug}`;
 }
 
+/**
+ * Python reads `{,34}` as "up to 34", where JavaScript matches the text `{,34}` itself. Spell each such limit `{0,34}`,
+ * skipping escaped characters and character classes, where a brace is only a brace.
+ */
+function convertOpenLimits(pattern: string): string {
+  let out = "";
+  let inClass = false;
+  for (let index = 0; index < pattern.length; index++) {
+    const char = pattern[index];
+    if (char === "\\") {
+      out += pattern.slice(index, index + 2);
+      index++;
+    } else if (inClass) {
+      if (char === "]") inClass = false;
+      out += char;
+    } else if (char === "[") {
+      inClass = true;
+      out += char;
+      // A ] right after [ or [^ is part of the class, not its end
+      const lead = pattern.slice(index + 1).match(/^\^?\]?/)?.[0] ?? "";
+      out += lead;
+      index += lead.length;
+    } else {
+      const limit = char === "{" ? pattern.slice(index).match(/^\{,(\d+)\}/) : null;
+      if (limit) {
+        out += `{0,${limit[1]}}`;
+        index += limit[0].length - 1;
+      } else {
+        out += char;
+      }
+    }
+  }
+  return out;
+}
+
 /** Sherlock's regexes are Python's; keep only those JavaScript reads the same way */
 function portablePattern(pattern: unknown): string | undefined {
   if (typeof pattern !== "string") return undefined;
+  const converted = convertOpenLimits(pattern);
   try {
-    new RegExp(pattern);
-    return pattern;
+    new RegExp(converted);
+    return converted;
   } catch {
     return undefined;
   }

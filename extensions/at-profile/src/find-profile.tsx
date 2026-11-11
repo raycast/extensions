@@ -6,5 +6,5 @@ import FindProfile from "./components/FindProfile";
  */
 export default function FindProfileCommand(props: LaunchProps<{ arguments: Arguments.FindProfile }>) {
   const profile = props.arguments.profile?.trim();
-  return <FindProfile initialProfile={profile} searchOnOpen={Boolean(profile)} />;
+  return <FindProfile initialProfile={profile} searchOnOpen={Boolean(profile)} isRoot />;
 }

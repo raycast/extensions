@@ -42,6 +42,8 @@ interface FindProfileProps {
   mode?: SearchMode;
   /** Search `initialProfile` right away. Otherwise show its last findings, if there are any. */
   searchOnOpen?: boolean;
+  /** The command's own view, where Raycast shows the command title; the search status moves into the Found section */
+  isRoot?: boolean;
 }
 
 interface SearchRun {
@@ -76,7 +78,12 @@ const REASONS: Partial<Record<SearchOutcome["status"], string>> = {
   unchecked: "This site can't be checked",
 };
 
-export default function FindProfile({ initialProfile, mode: initialMode = "default", searchOnOpen }: FindProfileProps) {
+export default function FindProfile({
+  initialProfile,
+  mode: initialMode = "default",
+  searchOnOpen,
+  isRoot,
+}: FindProfileProps) {
   const { entries: apps, isLoading: isLoadingApps } = useApps();
   const [searchText, setSearchText] = useState("");
   const [run, setRun] = useState<SearchRun>();
@@ -291,7 +298,8 @@ export default function FindProfile({ initialProfile, mode: initialMode = "defau
           title={`Search Everywhere for @${name}`}
           icon={Icon.Globe}
           onAction={() => start(name, "everywhere")}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          // Second after Find, where it takes ⌘⏎; after a row's own actions it needs its own shortcut
+          shortcut={withFind ? undefined : { modifiers: ["cmd", "shift"], key: "enter" }}
         />
       )}
       {run && name === run.profile && run.status !== "searching" && (
@@ -330,11 +338,8 @@ export default function FindProfile({ initialProfile, mode: initialMode = "defau
               <Action.CopyToClipboard title="Copy Username" content={profile} />
             )}
             {row.url && (
-              <Action.CopyToClipboard
-                title="Copy Profile URL"
-                content={row.url}
-                shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
-              />
+              // Always the second action, so it takes ⌘⏎
+              <Action.CopyToClipboard title="Copy Profile URL" content={row.url} />
             )}
             {!row.inMyApps && row.appId && (
               <Action
@@ -354,19 +359,21 @@ export default function FindProfile({ initialProfile, mode: initialMode = "defau
     );
   };
 
-  const section = (title: string, sectionRows: Row[]) =>
+  const section = (title: string, sectionRows: Row[], status?: string) =>
     sectionRows.length > 0 && (
-      <List.Section title={title} subtitle={countOf(sectionRows.length, "site")}>
+      <List.Section title={title} subtitle={[countOf(sectionRows.length, "site"), status].filter(Boolean).join(" · ")}>
         {sectionRows.map(renderRow)}
       </List.Section>
     );
 
-  // The username and how long its search took; the toast and History carry the rest
-  const navigationTitle = !run
-    ? "Find Profile"
+  // How long the search took; the toast and History carry the rest
+  const runStatus = !run
+    ? undefined
     : run.status === "searching"
-      ? `Finding @${run.profile}…`
-      : `@${run.profile} · ${run.status === "canceled" ? "canceled after " : ""}${formatDuration(run.durationMs ?? 0)}`;
+      ? "searching…"
+      : `${run.status === "canceled" ? "canceled after " : ""}${formatDuration(run.durationMs ?? 0)}`;
+  // Raycast titles a command's own view; a view pushed from History names the username and the status
+  const navigationTitle = isRoot ? undefined : run ? `@${run.profile} · ${runStatus}` : "Find Profile";
 
   return (
     <List
@@ -395,7 +402,7 @@ export default function FindProfile({ initialProfile, mode: initialMode = "defau
           description="Type a username, then press Return to look for it across sites."
         />
       )}
-      {section(run ? `Found @${run.profile}` : "Found", byStatus("found"))}
+      {section(run ? `Found @${run.profile}` : "Found", byStatus("found"), isRoot ? runStatus : undefined)}
       {section("Couldn't Check", byStatus("blocked", "error"))}
       {section("Not Checked", byStatus("unchecked"))}
       {section("Not Found", byStatus("not-found"))}

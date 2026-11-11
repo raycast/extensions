@@ -50,6 +50,40 @@ const RAW = {
   },
 };
 
+describe("Sherlock's Python username rules", () => {
+  it("reads an open-ended length limit like {,34} the way Python does", () => {
+    const [site] = normalizeSherlock({
+      Example: {
+        errorType: "status_code",
+        url: "https://example.com/{}",
+        urlMain: "https://example.com/",
+        username_claimed: "example_user",
+        regexCheck: "^[\\w-]{,34}$",
+      },
+    });
+    const pattern = new RegExp(site.usernamePattern ?? "");
+    expect(pattern.test("example_user")).toBe(true);
+    expect(pattern.test("x".repeat(35))).toBe(false);
+  });
+
+  it("leaves {,n} alone inside a character class or after a single backslash, and converts it after an escaped one", () => {
+    const patternOf = (regexCheck: string) =>
+      normalizeSherlock({
+        Example: {
+          errorType: "status_code",
+          url: "https://example.com/{}",
+          urlMain: "https://example.com/",
+          username_claimed: "example_user",
+          regexCheck,
+        },
+      })[0].usernamePattern;
+    expect(patternOf("^[{,3}]$")).toBe("^[{,3}]$");
+    expect(patternOf("^a\\{,3}$")).toBe("^a\\{,3}$");
+    expect(patternOf("^a\\\\{,3}$")).toBe("^a\\\\{0,3}$");
+    expect(patternOf("^[\\]]{,3}$")).toBe("^[\\]]{0,3}$");
+  });
+});
+
 describe("normalizeSherlock", () => {
   const sites = normalizeSherlock(RAW);
   const byName = new Map(sites.map((site) => [site.name, site]));

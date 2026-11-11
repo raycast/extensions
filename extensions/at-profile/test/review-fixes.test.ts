@@ -72,7 +72,8 @@ describe("a saved catalog with a damaged row", () => {
       reliability: "works",
     });
     const rows: unknown[] = Array.from({ length: 20 }, (_, index) => good(index));
-    const { reliability: _dropped, ...damaged } = good(99);
+    const damaged: Record<string, unknown> = { ...good(99) };
+    delete damaged.reliability;
     rows.push(damaged);
     // A check whose not-found text is damaged would match "null" instead of the real marker
     rows.push({ ...good(98), check: { signals: ["message"], notFoundText: [null] } });

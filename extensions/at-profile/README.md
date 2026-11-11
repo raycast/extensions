@@ -91,15 +91,11 @@ Export your settings to YAML format for:
 - Sharing configurations with team members
 - Version control of your app settings
 
-## Development
-
-### Refreshing the Catalog
-
-`npm run sync-catalog` downloads Sherlock's current site list, converts it, and probes every site to grade its check (a few minutes). It writes `src/catalog/sherlock.json`.
-
 ## Credits
 
 The site catalog comes from the [Sherlock project](https://github.com/sherlock-project/sherlock), MIT License, Copyright (c) 2019 Sherlock Project. The platform checks are this extension's own, inspired by [social-analyzer](https://github.com/qeeqbox/social-analyzer)'s shared detections.
+
+## Development
 
 ### Architecture
 
