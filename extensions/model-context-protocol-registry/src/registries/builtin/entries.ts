@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "own-page",
+    title: "own.page",
+    description:
+      "Build and edit your own.page link-in-bio page by chatting. Paste any link and it becomes the right widget (YouTube and Vimeo players, Spotify, SoundCloud and Apple Music players, Instagram, TikTok and X profile cards, link previews), plus headings, text, newsletter signups, contact forms, events, maps and galleries. Move, resize and remove widgets, change the theme and page language, create subpages, read visits and clicks for 7, 30 or 90 days and grade the page out of 100. Every change can be undone. 20 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an own.page Pro or Business plan or the 7-day free trial is required.",
+    icon: "https://own.page/icons/own-page-ai-512.png",
+    homepage: "https://own.page/ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.own.page"],
+    },
+    remoteUrl: "https://mcp.own.page",
+  },
+  {
     name: "glypse",
     title: "Glypse",
     description:
