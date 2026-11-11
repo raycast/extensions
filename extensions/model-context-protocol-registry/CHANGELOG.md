@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update deAPI MCP Server] - 2026-11-11
+
+- Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.
+
 ## [Update Mnemoverse description] - 2026-11-11
 
 - Shared rooms are out of beta: drop "(beta)" from the Mnemoverse entry and its README row.
