@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update VoiceMoat MCP Server] - {PR_MERGE_DATE}
+## [Update VoiceMoat MCP Server] - 2026-11-11
 
 - Update the VoiceMoat description: Style and Stance checks replace the old score, and the $5 Pro trial is included.
 
