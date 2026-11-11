@@ -7,12 +7,13 @@ import {
   PERMISSION_FALLBACK_HUD,
   PERMISSION_HUD,
   TargetAppError,
+  notInFrontHud,
   runFill,
 } from "./fill-sequence";
 import { KeyCode } from "./key-press";
 
 const PREVIOUS: ClipboardSnapshot = { text: "previous clipboard" };
-const NOT_IN_FRONT = "Stopped filling: Example isn't in front";
+const NOT_IN_FRONT = "Stopped filling: Example Helper is in front";
 
 /**
  * Records what the fill sequence does, optionally failing when returning to the app, on a given key press or when
@@ -121,6 +122,25 @@ test("stops as soon as another app comes in front", async () => {
 
   assert.equal(calls.includes("copy secret"), false);
   assert.deepEqual(calls.slice(-3), ["restore previous clipboard", `hud ${NOT_IN_FRONT}`, "finish"]);
+});
+
+test("names the app in front when stopping, in a HUD short enough not to be cut", () => {
+  assert.equal(notInFrontHud("Example Helper", "Example"), "Stopped filling: Example Helper is in front");
+  // A long name is cut, not the end of the HUD.
+  assert.equal(
+    notInFrontHud("Example Super Long Application", "Example"),
+    "Stopped filling: Example Super Long Applicat… is in front",
+  );
+  // Another program named like the app to fill.
+  assert.equal(notInFrontHud("example app", "Example App"), "Stopped filling: another example app is in front");
+  assert.equal(notInFrontHud(undefined, "Example"), "Stopped filling: another app is in front");
+
+  for (const name of ["E".repeat(200), "Example App ".repeat(20), "😀".repeat(100)]) {
+    for (const hud of [notInFrontHud(name, "Example"), notInFrontHud(name, name)]) {
+      assert.ok(Array.from(hud).length <= PERMISSION_HUD.length, hud);
+      assert.ok(hud.endsWith("… is in front"), hud);
+    }
+  }
 });
 
 const ACCESSIBILITY_DENIED = new Error(

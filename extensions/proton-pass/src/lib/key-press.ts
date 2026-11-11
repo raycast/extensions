@@ -3,12 +3,40 @@ export type KeyModifier = "command" | "shift" | "option" | "control";
 /** macOS virtual key codes. Unlike `keystroke`, they don't depend on the keyboard layout. */
 export const KeyCode = { V: 9, Tab: 48, Return: 36 } as const;
 
-/** Error raised by keyPressScript() when another app is in front. */
+/** Error raised by keyPressScript() when another app is in front, followed by that app's name in brackets. */
 export const NOT_FRONTMOST_ERROR = "The app to fill is not in front";
 
-/** AppleScript that returns the bundle identifier of the frontmost app. */
-export const FRONTMOST_BUNDLE_ID_SCRIPT =
-  'tell application "System Events" to get bundle identifier of first application process whose frontmost is true';
+/** AppleScript that returns the bundle identifier and the name of the frontmost app, on two lines. */
+export const FRONTMOST_APP_SCRIPT = [
+  'tell application "System Events"',
+  "  set frontmostApp to first application process whose frontmost is true",
+  "  return (bundle identifier of frontmostApp as text) & linefeed & displayed name of frontmostApp",
+  "end tell",
+].join("\n");
+
+/** The app System Events sees in front. Its bundle identifier is empty when it has none. */
+export interface FrontmostApp {
+  bundleId: string;
+  name?: string;
+}
+
+/** A name to show, or undefined when AppleScript gave none. */
+function appName(value: string | undefined): string | undefined {
+  const name = value?.trim();
+  return name && name !== "missing value" ? name : undefined;
+}
+
+/** Reads the output of FRONTMOST_APP_SCRIPT. */
+export function parseFrontmostApp(output: string): FrontmostApp {
+  const [bundleId = "", ...name] = output.split("\n");
+  return { bundleId: bundleId === "missing value" ? "" : bundleId.trim(), name: appName(name.join("\n")) };
+}
+
+/** The name of the app in front, from the error of a keyPressScript() that stopped because of it. */
+export function frontmostNameFromError(message: string): string | undefined {
+  // Up to the last bracket: the name may contain one.
+  return appName(message.match(new RegExp(`${NOT_FRONTMOST_ERROR} \\[(.*)\\]`, "s"))?.[1]);
+}
 
 /** Bundle identifiers only contain letters, digits, hyphens and periods. */
 export function isBundleId(value: string | undefined): value is string {
@@ -25,8 +53,9 @@ export function keyPressScript(keyCode: number, modifiers: KeyModifier[], bundle
   return [
     'tell application "System Events"',
     // In a variable first: a comparison right after a `whose` filter would become part of the filter.
-    "  set frontmostBundleId to bundle identifier of first application process whose frontmost is true",
-    `  if frontmostBundleId is not "${bundleId}" then error "${NOT_FRONTMOST_ERROR}"`,
+    "  set frontmostApp to first application process whose frontmost is true",
+    // The error names the app in front, so that the HUD can tell which one took the place of the app to fill.
+    `  if bundle identifier of frontmostApp is not "${bundleId}" then error "${NOT_FRONTMOST_ERROR} [" & displayed name of frontmostApp & "]"`,
     `  key code ${keyCode}${using}`,
     "end tell",
   ].join("\n");

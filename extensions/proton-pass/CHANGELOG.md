@@ -1,8 +1,9 @@
 # proton-pass Changelog
 
-## [Clearer Permission Message] - {PR_MERGE_DATE}
+## [Clearer Fill Messages] - {PR_MERGE_DATE}
 
 - When macOS doesn't let Raycast fill, Fill Login and the Paste actions open the place in System Settings where Raycast lacks a permission: Accessibility, named Device Control and Data Access in recent macOS versions, or Automation, to control System Events. Their message says to allow Raycast there, and fits on screen. It used to name both permissions, was cut short, and gave no way to get there
+- When filling stops because another app is in front, its message names the app macOS sees in front instead of the app to fill, and cuts a long name so that the message fits on screen
 
 ## [Shared with Me, Sorting and TOTP] - 2026-11-09
 

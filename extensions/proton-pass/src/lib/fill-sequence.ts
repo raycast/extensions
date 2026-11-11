@@ -59,6 +59,30 @@ export const PERMISSION_HUD = "Allow Raycast in the settings just opened, then t
 export const PERMISSION_FALLBACK_HUD = "Allow Raycast in System Settings › Privacy & Security";
 export const FAILURE_HUD = "Couldn't fill the login";
 
+/** Longest HUD built here, as long as PERMISSION_HUD: Raycast cuts longer ones. */
+const MAX_HUD_LENGTH = 57;
+
+/** Cuts text to at most this many characters, ending with an ellipsis. */
+function shorten(text: string, maxLength: number): string {
+  const characters = Array.from(text);
+  if (characters.length <= maxLength) return text;
+  const kept = characters.slice(0, maxLength - 1).join("");
+  return `${kept.trimEnd()}…`;
+}
+
+/**
+ * Message of a TargetAppError. Names the app System Events sees in front, since the user knows which one they were
+ * filling. A long name is cut so that the HUD isn't, and "is in front" stays visible.
+ */
+export function notInFrontHud(frontmostName: string | undefined, targetName: string): string {
+  if (!frontmostName) return "Stopped filling: another app is in front";
+  // Another program with the same name as the app to fill.
+  const sameName = frontmostName.toLowerCase() === targetName.trim().toLowerCase();
+  const prefix = sameName ? "Stopped filling: another " : "Stopped filling: ";
+  const suffix = " is in front";
+  return `${prefix}${shorten(frontmostName, MAX_HUD_LENGTH - prefix.length - suffix.length)}${suffix}`;
+}
+
 /** Raycast is closed by now, so a HUD is all that can show. When a permission is missing, opens where to give it. */
 async function failureHud(driver: FillDriver, error: unknown): Promise<string> {
   if (error instanceof TargetAppError) return error.message;

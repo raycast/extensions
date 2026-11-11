@@ -8,13 +8,16 @@ import {
   showHUD,
 } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { FillDriver, FillRequest, TargetAppError, runFill } from "./fill-sequence";
+import { FillDriver, FillRequest, TargetAppError, notInFrontHud, runFill } from "./fill-sequence";
 import {
-  FRONTMOST_BUNDLE_ID_SCRIPT,
+  FRONTMOST_APP_SCRIPT,
+  FrontmostApp,
   NOT_FRONTMOST_ERROR,
   PERMISSION_SETTINGS_URLS,
+  frontmostNameFromError,
   isBundleId,
   keyPressScript,
+  parseFrontmostApp,
 } from "./key-press";
 
 /** Minimum time for the previous app to get the focus back once Raycast closes. */
@@ -49,13 +52,13 @@ export async function getTargetApp(): Promise<TargetApp> {
   return { name: app.name, bundleId: app.bundleId };
 }
 
-function notInFront(app: TargetApp): TargetAppError {
-  return new TargetAppError(`Stopped filling: ${app.name} isn't in front`);
+/** Stops filling, naming the app in front instead of the target: that's the one the user can't guess. */
+function notInFront(target: TargetApp, frontmostName: string | undefined): TargetAppError {
+  return new TargetAppError(notInFrontHud(frontmostName, target.name));
 }
 
-async function isInFront(app: TargetApp): Promise<boolean> {
-  const bundleId = await runAppleScript(FRONTMOST_BUNDLE_ID_SCRIPT);
-  return bundleId.toLowerCase() === app.bundleId.toLowerCase();
+async function getFrontmostApp(): Promise<FrontmostApp> {
+  return parseFrontmostApp(await runAppleScript(FRONTMOST_APP_SCRIPT));
 }
 
 /** Fills the target app, and only that app: every key press checks that it's in front. */
@@ -75,7 +78,9 @@ function createRaycastDriver(target: TargetApp): FillDriver {
       try {
         await runAppleScript(keyPressScript(keyCode, modifiers, target.bundleId));
       } catch (error: unknown) {
-        if (error instanceof Error && error.message.includes(NOT_FRONTMOST_ERROR)) throw notInFront(target);
+        if (error instanceof Error && error.message.includes(NOT_FRONTMOST_ERROR)) {
+          throw notInFront(target, frontmostNameFromError(error.message));
+        }
         throw error;
       }
     },
@@ -85,8 +90,11 @@ function createRaycastDriver(target: TargetApp): FillDriver {
       await wait(FOCUS_DELAY_MS);
       // The app can take a moment to get the focus back. Never paste anywhere else in the meantime.
       const deadline = Date.now() + FOCUS_TIMEOUT_MS;
-      while (!(await isInFront(target))) {
-        if (Date.now() >= deadline) throw notInFront(target);
+      for (;;) {
+        const frontmost = await getFrontmostApp();
+        if (frontmost.bundleId.toLowerCase() === target.bundleId.toLowerCase()) return;
+        // Name the last app seen in front.
+        if (Date.now() >= deadline) throw notInFront(target, frontmost.name);
         await wait(FOCUS_POLL_MS);
       }
     },

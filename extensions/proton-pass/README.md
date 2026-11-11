@@ -87,7 +87,7 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
 
-Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key, and its message names the app in front.
 
 Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared.
 
