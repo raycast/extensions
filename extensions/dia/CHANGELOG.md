@@ -1,5 +1,11 @@
 # Dia Changelog
 
+## [History and Bookmarks Across Profiles] - 2026-11-11
+
+- Search History, Search Dia and the history and bookmark AI tools now include every Dia profile (space), not only the last used one.
+- With more than one profile, history results show the profile name and bookmarks are grouped under a folder per profile.
+- A profile whose History or Bookmarks file can't be read no longer hides the others.
+
 ## [Search Extensions Command] - 2026-11-07
 
 - Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.

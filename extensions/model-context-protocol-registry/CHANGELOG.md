@@ -4,6 +4,11 @@
 
 - Add HTTPfy to the official registry as a hosted Streamable HTTP server with 24 read-only DNS, email-authentication (SPF, DKIM, DMARC, BIMI, MTA-STS), TLS certificate, WHOIS, IP/ASN, blocklist, ping, traceroute and port-check tools, no authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add Liquid Inference MCP Server] - 2026-11-11
+
+- Add Liquid Inference to the official registry with direct HTTP access in Raycast and an `mcp-remote` fallback for other clients.
+- Compare models and prices, preview costs, read balances and receipts, and buy inference with OAuth sign-in and a spend limit.
+
 ## [Add Wavegrain MCP Server] - 2026-11-11
 
 - Add Wavegrain to the official registry: curated TikTok slideshows and Instagram carousels for your brand on autopilot. Read brands and slideshows, make new slideshows in the brand's voice with its own photos, edit slide text, schedule and export. Hosted Streamable HTTP server at https://wavegrain.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

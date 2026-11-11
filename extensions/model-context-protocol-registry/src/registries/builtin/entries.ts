@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "liquid-inference",
+    title: "Liquid Inference",
+    description:
+      "Compare AI models and prices, preview costs, and read your workspace balance and receipts. Buy text, images, speech, video, transcripts, embeddings, and decisions through the Liquid Inference exchange. Sign in with OAuth and choose a workspace, spend permission, and spend limit. Purchases charge your Liquid balance. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy and need Node.js.",
+    icon: "https://router.inference.ai.exchange/favicon.png",
+    homepage: "https://liquidinference.ai/docs/connect-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://router.inference.ai.exchange/mcp"],
+    },
+    remoteUrl: "https://router.inference.ai.exchange/mcp",
+  },
+  {
     name: "own-page",
     title: "own.page",
     description:

@@ -4,7 +4,7 @@
 /extensions/1-click-confetti                                        @peduarte @ridemountainpig
 /extensions/1bookmark                                               @1bookmark-bot @b6pzeusbc54tvhw5jgpyw8pwz2x6gs @1bookmark-bot
 /extensions/1loc                                                    @kud @kgrhartlage @sxn @xmok
-/extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @superwhys @Luk4h @LitoMore @vimtor @Pavelas @iml885203
+/extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @superwhys @Luk4h @LitoMore @vimtor @Pavelas @iml885203 @tharropoulos
 /extensions/2do                                                     @danielh-official
 /extensions/2fa-directory                                           @andreaselia @pernielsentikaer @xmok
 /extensions/2fas-authenticator                                      @LockeAG @MushuDG
@@ -1176,7 +1176,7 @@
 /extensions/google-calendar-quickadd                                @Baguirre03 @ridemountainpig
 /extensions/google-chat                                             @SMRehan
 /extensions/google-chrome                                           @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19 @Tarocch1 @rsperezn @drewbabel @haydencbarnes @pernielsentikaer @j3lte @0xdhrv @xmok @hayk94 @alexibuild @os-moussao @kirill-markin
-/extensions/google-chrome-profiles                                  @frouo @erics118 @jschmidtcordeiro @NirRosh @joshcarty @smpeotn @radekcabaj @0xdhrv @masamallow
+/extensions/google-chrome-profiles                                  @frouo @erics118 @jschmidtcordeiro @NirRosh @joshcarty @smpeotn @radekcabaj @0xdhrv @masamallow @danlane
 /extensions/google-cloud-platform-search                            @klaa97 @edomora97 @hisomura @m-gentil
 /extensions/google-cloud-run                                        @BhavyaMuni
 /extensions/google-contacts                                         @aicayzer
@@ -1662,6 +1662,7 @@
 /extensions/lotus-mtg-companion                                     @MadMaxMcKinney
 /extensions/luci-screen-memory                                      @akulafb
 /extensions/lucide-animated                                         @shivraj-roy
+/extensions/lucide-extended                                         @sepidsoroush
 /extensions/lucide-icons                                            @aeither @xilopaint @ridemountainpig @j3lte @muhammadrizo-y
 /extensions/lucky-surf                                              @Popalay
 /extensions/ludex                                                   @Leocadio94
@@ -2030,7 +2031,7 @@
 /extensions/obs-clippings                                           @trevware
 /extensions/obs-control                                             @Yukaii @j3lte @RealCyGuy
 /extensions/obscurify-ai                                            @tonydavis629
-/extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort @MuuNU @marcjulianschwarz @theherk @yokuraki8 @vicampuzano @ErBlack @byheaven @tofrankie @alexibuild @RLuf @SWHL @raulkolaric @Just-Me-22
+/extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort @MuuNU @marcjulianschwarz @theherk @yokuraki8 @vicampuzano @ErBlack @byheaven @tofrankie @alexibuild @RLuf @SWHL @raulkolaric @Just-Me-22 @kirill-markin
 /extensions/obsidian-bookmarks                                      @Dru89 @moeyua @iwex @qfettes @Victor-Cz
 /extensions/obsidian-link-opener                                    @osteele
 /extensions/obsidian-smart-capture                                  @trillhause @Jimmy-b36
@@ -2887,7 +2888,7 @@
 /extensions/split-video-scenes                                      @remorses
 /extensions/splix                                                   @cwooldridge1
 /extensions/spoiler-converter                                       @Visual-Studio-Coder @varunsatish2017
-/extensions/spokenly                                                @05bmckay @pernielsentikaer
+/extensions/spokenly                                                @05bmckay @pernielsentikaer @itsdanielsultan
 /extensions/spoqify                                                 @ajtruex
 /extensions/sportssync                                              @daniyalmaster693
 /extensions/spotifast                                               @Seigiard
@@ -3005,6 +3006,7 @@
 /extensions/tableplus                                               @pernielsentikaer @nagauta @xmok @MatteoGauthier
 /extensions/tablepro                                                @datlechin
 /extensions/tabler                                                  @zavbala @bensomething @bendrucker @alexibuild
+/extensions/tablestudio                                             @moshetanzer
 /extensions/tabletop-dice-roller                                    @sduemler
 /extensions/tabnews                                                 @juniorodilton
 /extensions/tabstack                                                @JustSteveKing

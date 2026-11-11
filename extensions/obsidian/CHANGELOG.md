@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [Fix Create Note saving] - 2026-11-11
+
+- Keep the Create Note form open when saving fails or an overwrite is canceled, and report the failure to the AI tool
+- Reject note names that are blank, start with a dot, or contain `/` or `\`, and paths outside the vault
+- Save `Task.md` as `Task.md` instead of `Task.md.md`
+
 ## [Fix Search Note crash when vault path is not in note path] - 2026-11-05
 
 - Fix a crash in Search Note when a note's path does not contain the vault path (e.g. on Windows with different separators), caused by `split(vault.path)[1]` returning undefined
