@@ -1,0 +1,88 @@
+import { ItemDef, ItemId } from "../../types";
+
+export const COOKING_ITEMS: Partial<Record<ItemId, ItemDef>> = {
+  ration: {
+    id: "ration",
+    name: "Glowcap Ration",
+    description: "Cooked, pressed and vaguely palatable.",
+    value: 10,
+    heal: 15,
+  },
+  honey_ration: {
+    id: "honey_ration",
+    name: "Honey Ration",
+    description: "A proper meal. Glowcap folded into Star Honey.",
+    value: 30,
+    heal: 40,
+  },
+  fish_ration: {
+    id: "fish_ration",
+    name: "Fish Ration",
+    description: "Pan-fried minnow. Crunchy.",
+    value: 17,
+    heal: 22,
+  },
+  eel_skewer: {
+    id: "eel_skewer",
+    name: "Eel Skewer",
+    description: "Spark eel on a stick, glowcap on the side.",
+    value: 54,
+    heal: 50,
+  },
+  ray_stew: {
+    id: "ray_stew",
+    name: "Ray Stew",
+    description: "Glow ray simmered in Star Honey. The warmth lasts for hours.",
+    value: 145,
+    heal: 90,
+  },
+  berry_compote: {
+    id: "berry_compote",
+    name: "Berry Compote",
+    description: "Sweet, thick and warm.",
+    value: 32,
+    heal: 32,
+  },
+  thorn_stew: {
+    id: "thorn_stew",
+    name: "Thorn Stew",
+    description: "Rich and bitter, the way a stew should be.",
+    value: 125,
+    heal: 65,
+  },
+  ember_curry: {
+    id: "ember_curry",
+    name: "Ember Curry",
+    description: "The ember pods are doing most of the work.",
+    value: 656,
+    heal: 110,
+  },
+  mist_broth: {
+    id: "mist_broth",
+    name: "Mist Broth",
+    description: "It is light, it is clear, and you will feel better in a minute.",
+    value: 646,
+    heal: 130,
+  },
+  sunfruit_tart: {
+    id: "sunfruit_tart",
+    name: "Sunfruit Tart",
+    description: "The locals call it a celebration and eat it every day.",
+    value: 2852,
+    heal: 160,
+  },
+  leviathan_steak: {
+    id: "leviathan_steak",
+    name: "Leviathan Steak",
+    description: "More meal than you can eat. You will try.",
+    value: 1706,
+    heal: 200,
+  },
+  elder_feast: {
+    id: "elder_feast",
+    name: "Elder Feast",
+    description: "It tastes like every good day you have had here.",
+    value: 6248,
+    heal: 260,
+  },
+};

@@ -4,8 +4,8 @@ Search Google from Raycast and browse titles, source URLs, snippets, and ranking
 
 ## Set up
 
-1. Sign in to [FlashData](https://flashdata.dev/) and create an API key with **Google Search** access.
-2. Make sure your FlashData account has sufficient Credits. See the [Google Search API reference](https://flashdata.dev/docs/sources/google_search) for current usage information.
+1. Create an account at [FlashData](https://flashdata.dev/signup?utm_source=raycast&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task) and create an API key with **Google Search** access.
+2. Make sure your FlashData account has sufficient Credits. See the [Google Search API reference](https://flashdata.dev/docs/sources/google_search?utm_source=raycast&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task) for current usage information.
 3. Enter your own key in the extension's required **FlashData API Key** preference.
 4. Open **Search Google**, enter a query, and submit the form.
 
@@ -27,6 +27,6 @@ The extension does not retry automatically. A timeout or connection failure does
 
 Your key is entered through Raycast's password preference. The extension sends your key, query, and selected search parameters only to the FlashData API. It does not include analytics, log your key, or save query history. **Open in Browser** opens the selected source website; clipboard actions copy only when chosen.
 
-- [FlashData](https://flashdata.dev/)
-- [API reference](https://flashdata.dev/docs/sources/google_search)
-- [Terms of service](https://flashdata.dev/legal/terms)
+- [FlashData](https://flashdata.dev/?utm_source=raycast&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task)
+- [API reference](https://flashdata.dev/docs/sources/google_search?utm_source=raycast&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task)
+- [Terms of service](https://flashdata.dev/legal/terms?utm_source=raycast&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task)

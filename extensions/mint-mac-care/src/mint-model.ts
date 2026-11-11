@@ -3,6 +3,7 @@
 // formatter the caller passes.
 
 import type { ByteFormatter, FolderCard, GroupBytes, LegendRow, ResourceCard } from "./mint-visuals";
+import { folderText, isScheduled, memoryText } from "./mint-care";
 
 export const TIER_COLORS = { optimizable: "#3DDC84", safeToClean: "#62A3FF", yours: "#F5BD45", keep: "#8E8E93" };
 export const PILE_COLORS = { idle: "#F5BD45", inUse: "#62A3FF", keep: "#8E8E93" };
@@ -101,6 +102,7 @@ export function diskCard(
   status: StatusJSON,
   care: AutoCareJSON | undefined,
   format: ByteFormatter,
+  getBackCard = false,
 ): ResourceCard | undefined {
   const total = status.volume?.totalBytes ?? (status.disk?.totalGB ?? 0) * GIB;
   const free = status.volume?.freeBytes ?? (status.disk?.freeGB ?? 0) * GIB;
@@ -122,12 +124,15 @@ export function diskCard(
     icon: "disk",
     title: "Disk",
     usage: `${format(used)} / ${format(total)}`,
-    // The dropdown's centre: what can go now. Without the groups, free space.
-    center: groups
-      ? { value: format(groups.optimizable + groups.safeToClean), label: "ready" }
-      : { value: format(free), label: "free" },
+    // The dropdown's centre: what can go now. When the Get back card above
+    // says that, or without the groups, free space.
+    center:
+      groups && !getBackCard
+        ? { value: format(groups.optimizable + groups.safeToClean), label: "ready" }
+        : { value: format(free), label: "free" },
     legend,
     totalBytes: total,
+    usedBytes: used,
     care: diskCare(care),
   };
 }
@@ -160,6 +165,7 @@ export function memoryCard(
       : { value: format(Math.max(0, total - used)), label: "free" },
     legend,
     totalBytes: total,
+    usedBytes: used,
     care: memoryCare(care),
   };
 }
@@ -174,35 +180,25 @@ function groupBytes(groups: StatusJSON["groups"]): GroupBytes | undefined {
   };
 }
 
+/**
+ * Home's Auto Care line for Disk (MoonlitHomeView.careFallback, Mint 1.1.2):
+ * "Hourly when idle" while any bucket's plan is on. Every plan is hourly from
+ * 1.1.2; an older Mint's daily plan reads "Daily when idle".
+ */
 export function diskCare(care: AutoCareJSON | undefined): string {
   if (!care) return "…";
-  if (care.automationAllowed === false) return "Needs a plan";
-  const on = (care.tasks ?? []).filter((task) => task.enabled && task.taskType === "cleanup" && task.diskCareBucket);
+  if (care.automationAllowed === false) return "Locked";
+  const on = (care.tasks ?? []).filter((task) => isScheduled(task));
   if (!on.length) return "Off";
-  return on.some((task) => task.scheduleFrequency === "hourly") ? "Every hour, when idle" : "Every day, when idle";
+  return on.some((task) => task.scheduleFrequency === "hourly") ? "Hourly when idle" : "Daily when idle";
 }
 
 export function memoryCare(care: AutoCareJSON | undefined): string {
-  if (!care) return "…";
-  if (care.automationAllowed === false) return "Needs a plan";
-  if (!care.memory?.available) return "Off";
-  return care.memory.enabled && care.memory.threshold ? `At ${care.memory.threshold}% used` : "Off";
+  return memoryText(care);
 }
 
-export function folderCare(path: string, care: AutoCareJSON | undefined, organizeOnArrival?: boolean): string {
-  if (!care) return "…";
-  if (care.automationAllowed === false) return "Needs a plan";
-  if (organizeOnArrival) return "As files arrive";
-  const task = (care.tasks ?? []).find(
-    (entry) =>
-      entry.enabled &&
-      entry.taskType === "organize" &&
-      entry.scheduleFrequency !== "manual" &&
-      (entry.folderPaths ?? []).includes(path),
-  );
-  if (!task) return "Off";
-  const often = task.scheduleFrequency === "weekly" ? "Weekly" : "Daily";
-  return typeof task.scheduleTimeMinutes === "number" ? `${often}, ${clock(task.scheduleTimeMinutes)}` : often;
+export function folderCare(path: string, care: AutoCareJSON | undefined): string {
+  return folderText(path, care);
 }
 
 export function folderStatus(toSort: number | undefined): string {
@@ -211,19 +207,14 @@ export function folderStatus(toSort: number | undefined): string {
 }
 
 export function folderCards(
-  folders: Array<{ path: string; organizeOnArrival?: boolean; toSort?: number }>,
+  folders: Array<{ path: string; toSort?: number }>,
   care: AutoCareJSON | undefined,
 ): FolderCard[] {
   return folders.map((folder) => ({
     name: folder.path.split("/").filter(Boolean).pop() ?? folder.path,
     status: folderStatus(folder.toSort),
-    care: folderCare(folder.path, care, folder.organizeOnArrival),
+    care: folderCare(folder.path, care),
   }));
-}
-
-export function clock(minutes: number): string {
-  const date = new Date(2000, 0, 1, Math.floor(minutes / 60), minutes % 60);
-  return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
 }
 
 // --- Optimize sources, as the app's chips name them (OptimizableOwner) ---

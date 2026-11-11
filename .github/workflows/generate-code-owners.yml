@@ -81,14 +81,6 @@ jobs:
           echo "Files actually checked out:"
           find . -type f -name "*.json" | head -20
           ls -la scripts/ .github/ || true  # Debug: Confirm dirs/files
-
-          # Store normalized for the script
-          {
-            echo "PACKAGE_FILES<<EOF"
-            echo "$PACKAGE_FILES"
-            echo "EOF"
-            echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED"
-          } >> "$GITHUB_ENV"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node
@@ -97,7 +89,7 @@ jobs:
           node-version-file: .node-version
       - name: Generate
         working-directory: scripts
-        run: ./generate-code-owners.js "$PACKAGE_FILES"
+        run: ./generate-code-owners.js
         env:
           PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
       - name: Set SHORT_SHA

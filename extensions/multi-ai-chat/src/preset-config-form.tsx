@@ -8,7 +8,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AI_SERVICES, type AIServiceId } from "./lib/prompt-urls.js";
 import { upsertPreset } from "./lib/preset-storage.js";
 import {
@@ -30,12 +30,15 @@ interface PresetConfigFormProps {
 }
 
 export function PresetConfigForm({ preset, onSave }: PresetConfigFormProps) {
+  const [presetId] = useState(() => preset?.id ?? randomUUID());
+  const isSaving = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [nameError, setNameError] = useState<string>();
   const [templateError, setTemplateError] = useState<string>();
   const { pop } = useNavigation();
 
   async function handleSubmit(values: PresetFormValues) {
+    if (isSaving.current) return;
     const name = values.name?.trim() ?? "";
     const template = values.template ?? "";
     if (!name || !template.trim()) {
@@ -59,18 +62,27 @@ export function PresetConfigForm({ preset, onSave }: PresetConfigFormProps) {
     }
 
     const nextPreset: PromptPreset = {
-      id: preset?.id ?? randomUUID(),
+      id: presetId,
       name,
       template,
       serviceCounts,
     };
+    isSaving.current = true;
     setIsLoading(true);
     try {
-      await upsertPreset(nextPreset);
+      let syncError: Error | undefined;
+      await upsertPreset(nextPreset, undefined, {
+        onSyncError: (error) => {
+          syncError = error;
+        },
+      });
       onSave(nextPreset);
       await showToast({
-        style: Toast.Style.Success,
-        title: `Saved ${name}`,
+        style: syncError ? Toast.Style.Failure : Toast.Style.Success,
+        title: syncError ? `Saved ${name} on this Mac` : `Saved ${name}`,
+        message: syncError
+          ? `iCloud sync pending: ${syncError.message}`
+          : undefined,
       });
       await pop();
     } catch (error) {
@@ -80,6 +92,7 @@ export function PresetConfigForm({ preset, onSave }: PresetConfigFormProps) {
         message: error instanceof Error ? error.message : String(error),
       });
     } finally {
+      isSaving.current = false;
       setIsLoading(false);
     }
   }

@@ -2,6 +2,7 @@ import { Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { observeCommands, type CommandEvent } from "../mise/exec";
 import { resolveMise, type MiseLocation, type MiseNotFound } from "../mise/locate";
+import { readVersion } from "../mise/version";
 import { readPreferences } from "./preferences";
 
 export type MiseFound = { status: "found"; location: MiseLocation };
@@ -15,10 +16,13 @@ function logCommand({ args, code, ms }: CommandEvent) {
   console.log(`mise ${args.join(" ")} → exit ${code ?? "signal"} in ${ms}ms`);
 }
 
-export function resolveMiseFromRaycast(): Promise<MiseLocation | MiseNotFound> {
+// The version is read on every launch rather than cached: mise can be upgraded in place at the same
+// path, and `mise version` costs a few milliseconds because mise caches its own latest-release check.
+export async function resolveMiseFromRaycast(): Promise<MiseLocation | MiseNotFound> {
   const { misePath, debugLogging } = readPreferences();
   observeCommands(debugLogging ? logCommand : undefined);
-  return resolveMise({ preferredPath: misePath, storage });
+  const result = await resolveMise({ preferredPath: misePath, storage });
+  return "path" in result ? { ...result, version: await readVersion(result) } : result;
 }
 
 export function useMise(): MiseState {

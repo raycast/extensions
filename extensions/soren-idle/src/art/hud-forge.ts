@@ -700,6 +700,10 @@ const ITEMS: Record<string, Item> = {
   craft_siege_maul: siegeMaul,
   craft_thorn_lance: thornLance,
   craft_fang_blade: fangBlade,
+  craft_venom_spitter: mk("VENOM SPITTER", "spore", [62, -20]),
+  craft_rail_carbine: mk("RAIL CARBINE", "maul", [62, -46]),
+  craft_glow_lantern: { ...chitinCrown, name: "GLOW LANTERN" },
+  craft_voidpearl_cloak: { ...wardPlate, name: "VOIDPEARL CLOAK" },
   craft_chitin_crown: chitinCrown,
   craft_sovereign_mail: sovereignMail,
 };

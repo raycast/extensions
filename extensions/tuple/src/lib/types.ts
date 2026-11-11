@@ -12,6 +12,8 @@ export interface Contact {
   favorited: boolean;
   recent: boolean;
   status: ContactStatus;
+  idle?: boolean;
+  avatar_url?: string;
   /** Present when the CLI exposes a busy contact’s call. */
   call?: ContactCall | null;
 }
@@ -85,14 +87,23 @@ export interface StoredCall {
   participants: CallParticipant[];
 }
 
-/**
- * The active call, normalized by `tuple state --format json`. The CLI
- * reconciles the direct-call and room-based shapes into one flat roster:
- * `participants` is the other people (the local user is already excluded),
- * `muted` is the local mic state, `transcribing` is whether the local user is
- * recording the call, and `active_room_slug` is the room slug for room-based
- * calls (null for direct calls). The state summary sets `in_call: false` and `call: null` when idle.
- */
+export interface VoiceNote {
+  id: string;
+  direction: "received" | "sent";
+  person: { id: number; full_name: string; email: string };
+  sent_at: string;
+  duration_ms: number;
+  heard: boolean;
+  state: "ready" | "other_mac" | "damaged" | "sent";
+  transcript: { state: "transcribing" | "done" | "failed" } | null;
+}
+
+export interface VoiceNoteTranscript {
+  id: string;
+  state: "done";
+  text: string;
+}
+
 export interface CallView {
   call_id: string;
   muted: boolean;
@@ -103,12 +114,24 @@ export interface CallView {
 
 export interface CallViewParticipant {
   id: number;
+  session_id?: string | null;
+  avatar_url?: string;
   /** Display name: full name, falling back to short name. */
   name: string;
   email: string;
-  /** Per-participant mute, when the wire shape carries it (null for room-based calls). */
   muted: boolean | null;
   connection_state: string | null;
+}
+
+export function callPeople(participants: CallViewParticipant[]): CallViewParticipant[] {
+  const seen = new Set<number | string>();
+  return participants.filter((person) => {
+    const key = person.id || person.email;
+    if (!key) return true;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export type RoomKind = "personal" | "team";
@@ -171,7 +194,6 @@ export enum TupleErrorKind {
   AlreadyInCall = "already_in_call",
   /** The Tuple app/daemon is not running, so the CLI could not reach it. */
   DaemonDown = "daemon_down",
-  /** The Capture store doesn't exist yet because Capture has never run on this machine. */
   CaptureUnavailable = "transcription_unavailable",
   /** `call start` refused: the target is offline. The app offers no start action for them either. */
   ContactOffline = "contact_offline",
@@ -179,6 +201,7 @@ export enum TupleErrorKind {
   ContactBusy = "contact_busy",
   /** `call join` refused: the target isn't on a call anyone can join. */
   NotJoinable = "not_joinable",
+  CapabilityUnavailable = "capability_unavailable",
   /** Anything else — surfaced to the user verbatim. */
   Unknown = "unknown",
 }
@@ -196,14 +219,18 @@ export interface TupleErrorPayload {
 
 export class TupleError extends Error {
   readonly kind: TupleErrorKind;
+  readonly cliKind?: string;
+  readonly status?: number;
   /** Raw stderr/stdout, preserved so the user sees the real failure rather than a generic message. */
   readonly detail?: string;
 
-  constructor(kind: TupleErrorKind, message: string, detail?: string) {
+  constructor(kind: TupleErrorKind, message: string, detail?: string, payload?: TupleErrorPayload) {
     super(message);
     this.name = "TupleError";
     this.kind = kind;
     this.detail = detail;
+    this.cliKind = payload?.kind;
+    this.status = payload?.error_code;
   }
 }
 

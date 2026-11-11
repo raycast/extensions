@@ -10,6 +10,7 @@ test("uses direct ps invocation for macOS process listing", () => {
   assert.deepEqual(getProcessListCommandSpec(), {
     executable: "ps",
     args: ["-eo", "pid,ppid,pcpu,rss,comm"],
+    env: { LC_ALL: "en_US.UTF-8" },
   });
 });
 
