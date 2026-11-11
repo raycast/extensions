@@ -4,7 +4,7 @@ import { ActionPanel, Detail, Toast, showToast } from "@raycast/api";
 import React from "react";
 import { CameraOpenStreamInBrowserAction, CameraOpenStreamInIINAAction, CameraOpenStreamInVLCAction } from "./actions";
 import { useImage } from "./hooks";
-import { getVideoStreamUrlFromCamera } from "./utils";
+import { getEmbeddableVideoStreamUrlFromCamera } from "./utils";
 
 export function CameraImageDetail(props: { state: State }): React.ReactElement {
   const s = props.state;
@@ -17,7 +17,7 @@ export function CameraImageDetail(props: { state: State }): React.ReactElement {
     });
   }
   let md = `# ${s.attributes.friendly_name || s.entity_id}`;
-  const streamUrl = getVideoStreamUrlFromCamera(s);
+  const streamUrl = getEmbeddableVideoStreamUrlFromCamera(s);
   if (streamUrl) {
     md += `\n![Camera](${streamUrl})`;
   } else if (imageFilepath) {

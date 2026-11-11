@@ -40,10 +40,12 @@ export function useImage(
       setIsLoading(true);
       setError(undefined);
 
+      // Track the attempted path outside the try so a failed download can be cleaned up.
+      let newFilepath: string | undefined;
       try {
         // Use a unique filename per snapshot. Raycast caches images by path, so reusing the
         // same path would never show a newer image.
-        const newFilepath = await getCacheFilepath(`img_${entityID}_${Date.now()}.jpg`, true);
+        newFilepath = await getCacheFilepath(`img_${entityID}_${Date.now()}.jpg`, true);
         await ha.getCameraProxyURL(entityID, newFilepath);
         if (didUnmount) {
           await removeFile(newFilepath);
@@ -60,6 +62,11 @@ export function useImage(
           setTimeout(fetchData, interval);
         }
       } catch (error) {
+        // Remove any partial output of the failed download, even after unmount. This never
+        // touches currentFilepath, so the last successful snapshot stays visible.
+        if (newFilepath && newFilepath !== currentFilepath) {
+          await removeFile(newFilepath);
+        }
         if (!didUnmount) {
           setError(getErrorMessage(error));
         }
