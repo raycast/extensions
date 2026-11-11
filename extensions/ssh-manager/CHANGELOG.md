@@ -1,6 +1,6 @@
 # SSH Manager Changelog
 
-## [Duplicate SSH Connections] - {PR_MERGE_DATE}
+## [Duplicate SSH Connections] - 2026-11-11
 
 - Add an action to duplicate a saved SSH connection and adjust its details before saving.
 
