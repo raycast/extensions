@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macsync",
+  "title": "MacSync",
+  "description": "Sync your Dock, apps and settings across your Macs with MacSync",
+  "icon": "command-icon.png",
+  "author": "mehdi_saharkhiz",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sync",
+      "title": "Sync Now",
+      "description": "Save this Mac's setup and check your other Macs. Changes nothing here.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pull",
+      "title": "Apply Dock Layout",
+      "description": "Preview the latest Dock layout, then apply it to this Mac",
+      "mode": "no-view"
+    },
+    {
+      "name": "undo",
+      "title": "Undo Last Apply",
+      "description": "Put the Dock back as it was before the last apply",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Show Status",
+      "description": "Show each Mac and whether it's in sync",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.4.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}
