@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Liquid Inference MCP Server] - {PR_MERGE_DATE}
+
+- Add Liquid Inference to the official registry with direct HTTP access in Raycast and an `mcp-remote` fallback for other clients.
+- Compare models and prices, preview costs, read balances and receipts, and buy inference with OAuth sign-in and a spend limit.
+
 ## [Update deAPI MCP Server] - 2026-11-11
 
 - Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.
