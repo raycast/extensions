@@ -4,6 +4,10 @@
 
 - Add Good Nature Vibe Catalog to the official registry as a hosted Streamable HTTP server with six read-only catalog and public-knowledge tools and no authentication.
 
+## [Add AIAgentCycle MCP Server] - 2026-11-11
+
+- Add AIAgentCycle to the official registry as a hosted Streamable HTTP server with ten read-only, source-linked company-knowledge tools and no authentication.
+
 ## [Update deAPI MCP Server] - 2026-11-11
 
 - Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.

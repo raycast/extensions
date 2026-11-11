@@ -332,6 +332,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://agenticwebscore.com/mcp",
   },
   {
+    name: "aiagentcycle",
+    title: "AIAgentCycle",
+    description:
+      "Read-only, source-linked knowledge about AIAgentCycle: services and indicative prices, 190 system integrations, case studies, FAQs, company details and full-text website search in Dutch and English. 10 tools; content refreshes hourly. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/aiagentcycle/aiagentcycle-mcp/main/aac_mcp/static/icon-512.png",
+    homepage: "https://aiagentcycle.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.aiagentcycle.com/mcp"],
+    },
+    remoteUrl: "https://mcp.aiagentcycle.com/mcp",
+  },
+  {
     name: "aggregate",
     title: "Aggregate",
     description:
