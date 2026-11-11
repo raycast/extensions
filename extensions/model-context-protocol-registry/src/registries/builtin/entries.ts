@@ -7,6 +7,22 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "openany",
+    title: "OpenAny",
+    description:
+      "One MCP for 3,200+ APIs and 168+ AI models: search APIs, inspect schemas and pricing, and run calls with one OpenAny key. Browsing, search and price checks are free and need no key. Only run_api requires Authorization: Bearer <OPENANY_API_KEY>; create a key at https://openany.si/dashboard?page=api-keys and store it in client secrets, never in chat. Hosted Streamable HTTP at https://mcp.openany.si. The advanced full catalog is https://mcp.openany.si/mcp. Official registry: si.openany/openany v0.1.2. MIT. Operator: Alephant AI LLC.",
+    icon: "https://openany.si/apple-touch-icon.png",
+    homepage: "https://openany.si/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.openany.si", "--header", "Authorization:${OPENANY_AUTH_HEADER}"],
+      env: {
+        OPENANY_AUTH_HEADER: "Bearer YOUR_OPENANY_API_KEY",
+      },
+    },
+    remoteUrl: "https://mcp.openany.si",
+  },
+  {
     name: "glypse",
     title: "Glypse",
     description:
