@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Fix controls for non-editable helpers] - {PR_MERGE_DATE}
+## [Fix controls for non-editable helpers] - 2026-11-11
 
 - Show Toggle, Turn On and Turn Off actions for `input_boolean` entities that are defined in YAML (or otherwise not editable in the UI). The `editable` attribute only says whether the helper's config can be edited, not whether it can be controlled
 - Show Start, Pause and Cancel actions for non-editable `timer` entities for the same reason
