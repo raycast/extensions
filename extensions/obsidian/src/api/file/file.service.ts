@@ -6,7 +6,7 @@ import { GetFilePathsHelper } from "./file.types";
 const logger = new Logger("File");
 
 export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]> {
-  const { path: vaultPath, excludedFolders = [], includedFileExtensions } = params;
+  const { path: vaultPath, excludedFolders = [], includedFileExtensions, includedFilePaths } = params;
   const defaultExcludedDirs = [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"];
 
   const cleanedExcludes = [...defaultExcludedDirs, ...excludedFolders].filter((dir) => !!dir && dir.trim() !== "");
@@ -31,7 +31,16 @@ export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]
 
   logger.info(`Globbing files with option ${JSON.stringify(options)}`);
 
-  const files = (await glob(extensionPattern, options)).map((file) => path.join(vaultPath, file));
+  // fast-glob's `escapePath` misses some names with `\` or `$$`, so match each character with `?` and keep exact
+  // matches. The first character is `*` because fast-glob treats a leading `Folder?/` as a literal folder.
+  // Same-length names share a pattern, and fast-glob compiles every copy, so pass each pattern once.
+  const patterns = includedFilePaths
+    ? [...new Set(includedFilePaths.map((file) => `*${file.slice(1).replace(/[^/]/g, "?")}`))]
+    : extensionPattern;
+  const globbedFiles = await glob(patterns, options);
+  const includedFileSet = includedFilePaths && new Set(includedFilePaths);
+  const matchedFiles = includedFileSet ? globbedFiles.filter((file) => includedFileSet.has(file)) : globbedFiles;
+  const files = matchedFiles.map((file) => path.join(vaultPath, file));
   logger.success(`Globbed ${files.length} file paths.`);
   return files;
 }

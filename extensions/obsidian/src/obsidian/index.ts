@@ -13,6 +13,7 @@ import { readCommunityPlugins, readCorePlugins, VaultPluginCheckParams, vaultPlu
 import {
   getNoteFileContent,
   getNotes,
+  getBookmarkedNotes,
   getMedia,
   getExcludedFolders,
   getMarkdownFilePaths,
@@ -68,6 +69,10 @@ export const Vault = {
 
   getNotes(path: string, configFileName: string, excludedFolders: string[]) {
     return getNotes(path, configFileName, excludedFolders);
+  },
+
+  getBookmarkedNotes(path: string, configFileName: string, excludedFolders: string[]) {
+    return getBookmarkedNotes(path, configFileName, excludedFolders);
   },
 
   getMedia(path: string, configFileName: string, excludedFolders: string[]) {

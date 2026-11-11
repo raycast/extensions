@@ -166,6 +166,7 @@ Many commands use a note list.
 - [ ] see vault selection
 - [ ] see note list
 - [ ] shows only bookmarked notes
+- [ ] lists notes in the order of Obsidian's Bookmarks pane
 - [ ] unbookmarking a note removes the bookmark icon
 
 ## Create Note Command

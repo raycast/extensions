@@ -35,6 +35,14 @@ export async function getNotesWithCache(vaultPath: string): Promise<Note[]> {
   return notes;
 }
 
+/**
+ * Gets bookmarked notes without the notes cache, so bookmark changes made in Obsidian show up right away.
+ */
+async function getBookmarkedNotes(vaultPath: string): Promise<Note[]> {
+  const { configFileName, excludedFolders } = getPreferenceValues<SearchNotePreferences>();
+  return Vault.getBookmarkedNotes(vaultPath, configFileName, parseExcludedFoldersPreferences(excludedFolders));
+}
+
 export function useNotes(vault: ObsidianVault, bookmarked = false) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +54,7 @@ export function useNotes(vault: ObsidianVault, bookmarked = false) {
     async function load() {
       try {
         setLoading(true);
-        const loadedNotes = await getNotesWithCache(vault.path);
+        const loadedNotes = bookmarked ? await getBookmarkedNotes(vault.path) : await getNotesWithCache(vault.path);
         if (!cancelled) setNotes(loadedNotes);
       } catch (error) {
         logger.error(`Error loading notes. ${error}`);
@@ -59,7 +67,7 @@ export function useNotes(vault: ObsidianVault, bookmarked = false) {
     return () => {
       cancelled = true;
     };
-  }, [vault.path, refreshKey]);
+  }, [vault.path, bookmarked, refreshKey]);
 
   // Refresh function to force reload
   const refresh = useCallback(() => {
@@ -79,9 +87,7 @@ export function useNotes(vault: ObsidianVault, bookmarked = false) {
     setNotes((prev) => prev.filter((note) => note.path !== notePath));
   }, []);
 
-  const filtered = useMemo(() => (bookmarked ? notes.filter((n) => n.bookmarked) : notes), [notes, bookmarked]);
-
-  return { notes: filtered, loading, refresh, updateNote, deleteNote } as const;
+  return { notes, loading, refresh, updateNote, deleteNote } as const;
 }
 
 export function useMedia(vault: ObsidianVault) {

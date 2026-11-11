@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Load Bookmarked Notes from bookmarks.json] - {PR_MERGE_DATE}
+
+- Read the vault's bookmarks.json in Bookmarked Notes and the menu bar instead of scanning every note in the vault
+- Show bookmarked notes in the order of Obsidian's Bookmarks pane, and show bookmark changes made in Obsidian right away
+
 ## [Fix Search Note crash when vault path is not in note path] - 2026-11-05
 
 - Fix a crash in Search Note when a note's path does not contain the vault path (e.g. on Windows with different separators), caused by `split(vault.path)[1]` returning undefined
