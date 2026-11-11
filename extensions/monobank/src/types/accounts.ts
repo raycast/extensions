@@ -1,4 +1,4 @@
-import { Currency } from "./index";
+import { Currency } from "./common";
 
 export enum AccountType {
   BLACK = "black",
@@ -37,4 +37,14 @@ export interface Jar {
   currency: Currency;
   balance: number;
   goal: number;
+}
+
+export type AccountOrJar = Account | Jar;
+
+/** The part of the client info the extension uses and caches. */
+export interface ClientInfo {
+  /** The owner's name as monobank has it, e.g. "Шевченко Тарас" (no patronymic). Missing in caches from older versions. */
+  name?: string;
+  accounts: Account[];
+  jars: Jar[];
 }
