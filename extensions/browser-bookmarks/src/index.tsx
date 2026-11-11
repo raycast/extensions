@@ -794,7 +794,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.ardia}
                     name="Ardia"
                     icon="ardia.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                    }}
                     profiles={ardia.profiles}
                     currentProfile={ardia.currentProfile}
                     setCurrentProfile={ardia.setCurrentProfile}
