@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { Blocklist, currentProfile, loadBlocklist, saveBlocklist } from "./blocklist";
+import { Blocklist, loadBlocklist, saveBlocklist } from "./blocklist";
+import { defaultProfile, preferredProfile } from "./profile";
 
 export function ManageHiddenSuggestions({ profile }: { profile: string }) {
   const [blocklist, setBlocklist] = useState<Blocklist>();
@@ -74,7 +75,24 @@ export function ManageHiddenSuggestions({ profile }: { profile: string }) {
   );
 }
 
+export function ProfileNotFound() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+        title={`Chrome profile "${preferredProfile()}" not found`}
+        description="Check Default Chrome Profile in the extension preferences."
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
 export default function Command() {
-  const profile = useMemo(currentProfile, []);
-  return <ManageHiddenSuggestions profile={profile} />;
+  const profile = useMemo(defaultProfile, []);
+  return profile ? <ManageHiddenSuggestions profile={profile} /> : <ProfileNotFound />;
 }
