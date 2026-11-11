@@ -4,7 +4,7 @@ import { open } from "node:fs/promises";
 import { homedir, userInfo } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { type Service, findBinary, shellQuote, tailLog, terminateGroups } from "./tmux.ts";
+import { type Service, type StopTargets, findBinary, shellQuote, tailLog, terminateProcesses } from "./tmux.ts";
 
 const execFileAsync = promisify(execFile);
 
@@ -45,8 +45,9 @@ const MAX_BUFFER = 64 * 1024 * 1024;
 // Only the end of a log file is shown; dev server logs can grow to gigabytes.
 const LOG_BYTES = 64 * 1024;
 const MOVE_TIMEOUT_MS = 30_000;
+const PS_ARGS = ["-x", "-ww", "-o", "pid=,ppid=,pgid=,args="];
 
-// Output of `ps -x -ww -o pid=,ppid=,pgid=,args=`.
+// Output of `ps` with PS_ARGS.
 export function parsePs(out: string): Proc[] {
   return out.split("\n").flatMap((line) => {
     const match = /^\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)$/.exec(line);
@@ -277,7 +278,7 @@ async function lsof(args: string[]): Promise<string> {
 }
 
 // lsof reports resolved paths (/private/tmp), tmux and homedir() may not.
-function realPath(path: string): string {
+export function realPath(path: string): string {
   try {
     return realpathSync(path);
   } catch {
@@ -295,7 +296,7 @@ function readMakefile(dir: string): string | null {
 
 export async function listExternalServices(services: Service[], home = homedir()): Promise<ExternalService[]> {
   const [ps, listening] = await Promise.all([
-    execFileAsync(PS, ["-x", "-ww", "-o", "pid=,ppid=,pgid=,args="], { maxBuffer: MAX_BUFFER }),
+    execFileAsync(PS, PS_ARGS, { maxBuffer: MAX_BUFFER }),
     lsof(["-nP", "-iTCP", "-sTCP:LISTEN", "-a", "-u", String(userInfo().uid), "-Fpn"]),
   ]);
   const procs = parsePs(ps.stdout);
@@ -334,18 +335,34 @@ export async function readLogFile(path: string, maxLines = 200): Promise<string>
   }
 }
 
+// Without job control (a coding agent's shell, `sh -c "… &"`) a server stays in its
+// parent's process group, which can also hold the agent and unrelated jobs. The group is
+// signaled only if the service leads it or every member descends from the service;
+// otherwise only the service and its descendants are.
+export function stopTargets(procs: Proc[], { pid, pgid }: { pid: number; pgid: number }): StopTargets {
+  const tree = subtree([pid], childrenOf(procs));
+  const running = procs.filter((proc) => tree.has(proc.pid)).map((proc) => proc.pid);
+  const ownsGroup = pgid === pid || procs.every((proc) => proc.pgid !== pgid || tree.has(proc.pid));
+  return { groups: ownsGroup ? [pgid] : [], pids: running };
+}
+
+// Looks at the processes again: the service may have started or lost children, or other
+// jobs may have joined its group, since the last scan.
 export async function stopExternal(service: ExternalService): Promise<void> {
-  await terminateGroups([service.pgid]);
+  const ps = await execFileAsync(PS, PS_ARGS, { maxBuffer: MAX_BUFFER });
+  await terminateProcesses(stopTargets(parsePs(ps.stdout), service));
 }
 
 // Stops what runs outside makedeck for this project, then starts the project in makedeck.
 // makedeck runs through the user's login shell so that nvm, rbenv & co. are on PATH, as
-// in a terminal.
+// in a terminal. Shell startup files may change the directory, so cd again before exec;
+// builtin skips cd wrappers such as zoxide.
 export async function moveToMakedeck(projectPath: string, externals: ExternalService[]): Promise<void> {
   const makedeck = findBinary("makedeck");
   if (!makedeck) throw new Error("makedeck not found. Install it and put it on PATH.");
   await Promise.all(externals.filter((s) => s.projectPath === projectPath).map(stopExternal));
-  const run = execFileAsync(process.env.SHELL || "/bin/zsh", ["-l", "-i", "-c", `exec ${shellQuote(makedeck)}`], {
+  const command = `builtin cd ${shellQuote(projectPath)} && exec ${shellQuote(makedeck)}`;
+  const run = execFileAsync(process.env.SHELL || "/bin/zsh", ["-l", "-i", "-c", command], {
     cwd: projectPath,
     timeout: MOVE_TIMEOUT_MS,
   });

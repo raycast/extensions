@@ -177,45 +177,58 @@ function ownProcessGroup(): number {
   return ownGroup;
 }
 
-// Returns false if the group no longer exists. Signal 0 only checks that it exists.
-function signalGroup(pgid: number, signal: NodeJS.Signals | 0): boolean {
+// What to signal: whole process groups, and single processes outside of them.
+export type StopTargets = { groups: number[]; pids: number[] };
+
+// Returns false if the group or process no longer exists. Signal 0 only checks that it exists.
+function signalTarget(kind: "group" | "process", id: number, signal: NodeJS.Signals | 0): boolean {
   // kill(-0) would hit our own process group (Raycast), kill(-1) every process of the user.
-  if (!Number.isInteger(pgid) || pgid <= 1) throw new Error(`invalid process group: ${pgid}`);
-  if (pgid === ownProcessGroup()) throw new Error("refusing to signal own process group");
+  if (!Number.isInteger(id) || id <= 1) throw new Error(`invalid ${kind === "group" ? "process group" : "PID"}: ${id}`);
+  if (kind === "group" && id === ownProcessGroup()) throw new Error("refusing to signal own process group");
+  if (kind === "process" && id === process.pid) throw new Error("refusing to signal own process");
   try {
-    process.kill(-pgid, signal);
+    process.kill(kind === "group" ? -id : id, signal);
     return true;
   } catch (error) {
     // macOS reports EPERM instead of ESRCH when every process left in the group has exited
-    // but is not yet reaped (zombies, e.g. right after SIGKILL). The signal reaches no
-    // process of ours either way.
+    // but is not yet reaped (zombies, e.g. right after SIGKILL). For a single PID, EPERM
+    // means it now belongs to another user. The signal reaches no process of ours either way.
     const code = (error as NodeJS.ErrnoException).code;
     if (code !== "ESRCH" && code !== "EPERM") throw error;
     return false;
   }
 }
 
+function signalAll({ groups, pids }: StopTargets, signal: NodeJS.Signals | 0): boolean {
+  const results = [
+    ...groups.map((pgid) => signalTarget("group", pgid, signal)),
+    ...pids.map((pid) => signalTarget("process", pid, signal)),
+  ];
+  return results.some(Boolean);
+}
+
 // A group leader can exit while a child that ignores SIGTERM keeps running in its
 // group, so wait for the groups themselves, not only for the leader.
-async function waitForExit(pgids: number[], stillRunning: () => Promise<boolean>, timeoutMs: number) {
+async function waitForExit(targets: StopTargets, stillRunning: () => Promise<boolean>, timeoutMs: number) {
   const deadline = Date.now() + timeoutMs;
-  while (pgids.some((pgid) => signalGroup(pgid, 0)) || (await stillRunning())) {
+  while (signalAll(targets, 0) || (await stillRunning())) {
     if (Date.now() > deadline) return false;
     await sleep(100);
   }
   return true;
 }
 
-// SIGTERM to every group, so it also reaches children, "&" and nohup processes. Anything
-// still running after STOP_TIMEOUT_MS gets SIGKILL. Groups that no longer exist are fine.
-export async function terminateGroups(
-  pgids: number[],
+// SIGTERM to every group, so it also reaches children, "&" and nohup processes, and to
+// every single process. Anything still running after STOP_TIMEOUT_MS gets SIGKILL.
+// Groups and processes that no longer exist are fine.
+export async function terminateProcesses(
+  targets: StopTargets,
   stillRunning: () => Promise<boolean> = async () => false,
 ): Promise<void> {
-  for (const pgid of pgids) signalGroup(pgid, "SIGTERM");
-  if (await waitForExit(pgids, stillRunning, STOP_TIMEOUT_MS)) return;
-  for (const pgid of pgids) signalGroup(pgid, "SIGKILL");
-  if (!(await waitForExit(pgids, stillRunning, KILL_TIMEOUT_MS))) {
+  signalAll(targets, "SIGTERM");
+  if (await waitForExit(targets, stillRunning, STOP_TIMEOUT_MS)) return;
+  signalAll(targets, "SIGKILL");
+  if (!(await waitForExit(targets, stillRunning, KILL_TIMEOUT_MS))) {
     throw new Error("Processes are still running after SIGKILL");
   }
 }
@@ -226,7 +239,7 @@ export async function terminateGroups(
 // Mirrors terminate() in bin/makedeck; keep both in sync.
 async function terminate(target: string[]): Promise<void> {
   const pids = (await panes(target)).flatMap(({ pid }) => (pid === null ? [] : [pid]));
-  await terminateGroups(pids, async () => (await panes(target)).some((pane) => !pane.dead));
+  await terminateProcesses({ groups: pids, pids: [] }, async () => (await panes(target)).some((pane) => !pane.dead));
 }
 
 export async function restartService(windowId: string): Promise<void> {

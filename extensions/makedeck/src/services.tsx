@@ -14,7 +14,14 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { homedir } from "node:os";
 import { useEffect, useState } from "react";
-import { ExternalService, listExternalServices, moveToMakedeck, readLogFile, stopExternal } from "./processes.ts";
+import {
+  ExternalService,
+  listExternalServices,
+  moveToMakedeck,
+  readLogFile,
+  realPath,
+  stopExternal,
+} from "./processes.ts";
 import {
   Service,
   TmuxMissingError,
@@ -57,7 +64,7 @@ function loadLog(windowId: string | null, path: string | null): Promise<string> 
   return windowId !== null ? captureLog(windowId) : readLogFile(path!);
 }
 
-type Project = { path: string; services: Service[]; externals: ExternalService[] };
+type Project = { name: string; path: string; services: Service[]; externals: ExternalService[] };
 
 export default function Command() {
   const data = usePromise(loadAll);
@@ -80,13 +87,16 @@ export default function Command() {
     return () => clearInterval(timer);
   }, [data.revalidate, log.revalidate, selectedWindow, selectedLogPath]);
 
+  // By resolved path: two repositories can share a folder name. External paths are resolved already.
   const projects = new Map<string, Project>();
   const projectFor = (name: string, path: string) => {
-    if (!projects.has(name)) projects.set(name, { path, services: [], externals: [] });
-    return projects.get(name)!;
+    if (!projects.has(path)) projects.set(path, { name, path, services: [], externals: [] });
+    return projects.get(path)!;
   };
-  for (const service of services) projectFor(service.project, service.projectPath).services.push(service);
+  for (const service of services) projectFor(service.project, realPath(service.projectPath)).services.push(service);
   for (const external of externals) projectFor(external.project, external.projectPath).externals.push(external);
+  // By name on purpose: makedeck names the session after the folder and does not start a
+  // second session of the same name, even for another path. Move would then only stop.
   const sessions = new Set(services.map((s) => s.project));
 
   return (
@@ -109,11 +119,11 @@ export default function Command() {
           description="Run makedeck in a project root, e.g. from a Zed task"
         />
       )}
-      {[...projects].map(([project, items]) => (
+      {[...projects.values()].map((items) => (
         <List.Section
-          key={project}
-          title={project}
-          subtitle={truncateStart(homeRelative(items.path), SECTION_CHARS - project.length - 2)}
+          key={items.path}
+          title={items.name}
+          subtitle={truncateStart(homeRelative(items.path), SECTION_CHARS - items.name.length - 2)}
         >
           {items.services.map((service) => (
             <ServiceItem
@@ -121,6 +131,7 @@ export default function Command() {
               service={service}
               siblings={items.services}
               log={service.windowId === selectedId ? log.data : undefined}
+              logError={service.windowId === selectedId ? log.error : undefined}
               onChange={data.revalidate}
             />
           ))}
@@ -178,7 +189,7 @@ function ExternalItem({
   const confirmStop = async () => {
     const confirmed = await confirmAlert({
       title: `Stop ${service.name} (PID ${service.pid})?`,
-      message: "Sends SIGTERM to its process group, SIGKILL after 5 s.",
+      message: "Sends SIGTERM to it and its child processes, SIGKILL after 5 s.",
       primaryAction: { title: "Stop", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
@@ -187,6 +198,13 @@ function ExternalItem({
   };
 
   const move = async () => {
+    const stopped = externals.filter((s) => s.projectPath === service.projectPath);
+    const confirmed = await confirmAlert({
+      title: `Move ${service.project} to makedeck?`,
+      message: `Stops ${stopped.map((s) => `${s.name} (PID ${s.pid})`).join(", ")} (SIGTERM, SIGKILL after 5 s), then starts the project with makedeck.`,
+      primaryAction: { title: "Move", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
     const toast = await showToast({ style: Toast.Style.Animated, title: `Moving ${service.project} to makedeck…` });
     await moveToMakedeck(service.projectPath, externals);
     toast.style = Toast.Style.Success;
@@ -197,24 +215,37 @@ function ExternalItem({
     <List.Item
       id={service.id}
       title={service.name}
+      // No accessories: the detail view leaves no room for them.
+      subtitle={["outside makedeck", ...service.ports.map((port) => `:${port}`)].join(" ")}
       icon={{ source: Icon.CircleFilled, tintColor: Color.Orange }}
-      accessories={[
-        { tag: { value: "outside makedeck", color: Color.Orange } },
-        ...(service.ports.length > 0 ? [{ text: service.ports.map((port) => `:${port}`).join(" ") }] : []),
-      ]}
       detail={<List.Item.Detail markdown={externalMarkdown(service, log, logError)} />}
       actions={
         <ActionPanel>
-          {canMove && <Action title="Move to Makedeck" icon={Icon.ArrowRight} onAction={runAction(move, onChange)} />}
-          <Action
-            title="Stop"
-            icon={Icon.Stop}
-            shortcut={{ modifiers: ["ctrl"], key: "c" }}
-            onAction={runAction(confirmStop, onChange)}
-          />
-          {service.logPath !== null && (
-            <Action.CopyToClipboard title="Copy Logs" content={log ?? ""} shortcut={Keyboard.Shortcut.Common.Copy} />
-          )}
+          {/* Read-only actions before Stop, so that Stop does not get ⏎ or ⌘⏎. */}
+          <ActionPanel.Section>
+            {canMove && (
+              <Action
+                title="Move to Makedeck"
+                icon={Icon.ArrowRight}
+                style={Action.Style.Destructive}
+                onAction={runAction(move, onChange)}
+              />
+            )}
+            <Action.CopyToClipboard title="Copy Command" content={service.command} />
+            <Action.ShowInFinder title="Show Project in Finder" path={service.projectPath} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {service.logPath !== null && (
+              <Action.CopyToClipboard title="Copy Logs" content={log ?? ""} shortcut={Keyboard.Shortcut.Common.Copy} />
+            )}
+            <Action
+              title="Stop"
+              icon={Icon.Stop}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl"], key: "c" }}
+              onAction={runAction(confirmStop, onChange)}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -234,11 +265,13 @@ function ServiceItem({
   service,
   siblings,
   log,
+  logError,
   onChange,
 }: {
   service: Service;
   siblings: Service[];
   log: string | undefined;
+  logError: Error | undefined;
   onChange: () => void;
 }) {
   const run = (action: () => Promise<void>, success?: string) => runAction(action, onChange, success);
@@ -263,9 +296,7 @@ function ServiceItem({
       title={service.name}
       icon={statusIcon(service)}
       accessories={[{ text: statusText(service) }]}
-      detail={
-        <List.Item.Detail markdown={log === undefined ? undefined : logMarkdown(fitLog(log, LOG_ROWS, LOG_COLS))} />
-      }
+      detail={<List.Item.Detail markdown={serviceMarkdown(log, logError)} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -314,6 +345,11 @@ function ServiceItem({
       }
     />
   );
+}
+
+function serviceMarkdown(log: string | undefined, logError: Error | undefined) {
+  if (logError) return `Cannot read the log from tmux: ${logError.message}`;
+  return log === undefined ? undefined : logMarkdown(fitLog(log, LOG_ROWS, LOG_COLS));
 }
 
 function statusText(service: Service): string {
