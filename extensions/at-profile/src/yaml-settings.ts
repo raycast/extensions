@@ -5,10 +5,15 @@ import { extname, join } from "path";
 import { countOf } from "@chrismessina/raycast-kit/plural";
 import * as yaml from "js-yaml";
 import { getPreferenceValues } from "@raycast/api";
+import { findCatalogSite } from "./catalog";
+import { isPlatformId } from "./catalog/platforms";
 import { getAppEntries, importCustomApp, mergeAppVisibility } from "./helpers/apps";
+import { FIND_PROFILE_APP_ID } from "./helpers/findings";
 import { getHistoryPairKey, MAX_HISTORY_ITEMS, sortHistory } from "./helpers/history";
 import { getUsageHistory, isValidTimestamp, setUsageHistory, toOpenCount, withStorageLock } from "./helpers/storage";
+import { completeHandle, isHandleDomain } from "./helpers/url";
 import { UsageHistoryItem, YAMLSettings } from "./types";
+import { appExtras } from "./utils/app-extras";
 import { isDefaultApp } from "./utils/default-apps";
 import { validateAndSanitizeFilename, validatePathInDirectory } from "./utils/file-security";
 
@@ -26,7 +31,13 @@ export async function exportSettingsToYAML(): Promise<string> {
     ),
     customApps: entries
       .filter((entry) => !entry.isDefault)
-      .map(({ name, value, urlTemplate, visible }) => ({ name, value, urlTemplate, visible })),
+      .map(({ name, value, urlTemplate, visible, platform, nsfw, handleDomain }) => ({
+        name,
+        value,
+        urlTemplate,
+        visible,
+        ...appExtras({ platform, nsfw, handleDomain }),
+      })),
   };
 
   return yaml.dump(settings, { indent: 2, lineWidth: 120, noRefs: true });
@@ -119,7 +130,16 @@ async function importLocked(yamlContent: string): Promise<ImportSummary> {
             ? appWithLegacy.enabled
             : true;
 
-      const result = await importCustomApp({ name: app.name, urlTemplate: app.urlTemplate });
+      const result = await importCustomApp(
+        {
+          name: app.name,
+          urlTemplate: app.urlTemplate,
+          platform: isPlatformId(app.platform) ? app.platform : undefined,
+          nsfw: app.nsfw === true,
+          handleDomain: isHandleDomain(app.handleDomain) ? app.handleDomain : undefined,
+        },
+        isNonEmptyString(app.value) ? app.value : undefined,
+      );
       if (result.status === "invalid") {
         summary.appsFailed++;
         summary.firstError ??= `Couldn't import "${label}": ${result.error}`;
@@ -153,7 +173,9 @@ async function importLocked(yamlContent: string): Promise<ImportSummary> {
   // 3. Usage history, keyed by profile + app. An imported entry replaces a stored one for the same pair, keeping
   // the larger open count; when the file holds the same pair twice (e.g. "Alice" and "alice"), the newer wins.
   if (Array.isArray(settings.usageHistory)) {
-    const knownApps = new Map((await getAppEntries()).map((entry) => [entry.value, entry.name]));
+    const entries = await getAppEntries();
+    const knownApps = new Map(entries.map((entry) => [entry.value, entry.name]));
+    const handleDomains = new Map(entries.map((entry) => [entry.value, entry.handleDomain]));
     const stored = new Map<string, UsageHistoryItem>();
     const fromFile = new Map<string, UsageHistoryItem>();
 
@@ -171,21 +193,30 @@ async function importLocked(yamlContent: string): Promise<ImportSummary> {
       }
 
       // YAML reads an unquoted 12345 as a number, so accept numbers for the text fields and store strings
-      const profile = toText(item.profile);
+      const fileProfile = toText(item.profile);
       const app = toText(item.app);
       const appName = toText(item.appName);
       // A row without its timestamp is incomplete; inventing "now" would let it displace real visits
-      if (!profile || !app || !appName || !isValidTimestamp(item.timestamp)) {
+      if (!fileProfile || !app || !appName || !isValidTimestamp(item.timestamp)) {
         summary.historySkipped++;
         continue;
       }
 
       const appValue = toStoredId(app);
-      const knownName = knownApps.get(appValue);
+      // Besides the apps: Find Profile's searches, and profiles opened on a catalog site that isn't in My Apps
+      const knownName =
+        knownApps.get(appValue) ??
+        (appValue === FIND_PROFILE_APP_ID ? "Find Profile" : findCatalogSite(appValue)?.name);
       if (!knownName) {
         summary.historySkipped++;
         continue;
       }
+      // An export from before bare ATProto names were completed holds `example` where opening records the full handle
+      const profile = completeHandle(
+        // A stored app's own setting wins, even when it has none; the catalog only speaks for sites not in My Apps
+        handleDomains.has(appValue) ? handleDomains.get(appValue) : findCatalogSite(appValue)?.handleDomain,
+        fileProfile,
+      );
 
       const count = toOpenCount(item.count);
       const key = getHistoryPairKey(profile, appValue);

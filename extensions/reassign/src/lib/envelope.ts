@@ -23,6 +23,19 @@ export function batchFailure(receipt: { results?: BatchResultRow[] } | undefined
   return receipt?.results?.find((row) => row.status === "error");
 }
 
+/**
+ * The first `notice` of an applied row, or undefined. The server adds one when
+ * the calendar event stays in place, for example after a delete of an imported all-day event.
+ */
+export function receiptNotice(receipt: { results?: BatchResultRow[] } | undefined): string | undefined {
+  for (const row of receipt?.results ?? []) {
+    if (row.status !== "ok" || !row.result || typeof row.result !== "object") continue;
+    const notice = (row.result as { notice?: unknown }).notice;
+    if (typeof notice === "string" && notice.trim()) return notice;
+  }
+  return undefined;
+}
+
 /** The text of a failed row that has no server message. */
 export const ROW_REJECTED_MESSAGE = "The server rejected the change.";
 

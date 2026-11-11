@@ -1,7 +1,10 @@
-// Pure helpers for Otty themes. No @raycast/api import, so vitest can exercise
-// everything here.
+import { createHash } from "node:crypto";
 
 export type ThemeMode = "light" | "dark";
+
+/** The config key holding each mode's theme; `theme-dark` applies only with auto-switching on. */
+export const THEME_KEYS: Record<ThemeMode, string> = { light: "theme", dark: "theme-dark" };
+export const AUTO_DARK_MODE_KEY = "auto-theme-dark-mode";
 
 export type ThemeColors = {
   background: string;
@@ -31,21 +34,18 @@ const ESCAPES: Record<string, string> = {
   "\\": "\\",
 };
 
-/** Decode a TOML basic string's escapes: `\"`, `\\`, `\n`, `\uXXXX`, `\UXXXXXXXX`. */
 function decodeBasicString(body: string): string {
   return body.replace(/\\(?:u([0-9A-Fa-f]{4})|U([0-9A-Fa-f]{8})|(.))/g, (match, short, long, char) =>
     short || long ? String.fromCodePoint(parseInt(short ?? long, 16)) : (ESCAPES[char] ?? match),
   );
 }
 
-/** A TOML scalar: a "basic" or 'literal' string, or a bare value, minus any `# comment`. */
 function tomlValue(raw: string): string {
   const quoted = raw.match(/^"((?:[^"\\]|\\.)*)"|^'([^']*)'/);
   if (quoted) return quoted[2] ?? decodeBasicString(quoted[1]);
   return raw.replace(/\s+#.*$/, "").trim();
 }
 
-/** Read the name, mode, and preview colors from an `.ottytheme` TOML file. */
 export function parseTheme(toml: string): Theme | undefined {
   const values = new Map<string, string>();
   const palette: string[] = [];
@@ -112,7 +112,6 @@ export function buildThemeCatalog(list: ThemeListEntry[], files: Theme[]): Theme
   return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** A small mock window in the theme's colors, like Otty's own theme picker. */
 export function themePreviewSvg(colors: ThemeColors): string {
   const { background, foreground, accent, secondary, tertiary } = colors;
   return [
@@ -127,4 +126,9 @@ export function themePreviewSvg(colors: ThemeColors): string {
     `<rect x="120" y="124" width="100" height="7" rx="3.5" fill="${tertiary}" opacity="0.6"/>`,
     `</svg>`,
   ].join("");
+}
+
+export function previewFileName(name: string): string {
+  const slug = name.replace(/[^\p{L}\p{N}]+/gu, "-").toLowerCase();
+  return `${slug}-${createHash("sha1").update(name).digest("hex").slice(0, 8)}.svg`;
 }

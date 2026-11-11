@@ -2,6 +2,16 @@
 
 Control Ghostty terminal with Raycast
 
+## Search Ghostty Tabs
+
+`Search Ghostty Tabs` lists every Ghostty surface — each tab and each split pane — and lets you jump straight to it.
+
+- Matches against the surface title, tab title, working directory, running foreground process (resolved from the surface pid) and tty via Raycast's built-in fuzzy search
+- `↩` focuses the exact surface (addressed by its stable id, so it can't hit the wrong tab if tabs changed since listing)
+- `⌘E` opens a rename form that sets a session alias for the surface (empty input restores the original title)
+- `⌘.` copies the surface's working directory
+- Surfaces whose shell already exited are hidden automatically
+
 ## Launch Configurations
 
 Launch configurations let you quickly open Ghostty windows, open tabs, navigate to folders and enter commands. They're inspired by [Warp's launch configurations](https://docs.warp.dev/features/sessions/launch-configurations). If you had already created a launch configuration in Warp, you can copy it into this extension.
