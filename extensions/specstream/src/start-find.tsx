@@ -300,7 +300,7 @@ export default function StartFind() {
         placeholder="Rust command-line tools on GitHub with more than 1,000 stars, pushed to in the last month, under an MIT or Apache license."
         value={q}
         onChange={(value) => {
-          if (!saved?.attempted) setQ(value);
+          if (!busy && !restoring && !saved?.attempted) setQ(value);
         }}
       />
       {saved ? (
