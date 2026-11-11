@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add AIAgentCycle MCP Server] - {PR_MERGE_DATE}
+## [Add AIAgentCycle MCP Server] - 2026-11-11
 
 - Add AIAgentCycle to the official registry as a hosted Streamable HTTP server with ten read-only, source-linked company-knowledge tools and no authentication.
 
