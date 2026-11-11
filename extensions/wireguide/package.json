@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
+  "name": "wireguide",
+  "title": "WireGuide",
+  "description": "Control WireGuide from Raycast",
+  "icon": "wireguide.png",
+  "author": "axelrindle",
+  "access": "public",
+  "keywords": [
+    "wireguide",
+    "wireguard"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-connections",
+      "title": "WireGuide",
+      "description": "Activate and deactivate WireGuide connections.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binary",
+      "type": "file",
+      "description": "Path to the WireGuide CLI executable. You can find this by running 'where wireguide' in the terminal.",
+      "placeholder": "/opt/homebrew/bin/wireguide",
+      "default": {
+        "macOS": "/opt/homebrew/bin/wireguide",
+        "Windows": "C:\\Program Files\\WireGuide\\wireguide.exe"
+      },
+      "title": "WireGuide Binary",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.17.0",
+    "pretty-bytes": "^7.1.1",
+    "usehooks-ts": "^3.1.1"
+  },
+  "devDependencies": {
+    "@eslint/config-inspector": "^3.5.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/bun": "^1.4.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
