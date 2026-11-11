@@ -1,23 +1,18 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getMe, getSession, server, Session, signOut } from "./lib/api";
 import { forgetLibrary } from "./lib/library";
 import { refreshMenuBar } from "./lib/no-view";
-import { SignInForm } from "./lib/session";
+import { SignInForm, useStoredSession } from "./lib/session";
 
 // Where the other commands send you when there is no token, and where to
 // sign out.
 export default function Account() {
-  const [session, setSession] = useState<Session | null>();
-
-  useEffect(() => {
-    getSession().then((stored) => setSession(stored ?? null));
-  }, []);
+  const { session, reload } = useStoredSession();
 
   if (session === undefined) return <List isLoading />;
-  if (session === null) return <SignInForm onSignedIn={setSession} />;
-  return <SignedIn session={session} onSignedOut={() => setSession(null)} />;
+  if (session === null) return <SignInForm onSignedIn={reload} />;
+  return <SignedIn session={session} onSignedOut={reload} />;
 }
 
 function SignedIn({ session, onSignedOut }: { session: Session; onSignedOut: () => void }) {
@@ -51,7 +46,7 @@ function SignedIn({ session, onSignedOut }: { session: Session; onSignedOut: () 
   const count = (value?: number) => (value === undefined ? "" : value.toLocaleString());
 
   return (
-    <List isLoading={isLoading} navigationTitle="Texthyper Account">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter your account and counts">
       <List.Section title="Signed In">
         <List.Item icon={Icon.Person} title={session.email} subtitle={me?.device_name ?? undefined} actions={actions} />
       </List.Section>
@@ -87,5 +82,5 @@ function SignedIn({ session, onSignedOut }: { session: Session; onSignedOut: () 
 
 async function onSignedOutIfRevoked(error: unknown, onSignedOut: () => void) {
   if (!(await getSession())) onSignedOut();
-  else await showToast({ style: Toast.Style.Failure, title: "Could not load your account", message: String(error) });
+  else await showFailureToast(error, { title: "Could not load your account" });
 }

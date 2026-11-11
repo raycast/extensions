@@ -18,7 +18,7 @@ import { articleUrl, CardSize, deleteHighlight, downloadCard, updateHighlight } 
 import { displayTitle, highlightMarkdown, quoteText, textFragmentUrl } from "./lib/logic";
 import { useSession, withSession } from "./lib/session";
 import type { Article, Highlight, HighlightColor } from "./lib/types";
-import { HIGHLIGHT_COLORS, useLibrary } from "./lib/views";
+import { HIGHLIGHT_COLORS, LoadFailed, useLibrary } from "./lib/views";
 
 type Changes = { color?: HighlightColor; comment?: string | null };
 
@@ -26,7 +26,7 @@ type Changes = { color?: HighlightColor; comment?: string | null };
 // Library command pushes this for an article.
 function Highlights({ articleId }: { articleId?: number }) {
   const { report } = useSession();
-  const { library, isLoading, refresh, update } = useLibrary(report);
+  const { library, isLoading, error, refresh, update } = useLibrary(report);
   const [filter, setFilter] = useState("all");
 
   const all = Object.values(library?.highlights ?? {})
@@ -43,8 +43,10 @@ function Highlights({ articleId }: { articleId?: number }) {
       const saved = await updateHighlight(highlight.id, changes);
       await update((current) => ({ ...current, highlights: { ...current.highlights, [saved.id]: saved } }));
       await showToast({ style: Toast.Style.Success, title: done });
+      return true;
     } catch (error) {
       report(error, "Could not update the highlight");
+      return false;
     }
   }
 
@@ -93,11 +95,15 @@ function Highlights({ articleId }: { articleId?: number }) {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.Highlight}
-        title={all.length === 0 ? "No highlights yet" : "No highlights like that"}
-        description={all.length === 0 ? "Select a passage while reading in Texthyper to highlight it." : undefined}
-      />
+      {error && all.length === 0 ? (
+        <LoadFailed error={error} onRetry={refresh} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Highlight}
+          title={all.length === 0 ? "No highlights yet" : "No highlights like that"}
+          description={all.length === 0 ? "Select a passage while reading in Texthyper to highlight it." : undefined}
+        />
+      )}
       {highlights.map((highlight) => {
         const article = library?.articles[highlight.article_id];
         return (
@@ -168,7 +174,7 @@ function HighlightDetail({ highlight, article }: { highlight: Highlight; article
 type ActionsProps = {
   highlight: Highlight;
   article?: Article;
-  change: (highlight: Highlight, changes: Changes, done: string) => Promise<void>;
+  change: (highlight: Highlight, changes: Changes, done: string) => Promise<boolean>;
   remove: (highlight: Highlight) => Promise<void>;
   refresh: () => void;
   report: (error: unknown, title?: string) => void;
@@ -267,8 +273,7 @@ function NoteForm({ highlight, change }: { highlight: Highlight; change: Actions
 
   async function submit(values: { comment: string }) {
     const comment = values.comment.trim();
-    pop();
-    await change(highlight, { comment: comment || null }, comment ? "Note saved" : "Note removed");
+    if (await change(highlight, { comment: comment || null }, comment ? "Note saved" : "Note removed")) pop();
   }
 
   return (
@@ -281,7 +286,13 @@ function NoteForm({ highlight, change }: { highlight: Highlight; change: Actions
       }
     >
       <Form.Description title="Highlight" text={quoteText(highlight)} />
-      <Form.TextArea id="comment" title="Note" defaultValue={highlight.comment ?? ""} autoFocus />
+      <Form.TextArea
+        id="comment"
+        title="Note"
+        placeholder="What this passage made you think"
+        defaultValue={highlight.comment ?? ""}
+        autoFocus
+      />
     </Form>
   );
 }

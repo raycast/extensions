@@ -45,7 +45,7 @@ import {
 import { run } from "./lib/no-view";
 import { useSession, withSession } from "./lib/session";
 import type { Article, Folder, Highlight, Tag } from "./lib/types";
-import { articleIcon } from "./lib/views";
+import { articleIcon, LoadFailed } from "./lib/views";
 
 const DEFAULT_FILTER = "state:unread";
 
@@ -68,6 +68,7 @@ function Library(props: LaunchProps) {
   const {
     data: fetched = [],
     isLoading,
+    error,
     pagination,
     revalidate,
   } = useCachedPromise(
@@ -129,9 +130,11 @@ function Library(props: LaunchProps) {
       const saved = await updateArticle(article.id, changed);
       override(article.id, { ...article, ...saved });
       await showToast({ style: Toast.Style.Success, title: done, message: displayTitle(article) });
+      return true;
     } catch (error) {
       override(article.id, undefined);
       report(error, "Could not update the article");
+      return false;
     }
   }
 
@@ -168,15 +171,19 @@ function Library(props: LaunchProps) {
       searchBarPlaceholder="Search titles, authors and the full text"
       searchBarAccessory={<FilterDropdown filter={filter} onChange={setFilter} folders={folders} tags={tags} />}
     >
-      <List.EmptyView
-        icon={query ? Icon.MagnifyingGlass : Icon.Book}
-        title={query ? "Nothing found" : "Nothing here yet"}
-        description={
-          query
-            ? "Search looks through everything you saved, the archive included."
-            : "Save a page with the Save to Texthyper command."
-        }
-      />
+      {error && articles.length === 0 ? (
+        <LoadFailed error={error} onRetry={refresh} />
+      ) : (
+        <List.EmptyView
+          icon={query ? Icon.MagnifyingGlass : Icon.Book}
+          title={query ? "Nothing found" : "Nothing here yet"}
+          description={
+            query
+              ? "Search looks through everything you saved, the archive included."
+              : "Save a page with the Save to Texthyper command."
+          }
+        />
+      )}
       {articles.map((article) => (
         <List.Item
           key={article.id}
@@ -305,7 +312,7 @@ function ArticleDetail(props: { article: Article; folder?: string; highlights?: 
 
 type ActionsProps = {
   article: Article;
-  change: (article: Article, changes: ArticleChanges, done: string) => Promise<void>;
+  change: (article: Article, changes: ArticleChanges, done: string) => Promise<boolean>;
   remove: (article: Article) => Promise<void>;
   refresh: () => void;
   report: (error: unknown, title?: string) => void;
@@ -447,8 +454,7 @@ function TagsForm(props: { article: Article; tags: Tag[]; change: ActionsProps["
 
   async function submit(values: { tags: string[]; added: string }) {
     const tags = [...new Set([...values.tags, ...parseTags(values.added)])];
-    pop();
-    await props.change(article, { tags }, tags.length ? `Tagged ${tags.join(", ")}` : "Tags removed");
+    if (await props.change(article, { tags }, tags.length ? `Tagged ${tags.join(", ")}` : "Tags removed")) pop();
   }
 
   return (

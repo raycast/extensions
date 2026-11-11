@@ -1,7 +1,7 @@
 // Small pieces the list commands and the menu bar share.
 
-import { Color, Icon, Image, showToast, Toast } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { getFavicon, showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SignedOutError } from "./api";
 import { loadLibrary, saveLibrary, syncLibrary } from "./library";
@@ -28,6 +28,7 @@ export const HIGHLIGHT_COLORS: Record<HighlightColor, { name: string; color: Col
 export function useLibrary(report: (error: unknown, title?: string) => void) {
   const [library, setLibrary] = useState<Library>();
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error>();
   const latest = useRef<Library>(undefined);
 
   const refresh = useCallback(async () => {
@@ -35,11 +36,13 @@ export function useLibrary(report: (error: unknown, title?: string) => void) {
     try {
       latest.current = await syncLibrary();
       setLibrary(latest.current);
+      setError(undefined);
     } catch (error) {
+      setError(error instanceof Error ? error : new Error(String(error)));
       if (error instanceof SignedOutError) {
         report(error, "Signed out");
       } else if (latest.current?.cursor) {
-        showToast({ style: Toast.Style.Failure, title: "Showing your last synced library", message: String(error) });
+        showFailureToast(error, { title: "Showing your last synced library" });
       } else {
         report(error, "Could not load your library");
       }
@@ -67,5 +70,22 @@ export function useLibrary(report: (error: unknown, title?: string) => void) {
     await saveLibrary(latest.current);
   }, []);
 
-  return { library, isLoading, refresh, update };
+  return { library, isLoading, error, refresh, update };
+}
+
+// What a list shows when loading failed and there is nothing to show
+// instead: the reason, and a way to try again.
+export function LoadFailed({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  return (
+    <List.EmptyView
+      icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+      title="Could not load from Texthyper"
+      description={error.message}
+      actions={
+        <ActionPanel>
+          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
+        </ActionPanel>
+      }
+    />
+  );
 }

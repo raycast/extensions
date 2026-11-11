@@ -3,7 +3,8 @@
 // until there is a token.
 
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast } from "@raycast/api";
-import { ComponentType, createContext, useCallback, useContext, useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { ComponentType, createContext, useCallback, useContext, useState } from "react";
 import { getSession, requestCode, Session, signIn, SignedOutError } from "./api";
 import { refreshMenuBar } from "./no-view";
 
@@ -19,21 +20,28 @@ export function useSession(): Errors {
   return context;
 }
 
+// The stored session, for the commands that gate on it: undefined while it
+// is read, null when there is none. `reload` reads it again after a sign-in,
+// a sign-out or a revoked token changed what is stored.
+export function useStoredSession() {
+  const { data, isLoading, revalidate } = usePromise(getSession);
+  return { session: isLoading && data === undefined ? undefined : (data ?? null), reload: revalidate };
+}
+
 export function withSession<Props extends object>(Command: ComponentType<Props>) {
   return function Gate(props: Props) {
-    const [session, setSession] = useState<Session | null>();
+    const { session, reload } = useStoredSession();
 
-    useEffect(() => {
-      getSession().then((stored) => setSession(stored ?? null));
-    }, []);
-
-    const report = useCallback((error: unknown, title = "Something went wrong") => {
-      if (error instanceof SignedOutError) setSession(null);
-      showToast({ style: Toast.Style.Failure, title, message: error instanceof Error ? error.message : String(error) });
-    }, []);
+    const report = useCallback(
+      (error: unknown, title = "Something went wrong") => {
+        if (error instanceof SignedOutError) reload();
+        showFailureToast(error, { title });
+      },
+      [reload],
+    );
 
     if (session === undefined) return <List isLoading />;
-    if (session === null) return <SignInForm onSignedIn={setSession} />;
+    if (session === null) return <SignInForm onSignedIn={reload} />;
     return (
       <SessionContext.Provider value={{ report, session }}>
         <Command {...props} />
@@ -42,7 +50,7 @@ export function withSession<Props extends object>(Command: ComponentType<Props>)
   };
 }
 
-export function SignInForm({ onSignedIn }: { onSignedIn: (session: Session) => void }) {
+export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState<string>();
@@ -61,7 +69,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: (session: Session) => v
       setCode("");
       showToast({ style: Toast.Style.Success, title: "Code sent", message: `Check ${address}` });
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Could not send a code", message: (error as Error).message });
+      showFailureToast(error, { title: "Could not send a code" });
     } finally {
       setIsLoading(false);
     }
@@ -74,9 +82,9 @@ export function SignInForm({ onSignedIn }: { onSignedIn: (session: Session) => v
       const session = await signIn(sentTo, code.trim());
       showToast({ style: Toast.Style.Success, title: "Signed in", message: session.email });
       refreshMenuBar();
-      onSignedIn(session);
+      onSignedIn();
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Could not sign in", message: (error as Error).message });
+      showFailureToast(error, { title: "Could not sign in" });
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +94,6 @@ export function SignInForm({ onSignedIn }: { onSignedIn: (session: Session) => v
     return (
       <Form
         isLoading={isLoading}
-        navigationTitle="Sign In to Texthyper"
         actions={
           <ActionPanel>
             <Action.SubmitForm title="Email Me a Code" icon={Icon.Envelope} onSubmit={sendCode} />
@@ -102,7 +109,6 @@ export function SignInForm({ onSignedIn }: { onSignedIn: (session: Session) => v
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Sign In to Texthyper"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Sign in" icon={Icon.Key} onSubmit={submitCode} />

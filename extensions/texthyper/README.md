@@ -17,7 +17,7 @@ With Raycast AI, `@texthyper` can search and list your articles, read one, save 
 
 ## Signing in
 
-There is nothing to paste. The first command you run asks for your email address, Texthyper emails a six-digit code, and the code buys a token that stays in Raycast's encrypted storage. It shows as "Raycast on <your Mac>" under Settings → API tokens in Texthyper, where you can revoke it. Signing out from the Texthyper Account command revokes it too.
+The extension needs a Texthyper account. There is nothing to paste. The first command you run asks for your email address, Texthyper emails a six-digit code, and the code buys a token that stays in Raycast's encrypted storage. It shows as "Raycast on <your Mac>" under Settings → API tokens in Texthyper, where you can revoke it. Signing out from the Texthyper Account command revokes it too.
 
 ## Preferences
 

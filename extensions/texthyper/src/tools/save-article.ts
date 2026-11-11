@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { saveArticle, updateArticle } from "../lib/api";
 import { asUrl } from "../lib/logic";
 import { compactArticle, requireSession } from "../lib/tool";
@@ -26,3 +27,15 @@ export default async function tool(input: Input) {
     : article;
   return { ...compactArticle(saved), already_saved: !created };
 }
+
+// Saving changes the library, so Raycast asks first, naming what is saved.
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tags = (input.tags ?? []).map((tag) => tag.trim()).filter(Boolean);
+  return {
+    message: "Save this page to Texthyper?",
+    info: [
+      { name: "URL", value: asUrl(input.url) ?? input.url },
+      ...(tags.length ? [{ name: "Tags", value: tags.join(", ") }] : []),
+    ],
+  };
+};
