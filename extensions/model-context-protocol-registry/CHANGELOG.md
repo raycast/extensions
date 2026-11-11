@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update VoiceMoat MCP Server] - 2026-11-11
+
+- Update the VoiceMoat description: Style and Stance checks replace the old score, and the $5 Pro trial is included.
+
 ## [Add own.page MCP Server] - 2026-11-11
 
 - Add own.page to the official registry: build and edit an own.page link-in-bio page by chatting (links become video, music and profile widgets, themes, subpages, stats and a page grader, every change undoable). 20 tools. Hosted Streamable HTTP server at https://mcp.own.page with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An own.page Pro or Business plan or the 7-day free trial is required.

@@ -2665,7 +2665,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "voicemoat",
     title: "VoiceMoat",
     description:
-      "The personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics and recent posts, and publish or schedule posts. Publishing and scheduling are two-step: the first call only returns a preview, and a second call with its one-time code is needed to post. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Requires a paid VoiceMoat Pro or Enterprise plan; scoring and improving use plan credits.",
+      "The personal brand OS for LinkedIn and Twitter. Check a draft for Style and Stance against your voice profile, improve it, get hooks and post ideas, read your analytics and recent posts, and publish or schedule posts. Publishing and scheduling are two-step: the first call only returns a preview, and a second call with its one-time code is needed to post. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE. Requires a VoiceMoat Pro or Enterprise plan or the $5 Pro trial; checks and improvements use plan credits.",
     icon: "https://raw.githubusercontent.com/prateeks367/voicemoat-mcp/main/assets/voicemoat-icon-512.png",
     homepage: "https://voicemoat.com/mcp",
     configuration: {
