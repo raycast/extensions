@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add OpenAny MCP Server] - 2026-11-11
+
+- Add OpenAny to the official registry: one MCP for 3,200+ APIs and 168+ AI models. Hosted Streamable HTTP server at https://mcp.openany.si with direct HTTP in Raycast, `mcp-remote` fallback for other clients. Browsing needs no key; only `run_api` needs an optional Bearer key.
+
 ## [Update deAPI MCP Server] - 2026-11-11
 
 - Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.
