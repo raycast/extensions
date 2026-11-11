@@ -160,6 +160,7 @@
       "description": "Seconds to wait for a Roku response.",
       "type": "textfield",
       "required": false,
+      "placeholder": "4",
       "default": "4"
     }
   ],
