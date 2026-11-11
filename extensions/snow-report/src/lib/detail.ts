@@ -5,7 +5,7 @@ import type { ResortForecast } from "./forecast";
 import type { Resort } from "../types";
 
 export const ATTRIBUTION =
-  "Weather data by [Open-Meteo.com](https://open-meteo.com/). Resort data © [OpenSkiData](https://openskidata.org/) / [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL).";
+  "Weather data by [Open-Meteo.com](https://open-meteo.com/). Resort data from [OpenSkiData](https://openskidata.org/) / [OpenSkiMap.org](https://openskimap.org/), © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), [Skimap.org](https://skimap.org/), [Who's On First](https://whosonfirst.org/), © [Mapterhorn](https://mapterhorn.com/attribution).";
 
 /** Base and summit side by side, never averaged. */
 function columnsFor(forecast: ResortForecast): Column[] {

@@ -102,7 +102,7 @@ export default function SnowReport({ launchContext }: Props) {
       throttle
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search resorts by name, country or region"
-      selectedItemId={launchContext?.resortId}
+      selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
     >
       {searchText ? (

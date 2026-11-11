@@ -38,4 +38,6 @@ Add somewhere that isn't listed, by name, coordinates and base and top elevation
 ## Attribution
 
 - Weather data by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0)
-- Resort data © [OpenSkiData](https://openskidata.org/) / [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL)
+- Resort data from [OpenSkiData](https://openskidata.org/) / [OpenSkiMap.org](https://openskimap.org/), © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), [Skimap.org](https://skimap.org/), [Who's On First](https://whosonfirst.org/), © [Mapterhorn](https://mapterhorn.com/attribution)
+
+The extension's code is MIT licensed. The resort list in `src/data/resorts.json` is a derived database of OpenSkiData and is available under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/): if you share a modified version of it, share it under the same license.
