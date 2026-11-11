@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add HoneyVid MCP Server] - {PR_MERGE_DATE}
+## [Add HoneyVid MCP Server] - 2026-11-11
 
 - Add HoneyVid to the official registry: find trending AI video templates and put a person, pet or character from a photo into them, or generate videos and images with Kling, Veo and Seedance, with a credit quote before every job. Hosted Streamable HTTP server at https://honeyvid.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a HoneyVid account and paid credits.
 
