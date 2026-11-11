@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Liquid Inference MCP Server] - {PR_MERGE_DATE}
+## [Add Liquid Inference MCP Server] - 2026-11-11
 
 - Add Liquid Inference to the official registry with direct HTTP access in Raycast and an `mcp-remote` fallback for other clients.
 - Compare models and prices, preview costs, read balances and receipts, and buy inference with OAuth sign-in and a spend limit.
