@@ -1,6 +1,6 @@
 # Tmux Sessioner Changelog
 
-## [Fix switching on tmux 3.8] - {PR_MERGE_DATE}
+## [Fix switching on tmux 3.8] - 2026-11-11
 
 ### Fixed
 
