@@ -4,6 +4,38 @@
 
 - Update the VoiceMoat description: Style and Stance checks replace the old score, and the $5 Pro trial is included.
 
+## [Add own.page MCP Server] - 2026-11-11
+
+- Add own.page to the official registry: build and edit an own.page link-in-bio page by chatting (links become video, music and profile widgets, themes, subpages, stats and a page grader, every change undoable). 20 tools. Hosted Streamable HTTP server at https://mcp.own.page with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An own.page Pro or Business plan or the 7-day free trial is required.
+
+## [Add Good Nature Vibe Catalog MCP Server] - 2026-11-11
+
+- Add Good Nature Vibe Catalog to the official registry as a hosted Streamable HTTP server with six read-only catalog and public-knowledge tools and no authentication.
+
+## [Add AIAgentCycle MCP Server] - 2026-11-11
+
+- Add AIAgentCycle to the official registry as a hosted Streamable HTTP server with ten read-only, source-linked company-knowledge tools and no authentication.
+
+## [Update deAPI MCP Server] - 2026-11-11
+
+- Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.
+
+## [Update Mnemoverse description] - 2026-11-11
+
+- Shared rooms are out of beta: drop "(beta)" from the Mnemoverse entry and its README row.
+
+## [Add Termalin MCP Server] - 2026-11-11
+
+- Add Termalin to the community registry: SSH, SFTP, databases and monitoring for your own Linux servers (23 tools), without handing the agent an SSH key. Hosted Streamable HTTP server at https://termal.in/mcp with direct HTTP in Raycast and OAuth 2.1 sign-in (dynamic client registration), `mcp-remote` fallback for other clients.
+
+## [Add Glypse MCP Server] - 2026-11-10
+
+- Add Glypse’s official prediction market MCP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A free Glypse account and OAuth sign-in are required.
+
+## [Add EL7.AI MCP Server] - 2026-11-10
+
+- Add EL7.AI to the official registry: financial market intelligence (markets news, economic calendar, 8 central banks, COT positioning, stocks, earnings, gold and oil, with sources and dates). 85 read-only tools. Hosted Streamable HTTP server at https://mcp.el7.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a personal EL7 MCP API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Full access requires an EL7 paid membership.
+
 ## [Add Hermoso Ads Manager, Social Media Manager and AI Ad Generator MCP Servers] - 2026-11-10
 
 - Add three focused apps of Hermoso as their own hosted Streamable HTTP servers, each a smaller tool set from the same server with OAuth sign-in: Hermoso: Ads Manager (paid campaigns on 11 ad networks plus web and business analytics), Hermoso: Social Media Manager (posting, scheduling and one inbox across 15 channels) and Hermoso: AI Ad Generator (image and video ads plus competitor ad research). The full Hermoso entry is unchanged.

@@ -7,6 +7,32 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "own-page",
+    title: "own.page",
+    description:
+      "Build and edit your own.page link-in-bio page by chatting. Paste any link and it becomes the right widget (YouTube and Vimeo players, Spotify, SoundCloud and Apple Music players, Instagram, TikTok and X profile cards, link previews), plus headings, text, newsletter signups, contact forms, events, maps and galleries. Move, resize and remove widgets, change the theme and page language, create subpages, read visits and clicks for 7, 30 or 90 days and grade the page out of 100. Every change can be undone. 20 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an own.page Pro or Business plan or the 7-day free trial is required.",
+    icon: "https://own.page/icons/own-page-ai-512.png",
+    homepage: "https://own.page/ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.own.page"],
+    },
+    remoteUrl: "https://mcp.own.page",
+  },
+  {
+    name: "glypse",
+    title: "Glypse",
+    description:
+      "Glypse's MCP server gives your AI agent a bird’s-eye view of prediction markets. It helps your agent scan thousands of markets and draw on millions of analyzed posts, so you don’t have to piece it all together one post at a time. Create a free Glypse account before connecting, then sign in through OAuth.",
+    icon: "https://glypse.ai/logo.png",
+    homepage: "https://glypse.ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.glypse.ai"],
+    },
+    remoteUrl: "https://mcp.glypse.ai",
+  },
+  {
     name: "model-salt",
     title: "Model Salt",
     description:
@@ -44,6 +70,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.helena.bio/folklore/v1/mcp"],
     },
     remoteUrl: "https://api.helena.bio/folklore/v1/mcp",
+  },
+  {
+    name: "el7-ai",
+    title: "EL7.AI",
+    description:
+      "Financial market intelligence for your AI: markets news, economic calendar, 8 central banks, COT positioning, stocks, earnings, gold and oil, with sources and dates. 85 read-only tools; every answer returns a source date and an el7.ai link, and no tool places trades. English first, with full Arabic support. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), or a personal EL7 MCP API key as a Bearer token. Full access requires an EL7 paid membership; free accounts get the EL7 Wire.",
+    icon: "https://raw.githubusercontent.com/walidelhelw/el7-mcp/main/assets/icon-512.png",
+    homepage: "https://el7.ai/en/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.el7.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.el7.ai/mcp",
   },
   {
     name: "postel",
@@ -304,6 +343,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://agenticwebscore.com/mcp"],
     },
     remoteUrl: "https://agenticwebscore.com/mcp",
+  },
+  {
+    name: "aiagentcycle",
+    title: "AIAgentCycle",
+    description:
+      "Read-only, source-linked knowledge about AIAgentCycle: services and indicative prices, 190 system integrations, case studies, FAQs, company details and full-text website search in Dutch and English. 10 tools; content refreshes hourly. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/aiagentcycle/aiagentcycle-mcp/main/aac_mcp/static/icon-512.png",
+    homepage: "https://aiagentcycle.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.aiagentcycle.com/mcp"],
+    },
+    remoteUrl: "https://mcp.aiagentcycle.com/mcp",
   },
   {
     name: "aggregate",
@@ -892,10 +944,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Image, video, audio and transcription tools on open-source models, billed per use to your deAPI balance: generate and edit images, remove backgrounds, upscale images and videos, read text from images (OCR), turn text, images or audio into video, text to speech, music, transcribe audio and video files or YouTube, X, TikTok, Twitch and Kick links, describe videos and create embeddings. Each generation tool has a matching price tool, plus balance, model list and job status. 39 tools. Hosted remote Streamable HTTP server through `mcp-remote`; deAPI API key (app.deapi.ai) as an `Authorization: Bearer` header. Replace YOUR_DEAPI_API_KEY in DEAPI_AUTH_HEADER; keep the Bearer prefix.",
     icon: "https://raw.githubusercontent.com/deapi-ai/ai-provider-for-deapi/main/.wordpress-org/icon-256x256.png",
-    homepage: "https://docs.deapi.ai/execution-modes-and-integrations/mcp-server",
+    homepage:
+      "https://docs.deapi.ai/execution-modes-and-integrations/mcp-server?utm_source=raycast&utm_medium=mcp-registry",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.deapi.ai/mcp", "--header", "Authorization:${DEAPI_AUTH_HEADER}"],
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.deapi.ai/mcp?source=raycast",
+        "--header",
+        "Authorization:${DEAPI_AUTH_HEADER}",
+      ],
       env: {
         DEAPI_AUTH_HEADER: "Bearer YOUR_DEAPI_API_KEY",
       },
@@ -1608,7 +1667,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
-      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms (beta) let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
+      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
     icon: "https://mnemoverse.com/apple-touch-icon.png",
     homepage: "https://mnemoverse.com/docs/api/remote-mcp-server",
     configuration: {
@@ -3420,6 +3479,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.holos33.com/mcp",
   },
   {
+    name: "gnv-catalog",
+    title: "Good Nature Vibe Catalog MCP",
+    description:
+      "Search the public Good Nature Vibe product catalog and shop knowledge through six read-only tools. Hosted remote Streamable HTTP server; no sign-in, carts, orders, payments, checkout or write actions.",
+    icon: "https://raw.githubusercontent.com/aiagentcycle/gnv-catalog-mcp/main/src/static/icon-192.png",
+    homepage: "https://goodnaturevibe.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://catalog-mcp.goodnaturevibe.com/mcp"],
+    },
+    remoteUrl: "https://catalog-mcp.goodnaturevibe.com/mcp",
+  },
+  {
     name: "ecommerce-leads",
     title: "Ecommerce Leads",
     description:
@@ -4057,5 +4129,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.flowra.dev/mcp"],
     },
+  },
+  {
+    name: "termalin",
+    title: "Termalin",
+    description:
+      "SSH, SFTP, databases and monitoring for your own Linux servers: run commands and background jobs, read and write files, query databases, read metrics, alerts and pending security updates on the servers you connected, without handing an SSH key to the agent. 23 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Termalin API key as a Bearer token. Needs a Termalin account with at least one server enrolled through its Connector.",
+    icon: "https://raw.githubusercontent.com/termalinapp/termalin-plugin/main/assets/logo-400.png",
+    homepage: "https://termal.in/mcp/?utm_source=raycast&utm_medium=listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://termal.in/mcp"],
+    },
+    remoteUrl: "https://termal.in/mcp",
   },
 ];

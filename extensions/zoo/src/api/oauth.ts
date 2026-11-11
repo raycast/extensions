@@ -1,5 +1,4 @@
 import { OAuthService } from "@raycast/utils";
-import fetch from "node-fetch";
 import { Octokit } from "@octokit/core";
 import { GithubClient } from "./github-client";
 

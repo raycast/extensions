@@ -21,6 +21,9 @@ import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { RetryActions } from "./confirm-in-mint";
+import { usePlanWall } from "./plan-wall";
+import { ownKey } from "./mint-actions";
 import {
   Remnant,
   UninstallScan as UninstallScanResponse,
@@ -85,6 +88,8 @@ function InstalledApps({ cli }: { cli: string }) {
   const pending = useRef<Partial<Record<string, Promise<UninstallScanResponse>>>>({});
   const strike = useStrike();
   const { push, pop } = useNavigation();
+  // The plan wall (2026-11-10): where Mint holds an uninstall back for the week's free allowance.
+  const wall = usePlanWall(cli);
   const appearance = environment.appearance === "light" ? "light" : "dark";
 
   const look = (app: InstalledApp): Promise<UninstallScanResponse> => {
@@ -231,9 +236,11 @@ function InstalledApps({ cli }: { cli: string }) {
               : `${app.name} was not removed`,
           message: problems.length ? problems.join(" · ") : undefined,
         });
+        if (result.quotaBlockedCount) wall.held(bytes);
       });
     } catch (executeError) {
       strike.end([], () => setRun(undefined));
+      if (await wall.refused(bytes)) return;
       await showToast({
         style: Toast.Style.Failure,
         title: `Mint could not uninstall ${app.name}`,
@@ -254,7 +261,12 @@ function InstalledApps({ cli }: { cli: string }) {
       onSelectionChange={(id) => setSelected(id ?? undefined)}
     >
       {error ? (
-        <List.EmptyView title="Mint could not list your apps" description={error.message} icon={Icon.Warning} />
+        <List.EmptyView
+          title="Mint could not list your apps"
+          description={error.message}
+          icon={Icon.Warning}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {apps.map((app) => {
         const left = stayed[app.id];
@@ -287,6 +299,8 @@ function InstalledApps({ cli }: { cli: string }) {
         const scan = result?.scan;
         const plan = scan ? uninstallPlan(scan) : undefined;
         const here = run?.appID === app.id ? run : undefined;
+        // How many actions come before Show in Finder (`ownKey`).
+        const offered = (!busy ? 1 : 0) + (scan && !busy ? 1 : 0);
         return (
           <List.Item
             key={app.id}
@@ -326,7 +340,6 @@ function InstalledApps({ cli }: { cli: string }) {
                   <Action
                     title="Choose What to Remove"
                     icon={Icon.List}
-                    shortcut={Keyboard.Shortcut.Common.Open}
                     onAction={() =>
                       push(
                         <UninstallReview
@@ -341,12 +354,15 @@ function InstalledApps({ cli }: { cli: string }) {
                     }
                   />
                 ) : null}
-                <Action.ShowInFinder path={app.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.ShowInFinder
+                  path={app.path}
+                  shortcut={ownKey(offered, { modifiers: ["cmd", "shift"], key: "f" })}
+                />
                 <ActionPanel.Section>
                   <Action
                     title="Look Again"
                     icon={Icon.ArrowClockwise}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    shortcut={ownKey(offered + 1, Keyboard.Shortcut.Common.Refresh)}
                     onAction={() => {
                       forget(app.id);
                       revalidate();
@@ -484,16 +500,16 @@ function UninstallReview({
                     onAction={() => toggle(item)}
                   />
                 ) : null}
-                {picked.length ? (
+                <Action.ShowInFinder path={item.path} />
+                {item.selectable && picked.length ? (
                   <Action
                     title="Move Chosen to Trash"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => onRemove(picked)}
                   />
                 ) : null}
-                <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
               </ActionPanel>
             }
           />

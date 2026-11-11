@@ -1,5 +1,12 @@
 # Lantern Changelog
 
+## [New Icon] - 2026-11-10
+
+- New icon: a lantern with its flame lit, matching the Lantern app's new icon (the magnifier looked too much like
+  macOS's own Magnifier app).
+- Office documents (Word, Excel, PowerPoint, RTF, OpenDocument text) show up in results once Lantern indexes them
+  (Lantern 0.2.4 or newer).
+
 ## [Initial Version] - 2026-11-06
 
 - Initial release of the Lantern extension for Raycast.
