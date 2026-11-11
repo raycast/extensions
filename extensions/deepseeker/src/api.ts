@@ -30,8 +30,14 @@ const legacyModels: Record<string, string> = {
   "deepseek-r1": "deepseek-v4-pro",
 };
 
+/**
+ * Only the official DeepSeek API retired those IDs; other OpenAI-compatible
+ * endpoints set in the Base URL preference may still serve them.
+ */
+const usesDeepSeekApi = !preferences.baseurl || /^https?:\/\/api\.deepseek\.com(\/|$)/i.test(preferences.baseurl);
+
 export function normalizeModel(model: string): string {
-  return legacyModels[model] ?? model;
+  return usesDeepSeekApi ? legacyModels[model] ?? model : model;
 }
 
 const customModel = preferences.custom_model;

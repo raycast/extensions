@@ -1,9 +1,9 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
-import { globalModel, openai } from "./api";
+import { globalModel, normalizeModel, openai } from "./api";
 
 export default async function Command() {
   const { model_execute } = getPreferenceValues();
-  const model = model_execute === "global" ? globalModel : model_execute;
+  const model = model_execute === "global" ? globalModel : normalizeModel(model_execute);
   let selectedText = "";
   try {
     selectedText = await getSelectedText();
