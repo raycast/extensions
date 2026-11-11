@@ -10,6 +10,7 @@
 - Sync Day One downloads and uploads entries and shows a running count, even on a first sync of thousands of entries.
 - Add Entry now writes through the new CLI, uploads after you save (a preference can turn this off), keeps your unsent text and journal as a draft, and lists the journals you use most first. It works on Windows and without the Mac app.
 - Fixed a security problem: entry text was passed through a shell and could run commands. Text now goes to the CLI directly.
+- The extension icon now matches the current Day One app icon.
 
 ## [Support the renamed dayone CLI] - 2026-09-09
 
