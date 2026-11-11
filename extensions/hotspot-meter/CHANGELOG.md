@@ -1,6 +1,6 @@
 # Hotspot Meter Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-11
 
 - Menu bar totals for the last 15 minutes, 1 hour, 2 hours and 4 hours, plus a total since your last reset
 - Per-app breakdown with remote destinations, retransmitted data and what each macOS background service is
