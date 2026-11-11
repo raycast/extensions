@@ -75,8 +75,13 @@ export const getHolidays = async (countryCode: string): Promise<Holiday[]> => {
 
   return [...byDate.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([, h]) => ({
-      date: new Date(h.date),
-      name: h.name,
-    }));
+    .map(([, h]) => {
+      // Nager.Date returns calendar dates, not UTC timestamps. Parse in local
+      // time so timezones west of UTC don't display the previous day.
+      const [year, month, day] = h.date.split("-").map(Number);
+      return {
+        date: new Date(year, month - 1, day),
+        name: h.name,
+      };
+    });
 };

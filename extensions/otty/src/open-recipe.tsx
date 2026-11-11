@@ -11,11 +11,10 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { homedir } from "node:os";
 import { dirname } from "node:path";
-import { findFiles } from "./lib/paths";
+import { OTTY_BUNDLE_ID } from "./lib/otty-core";
+import { abbreviateHome, basename, expandHome, findFiles } from "./lib/paths";
 import { runAndClose } from "./lib/ui";
-import { abbreviateHome, basename, expandHome } from "./lib/workspace";
 
-const OTTY_BUNDLE_ID = "io.appmakes.otty";
 const RECIPE_EXTENSION = ".ottyrecipe";
 const RECIPES_DOCS_URL = "https://docs.otty.sh/workflows/recipes";
 
@@ -30,29 +29,20 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search recipes">
-      {root ? (
-        <List.EmptyView
-          icon={Icon.Document}
-          title="No Recipes Found"
-          description="Export a recipe from Otty with ⇧⌘S and save it in this folder."
-          actions={
-            <ActionPanel>
-              <SetupActions />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.EmptyView
-          icon={Icon.Document}
-          title="Choose a Recipes Folder"
-          description="Pick the folder that holds your exported recipes in preferences."
-          actions={
-            <ActionPanel>
-              <SetupActions />
-            </ActionPanel>
-          }
-        />
-      )}
+      <List.EmptyView
+        icon={Icon.Document}
+        title={root ? "No Recipes Found" : "Choose a Recipes Folder"}
+        description={
+          root
+            ? "Export a recipe from Otty with ⇧⌘S and save it in this folder."
+            : "Pick the folder that holds your exported recipes in preferences."
+        }
+        actions={
+          <ActionPanel>
+            <SetupActions />
+          </ActionPanel>
+        }
+      />
       {(data ?? []).map((path) => (
         <List.Item
           key={path}
