@@ -10,6 +10,7 @@ import {
   Detail,
   Clipboard,
   Keyboard,
+  useNavigation,
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { ReactElement, useMemo, useCallback, useEffect, useState } from "react";
@@ -43,6 +44,7 @@ export default function ComputeInstanceDetailView({
   projectId,
 }: ComputeInstanceDetailViewProps): ReactElement {
   const [currentInstance, setCurrentInstance] = useState(instance);
+  const { pop } = useNavigation();
   const { isEnabled: isStreamerMode } = useStreamerMode();
   const zone = service.formatZone(currentInstance.zone);
   const machineType = service.formatMachineType(currentInstance.machineType);
@@ -394,6 +396,50 @@ export default function ComputeInstanceDetailView({
     });
   }, [currentInstance, zone, projectId]);
 
+  const deleteInstance = useCallback(async () => {
+    const shouldDelete = await confirmAlert({
+      title: "Delete Instance",
+      message: `Permanently delete ${currentInstance.name}? Disks configured to auto-delete will also be deleted. This action cannot be undone.`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const deletingToast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Deleting instance ${currentInstance.name}...`,
+      message: `Zone: ${zone}`,
+    });
+
+    try {
+      const result = await service.deleteInstance(currentInstance.name, zone);
+      deletingToast.hide();
+      await onRefresh();
+
+      showToast({
+        style: Toast.Style.Success,
+        title: result.isTimedOut ? "Delete requested" : "Instance deleted",
+        message: result.isTimedOut
+          ? `${currentInstance.name} is still being deleted. Refresh again in a moment to confirm.`
+          : `${currentInstance.name} has been permanently deleted.`,
+      });
+      pop();
+    } catch (error) {
+      deletingToast.hide();
+      const friendly = friendlyErrorMessage(error, "Failed to delete instance");
+      showToast({
+        style: Toast.Style.Failure,
+        title: friendly.title,
+        message: friendly.message,
+      });
+    }
+  }, [currentInstance.name, onRefresh, pop, service, zone]);
+
   return (
     <Detail
       markdown={markdown}
@@ -489,6 +535,15 @@ export default function ComputeInstanceDetailView({
                 onAction={() => handleLifecycleAction(action.kind)}
               />
             ))}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="VM Management">
+            <Action
+              title="Delete Instance"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              onAction={deleteInstance}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Privacy">
             <StreamerModeAction />
