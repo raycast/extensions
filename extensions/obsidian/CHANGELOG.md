@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix Create Note saving] - {PR_MERGE_DATE}
+## [Fix Create Note saving] - 2026-11-11
 
 - Keep the Create Note form open when saving fails or an overwrite is canceled, and report the failure to the AI tool
 - Reject note names that are blank, start with a dot, or contain `/` or `\`, and paths outside the vault
