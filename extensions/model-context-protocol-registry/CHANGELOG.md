@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update deAPI MCP Server] - {PR_MERGE_DATE}
+## [Update deAPI MCP Server] - 2026-11-11
 
 - Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.
 
