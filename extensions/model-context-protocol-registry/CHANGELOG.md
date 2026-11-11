@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add HTTPfy MCP Server] - {PR_MERGE_DATE}
+## [Add HTTPfy MCP Server] - 2026-11-11
 
 - Add HTTPfy to the official registry as a hosted Streamable HTTP server with 24 read-only DNS, email-authentication (SPF, DKIM, DMARC, BIMI, MTA-STS), TLS certificate, WHOIS, IP/ASN, blocklist, ping, traceroute and port-check tools, no authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
