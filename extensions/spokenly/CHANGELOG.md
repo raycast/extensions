@@ -1,6 +1,6 @@
 # Spokenly Changelog
 
-## [Word Replacements] - {PR_MERGE_DATE}
+## [Word Replacements] - 2026-11-11
 
 - Add `Manage Word Replacements` — search, add and remove Spokenly word replacements and copy a JSON backup, through the official `spokenly` CLI.
 - Add `Add Word Replacement` — add a literal or regular-expression correction, pre-filled from selected text, and verify it was saved.
