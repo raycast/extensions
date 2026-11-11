@@ -172,7 +172,12 @@ function RandomResult(props: { filters: Filters }) {
   }, [shouldRedraw, target, roll]);
 
   // Step 3: the picked problem's description, which the list query leaves out.
-  const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
+  const {
+    isLoading: isProblemLoading,
+    data: problem,
+    error: problemError,
+    revalidate: reloadProblem,
+  } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({ query: getProblemQuery, variables: { titleSlug: picked?.titleSlug } }),
     headers: { 'Content-Type': 'application/json' },
@@ -222,7 +227,11 @@ function RandomResult(props: { filters: Filters }) {
 
   const url = `https://leetcode.com/problems/${picked.titleSlug}/`;
   const markdown = `# ${picked.questionFrontendId}. ${picked.title}\n\n${
-    pickedProblem ? problemContentMarkdown(pickedProblem) : ''
+    pickedProblem
+      ? problemContentMarkdown(pickedProblem)
+      : problemError && !isProblemLoading
+        ? `> Couldn't load the description${problemError.message ? ` (${problemError.message})` : ''}. Choose **Reload Description** from the actions (⌘K) to try again.`
+        : ''
   }`;
   const topicTags = showTopicTags ? (pickedProblem?.topicTags ?? []) : [];
 
@@ -258,6 +267,9 @@ function RandomResult(props: { filters: Filters }) {
       actions={
         <ActionPanel>
           <Action title="Pick Another" icon={Icon.Shuffle} onAction={() => setRoll((r) => r + 1)} />
+          {problemError && !pickedProblem ? (
+            <Action title="Reload Description" icon={Icon.ArrowClockwise} onAction={reloadProblem} />
+          ) : null}
           <Action.OpenInBrowser title="Open in Browser" url={url} />
           <Action
             title="Preview Full Problem"

@@ -8,7 +8,7 @@
 - Fix problem search showing stale results: clearing the search text or switching the category now refreshes the list, and reopening the command revalidates instead of showing the last search
 - Add `Open in Browser` and `Copy Link to Clipboard` actions to search results
 - Fetch problem lists without code templates, making search and random-pick responses about 90% smaller
-- Fix `Pick a Random Problem` showing `No matches` with the `All` category, and ignoring a saved `Exclude premium` checkbox until it was toggled
+- Fix `Pick a Random Problem` showing `No matches` with the `All` category, and ignoring a saved `Exclude premium` checkbox until it was toggled. Filters saved before this update are reset once, so pick your difficulty, category, topic tags, and premium choice again
 - Show the picked problem's description in `Pick a Random Problem`; `Pick Another` is now the primary action
 - Make random picks uniform over every matching problem, including with premium excluded; the last problems matching the filters were picked less often or never, and when every problem matching the filters is premium, say so instead of re-rolling
 - Fix the default language preference: add `Python3` as the new default (`Python` is LeetCode's Python 2), fix `Go` never matching LeetCode's `golang` templates, and add Rust, PHP, Dart, Scala, Elixir, Erlang, and Racket

@@ -239,7 +239,20 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle={true}
     >
-      <List.EmptyView title={isLoading ? 'Loading ...' : 'No results found'} />
+      {error && uniqueProblems.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load problems"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Reload" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView title={isLoading ? 'Loading ...' : 'No results found'} />
+      )}
       {uniqueProblems.map((problem) => {
         const ratingsLoaded = showProblemRatings && ratings != null;
         const problemUrl = `https://leetcode.com/problems/${problem.titleSlug}`;
