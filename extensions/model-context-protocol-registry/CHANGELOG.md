@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Mnemoverse description] - {PR_MERGE_DATE}
+## [Update Mnemoverse description] - 2026-11-11
 
 - Shared rooms are out of beta: drop "(beta)" from the Mnemoverse entry and its README row.
 
