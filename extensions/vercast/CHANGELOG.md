@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.21] - {PR_MERGE_DATE}
+## [2.21] - 2026-11-11
 
 - Added `Service Status` command to check Vercel's service status, active incidents, scheduled maintenance and recently resolved incidents
 - Renamed `Menu Bar Deployments` to `Deploy & Status`: below the deployments it now shows Vercel's service status, active incidents and affected components, and flags an ongoing issue next to the menu bar icon
