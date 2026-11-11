@@ -21,7 +21,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Blocklist, CHROME_DIR, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
 import { ManageHiddenSuggestions } from "./manage-hidden";
-import { chromeProfiles, defaultProfile, profileName } from "./profile";
+import { chromeProfiles, currentProfile, defaultProfile, profileName, showDefaultProfileNotFound } from "./profile";
 
 export function toUrl(input: string): string {
   const q = input.trim();
@@ -269,7 +269,9 @@ const cache = new Cache();
 export default function Command(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const profiles = useMemo(chromeProfiles, []);
-  const [profile, setProfile] = useState(defaultProfile);
+  const initialProfile = useMemo(defaultProfile, []);
+  const [profile, setProfile] = useState(() => initialProfile ?? currentProfile());
+  const profileRef = useRef(profile);
   const profileLabel = useMemo(() => profileName(profile), [profile]);
   const cacheKey = `initial:${profile}`;
   const [items, setItems] = useState<HistoryItem[]>(() => {
@@ -285,6 +287,10 @@ export default function Command(props: LaunchProps) {
   const db = useMemo(() => snapshotHistory(profile), [profile]);
 
   useEffect(() => {
+    if (!initialProfile) showDefaultProfileNotFound();
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     loadBlocklist(profile).then((b) => !cancelled && setBlocklist(b));
     return () => {
@@ -294,6 +300,7 @@ export default function Command(props: LaunchProps) {
 
   function changeProfile(next: string) {
     if (next === profile) return;
+    profileRef.current = next;
     setProfile(next);
     setBlocklist(undefined);
     const cached = !searchText.trim() && cache.get(`initial:${next}`);
@@ -303,7 +310,7 @@ export default function Command(props: LaunchProps) {
 
   async function updateBlocklist(next: Blocklist) {
     await saveBlocklist(profile, next);
-    setBlocklist(next);
+    if (profileRef.current === profile) setBlocklist(next);
     // The cached empty-search rows are only rewritten by an empty search, so drop hidden ones now.
     const cached = cache.get(cacheKey);
     if (cached) {

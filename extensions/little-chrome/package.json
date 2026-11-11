@@ -34,7 +34,7 @@
         },
         {
           "name": "profile",
-          "placeholder": "Chrome profile",
+          "placeholder": "Chrome Profile",
           "type": "text",
           "required": false
         }

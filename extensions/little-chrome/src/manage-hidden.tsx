@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { Blocklist, loadBlocklist, saveBlocklist } from "./blocklist";
-import { defaultProfile } from "./profile";
+import { currentProfile, defaultProfile, showDefaultProfileNotFound } from "./profile";
 
 export function ManageHiddenSuggestions({ profile }: { profile: string }) {
   const [blocklist, setBlocklist] = useState<Blocklist>();
@@ -76,6 +76,12 @@ export function ManageHiddenSuggestions({ profile }: { profile: string }) {
 }
 
 export default function Command() {
-  const profile = useMemo(defaultProfile, []);
+  const initialProfile = useMemo(defaultProfile, []);
+  const profile = initialProfile ?? currentProfile();
+
+  useEffect(() => {
+    if (!initialProfile) showDefaultProfileNotFound();
+  }, []);
+
   return <ManageHiddenSuggestions profile={profile} />;
 }

@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, Image } from "@raycast/api";
+import { getPreferenceValues, Icon, Image, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CHROME_DIR } from "./blocklist";
@@ -54,16 +54,31 @@ export function chromeProfiles(): ChromeProfile[] {
   }
 }
 
-// Finds a profile directory by its name or directory name, ignoring case.
+// Finds a profile directory by its directory name, then by its name, ignoring case.
 export function findProfile(query: string): string | undefined {
   const q = query.trim().toLowerCase();
-  return chromeProfiles().find((p) => p.name.toLowerCase() === q || p.dir.toLowerCase() === q)?.dir;
+  const profiles = chromeProfiles();
+  return (profiles.find((p) => p.dir.toLowerCase() === q) || profiles.find((p) => p.name.toLowerCase() === q))?.dir;
 }
 
-// The profile from the preferences, or the last used one when it is empty or unknown.
-export function defaultProfile(): string {
-  const query = getPreferenceValues<Preferences>().profile?.trim();
-  return (query && findProfile(query)) || currentProfile();
+// The profile set in the preferences, if any.
+export function preferredProfile(): string | undefined {
+  return getPreferenceValues<Preferences>().profile?.trim() || undefined;
+}
+
+// The profile from the preferences, the last used one when it is empty, or undefined when it is unknown.
+export function defaultProfile(): string | undefined {
+  const query = preferredProfile();
+  return query ? findProfile(query) : currentProfile();
+}
+
+export async function showDefaultProfileNotFound(): Promise<void> {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: `Chrome profile "${preferredProfile()}" not found`,
+    message: "Check Default Chrome Profile in the extension preferences.",
+    primaryAction: { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() },
+  });
 }
 
 // The profile matching the query, or the default one when the query is empty.
