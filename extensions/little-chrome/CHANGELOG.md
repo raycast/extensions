@@ -8,7 +8,6 @@
 
 - Rank suggestions higher when a page was visited much more often in the last couple of days
 - Show the current Chrome profile name in Open Little Chrome
-- Show suggestions faster while typing
 
 ## [Initial Version] - 2026-11-09
 

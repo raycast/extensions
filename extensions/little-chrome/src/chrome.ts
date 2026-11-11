@@ -16,7 +16,8 @@ export async function windowIds(): Promise<string[]> {
   return out ? out.split(/,\s*/) : [];
 }
 
-// Returns the id of Chrome's frontmost window not showing about:blank (skips Picture-in-Picture), or undefined when Chrome is not the frontmost app.
+// Returns the id of Chrome's frontmost window, or undefined when Chrome is not the frontmost app.
+// Document Picture-in-Picture windows (e.g. Google Meet) stay in front; they show about:blank under the opener's title.
 // Launched from Raycast's search, Raycast is still frontmost, so hide it and wait for focus to return.
 export async function frontChromeWindowId(): Promise<string | undefined> {
   await closeMainWindow();
@@ -27,7 +28,7 @@ export async function frontChromeWindowId(): Promise<string | undefined> {
       if frontApp is not "${CHROME}" then return ""
       tell application "${CHROME}"
         repeat with w in windows
-          if URL of active tab of w is not "about:blank" then return id of w
+          if URL of active tab of w is not "about:blank" or name of w is "about:blank" then return id of w
         end repeat
       end tell
       return ""`);
