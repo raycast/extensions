@@ -1,6 +1,6 @@
 # Reassign Changelog
 
-## [All-Day Events and New Sources] - {PR_MERGE_DATE}
+## [All-Day Events and New Sources] - 2026-11-11
 
 - Agenda and Search Blocks show an all-day event as "All day". On an event
   of more than one day, the row also shows the day, for example "All day ·
