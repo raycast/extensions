@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spark",
   "title": "Spark",
-  "description": "Triage your inbox, search mail, check your agenda, and draft replies in Spark without leaving Raycast.",
+  "description": "Triage your inbox, search mail, check your agenda, and draft replies in Spark without leaving Raycast. Requires Spark Desktop with Spark CLI enabled.",
   "icon": "icon.png",
   "author": "sparkmailapp",
   "contributors": [

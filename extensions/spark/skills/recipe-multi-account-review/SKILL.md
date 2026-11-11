@@ -69,6 +69,7 @@ This uses the unified inbox to surface priority items regardless of which accoun
 ### Step 5: Present the summary
 
 Report per account:
+
 - **work@company.com:** N unread (X priority, Y people)
 - **personal@gmail.com:** M unread
 - **side@project.com:** K unread

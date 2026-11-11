@@ -49,18 +49,46 @@ export function addressList(value: string | string[] | undefined): string[] {
     .filter((item) => item && !seen.has(item.toLowerCase()) && seen.add(item.toLowerCase()));
 }
 
-/// What was typed into Add Address: one or more entries separated by commas
-/// or semicolons, each an address or "Name <address>". Entries without a valid
+/// Separators inside a quoted display name or angle brackets belong to the
+/// entry. Escaped quotes must not end a quoted name.
+function splitAddresses(text: string): string[] {
+  const entries: string[] = [];
+  let start = 0;
+  let quoted = false;
+  let inAngleBrackets = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted && char === "\\") {
+      i++;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (!quoted) {
+      if (char === "<") inAngleBrackets = true;
+      else if (char === ">") inAngleBrackets = false;
+      else if (!inAngleBrackets && /[,;\n]/.test(char)) {
+        entries.push(text.slice(start, i));
+        start = i + 1;
+      }
+    }
+  }
+  entries.push(text.slice(start));
+  return entries;
+}
+
+/// What was typed into Add Address: one or more entries separated by commas,
+/// semicolons, or newlines, each an address or "Name <address>". Entries without a valid
 /// address come back in `invalid`, for the form to point out.
 export function parseAddresses(text: string): { people: Person[]; invalid: string[] } {
   const people: Person[] = [];
   const invalid: string[] = [];
-  for (const raw of text.split(/[,;\n]/)) {
+  for (const raw of splitAddresses(text)) {
     const entry = raw.trim();
     if (!entry) continue;
     const named = entry.match(/^(.*?)\s*<([^<>]*)>$/);
     const email = (named ? named[2] : entry).trim();
-    const name = named?.[1].replace(/^"|"$/g, "").trim() || undefined;
+    const displayName = named?.[1].trim();
+    const name =
+      displayName?.replace(/^"(.*)"$/s, (_, quoted: string) => quoted.replace(/\\(.)/gs, "$1")).trim() || undefined;
     if (EMAIL.test(email)) people.push({ email, name });
     else invalid.push(entry);
   }

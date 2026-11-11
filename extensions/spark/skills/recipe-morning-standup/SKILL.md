@@ -56,6 +56,7 @@ Review the assignment summary - who has open items, any unassigned work.
 ### Step 5: Present the briefing
 
 Summarize for the user:
+
 - **Calendar:** N meetings today (list times and titles)
 - **People mail:** M unread (list senders and subjects)
 - **Priority mail:** K unread

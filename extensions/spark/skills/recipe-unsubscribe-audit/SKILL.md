@@ -42,14 +42,14 @@ emails { "folder": "Inbox", "new_senders": true, "page_size": 50 }
 
 Count per sender: emails per 30 days and unread rate (from the Flags column). Classify into tiers:
 
-| Tier | Signal | Action |
-|---|---|---|
-| Unsubscribe | Pure marketing/drip, ~100% unread | Recommend removal |
-| Consider | High volume, partial engagement | User's call; suggest digest or auto-summary |
-| Keep | Mostly read | Leave alone |
-| Transactional | Invoices, PINs, order/security notices | Exclude from the audit |
-| Phishing | See below | Mark as spam — NEVER unsubscribe |
-| App-nag | Instagram/LinkedIn-style notification mail | Fix in the app's notification settings |
+| Tier          | Signal                                     | Action                                      |
+| ------------- | ------------------------------------------ | ------------------------------------------- |
+| Unsubscribe   | Pure marketing/drip, ~100% unread          | Recommend removal                           |
+| Consider      | High volume, partial engagement            | User's call; suggest digest or auto-summary |
+| Keep          | Mostly read                                | Leave alone                                 |
+| Transactional | Invoices, PINs, order/security notices     | Exclude from the audit                      |
+| Phishing      | See below                                  | Mark as spam — NEVER unsubscribe            |
+| App-nag       | Instagram/LinkedIn-style notification mail | Fix in the app's notification settings      |
 
 **Phishing tripwire:** brand name in the display name but an unrelated sender domain (e.g. "SpotifyUS" from `mail@jhbuilder.com`), urgent billing/security subjects. Clicking anything — including unsubscribe — confirms the address is live. Flag prominently; recommend mark-as-spam instead. The same applies to everything already in the Spam folder: never unsubscribe there.
 

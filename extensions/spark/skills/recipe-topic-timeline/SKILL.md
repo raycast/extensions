@@ -24,6 +24,7 @@ For a given project or topic, build a unified chronological narrative by interle
 ### Step 1: Define the scope
 
 Ask the user for:
+
 - The **topic or project name** (keywords to search on)
 - The **time range** (default to 30 days if unspecified)
 
@@ -85,6 +86,7 @@ Combine all entries (meetings and emails) and sort by date. For each entry:
 ### Step 5: Annotate the timeline
 
 Layer on editorial notes:
+
 - Mark **turning points** where direction changed
 - Flag **open threads** that don't have a resolution
 - Note **gaps** — periods with no activity that might indicate stalled progress
@@ -92,6 +94,7 @@ Layer on editorial notes:
 ### Step 6: Present the timeline
 
 Start with a one-paragraph executive summary of where the topic stands now, then present the full timeline oldest-to-newest. End with:
+
 - **Current status:** the latest known state
 - **Open items:** anything still unresolved
 - **Next touchpoint:** upcoming meeting or pending email that will advance the topic

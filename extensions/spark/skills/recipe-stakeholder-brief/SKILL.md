@@ -32,13 +32,13 @@ Note their email address(es) and any other details.
 ### Step 2: Pull recent email threads
 
 ```
-emails { "filter": "from:person@co.com newer_than:30d" }
+search { "filter": "from:person@co.com newer_than:30d" }
 ```
 
 Also check emails sent to them:
 
 ```
-emails { "filter": "to:person@co.com newer_than:30d" }
+search { "filter": "to:person@co.com newer_than:30d" }
 ```
 
 For the most important threads, read the full conversation:

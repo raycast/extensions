@@ -476,6 +476,33 @@ test("recipients: Add Address takes addresses with or without a name", async () 
   assert.deepEqual(parseAddresses("  ").people, []);
 });
 
+test("recipients: quoted names keep their separators and escaped quotes", async () => {
+  const { parseAddresses } = await import("../src/lib/recipients.ts");
+  assert.deepEqual(
+    parseAddresses(
+      String.raw`"Doe, Jane" <jane@example.com>; "Smith; John" <john@example.com>, "Lee \"JJ\", Jo" <jo@example.com>` +
+        "\nnext@example.com",
+    ),
+    {
+      people: [
+        { email: "jane@example.com", name: "Doe, Jane" },
+        { email: "john@example.com", name: "Smith; John" },
+        { email: "jo@example.com", name: 'Lee "JJ", Jo' },
+        { email: "next@example.com", name: undefined },
+      ],
+      invalid: [],
+    },
+  );
+});
+
+test("recipients: separators inside angle brackets stay in the invalid entry", async () => {
+  const { parseAddresses } = await import("../src/lib/recipients.ts");
+  assert.deepEqual(parseAddresses("Bad <one@example.com,two@example.com>; good@example.com"), {
+    people: [{ email: "good@example.com", name: undefined }],
+    invalid: ["Bad <one@example.com,two@example.com>"],
+  });
+});
+
 test("setup card: wraps the intro and lists the steps", async () => {
   const { setupCardSVG, wrap } = await import("../src/lib/setupCard.ts");
   assert.deepEqual(wrap("one two three", 60, 15), ["one two", "three"]);

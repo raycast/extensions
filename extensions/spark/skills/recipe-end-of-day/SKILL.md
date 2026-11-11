@@ -56,6 +56,7 @@ Flag any meetings that need preparation. If a meeting needs prep, note it so the
 ### Step 5: Present the summary
 
 Report to the user:
+
 - **Loose ends:** N unreplied people/priority emails (list senders and subjects)
 - **Pinned items:** M active, K look resolved
 - **Tomorrow:** P meetings (list times and titles), any needing prep

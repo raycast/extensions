@@ -24,11 +24,11 @@ The Spark MCP server exposes the user's mailbox, calendar, contacts, meetings, a
 
 Each account and shared inbox has its own **access level**, configured by the user in Spark Desktop under **Settings > AI Agents**. The `accounts` tool reports the current level for every account and shared inbox.
 
-| Level | Allowed operations |
-|-------|-------------------|
-| **read-only** | List, search, and read emails, threads, folders, events, contacts, meetings, teams |
-| **triage** | Everything in read-only plus all write operations: `draft`, `comment`, `action`, `contact-action` |
-| **send** | Everything in triage plus mail-emitting operations: sending drafts (`action` with `send`, including scheduled "Send Later") and the entire `event` tool (create / update / delete / rsvp, including inviting or removing attendees) |
+| Level         | Allowed operations                                                                                                                                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **read-only** | List, search, and read emails, threads, folders, events, contacts, meetings, teams                                                                                                                                                  |
+| **triage**    | Everything in read-only plus all write operations: `draft`, `comment`, `action`, `contact-action`                                                                                                                                   |
+| **send**      | Everything in triage plus mail-emitting operations: sending drafts (`action` with `send`, including scheduled "Send Later") and the entire `event` tool (create / update / delete / rsvp, including inviting or removing attendees) |
 
 Shared inboxes can have a different access level than the parent account - for example, a personal account may have triage access while a shared inbox under the same team is read-only or disabled.
 
@@ -48,28 +48,28 @@ Always call `accounts` once at the start of any non-trivial task to discover ava
 
 ## Tools
 
-| Tool | Access | Description |
-|------|--------|-------------|
-| `accounts` | read-only | List accounts, calendars, teams, shared inboxes, and access levels |
-| `folders` | read-only | List folders/labels with message counts |
-| `emails` | read-only | List emails with filters and pagination |
-| `search` | read-only | Topic search (full bodies), or list emails by filter across all folders |
-| `thread` | read-only | Read full thread - headers, bodies, attachments |
-| `attachment` | read-only | Read a single email attachment by ID (auto-downloads) |
-| `events` | read-only | List calendar events for a time range |
-| `event` | send | Create, update, delete, or RSVP to a calendar event; invite or remove attendees |
-| `availability` | read-only | Find free time slots, optionally with attendees |
-| `contacts` | read-only | Search contacts by name or email, or list the most-used ones |
-| `contact` | read-only | Show one contact's details and settings |
-| `team` | read-only | Show team info, members, shared inboxes, assignments |
-| `meetings` | read-only | List meeting transcripts |
-| `meeting` | read-only | Read a single meeting transcript |
-| `templates` | read-only | List saved message templates (personal and team) |
-| `template` | read-only | Show a single template by ID or name with its placeholders |
-| `draft` | triage | Create or edit a draft (new, reply, reply-all, forward, from template); delete a draft; list account signatures; share with team |
-| `comment` | triage | Post a team comment on a thread |
-| `action` | triage (send for `send` / `unschedule`) | Perform actions on emails (archive, pin, snooze, assign, etc.); send a draft or manage a scheduled send at the **send** level |
-| `contact-action` | triage | Perform actions on contacts (block, accept, categorize, etc.) |
+| Tool             | Access                                  | Description                                                                                                                      |
+| ---------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `accounts`       | read-only                               | List accounts, calendars, teams, shared inboxes, and access levels                                                               |
+| `folders`        | read-only                               | List folders/labels with message counts                                                                                          |
+| `emails`         | read-only                               | List emails with filters and pagination                                                                                          |
+| `search`         | read-only                               | Topic search (full bodies), or list emails by filter across all folders                                                          |
+| `thread`         | read-only                               | Read full thread - headers, bodies, attachments                                                                                  |
+| `attachment`     | read-only                               | Read a single email attachment by ID (auto-downloads)                                                                            |
+| `events`         | read-only                               | List calendar events for a time range                                                                                            |
+| `event`          | send                                    | Create, update, delete, or RSVP to a calendar event; invite or remove attendees                                                  |
+| `availability`   | read-only                               | Find free time slots, optionally with attendees                                                                                  |
+| `contacts`       | read-only                               | Search contacts by name or email, or list the most-used ones                                                                     |
+| `contact`        | read-only                               | Show one contact's details and settings                                                                                          |
+| `team`           | read-only                               | Show team info, members, shared inboxes, assignments                                                                             |
+| `meetings`       | read-only                               | List meeting transcripts                                                                                                         |
+| `meeting`        | read-only                               | Read a single meeting transcript                                                                                                 |
+| `templates`      | read-only                               | List saved message templates (personal and team)                                                                                 |
+| `template`       | read-only                               | Show a single template by ID or name with its placeholders                                                                       |
+| `draft`          | triage                                  | Create or edit a draft (new, reply, reply-all, forward, from template); delete a draft; list account signatures; share with team |
+| `comment`        | triage                                  | Post a team comment on a thread                                                                                                  |
+| `action`         | triage (send for `send` / `unschedule`) | Perform actions on emails (archive, pin, snooze, assign, etc.); send a draft or manage a scheduled send at the **send** level    |
+| `contact-action` | triage                                  | Perform actions on contacts (block, accept, categorize, etc.)                                                                    |
 
 ### accounts
 
@@ -85,9 +85,9 @@ Run first to discover what is available and which accounts allow triage actions.
 
 List folders with message counts. Output includes folder identifiers in parentheses - use those as the `folder` parameter for `emails` and as scope for `search`. Mailboxes backed by a Google account show `(Gmail labels)` on the **Email Account** or **Shared Inbox** header. Teams show the team name as a usable identifier for `emails`.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `account` | string | no | Filter by email address (account or shared inbox). All accounts if omitted. |
+| Parameter | Type   | Required | Description                                                                 |
+| --------- | ------ | -------- | --------------------------------------------------------------------------- |
+| `account` | string | no       | Filter by email address (account or shared inbox). All accounts if omitted. |
 
 ```
 folders {}
@@ -98,14 +98,14 @@ folders { "account": "user@example.com" }
 
 List emails with metadata (ID, From, Date, Subject, Flags). Supports pagination and Gmail-style filters. Does **not** return bodies - use `search` or `thread` when you need content.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `folder` | string | no | Folder identifier. Unified Inbox if omitted. |
-| `filter` | string | no | Gmail-style filter (see operators below). |
-| `page` | integer | no | Page number, 1-based (default `1`). |
-| `page_size` | integer | no | Results per page (default `50`). |
-| `order` | string | no | `ascending` or `descending`. |
-| `new_senders` | boolean | no | Show only new-sender emails (GateKeeper). |
+| Parameter     | Type    | Required | Description                                  |
+| ------------- | ------- | -------- | -------------------------------------------- |
+| `folder`      | string  | no       | Folder identifier. Unified Inbox if omitted. |
+| `filter`      | string  | no       | Gmail-style filter (see operators below).    |
+| `page`        | integer | no       | Page number, 1-based (default `1`).          |
+| `page_size`   | integer | no       | Results per page (default `50`).             |
+| `order`       | string  | no       | `ascending` or `descending`.                 |
+| `new_senders` | boolean | no       | Show only new-sender emails (GateKeeper).    |
 
 ```
 emails {}                                                                         # Unified Inbox
@@ -122,37 +122,37 @@ emails { "new_senders": true }
 
 **Folder identifier formats** (call `folders` to see available ones):
 
-| Format | Example | Meaning |
-|--------|---------|---------|
-| Bare name | `Inbox`, `Archive` | Unified folder (cross-account) |
-| Email | `user@example.com` | Account inbox shorthand |
-| `email:Folder` | `user@example.com:Archive` | Specific account folder |
-| Team name | `My Team` | All shared threads in a team |
-| `shared@email:Inbox` | `shared@co.com:Inbox` | Shared inbox open items (conversation view, matches Desktop) |
-| `shared@email:Archive` | `shared@co.com:Archive` | Shared inbox done/archived items (conversation view) |
-| `shared@email:Folder` | `shared@co.com:Label` | Other shared inbox folder / label |
+| Format                 | Example                    | Meaning                                                      |
+| ---------------------- | -------------------------- | ------------------------------------------------------------ |
+| Bare name              | `Inbox`, `Archive`         | Unified folder (cross-account)                               |
+| Email                  | `user@example.com`         | Account inbox shorthand                                      |
+| `email:Folder`         | `user@example.com:Archive` | Specific account folder                                      |
+| Team name              | `My Team`                  | All shared threads in a team                                 |
+| `shared@email:Inbox`   | `shared@co.com:Inbox`      | Shared inbox open items (conversation view, matches Desktop) |
+| `shared@email:Archive` | `shared@co.com:Archive`    | Shared inbox done/archived items (conversation view)         |
+| `shared@email:Folder`  | `shared@co.com:Label`      | Other shared inbox folder / label                            |
 
 **Filter operators** (combine space-separated inside the `filter` string):
 
-| Operator | Example |
-|----------|---------|
-| `from:<addr>` | `from:alice@co.com` |
-| `to:<addr>` | `to:bob@co.com` |
-| `cc:<addr>` | `cc:team@co.com` |
-| `subject:<text>` | `subject:"quarterly report"` |
-| `before:yyyy/MM/dd` | `before:2026/03/01` |
-| `after:yyyy/MM/dd` | `after:2026/01/01` |
-| `newer_than:Xd` | `newer_than:7d` (also `w`, `m`, `y`) |
-| `older_than:Xd` | `older_than:30d` |
-| `has:attachment` | also `document`, `spreadsheet`, `presentation`, `reminder` |
-| `is:unread` | also `read`, `starred`, `pinned`, `unreplied` |
-| `is:shared` | emails shared to any team (alias for `is:shared_email`) |
-| `is:shared_inbox_open` | open items in shared inbox |
-| `is:shared_inbox_done` | completed/closed items in shared inbox |
-| `category:<name>` | `priority`, `personal`, `notification`, `newsletter`, `invitation`, `invitation_response` |
-| `assigned_to:<who>` | `me`, `<email>`, `unassigned`, `other` |
-| `assigned_by:me` | emails you delegated |
-| `filename:<name>` | `filename:report.pdf` |
+| Operator               | Example                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `from:<addr>`          | `from:alice@co.com`                                                                       |
+| `to:<addr>`            | `to:bob@co.com`                                                                           |
+| `cc:<addr>`            | `cc:team@co.com`                                                                          |
+| `subject:<text>`       | `subject:"quarterly report"`                                                              |
+| `before:yyyy/MM/dd`    | `before:2026/03/01`                                                                       |
+| `after:yyyy/MM/dd`     | `after:2026/01/01`                                                                        |
+| `newer_than:Xd`        | `newer_than:7d` (also `w`, `m`, `y`)                                                      |
+| `older_than:Xd`        | `older_than:30d`                                                                          |
+| `has:attachment`       | also `document`, `spreadsheet`, `presentation`, `reminder`                                |
+| `is:unread`            | also `read`, `starred`, `pinned`, `unreplied`                                             |
+| `is:shared`            | emails shared to any team (alias for `is:shared_email`)                                   |
+| `is:shared_inbox_open` | open items in shared inbox                                                                |
+| `is:shared_inbox_done` | completed/closed items in shared inbox                                                    |
+| `category:<name>`      | `priority`, `personal`, `notification`, `newsletter`, `invitation`, `invitation_response` |
+| `assigned_to:<who>`    | `me`, `<email>`, `unassigned`, `other`                                                    |
+| `assigned_by:me`       | emails you delegated                                                                      |
+| `filename:<name>`      | `filename:report.pdf`                                                                     |
 
 ### search
 
@@ -161,14 +161,14 @@ Two modes, selected by whether you pass `query`:
 - **Topic mode** (`query` set): hybrid keyword + semantic search returning up to 20 emails **with full bodies**, sorted by relevance. Use this when the user asks about a topic and you need content to answer.
 - **List mode** (`query` omitted): a paged, compact table of every email matching `filter`/`in` across **all folders in all accounts**, newest first (same columns as `emails`). Trash, Spam, and Blocked are excluded unless `in` targets one of them. Use this to filter by metadata (especially `from:`) beyond the Unified Inbox that `emails` is limited to.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `query` | string | no | Search topic (keyword + semantic matching). Omit to switch to list mode. |
-| `filter` | string | no | Gmail-style filter to narrow results (same operators as `emails`). |
-| `in` | string | no | Scope: account, folder, team, or shared inbox. All folders if omitted. |
-| `page` | integer | no | Page number, 1-based (default `1`). List mode only. |
-| `page_size` | integer | no | Results per page (default `50`). List mode only. |
-| `order` | string | no | `ascending` or `descending`. List mode only. |
+| Parameter   | Type    | Required | Description                                                              |
+| ----------- | ------- | -------- | ------------------------------------------------------------------------ |
+| `query`     | string  | no       | Search topic (keyword + semantic matching). Omit to switch to list mode. |
+| `filter`    | string  | no       | Gmail-style filter to narrow results (same operators as `emails`).       |
+| `in`        | string  | no       | Scope: account, folder, team, or shared inbox. All folders if omitted.   |
+| `page`      | integer | no       | Page number, 1-based (default `1`). List mode only.                      |
+| `page_size` | integer | no       | Results per page (default `50`). List mode only.                         |
+| `order`     | string  | no       | `ascending` or `descending`. List mode only.                             |
 
 ```
 search { "query": "quarterly report" }
@@ -185,10 +185,10 @@ Use `search` with a `query` when the user asks about content (you need bodies). 
 
 Read every message in a conversation - headers, plain-text bodies, attachment info. After the thread summary line, lists custom (non-system) folder labels once for the whole thread.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `message_id` | string | yes | Message ID from `emails`/`search`, or a Spark deep link (the `Link:` line of a previous result). |
-| `download_attachments` | boolean | no | Fetch attachments that aren't yet local. |
+| Parameter              | Type    | Required | Description                                                                                      |
+| ---------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `message_id`           | string  | yes      | Message ID from `emails`/`search`, or a Spark deep link (the `Link:` line of a previous result). |
+| `download_attachments` | boolean | no       | Fetch attachments that aren't yet local.                                                         |
 
 ```
 thread { "message_id": "1114" }
@@ -207,9 +207,9 @@ Read a single email attachment by its ID and receive the file content directly t
 
 This is the sandbox-friendly way to read attachments: clients never need to touch the local filesystem path printed in the `thread` output.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | yes | Attachment ID from the `thread` Attachments table. |
+| Parameter | Type    | Required | Description                                        |
+| --------- | ------- | -------- | -------------------------------------------------- |
+| `id`      | integer | yes      | Attachment ID from the `thread` Attachments table. |
 
 ```
 attachment { "id": 42 }
@@ -233,15 +233,15 @@ Typical flow:
 
 List calendar events for a time range. Defaults to today's remaining events.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `today` | boolean | no | From now until end of today. |
-| `tomorrow` | boolean | no | Tomorrow, full day. |
-| `week` | boolean | no | From now until end of this week. |
-| `start` | string | no | Start date (`yyyy-MM-dd` or `yyyy-MM-ddTHH:mm`). |
-| `end` | string | no | End date (same formats). |
-| `in` | string | no | Calendar account (`user@example.com`) or specific calendar (`user@example.com:Work`). A named calendar is listed even when hidden. |
-| `include_hidden` | boolean | no | Include calendars switched off in Spark's calendar view. |
+| Parameter        | Type    | Required | Description                                                                                                                        |
+| ---------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `today`          | boolean | no       | From now until end of today.                                                                                                       |
+| `tomorrow`       | boolean | no       | Tomorrow, full day.                                                                                                                |
+| `week`           | boolean | no       | From now until end of this week.                                                                                                   |
+| `start`          | string  | no       | Start date (`yyyy-MM-dd` or `yyyy-MM-ddTHH:mm`).                                                                                   |
+| `end`            | string  | no       | End date (same formats).                                                                                                           |
+| `in`             | string  | no       | Calendar account (`user@example.com`) or specific calendar (`user@example.com:Work`). A named calendar is listed even when hidden. |
+| `include_hidden` | boolean | no       | Include calendars switched off in Spark's calendar view.                                                                           |
 
 ```
 events {}
@@ -263,22 +263,22 @@ Call `accounts` to see available calendar accounts and calendar names.
 
 Create, update, delete, or RSVP to a calendar event, including managing its attendees. Use `add` / `remove` on `create` or `update` to invite or remove attendees; adding or removing attendees sends invitations / cancellations through the calendar provider (CalDAV / Google / Exchange).
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `mode` | string | yes | `create`, `update`, `delete`, or `rsvp`. |
-| `event_id` | string | for `update`/`delete`/`rsvp` | For `update`/`delete`: a calendar event ID (use `events`). For `rsvp`: a calendar event ID **or** the message ID of the invitation email (use `emails` / `thread`). |
-| `status` | string | for `rsvp` | RSVP status: `accept`, `decline`, or `maybe`. |
-| `title` | string | no | Event title / summary. |
-| `start` | string | yes (for `create`) | Start date/time (`yyyy-MM-dd`, `dd/MM/yyyy`, `yyyy-MM-ddTHH:mm`, or `yyyy-MM-ddTHH:mm:ssXXX`). |
-| `end` | string | no | End date/time (same formats). |
-| `all_day` | boolean | no | Mark the event as all-day. |
-| `description` | string | no | Event description / notes. |
-| `alerts` | string | no | Comma-separated alert offsets (`Ns` for N seconds before, e.g. `300s,600s`) or absolute dates. |
-| `location` | string | no | Event location. |
-| `video_conference` | string | no | Attach a video conference: `auto` (account default), or `meet` / `zoom` / `teams`. |
-| `calendar` | string | no | Target calendar for `create` (`email@domain.com` or `email@domain.com:Name`). Hidden calendars work too, and saving an event in one switches it back on in Spark's calendar view. |
-| `add` | array of string | no | Attendee email address(es) to invite (create / update). New attendees receive an invitation. |
-| `remove` | array of string | no | Attendee email address(es) to remove (update). Removed attendees receive a cancellation. The organizer cannot be removed. |
+| Parameter          | Type            | Required                     | Description                                                                                                                                                                       |
+| ------------------ | --------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`             | string          | yes                          | `create`, `update`, `delete`, or `rsvp`.                                                                                                                                          |
+| `event_id`         | string          | for `update`/`delete`/`rsvp` | For `update`/`delete`: a calendar event ID (use `events`). For `rsvp`: a calendar event ID **or** the message ID of the invitation email (use `emails` / `thread`).               |
+| `status`           | string          | for `rsvp`                   | RSVP status: `accept`, `decline`, or `maybe`.                                                                                                                                     |
+| `title`            | string          | no                           | Event title / summary.                                                                                                                                                            |
+| `start`            | string          | yes (for `create`)           | Start date/time (`yyyy-MM-dd`, `dd/MM/yyyy`, `yyyy-MM-ddTHH:mm`, or `yyyy-MM-ddTHH:mm:ssXXX`).                                                                                    |
+| `end`              | string          | no                           | End date/time (same formats).                                                                                                                                                     |
+| `all_day`          | boolean         | no                           | Mark the event as all-day.                                                                                                                                                        |
+| `description`      | string          | no                           | Event description / notes.                                                                                                                                                        |
+| `alerts`           | string          | no                           | Comma-separated alert offsets (`Ns` for N seconds before, e.g. `300s,600s`) or absolute dates.                                                                                    |
+| `location`         | string          | no                           | Event location.                                                                                                                                                                   |
+| `video_conference` | string          | no                           | Attach a video conference: `auto` (account default), or `meet` / `zoom` / `teams`.                                                                                                |
+| `calendar`         | string          | no                           | Target calendar for `create` (`email@domain.com` or `email@domain.com:Name`). Hidden calendars work too, and saving an event in one switches it back on in Spark's calendar view. |
+| `add`              | array of string | no                           | Attendee email address(es) to invite (create / update). New attendees receive an invitation.                                                                                      |
+| `remove`           | array of string | no                           | Attendee email address(es) to remove (update). Removed attendees receive a cancellation. The organizer cannot be removed.                                                         |
 
 ```
 event { "mode": "create", "title": "Sync", "start": "2026-07-01T12:00", "end": "2026-07-01T13:00" }
@@ -298,7 +298,7 @@ event { "mode": "rsvp", "event_id": "44268", "status": "maybe" }      # invitati
 
 **`update` / `delete` semantics:** an event with **no attendees** is a local change (no mail). An event **with attendees** sends an iTIP UPDATE (on update) or CANCEL (on delete) to all attendees. An alerts-only edit is a personal reminder and notifies nobody.
 
-**`rsvp` semantics:** sets *your own* status on an invitation and emits an iTIP REPLY to the organizer. The id can be a calendar event ID or the invitation email's message ID - when a user asks you to respond to an invite, look it up with `emails` / `thread` and pass that message ID, since many providers leave an unanswered invite in the inbox without adding it to the calendar.
+**`rsvp` semantics:** sets _your own_ status on an invitation and emits an iTIP REPLY to the organizer. The id can be a calendar event ID or the invitation email's message ID - when a user asks you to respond to an invite, look it up with `emails` / `thread` and pass that message ID, since many providers leave an unanswered invite in the inbox without adding it to the calendar.
 
 Typical flow when scheduling a new meeting: `event { "mode": "create", ... }` to lay down the event, confirm the time with the user, then `event { "mode": "update", "event_id": "...", "add": [...] }` to push invitations - so the user can review before any external mail goes out. When you already have the attendees, create with `add` in one step.
 
@@ -308,14 +308,14 @@ Run `accounts` to see writable calendars and the access level on each account.
 
 Find free time slots. Without `attendees`, shows the user's own availability. With `attendees`, computes mutual free windows. Working hours are 08:00-20:00, weekends skipped, events marked "free" are ignored.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `today` | boolean | no | From now until end of today. |
-| `tomorrow` | boolean | no | Tomorrow, full day. |
-| `week` | boolean | no | From now until end of this week. |
-| `start` | string | no | Start date (`yyyy-MM-dd` or `yyyy-MM-ddTHH:mm`). |
-| `end` | string | no | End date (same formats). |
-| `attendees` | string | no | Comma-separated email addresses. |
+| Parameter   | Type    | Required | Description                                      |
+| ----------- | ------- | -------- | ------------------------------------------------ |
+| `today`     | boolean | no       | From now until end of today.                     |
+| `tomorrow`  | boolean | no       | Tomorrow, full day.                              |
+| `week`      | boolean | no       | From now until end of this week.                 |
+| `start`     | string  | no       | Start date (`yyyy-MM-dd` or `yyyy-MM-ddTHH:mm`). |
+| `end`       | string  | no       | End date (same formats).                         |
+| `attendees` | string  | no       | Comma-separated email addresses.                 |
 
 ```
 availability {}
@@ -328,10 +328,10 @@ availability { "start": "2026-03-16", "end": "2026-03-20", "attendees": "a@co.co
 
 Search contacts by name or email. Strict match first, then fuzzy fallback. Without a query, lists the contacts the user writes to most, most-used first.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `query` | string | no | Name or email to search for. Omit to list the most-used contacts. |
-| `limit` | integer | no | Maximum number of contacts, 1-1000 (default: 25). |
+| Parameter | Type    | Required | Description                                                       |
+| --------- | ------- | -------- | ----------------------------------------------------------------- |
+| `query`   | string  | no       | Name or email to search for. Omit to list the most-used contacts. |
+| `limit`   | integer | no       | Maximum number of contacts, 1-1000 (default: 25).                 |
 
 ```
 contacts { "query": "john" }
@@ -343,30 +343,30 @@ contacts { "limit": 100 }
 
 Show one contact's details: name, other addresses, and each setting `contact-action` changes. Check a sender's state before changing it - e.g. whether they are already Priority or blocked. An unknown address is an error.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `email` | string | yes | The contact's email address. |
+| Parameter | Type   | Required | Description                  |
+| --------- | ------ | -------- | ---------------------------- |
+| `email`   | string | yes      | The contact's email address. |
 
 ```
 contact { "email": "bob@example.com" }
 ```
 
-| Field | Changed by (`contact-action`) |
-|-------|-----------|
-| Category (`personal` / `notification` / `newsletter`) | `changeCategory*` |
-| Priority | `markContactAsPrimary` / `unmarkContactAsPrimary` |
-| Notifications | `markContactAsImportant` / `unmarkContactAsImportant` |
-| GateKeeper: blocked / accepted (neither for a new sender) | `blockContact` / `acceptContact` |
-| Grouped (in Inbox or by category) | `groupEmailsFromContact[AndShowInInbox]` / `ungroupEmailsFromContact` |
-| Auto-summary | `enableAutosummaryForContact` / `disableAutosummaryForContact` |
+| Field                                                     | Changed by (`contact-action`)                                         |
+| --------------------------------------------------------- | --------------------------------------------------------------------- |
+| Category (`personal` / `notification` / `newsletter`)     | `changeCategory*`                                                     |
+| Priority                                                  | `markContactAsPrimary` / `unmarkContactAsPrimary`                     |
+| Notifications                                             | `markContactAsImportant` / `unmarkContactAsImportant`                 |
+| GateKeeper: blocked / accepted (neither for a new sender) | `blockContact` / `acceptContact`                                      |
+| Grouped (in Inbox or by category)                         | `groupEmailsFromContact[AndShowInInbox]` / `ungroupEmailsFromContact` |
+| Auto-summary                                              | `enableAutosummaryForContact` / `disableAutosummaryForContact`        |
 
 ### team
 
 Show team info - metadata, shared inboxes with members, full member list, assigned emails, and assignment summary. Call without `name` to list available teams.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | string | no | Team name (or partial match). Lists all teams if omitted. |
+| Parameter | Type   | Required | Description                                               |
+| --------- | ------ | -------- | --------------------------------------------------------- |
+| `name`    | string | no       | Team name (or partial match). Lists all teams if omitted. |
 
 ```
 team {}
@@ -377,11 +377,11 @@ team { "name": "My Team" }
 
 List meeting transcripts, newest first. Supports filtering and pagination.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `filter` | string | no | Filter expression (operators below). |
-| `page` | integer | no | Page number, 1-based. |
-| `page_size` | integer | no | Results per page (default `50`). |
+| Parameter   | Type    | Required | Description                          |
+| ----------- | ------- | -------- | ------------------------------------ |
+| `filter`    | string  | no       | Filter expression (operators below). |
+| `page`      | integer | no       | Page number, 1-based.                |
+| `page_size` | integer | no       | Results per page (default `50`).     |
 
 ```
 meetings {}
@@ -395,11 +395,11 @@ Filter operators for `meetings`: `subject:<text>`, `before:yyyy/MM/dd`, `after:y
 
 Read a single meeting transcript's summary. Optionally include the full transcript and/or user notes.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `meeting_id` | string | yes | Meeting ID (from `meetings`) or a Spark deep link. |
-| `transcript` | boolean | no | Include the full transcript text. |
-| `notes` | boolean | no | Include user notes. |
+| Parameter    | Type    | Required | Description                                        |
+| ------------ | ------- | -------- | -------------------------------------------------- |
+| `meeting_id` | string  | yes      | Meeting ID (from `meetings`) or a Spark deep link. |
+| `transcript` | boolean | no       | Include the full transcript text.                  |
+| `notes`      | boolean | no       | Include user notes.                                |
 
 ```
 meeting { "meeting_id": "42" }
@@ -412,12 +412,12 @@ meeting { "meeting_id": "42", "transcript": true, "notes": true }
 
 List saved Spark message templates - the drafts you can apply via `draft`'s `template` parameter. Personal and team templates both appear; they round-trip from Spark Desktop.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `personal` | boolean | no | Show only personal templates. |
-| `team` | string | no | Show only the named team's templates. |
-| `page` | integer | no | Page number, 1-based (default `1`). |
-| `page_size` | integer | no | Results per page (default `50`). |
+| Parameter   | Type    | Required | Description                           |
+| ----------- | ------- | -------- | ------------------------------------- |
+| `personal`  | boolean | no       | Show only personal templates.         |
+| `team`      | string  | no       | Show only the named team's templates. |
+| `page`      | integer | no       | Page number, 1-based (default `1`).   |
+| `page_size` | integer | no       | Results per page (default `50`).      |
 
 ```
 templates {}
@@ -432,9 +432,9 @@ Output columns: `ID`, `Scope` (Personal or team name), `Name`, `Subject`, `Modif
 
 Show a single template's full contents and its placeholder requirements. Run this before `draft { "template": ... }` so you know which placeholders to fill.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `ref` | string | yes | Template ID (numeric) or name (case-insensitive). |
+| Parameter | Type   | Required | Description                                       |
+| --------- | ------ | -------- | ------------------------------------------------- |
+| `ref`     | string | yes      | Template ID (numeric) or name (case-insensitive). |
 
 ```
 template { "ref": "123" }
@@ -454,30 +454,30 @@ If a name matches more than one template, the call errors with the matching IDs 
 
 Create a new email draft or edit an existing one. The body is markdown and is converted to HTML. Seed a draft from an existing message with `reply_to`, `reply_all`, or `forward`, update an existing draft with `edit`, apply a saved template with `template`, list account signatures with `mode`, delete a draft with `delete`, and collaborate with teammates with the sharing parameters.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `mode` | string | no | Pass `"signatures"` to list the signature each account appends instead of touching a draft. Must be the only parameter. |
-| `to` | array of string | no | Recipient addresses. |
-| `cc` | array of string | no | CC addresses. |
-| `bcc` | array of string | no | BCC addresses. |
-| `subject` | string | no | Subject line. |
-| `body` | string | no (yes for new) | Body content in markdown. Required for a new draft unless a template supplies one. `![alt](file name)` shows an attached image in the text - see [Images in the body](#images-in-the-body). |
-| `account` | string | no | Account email to send from. Personal accounts, aliases, and shared-inbox emails are all valid - any account that has triage access. |
-| `edit` | string | no | Message ID (or Spark deep link) of an existing draft to update. |
-| `reply_to` | string | no | Message ID (or deep link) to reply to. Addresses the sender alone (or the `Reply-To:` address when the message carries one). |
-| `reply_all` | string | no | Message ID (or deep link) to reply to while keeping everyone else on the thread: the other `To:` recipients land in To, the original `Cc:` in CC, minus your own address. Mutually exclusive with `reply_to`; `to` / `cc` override the lists it builds. |
-| `forward` | string | no | Message ID (or deep link) to forward. |
-| `delete` | string | no | Message ID (or deep link) of a draft to delete **permanently**. Must be the only parameter. Drafts have no Trash, so the deletion cannot be undone. A scheduled draft and a draft shared with teammates are both refused - `action { "action_name": "unschedule", ... }` or `draft { "edit": "<pk>", "unshare": true }` first. |
-| `attach` | array of string | no | Absolute paths to files on the user's computer. See [Files from a sandbox](#files-from-a-sandbox). |
-| `template` | string | no | Apply a saved template by ID or name. Combine with `edit` to overlay it onto an existing draft. |
-| `placeholder` | array of string | no | Fill manual template placeholders, each `"<name>=<value>"`. Auto placeholders (recipient/self name) resolve from `to`/`account` and are not addressable here. |
-| `no_signature` | boolean | no | Send without a signature, suppressing the account's default for this draft. On `edit` it strips a signature already on the draft, keeping the body and quoted thread. |
-| `team` | string | no | Team to share the draft with. Required when you belong to multiple teams; on an already-shared draft, must match the owning team. |
-| `user` | array of string | no | Teammate emails to share with. On an already-shared draft this **adds** collaborators - use `remove_user` to remove. |
-| `remove_user` | array of string | no | Teammate emails to **remove** from a shared draft, preserving the share, its comments, and remaining collaborators. Requires `edit` of a shared draft. Cannot remove yourself - use `unshare`. |
-| `allow_send` | boolean | no | Let teammates send the shared draft on your behalf. New share defaults to off; on edit, omit to leave the current value unchanged. |
-| `disallow_send` | boolean | no | Revoke teammates' send-on-behalf permission. (This is the parameter for the `--no-allow-send` flag - note the name.) |
-| `unshare` | boolean | no | Revert a shared draft back to a personal draft. Requires `edit`; cannot be combined with sharing params or content edits. |
+| Parameter       | Type            | Required         | Description                                                                                                                                                                                                                                                                                                                    |
+| --------------- | --------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mode`          | string          | no               | Pass `"signatures"` to list the signature each account appends instead of touching a draft. Must be the only parameter.                                                                                                                                                                                                        |
+| `to`            | array of string | no               | Recipient addresses.                                                                                                                                                                                                                                                                                                           |
+| `cc`            | array of string | no               | CC addresses.                                                                                                                                                                                                                                                                                                                  |
+| `bcc`           | array of string | no               | BCC addresses.                                                                                                                                                                                                                                                                                                                 |
+| `subject`       | string          | no               | Subject line.                                                                                                                                                                                                                                                                                                                  |
+| `body`          | string          | no (yes for new) | Body content in markdown. Required for a new draft unless a template supplies one. `![alt](file name)` shows an attached image in the text - see [Images in the body](#images-in-the-body).                                                                                                                                    |
+| `account`       | string          | no               | Account email to send from. Personal accounts, aliases, and shared-inbox emails are all valid - any account that has triage access.                                                                                                                                                                                            |
+| `edit`          | string          | no               | Message ID (or Spark deep link) of an existing draft to update.                                                                                                                                                                                                                                                                |
+| `reply_to`      | string          | no               | Message ID (or deep link) to reply to. Addresses the sender alone (or the `Reply-To:` address when the message carries one).                                                                                                                                                                                                   |
+| `reply_all`     | string          | no               | Message ID (or deep link) to reply to while keeping everyone else on the thread: the other `To:` recipients land in To, the original `Cc:` in CC, minus your own address. Mutually exclusive with `reply_to`; `to` / `cc` override the lists it builds.                                                                        |
+| `forward`       | string          | no               | Message ID (or deep link) to forward.                                                                                                                                                                                                                                                                                          |
+| `delete`        | string          | no               | Message ID (or deep link) of a draft to delete **permanently**. Must be the only parameter. Drafts have no Trash, so the deletion cannot be undone. A scheduled draft and a draft shared with teammates are both refused - `action { "action_name": "unschedule", ... }` or `draft { "edit": "<pk>", "unshare": true }` first. |
+| `attach`        | array of string | no               | Absolute paths to files on the user's computer. See [Files from a sandbox](#files-from-a-sandbox).                                                                                                                                                                                                                             |
+| `template`      | string          | no               | Apply a saved template by ID or name. Combine with `edit` to overlay it onto an existing draft.                                                                                                                                                                                                                                |
+| `placeholder`   | array of string | no               | Fill manual template placeholders, each `"<name>=<value>"`. Auto placeholders (recipient/self name) resolve from `to`/`account` and are not addressable here.                                                                                                                                                                  |
+| `no_signature`  | boolean         | no               | Send without a signature, suppressing the account's default for this draft. On `edit` it strips a signature already on the draft, keeping the body and quoted thread.                                                                                                                                                          |
+| `team`          | string          | no               | Team to share the draft with. Required when you belong to multiple teams; on an already-shared draft, must match the owning team.                                                                                                                                                                                              |
+| `user`          | array of string | no               | Teammate emails to share with. On an already-shared draft this **adds** collaborators - use `remove_user` to remove.                                                                                                                                                                                                           |
+| `remove_user`   | array of string | no               | Teammate emails to **remove** from a shared draft, preserving the share, its comments, and remaining collaborators. Requires `edit` of a shared draft. Cannot remove yourself - use `unshare`.                                                                                                                                 |
+| `allow_send`    | boolean         | no               | Let teammates send the shared draft on your behalf. New share defaults to off; on edit, omit to leave the current value unchanged.                                                                                                                                                                                             |
+| `disallow_send` | boolean         | no               | Revoke teammates' send-on-behalf permission. (This is the parameter for the `--no-allow-send` flag - note the name.)                                                                                                                                                                                                           |
+| `unshare`       | boolean         | no               | Revert a shared draft back to a personal draft. Requires `edit`; cannot be combined with sharing params or content edits.                                                                                                                                                                                                      |
 
 ```
 draft { "to": ["alice@example.com"], "subject": "Hello", "body": "Hi Alice, ..." }
@@ -533,7 +533,7 @@ Use `emails` to find message IDs for `edit`, `reply_to`, `reply_all`, and `forwa
 
 **Sharing.** Sharing is triggered by the presence of `team` or `user`; teams with exactly one other active member auto-share with everyone, otherwise `user` is required. To change collaborators or the send-on-behalf setting on an existing shared draft, pass `edit` together with the sharing params - the change is applied to the existing share. Content edits (`to`/`cc`/`bcc`/`subject`/`body`/`attach`) and sharing updates (`team`/`user`/`remove_user`/`allow_send`/`disallow_send`) must be issued as **separate** calls, and `unshare` cannot be combined with either.
 
-**Deleting a draft is final.** `delete` removes the draft outright - unlike a received email there is no Trash to recover it from. Only delete a draft the user asked you to discard, and say so plainly in your response rather than implying it can be restored. To throw away just the *text* of a draft while keeping the draft itself, edit it (`draft { "edit": "<pk>", "body": "..." }`) instead.
+**Deleting a draft is final.** `delete` removes the draft outright - unlike a received email there is no Trash to recover it from. Only delete a draft the user asked you to discard, and say so plainly in your response rather than implying it can be restored. To throw away just the _text_ of a draft while keeping the draft itself, edit it (`draft { "edit": "<pk>", "body": "..." }`) instead.
 
 ### comment
 
@@ -541,14 +541,14 @@ Use `emails` to find message IDs for `edit`, `reply_to`, `reply_all`, and `forwa
 
 Post a team comment (chat message) on a thread. If the thread isn't yet shared, it is shared automatically. Supports text comments, file attachments, or both. Use `edit` to update an existing comment.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `message_id` | string | yes (post) | Message ID (or Spark deep link) of a message in the thread to comment on. Required when posting a new comment; omit when using `edit`. |
-| `body` | string | when no `attach` | Comment text. Required when using `edit`. |
-| `attach` | array of string | when no `body` | Absolute paths to files on the user's computer. Each file is sent as a separate message. Cannot be combined with `edit`. See [Files from a sandbox](#files-from-a-sandbox). |
-| `edit` | string | no | Message ID of an existing comment to edit. Requires `body`. |
-| `team` | string | when >1 team | Team name. Required when the user belongs to multiple teams. |
-| `user` | array of string | when team >2 members | Teammate emails to share with. Only used when auto-sharing an unshared thread. For teams with 2 or fewer members, the whole team is shared with automatically. |
+| Parameter    | Type            | Required             | Description                                                                                                                                                                 |
+| ------------ | --------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `message_id` | string          | yes (post)           | Message ID (or Spark deep link) of a message in the thread to comment on. Required when posting a new comment; omit when using `edit`.                                      |
+| `body`       | string          | when no `attach`     | Comment text. Required when using `edit`.                                                                                                                                   |
+| `attach`     | array of string | when no `body`       | Absolute paths to files on the user's computer. Each file is sent as a separate message. Cannot be combined with `edit`. See [Files from a sandbox](#files-from-a-sandbox). |
+| `edit`       | string          | no                   | Message ID of an existing comment to edit. Requires `body`.                                                                                                                 |
+| `team`       | string          | when >1 team         | Team name. Required when the user belongs to multiple teams.                                                                                                                |
+| `user`       | array of string | when team >2 members | Teammate emails to share with. Only used when auto-sharing an unshared thread. For teams with 2 or fewer members, the whole team is shared with automatically.              |
 
 ```
 comment { "message_id": "1234", "body": "Looks good, let's proceed." }
@@ -567,53 +567,53 @@ Use `emails` to find message IDs. Use `thread` to see comment IDs already posted
 
 Perform an action on one or more emails. Pass `action_name` plus a `message_ids` array; some actions need additional options (`date`, `folder`, `team`, `user`, `assignee`, `comment`).
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `action_name` | string | yes | Action to perform (see list below). |
-| `message_ids` | array of string | yes | Message IDs (or Spark deep links) to act on. |
-| `date` | string | for `snooze`, `changeReminder`; optional for `assign` | `yyyy-MM-dd`, `dd/MM/yyyy`, or `yyyy-MM-ddTHH:mm`. |
-| `folder` | string | for `moveToFolder`, `attachLabel`, `detachLabel` | Qualified folder/label (e.g. `user@example.com:Archive`). Run `folders` for valid identifiers. |
-| `team` | string | when >1 team for team actions | Team name. |
-| `user` | array of string | for `shareInTeam` when team >2 members | Teammate emails to share with. |
-| `assignee` | string | for `assign` | Teammate email to assign the email to. |
-| `comment` | string | optional for `assign` | Comment text included with the assignment. |
+| Parameter     | Type            | Required                                              | Description                                                                                    |
+| ------------- | --------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `action_name` | string          | yes                                                   | Action to perform (see list below).                                                            |
+| `message_ids` | array of string | yes                                                   | Message IDs (or Spark deep links) to act on.                                                   |
+| `date`        | string          | for `snooze`, `changeReminder`; optional for `assign` | `yyyy-MM-dd`, `dd/MM/yyyy`, or `yyyy-MM-ddTHH:mm`.                                             |
+| `folder`      | string          | for `moveToFolder`, `attachLabel`, `detachLabel`      | Qualified folder/label (e.g. `user@example.com:Archive`). Run `folders` for valid identifiers. |
+| `team`        | string          | when >1 team for team actions                         | Team name.                                                                                     |
+| `user`        | array of string | for `shareInTeam` when team >2 members                | Teammate emails to share with.                                                                 |
+| `assignee`    | string          | for `assign`                                          | Teammate email to assign the email to.                                                         |
+| `comment`     | string          | optional for `assign`                                 | Comment text included with the assignment.                                                     |
 
 Supported `action_name` values:
 
-| Action | Effect |
-|--------|--------|
-| `pin` | Pin the message to keep it at the top |
-| `unpin` | Remove the pin |
-| `mute` | Mute the thread (stop notifications) |
-| `unmute` | Unmute a previously muted thread |
-| `snooze` | Snooze until `date` |
-| `unsnooze` | Remove snooze, return to inbox |
-| `changeReminder` | Set a follow-up reminder for `date` if no reply |
-| `clearReminder` | Remove the follow-up reminder |
-| `setAside` | Set aside for later review |
-| `archive` | Archive |
-| `moveToInbox` | Move back to inbox |
-| `moveToTrash` | Move to trash |
-| `moveToFolder` | Move to `folder` |
-| `attachLabel` | Attach Gmail/Spark Team label `folder` (keeps other labels) |
-| `detachLabel` | Remove Gmail/Spark Team label `folder` |
-| `markAsDone` | Mark as done |
-| `markAsUndone` | Mark as not done |
-| `markAsSeen` | Mark as read |
-| `markAsUnseen` | Mark as unread |
-| `markAsSpam` | Mark as spam |
-| `markThreadAsPriority` | Mark thread as priority |
-| `unmarkThreadAsPriority` | Remove priority |
-| `unsubscribe` | Unsubscribe from sender/mailing list |
-| `changeCategoryPersonal` | Reclassify as Personal |
-| `changeCategoryNotification` | Reclassify as Notification |
-| `changeCategoryNewsletters` | Reclassify as Newsletter |
-| `shareInTeam` | Share thread with teammates (`team`, `user`) |
-| `assign` | Assign to teammate (`assignee`, optional `date`, `comment`) |
-| `delegationComplete` | Mark delegation as complete |
-| `delegationReopen` | Reopen a completed delegation |
-| `send` | **(send access)** Send a draft now, or schedule it with `date` ("Send Later"); on an already-scheduled message, reschedule (with `date`) or send now (no `date`) |
-| `unschedule` | **(send access)** Cancel a scheduled send and return the message to drafts |
+| Action                       | Effect                                                                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pin`                        | Pin the message to keep it at the top                                                                                                                            |
+| `unpin`                      | Remove the pin                                                                                                                                                   |
+| `mute`                       | Mute the thread (stop notifications)                                                                                                                             |
+| `unmute`                     | Unmute a previously muted thread                                                                                                                                 |
+| `snooze`                     | Snooze until `date`                                                                                                                                              |
+| `unsnooze`                   | Remove snooze, return to inbox                                                                                                                                   |
+| `changeReminder`             | Set a follow-up reminder for `date` if no reply                                                                                                                  |
+| `clearReminder`              | Remove the follow-up reminder                                                                                                                                    |
+| `setAside`                   | Set aside for later review                                                                                                                                       |
+| `archive`                    | Archive                                                                                                                                                          |
+| `moveToInbox`                | Move back to inbox                                                                                                                                               |
+| `moveToTrash`                | Move to trash                                                                                                                                                    |
+| `moveToFolder`               | Move to `folder`                                                                                                                                                 |
+| `attachLabel`                | Attach Gmail/Spark Team label `folder` (keeps other labels)                                                                                                      |
+| `detachLabel`                | Remove Gmail/Spark Team label `folder`                                                                                                                           |
+| `markAsDone`                 | Mark as done                                                                                                                                                     |
+| `markAsUndone`               | Mark as not done                                                                                                                                                 |
+| `markAsSeen`                 | Mark as read                                                                                                                                                     |
+| `markAsUnseen`               | Mark as unread                                                                                                                                                   |
+| `markAsSpam`                 | Mark as spam                                                                                                                                                     |
+| `markThreadAsPriority`       | Mark thread as priority                                                                                                                                          |
+| `unmarkThreadAsPriority`     | Remove priority                                                                                                                                                  |
+| `unsubscribe`                | Unsubscribe from sender/mailing list                                                                                                                             |
+| `changeCategoryPersonal`     | Reclassify as Personal                                                                                                                                           |
+| `changeCategoryNotification` | Reclassify as Notification                                                                                                                                       |
+| `changeCategoryNewsletters`  | Reclassify as Newsletter                                                                                                                                         |
+| `shareInTeam`                | Share thread with teammates (`team`, `user`)                                                                                                                     |
+| `assign`                     | Assign to teammate (`assignee`, optional `date`, `comment`)                                                                                                      |
+| `delegationComplete`         | Mark delegation as complete                                                                                                                                      |
+| `delegationReopen`           | Reopen a completed delegation                                                                                                                                    |
+| `send`                       | **(send access)** Send a draft now, or schedule it with `date` ("Send Later"); on an already-scheduled message, reschedule (with `date`) or send now (no `date`) |
+| `unschedule`                 | **(send access)** Cancel a scheduled send and return the message to drafts                                                                                       |
 
 `send` takes the draft/message IDs in `message_ids` and an optional `date` to schedule (future date required). `unschedule` takes the scheduled message IDs. Both require **send** access on the owning account; the owning draft must have a recipient, a subject, uploaded attachments, and no unresolved manual template placeholders (same validation as the desktop composer). Typical flow: `draft { ... }` to compose, review, then `action { "action_name": "send", ... }` to commit - `draft` alone never sends.
 
@@ -647,31 +647,31 @@ Use `emails` to find message IDs. Use `folders` to resolve qualified names for `
 
 Perform an action on one or more contacts by email address.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `action_name` | string | yes | Action to perform (see list below). |
-| `emails` | array of string | yes | Contact email addresses to act on. |
+| Parameter     | Type            | Required | Description                         |
+| ------------- | --------------- | -------- | ----------------------------------- |
+| `action_name` | string          | yes      | Action to perform (see list below). |
+| `emails`      | array of string | yes      | Contact email addresses to act on.  |
 
 Supported `action_name` values:
 
-| Action | Effect |
-|--------|--------|
-| `changeCategoryPersonal` | Reclassify the contact as Personal |
-| `changeCategoryNotification` | Reclassify the contact as Notification |
-| `changeCategoryNewsletters` | Reclassify the contact as Newsletter |
-| `groupEmailsFromContact` | Group emails from the contact by category |
-| `groupEmailsFromContactAndShowInInbox` | Group emails from the contact and show in inbox |
-| `ungroupEmailsFromContact` | Ungroup emails from the contact |
-| `markContactAsImportant` | Enable notifications for the contact |
-| `unmarkContactAsImportant` | Disable notifications for the contact |
-| `markContactAsPrimary` | Mark contact as priority (auto-prioritize) |
-| `unmarkContactAsPrimary` | Remove priority mark |
-| `acceptContact` | Accept or unblock the contact (bypass GateKeeper) |
-| `blockContact` | Block the contact |
-| `acceptDomain` | Accept or unblock the contact's entire domain |
-| `blockDomain` | Block the contact's entire domain |
-| `enableAutosummaryForContact` | Enable AI auto-summary for emails from the contact |
-| `disableAutosummaryForContact` | Disable AI auto-summary for emails from the contact |
+| Action                                 | Effect                                              |
+| -------------------------------------- | --------------------------------------------------- |
+| `changeCategoryPersonal`               | Reclassify the contact as Personal                  |
+| `changeCategoryNotification`           | Reclassify the contact as Notification              |
+| `changeCategoryNewsletters`            | Reclassify the contact as Newsletter                |
+| `groupEmailsFromContact`               | Group emails from the contact by category           |
+| `groupEmailsFromContactAndShowInInbox` | Group emails from the contact and show in inbox     |
+| `ungroupEmailsFromContact`             | Ungroup emails from the contact                     |
+| `markContactAsImportant`               | Enable notifications for the contact                |
+| `unmarkContactAsImportant`             | Disable notifications for the contact               |
+| `markContactAsPrimary`                 | Mark contact as priority (auto-prioritize)          |
+| `unmarkContactAsPrimary`               | Remove priority mark                                |
+| `acceptContact`                        | Accept or unblock the contact (bypass GateKeeper)   |
+| `blockContact`                         | Block the contact                                   |
+| `acceptDomain`                         | Accept or unblock the contact's entire domain       |
+| `blockDomain`                          | Block the contact's entire domain                   |
+| `enableAutosummaryForContact`          | Enable AI auto-summary for emails from the contact  |
+| `disableAutosummaryForContact`         | Disable AI auto-summary for emails from the contact |
 
 ```
 contact-action { "action_name": "blockContact", "emails": ["spammer@example.com"] }
@@ -687,14 +687,14 @@ Use `contacts` to look up email addresses.
 
 Spark automatically classifies incoming email into six categories. Use the `category:` filter operator with `emails` and `search` to view mail by category, and use `action` / `contact-action` to reclassify and tune (triage).
 
-| Category | Filter | Typical Content |
-|----------|--------|-----------------|
-| Priority | `category:priority` | Auto-prioritized or manually marked as priority |
-| People | `category:personal` | Direct person-to-person email |
-| Notifications | `category:notification` | Service notifications, alerts, receipts |
-| Newsletters | `category:newsletter` | Subscriptions, digests, marketing |
-| Invites | `category:invitation` | Calendar invitations |
-| Invite Responses | `category:invitation_response` | RSVPs, accepts, declines |
+| Category         | Filter                         | Typical Content                                 |
+| ---------------- | ------------------------------ | ----------------------------------------------- |
+| Priority         | `category:priority`            | Auto-prioritized or manually marked as priority |
+| People           | `category:personal`            | Direct person-to-person email                   |
+| Notifications    | `category:notification`        | Service notifications, alerts, receipts         |
+| Newsletters      | `category:newsletter`          | Subscriptions, digests, marketing               |
+| Invites          | `category:invitation`          | Calendar invitations                            |
+| Invite Responses | `category:invitation_response` | RSVPs, accepts, declines                        |
 
 Browse by category (read-only):
 
@@ -730,70 +730,87 @@ contact-action { "action_name": "enableAutosummaryForContact", "emails": ["newsl
 ## Typical Workflows
 
 **Answer a question about emails:**
+
 1. `search { "query": "topic" }` - find relevant emails with bodies.
 2. Read the output and answer the user's question.
 
 **Find and read a specific email:**
+
 1. `emails { "filter": "from:sender subject:keyword" }` - locate the email.
 2. `thread { "message_id": "<ID>" }` - read the full conversation.
 
 **Read an attachment (image, PDF, CSV):**
+
 1. `thread { "message_id": "<ID>" }` - look up the `ID` column in the `Attachments:` table.
 2. `attachment { "id": <attachment-id> }` - receive the file contents directly (no need to read the local `Path`).
 
 **Draft a reply:**
+
 1. `emails { "filter": "from:sender" }` - find the email.
 2. `draft { "reply_to": "<ID>", "body": "Thanks for the update!" }`.
 
 **Send an email from a saved template:**
+
 1. `templates {}` - list templates (or `templates { "personal": true }` / `templates { "team": "<name>" }`).
 2. `template { "ref": "<id|name>" }` - inspect required manual placeholders.
 3. `draft { "template": "<id|name>", "to": ["alice@co.com"], "placeholder": ["<name>=<value>"] }` - create the draft.
 
 **Send a draft (send access):**
+
 1. `draft { "to": ["alice@co.com"], "subject": "Hi", "body": "..." }` - compose and review.
 2. `action { "action_name": "send", "message_ids": ["<draft-ID>"] }` - send now, or add `"date"` to schedule.
 
 **Check someone's schedule for a meeting:**
+
 1. `availability { "tomorrow": true, "attendees": "alice@co.com,bob@co.com" }`.
 2. Suggest a time from the free slots.
 
 **Schedule a meeting and invite attendees (send access):**
+
 1. `availability { "week": true, "attendees": "alice@co.com,bob@co.com" }` - find a mutual slot.
 2. `event { "mode": "create", "title": "Sync", "start": "2026-07-01T14:00", "end": "2026-07-01T14:30" }` - create the event.
 3. Confirm the time with the user, then `event { "mode": "update", "event_id": "<id>", "add": ["alice@co.com", "bob@co.com"] }` - send invitations.
 
 **Comment on a shared thread:**
+
 1. `emails { "filter": "subject:keyword" }` - find the email.
 2. `comment { "message_id": "<ID>", "body": "Looks good, approved!" }`.
 
 **Get team workload overview:**
+
 1. `team { "name": "Team Name" }` - see members and assigned emails.
 
 **Look up a contact:**
+
 1. `contacts { "query": "name or domain" }` - find their email address.
 
 **Triage a thread (archive/pin/snooze):**
+
 1. `emails { "filter": "from:sender" }` - find the message.
 2. `action { "action_name": "archive", "message_ids": ["<ID>"] }` - archive (or `pin`, `snooze` with `date`, etc.).
 
 **Bulk archive after review:**
+
 1. `emails { "folder": "Inbox", "filter": "category:newsletter newer_than:7d" }` - list candidates.
 2. `action { "action_name": "archive", "message_ids": ["<ID1>", "<ID2>", "<ID3>"] }` - archive in one call.
 
 **Share an email with the team:**
+
 1. `emails { "filter": "subject:keyword" }` - find the email.
 2. `action { "action_name": "shareInTeam", "message_ids": ["<ID>"], "user": ["alice@co.com"] }`.
 
 **Delegate an email to a teammate:**
+
 1. `emails { "filter": "subject:keyword" }` - find the email.
 2. `action { "action_name": "assign", "message_ids": ["<ID>"], "assignee": "bob@co.com", "date": "2026-04-15", "comment": "Please handle this" }`.
 
 **Mark delegated emails as done:**
+
 1. `emails { "filter": "subject:keyword" }` - find the email(s).
 2. `action { "action_name": "delegationComplete", "message_ids": ["<ID1>", "<ID2>"] }`.
 
 **Review assigned shared inbox items:**
+
 1. `emails { "folder": "shared@co.com:Inbox", "filter": "assigned_to:unassigned" }` - unassigned items.
 2. `action { "action_name": "assign", "message_ids": ["<ID>"], "assignee": "bob@co.com" }` - assign to a teammate.
 3. `emails { "filter": "assigned_to:bob@co.com" }` - items assigned to a teammate.
@@ -801,10 +818,12 @@ contact-action { "action_name": "enableAutosummaryForContact", "emails": ["newsl
 5. `emails { "filter": "is:shared_inbox_done" }` - completed items.
 
 **Read meeting notes:**
+
 1. `meetings { "filter": "newer_than:30d" }` - find recent meetings.
 2. `meeting { "meeting_id": "<ID>", "transcript": true, "notes": true }` - read summary, transcript, and notes.
 
 **Manage a contact (block/accept/categorize):**
+
 1. `contacts { "query": "name or domain" }` - find the contact email.
 2. `contact-action { "action_name": "blockContact", "emails": ["spammer@example.com"] }` - block (or `acceptContact`, change category, etc.).
 

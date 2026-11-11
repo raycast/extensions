@@ -71,14 +71,9 @@ function Command() {
                 key={event.id}
                 icon={eventIcon(event)}
                 title={event.title ?? "(no title)"}
+                subtitle={showingDetail ? startLabel(event) : undefined}
                 keywords={[event.calendar?.title ?? "", event.location ?? "", ...event.attendees.map(displayName)]}
-                accessories={[
-                  ...(showingDetail ? [] : eventAccessories(event)),
-                  // The time sits at the end of the row, so times line up: the
-                  // full range when the list has the whole width, only the start
-                  // beside the details pane.
-                  showingDetail ? { text: startLabel(event), tooltip: timeLabel(event) } : { text: timeLabel(event) },
-                ]}
+                accessories={showingDetail ? undefined : [...eventAccessories(event), { text: timeLabel(event) }]}
                 detail={<List.Item.Detail markdown={eventMarkdown(event)} metadata={<EventMetadata event={event} />} />}
                 actions={
                   <EventActions

@@ -52,10 +52,10 @@ draft { "edit": "<id>", "subject": "Updated subject" }
 
 **Keep as-is** - the draft is ready to send. Note it for the user.
 
-**Discard** - the draft is no longer needed. Move to trash:
+**Discard** - the draft is no longer needed. Only discard drafts the user asked you to discard, and explain that deletion is permanent: drafts have no Trash and cannot be recovered.
 
 ```
-action { "action_name": "moveToTrash", "message_ids": ["<id>"] }
+draft { "delete": "<id>" }
 ```
 
 ### Step 4: Report
@@ -70,4 +70,4 @@ Summarize: "Reviewed N drafts. M edited, K ready to send, L discarded."
 - `draft`'s `edit` updates the draft in place - it doesn't create a new one.
 - For drafts that are replies (`reply_to`), read the original thread to verify the reply still makes sense.
 - Run this recipe weekly to prevent draft accumulation.
-- Discarding via `moveToTrash` is reversible - the draft can be recovered from trash if needed.
+- `draft`'s `delete` must be the only parameter. Scheduled or shared drafts cannot be deleted until they are unscheduled or unshared, as described in `use-spark`.

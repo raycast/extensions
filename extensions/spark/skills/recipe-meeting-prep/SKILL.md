@@ -67,6 +67,7 @@ Note any threads that look relevant to the meeting topic but haven't been resolv
 ### Step 6: Present the prep summary
 
 Summarize for the user:
+
 - **Meeting:** time, title, attendees
 - **Context:** key points from relevant email threads
 - **Open items:** unanswered questions or pending actions from recent correspondence
@@ -78,12 +79,15 @@ Summarize for the user:
 After the meeting, compare what was discussed against the email record to catch gaps. This step requires the meeting transcript to be available.
 
 1. Read the transcript:
+
    ```
    meeting { "meeting_id": "<id>", "transcript": true, "notes": true }
    ```
+
    Extract topics discussed, commitments made, and decisions reached.
 
 2. For each major topic, check whether it has an email trail:
+
    ```
    search { "query": "topic from meeting" }
    ```

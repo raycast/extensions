@@ -73,6 +73,7 @@ The ratio of open to done gives a sense of whether the team is keeping up.
 ### Step 6: Present the workload report
 
 Summarize:
+
 - **Per member:** assignment count and any notably old items
 - **Imbalances:** flag members with significantly more or fewer assignments than average
 - **Delegated by you:** N items still open, any that look overdue

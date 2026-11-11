@@ -51,6 +51,7 @@ availability { "week": true, "attendees": "alice@co.com,bob@co.com" }
 ### Step 3: Present the options
 
 List the available time slots for the user to choose from. Include:
+
 - Date and time range for each slot
 - Duration of each slot (so the user knows if a 1-hour meeting fits)
 

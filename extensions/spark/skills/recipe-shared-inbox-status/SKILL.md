@@ -71,6 +71,7 @@ Review recently completed items for a sense of throughput.
 ### Step 6: Present the status
 
 Report per shared inbox:
+
 - **Open:** N items awaiting action
 - **Unassigned:** M items with no owner
 - **Per member:** assignment counts (flag anyone with significantly more or fewer)

@@ -64,6 +64,7 @@ Subscriptions and digests from the past week. Skim for interest, skip the rest.
 ### Step 6: Summarize
 
 Report to the user:
+
 - N unread people emails (with subjects/senders for the most recent)
 - M unread priority emails
 - K pending invitations

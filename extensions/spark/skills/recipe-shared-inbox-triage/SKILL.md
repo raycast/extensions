@@ -47,21 +47,25 @@ Read the full conversation to understand the request.
 ### Step 4: Take action
 
 **Assign** to the right person:
+
 ```
 action { "action_name": "assign", "message_ids": ["<id>"], "assignee": "specialist@co.com", "comment": "Billing question, your area" }
 ```
 
 **Respond** directly if you can:
+
 ```
 draft { "reply_to": "<id>", "body": "..." }
 ```
 
 **Comment** for internal coordination:
+
 ```
 comment { "message_id": "<id>", "body": "I've contacted the vendor about this, waiting for their response" }
 ```
 
 **Mark as done** if resolved:
+
 ```
 action { "action_name": "markAsDone", "message_ids": ["<id>"] }
 ```

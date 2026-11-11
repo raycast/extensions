@@ -54,6 +54,7 @@ This shows free slots within working hours (08:00-20:00), skipping weekends and 
 ### Step 3: Compute metrics
 
 From the events list, calculate:
+
 - **Total meetings:** count of events
 - **Total meeting hours:** sum of all event durations
 - **Per-day breakdown:** meetings and hours per day
@@ -76,6 +77,7 @@ Compare meeting loads across contexts.
 ### Step 5: Present the audit
 
 Report:
+
 - **Summary:** N meetings totaling X hours this week (Y% of working hours)
 - **Per day:** table of meetings and hours per day, flagging the busiest and lightest
 - **Back-to-back:** list any chains of consecutive meetings (flag chains of 3+)

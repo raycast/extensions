@@ -27,7 +27,10 @@ interface Hit {
   isComment?: boolean;
 }
 
-async function search(text: string, signal?: AbortSignal): Promise<{ hits: Hit[]; semantic: boolean }> {
+async function search(
+  text: string,
+  signal?: AbortSignal,
+): Promise<{ hits: Hit[]; semantic: boolean; hasMore: boolean }> {
   const { topic, filter, folder } = splitQuery(text);
   if (topic) {
     // A topic search spans every folder; `in:` only narrows filter listings.
@@ -36,6 +39,7 @@ async function search(text: string, signal?: AbortSignal): Promise<{ hits: Hit[]
     const result = await sparkJSON<SearchResult>(args, { signal });
     return {
       semantic: result.semantic_available,
+      hasMore: false,
       hits: result.matches
         .filter((m) => !m.outside_plan_range && m.id !== undefined)
         .map((m) => ({
@@ -48,12 +52,13 @@ async function search(text: string, signal?: AbortSignal): Promise<{ hits: Hit[]
         })),
     };
   }
-  // Operators only: list every match in the folder, or across all folders.
+  // Operators only: list the first page in the folder, or across all folders.
   const args = folder ? ["emails", folder] : ["search"];
   if (filter) args.push("--filter", filter);
   const result = await sparkJSON<EmailsResult>([...args, "--page-size", "50"], { signal });
   return {
     semantic: true,
+    hasMore: result.page.total_pages > 1,
     hits: result.emails.map((e) => ({
       id: String(e.id),
       subject: e.subject ?? "(no subject)",
@@ -107,7 +112,15 @@ function Command(props: LaunchProps<{ arguments: Arguments.SearchMail }>) {
         />
       )}
       <List.Section
-        title={ready && data && !data.semantic ? "Keyword matches (semantic search unavailable)" : undefined}
+        title={
+          ready && data
+            ? data.hasMore
+              ? "First 50 matches — narrow your filters to see more"
+              : !data.semantic
+                ? "Keyword matches (semantic search unavailable)"
+                : undefined
+            : undefined
+        }
       >
         {hits.map((hit) => (
           <List.Item

@@ -44,31 +44,37 @@ thread { "message_id": "<id>" }
 Then decide the action:
 
 **Archive** - handled or informational, no further action needed:
+
 ```
 action { "action_name": "archive", "message_ids": ["<id>"] }
 ```
 
 **Move to folder** - needs filing:
+
 ```
 action { "action_name": "moveToFolder", "message_ids": ["<id>"], "folder": "user@example.com:Projects" }
 ```
 
 **Mark as done** - completed/resolved:
+
 ```
 action { "action_name": "markAsDone", "message_ids": ["<id>"] }
 ```
 
 **Pin** - important, need to come back to:
+
 ```
 action { "action_name": "pin", "message_ids": ["<id>"] }
 ```
 
 **Snooze** - not relevant now, revisit later:
+
 ```
 action { "action_name": "snooze", "message_ids": ["<id>"], "date": "2026-04-10" }
 ```
 
 **Set aside** - save for later review:
+
 ```
 action { "action_name": "setAside", "message_ids": ["<id>"] }
 ```

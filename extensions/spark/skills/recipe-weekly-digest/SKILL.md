@@ -59,6 +59,7 @@ List meetings that have transcripts available for review.
 ### Step 5: Present the digest
 
 Summarize for the user:
+
 - **Calendar:** N events this week (highlight important ones)
 - **Email:** unread counts by category (people: M, priority: K, notifications: L, newsletters: J)
 - **Team:** open assignments, any bottlenecks
