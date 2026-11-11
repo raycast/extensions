@@ -91,12 +91,31 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 - [ ] **Recently Added** - View recently added items
 - [ ] **Favorites** - Mark and quick access to favorite items
 
+## AI Tools
+
+Mention `@eagle` in Raycast AI to find assets, inspect the active library and its folders, import a single asset, or update an item's metadata. AI tools require **Eagle 4.0 Build 21 or later**, running on the same Mac. Local access needs no API token.
+
+- **Get Library** returns the active library identity and existing folders with full paths.
+- **Find Items** searches with pagination or looks up an exact ID. Results include notes, tags, folders, ratings, source URLs, and `eagle://` links.
+- **Import Item** accepts one readable local file or public HTTP(S) direct asset URL. A source webpage URL can be recorded separately. It does not capture webpages or screenshots, and it never deletes the local source.
+- **Update Item** changes only specified names, source URLs, notes, or explicit integer ratings from 0 to 5. Tags and folder memberships are additive. Omitted metadata is preserved.
+
+For example, ask “Find material studies in my library” or “Rate this item four stars.” Before a write, the tools check the library identity and show a native Raycast confirmation with the library, folder paths, and intended changes. Folders must already exist.
+
+Imports are verified against Eagle's saved library collection and the item's non-empty original file inside the native library. A provisional item awaiting Eagle's duplicate-file decision does not count as saved. Local originals must also match the source's size and SHA-256 hash. Importing can be asynchronous: `pending` or `uncertain` means the result has not been verified. Resolve any duplicate alert in Eagle, then repeat the same input to reconcile the reserved item ID; the extension will not send a second import request for that source in that library. Cancel or Use Existing can remove the reserved item, so inspect existing items before trying another capture. Recovery records remain in the extension's support directory, including after success. If a file's contents change at an already imported local path, use a new path for the replacement asset. Use Update Item for later metadata changes. Search before importing assets from different paths or URLs to avoid duplicates.
+
+Remote assets must be publicly downloadable without authentication and are limited to 100 MiB and a 60-second download deadline. Every connection, including redirects, uses validated public IP addresses. The extension stages the downloaded bytes privately and imports that local file, preserving the source URL and verifying the original against the downloaded size and SHA-256 hash. Owned staging files remain while an import is pending or uncertain and are removed after verified success; local source files are never removed. HTML webpages and private network hosts are rejected. These tools use Eagle's native API and do not run an image model, create folders, delete assets, or alter Eagle's metadata files directly.
+
+Eagle does not offer an atomic library or metadata compare-and-swap operation. The tools recheck the library immediately before a write and merge additions from freshly read metadata, but another client can still switch libraries or edit an item during the final request. An uncertain update must be read back in the intended library before retrying.
+
 ## Development
 
 ```bash
 npm install
 npm run dev
 ```
+
+Run `npm test`, `npm run lint`, and `npm run build` before submitting changes. The focused tests use temporary files and a simulated Eagle client; they do not modify a real Eagle library. `ai.yaml` contains sanitized eval mocks; `npx ray evals` tests AI tool selection using those mocks without executing the tools.
 
 ## Requirements
 

@@ -85,13 +85,16 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "tsx": "^4.20.6"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts"
   },
   "platforms": [
     "macOS"
@@ -101,5 +104,30 @@
     "brace-expansion@2": "2.1.7",
     "brace-expansion@5": "5.0.12",
     "js-yaml@4": "4.3.2"
-  }
+  },
+  "contributors": [
+    "aic"
+  ],
+  "tools": [
+    {
+      "name": "get-library",
+      "title": "Get Library",
+      "description": "Get the active Eagle library and existing folders with full paths."
+    },
+    {
+      "name": "find-items",
+      "title": "Find Items",
+      "description": "Search Eagle items or look up an exact item with metadata and links."
+    },
+    {
+      "name": "import-item",
+      "title": "Import Item",
+      "description": "Import one local file or public direct asset into the confirmed Eagle library."
+    },
+    {
+      "name": "update-item",
+      "title": "Update Item",
+      "description": "Update specified item metadata and add tags or folder memberships with confirmation."
+    }
+  ]
 }
