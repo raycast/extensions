@@ -17,9 +17,14 @@ export type Quote = {
 
 export type FindCreate = { find_id: string; status: string };
 export type FindSnap = { find_id: string; status: string };
-export type RowCell = { column_id: string; label?: string; display?: string | null };
+export type RowCell = {
+  column_id: string;
+  label?: string;
+  display?: string | null;
+  provenance?: { source_url?: string | null } | null;
+};
 export type AcceptedRow = { entity_id: string; cells: RowCell[] };
-export type RowsPage = { find_id: string; accepted_count: number; rows: AcceptedRow[] };
+export type RowsPage = { find_id: string; accepted_count: number; rows: AcceptedRow[]; next_cursor?: string | null };
 export type PaidRun = { find_id: string; status: string; funding_url?: string | null };
 
 export async function specstreamRequest<T>(

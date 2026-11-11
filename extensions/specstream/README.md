@@ -13,7 +13,7 @@ In Raycast, you describe the data you need in plain words, approve the most it c
 1. Run **Request Data** and describe the data you need.
 2. Choose **Check My Request**. SpecStream shows how it read your request and the most the run can cost. Nothing is spent yet.
 3. Type that maximum to approve it, then choose **Approve and Run**.
-4. The results open in Raycast. Choose **Open in SpecStream** to open the run in your workspace.
+4. The results open in Raycast. On a result, choose **Copy Result**, or **Open Source** to open the page its value came from. Choose **Open in SpecStream** to open the run in your workspace.
 
 ## Pricing
 

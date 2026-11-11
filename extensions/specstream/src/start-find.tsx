@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Form, Icon, List, getPreferenceValues, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { createHash } from "node:crypto";
-import { centsToUsd, specstreamRequest, type FindSnap, type ParseResult, type RowsPage } from "./api";
+import { centsToUsd, specstreamRequest, type AcceptedRow, type FindSnap, type ParseResult, type RowsPage } from "./api";
 
 type Quote = {
   quote_id: string;
@@ -10,19 +10,78 @@ type Quote = {
   maximum_cents: number;
   currency?: string;
   expires_at: string;
-  terms: { minimum_units: number; maximum_units: number };
-  existing_execution?: { find_id?: string } | null;
+  terms?: Record<string, unknown> | null;
+  scope?: Record<string, unknown> | null;
+  existing_execution?: { find_id?: string | null } | null;
 };
+type Execution = { find_id?: string | null; state?: string };
 type Saved = { q: string; canonical: string; quote: Quote; requestKey: string; attempted: boolean; findId?: string };
 const TERMINAL = new Set(["completed", "partial", "failed", "canceled", "expired"]);
 const money = (cents: number, currency?: string) => `${currency === "EUR" ? "€" : "$"}${centsToUsd(cents).toFixed(2)}`;
+const count = (value: unknown) => (typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null);
+const pause = () => new Promise((resolve) => setTimeout(resolve, 1000));
+function priceText(quote: Quote) {
+  const most = money(quote.maximum_cents, quote.currency);
+  const units = count(quote.terms?.maximum_units) ?? count(quote.scope?.requested_units);
+  const minimum = count(quote.terms?.minimum_units);
+  const head = units ? `Up to ${units} results, at most ${most}.` : `At most ${most}.`;
+  if (!minimum) return head;
+  return minimum > 1
+    ? `${head} If fewer than ${minimum} match, nothing is charged.`
+    : `${head} If nothing matches, nothing is charged.`;
+}
 async function waitForFind(origin: string, apiKey: string, id: string): Promise<FindSnap> {
   for (let index = 0; index < 60; index++) {
     const result = await specstreamRequest<FindSnap>(origin, apiKey, "GET", `/v1/finds/${encodeURIComponent(id)}`);
     if (TERMINAL.has(result.status)) return result;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await pause();
   }
   throw new Error("The request is still running. Reopen this command to pick it up. Nothing new is started.");
+}
+async function waitForFindId(origin: string, apiKey: string, requestKey: string): Promise<string | null> {
+  for (let index = 0; index < 30; index++) {
+    const result = await specstreamRequest<Execution>(
+      origin,
+      apiKey,
+      "GET",
+      `/v1/capacity/requests/${encodeURIComponent(requestKey)}`,
+    );
+    if (result.find_id) return result.find_id;
+    if (result.state === "released") return null;
+    await pause();
+  }
+  throw new Error("The request is still starting. Reopen this command to pick it up. Nothing new is started.");
+}
+async function allRows(origin: string, apiKey: string, findId: string): Promise<RowsPage> {
+  const path = `/v1/finds/${encodeURIComponent(findId)}/rows?limit=100`;
+  let page = await specstreamRequest<RowsPage>(origin, apiKey, "GET", path);
+  const rows = [...page.rows];
+  const seen = new Set<string>();
+  while (page.next_cursor && !seen.has(page.next_cursor)) {
+    seen.add(page.next_cursor);
+    page = await specstreamRequest<RowsPage>(
+      origin,
+      apiKey,
+      "GET",
+      `${path}&cursor=${encodeURIComponent(page.next_cursor)}`,
+    );
+    rows.push(...page.rows);
+  }
+  return { ...page, rows, next_cursor: null };
+}
+function rowText(row: AcceptedRow) {
+  return row.cells
+    .filter((cell) => cell.display)
+    .map((cell) => (cell.label ? `${cell.label}: ${cell.display}` : String(cell.display)))
+    .join("\n");
+}
+function sources(row: AcceptedRow) {
+  const links = new Map<string, string>();
+  for (const cell of row.cells) {
+    const url = cell.provenance?.source_url;
+    if (url && /^https?:\/\//i.test(url) && !links.has(url)) links.set(url, cell.label || cell.column_id);
+  }
+  return [...links].map(([url, label]) => ({ url, label }));
 }
 function Results({
   rows,
@@ -34,29 +93,30 @@ function Results({
   onStartAnother: () => Promise<void>;
 }) {
   const { pop } = useNavigation();
+  const listActions = (
+    <ActionPanel.Section>
+      {findId ? (
+        <Action.OpenInBrowser
+          title="Open in SpecStream"
+          icon={Icon.Globe}
+          url={`https://specstream.ai/find/${encodeURIComponent(findId)}`}
+        />
+      ) : null}
+      <Action
+        title="Start Another Request"
+        icon={Icon.Plus}
+        onAction={async () => {
+          await onStartAnother();
+          pop();
+        }}
+      />
+    </ActionPanel.Section>
+  );
   return (
     <List
       navigationTitle="Results"
       searchBarPlaceholder="Search results"
-      actions={
-        <ActionPanel>
-          {findId ? (
-            <Action.OpenInBrowser
-              title="Open in SpecStream"
-              icon={Icon.Globe}
-              url={`https://specstream.ai/find/${encodeURIComponent(findId)}`}
-            />
-          ) : null}
-          <Action
-            title="Start Another Request"
-            icon={Icon.Plus}
-            onAction={async () => {
-              await onStartAnother();
-              pop();
-            }}
-          />
-        </ActionPanel>
-      }
+      actions={<ActionPanel>{listActions}</ActionPanel>}
     >
       <List.EmptyView
         title={rows.rows.length === 0 ? "No results" : "No matching results"}
@@ -66,17 +126,42 @@ function Results({
             : "Try a different search to find your results."
         }
       />
-      {rows.rows.map((row) => (
-        <List.Item
-          key={row.entity_id}
-          title={row.cells[0]?.display || row.entity_id}
-          subtitle={row.cells
-            .slice(1, 4)
-            .map((cell) => cell.display)
-            .filter(Boolean)
-            .join(" · ")}
-        />
-      ))}
+      {rows.rows.map((row) => {
+        const links = sources(row);
+        return (
+          <List.Item
+            key={row.entity_id}
+            title={row.cells[0]?.display || row.entity_id}
+            subtitle={row.cells
+              .slice(1, 4)
+              .map((cell) => cell.display)
+              .filter(Boolean)
+              .join(" · ")}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard title="Copy Result" content={rowText(row) || row.entity_id} />
+                  {links[0] ? (
+                    <Action.OpenInBrowser
+                      title="Open Source"
+                      url={links[0].url}
+                      shortcut={Keyboard.Shortcut.Common.Open}
+                    />
+                  ) : null}
+                  {links.length > 1 ? (
+                    <ActionPanel.Submenu title="Open Source of a Value" icon={Icon.Link}>
+                      {links.map((link) => (
+                        <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+                      ))}
+                    </ActionPanel.Submenu>
+                  ) : null}
+                </ActionPanel.Section>
+                {listActions}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
@@ -159,19 +244,27 @@ export default function StartFind() {
           throw new Error("The price changed. Check the request again.");
         current = { ...current, attempted: true };
         await persist(current);
+        let findId: string | null | undefined;
         try {
-          const result = await call<{ find_id: string }>("POST", "/v1/capacity/executions", {
+          const result = await call<Execution>("POST", "/v1/capacity/executions", {
             quote_id: quote.quote_id,
             quote_hash: quote.quote_hash,
             confirm_max_cents: quote.maximum_cents,
             idempotency_key: current.requestKey,
           });
-          current = { ...current, findId: result.find_id };
+          findId = result.find_id;
         } catch (error) {
           const status = error && typeof error === "object" && "status" in error ? Number(error.status) : 0;
           if (status >= 400 && status < 500) await persist({ ...current, attempted: false });
           throw error;
         }
+        // The 202 can arrive before the run has its find. The request ID shows it once it does.
+        if (!findId) findId = await waitForFindId(prefs.apiOrigin, prefs.apiKey, current.requestKey);
+        if (!findId) {
+          await persist({ ...current, attempted: false });
+          throw new Error("The request did not start, so nothing was charged.");
+        }
+        current = { ...current, findId };
       }
       await persist(current);
     }
@@ -180,7 +273,7 @@ export default function StartFind() {
       await persist({ ...current, attempted: false });
       throw new Error(`The request ended as ${status.status}. Your earlier results are still available.`);
     }
-    const page = await call<RowsPage>("GET", `/v1/finds/${encodeURIComponent(current.findId!)}/rows`);
+    const page = await allRows(prefs.apiOrigin, prefs.apiKey, current.findId!);
     push(<Results rows={page} findId={current.findId} onStartAnother={startAnother} />);
   }
   return (
@@ -213,10 +306,7 @@ export default function StartFind() {
       {saved ? (
         <>
           <Form.Description title="How SpecStream Read It" text={saved.canonical} />
-          <Form.Description
-            title="Price"
-            text={`Up to ${saved.quote.terms.maximum_units} results, at most ${money(saved.quote.maximum_cents, saved.quote.currency)}. If fewer than ${saved.quote.terms.minimum_units} match, nothing is charged.`}
-          />
+          <Form.Description title="Price" text={priceText(saved.quote)} />
         </>
       ) : null}
       <Form.TextField
