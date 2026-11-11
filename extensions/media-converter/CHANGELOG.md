@@ -1,6 +1,6 @@
 # Media Converter Changelog
 
-## [Fix WebP and AVIF with FFmpeg builds missing encoders] - {PR_MERGE_DATE}
+## [Fix WebP and AVIF with FFmpeg builds missing encoders] - 2026-11-11
 
 - AVIF images now use libsvtav1 when FFmpeg has no libaom-av1, as in Homebrew's `ffmpeg` formula, instead of failing
 - WebP conversion with an FFmpeg build that has no libwebp now explains which encoder is missing and how to point the extension at a build that has it, instead of showing the raw FFmpeg error
