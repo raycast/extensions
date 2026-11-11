@@ -1,6 +1,6 @@
 # Lucide Extended Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-11
 
 - Search filled and duotone icons by name, alias, tag, category and use case
 - Filter by style and preview icons in any Raycast color
