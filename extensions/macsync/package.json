@@ -42,6 +42,24 @@
       "title": "Show History",
       "description": "Open MacSync's history to go back to before any saved apply",
       "mode": "no-view"
+    },
+    {
+      "name": "homebrew-updates",
+      "title": "Check Homebrew Updates",
+      "description": "See which Homebrew apps and tools, npm packages and uv tools have newer versions",
+      "mode": "no-view"
+    },
+    {
+      "name": "homebrew-upgrade",
+      "title": "Update Homebrew Apps",
+      "description": "Update every Homebrew app and tool, npm package and uv tool. Apps you have open wait.",
+      "mode": "no-view"
+    },
+    {
+      "name": "share",
+      "title": "Share My Setup",
+      "description": "Make a file a friend opens in MacSync to get your apps, tools, settings and config",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
