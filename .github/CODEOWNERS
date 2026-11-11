@@ -1088,6 +1088,7 @@
 /extensions/geoconverter                                            @kylinwowo
 /extensions/geoguesser                                              @Boosteblume
 /extensions/geohash-encode-decode                                   @alrico88
+/extensions/geolocation                                             @lebedev-nikita
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
 /extensions/get-app-icon                                            @chrismessina
