@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, Color, Icon, showToast, Toast, LaunchProps } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon, LaunchProps } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { EngineBridge } from "./services/engine-bridge.js";
 import type { SeoAuditResult } from "./types.js";
 
@@ -8,7 +9,7 @@ export async function runSeoAuditor(url: string, htmlOverride?: string): Promise
   return bridge.auditSeo(url, htmlOverride);
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.SeoAuditor }>): JSX.Element {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SeoAuditor }>) {
   const url = props.arguments.url;
   const [result, setResult] = useState<SeoAuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.SeoAud
           const message = err instanceof Error ? err.message : String(err);
           setError(message);
           setIsLoading(false);
-          showToast({ style: Toast.Style.Failure, title: "Audit failed", message });
+          showFailureToast(err, { title: "Audit failed" });
         }
       });
 

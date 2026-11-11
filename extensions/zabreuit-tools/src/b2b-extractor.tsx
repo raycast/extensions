@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color, LaunchProps } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, LaunchProps } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { EngineBridge } from "./services/engine-bridge.js";
 import type { B2bContactResult } from "./types.js";
 
@@ -8,7 +9,7 @@ export async function runB2bExtractor(url: string, htmlOverride?: string): Promi
   return bridge.extractB2b(url, htmlOverride);
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.B2bExtractor }>): JSX.Element {
+export default function Command(props: LaunchProps<{ arguments: Arguments.B2bExtractor }>) {
   const url = props.arguments.url;
   const [result, setResult] = useState<B2bContactResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.B2bExt
           const message = err instanceof Error ? err.message : String(err);
           setError(message);
           setIsLoading(false);
-          showToast({ style: Toast.Style.Failure, title: "Extraction failed", message });
+          showFailureToast(err, { title: "Extraction failed" });
         }
       });
 

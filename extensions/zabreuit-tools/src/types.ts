@@ -1,8 +1,3 @@
-export interface RaycastPreferences {
-  licenseKey?: string;
-  defaultFormat?: 'markdown' | 'json' | 'html';
-}
-
 export interface ScrapeResult {
   url: string;
   title: string;

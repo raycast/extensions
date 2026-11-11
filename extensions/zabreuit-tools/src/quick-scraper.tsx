@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Detail, ActionPanel, Action, showToast, Toast, LaunchProps } from "@raycast/api";
+import { Detail, ActionPanel, Action, LaunchProps } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { EngineBridge } from "./services/engine-bridge.js";
 import type { ScrapeResult } from "./types.js";
 
@@ -8,7 +9,7 @@ export async function runQuickScraper(url: string, htmlOverride?: string): Promi
   return bridge.scrapeUrl(url, htmlOverride);
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.QuickScraper }>): JSX.Element {
+export default function Command(props: LaunchProps<{ arguments: Arguments.QuickScraper }>) {
   const url = props.arguments.url;
   const [result, setResult] = useState<ScrapeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.QuickS
           const message = err instanceof Error ? err.message : String(err);
           setError(message);
           setIsLoading(false);
-          showToast({ style: Toast.Style.Failure, title: "Scrape failed", message });
+          showFailureToast(err, { title: "Scrape failed" });
         }
       });
 
