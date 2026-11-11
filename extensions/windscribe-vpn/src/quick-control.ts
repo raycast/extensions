@@ -1,4 +1,5 @@
 import { environment, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { createWindscribe, type Control, WindscribeError } from "./windscribe.ts";
 
 const titles = {
@@ -20,23 +21,23 @@ const errorTitles = {
 
 export async function quickControl(action: Control) {
   const progress = await showToast({ style: Toast.Style.Animated, title: "Checking Windscribe" });
-  let feedback: Toast.Options;
+  let result;
   try {
-    const result = await createWindscribe(environment.supportPath).control(action, (request) => {
-      progress.title = request === "connect" ? "Connecting Windscribe" : "Disconnecting Windscribe";
-    });
-    feedback = {
-      title: titles[result.state],
-      message: result.message,
-      style: result.state === "in-progress" ? Toast.Style.Failure : Toast.Style.Success,
-    };
+    result = await createWindscribe(environment.supportPath)
+      .control(action, (request) => {
+        progress.title = request === "connect" ? "Connecting Windscribe" : "Disconnecting Windscribe";
+      })
+      .finally(() => progress.hide());
   } catch (error) {
-    feedback = {
-      style: Toast.Style.Failure,
-      title: error instanceof WindscribeError ? errorTitles[error.code] : "Windscribe is unavailable",
-      message: error instanceof WindscribeError ? error.message : "Open Windscribe to check the VPN and try again.",
-    };
+    await showFailureToast(
+      error instanceof WindscribeError ? error : new Error("Open Windscribe to check the VPN and try again."),
+      { title: error instanceof WindscribeError ? errorTitles[error.code] : "Windscribe is unavailable" },
+    );
+    return;
   }
-  await progress.hide();
-  await showToast(feedback);
+  await showToast({
+    title: titles[result.state],
+    message: result.message,
+    style: result.state === "in-progress" ? Toast.Style.Failure : Toast.Style.Success,
+  });
 }

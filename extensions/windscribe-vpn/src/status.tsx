@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, environment, Icon, open, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Detail, environment, Icon, open } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { createWindscribe, findWindscribeApp, type Status, WindscribeError } from "./windscribe.ts";
 
 const windscribe = createWindscribe(environment.supportPath);
@@ -14,55 +14,34 @@ const stateTitles: Record<Status["state"], string> = {
   failed: "Connection Error",
 };
 
-type View = { status: Status } | { error: string; missing: boolean };
-
 async function openWindscribe() {
   try {
     await open(await findWindscribeApp());
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open Windscribe",
-      message: error instanceof WindscribeError ? error.message : "Try opening Windscribe from Applications.",
-    });
+    await showFailureToast(
+      error instanceof WindscribeError ? error : new Error("Try opening Windscribe from Applications."),
+      { title: "Could not open Windscribe" },
+    );
   }
 }
 
 export default function Command() {
-  const [view, setView] = useState<View>();
-  const [isLoading, setIsLoading] = useState(true);
-  const pending = useRef(false);
-
-  const refresh = useCallback(async () => {
-    if (pending.current) return;
-    pending.current = true;
-    setIsLoading(true);
-    setView(undefined);
-    try {
-      setView({ status: await windscribe.status() });
-    } catch (error) {
-      setView({
-        error: error instanceof WindscribeError ? error.message : "Open Windscribe to check the VPN and try again.",
-        missing: error instanceof WindscribeError && error.code === "missing",
-      });
-    } finally {
-      pending.current = false;
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  const status = view && "status" in view ? view.status : undefined;
-  const failure = view && "error" in view ? view : undefined;
+  const { data, error, isLoading, revalidate } = usePromise(windscribe.status, [], {
+    onError: () => {
+      // The view displays the error and a Refresh Status action.
+    },
+  });
+  const failure = isLoading ? undefined : error;
+  const status = isLoading || failure ? undefined : data;
   const title = status ? stateTitles[status.state] : failure ? "Status Unavailable" : "Checking Windscribe";
-  const detail = status?.detail ?? failure?.error;
+  const detail = failure
+    ? failure instanceof WindscribeError
+      ? failure.message
+      : "Open Windscribe to check the VPN and try again."
+    : status?.detail;
 
   return (
     <Detail
-      navigationTitle="Windscribe Status"
       isLoading={isLoading}
       markdown={`# ${title}`}
       metadata={
@@ -76,8 +55,8 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          {!isLoading && <Action title="Refresh Status" icon={Icon.ArrowClockwise} onAction={refresh} />}
-          {failure?.missing ? (
+          {!isLoading && <Action title="Refresh Status" icon={Icon.ArrowClockwise} onAction={revalidate} />}
+          {failure instanceof WindscribeError && failure.code === "missing" ? (
             <Action.OpenInBrowser title="Download Windscribe" url={downloadUrl} />
           ) : (
             <Action title="Open Windscribe" icon={Icon.AppWindow} onAction={openWindscribe} />

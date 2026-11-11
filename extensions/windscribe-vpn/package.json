@@ -1,7 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windscribe-vpn",
-  "version": "1.0.0",
   "private": true,
   "type": "module",
   "title": "Windscribe VPN",
@@ -78,6 +77,7 @@
   },
   "dependencies": {
     "@raycast/api": "2.11.1",
+    "@raycast/utils": "^2.3.3",
     "proper-lockfile": "^4.1.2",
     "react": "19.3.1"
   },
