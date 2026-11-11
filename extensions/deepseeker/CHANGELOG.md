@@ -1,5 +1,10 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [Current DeepSeek Models] - {PR_MERGE_DATE}
+
+- Use the current DeepSeek model IDs, `deepseek-flash` and `deepseek-v4-pro`. DeepSeek rejects `deepseek-chat` and `deepseek-reasoner`, and saved preferences that still hold them are mapped to the new models
+- Upgrade the OpenAI SDK to v7, which fixes the crash on launch from the v4 SDK
+
 ## [New Features] - 2025-03-31
 
 - 🤖 Now Ask LLM command supports **search bar fallback**
