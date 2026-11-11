@@ -13,7 +13,8 @@ import { AccountOrJar } from "../types";
 import { getLatestPeriodEnd, resolvePeriod, validatePeriod } from "../utils/statement";
 import { toUserFacingError } from "./clientInfo";
 import { toLocalIso } from "./format";
-import { reserveStatementSlot, sleep } from "./rateLimit";
+import { sleep } from "../utils/common";
+import { reserveStatementSlot } from "./rateLimit";
 import { readJson, writeJson } from "./storage";
 
 /** Unix seconds, both ends included. */

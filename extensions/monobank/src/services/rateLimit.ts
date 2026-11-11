@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { STATEMENT_RATE_LIMIT, STORAGE_KEYS } from "../data/constants";
+import { sleep } from "../utils/common";
 
 /** One reserved statement request, shared by every command, the menu bar and the AI. */
 interface Reservation {
@@ -18,6 +19,11 @@ export interface StatementSlot {
   at: number;
 }
 
+/**
+ * How far apart reservations are: the rate limit and a second more, so a request sent a little after its time (e.g.
+ * a late timer) still comes a full minute after the previous one.
+ */
+const SPACING = STATEMENT_RATE_LIMIT + 1000;
 /** How long a reservation waits before reading the list back, so a reservation written at the same time shows. */
 const SETTLE_DELAY = 50;
 /** Reservations that keep losing to others give up checking after this many tries. */
@@ -49,7 +55,7 @@ async function readReservations(now: number): Promise<Reservation[]> {
       typeof item.at === "number" &&
       typeof item.reservedAt === "number" &&
       item.reservedAt <= now &&
-      item.at + STATEMENT_RATE_LIMIT > now,
+      item.at + SPACING > now,
   );
 }
 
@@ -80,7 +86,7 @@ async function reserve(notBefore: number): Promise<StatementSlot> {
   for (let attempt = 1; ; attempt++) {
     const now = Date.now();
     const list = await readReservations(now);
-    const latest = Math.max(...list.map((item) => item.at + STATEMENT_RATE_LIMIT), 0);
+    const latest = Math.max(...list.map((item) => item.at + SPACING), 0);
     const slot = { id: randomUUID(), at: Math.max(now, notBefore, latest) };
 
     await writeReservations([...list, { ...slot, reservedAt: now }]);
@@ -104,8 +110,4 @@ export function releaseStatementSlot(slot: StatementSlot): Promise<void> {
   });
   queue = next.catch(() => undefined);
   return next;
-}
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, Math.max(ms, 0)));
 }

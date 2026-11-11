@@ -13,13 +13,15 @@ export type SubscriptionStatus = "active" | "late";
 /** A recurring charge found in the stored statements. */
 export interface Subscription {
   /**
-   * Identifies the subscription to its override. Detected from the account, merchant, currency and the first amount
-   * in the stored history, so it stays across price changes. A subscription with an override takes the override's
-   * key instead, since the first stored charge changes as history drops out (see `applySubscriptionOverrides`).
+   * Unique among the subscriptions found. Detected from the account, merchant, currency and the first amount in the
+   * stored history, which changes as old charges drop out, so overrides aren't matched by it. A subscription with an
+   * override takes the override's key, under which changes are saved (see `applySubscriptionOverrides`).
    */
   key: string;
   /** The description of the latest charge. */
   name: string;
+  /** The merchant the charges are grouped by (see `normalizeMerchant`). */
+  merchant: string;
   account: Account;
   cadence: SubscriptionCadence;
   confidence: SubscriptionConfidence;
@@ -69,12 +71,30 @@ export interface SubscriptionOverride {
   rejectedPriceChanges?: string[];
   /**
    * The ids of the subscription's charges when the override was last saved or matched. The override follows these
-   * charges, so it stays with its subscription when the detected key changes.
+   * charges, so it stays with its subscription as old charges drop out of the history.
    */
   chargeIds?: string[];
+  /**
+   * The subscription as it was when the override was last saved or matched, to find it again once none of
+   * `chargeIds` are stored anymore (see `bindSubscriptionOverrides`).
+   */
+  identity?: SubscriptionIdentity;
 }
 
-/** By `Subscription.key`. */
+/** What identifies a subscription apart from its charges. */
+export interface SubscriptionIdentity {
+  accountId: string;
+  /** See `Subscription.merchant`. */
+  merchant: string;
+  /** The operation currency's code, e.g. "USD". */
+  currency: string;
+  /** The latest charge, positive, in `currency`. */
+  amount: number;
+  /** Unix seconds of the latest charge. */
+  lastCharge: number;
+}
+
+/** By `Subscription.key`, which is set once when the override is first saved. */
 export type SubscriptionOverrides = Record<string, SubscriptionOverride>;
 
 /** The stored transactions of one account, for `detectSubscriptions`. */

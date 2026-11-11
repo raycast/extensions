@@ -35,16 +35,17 @@ export default function AccountActions(props: {
             <Action.CopyToClipboard title="Copy Top up Page URL" icon={Icon.Link} content={sendUrl} />
           </>
         )}
+        {/* Copy IBAN stays first after the top-up actions, as before "View Statement" was added. */}
+        <Action.CopyToClipboard
+          title="Copy IBAN"
+          content={account.iban}
+          shortcut={isTopUpFirst ? shortcuts.copyIban : undefined}
+        />
         <Action.Push
           title="View Statement"
           icon={Icon.List}
           shortcut={isTopUpFirst ? shortcuts.viewStatement : undefined}
           target={<StatementView account={account} />}
-        />
-        <Action.CopyToClipboard
-          title="Copy IBAN"
-          content={account.iban}
-          shortcut={isTopUpFirst ? shortcuts.copyIban : undefined}
         />
         <Action.CopyToClipboard
           title="Copy Requisites"

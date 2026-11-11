@@ -1,3 +1,8 @@
+/** Resolves after `ms` milliseconds, or right away when `ms` isn't positive. */
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(ms, 0)));
+}
+
 export function satisfiesTexts(searchText: string, ...texts: string[]): boolean {
   return texts.some((text) => text.toLowerCase().includes(searchText.toLowerCase()));
 }

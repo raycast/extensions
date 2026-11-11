@@ -16,6 +16,7 @@ import {
   CurrencyRate,
   Subscription,
   SubscriptionCadence,
+  SubscriptionIdentity,
   SubscriptionOverrides,
   SubscriptionSource,
   Transaction,
@@ -382,6 +383,7 @@ function toSubscription(account: Account, merchant: string, series: Series, now:
   return {
     key: [account.id, merchant, last.operationCurrency.code, formatKeyAmount(getChargeAmount(charges[0]))].join("|"),
     name: last.description,
+    merchant,
     account,
     cadence,
     confidence,
@@ -458,8 +460,9 @@ export function detectSubscriptions(
 
 /**
  * Makes the keys of one merchant's subscriptions unique: interleaved ones at the same price share a key. The one
- * charged first keeps it; the others get the day they're charged on, e.g. "…|2.99@21". Overrides find their
- * subscription by its charges, not only by this key (see `bindSubscriptionOverrides`).
+ * charged first keeps it; the others get the day they're charged on, e.g. "…|2.99@21". Which one keeps it can change
+ * as old charges drop out, so overrides find their subscription by its charges instead (see
+ * `bindSubscriptionOverrides`).
  */
 function withUniqueKeys(subscriptions: Subscription[]): Subscription[] {
   const firstCharge = (subscription: Subscription) => subscription.charges[subscription.charges.length - 1].time;
@@ -484,11 +487,13 @@ export function getRejectedPriceChanges(overrides: SubscriptionOverrides): Set<s
 }
 
 /**
- * Which override belongs to each subscription: the key of its override, or `undefined`. A detected key depends on
- * the first charge in the stored history, so it changes as old charges drop out. The charges themselves don't:
+ * Which override belongs to each subscription: the key of its override, or `undefined`. Never by the detected key,
+ * which depends on the first charge in the stored history and changes as old charges drop out:
  * 1. An override with `chargeIds` belongs to the subscription that shares the most charges with it.
- * 2. The other overrides (older ones without ids, or ones whose charges are all gone) match by key, and only
- *    subscriptions that no override matched yet.
+ * 2. An override none of whose charges are stored anymore (e.g. no command ran while they all dropped out) belongs
+ *    to the subscription that continues its `identity`: the same account, merchant and currency, charged only after
+ *    the override's last charge, at a price it could have changed to. The closest price wins, then the closest day of
+ *    the month, so two subscriptions at the same price (e.g. on the 12th and the 21st) aren't swapped.
  */
 export function bindSubscriptionOverrides(
   subscriptions: Subscription[],
@@ -498,28 +503,79 @@ export function bindSubscriptionOverrides(
   const boundKeys = new Set<string>();
   const chargeIds = subscriptions.map((subscription) => new Set(subscription.charges.map((charge) => charge.id)));
 
-  // The most shared charges bind first, so two overrides never take the same subscription.
-  const matches = Object.entries(overrides).flatMap(([key, override]) =>
-    subscriptions.flatMap((subscription, index) => {
-      const shared = override.chargeIds?.filter((id) => chargeIds[index].has(id)).length ?? 0;
-      return shared ? [{ key, index, shared, isSameKey: subscription.key === key }] : [];
-    }),
-  );
-  matches.sort((a, b) => b.shared - a.shared || Number(b.isSameKey) - Number(a.isSameKey));
-  for (const { key, index } of matches) {
-    if (boundKeys.has(key) || bound[index] !== undefined) continue;
-    bound[index] = key;
-    boundKeys.add(key);
+  /** Binds the best matches first (lowest `rank`), so two overrides never take the same subscription. */
+  function bindBest(matches: { key: string; index: number; rank: number[] }[]) {
+    matches.sort((a, b) => compareRanks(a.rank, b.rank));
+    for (const { key, index } of matches) {
+      if (boundKeys.has(key) || bound[index] !== undefined) continue;
+      bound[index] = key;
+      boundKeys.add(key);
+    }
   }
 
-  subscriptions.forEach((subscription, index) => {
-    const { key } = subscription;
-    if (bound[index] !== undefined || boundKeys.has(key) || !overrides[key]) return;
-    bound[index] = key;
-    boundKeys.add(key);
-  });
+  bindBest(
+    Object.entries(overrides).flatMap(([key, override]) =>
+      subscriptions.flatMap((_, index) => {
+        const shared = override.chargeIds?.filter((id) => chargeIds[index].has(id)).length ?? 0;
+        return shared ? [{ key, index, rank: [-shared] }] : [];
+      }),
+    ),
+  );
+
+  bindBest(
+    Object.entries(overrides).flatMap(([key, { identity }]) => {
+      if (!identity || boundKeys.has(key)) return [];
+      return subscriptions.flatMap((subscription, index) => {
+        const rank = bound[index] === undefined ? getContinuationRank(identity, subscription) : undefined;
+        return rank ? [{ key, index, rank }] : [];
+      });
+    }),
+  );
 
   return bound;
+}
+
+/**
+ * How well `subscription` continues the one saved as `identity` (lower is better), or `undefined` when it can't:
+ * another account, merchant or currency, a charge from before the saved last one (then it ran alongside it), or a
+ * price too far off.
+ */
+function getContinuationRank(identity: SubscriptionIdentity, subscription: Subscription): number[] | undefined {
+  const firstCharge = subscription.charges[subscription.charges.length - 1];
+  if (
+    subscription.account.id !== identity.accountId ||
+    subscription.merchant !== identity.merchant ||
+    subscription.currency.code !== identity.currency ||
+    firstCharge.time <= identity.lastCharge
+  ) {
+    return undefined;
+  }
+
+  const amount = getChargeAmount(firstCharge);
+  const [low, high] = [amount, identity.amount].sort((a, b) => a - b);
+  if (low <= 0 || high > low * (1 + SUBSCRIPTION_MAX_PRICE_CHANGE)) return undefined;
+
+  const days = Math.abs(toDay(firstCharge.time).getDate() - toDay(identity.lastCharge).getDate());
+  return [high / low, Math.min(days, 31 - days)];
+}
+
+function compareRanks(a: number[], b: number[]) {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const difference = (a[i] ?? 0) - (b[i] ?? 0);
+    if (difference) return difference;
+  }
+  return 0;
+}
+
+/** What `updateSubscriptionOverride` saves, so the override finds `subscription` again (see `bindSubscriptionOverrides`). */
+export function getSubscriptionIdentity(subscription: Subscription): SubscriptionIdentity {
+  return {
+    accountId: subscription.account.id,
+    merchant: subscription.merchant,
+    currency: subscription.currency.code,
+    amount: subscription.amount,
+    lastCharge: subscription.lastCharge,
+  };
 }
 
 /**

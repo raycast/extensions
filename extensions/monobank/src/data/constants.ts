@@ -21,6 +21,8 @@ export const STORAGE_KEYS = {
   budgetAccounts: `${STORAGE_PREFIX}budgetAccounts`,
   /** Renamed and hidden subscriptions, by `Subscription.key`. */
   subscriptionOverrides: `${STORAGE_PREFIX}subscriptionOverrides`,
+  /** Held while a command changes `subscriptionOverrides` (see `withStorageLock`). */
+  subscriptionOverridesLock: `${STORAGE_PREFIX}subscriptionOverrides:lock`,
 } as const;
 
 /** The stored statement of one account or jar (see `StoredStatement`). */

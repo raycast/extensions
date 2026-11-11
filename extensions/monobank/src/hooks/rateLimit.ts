@@ -1,7 +1,8 @@
 import { Toast, showToast } from "@raycast/api";
 import { RateLimitError } from "../api/monobank";
 import { STATEMENT_RATE_LIMIT, STATEMENT_REQUEST_DELAY } from "../data/constants";
-import { releaseStatementSlot, reserveStatementSlot, sleep } from "../services/rateLimit";
+import { releaseStatementSlot, reserveStatementSlot } from "../services/rateLimit";
+import { sleep } from "../utils/common";
 
 /** A load was replaced by a newer one, or the view was closed, before it sent its request. */
 export class CancelledError extends Error {}
