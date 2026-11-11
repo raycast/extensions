@@ -245,10 +245,10 @@ function EntryItem(props: {
   actions: ReactNode;
 }) {
   const { entry, journal, showDetail, isSearching, onFilter } = props;
-  // With the sidebar open a row has half the width, so the date gets shorter. Searches span years, so they keep the year.
+  // With the sidebar open a row has half the width, so the date is all digits ("11/9" in the US). Searches span years, so they keep the year.
   const date = formatDate(
     entry,
-    isSearching ? { month: "short", year: "numeric" } : { month: "short", day: "numeric" },
+    isSearching ? { month: "short", year: "numeric" } : { month: showDetail ? "numeric" : "short", day: "numeric" },
   );
   const media = mediaLabel(entry);
 
