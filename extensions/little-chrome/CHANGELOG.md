@@ -1,5 +1,10 @@
 # Little Chrome Changelog
 
+## [Trending Suggestions and Profile Name] - {PR_MERGE_DATE}
+
+- Rank suggestions higher when a page was visited much more often in the last couple of days
+- Show the current Chrome profile name in Open Little Chrome
+
 ## [Initial Version] - 2026-11-09
 
 - Open URLs or Google searches in a chromeless Chrome app window

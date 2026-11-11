@@ -18,7 +18,15 @@ import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Blocklist, CHROME_DIR, currentProfile, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
+import {
+  Blocklist,
+  CHROME_DIR,
+  currentProfile,
+  isBlocked,
+  loadBlocklist,
+  profileName,
+  saveBlocklist,
+} from "./blocklist";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
 import { ManageHiddenSuggestions } from "./manage-hidden";
 
@@ -181,18 +189,27 @@ async function searchHistory(db: string, text: string, blocklist: Blocklist): Pr
         .map((p) => `url LIKE '${p}${escape(words[0])}%' ESCAPE '\\'`)
         .join(" OR ")} THEN 3 ELSE 1 END`
     : "1";
-  const days = `((strftime('%s', 'now') + 11644473600) * 1000000 - last_visit_time) / 86400000000.0`;
+  const now = `((strftime('%s', 'now') + 11644473600) * 1000000)`;
+  const days = `(${now} - last_visit_time) / 86400000000.0`;
   const recency = `CASE WHEN ${days} < 4 THEN 1.0 WHEN ${days} < 14 THEN 0.7 WHEN ${days} < 31 THEN 0.5
     WHEN ${days} < 90 THEN 0.3 ELSE 0.1 END`;
-  const order = `ORDER BY (visit_count + 2 * typed_count) * ${recency} * ${hostMatch} DESC, last_visit_time DESC LIMIT 50`;
+  // Trending: visits per day over the last 2 days against the 28 days before, so pages that suddenly
+  // get visited a lot rise. The +1 keeps a single new visit from spiking; capped at 5x.
+  const trend = `WITH trend AS (SELECT url AS id, SUM(visit_time > ${now} - 2 * 86400000000) AS recent,
+      SUM(visit_time <= ${now} - 2 * 86400000000) AS prior
+    FROM visits WHERE visit_time > ${now} - 30 * 86400000000 GROUP BY url)`;
+  const growth = `MIN(5.0, COALESCE(trend.recent, 0) / 2.0 / (COALESCE(trend.prior, 0) / 28.0 + 1))`;
+  const from = `FROM urls LEFT JOIN trend ON trend.id = urls.id`;
+  const order = `ORDER BY (visit_count + 2 * typed_count) * ${recency} * ${hostMatch} * (1 + ${growth}) DESC,
+    last_visit_time DESC LIMIT 50`;
   try {
     // Largest favicon bitmap per page; files are cached by bitmap id + update time.
     const rows = await sqlite<HistoryItem & { bitmap: string | null }>(
       db,
-      `SELECT url, title, (SELECT b.id || '-' || b.last_updated FROM f.icon_mapping m
+      `${trend} SELECT url, title, (SELECT b.id || '-' || b.last_updated FROM f.icon_mapping m
          JOIN f.favicon_bitmaps b ON b.icon_id = m.icon_id
          WHERE m.page_url = urls.url ORDER BY b.width DESC LIMIT 1) AS bitmap
-       FROM urls WHERE ${filter} ${order}`,
+       ${from} WHERE ${filter} ${order}`,
     );
     const missing = [...new Set(rows.map((r) => r.bitmap).filter((b): b is string => !!b))].filter(
       (b) => !existsSync(join(FAVICON_DIR, `${b}.png`)),
@@ -213,7 +230,7 @@ async function searchHistory(db: string, text: string, blocklist: Blocklist): Pr
         bitmap && existsSync(join(FAVICON_DIR, `${bitmap}.png`)) ? join(FAVICON_DIR, `${bitmap}.png`) : undefined,
     }));
   } catch {
-    return sqlite<HistoryItem>(db, `SELECT url, title FROM urls WHERE ${filter} ${order}`);
+    return sqlite<HistoryItem>(db, `${trend} SELECT url, title ${from} WHERE ${filter} ${order}`);
   }
 }
 
@@ -223,6 +240,7 @@ const cache = new Cache();
 export default function Command(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const profile = useMemo(currentProfile, []);
+  const profileLabel = useMemo(() => profileName(profile), [profile]);
   const cacheKey = `initial:${profile}`;
   const [items, setItems] = useState<HistoryItem[]>(() => {
     const cached = !props.fallbackText && cache.get(cacheKey);
@@ -305,6 +323,7 @@ export default function Command(props: LaunchProps) {
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      navigationTitle={`Little Chrome — ${profileLabel}`}
       searchBarPlaceholder="URL or search"
       isLoading={isLoading}
       filtering={false}
@@ -335,7 +354,7 @@ export default function Command(props: LaunchProps) {
           }
         />
       )}
-      <List.Section title="History">
+      <List.Section title="History" subtitle={profileLabel}>
         {visible.map((item) => (
           <List.Item
             key={`${generation}:${item.url}`}
