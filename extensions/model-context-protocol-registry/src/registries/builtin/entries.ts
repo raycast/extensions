@@ -792,6 +792,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.connectmachine.ai/mcp",
   },
   {
+    name: "contentin",
+    title: "ContentIn",
+    description:
+      "Write LinkedIn posts in your own voice from your AI agent, then schedule and publish them through LinkedIn's official API. Your agent gets your voice profile, the material and stories you have saved, what worked on your past posts, post analytics and, on Pro plans, the people who engaged with your posts scored against your ideal customer profile. Scheduling and publishing show the exact text and wait for your confirmation. 13 tools. Hosted remote Streamable HTTP server at https://mcp.contentin.io/mcp-server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The account and voice profile are free; the tools need a paid ContentIn plan (7-day trial).",
+    icon: "https://contentin.io/contentin-logo.png",
+    homepage: "https://contentin.io/linkedin-for-ai-agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.contentin.io/mcp-server"],
+    },
+    remoteUrl: "https://mcp.contentin.io/mcp-server",
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:
