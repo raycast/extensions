@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Mnemoverse description] - 2026-11-11
+
+- Shared rooms are out of beta: drop "(beta)" from the Mnemoverse entry and its README row.
+
 ## [Add Termalin MCP Server] - 2026-11-11
 
 - Add Termalin to the community registry: SSH, SFTP, databases and monitoring for your own Linux servers (23 tools), without handing the agent an SSH key. Hosted Streamable HTTP server at https://termal.in/mcp with direct HTTP in Raycast and OAuth 2.1 sign-in (dynamic client registration), `mcp-remote` fallback for other clients.

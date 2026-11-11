@@ -1634,7 +1634,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
-      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms (beta) let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
+      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
     icon: "https://mnemoverse.com/apple-touch-icon.png",
     homepage: "https://mnemoverse.com/docs/api/remote-mcp-server",
     configuration: {
