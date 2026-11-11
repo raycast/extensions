@@ -16,6 +16,7 @@
     {
       "name": "search-symbol",
       "title": "Search Symbol",
+      "subtitle": "Pulse",
       "description": "Find a stock, index or crypto pair by ticker or by name in English, Chinese, Japanese or Korean, and see its price and today's chart.",
       "mode": "view",
       "keywords": [
@@ -78,7 +79,6 @@
     "@types/react": "19.3.0",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "tsx": "^4.23.15",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -87,7 +87,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
