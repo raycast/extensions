@@ -9,7 +9,6 @@ import {
   environment,
   getPreferenceValues,
   launchCommand,
-  showToast,
   Toast,
 } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
@@ -20,6 +19,7 @@ import {
   stopCaffeinate,
   deviceName,
   prepareUserStop,
+  showFailure,
   getCaffeinationState,
   stopLegacyCaffeinate,
   CaffeinationState,
@@ -145,7 +145,7 @@ export default function Command(props: LaunchProps) {
       });
     } catch (error) {
       setCachedCaffeinated(data.isRunning);
-      await showToast({ style: Toast.Style.Failure, title: "Failed to caffeinate", message: String(error) });
+      await showFailure({ style: Toast.Style.Failure, title: "Failed to caffeinate", message: String(error) });
     }
   };
 
@@ -175,7 +175,7 @@ export default function Command(props: LaunchProps) {
       setCachedCaffeinated(stopped.isRunning);
       if (isHideEnabled && !stopped.isRunning) keepVisibleAfterStop();
     } catch (error) {
-      await showToast({
+      await showFailure({
         style: Toast.Style.Failure,
         title: "Failed to stop caffeinate process",
         message: error instanceof Error ? error.message : String(error),
@@ -215,7 +215,7 @@ export default function Command(props: LaunchProps) {
       if (isHideEnabled && !stopped.isRunning) keepVisibleAfterStop();
     } catch {
       setCachedCaffeinated(data.isRunning);
-      await showToast({
+      await showFailure({
         style: Toast.Style.Failure,
         title: "Failed to decaffeinate",
         message: "Caffeination may still be running",

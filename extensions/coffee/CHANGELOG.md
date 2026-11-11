@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] Menu bar error messages no longer break the menu - {PR_MERGE_DATE}
+
+- When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
+
 ## [Fix] Recover the session lock after Raycast unloads a command - 2026-11-10
 
 - Recover the session lock within seconds when Raycast unloads a command that holds it, instead of failing every Coffee command until Raycast restarts ([#33234](https://github.com/raycast/extensions/issues/33234)).
