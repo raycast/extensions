@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Brave Origin Support] - {PR_MERGE_DATE}
+
+- Add Brave Origin as a supported browser. Brave Origin installs as `Brave Origin.app` rather than `Brave Browser.app`, so as the default or preferred browser it failed with "isn't a supported browser". It is Chromium-based, so meeting links are read from its tabs the same way as Brave and Chrome.
+
 ## [Helium Support & Meet Link Detection Fix] - 2026-10-29
 
 - Add Helium as a supported browser. Helium is Chromium-based, so meeting links are read from its tabs the same way as Chrome, Brave, and Edge. Previously, Helium as the default browser failed with "isn't a supported browser".
