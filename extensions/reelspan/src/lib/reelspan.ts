@@ -22,13 +22,9 @@ export const NETWORKS: { id: string; name: string }[] = [
   ["discord", "Discord"],
   ["slack", "Slack"],
   ["mastodon", "Mastodon"],
-  ["nostr", "Nostr"],
-  ["lemmy", "Lemmy"],
   ["devto", "Dev.to"],
   ["hashnode", "Hashnode"],
   ["wordpress", "WordPress"],
-  ["whop", "Whop"],
-  ["listmonk", "Listmonk"],
   ["sandbox", "Sandbox"],
 ].map(([id, name]) => ({ id, name }));
 
