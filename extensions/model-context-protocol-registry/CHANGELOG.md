@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Wavegrain MCP Server] - {PR_MERGE_DATE}
+## [Add Wavegrain MCP Server] - 2026-11-11
 
 - Add Wavegrain to the official registry: curated TikTok slideshows and Instagram carousels for your brand on autopilot. Read brands and slideshows, make new slideshows in the brand's voice with its own photos, edit slide text, schedule and export. Hosted Streamable HTTP server at https://wavegrain.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
