@@ -20,8 +20,8 @@ import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Blocklist, CHROME_DIR, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
-import { ManageHiddenSuggestions } from "./manage-hidden";
-import { chromeProfiles, currentProfile, defaultProfile, profileName, showDefaultProfileNotFound } from "./profile";
+import { ManageHiddenSuggestions, ProfileNotFound } from "./manage-hidden";
+import { chromeProfiles, defaultProfile, profileName } from "./profile";
 
 export function toUrl(input: string): string {
   const q = input.trim();
@@ -267,10 +267,14 @@ async function searchHistory(
 const cache = new Cache();
 
 export default function Command(props: LaunchProps) {
+  const initialProfile = useMemo(defaultProfile, []);
+  return initialProfile ? <LittleChrome {...props} initialProfile={initialProfile} /> : <ProfileNotFound />;
+}
+
+function LittleChrome(props: LaunchProps & { initialProfile: string }) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const profiles = useMemo(chromeProfiles, []);
-  const initialProfile = useMemo(defaultProfile, []);
-  const [profile, setProfile] = useState(() => initialProfile ?? currentProfile());
+  const [profile, setProfile] = useState(props.initialProfile);
   const profileRef = useRef(profile);
   const profileLabel = useMemo(() => profileName(profile), [profile]);
   const cacheKey = `initial:${profile}`;
@@ -285,10 +289,6 @@ export default function Command(props: LaunchProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [blocklist, setBlocklist] = useState<Blocklist>();
   const db = useMemo(() => snapshotHistory(profile), [profile]);
-
-  useEffect(() => {
-    if (!initialProfile) showDefaultProfileNotFound();
-  }, []);
 
   useEffect(() => {
     let cancelled = false;

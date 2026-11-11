@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, Image, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Icon, Image } from "@raycast/api";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CHROME_DIR } from "./blocklist";
@@ -70,15 +70,6 @@ export function preferredProfile(): string | undefined {
 export function defaultProfile(): string | undefined {
   const query = preferredProfile();
   return query ? findProfile(query) : currentProfile();
-}
-
-export async function showDefaultProfileNotFound(): Promise<void> {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: `Chrome profile "${preferredProfile()}" not found`,
-    message: "Check Default Chrome Profile in the extension preferences.",
-    primaryAction: { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() },
-  });
 }
 
 // The profile matching the query, or the default one when the query is empty.
