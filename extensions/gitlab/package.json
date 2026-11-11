@@ -492,7 +492,8 @@
   "ernest0n",
   "JonathanXDR",
   "danilorequena",
-  "danulqua"
+  "danulqua",
+  "Fizzbow"
  ],
  "dependencies": {
   "@apollo/client": "^3.4.8",
