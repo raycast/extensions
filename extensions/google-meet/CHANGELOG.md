@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Yab Support] - {PR_MERGE_DATE}
+## [Yab Support] - 2026-11-11
 
 - Add Yab as a supported browser. Yab speaks the same AppleScript dictionary as Chrome, so the meeting opens in a tab of its own and the link is read from that tab. Previously, Yab as the default browser failed with `"yab" isn't a supported browser`.
 - Accept UUID tab ids from Chromium-based browsers that use them, alongside numeric ones.
