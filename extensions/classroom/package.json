@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "classroom",
   "title": "Google Classroom",
-  "description": "See what's due, what's missing and what's graded across your Google Classroom courses.",
+  "description": "See what's due, what's missing and what's graded across your Google Classroom courses. Requires a Google Classroom account and your own Google Cloud OAuth client.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "license": "MIT",
