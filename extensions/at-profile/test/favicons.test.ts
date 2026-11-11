@@ -43,6 +43,17 @@ describe("cacheFavicon", () => {
     expect(existsSync(join(environment.supportPath, "favicons", "missing.example.png"))).toBe(false);
   });
 
+  it("skips an ICO sent as image/png and takes the next service's PNG", async () => {
+    // A Windows icon resource's header, as one service sent for facebook.com
+    const ICO = Uint8Array.from([0x00, 0x00, 0x01, 0x00, 0x03, 0x00, 0x10, 0x10]);
+    const answers = [ICO, PNG];
+    const fetchImpl = (async () =>
+      new Response(answers.shift(), { headers: { "content-type": "image/png" } })) as typeof fetch;
+    expect(await cacheFavicon("https://ico.example/{profile}", { fetchImpl })).toBe(true);
+    const saved = readFileSync(join(environment.supportPath, "favicons", "ico.example.png"));
+    expect([...saved.subarray(0, 8)]).toEqual([...PNG]);
+  });
+
   it("doesn't download a favicon that ships with the extension", async () => {
     let requests = 0;
     const fetchImpl = (async () => {

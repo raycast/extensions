@@ -20,6 +20,7 @@ const SERVICES = [
   (key: string) => `https://api.ray.so/favicon?size=64&url=${encodeURIComponent(key)}`,
   (key: string) => `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(key)}`,
 ];
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const MASK = Image.Mask.RoundedRectangle;
 
 const bundledKeys = new Set<string>(bundled);
@@ -87,9 +88,10 @@ export async function downloadFavicon(key: string, fetchImpl: typeof fetch = sit
   for (const service of SERVICES) {
     try {
       const response = await fetchImpl(service(key), { signal: AbortSignal.timeout(10_000) });
-      if (response.ok && response.headers.get("content-type")?.startsWith("image/png")) {
-        return Buffer.from(await response.arrayBuffer());
-      }
+      if (!response.ok) continue;
+      const bytes = Buffer.from(await response.arrayBuffer());
+      // The content type can say PNG over an ICO, so check the bytes
+      if (bytes.subarray(0, 8).equals(PNG_SIGNATURE)) return bytes;
     } catch {
       // Try the next service
     }
