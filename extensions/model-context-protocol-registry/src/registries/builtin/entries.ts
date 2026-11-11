@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "summitscribe",
+    title: "SummitScribe",
+    description:
+      "Search your SummitScribe meeting notes, transcripts and action items. Ask what was decided, quote the transcript, and list open action items. Every tool is read-only; sign in with OAuth.",
+    icon: "https://summitscribe.app/web-app-manifest-512x512.png",
+    homepage: "https://summitscribe.app/developers/agents",
+    remoteUrl: "https://summitscribe.app/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://summitscribe.app/api/mcp"],
+    },
+  },
+  {
     name: "honeyvid",
     title: "HoneyVid",
     description:
