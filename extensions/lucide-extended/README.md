@@ -6,7 +6,7 @@ Not affiliated with or endorsed by Lucide.
 
 ## Usage
 
-Run **Search Icons** and type a name, tag or use case. `heart filled` narrows the search to one style, and Lucide's old names work too, so `alert-circle` finds `circle-alert`.
+Run **Search Icons** and type a name, tag or use case. `heart filled` narrows the search to one style, and Lucide's old names work too, so `circle-alert` finds `circle-exclamation-point`.
 
 - **Style:** the dropdown in the search bar switches between all styles, filled and duotone.
 - **Color:** **Change Color…** in the actions panel (`⌘K`) changes the preview color. Copied SVGs always use `currentColor`.
