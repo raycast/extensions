@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Good Nature Vibe Catalog MCP Server] - {PR_MERGE_DATE}
+## [Add Good Nature Vibe Catalog MCP Server] - 2026-11-11
 
 - Add Good Nature Vibe Catalog to the official registry as a hosted Streamable HTTP server with six read-only catalog and public-knowledge tools and no authentication.
 
