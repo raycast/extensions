@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "makedeck",
   "title": "Makedeck",
-  "description": "See your makedeck services with live logs, open them in Terminal, restart or stop them.",
+  "description": "See your makedeck services with live logs, open them in Terminal, restart or stop them, and spot dev servers started outside makedeck.",
   "icon": "icon.png",
   "author": "SemL",
   "license": "MIT",
