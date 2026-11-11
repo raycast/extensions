@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ContentIn MCP Server] - 2026-11-11
+
+- Add ContentIn to the official registry: write LinkedIn posts in your own voice, schedule and publish them through LinkedIn's official API after your confirmation, read post analytics and the people who engaged with your posts. 13 tools. Hosted Streamable HTTP server at https://mcp.contentin.io/mcp-server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a paid ContentIn plan.
+
 ## [Update VoiceMoat MCP Server] - 2026-11-11
 
 - Update the VoiceMoat description: Style and Stance checks replace the old score, and the $5 Pro trial is included.
