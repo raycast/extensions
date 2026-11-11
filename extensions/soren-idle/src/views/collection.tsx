@@ -92,9 +92,7 @@ export function Collection({ state, frame }: { state: GameState; frame: number }
             title={found(logged.has(id), ITEMS[id].name, "???")}
             icon={check(logged.has(id))}
             detail={note(
-              logged.has(id)
-                ? `# ${ITEMS[id].name}\nGained ×${formatNumber(state.stats.produced[id] ?? 0)}`
-                : "# ???",
+              logged.has(id) ? `# ${ITEMS[id].name}\nGained ×${formatNumber(state.stats.produced[id] ?? 0)}` : "# ???",
             )}
           />
         ))}

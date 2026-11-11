@@ -1088,6 +1088,7 @@
 /extensions/geoconverter                                            @kylinwowo
 /extensions/geoguesser                                              @Boosteblume
 /extensions/geohash-encode-decode                                   @alrico88
+/extensions/geolocation                                             @lebedev-nikita
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
 /extensions/get-app-icon                                            @chrismessina
@@ -1500,7 +1501,7 @@
 /extensions/keyraycast                                              @benostein @0xdhrv
 /extensions/kill-mcp                                                @baptitse-jn
 /extensions/kill-node-modules                                       @NicolasMontone @M-Subhan1 @ridemountainpig
-/extensions/kill-process                                            @rolandleth @crazyones110 @zhenpewu @Saafo @erics118 @xilopaint @validatedev @nmder @mateusbadalotti @jomifepe @0xdhrv @Just-Me-22
+/extensions/kill-process                                            @rolandleth @crazyones110 @zhenpewu @Saafo @erics118 @xilopaint @validatedev @nmder @mateusbadalotti @jomifepe @0xdhrv @Just-Me-22 @Ghoul0718
 /extensions/kimai                                                   @marinsokol @codiini
 /extensions/kimai-parallel-timers                                   @krowaldek
 /extensions/kimi                                                    @degouville
@@ -1662,6 +1663,7 @@
 /extensions/lucide-animated                                         @shivraj-roy
 /extensions/lucide-icons                                            @aeither @xilopaint @ridemountainpig @j3lte @muhammadrizo-y
 /extensions/lucky-surf                                              @Popalay
+/extensions/ludex                                                   @Leocadio94
 /extensions/luma                                                    @ridemountainpig
 /extensions/lume                                                    @sharatvisweswara
 /extensions/lumen                                                   @ParamoStudio
@@ -1793,6 +1795,7 @@
 /extensions/microsoft-onedrive                                      @xilopaint
 /extensions/microsoft-teams                                         @svenwiegand @mSarheed @0xdhrv
 /extensions/microsoft-teams-calling                                 @svenwiegand @leec-666
+/extensions/microsoft-teams-keys                                    @jnbp
 /extensions/microsoft-tenant-id                                     @Rediwed
 /extensions/mictape                                                 @t4kamuna
 /extensions/midas                                                   @sunosuporno
@@ -1969,7 +1972,7 @@
 /extensions/nixpkgs-search                                          @aiotter @xmok @0xdhrv @SConaway @ridemountainpig
 /extensions/nl-news-headlines                                       @namzo
 /extensions/nmbs-planner                                            @SamuelVanhaecke @0xdhrv
-/extensions/no-as-a-service                                         @matholamew
+/extensions/no-as-a-service                                         @matholamew @0xAdriaTorralba
 /extensions/no-more-caffeine                                        @atzzCokeK
 /extensions/nocal                                                   @brianmuse
 /extensions/node-js-evaluate                                        @selfish
@@ -2149,6 +2152,7 @@
 /extensions/palette-colors                                          @douglas-pires @elibattistoni
 /extensions/palette-picker                                          @juliusmarminge
 /extensions/pandas-documentation-search                             @Faria22
+/extensions/pangram-ai-detector                                     @mygirleatsmayo
 /extensions/pangu-for-raycast                                       @beviz
 /extensions/pantheon-sites                                          @matbrady
 /extensions/papago-translate                                        @Rita-Mordio @jaeyeonling @hongmono
@@ -2648,6 +2652,7 @@
 /extensions/sayintentions                                           @kyleawayan
 /extensions/scaleway                                                @philibea @flozdra
 /extensions/scheduler                                               @csymons @ridemountainpig
+/extensions/schemastore                                             @hasansezertasan
 /extensions/schoology                                               @Visual-Studio-Coder
 /extensions/schwab-portfolio                                        @dlev02
 /extensions/scira                                                   @zaidmukaddam @thomaspaulmann
@@ -2892,7 +2897,7 @@
 /extensions/sql-reference-search                                    @Faria22
 /extensions/squeeze                                                 @DanielAmCa
 /extensions/ssh-image-drop                                          @free4416
-/extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara @ViGeng @alshchetinin @xmok @benhepburnn
+/extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara @ViGeng @alshchetinin @xmok @benhepburnn @olafvanmidden
 /extensions/ssh-tunnel-manager                                      @MinatoHikari
 /extensions/st-andrews-main-library-occupancy                       @Alleluia23
 /extensions/stablecog                                               @yekta
@@ -2989,7 +2994,7 @@
 /extensions/system-monitor                                          @hossammourad @lucasmezencio @pernielsentikaer @lucasmezencio @ridemountainpig @xmok @JadenMajid @ADCAdams @TurboCoder13 @Olli0103 @alexibuild
 /extensions/system-status                                           @JamexCEO
 /extensions/t3-chat                                                 @Lermatroid @Sclafus @effektsvk @wxiaoyun @lukrencijus @ridemountainpig @AJJPostma
-/extensions/t3-code                                                 @Skilux
+/extensions/t3-code                                                 @Skilux @ikazoy
 /extensions/tabbit                                                  @AkaChou
 /extensions/tabby                                                   @chupi33
 /extensions/table-converter                                         @naserowaimer
@@ -3300,7 +3305,7 @@
 /extensions/vaulted                                                 @maximn
 /extensions/vc-ru-news                                              @khlebobul
 /extensions/veganify-application                                    @philipbrembeck @pernielsentikaer
-/extensions/vercast                                                 @MaxLeiter @gleich @dgrcode @samuelkraft @xmok @ridemountainpig @sebdanielsson @1weiho @thomas-forbes @0xdhrv
+/extensions/vercast                                                 @MaxLeiter @gleich @dgrcode @samuelkraft @xmok @ridemountainpig @sebdanielsson @1weiho @thomas-forbes @0xdhrv @gfazioli
 /extensions/verify-number                                           @xmok
 /extensions/vesslo                                                  @hjm79
 /extensions/viacep                                                  @xilopaint

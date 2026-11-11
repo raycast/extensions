@@ -42,7 +42,7 @@ export default function Command() {
     codeSnippets: dailyChallenge?.problem.codeSnippets,
     problemMarkdown,
     isPaidOnly: dailyChallenge?.problem.isPaidOnly,
-    linkUrl: `https://leetcode.com${dailyChallenge?.link}`,
+    linkUrl: dailyChallenge ? `https://leetcode.com${dailyChallenge.link}` : undefined,
   });
 
   return (

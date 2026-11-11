@@ -1,5 +1,10 @@
 # Browser History Changelog
 
+## [Fix Search With Special Characters] - 2026-11-11
+
+- Fix: searching history for text with an apostrophe failed with an SQL error
+- Fix: `%` and `_` in a search now match literally instead of acting as wildcards
+
 ## [Fix Helium history path] - 2026-11-09
 
 - Fixed Helium browser not being detected: the default profile path used the product name (`Helium`) but the browser stores its data under the bundle ID (`net.imput.helium`).

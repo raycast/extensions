@@ -31,17 +31,17 @@ const GROUPS: Array<{ key: keyof NonNullable<StatusJSON["groups"]>; name: string
   {
     key: "optimizableBytes",
     name: "Optimizable",
-    what: "Identical copies Mint can make share their storage. Nothing is deleted. Run Optimize Storage.",
+    what: "Identical copies Mint can make share their storage, and idle files it can store compressed in place. Nothing is deleted. Run Optimize Storage.",
   },
   {
     key: "safeToCleanBytes",
     name: "Safe to clean",
-    what: "Caches, build output and leftovers that apps make again. Run Free Disk.",
+    what: "Caches, build output, leftovers that apps make again and finished agent worktrees (merged, untouched for a day). Free Disk deletes them permanently, after one question.",
   },
   {
     key: "yoursBytes",
     name: "Yours",
-    what: "Your own downloads, captures and conversations. Only you can decide; choose them in Free Disk.",
+    what: "Your own downloads, captures, conversations and agent worktrees that still hold your work. Only you can decide; choose them in Free Disk.",
   },
   { key: "keepBytes", name: "Keep", what: "Everything Mint leaves alone: macOS, apps and the files they use." },
 ];
