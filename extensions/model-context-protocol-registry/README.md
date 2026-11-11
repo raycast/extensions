@@ -298,6 +298,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [VoiceLabs](https://voicelabs.now/mcp) | Generate speech from text in your voices and transcribe audio with VoiceLabs. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
 | [Zihin](https://docs.zihin.ai/integrations/mcp-server) | Build and operate AI agents on the Zihin platform: create agents and personas, attach API and MCP tools, configure webhook, schedule and email triggers, set budgets and human-approval policies, inspect runs and chat with your agents. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`. |
 | [Caly](https://trycaly.com/docs/) | Find open meeting times, book, reschedule and cancel meetings, and read your event types, bookings and schedules in Caly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [HTTPfy](https://httpfy.io/agents) | Free DNS, email-authentication (SPF, DKIM, DMARC, BIMI, MTA-STS), TLS certificate, WHOIS, IP/ASN, blocklist, ping, traceroute and port checks run from httpfy.io servers. 24 read-only tools, every result links to a full report. Hosted remote Streamable HTTP server; no sign-in and no API key. |
 
 ### Community MCP Servers
 
