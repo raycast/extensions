@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Project, Story, StorySlim } from "@useshortcut/client";
+import { Project, Story, StorySlim, StorySearchResult } from "@useshortcut/client";
 import { useMemberMap } from "../hooks";
 import { getOwnersAccessoryItems, getStoryColor } from "../helpers/storyHelpers";
 import StoryDetail from "./StoryDetail";
@@ -11,7 +11,7 @@ export default function StoryListItem({
   mutate,
 }: {
   project?: Project;
-  story: StorySlim | Story;
+  story: Story | StorySlim | StorySearchResult;
   mutate?: () => void;
 }) {
   const memberMap = useMemberMap();
