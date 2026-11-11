@@ -168,7 +168,7 @@ export async function refreshMenuBar(): Promise<void> {
 async function requireMenuBar(): Promise<void> {
   // Called from the menu bar itself, which is running and revalidates after the action. Raycast rejects a command
   // launching itself, so the launch would fail and wrongly undo the start.
-  if (environment.commandName === "statusmenu") {
+  if (environment.entryPointName === "statusmenu") {
     await launchCommand({ name: "status", type: LaunchType.Background }).catch(() => undefined);
     return;
   }
