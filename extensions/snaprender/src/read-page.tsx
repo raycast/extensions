@@ -1,39 +1,27 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useForm, usePromise } from "@raycast/utils";
 import MarkdownResult from "./components/MarkdownResult";
-import { SnapRenderError, normalizeUrl } from "./lib/api";
+import { normalizeUrl, urlValidationError } from "./lib/api";
 import { getActiveTabUrl } from "./lib/raycast";
 
 function UrlForm() {
   const { push } = useNavigation();
-  const [urlError, setUrlError] = useState<string | undefined>();
+  const { handleSubmit, itemProps } = useForm<{ url: string }>({
+    validation: { url: urlValidationError },
+    onSubmit: (values) => {
+      push(<MarkdownResult url={normalizeUrl(values.url)} nested />);
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Read Page"
-            icon={Icon.Document}
-            onSubmit={(values: { url: string }) => {
-              try {
-                push(<MarkdownResult url={normalizeUrl(values.url)} nested />);
-              } catch (error) {
-                setUrlError(error instanceof SnapRenderError ? error.detail : "Enter a valid URL");
-              }
-            }}
-          />
+          <Action.SubmitForm title="Read Page" icon={Icon.Document} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="url"
-        title="URL"
-        placeholder="https://example.com/article"
-        error={urlError}
-        onChange={() => setUrlError(undefined)}
-      />
+      <Form.TextField title="URL" placeholder="https://example.com/article" {...itemProps.url} />
       <Form.Description text="No browser tab was found, so enter the page to read. Each read uses one capture from your monthly allowance." />
     </Form>
   );

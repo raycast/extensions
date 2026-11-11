@@ -100,6 +100,16 @@ export function normalizeUrl(input: string): string {
   return parsed.toString();
 }
 
+/** Form validator for URL fields: returns the message normalizeUrl would raise, or undefined when the URL is valid. */
+export function urlValidationError(value: string | undefined): string | undefined {
+  try {
+    normalizeUrl(value ?? "");
+    return undefined;
+  } catch (error) {
+    return error instanceof SnapRenderError ? error.detail : "Enter a valid URL";
+  }
+}
+
 /** Builds the JSON body shared by /v1/screenshot and /v1/screenshot/sign. */
 export function screenshotBody(options: ScreenshotOptions): Record<string, unknown> {
   const body: Record<string, unknown> = {

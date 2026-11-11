@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { Device } from "../lib/api";
-import { getClient, screenshotFileName, writeToDownloads } from "../lib/raycast";
+import { getClient, screenshotFileName, slugFor, writeToDownloads } from "../lib/raycast";
 
 type Input = {
   /** The public web page to capture, for example https://example.com */
@@ -18,7 +18,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     message: `Capture a screenshot of ${input.url}?`,
     info: [
       { name: "Page", value: input.url },
-      { name: "Saves to", value: "A new PNG file in your Downloads folder" },
+      { name: "File", value: `New PNG in Downloads: snaprender-${slugFor(input.url)}-<date and time>.png` },
       { name: "Cost", value: "Uses 1 capture from your monthly SnapRender allowance" },
       ...(input.device ? [{ name: "Device", value: input.device }] : []),
       ...(input.fullPage ? [{ name: "Full page", value: "Yes" }] : []),

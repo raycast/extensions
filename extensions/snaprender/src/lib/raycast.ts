@@ -81,7 +81,8 @@ export async function getActiveTabUrl(): Promise<string | undefined> {
   }
 }
 
-function slugFor(url: string): string {
+/** The host part of a screenshot file name, for example "example.com". */
+export function slugFor(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, "").replace(/[^a-z0-9.-]/gi, "-");
   } catch {
