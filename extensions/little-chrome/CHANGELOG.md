@@ -1,7 +1,10 @@
 # Little Chrome Changelog
 
-## [Copy URL Fix] - {PR_MERGE_DATE}
+## [Chrome Profiles and Copy URL Fix] - {PR_MERGE_DATE}
 
+- Choose the Chrome profile in Open Little Chrome; suggestions, hidden items and opened windows follow it
+- Pass a Chrome profile to Open URL in Little Chrome
+- Set the default Chrome profile in the extension preferences
 - Copy the right URL while a Google Meet picture-in-picture window is open
 
 ## [Trending Suggestions and Profile Name] - 2026-11-11

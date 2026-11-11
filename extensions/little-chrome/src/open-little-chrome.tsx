@@ -18,17 +18,10 @@ import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Blocklist,
-  CHROME_DIR,
-  currentProfile,
-  isBlocked,
-  loadBlocklist,
-  profileName,
-  saveBlocklist,
-} from "./blocklist";
+import { Blocklist, CHROME_DIR, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
 import { ManageHiddenSuggestions } from "./manage-hidden";
+import { chromeProfiles, defaultProfile, profileName } from "./profile";
 
 export function toUrl(input: string): string {
   const q = input.trim();
@@ -84,7 +77,7 @@ async function resizeNewWindow(before: Set<string>, url: string, width: number, 
     end tell`);
 }
 
-export async function openLittleChrome(url: string): Promise<void> {
+export async function openLittleChrome(url: string, profile: string): Promise<void> {
   const prefs = getPreferenceValues<Preferences>();
   const width = parseInt(prefs.width ?? "", 10) || 900;
   const height = parseInt(prefs.height ?? "", 10) || 700;
@@ -98,7 +91,14 @@ export async function openLittleChrome(url: string): Promise<void> {
     before = undefined;
   }
   try {
-    await exec("open", ["-na", CHROME, "--args", `--app=${url}`, `--window-size=${width},${height}`]);
+    await exec("open", [
+      "-na",
+      CHROME,
+      "--args",
+      `--profile-directory=${profile}`,
+      `--app=${url}`,
+      `--window-size=${width},${height}`,
+    ]);
   } catch (e) {
     await showHUD(`Little Chrome failed: ${e instanceof Error ? e.message : String(e)}`);
     return;
@@ -108,9 +108,9 @@ export async function openLittleChrome(url: string): Promise<void> {
 
 // Raycast stops a view command once its window closes, before the new window is resized and
 // recorded, so hand the URL to the no-view Open URL command.
-async function launchLittleChrome(url: string): Promise<void> {
+async function launchLittleChrome(url: string, profile: string): Promise<void> {
   try {
-    await launchCommand({ name: "open-url", type: LaunchType.Background, arguments: { url } });
+    await launchCommand({ name: "open-url", type: LaunchType.Background, arguments: { url, profile } });
   } catch (e) {
     await showToast({
       style: Toast.Style.Failure,
@@ -122,10 +122,10 @@ async function launchLittleChrome(url: string): Promise<void> {
   await closeMainWindow({ clearRootSearch: true });
 }
 
-// Chrome opens URLs from other apps in its last active normal window, never in an app window.
-async function openInChromeTab(url: string): Promise<void> {
+// Chrome opens URLs from other apps in the profile's last active normal window, never in an app window.
+async function openInChromeTab(url: string, profile: string): Promise<void> {
   try {
-    await exec("open", ["-a", CHROME, url]);
+    await exec("open", ["-na", CHROME, "--args", `--profile-directory=${profile}`, url]);
   } catch (e) {
     await showHUD(`Opening in Chrome failed: ${e instanceof Error ? e.message : String(e)}`);
     return;
@@ -268,7 +268,8 @@ const cache = new Cache();
 
 export default function Command(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const profile = useMemo(currentProfile, []);
+  const profiles = useMemo(chromeProfiles, []);
+  const [profile, setProfile] = useState(defaultProfile);
   const profileLabel = useMemo(() => profileName(profile), [profile]);
   const cacheKey = `initial:${profile}`;
   const [items, setItems] = useState<HistoryItem[]>(() => {
@@ -284,8 +285,21 @@ export default function Command(props: LaunchProps) {
   const db = useMemo(() => snapshotHistory(profile), [profile]);
 
   useEffect(() => {
-    loadBlocklist(profile).then(setBlocklist);
+    let cancelled = false;
+    loadBlocklist(profile).then((b) => !cancelled && setBlocklist(b));
+    return () => {
+      cancelled = true;
+    };
   }, [profile]);
+
+  function changeProfile(next: string) {
+    if (next === profile) return;
+    setProfile(next);
+    setBlocklist(undefined);
+    const cached = !searchText.trim() && cache.get(`initial:${next}`);
+    setItems(cached ? JSON.parse(cached) : []);
+    firstQuery.current = true;
+  }
 
   async function updateBlocklist(next: Blocklist) {
     await saveBlocklist(profile, next);
@@ -358,6 +372,15 @@ export default function Command(props: LaunchProps) {
       isLoading={isLoading}
       filtering={false}
       selectedItemId={visible[0] ? `${generation}:${visible[0].url}` : undefined}
+      searchBarAccessory={
+        profiles.length > 1 ? (
+          <List.Dropdown tooltip="Chrome Profile" value={profile} onChange={changeProfile}>
+            {profiles.map((p) => (
+              <List.Dropdown.Item key={p.dir} title={p.name} value={p.dir} icon={p.icon} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
     >
       <List.EmptyView
         icon={Icon.Globe}
@@ -376,9 +399,13 @@ export default function Command(props: LaunchProps) {
               <Action
                 title="Open in Little Chrome"
                 icon={Icon.Window}
-                onAction={() => launchLittleChrome(toUrl(typed))}
+                onAction={() => launchLittleChrome(toUrl(typed), profile)}
               />
-              <Action title="Open in Chrome Tab" icon={Icon.Globe} onAction={() => openInChromeTab(toUrl(typed))} />
+              <Action
+                title="Open in Chrome Tab"
+                icon={Icon.Globe}
+                onAction={() => openInChromeTab(toUrl(typed), profile)}
+              />
               {manageAction}
             </ActionPanel>
           }
@@ -397,9 +424,13 @@ export default function Command(props: LaunchProps) {
                 <Action
                   title="Open in Little Chrome"
                   icon={Icon.Window}
-                  onAction={() => launchLittleChrome(item.url)}
+                  onAction={() => launchLittleChrome(item.url, profile)}
                 />
-                <Action title="Open in Chrome Tab" icon={Icon.Globe} onAction={() => openInChromeTab(item.url)} />
+                <Action
+                  title="Open in Chrome Tab"
+                  icon={Icon.Globe}
+                  onAction={() => openInChromeTab(item.url, profile)}
+                />
                 <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 <ActionPanel.Section>
                   <Action
