@@ -1,6 +1,6 @@
 # Mint Changelog
 
-## [Everything Mint does, from Raycast] - {PR_MERGE_DATE}
+## [Everything Mint does, from Raycast] - 2026-11-11
 
 - New commands:
   - **Auto Care**: turn Mint's automatic care for disk, memory and folders on or off, without opening Mint.
