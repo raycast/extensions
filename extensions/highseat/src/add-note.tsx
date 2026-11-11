@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api"
 import { withAccessToken } from "@raycast/utils"
+import { RefreshAction } from "./components/load-state"
 import { getSiteIcon, useSelectedSite } from "./components/site-picker"
 import { api, APP_URL, highseat } from "./lib/highseat"
 
@@ -15,7 +16,7 @@ function formatDay(date: Date) {
 }
 
 function AddNote({ arguments: { text } }: LaunchProps<{ arguments: Arguments.AddNote }>) {
-  const { sites, site, setSiteId, isLoading } = useSelectedSite()
+  const { sites, site, setSiteId, isLoading, error, revalidate } = useSelectedSite()
 
   async function submit({ date, text: note }: NoteValues) {
     if (!site) return
@@ -35,6 +36,20 @@ function AddNote({ arguments: { text } }: LaunchProps<{ arguments: Arguments.Add
       toast.title = "Could not add the note"
       toast.message = error instanceof Error ? error.message : String(error)
     }
+  }
+
+  if (!isLoading && !site && error) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <RefreshAction onRefresh={revalidate} />
+          </ActionPanel>
+        }
+      >
+        <Form.Description title="Could not load your sites" text={error.message} />
+      </Form>
+    )
   }
 
   if (!isLoading && !site) {
