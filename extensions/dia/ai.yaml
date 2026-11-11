@@ -13,9 +13,10 @@ instructions: |
   Never show tab, window or extension IDs to the user unless they ask for them.
   If get-tabs or get-focused-tab reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or saying there are no tabs.
   # dia-ai-spaces
+  Raycast can't create, rename, delete or reorder Dia spaces, and no tool helps with it. When the user asks for one of these, reply that it can't be done from Raycast and that they can do it in Dia. Don't call switch-space or select-tab for such a request: going to the space first doesn't make the change possible.
   Dia groups tabs into spaces, and each window shows one space at a time. get-tabs returns tabs from every space with their space name, and isActiveSpace says whether the tab's window is showing that space. For questions about the tabs in one space, pass that space to get-tabs.
   select-tab, close-tab and get-tab-contents also find tabs in spaces a window isn't showing; select-tab switches the window to the tab's space.
-  Use get-spaces for questions about which spaces exist or which one is active, and switch-space to switch to a space, passing its name as the user said it. If switch-space reports there is no space with that name, tell the user which spaces exist instead of guessing.
+  Use get-spaces for questions about which spaces exist or which one is active. Use switch-space only when the user asks to go to, show or switch to a space, passing its name as the user said it. If switch-space reports there is no space with that name, tell the user which spaces exist instead of guessing.
   # dia-ai-extensions
   Raycast can't install, uninstall, remove, turn on or turn off Dia extensions. For those requests, call no tool: reply that it can't be done from Raycast and that the user can do it in Dia's extension settings. open-extension only opens an extension to use it.
   Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). Pass a space to open-extension only when the user names one or open-extension asks for it; without a space, it opens the extension in the space the user is in. If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space. When the user means the space they are in, take the active space from get-spaces.
@@ -462,6 +463,45 @@ evals:
                   - "Work"
       - includes: "Personal"
       - includes: "Work"
+  - input: "@dia rename my Work space to Clients"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T1"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          space: "Personal"
+          isActiveSpace: true
+          isPinned: false
+          isFocused: true
+        - windowId: "W1"
+          tabId: "T2"
+          title: "Linear"
+          url: "https://linear.app/"
+          space: "Work"
+          isActiveSpace: false
+          isPinned: false
+          isFocused: false
+      switch-space:
+        switchedTo: "Work"
+      select-tab:
+        title: "Linear"
+        url: "https://linear.app/"
+        space: "Work"
+    expected:
+      - not:
+          callsTool: switch-space
+      - not:
+          callsTool: select-tab
+      - includes: "Dia"
   # dia-ai-extensions
   - input: "@dia which browser extensions do I have installed?"
     mocks:
@@ -528,7 +568,7 @@ evals:
       - callsTool: get-extensions
       - includes: "Bitwarden"
       - includes: "uBlock"
-      - matches: "([Aa]ll|[Ee]very)( of)?( your)?( Dia)? [Ss]paces?"
+      - matches: "([Aa]ll|[Ee]very)[^.]{0,25}[Ss]paces?"
       - not:
           matches: "\\bWork\\b"
   - input: "@dia open bitwarden"

@@ -3,7 +3,8 @@ import { readSpacesForTool } from "../spaces";
 
 /**
  * Returns the Dia spaces in Dia's sidebar order, with each space's color and whether a window is showing it.
- * Use it before switch-space, or to answer which spaces exist and which one is active.
+ * Use it to answer which spaces exist and which one is active, or to find a space's exact name.
+ * Spaces can only be listed and switched to: they can't be created, renamed, deleted or reordered from Raycast.
  */
 export default async function tool() {
   const [spaces, colors] = await Promise.all([readSpacesForTool(), getProfileColors().catch(() => undefined)]);

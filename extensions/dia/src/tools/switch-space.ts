@@ -35,6 +35,10 @@ async function resolveTarget(input: Input) {
 
 /**
  * Switches a Dia window to another space, like picking it in Dia's sidebar, and brings Dia to the front.
+ *
+ * Only for requests to go to, show or switch to a space. Don't call it when the user asks to create, rename,
+ * delete or reorder a space: this can't be done from Raycast, and switching to the space first doesn't help.
+ * Tell the user to do it in Dia instead.
  */
 export default async function tool(input: Input) {
   const { space, windowId } = await resolveTarget(input);
