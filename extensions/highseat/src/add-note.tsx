@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api"
 import { withAccessToken } from "@raycast/utils"
 import { getSiteIcon, useSelectedSite } from "./components/site-picker"
-import { api, highseat } from "./lib/highseat"
+import { api, APP_URL, highseat } from "./lib/highseat"
 
 interface NoteValues {
   date: Date | null
@@ -37,13 +37,29 @@ function AddNote({ arguments: { text } }: LaunchProps<{ arguments: Arguments.Add
     }
   }
 
+  if (!isLoading && !site) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Dashboard" url={APP_URL} />
+          </ActionPanel>
+        }
+      >
+        <Form.Description title="No sites yet" text="Add a site in the dashboard, then add a note to it." />
+      </Form>
+    )
+  }
+
   return (
     <Form
       isLoading={isLoading}
       actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Add Note" onSubmit={submit} />
-        </ActionPanel>
+        site && (
+          <ActionPanel>
+            <Action.SubmitForm title="Add Note" onSubmit={submit} />
+          </ActionPanel>
+        )
       }
     >
       {/* The sites load after the form opens, so the note goes to the site this dropdown shows. */}

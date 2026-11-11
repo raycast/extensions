@@ -404,6 +404,10 @@
           "get-filter-values": {
             "data": [],
             "nextCursor": null
+          },
+          "list-notes": {
+            "data": [],
+            "nextCursor": null
           }
         },
         "expected": [
@@ -534,7 +538,6 @@
             "callsTool": {
               "name": "delete-note",
               "arguments": {
-                "site": "example.com",
                 "id": "note_9"
               }
             }
@@ -595,6 +598,1108 @@
           }
         ],
         "usedAsExample": false
+      },
+      {
+        "input": "@highseat list my sites with their timezones",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-sites"
+          }
+        ]
+      },
+      {
+        "input": "@highseat what reporting currency does example.com use?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "get-site": {
+            "data": {
+              "id": "site_1",
+              "name": "Example",
+              "domain": "example.com",
+              "timezone": "Europe/Warsaw",
+              "reportingCurrency": "USD",
+              "attributionModel": "last",
+              "attributionLookback": 30,
+              "thankYouPaths": [],
+              "excludedIps": [],
+              "excludedPaths": [],
+              "extraHostnames": []
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-site",
+              "arguments": {
+                "site": "example.com"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat is the tracking snippet working on example.com?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "get-install-status": {
+            "data": {
+              "firstEventAt": "2026-10-01T09:12:00Z",
+              "lastEventAt": "2026-11-11T18:40:00Z",
+              "refused": []
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-install-status",
+              "arguments": {
+                "site": "example.com"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat which browsers can I filter example.com by in the last 7 days?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-filter-values",
+              "arguments": {
+                "dimension": "browser"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat which custom events has example.com ever sent?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "get-catalog": {
+            "data": [
+              {
+                "name": "signup",
+                "count": 812
+              },
+              {
+                "name": "checkout",
+                "count": 240
+              }
+            ],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-catalog",
+              "arguments": {
+                "kind": "event"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat how many events do I have left on my plan this month?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "get-usage": {
+            "data": {
+              "used": 412000,
+              "limit": 1000000,
+              "remaining": 588000,
+              "resetsAt": "2026-12-01T00:00:00Z"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-usage"
+          }
+        ]
+      },
+      {
+        "input": "@highseat delete the signup goal on example.com",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "list-goals": {
+            "data": [
+              {
+                "id": "goal_1",
+                "name": "Pricing visit",
+                "type": "page",
+                "match": "/pricing"
+              },
+              {
+                "id": "goal_2",
+                "name": "Signup",
+                "type": "event",
+                "match": "signup"
+              }
+            ],
+            "nextCursor": null
+          },
+          "delete-goal": {
+            "deleted": "goal_2"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-goals"
+          },
+          {
+            "callsTool": {
+              "name": "delete-goal",
+              "arguments": {
+                "id": "goal_2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat how is the checkout funnel doing on example.com?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "list-funnels": {
+            "data": [
+              {
+                "id": "funnel_1",
+                "name": "Checkout",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/pricing"
+                  },
+                  {
+                    "type": "event",
+                    "match": "checkout"
+                  }
+                ]
+              },
+              {
+                "id": "funnel_2",
+                "name": "Old onboarding",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/welcome"
+                  },
+                  {
+                    "type": "page",
+                    "match": "/setup"
+                  }
+                ]
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-funnel": {
+            "data": {
+              "steps": [
+                {
+                  "visitors": 1830
+                },
+                {
+                  "visitors": 240
+                }
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-funnels"
+          },
+          {
+            "callsTool": {
+              "name": "get-funnel",
+              "arguments": {
+                "id": "funnel_1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat delete the old onboarding funnel on example.com",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "list-funnels": {
+            "data": [
+              {
+                "id": "funnel_1",
+                "name": "Checkout",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/pricing"
+                  },
+                  {
+                    "type": "event",
+                    "match": "checkout"
+                  }
+                ]
+              },
+              {
+                "id": "funnel_2",
+                "name": "Old onboarding",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/welcome"
+                  },
+                  {
+                    "type": "page",
+                    "match": "/setup"
+                  }
+                ]
+              }
+            ],
+            "nextCursor": null
+          },
+          "delete-funnel": {
+            "deleted": "funnel_2"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-funnels"
+          },
+          {
+            "callsTool": {
+              "name": "delete-funnel",
+              "arguments": {
+                "id": "funnel_2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat without saving anything, how many visitors would go from / to /pricing to /signup on example.com?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "get-funnel-preview": {
+            "data": {
+              "steps": [
+                {
+                  "visitors": 5120
+                },
+                {
+                  "visitors": 1830
+                },
+                {
+                  "visitors": 310
+                }
+              ]
+            }
+          },
+          "save-funnel": {
+            "data": {
+              "id": "funnel_3",
+              "name": "Pricing to signup"
+            }
+          },
+          "list-funnels": {
+            "data": [
+              {
+                "id": "funnel_1",
+                "name": "Checkout",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/pricing"
+                  },
+                  {
+                    "type": "event",
+                    "match": "checkout"
+                  }
+                ]
+              },
+              {
+                "id": "funnel_2",
+                "name": "Old onboarding",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/welcome"
+                  },
+                  {
+                    "type": "page",
+                    "match": "/setup"
+                  }
+                ]
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-catalog": {
+            "data": [
+              {
+                "name": "/",
+                "count": 9000
+              },
+              {
+                "name": "/pricing",
+                "count": 4200
+              },
+              {
+                "name": "/signup",
+                "count": 900
+              }
+            ],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-funnel-preview"
+          },
+          {
+            "not": {
+              "callsTool": "save-funnel"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat create a funnel on example.com from /pricing to /signup",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "save-funnel": {
+            "data": {
+              "id": "funnel_3",
+              "name": "Pricing to signup"
+            }
+          },
+          "list-funnels": {
+            "data": [
+              {
+                "id": "funnel_1",
+                "name": "Checkout",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/pricing"
+                  },
+                  {
+                    "type": "event",
+                    "match": "checkout"
+                  }
+                ]
+              },
+              {
+                "id": "funnel_2",
+                "name": "Old onboarding",
+                "steps": [
+                  {
+                    "type": "page",
+                    "match": "/welcome"
+                  },
+                  {
+                    "type": "page",
+                    "match": "/setup"
+                  }
+                ]
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-funnel-preview": {
+            "data": {
+              "steps": [
+                {
+                  "visitors": 5120
+                },
+                {
+                  "visitors": 1830
+                },
+                {
+                  "visitors": 310
+                }
+              ]
+            }
+          },
+          "get-catalog": {
+            "data": [
+              {
+                "name": "/",
+                "count": 9000
+              },
+              {
+                "name": "/pricing",
+                "count": 4200
+              },
+              {
+                "name": "/signup",
+                "count": 900
+              }
+            ],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "save-funnel"
+          }
+        ]
+      },
+      {
+        "input": "@highseat what does my saved report \"Visitors by country\" on example.com show?",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "list-reports": {
+            "data": [
+              {
+                "id": "report_1",
+                "name": "Visitors by country",
+                "type": "list"
+              },
+              {
+                "id": "report_2",
+                "name": "Legacy referrers",
+                "type": "list"
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-report-results": {
+            "data": [
+              {
+                "value": "DE",
+                "visitors": 2100
+              },
+              {
+                "value": "PL",
+                "visitors": 1400
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-reports"
+          },
+          {
+            "callsTool": {
+              "name": "get-report-results",
+              "arguments": {
+                "id": "report_1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat delete the legacy referrers report on example.com",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "list-reports": {
+            "data": [
+              {
+                "id": "report_1",
+                "name": "Visitors by country",
+                "type": "list"
+              },
+              {
+                "id": "report_2",
+                "name": "Legacy referrers",
+                "type": "list"
+              }
+            ],
+            "nextCursor": null
+          },
+          "delete-report": {
+            "deleted": "report_2"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-reports"
+          },
+          {
+            "callsTool": {
+              "name": "delete-report",
+              "arguments": {
+                "id": "report_2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat add a report to example.com that lists visitors by browser",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "save-report": {
+            "data": {
+              "id": "report_3",
+              "name": "Visitors by country"
+            }
+          },
+          "list-reports": {
+            "data": [
+              {
+                "id": "report_1",
+                "name": "Visitors by country",
+                "type": "list"
+              },
+              {
+                "id": "report_2",
+                "name": "Legacy referrers",
+                "type": "list"
+              }
+            ],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-report",
+              "arguments": {
+                "dimension": "browser"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat add a new site acme.dev called Acme",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "save-site": {
+            "data": {
+              "id": "site_2",
+              "name": "Acme",
+              "domain": "acme.dev",
+              "timezone": "Europe/Warsaw"
+            }
+          },
+          "get-site": {
+            "data": {
+              "id": "site_1",
+              "name": "Example",
+              "domain": "example.com",
+              "timezone": "Europe/Warsaw",
+              "reportingCurrency": "USD",
+              "attributionModel": "last",
+              "attributionLookback": 30,
+              "thankYouPaths": [],
+              "excludedIps": [],
+              "excludedPaths": [],
+              "extraHostnames": []
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-site",
+              "arguments": {
+                "domain": "acme.dev"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@highseat switch example.com to first-touch attribution",
+        "mocks": {
+          "list-sites": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw"
+              }
+            ],
+            "nextCursor": null
+          },
+          "list-site-overviews": {
+            "data": [
+              {
+                "id": "site_1",
+                "name": "Example",
+                "domain": "example.com",
+                "timezone": "Europe/Warsaw",
+                "visitors": 1200,
+                "previousVisitors": 1000,
+                "online": 14
+              }
+            ],
+            "nextCursor": null
+          },
+          "get-filter-values": {
+            "data": [],
+            "nextCursor": null
+          },
+          "save-site": {
+            "data": {
+              "id": "site_2",
+              "name": "Acme",
+              "domain": "acme.dev",
+              "timezone": "Europe/Warsaw"
+            }
+          },
+          "get-site": {
+            "data": {
+              "id": "site_1",
+              "name": "Example",
+              "domain": "example.com",
+              "timezone": "Europe/Warsaw",
+              "reportingCurrency": "USD",
+              "attributionModel": "last",
+              "attributionLookback": 30,
+              "thankYouPaths": [],
+              "excludedIps": [],
+              "excludedPaths": [],
+              "extraHostnames": []
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-site",
+              "arguments": {
+                "attributionModel": "first"
+              }
+            }
+          }
+        ]
       }
     ]
   },

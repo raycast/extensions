@@ -2,6 +2,7 @@ import { withAccessToken } from "@raycast/utils"
 import { highseat, request } from "../lib/highseat"
 
 type Input = {
+  /** The report to read, one of the dashboard's cards. The tool description lists what each returns. */
   report:
     | "realtime"
     | "overview"
