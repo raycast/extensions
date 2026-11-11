@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reelspan",
+  "title": "Reelspan",
+  "description": "Publish videos, photos and text to TikTok, YouTube, Instagram, X, LinkedIn and more; check results, scheduled posts and history.",
+  "icon": "extension-icon.png",
+  "author": "fabwaseem",
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Media"
+  ],
+  "keywords": [
+    "social media",
+    "tiktok",
+    "youtube",
+    "instagram",
+    "linkedin",
+    "x",
+    "twitter",
+    "bluesky",
+    "schedule",
+    "post"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "subtitle": "Reelspan",
+      "description": "Publish or schedule text, a video or photos to your networks.",
+      "mode": "view"
+    },
+    {
+      "name": "post-history",
+      "title": "Post History",
+      "subtitle": "Reelspan",
+      "description": "Recent posts with each network's result and link; retry the failed ones.",
+      "mode": "view"
+    },
+    {
+      "name": "scheduled-posts",
+      "title": "Scheduled Posts",
+      "subtitle": "Reelspan",
+      "description": "Posts waiting for their time; cancel or open them.",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Profiles",
+      "subtitle": "Reelspan",
+      "description": "Your profiles and connected networks; copy a connect link.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-profiles",
+      "title": "Get Profiles",
+      "description": "Lists the user's Reelspan profiles (brands) and the networks each has connected. Use it to find the profile username before posting."
+    },
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "description": "Publishes or schedules a post to social networks through Reelspan: text, or a video or photos from public URLs or local file paths."
+    },
+    {
+      "name": "get-post-status",
+      "title": "Get Post Status",
+      "description": "Gets each network's result and link for a post by its request ID (or a scheduled post's job ID)."
+    },
+    {
+      "name": "get-post-history",
+      "title": "Get Post History",
+      "description": "Lists recent posts, one row per network, newest first."
+    },
+    {
+      "name": "get-scheduled-posts",
+      "title": "Get Scheduled Posts",
+      "description": "Lists posts waiting for their scheduled time."
+    },
+    {
+      "name": "cancel-scheduled-post",
+      "title": "Cancel Scheduled Post",
+      "description": "Cancels a scheduled post by its job ID so it is never published."
+    }
+  ],
+  "ai": {
+    "instructions": "Reelspan publishes to social networks. A profile (username) is one brand with its connected accounts: call get-profiles first unless the user named one or set a default. Only post to networks the profile has connected. Times are ISO-8601; pass the user's timezone with a scheduled time.",
+    "evals": [
+      {
+        "input": "@reelspan post 'We shipped dark mode' to X and LinkedIn for acme",
+        "mocks": {
+          "get-profiles": [
+            {
+              "username": "acme",
+              "name": "Acme",
+              "networks": [
+                "x",
+                "linkedin"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-post",
+              "arguments": {
+                "profile": "acme",
+                "type": "text",
+                "platforms": [
+                  "x",
+                  "linkedin"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create one in the Reelspan dashboard under API keys",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultProfile",
+      "title": "Default Profile",
+      "description": "Profile username to preselect when posting (optional)",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "reelspan": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "esbuild test/entry.ts --bundle --platform=node --format=esm --external:@raycast/api --outfile=test/.build/reelspan.mjs && node --test test/lib.test.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
