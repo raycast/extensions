@@ -20,6 +20,7 @@ import { useAutoSync } from "./lib/use-auto-sync";
 import { useRebuildNews } from "./lib/use-rebuild-news";
 import { demoScoped, isDemo } from "./lib/demo";
 import { useJournals } from "./lib/use-journals";
+import { unsavedRemainder } from "./lib/parse";
 
 const log = logger.child("[add-entry]");
 
@@ -91,13 +92,15 @@ export default function Command(props: LaunchProps<{ draftValues: Partial<Values
         return;
       }
       if (journal) void visitItem(journal);
-      reset(emptyValues());
+      // The form stays editable while the CLI writes, so keep anything typed since Submit.
+      const remainder = unsavedRemainder(values.body, unsavedBody.current);
+      reset({ ...emptyValues(), body: remainder });
       if (!syncAfterSaving) {
         toast.style = Toast.Style.Success;
         toast.title = saved;
         toast.message = "It uploads on the next sync";
         saving.current = false;
-        await popToRoot();
+        if (!remainder) await popToRoot();
         return;
       }
       try {

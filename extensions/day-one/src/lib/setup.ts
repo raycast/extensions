@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { existsSync, lstatSync, readFileSync, readlinkSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { runAppleScript } from "@raycast/utils";
 import { INSTALL_COMMAND, IS_MAC, IS_WINDOWS } from "./cli";
 import { isDemo } from "./demo";
 import { findLegacyMcpServers, isLegacyCliTarget } from "./parse";
@@ -71,21 +72,20 @@ function pointsIntoDayOneApp(path: string): boolean {
 }
 
 /** Renames the legacy CLI with macOS's administrator prompt. `mv -n` never overwrites an existing dayone-mac. */
-export function renameLegacyCli(): Promise<void> {
-  if (isDemo()) return Promise.resolve();
+export async function renameLegacyCli(): Promise<void> {
+  if (isDemo()) return;
   const script = `do shell script "/bin/mv -n ${LEGACY_CLI_PATH} ${RENAMED_LEGACY_CLI_PATH}" with administrator privileges`;
-  return new Promise((resolve, reject) => {
-    execFile("/usr/bin/osascript", ["-e", script], { timeout: 120_000 }, (error, _stdout, stderr) => {
-      // `mv -n` exits 0 without moving when dayone-mac already exists, so check that the old CLI actually moved.
-      if (!error) {
-        if (pointsIntoDayOneApp(LEGACY_CLI_PATH)) {
-          return reject(new Error(`${RENAMED_LEGACY_CLI_PATH} already exists, so ${LEGACY_CLI_PATH} wasn't moved`));
-        }
-        return resolve();
-      }
-      reject(new Error(stderr.includes("(-128)") ? "Canceled" : stderr.trim() || error.message));
-    });
-  });
+  try {
+    // The administrator prompt waits on the person, so allow longer than the default 10 seconds.
+    await runAppleScript(script, { timeout: 120_000 });
+  } catch (error) {
+    const stderr = String((error as { stderr?: unknown }).stderr ?? "");
+    throw new Error(stderr.includes("(-128)") ? "Canceled" : stderr.trim() || (error as Error).message);
+  }
+  // `mv -n` exits 0 without moving when dayone-mac already exists, so check that the old CLI actually moved.
+  if (pointsIntoDayOneApp(LEGACY_CLI_PATH)) {
+    throw new Error(`${RENAMED_LEGACY_CLI_PATH} already exists, so ${LEGACY_CLI_PATH} wasn't moved`);
+  }
 }
 
 export type McpConfigFinding = { file: string; servers: string[] };

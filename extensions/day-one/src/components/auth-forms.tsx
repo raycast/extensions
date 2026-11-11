@@ -96,7 +96,7 @@ export function EncryptionKeyForm({ onDone }: { onDone: () => void }) {
       }
     >
       <Form.Description text={KEY_HELP} />
-      <Form.PasswordField title="Encryption Key" autoFocus {...itemProps.key} />
+      <Form.PasswordField title="Encryption Key" placeholder="Enter Your Encryption Key" autoFocus {...itemProps.key} />
       <Form.Description text="Saving the key re-downloads your journals so encrypted entries can be read." />
     </Form>
   );

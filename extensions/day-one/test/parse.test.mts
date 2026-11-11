@@ -15,6 +15,7 @@ import {
   parseCliVersion,
   parseSyncProgress,
   plural,
+  unsavedRemainder,
 } from "../src/lib/parse.ts";
 
 describe("parseCliVersion", () => {
@@ -194,5 +195,17 @@ describe("timeZoneOrUndefined", () => {
     assert.equal(timeZoneOrUndefined(null), undefined);
     assert.equal(timeZoneOrUndefined(""), undefined);
     assert.equal(timeZoneOrUndefined("Not/AZone"), undefined);
+  });
+});
+
+describe("unsavedRemainder", () => {
+  it("clears the form when nothing changed while saving", () => {
+    assert.equal(unsavedRemainder("Lake day", "Lake day"), "");
+  });
+  it("keeps only the text added after the saved entry", () => {
+    assert.equal(unsavedRemainder("Lake day", "Lake day\n\nAnd then it rained."), "And then it rained.");
+  });
+  it("keeps everything when the saved text itself was edited, so nothing is lost", () => {
+    assert.equal(unsavedRemainder("Lake day", "Lake trip day"), "Lake trip day");
   });
 });

@@ -193,3 +193,9 @@ export function timeZoneOrUndefined(zone: unknown): string | undefined {
     return undefined;
   }
 }
+
+/** What Add Entry keeps after a save. Text typed after the saved entry stays; if the saved part itself changed, everything stays, so nothing typed is lost. */
+export function unsavedRemainder(saved: string, current: string): string {
+  if (current === saved) return "";
+  return current.startsWith(saved) ? current.slice(saved.length).trimStart() : current;
+}

@@ -1,4 +1,8 @@
+import { existsSync, readdirSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { Cache } from "@raycast/api";
 import { DayOneCliError, runCli } from "./cli";
+import { isDemo } from "./demo";
 import { entryTitle, Place, timeZoneOrUndefined } from "./parse";
 
 // Only the fields this extension reads. The CLI returns much more (locations, weather, revisions); none of it is kept.
@@ -205,6 +209,21 @@ export async function setEncryptionKey(key: string): Promise<void> {
 /** Signs out and deletes this device's local copy of the journals. Callers must check the outbox is empty first. */
 export async function logout(): Promise<void> {
   await runCli(["auth", "logout", "--force"]);
+  forgetCachedResults();
+}
+
+/**
+ * Raycast keeps each `useCachedPromise` hook's last results, full entries included, in its own folder under the
+ * cache directory. Sign-out deletes those folders so the next account never sees them. The loose files beside them
+ * are settings (sidebar, journal order), so they stay.
+ */
+function forgetCachedResults(): void {
+  if (isDemo()) return;
+  const root = new Cache().storageDirectory;
+  if (!existsSync(root)) return;
+  for (const item of readdirSync(root, { withFileTypes: true })) {
+    if (item.isDirectory()) rmSync(join(root, item.name), { recursive: true, force: true });
+  }
 }
 
 export type DoctorCheck = { check: string; status: string; summary: string; details?: Record<string, unknown> };
