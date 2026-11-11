@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Brave and Brave Origin] - {PR_MERGE_DATE}
+## [Brave and Brave Origin] - 2026-11-11
 
 - Add Brave Browser and Brave Origin (standalone, `com.brave.Browser.origin`) to the Browser preference.
 
