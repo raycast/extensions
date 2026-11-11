@@ -1,6 +1,6 @@
 # T3 Code Changelog
 
-## [Fix opening threads on recent T3 Code versions] - {PR_MERGE_DATE}
+## [Fix opening threads on recent T3 Code versions] - 2026-11-11
 
 - Open threads by environment and thread ID on supported desktops, avoiding failed title and branch searches and non-ASCII keystroke input.
 - Keep command-palette navigation for older desktops and servers without an environment ID.
