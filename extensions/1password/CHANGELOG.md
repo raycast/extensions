@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Reopen Raycast After Unlocking] - {PR_MERGE_DATE}
+## [Reopen Raycast After Unlocking] - 2026-11-11
 
 - Fixed Raycast staying closed on macOS after you answer 1Password's Touch ID or password prompt on launch. It now reopens on the command, so you don't have to open it again by hand.
 - While it waits for you to sign in, the command shows a loading screen instead of "Authentication Required".
