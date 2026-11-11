@@ -2,6 +2,8 @@
 
 ## [Chrome Profiles and Copy URL Fix] - {PR_MERGE_DATE}
 
+- Suggest Chrome bookmarks in Open Little Chrome
+- Show only history or only bookmarks with ⌘2 and ⌘3
 - Choose the Chrome profile in Open Little Chrome; suggestions, hidden items and opened windows follow it
 - Pass a Chrome profile to Open URL in Little Chrome
 - Set the default Chrome profile in the extension preferences
