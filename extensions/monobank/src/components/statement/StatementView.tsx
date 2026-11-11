@@ -15,7 +15,7 @@ import { writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, parse } from "node:path";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TokenError } from "../../api/monobank";
+import { ApiError, TokenError } from "../../api/monobank";
 import { STATEMENT_SELECTION_TTL, STORAGE_KEYS } from "../../data/constants";
 import {
   useBudgetAccounts,
@@ -51,10 +51,11 @@ import TransactionListItem from "./TransactionListItem";
 
 /**
  * Transactions of an account or jar. Without `account`, the account is picked in the search bar
- * (the "Show Statement" command); with it, the account is fixed ("View Statement" in "Show Accounts").
+ * (the "Show Statement" command); with it, the account is fixed ("View Statement" in "Show Accounts"), and the view
+ * is pushed, so it's titled after the account.
  */
 export default function StatementView(props: { account?: AccountOrJar }) {
-  return props.account ? <StatementList account={props.account} /> : <StatementCommand />;
+  return props.account ? <StatementList account={props.account} isPushed /> : <StatementCommand />;
 }
 
 function StatementCommand() {
@@ -80,8 +81,10 @@ function StatementList(props: {
   accountDropdown?: List.Props["searchBarAccessory"];
   isLoadingAccounts?: boolean;
   accountsTokenError?: TokenError;
+  /** Whether the view was pushed: only then it has a navigation title, as the command's own shows at the root. */
+  isPushed?: boolean;
 }) {
-  const { account, accountDropdown, isLoadingAccounts = false, accountsTokenError } = props;
+  const { account, accountDropdown, isLoadingAccounts = false, accountsTokenError, isPushed = false } = props;
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [searchText, setSearchText] = useState("");
   const {
@@ -207,6 +210,26 @@ function StatementList(props: {
       return <List.EmptyView icon={Icon.CreditCard} title="No Accounts" description="No accounts to show." />;
     }
 
+    if (statement.error && !statement.isLoading) {
+      const { error } = statement;
+      return (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Couldn't Load Statement"
+          description={
+            (error instanceof ApiError ? error.description : undefined) ??
+            (error instanceof Error ? error.message : undefined)
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={statement.retry} />
+              <StatementActionsSection {...statementActions} actionsBefore={1} />
+            </ActionPanel>
+          }
+        />
+      );
+    }
+
     return (
       <List.EmptyView
         icon={Icon.Receipt}
@@ -214,7 +237,7 @@ function StatementList(props: {
         description={statement.period ? `${accountTitle} · ${statement.period.label}` : undefined}
         actions={
           <ActionPanel>
-            <StatementActionsSection {...statementActions} />
+            <StatementActionsSection {...statementActions} actionsBefore={0} />
           </ActionPanel>
         }
       />
@@ -226,7 +249,7 @@ function StatementList(props: {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       navigationTitle={
-        accountTitle && statement.period ? `${accountTitle} · ${statement.period.label}` : "Show Statement"
+        isPushed && accountTitle ? [accountTitle, statement.period?.label].filter(Boolean).join(" · ") : undefined
       }
       filtering={false}
       onSearchTextChange={setSearchText}
@@ -281,7 +304,7 @@ function StatementList(props: {
           actions={
             <ActionPanel>
               <Action title="Load Older Transactions" icon={Icon.ArrowDown} onAction={statement.loadOlder} />
-              <StatementActionsSection {...statementActions} />
+              <StatementActionsSection {...statementActions} actionsBefore={1} />
             </ActionPanel>
           }
         />

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   BudgetInput,
   deleteBudget,
@@ -22,32 +23,29 @@ function notifyChange() {
   listeners.forEach((listener) => listener());
 }
 
-/** The saved budgets. Writes go through storage (see `upsertBudget`), then every `useBudgets` reads it again. */
-export function useBudgets() {
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+/** Calls the latest `revalidate` whenever a listener in `set` is notified. */
+function useListener(set: Set<() => void>, revalidate: () => unknown) {
+  const latest = useRef(revalidate);
+  latest.current = revalidate;
 
   useEffect(() => {
-    let isCancelled = false;
-
-    function load() {
-      readBudgets()
-        .then((budgets) => {
-          if (!isCancelled) setBudgets(budgets);
-        })
-        .catch(console.error)
-        .finally(() => {
-          if (!isCancelled) setIsLoading(false);
-        });
-    }
-
-    load();
-    listeners.add(load);
-    return () => {
-      isCancelled = true;
-      listeners.delete(load);
+    const listener = () => {
+      latest.current();
     };
-  }, []);
+    set.add(listener);
+    return () => {
+      set.delete(listener);
+    };
+  }, [set]);
+}
+
+/** The saved budgets. Writes go through storage (see `upsertBudget`), then every `useBudgets` reads it again. */
+export function useBudgets() {
+  const { data, isLoading, revalidate } = usePromise(readBudgets, [], {
+    failureToastOptions: { title: "Failed to load budgets" },
+  });
+  useListener(listeners, revalidate);
+  const budgets = useMemo(() => data ?? [], [data]);
 
   const save = useCallback(async (input: BudgetInput) => {
     const budget = await upsertBudget(input);
@@ -78,30 +76,14 @@ const accountListeners = new Set<() => void>();
  */
 export function useBudgetAccounts() {
   const { data: clientInfo, isLoading: isLoadingClientInfo, isLoadingFromStorage, tokenError } = useClientInfo();
-  const [savedIds, setSavedIds] = useState<string[]>();
-  const [isLoadingIds, setIsLoadingIds] = useState(true);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    function load() {
-      readBudgetAccountIds()
-        .then((ids) => {
-          if (!isCancelled) setSavedIds(ids);
-        })
-        .catch(console.error)
-        .finally(() => {
-          if (!isCancelled) setIsLoadingIds(false);
-        });
-    }
-
-    load();
-    accountListeners.add(load);
-    return () => {
-      isCancelled = true;
-      accountListeners.delete(load);
-    };
-  }, []);
+  // Wrapped, so "nothing saved" (`undefined` ids) can be told apart from "not read yet".
+  const saved = usePromise(async () => ({ ids: await readBudgetAccountIds() }), [], {
+    failureToastOptions: { title: "Failed to load budget accounts" },
+  });
+  useListener(accountListeners, saved.revalidate);
+  const savedIds = saved.data?.ids;
+  // Ready once read, and still ready while it's read again after a change. A failed read counts the default ones.
+  const isLoadingIds = !saved.data && !saved.error;
 
   const eligible = useMemo(() => {
     const cards = clientInfo.accounts.filter((account) => account.type !== AccountType.FOP);

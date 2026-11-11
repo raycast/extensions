@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect } from "react";
 import { getSections } from "../components/AccountDropdown";
 import { STATEMENT_SELECTION_TTL, STORAGE_KEYS } from "../data/constants";
@@ -18,6 +18,7 @@ export function useStatementAccount() {
     isLoading: isLoadingAccounts,
     isLoadingFromStorage: isLoadingCachedAccounts,
     isError,
+    error,
     tokenError,
   } = useClientInfo();
   const {
@@ -29,7 +30,7 @@ export function useStatementAccount() {
 
   useEffect(() => {
     if (isError && !tokenError) {
-      showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "Failed to load accounts" });
+      showFailureToast(error, { title: "Failed to load accounts" });
     }
   }, [isError, tokenError]);
 

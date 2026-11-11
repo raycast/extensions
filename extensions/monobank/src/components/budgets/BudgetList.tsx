@@ -43,8 +43,20 @@ export default function BudgetList(props: {
   note?: string;
   /** Extra actions on every item, e.g. switching the month. */
   actions?: ReactNode;
+  /** Only for a pushed view: the command's own title shows at the root. */
+  navigationTitle?: string;
 }) {
-  const { accounts, groups, month, isLoading = false, isPartial, oldestSyncedAt, note, actions } = props;
+  const {
+    accounts,
+    groups,
+    month,
+    isLoading = false,
+    isPartial,
+    oldestSyncedAt,
+    note,
+    actions,
+    navigationTitle,
+  } = props;
   const { budgets, isLoading: isLoadingBudgets, remove, move } = useBudgets();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
@@ -89,12 +101,13 @@ export default function BudgetList(props: {
   }
 
   const formProps = { spentCategories };
-  const createActions = (
+  // `isFirst`: in the empty view, "Create Budget" takes ⏎ instead of its shortcut.
+  const renderCreateActions = (isFirst: boolean) => (
     <>
       <Action.Push
         title="Create Budget"
         icon={Icon.Plus}
-        shortcut={shortcuts.create}
+        shortcut={isFirst ? undefined : shortcuts.create}
         target={<BudgetForm {...formProps} />}
       />
       <PresetSubmenu budgets={budgets} spentCategories={spentCategories} />
@@ -107,7 +120,7 @@ export default function BudgetList(props: {
       // "Create Budget" when there are no budgets yet. Its toast still shows the progress.
       isLoading={isLoadingBudgets || (budgets.length > 0 && isLoading)}
       isShowingDetail={isShowingDetail && budgets.length > 0}
-      navigationTitle={sectionTitle ? `Budgets · ${sectionTitle}` : "Budgets"}
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search budgets"
     >
       {!isLoadingBudgets && (
@@ -117,7 +130,7 @@ export default function BudgetList(props: {
           description="Set a monthly limit for spending categories, e.g. 5 000 ₴ for cafes."
           actions={
             <ActionPanel>
-              {createActions}
+              {renderCreateActions(true)}
               {actions}
             </ActionPanel>
           }
@@ -142,17 +155,15 @@ export default function BudgetList(props: {
                     <Action.Push
                       title="Edit Budget"
                       icon={Icon.Pencil}
-                      shortcut={shortcuts.edit}
                       target={<BudgetForm budget={budget} {...formProps} />}
                     />
                     <Action
                       title="Toggle Details"
                       icon={Icon.Sidebar}
-                      shortcut={shortcuts.toggleDetails}
                       onAction={() => setIsShowingDetail((value) => !value)}
                     />
                   </ActionPanel.Section>
-                  <ActionPanel.Section>{createActions}</ActionPanel.Section>
+                  <ActionPanel.Section>{renderCreateActions(false)}</ActionPanel.Section>
                   <ActionPanel.Section>
                     {index > 0 && (
                       <Action

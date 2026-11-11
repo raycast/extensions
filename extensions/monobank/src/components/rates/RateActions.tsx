@@ -9,6 +9,9 @@ import ConvertCurrency from "./ConvertCurrency";
 
 export default function RateActions(props: { rate: CurrencyRate; pin: PinProps }) {
   const { rate, pin } = props;
+  // "Convert Currency" takes ⌘⏎ instead of its own shortcut when it's the second action.
+  const copyCount =
+    rate.rateCross !== undefined ? 1 : [rate.rateSell, rate.rateBuy].filter((r) => r !== undefined).length;
 
   return (
     <ActionPanel>
@@ -24,7 +27,7 @@ export default function RateActions(props: { rate: CurrencyRate; pin: PinProps }
         <Action.Push
           title="Convert Currency"
           icon={Icon.Coins}
-          shortcut={shortcuts.convert}
+          shortcut={copyCount >= 2 ? shortcuts.convert : undefined}
           target={<ConvertCurrency rate={rate} />}
         />
         {isMenuBarSupported && (

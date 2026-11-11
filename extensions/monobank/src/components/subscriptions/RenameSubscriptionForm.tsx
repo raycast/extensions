@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Subscription } from "../../types";
 import { getSubscriptionTitle } from "../../utils";
 
@@ -9,7 +10,7 @@ interface FormValues {
 /** Renames a subscription. An empty name brings back the merchant's own. */
 export default function RenameSubscriptionForm(props: {
   subscription: Subscription;
-  onRename: (key: string, patch: { name: string }) => Promise<void>;
+  onRename: (subscription: Subscription, patch: { name: string }) => Promise<void>;
 }) {
   const { subscription, onRename } = props;
   const navigation = useNavigation();
@@ -18,12 +19,11 @@ export default function RenameSubscriptionForm(props: {
     try {
       // The merchant's own name isn't saved, so the subscription follows it if it changes.
       const name = values.name.trim() === subscription.name ? "" : values.name;
-      await onRename(subscription.key, { name });
+      await onRename(subscription, { name });
       navigation.pop();
       await showToast(Toast.Style.Success, "Subscription Renamed");
     } catch (error) {
-      console.error(error);
-      await showToast(Toast.Style.Failure, "Failed to rename subscription");
+      await showFailureToast(error, { title: "Failed to rename subscription" });
     }
   }
 

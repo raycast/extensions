@@ -30,12 +30,11 @@
 - Updated dependencies to the latest Raycast API
 - Adopted Raycast common shortcuts: Pin is now `⌘ .` (`Ctrl .` on Windows) and Copy IBAN is now `⌘ ⇧ C` (`Ctrl ⇧ C` on Windows)
 - Fixed a crash when searching accounts that have no card number
-- Moved the access token to the extension preferences. It's now optional and only needed for "Show Accounts". If you had set it before, you may need to enter it again
+- Moved the access token to the extension preferences. It's now optional: "Show Currency Rates", "Convert Currency" and "Currency Rate Menu Bar" work without it. It's needed for your personal data: "Show Accounts", "Show Statement", "Show Budgets", "Show Subscriptions", "Sync Statements", "Jar Progress Menu Bar", "Subscriptions Menu Bar", and AI questions about your accounts. If you had set it before, you may need to enter it again
 - Show a clear "Access token required" or "Invalid access token" screen with a shortcut to the preferences, and retry right after the token is fixed
 - Cached accounts are now tied to the access token that loaded them, and are no longer shown after the token is changed, removed or rejected
 - Fixed the accounts total showing NaN when an account or jar is in a currency other than UAH, USD or EUR
 - Fixed currencies with a code below 100, such as the Australian dollar, missing from the rates
-- Internal cleanup and refactoring
 
 ## [Fix] - 2025-12-02
 

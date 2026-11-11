@@ -458,8 +458,8 @@ export function detectSubscriptions(
 
 /**
  * Makes the keys of one merchant's subscriptions unique: interleaved ones at the same price share a key. The one
- * charged first keeps it, so its name and hidden mark stay when another one starts; the others get the day they're
- * charged on, e.g. "…|2.99@21".
+ * charged first keeps it; the others get the day they're charged on, e.g. "…|2.99@21". Overrides find their
+ * subscription by its charges, not only by this key (see `bindSubscriptionOverrides`).
  */
 function withUniqueKeys(subscriptions: Subscription[]): Subscription[] {
   const firstCharge = (subscription: Subscription) => subscription.charges[subscription.charges.length - 1].time;
@@ -483,18 +483,70 @@ export function getRejectedPriceChanges(overrides: SubscriptionOverrides): Set<s
   return new Set(Object.values(overrides).flatMap((override) => override.rejectedPriceChanges ?? []));
 }
 
-/** Adds the user's names, hidden marks and confirmed prices to `subscriptions`. */
+/**
+ * Which override belongs to each subscription: the key of its override, or `undefined`. A detected key depends on
+ * the first charge in the stored history, so it changes as old charges drop out. The charges themselves don't:
+ * 1. An override with `chargeIds` belongs to the subscription that shares the most charges with it.
+ * 2. The other overrides (older ones without ids, or ones whose charges are all gone) match by key, and only
+ *    subscriptions that no override matched yet.
+ */
+export function bindSubscriptionOverrides(
+  subscriptions: Subscription[],
+  overrides: SubscriptionOverrides,
+): (string | undefined)[] {
+  const bound: (string | undefined)[] = subscriptions.map(() => undefined);
+  const boundKeys = new Set<string>();
+  const chargeIds = subscriptions.map((subscription) => new Set(subscription.charges.map((charge) => charge.id)));
+
+  // The most shared charges bind first, so two overrides never take the same subscription.
+  const matches = Object.entries(overrides).flatMap(([key, override]) =>
+    subscriptions.flatMap((subscription, index) => {
+      const shared = override.chargeIds?.filter((id) => chargeIds[index].has(id)).length ?? 0;
+      return shared ? [{ key, index, shared, isSameKey: subscription.key === key }] : [];
+    }),
+  );
+  matches.sort((a, b) => b.shared - a.shared || Number(b.isSameKey) - Number(a.isSameKey));
+  for (const { key, index } of matches) {
+    if (boundKeys.has(key) || bound[index] !== undefined) continue;
+    bound[index] = key;
+    boundKeys.add(key);
+  }
+
+  subscriptions.forEach((subscription, index) => {
+    const { key } = subscription;
+    if (bound[index] !== undefined || boundKeys.has(key) || !overrides[key]) return;
+    bound[index] = key;
+    boundKeys.add(key);
+  });
+
+  return bound;
+}
+
+/**
+ * Adds the user's names, hidden marks and confirmed prices to `subscriptions` (see `bindSubscriptionOverrides`).
+ * A subscription with an override takes its key, so later changes update the same override. One without whose
+ * detected key belongs to another subscription's override gets its newest charge added to the key, so a change to
+ * it never lands on the other one.
+ */
 export function applySubscriptionOverrides(
   subscriptions: Subscription[],
   overrides: SubscriptionOverrides,
 ): Subscription[] {
-  return subscriptions.map((subscription) => {
-    const override = overrides[subscription.key];
-    if (!override) return subscription;
+  const bound = bindSubscriptionOverrides(subscriptions, overrides);
+
+  return subscriptions.map((subscription, index) => {
+    const key = bound[index];
+    if (key === undefined) {
+      if (!overrides[subscription.key]) return subscription;
+      return { ...subscription, key: `${subscription.key}#${subscription.charges[0].id}` };
+    }
+
+    const override = overrides[key];
     const isConfirmed =
       subscription.newPriceChargeId !== undefined && override.confirmedPriceChange === subscription.newPriceChargeId;
     return {
       ...subscription,
+      key,
       customName: override.name,
       hidden: override.hidden,
       newPriceChargeId: isConfirmed ? undefined : subscription.newPriceChargeId,

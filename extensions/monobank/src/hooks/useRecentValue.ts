@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback } from "react";
 
 interface StoredValue<T> {
   value: T;
@@ -13,44 +14,36 @@ interface StoredValue<T> {
  * `value` is `undefined` when nothing recent is saved, or the saved value fails `isValue`.
  */
 export function useRecentValue<T>(key: string, ttl: number, isValue: (value: unknown) => value is T) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [value, setValueState] = useState<T>();
+  const { data, isLoading, mutate } = usePromise(
+    async (key: string, ttl: number): Promise<T | undefined> => {
+      const stored = parse(await LocalStorage.getItem<string>(key), isValue);
+      const now = Date.now();
+      if (!stored || now - stored.usedAt >= ttl) return undefined;
 
-  useEffect(() => {
-    let isCancelled = false;
+      await save(key, stored.value, now);
+      return stored.value;
+    },
+    [key, ttl],
+    { failureToastOptions: { title: "Failed to load the last selection" } },
+  );
 
-    LocalStorage.getItem<string>(key)
-      .then((json) => {
-        if (isCancelled) return;
-        const stored = parse(json, isValue);
-        if (!stored) return;
+  const setValue = useCallback(
+    (value: T) => {
+      // Not read again after saving: the expiry is only checked on launch.
+      mutate(save(key, value, Date.now()), {
+        optimisticUpdate: () => value as Awaited<T>,
+        shouldRevalidateAfter: false,
+      }).catch(console.error);
+    },
+    [key, mutate],
+  );
 
-        const now = Date.now();
-        if (now - stored.usedAt >= ttl) return;
-
-        setValueState(stored.value);
-        save(key, stored.value, now);
-      })
-      .finally(() => {
-        if (!isCancelled) setIsLoading(false);
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-    // `isValue` is left out: the value is only read on launch, so a new validator wouldn't change anything.
-  }, [key, ttl]);
-
-  function setValue(value: T) {
-    setValueState(value);
-    save(key, value, Date.now());
-  }
-
-  return { value, setValue, isLoading };
+  // A value set before the first read finished cancels that read, so it counts as loaded.
+  return { value: data, setValue, isLoading: isLoading && data === undefined };
 }
 
 function save<T>(key: string, value: T, usedAt: number) {
-  LocalStorage.setItem(key, JSON.stringify({ value, usedAt } satisfies StoredValue<T>));
+  return LocalStorage.setItem(key, JSON.stringify({ value, usedAt } satisfies StoredValue<T>));
 }
 
 /** The stored value, or undefined if there is none or it has another shape. */

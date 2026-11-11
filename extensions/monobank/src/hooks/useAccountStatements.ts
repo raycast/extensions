@@ -1,4 +1,5 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toTransaction } from "../api/mappers";
 import { ApiError, getStatement, getTokenError, requireToken } from "../api/monobank";
@@ -140,16 +141,18 @@ export function useAccountStatements(
       } catch (error) {
         if (error instanceof CancelledError || !isCurrent()) return;
 
-        console.error(error);
         setError(error);
 
-        if (!getTokenError(error)) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: `Failed to update ${label}`,
-            message: error instanceof ApiError ? error.description : undefined,
-          });
+        if (getTokenError(error)) {
+          console.error(error);
+        } else {
+          // Hides the progress toast before the failure shows.
+          await toast?.hide();
           toast = undefined;
+          await showFailureToast(error, {
+            title: `Failed to update ${label}`,
+            ...(error instanceof ApiError && error.description && { message: error.description }),
+          });
         }
       } finally {
         if (isCurrent()) setIsSyncing(false);

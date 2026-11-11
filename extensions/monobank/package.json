@@ -241,7 +241,7 @@
     {
       "name": "get-transactions",
       "title": "Get Transactions",
-      "description": "Get the transactions of a monobank account or jar for a period of up to 31 days, with income, spending and per-category totals."
+      "description": "Get the transactions of a monobank account or jar for a period, with income, spending and per-category totals. A period can be up to 31 days, or longer when the stored history covers it."
     },
     {
       "name": "get-budgets",

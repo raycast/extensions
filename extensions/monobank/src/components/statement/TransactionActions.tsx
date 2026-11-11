@@ -17,11 +17,7 @@ export default function TransactionActions(props: {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.CopyToClipboard
-          title="Copy Amount"
-          content={formatPlainAmount(t.amount, t.currency)}
-          shortcut={shortcuts.copyAmount}
-        />
+        <Action.CopyToClipboard title="Copy Amount" content={formatPlainAmount(t.amount, t.currency)} />
         <Action.CopyToClipboard title="Copy Description" content={t.description} />
         {t.receiptId && (
           <>

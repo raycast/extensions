@@ -11,10 +11,11 @@ export type BudgetPeriod = "thisMonth" | "lastMonth";
 
 /**
  * The saved budgets with their progress for This Month or Last Month across the budget accounts, updating their
- * statements itself. Used by Show Budgets and by "Manage Budgets…" in Show Statement.
+ * statements itself. Used by Show Budgets and by "Manage Budgets…" in Show Statement. `navigationTitle` is only for
+ * a pushed view: the command's own title shows at the root.
  */
-export default function BudgetsView(props: { initialMonth?: BudgetPeriod }) {
-  const { initialMonth = "thisMonth" } = props;
+export default function BudgetsView(props: { initialMonth?: BudgetPeriod; navigationTitle?: string }) {
+  const { initialMonth = "thisMonth", navigationTitle } = props;
   const [preset, setPreset] = useState<BudgetPeriod>(initialMonth);
   const period = useMemo(() => ({ preset }), [preset]);
   const month = useMemo(() => getBudgetMonth(period), [period]);
@@ -32,6 +33,7 @@ export default function BudgetsView(props: { initialMonth?: BudgetPeriod }) {
       accounts={budgetAccounts.accounts ?? []}
       groups={statements.groups}
       month={month}
+      navigationTitle={navigationTitle}
       isLoading={budgetAccounts.isLoading || statements.isLoading}
       isPartial={statements.isPartial}
       oldestSyncedAt={statements.oldestSyncedAt}

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { useMemo, useRef } from "react";
 import { BudgetPreset, budgetPresets } from "../../data/budgetPresets";
 import { useBudgets } from "../../hooks";
@@ -56,11 +56,7 @@ export default function BudgetForm(props: {
         navigation.pop();
         await showToast(Toast.Style.Success, budget ? "Budget Saved" : "Budget Created", values.name.trim());
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to save budget",
-          message: error instanceof Error ? error.message : undefined,
-        });
+        await showFailureToast(error, { title: "Failed to save budget" });
       }
     },
   });

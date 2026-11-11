@@ -37,14 +37,25 @@ export function toJar(jar: JarResponse): Jar {
 /**
  * Keeps custom titles from `previous`, which only exist locally. They are matched by account ID, so a
  * previous cache from another token only contributes titles of accounts this token can see.
+ *
+ * `scope` is the token fingerprint. The jar title history (see `ClientInfo.jarTitleHistory`) adds the previous
+ * jars and the current ones, and starts over when `previous` belongs to another token.
  */
-export function toClientInfo(response: ClientInfoResponse, previous: ClientInfo): ClientInfo {
+export function toClientInfo(response: ClientInfoResponse, previous: ClientInfo, scope: string): ClientInfo {
   const accounts = response.accounts.map(toAccount).map((account) => {
     const savedAccount = previous.accounts.find((saved) => saved.id === account.id);
     return savedAccount ? { ...account, title: savedAccount.title } : account;
   });
+  const jars = response.jars?.map(toJar) ?? [];
 
-  return { name: response.name, accounts, jars: response.jars?.map(toJar) ?? [] };
+  const isSameScope = previous.jarTitleHistory?.scope === scope;
+  const titles = [
+    ...(isSameScope ? (previous.jarTitleHistory?.titles ?? []) : []),
+    ...(isSameScope ? previous.jars.map((jar) => jar.title) : []),
+    ...jars.map((jar) => jar.title),
+  ].filter(Boolean);
+
+  return { name: response.name, accounts, jars, jarTitleHistory: { scope, titles: [...new Set(titles)] } };
 }
 
 /** Whether both currencies are known to `currency-codes`, which `toCurrencyRate` requires. */

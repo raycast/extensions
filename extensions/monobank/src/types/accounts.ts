@@ -47,4 +47,9 @@ export interface ClientInfo {
   name?: string;
   accounts: Account[];
   jars: Jar[];
+  /**
+   * Every jar title seen for the token with fingerprint `scope`, including closed and renamed jars, so their
+   * top-ups in the stored history still count as Savings. Missing in caches from older versions.
+   */
+  jarTitleHistory?: { scope: string; titles: string[] };
 }

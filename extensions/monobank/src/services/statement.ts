@@ -1,4 +1,4 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { ApiError, RateLimitError, getStatement, getTokenFingerprint, requireToken } from "../api/monobank";
 import { StatementItemResponse } from "../api/types";
 import {
@@ -7,13 +7,13 @@ import {
   STATEMENT_MAX_PERIOD,
   STATEMENT_PAGE_SIZE,
   STATEMENT_RATE_LIMIT,
-  STORAGE_KEYS,
   getStatementKey,
 } from "../data/constants";
 import { AccountOrJar } from "../types";
 import { getLatestPeriodEnd, resolvePeriod, validatePeriod } from "../utils/statement";
 import { toUserFacingError } from "./clientInfo";
 import { toLocalIso } from "./format";
+import { reserveStatementSlot, sleep } from "./rateLimit";
 import { readJson, writeJson } from "./storage";
 
 /** Unix seconds, both ends included. */
@@ -186,7 +186,9 @@ export function getPeriodItems(stored: StoredStatement, period: StatementPeriod)
  *   runs until now, resyncs from its start (only the last 31 days when it's longer than one request covers).
  *
  * A missing part longer than one request covers is cut to its newest 31 days.
- * - `refresh`: always requests: the last 31 days, or the period itself when it's older.
+ * - `refresh`: always requests: the last 31 days for a period within them, or the period itself when it's older.
+ *   A longer period is cut like in `auto`: one running until now resyncs the last 31 days, and one with a fixed
+ *   end requests its newest 31 days. The rest of it comes from the stored history.
  * - `older`: the newest missing part of the period.
  *
  * `staleAfter` (milliseconds) is how old the last sync can be before `auto` resyncs a period that runs until now.
@@ -214,7 +216,12 @@ export function planRequest(
       }
       return gaps[0] && limitGap(gaps[0]);
     case "refresh":
-      return isInWindow ? syncWindow : { from: period.from, to: period.to };
+      if (isInWindow) return syncWindow;
+      if (period.to === undefined) {
+        return now / 1000 - period.from > STATEMENT_MAX_PERIOD ? syncWindow : { from: period.from };
+      }
+      // Older stored transactions stay, since a response only replaces the range it covers.
+      return limitGap({ from: period.from, to: period.to });
     case "older":
       return gaps[0] && limitGap(gaps[0]);
   }
@@ -517,30 +524,23 @@ async function saveHistoryFrom(accountId: string, historyFrom: number) {
   await writeJson(getStatementKey(accountId), { ...stored, historyFrom });
 }
 
-/** Sends `request` once monobank's rate limit allows it. On a 429, waits a full minute and retries once. */
+/**
+ * Sends `request` once monobank's rate limit allows it, at a time reserved with the commands, the menu bar and the
+ * AI (see `reserveStatementSlot`). On a 429, waits a full minute and retries once.
+ */
 async function withRateLimit<T>(request: () => Promise<T>): Promise<T> {
-  await waitForRateLimit();
-
   try {
-    return await request();
+    return await sendInSlot(request);
   } catch (error) {
     if (!(error instanceof RateLimitError)) throw error;
 
     // The limit was used elsewhere, e.g. by another app with the same token.
-    await LocalStorage.setItem(STORAGE_KEYS.statementRequestedAt, Date.now());
-    await waitForRateLimit();
-    return await request();
+    return await sendInSlot(request, Date.now() + STATEMENT_RATE_LIMIT);
   }
 }
 
-async function waitForRateLimit() {
-  const requestedAt = (await LocalStorage.getItem<number>(STORAGE_KEYS.statementRequestedAt)) ?? 0;
-  // Capped, in case the stored time is in the future after a clock change.
-  const remaining = Math.min(requestedAt + STATEMENT_RATE_LIMIT - Date.now(), STATEMENT_RATE_LIMIT);
-
-  if (remaining > 0) {
-    await new Promise((resolve) => setTimeout(resolve, remaining));
-  }
-
-  await LocalStorage.setItem(STORAGE_KEYS.statementRequestedAt, Date.now());
+async function sendInSlot<T>(request: () => Promise<T>, notBefore?: number): Promise<T> {
+  const slot = await reserveStatementSlot({ notBefore });
+  await sleep(slot.at - Date.now());
+  return await request();
 }

@@ -1,4 +1,5 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toTransaction } from "../api/mappers";
 import { ApiError, getStatement, getTokenError, requireToken } from "../api/monobank";
@@ -143,14 +144,14 @@ export function useStatement(account: AccountOrJar | undefined, period: Period |
       } catch (error) {
         if (error instanceof CancelledError || !isCurrent()) return;
 
-        console.error(error);
         setError(error);
 
-        if (!getTokenError(error)) {
-          showToast({
-            style: Toast.Style.Failure,
+        if (getTokenError(error)) {
+          console.error(error);
+        } else {
+          showFailureToast(error, {
             title: "Failed to load statement",
-            message: error instanceof ApiError ? error.description : undefined,
+            ...(error instanceof ApiError && error.description && { message: error.description }),
           });
         }
       } finally {
@@ -199,6 +200,8 @@ export function useStatement(account: AccountOrJar | undefined, period: Period |
     missing: !tokenError && !isFetching ? missing : undefined,
     loadOlder: useCallback(() => load("older"), [load]),
     refresh: useCallback(() => load("refresh"), [load]),
+    /** Loads what the period needs again, e.g. after it failed. */
+    retry: useCallback(() => load("auto"), [load]),
     /** Seconds left until the rate limit allows the next request, or 0 when not waiting. */
     waitSeconds,
   };

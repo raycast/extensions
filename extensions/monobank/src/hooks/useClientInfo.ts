@@ -25,7 +25,7 @@ export function useClientInfo() {
     // Data cached for another token (or before there was any) is never shown.
     scope: tokenFingerprint,
     fetch: async (previous) => ({
-      clientInfo: toClientInfo(await getClientInfo(token), previous.clientInfo),
+      clientInfo: toClientInfo(await getClientInfo(token), previous.clientInfo, tokenFingerprint),
     }),
     // A missing or rejected token isn't rate limited, so refetch as soon as the user fixes it.
     shouldRetryNextLaunch: (error) => getTokenError(error) !== undefined,
@@ -54,6 +54,7 @@ export function useClientInfo() {
     /** Whether the cached accounts are still being read. Stays false while refetching. */
     isLoadingFromStorage,
     isError,
+    error,
     tokenError,
   };
 }
@@ -61,5 +62,6 @@ export function useClientInfo() {
 /** The user's jar titles for `toTransaction`, so transfers to them are categorized as Savings. */
 export function useJarTitles() {
   const { data } = useClientInfo();
-  return useMemo(() => getJarTitles(data.jars), [data.jars]);
+  const { jars, jarTitleHistory } = data;
+  return useMemo(() => getJarTitles({ accounts: [], jars, jarTitleHistory }), [jars, jarTitleHistory]);
 }

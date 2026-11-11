@@ -1,6 +1,6 @@
 <div align="center">
   <img
-    src="https://github.com/raycast/extensions/blob/main/extensions/monobank/assets/command-icon.png?raw=true"
+    src="https://github.com/raycast/extensions/blob/main/extensions/monobank/media/command-icon.png?raw=true"
     width="64"
     alt="monobank extension icon"
   />
@@ -39,7 +39,7 @@ See all your cards, FOP accounts and jars with their balances, and the total of 
 
 ![Show Accounts with a jar's details](media/accounts.png)
 
-- Pin the accounts and jars you use most (`⌘ ⇧ P`) to keep them on top, and reorder them.
+- Pin the accounts and jars you use most (`⌘ .`) to keep them on top, and reorder them.
 - Give an account your own name with "Edit Account" (`⌘ E`). AI finds the account by it too.
 - Toggle details (`⌘ ⇧ D`) to see an account's IBAN, credit limit and cashback type, or a jar's goal and top-up link.
 - Copy the balance (`⌘ ⇧ B`), the total (`⌘ ⇧ T`), the IBAN (`⌘ ⇧ C`) or a jar's goal (`⌘ ⇧ G`), open the top-up page, or see the statement with "View Statement" (`⌘ ⇧ S`).
@@ -117,7 +117,7 @@ Browse the transactions of a card, FOP account or jar. Pick the account in the s
 
 ![Show Statement with the Summary of the last 31 days](media/statement.png)
 
-- Choose a period with "Change Period…" (`⌘ ⇧ P`): today, the last 7 days, this or last month, the last 31 days, or a custom range of up to 31 days.
+- Choose a period with "Change Period…" (`⌘ ⇧ P`): today, the last 7 days, this or last month, the last 31 days, or a custom range. A custom range can be longer than 31 days within the stored history (see "Keep Statements For"); before it, it can be up to 31 days, the most monobank returns at once.
 
   ![Change Period with a custom range](media/statement-period.png)
 
@@ -162,7 +162,7 @@ See your recurring charges, such as Netflix, Spotify, ChatGPT or your mobile pla
 - **Sections**: Upcoming (the next 7 days), Active, and Possibly Cancelled for subscriptions whose expected charge didn't come.
 - **History**: the command makes no requests when it opens. "Sync Statements" loads the history in the background, back to the "Keep Statements For" preference (3 months by default), and subscriptions show once a merchant has charged at least twice. Use Refresh (`⌘ R`) to update the last 31 days.
 - **Corrections**: rename a subscription with "Rename…" (`⌘ E`), or hide something that isn't one with "Not a Subscription" (`⌃ X`), here or on one of its charges in "Show Statement". Undo it from the toast, or later with "Show Hidden Subscriptions" (`⌘ ⇧ H`) and "Unhide".
-- Toggle details (`⌘ ⇧ D`) to see the monthly and yearly cost, the card, the category and every charge, and open the card's statement with `⌘ ⇧ S`.
+- Toggle details to see the monthly and yearly cost, the card, the category and every charge, or open the card's statement.
 
   ![Details of Netflix with a new price and its charges](media/subscriptions-details.png)
 
@@ -213,4 +213,4 @@ Conversions use monobank's current rates, the same way as "Convert Currency". Qu
 
 ## Credits
 
-Merchant categories come from the [Merchant Category Codes](https://github.com/Oleksios/Merchant-Category-Codes) dataset by Oleksios, licensed under MIT. Run `node scripts/update-mcc.mjs` to update them.
+Merchant categories come from the [Merchant Category Codes](https://github.com/Oleksios/Merchant-Category-Codes) dataset by Oleksios, licensed under MIT.

@@ -108,7 +108,7 @@ export default async function tool(input: Input) {
     return { account: accountInfo, periodTooLong: describeTooLong(error, from, to ?? now) };
   }
 
-  const jarTitles = getJarTitles(loaded.clientInfo.jars);
+  const jarTitles = getJarTitles(loaded.clientInfo);
   const matches = statement.items
     .map((item) => toTransaction(item, account.currency, jarTitles))
     .filter((transaction) => matchesInput(transaction, input, categories));

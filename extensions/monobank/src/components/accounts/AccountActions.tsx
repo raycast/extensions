@@ -23,11 +23,13 @@ export default function AccountActions(props: {
   const sendUrl = getSendUrl(account.sendId);
   // The preference has the patronymic, which monobank's name doesn't.
   const owner = { name: fullName?.trim() || ownerName, taxId };
+  // Without the top-up actions, the next two are first and take ⏎ and ⌘⏎ instead of their own shortcuts.
+  const isTopUpFirst = hasTopUpPage(account);
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {hasTopUpPage(account) && (
+        {isTopUpFirst && (
           <>
             <Action.OpenInBrowser title="Open Top up Page" url={sendUrl} />
             <Action.CopyToClipboard title="Copy Top up Page URL" icon={Icon.Link} content={sendUrl} />
@@ -36,10 +38,14 @@ export default function AccountActions(props: {
         <Action.Push
           title="View Statement"
           icon={Icon.List}
-          shortcut={shortcuts.viewStatement}
+          shortcut={isTopUpFirst ? shortcuts.viewStatement : undefined}
           target={<StatementView account={account} />}
         />
-        <Action.CopyToClipboard title="Copy IBAN" content={account.iban} shortcut={shortcuts.copyIban} />
+        <Action.CopyToClipboard
+          title="Copy IBAN"
+          content={account.iban}
+          shortcut={isTopUpFirst ? shortcuts.copyIban : undefined}
+        />
         <Action.CopyToClipboard
           title="Copy Requisites"
           icon={Icon.Document}

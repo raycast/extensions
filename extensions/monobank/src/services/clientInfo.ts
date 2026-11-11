@@ -74,7 +74,7 @@ export async function fetchClientInfo({
 
   try {
     // A cache from another token only contributes custom names of accounts this token can see.
-    const clientInfo = toClientInfo(await getClientInfo(token), cache?.clientInfo ?? emptyClientInfo);
+    const clientInfo = toClientInfo(await getClientInfo(token), cache?.clientInfo ?? emptyClientInfo, scope);
     const lastUpdated = Date.now();
     await writeJson(STORAGE_KEYS.clientInfo, { clientInfo, lastUpdated, scope } satisfies ClientInfoCache);
     return result(clientInfo, lastUpdated, false);

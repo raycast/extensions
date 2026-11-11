@@ -24,7 +24,7 @@ export default function SubscriptionActions(props: { subscription: Subscription;
           <Action.Push
             title="Show in Subscriptions"
             icon={Icon.Repeat}
-            target={<SubscriptionsView selectedKey={subscription.key} />}
+            target={<SubscriptionsView selectedKey={subscription.key} navigationTitle="Subscriptions" />}
           />
           <Action
             title="Not a Subscription"

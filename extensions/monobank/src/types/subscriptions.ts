@@ -12,7 +12,11 @@ export type SubscriptionStatus = "active" | "late";
 
 /** A recurring charge found in the stored statements. */
 export interface Subscription {
-  /** Stable across price changes: the account, merchant, currency and first amount. */
+  /**
+   * Identifies the subscription to its override. Detected from the account, merchant, currency and the first amount
+   * in the stored history, so it stays across price changes. A subscription with an override takes the override's
+   * key instead, since the first stored charge changes as history drops out (see `applySubscriptionOverrides`).
+   */
   key: string;
   /** The description of the latest charge. */
   name: string;
@@ -63,6 +67,11 @@ export interface SubscriptionOverride {
   confirmedPriceChange?: string;
   /** Ids of charges the user said aren't a new price of this subscription. */
   rejectedPriceChanges?: string[];
+  /**
+   * The ids of the subscription's charges when the override was last saved or matched. The override follows these
+   * charges, so it stays with its subscription when the detected key changes.
+   */
+  chargeIds?: string[];
 }
 
 /** By `Subscription.key`. */

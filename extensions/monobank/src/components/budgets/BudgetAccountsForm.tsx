@@ -12,10 +12,11 @@ export default function BudgetAccountsForm() {
   const [checked, setChecked] = useState<Set<string>>();
   const [error, setError] = useState<string>();
 
-  // Starts from the current selection once it's known.
+  // Starts from the current selection once it's known. Waits for the accounts too: before the first fetch, there are
+  // none to check.
   useEffect(() => {
-    if (accounts && !checked) setChecked(new Set(accounts.map((account) => account.id)));
-  }, [accounts]);
+    if (accounts && !isLoading && !checked) setChecked(new Set(accounts.map((account) => account.id)));
+  }, [accounts, isLoading]);
 
   function toggle(id: string, value: boolean) {
     const next = new Set(checked);

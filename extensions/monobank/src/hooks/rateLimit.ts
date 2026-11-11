@@ -1,13 +1,17 @@
-import { LocalStorage, Toast, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { RateLimitError } from "../api/monobank";
-import { STATEMENT_RATE_LIMIT, STATEMENT_REQUEST_DELAY, STORAGE_KEYS } from "../data/constants";
+import { STATEMENT_RATE_LIMIT, STATEMENT_REQUEST_DELAY } from "../data/constants";
+import { releaseStatementSlot, reserveStatementSlot, sleep } from "../services/rateLimit";
 
 /** A load was replaced by a newer one, or the view was closed, before it sent its request. */
 export class CancelledError extends Error {}
 
 /**
- * Sends `request` once monobank's rate limit allows it. On a 429, waits a full minute and retries once.
- * `label` starts the countdown toast, e.g. "Updating White *0002".
+ * Sends `request` once monobank's rate limit allows it, counting down in a toast while it waits. On a 429, waits a
+ * full minute and retries once. `label` starts the countdown toast, e.g. "Updating White *0002".
+ *
+ * Its time is reserved with the other commands, the menu bar and the AI (see `reserveStatementSlot`), so loads that
+ * start together queue a minute apart. A load cancelled while waiting gives its time back.
  */
 export async function withRateLimit<T>(
   request: () => Promise<T>,
@@ -19,31 +23,34 @@ export async function withRateLimit<T>(
   await sleep(STATEMENT_REQUEST_DELAY);
   if (!isCurrent()) throw new CancelledError();
 
-  await waitForRateLimit(isCurrent, onWait, label);
-
   try {
-    return await request();
+    return await sendInSlot(request, {}, isCurrent, onWait, label);
   } catch (error) {
     if (!(error instanceof RateLimitError)) throw error;
 
     // The limit was used elsewhere, e.g. by another app with the same token.
-    await LocalStorage.setItem(STORAGE_KEYS.statementRequestedAt, Date.now());
-    await waitForRateLimit(isCurrent, onWait, label);
-    return await request();
+    return await sendInSlot(request, { notBefore: Date.now() + STATEMENT_RATE_LIMIT }, isCurrent, onWait, label);
   }
 }
 
-export async function waitForRateLimit(isCurrent: () => boolean, onWait: (seconds: number) => void, label?: string) {
-  const requestedAt = (await LocalStorage.getItem<number>(STORAGE_KEYS.statementRequestedAt)) ?? 0;
-  // Capped, in case the stored time is in the future after a clock change.
-  const remaining = Math.min(requestedAt + STATEMENT_RATE_LIMIT - Date.now(), STATEMENT_RATE_LIMIT);
+async function sendInSlot<T>(
+  request: () => Promise<T>,
+  options: { notBefore?: number },
+  isCurrent: () => boolean,
+  onWait: (seconds: number) => void,
+  label?: string,
+): Promise<T> {
+  const slot = await reserveStatementSlot(options);
 
-  if (remaining > 0) {
-    await countDown(Date.now() + remaining, isCurrent, onWait, label);
+  try {
+    if (slot.at > Date.now()) await countDown(slot.at, isCurrent, onWait, label);
+    if (!isCurrent()) throw new CancelledError();
+  } catch (error) {
+    if (error instanceof CancelledError) await releaseStatementSlot(slot);
+    throw error;
   }
 
-  if (!isCurrent()) throw new CancelledError();
-  await LocalStorage.setItem(STORAGE_KEYS.statementRequestedAt, Date.now());
+  return await request();
 }
 
 export async function countDown(
@@ -75,8 +82,4 @@ export async function countDown(
   } finally {
     await toast.hide();
   }
-}
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

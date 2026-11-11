@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ReactNode, useEffect, useState } from "react";
 import { HISTORY_SYNC_MONTHS_UNLIMITED, accountTypeColors } from "../../data/constants";
 import { shortcuts } from "../../data/shortcuts";
@@ -30,10 +31,11 @@ const LAST_31_DAYS: Period = { preset: "last31Days" };
 /**
  * Recurring charges found in the stored statements of every card and FOP account. Opening it makes no statement
  * requests: "Sync Statements" loads the history, and Refresh updates the last 31 days. `selectedKey` selects that
- * subscription, e.g. from "Show in Subscriptions" in a statement.
+ * subscription, e.g. from "Show in Subscriptions" in a statement. `navigationTitle` is only for a pushed view: the
+ * command's own title shows at the root.
  */
-export default function SubscriptionsView(props: { selectedKey?: string }) {
-  const { selectedKey } = props;
+export default function SubscriptionsView(props: { selectedKey?: string; navigationTitle?: string }) {
+  const { selectedKey, navigationTitle } = props;
   const [now] = useState(() => new Date());
   const clientInfo = useClientInfo();
   // Cards and FOP accounts. Jars are never charged for subscriptions.
@@ -99,7 +101,7 @@ export default function SubscriptionsView(props: { selectedKey?: string }) {
 
   async function confirmPriceChange(subscription: Subscription) {
     if (!subscription.newPriceChargeId) return;
-    await update(subscription.key, { confirmPriceChange: subscription.newPriceChargeId });
+    await update(subscription, { confirmPriceChange: subscription.newPriceChargeId });
     await showToast(
       Toast.Style.Success,
       "New Price Confirmed",
@@ -110,7 +112,7 @@ export default function SubscriptionsView(props: { selectedKey?: string }) {
   async function rejectPriceChange(subscription: Subscription) {
     const chargeId = subscription.newPriceChargeId;
     if (!chargeId || subscription.previousAmount === undefined) return;
-    await update(subscription.key, { rejectPriceChange: chargeId });
+    await update(subscription, { rejectPriceChange: chargeId });
     await showToast({
       style: Toast.Style.Success,
       title: "Not a Price Change",
@@ -136,35 +138,49 @@ export default function SubscriptionsView(props: { selectedKey?: string }) {
     );
   }
 
-  const commonActions = (
-    <>
-      {hidden.length > 0 && (
-        <Action
-          title={isShowingHidden ? "Hide Hidden Subscriptions" : `Show Hidden Subscriptions (${hidden.length})`}
-          icon={isShowingHidden ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={shortcuts.showHidden}
-          onAction={() => setIsShowingHidden((value) => !value)}
-        />
-      )}
-      {!tokenError && (
-        <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={recent.refresh} />
-      )}
-    </>
-  );
+  /** `actionsBefore`: how many actions come before them. The first two take ⏎ and ⌘⏎ instead of shortcuts. */
+  const renderCommonActions = (actionsBefore: number) => {
+    const hasHiddenAction = hidden.length > 0;
+    return (
+      <>
+        {hasHiddenAction && (
+          <Action
+            title={isShowingHidden ? "Hide Hidden Subscriptions" : `Show Hidden Subscriptions (${hidden.length})`}
+            icon={isShowingHidden ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={actionsBefore >= 2 ? shortcuts.showHidden : undefined}
+            onAction={() => setIsShowingHidden((value) => !value)}
+          />
+        )}
+        {!tokenError && (
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={actionsBefore + Number(hasHiddenAction) >= 2 ? shortcuts.refresh : undefined}
+            onAction={recent.refresh}
+          />
+        )}
+      </>
+    );
+  };
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail && sections.length > 0}
       selectedItemId={selectedKey}
-      navigationTitle="Subscriptions"
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search subscriptions"
     >
       {tokenError ? (
         <TokenErrorEmptyView tokenError={tokenError} purpose="see your subscriptions" />
       ) : (
         !isLoading && (
-          <EmptyView hasHistory={hasHistory} historySince={historySince} now={now} actions={commonActions} />
+          <EmptyView
+            hasHistory={hasHistory}
+            historySince={historySince}
+            now={now}
+            renderActions={renderCommonActions}
+          />
         )
       )}
 
@@ -174,99 +190,109 @@ export default function SubscriptionsView(props: { selectedKey?: string }) {
           title={section.title}
           subtitle={index === 0 ? firstSubtitle || undefined : undefined}
         >
-          {section.items.map((subscription) => (
-            <List.Item
-              key={subscription.key}
-              id={subscription.key}
-              icon={subscription.category.icon}
-              title={getSubscriptionTitle(subscription)}
-              subtitle={isShowingDetail ? undefined : formatCadence(subscription.cadence)}
-              keywords={[subscription.name, subscription.category.name, subscription.category.nameUk]}
-              accessories={getAccessories(subscription, showsCard, isShowingDetail, now)}
-              detail={<SubscriptionDetail subscription={subscription} />}
-              actions={
-                <ActionPanel>
-                  {subscription.newPriceChargeId && subscription.previousAmount !== undefined && (
-                    <ActionPanel.Section
-                      title={`Is ${formatAmount(subscription.amount, subscription.currency)} the New Price?`}
-                    >
-                      <Action
-                        title="Confirm New Price"
-                        icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                        onAction={() => confirmPriceChange(subscription)}
-                      />
-                      <Action
-                        title="Not a Price Change"
-                        icon={Icon.XMarkCircle}
-                        onAction={() => rejectPriceChange(subscription)}
-                      />
-                    </ActionPanel.Section>
-                  )}
-                  {subscription.rejectedPriceChange && (
-                    <ActionPanel.Section title={getRejectedPriceChangeText(subscription)}>
-                      <Action
-                        title="It Was a Price Change"
-                        icon={Icon.ArrowCounterClockwise}
-                        onAction={() => restoreRejectedPriceChange(subscription)}
-                      />
-                    </ActionPanel.Section>
-                  )}
-                  <ActionPanel.Section>
-                    <Action.Push
-                      title="Open Statement"
-                      icon={Icon.List}
-                      shortcut={shortcuts.viewStatement}
-                      target={<StatementView account={subscription.account} />}
-                    />
-                    <Action
-                      title="Toggle Details"
-                      icon={Icon.Sidebar}
-                      shortcut={shortcuts.toggleDetails}
-                      onAction={() => setIsShowingDetail((value) => !value)}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Amount"
-                      content={formatPlainAmount(subscription.amount, subscription.currency)}
-                      shortcut={shortcuts.copyAmount}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <Action.Push
-                      title="Rename…"
-                      icon={Icon.Pencil}
-                      shortcut={shortcuts.edit}
-                      target={<RenameSubscriptionForm subscription={subscription} onRename={update} />}
-                    />
-                    {subscription.hidden ? (
-                      <Action
-                        title="Unhide"
-                        icon={Icon.Eye}
-                        shortcut={shortcuts.remove}
-                        onAction={() => setHidden(subscription, false)}
-                      />
-                    ) : (
-                      <Action
-                        title="Not a Subscription"
-                        icon={Icon.EyeDisabled}
-                        style={Action.Style.Destructive}
-                        shortcut={shortcuts.remove}
-                        onAction={() => setHidden(subscription, true)}
-                      />
+          {section.items.map((subscription) => {
+            const hasPriceQuestion = !!subscription.newPriceChargeId && subscription.previousAmount !== undefined;
+            // The actions before "Open Statement": the first two take ⏎ and ⌘⏎ instead of their shortcuts.
+            const actionsBefore = (hasPriceQuestion ? 2 : 0) + (subscription.rejectedPriceChange ? 1 : 0);
+            return (
+              <List.Item
+                key={subscription.key}
+                id={subscription.key}
+                icon={subscription.category.icon}
+                title={getSubscriptionTitle(subscription)}
+                subtitle={isShowingDetail ? undefined : formatCadence(subscription.cadence)}
+                keywords={[subscription.name, subscription.category.name, subscription.category.nameUk]}
+                accessories={getAccessories(subscription, showsCard, isShowingDetail, now)}
+                detail={<SubscriptionDetail subscription={subscription} />}
+                actions={
+                  <ActionPanel>
+                    {hasPriceQuestion && (
+                      <ActionPanel.Section
+                        title={`Is ${formatAmount(subscription.amount, subscription.currency)} the New Price?`}
+                      >
+                        <Action
+                          title="Confirm New Price"
+                          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                          onAction={() => confirmPriceChange(subscription)}
+                        />
+                        <Action
+                          title="Not a Price Change"
+                          icon={Icon.XMarkCircle}
+                          onAction={() => rejectPriceChange(subscription)}
+                        />
+                      </ActionPanel.Section>
                     )}
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>{commonActions}</ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
+                    {subscription.rejectedPriceChange && (
+                      <ActionPanel.Section title={getRejectedPriceChangeText(subscription)}>
+                        <Action
+                          title="It Was a Price Change"
+                          icon={Icon.ArrowCounterClockwise}
+                          onAction={() => restoreRejectedPriceChange(subscription)}
+                        />
+                      </ActionPanel.Section>
+                    )}
+                    <ActionPanel.Section>
+                      <Action.Push
+                        title="Open Statement"
+                        icon={Icon.List}
+                        shortcut={actionsBefore >= 2 ? shortcuts.viewStatement : undefined}
+                        target={<StatementView account={subscription.account} />}
+                      />
+                      <Action
+                        title="Toggle Details"
+                        icon={Icon.Sidebar}
+                        shortcut={actionsBefore >= 1 ? shortcuts.toggleDetails : undefined}
+                        onAction={() => setIsShowingDetail((value) => !value)}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Amount"
+                        content={formatPlainAmount(subscription.amount, subscription.currency)}
+                        shortcut={shortcuts.copyAmount}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action.Push
+                        title="Rename…"
+                        icon={Icon.Pencil}
+                        shortcut={shortcuts.edit}
+                        target={<RenameSubscriptionForm subscription={subscription} onRename={update} />}
+                      />
+                      {subscription.hidden ? (
+                        <Action
+                          title="Unhide"
+                          icon={Icon.Eye}
+                          shortcut={shortcuts.remove}
+                          onAction={() => setHidden(subscription, false)}
+                        />
+                      ) : (
+                        <Action
+                          title="Not a Subscription"
+                          icon={Icon.EyeDisabled}
+                          style={Action.Style.Destructive}
+                          shortcut={shortcuts.remove}
+                          onAction={() => setHidden(subscription, true)}
+                        />
+                      )}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>{renderCommonActions(Infinity)}</ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>
   );
 }
 
-function EmptyView(props: { hasHistory: boolean; historySince?: number; now: Date; actions: ReactNode }) {
-  const { hasHistory, historySince, now, actions } = props;
+function EmptyView(props: {
+  hasHistory: boolean;
+  historySince?: number;
+  now: Date;
+  renderActions: (actionsBefore: number) => ReactNode;
+}) {
+  const { hasHistory, historySince, now, renderActions } = props;
   const months = getRetentionMonths() ?? HISTORY_SYNC_MONTHS_UNLIMITED;
 
   return hasHistory ? (
@@ -274,7 +300,7 @@ function EmptyView(props: { hasHistory: boolean; historySince?: number; now: Dat
       icon={Icon.Repeat}
       title="No Subscriptions Found"
       description={`No recurring charges found since ${formatDate(new Date((historySince ?? now.getTime() / 1000) * 1000), { year: true })}.`}
-      actions={<ActionPanel>{actions}</ActionPanel>}
+      actions={<ActionPanel>{renderActions(0)}</ActionPanel>}
     />
   ) : (
     <List.EmptyView
@@ -283,16 +309,23 @@ function EmptyView(props: { hasHistory: boolean; historySince?: number; now: Dat
       description={`"Sync Statements" loads up to ${months} ${months === 1 ? "month" : "months"} of history. Subscriptions show once a merchant charges at least twice.`}
       actions={
         <ActionPanel>
-          <Action
-            title="Run Sync Statements"
-            icon={Icon.ArrowClockwise}
-            onAction={() => launchCommand({ name: "sync-statements", type: LaunchType.UserInitiated })}
-          />
-          {actions}
+          <Action title="Run Sync Statements" icon={Icon.ArrowClockwise} onAction={runSyncStatements} />
+          {renderActions(1)}
         </ActionPanel>
       }
     />
   );
+}
+
+async function runSyncStatements() {
+  try {
+    await launchCommand({ name: "sync-statements", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Couldn't run Sync Statements",
+      message: 'Enable the "Sync Statements" command in Raycast Settings and try again.',
+    });
+  }
 }
 
 function getAccessories(

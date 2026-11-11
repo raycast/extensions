@@ -155,6 +155,7 @@ function getBill(name: string, date: Date, range: [number, number]) {
 
 const VACATION_TOP_UP: [number, number] = [400, 800];
 const LAPTOP_TOP_UP: [number, number] = [300, 700];
+const SAFETY_TOP_UP: [number, number] = [3_000, 6_000];
 const WHITE_TOP_UP = 12_000;
 
 const black: Profile = {
@@ -256,12 +257,20 @@ const black: Profile = {
     if (day === 5 && date < startOfMonthAgo(new Date().getDate() > 10 ? 0 : 1)) {
       ops.push({ description: "MEGOGO", mcc: 4899, amount: -199, card: true, at: 8 * HOUR });
     }
+    // Jar top-ups show as Savings. monobank describes a manual one as "Поповнення «Title»" and an automatic one
+    // (a regular top-up set up in the jar) as just the jar's title.
     if (date.getDay() === 0) {
       const vacation = getJarTopUp(MOCK_IDS.jarVacation, date, VACATION_TOP_UP);
       const laptop = getJarTopUp(MOCK_IDS.jarLaptop, date, LAPTOP_TOP_UP);
-      ops.push({ description: "На банку «На відпустку»", mcc: 4829, amount: -vacation, at: 20 * HOUR });
-      ops.push({ description: "На банку «Новий ноутбук»", mcc: 4829, amount: -laptop, at: 20 * HOUR + 60 });
+      ops.push({ description: "Поповнення «На відпустку»", mcc: 4829, amount: -vacation, at: 20 * HOUR });
+      ops.push({ description: "Поповнення «Новий ноутбук»", mcc: 4829, amount: -laptop, at: 20 * HOUR + 60 });
     }
+    if (day === 1 || day === 15) {
+      const safety = getJarTopUp(MOCK_IDS.jarSafety, date, SAFETY_TOP_UP);
+      ops.push({ description: "Подушка безпеки", mcc: 4829, amount: -safety, at: 12 * HOUR });
+    }
+    // Only mentions the "Долари" jar, so it stays a money transfer.
+    if (day === 25) ops.push({ description: "Борг за долари", mcc: 4829, amount: -500, at: 13 * HOUR });
     return ops;
   },
 };
@@ -485,9 +494,16 @@ const jarSafety: Profile = {
   merchants: [
     merchant({ names: ["На чорну картку"], mcc: 4829, range: [5_000, 15_000], weight: 1, transfer: true, whole: true }),
   ],
-  scheduled: (date, random) =>
+  scheduled: (date) =>
     date.getDate() === 1 || date.getDate() === 15
-      ? [{ description: "З чорної картки", mcc: 4829, amount: random.amount(3_000, 6_000, 0), at: 12 * HOUR }]
+      ? [
+          {
+            description: "З чорної картки",
+            mcc: 4829,
+            amount: getJarTopUp(MOCK_IDS.jarSafety, date, SAFETY_TOP_UP),
+            at: 12 * HOUR,
+          },
+        ]
       : [],
 };
 

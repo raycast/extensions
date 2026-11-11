@@ -11,7 +11,12 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { Fragment } from "react";
 import { getTokenError, getTokenFingerprint } from "./api/monobank";
-import MenuBarFooter, { ConfigureCommandItem, OpenCommandItem, relaunchCommand } from "./components/MenuBarFooter";
+import MenuBarFooter, {
+  ConfigureCommandItem,
+  OpenCommandItem,
+  openCommand,
+  relaunchCommand,
+} from "./components/MenuBarFooter";
 import { RATES_TTL } from "./data/constants";
 import { shortcuts } from "./data/shortcuts";
 import { fetchClientInfo } from "./services/clientInfo";
@@ -106,7 +111,7 @@ async function loadMenuSubscriptions(scope: string) {
 }
 
 function openSubscription(key: string) {
-  return launchCommand({ name: "subscriptions", type: LaunchType.UserInitiated, context: { selectedKey: key } });
+  return openCommand("subscriptions", { selectedKey: key });
 }
 
 async function copy(text: string) {

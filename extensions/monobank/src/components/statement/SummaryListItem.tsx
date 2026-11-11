@@ -185,7 +185,7 @@ export default function SummaryListItem(props: {
       }
       actions={
         <ActionPanel>
-          <StatementActionsSection {...statement} />
+          <StatementActionsSection {...statement} actionsBefore={0} />
         </ActionPanel>
       }
     />

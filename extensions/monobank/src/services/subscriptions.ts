@@ -10,14 +10,29 @@ import { readJson, writeJson } from "./storage";
 
 function isOverride(value: unknown): value is SubscriptionOverride {
   if (typeof value !== "object" || value === null) return false;
-  const { hidden, name, confirmedPriceChange, rejectedPriceChanges } = value as Record<string, unknown>;
+  const { hidden, name, confirmedPriceChange, rejectedPriceChanges, chargeIds } = value as Record<string, unknown>;
   return (
     (hidden === undefined || hidden === true) &&
     (name === undefined || typeof name === "string") &&
     (confirmedPriceChange === undefined || typeof confirmedPriceChange === "string") &&
-    (rejectedPriceChanges === undefined ||
-      (Array.isArray(rejectedPriceChanges) && rejectedPriceChanges.every((id) => typeof id === "string")))
+    (rejectedPriceChanges === undefined || isStringArray(rejectedPriceChanges)) &&
+    (chargeIds === undefined || isStringArray(chargeIds))
   );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function getChargeIds(subscription: Subscription) {
+  return subscription.charges.map((charge) => charge.id);
+}
+
+/** Whether two lists have the same ids, in any order. */
+function isSameIds(a: string[] | undefined, b: string[]) {
+  if (a?.length !== b.length) return false;
+  const set = new Set(a);
+  return b.every((id) => set.has(id));
 }
 
 /** A change to a subscription's override. */
@@ -40,12 +55,15 @@ export async function readSubscriptionOverrides(): Promise<SubscriptionOverrides
 }
 
 /**
- * Changes the override of the subscription with `key`. Storage is read again first, so a change saved meanwhile by
- * another command isn't lost.
+ * Changes the override of `subscription` (under its `key`, see `applySubscriptionOverrides`) and saves its charges,
+ * which the override follows from now on. Storage is read again first, so a change saved meanwhile by another
+ * command isn't lost.
  */
-export async function updateSubscriptionOverride(key: string, patch: SubscriptionOverridePatch) {
+export async function updateSubscriptionOverride(subscription: Subscription, patch: SubscriptionOverridePatch) {
+  const { key } = subscription;
   const overrides = await readSubscriptionOverrides();
   const next: SubscriptionOverride = { ...overrides[key] };
+  delete next.chargeIds;
 
   if (patch.hidden !== undefined) {
     if (patch.hidden) next.hidden = true;
@@ -62,9 +80,31 @@ export async function updateSubscriptionOverride(key: string, patch: Subscriptio
     next.rejectedPriceChanges = [...new Set([...(next.rejectedPriceChanges ?? []), patch.rejectPriceChange])];
   }
 
-  if (Object.keys(next).length) overrides[key] = next;
+  if (Object.keys(next).length) overrides[key] = { ...next, chargeIds: getChargeIds(subscription) };
   else delete overrides[key];
   await writeJson(STORAGE_KEYS.subscriptionOverrides, overrides);
+}
+
+/**
+ * Saves the current charges of each subscription that has an override (from `applySubscriptionOverrides`), so the
+ * override keeps following it as new charges come and old ones drop out of the history. Reads storage again first
+ * and writes only when some ids changed. Returns whether it wrote.
+ */
+export async function syncSubscriptionOverrideIds(subscriptions: Subscription[]): Promise<boolean> {
+  const overrides = await readSubscriptionOverrides();
+  let isChanged = false;
+
+  for (const subscription of subscriptions) {
+    const override = overrides[subscription.key];
+    const chargeIds = getChargeIds(subscription);
+    if (!override || isSameIds(override.chargeIds, chargeIds)) continue;
+
+    overrides[subscription.key] = { ...override, chargeIds };
+    isChanged = true;
+  }
+
+  if (isChanged) await writeJson(STORAGE_KEYS.subscriptionOverrides, overrides);
+  return isChanged;
 }
 
 /**
@@ -80,7 +120,8 @@ export async function restorePriceChange(chargeId: string) {
     const next: SubscriptionOverride = { ...override, rejectedPriceChanges: rest };
     if (!rest.length) delete next.rejectedPriceChanges;
 
-    if (Object.keys(next).length) overrides[key] = next;
+    // Charge ids alone don't change the subscription.
+    if (Object.keys(next).some((field) => field !== "chargeIds")) overrides[key] = next;
     else delete overrides[key];
   }
   await writeJson(STORAGE_KEYS.subscriptionOverrides, overrides);
@@ -114,7 +155,7 @@ export async function detectStoredSubscriptions(
   now = Date.now(),
 ): Promise<StoredSubscriptions> {
   const accounts = loaded.items.filter(isAccount);
-  const jarTitles = getJarTitles(loaded.clientInfo.jars);
+  const jarTitles = getJarTitles(loaded.clientInfo);
   const period = { from: getHistoryCutoff(now) };
 
   const [statements, overrides] = await Promise.all([
@@ -130,6 +171,7 @@ export async function detectStoredSubscriptions(
     detectSubscriptions(groups, new Date(now), { rejectedPriceChanges: getRejectedPriceChanges(overrides) }),
     overrides,
   );
+  await syncSubscriptionOverrideIds(subscriptions).catch(console.error);
 
   return { loaded, subscriptions, statements };
 }
