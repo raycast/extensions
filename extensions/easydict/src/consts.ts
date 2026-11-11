@@ -33,6 +33,7 @@ export const RELEASE_MARKDOWN = `
 ### ✨ New Features
 
 - Added **Wiktionary Dictionary**, a free dictionary that fills gaps such as English ↔ Danish. It shows available target-language translations for English words and labels English definitions when they serve as a fallback. Results can include IPA pronunciation, recorded audio, word forms, and usage examples. The setup screen now shows all three built-in dictionary switches. Wiktionary is off by default and can be enabled in the extension settings.
+  - Thanks to [@d3faulter](https://github.com/d3faulter)!
 
 ---
 
@@ -65,6 +66,7 @@ Thanks to [@duckieeeduck](https://github.com/duckieeeduck) for the original Wind
 ### ✨ 新特性
 
 - 新增 **Wiktionary Dictionary**，无需 API 密钥，可补充英语与丹麦语等语言对的词典查询。查英语单词时会显示可用的目标语言译文，并为作为回退的英文释义加上标注。词条可包含国际音标、发音录音、词形变化和用法示例。设置界面现在会显示三个内置词典的开关。Wiktionary 默认关闭，可在扩展设置中启用。
+  - 感谢 [@d3faulter](https://github.com/d3faulter)！
 
 ---
 
