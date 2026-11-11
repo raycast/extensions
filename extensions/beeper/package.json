@@ -91,7 +91,7 @@
     {
       "name": "awaiting-reply-menu-bar",
       "title": "Awaiting Reply Count",
-      "description": "Show how many conversations are waiting for your reply in the menu bar.",
+      "description": "Show how many conversations are waiting for your reply in the menu bar (macOS only).",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
