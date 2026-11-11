@@ -1,0 +1,68 @@
+import { ItemDef, ItemId } from "../../types";
+
+export const MISC_ITEMS: Partial<Record<ItemId, ItemDef>> = {
+  glyph_tablet: {
+    id: "glyph_tablet",
+    name: "Glyph Tablet",
+    description: "A clay tablet covered in the locals' writing. Needed to learn their language.",
+    value: 20,
+  },
+  resonance_coil: {
+    id: "resonance_coil",
+    name: "Resonance Coil",
+    description: "A coil of local make that hums at frequencies your electronics cannot produce.",
+    value: 60,
+  },
+  star_honey: {
+    id: "star_honey",
+    name: "Star Honey",
+    description: "Thick, sweet, faintly glowing. The locals cook with it.",
+    value: 12,
+  },
+  skyweave_thread: {
+    id: "skyweave_thread",
+    name: "Skyweave Thread",
+    description: "Light, strong thread spun by something that lives in the canopy.",
+    value: 30,
+  },
+  sorenian_lance: {
+    id: "sorenian_lance",
+    name: "Sorenian Lance",
+    description: "+14 damage per combat round. A hunter's lance, made by the locals and given to those they trust.",
+    value: 0,
+    weaponDamage: 14,
+    unsellable: true,
+    slot: "weapon",
+    tier: 3,
+    combatReq: 58,
+  },
+  sorenian_warplate: {
+    id: "sorenian_warplate",
+    name: "Sorenian Warplate",
+    description: "Take 7 less damage per enemy hit. Grown, not forged.",
+    value: 0,
+    armor: 7,
+    unsellable: true,
+    slot: "body",
+    tier: 3,
+    combatReq: 73,
+  },
+  stim_pack: {
+    id: "stim_pack",
+    name: "Stim Pack",
+    description: "A local battlefield remedy. Heals far more than a ration and tastes of copper.",
+    value: 0,
+    heal: 80,
+    unsellable: true,
+  },
+  prospector_charm: {
+    id: "prospector_charm",
+    name: "Prospector's Charm",
+    description: "Rare finds are 50% more likely. The locals say it is not luck, only attention.",
+    value: 0,
+    rareBonus: 1.5,
+    unsellable: true,
+    slot: "charm",
+    tier: 3,
+  },
+};

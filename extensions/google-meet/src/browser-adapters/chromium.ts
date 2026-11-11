@@ -10,6 +10,10 @@ import {
 } from "../utils/scripts";
 import type { MeetingUrlSource } from "./types";
 
+// Chrome and most Chromium browsers number their tabs; Yab identifies them by
+// UUID. The id is interpolated into AppleScript, so nothing else is accepted.
+const TAB_ID_PATTERN = /^(\d+|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
+
 export function createChromiumAdapter(application: Application): MeetingUrlSource {
   const { bundleId } = application;
   if (!bundleId || !BUNDLE_ID_PATTERN.test(bundleId)) {
@@ -25,7 +29,7 @@ export function createChromiumAdapter(application: Application): MeetingUrlSourc
         const createdTabId = await runAppleScriptSafe(
           getOpenChromiumTabScript(bundleId, `about:blank#raycast-google-meet-${randomUUID()}`, url),
         );
-        if (!/^\d+$/.test(createdTabId)) throw new Error(`Unexpected tab id "${createdTabId}"`);
+        if (!TAB_ID_PATTERN.test(createdTabId)) throw new Error(`Unexpected tab id "${createdTabId}"`);
         tabId = createdTabId;
       } catch (error) {
         if (isMeetError(error) && error.code === "URL_READ_PERMISSION_DENIED") throw error;

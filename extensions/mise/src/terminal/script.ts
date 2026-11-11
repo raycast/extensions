@@ -13,8 +13,12 @@ export function shellQuote(arg: string): string {
   return BARE_WORD.test(arg) ? arg : `'${arg.replace(/'/g, "'\\''")}'`;
 }
 
+export function commandLine(argv: string[]): string {
+  return argv.map(shellQuote).join(" ");
+}
+
 export function miseCommandLine(location: Pick<MiseLocation, "path">, op: Pick<MiseOperation, "args">): string {
-  return [location.path, ...op.args].map(shellQuote).join(" ");
+  return commandLine([location.path, ...op.args]);
 }
 
 // An interactive login shell: -l alone skips .zshrc, where PATH additions, mise activate and

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
@@ -112,7 +112,11 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
       title={contact.full_name}
       subtitle={contact.email}
       keywords={[contact.short_name, contact.email]}
-      icon={{ source: Icon.Person, tintColor: presence.color }}
+      icon={
+        contact.avatar_url
+          ? { source: contact.avatar_url, mask: Image.Mask.Circle, fallback: Icon.Person }
+          : { source: Icon.Person, tintColor: presence.color }
+      }
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -164,7 +168,10 @@ function platformName(platform: string): string {
 async function joinCallWithFeedback(contact: Contact) {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Joining ${contact.short_name}'s call…` });
   try {
-    await joinCall(contact.email);
+    if (!(await joinCall(contact.email))) {
+      await toast.hide();
+      return;
+    }
     toast.style = Toast.Style.Success;
     toast.title = `Joined ${contact.short_name}'s call`;
   } catch (error) {
@@ -196,7 +203,7 @@ function isPresent(contact: Contact): boolean {
 function presenceTag(contact: Contact, callAction: ContactCallAction): { value: string; color: Color } {
   switch (contact.status) {
     case "online":
-      return { value: "Online", color: Color.Green };
+      return contact.idle ? { value: "Idle", color: Color.SecondaryText } : { value: "Online", color: Color.Green };
     case "busy":
       return callAction === "join"
         ? { value: "In a Call", color: Color.Orange }

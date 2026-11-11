@@ -27,6 +27,7 @@ export function buyFromShop(s: GameState, id: ItemId): { state: GameState; error
   const next = structuredClone(s);
   next.marks -= entry.cost;
   next.inventory[id] = count(s, id) + 1;
+  next.stats.produced[id] = (next.stats.produced[id] ?? 0) + 1;
   autoEquip(next, id);
   return { state: next, cost: entry.cost };
 }

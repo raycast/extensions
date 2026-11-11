@@ -16,6 +16,10 @@ const STEPS: Record<number, (s: GameState) => void> = {
     for (const id of Object.keys(s.inventory) as (keyof typeof ITEMS)[])
       if (ITEMS[id] && (s.inventory[id] ?? 0) > 0) autoEquip(s, id);
   },
+  // v3 -> v4: gear moved from Engineering to the new Fabrication skill, so carry the level over and keep what was unlocked.
+  3: (s) => {
+    s.xp.fabrication = Math.max(s.xp.fabrication, s.xp.engineering);
+  },
 };
 
 /** Brings a save written by an older build up to the current shape. */
@@ -25,6 +29,13 @@ export function migrateSave(saved: Partial<GameState>): GameState {
     ...base,
     ...saved,
     xp: { ...base.xp, ...saved.xp },
+    masteryPool: { ...saved.masteryPool },
+    perks: { ...saved.perks },
+    recentTasks: [...(saved.recentTasks ?? [])],
+    achievements: [...(saved.achievements ?? [])],
+    pets: [...(saved.pets ?? [])],
+    mods: [...(saved.mods ?? [])],
+    nextMods: [...(saved.nextMods ?? [])],
     stats: { ...base.stats, ...saved.stats, produced: { ...saved.stats?.produced } },
     settings: { ...base.settings, ...saved.settings },
     equipped: { ...saved.equipped },
@@ -41,7 +52,7 @@ const isPlain = (v: unknown): v is Record<string, unknown> => typeof v === "obje
 const isNumber = (v: unknown) => typeof v === "number" && Number.isFinite(v);
 
 /** Records whose every value must be a number. */
-const NUMBER_RECORDS = ["xp", "inventory", "buildings", "passive", "keep", "mastery"] as const;
+const NUMBER_RECORDS = ["xp", "inventory", "buildings", "passive", "keep", "mastery", "masteryPool", "perks"] as const;
 
 /** The first part of a save that has the wrong shape, if any. Compared against a fresh game. */
 function shapeProblem(state: GameState): string | undefined {
