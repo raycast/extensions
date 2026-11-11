@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [Search Pagination and Fixes] - {PR_MERGE_DATE}
+## [Search Pagination and Fixes] - 2026-11-11
 
 - Load more search results as you scroll instead of stopping at the first 30, and reload from the first page if loading a page fails
 - Search by keyword with the query behind LeetCode's own problemset search, so results stay in relevance order across pages without repeats or gaps, and each page loads several times faster
