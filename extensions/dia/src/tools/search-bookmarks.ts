@@ -24,7 +24,7 @@ type Input = {
 };
 
 /**
- * Searches the Dia bookmarks of the active profile and returns each match with its folder.
+ * Searches the Dia bookmarks across all profiles and returns each match with its folder.
  */
 export default async function tool(input: Input) {
   const limit = Math.min(Math.max(Math.floor(input.limit ?? DEFAULT_LIMIT), 1), MAX_LIMIT);
