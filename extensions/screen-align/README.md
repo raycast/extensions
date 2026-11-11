@@ -2,6 +2,10 @@
 
 Line up two displays so the pointer crosses between them at the right height — with a real millimeter ruler on each screen instead of a drag-and-guess in System Settings.
 
+![Rulers meeting at the seam between two displays](media/rulers-side-by-side.png)
+
+The zeros sit on the shared line, but the two scales drift apart either side of it — that is the density difference you are working around.
+
 ## Why it is fiddly without this
 
 macOS arranges displays in *points*, but your eye judges them in *millimeters*. A MacBook panel and a 32" monitor can differ by 10% in points per millimeter, so two displays that look aligned in System Settings are not aligned on your desk.
@@ -33,7 +37,11 @@ Move a display to a different side and the whole extension switches axis with it
 
 Run the command again to close the rulers. Nudges are drawn immediately and written to the display configuration once you stop pressing, because each change takes macOS about a third of a second to apply.
 
+![Horizontal rulers when the displays are stacked](media/rulers-stacked.png)
+
 **Arrange Displays** — the same moves from a Raycast list, with the exact numbers: position, panel size in millimeters, density, offset from aligned tops, and the band where the pointer can cross.
+
+![Arrange Displays showing position, density, offset and drift](media/arrange-displays.png)
 
 **Display Layouts** — save the current arrangement and restore it after a reconnect. Displays are matched by hardware UUID, so it survives unplugging and re-plugging.
 
