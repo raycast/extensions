@@ -1,6 +1,6 @@
 # Mac Browse Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-11
 
 - Search Mac Browse's hand-picked Mac apps, with icons, taglines, categories and prices.
 - Browse the directory one category at a time.
