@@ -6,7 +6,7 @@
 - Search Everywhere, in Find Profile or from any History item, checks every site in the catalog that answers reliably
 - Each search goes into History, and its findings are kept: reopen Find Profile, or choose Show Findings in History, to see them again without searching
 - Cancel a search from its progress toast and keep what it found so far
-- Once results arrive, the search bar filters them; type a new username and press Return to search again
+- Once results arrive, the search bar filters them; type a new username and press Return to search again, or choose Clear Search (⌃⇧X) to start over
 - New Find Profiles AI tool: ask "@at-profile where does nickelback have profiles?"
 - Built-in apps and the default sites show their icons right away, and an app you add keeps its icon
 - Bluesky takes a bare name: "example" opens and finds example.bsky.social. Blacksky is searched too, and any app on the AT Protocol can be added with its own handle domain

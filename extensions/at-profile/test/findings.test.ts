@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Cache } from "@raycast/api";
-import { Findings, lastSearchedProfile, readFindings, saveFindings } from "../src/helpers/findings";
+import { Findings, forgetLastSearch, lastSearchedProfile, readFindings, saveFindings } from "../src/helpers/findings";
 
 const findings = (profile: string, overrides: Partial<Findings> = {}): Findings => ({
   profile,
@@ -28,6 +28,13 @@ describe("findings", () => {
     saveFindings(findings("second_user", { canceled: true }));
     expect(lastSearchedProfile()).toBe("second_user");
     expect(readFindings("second_user")?.canceled).toBe(true);
+  });
+
+  it("forgets the last username on Clear Search, and keeps its findings for History", () => {
+    saveFindings(findings("example_user"));
+    forgetLastSearch();
+    expect(lastSearchedProfile()).toBeUndefined();
+    expect(readFindings("example_user")).toBeDefined();
   });
 
   it("ignores damaged findings and outcomes it doesn't know", () => {

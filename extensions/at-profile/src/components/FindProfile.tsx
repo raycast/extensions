@@ -16,7 +16,7 @@ import {
 import { findCatalogSite } from "../catalog";
 import { addToMyApps } from "../helpers/add-to-my-apps";
 import { getAppFavicon } from "../helpers/apps";
-import { lastSearchedProfile, readFindings, recordSearch, saveFindings } from "../helpers/findings";
+import { forgetLastSearch, lastSearchedProfile, readFindings, recordSearch, saveFindings } from "../helpers/findings";
 import { openProfile } from "../helpers/open-profile";
 import {
   buildSearchEntries,
@@ -34,8 +34,9 @@ import { PROGRESS_INTERVAL_MS } from "../utils/progress";
 
 const log = logger.child("[Find]");
 
-// Why a search stopped. Only a cancel finishes its toast; a newer search owns the toast slot, and a closed view hides it
-type StopReason = "canceled" | "superseded" | "closed";
+// Why a search stopped. Only a cancel finishes its toast; a newer search owns the toast slot, and a closed or cleared
+// view hides it
+type StopReason = "canceled" | "superseded" | "closed" | "cleared";
 
 interface FindProfileProps {
   initialProfile?: string;
@@ -56,10 +57,10 @@ interface SearchRun {
   durationMs?: number;
 }
 
-/** `13 s`, `1 min 5 s` */
+/** `13s`, `1m 5s` */
 function formatDuration(ms: number): string {
   const seconds = Math.max(1, Math.round(ms / 1000));
-  return seconds < 60 ? `${seconds} s` : `${Math.floor(seconds / 60)} min ${seconds % 60} s`;
+  return seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 }
 
 /**
@@ -149,7 +150,8 @@ export default function FindProfile({
         signal: controller.signal,
         onOutcome: (key, outcome) => {
           results.set(key, outcome);
-          if (Date.now() - lastShown > PROGRESS_INTERVAL_MS) {
+          // A cleared or newer search owns the view now
+          if (runRef.current === mine && Date.now() - lastShown > PROGRESS_INTERVAL_MS) {
             lastShown = Date.now();
             progress.message = `${results.size} of ${entries.length}`;
             update("searching");
@@ -164,9 +166,9 @@ export default function FindProfile({
     }
 
     const reason = controller.signal.aborted ? (controller.signal.reason as StopReason) : undefined;
-    if (reason === "superseded" || reason === "closed") {
+    if (reason === "superseded" || reason === "closed" || reason === "cleared") {
       log.log(`Search for ${profile} stopped: ${reason}`);
-      if (reason === "closed" && runRef.current === mine) {
+      if (reason === "cleared" || (reason === "closed" && runRef.current === mine)) {
         progress.hide().catch((error) => log.log("Hiding the toast failed", error));
       }
       return;
@@ -191,8 +193,8 @@ export default function FindProfile({
     const found = count("found");
     const answered = found + count("not-found");
     const failed = count("blocked", "error");
-    const seconds = Math.max(1, Math.round((finishedAt - startedAt) / 1000));
-    log.log(`Search for ${profile} ${canceled ? "canceled" : "done"}`, { found, answered, failed, seconds });
+    const durationMs = finishedAt - startedAt;
+    log.log(`Search for ${profile} ${canceled ? "canceled" : "done"}`, { found, answered, failed, durationMs });
     // Finish in place; replacing the toast while its progress updates are in flight can let one land on top
     progress.primaryAction = undefined;
     if (!canceled && answered === 0 && failed > 0) {
@@ -209,11 +211,20 @@ export default function FindProfile({
       progress.message = `Checked ${results.size} of ${countOf(entries.length, "site")}, found ${found}`;
     } else if (found > 0) {
       progress.title = `Found @${profile} on ${countOf(found, "site")}`;
-      progress.message = `Checked ${countOf(entries.length, "site")} in ${seconds} s${unanswered}`;
+      progress.message = `Checked ${countOf(entries.length, "site")} in ${formatDuration(durationMs)}${unanswered}`;
     } else {
       progress.title = `@${profile} Not Found`;
       progress.message = `No profile on the ${countOf(answered, "site")} that answered${unanswered}`;
     }
+  };
+
+  /** Back to the empty view: stop a search still running, and open on the empty view next time too */
+  const clear = () => {
+    runRef.current++;
+    controllerRef.current?.abort("cleared" satisfies StopReason);
+    setRun(undefined);
+    setSearchText("");
+    forgetLastSearch();
   };
 
   // Opening: search the username passed in, or show the last findings for it (or for the last username searched)
@@ -236,6 +247,8 @@ export default function FindProfile({
       (entry) =>
         entry.key in findings.outcomes && (!checked?.[entry.key] || checked[entry.key] === entryIdentity(entry)),
     );
+    // Every site's check changed since (a catalog update): nothing left to show, so open on the empty state
+    if (entries.length === 0) return;
     setRun({
       profile: findings.profile,
       mode: findings.mode,
@@ -308,6 +321,14 @@ export default function FindProfile({
           icon={Icon.ArrowClockwise}
           onAction={() => start(run.profile, run.mode)}
           shortcut={Keyboard.Shortcut.Common.Refresh}
+        />
+      )}
+      {run && (
+        <Action
+          title="Clear Search"
+          icon={Icon.XMarkCircle}
+          onAction={clear}
+          shortcut={Keyboard.Shortcut.Common.RemoveAll}
         />
       )}
     </ActionPanel.Section>
@@ -395,11 +416,15 @@ export default function FindProfile({
           />
         </List.Section>
       )}
-      {!typed && !run && (
+      {!typed && shownRows.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title="Find a Profile"
-          description="Type a username, then press Return to look for it across sites."
+          {...(run?.status === "searching"
+            ? { title: `Checking Sites for @${run.profile}…`, description: "Each site appears here as it answers." }
+            : {
+                title: "Find a Profile",
+                description: "Type a username, then press Return to look for it across sites.",
+              })}
         />
       )}
       {section(run ? `Found @${run.profile}` : "Found", byStatus("found"), isRoot ? runStatus : undefined)}

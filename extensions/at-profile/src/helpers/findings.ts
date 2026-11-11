@@ -89,6 +89,11 @@ export function readFindings(profile: string): Findings | undefined {
   }
 }
 
+/** Clear Search: Find Profile opens empty until the next search. Each username's findings stay for History. */
+export function forgetLastSearch(): void {
+  cache.remove(LAST_KEY);
+}
+
 /** The username Find Profile searched last, for reopening it without an argument */
 export function lastSearchedProfile(): string | undefined {
   return cache.get(LAST_KEY) || undefined;
