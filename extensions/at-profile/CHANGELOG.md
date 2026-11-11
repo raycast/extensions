@@ -1,6 +1,6 @@
 # @ Profile Changelog
 
-## [Find Profile and the Sherlock catalog] - {PR_MERGE_DATE}
+## [Find Profile and the Sherlock catalog] - 2026-11-11
 
 - New Find Profile command looks for a username on your apps and about 30 popular sites, and lists where it found a profile, where the site wouldn't say, and where there isn't one
 - Search Everywhere, in Find Profile or from any History item, checks every site in the catalog that answers reliably
