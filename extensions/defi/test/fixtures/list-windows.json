@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "windows": [
+    {
+      "appID": "com.apple.mail",
+      "appName": "Mail",
+      "column": 1,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 112,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 1",
+      "workspace": {
+        "id": "dev",
+        "name": "dev",
+        "position": 1
+      }
+    },
+    {
+      "appID": "com.t3tools.t3code",
+      "appName": "T3 Code (Nightly)",
+      "column": 2,
+      "display": 1,
+      "floating": false,
+      "focused": true,
+      "id": 2613,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 2",
+      "workspace": {
+        "id": "dev",
+        "name": "dev",
+        "position": 1
+      }
+    },
+    {
+      "appID": "com.apple.finder",
+      "appName": "Finder",
+      "column": 3,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 46,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 3",
+      "workspace": {
+        "id": "dev",
+        "name": "dev",
+        "position": 1
+      }
+    },
+    {
+      "appID": "com.apple.dt.Devices",
+      "appName": "Device Hub",
+      "column": 4,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 45,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 4",
+      "workspace": {
+        "id": "dev",
+        "name": "dev",
+        "position": 1
+      }
+    },
+    {
+      "appID": "com.ardia.browser",
+      "appName": "Ardia",
+      "column": 1,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 51,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 5",
+      "workspace": {
+        "id": "web",
+        "name": "web",
+        "position": 2
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 1,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 53,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 6",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 2,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 59,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 7",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 3,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 58,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 8",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 4,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 57,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 9",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 5,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 55,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 10",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 6,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 54,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 11",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    },
+    {
+      "appID": "com.mitchellh.ghostty",
+      "appName": "Ghostty",
+      "column": 7,
+      "display": 1,
+      "floating": false,
+      "focused": false,
+      "id": 56,
+      "monitorID": 1,
+      "row": 1,
+      "title": "Window 12",
+      "workspace": {
+        "id": "dev-secondary",
+        "name": "dev-secondary",
+        "position": 3
+      }
+    }
+  ]
+}
