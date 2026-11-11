@@ -3,6 +3,14 @@
 Publish to TikTok, YouTube, Instagram, Facebook, X, Threads, LinkedIn, Pinterest, Bluesky, Reddit and more
 from Raycast with [Reelspan](https://reelspan.com), and ask Raycast AI to do it for you.
 
+## Setup
+
+You need a [Reelspan](https://reelspan.com) account with at least one profile and a connected social account.
+
+1. Create an API key at [app.reelspan.com/dashboard/api-keys](https://app.reelspan.com/dashboard/api-keys).
+2. Open any Reelspan command and paste the key when Raycast asks for it.
+3. Optionally set a **Default Profile** (the profile username, e.g. `acme`) to preselect it when posting.
+
 ## Commands
 
 | Command | |
@@ -21,20 +29,4 @@ Mention `@reelspan` in Raycast AI:
 - *@reelspan what failed in my last posts?*
 - *@reelspan cancel the post scheduled for Friday*
 
-Posting and cancelling always ask for confirmation first.
-
-## Setup
-
-1. Create an API key in the Reelspan dashboard (**API keys**).
-2. Paste it into the extension preferences. Optionally set a default profile.
-
-## Develop
-
-```bash
-npm ci
-npm run dev     # ray develop
-npm test        # shared logic, no network
-npm run lint
-```
-
-MIT licensed. Security reports: see [SECURITY.md](SECURITY.md).
+Posting and canceling always ask for confirmation first.

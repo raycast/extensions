@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { problems, publish, results, summary, profiles, Reelspan } from './.build/reelspan.mjs';
+import { problems, publish, results, summary, profiles, expandHome, Reelspan } from './.build/reelspan.mjs';
 
 const seen = [];
 let server, c;
@@ -33,7 +33,7 @@ test('drafts are checked in plain words', () => {
   assert.deepEqual(problems({ profile: 'a', type: 'photos', platforms: ['x'] }), ['Add at least one photo.']);
 });
 
-test('text post waits and summarises', async () => {
+test('text post waits and summarizes', async () => {
   const r = await publish(c, { profile: 'acme', type: 'text', platforms: ['x', 'bluesky'], text: 'Hi' });
   assert.equal(summary(r), 'Posted to X · failed on Bluesky');
   assert.deepEqual(results(r).map((x) => x.ok), [true, false]);
@@ -51,4 +51,11 @@ test('a scheduled video from a local file sends the timezone', async () => {
 
 test('profiles list connected networks only', async () => {
   assert.deepEqual(await profiles(c), [{ username: 'acme', name: 'Acme', networks: ['x'] }]);
+});
+
+test('a leading ~ means the home folder', () => {
+  assert.equal(expandHome('~', '/Users/me'), '/Users/me');
+  assert.equal(expandHome('~/Movies/launch.mp4', '/Users/me'), join('/Users/me', 'Movies/launch.mp4'));
+  assert.equal(expandHome('/tmp/~a.mp4', '/Users/me'), '/tmp/~a.mp4');
+  assert.equal(expandHome('~other/a.mp4', '/Users/me'), '~other/a.mp4');
 });

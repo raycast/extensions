@@ -1,6 +1,7 @@
 // Everything the commands and AI tools share, without Raycast imports (so it can be tested on its own).
 import { readFile } from "node:fs/promises";
-import { basename, extname } from "node:path";
+import { homedir } from "node:os";
+import { basename, extname, join } from "node:path";
 import { Reelspan, type FileInput, type Json, type PostCommon } from "reelspan";
 
 export const VERSION = "0.1.0";
@@ -30,6 +31,8 @@ export const NETWORKS: { id: string; name: string }[] = [
   ["listmonk", "Listmonk"],
   ["sandbox", "Sandbox"],
 ].map(([id, name]) => ({ id, name }));
+
+export const DASHBOARD_URL = "https://app.reelspan.com/dashboard";
 
 export const networkName = (id: string) => NETWORKS.find((n) => n.id === id)?.name ?? id;
 
@@ -61,10 +64,17 @@ const MIME: Record<string, string> = {
   ".pdf": "application/pdf",
 };
 
+/** `~` and `~/…` become the home folder, as a shell would expand them. */
+export function expandHome(path: string, home = homedir()): string {
+  if (path === "~") return home;
+  return /^~[/\\]/.test(path) ? join(home, path.slice(2)) : path;
+}
+
 /** A URL is sent as is; a local path is read and uploaded. */
 export async function toFile(pathOrUrl: string): Promise<FileInput> {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-  return { data: await readFile(pathOrUrl), name: basename(pathOrUrl), type: MIME[extname(pathOrUrl).toLowerCase()] };
+  const path = expandHome(pathOrUrl.trim());
+  return { data: await readFile(path), name: basename(path), type: MIME[extname(path).toLowerCase()] };
 }
 
 export type PostDraft = {

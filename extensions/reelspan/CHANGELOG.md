@@ -8,4 +8,4 @@
 - Scheduled Posts: see what is waiting and cancel with a confirmation.
 - Profiles: connected networks per profile, copy a 48-hour connect link for a client.
 - AI tools for Raycast AI: get profiles, create post, get post status, get history, get scheduled posts, cancel a
-  scheduled post. Posting and cancelling ask for confirmation first.
+  scheduled post. Posting and canceling ask for confirmation first.

@@ -32,6 +32,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       { name: "Networks", value: d.platforms.map(networkName).join(", ") },
       { name: "Type", value: d.type },
       ...(d.text ? [{ name: "Text", value: d.text }] : []),
+      ...(d.firstComment ? [{ name: "First Comment", value: d.firstComment }] : []),
       ...(d.media?.length ? [{ name: "Media", value: d.media.join("\n") }] : []),
       ...(d.scheduledDate
         ? [{ name: "When", value: `${d.scheduledDate}${d.timezone ? ` (${d.timezone})` : ""}` }]
