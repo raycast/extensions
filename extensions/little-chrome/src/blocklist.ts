@@ -1,29 +1,8 @@
 import { LocalStorage } from "@raycast/api";
-import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
 export const CHROME_DIR = join(homedir(), "Library/Application Support/Google/Chrome");
-
-// The profile Chrome last used, which is also where `--app` windows open.
-export function currentProfile(): string {
-  try {
-    return JSON.parse(readFileSync(join(CHROME_DIR, "Local State"), "utf8")).profile?.last_used || "Default";
-  } catch {
-    return "Default";
-  }
-}
-
-// The name shown in Chrome's profile menu, falling back to the profile directory name.
-export function profileName(profile: string): string {
-  try {
-    return (
-      JSON.parse(readFileSync(join(CHROME_DIR, "Local State"), "utf8")).profile?.info_cache?.[profile]?.name || profile
-    );
-  } catch {
-    return profile;
-  }
-}
 
 // Suggestions the user hid, per Chrome profile. Only filters suggestions; Chrome's history is untouched.
 export type Blocklist = { urls: string[]; hosts: string[] };

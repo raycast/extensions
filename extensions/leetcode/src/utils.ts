@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from '@raycast/api';
+import { getPreferenceValues } from '@raycast/api';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
-import { Problem, ProblemStats } from './types';
+import { Problem, ProblemStats, SearchProblemResponse } from './types';
 import { UNRATED_LABEL } from './ratings';
 
 const html2markdown = new NodeHtmlMarkdown(
@@ -18,12 +18,30 @@ const html2markdown = new NodeHtmlMarkdown(
   },
 );
 
+// LeetCode answers rejected list arguments with HTTP 200 and a null list, so
+// surface that as an error instead of reading it as "no problems".
+export function questionListOrThrow(result: SearchProblemResponse) {
+  const list = result.data?.problemsetQuestionList;
+  if (!list) {
+    throw new Error(result.errors?.[0]?.message ?? 'LeetCode returned no problem list');
+  }
+  return list;
+}
+
+// The description as markdown, or a notice for premium problems, whose content
+// isn't served. (No toast here: this runs during render and would repeat.)
+export function problemContentMarkdown(problem: Problem): string {
+  return problem.isPaidOnly
+    ? 'The problem is paid only, currently preview is not supported.'
+    : html2markdown.translate(problem.content);
+}
+
 export function formatProblemMarkdown(problem?: Problem, date?: string, rating?: number, ratingsLoaded = false) {
   if (!problem) {
     return '';
   }
 
-  const { showProblemStats, showProblemRatings } = getPreferenceValues<Preferences>();
+  const { showProblemStats, showProblemRatings, showTopicTags } = getPreferenceValues<Preferences>();
 
   const title = `# ${problem.questionFrontendId}. ${problem.title}`;
   const dateHeader = date ? `**🗓️ Date**: ${date} ` : '';
@@ -33,13 +51,12 @@ export function formatProblemMarkdown(problem?: Problem, date?: string, rating?:
   // Hidden until the ratings file has loaded, so no "Unrated" flashes mid-fetch.
   const ratingHeader = showProblemRatings && ratingsLoaded ? ` | **📈 Rating**: ${rating ?? UNRATED_LABEL}` : '';
   const header = `${dateHeader}${statsHeader}${ratingHeader}\n`;
+  const topics =
+    showTopicTags && problem.topicTags?.length
+      ? `\n**🏷️ Topics**: ${problem.topicTags.map((tag) => tag.name).join(', ')}\n`
+      : '';
 
-  let content = 'The problem is paid only, currently preview is not supported.';
-  if (problem.isPaidOnly) {
-    showToast(Toast.Style.Failure, content);
-  } else {
-    content = html2markdown.translate(problem.content);
-  }
+  const content = problemContentMarkdown(problem);
 
   let footer = '';
   if (showProblemStats) {
@@ -49,5 +66,5 @@ export function formatProblemMarkdown(problem?: Problem, date?: string, rating?:
 `;
   }
 
-  return `${title}\n\n${header}\n${content}\n${footer}`;
+  return `${title}\n\n${header}${topics}\n${content}\n${footer}`;
 }

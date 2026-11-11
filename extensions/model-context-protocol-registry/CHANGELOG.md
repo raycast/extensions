@@ -5,6 +5,26 @@
 - Add Liquid Inference to the official registry with direct HTTP access in Raycast and an `mcp-remote` fallback for other clients.
 - Compare models and prices, preview costs, read balances and receipts, and buy inference with OAuth sign-in and a spend limit.
 
+## [Add ContentIn MCP Server] - 2026-11-11
+
+- Add ContentIn to the official registry: write LinkedIn posts in your own voice, schedule and publish them through LinkedIn's official API after your confirmation, read post analytics and the people who engaged with your posts. 13 tools. Hosted Streamable HTTP server at https://mcp.contentin.io/mcp-server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a paid ContentIn plan.
+
+## [Update VoiceMoat MCP Server] - 2026-11-11
+
+- Update the VoiceMoat description: Style and Stance checks replace the old score, and the $5 Pro trial is included.
+
+## [Add own.page MCP Server] - 2026-11-11
+
+- Add own.page to the official registry: build and edit an own.page link-in-bio page by chatting (links become video, music and profile widgets, themes, subpages, stats and a page grader, every change undoable). 20 tools. Hosted Streamable HTTP server at https://mcp.own.page with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An own.page Pro or Business plan or the 7-day free trial is required.
+
+## [Add Good Nature Vibe Catalog MCP Server] - 2026-11-11
+
+- Add Good Nature Vibe Catalog to the official registry as a hosted Streamable HTTP server with six read-only catalog and public-knowledge tools and no authentication.
+
+## [Add AIAgentCycle MCP Server] - 2026-11-11
+
+- Add AIAgentCycle to the official registry as a hosted Streamable HTTP server with ten read-only, source-linked company-knowledge tools and no authentication.
+
 ## [Update deAPI MCP Server] - 2026-11-11
 
 - Tag the deAPI server URL with `?source=raycast` and the homepage link with UTM parameters, so deAPI can see which installs and visits come from the Raycast registry. The server ignores the parameter otherwise; tools and setup are unchanged.
