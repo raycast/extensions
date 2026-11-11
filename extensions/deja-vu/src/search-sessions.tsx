@@ -63,11 +63,15 @@ function SessionDetail({ bin, hit }: { bin: string; hit: DejaSessionHit }) {
 }
 
 export function SessionActions({ bin, hit }: { bin: string; hit: DejaSessionHit }) {
-  async function resolveResume(): Promise<string> {
-    const out = await runDeja(bin, ["resume", hit.id]);
+  async function resolveResume(): Promise<{ command: string; cwd?: string }> {
+    const args = ["resume", hit.id];
+    if (hit.harness) args.push("--harness", hit.harness);
+    const out = await runDeja(bin, args);
     const parsed = parseResumeOutput(out);
-    if (!parsed) throw new Error(out.trim() || `No resume command for ${hit.id}`);
-    return parsed.command;
+    if (!parsed.command) {
+      throw new Error(out.trim() || `No resume command for ${hit.id}`);
+    }
+    return parsed;
   }
 
   return (
@@ -78,9 +82,9 @@ export function SessionActions({ bin, hit }: { bin: string; hit: DejaSessionHit 
         icon={Icon.Terminal}
         onAction={async () => {
           try {
-            const cmd = await resolveResume();
-            await runInTerminalApp(cmd);
-            await showToast({ style: Toast.Style.Success, title: "Launched in Terminal", message: cmd });
+            const { command } = await resolveResume();
+            await runInTerminalApp(command);
+            await showToast({ style: Toast.Style.Success, title: "Launched in Terminal", message: command });
           } catch (e) {
             await showFailureToast(e, { title: "Cannot resume session" });
           }
@@ -92,29 +96,31 @@ export function SessionActions({ bin, hit }: { bin: string; hit: DejaSessionHit 
         shortcut={Keyboard.Shortcut.Common.Copy}
         onAction={async () => {
           try {
-            const cmd = await resolveResume();
-            await Clipboard.copy(cmd);
-            await showToast({ style: Toast.Style.Success, title: "Copied resume command", message: cmd });
+            const { command } = await resolveResume();
+            await Clipboard.copy(command);
+            await showToast({ style: Toast.Style.Success, title: "Copied resume command", message: command });
           } catch (e) {
             await showFailureToast(e, { title: "Cannot copy resume command" });
           }
         }}
       />
       <Action.CopyToClipboard title="Copy Session ID" content={hit.id} shortcut={Keyboard.Shortcut.Common.CopyName} />
-      {hit.project ? (
-        <Action
-          title="Open Project Folder"
-          icon={Icon.Folder}
-          shortcut={Keyboard.Shortcut.Common.Open}
-          onAction={async () => {
-            try {
-              await open(hit.project!);
-            } catch (e) {
-              await showFailureToast(e, { title: "Cannot open project folder" });
+      <Action
+        title="Open Project Folder"
+        icon={Icon.Folder}
+        shortcut={Keyboard.Shortcut.Common.Open}
+        onAction={async () => {
+          try {
+            const { cwd } = await resolveResume();
+            if (!cwd) {
+              throw new Error("No project folder path available for this session");
             }
-          }}
-        />
-      ) : null}
+            await open(cwd);
+          } catch (e) {
+            await showFailureToast(e, { title: "Cannot open project folder" });
+          }
+        }}
+      />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel>
   );

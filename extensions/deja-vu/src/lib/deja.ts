@@ -35,16 +35,47 @@ export interface ShowSessionEnvelope {
   messages: ShowSessionMessage[];
 }
 
+function normalizeHit(raw: unknown): DejaSessionHit {
+  const item = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const session =
+    item.session && typeof item.session === "object" && !Array.isArray(item.session)
+      ? (item.session as Record<string, unknown>)
+      : item;
+  const snippets = Array.isArray(item.snippets) ? item.snippets : undefined;
+  const firstSnippet = snippets?.find((s): s is string => typeof s === "string" && s.length > 0);
+  const fallbackSnippet =
+    typeof item.snippet === "string"
+      ? item.snippet
+      : typeof session.snippet === "string"
+        ? session.snippet
+        : undefined;
+  return {
+    harness: String(session.harness || ""),
+    id: String(session.id || ""),
+    project: String(session.project || ""),
+    title: typeof session.title === "string" && session.title ? session.title : undefined,
+    started: typeof session.started === "string" && session.started ? session.started : undefined,
+    updated: typeof session.updated === "string" && session.updated ? session.updated : undefined,
+    snippet: firstSnippet ?? fallbackSnippet,
+    strict: Boolean(item.strict ?? session.strict),
+  };
+}
+
 export function parseSearchJSON(raw: string): SearchResultEnvelope {
   const parsed = JSON.parse(raw);
   if (Array.isArray(parsed)) {
-    return { tier: "exact", strictHits: parsed as DejaSessionHit[], nearestHits: [] };
+    return {
+      tier: "exact",
+      strictHits: parsed.map(normalizeHit).filter((h) => h.id.length > 0),
+      nearestHits: [],
+    };
   }
   const tier = typeof parsed?.tier === "string" ? parsed.tier : "exact";
-  const hits: DejaSessionHit[] = Array.isArray(parsed?.hits) ? parsed.hits : [];
+  const rawHits: unknown[] = Array.isArray(parsed?.hits) ? parsed.hits : [];
+  const hits = rawHits.map(normalizeHit).filter((h) => h.id.length > 0);
   if (tier === "relevance") {
-    const strictHits = hits.filter((h) => Boolean(h?.strict));
-    const nearestHits = hits.filter((h) => !h?.strict);
+    const strictHits = hits.filter((h) => Boolean(h.strict));
+    const nearestHits = hits.filter((h) => !h.strict);
     return { tier, strictHits, nearestHits };
   }
   return { tier, strictHits: hits, nearestHits: [] };
@@ -52,10 +83,14 @@ export function parseSearchJSON(raw: string): SearchResultEnvelope {
 
 export function parseLastJSON(raw: string): DejaSessionHit[] {
   const parsed = JSON.parse(raw);
-  if (Array.isArray(parsed)) return parsed as DejaSessionHit[];
-  if (Array.isArray(parsed?.sessions)) return parsed.sessions as DejaSessionHit[];
-  if (Array.isArray(parsed?.hits)) return parsed.hits as DejaSessionHit[];
-  return [];
+  const arr: unknown[] = Array.isArray(parsed)
+    ? parsed
+    : Array.isArray(parsed?.sessions)
+      ? parsed.sessions
+      : Array.isArray(parsed?.hits)
+        ? parsed.hits
+        : [];
+  return arr.map(normalizeHit).filter((h) => h.id.length > 0);
 }
 
 export function parseShowJSON(raw: string): ShowSessionEnvelope {
@@ -77,9 +112,11 @@ export function parseResumeOutput(raw: string): { command: string; cwd?: string 
       .split(/\r?\n/)
       .map((l) => l.trim())
       .find((l) => l.length > 0 && !l.startsWith("deja:")) || "";
-  const m = command.match(/^cd\s+'([^']*(?:''[^']*)*)'\s*&&\s*(.+)$/);
+  const m = command.match(/^cd\s+((?:'[^']*'|"'")+)\s*&&\s*(.+)$/);
   if (m) {
-    return { command, cwd: m[1].replace(/''/g, "'") };
+    const tokens = m[1].match(/'[^']*'|"'"+/g) ?? [];
+    const unquoted = tokens.map((t) => t.slice(1, -1)).join("");
+    return { command, cwd: unquoted || undefined };
   }
   return { command };
 }

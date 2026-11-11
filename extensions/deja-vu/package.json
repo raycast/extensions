@@ -17,12 +17,14 @@
     {
       "name": "search-sessions",
       "title": "Search Sessions",
+      "subtitle": "Deja-Vu",
       "description": "Full-text search across every coding agent session on this Mac.",
       "mode": "view"
     },
     {
       "name": "recent-sessions",
       "title": "Recent Sessions",
+      "subtitle": "Deja-Vu",
       "description": "Browse the 100 most recent coding agent sessions across all harnesses.",
       "mode": "view"
     }
