@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useRef } from "react";
 import { searchArticles, WikiHowSearchError } from "../lib/wikihow";
 
@@ -38,7 +38,11 @@ export function useArticleSearch(query: string, page: number, apiKey: string, re
       abortable,
       execute: Boolean(query.trim() && apiKey.trim()),
       keepPreviousData: true,
-      onError: () => undefined,
+      // Previous results stay visible after a failed search, so always say that it failed.
+      onError: (error) => {
+        if (error.name === "AbortError") return;
+        showFailureToast(error, { title: "wikiHow search failed" });
+      },
     },
   );
 }

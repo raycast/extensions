@@ -14,7 +14,7 @@ import {
 import { useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
 import { useArticleSearch } from "./hooks/use-article-search";
-import { articleMarkdown, WikiHowArticle } from "./lib/wikihow";
+import { articleMarkdown, MAX_PAGE, WikiHowArticle } from "./lib/wikihow";
 
 const RECENT_KEY = "recent-articles";
 const MAX_RECENT = 25;
@@ -106,16 +106,18 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
   const trimmed = query.trim();
   // Previous results stay visible while a new search loads, but not once the search is cleared.
   const results = trimmed && hasKey ? data : undefined;
+  // Only page forward from the page that is actually loaded, and never past Brave's last page.
+  const canGoNext = Boolean(results?.hasMore && results.page === page && page < MAX_PAGE);
 
   const pagingActions = (
     <ActionPanel.Section title="Search">
       {trimmed ? <Action.OpenInBrowser title="Search on WikiHow.com" url={siteSearchUrl(trimmed)} /> : null}
-      {results?.hasMore ? (
+      {canGoNext ? (
         <Action
           title="Next Results Page"
           icon={Icon.ArrowRight}
           shortcut={{ macOS: { modifiers: ["cmd"], key: "]" }, Windows: { modifiers: ["ctrl"], key: "]" } }}
-          onAction={() => setPage((current) => current + 1)}
+          onAction={() => setPage((current) => Math.min(current + 1, MAX_PAGE))}
         />
       ) : null}
       {page > 0 ? (
