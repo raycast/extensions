@@ -60,10 +60,6 @@ export default function ViewAirlineInfo() {
           { title: "Succeeded By", airlines: successor ? [successor] : [] },
           { title: "Preceded By", airlines: predecessors },
         ].filter((row) => row.airlines.length > 0);
-        const accessories: List.Item.Accessory[] = [];
-        if (ceased)
-          accessories.push({ icon: { source: Icon.AirplaneLanding, tintColor: Color.SecondaryText }, tooltip: ceased });
-        if (airline.flag_carrier) accessories.push({ text: flags, tooltip: "Flag Carrier" });
 
         const markdown = logo ? `<img src="${logo}" alt="${airline.name}" width="200" height="200" />` : "";
 
@@ -76,7 +72,6 @@ export default function ViewAirlineInfo() {
               fallback: Icon.CircleProgress,
             }}
             keywords={searchKeywords(airline)}
-            accessories={accessories}
             detail={
               <List.Item.Detail
                 markdown={markdown}
@@ -85,6 +80,16 @@ export default function ViewAirlineInfo() {
                     {airline.branding?.tagline && (
                       <List.Item.Detail.Metadata.Label title="Tagline" text={airline.branding.tagline} />
                     )}
+                    {/* Status lives here: the detail pane hides List.Item accessories */}
+                    <List.Item.Detail.Metadata.TagList title="Status">
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={ceased ?? "Operating"}
+                        color={ceased ? Color.SecondaryText : Color.Green}
+                      />
+                      {airline.flag_carrier && (
+                        <List.Item.Detail.Metadata.TagList.Item text={`${flags} Flag Carrier`} color={Color.Blue} />
+                      )}
+                    </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label title="IATA" text={airline.iata} />
                     <List.Item.Detail.Metadata.Label title="ICAO" text={airline.icao} />
                     {airline.callsign && <List.Item.Detail.Metadata.Label title="Callsign" text={airline.callsign} />}

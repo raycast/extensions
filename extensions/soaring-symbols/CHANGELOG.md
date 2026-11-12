@@ -4,7 +4,7 @@
 
 - Airline Information shows the callsign, hubs, founding year and former names, or the years flown for airlines that have ceased.
 - Search both commands by callsign or former name: T'way Air finds Trinity Airways.
-- Airlines that have ceased are marked with the year they stopped flying.
+- Airlines that have ceased are marked with the year they stopped flying, and Airline Information shows each airline's status, flag carriers included.
 - Jump between an airline, its group and the airlines it owns or once owned (AirAsia and Thai AirAsia), and between an airline and the one that carried it on (Jetstar Pacific and Pacific Airlines).
 - The assets grid shows earlier logos below the current ones, with the years and name each was used under.
 - Replaced logos appear as soon as the data updates, not up to a week later.
