@@ -1,4 +1,5 @@
-import { closeMainWindow, launchCommand, LaunchType, popToRoot, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, launchCommand, LaunchType, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { fetchActivities } from "../commands/activities/api";
 import { Activity } from "../commands/activities/types";
 import { fetchUser } from "../commands/user/api";
@@ -53,10 +54,8 @@ export const finishMenuBarForm = async (): Promise<void> => {
   try {
     await refreshTodaysActivities();
   } catch {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error("Your change was saved. Reopen MOCO to refresh the list."), {
       title: "Saved, but activity list could not refresh",
-      message: "Your change was saved. Reopen MOCO to refresh the list.",
     });
   }
   // Fails when the menu bar command is not enabled. The menu bar then updates on its next run.

@@ -15,14 +15,15 @@ function harness({ refreshFails = false, menuBarDisabled = false } = {}) {
   const modules = {
     "@raycast/api": {
       LaunchType: { Background: "background" },
-      Toast: { Style: { Failure: "failure" } },
-      showToast: async (options) => calls.push(["toast", options]),
       closeMainWindow: async (options) => calls.push(["close", options]),
       popToRoot: async () => calls.push(["pop"]),
       launchCommand: async (options) => {
         calls.push(["launch", options]);
         if (menuBarDisabled) throw new Error("Command disabled");
       },
+    },
+    "@raycast/utils": {
+      showFailureToast: async (error, options) => calls.push(["toast", options, error]),
     },
     "../commands/activities/api": {
       fetchActivities: async (...args) => {
@@ -67,7 +68,7 @@ test("a post-save refresh failure still closes the form and reports that the cha
     ["fetch", "toast", "launch", "close", "pop"],
   );
   assert.match(calls[1][1].title, /^Saved/);
-  assert.match(calls[1][1].message, /Your change was saved/);
+  assert.match(calls[1][2].message, /Your change was saved/);
 });
 
 test("a disabled menu bar does not turn a successful save into a form error", async () => {
