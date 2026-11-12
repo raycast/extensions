@@ -198,12 +198,7 @@ export default function Command() {
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Keep Awake"
-      isShowingDetail
-      searchBarPlaceholder="Keep this Mac awake…"
-    >
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Keep this Mac awake…">
       {data ? (
         <List.Section title="Now">
           <List.Item

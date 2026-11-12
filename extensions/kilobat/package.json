@@ -116,6 +116,82 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "ai": {
-    "instructions": "Kilobat reads this Mac's live network state through the local kilobat CLI. Prefer check-host for any question about a site, API or host failing; get-network-status for Wi-Fi, latency, VPN or metered questions; get-network-apps for what is using bandwidth. Bytes are decimal (1 MB = 1,000,000 bytes). Say what you measured and avoid guessing about causes the results don't show."
+    "instructions": "Kilobat reads this Mac's live network state through the local kilobat CLI. Prefer check-host for any question about a site, API or host failing; get-network-status for Wi-Fi, latency, VPN or metered questions; get-network-apps for what is using bandwidth. Bytes are decimal (1 MB = 1,000,000 bytes). Say what you measured and avoid guessing about causes the results don't show.",
+    "evals": [
+      {
+        "input": "@kilobat Is my Wi-Fi signal weak, and am I on a metered network?",
+        "mocks": {
+          "get-network-status": {
+            "wifi": {
+              "powered": true,
+              "ssid": "Example Wi-Fi",
+              "score": 80,
+              "rssi": -50,
+              "band": "5 GHz"
+            },
+            "conditions": {
+              "connected": true,
+              "network": "Wi-Fi",
+              "internetLatencyMs": 20,
+              "internetLossPercent": 0,
+              "vpn": false,
+              "metered": true
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-network-status"
+          }
+        ]
+      },
+      {
+        "input": "@kilobat Which apps are using my bandwidth right now?",
+        "mocks": {
+          "get-network-apps": [
+            {
+              "name": "Example Browser",
+              "id": "example.browser",
+              "downloadBytesPerSecond": 2000000,
+              "uploadBytesPerSecond": 10000,
+              "sessionBytes": 50000000
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-network-apps"
+          }
+        ]
+      },
+      {
+        "input": "@kilobat Why can't I reach example.com?",
+        "mocks": {
+          "check-host": {
+            "target": "https://example.com",
+            "verdict": "DNS lookup failed",
+            "steps": [
+              {
+                "layer": "DNS",
+                "status": "fail",
+                "detail": "The DNS lookup timed out."
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "check-host",
+              "arguments": {
+                "target": {
+                  "matches": "^(https?://)?example\\.com/?$"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
   }
 }

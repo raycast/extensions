@@ -33,7 +33,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Why }>
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={`Why Can't I Reach ${host}`}
       markdown={image(data && !isLoading ? whyCard(data) : checkingCard(host, tick), 700, `Checking ${host}`)}
       actions={
         <ActionPanel>

@@ -160,13 +160,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      isShowingDetail
-      searchBarPlaceholder="Find an app or process…"
-      navigationTitle={
-        error ? "Not updating · last reading shown" : `↓ ${formatRate(total.down)}  ↑ ${formatRate(total.up)}`
-      }
-    >
+    <List isShowingDetail searchBarPlaceholder="Find an app or process…">
       {error ? (
         // When a refresh fails, the last reading stays, labelled as old rather than shown as live.
         <List.Section title="Not updating">
@@ -182,7 +176,7 @@ export default function Command() {
           />
         </List.Section>
       ) : null}
-      <List.Section title="This Mac">
+      <List.Section title="This Mac" subtitle={`↓ ${formatRate(total.down)}  ↑ ${formatRate(total.up)}`}>
         {item({
           id: "mac",
           name: "All traffic",

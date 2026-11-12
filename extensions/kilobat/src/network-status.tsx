@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { noticeCard, staleCard, statusCard } from "./cards";
-import { ErrorView, KilobatAppAction } from "./components";
+import { ErrorView, failureToast, KilobatAppAction } from "./components";
 import { image } from "./draw";
 import { Conditions, kilobat, WiFi } from "./kilobat";
 
@@ -66,7 +66,6 @@ export default function Command() {
   return (
     <Detail
       isLoading={!snapshot}
-      navigationTitle="Network Status"
       markdown={
         snapshot
           ? // When a refresh fails, the last reading stays, labelled as old rather than shown as live.
@@ -79,12 +78,12 @@ export default function Command() {
           <Action
             title="Check a Site"
             icon={Icon.MagnifyingGlass}
-            onAction={() => launchCommand({ name: "why", type: LaunchType.UserInitiated })}
+            onAction={() => launchCommand({ name: "why", type: LaunchType.UserInitiated }).catch(failureToast)}
           />
           <Action
             title="Run Speed Test"
             icon={Icon.Gauge}
-            onAction={() => launchCommand({ name: "speed-test", type: LaunchType.UserInitiated })}
+            onAction={() => launchCommand({ name: "speed-test", type: LaunchType.UserInitiated }).catch(failureToast)}
           />
           {snapshot ? (
             <Action.CopyToClipboard

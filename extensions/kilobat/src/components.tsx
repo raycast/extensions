@@ -31,7 +31,6 @@ export function KilobatAppAction({ title, link = "open/overview" }: { title?: st
 export function MissingCLI() {
   return (
     <Detail
-      navigationTitle="Install the Kilobat CLI"
       markdown={image(
         noticeCard(
           "Install the Kilobat CLI",

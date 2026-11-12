@@ -121,7 +121,6 @@ export default function Command() {
   if (state.kind === "metered") {
     return (
       <Detail
-        navigationTitle="Speed Test"
         markdown={image(speedCard(undefined, undefined, true), WIDE, "Metered network")}
         actions={
           <ActionPanel>
@@ -143,7 +142,6 @@ export default function Command() {
   return (
     <Detail
       isLoading={state.kind !== "done"}
-      navigationTitle="Speed Test"
       markdown={image(speedCard(live, result), WIDE, "Speed test")}
       actions={
         <ActionPanel>
