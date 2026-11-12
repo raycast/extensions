@@ -17,7 +17,7 @@ Browse your [Amp](https://ampcode.com) projects and threads, steer agents, and s
 | Command | What it does |
 | --- | --- |
 | **Amp** | Home for your threads, like the Amp web app: what is working, what is ready for you, your projects, and thread search with Amp's query syntax (`repo:`, `author:me`, `after:7d`, `pr:`). Enter on a project lists its threads and portals; Enter on a thread opens it. |
-| **Thread view** | A thread's transcript, newest turn first, with tool calls summarised. The search bar is the composer: type and press Enter to send the agent a message. Also copy the URL, `@T-…` mention, or `amp threads continue` command, rename, and archive. |
+| **Thread view** | A thread's transcript, newest turn first, with tool calls summarized. The search bar is the composer: type and press Enter to send the agent a message. Also copy the URL, `@T-…` mention, or `amp threads continue` command, rename, and archive. |
 | **New Thread** | Form with prompt, project, mode, title, orb size, and Fast. Starts an orb thread, copies its URL, and opens it. |
 | **Start Thread** | The same from the root search: `Start Thread <prompt> [project]`, using your default project and mode. |
 | **Execute Amp Prompts** | Your saved prompts, by category. Start one as an orb thread, in a project of your choice, or paste or copy it as an `amp -x` command. |
