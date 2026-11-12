@@ -1,8 +1,8 @@
 // Small pieces the list commands and the menu bar share.
 
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { getFavicon, showFailureToast } from "@raycast/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { getFavicon, showFailureToast, usePromise } from "@raycast/utils";
+import { useCallback, useState } from "react";
 import { SignedOutError } from "./api";
 import { loadLibrary, saveLibrary, syncLibrary } from "./library";
 import type { Article, HighlightColor, Library } from "./types";
@@ -24,53 +24,62 @@ export const HIGHLIGHT_COLORS: Record<HighlightColor, { name: string; color: Col
 
 // The library from disk at once, then again after a sync. `update` applies
 // a change made here (a note edited, a highlight deleted) without waiting
-// for the next sync to bring it back.
+// for the next sync to bring it back. A failed refresh keeps what is already
+// showing, because the hook drops its data when the request fails.
 export function useLibrary(report: (error: unknown, title?: string) => void) {
-  const [library, setLibrary] = useState<Library>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error>();
-  const latest = useRef<Library>(undefined);
+  const [kept, setKept] = useState<Library>();
+  // An edit made here, tied to the library it was applied to. A newer sync
+  // (a different object) drops it.
+  const [override, setOverride] = useState<{ anchor: Library | undefined; library: Library }>();
 
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      latest.current = await syncLibrary();
-      setLibrary(latest.current);
-      setError(undefined);
-    } catch (error) {
-      setError(error instanceof Error ? error : new Error(String(error)));
-      if (error instanceof SignedOutError) {
-        report(error, "Signed out");
-      } else if (latest.current?.cursor) {
-        showFailureToast(error, { title: "Showing your last synced library" });
-      } else {
-        report(error, "Could not load your library");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [report]);
+  const stored = usePromise(loadLibrary, [], {
+    onError(error) {
+      if (error instanceof SignedOutError) report(error, "Signed out");
+      else report(error, "Could not load your library");
+    },
+  });
 
-  useEffect(() => {
-    loadLibrary()
-      .then((stored) => {
-        if (!latest.current && stored.cursor > 0) {
-          latest.current = stored;
-          setLibrary(stored);
-        }
-      })
-      .catch(() => {})
-      .finally(refresh);
-  }, [refresh]);
+  const {
+    data: synced,
+    isLoading: syncing,
+    error: syncError,
+    revalidate,
+  } = usePromise(syncLibrary, [], {
+    execute: stored.data !== undefined,
+    onData: setKept,
+    onError(error) {
+      const hasLibrary = (stored.data?.cursor ?? 0) > 0 || (kept?.cursor ?? 0) > 0;
+      if (error instanceof SignedOutError) report(error, "Signed out");
+      else if (hasLibrary) showFailureToast(error, { title: "Showing your last synced library" });
+      else report(error, "Could not load your library");
+    },
+  });
 
-  const update = useCallback(async (change: (library: Library) => Library) => {
-    if (!latest.current) return;
-    latest.current = change(latest.current);
-    setLibrary(latest.current);
-    await saveLibrary(latest.current);
-  }, []);
+  const cached = stored.data && stored.data.cursor > 0 ? stored.data : undefined;
+  const anchor = synced ?? kept;
+  const library = override && override.anchor === anchor ? override.library : (anchor ?? cached);
 
-  return { library, isLoading, error, refresh, update };
+  const update = useCallback(
+    async (change: (library: Library) => Library) => {
+      if (!library) return;
+      const next = change(library);
+      await saveLibrary(next);
+      setOverride({ anchor, library: next });
+    },
+    [library, anchor],
+  );
+
+  const refresh = useCallback(() => {
+    revalidate();
+  }, [revalidate]);
+
+  return {
+    library,
+    isLoading: stored.isLoading || syncing,
+    error: syncError ?? (library ? undefined : stored.error),
+    refresh,
+    update,
+  };
 }
 
 // What a list shows when loading failed and there is nothing to show
