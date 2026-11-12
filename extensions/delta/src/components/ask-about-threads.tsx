@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { useAnswerModel } from "../hooks/use-answer-model";
 import { isAskableQuestion } from "../lib/threads";
@@ -39,7 +40,7 @@ export function AskAboutThreads({ threads }: { threads: QuerySource[] }) {
         onPush={() => {
           // Remember the model shown in the dropdown, so later questions elsewhere don't ask for one.
           if (!isLoadingModel && !hasChosen) {
-            setModel(model);
+            setModel(model).catch((error) => showFailureToast(error, { title: "Couldn't save answer model" }));
           }
         }}
       />

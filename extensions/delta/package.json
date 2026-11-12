@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "delta",
   "title": "Delta",
-  "description": "Search, create and open Delta threads, and ask questions about your past work with coding agents",
+  "description": "Search, create and open Delta threads, and ask about past work. Requires the Delta desktop app and a signed-in account.",
   "icon": "icon.png",
   "author": "lbv",
   "categories": [

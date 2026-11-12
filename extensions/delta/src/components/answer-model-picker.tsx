@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { useAnswerModel } from "../hooks/use-answer-model";
 import { useUsedModels } from "../hooks/use-used-models";
@@ -10,10 +11,12 @@ interface AnswerModelPickerProps {
    * which makes the answer screen render instead, so the picker neither pops nor confirms with a toast.
    */
   isFirstChoice?: boolean;
+  /** For the first choice, the title of the screen it stands in for; unset at a command's root. */
+  navigationTitle?: string;
 }
 
 /** Lists Delta's default, the models used in recent threads, and a custom `provider/model-id`. */
-export function AnswerModelPicker({ isFirstChoice = false }: AnswerModelPickerProps) {
+export function AnswerModelPicker({ isFirstChoice = false, navigationTitle }: AnswerModelPickerProps) {
   const { pop } = useNavigation();
   const { model: current, setModel, isLoading: isLoadingCurrent } = useAnswerModel();
   const { data: usedModels, isLoading: isScanning, rescan } = useUsedModels();
@@ -22,7 +25,12 @@ export function AnswerModelPicker({ isFirstChoice = false }: AnswerModelPickerPr
   const query = typed.toLowerCase();
 
   async function choose(model: string | undefined) {
-    await setModel(model);
+    try {
+      await setModel(model);
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't save answer model" });
+      return;
+    }
     if (!isFirstChoice) {
       await showToast({ style: Toast.Style.Success, title: "Answer model set", message: model ?? "Delta's default" });
       pop();
@@ -58,7 +66,7 @@ export function AnswerModelPicker({ isFirstChoice = false }: AnswerModelPickerPr
 
   return (
     <List
-      navigationTitle={isFirstChoice ? "Choose Answer Model" : "Answer Model"}
+      navigationTitle={isFirstChoice ? navigationTitle : "Answer Model"}
       isLoading={isLoadingCurrent || isScanning}
       searchBarPlaceholder="Filter models or type provider/model-id"
       filtering={false}

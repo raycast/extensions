@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 import { ThreadsState } from "../hooks/use-threads";
 import { deleteThread, forkThread, setThreadArchived, shareThreadWithOrganization, unshareThread } from "../lib/delta";
-import { openThreadInDelta, runWithToast } from "../lib/feedback";
+import { openThreadInDelta, runWithToast, showDeltaFailure } from "../lib/feedback";
 import { getThreadTitle, getThreadWebUrl } from "../lib/threads";
 import { Thread } from "../lib/types";
 import { AskAboutThreads } from "./ask-about-threads";
@@ -96,7 +96,8 @@ export function ThreadActions({ thread, threads, detail }: ThreadActionsProps) {
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Open in Delta" icon={Icon.AppWindow} onAction={() => openThreadInDelta(thread)} />
-        {webUrl && <Action.OpenInBrowser url={webUrl} shortcut={Keyboard.Shortcut.Common.Open} />}
+        {/* Second action, so Raycast already gives it ⌘↵. */}
+        {webUrl && <Action.OpenInBrowser url={webUrl} />}
         <Action.Push
           title="Ask About Thread"
           icon={Icon.Stars}
@@ -177,7 +178,11 @@ export function CreateThreadAction() {
       title="Create Thread"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      onAction={() => launchCommand({ name: "create-thread", type: LaunchType.UserInitiated })}
+      onAction={() =>
+        launchCommand({ name: "create-thread", type: LaunchType.UserInitiated }).catch((error) =>
+          showDeltaFailure(error, "Couldn't open Create Thread"),
+        )
+      }
     />
   );
 }

@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/icon@dark.png">
-    <img src="assets/icon.png" width="128" height="128" alt="Delta">
+    <source media="(prefers-color-scheme: dark)" srcset="media/icon@dark.png">
+    <img src="media/icon.png" width="128" height="128" alt="Delta">
   </picture>
 </p>
 
@@ -35,15 +35,6 @@ Install [Delta](https://delta.dev/download) and sign in
 | Ask Past Threads | Ask from root search, best as a [fallback command](https://manual.raycast.com/fallback-commands) |
 
 Ask `@delta` in Raycast AI about your threads
-
----
-
-### Development
-
-Сontribute!!!
-
-    npm i
-    npm run dev
 
 ---
 

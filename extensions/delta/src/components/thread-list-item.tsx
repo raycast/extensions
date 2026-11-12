@@ -14,7 +14,8 @@ export function ThreadListItem({ thread, isShowingDetail, actions }: ThreadListI
   const createdAt = parseDeltaDate(thread.created_at_utc);
 
   const accessories: List.Item.Accessory[] = [];
-  if (thread.archived) {
+  // The detail pane hides accessories and shows the status itself.
+  if (thread.archived && !isShowingDetail) {
     accessories.push({ icon: { source: Icon.Box, tintColor: Color.SecondaryText }, tooltip: "Archived" });
   }
   if (!isShowingDetail && createdAt) {

@@ -1,4 +1,5 @@
 import { Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useAnswerModel } from "../hooks/use-answer-model";
 import { useUsedModels } from "../hooks/use-used-models";
 
@@ -29,7 +30,9 @@ export function AnswerModelDropdown() {
       onChange={(value) => {
         // Raycast also calls onChange on mount; only save real changes.
         if (value !== current) {
-          setModel(value === DEFAULT_VALUE ? undefined : value);
+          setModel(value === DEFAULT_VALUE ? undefined : value).catch((error) =>
+            showFailureToast(error, { title: "Couldn't save answer model" }),
+          );
         }
       }}
     >

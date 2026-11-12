@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { useAnswerModel } from "../hooks/use-answer-model";
 import { buildAnswerMarkdown, getAnswerSources, isTooVague } from "../lib/answers";
 import { extractKeywords, isDeltaError } from "../lib/cli";
@@ -27,7 +28,8 @@ function ask(question: string, threadIds: string, model: string | undefined) {
 
 /**
  * Asks Delta once per mount. Answers aren't cached on purpose: every question costs a model call,
- * so asking again is always an explicit action.
+ * so asking again is always an explicit action. Changing the model doesn't re-ask either; the new
+ * model answers on Ask Again.
  */
 export function ThreadAnswer({ question, threads = [], navigationTitle, skipModelChoice = false }: ThreadAnswerProps) {
   const { model, hasChosen, isLoading: isLoadingModel } = useAnswerModel();
@@ -35,26 +37,38 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
   // Delta refuses a question it can't pick threads for, so don't spend a call or a model choice on it.
   const cannotAsk = isTooVague({ threads, keywords });
   const needsModelChoice = !cannotAsk && !isLoadingModel && !hasChosen && !skipModelChoice;
+  // Read at call time, so a model change takes effect on Ask Again instead of re-asking at once.
+  const latestModel = useRef(model);
+  latestModel.current = model;
+  const [askedWith, setAskedWith] = useState<{ model: string | undefined }>();
 
   const {
     data: result,
     isLoading: isAsking,
     error,
     revalidate: askAgain,
-  } = usePromise(ask, [question, threads.map((thread) => thread.id).join(","), model], {
-    // Wait for the stored model so the question isn't asked twice, or with the wrong model.
-    execute: !cannotAsk && !isLoadingModel && !needsModelChoice,
-    onError: (e) => {
-      // "No thread matches" is an answer of sorts; the screen explains it without an error toast.
-      if (!isDeltaError(e, "no-matching-threads")) {
-        showDeltaFailure(e, "Delta couldn't answer");
-      }
+  } = usePromise(
+    (question: string, threadIds: string) => {
+      const model = latestModel.current;
+      setAskedWith({ model });
+      return ask(question, threadIds, model);
     },
-  });
+    [question, threads.map((thread) => thread.id).join(",")],
+    {
+      // Wait for the stored model so the question isn't asked twice, or with the wrong model.
+      execute: !cannotAsk && !isLoadingModel && !needsModelChoice,
+      onError: (e) => {
+        // "No thread matches" is an answer of sorts; the screen explains it without an error toast.
+        if (!isDeltaError(e, "no-matching-threads")) {
+          showDeltaFailure(e, "Delta couldn't answer");
+        }
+      },
+    },
+  );
 
   // Before the first answer, pick a model once; choosing it renders the answer in this same place.
   if (needsModelChoice) {
-    return <AnswerModelPicker isFirstChoice />;
+    return <AnswerModelPicker isFirstChoice navigationTitle={navigationTitle} />;
   }
 
   const sources = getAnswerSources(result, threads);
@@ -63,30 +77,27 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
     <Detail
       isLoading={isAsking || isLoadingModel}
       navigationTitle={navigationTitle}
-      markdown={buildAnswerMarkdown({ question, model, threads, keywords, result, error })}
+      // The model that answered, which differs from the chosen one after a change until Ask Again.
+      markdown={buildAnswerMarkdown({
+        question,
+        model: askedWith ? askedWith.model : model,
+        threads,
+        keywords,
+        result,
+        error,
+      })}
       actions={
         <ActionPanel>
-          {result?.answer && (
-            <Action.CopyToClipboard
-              title="Copy Answer"
-              content={result.answer}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-          )}
+          {result?.answer && <Action.CopyToClipboard title="Copy Answer" content={result.answer} />}
           {sources.length === 1 && (
             <Action
               title={threads.length === 1 ? "Open Thread in Delta" : "Open Source Thread in Delta"}
               icon={Icon.AppWindow}
-              shortcut={Keyboard.Shortcut.Common.Open}
               onAction={() => openThreadInDelta(sources[0])}
             />
           )}
           {sources.length > 1 && (
-            <ActionPanel.Submenu
-              title="Open Source Thread in Delta"
-              icon={Icon.AppWindow}
-              shortcut={Keyboard.Shortcut.Common.Open}
-            >
+            <ActionPanel.Submenu title="Open Source Thread in Delta" icon={Icon.AppWindow}>
               {sources.map((source) => (
                 <Action
                   key={source.id}
@@ -116,7 +127,7 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
                   name: "create-thread",
                   type: LaunchType.UserInitiated,
                   context: { prompt: result.answer },
-                })
+                }).catch((e) => showDeltaFailure(e, "Couldn't open Create Thread"))
               }
             />
           )}

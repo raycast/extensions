@@ -50,15 +50,26 @@ function subscribe(listener: () => void) {
   };
 }
 
-/** Saves the choice; `undefined` means Delta's default. Screens update before the write finishes. */
-function setModel(model: string | undefined): Promise<void> {
+/**
+ * Saves the choice; `undefined` means Delta's default. Screens update before the write finishes;
+ * if it fails, the previous choice comes back and the returned promise rejects.
+ */
+async function setModel(model: string | undefined): Promise<void> {
+  const previous = state;
   const stored = model ?? "";
   setState({ stored });
   // Writes are queued so the last choice is also the last one written.
-  lastWrite = lastWrite
-    .then(() => LocalStorage.setItem(ANSWER_MODEL_KEY, JSON.stringify(stored)))
-    .catch(() => undefined);
-  return lastWrite;
+  const write = lastWrite.then(() => LocalStorage.setItem(ANSWER_MODEL_KEY, JSON.stringify(stored)));
+  lastWrite = write.catch(() => undefined);
+  try {
+    await write;
+  } catch (error) {
+    // Unless a later choice has replaced it meanwhile.
+    if (state?.stored === stored) {
+      setState(previous);
+    }
+    throw error;
+  }
 }
 
 /**
