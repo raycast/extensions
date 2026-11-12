@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Airbridge MCP Server] - {PR_MERGE_DATE}
+## [Add Airbridge MCP Server] - 2026-11-12
 
 - Add Airbridge to the official registry: mobile attribution for subscription apps, to ask which ads and creators bring installs, trials and paying subscribers. Hosted Streamable HTTP server at https://mcp.airbridge.io/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
