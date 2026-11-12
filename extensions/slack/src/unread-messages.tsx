@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { isEqual } from "lodash";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 
@@ -16,6 +17,11 @@ let storageQueue: Promise<void> = Promise.resolve();
 let saveCount = 0;
 
 function UnreadMessages() {
+  const { data: me } = usePromise(SlackClient.getMe, [], {
+    onError: (error) => {
+      void handleError(error);
+    },
+  });
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
   const { isAppInstalled, isLoading } = useSlackApp();
@@ -151,10 +157,10 @@ function UnreadMessages() {
                 ]}
                 actions={
                   <ActionPanel>
-                    {conversation && (
+                    {conversation && me?.teamId && (
                       <>
                         <OpenChannelInSlack
-                          workspaceId={conversation.teamId}
+                          workspaceId={me.teamId}
                           channelId={unreadConversation.conversationId}
                           isAppInstalled={isAppInstalled}
                           onAction={() => markConversationAsRead(unreadConversation.conversationId)}

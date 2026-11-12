@@ -16,9 +16,8 @@ import { SlackClient, User, useDirectorySearch, type Channel, type Group } from 
 import { withSlackClient } from "./shared/withSlackClient";
 import { useCachedState, useFrecencySorting, usePromise } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
-import { convertSlackEmojiToUnicode } from "./shared/utils";
-import { toZonedTime } from "date-fns-tz";
-import { differenceInMinutes } from "date-fns";
+import { handleError } from "./shared/utils";
+import { getStatusEmoji, getTimezoneMetadata } from "./shared/client/presentation";
 import SendMessage from "./send-message";
 import { directMessageAction } from "./shared/directMessageAction";
 import {
@@ -33,37 +32,27 @@ type OpenChannelItem = User | Channel | Group;
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
-// See OpenInSlack.tsx — `application` hint is mac-only.
-const isMac = process.platform === "darwin";
-
-function getCoworkerTime(coworkerTimeZone: string): string {
-  const localTime = new Date();
-  const coworkerTime = toZonedTime(localTime, coworkerTimeZone);
-
-  const diffInMinutes = differenceInMinutes(coworkerTime, localTime);
-  const diffInHours = diffInMinutes / 60;
-  return `${diffInMinutes >= 0 ? "+" : "-"}${Math.abs(diffInHours) % 1 === 0 ? Math.abs(diffInHours) : Math.abs(diffInHours).toFixed(1)}h`;
-}
-
 function searchItemAccessories(
   statusEmoji: string | undefined,
   statusText: string | undefined,
   statusExpiration: string | null,
   timezone: string,
 ) {
-  const searchMetadata: Array<{ icon: string | Icon; text: string; tooltip?: string | null | undefined }> = [
-    {
-      icon: convertSlackEmojiToUnicode(statusEmoji ?? ""),
+  const searchMetadata: List.Item.Accessory[] = [];
+  const icon = getStatusEmoji(statusEmoji);
+  if (icon || statusText) {
+    searchMetadata.push({
+      icon,
       text: statusText ?? "",
       tooltip: statusExpiration ? String(statusExpiration) : undefined,
-    },
-  ];
+    });
+  }
 
   if (displayExtraMetadata) {
-    searchMetadata.push({ icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") });
-
-    if (getCoworkerTime(timezone) !== "+0h") {
-      searchMetadata.push({ icon: Icon.Clock, text: getCoworkerTime(timezone) });
+    const metadata = getTimezoneMetadata(timezone);
+    if (metadata) {
+      searchMetadata.push({ icon: Icon.Globe, text: metadata.name });
+      if (metadata.offset) searchMetadata.push({ icon: Icon.Clock, text: metadata.offset });
     }
   }
 
@@ -86,7 +75,11 @@ function CopyIdAction({ id }: { id: string }) {
 function Search() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
-  const { data: me } = usePromise(SlackClient.getMe);
+  const { data: me, isLoading: isLoadingMe } = usePromise(SlackClient.getMe, [], {
+    onError: (error) => {
+      void handleError(error);
+    },
+  });
   const [recentItems, setRecentItems] = useCachedState<OpenChannelItem[]>(
     visitedDirectoryItemsCacheKey(me?.teamId),
     [],
@@ -95,7 +88,7 @@ function Search() {
   const { data, isLoading: isLoadingChannels } = useDirectorySearch(searchText);
 
   const channels = mergeVisitedDirectoryItems(
-    data?.flat(),
+    me?.teamId ? data?.flat() : undefined,
     visitedDirectoryItemsForWorkspace(recentItems, me?.teamId),
     searchText,
   );
@@ -117,7 +110,12 @@ function Search() {
   };
 
   return (
-    <List isLoading={isLoading || isLoadingChannels} filtering={false} throttle onSearchTextChange={setSearchText}>
+    <List
+      isLoading={isLoading || isLoadingChannels || isLoadingMe}
+      filtering={false}
+      throttle
+      onSearchTextChange={setSearchText}
+    >
       {recents.map((item) => {
         const isUser = isSlackUserId(item.id);
 
@@ -130,10 +128,11 @@ function Search() {
             statusEmoji,
             statusText,
             statusExpiration,
-            teamId: workspaceId,
+            teamId,
             conversationId,
             timezone,
           } = item as User;
+          const workspaceId = me?.teamId ?? teamId;
           return (
             <List.Item
               key={userId}
@@ -159,7 +158,6 @@ function Search() {
                       quicklink={{
                         name: `Open Chat with ${name}`,
                         link: `slack://user?team=${workspaceId}&id=${userId}`,
-                        ...(isMac ? { application: "Slack" } : {}),
                       }}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                     />
@@ -212,7 +210,8 @@ function Search() {
             />
           );
         } else {
-          const { id: channelId, name, icon, teamId: workspaceId } = item;
+          const { id: channelId, name, icon, teamId } = item;
+          const workspaceId = me?.teamId ?? teamId;
 
           return (
             <List.Item
@@ -231,7 +230,6 @@ function Search() {
                       ...(isAppInstalled
                         ? {
                             link: `slack://channel?team=${workspaceId}&id=${channelId}`,
-                            ...(isMac ? { application: "Slack" } : {}),
                           }
                         : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
                     }}

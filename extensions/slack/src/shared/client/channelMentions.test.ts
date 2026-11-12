@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readChannelMention, searchChannelMentions } from "./channelMentions";
+import { CHANNEL_MISS_RESCAN_AFTER_MS, readChannelMention, searchChannelMentions } from "./channelMentions";
 import type { SlackConversation } from "./slackTypes";
 
 const channel = (name: string, overrides: Partial<SlackConversation> = {}): SlackConversation => ({
@@ -56,128 +56,104 @@ test("an empty query lists every joined channel by name, without scanning the wo
 });
 
 test("a query matches channel names, ignores a leading #, and ranks joined channels first", async () => {
-  const member = pages([channel("eng-desktop"), channel("marketing")]);
-  const directory = pages([
-    channel("eng-web"),
-    channel("marketing"),
-    channel("eng-archive", { is_archived: true }),
-    channel("mpdm-eng--bob-1", { is_mpim: true }),
-  ]);
+  const directory = pages(
+    [channel("eng-web"), channel("marketing"), channel("eng-desktop", { is_member: true })],
+    [channel("eng-archive", { is_archived: true }), channel("mpdm-alice--bob-1", { is_mpim: true })],
+  );
   const results = await searchChannelMentions("#eng", {
-    loadMemberChannelsPage: member.load,
-    loadChannelsPage: directory.load,
-  });
-
-  assert.deepEqual(directory.requested, [undefined]);
-  assert.deepEqual(
-    results.map((result) => result.title),
-    ["#eng-desktop", "#eng-web"],
-  );
-});
-
-test("ten joined matches across member pages skip the workspace directory", async () => {
-  const matches = Array.from({ length: 10 }, (_, i) => channel(`ai-${String(i).padStart(2, "0")}`));
-  const member = pages([channel("billing"), ...matches.slice(0, 5)], matches.slice(5).reverse());
-  const results = await searchChannelMentions("AI", {
-    loadMemberChannelsPage: member.load,
-    loadChannelsPage: unused,
-  });
-
-  assert.deepEqual(member.requested, [undefined, "1"]);
-  assert.deepEqual(
-    results.map((result) => result.title),
-    matches.map((match) => `#${match.name}`),
-  );
-});
-
-test("fewer than ten joined matches scan the directory only through the first matching page", async () => {
-  const member = pages(Array.from({ length: 9 }, (_, i) => channel(`team-joined-${i}`)));
-  const directory = pages(
-    [channel("billing")],
-    [],
-    [channel("team-archived", { is_archived: true })],
-    [channel("team-zebra"), channel("team-alpha")],
-    [channel("team-later")],
-  );
-  const results = await searchChannelMentions("team", {
-    loadMemberChannelsPage: member.load,
-    loadChannelsPage: directory.load,
-  });
-
-  assert.deepEqual(directory.requested, [undefined, "1", "2", "3"]);
-  assert.deepEqual(
-    results.map((result) => result.title),
-    [...Array.from({ length: 9 }, (_, i) => `#team-joined-${i}`), "#team-alpha", "#team-zebra"],
-  );
-});
-
-test("directory search skips pages containing only joined matches", async () => {
-  const joined = channel("team-zebra", { topic: { value: "Joined metadata" } });
-  const directory = pages(
-    [{ ...joined, is_member: false, topic: { value: "Directory metadata" } }],
-    [channel("team-alpha")],
-    [channel("team-later")],
-  );
-  const results = await searchChannelMentions("team", {
-    loadMemberChannelsPage: pages([joined]).load,
+    loadMemberChannelsPage: unused,
     loadChannelsPage: directory.load,
   });
 
   assert.deepEqual(directory.requested, [undefined, "1"]);
   assert.deepEqual(
     results.map((result) => result.title),
-    ["#team-zebra", "#team-alpha"],
+    ["#eng-desktop", "#eng-web"],
   );
-  assert.equal(results[0].description, "Joined metadata");
 });
 
-test("joined channels win duplicate IDs and sort before other directory matches", async () => {
-  const joined = channel("team-zebra", { topic: { value: "Joined metadata" } });
-  const member = pages([joined, channel("team-beta")]);
-  const directory = pages([
-    channel("team-alpha"),
-    { ...joined, is_member: false, topic: { value: "Directory metadata" } },
-    channel("team-charlie", { is_member: true }),
-    channel("team-alpha"),
-  ]);
-  const results = await searchChannelMentions("team", {
-    loadMemberChannelsPage: member.load,
-    loadChannelsPage: directory.load,
-  });
-
-  assert.deepEqual(
-    results.map((result) => result.title),
-    ["#team-beta", "#team-charlie", "#team-zebra", "#team-alpha"],
-  );
-  assert.equal(results[2].description, "Joined metadata");
-});
-
-test("search results are capped at 50 with joined matches retained before directory matches", async () => {
+test("search results are capped at 50 while joined channels displace the others", async () => {
   const others = Array.from({ length: 60 }, (_, i) => channel(`team-${String(i).padStart(2, "0")}`));
-  const directory = pages(others, [channel("team-later")]);
+  const joined = channel("team-joined", { is_member: true });
+  const directory = pages(others, [joined]);
   const results = await searchChannelMentions("team", {
-    loadMemberChannelsPage: pages([channel("team-joined")]).load,
+    loadMemberChannelsPage: unused,
     loadChannelsPage: directory.load,
   });
 
-  assert.deepEqual(directory.requested, [undefined]);
   assert.equal(results.length, 50);
   assert.equal(results[0].title, "#team-joined");
 });
 
-test("joined-only searches scan all member pages, sort, and cap results at 50", async () => {
-  const joined = Array.from({ length: 60 }, (_, i) => channel(`team-${String(i).padStart(2, "0")}`));
-  const member = pages(joined.slice(10).reverse(), joined.slice(0, 10));
-  const results = await searchChannelMentions("team", {
-    loadMemberChannelsPage: member.load,
-    loadChannelsPage: unused,
+/** A cached directory: pages from a snapshot saved at `savedAt`, then `rescanned` once a newer scan is asked for. */
+const cachedDirectory = (savedAt: number, snapshot: SlackConversation[], rescanned: SlackConversation[] | Error) => {
+  const requests: Array<{ cursor?: string; maxAgeMs?: number }> = [];
+  return {
+    requests,
+    load: async (cursor?: string, options?: { maxAgeMs?: number }) => {
+      requests.push({ cursor, maxAgeMs: options?.maxAgeMs });
+      if (options?.maxAgeMs === undefined) return { items: snapshot, savedAt };
+      if (rescanned instanceof Error) throw rescanned;
+      return { items: rescanned };
+    },
+  };
+};
+
+test("a query is answered from a recent directory snapshot without rescanning, even with no match", async () => {
+  const directory = cachedDirectory(Date.now(), [channel("general")], new Error("must not rescan"));
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
   });
 
-  assert.deepEqual(member.requested, [undefined, "1"]);
+  assert.deepEqual(results, []);
+  assert.deepEqual(directory.requests, [{ cursor: undefined, maxAgeMs: undefined }]);
+});
+
+test("a query with no match in an older snapshot rescans so a new channel is still found", async () => {
+  const directory = cachedDirectory(
+    Date.now() - CHANNEL_MISS_RESCAN_AFTER_MS,
+    [channel("general")],
+    [channel("general"), channel("launch-room")],
+  );
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
   assert.deepEqual(
     results.map((result) => result.title),
-    joined.slice(0, 50).map((match) => `#${match.name}`),
+    ["#launch-room"],
   );
+  assert.deepEqual(directory.requests, [
+    { cursor: undefined, maxAgeMs: undefined },
+    { cursor: undefined, maxAgeMs: CHANNEL_MISS_RESCAN_AFTER_MS },
+  ]);
+});
+
+test("a query that matches an older snapshot does not rescan", async () => {
+  const directory = cachedDirectory(0, [channel("launch")], new Error("must not rescan"));
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(
+    results.map((result) => result.title),
+    ["#launch"],
+  );
+  assert.equal(directory.requests.length, 1);
+});
+
+test("a failed rescan keeps the snapshot's empty answer instead of failing the search", async () => {
+  const directory = cachedDirectory(0, [channel("general")], new Error("ratelimited"));
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(results, []);
+  assert.equal(directory.requests.length, 2);
 });
 
 test("long topics are compacted into a short description", async () => {

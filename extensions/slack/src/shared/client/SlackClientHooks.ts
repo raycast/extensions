@@ -94,4 +94,8 @@ export const useDirectorySearch = (query: string) => {
 export const useMe = () => useCachedPromise(SlackClient.getMe);
 
 export const useUnreadConversations = (conversationIds: string[] | undefined) =>
-  useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []]);
+  useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []], {
+    onError(error) {
+      handleError(error, "Failed to load unread messages");
+    },
+  });

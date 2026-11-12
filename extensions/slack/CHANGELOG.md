@@ -1,9 +1,23 @@
 # Slack Changelog
 
-## [Faster Channel Mentions in AI Chat] - {PR_MERGE_DATE}
+## [Navigation and Search Reliability] - {PR_MERGE_DATE}
 
-- Speed up **Channels** mention search in AI Chat by searching channels you've joined first.
-- When fewer than 10 joined channels match, include results from the first page with additional matches in the workspace directory. Keep joined channels first and remove duplicates.
+- Add an **Open Links In** preference to choose the Slack app or browser when automatic app detection is incorrect.
+- Recognize renamed and alternate Slack installations and open native links through the system's registered Slack handler.
+- Use the signed-in workspace when opening conversations, including Slack Connect users and shared channels.
+- Handle missing or invalid profile metadata and message timestamps without passing invalid values to search results.
+- Load the Search Messages author menu only when opened, with searchable results limited to 100 at a time to reduce memory use in large workspaces.
+- Show the permissions Slack requires and the correct recovery steps for OAuth or personal access tokens, including errors while loading unread messages.
+
+## [Faster Channel Mentions] - 2026-11-02
+
+- The **Channels** mention search in AI Chat now reads the cached channel directory that Open Channel uses, instead of scanning every channel in the workspace on each keystroke. Your own channels are cached too, so the default list opens instantly.
+- A search that finds nothing in a cache older than a minute looks again, so newly created channels still show up.
+- Cache only the channel fields search needs, so the directory loads faster on large workspaces.
+
+## [Cache channel directory for instant local search] - 2026-11-01
+
+- Open Channel now filters locally as pages arrive instead of restarting a full `conversations.list` scan on each keystroke. The workspace channel and group directory is shared across all searches and refreshed in the background at most once per hour.
 
 ## [Channel Mentions in AI Chat] - 2026-10-31
 
