@@ -18,6 +18,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://freelance.link/mcp"],
     },
     remoteUrl: "https://freelance.link/mcp",
+  },
+  {
     name: "mobile-joe",
     title: "Mobile Joe",
     description:
