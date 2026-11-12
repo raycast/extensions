@@ -1,50 +1,61 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_OTTY_CLI_PATH,
-  buildOpenDirectoryArgs,
-  buildFinderDirectoryScriptArgs,
-  buildOpenDirectoryTabArgs,
-  buildRunCommandArgs,
+  buildCaptureArgs,
+  buildConfigGetArgs,
+  buildConfigSetArgs,
+  buildConfigUnsetArgs,
+  buildFocusArgs,
   buildJumpListArgs,
-  buildViewFileArgs,
-  splitPinned,
+  buildListArgs,
+  buildNewTabArgs,
+  buildOpenWindowArgs,
+  buildPaneLinkArgs,
+  buildRunCommandArgs,
+  buildSendTextArgs,
   buildSshCommandArgs,
-  normalizeSshTarget,
+  buildViewFileArgs,
+  rankByRecentVisits,
+  splitPinned,
 } from "./otty-core";
 
+describe("CLI args", () => {
+  it.each([
+    [buildOpenWindowArgs(), ["open"]],
+    [buildOpenWindowArgs("/tmp/a dir; touch bad"), ["open", "/tmp/a dir; touch bad"]],
+    [buildNewTabArgs(), ["tab", "new"]],
+    [buildNewTabArgs("/tmp/project"), ["tab", "new", "--cwd", "/tmp/project"]],
+    [buildRunCommandArgs("npm run dev"), ["open", "--command", "npm run dev"]],
+    [buildListArgs("window"), ["window", "list", "--json"]],
+    [buildFocusArgs("pane", "p_1"), ["pane", "focus", "p_1"]],
+    [buildPaneLinkArgs("p_1"), ["pane", "link", "--pane", "p_1"]],
+    [buildCaptureArgs("p_1", 30), ["pane", "capture", "--pane", "p_1", "--lines", "30", "--trim"]],
+    [buildJumpListArgs(200), ["jump:ls", "200", "--json"]],
+    [buildViewFileArgs("/tmp/notes.md"), ["view", "/tmp/notes.md", "--new-tab"]],
+    [buildConfigGetArgs("font-size"), ["config", "get", "font-size"]],
+    [buildConfigUnsetArgs("font-size"), ["config", "unset", "font-size"]],
+  ])("builds %j", (args, expected) => {
+    expect(args).toEqual(expected);
+  });
+
+  it("puts `--` before a config value, so `-1` isn't read as a flag", () => {
+    expect(buildConfigSetArgs("font-size", "-1")).toEqual(["config", "set", "font-size", "--", "-1"]);
+  });
+
+  it("queues text verbatim, even when it looks like a flag", () => {
+    expect(buildSendTextArgs("p_1", "--help \\n")).toEqual([
+      "pane",
+      "send-text",
+      "--pane",
+      "p_1",
+      "--no-escape",
+      "--submit",
+      "--",
+      "--help \\n",
+    ]);
+  });
+});
+
 describe("Otty helper", () => {
-  it("uses the installed app bundle CLI as the default", () => {
-    expect(DEFAULT_OTTY_CLI_PATH).toBe("/Applications/Otty.app/Contents/MacOS/otty-cli");
-  });
-
-  it("builds open-directory args with Otty's path argument", () => {
-    expect(buildOpenDirectoryArgs("/tmp/a dir; touch bad")).toEqual(["open", "/tmp/a dir; touch bad"]);
-  });
-
-  it("builds open-directory tab args with Otty's cwd option", () => {
-    expect(buildOpenDirectoryTabArgs("/tmp/project")).toEqual(["tab", "new", "--cwd", "/tmp/project"]);
-  });
-
-  it("builds run-command args with Otty's command option", () => {
-    expect(buildRunCommandArgs("npm run dev")).toEqual(["open", "--command", "npm run dev"]);
-  });
-
-  it("builds Finder directory script args with a desktop fallback", () => {
-    const args = buildFinderDirectoryScriptArgs();
-
-    expect(args[0]).toBe("-e");
-    expect(args.join("\n")).toContain("target of front Finder window");
-    expect(args.join("\n")).toContain("desktop as alias");
-  });
-
-  it("normalizes ssh URL input by stripping the scheme", () => {
-    expect(normalizeSshTarget("ssh://ethan@example.com")).toBe("ethan@example.com");
-  });
-
-  it("normalizes bare ssh target input", () => {
-    expect(normalizeSshTarget("ethan@example.com")).toBe("ethan@example.com");
-  });
-
   it("connects through Otty's native ssh command", () => {
     expect(buildSshCommandArgs("ethan@example.com")).toEqual(["connect", "ethan@example.com"]);
     expect(buildSshCommandArgs("ssh://ethan@example.com")).toEqual(["connect", "ethan@example.com"]);
@@ -69,10 +80,6 @@ describe("Otty helper", () => {
     ]);
   });
 
-  it("lists the jump database as JSON", () => {
-    expect(buildJumpListArgs(200)).toEqual(["jump:ls", "200", "--json"]);
-  });
-
   it("puts pinned folders first, in pin order, and keeps the rest ranked", () => {
     const entries = [
       { path: "/a", last_seen: 1, score: 30 },
@@ -84,13 +91,42 @@ describe("Otty helper", () => {
     expect(others.map((e) => e.path)).toEqual(["/b"]);
   });
 
+  it("ranks this week's folders above one that was busy months ago", () => {
+    const day = 24 * 60 * 60;
+    const now = 200 * day;
+    const ranked = rankByRecentVisits(
+      [
+        // Otty's own order: the stale folder's score is only divided by 4.
+        { path: "/imported", last_seen: now - 104 * day, raw_score: 9999, score: 2499.75 },
+        { path: "/today", last_seen: now - 3 * 60 * 60, raw_score: 5, score: 10 },
+        { path: "/last-week", last_seen: now - 8 * day, raw_score: 20.8, score: 5.2 },
+      ],
+      now,
+    );
+    expect(ranked.map((e) => e.path)).toEqual(["/last-week", "/today", "/imported"]);
+  });
+
+  it("orders exact ties by path, whatever order Otty returns them in", () => {
+    const alpha = { path: "/alpha", last_seen: 100, raw_score: 1, score: 1 };
+    const beta = { path: "/beta", last_seen: 100, raw_score: 1, score: 1 };
+    expect(rankByRecentVisits([beta, alpha], 200).map((e) => e.path)).toEqual(["/alpha", "/beta"]);
+    expect(rankByRecentVisits([alpha, beta], 200).map((e) => e.path)).toEqual(["/alpha", "/beta"]);
+  });
+
+  it("falls back to Otty's score when the raw score is missing", () => {
+    const ranked = rankByRecentVisits(
+      [
+        { path: "/a", last_seen: 100, score: 1 },
+        { path: "/b", last_seen: 100, score: 2 },
+      ],
+      100,
+    );
+    expect(ranked.map((e) => e.path)).toEqual(["/b", "/a"]);
+  });
+
   it("keeps a pinned folder that left the jump history", () => {
     const { pinned } = splitPinned([], ["/gone"]);
     expect(pinned).toEqual([{ path: "/gone" }]);
-  });
-
-  it("opens a file in Otty's viewer in a new tab", () => {
-    expect(buildViewFileArgs("/tmp/notes.md")).toEqual(["view", "/tmp/notes.md", "--new-tab"]);
   });
 
   it("keeps quoted ssh arguments together, without a shell", () => {

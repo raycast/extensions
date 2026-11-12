@@ -13,5 +13,5 @@ compiled_raycast_rust
 # misc
 .DS_Store
 
-# local agent tooling (verify-mise harness); not part of the extension
-.agents/
+# verify-mise evidence (logs, screenshots) stays local
+.agents/skills/verify-mise/artifacts/

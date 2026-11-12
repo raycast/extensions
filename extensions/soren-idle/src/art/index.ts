@@ -1,5 +1,6 @@
-import { BuildingId } from "../engine/types";
+import { BuildingId, SkillId } from "../engine/types";
 import { buildingSvg } from "./hud-base";
+import { PET_ART } from "./hud-petdex";
 import { sceneFor } from "./scenes";
 import { toDataUri } from "./util";
 
@@ -23,6 +24,18 @@ export function buildingMarkdown(id: BuildingId, level: number, frame = 2, anima
   let uri = cache.get(key);
   if (!uri) {
     uri = toDataUri(buildingSvg(id, level, f));
+    cache.set(key, uri);
+  }
+  return `![](${uri})`;
+}
+
+/** Markdown image for a skill's pet. */
+export function petMarkdown(skill: SkillId, frame = 2, animate = false): string {
+  const f = animate ? frame % FRAMES : 2;
+  const key = `pet:${skill}:${f}`;
+  let uri = cache.get(key);
+  if (!uri) {
+    uri = toDataUri(PET_ART[skill](f));
     cache.set(key, uri);
   }
   return `![](${uri})`;

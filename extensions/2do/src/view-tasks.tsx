@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { actionURL, List as TwoDoList, scopeArgs, SmartList, Task, taskLinks, twoDo } from "./2do";
+import { actionURL, List as TwoDoList, repeatRule, scopeArgs, SmartList, Task, taskLinks, twoDo } from "./2do";
 import { TaskForm } from "./task-form";
 
 const FOCUSES = [
@@ -108,6 +108,7 @@ export default function Command() {
                 ]
               : []),
             ...(primary ? [{ icon: primary.icon, tooltip: `${primary.title}: ${primary.value}` }] : []),
+            ...(repeatRule(t) ? [{ icon: Icon.Repeat, tooltip: `Repeats: ${repeatRule(t)}` }] : []),
             ...(t.starred ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []),
           ]}
           actions={
