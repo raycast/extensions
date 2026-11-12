@@ -175,7 +175,7 @@ export async function stopDaemon(
 }
 
 export async function restartDaemon(): Promise<void> {
-  await stopDaemon({ onlyIfIdle: true });
+  await stopDaemon({ onlyIfIdle: false, force: true });
   await startDaemon();
 }
 

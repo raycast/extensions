@@ -60,17 +60,21 @@ try {
 
     $activeCount = 0
     $waitingCount = 0
+    $queueCheckFailed = $false
     if ($rpcUp) {
         try {
             $activeCount = @(Invoke-Aria2Rpc -Port $port -Secret $secret -Method 'aria2.tellActive' -TimeoutMs 3000).Count
         } catch {
-            $activeCount = 0
+            $queueCheckFailed = $true
         }
         try {
             $waitingCount = @(Invoke-Aria2Rpc -Port $port -Secret $secret -Method 'aria2.tellWaiting' -Parameters @(0, 1000) -TimeoutMs 3000).Count
         } catch {
-            $waitingCount = 0
+            $queueCheckFailed = $true
         }
+    }
+    if ($queueCheckFailed -and -not $Force) {
+        throw (New-Aria2Error 'Could not verify the aria2 queue state; refusing an idle-only stop. Use -Force to stop it anyway.' $exitCodes.RpcFailure)
     }
     $busy = ($activeCount + $waitingCount) -gt 0
 

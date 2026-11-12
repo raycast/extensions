@@ -29,7 +29,9 @@ export function validateSettings(settings: Aria2Settings): string[] {
   integer(settings.dhtListenPort, 1024, 65535, "DHT listen port");
   integer(settings.btMaxPeers, 1, 1000, "BT max peers");
 
-  if (!settings.downloadDir || !/^[a-zA-Z]:[\\/]/.test(settings.downloadDir)) {
+  const isDrivePath = /^[a-zA-Z]:[\\/]/.test(settings.downloadDir);
+  const isUncPath = /^\\\\[^\\/]+[\\/][^\\/]+/.test(settings.downloadDir);
+  if (!settings.downloadDir || (!isDrivePath && !isUncPath)) {
     errors.push("Download directory must be an absolute Windows path");
   }
   if (!MIN_SPLIT_SIZE_PATTERN.test(settings.minSplitSize)) {

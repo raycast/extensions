@@ -8,7 +8,9 @@ import { normalizeSettings } from "./settings";
 const LOCAL_APP_DATA =
   process.env.LOCALAPPDATA ??
   path.join(process.env.USERPROFILE ?? os.homedir(), "AppData", "Local");
-export const STATE_ROOT = path.join(LOCAL_APP_DATA, "lat3ncy-toolbox", "aria2");
+export const STATE_ROOT =
+  process.env.LAT3NCY_ARIA2_HOME?.trim() ||
+  path.join(LOCAL_APP_DATA, "lat3ncy-toolbox", "aria2");
 
 export const SETTINGS_PATH = path.join(STATE_ROOT, "settings.json");
 export const SECRET_PATH = path.join(STATE_ROOT, "rpc-secret.txt");

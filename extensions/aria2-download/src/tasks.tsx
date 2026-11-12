@@ -73,7 +73,6 @@ function taskActions(
         <Action
           title="Pause"
           icon={Icon.Pause}
-          shortcut={ctrlShortcut("p")}
           onAction={async () => {
             try {
               await pauseTask(task.gid);
@@ -89,7 +88,6 @@ function taskActions(
         <Action
           title="Resume"
           icon={Icon.Play}
-          shortcut={ctrlShortcut("r")}
           onAction={async () => {
             try {
               await resumeTask(task.gid);

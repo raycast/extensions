@@ -14,7 +14,12 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
 import { getVersion, isDaemonRunning } from "./lib/rpc";
-import { restartDaemon, saveSettings, stopDaemon } from "./lib/engine";
+import {
+  EngineError,
+  restartDaemon,
+  saveSettings,
+  stopDaemon,
+} from "./lib/engine";
 import { loadSettingsOrDefaults, readSecret } from "./lib/state";
 import { validateSettings } from "./lib/settings";
 import { Aria2Settings } from "./lib/types";
@@ -143,13 +148,17 @@ export default function Configuration() {
       try {
         await stopDaemon({ onlyIfIdle: true });
         stoppedForPortChange = true;
-      } catch {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Stop aria2 before changing the RPC port",
-          message:
-            "The daemon has active or queued downloads. Stop it only after they are idle.",
-        });
+      } catch (error) {
+        if (error instanceof EngineError && error.code === 5) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Stop aria2 before changing the RPC port",
+            message:
+              "The daemon has active or queued downloads. Stop it only after they are idle.",
+          });
+        } else {
+          await showFailureToast(error, { title: "Could not stop aria2" });
+        }
         return;
       }
     }

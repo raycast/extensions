@@ -44,7 +44,6 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
 import { Aria2Task } from "./lib/types";
-import { ctrlShortcut } from "./lib/shortcuts";
 import {
   pauseTask,
   removeTask,
@@ -160,7 +159,6 @@ function taskActions(
               : "Switch to Native Mosaic"
           }
           icon={Icon.AppWindowGrid3x3}
-          shortcut={ctrlShortcut("m")}
           onAction={onToggleChunkView}
         />
       )}
@@ -168,7 +166,6 @@ function taskActions(
         <Action
           title="Pause"
           icon={Icon.Pause}
-          shortcut={ctrlShortcut("p")}
           onAction={async () => {
             try {
               await pauseTask(task.gid);
@@ -184,7 +181,6 @@ function taskActions(
         <Action
           title="Resume"
           icon={Icon.Play}
-          shortcut={ctrlShortcut("r")}
           onAction={async () => {
             try {
               await resumeTask(task.gid);
@@ -311,10 +307,28 @@ function metadataFor(task: Aria2Task) {
   );
 }
 
-function TaskMetadataDetail({ task }: { task: Aria2Task }) {
+function TaskMetadataDetail({ gid }: { gid: string }) {
   const { pop } = useNavigation();
+  const { task, error, isLoading, refresh } = useTaskStatus(gid, 1);
+
+  if (!task) {
+    return (
+      <Detail
+        isLoading={isLoading}
+        navigationTitle="Metadata"
+        markdown={error ?? "Loading task details…"}
+        actions={
+          <ActionPanel>
+            <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   return (
     <Detail
+      isLoading={isLoading}
       navigationTitle={getTaskName(task)}
       markdown={[
         `# ${getTaskName(task)}`,
@@ -334,6 +348,11 @@ function TaskMetadataDetail({ task }: { task: Aria2Task }) {
       metadata={metadataFor(task)}
       actions={
         <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={refresh}
+          />
           <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
         </ActionPanel>
       }
@@ -408,7 +427,7 @@ function MosaicDetail({
         task,
         refresh,
         pop,
-        () => push(<TaskMetadataDetail task={task} />),
+        () => push(<TaskMetadataDetail gid={task.gid} />),
         chunkViz,
         onToggleChunkView,
       )}
@@ -428,7 +447,7 @@ function MosaicDetail({
             task,
             refresh,
             undefined,
-            () => push(<TaskMetadataDetail task={task} />),
+            () => push(<TaskMetadataDetail gid={task.gid} />),
             chunkViz,
             onToggleChunkView,
           )}

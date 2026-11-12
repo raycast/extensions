@@ -37,4 +37,4 @@ Netdisk direct links should be added through LinkSwift, not pasted directly into
 
 ## Privacy
 
-The extension communicates only with the local aria2 RPC endpoint on `127.0.0.1`.
+The extension controls aria2 through its local RPC endpoint on `127.0.0.1`. When you add a remote `.torrent` URL, the extension asks aria2 to fetch that file using the request headers and proxy you supplied. aria2 also makes the download, tracker and peer connections needed for queued tasks.

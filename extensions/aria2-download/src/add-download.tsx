@@ -54,17 +54,6 @@ function buildHeaders(values: FormValues): string[] {
   return headers;
 }
 
-function buildFetchHeaders(values: FormValues): Record<string, string> {
-  const headers: Record<string, string> = {};
-  if (values.userAgent.trim()) headers["User-Agent"] = values.userAgent.trim();
-  if (values.referer.trim()) headers.Referer = values.referer.trim();
-  if (values.cookie.trim()) headers.Cookie = values.cookie.trim();
-  if (values.authorization.trim()) {
-    headers.Authorization = values.authorization.trim();
-  }
-  return headers;
-}
-
 export default function AddDownload({
   fromTasks = false,
 }: { fromTasks?: boolean } = {}) {
@@ -307,21 +296,34 @@ export default function AddDownload({
     });
     try {
       if (!(await ensureDaemonForAdd())) return;
+      const failed: string[] = [];
+      let added = 0;
+      let firstError: unknown = null;
       for (const line of lines) {
-        if (isTorrentUrl(line)) {
-          const response = await fetch(line, {
-            headers: buildFetchHeaders(values),
-          });
-          if (!response.ok) {
-            throw new Error(
-              `Could not download torrent: HTTP ${response.status}`,
-            );
+        try {
+          if (isTorrentUrl(line)) {
+            // Let aria2 fetch remote .torrent files so the selected proxy,
+            // headers and authentication settings apply to the request too.
+            await addUri([line], { ...options, "follow-torrent": "true" });
+          } else {
+            await addUri([line], options);
           }
-          const bytes = Buffer.from(await response.arrayBuffer());
-          await addTorrent(bytes.toString("base64"), options);
-        } else {
-          await addUri([line], options);
+          added += 1;
+        } catch (error) {
+          failed.push(line);
+          if (!firstError) firstError = error;
         }
+      }
+      if (failed.length > 0) {
+        setUrls(failed.join("\n"));
+        await toast.hide();
+        await showFailureToast(firstError, {
+          title:
+            added > 0
+              ? `Added ${added}; ${failed.length} failed`
+              : "Could not add download",
+        });
+        return;
       }
       toast.style = Toast.Style.Success;
       toast.title =

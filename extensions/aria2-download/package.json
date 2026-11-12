@@ -33,7 +33,7 @@
     {
       "name": "toggle",
       "title": "Toggle Aria2",
-      "subtitle": "Start / stop local aria2 RPC",
+      "subtitle": "Aria2",
       "description": "Toggle the aria2 RPC daemon; the command subtitle shows the current daemon state.",
       "mode": "no-view",
       "interval": "1m",
@@ -51,7 +51,7 @@
     {
       "name": "add-download",
       "title": "Add Download",
-      "subtitle": "URL, magnet or torrent",
+      "subtitle": "Aria2",
       "description": "Queue a URL, magnet link, or local .torrent file in one form.",
       "mode": "view",
       "keywords": [
