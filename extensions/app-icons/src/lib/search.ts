@@ -47,6 +47,28 @@ export async function searchAppIcons(term: string, country: string, signal?: Abo
   return normalizeResults(await response.json());
 }
 
+/** One request for curated suggestion artwork; IDs must be known App Store track IDs. */
+export async function lookupAppIcons(ids: number[], country: string, signal?: AbortSignal): Promise<AppIcon[]> {
+  const unique = [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
+  if (unique.length === 0) return [];
+
+  const url = new URL("https://itunes.apple.com/lookup");
+  url.searchParams.set("id", unique.join(","));
+  url.searchParams.set("country", normalizeCountry(country));
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`App Store lookup failed (${response.status})`);
+  }
+
+  return normalizeResults(await response.json());
+}
+
 function normalizeResults(payload: unknown): AppIcon[] {
   if (!payload || typeof payload !== "object") return [];
   const results = (payload as { results?: unknown }).results;
