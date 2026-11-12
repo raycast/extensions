@@ -82,7 +82,7 @@ function AddNewAddress() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Profile" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Check} title="Save Profile" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

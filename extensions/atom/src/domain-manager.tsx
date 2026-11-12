@@ -302,6 +302,12 @@ function AddRecord({ domainName }: { domainName: string }) {
           info="The IPv4 address that this domain or subdomain should point to. Must be a valid IPv4 format (e.g., 192.0.2.1)."
           {...itemProps.content}
         />
+      ) : values.type === "AAAA" ? (
+        <Form.TextField
+          title="IP V6 Address"
+          placeholder="e.g. 2001:0db8:85a3::8a2e:0370:7334"
+          {...itemProps.content}
+        />
       ) : (
         <Form.TextField
           title="Value"
@@ -320,7 +326,7 @@ function AddRecord({ domainName }: { domainName: string }) {
         <Form.Dropdown.Item title="60 min" value="3600" />
       </Form.Dropdown>
       <Form.TextField
-        title="Comment"
+        title="Comment (optional)"
         info="Note: The details shown here do not affect DNS record resolution and are provided for reference only."
         {...itemProps.comment}
       />

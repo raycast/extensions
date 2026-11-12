@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "atom",
   "title": "Atom",
-  "description": "",
+  "description": "Manage Contact Profiles and Domains in atom.com",
   "icon": "atom-logo.png",
   "author": "xmok",
   "platforms": [
@@ -24,6 +24,20 @@
     }
   ],
   "commands": [
+    {
+      "name": "check-domain-availability",
+      "title": "Check Domain Availability",
+      "description": "Returns whether Atom can register the domain",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain_name",
+          "placeholder": "example.com",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
     {
       "name": "contact-profiles",
       "title": "Contact Profiles",

@@ -1,3 +1,28 @@
+export type AtomDomainAvailability =
+  | {
+      availability: 1;
+      status: "available";
+      domain_price: {
+        unit_price: number;
+        renewal_price: number;
+        icann_fee: number;
+        is_premium: boolean;
+        registration_length: number;
+        subtotal: number;
+        vat_rate: number;
+        vat_amount: number;
+        total: number;
+      };
+    }
+  | {
+      availability: 0;
+      status: "unavailable";
+    }
+  | {
+      availability: -1;
+      status: "unknown";
+    };
+
 export type AtomContact = {
   handle: string;
   type: "registrant_user" | "contact_handle";
