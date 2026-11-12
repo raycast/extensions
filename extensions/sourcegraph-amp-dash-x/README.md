@@ -6,7 +6,7 @@
 Browse your [Amp](https://ampcode.com) projects and threads, steer agents, and start threads or saved prompts without leaving Raycast. Chat with Puck, see which agents are working from the menu bar, and jump into your orbs' portals.
 
 <p>
-  <img src="media/amp.jpg" alt="The Amp command: working threads, threads ready for you, and projects" width="49%">
+  <img src="media/amp.jpg" alt="The Amp command searching threads and projects, with working and ready threads tagged" width="49%">
   <img src="media/thread.jpg" alt="A thread's transcript in Raycast, with a message typed in the search bar" width="49%">
 </p>
 
@@ -31,7 +31,7 @@ Saved prompts and categories come from [Amp Dash X](https://www.raycast.com/jdor
 
 <p>
   <img src="media/project.jpg" alt="A project with its working threads, other threads, and portals" width="49%">
-  <img src="media/prompts.jpg" alt="Saved prompts with Start as Thread as the first action" width="49%">
+  <img src="media/prompts.jpg" alt="Saved prompts filtered by search, with Start as Thread as the primary action" width="49%">
 </p>
 <p>
   <img src="media/ask-puck.jpg" alt="Ask Puck chat in Raycast" width="49%">

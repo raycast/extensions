@@ -1,5 +1,15 @@
-import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
-import { useCachedPromise, useForm } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  getPreferenceValues,
+  Icon,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { listProjects, projectSlug, startThread } from "../lib/amp";
 import { openInAmp, withToast } from "../lib/ui";
 
@@ -53,11 +63,18 @@ export function NewThreadForm({
           title: v.title.trim() || undefined,
           fast: v.fast,
         }),
-      "Thread started — URL copied",
+      "Thread started",
     );
     if (!url) return;
-    await Clipboard.copy(url);
-    if (v.open) await openInAmp(url);
+    // Claim the URL was copied only once it was, and stay on the form if copying or opening fails.
+    try {
+      await Clipboard.copy(url);
+      if (v.open) await openInAmp(url);
+    } catch (error) {
+      await showFailureToast(error, { title: "Thread started, but it couldn't be opened" });
+      return;
+    }
+    await showToast({ style: Toast.Style.Success, title: "Thread started — URL copied" });
     await popToRoot({ clearSearchBar: true });
   }
 

@@ -116,7 +116,7 @@ ${ampCommand(prompt)}
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search prompts…">
       {[...byCategory].map(([category, items]) => (
-        <List.Section key={category} title={category} subtitle={String(items.length)}>
+        <List.Section key={category} title={category}>
           {items.map((prompt) => (
             <List.Item
               key={prompt.id}
