@@ -1,6 +1,6 @@
 # monobank Changelog
 
-## [AI, Statements, Budgets, Subscriptions, Menu Bar and Currency Converter] - {PR_MERGE_DATE}
+## [AI, Statements, Budgets, Subscriptions, Menu Bar and Currency Converter] - 2026-11-12
 
 - Added the "Currency Rate Menu Bar" command (macOS): a currency rate in the menu bar, with your pinned rates and all other rates in its menu. Choose the rate there, or with "Show in Menu Bar" (`⌘ ⇧ M`) in "Show Currency Rates", and choose whether the title shows the sell rate, the buy rate, both or only the flag
 - Added the "Jar Progress Menu Bar" command (macOS): a jar's progress in the menu bar, with your other jars in its menu, and links to their top-up pages. Choose the jar there, or with "Show in Menu Bar" (`⌘ ⇧ M`) in "Show Accounts", and choose whether the title shows the percentage, the balance, the balance and goal, or nothing
