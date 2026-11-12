@@ -15,6 +15,7 @@ export default function Command() {
     isLoading,
     error,
     pagination,
+    revalidate,
   } = useCachedPromise(
     (q: string, sort: string) =>
       async ({ cursor }: { cursor?: string }) => {
@@ -41,7 +42,7 @@ export default function Command() {
     >
       {error || !projects?.length ? (
         isLoading && !error ? null : (
-          <DirectoryEmptyView error={error} noun="projects" />
+          <DirectoryEmptyView error={error} noun="projects" onRetry={revalidate} />
         )
       ) : (
         projects.map((project) => (

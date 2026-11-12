@@ -2,9 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "buildinpublic",
   "title": "Build in Public",
-  "description": "Manage your Build in Public projects, find member deals and search the maker directory from Raycast.",
+  "description": "Manage your Build in Public projects, find member deals and search the maker directory from Raycast. Requires a Build in Public account.",
   "icon": "extension-icon.png",
   "author": "marckohlbrugge",
+  "platforms": ["macOS"],
   "categories": [
     "Productivity",
     "Developer Tools"

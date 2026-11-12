@@ -17,12 +17,3 @@ Directory search (Search Projects and Search Members) isn't available for every 
 ## Signing in
 
 The first command you run opens buildinpublic.com to connect your account. You can disconnect Raycast any time at [buildinpublic.com/settings/apps](https://buildinpublic.com/settings/apps).
-
-## Development
-
-```sh
-npm install
-npm run dev
-```
-
-To point the extension at a local server (`localhost:3000` and `api.localhost:3000`), set Environment to Development in the extension's preferences.

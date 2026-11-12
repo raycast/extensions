@@ -12,7 +12,15 @@ interface Values {
 
 const FIELDS = ["name", "url", "pitch"] as const;
 
-export function ProjectForm({ project, onSave }: { project?: Project; onSave?: (project: OwnProject) => void }) {
+export function ProjectForm({
+  project,
+  onSave,
+  navigationTitle,
+}: {
+  project?: Project;
+  onSave?: (project: OwnProject) => void;
+  navigationTitle?: string;
+}) {
   const { push, pop } = useNavigation();
 
   const { handleSubmit, itemProps, setValidationError } = useForm<Values>({
@@ -51,7 +59,7 @@ export function ProjectForm({ project, onSave }: { project?: Project; onSave?: (
 
   return (
     <Form
-      navigationTitle={project ? `Edit ${project.name}` : "Add Project"}
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm

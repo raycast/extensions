@@ -7,7 +7,13 @@ import { ProjectCopyActions, ProjectListItem, ProjectOpenActions } from "./compo
 import { Project } from "./types";
 
 export default function Command() {
-  const { data: projects, isLoading, revalidate, mutate } = useCachedPromise(myProjects);
+  const {
+    data: projects,
+    isLoading,
+    error,
+    revalidate,
+    mutate,
+  } = useCachedPromise(myProjects, [], { onError: (error) => console.error(error) });
   const [filter, setFilter] = useState("all");
   const shown = filter === "unverified" ? projects?.filter((project) => !project.verified) : projects;
 
@@ -35,7 +41,7 @@ export default function Command() {
       title="Add Project"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<ProjectForm onSave={revalidate} />}
+      target={<ProjectForm navigationTitle="Add Project" onSave={revalidate} />}
     />
   );
 
@@ -50,7 +56,23 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filter === "unverified" && projects?.length ? (
+      {error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't load your projects"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : filter === "unverified" && projects?.length ? (
         <List.EmptyView icon={Icon.CheckCircle} title="All your projects are verified" />
       ) : (
         <List.EmptyView
@@ -74,7 +96,9 @@ export default function Command() {
                   title="Edit Project"
                   icon={Icon.Pencil}
                   shortcut={Keyboard.Shortcut.Common.Edit}
-                  target={<ProjectForm project={project} onSave={revalidate} />}
+                  target={
+                    <ProjectForm project={project} navigationTitle={`Edit ${project.name}`} onSave={revalidate} />
+                  }
                 />
                 {addProject}
                 <ProjectCopyActions project={project} />

@@ -20,6 +20,7 @@ export default function Command() {
     isLoading,
     error,
     pagination,
+    revalidate,
   } = useCachedPromise(
     (q: string, category: string) =>
       async ({ cursor }: { cursor?: string }) => {
@@ -62,7 +63,21 @@ export default function Command() {
       {unavailable(error) ? (
         <List.EmptyView icon={Icon.Lock} title="Deals aren't available for your account yet" />
       ) : error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Couldn't load deals" description={error.message} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't load deals"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
       ) : !deals?.length && !isLoading ? (
         <List.EmptyView
           icon={Icon.Megaphone}

@@ -15,9 +15,23 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Build in Public",
   providerIcon: "extension-icon.png",
-  providerId: "buildinpublic",
+  providerId: development ? "buildinpublic-development" : "buildinpublic",
   description: "Connect your Build in Public account to manage your projects.",
 });
+
+// Search Deals fires two requests at once. A second one waits, then reads the
+// tokens the first one stored, so they never register two clients or refresh
+// the same token.
+let turn: Promise<unknown> = Promise.resolve();
+
+function inTurn<T>(run: () => Promise<T>): Promise<T> {
+  const result = turn.then(run, run);
+  turn = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
 
 interface RegisteredClient {
   id: string;
@@ -25,23 +39,27 @@ interface RegisteredClient {
   authorized: boolean;
 }
 
-export async function accessToken(): Promise<string> {
-  const tokens = await client.getTokens();
+export function accessToken(): Promise<string> {
+  return inTurn(async () => {
+    const tokens = await client.getTokens();
 
-  if (tokens?.accessToken && !tokens.isExpired()) return tokens.accessToken;
-  if (tokens?.refreshToken) {
-    const refreshed = await refresh(tokens.refreshToken);
-    if (refreshed) return refreshed;
-  }
+    if (tokens?.accessToken && !tokens.isExpired()) return tokens.accessToken;
+    if (tokens?.refreshToken) {
+      const refreshed = await refresh(tokens.refreshToken);
+      if (refreshed) return refreshed;
+    }
 
-  return signIn();
+    return signIn();
+  });
 }
 
 // For a request the server refused with 401 although the token looked fresh.
-export async function renewAccessToken(): Promise<string> {
-  const tokens = await client.getTokens();
-  const refreshed = tokens?.refreshToken ? await refresh(tokens.refreshToken) : undefined;
-  return refreshed ?? signIn();
+export function renewAccessToken(): Promise<string> {
+  return inTurn(async () => {
+    const tokens = await client.getTokens();
+    const refreshed = tokens?.refreshToken ? await refresh(tokens.refreshToken) : undefined;
+    return refreshed ?? signIn();
+  });
 }
 
 async function signIn(): Promise<string> {

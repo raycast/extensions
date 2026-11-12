@@ -24,6 +24,7 @@ export default function Command() {
     isLoading,
     error,
     pagination,
+    revalidate,
   } = useCachedPromise(
     (q: string, sort: string) =>
       async ({ cursor }: { cursor?: string }) => {
@@ -50,7 +51,7 @@ export default function Command() {
     >
       {error || !users?.length ? (
         isLoading && !error ? null : (
-          <DirectoryEmptyView error={error} noun="makers" />
+          <DirectoryEmptyView error={error} noun="makers" onRetry={revalidate} />
         )
       ) : (
         users.map((user) => <MemberListItem key={user.id} user={user} />)
@@ -105,13 +106,20 @@ function MemberListItem({ user }: { user: User }) {
 }
 
 function MemberProjects({ user }: { user: User }) {
-  const { data: projects, isLoading, error } = useCachedPromise(userProjects, [user.id]);
+  const {
+    data: projects,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(userProjects, [user.id], {
+    onError: (error) => (isExpected(error) ? undefined : console.error(error)),
+  });
 
   return (
     <List isLoading={isLoading} navigationTitle={`@${user.username}'s Projects`}>
       {error || !projects?.length ? (
         isLoading && !error ? null : (
-          <DirectoryEmptyView error={error} noun="projects" />
+          <DirectoryEmptyView error={error} noun="projects" onRetry={revalidate} />
         )
       ) : (
         projects.map((project) => (

@@ -1,9 +1,9 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { APIError } from "../api";
 
 // Directory search is only on for some accounts so far; everyone else gets a
 // friendly note instead of an error toast.
-export function DirectoryEmptyView({ error, noun }: { error?: Error; noun: string }) {
+export function DirectoryEmptyView({ error, noun, onRetry }: { error?: Error; noun: string; onRetry?: () => void }) {
   if (error instanceof APIError && error.needsElevatedAccess) {
     return (
       <List.EmptyView
@@ -15,7 +15,20 @@ export function DirectoryEmptyView({ error, noun }: { error?: Error; noun: strin
   }
 
   if (error) {
-    return <List.EmptyView icon={Icon.ExclamationMark} title={`Couldn't load ${noun}`} description={error.message} />;
+    return (
+      <List.EmptyView
+        icon={Icon.ExclamationMark}
+        title={`Couldn't load ${noun}`}
+        description={error.message}
+        actions={
+          onRetry && (
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+            </ActionPanel>
+          )
+        }
+      />
+    );
   }
 
   return <List.EmptyView icon={Icon.MagnifyingGlass} title={`No ${noun} found`} />;
