@@ -1,5 +1,5 @@
 import { environment } from "@raycast/api";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 import path from "path";
 import initSqlJs, { Database, ParamsObject } from "sql.js";
@@ -26,12 +26,18 @@ export interface Note {
   pinned: boolean;
   formattedTags: string;
   wordCount: number;
+  // Bear 2 embeds images as relative links, `![](name.png)`; this maps each attached file's name
+  // to its absolute path, for the attachments that exist on disk (see resolveBearImages).
+  imagePaths: Record<string, string>;
 }
 
 const BEAR_DB_PATH =
   homedir() + "/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite";
 
 const BEAR_EPOCH = 978307200; // Start of 2001 as a timestamp
+
+const BEAR_NOTE_IMAGES_PATH =
+  homedir() + "/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files/Note Images";
 
 export async function loadDatabase(): Promise<BearDb> {
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
@@ -105,6 +111,7 @@ export class BearDb {
       encrypted: row.encrypted === 1,
       pinned: row.pinned === 1,
       wordCount: [...text.matchAll(/\b\w+\b/g)].length,
+      imagePaths: {},
     };
   }
 
@@ -139,7 +146,7 @@ export class BearDb {
     statement.free();
     // pinned notes should be at the top
     results.sort((a, b) => (a.pinned === b.pinned ? 0 : a.pinned ? -1 : 1));
-    return results;
+    return this.withImagePaths(results);
   }
 
   getTags(): string[] {
@@ -169,7 +176,7 @@ export class BearDb {
 
     statement.free();
 
-    return results;
+    return this.withImagePaths(results);
   }
 
   getNoteLinks(noteID: string): Note[] {
@@ -186,6 +193,31 @@ export class BearDb {
 
     statement.free();
 
-    return results;
+    return this.withImagePaths(results);
+  }
+
+  // Bear 2 stores each attachment at Note Images/<file id>/<file name>, and the note text links
+  // it by name alone. One query for the notes at hand; Bear 1's `[image:…]` syntax carries its own
+  // path and is handled by formatBearAttachments instead.
+  private withImagePaths(notes: Note[]): Note[] {
+    if (notes.length === 0 || this.getBearVersion() !== 2) return notes;
+    const byId = new Map(notes.map((n) => [n.id, n]));
+    const placeholders = notes.map(() => "?").join(",");
+    const statement = this.database.prepare(
+      `SELECT notes.ZUNIQUEIDENTIFIER AS note_id, files.ZFILENAME AS name, files.ZUNIQUEIDENTIFIER AS file_id
+       FROM ZSFNOTEFILE AS files JOIN ZSFNOTE AS notes ON files.ZNOTE = notes.Z_PK
+       WHERE notes.ZUNIQUEIDENTIFIER IN (${placeholders})`,
+    );
+    statement.bind(notes.map((n) => n.id));
+    while (statement.step()) {
+      const row = statement.getAsObject();
+      const note = byId.get(row.note_id as string);
+      const name = row.name as string | null;
+      if (!note || !name || !row.file_id) continue;
+      const path = `${BEAR_NOTE_IMAGES_PATH}/${row.file_id}/${name}`;
+      if (existsSync(path)) note.imagePaths[name.normalize("NFC")] = path;
+    }
+    statement.free();
+    return notes;
   }
 }

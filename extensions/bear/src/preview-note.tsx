@@ -1,6 +1,7 @@
 import { Detail } from "@raycast/api";
 import { homedir } from "os";
 import { Note } from "./bear-db";
+import { resolveBearImages } from "./bear-images";
 import NoteActions from "./note-actions";
 
 const BEAR_LOCAL_FILES_PATH =
@@ -37,7 +38,7 @@ export default function PreviewNote({ note }: { note: Note }) {
   const noteContent = note.encrypted ? `# ${note.title}\n\n*This note's content is encrypted*` : note.text;
   return (
     <Detail
-      markdown={formatBearAttachments(noteContent)}
+      markdown={formatBearAttachments(resolveBearImages(noteContent, note.imagePaths))}
       navigationTitle={note.title}
       actions={<NoteActions isNotePreview={true} note={note} />}
     />
