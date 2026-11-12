@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "external-hdr",
+  "title": "External HDR",
+  "description": "Turn high dynamic range on or off for external displays",
+  "icon": "icon.png",
+  "author": "jjuan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "toggle-hdr",
+      "title": "Toggle HDR",
+      "description": "Flip high dynamic range for your external display",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "menu-bar",
+      "title": "HDR Displays",
+      "description": "See and change HDR state from the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "hdr-on-connect",
+      "title": "HDR on Connect",
+      "subtitle": "Auto-apply rules",
+      "description": "Choose which displays get HDR applied automatically when connected",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayName",
+      "type": "textfield",
+      "required": false,
+      "title": "Target Display",
+      "description": "Name of the display Toggle HDR should act on. Leave empty to use the first external HDR-capable display.",
+      "placeholder": "e.g. LG HDR 4K"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.0",
+    "typescript": "^5.7.0"
+  }
+}

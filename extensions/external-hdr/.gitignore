@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# build output for local development; the copy in assets/ is committed on purpose
+# so a clone and the Raycast Store build both ship a working binary
+tools/hdrctl
