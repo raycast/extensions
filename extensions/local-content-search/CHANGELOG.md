@@ -1,6 +1,6 @@
 # Local Content Search Changelog
 
-## [Lighter Background Indexing] - {PR_MERGE_DATE}
+## [Lighter Background Indexing] - 2026-11-12
 
 - Fixed constant background activity when a selected folder holds many files, especially in iCloud Drive: folders are rescanned when they change, not every minute.
 - Scans no longer query iCloud Drive or other file providers about files that are not indexed, and never read online-only files.
