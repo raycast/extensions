@@ -642,6 +642,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "buildbase-console",
+    title: "BuildBase Console",
+    description:
+      "Manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/buildbase-app/mcp/main/assets/logo-400.png",
+    homepage: "https://docs.buildbase.app/console/ai-agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.console.buildbase.app/mcp"],
+    },
+    remoteUrl: "https://api.console.buildbase.app/mcp",
+  },
+  {
     name: "bulkpublish",
     title: "BulkPublish",
     description:
