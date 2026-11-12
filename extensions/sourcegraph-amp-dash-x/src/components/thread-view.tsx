@@ -131,8 +131,7 @@ export function ThreadView({ id, title, onChange }: { id: string; title: string;
         <List.Item
           id="pending"
           title={pending}
-          icon={Icon.Person}
-          accessories={[{ icon: { source: Icon.CircleProgress50, tintColor: Color.Green }, tooltip: "Sending" }]}
+          icon={{ source: Icon.CircleProgress50, tintColor: Color.Green }}
           detail={<List.Item.Detail markdown={`**You**\n\n${pending}\n\n_Sending…_`} metadata={metadata} />}
           actions={actions(pending)}
         />
@@ -151,9 +150,6 @@ export function ThreadView({ id, title, onChange }: { id: string; title: string;
                 : t.role === "user"
                   ? Icon.Person
                   : { source: "amp-menubar.png", tintColor: Color.SecondaryText }
-            }
-            accessories={
-              t.tools.length ? [{ text: String(t.tools.length), icon: Icon.Hammer, tooltip: "Tool calls" }] : []
             }
             detail={
               <List.Item.Detail
