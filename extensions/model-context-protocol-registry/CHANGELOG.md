@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Toolbox POD MCP Server] - {PR_MERGE_DATE}
+## [Add Toolbox POD MCP Server] - 2026-11-12
 
 - Add Toolbox POD to the official registry: design custom tees and hoodies, see them on mockups, price them, and prepare an order with a link to pay on toolboxpod.com, then follow it to tracking. Prints are made and shipped from Utah (US only). Hosted Streamable HTTP server at https://mcp.toolboxpod.com/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
