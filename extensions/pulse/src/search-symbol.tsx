@@ -13,11 +13,13 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { CatalogStore } from "./lib/catalog";
 import { chartMarkdown, chartSvg } from "./lib/chart";
+import { addFavorites, loadFavorites, moveFavorite, removeFavorites } from "./lib/favorites";
 import { SESSION_LABELS, formatChange, formatDelay, formatNumber, formatPrice, formatTimestamp } from "./lib/format";
-import { Quote, RowQuote, fetchBinanceRows, fetchQuote, fetchSparkQuotes } from "./lib/quotes";
-import { SymbolIndex, readerLanguage } from "./lib/search";
+import { loadIndex, updateCatalog } from "./lib/load-index";
+import { refreshMenuBar } from "./lib/menu-bar";
+import { Quote, fetchQuote, fetchRows } from "./lib/quotes";
+import { readerLanguage, typedInstrument } from "./lib/search";
 import {
   INDICES,
   Instrument,
@@ -25,75 +27,18 @@ import {
   MARKET_CURRENCIES,
   MARKET_FILTERS,
   MARKET_LABELS,
-  Market,
   PULSE_FOR_MAC_URL,
   isCryptoPair,
-  normalizeTypedSymbol,
   quotePageUrl,
 } from "./lib/symbols";
 
-const store = new CatalogStore(environment.supportPath);
 const SYSTEM_LOCALE = Intl.DateTimeFormat().resolvedOptions().locale;
 const RECENT_LIMIT = 12;
 
-/** The catalog and pair directory on disk, refreshed in the background once a day. */
-async function loadIndex(): Promise<SymbolIndex> {
-  const [catalog, pairs] = await Promise.all([store.loadCatalog(), store.loadPairs()]);
-  let document = catalog.value;
-  let directory = pairs.value;
-  const refreshes: Promise<void>[] = [];
-  if (store.isStale(catalog)) {
-    refreshes.push(
-      store.refreshCatalog(document).then((fresh) => {
-        document = fresh;
-      }),
-    );
-  }
-  if (store.isStale(pairs)) {
-    refreshes.push(
-      store.refreshPairs().then((fresh) => {
-        directory = fresh;
-      }),
-    );
-  }
-  if (!document) {
-    // Nothing to search yet: wait for the first download.
-    const results = await Promise.allSettled(refreshes);
-    const failed = results.find((result) => result.status === "rejected");
-    if (!document) throw failed?.reason ?? new Error("The symbol list could not be downloaded.");
-    return new SymbolIndex(document, directory);
-  }
-  if (refreshes.length) {
-    // The copy in hand answers now; a newer one is used from the next launch.
-    void Promise.allSettled(refreshes);
-  }
-  return new SymbolIndex(document, directory);
-}
-
-function typedInstrument(query: string, index: SymbolIndex | undefined): Instrument | null {
-  const symbol = normalizeTypedSymbol(query.replace(/\s+/g, ""));
-  if (!symbol || symbol.length < 2) return null;
-  if (isCryptoPair(symbol)) {
-    if (index && index.pairs.size > 0 && !index.pairs.has(symbol)) return null;
-    return { symbol, market: "crypto", kind: "crypto", name: symbol.split("/")[0], exchange: "Binance Spot" };
-  }
-  // A typed "^FTSE" is an index whatever its exchange, so the Indices filter keeps it.
-  if (symbol.startsWith("^")) return { symbol, market: "index", kind: "index", name: symbol, exchange: null };
-  const suffix = /\.([A-Z]+)$/.exec(symbol)?.[1];
-  const market = (suffix ? SUFFIX_MARKETS[suffix] : undefined) ?? "us";
-  return { symbol, market, kind: "equity", name: symbol, exchange: null };
-}
-
-// The Yahoo suffixes of the markets the filter offers, so a typed `7203.T` stays under Japan.
-const SUFFIX_MARKETS: Record<string, Market> = {
-  HK: "hk",
-  SS: "sh",
-  SZ: "sz",
-  T: "jp",
-  KS: "kr",
-  KQ: "kq",
-  TW: "tw",
-  TWO: "two",
+const FAVORITES_SECTION = "Favorites";
+const FAVORITE_ACCESSORY: List.Item.Accessory = {
+  icon: { source: Icon.Star, tintColor: Color.Yellow },
+  tooltip: "Favorite",
 };
 
 const changeColor = (value: number | null | undefined) =>
@@ -124,6 +69,7 @@ export default function Command() {
   const [filter, setFilter] = useState("all");
   const [showingDetail, setShowingDetail] = useCachedState("showing-detail", true);
   const [recent, setRecent] = useCachedState<string[]>("recent-symbols", []);
+  const { data: favorites = [], mutate: mutateFavorites } = usePromise(loadFavorites);
   const {
     data: index,
     isLoading: indexLoading,
@@ -141,15 +87,23 @@ export default function Command() {
     const allowed = (instrument: Instrument) => markets.length === 0 || markets.includes(instrument.market);
     if (!query) {
       const lookup = (symbol: string) => index?.lookup(symbol, language) ?? typedInstrument(symbol, undefined) ?? null;
-      const recents = recent.map(lookup).filter((item): item is Instrument => item !== null && allowed(item));
+      // A favorite is named in the reader's language when the catalog lists it, else as it was pinned.
+      const pinned = favorites.map((favorite) => index?.lookup(favorite.symbol, language) ?? favorite).filter(allowed);
+      const shown = new Set(favorites.map((favorite) => favorite.symbol));
+      const recents = recent
+        .filter((symbol) => !shown.has(symbol))
+        .map(lookup)
+        .filter((item): item is Instrument => item !== null && allowed(item));
+      recent.forEach((symbol) => shown.add(symbol));
       const indices = INDICES.map((entry) => lookup(entry.symbol)).filter(
-        (item): item is Instrument => item !== null && allowed(item) && !recent.includes(item.symbol),
+        (item): item is Instrument => item !== null && allowed(item) && !shown.has(item.symbol),
       );
       const browse = markets.length && !markets.includes("index") && index ? index.top(markets, 30, language) : [];
       return [
+        { title: FAVORITES_SECTION, items: pinned },
         { title: "Recent", items: recents },
         { title: "Indices", items: indices },
-        { title: "Most Valuable", items: browse.filter((item) => !recent.includes(item.symbol)) },
+        { title: "Most Valuable", items: browse.filter((item) => !shown.has(item.symbol)) },
       ];
     }
     const hits = index ? index.search(query, { language, markets, limit: 30 }).map((hit) => hit.instrument) : [];
@@ -164,7 +118,7 @@ export default function Command() {
     const results = { title: "Results", items: hits };
     const exactCode = hits.some((hit) => hit.symbol.toUpperCase() === typed?.symbol);
     return /[\^=]/.test(query) && !exactCode ? [direct, results] : [results, direct];
-  }, [index, searchText, filter, language, recent]);
+  }, [index, searchText, filter, language, recent, favorites]);
 
   const visible = useMemo(() => sections.flatMap((section) => section.items.map((item) => item.symbol)), [sections]);
   // List rows carry a price only while the detail pane is hidden; the pane prices the selected row itself.
@@ -172,39 +126,11 @@ export default function Command() {
     data: priced,
     isLoading: rowsLoading,
     revalidate: repriceRows,
-  } = useCachedPromise(
-    async (symbols: string[]) => {
-      const crypto = symbols.filter(isCryptoPair);
-      const stocks = symbols.filter((symbol) => !isCryptoPair(symbol));
-      const [stockRows, cryptoRows] = await Promise.allSettled([
-        fetchSparkQuotes(stocks),
-        // One bad pair fails a Binance batch, so price pairs one by one when the batch fails.
-        fetchBinanceRows(crypto).catch(async () => {
-          const each = await Promise.allSettled(crypto.map((pair) => fetchBinanceRows([pair])));
-          return Object.assign({}, ...each.map((result) => (result.status === "fulfilled" ? result.value : {})));
-        }),
-      ]);
-      const failed = [
-        ...(stockRows.status === "rejected" ? ["Yahoo Finance"] : []),
-        ...(cryptoRows.status === "rejected" ? ["Binance"] : []),
-      ];
-      const quotes = {
-        ...(stockRows.status === "fulfilled" ? stockRows.value : {}),
-        ...(cryptoRows.status === "fulfilled" ? cryptoRows.value : {}),
-      } as Record<string, RowQuote>;
-      // Nothing priced: fail outright, and the hook's toast offers Retry.
-      if (failed.length && Object.keys(quotes).length === 0) {
-        throw new Error(`${failed.join(" and ")} did not answer.`);
-      }
-      return { quotes, failed };
-    },
-    [visible],
-    {
-      execute: !showingDetail && visible.length > 0,
-      keepPreviousData: true,
-      failureToastOptions: { title: "Could not load prices" },
-    },
-  );
+  } = useCachedPromise(fetchRows, [visible], {
+    execute: !showingDetail && visible.length > 0,
+    keepPreviousData: true,
+    failureToastOptions: { title: "Could not load prices" },
+  });
   const rows = priced?.quotes;
   // Some rows priced and some not: keep the priced ones, and say which source failed.
   const failedSources = priced?.failed.join(" and ");
@@ -220,6 +146,22 @@ export default function Command() {
 
   const remember = (symbol: string) =>
     setRecent((current) => [symbol, ...current.filter((item) => item !== symbol)].slice(0, RECENT_LIMIT));
+
+  const favoriteSymbols = useMemo(() => new Set(favorites.map((favorite) => favorite.symbol)), [favorites]);
+
+  const changeFavorites = async (update: Promise<unknown>, success: string, instrument: Instrument) => {
+    try {
+      await mutateFavorites(update);
+      await showToast({ style: Toast.Style.Success, title: success, message: instrument.symbol });
+      refreshMenuBar();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not update favorites",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
 
   const empty = !indexLoading && sections.every((section) => section.items.length === 0);
 
@@ -275,8 +217,13 @@ export default function Command() {
                 }
                 accessories={
                   showingDetail
-                    ? undefined
+                    ? favoriteSymbols.has(instrument.symbol) && section.title !== FAVORITES_SECTION
+                      ? [FAVORITE_ACCESSORY]
+                      : undefined
                     : [
+                        ...(favoriteSymbols.has(instrument.symbol) && section.title !== FAVORITES_SECTION
+                          ? [FAVORITE_ACCESSORY]
+                          : []),
                         { tag: { value: marketTag(instrument), color: Color.SecondaryText } },
                         row
                           ? {
@@ -296,11 +243,23 @@ export default function Command() {
                     showingDetail={showingDetail}
                     toggleDetail={() => setShowingDetail((value) => !value)}
                     remember={remember}
+                    favorite={favoriteSymbols.has(instrument.symbol)}
+                    toggleFavorite={() =>
+                      favoriteSymbols.has(instrument.symbol)
+                        ? changeFavorites(removeFavorites([instrument.symbol]), "Removed from favorites", instrument)
+                        : changeFavorites(addFavorites([instrument]), "Added to favorites", instrument)
+                    }
+                    moveFavorite={
+                      section.title === FAVORITES_SECTION && !searchText.trim() && filter === "all"
+                        ? (offset) => mutateFavorites(moveFavorite(instrument.symbol, offset)).then(refreshMenuBar)
+                        : undefined
+                    }
+                    favoritePosition={favorites.findIndex((favorite) => favorite.symbol === instrument.symbol)}
+                    favoriteCount={favorites.length}
                     onUpdateCatalog={async () => {
                       const toast = await showToast({ style: Toast.Style.Animated, title: "Updating symbol list…" });
                       try {
-                        const current = (await store.loadCatalog()).value;
-                        await Promise.all([store.refreshCatalog(current), store.refreshPairs()]);
+                        await updateCatalog();
                         reloadIndex();
                         toast.style = Toast.Style.Success;
                         toast.title = "Symbol list is up to date";
@@ -326,9 +285,15 @@ function InstrumentActions(props: {
   showingDetail: boolean;
   toggleDetail: () => void;
   remember: (symbol: string) => void;
+  favorite: boolean;
+  toggleFavorite: () => void;
+  /** Set only on rows of the Favorites section while it shows every favorite in order. */
+  moveFavorite?: (offset: -1 | 1) => void;
+  favoritePosition: number;
+  favoriteCount: number;
   onUpdateCatalog: () => void;
 }) {
-  const { instrument, remember } = props;
+  const { instrument, remember, moveFavorite } = props;
   const crypto = isCryptoPair(instrument.symbol);
   return (
     <ActionPanel title={instrument.symbol}>
@@ -348,6 +313,30 @@ function InstrumentActions(props: {
             title="Copy Name"
             content={instrument.name}
             shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
+        )}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title={props.favorite ? "Remove from Favorites" : "Add to Favorites"}
+          icon={props.favorite ? Icon.StarDisabled : Icon.Star}
+          shortcut={Keyboard.Shortcut.Common.Pin}
+          onAction={props.toggleFavorite}
+        />
+        {moveFavorite && props.favoritePosition > 0 && (
+          <Action
+            title="Move Favorite Higher"
+            icon={Icon.ArrowUp}
+            shortcut={Keyboard.Shortcut.Common.MoveUp}
+            onAction={() => moveFavorite(-1)}
+          />
+        )}
+        {moveFavorite && props.favoritePosition >= 0 && props.favoritePosition < props.favoriteCount - 1 && (
+          <Action
+            title="Move Favorite Lower"
+            icon={Icon.ArrowDown}
+            shortcut={Keyboard.Shortcut.Common.MoveDown}
+            onAction={() => moveFavorite(1)}
           />
         )}
       </ActionPanel.Section>
