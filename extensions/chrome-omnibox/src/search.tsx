@@ -197,11 +197,12 @@ export default function Command() {
           description={BROWSERS.map((b) => b.names[0]).join(", ")}
         />
       )}
+      {/* A list item, not EmptyView: it stays on top while address/search items are shown. */}
       {error && (
-        <List.EmptyView
+        <List.Item
           icon={Icon.Warning}
           title="Cannot read browser history"
-          description={error.message}
+          subtitle={error.message}
           actions={
             <ActionPanel>
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
