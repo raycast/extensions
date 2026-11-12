@@ -90,7 +90,24 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your agenda">
-      <List.EmptyView icon={Icon.Calendar} title="Nothing left today" description="No more events today or tomorrow." />
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not read your calendar"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Calendar}
+          title="Nothing left today"
+          description="No more events today or tomorrow."
+        />
+      )}
       {sections
         .filter((section) => section.events.length > 0)
         .map((section) => (
@@ -132,17 +149,17 @@ export default function Command() {
                       />
                     )}
                     <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={revalidate}
+                    />
+                    <Action
                       title="Delete Event"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => remove(event)}
-                    />
-                    <Action
-                      title="Refresh"
-                      icon={Icon.ArrowClockwise}
-                      shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={revalidate}
                     />
                   </ActionPanel>
                 }

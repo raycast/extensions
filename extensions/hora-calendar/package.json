@@ -109,7 +109,7 @@
       "arguments": [
         {
           "name": "minutes",
-          "placeholder": "Minutes (default from hora)",
+          "placeholder": "Minutes",
           "type": "text",
           "required": false
         }
@@ -147,7 +147,7 @@
       "arguments": [
         {
           "name": "duration",
-          "placeholder": "Duration (default 30 min)",
+          "placeholder": "Duration",
           "type": "dropdown",
           "required": false,
           "data": [
@@ -167,7 +167,7 @@
         },
         {
           "name": "days",
-          "placeholder": "Days ahead (default 5)",
+          "placeholder": "Days Ahead",
           "type": "dropdown",
           "required": false,
           "data": [

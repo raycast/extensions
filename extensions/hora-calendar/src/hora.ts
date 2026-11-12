@@ -106,7 +106,7 @@ export async function horaBundleID(): Promise<string> {
   return cachedBundleID ?? (await orderedCandidates())[0];
 }
 
-/** Escapes a value for use inside an AppleScript string literal. */
+/** Escapes one of our own bundle IDs for an `application id` literal. Data goes through `command` instead. */
 function quote(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
@@ -130,6 +130,22 @@ function dateLiteral(variable: string, date: Date): string {
   ].join("\n");
 }
 
+/** A hora command whose values travel as `argv` items, never as script source. */
+interface Command {
+  text: string;
+  args: string[];
+}
+
+/** `arg` swaps a value for `(item n of argv)` and keeps the value aside. */
+function command(build: (arg: (value: string) => string) => string): Command {
+  const args: string[] = [];
+  const text = build((value) => {
+    args.push(value);
+    return `(item ${args.length} of argv)`;
+  });
+  return { text, args };
+}
+
 /**
  * Runs one command against hora and parses its JSON answer.
  *
@@ -137,7 +153,8 @@ function dateLiteral(variable: string, date: Date): string {
  * which in practice means date variables. `only` pins the builds to try, for
  * callers that must not wake a closed one.
  */
-async function tellHora<T>(command: string, preamble = "", only?: string[]): Promise<T> {
+async function tellHora<T>(request: string | Command, preamble = "", only?: string[]): Promise<T> {
+  const { text, args } = typeof request === "string" ? { text: request, args: [] } : request;
   // More than one hora can be installed — a Setapp copy beside a Direct one,
   // or an old build somebody never removed. Only the ones from 1.1.5 carry a
   // dictionary, so walk the list until one answers rather than betting the
@@ -146,13 +163,20 @@ async function tellHora<T>(command: string, preamble = "", only?: string[]): Pro
   let lastOutdated: HoraOutdatedError | undefined;
 
   for (const bundleID of candidates) {
-    const script = [preamble, `tell application id ${quote(bundleID)}`, `  ${command}`, "end tell"]
+    const script = [
+      "on run argv",
+      preamble,
+      `tell application id ${quote(bundleID)}`,
+      `  ${text}`,
+      "end tell",
+      "end run",
+    ]
       .filter(Boolean)
       .join("\n");
 
     let output: string;
     try {
-      output = await runAppleScript(script, { humanReadableOutput: true, timeout: 30_000 });
+      output = await runAppleScript(script, args, { humanReadableOutput: true, timeout: 30_000 });
     } catch (error) {
       const failure = translate(error);
       if (failure instanceof HoraOutdatedError) {
@@ -275,13 +299,17 @@ export interface FreeTime {
 
 /** Creates the event straight away. hora stays closed. */
 export async function quickAddEvent(sentence: string, calendarName?: string): Promise<CreatedEvent> {
-  const inCalendar = calendarName ? ` in calendar ${quote(calendarName)}` : "";
-  return tellHora<CreatedEvent>(`parse sentence ${quote(sentence)} with add immediately${inCalendar}`);
+  return tellHora<CreatedEvent>(
+    command((arg) => {
+      const inCalendar = calendarName ? ` in calendar ${arg(calendarName)}` : "";
+      return `parse sentence ${arg(sentence)} with add immediately${inCalendar}`;
+    }),
+  );
 }
 
 /** Opens hora's editor with the sentence already parsed into the fields. */
 export async function addEventForEditing(sentence: string): Promise<void> {
-  await tellHora(`parse sentence ${quote(sentence)}`);
+  await tellHora(command((arg) => `parse sentence ${arg(sentence)}`));
 }
 
 export async function addTask(input: {
@@ -292,17 +320,19 @@ export async function addTask(input: {
   accountEmail?: string;
   notes?: string;
 }): Promise<CreatedTask> {
-  let preamble = "";
-  const parts = [`add task ${quote(input.title)}`];
-  if (input.due) {
-    preamble = dateLiteral("dueDate", input.due);
-    parts.push("due on dueDate");
-  }
+  const preamble = input.due ? dateLiteral("dueDate", input.due) : "";
+  const addTaskCommand = (list?: { id: string; account: string } | { name: string }) =>
+    command((arg) => {
+      const parts = [`add task ${arg(input.title)}`];
+      if (input.due) parts.push("due on dueDate");
+      if (list && "id" in list) parts.push(`with list ID ${arg(list.id)}`, `for account ${arg(list.account)}`);
+      if (list && "name" in list) parts.push(`in list ${arg(list.name)}`);
+      if (input.notes) parts.push(`notes ${arg(input.notes)}`);
+      return parts.join(" ");
+    });
   if (input.listID && input.accountEmail) {
-    const exactParts = [...parts, `with list ID ${quote(input.listID)}`, `for account ${quote(input.accountEmail)}`];
-    if (input.notes) exactParts.push(`notes ${quote(input.notes)}`);
     try {
-      return await tellHora<CreatedTask>(exactParts.join(" "), preamble);
+      return await tellHora<CreatedTask>(addTaskCommand({ id: input.listID, account: input.accountEmail }), preamble);
     } catch (error) {
       if (!(error instanceof HoraOutdatedError) || !input.listName) throw error;
       const sameName = (await listTaskLists()).filter(
@@ -317,15 +347,13 @@ export async function addTask(input: {
           "This hora build cannot safely select that task list. Update to a build with account-specific task lists.",
         );
       }
-      parts.push(`in list ${quote(input.listName)}`);
+      return tellHora<CreatedTask>(addTaskCommand({ name: input.listName }), preamble);
     }
-  } else if (input.listID || input.accountEmail) {
-    throw new Error("Pass a task list ID together with its account email.");
-  } else if (input.listName) {
-    parts.push(`in list ${quote(input.listName)}`);
   }
-  if (input.notes) parts.push(`notes ${quote(input.notes)}`);
-  return tellHora<CreatedTask>(parts.join(" "), preamble);
+  if (input.listID || input.accountEmail) {
+    throw new Error("Pass a task list ID together with its account email.");
+  }
+  return tellHora<CreatedTask>(addTaskCommand(input.listName ? { name: input.listName } : undefined), preamble);
 }
 
 export async function upcomingEvents(
@@ -339,7 +367,7 @@ export async function upcomingEvents(
 }
 
 export async function joinConference(eventID: string): Promise<{ conferenceLink: string; title: string }> {
-  return tellHora(`join conference ${quote(eventID)}`);
+  return tellHora(command((arg) => `join conference ${arg(eventID)}`));
 }
 
 export async function listCalendars(): Promise<HoraCalendar[]> {
@@ -351,12 +379,12 @@ export async function listTaskLists(): Promise<HoraTaskList[]> {
 }
 
 export async function respondToEvent(eventID: string, response: "accepted" | "declined" | "tentative"): Promise<void> {
-  await tellHora(`respond to event ${quote(eventID)} response ${response}`);
+  await tellHora(command((arg) => `respond to event ${arg(eventID)} response ${response}`));
 }
 
 /** Guests are never notified: a stray Raycast keystroke should not email anyone. */
 export async function deleteEvent(eventID: string): Promise<void> {
-  await tellHora(`delete event ${quote(eventID)} notifying guests false`);
+  await tellHora(command((arg) => `delete event ${arg(eventID)} notifying guests false`));
 }
 
 // MARK: - Focus and availability (hora 3.0.2+)

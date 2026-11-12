@@ -26,11 +26,24 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your meetings">
-      <List.EmptyView
-        icon={Icon.Calendar}
-        title="No meetings with a link"
-        description="Nothing in the next week has a joinable conference."
-      />
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not read your calendar"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Calendar}
+          title="No meetings with a link"
+          description="Nothing in the next week has a joinable conference."
+        />
+      )}
       {data.map((event) => (
         <List.Item
           key={event.id}
