@@ -14,7 +14,7 @@ struct DockItem {
 
     let bundleID: String?
 
-    var ref: AppRef { AppRef(url: url, bundleID: bundleID) }
+    var ref: AppRef { AppRef(url: url) }
 
     /// macOS won't let Finder leave the Dock.
     var isRemovable: Bool { bundleID != "com.apple.finder" }
@@ -41,20 +41,27 @@ struct DockItem {
     }
 }
 
-/// Identifies an app across the Dock, the file system and running processes.
-/// Paths alone don't work: the Dock lists Safari under /System/Volumes/Preboot/Cryptexes/…
+/// Identifies an app across the Dock, the file system and running processes, by its bundle on disk.
+/// Two copies of an app (say, two Xcode versions) share a bundle ID but are different apps, so the bundle's path
+/// is what counts. Symlinks are resolved first: /Applications/Safari.app links to the Cryptexes path the Dock reports.
 struct AppRef: Hashable {
     let url: URL
-    let bundleID: String?
 
     func matches(_ other: AppRef) -> Bool {
-        if let a = bundleID, let b = other.bundleID { return a == b }
-        return url.standardizedFileURL.resolvingSymlinksInPath().path == other.url.standardizedFileURL.resolvingSymlinksInPath().path
+        if AppRef.realPath(url) == AppRef.realPath(other.url) { return true }
+        // Same bundle reached through a path that isn't a symlink, such as a firmlink: compare file identity.
+        guard let a = AppRef.fileID(url), let b = AppRef.fileID(other.url) else { return false }
+        return a.isEqual(b)
     }
 
     func matches(_ app: NSRunningApplication) -> Bool {
         guard let url = app.bundleURL else { return false }
-        return matches(AppRef(url: url, bundleID: app.bundleIdentifier))
+        return matches(AppRef(url: url))
+    }
+
+    private static func realPath(_ url: URL) -> String { url.standardizedFileURL.resolvingSymlinksInPath().path }
+    private static func fileID(_ url: URL) -> NSObject? {
+        (try? url.resourceValues(forKeys: [.fileResourceIdentifierKey]))?.fileResourceIdentifier as? NSObject
     }
 }
 
@@ -116,7 +123,7 @@ enum Dock {
             remove = waitFor(findRemove)
         }
         guard let remove else { close(); return false }
-        AXUIElementPerformAction(remove, kAXPressAction as CFString)
+        guard AXUIElementPerformAction(remove, kAXPressAction as CFString) == .success else { close(); return false }
         return true
     }
 
@@ -132,7 +139,7 @@ enum Dock {
                       let file = data["file-data"] as? [String: Any],
                       let s = file["_CFURLString"] as? String,
                       let u = s.hasPrefix("file://") ? URL(string: s) : URL(fileURLWithPath: s) else { return true }
-                let tileApp = AppRef(url: u, bundleID: data["bundle-identifier"] as? String)
+                let tileApp = AppRef(url: u)
                 return !apps.contains { $0.matches(tileApp) }
             }
             if kept.count != tiles.count {
