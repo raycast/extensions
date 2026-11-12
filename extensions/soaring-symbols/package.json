@@ -26,21 +26,21 @@
       "name": "airline-info",
       "title": "Airline Information",
       "subtitle": "Soaring Symbols",
-      "description": "View detailed airline information including name, IATA, ICAO, country, website, and related assets.",
+      "description": "View detailed airline information including name, IATA, ICAO, callsign, founding year, country, alliance, hubs, and website.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.11.0",
+    "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.3.3",
-    "soaring-symbols": "^0.2.0"
+    "soaring-symbols": "^0.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^26.6.6",
     "@types/react": "19.3.0",
     "eslint": "^10.14.0",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "typescript": "^6.0.3"
   },
   "scripts": {
