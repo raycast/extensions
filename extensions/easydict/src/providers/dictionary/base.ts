@@ -6,6 +6,8 @@ import type { DictionaryResult, QueryInput, RequestOptions } from "@/core/result
 import { CancelledError, handleRequestError } from "@/shared/errors";
 import { createTimer } from "@/shared/logger";
 
+type DictionaryLookup = DictionaryContent | Omit<DictionaryResult, "type">;
+
 /**
  * Abstract base for dictionary providers.
  *
@@ -23,10 +25,11 @@ export abstract class BaseDictionaryProvider {
   public request = async (queryWordInfo: QueryInput, options?: RequestOptions): Promise<DictionaryResult> => {
     const timer = createTimer(this.logLabel);
     try {
-      const result = await this.doQuery(queryWordInfo, options);
-      const sectionCount = result.sections.length;
+      const lookup = await this.doQuery(queryWordInfo, options);
+      const result = "content" in lookup ? lookup : { content: lookup };
+      const sectionCount = result.content.sections.length;
       timer.done(sectionCount > 0 ? `${sectionCount} sections` : "no entries");
-      return { type: this.type, content: result };
+      return { type: this.type, ...result };
     } catch (error) {
       const requestError = handleRequestError(this.type, error, options?.signal, this.logLabel);
       if (!(requestError instanceof CancelledError)) {
@@ -36,5 +39,5 @@ export abstract class BaseDictionaryProvider {
     }
   };
 
-  protected abstract doQuery(queryWordInfo: QueryInput, options?: RequestOptions): Promise<DictionaryContent>;
+  protected abstract doQuery(queryWordInfo: QueryInput, options?: RequestOptions): Promise<DictionaryLookup>;
 }

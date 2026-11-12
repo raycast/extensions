@@ -1,31 +1,37 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import { networkTimeout } from "@/consts";
 import type { DictionaryContent } from "@/core/content/types";
 import type { WiktionaryLanguage } from "@/core/language/types";
 import { getWiktionaryLanguage } from "@/core/language/utils";
 import { DictionaryType } from "@/core/results/kinds";
-import type { QueryInput, RequestOptions } from "@/core/results/types";
+import type { DictionaryResult, QueryInput, RequestOptions } from "@/core/results/types";
 import { BaseDictionaryProvider } from "@/providers/dictionary/base";
-import { RequestError } from "@/shared/errors";
+import { normalizeError, RequestError } from "@/shared/errors";
 import { timedFetch } from "@/shared/http";
 import { logTrace } from "@/shared/logger";
 
 import { buildWiktionaryContent } from "./content";
 import {
   getWiktionaryHeadwordWikitext,
-  hasWiktionaryTranslationSubpage,
+  getWiktionarySimplifiedVariantTarget,
   parseWiktionaryDefinitions,
   parseWiktionaryForms,
   parseWiktionaryPronunciation,
-  parseWiktionaryTranslations,
+  parseWiktionaryTranslationPage,
   type WiktionaryHeadwordForms,
-  type WiktionaryTranslationGroup,
+  type WiktionaryTranslationPage,
 } from "./parse";
 import { getWiktionaryEntryURL, getWiktionaryTitle } from "./url";
 
 /** Wikimedia asks API clients to identify themselves. */
 const headers = { "User-Agent": "Raycast-Easydict (https://github.com/tisfeng/Raycast-Easydict)" };
 const baseURL = "https://en.wiktionary.org";
+const maxReferencedEntries = 3;
+const referenceLookupTimeout = 2500;
+
+type TranslationLookup = Pick<WiktionaryTranslationPage, "tables"> & Pick<DictionaryResult, "cacheable">;
+type TranslationPageLookup = TranslationLookup & Pick<WiktionaryTranslationPage, "references">;
 
 /**
  * Wiktionary dictionary provider, free and keyless.
@@ -38,13 +44,14 @@ export class WiktionaryDictionaryProvider extends BaseDictionaryProvider {
   protected override async doQuery(
     queryWordInfo: QueryInput,
     { signal }: RequestOptions = {},
-  ): Promise<DictionaryContent> {
+  ): Promise<DictionaryContent | Omit<DictionaryResult, "type">> {
     const word = queryWordInfo.word.trim();
     // Wiktionary titles are case-sensitive; sentence-initial capitals are common in selected text.
     const candidates = word === word.toLowerCase() ? [word] : [word, word.toLowerCase()];
     const sourceLanguage = getWiktionaryLanguage(queryWordInfo.fromLanguage);
     const needsTargetTranslation = queryWordInfo.fromLanguage === "en" && queryWordInfo.toLanguage !== "en";
     const targetLanguage = needsTargetTranslation ? getWiktionaryLanguage(queryWordInfo.toLanguage) : undefined;
+    let cacheable: false | undefined;
     for (const candidate of candidates) {
       const query = { ...queryWordInfo, word: candidate };
       const title = getWiktionaryTitle(candidate);
@@ -55,19 +62,34 @@ export class WiktionaryDictionaryProvider extends BaseDictionaryProvider {
       const matches = sourceLanguage.names
         .map((name) => ({ name, entries: parseWiktionaryDefinitions(definitionPayload, [name]) }))
         .filter(({ entries }) => entries.length);
-      const definitions = matches.flatMap(({ entries }) => entries);
+      let definitions = matches.flatMap(({ entries }) => entries);
       const languageNames = matches.length ? matches.map(({ name }) => name) : sourceLanguage.names;
       const page = typeof wikitext === "string" ? wikitext : "";
+      if (!definitions.length && languageNames.includes("Chinese")) {
+        const target = getWiktionarySimplifiedVariantTarget(page);
+        const targetTitle = target && getWiktionaryTitle(target);
+        if (targetTitle && targetTitle !== title) {
+          const variant = await this.fetchPage(`${baseURL}/api/rest_v1/page/definition/${targetTitle}`, "json", signal);
+          definitions = parseWiktionaryDefinitions(variant, ["Chinese"]);
+        }
+      }
       if (!definitions.length && (!targetLanguage || !page)) continue;
 
-      const [translations, forms] = await Promise.all([
-        targetLanguage ? this.fetchTranslations(title, page, targetLanguage, signal) : [],
+      const [lookup, forms] = await Promise.all([
+        targetLanguage ? this.fetchTranslations(title, page, targetLanguage, signal) : undefined,
         this.fetchForms(title, getWiktionaryHeadwordWikitext(page, languageNames), signal),
       ]);
+      if (lookup?.cacheable === false) cacheable = false;
       const pronunciation = parseWiktionaryPronunciation(page, languageNames, sourceLanguage.codes);
-      const content = buildWiktionaryContent(query, { definitions, translations, pronunciation, forms });
+      const content = buildWiktionaryContent(query, {
+        definitions,
+        translations: lookup?.tables ?? [],
+        pronunciation,
+        forms,
+      });
       if (content.sections.length) {
-        return { ...content, sourceUrl: getWiktionaryEntryURL(candidate, languageNames[0]) };
+        const entry = { ...content, sourceUrl: getWiktionaryEntryURL(candidate, languageNames[0]) };
+        return cacheable === false ? { content: entry, cacheable } : entry;
       }
     }
     return { kind: "dictionary", query: queryWordInfo, sections: [] };
@@ -78,14 +100,116 @@ export class WiktionaryDictionaryProvider extends BaseDictionaryProvider {
     wikitext: string,
     targetLanguage: WiktionaryLanguage,
     signal?: AbortSignal,
-  ): Promise<WiktionaryTranslationGroup[]> {
-    const subpage = hasWiktionaryTranslationSubpage(wikitext)
-      ? await this.fetchPage(`${baseURL}/w/index.php?title=${title}/translations&action=raw`, "text", signal)
-      : undefined;
-    return [
-      ...(typeof subpage === "string" ? parseWiktionaryTranslations(subpage, targetLanguage) : []),
-      ...parseWiktionaryTranslations(wikitext, targetLanguage),
-    ];
+  ): Promise<TranslationLookup> {
+    const page = await this.readTranslationPage(title, wikitext, targetLanguage, signal, signal);
+    if (page.tables.length || !page.references.length) return page;
+    const linked = await this.fetchReferencedTables(title, page.references, targetLanguage, signal);
+    return { tables: linked.tables, cacheable: page.cacheable ?? linked.cacheable };
+  }
+
+  private async fetchReferencedTables(
+    title: string,
+    pageReferences: WiktionaryTranslationPage["references"],
+    targetLanguage: WiktionaryLanguage,
+    signal?: AbortSignal,
+  ): Promise<TranslationLookup> {
+    const deadline = new AbortController();
+    const timer = setTimeout(
+      () => deadline.abort(new DOMException("Wiktionary translation reference timed out", "TimeoutError")),
+      referenceLookupTimeout,
+    );
+    const requestSignal = signal ? AbortSignal.any([signal, deadline.signal]) : deadline.signal;
+    const linkedPages = new Map<string, Promise<TranslationLookup>>();
+    try {
+      const results = await Promise.all(
+        pageReferences.map(async ({ title: target, partOfSpeech, gloss, senseId }): Promise<TranslationLookup> => {
+          const linkedTitle = getWiktionaryTitle(target);
+          if (linkedTitle === title) return { tables: [] };
+          let lookup = linkedPages.get(linkedTitle);
+          if (!lookup) {
+            if (linkedPages.size >= maxReferencedEntries) return { tables: [] };
+            lookup = this.readReferencedTranslationPage(linkedTitle, targetLanguage, requestSignal, signal);
+            linkedPages.set(linkedTitle, lookup);
+          }
+          const { tables, cacheable } = await lookup;
+          if (senseId) return { tables: tables.filter((table) => table.senseId === senseId), cacheable };
+          const matching = tables.filter((table) => !partOfSpeech || table.partOfSpeech === partOfSpeech);
+          const sameGloss = matching.filter((table) => table.gloss === gloss);
+          return { tables: sameGloss.length ? sameGloss : matching, cacheable };
+        }),
+      );
+      signal?.throwIfAborted();
+      return {
+        tables: [...new Set(results.flatMap((result) => result.tables))],
+        cacheable: results.some((result) => result.cacheable === false) ? false : undefined,
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private async readTranslationPage(
+    title: string,
+    wikitext: string,
+    targetLanguage: WiktionaryLanguage,
+    signal: AbortSignal | undefined,
+    callerSignal: AbortSignal | undefined,
+  ): Promise<TranslationPageLookup> {
+    const page = parseWiktionaryTranslationPage(wikitext, targetLanguage);
+    if (!page.subpages.length) return page;
+    const sectionsByTitle = new Map<string, string[]>();
+    for (const { section, title: target } of page.subpages) {
+      const subpageTitle = target ? getWiktionaryTitle(target) : title;
+      const sections = sectionsByTitle.get(subpageTitle) ?? [];
+      sections.push(section);
+      sectionsByTitle.set(subpageTitle, sections);
+    }
+    const subpages = await Promise.all(
+      Array.from(sectionsByTitle, async ([subpageTitle, sections]) => {
+        const { wikitext: raw, cacheable } = await this.fetchOptionalTranslationText(
+          `${subpageTitle}/translations`,
+          signal,
+          callerSignal,
+        );
+        const parsed = raw === undefined ? undefined : parseWiktionaryTranslationPage(raw, targetLanguage, sections);
+        return { parsed, cacheable };
+      }),
+    );
+    return {
+      tables: [...subpages.flatMap(({ parsed }) => parsed?.tables ?? []), ...page.tables],
+      references: [...subpages.flatMap(({ parsed }) => parsed?.references ?? []), ...page.references],
+      cacheable: subpages.some((subpage) => subpage.cacheable === false) ? false : undefined,
+    };
+  }
+
+  private async readReferencedTranslationPage(
+    title: string,
+    targetLanguage: WiktionaryLanguage,
+    signal: AbortSignal,
+    callerSignal?: AbortSignal,
+  ): Promise<TranslationLookup> {
+    const { wikitext, cacheable } = await this.fetchOptionalTranslationText(title, signal, callerSignal);
+    return wikitext === undefined
+      ? { tables: [], cacheable }
+      : this.readTranslationPage(title, wikitext, targetLanguage, signal, callerSignal);
+  }
+
+  private async fetchOptionalTranslationText(
+    title: string,
+    signal: AbortSignal | undefined,
+    callerSignal: AbortSignal | undefined,
+  ): Promise<{ wikitext?: string; cacheable?: false }> {
+    try {
+      signal?.throwIfAborted();
+      const raw = await this.fetchPage(`${baseURL}/w/index.php?title=${title}&action=raw`, "text", signal);
+      return typeof raw === "string" ? { wikitext: raw } : {};
+    } catch (error) {
+      callerSignal?.throwIfAborted();
+      const { name, message } = normalizeError(error);
+      if (!signal?.aborted && (name === "AbortError" || name === "CancelledError")) throw error;
+      logTrace(this.type, `Wiktionary translation page ${title} failed: ${message}`);
+      return { cacheable: false };
+    }
   }
 
   /** Renders only the headword templates, whose output carries the inflections; `title` sets their page name. */
@@ -114,9 +238,10 @@ export class WiktionaryDictionaryProvider extends BaseDictionaryProvider {
     body?: URLSearchParams,
   ): Promise<unknown> {
     logTrace(this.type, `url: ${url}`);
+    const deadline = AbortSignal.timeout(networkTimeout);
     const response = await timedFetch.raw(url, {
       headers,
-      signal,
+      signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
       responseType,
       ignoreResponseError: true,
       ...(body && { method: "POST", body }),

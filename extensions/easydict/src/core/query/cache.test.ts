@@ -165,6 +165,23 @@ describe("query cache", () => {
     expect(getCachedQueryResult(service, query)).toEqual(result);
   });
 
+  it("allows a fresh lookup after a temporarily incomplete dictionary result", () => {
+    const service = createService("builtin:dictionary:Wiktionary", "regular");
+    const result: DictionaryResult = {
+      type: DictionaryType.Wiktionary,
+      cacheable: false,
+      content: {
+        kind: "dictionary",
+        query,
+        sections: [{ kind: "definitions", entries: [{ kind: "plain", text: "A place to live." }] }],
+      },
+    };
+
+    cacheQueryResult(service, query, result);
+
+    expect(getCachedQueryResult(service, query)).toBeUndefined();
+  });
+
   it("stores content version 2 while retaining version 1 word evidence and seven-day dictionary expiry", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));

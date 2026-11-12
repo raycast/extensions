@@ -24,6 +24,23 @@ export interface WiktionaryTranslationGroup {
   words: string[];
 }
 
+interface WiktionaryTranslationTable extends WiktionaryTranslationGroup {
+  senseId?: string;
+}
+
+interface WiktionaryTranslationReference {
+  title: string;
+  partOfSpeech?: string;
+  gloss: string;
+  senseId?: string;
+}
+
+export interface WiktionaryTranslationPage {
+  tables: WiktionaryTranslationTable[];
+  references: WiktionaryTranslationReference[];
+  subpages: { section: string; title?: string }[];
+}
+
 export interface WiktionaryPronunciation {
   /** eg. `[ˈhuˀs]` */
   ipa?: string;
@@ -174,7 +191,10 @@ export function parseWiktionaryPronunciation(
   const section = getLanguageSection(wikitext, languageNames);
   const templates = (name: string) =>
     [...section.matchAll(new RegExp(`\\{\\{${name}\\|([^}]*)\\}\\}`, "g"))]
-      .map(([, body]) => templateArguments(body).map((argument) => argument.trim()))
+      .map(([, body]) => {
+        const [code, value] = positionalTemplateArguments(body);
+        return [code, value] as const;
+      })
       .filter(([code]) => languageCodes.includes(code));
 
   const ipa = templates("IPA")[0]?.[1];
@@ -220,9 +240,37 @@ export function parseWiktionaryForms(html: string): WiktionaryHeadwordForms[] {
   return results;
 }
 
-/** Positional template arguments, without named ones such as `id=` or `tr=`. */
-function templateArguments(template: string): string[] {
-  return template.split("|").filter((argument) => !/^\s*[\w-]+\s*=/.test(argument));
+function* splitTemplateArguments(template: string): Generator<string, void> {
+  const closingTokens: string[] = [];
+  let start = 0;
+  for (const { 0: token, index } of template.matchAll(/\[\[|\]\]|\{\{|\}\}|\|/g)) {
+    if (token === "[[" || token === "{{") closingTokens.push(token === "[[" ? "]]" : "}}");
+    else if (token === closingTokens.at(-1)) closingTokens.pop();
+    else if (token === "|" && !closingTokens.length) {
+      yield template.slice(start, index).trim();
+      start = index + 1;
+    }
+  }
+  yield template.slice(start).trim();
+}
+
+const namedParameter = /^([\w-]+)\s*=\s*([\s\S]*)$/;
+
+function* positionalTemplateArguments(template: string): Generator<string, void> {
+  for (const argument of splitTemplateArguments(template)) {
+    if (!namedParameter.test(argument)) yield argument;
+  }
+}
+
+function templateArguments(template: string) {
+  const positional: string[] = [];
+  const named = new Map<string, string>();
+  for (const argument of splitTemplateArguments(template)) {
+    const parameter = argument.match(namedParameter);
+    if (parameter) named.set(parameter[1], parameter[2]);
+    else positional.push(argument);
+  }
+  return { positional, named };
 }
 
 function cleanWikiText(text: string): string {
@@ -254,49 +302,108 @@ const partsOfSpeech = new Set([
   "Suffix",
 ]);
 
-export function hasWiktionaryTranslationSubpage(wikitext: string): boolean {
-  return wikitext.includes("{{see translation subpage");
+export function getWiktionarySimplifiedVariantTarget(wikitext: string): string | undefined {
+  const section = getSingleLanguageSection(wikitext.replace(/<!--[\s\S]*?-->/g, ""), "Chinese");
+  const [reference, another] = section.matchAll(/\{\{zh-see\|([^}]*)\}\}/g);
+  if (!reference || another) return undefined;
+  const { positional, named } = templateArguments(reference[1]);
+  const target = named.get("1") ?? positional[0];
+  const variant = named.get("2") ?? positional[1] ?? "";
+  const gloss = named.get("3") ?? positional[2];
+  if (target && !gloss && ["", "s", "simp", "simplified"].includes(variant)) return cleanWikiText(target);
 }
 
 /**
  * Parse translation tables (`{{trans-top|gloss}} ... {{t|da|word}} ... {{trans-bottom}}`)
  * from the English section of an English Wiktionary page.
  */
-export function parseWiktionaryTranslations(
+export function parseWiktionaryTranslationPage(
   wikitext: string,
   { codes, latinOnly }: Pick<WiktionaryLanguage, "codes" | "latinOnly">,
-): WiktionaryTranslationGroup[] {
-  const englishSection = getLanguageSection(wikitext, ["English"]);
-  const groups: WiktionaryTranslationGroup[] = [];
+  sections: readonly string[] = [],
+): WiktionaryTranslationPage {
+  const englishSection = getSingleLanguageSection(wikitext.replace(/<!--[\s\S]*?-->/g, ""), "English");
+  const tables: WiktionaryTranslationTable[] = [];
+  const references: WiktionaryTranslationReference[] = [];
+  const subpages: WiktionaryTranslationPage["subpages"] = [];
+  const selectedSections = new Set(sections.map((section) => section.toLowerCase().replace(/\s*:\s*/g, ":")));
+  const wholePage = !selectedSections.size || selectedSections.has("");
+  const headings: { level: number; name: string }[] = [];
+  let inScope = wholePage;
   let partOfSpeech: string | undefined;
-  let current: WiktionaryTranslationGroup | undefined;
+  let current: WiktionaryTranslationTable | undefined;
 
   for (const line of englishSection.split("\n")) {
-    const heading = line.match(/^={3,}\s*([^=]+?)\s*={3,}\s*$/);
+    const heading = line.match(/^(={3,})\s*([^=]+?)\s*\1\s*$/);
     if (heading) {
-      if (partsOfSpeech.has(heading[1])) partOfSpeech = heading[1];
+      const [, marks, name] = heading;
+      const level = marks.length;
+      while ((headings.at(-1)?.level ?? 0) >= level) headings.pop();
+      headings.push({ level, name });
+      current = undefined;
+      partOfSpeech = headings.findLast(({ name }) => partsOfSpeech.has(name))?.name;
+      const etymology = headings.findLast(({ name }) => /^Etymology(?: \d+)?$/i.test(name))?.name.toLowerCase() ?? "";
+      const part = partOfSpeech?.toLowerCase() ?? "";
+      inScope =
+        wholePage ||
+        selectedSections.has(part) ||
+        selectedSections.has(etymology) ||
+        selectedSections.has(`${etymology}:${part}`);
+      continue;
+    }
+    if (!inScope) continue;
+
+    const subpage = line.match(/\{\{see translation subpage(?:\|([^}]*))?\}\}/);
+    if (subpage) {
+      const { positional, named } = templateArguments(subpage[1] ?? "");
+      subpages.push({ section: named.get("1") ?? positional[0] ?? "", title: named.get("2") ?? positional[1] });
       continue;
     }
 
-    const top = line.match(/\{\{trans-top(?:-see)?\|([^}]*)\}\}/);
+    const top = line.match(/\{\{trans-top(?:-see|-also)?\|([^}]*)\}\}/);
     if (top) {
-      current = { partOfSpeech, gloss: cleanWikiText(templateArguments(top[1])[0] ?? ""), words: [] };
+      const {
+        positional: [gloss = ""],
+        named,
+      } = templateArguments(top[1]);
+      current = { partOfSpeech, gloss: cleanWikiText(gloss), senseId: named.get("id"), words: [] };
+      continue;
+    }
+    const reference = line.match(/\{\{trans-see\|([^}]*)\}\}/);
+    if (reference) {
+      const {
+        positional: [gloss = "", ...targets],
+        named,
+      } = templateArguments(reference[1]);
+      for (const [index, target] of (targets.length ? targets : [gloss]).entries()) {
+        const title = cleanWikiText(target);
+        if (title)
+          references.push({
+            title,
+            partOfSpeech,
+            gloss: cleanWikiText(gloss),
+            senseId: named.get(`id${index + 1}`) || named.get("id"),
+          });
+      }
       continue;
     }
     if (/\{\{trans-bottom\}\}/.test(line)) {
-      if (current?.words.length) groups.push(current);
+      if (current?.words.length) tables.push(current);
       current = undefined;
       continue;
     }
     if (!current) continue;
 
     for (const [, body] of line.matchAll(/\{\{tt?\+?\|([^}]*)\}\}/g)) {
-      const [code, word] = templateArguments(body);
-      if (!code || !word || !codes.includes(code.trim())) continue;
+      const parameters = positionalTemplateArguments(body);
+      const code = parameters.next().value;
+      if (!code || !codes.includes(code)) continue;
+      const [word] = parameters;
+      if (!word) continue;
       const text = cleanWikiText(word);
       if (latinOnly && /\p{Script=Cyrillic}/u.test(text)) continue;
       if (text && !current.words.includes(text)) current.words.push(text);
     }
   }
-  return groups;
+  return { tables, references, subpages };
 }

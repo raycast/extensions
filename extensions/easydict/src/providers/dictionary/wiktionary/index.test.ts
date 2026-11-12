@@ -155,6 +155,10 @@ describe("Wiktionary dictionary", () => {
 
     expect(result.content.query.phonetic).toBe("/haʊ̯s/");
     expect(sections[0]).toMatchObject({ kind: "translation", text: "hus" });
+    expect(fetchRaw).not.toHaveBeenCalledWith(
+      expect.stringMatching(/title=(?:house_music|bingo)&action=raw/),
+      expect.anything(),
+    );
     const formsCall = fetchRaw.mock.calls.find(([url]) => String(url).includes("action=parse"));
     expect((formsCall?.[1].body as URLSearchParams).get("text")?.split("\n")).toEqual([
       "====Noun====",
@@ -284,6 +288,42 @@ describe("Wiktionary dictionary", () => {
     expect(result.content.sections[0]).toMatchObject({ kind: "translation", text: "hello; hi" });
   });
 
+  it("looks up the definition behind a simplified Chinese variant and keeps the queried spelling", async () => {
+    activePages[`title=${encodeURIComponent("颜色")}&action=raw`] = () => "==Chinese==\n{{zh-see|顏色}}";
+    activePages[`rest_v1/page/definition/${encodeURIComponent("顏色")}`] = () => ({
+      zh: [
+        { language: "Chinese", partOfSpeech: "Noun", definitions: [{ definition: '<a href="/wiki/color">color</a>' }] },
+      ],
+    });
+
+    const { content } = await new WiktionaryDictionaryProvider().request({
+      word: "颜色",
+      fromLanguage: "zh-CHS",
+      toLanguage: "en",
+    });
+
+    expect(content.query.word).toBe("颜色");
+    expect(content.sections[0]).toMatchObject({ kind: "translation", text: "color", lemma: "颜色" });
+  });
+
+  it.each(["{{zh-see|乾}}\n{{zh-see|幹}}", "{{zh-see|乾|3=dry}}"])(
+    "does not borrow definitions from a Chinese reference with ambiguous or limited senses (%s)",
+    async (references) => {
+      activePages[`title=${encodeURIComponent("干")}&action=raw`] = () => `==Chinese==\n${references}`;
+      activePages[`rest_v1/page/definition/${encodeURIComponent("乾")}`] = () => ({
+        zh: [{ language: "Chinese", partOfSpeech: "Adjective", definitions: [{ definition: "dry" }] }],
+      });
+
+      const { content } = await new WiktionaryDictionaryProvider().request({
+        word: "干",
+        fromLanguage: "zh-CHS",
+        toLanguage: "en",
+      });
+
+      expect(content.sections).toEqual([]);
+    },
+  );
+
   it("uses the Commons MP3 transcode of the first recording for the source language", () => {
     const wikitext =
       "==English==\n{{audio|en|en-us-cat.ogg}}\n==Danish==\n* {{IPA|da|[kʰæd]}}\n* {{audio|da|Da-kat.ogg}}\n";
@@ -380,6 +420,195 @@ describe("Wiktionary dictionary", () => {
     });
 
     expect(result.content.sections[0]).toMatchObject({ kind: "translation", text: expect.stringContaining("خانِه") });
+  });
+
+  it("uses the referenced Danish verb translations while keeping the original spelling", async () => {
+    activePages["title=colour&action=raw"] = () => "==English==\n===Verb===\n====Translations====\n{{trans-see|color}}";
+    activePages["title=color&action=raw"] = () => `==English==
+===Noun===
+====Translations====
+{{trans-top|hue}}
+* Danish: {{t|da|kulør}}
+{{trans-bottom}}
+===Verb===
+{{trans-top|give color to}}
+* Danish: {{t|da|farve}}
+{{trans-bottom}}`;
+
+    const { content } = await new WiktionaryDictionaryProvider().request({
+      word: "colour",
+      fromLanguage: "en",
+      toLanguage: "da",
+    });
+
+    expect(content.sourceUrl).toBe("https://en.wiktionary.org/wiki/colour#English");
+    expect(content.sections[0]).toMatchObject({ kind: "translation", text: "farve", lemma: "colour" });
+  });
+
+  it("uses sense IDs and keeps reference order while sharing a lookup of the same subpage", async () => {
+    activePages["title=home&action=raw"] = () => `==English==
+===Noun===
+{{trans-see|dwelling|house|id=home|id1=abode}}
+{{trans-see|cottage}}
+{{trans-see|residence|house|id=residence}}`;
+    activePages["title=house&action=raw"] = () => "==English==\n===Noun===\n{{see translation subpage|Noun}}";
+    activePages["title=cottage&action=raw"] = () =>
+      "==English==\n===Noun===\n{{trans-top|cottage}}\n* Danish: {{t|da|hytte}}\n{{trans-bottom}}";
+    activePages["title=house/translations&action=raw"] = () => `==English==
+===Noun===
+{{trans-top|institution|id=institution}}
+* Danish: {{t|da|institution}}
+{{trans-bottom}}
+{{trans-top|human abode|id=abode}}
+* Danish: {{t|da|hus}}
+{{trans-bottom}}
+{{trans-top|residence|id=residence}}
+* Danish: {{t|da|bolig}}
+{{trans-bottom}}`;
+
+    const { content } = await new WiktionaryDictionaryProvider().request({
+      word: "home",
+      fromLanguage: "en",
+      toLanguage: "da",
+    });
+
+    expect(content.sections[0]).toMatchObject({ kind: "translation", text: "hus" });
+    const equivalents = content.sections.flatMap((section) =>
+      section.kind === "equivalents" ? section.entries.map(({ text }) => text) : [],
+    );
+    expect(equivalents).toEqual(["hus", "hytte", "bolig"]);
+    expect(fetchRaw.mock.calls.filter(([url]) => String(url).endsWith("title=house&action=raw"))).toHaveLength(1);
+    expect(
+      fetchRaw.mock.calls.filter(([url]) => String(url).endsWith("title=house/translations&action=raw")),
+    ).toHaveLength(1);
+  });
+
+  it("loads only the referenced section of another entry's translation subpage", async () => {
+    activePages["title=a&action=raw"] = () =>
+      "==English==\n===Article===\n====Translations====\n{{see translation subpage|1=Article|2=an}}";
+    activePages["title=an/translations&action=raw"] = () => `==English==
+===Noun===
+====Translations====
+{{trans-top|a year}}
+* French: {{t|fr|année}}
+{{trans-bottom}}
+===Article===
+====Translations====
+{{trans-top|indefinite article}}
+* French: {{t+|fr|un|m}}, {{t+|fr|une|f}}
+{{trans-bottom}}`;
+
+    const { content } = await new WiktionaryDictionaryProvider().request({
+      word: "a",
+      fromLanguage: "en",
+      toLanguage: "fr",
+    });
+
+    expect(content.sections[0]).toMatchObject({ kind: "translation", text: "un, une" });
+    expect(content.sections.filter(({ kind }) => kind === "equivalents")).toHaveLength(1);
+  });
+
+  it.each([
+    ["house", { kind: "definitions" }],
+    ["house/translations", { kind: "translation", text: "indhuse" }],
+  ])(
+    "returns available content without caching when the reference request for %s times out",
+    async (title, section) => {
+      vi.useFakeTimers();
+      try {
+        const fetch = fetchRaw.getMockImplementation();
+        const endpoint = `title=${title}&action=raw`;
+        fetchRaw.mockImplementation((url: string, options: { signal?: AbortSignal }) => {
+          if (!url.endsWith(endpoint)) return fetch?.(url);
+          return new Promise((resolve) => {
+            const timer = setTimeout(() => resolve({ status: 503, ok: false }), 4000);
+            options.signal?.addEventListener(
+              "abort",
+              () => {
+                clearTimeout(timer);
+                resolve({ status: 503, ok: false });
+              },
+              { once: true },
+            );
+          });
+        });
+        activePages["title=home&action=raw"] = () =>
+          "==English==\n===Verb===\n====Translations====\n{{trans-see|house}}";
+
+        const pending = new WiktionaryDictionaryProvider().request({
+          word: "home",
+          fromLanguage: "en",
+          toLanguage: "da",
+        });
+        await vi.advanceTimersByTimeAsync(2500);
+        const referenceCall = fetchRaw.mock.calls.find(([url]) => String(url).endsWith(endpoint));
+        expect(referenceCall?.[1].signal?.aborted).toBe(true);
+        const result = await pending;
+        expect(result.cacheable).toBe(false);
+        expect(result.content.sections[0]).toMatchObject(section);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+
+  it("keeps English definitions when a referenced entry only points to another entry", async () => {
+    activePages["title=home&action=raw"] = () => "==English==\n===Noun===\n{{trans-see|house}}";
+    activePages["title=house&action=raw"] = () => "==English==\n===Noun===\n{{trans-see|dwelling}}";
+    activePages["title=dwelling&action=raw"] = () =>
+      "==English==\n===Noun===\n{{trans-top|home}}\n* Danish: {{t|da|bolig}}\n{{trans-bottom}}";
+
+    const { content } = await new WiktionaryDictionaryProvider().request({
+      word: "home",
+      fromLanguage: "en",
+      toLanguage: "da",
+    });
+
+    expect(content.sections[0]).toMatchObject({
+      kind: "definitions",
+      entries: [expect.objectContaining({ meanings: ["A place to live."] })],
+    });
+  });
+
+  it("cancels the lookup while fetching a referenced translation", async () => {
+    const controller = new AbortController();
+    const fetch = fetchRaw.getMockImplementation();
+    fetchRaw.mockImplementation(async (url: string) => {
+      if (url.endsWith("title=house&action=raw")) {
+        controller.abort();
+        throw controller.signal.reason;
+      }
+      return fetch?.(url);
+    });
+    activePages["title=home&action=raw"] = () => "==English==\n===Noun===\n====Translations====\n{{trans-see|house}}";
+
+    await expect(
+      new WiktionaryDictionaryProvider().request(
+        { word: "home", fromLanguage: "en", toLanguage: "da" },
+        { signal: controller.signal },
+      ),
+    ).rejects.toBeInstanceOf(CancelledError);
+  });
+
+  it("uses the Chinese spelling from the translation table with only one request to render word forms", async () => {
+    activePages["title=color&action=raw"] = () => `==English==
+===Noun===
+{{en-noun}}
+# A hue.
+====Translations====
+{{trans-top|hue}}
+* Mandarin: {{t|cmn|顏色}}
+{{trans-bottom}}`;
+    activePages["action=parse&title=color&prop=text&contentmodel=wikitext&"] = () => ({ parse: { text: "" } });
+
+    const { content } = await new WiktionaryDictionaryProvider().request({
+      word: "color",
+      fromLanguage: "en",
+      toLanguage: "zh-CHS",
+    });
+
+    expect(content.sections[0]).toMatchObject({ kind: "translation", text: "顏色" });
+    expect(fetchRaw.mock.calls.filter(([url]) => String(url).includes("action=parse"))).toHaveLength(1);
   });
 
   it("keeps English definitions without presenting them as missing Danish translations", async () => {
@@ -504,15 +733,54 @@ describe("Wiktionary dictionary", () => {
     ).rejects.toThrow("429");
   });
 
-  it.each(["/translations&action=raw", "action=parse"])("rejects the lookup when %s fails", async (endpoint) => {
+  it.each(["house", "accommodate"])(
+    "keeps the available translation for %s when its translation subpage fails",
+    async (word) => {
+      activePages["title=accommodate&action=raw"] = () =>
+        "==English==\n===Verb===\n====Translations====\n{{trans-see|house}}";
+      const fetchPage = fetchRaw.getMockImplementation();
+      fetchRaw.mockImplementation((url: string) =>
+        url.endsWith("title=house/translations&action=raw") ? { status: 503, ok: false } : fetchPage?.(url),
+      );
+
+      const result = await new WiktionaryDictionaryProvider().request({ word, fromLanguage: "en", toLanguage: "da" });
+
+      expect(result.content.sections[0]).toMatchObject({ kind: "translation", text: "indhuse" });
+      expect(result.cacheable).toBe(false);
+    },
+  );
+
+  it("reports a provider error when the word form request fails", async () => {
     const fetchPage = fetchRaw.getMockImplementation();
     fetchRaw.mockImplementation((url: string) =>
-      url.includes(endpoint) ? { status: 503, ok: false, _data: undefined } : fetchPage?.(url),
+      url.includes("action=parse") ? { status: 503, ok: false } : fetchPage?.(url),
     );
-
     await expect(
       new WiktionaryDictionaryProvider().request({ word: "house", fromLanguage: "en", toLanguage: "da" }),
     ).rejects.toThrow("503");
+  });
+
+  it("reports a network timeout while the caller's cancellation signal is still active", async () => {
+    const caller = new AbortController();
+    const deadline = new AbortController();
+    const timeout = vi.spyOn(AbortSignal, "timeout").mockReturnValue(deadline.signal);
+    try {
+      fetchRaw.mockImplementationOnce((_url: string, { signal }: { signal: AbortSignal }) => {
+        deadline.abort(new DOMException("network deadline", "TimeoutError"));
+        signal.throwIfAborted();
+        return { status: 503, ok: false };
+      });
+
+      await expect(
+        new WiktionaryDictionaryProvider().request(
+          { word: "hus", fromLanguage: "da", toLanguage: "en" },
+          { signal: caller.signal },
+        ),
+      ).rejects.toThrow("network deadline");
+      expect(caller.signal.aborted).toBe(false);
+    } finally {
+      timeout.mockRestore();
+    }
   });
 
   it("passes cancellation to requests and reports a cancelled lookup", async () => {
@@ -526,7 +794,10 @@ describe("Wiktionary dictionary", () => {
         { signal: controller.signal },
       ),
     ).rejects.toBeInstanceOf(CancelledError);
-    expect(fetchRaw).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ signal: controller.signal }));
+    expect(fetchRaw).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ signal: expect.objectContaining({ aborted: true }) }),
+    );
     expect(fetchRaw.mock.calls.some(([url]) => url.includes("definition/house"))).toBe(false);
   });
 });

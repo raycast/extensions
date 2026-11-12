@@ -346,7 +346,15 @@ export class QueryRunner {
       if (!this.isCurrent(session, request)) return;
       if (result.content.sections.length) {
         if (!fromCache) cacheQueryResult(service, input, result, cacheGeneration);
-        if (!this.accept(session, request, { ...result, ...serviceMetadata(service), fromCache })) return;
+        if (
+          !this.accept(session, request, {
+            type: result.type,
+            content: result.content,
+            ...serviceMetadata(service),
+            fromCache,
+          })
+        )
+          return;
         const word = result.content.query;
         if (
           myPreferences.enableAutomaticPlayWordAudio &&

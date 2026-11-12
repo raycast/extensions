@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { getWiktionaryHeadwordWikitext, parseWiktionaryDefinitions, parseWiktionaryForms } from "./parse";
+import {
+  getWiktionaryHeadwordWikitext,
+  parseWiktionaryDefinitions,
+  parseWiktionaryForms,
+  parseWiktionaryTranslationPage,
+} from "./parse";
 
 vi.mock("@raycast/api", () => ({ environment: { isDevelopment: false } }));
 
@@ -105,6 +110,53 @@ describe("Wiktionary headword forms", () => {
 
     expect(parseWiktionaryForms(html)).toEqual([
       { partOfSpeech: "Verb", forms: [{ label: "past participle", value: "touché" }] },
+    ]);
+  });
+});
+
+describe("Wiktionary translation tables", () => {
+  it("ends a selected etymology's scope at the next sibling heading", () => {
+    const wikitext = `==English==
+===Etymology 1===
+====Noun====
+=====Translations=====
+{{trans-top|inside}}
+* Danish: {{t|da|indenfor}}
+{{trans-bottom}}
+===Noun===
+====Translations====
+{{trans-top|outside}}
+* Danish: {{t|da|udenfor}}
+{{trans-bottom}}`;
+
+    expect(parseWiktionaryTranslationPage(wikitext, { codes: ["da"] }, ["Etymology 1: Noun"]).tables).toMatchObject([
+      { words: ["indenfor"] },
+    ]);
+  });
+
+  it("reads translations from a table headed by trans-top-also", () => {
+    const wikitext = `==English==
+===Noun===
+====Translations====
+{{trans-top-also|cloudy diffused matter|mist|steam|fume}}
+* Finnish: {{t+|fi|höyry}}
+{{trans-bottom}}`;
+
+    expect(parseWiktionaryTranslationPage(wikitext, { codes: ["fi"] }).tables).toMatchObject([
+      { partOfSpeech: "Noun", gloss: "cloudy diffused matter", words: ["höyry"] },
+    ]);
+  });
+
+  it("keeps the display text of piped links in a multiword translation", () => {
+    const wikitext = `==English==
+===Noun===
+====Translations====
+{{trans-top|skin tone}}
+* Polish: {{tt|pl|[[kolor]] [[skóra|skóry]]|m-in}}
+{{trans-bottom}}`;
+
+    expect(parseWiktionaryTranslationPage(wikitext, { codes: ["pl"] }).tables).toMatchObject([
+      { words: ["kolor skóry"] },
     ]);
   });
 });
