@@ -1,6 +1,6 @@
 # Passbolt Changelog
 
-## [Create Password Works Again] - {PR_MERGE_DATE}
+## [Create Password Works Again] - 2026-11-12
 
 - Create passwords with the v5 resource types and encrypted metadata and secret data.
 - Use personal or shared metadata keys, with legacy v4 creation when the server allows it.
