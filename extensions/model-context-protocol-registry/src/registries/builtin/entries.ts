@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "alphagrowth",
+    title: "AlphaGrowth",
+    description:
+      "Free, read-only crypto data for AI agents: project metrics and TVL history, chains, fees and revenue, funding rounds and investors, DeFi yield pools, token unlocks and DAO treasuries. 27 tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://alphagrowth.io/images/android-chrome-384x384.png",
+    homepage: "https://alphagrowth.io/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://alphagrowth.io/mcp"],
+    },
+    remoteUrl: "https://alphagrowth.io/mcp",
+  },
+  {
     name: "honeyvid",
     title: "HoneyVid",
     description:
