@@ -1,0 +1,376 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "delta",
+  "title": "Delta",
+  "description": "Search, create and open Delta threads, and ask questions about your past work with coding agents",
+  "icon": "icon.png",
+  "author": "lbv",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-threads",
+      "title": "Search Threads",
+      "subtitle": "Delta",
+      "description": "Search your Delta threads, then open, share, fork or archive them, or ask Delta a question about them",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultFilter",
+          "title": "Default Filter",
+          "description": "Which threads Search Threads shows when it opens",
+          "type": "dropdown",
+          "required": false,
+          "default": "active",
+          "data": [
+            {
+              "title": "Active",
+              "value": "active"
+            },
+            {
+              "title": "Archived",
+              "value": "archived"
+            },
+            {
+              "title": "All Threads",
+              "value": "all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create-thread",
+      "title": "Create Thread",
+      "subtitle": "Delta",
+      "description": "Create a Delta thread with a draft prompt and open it in Delta to review and send",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultVisibility",
+          "title": "Default Visibility",
+          "description": "Who can open a new thread unless you choose otherwise in the form",
+          "type": "dropdown",
+          "required": false,
+          "default": "private",
+          "data": [
+            {
+              "title": "Private",
+              "value": "private"
+            },
+            {
+              "title": "Organization",
+              "value": "organization"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-with-delta",
+      "title": "Open with Delta",
+      "subtitle": "Delta",
+      "description": "Open the selected Finder items, or the front Finder folder, in Delta",
+      "mode": "no-view"
+    },
+    {
+      "name": "ask-past-threads",
+      "title": "Ask Past Threads",
+      "subtitle": "Delta",
+      "description": "Ask a question and get an answer drawn from your past Delta threads",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "placeholder": "Question",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "find-threads",
+      "title": "Find Threads",
+      "description": "Find the user's Delta threads (conversations with coding agents) by topic or creation date, or list the most recent ones. Returns IDs, titles, short summaries, keywords and links."
+    },
+    {
+      "name": "read-thread",
+      "title": "Read Thread",
+      "description": "Read one Delta thread by ID: its summary, goals and a compact transcript of what the user and the coding agent said."
+    },
+    {
+      "name": "create-draft-thread",
+      "title": "Create Draft Thread",
+      "description": "Create a Delta thread with a draft prompt and open it in Delta for the user to review and send. Asks for confirmation."
+    },
+    {
+      "name": "archive-thread",
+      "title": "Archive Thread",
+      "description": "Archive or unarchive one Delta thread by ID. Nothing is deleted. Asks for confirmation."
+    }
+  ],
+  "ai": {
+    "instructions": "Delta threads are conversations between the user and coding agents in the Delta app; each has an ID, a title, a short generated summary and a transcript. The user writes in English and Russian, and so are the threads.\n\nAnswering questions about past work: call find-threads with 1 to 4 distinctive topic words (project, feature, error or file names), not the whole question. A thread matches when it mentions any of the words as written, so if nothing is found, try once more with a synonym, the other language or a shorter form of the word, and with includeArchived. For questions about a period (today, this week), call find-threads without a query and with createdAfter. Then call read-thread on the most relevant threads, at most 3, before answering anything about decisions, details, status or next steps; summaries alone are only enough for overviews and lists. If a thread can't be read, answer from its summary and say so. Never invent thread contents; if nothing relevant is found, say that.\n\nAnswer in the language the user writes in. Mention each thread you used as a Markdown link with its title as the text and its link field as the URL.\n\nOnly call create-draft-thread or archive-thread when the user explicitly asks to create, archive or unarchive a thread. Thread IDs always come from find-threads; never guess one. To archive several threads, call archive-thread once per thread.",
+    "evals": [
+      {
+        "input": "@delta What did we decide about the PantryPal push to GitLab?",
+        "mocks": {
+          "find-threads": {
+            "threads": [
+              {
+                "id": "thread-pantrypal",
+                "title": "PantryPal",
+                "summary": "Pushed PantryPal to GitLab; the first push failed with 'shallow update not allowed'.",
+                "keywords": [
+                  "PantryPal",
+                  "GitLab",
+                  "force push"
+                ],
+                "createdAt": "2026-11-04T11:10:25.000Z",
+                "archived": false,
+                "link": "delta://thread/thread-pantrypal"
+              }
+            ]
+          },
+          "read-thread": {
+            "id": "thread-pantrypal",
+            "title": "PantryPal",
+            "summary": "Pushed PantryPal to GitLab; the first push failed with 'shallow update not allowed'.",
+            "goals": [
+              "Push PantryPal to GitLab"
+            ],
+            "keywords": [
+              "PantryPal",
+              "GitLab",
+              "force push"
+            ],
+            "messageCount": 31,
+            "transcript": "USER\nPush to GitLab fails with 'shallow update not allowed'.\n\nAGENT\nThe clone is shallow. We decided to keep the old remote history in a backup branch, unshallow the repository and then force push main.",
+            "link": "delta://thread/thread-pantrypal"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-threads"
+          },
+          {
+            "callsTool": {
+              "name": "read-thread",
+              "arguments": {
+                "threadId": "thread-pantrypal"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Says the decision was to back up the old history in a branch, unshallow the repository and force push main, and links the PantryPal thread as a Markdown link"
+          },
+          {
+            "not": {
+              "callsTool": "create-draft-thread"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@delta Какие треды были про SSH ключи?",
+        "mocks": {
+          "find-threads": {
+            "threads": [
+              {
+                "id": "thread-ssh",
+                "title": "SSH ключи: приватный и публичный",
+                "summary": "Разобрали, где лежат приватный и публичный SSH ключи и какой из них добавлять в GitLab.",
+                "keywords": [
+                  "SSH",
+                  "ключи"
+                ],
+                "createdAt": "2026-11-10T09:00:00.000Z",
+                "archived": false,
+                "link": "delta://thread/thread-ssh"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-threads"
+          },
+          {
+            "meetsCriteria": "Answers in Russian and lists the thread 'SSH ключи: приватный и публичный' as a Markdown link to delta://thread/thread-ssh"
+          },
+          {
+            "not": {
+              "callsTool": "archive-thread"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@delta Summarize what I worked on in Delta this week",
+        "mocks": {
+          "find-threads": {
+            "threads": [
+              {
+                "id": "thread-ssh",
+                "title": "SSH ключи: приватный и публичный",
+                "summary": "Разобрали, где лежат приватный и публичный SSH ключи и какой из них добавлять в GitLab.",
+                "keywords": [
+                  "SSH",
+                  "ключи"
+                ],
+                "createdAt": "2026-11-10T09:00:00.000Z",
+                "archived": false,
+                "link": "delta://thread/thread-ssh"
+              },
+              {
+                "id": "thread-old",
+                "title": "Capy Stack",
+                "summary": "Scaffolded the Capy Stack Expo app for Android and pushed it to GitLab.",
+                "keywords": [
+                  "Capy Stack",
+                  "Expo",
+                  "Android"
+                ],
+                "createdAt": "2026-11-08T10:00:00.000Z",
+                "archived": false,
+                "link": "delta://thread/thread-old"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-threads"
+          },
+          {
+            "meetsCriteria": "Gives a short overview that mentions both the SSH keys thread and the Capy Stack thread"
+          },
+          {
+            "not": {
+              "callsTool": "create-draft-thread"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@delta What did we do about Kubernetes autoscaling?",
+        "mocks": {
+          "find-threads": {
+            "threads": [],
+            "note": "No threads matched. Try fewer or different words, another language, or includeArchived."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-threads"
+          },
+          {
+            "meetsCriteria": "Says no Delta thread about Kubernetes autoscaling was found and does not invent an answer"
+          },
+          {
+            "not": {
+              "callsTool": "read-thread"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@delta Create a thread to add dark mode to the settings screen",
+        "mocks": {
+          "create-draft-thread": {
+            "id": "thread-new",
+            "link": "delta://thread/thread-new",
+            "note": "The thread is open in Delta with the prompt as a draft; the user sends it from there."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-draft-thread"
+          },
+          {
+            "meetsCriteria": "Tells the user the thread was created as a draft that they still need to send from Delta"
+          },
+          {
+            "not": {
+              "callsTool": "archive-thread"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@delta Archive the Capy Stack thread",
+        "mocks": {
+          "find-threads": {
+            "threads": [
+              {
+                "id": "thread-old",
+                "title": "Capy Stack",
+                "summary": "Scaffolded the Capy Stack Expo app for Android and pushed it to GitLab.",
+                "keywords": [
+                  "Capy Stack",
+                  "Expo",
+                  "Android"
+                ],
+                "createdAt": "2026-11-08T10:00:00.000Z",
+                "archived": false,
+                "link": "delta://thread/thread-old"
+              }
+            ]
+          },
+          "archive-thread": {
+            "id": "thread-old",
+            "title": "Capy Stack",
+            "archived": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-threads"
+          },
+          {
+            "callsTool": {
+              "name": "archive-thread",
+              "arguments": {
+                "threadId": "thread-old"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms that the Capy Stack thread was archived"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.12.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

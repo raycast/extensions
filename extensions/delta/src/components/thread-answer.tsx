@@ -1,0 +1,136 @@
+import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useAnswerModel } from "../hooks/use-answer-model";
+import { buildAnswerMarkdown, getAnswerSources, isTooVague } from "../lib/answers";
+import { extractKeywords, isDeltaError } from "../lib/cli";
+import { askDelta } from "../lib/delta";
+import { openThreadInDelta, showDeltaFailure } from "../lib/feedback";
+import { QuerySource } from "../lib/types";
+import { AnswerModelPicker } from "./answer-model-picker";
+import { AskAboutThreads } from "./ask-about-threads";
+import { ChangeModelAction } from "./change-model-action";
+
+interface ThreadAnswerProps {
+  question: string;
+  /** Answer from these threads only; otherwise Delta picks threads by the question's keywords. */
+  threads?: QuerySource[];
+  /** Only for pushed screens; a command's root keeps its own title. */
+  navigationTitle?: string;
+  /** Set where the model was already visible and chosen, so the first question doesn't ask again. */
+  skipModelChoice?: boolean;
+}
+
+/** `threadIds` is comma-separated so the hook sees a stable argument; thread IDs never contain commas. */
+function ask(question: string, threadIds: string, model: string | undefined) {
+  return askDelta(question, { threadId: threadIds ? threadIds.split(",") : [], model });
+}
+
+/**
+ * Asks Delta once per mount. Answers aren't cached on purpose: every question costs a model call,
+ * so asking again is always an explicit action.
+ */
+export function ThreadAnswer({ question, threads = [], navigationTitle, skipModelChoice = false }: ThreadAnswerProps) {
+  const { model, hasChosen, isLoading: isLoadingModel } = useAnswerModel();
+  const keywords = threads.length > 0 ? [] : extractKeywords(question);
+  // Delta refuses a question it can't pick threads for, so don't spend a call or a model choice on it.
+  const cannotAsk = isTooVague({ threads, keywords });
+  const needsModelChoice = !cannotAsk && !isLoadingModel && !hasChosen && !skipModelChoice;
+
+  const {
+    data: result,
+    isLoading: isAsking,
+    error,
+    revalidate: askAgain,
+  } = usePromise(ask, [question, threads.map((thread) => thread.id).join(","), model], {
+    // Wait for the stored model so the question isn't asked twice, or with the wrong model.
+    execute: !cannotAsk && !isLoadingModel && !needsModelChoice,
+    onError: (e) => {
+      // "No thread matches" is an answer of sorts; the screen explains it without an error toast.
+      if (!isDeltaError(e, "no-matching-threads")) {
+        showDeltaFailure(e, "Delta couldn't answer");
+      }
+    },
+  });
+
+  // Before the first answer, pick a model once; choosing it renders the answer in this same place.
+  if (needsModelChoice) {
+    return <AnswerModelPicker isFirstChoice />;
+  }
+
+  const sources = getAnswerSources(result, threads);
+
+  return (
+    <Detail
+      isLoading={isAsking || isLoadingModel}
+      navigationTitle={navigationTitle}
+      markdown={buildAnswerMarkdown({ question, model, threads, keywords, result, error })}
+      actions={
+        <ActionPanel>
+          {result?.answer && (
+            <Action.CopyToClipboard
+              title="Copy Answer"
+              content={result.answer}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+          )}
+          {sources.length === 1 && (
+            <Action
+              title={threads.length === 1 ? "Open Thread in Delta" : "Open Source Thread in Delta"}
+              icon={Icon.AppWindow}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onAction={() => openThreadInDelta(sources[0])}
+            />
+          )}
+          {sources.length > 1 && (
+            <ActionPanel.Submenu
+              title="Open Source Thread in Delta"
+              icon={Icon.AppWindow}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            >
+              {sources.map((source) => (
+                <Action
+                  key={source.id}
+                  title={source.name}
+                  icon={Icon.SpeechBubble}
+                  onAction={() => openThreadInDelta(source)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
+          {result && sources.length > 0 && (
+            <Action.Push
+              title="Ask Follow-Up"
+              icon={Icon.SpeechBubble}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+              // A new question to the same threads; Delta doesn't see the previous answer.
+              target={<AskAboutThreads threads={sources} />}
+            />
+          )}
+          {result?.answer && (
+            <Action
+              title="Create Thread from Answer"
+              icon={Icon.Plus}
+              shortcut={Keyboard.Shortcut.Common.New}
+              onAction={() =>
+                launchCommand({
+                  name: "create-thread",
+                  type: LaunchType.UserInitiated,
+                  context: { prompt: result.answer },
+                })
+              }
+            />
+          )}
+          {!cannotAsk && !isAsking && (
+            <Action
+              title="Ask Again"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={askAgain}
+            />
+          )}
+          {!cannotAsk && <ChangeModelAction />}
+        </ActionPanel>
+      }
+    />
+  );
+}
