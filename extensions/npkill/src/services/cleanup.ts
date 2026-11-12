@@ -1,5 +1,4 @@
-import { rm } from "node:fs/promises";
-import { Artifact, CleanupMethod, ScanRoot } from "../types";
+import { Artifact, ScanRoot } from "../types";
 import { isWithin, revalidateArtifact } from "./path-validation";
 
 export interface CleanupResult {
@@ -17,7 +16,6 @@ export async function cleanup(
   root: ScanRoot,
   confirmed: readonly Artifact[],
   current: ReadonlyMap<string, Artifact>,
-  method: CleanupMethod,
   moveToTrash: (path: string) => Promise<void>,
 ): Promise<CleanupResult[]> {
   // Freeze the allowlist before the first filesystem operation.
@@ -34,8 +32,7 @@ export async function cleanup(
     try {
       await revalidateArtifact(root, item);
       validated = true;
-      if (method === "trash") await moveToTrash(item.path);
-      else await rm(item.path, { recursive: true, force: false, maxRetries: 0 });
+      await moveToTrash(item.path);
       results.push({ path: item.path, status: "success", size: item.size });
     } catch (error) {
       // Only a missing source during validation is stale. A Trash service may itself fail

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, chmod, mkdir, mkdtemp, realpath, rename, rm, symlink, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, mkdtemp, readFile, realpath, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir, homedir } from "node:os";
 import { join } from "node:path";
 import test, { TestContext } from "node:test";
@@ -78,15 +78,15 @@ test("cleanup only processes the confirmed allowlist and reports individual fail
     [second.path, second],
   ]);
   await assert.rejects(
-    cleanup(root, [{ ...first }], current, "permanent", async () => {}),
+    cleanup(root, [{ ...first }], current, async () => {}),
     /Selection changed/,
   );
   await assert.rejects(
-    cleanup(root, [first, first], current, "permanent", async () => {}),
+    cleanup(root, [first, first], current, async () => {}),
     /Selection changed/,
   );
   const moved: string[] = [];
-  const results = await cleanup(root, [first, second], current, "trash", async (target) => {
+  const results = await cleanup(root, [first, second], current, async (target) => {
     if (target === first.path) throw new Error("Trash permission denied");
     moved.push(target);
   });
@@ -96,39 +96,33 @@ test("cleanup only processes the confirmed allowlist and reports individual fail
   await access(first.path);
 });
 
-test("permanent cleanup deletes disposable fixtures only and preserves unselected directories", async (t) => {
-  const { root, path } = await fixture(t);
+test("cleanup moves the reviewed directory intact and leaves unselected directories in place", async (t) => {
+  const { base, root, path } = await fixture(t);
   const item = await captureArtifact(root, record(path));
   const keep = join(root.path, "keep");
   await mkdir(keep);
-  const result = await cleanup(root, [item], new Map([[path, item]]), "permanent", async () => {
-    throw new Error("Must not trash");
+  const unselected = await captureArtifact(root, record(keep));
+  const current = new Map([
+    [path, item],
+    [keep, unselected],
+  ]);
+  const trashedPath = join(base, "trashed");
+  const result = await cleanup(root, [item], current, async (target) => {
+    await rename(target, trashedPath);
   });
   assert.equal(result[0].status, "success");
-  await assert.rejects(access(path));
+  await assert.rejects(access(path), { code: "ENOENT" });
+  assert.equal(await readFile(join(trashedPath, "file"), "utf8"), "fixture only");
   await access(keep);
   await access(root.path);
 });
 
-test("permanent cleanup never follows symlinks inside the selected directory", async (t) => {
-  const { base, root, path } = await fixture(t);
-  const outside = join(base, "outside");
-  await mkdir(outside);
-  const keep = join(outside, "keep.txt");
-  await writeFile(keep, "keep");
-  await symlink(outside, join(path, "linked-content"));
-  const item = await captureArtifact(root, record(path));
-  const result = await cleanup(root, [item], new Map([[path, item]]), "permanent", async () => {});
-  assert.equal(result[0].status, "success");
-  await access(keep);
-});
-
-test("missing candidates are removed as stale without invoking a deletion operation", async (t) => {
+test("missing candidates are removed as stale without invoking Trash", async (t) => {
   const { root, path } = await fixture(t);
   const item = await captureArtifact(root, record(path));
   await rm(path, { recursive: true });
   let called = false;
-  const results = await cleanup(root, [item], new Map([[path, item]]), "trash", async () => {
+  const results = await cleanup(root, [item], new Map([[path, item]]), async () => {
     called = true;
   });
   assert.equal(results[0].status, "missing");
@@ -138,14 +132,14 @@ test("missing candidates are removed as stale without invoking a deletion operat
 test("a Trash ENOENT failure preserves a source that still exists", async (t) => {
   const { root, path } = await fixture(t);
   const item = await captureArtifact(root, record(path));
-  const results = await cleanup(root, [item], new Map([[path, item]]), "trash", async () => {
+  const results = await cleanup(root, [item], new Map([[path, item]]), async () => {
     throw Object.assign(new Error("Trash destination missing"), { code: "ENOENT" });
   });
   assert.equal(results[0].status, "failed");
   await access(path);
 });
 
-test("overlapping directories are rejected before any deletion", async (t) => {
+test("overlapping directories are rejected before invoking Trash", async (t) => {
   const { root, path } = await fixture(t);
   const parent = await captureArtifact(root, record(join(path, "..")));
   const child = await captureArtifact(root, record(path));
@@ -157,7 +151,6 @@ test("overlapping directories are rejected before any deletion", async (t) => {
         [parent.path, parent],
         [child.path, child],
       ]),
-      "permanent",
       async () => {},
     ),
     /overlapping/,

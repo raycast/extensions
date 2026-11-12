@@ -32,4 +32,3 @@ export interface Artifact extends ScanRecord {
 }
 
 export type ScanStatus = "preparing" | "scanning" | "complete" | "canceled" | "failed";
-export type CleanupMethod = "trash" | "permanent";

@@ -18,7 +18,7 @@ import {
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { basename, dirname, relative } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Artifact, CleanupMethod, ScanOptions } from "./types";
+import { Artifact, ScanOptions } from "./types";
 import { ScanForm } from "./components/scan-form";
 import { ArtifactDetails } from "./components/artifact-details";
 import { CleanupReview } from "./components/cleanup-review";
@@ -99,24 +99,22 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
     await scan.refresh();
   }
 
-  function review(items: Artifact[], method: CleanupMethod) {
+  function review(items: Artifact[]) {
     if (!items.length || operation.current) return;
     const confirmedItems = [...items];
     push(
       <CleanupReview
         items={confirmedItems}
-        method={method}
         onConfirm={async () => {
           if (operation.current) return;
           operation.current = true;
           setBusy(true);
           try {
-            const title = method === "trash" ? "Move to Trash" : "Permanently Delete";
             if (
               !(await confirmAlert({
-                title: `${title} ${confirmedItems.length} ${confirmedItems.length === 1 ? "Directory" : "Directories"}?`,
-                message: `${confirmedItems.length === 1 ? `${confirmedItems[0].path}\n\n` : "Only the exact paths shown in the review will be processed.\n\n"}${estimatedTotal(confirmedItems)}. ${method === "trash" ? "Trash does not immediately release disk space." : "This cannot be undone."}`,
-                primaryAction: { title, style: Alert.ActionStyle.Destructive },
+                title: `Move ${confirmedItems.length} ${confirmedItems.length === 1 ? "Directory" : "Directories"} to Trash?`,
+                message: `${confirmedItems.length === 1 ? `${confirmedItems[0].path}\n\n` : "Only the exact paths shown in the review will be moved.\n\n"}${estimatedTotal(confirmedItems)}. Trash does not immediately release disk space.`,
+                primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
               }))
             )
               return;
@@ -126,7 +124,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
               !(await confirmAlert({
                 title: "Sensitive Directories Selected",
                 message: `npkill flagged ${sensitive.length} ${sensitive.length === 1 ? "directory" : "directories"} as potentially important to an application. Review the warnings shown above. Removing them may break the application or lose local state.`,
-                primaryAction: { title: "Clean Sensitive Directories", style: Alert.ActionStyle.Destructive },
+                primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
               }))
             )
               return;
@@ -134,21 +132,21 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
             await scan.stop();
             const root = scan.root.current;
             if (!root) throw new Error("No validated scan root. Scan again.");
-            const toast = await showToast({ style: Toast.Style.Animated, title: "Cleaning Reviewed Directories…" });
-            const results = await cleanup(root, confirmedItems, scan.current.current, method, async (path) => {
-              await trash(path);
+            const toast = await showToast({
+              style: Toast.Style.Animated,
+              title: "Moving Reviewed Directories to Trash…",
             });
+            const results = await cleanup(root, confirmedItems, scan.current.current, trash);
             const removed = results.filter((item) => item.status !== "failed").map((item) => item.path);
             scan.remove(removed);
             setSelected((previous) => new Set([...previous].filter((path) => !removed.includes(path))));
             const succeeded = results.filter((item) => item.status === "success").length;
             const failed = results.filter((item) => item.status === "failed").length;
             toast.style = failed ? Toast.Style.Failure : Toast.Style.Success;
-            toast.title = `${succeeded} ${method === "trash" ? "Moved to Trash" : "Deleted"}${failed ? ` · ${failed} Failed` : ""}`;
-            toast.message =
-              method === "trash"
-                ? "Disk space is released only after emptying Trash."
-                : "See the cleanup report for each path.";
+            toast.title = `${succeeded} Moved to Trash${failed ? ` · ${failed} Failed` : ""}`;
+            toast.message = failed
+              ? "See the cleanup report for each path."
+              : "Disk space is released only after emptying Trash.";
             return results;
           } catch (error) {
             await showFailureToast(error, { title: "Cleanup Failed" });
@@ -169,12 +167,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
             title="Review Selected for Trash"
             icon={Icon.Trash}
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-            onAction={() => review(selectedVisible, "trash")}
-          />
-          <Action
-            title="Review Selected for Permanent Deletion"
-            icon={Icon.XMarkCircle}
-            onAction={() => review(selectedVisible, "permanent")}
+            onAction={() => review(selectedVisible)}
           />
         </ActionPanel.Section>
       )}
@@ -338,12 +331,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
                     title="Review for Trash"
                     icon={Icon.Trash}
                     shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                    onAction={() => review([artifact], "trash")}
-                  />
-                  <Action
-                    title="Review for Permanent Deletion"
-                    icon={Icon.XMarkCircle}
-                    onAction={() => review([artifact], "permanent")}
+                    onAction={() => review([artifact])}
                   />
                 </ActionPanel.Section>
                 <Action.ShowInFinder path={artifact.path} />

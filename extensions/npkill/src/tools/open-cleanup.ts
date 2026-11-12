@@ -23,6 +23,6 @@ export default async function tool() {
     command: "Scan Development Artifacts",
     cleanupPerformed: false,
     message:
-      "Opened the native command with its saved settings. Review fresh results, select exact directories, and confirm Move to Trash or Permanent Deletion. No files have been moved or deleted by this tool.",
+      "Opened the native command with its saved settings. Review fresh results, select exact directories, and confirm Move to Trash. No files have been moved or deleted by this tool.",
   };
 }

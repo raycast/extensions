@@ -71,7 +71,7 @@ See upstream's [profile definitions](https://github.com/voidcosmos/npkill/blob/v
 
 ## Cleanup
 
-**Move to Trash** is the primary cleanup workflow. **Permanent Deletion** is an advanced alternative. Both show a review containing every selected path, its estimated size, and risk information, followed by a destructive confirmation alert.
+Review the exact paths, estimated sizes, and risk information before confirming **Move to Trash**. You can restore directories from Finder’s Trash until you empty it.
 
 ![Review the exact selected directories before cleanup](media/npkill-2.png)
 
@@ -79,7 +79,6 @@ See upstream's [profile definitions](https://github.com/voidcosmos/npkill/blob/v
 - **Review Selected for Trash** (`⌘⇧T`) includes only selected results visible under the current search and filter. The header shows visible and total selected counts. **Clear Selection** removes all selections.
 - Scanning stops before cleanup starts. Each directory is revalidated immediately before the filesystem operation.
 - The extension rejects the scan root, filesystem root, home directory, out-of-root paths, symlinks in the candidate's ancestor chain, overlapping selections, and changed directory identities.
-- Trash uses Raycast's native `trash()` API. Permanent deletion uses Node filesystem operations with no shell, privilege escalation, retries, or `--delete-all`.
 - Failures are handled per directory. Successful or already-missing candidates leave the list; failed candidates remain available for review.
 - **Moving to Trash does not immediately release disk space.** No estimated byte count is presented as guaranteed freed space.
 
@@ -115,5 +114,5 @@ Scanning itself remains local. **When you invoke an AI tool, its returned paths,
 | Permission denied                     | Review the affected path and macOS permissions. The extension never requests administrator privileges.                                                                          |
 | No results                            | Check the root, profiles, exclusions, and upstream marker rules. A `.venv` must contain `pyvenv.cfg`; an arbitrary directory named `target` is not necessarily a Rust artifact. |
 | Directory changed or became a symlink | Refresh and review it again. The old discovery identity cannot authorize cleanup.                                                                                               |
-| Trash or deletion fails               | Read the per-path cleanup report. The result is retained unless validation established it was already missing.                                                                  |
+| Move to Trash fails                   | Read the per-path cleanup report. The result is retained unless validation established it was already missing.                                                                  |
 | Scan canceled                         | Partial results remain. Refresh to start over.                                                                                                                                  |
