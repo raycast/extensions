@@ -15,6 +15,7 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { basename, dirname, relative } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Artifact, CleanupMethod, ScanOptions } from "./types";
@@ -38,42 +39,38 @@ import {
 } from "./utils/artifacts";
 
 export default function Command() {
-  const [options, setOptions] = useState<ScanOptions>();
-  const [loaded, setLoaded] = useState(false);
+  const { value, isLoading } = useLocalStorage<unknown>(SETTINGS_KEY);
+  const [savedOptions, setSavedOptions] = useState<ScanOptions>();
+  const { options, error } = useMemo(() => {
+    try {
+      return { options: parseScanSettings(value) };
+    } catch (error) {
+      return { error };
+    }
+  }, [value]);
   useEffect(() => {
-    let disposed = false;
-    LocalStorage.getItem<string>(SETTINGS_KEY)
-      .then((value) => {
-        if (disposed || !value) return;
-        setOptions(parseScanSettings(value));
-      })
-      .catch(() => {
-        void showToast({
-          style: Toast.Style.Failure,
-          title: "Saved Settings Could Not Be Read",
-          message: "Configure a new scan to continue.",
-        });
-      })
-      .finally(() => {
-        if (!disposed) setLoaded(true);
+    if (error !== undefined) {
+      void showFailureToast(error, {
+        title: "Saved Settings Could Not Be Read",
+        message: "Configure a new scan to continue.",
       });
-    return () => {
-      disposed = true;
-    };
-  }, []);
+    }
+  }, [error]);
   async function save(value: ScanOptions) {
+    // The hook's setter handles write errors internally. Keep the form open if saving fails.
     await LocalStorage.setItem(SETTINGS_KEY, JSON.stringify(value));
-    setOptions(value);
+    setSavedOptions(value);
   }
-  if (!loaded) return <List isLoading navigationTitle="Developer Cleanup" />;
-  if (!options)
+  if (isLoading) return <List isLoading />;
+  const scanOptions = savedOptions ?? options;
+  if (!scanOptions)
     return (
       <ScanForm
         initial={{ root: "", profiles: "node", executable: "", config: "", exclusions: "", includeSensitive: false }}
         onSave={save}
       />
     );
-  return <ArtifactList options={options} onSave={save} />;
+  return <ArtifactList options={scanOptions} onSave={save} />;
 }
 
 function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (value: ScanOptions) => Promise<void> }) {
@@ -82,10 +79,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
   const { push, pop } = useNavigation();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const [sort, setSort] = useState<Sort>(() => {
-    const value = getPreferenceValues<{ sortOrder: string }>().sortOrder;
-    return value in sorts ? (value as Sort) : "largest";
-  });
+  const [sort, setSort] = useState<Sort>(() => getPreferenceValues<Preferences>().sortOrder ?? "largest");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const operation = useRef(false);
@@ -157,11 +151,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
                 : "See the cleanup report for each path.";
             return results;
           } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Cleanup Failed",
-              message: error instanceof Error ? error.message : String(error),
-            });
+            await showFailureToast(error, { title: "Cleanup Failed" });
           } finally {
             operation.current = false;
             setBusy(false);
@@ -206,7 +196,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
           <Action
             title="Stop Scan"
             icon={Icon.Stop}
-            shortcut={Keyboard.Shortcut.Common.Pin}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
             onAction={() => scan.stop()}
           />
         ) : (
@@ -226,6 +216,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
             await scan.stop();
             push(
               <ScanForm
+                navigationTitle="Configure Development Scan"
                 initial={options}
                 onSave={async (value) => {
                   await onSave(value);
@@ -250,7 +241,6 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
   const summary = `${statusText} · ${scan.artifacts.length} directories · ${estimatedTotal(scan.artifacts)}`;
   return (
     <List
-      navigationTitle="Developer Cleanup"
       isLoading={scanning || busy}
       filtering={false}
       searchText={query}
@@ -334,7 +324,6 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
                 <Action
                   title={selected.has(artifact.path) ? "Deselect Directory" : "Select Directory"}
                   icon={Icon.CheckCircle}
-                  shortcut={Keyboard.Shortcut.Common.Save}
                   onAction={() =>
                     setSelected((previous) => {
                       const next = new Set(previous);

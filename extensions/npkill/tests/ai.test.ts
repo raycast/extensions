@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 import { checkSetup, searchArtifacts, searchOptions } from "../src/services/ai-search";
-import { parseScanSettings } from "../src/services/scan-settings";
+import { decodeScanSettings, parseScanSettings } from "../src/services/scan-settings";
 import { scan } from "../src/services/scan-manager";
 import { Artifact, ScanOptions } from "../src/types";
 
@@ -32,10 +32,12 @@ function runner(items: Artifact[]): typeof scan {
 }
 
 test("AI and UI read the same settings while dropping unrelated stored fields", () => {
-  assert.deepEqual(parseScanSettings(JSON.stringify({ ...saved, directoryPicker: ["/unrelated"] })), saved);
+  const stored = { ...saved, directoryPicker: ["/unrelated"] };
+  assert.deepEqual(parseScanSettings(stored), saved);
+  assert.deepEqual(decodeScanSettings(JSON.stringify(stored)), saved);
   assert.equal(parseScanSettings(undefined), undefined);
-  assert.throws(() => parseScanSettings('{"root":"/"}'), /invalid/);
-  assert.throws(() => parseScanSettings("broken JSON"));
+  assert.throws(() => parseScanSettings({ root: "/" }), /invalid/);
+  assert.throws(() => decodeScanSettings("broken JSON"));
   assert.deepEqual(searchOptions({}, saved), saved);
   const changed = searchOptions({ directory: "~/Developer", profiles: "rust" }, saved);
   assert.equal(changed.root, "~/Developer");

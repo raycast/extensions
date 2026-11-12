@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { searchArtifacts } from "../services/ai-search";
-import { parseScanSettings, SETTINGS_KEY } from "../services/scan-settings";
+import { decodeScanSettings, SETTINGS_KEY } from "../services/scan-settings";
 
 type Input = {
   /** Contiguous text to match in the project name or full path. Omit to show all matching candidates. */
@@ -23,5 +23,5 @@ type Input = {
 
 /** Run a fresh read-only npkill scan. Returns estimated sizes, project activity, risk, and explicit completeness metadata. Never deletes files. */
 export default async function tool(input: Input) {
-  return searchArtifacts(input, parseScanSettings(await LocalStorage.getItem<string>(SETTINGS_KEY)));
+  return searchArtifacts(input, decodeScanSettings(await LocalStorage.getItem<string>(SETTINGS_KEY)));
 }

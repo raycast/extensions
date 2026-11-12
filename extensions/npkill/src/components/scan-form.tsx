@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { ScanOptions } from "../types";
 import { validateRoot } from "../services/path-validation";
@@ -7,9 +8,11 @@ import { buildArguments, detectCli, INSTALL_HELP } from "../services/npkill-cli"
 export function ScanForm({
   initial,
   onSave,
+  navigationTitle,
 }: {
   initial: ScanOptions;
   onSave: (options: ScanOptions) => Promise<void>;
+  navigationTitle?: string;
 }) {
   const [root, setRoot] = useState(initial.root);
   const [loading, setLoading] = useState(false);
@@ -29,11 +32,7 @@ export function ScanForm({
       await onSave(options);
     } catch (error) {
       if (controller.signal.aborted) return;
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Start Scan",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Could Not Start Scan" });
     } finally {
       submission.current = undefined;
       if (!controller.signal.aborted) setLoading(false);
@@ -41,7 +40,7 @@ export function ScanForm({
   }
   return (
     <Form
-      navigationTitle="Configure Development Scan"
+      navigationTitle={navigationTitle}
       isLoading={loading}
       actions={
         <ActionPanel>

@@ -1,7 +1,7 @@
 <div align="center">
     <br/>
     <br/>
-    <img src="./assets/npkill-icon.svg" alt="npkill" width="100"/>
+    <img src="./media/npkill-icon.svg" alt="npkill" width="100"/>
     <h3>npkill</h3>
     <p>Find and clean development dependencies, build artifacts, and caches</p>
     <br/>
@@ -12,23 +12,23 @@ npkill is a Raycast extension that helps you find development dependencies, buil
 
 This is an **unofficial npkill integration** for **macOS**. Scanning runs locally through the installed npkill CLI. No account, API key, background schedule, or filesystem analytics service is required.
 
-![Development artifacts discovered with npkill](metadata/npkill-1.png)
+![Development artifacts discovered with npkill](media/npkill-1.png)
 
 ## Requirements
 
 - Raycast for macOS.
 - Node.js **20.19.0 or later**, available to the npkill executable.
-- **npkill 1.x** with output schema version 1. Integration tests use the published **1.0.0** package. Future major versions are rejected until verified.
+- **npkill 1.x** with output schema version 1.
 
 Install the CLI yourself in a terminal:
 
 ```sh
-npm install -g npkill
+npm install -g npkill@1
 npkill --version
 node --version
 ```
 
-The extension never installs packages or runs an automatic `npx` download. The development dependency on npkill is solely for integration tests; the extension does not import or bundle its worker-based Node API.
+The extension uses the copy of npkill you install. It does not download or install packages.
 
 ## First scan
 
@@ -50,7 +50,7 @@ The executable's directory, Raycast's inherited PATH, Homebrew locations, `~/.vo
 - **Unknown** activity stays unknown and does not match inactivity filters. Unknown sizes sort last.
 - **Review** means npkill returned no specific sensitive-folder warning. It is not a safety guarantee. **Unknown** risk means upstream did not provide analysis.
 - Sensitive results are hidden unless you explicitly enable them, even when `.npkillrc` enables them. Cleaning them requires a second confirmation.
-- **Stop Scan** preserves partial results. **Refresh Scan** starts a new scan and clears selection.
+- **Stop Scan** (`⌘⌥S`) preserves partial results. **Refresh Scan** starts a new scan and clears selection.
 - Enter opens details. Destructive actions are never the default Enter action.
 
 Project activity is npkill's `projectModificationTime`: the newest eligible file it found in the parent project. The extension does not substitute directory modification time or infer activity independently. Sizes are estimates, not guaranteed recoverable disk space.
@@ -73,9 +73,9 @@ See upstream's [profile definitions](https://github.com/voidcosmos/npkill/blob/v
 
 **Move to Trash** is the primary cleanup workflow. **Permanent Deletion** is an advanced alternative. Both show a review containing every selected path, its estimated size, and risk information, followed by a destructive confirmation alert.
 
-![Review the exact selected directories before cleanup](metadata/npkill-2.png)
+![Review the exact selected directories before cleanup](media/npkill-2.png)
 
-- Use **Select Directory** (`⌘S`) to mark results, or deselect with the same action.
+- Use **Select Directory** (`⌘↵`) to mark results, or deselect with the same action.
 - **Review Selected for Trash** (`⌘⇧T`) includes only selected results visible under the current search and filter. The header shows visible and total selected counts. **Clear Selection** removes all selections.
 - Scanning stops before cleanup starts. Each directory is revalidated immediately before the filesystem operation.
 - The extension rejects the scan root, filesystem root, home directory, out-of-root paths, symlinks in the candidate's ancestor chain, overlapping selections, and changed directory identities.
@@ -83,7 +83,7 @@ See upstream's [profile definitions](https://github.com/voidcosmos/npkill/blob/v
 - Failures are handled per directory. Successful or already-missing candidates leave the list; failed candidates remain available for review.
 - **Moving to Trash does not immediately release disk space.** No estimated byte count is presented as guaranteed freed space.
 
-![Per-directory cleanup report](metadata/npkill-3.png)
+![Per-directory cleanup report](media/npkill-3.png)
 
 Some development artifacts contain local state that cannot be rebuilt. Stop processes using a directory and inspect it first. Identity checks detect changes observed between discovery and cleanup, but path-based Node and Raycast APIs cannot atomically lock an entire directory tree against a concurrent rename or write. This is not a security boundary against another process deliberately racing filesystem changes.
 
@@ -105,8 +105,6 @@ Search supports path text, minimum estimated size, minimum project inactivity, r
 
 Scanning itself remains local. **When you invoke an AI tool, its returned paths, metadata, settings, and diagnostic messages are provided to your selected Raycast AI model.** File contents are not returned. Use the native command if you want to keep those results outside AI conversations.
 
-AI behavior instructions and seven mocked evaluations are in `ai.yaml`. Run them with `npm run evals`; the evaluation fixtures use synthetic paths and do not scan your files.
-
 ## Troubleshooting
 
 | Problem                               | What to do                                                                                                                                                                      |
@@ -119,20 +117,3 @@ AI behavior instructions and seven mocked evaluations are in `ai.yaml`. Run them
 | Directory changed or became a symlink | Refresh and review it again. The old discovery identity cannot authorize cleanup.                                                                                               |
 | Trash or deletion fails               | Read the per-path cleanup report. The result is retained unless validation established it was already missing.                                                                  |
 | Scan canceled                         | Partial results remain. Refresh to start over.                                                                                                                                  |
-
-## Development
-
-```sh
-npm install
-npm test
-npm run typecheck
-npm run build
-npm run lint
-npm run dev
-```
-
-`npm run demo` creates a new disposable project tree in the system temporary directory and prints its canonical path. Use that root with `node,python,rust` and the full path to `node_modules/.bin/npkill` for native QA.
-
-`npm run benchmark` scans 5,000 disposable project directories through the real CLI and adapter, reports first-result and completion timing, and removes its fixtures afterward.
-
-Tests cover JSON framing/schema validation, stderr, compatibility checks, argument isolation, filtering, selection, boundaries, changed identities, symlinks, permission errors, independent cleanup failures, real permanent deletion of disposable fixtures, real npkill profile/configuration integration, partial results, process termination, and duplicate scan prevention. The 5,000-result test exercises filtering and sorting; it is not a claim that native UI performance has been benchmarked at that scale.

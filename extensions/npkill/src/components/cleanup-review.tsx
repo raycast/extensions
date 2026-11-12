@@ -42,7 +42,6 @@ export function CleanupReview({
                 setWorking(false);
               }
             }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
           />
         </ActionPanel>
       }

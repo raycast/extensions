@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "npkill",
   "title": "Npkill",
-  "description": "Discover development artifacts with npkill, review project activity and risk, and clean selected directories.",
+  "description": "Discover development artifacts with npkill, review project activity and risk, and clean selected directories. Requires installed npkill 1.x and Node.js 20.19.0+.",
   "icon": "npkill-icon.png",
   "author": "0xdhrv",
   "platforms": [
@@ -16,7 +16,6 @@
     {
       "name": "scan-artifacts",
       "title": "Scan Development Artifacts",
-      "subtitle": "npkill",
       "description": "Find development dependencies, build artifacts, and caches using npkill profiles; review and clean selected directories.",
       "mode": "view"
     }
@@ -44,8 +43,6 @@
     "publish": "npx @raycast/api@latest publish",
     "test": "tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json",
-    "demo": "tsx scripts/create-demo-fixtures.ts",
-    "benchmark": "tsx scripts/benchmark-scan.ts",
     "evals": "ray evals -I --exit-on-error"
   },
   "preferences": [

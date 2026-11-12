@@ -7,7 +7,7 @@ import { ScanOptions } from "../types";
 import { expandPath } from "./path-validation";
 
 export const INSTALL_HELP =
-  "Install Node.js 20.19.0+ and npkill 1.x with npm install -g npkill, then set the executable path if needed.";
+  "Install Node.js 20.19.0+ and npkill 1.x with npm install -g npkill@1, then set the executable path if needed.";
 
 export function cliEnvironment(executable?: string): NodeJS.ProcessEnv {
   return {
