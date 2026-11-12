@@ -3,13 +3,13 @@ import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { directMessageAction } from "./directMessageAction";
 import { buildScriptEnsuringSlackIsRunning } from "./utils";
-import { shouldOpenInSlack, type SlackLinkPreference } from "./client/navigation";
+import { shouldOpenInSlack } from "./client/navigation";
 
 // Let the OS forward the URI to its registered handler, including nonstandard Slack installs.
 const slackAppOpenProps = { icon: "slack-icon-rounded.png" } as const;
 
 export const useSlackApp = () => {
-  const { openLinksIn = "auto" } = getPreferenceValues<{ openLinksIn?: SlackLinkPreference }>();
+  const { openLinksIn = "auto" } = getPreferenceValues<Preferences>();
   const [state, set] = useState<{ isAppInstalled: boolean; isLoading: boolean }>({
     isAppInstalled: false,
     isLoading: true,
@@ -34,6 +34,10 @@ export const useSlackApp = () => {
 
   return state;
 };
+
+export const RetrySlackConnection = ({ retry }: { retry: () => void }) => (
+  <Action title="Retry Slack Connection" icon={Icon.ArrowClockwise} onAction={retry} />
+);
 
 // https://api.slack.com/reference/deep-linking
 export const OpenChatInSlack = ({

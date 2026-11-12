@@ -12,11 +12,10 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useState } from "react";
-import { SlackClient, User, useDirectorySearch, type Channel, type Group } from "./shared/client";
+import { User, useDirectorySearch, useMe, type Channel, type Group } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
-import { useCachedState, useFrecencySorting, usePromise } from "@raycast/utils";
-import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
-import { handleError } from "./shared/utils";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
+import { OpenChannelInSlack, OpenChatInSlack, RetrySlackConnection, useSlackApp } from "./shared/OpenInSlack";
 import { getStatusEmoji, getTimezoneMetadata } from "./shared/client/presentation";
 import SendMessage from "./send-message";
 import { directMessageAction } from "./shared/directMessageAction";
@@ -75,11 +74,8 @@ function CopyIdAction({ id }: { id: string }) {
 function Search() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
-  const { data: me, isLoading: isLoadingMe } = usePromise(SlackClient.getMe, [], {
-    onError: (error) => {
-      void handleError(error);
-    },
-  });
+  const { data: me, isLoading: isLoadingMe, error: workspaceError, revalidate: retryWorkspace } = useMe();
+  const workspaceId = me?.teamId;
   const [recentItems, setRecentItems] = useCachedState<OpenChannelItem[]>(
     visitedDirectoryItemsCacheKey(me?.teamId),
     [],
@@ -88,7 +84,7 @@ function Search() {
   const { data, isLoading: isLoadingChannels } = useDirectorySearch(searchText);
 
   const channels = mergeVisitedDirectoryItems(
-    me?.teamId ? data?.flat() : undefined,
+    data?.flat(),
     visitedDirectoryItemsForWorkspace(recentItems, me?.teamId),
     searchText,
   );
@@ -112,6 +108,13 @@ function Search() {
   return (
     <List
       isLoading={isLoading || isLoadingChannels || isLoadingMe}
+      actions={
+        workspaceError || !workspaceId ? (
+          <ActionPanel>
+            <RetrySlackConnection retry={retryWorkspace} />
+          </ActionPanel>
+        ) : undefined
+      }
       filtering={false}
       throttle
       onSearchTextChange={setSearchText}
@@ -128,11 +131,9 @@ function Search() {
             statusEmoji,
             statusText,
             statusExpiration,
-            teamId,
             conversationId,
             timezone,
           } = item as User;
-          const workspaceId = me?.teamId ?? teamId;
           return (
             <List.Item
               key={userId}
@@ -142,9 +143,13 @@ function Search() {
               accessories={searchItemAccessories(statusEmoji, statusText, statusExpiration, timezone)}
               actions={
                 <ActionPanel>
-                  <OpenChatInSlack
-                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => rememberVisit(item) }}
-                  />
+                  {workspaceId ? (
+                    <OpenChatInSlack
+                      {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => rememberVisit(item) }}
+                    />
+                  ) : (
+                    <RetrySlackConnection retry={retryWorkspace} />
+                  )}
 
                   <Action.Push
                     title="Send Message"
@@ -153,52 +158,56 @@ function Search() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
 
-                  {isAppInstalled ? (
-                    <Action.CreateQuicklink
-                      quicklink={{
-                        name: `Open Chat with ${name}`,
-                        link: `slack://user?team=${workspaceId}&id=${userId}`,
-                      }}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                    />
-                  ) : (
+                  {workspaceId &&
+                    (isAppInstalled ? (
+                      <Action.CreateQuicklink
+                        quicklink={{
+                          name: `Open Chat with ${name}`,
+                          link: `slack://user?team=${workspaceId}&id=${userId}`,
+                        }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                      />
+                    ) : (
+                      <Action
+                        title="Create Quicklink"
+                        icon={Icon.Link}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                        onAction={() =>
+                          directMessageAction(userId, conversationId, async (id) => {
+                            const link = `https://app.slack.com/client/${workspaceId}/${id}`;
+                            push(
+                              <Detail
+                                markdown={`Create a Quicklink to open this Slack conversation in your browser.`}
+                                actions={
+                                  <ActionPanel>
+                                    <Action.CreateQuicklink quicklink={{ name: `Open Chat with ${name}`, link }} />
+                                  </ActionPanel>
+                                }
+                              />,
+                            );
+                          })
+                        }
+                      />
+                    ))}
+
+                  {workspaceId && (
                     <Action
-                      title="Create Quicklink"
-                      icon={Icon.Link}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                      title="Copy Huddle Link"
+                      icon={Icon.Clipboard}
                       onAction={() =>
                         directMessageAction(userId, conversationId, async (id) => {
-                          const link = `https://app.slack.com/client/${workspaceId}/${id}`;
-                          push(
-                            <Detail
-                              markdown={`Create a Quicklink to open this Slack conversation in your browser.`}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CreateQuicklink quicklink={{ name: `Open Chat with ${name}`, link }} />
-                                </ActionPanel>
-                              }
-                            />,
-                          );
+                          await Clipboard.copy(`https://app.slack.com/huddle/${workspaceId}/${id}`);
+                          await showHUD("Copied Huddle link");
                         })
                       }
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                     />
                   )}
-
-                  <Action
-                    title="Copy Huddle Link"
-                    icon={Icon.Clipboard}
-                    onAction={() =>
-                      directMessageAction(userId, conversationId, async (id) => {
-                        await Clipboard.copy(`https://app.slack.com/huddle/${workspaceId}/${id}`);
-                        await showHUD("Copied Huddle link");
-                      })
-                    }
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                  />
 
                   <CopyIdAction id={userId} />
 
                   <ActionPanel.Section>
+                    {workspaceError && workspaceId ? <RetrySlackConnection retry={retryWorkspace} /> : null}
                     <Action
                       icon={Icon.ArrowCounterClockwise}
                       title="Reset Ranking"
@@ -210,8 +219,7 @@ function Search() {
             />
           );
         } else {
-          const { id: channelId, name, icon, teamId } = item;
-          const workspaceId = me?.teamId ?? teamId;
+          const { id: channelId, name, icon } = item;
 
           return (
             <List.Item
@@ -220,25 +228,32 @@ function Search() {
               icon={icon}
               actions={
                 <ActionPanel>
-                  <OpenChannelInSlack
-                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => rememberVisit(item) }}
-                  />
+                  {workspaceId ? (
+                    <OpenChannelInSlack
+                      {...{ workspaceId, channelId, isAppInstalled, onAction: () => rememberVisit(item) }}
+                    />
+                  ) : (
+                    <RetrySlackConnection retry={retryWorkspace} />
+                  )}
 
-                  <Action.CreateQuicklink
-                    quicklink={{
-                      name: `Open #${name} Channel`,
-                      ...(isAppInstalled
-                        ? {
-                            link: `slack://channel?team=${workspaceId}&id=${channelId}`,
-                          }
-                        : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
-                    }}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                  />
+                  {workspaceId && (
+                    <Action.CreateQuicklink
+                      quicklink={{
+                        name: `Open #${name} Channel`,
+                        ...(isAppInstalled
+                          ? {
+                              link: `slack://channel?team=${workspaceId}&id=${channelId}`,
+                            }
+                          : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
+                      }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    />
+                  )}
 
                   <CopyIdAction id={channelId} />
 
                   <ActionPanel.Section>
+                    {workspaceError && workspaceId ? <RetrySlackConnection retry={retryWorkspace} /> : null}
                     <Action
                       icon={Icon.ArrowCounterClockwise}
                       title="Reset Ranking"

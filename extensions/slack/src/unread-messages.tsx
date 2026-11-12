@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { isEqual } from "lodash";
-import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 
-import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
+import { Message, SlackClient, useChannels, useMe, User, useUnreadConversations } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { handleError, timeDifference } from "./shared/utils";
-import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
+import { OpenChannelInSlack, RetrySlackConnection, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
@@ -17,11 +16,7 @@ let storageQueue: Promise<void> = Promise.resolve();
 let saveCount = 0;
 
 function UnreadMessages() {
-  const { data: me } = usePromise(SlackClient.getMe, [], {
-    onError: (error) => {
-      void handleError(error);
-    },
-  });
+  const { data: me, error: workspaceError, revalidate: retryWorkspace } = useMe();
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
   const { isAppInstalled, isLoading } = useSlackApp();
@@ -157,22 +152,23 @@ function UnreadMessages() {
                 ]}
                 actions={
                   <ActionPanel>
-                    {conversation && me?.teamId && (
-                      <>
-                        <OpenChannelInSlack
-                          workspaceId={me.teamId}
-                          channelId={unreadConversation.conversationId}
-                          isAppInstalled={isAppInstalled}
-                          onAction={() => markConversationAsRead(unreadConversation.conversationId)}
-                        />
-                        <Action
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                          title="Mark as Read"
-                          icon={Icon.Checkmark}
-                          onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
-                        />
-                      </>
+                    {me?.teamId ? (
+                      <OpenChannelInSlack
+                        workspaceId={me.teamId}
+                        channelId={unreadConversation.conversationId}
+                        isAppInstalled={isAppInstalled}
+                        onAction={() => markConversationAsRead(unreadConversation.conversationId)}
+                      />
+                    ) : (
+                      <RetrySlackConnection retry={retryWorkspace} />
                     )}
+                    <Action
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      title="Mark as Read"
+                      icon={Icon.Checkmark}
+                      onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
+                    />
+                    {workspaceError && me?.teamId ? <RetrySlackConnection retry={retryWorkspace} /> : null}
                     <Action.Push
                       title="Show Unread Messages"
                       icon={Icon.Sidebar}

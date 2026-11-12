@@ -5,6 +5,7 @@
 - Add an **Open Links In** preference to choose the Slack app or browser when automatic app detection is incorrect.
 - Recognize renamed and alternate Slack installations and open native links through the system's registered Slack handler.
 - Use the signed-in workspace when opening conversations, including Slack Connect users and shared channels.
+- Keep cached workspace navigation available when the connection fails, with a retry action; allow marking conversations as read independently of workspace lookup.
 - Handle missing or invalid profile metadata and message timestamps without passing invalid values to search results.
 - Load the Search Messages author menu only when opened, with searchable results limited to 100 at a time to reduce memory use in large workspaces.
 - Show the permissions Slack requires and the correct recovery steps for OAuth or personal access tokens, including errors while loading unread messages.
