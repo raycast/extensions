@@ -4,6 +4,7 @@ import OpenProfileForm from "../forms/open-profile-form";
 import { exportWithToast } from "../helpers/import-export";
 import { ImportAppsForm } from "../import-apps";
 import { AppEntry } from "../types";
+import CatalogPicker from "./CatalogPicker";
 
 const IMPORT_ICON = Icon.Download;
 const EXPORT_ICON = Icon.Upload;
@@ -29,12 +30,20 @@ function ImportExportSection() {
 
 function AddCustomAppAction() {
   return (
-    <Action.Push
-      title="Add Custom App"
-      icon={Icon.Plus}
-      target={<CustomAppForm />}
-      shortcut={Keyboard.Shortcut.Common.New}
-    />
+    <>
+      <Action.Push
+        title="Add Custom App"
+        icon={Icon.Plus}
+        target={<CustomAppForm />}
+        shortcut={Keyboard.Shortcut.Common.New}
+      />
+      <Action.Push
+        title="Import from Catalog…"
+        icon={Icon.List}
+        target={<CatalogPicker />}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+      />
+    </>
   );
 }
 

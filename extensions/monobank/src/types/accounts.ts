@@ -1,4 +1,4 @@
-import { Currency } from "./index";
+import { Currency } from "./common";
 
 export enum AccountType {
   BLACK = "black",
@@ -37,4 +37,19 @@ export interface Jar {
   currency: Currency;
   balance: number;
   goal: number;
+}
+
+export type AccountOrJar = Account | Jar;
+
+/** The part of the client info the extension uses and caches. */
+export interface ClientInfo {
+  /** The owner's name as monobank has it, e.g. "Шевченко Тарас" (no patronymic). Missing in caches from older versions. */
+  name?: string;
+  accounts: Account[];
+  jars: Jar[];
+  /**
+   * Every jar title seen for the token with fingerprint `scope`, including closed and renamed jars, so their
+   * top-ups in the stored history still count as Savings. Missing in caches from older versions.
+   */
+  jarTitleHistory?: { scope: string; titles: string[] };
 }

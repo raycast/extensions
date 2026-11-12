@@ -87,7 +87,21 @@
       "title": "Search Tabs",
       "subtitle": "Dia",
       "description": "Search tabs in Dia",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "spaceLabel",
+          "type": "dropdown",
+          "title": "Space Label",
+          "description": "How each tab shows the Dia space it belongs to when you have more than one space.",
+          "required": false,
+          "default": "name",
+          "data": [
+            { "title": "Colored Name", "value": "name" },
+            { "title": "Colored Dot", "value": "dot" }
+          ]
+        }
+      ]
     },
     {
       "name": "search-history",
@@ -102,6 +116,24 @@
       "subtitle": "Dia",
       "description": "Search bookmarks in Dia",
       "mode": "view"
+    },
+    {
+      "name": "search-extensions",
+      "title": "Search Extensions",
+      "subtitle": "Dia",
+      "description": "Search the browser extensions installed in each Dia profile and open them",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showBuiltInExtensions",
+          "type": "checkbox",
+          "title": "Built-in Extensions",
+          "label": "Show built-in extensions",
+          "description": "Include extensions bundled with Dia, such as the PDF viewer.",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "new-window",

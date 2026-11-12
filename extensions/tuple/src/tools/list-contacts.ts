@@ -20,6 +20,7 @@ export default async function (input: Input) {
       name: contact.full_name,
       email: contact.email,
       status: contact.status,
+      idle: contact.idle ?? false,
       favorited: contact.favorited,
       recent: contact.recent,
       kind: contact.kind,

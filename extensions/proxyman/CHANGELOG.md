@@ -1,5 +1,10 @@
 # Proxyman Changelog
 
+## [Fix Chrome Current Profile Proxy] - 2026-11-06
+
+- Setup Chrome Current Profile now quits every Chrome instance that uses your profile and waits until it has exited before relaunching, so the proxy flags are no longer silently dropped when Chrome was slow to quit or another Chrome instance (e.g. the New Profile one) was running
+- The command now verifies that Chrome restarted with the Proxyman proxy and shows an error instead of a false success
+
 ## [Auto-Start Proxyman and Auto-Detect Proxy Port] - 2026-07-06
 
 - Setup commands now automatically start Proxyman and wait for its proxy to be ready if it is not already running, so a configured browser no longer points to a dead proxy

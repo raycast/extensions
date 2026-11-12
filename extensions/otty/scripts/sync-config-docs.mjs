@@ -16,9 +16,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { diffDocs, parseConfigReference } from "../src/lib/settings.ts";
+import { CONFIG_REFERENCE_URL, diffDocs, parseConfigReference } from "../src/lib/settings.ts";
 
-const REFERENCE_URL = "https://docs.otty.sh/reference/configuration";
 const CHANGELOG_URL = "https://docs.otty.sh/changelog";
 // The reference documented 200 keys on 2026-10-22; far fewer means the page
 // layout changed and the parser no longer matches it.
@@ -46,7 +45,7 @@ async function fetchText(url) {
 }
 
 const [referenceHtml, changelogHtml] = await Promise.all([
-  fetchText(REFERENCE_URL),
+  fetchText(CONFIG_REFERENCE_URL),
   fetchText(CHANGELOG_URL),
 ]);
 
@@ -65,22 +64,17 @@ if (!docsVersion) fail(`couldn't find a version in ${CHANGELOG_URL}.`);
 const settings = Object.fromEntries(
   [...parsed.entries()].sort(([a], [b]) => a.localeCompare(b)),
 );
-const next = { source: REFERENCE_URL, docsVersion, settings };
+const next = { source: CONFIG_REFERENCE_URL, docsVersion, settings };
 const nextText = `${JSON.stringify(next, null, 2)}\n`;
 
+let previousText = "";
+try {
+  previousText = readFileSync(snapshotPath, "utf8");
+} catch {}
 let previous = { docsVersion: "none", settings: {} };
 try {
-  previous = JSON.parse(readFileSync(snapshotPath, "utf8"));
-} catch {
-  // First run: no snapshot yet.
-}
-const previousText = (() => {
-  try {
-    return readFileSync(snapshotPath, "utf8");
-  } catch {
-    return "";
-  }
-})();
+  previous = JSON.parse(previousText);
+} catch {}
 
 if (previousText === nextText) {
   console.log(

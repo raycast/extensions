@@ -1,4 +1,3 @@
-// Filesystem helpers with no @raycast/api import, so vitest can exercise them.
 import { readdir, stat } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -6,7 +5,6 @@ const SKIPPED_DIRS = new Set(["node_modules"]);
 
 type Visit = (dir: string, names: Set<string>) => "stop" | "descend";
 
-/** Walk directories breadth-first to `depth`, skipping hidden and vendored ones. */
 async function walk(root: string, depth: number, visit: Visit): Promise<void> {
   let level = [root];
   for (let current = 0; current <= depth && level.length > 0; current++) {
@@ -27,7 +25,6 @@ async function walk(root: string, depth: number, visit: Visit): Promise<void> {
   }
 }
 
-/** Git repositories up to `depth` folders below `root`, sorted by path. */
 export async function findRepos(root: string, depth: number): Promise<string[]> {
   const repos: string[] = [];
   await walk(root, depth, (dir, names) => {
@@ -41,7 +38,6 @@ export async function findRepos(root: string, depth: number): Promise<string[]> 
   return repos.sort();
 }
 
-/** Files ending in `extension` up to `depth` folders below `root`, sorted by path. */
 export async function findFiles(root: string, extension: string, depth: number): Promise<string[]> {
   const files: string[] = [];
   await walk(root, depth, (dir, names) => {
@@ -53,7 +49,6 @@ export async function findFiles(root: string, extension: string, depth: number):
   return files.sort();
 }
 
-/** Split a selection into existing folders and files, deduped, in order. */
 export async function classifyPaths(paths: string[]): Promise<{ directories: string[]; files: string[] }> {
   const unique = [...new Set(paths)];
   const kinds = await Promise.all(
@@ -68,9 +63,23 @@ export async function classifyPaths(paths: string[]): Promise<{ directories: str
   };
 }
 
-/** Where `path` sits below `root`: `/r/owner/repo` under `/r` is `owner`. */
 export function relativeParent(path: string, root: string): string | undefined {
   const base = root.replace(/\/+$/, "");
   const parent = dirname(path.slice(base.length + 1));
   return parent === "." ? undefined : parent;
+}
+
+export function expandHome(path: string | undefined, home: string): string | undefined {
+  const trimmed = path?.trim();
+  return trimmed ? trimmed.replace(/^~(?=$|\/)/, home) : undefined;
+}
+
+export function abbreviateHome(path: string, home: string): string {
+  if (path === home) return "~";
+  if (path.startsWith(`${home}/`)) return `~${path.slice(home.length)}`;
+  return path;
+}
+
+export function basename(path: string): string {
+  return path.split("/").filter(Boolean).pop() ?? path;
 }

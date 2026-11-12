@@ -52,8 +52,8 @@ function describeTupleError(error: Error): TupleErrorPresentation {
     case TupleErrorKind.CaptureUnavailable:
       return {
         icon: Icon.Microphone,
-        title: "No Recorded Calls Yet",
-        description: "Capture hasn’t run on this Mac. Enable it in Tuple’s Capture settings to start recording calls.",
+        title: "Capture Store Unavailable",
+        description: "Tuple could not open its stored Capture. Check the app’s Capture settings, then try again.",
         actions: (retry) => (
           <>
             <Action

@@ -47,6 +47,7 @@ export default function ManageAppsCommand() {
       subtitle={app.urlTemplate}
       icon={getAppFavicon(app)}
       accessories={[
+        ...(app.nsfw ? [{ tag: { value: "NSFW", color: Color.Red } }] : []),
         {
           icon: {
             source: app.visible ? Icon.CheckCircle : Icon.Circle,

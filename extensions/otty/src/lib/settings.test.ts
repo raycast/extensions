@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildConfigGetArgs,
-  buildConfigSetArgs,
-  buildConfigUnsetArgs,
+  colorSwatch,
   formatValue,
   groupSettings,
   parseCustomizedKeys,
@@ -16,14 +14,6 @@ describe("toKebabKey", () => {
     expect(toKebabKey("ipcAllowSendKeys")).toBe("ipc-allow-send-keys");
     expect(toKebabKey("ctrlCAction")).toBe("ctrl-c-action");
     expect(toKebabKey("theme")).toBe("theme");
-  });
-});
-
-describe("CLI args", () => {
-  it("gets, sets, and unsets by kebab key", () => {
-    expect(buildConfigGetArgs("font-size")).toEqual(["config", "get", "font-size"]);
-    expect(buildConfigSetArgs("font-size", "14")).toEqual(["config", "set", "font-size", "--", "14"]);
-    expect(buildConfigUnsetArgs("font-size")).toEqual(["config", "unset", "font-size"]);
   });
 });
 
@@ -99,5 +89,19 @@ describe("groupSettings", () => {
       ["Font", ["font-family", "font-size"]],
       ["General", ["copy-on-select", "theme"]],
     ]);
+  });
+});
+
+describe("colorSwatch", () => {
+  it("reads hex colors, dropping any alpha", () => {
+    expect(colorSwatch("#1a1a1a")).toBe("#1a1a1a");
+    expect(colorSwatch("#FFF")).toBe("#FFF");
+    expect(colorSwatch("#2b5a3880")).toBe("#2b5a38");
+  });
+
+  it("ignores anything that is not a hex color", () => {
+    for (const text of ["(auto)", "(theme)", "", undefined, "#12345", "#abcd", "red", "1a1a1a"]) {
+      expect(colorSwatch(text)).toBeUndefined();
+    }
   });
 });

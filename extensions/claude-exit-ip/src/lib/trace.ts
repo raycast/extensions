@@ -1,4 +1,6 @@
-import { isIP } from "node:net";
+// Avoid node:net: some Raycast-compatible runtimes stub it and isIP throws.
+// shortcut: shape check only (999.1.1.1 and ":" pass), tighten if a malformed address ever slips through.
+const IP_SHAPE = /^(\d{1,3}(\.\d{1,3}){3}|[0-9a-f:.]*:[0-9a-f:.]*)$/i;
 
 export type TraceResult =
   | { kind: "ok"; ip: string; countryCode?: string }
@@ -14,7 +16,7 @@ export function parseTrace(status: number, body: string): TraceResult {
   if (status < 200 || status >= 300) return { kind: "blocked", status, reason: "status" };
 
   const ip = valueFor(body, "ip");
-  if (!ip || isIP(ip) === 0 || !body.split(/\r?\n/).includes("h=claude.ai")) {
+  if (!ip || !IP_SHAPE.test(ip) || !body.split(/\r?\n/).includes("h=claude.ai")) {
     return { kind: "blocked", status, reason: "not-a-trace" };
   }
 

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monobank",
   "title": "monobank",
-  "description": "View currency rates and all your accounts in monobank.",
+  "description": "View currency rates, all your accounts and their transactions in monobank, set monthly budgets per category, see your subscriptions, keep a rate, a jar or your next subscription charge in the menu bar, and ask AI about them. Unofficial, not affiliated with mono.",
   "icon": "command-icon.png",
   "author": "danulqua",
   "contributors": [
@@ -21,7 +21,12 @@
     "currency",
     "money",
     "cards",
-    "jars"
+    "jars",
+    "statement",
+    "transactions",
+    "budget",
+    "subscriptions",
+    "ai"
   ],
   "license": "MIT",
   "commands": [
@@ -33,36 +38,285 @@
       "mode": "view"
     },
     {
+      "name": "convert",
+      "title": "Convert Currency",
+      "subtitle": "monobank",
+      "description": "Convert an amount at monobank's rates, e.g. Convert 100 USD.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "placeholder": "100",
+          "required": true
+        },
+        {
+          "name": "from",
+          "type": "text",
+          "placeholder": "USD",
+          "required": false
+        },
+        {
+          "name": "to",
+          "type": "text",
+          "placeholder": "UAH",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "accounts",
       "title": "Show Accounts",
       "subtitle": "monobank",
       "description": "All your accounts in monobank.",
-      "mode": "view",
+      "mode": "view"
+    },
+    {
+      "name": "statement",
+      "title": "Show Statement",
+      "subtitle": "monobank",
+      "description": "Transactions of your monobank accounts and jars.",
+      "mode": "view"
+    },
+    {
+      "name": "budgets",
+      "title": "Show Budgets",
+      "subtitle": "monobank",
+      "description": "Monthly spending limits per category for your monobank accounts.",
+      "mode": "view"
+    },
+    {
+      "name": "subscriptions",
+      "title": "Show Subscriptions",
+      "subtitle": "monobank",
+      "description": "Recurring charges on your monobank cards, with their amount and next expected date.",
+      "mode": "view"
+    },
+    {
+      "name": "sync-statements",
+      "title": "Sync Statements",
+      "subtitle": "monobank",
+      "description": "Keeps the statements of all your accounts and jars up to date in the background: the last 31 days are refreshed daily, and older history is loaded up to \"Keep Statements For\", one request every 2 minutes.",
+      "mode": "no-view",
+      "interval": "2m"
+    },
+    {
+      "name": "rates-menu-bar",
+      "title": "Currency Rate Menu Bar",
+      "subtitle": "monobank",
+      "description": "A monobank currency rate in the menu bar, with the other rates in its menu.",
+      "mode": "menu-bar",
+      "interval": "2h",
       "preferences": [
         {
-          "name": "token",
-          "type": "password",
-          "title": "Access Token",
-          "description": "Your monobank Access Token",
-          "placeholder": "Enter Your Access Token",
-          "required": true
+          "name": "rateTitle",
+          "title": "Menu Bar Title",
+          "description": "Which rate is shown next to the flag. Pairs with only a cross rate always show it.",
+          "type": "dropdown",
+          "required": false,
+          "default": "sell",
+          "data": [
+            {
+              "title": "Sell",
+              "value": "sell"
+            },
+            {
+              "title": "Buy",
+              "value": "buy"
+            },
+            {
+              "title": "Buy / Sell",
+              "value": "buySell"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "showRateChange",
+          "title": "Change in Title",
+          "label": "Show change since yesterday",
+          "description": "Add how much the rate in the title changed since the previous day, e.g. ↑0.12. The menu always shows it.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "jar-menu-bar",
+      "title": "Jar Progress Menu Bar",
+      "subtitle": "monobank",
+      "description": "A monobank jar's progress in the menu bar, with your other jars in its menu.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "jarTitle",
+          "title": "Menu Bar Title",
+          "description": "What is shown next to the progress icon. Jars without a goal show their balance.",
+          "type": "dropdown",
+          "required": false,
+          "default": "percentage",
+          "data": [
+            {
+              "title": "Percentage",
+              "value": "percentage"
+            },
+            {
+              "title": "Balance",
+              "value": "balance"
+            },
+            {
+              "title": "Balance and Goal",
+              "value": "balanceAndGoal"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "subscriptions-menu-bar",
+      "title": "Subscriptions Menu Bar",
+      "subtitle": "monobank",
+      "description": "Your next monobank subscription charge in the menu bar, with all your subscriptions in its menu.",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "preferences": [
+        {
+          "name": "subscriptionsTitle",
+          "title": "Menu Bar Title",
+          "description": "What is shown next to the icon.",
+          "type": "dropdown",
+          "required": false,
+          "default": "nextCharge",
+          "data": [
+            {
+              "title": "Next Charge",
+              "value": "nextCharge"
+            },
+            {
+              "title": "Next Charge and Price",
+              "value": "nextChargeAndPrice"
+            },
+            {
+              "title": "Monthly Total",
+              "value": "monthlyTotal"
+            },
+            {
+              "title": "Upcoming Count",
+              "value": "upcomingCount"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
         }
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get the user's monobank accounts and jars: names, balances, own funds, credit limits, jar goals and progress, and top-up links."
+    },
+    {
+      "name": "get-currency-rates",
+      "title": "Get Currency Rates",
+      "description": "Get monobank's current currency exchange rates (buy, sell and cross rates)."
+    },
+    {
+      "name": "convert-currency",
+      "title": "Convert Currency",
+      "description": "Convert an amount between currencies at monobank's current rates."
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Get the transactions of a monobank account or jar for a period, with income, spending and per-category totals. A period can be up to 31 days, or longer when the stored history covers it."
+    },
+    {
+      "name": "get-budgets",
+      "title": "Get Budgets",
+      "description": "Get the user's monthly budgets per spending category and how much of each is spent and left this or last month."
+    },
+    {
+      "name": "set-budget",
+      "title": "Set Budget",
+      "description": "Create a monthly budget (a spending limit in UAH for some categories) or change an existing one, after the user confirms."
+    },
+    {
+      "name": "delete-budget",
+      "title": "Delete Budget",
+      "description": "Delete one of the user's monthly budgets, after the user confirms."
+    },
+    {
+      "name": "get-subscriptions",
+      "title": "Get Subscriptions",
+      "description": "Get the user's subscriptions and other recurring charges on their monobank cards, with the amount, cadence and next expected date of each, found in the stored statement history."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "Access Token",
+      "description": "Your monobank Access Token. Required for the \"Show Accounts\", \"Show Statement\", \"Show Budgets\", \"Show Subscriptions\", \"Sync Statements\", \"Jar Progress Menu Bar\" and \"Subscriptions Menu Bar\" commands and for AI questions about your accounts, transactions, budgets and subscriptions.",
+      "placeholder": "Enter Your Access Token",
+      "required": false
+    },
+    {
+      "name": "statementRetention",
+      "type": "dropdown",
+      "title": "Keep Statements For",
+      "description": "How long transactions stay stored on this device. \"Sync Statements\" loads history up to this length (a year for Unlimited). Older ones are deleted the next time a statement is read. Unlimited never deletes them, so storage keeps growing.",
+      "required": false,
+      "default": "3",
+      "data": [
+        { "title": "1 Month", "value": "1" },
+        { "title": "3 Months", "value": "3" },
+        { "title": "6 Months", "value": "6" },
+        { "title": "1 Year", "value": "12" },
+        { "title": "Unlimited (uses more disk space)", "value": "unlimited" }
+      ]
+    },
+    {
+      "name": "fullName",
+      "type": "textfield",
+      "title": "Full Name for Requisites",
+      "description": "Your full name for \"Copy Requisites\" in \"Show Accounts\". Overrides the name from monobank, which has no patronymic.",
+      "placeholder": "Прізвище Ім'я По батькові",
+      "required": false
+    },
+    {
+      "name": "taxId",
+      "type": "textfield",
+      "title": "Tax ID (РНОКПП)",
+      "description": "Your tax ID for \"Copy Requisites\" in \"Show Accounts\". Left out when empty.",
+      "placeholder": "1234567890",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2",
-    "axios": "^1.13.2",
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
     "currency-codes": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

@@ -2,11 +2,6 @@
 
 Search and manage your Proton Pass items directly from Raycast.
 
-## Project Notes
-
-- This extension is maintained as an independent `proton-pass` implementation.
-- It uses local `pass-cli` execution, local caching, and command-specific flows implemented in this repository.
-
 ## Setup
 
 This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
@@ -49,34 +44,48 @@ Test that the CLI is working:
 pass-cli vault list
 ```
 
+## Browse Items
+
+Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
+
 ## Preferences
 
 - **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
-- **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
+- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
-  - Show website icons instead of initials, from Raycast's favicon provider, which receives the domains (off by default)
+  - Show website icons instead of initials, in Browse Items and Get TOTP Code, from the Favicon Provider chosen in Raycast's Advanced settings, which receives the domains (off by default). With no provider chosen there, initials show
+
+### Browse Items
+
+- **Sort items by**: Order of the items: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) changes it until the window closes
+- **Sort vaults by**: Order of the vaults in the vault list and the vault menu: name (default), item count or most used. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes
 
 ### Generate Password
 
 Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
 
 - **Password Type**: Random password or passphrase (default: random)
-- **Password Length**: Characters in random passwords, from 8 to 128 (default: 20)
-- **Characters**: Uppercase letters, symbols and numbers, all on by default (numbers also apply to passphrases)
-- **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
-- **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
-- **Capitalization**: Capitalize passphrase words (on by default)
+- **Random: Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Random: Characters**: Uppercase letters, symbols and numbers, all on by default
+- **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Passphrase: Options**: Capitalize words and include numbers, both on by default
+
+### Get TOTP Code
+
+- **Codes**: Hide codes behind dots, until Show Codes (⌘H) shows them while the command stays open. Copying still works (off by default)
+- **Sort items by**: Order of the codes, as in Browse Items but set apart. The vault menu lists vaults by name
 
 ## Filling Logins (macOS)
 
-**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a 2FA code, the code is then left in the clipboard, ready to paste on the next screen.
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.
 
-For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
 
 Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
 
@@ -115,21 +124,3 @@ If the CLI is installed but not detected, set the full path in extension prefere
 ### Re-download CLI
 
 If the auto-installed CLI becomes corrupted or you want to force a re-download, use the "Clear CLI Cache" action available in the error screens.
-
-## Platform Verification
-
-Run on Windows x86_64 from this extension directory:
-
-```powershell
-npm ci; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm test; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npx tsc --noEmit
-```
-
-Then verify a fresh automatic install keeps `pass-cli.exe` beside `libcrypto-3-x64.dll`, browser login persists through Windows Credential Manager (or shows the documented `keyring_error` guidance), search/copy/TOTP work, shortcuts display Ctrl-based keys, and Browser Extension plus Terminal fallback actions stay absent.
-
-Run on macOS:
-
-```bash
-npm ci && npm test && npm run lint && npm run build
-```
-
-Then verify a fresh install passes Gatekeeper after chmod/quarantine removal, browser re-login works with CLI 2.3.3, and all commands complete a smoke test. Sessions from CLI 1.4.1 may require login again.

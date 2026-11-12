@@ -11,7 +11,7 @@ import {
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useRef } from "react";
 import { JumpseatApiError } from "./api";
-import { trustedJumpseatAssetUrl } from "./assets";
+import { trustedAirlineMenuBarLogoSource } from "./assets";
 import {
   flightSummary,
   // jumpseatFlightUrl,
@@ -56,7 +56,7 @@ function FlightDetails({ flight }: { flight: MenuBarFlight }) {
   const arrival = effectiveArrival(flight);
   const status =
     operationalMenuBarStatus(flight) ?? formatFlightStatus(flight.flight);
-  const logo = trustedJumpseatAssetUrl(flight.airline.logoUrl, "airline-logo");
+  const logo = trustedAirlineMenuBarLogoSource(flight.airline);
 
   return (
     <>
@@ -154,10 +154,7 @@ function OtherFlights({
   return (
     <MenuBarExtra.Section title="Other Flights">
       {visible.map((flight) => {
-        const logo = trustedJumpseatAssetUrl(
-          flight.airline.logoUrl,
-          "airline-logo",
-        );
+        const logo = trustedAirlineMenuBarLogoSource(flight.airline);
         return (
           <MenuBarExtra.Item
             key={flight.flight.id}
@@ -252,10 +249,7 @@ function NextFlightInMenuBarCommand() {
     ) : null;
   }
 
-  const selectedAirlineLogo = trustedJumpseatAssetUrl(
-    selected.airline.logoUrl,
-    "airline-logo",
-  );
+  const selectedAirlineLogo = trustedAirlineMenuBarLogoSource(selected.airline);
 
   return (
     <MenuBarExtra

@@ -40,7 +40,7 @@ function host(name) {
 }
 function fixtureUI(overrides = {}) {
   const Form = Object.assign(host("form"), {
-    Dropdown: Object.assign(host("dropdown"), { Item: host("dropdown-item") }),
+    Dropdown: Object.assign(host("dropdown"), { Item: host("dropdown-item"), Section: host("dropdown-section") }),
     DatePicker: host("date"),
     TextField: host("text-field"),
     TextArea: host("text-area"),
@@ -104,6 +104,21 @@ function fixtureUI(overrides = {}) {
     cache.set(name, module.exports);
     const requireFixture = (id) => {
       if (id === "@raycast/api") return api;
+      if (id === "@raycast/utils") {
+        // Run the installed hook implementation, mocking only its native Raycast boundary.
+        if (!cache.has(id)) {
+          const utilsModule = { exports: {} };
+          const utilsPath = require.resolve(id);
+          const utilsCode = fs.readFileSync(utilsPath, "utf8");
+          vm.runInThisContext(`(function(require,module,exports){${utilsCode}\n})`, { filename: utilsPath })(
+            (dependency) => (dependency === "@raycast/api" ? api : require(dependency)),
+            utilsModule,
+            utilsModule.exports,
+          );
+          cache.set(id, utilsModule.exports);
+        }
+        return cache.get(id);
+      }
       if (id === "react" || id === "react/jsx-runtime") return require(id);
       if (id === "./requests")
         return {
@@ -384,5 +399,234 @@ test("reopening the view fetches external changes and preserves seconds in every
     assert.equal(requests, 2);
   } finally {
     await act(async () => reopened.unmount());
+  }
+});
+
+const waitForLookup = () => act(async () => new Promise((resolve) => setTimeout(resolve, 350)));
+test("exact search bypasses the loaded list, keeps the date, and submits the found ticket", async () => {
+  const requests = [];
+  const ui = fixtureUI({
+    getIssue: async (key) => {
+      requests.push(key);
+      return issue(key);
+    },
+  });
+  const date = new Date(2026, 8, 2);
+  const renderer = await mount(ui.load("index").default, { initialDate: date });
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  try {
+    assert.equal(field().props.filtering, false);
+    await act(async () => field().props.onSearchTextChange("old summary"));
+    await waitForLookup();
+    await act(async () => field().props.onSearchTextChange("A-1"));
+    await waitForLookup();
+    assert.equal(requests.length, 0);
+    await act(async () => field().props.onSearchTextChange(" b-999 "));
+    await waitForLookup();
+    assert.deepEqual(requests, ["B-999"]);
+    assert.equal(field().props.value, "B-999");
+    const displayedKeys = () =>
+      elements(field().props.children)
+        .filter((node) => node.props.value)
+        .map((node) => node.props.value);
+    assert.equal(displayedKeys()[0], "B-999");
+    assert.equal(displayedKeys().filter((key) => key === "B-999").length, 1);
+    await act(async () => field().props.onSearchTextChange(""));
+    assert.equal(displayedKeys()[0], "B-999");
+    assert.equal(field().props.value, "B-999");
+    assert.equal(renderer.root.findByProps({ id: "startedAt" }).props.value, date);
+    await act(async () =>
+      action(renderer, "Submit").props.onSubmit({
+        issueId: "B-999",
+        timeInput: "1h",
+        description: "",
+        startedAt: date,
+      }),
+    );
+    assert.equal(ui.calls.posted[0][1], "B-999");
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("stale exact lookups cannot overwrite a newer search or project", async () => {
+  const pending = deferred();
+  const ui = fixtureUI({ getIssue: (key) => (key === "A-999" ? pending.promise : Promise.resolve(issue(key))) });
+  const renderer = await mount(ui.load("index").default);
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  try {
+    await act(async () => field().props.onSearchTextChange("A-999"));
+    await waitForLookup();
+    await act(async () => field().props.onSearchTextChange("A-998"));
+    await waitForLookup();
+    assert.equal(field().props.value, "A-998");
+    await act(async () => renderer.root.findByProps({ id: "projectId" }).props.onChange("B"));
+    await act(async () => pending.resolve(issue("A-999")));
+    assert.equal(field().props.value, "B-1");
+    assert.ok(!elements(field().props.children).some((child) => child.props.value === "A-999"));
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("failed exact lookup shows an error and cannot submit the previous issue", async () => {
+  const ui = fixtureUI({
+    getIssue: async () => {
+      throw new Error("Issue not found or inaccessible");
+    },
+  });
+  const renderer = await mount(ui.load("index").default);
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  try {
+    await act(async () => field().props.onSearchTextChange("A-999"));
+    await waitForLookup();
+    assert.match(field().props.error, /not found/);
+    await act(async () =>
+      action(renderer, "Submit").props.onSubmit({
+        issueId: "A-1",
+        timeInput: "1h",
+        description: "",
+        startedAt: new Date(),
+      }),
+    );
+    assert.equal(ui.calls.posted.length, 0);
+    await act(async () => field().props.onSearchTextChange(""));
+    assert.equal(field().props.error, undefined);
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("exact lookup debounces typing and blocks submission while pending", async () => {
+  const pending = deferred();
+  const requests = [];
+  const ui = fixtureUI({
+    getIssue: (key) => {
+      requests.push(key);
+      return pending.promise;
+    },
+  });
+  const renderer = await mount(ui.load("index").default);
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  try {
+    await act(async () => field().props.onSearchTextChange("A-99"));
+    await act(async () => field().props.onSearchTextChange("A-999"));
+    await act(async () =>
+      action(renderer, "Submit").props.onSubmit({
+        issueId: "A-1",
+        timeInput: "1h",
+        description: "",
+        startedAt: new Date(),
+      }),
+    );
+    assert.equal(ui.calls.posted.length, 0);
+    await waitForLookup();
+    assert.deepEqual(requests, ["A-999"]);
+    await act(async () => field().props.onSearchTextChange(""));
+    await act(async () => pending.resolve(issue("A-999")));
+    assert.equal(field().props.value, "A-1");
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("moved issue keys are cached without repeated requests and loaded keys select correctly", async () => {
+  const requests = [];
+  const ui = fixtureUI({
+    getIssue: async (key) => {
+      requests.push(key);
+      return issue("B-999");
+    },
+  });
+  const renderer = await mount(ui.load("index").default);
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  try {
+    await act(async () => field().props.onSearchTextChange("A-999"));
+    await waitForLookup();
+    assert.equal(field().props.value, "B-999");
+    assert.equal(field().props.children[0].props.value, "B-999");
+    await waitForLookup();
+    assert.deepEqual(requests, ["A-999"]);
+    await act(async () => field().props.onSearchTextChange("A-2"));
+    assert.equal(field().props.value, "A-2");
+    await act(async () => field().props.onSearchTextChange("A-999"));
+    assert.equal(field().props.value, "B-999");
+    assert.deepEqual(requests, ["A-999"]);
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("summary search filters rendered issues after an exact lookup", async () => {
+  const requests = [];
+  const ui = fixtureUI({
+    getIssue: async (key) => {
+      requests.push(key);
+      return issue(key);
+    },
+  });
+  const renderer = await mount(ui.load("index").default);
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  try {
+    await act(async () => field().props.onSearchTextChange("B-999"));
+    await waitForLookup();
+    assert.equal(field().props.filtering, false);
+    await act(async () => field().props.onSearchTextChange("Fixture A"));
+    await waitForLookup();
+    assert.equal(field().props.filtering, false);
+    assert.deepEqual(
+      field().props.children.map((child) => child.props.value),
+      ["A-1", "A-2"],
+    );
+    assert.equal(field().props.children[0].props.title, "A-1: Fixture A-1");
+    assert.deepEqual(requests, ["B-999"]);
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("text search matches summary words and partial keys, clears, and cannot submit hidden issues", async () => {
+  const requests = [];
+  const ui = fixtureUI({
+    getIssues: async () => ({
+      data: [
+        { ...issue("A-1"), fields: { summary: "Corriger la vidéo du lecteur" } },
+        { ...issue("A-2"), fields: { summary: "Ajouter le suivi du lecteur" } },
+        { ...issue("A-20"), fields: { summary: "Mettre à jour les dépendances" } },
+      ],
+    }),
+    getIssue: async (key) => {
+      requests.push(key);
+      return issue(key);
+    },
+  });
+  const renderer = await mount(ui.load("index").default);
+  const field = () => renderer.root.findByProps({ id: "issueId" });
+  const keys = () => field().props.children.map((child) => child.props.value);
+  try {
+    await act(async () => field().props.onSearchTextChange("LECTEUR video"));
+    assert.deepEqual(keys(), ["A-1"]);
+    await act(async () => field().props.onSearchTextChange("suivi"));
+    assert.deepEqual(keys(), ["A-2"]);
+    assert.equal(field().props.value, "A-2");
+    await act(async () => field().props.onSearchTextChange("A-2"));
+    assert.deepEqual(keys(), ["A-2", "A-20"]);
+    await act(async () => field().props.onSearchTextChange("introuvable"));
+    assert.deepEqual(keys(), []);
+    assert.equal(field().props.value, "");
+    await act(async () =>
+      action(renderer, "Submit").props.onSubmit({
+        issueId: "A-1",
+        timeInput: "1h",
+        description: "",
+        startedAt: new Date(),
+      }),
+    );
+    assert.equal(ui.calls.posted.length, 0);
+    await act(async () => field().props.onSearchTextChange(""));
+    assert.deepEqual(keys(), ["A-1", "A-2", "A-20"]);
+    assert.deepEqual(requests, []);
+  } finally {
+    await act(async () => renderer.unmount());
   }
 });

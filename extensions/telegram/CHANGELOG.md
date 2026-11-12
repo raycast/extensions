@@ -1,5 +1,9 @@
 # Telegram Changelog
 
+## [Fix Distributed Client Initialization] - 2026-11-06
+
+- Fix session type errors that prevent QR sign-in and other commands from loading in the distributed extension
+
 ## [Recover Invalid Telegram Sessions] - 2026-10-15
 
 - Clear rejected or revoked sessions and offer a sign-in action instead of failing requests with an unusable saved key

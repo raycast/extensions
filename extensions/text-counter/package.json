@@ -87,5 +87,8 @@
     "lint": "ray lint",
     "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "vite": "^8.3.3"
   }
 }

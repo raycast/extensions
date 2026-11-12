@@ -20,7 +20,7 @@ export async function isImageURL(url: string) {
     const contentType = response.headers["content-type"];
     console.log("Content-Type of URL:", contentType);
 
-    return contentType && ALLOWED_IMAGE_TYPES.includes(contentType);
+    return typeof contentType === "string" && ALLOWED_IMAGE_TYPES.includes(contentType);
   } catch (error) {
     console.error("Failed to check URL content type", error);
     return false;

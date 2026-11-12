@@ -17,6 +17,8 @@ export const defaultApps: App[] = [
     value: "bluesky",
     urlTemplate: "https://bsky.app/profile/{profile}",
     placeholder: "username.bsky.social",
+    platform: "atproto",
+    handleDomain: "bsky.social",
   },
   {
     name: "Raycast",

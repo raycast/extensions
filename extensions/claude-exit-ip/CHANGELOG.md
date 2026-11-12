@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix Raycast-Compatible Runtimes] - 2026-11-10
+
+- Show the exit IP in Raycast-compatible runtimes that stub `node:net`, where the card wrongly said claude.ai was unreachable.
+- Show an unexpected error as an error, not as "Couldn't reach claude.ai".
+
 ## [Initial Version] - 2026-10-05
 
 - Show the exit IP, country, city, and ISP that claude.ai sees, read from Claude's own edge with verified provenance and IPv4 and IPv6 support.

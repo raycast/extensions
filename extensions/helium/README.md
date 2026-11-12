@@ -30,17 +30,28 @@ full path of Helium's `chrome.exe`.
 
 **Search Tabs works differently on Windows.** Chromium exposes no scripting interface there, so tabs are read through
 [Raycast's browser extension](https://www.raycast.com/browser-extension) — install it in Helium, otherwise the tab list
-stays empty. Selecting a tab focuses it through the Windows accessibility tree, matching on the tab's title; if the page
-has retitled itself since the list was read, the URL is opened instead. Closing tabs and deduplicating tabs have no
-Windows equivalent and are hidden.
+stays empty. Selecting a tab uses a native Rust UI Automation helper that matches Helium's full executable path and
+the tab's title, then verifies selection. It preserves normal/maximized window placement and restores minimized
+windows. If the tab is missing or its title changed, refresh the list and try again; switching failures leave the list
+open and offer Copy Error. In Frameless mode, the helper can temporarily reveal a hidden vertical sidebar by moving
+the pointer to the window edge, then returning it to its original position. It stops if you move the pointer, hold a
+mouse button, or change focus. This works independently of the Ctrl+S setting and does not change sidebar pinning.
+Helium's hover and window-exit grace period can briefly keep the unpinned sidebar visible afterward.
+Duplicate titles remain ambiguous; the first matching Helium tab is selected. Closing tabs and deduplicating tabs
+have no Windows equivalent and are hidden.
 
 Note that Raycast's browser extension reports tabs from every browser it is installed in, and its API does not say which
 browser a tab belongs to. If you also run it in another Chromium browser, those tabs appear in this list as well.
 
 **Open New Tab focuses Helium on Windows.** Chromium's command line can add a tab to an existing window only for
 ordinary web addresses — `chrome://new-tab-page/` always opens a *new window* — so the command brings Helium forward and
-sends `Ctrl+T` to get a real new tab. If Helium isn't running, or its window can't be focused, it falls back to opening
-the new tab page in a new window.
+sends `Ctrl+T` to get a real new tab. If Helium isn't running, it opens the new tab page in a new window. Focus or
+keyboard failures are reported without sending input to another app.
+
+**Custom profiles:** Set **User Data Directory (Windows)** to an existing Helium User Data folder for portable/custom
+installations. Profile reads and URL/window launches use this directory. Open New Tab also uses a profile-directed
+launch in this case, which may open a new window. Tab switching matches the executable, so it can select tabs in any
+User Data instance of that installation.
 
 Windows shortcuts use `Ctrl`/`Alt` wherever this document mentions `⌘`/`⌥`.
 

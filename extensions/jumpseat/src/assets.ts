@@ -41,6 +41,39 @@ export function trustedJumpseatAssetUrl(
   }
 }
 
+// Theme-aware airline logo. The light asset is drawn for light backgrounds and
+// the dark asset for dark ones; either falls back to the other when missing.
+export function trustedAirlineLogoSource(airline: {
+  logoUrl?: string | null;
+  logoDarkUrl?: string | null;
+}): { light: string; dark: string } | undefined {
+  const light = trustedJumpseatAssetUrl(airline.logoUrl, "airline-logo");
+  const dark = trustedJumpseatAssetUrl(airline.logoDarkUrl, "airline-logo");
+  const fallback = light ?? dark;
+  if (!fallback) return undefined;
+  return { light: light ?? fallback, dark: dark ?? fallback };
+}
+
+function airlineLogoPngUrl(svgUrl: string): string {
+  const url = new URL(svgUrl);
+  url.pathname = url.pathname.replace(/\.svg$/, ".png");
+  return url.toString();
+}
+
+// The menu bar's SVG renderer paints gradient fills black (e.g. Qatar's dark
+// logo), so use the PNG the CDN publishes alongside every airline SVG.
+export function trustedAirlineMenuBarLogoSource(airline: {
+  logoUrl?: string | null;
+  logoDarkUrl?: string | null;
+}): { light: string; dark: string } | undefined {
+  const source = trustedAirlineLogoSource(airline);
+  if (!source) return undefined;
+  return {
+    light: airlineLogoPngUrl(source.light),
+    dark: airlineLogoPngUrl(source.dark),
+  };
+}
+
 export function trustedProfilePictureUrl(value: unknown): string | undefined {
   if (typeof value !== "string" || value.length === 0 || value.length > 2_048) {
     return undefined;

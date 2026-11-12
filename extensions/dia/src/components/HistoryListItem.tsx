@@ -18,7 +18,7 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
       icon={getFavicon(item.url, { mask: Image.Mask.Circle })}
       title={item.title ?? "Untitled"}
       subtitle={{ value: getSubtitle(item.url), tooltip: item.url }}
-      accessories={[{ date: new Date(item.lastVisitedAt) }]}
+      accessories={[...(item.profile ? [{ tag: item.profile }] : []), { date: new Date(item.lastVisitedAt) }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

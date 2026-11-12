@@ -7,6 +7,15 @@ import { decryptEntry } from "./crypto";
 import { decodeAuthenticatorEntry } from "./protobuf";
 import { parseOtpAuthUri } from "./parser";
 
+// macOS 27 blocks reading another app's group container until the user allows it
+export class DatabaseAccessDeniedError extends Error {
+  constructor() {
+    super(
+      'macOS blocked Raycast from reading Proton Authenticator\'s data. Go to System Settings > Privacy & Security > Files & Folders > Raycast and turn on "Data shared by Proton Authenticator and affiliated apps".',
+    );
+  }
+}
+
 export interface DatabaseLoadResult extends LoadResult {
   // keys that decrypted at least one entry
   usedKeys: Buffer[];
@@ -41,9 +50,14 @@ export async function loadAccountsFromDatabase(keys: Buffer[]): Promise<Database
     output = execSync(`sqlite3 "${dbPath}" "${query}"`, {
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+      stdio: ["ignore", "pipe", "pipe"],
     });
-  } catch {
-    throw new Error("Failed to query database. Make sure sqlite3 is available.");
+  } catch (error) {
+    const stderr = (error as { stderr?: string }).stderr?.trim() ?? "";
+    if (stderr.includes("authorization denied")) {
+      throw new DatabaseAccessDeniedError();
+    }
+    throw new Error(`Failed to query database${stderr ? `: ${stderr}` : "."}`);
   }
 
   if (!output.trim()) {
