@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "opencart-greece",
+    title: "OpenCart Greece",
+    description:
+      "Search the OpenCart Greece catalog of OpenCart extensions, themes and services, with full prices, option groups, categories and store contacts. Hosted Streamable HTTP server with read-only tools, no account and no API key.",
+    icon: "https://eshop.opencartgreece.gr/favicon.ico",
+    homepage: "https://eshop.opencartgreece.gr/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://eshop.opencartgreece.gr/mcp"],
+    },
+    remoteUrl: "https://eshop.opencartgreece.gr/mcp",
+  },
+  {
     name: "honeyvid",
     title: "HoneyVid",
     description:
