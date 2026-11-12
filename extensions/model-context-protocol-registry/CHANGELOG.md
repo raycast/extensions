@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add a11y-toolkit MCP Server] - 2026-11-12
+
+- Add a11y-toolkit to the community registry: WCAG 2.2 accessibility for coding agents with 37 tools that audit a URL, an HTML string or a rendered page, sample real text-over-image contrast pixel by pixel, walk Tab to find keyboard traps, judge form errors by really submitting invalid data, read what a screen reader would announce and run blindfold task journeys; plus nearest-passing-color fixes, deterministic autofixes, EAA / RD 1112 statements, VPAT 2.5, OpenACR and SHA-256-sealed evidence packs. Local stdio server installed from PyPI through `uvx` (requires uv); zero core dependencies, no account and no API keys, English and Spanish output, no telemetry.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.

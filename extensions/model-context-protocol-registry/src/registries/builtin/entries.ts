@@ -3651,6 +3651,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "a11y-toolkit",
+    title: "a11y-toolkit",
+    description:
+      "WCAG 2.2 accessibility for coding agents. 37 tools that audit a URL, an HTML string or a rendered page, sample real text-over-image contrast pixel by pixel, walk Tab to find keyboard traps, submit invalid data to judge form errors, linearize what a screen reader would announce, and run blindfold task journeys. It also fixes (nearest passing color, deterministic autofixes, SHA-256-sealed patch sets), documents (EAA / RD 1112 statements, VPAT 2.5, OpenACR, evidence packs a human can sign) and watches for regressions (snapshot diffs, an error budget where only new findings block, SARIF for code scanning). 51 of 55 A/AA criteria carry automated signals and every report prints what still needs a human; it never claims conformance. Local stdio server from PyPI through uvx, so it needs uv; the core has zero dependencies, no account and no API keys, and the rendered tools optionally use Playwright. MIT, English and Spanish output, no telemetry.",
+    icon: "https://raw.githubusercontent.com/kinti/a11y-toolkit/main/docs/logo-400.png",
+    homepage: "https://github.com/kinti/a11y-toolkit",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "a11y-toolkit", "a11y-toolkit-mcp"],
+    },
+  },
+  {
     name: "agentmailkit",
     title: "AgentMailKit",
     description:
