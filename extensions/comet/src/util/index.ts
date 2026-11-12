@@ -298,13 +298,14 @@ export function showCometNotOpenToast() {
   });
 }
 
+// Escape ' for the SQL string literal, and \, % and _ so LIKE matches them literally (with ESCAPE '\').
+const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
+
+const likeTerm = (column: string, term: string) => `${column} LIKE '%${escapeLike(term)}%' ESCAPE '\\'`;
+
 const whereClauses = (tableTitle: string, terms: string[]) => {
-  // More robust SQL sanitization to prevent injection attacks
-  const sanitizedTerms = terms.map((t) =>
-    t.replace(/'/g, "''").replace(/"/g, '""').replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_"),
-  );
-  return sanitizedTerms
-    .map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`)
+  return terms
+    .map((t) => `(${likeTerm(`${tableTitle}.title`, t)} OR ${likeTerm(`${tableTitle}.url`, t)})`)
     .join(" AND ");
 };
 
@@ -324,11 +325,7 @@ export const getOptimizedHistoryQuery = (table: string, date_field: string, term
     return `SELECT id, url, title FROM ${table} WHERE last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
   }
 
-  // Use optimized search with proper indexing and enhanced sanitization
-  const sanitizedTerms = terms.map((t) =>
-    t.replace(/'/g, "''").replace(/"/g, '""').replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_"),
-  );
-  const searchConditions = sanitizedTerms.map((t) => `(title LIKE '%${t}%' OR url LIKE '%${t}%')`).join(" AND ");
+  const searchConditions = terms.map((t) => `(${likeTerm("title", t)} OR ${likeTerm("url", t)})`).join(" AND ");
 
   return `SELECT id, url, title FROM ${table} WHERE ${searchConditions} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
 };
