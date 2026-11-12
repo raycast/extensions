@@ -163,7 +163,9 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
               <Action.CopyToClipboard title="Copy URI" content={resource.uri} icon={Icon.Link} />
             </ActionPanel.Section>
           )}
-          {secureNotes && <Action.CopyToClipboard title="Copy Secure Notes" content={secureNotes} icon={Icon.Text} />}
+          {secureNotes && (
+            <Action.CopyToClipboard title="Copy Secure Notes" content={secureNotes} icon={Icon.Text} concealed={true} />
+          )}
           {resource.description && (
             <ActionPanel.Section title="Notes">
               <Action.CopyToClipboard title="Copy Notes" content={resource.description} icon={Icon.Text} />
