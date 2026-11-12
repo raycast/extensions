@@ -1,8 +1,7 @@
 import {getApplications} from '@raycast/api'
 import {executeSQL} from '@raycast/utils'
 import {existsSync} from 'fs'
-import {z} from 'zod'
-import {FlightSchema, flightDatabasePath, flightQuery} from './flights'
+import {parseFlights, flightDatabasePath, flightQuery} from './flights'
 
 export async function loadFlights() {
     const applications = await getApplications()
@@ -25,7 +24,5 @@ export async function loadFlights() {
         )
     }
 
-    const result = z.array(FlightSchema).safeParse(rows)
-    if (!result.success) throw new Error('Unable to parse Flighty data. The database format may have changed. Please report this issue.')
-    return result.data
+    return parseFlights(rows)
 }
