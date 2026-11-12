@@ -1,6 +1,6 @@
 import axios from "axios";
 import BonjourService from "bonjour-service";
-import { waitUntil } from "./utils";
+import { networkInterfaces } from "node:os";
 import { environment, Cache, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
@@ -173,7 +173,6 @@ export class KeyLight {
       }
     }
 
-    const bonjour = new BonjourService();
     this.keyLights = [];
 
     await showToast({
@@ -182,10 +181,20 @@ export class KeyLight {
       message: "Searching for Elgato Key Lights on your network",
     });
 
-    let discoveryComplete = false;
+    const addresses = [
+      ...new Set(
+        Object.values(networkInterfaces())
+          .flatMap((interfaces) => interfaces ?? [])
+          .filter((network) => network.family === "IPv4" && !network.internal)
+          .map((network) => network.address),
+      ),
+    ];
+    const clients: BonjourService[] = [];
+    const browsers: ReturnType<BonjourService["find"]>[] = [];
+    let discoveryTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const find = new Promise<KeyLight>((resolve, reject) => {
-      const browser = bonjour.find({ type: "elg" }, (service: ElgatoService) => {
+      const onService = (service: ElgatoService) => {
         // Log complete service object for debugging
         if (environment.isDevelopment) {
           console.log(
@@ -276,22 +285,6 @@ export class KeyLight {
         // Save to cache as soon as we find lights, without waiting on enrichment below
         this.saveCache(this.keyLights);
 
-        // If discovery timeout has already elapsed, resolve immediately now that a light was found
-        if (discoveryComplete) {
-          if (environment.isDevelopment) {
-            console.log(`Discovery complete. Found ${this.keyLights.length} Key Light(s)`);
-          }
-          showToast({
-            style: Toast.Style.Success,
-            title: "Discovery Complete",
-            message: `Found ${this.keyLights.length} Key Light(s)`,
-          });
-          resolve(keyLight);
-          browser.stop();
-          bonjour.destroy();
-          clearTimeout(discoveryTimeout);
-        }
-
         // Enrich the light with its display name in the background. This is
         // purely cosmetic, so it must never gate (or be gated by) discovery
         // resolution/rejection above.
@@ -306,33 +299,42 @@ export class KeyLight {
 
           this.saveCache(this.keyLights);
         });
-      });
+      };
 
-      browser.on("up", (service: ElgatoService) => {
-        if (environment.isDevelopment) {
-          console.log("Service came up:", service.name);
-        }
-      });
+      // Bind receivers to all addresses, but send queries on each interface.
+      // The default multicast route may use Ethernet while lights are on Wi-Fi.
+      for (const address of addresses) {
+        const options = { interface: address, bind: "0.0.0.0", port: 5353 };
+        const bonjour = new BonjourService(options);
+        clients.push(bonjour);
+        const browser = bonjour.find({ type: "elg" }, onService);
+        browsers.push(browser);
 
-      browser.on("down", (service: ElgatoService) => {
-        if (environment.isDevelopment) {
-          console.log("Service went down:", service.name);
-        }
-      });
+        browser.on("up", (service: ElgatoService) => {
+          if (environment.isDevelopment) {
+            console.log("Service came up:", service.name);
+          }
+        });
 
-      browser.on("error", (error: Error) => {
-        if (environment.isDevelopment) {
-          console.error("Bonjour browser error:", error);
-        }
-        showFailureToast(error, { title: "Discovery Failed" });
-        reject(new Error(`Bonjour discovery error: ${error.toString()}`));
-      });
+        browser.on("down", (service: ElgatoService) => {
+          if (environment.isDevelopment) {
+            console.log("Service went down:", service.name);
+          }
+        });
 
-      const discoveryTimeout = setTimeout(() => {
+        browser.on("error", (error: Error) => {
+          if (environment.isDevelopment) {
+            console.error("Bonjour browser error:", error);
+          }
+          showFailureToast(error, { title: "Discovery Failed" });
+          reject(new Error(`Bonjour discovery error: ${error.toString()}`));
+        });
+      }
+
+      discoveryTimeout = setTimeout(() => {
         if (environment.isDevelopment) {
           console.log(`Discovery timeout reached. Found ${this.keyLights.length} light(s)`);
         }
-        discoveryComplete = true;
 
         if (this.keyLights.length > 0) {
           if (environment.isDevelopment) {
@@ -347,9 +349,6 @@ export class KeyLight {
             message: `Found ${this.keyLights.length} Key Light(s)`,
           });
           resolve(this.keyLights[0]);
-          browser.stop();
-          bonjour.destroy();
-          clearTimeout(discoveryTimeout);
         } else {
           showFailureToast(new Error("Could not discover any Key Lights on your network"), {
             title: "No Key Lights Found",
@@ -360,13 +359,17 @@ export class KeyLight {
     });
 
     try {
-      return await waitUntil(find, { timeout: 5000, timeoutMessage: "Cannot discover any Key Lights in the network" });
+      return await find;
     } catch (error) {
       if (environment.isDevelopment) {
         console.error("Discovery failed:", error);
       }
       showFailureToast(error, { title: "Discovery Failed" });
       throw error;
+    } finally {
+      clearTimeout(discoveryTimeout);
+      for (const browser of browsers) browser.stop();
+      for (const client of clients) client.destroy();
     }
   }
 
