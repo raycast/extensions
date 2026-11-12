@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix AI Chat Mention Icons] - {PR_MERGE_DATE}
+## [Fix AI Chat Mention Icons] - 2026-11-12
 
 - Make pull request and issue icons readable in dark mode in the AI Chat `@` menu and mention pills.
 
