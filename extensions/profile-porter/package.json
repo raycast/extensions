@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "profile-porter",
+  "title": "Profile Porter",
+  "description": "Open links and sites in the right browser profile, with Profile Porter.",
+  "icon": "icon.png",
+  "author": "rahmakyan",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "open-in-profile",
+      "title": "Open in Profile",
+      "subtitle": "Profile Porter",
+      "description": "Pick a browser profile and open a link in it. Without a link, the link on the clipboard, or just a window of the profile.",
+      "mode": "view",
+      "arguments": [{ "name": "url", "placeholder": "Link (optional)", "type": "text", "required": false }]
+    },
+    {
+      "name": "open-link",
+      "title": "Open Link in the Right Profile",
+      "subtitle": "Profile Porter",
+      "description": "Hand a link to Profile Porter, which opens it in the profile you use that site in.",
+      "mode": "no-view",
+      "arguments": [{ "name": "url", "placeholder": "Link", "type": "text", "required": true }]
+    },
+    {
+      "name": "search",
+      "title": "Search Sites and Pages",
+      "subtitle": "Profile Porter",
+      "description": "Show Profile Porter's panel with what you typed: the profile each site is used in, and the pages you visited.",
+      "mode": "no-view",
+      "arguments": [{ "name": "query", "placeholder": "Site or page", "type": "text", "required": true }]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  }
+}
