@@ -4,6 +4,10 @@
 
 - Add freelance.link to the official registry: keep a freelancer's availability current from an AI agent by managing projects, absences and the waitlist. 11 tools. Hosted Streamable HTTP server at https://freelance.link/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A freelance.link account is required.
 
+## [Add Mobile Joe MCP Server] - 2026-11-12
+
+- Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
+
 ## [Add Airbridge MCP Server] - 2026-11-12
 
 - Add Airbridge to the official registry: mobile attribution for subscription apps, to ask which ads and creators bring installs, trials and paying subscribers. Hosted Streamable HTTP server at https://mcp.airbridge.io/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

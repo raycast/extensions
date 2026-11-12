@@ -18,6 +18,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://freelance.link/mcp"],
     },
     remoteUrl: "https://freelance.link/mcp",
+    name: "mobile-joe",
+    title: "Mobile Joe",
+    description:
+      "Manage your mobile app's FAQs, translations, feature plans and in-app alerts from your AI agent. Maintain FAQs and their translations, curate the feature plans app users vote on, prepare and deliver targeted in-app alerts, and update app settings for apps that use the Mobile Joe iOS and Android SDKs. Prepares drafts and publishes or delivers only when asked. 33 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which apps and permissions to share. A Mobile Joe account is required (14-day free trial, no credit card).",
+    icon: "https://app.mobilejoe.dev/icon.png",
+    homepage: "https://docs.mobilejoe.dev/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.mobilejoe.dev/mcp"],
+    },
+    remoteUrl: "https://app.mobilejoe.dev/mcp",
   },
   {
     name: "alphagrowth",
