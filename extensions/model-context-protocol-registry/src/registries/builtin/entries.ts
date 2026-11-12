@@ -2487,6 +2487,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "statuz",
+    title: "Statuz",
+    description:
+      "Schedule and publish posts and threads to X, Bluesky, Mastodon, LinkedIn and Reddit (beta) from your agent: draft, schedule in plain words like \"tomorrow 9am\", list what goes out next, edit, and publish. Every post is checked against each network's limits before it's saved, and the same post never goes out twice. Hosted remote Streamable HTTP server at https://api.statuz.cloud/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Statuz Cloud account: drafts and scheduling are free, a published post costs $0.01 per account ($0.03 on X).",
+    icon: "https://statuz.app/assets/appIcon.png",
+    homepage: "https://statuz.app/docs/agents?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.statuz.cloud/mcp"],
+    },
+    remoteUrl: "https://api.statuz.cloud/mcp",
+  },
+  {
     name: "stripe",
     title: "Stripe",
     description:
