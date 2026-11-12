@@ -1,11 +1,11 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Currency, CurrencyRate } from "./types";
-import { useLocalStorage, useCurrencyRates } from "./hooks";
-
-import RateActions from "./components/rates/RateActions";
-
-import { getFlagImage, filterOutPinnedItems, transformRate } from "./utils";
+import { CurrencyRate } from "./types";
+import { useCurrencyRates, usePinned } from "./hooks";
+import { STORAGE_KEYS } from "./data/constants";
+import CategoryDropdown from "./components/CategoryDropdown";
+import RateListItem from "./components/rates/RateListItem";
+import { filterOutPinnedItems, getRateTitle } from "./utils";
 
 enum Category {
   ALL = "all",
@@ -17,14 +17,12 @@ const categoryLabel: Record<Category, string> = {
   [Category.PINNED]: "Pinned",
 };
 
+const categorySections = [[Category.ALL, Category.PINNED].map((value) => ({ value, title: categoryLabel[value] }))];
+
 export default function Command() {
   const [category, setCategory] = useState<Category>(Category.ALL);
-  const { data, isLoading: isRatesLoading, isError } = useCurrencyRates();
-  const {
-    data: pinned,
-    setData: setPinned,
-    isLoading: isPinnedLoadingFromLS,
-  } = useLocalStorage<string[]>("pinnedRates", []);
+  const { data: rates, previous, isLoading: isRatesLoading, isError } = useCurrencyRates();
+  const pinned = usePinned<CurrencyRate>(STORAGE_KEYS.pinnedRates, getRateTitle);
 
   useEffect(() => {
     if (isError) {
@@ -36,116 +34,44 @@ export default function Command() {
     }
   }, [isError]);
 
-  function onCategoryChange(newValue: string) {
-    setCategory(newValue as Category);
-  }
-
-  async function onPin(rate: CurrencyRate) {
-    const isPinned = pinned.some((pinnedRate) => pinnedRate === rate.id);
-    if (isPinned) {
-      setPinned(pinned.filter((pinnedRate) => pinnedRate !== rate.id));
-      await showToast(Toast.Style.Success, `Unpinned ${getTitle(rate.currencyA, rate.currencyB)}`);
-    } else {
-      setPinned([...pinned, rate.id]);
-      await showToast(Toast.Style.Success, `Pinned ${getTitle(rate.currencyA, rate.currencyB)}`);
-    }
-  }
-
-  async function onRearrange(rate: CurrencyRate, direction: "up" | "down") {
-    const rateIndex = pinned.findIndex((pinnedRate) => pinnedRate === rate.id);
-    const newPinned = [...pinned];
-
-    if (direction === "up") {
-      newPinned[rateIndex] = newPinned[rateIndex - 1];
-      newPinned[rateIndex - 1] = rate.id;
-      await showToast(Toast.Style.Success, `Moved up ${getTitle(rate.currencyA, rate.currencyB)}`);
-    } else {
-      newPinned[rateIndex] = newPinned[rateIndex + 1];
-      newPinned[rateIndex + 1] = rate.id;
-      await showToast(Toast.Style.Success, `Moved down ${getTitle(rate.currencyA, rate.currencyB)}`);
-    }
-
-    setPinned(newPinned);
-  }
-
-  function getValidRearrangeDirections(rate: CurrencyRate) {
-    return {
-      up: pinned.findIndex((pinnedRate) => pinnedRate === rate.id) > 0,
-      down: pinned.findIndex((pinnedRate) => pinnedRate === rate.id) < pinned.length - 1,
-    };
-  }
-
-  const transformedRates = data.map(transformRate);
-  const pinnedRates = pinned
-    .map((pinnedRate) => transformedRates.find((rate) => rate.id === pinnedRate))
-    .filter(Boolean) as CurrencyRate[];
-  const filteredRates = filterOutPinnedItems({ category, items: transformedRates, pinned });
-  const isLoading = isRatesLoading || isPinnedLoadingFromLS;
+  const pinnedRates = pinned.pinnedIds
+    .map((id) => rates.find((rate) => rate.id === id))
+    .filter((rate): rate is CurrencyRate => !!rate);
+  const otherRates = filterOutPinnedItems({ category, items: rates, pinned: pinned.pinnedIds });
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}>
+    <List
+      isLoading={isRatesLoading || pinned.isLoading}
+      searchBarAccessory={<CategoryDropdown sections={categorySections} onChange={setCategory} />}
+    >
       <List.Section title={categoryLabel[Category.PINNED]}>
         {[Category.ALL, Category.PINNED].includes(category) &&
-          pinnedRates.map((item) => (
-            <List.Item
-              key={item.id}
-              id={item.id}
-              icon={getFlagImage(item.currencyA.code)}
-              title={getTitle(item.currencyA, item.currencyB)}
-              subtitle={getSubtitle(item)}
-              accessories={getAccessories(item)}
-              actions={
-                <RateActions
-                  item={item}
-                  isPinned={true}
-                  onRearrange={onRearrange}
-                  validRearrangeDirections={getValidRearrangeDirections(item)}
-                  onPin={onPin}
-                />
-              }
+          pinnedRates.map((rate) => (
+            <RateListItem
+              key={rate.id}
+              rate={rate}
+              previous={previous}
+              pin={{
+                isPinned: true,
+                onTogglePin: () => pinned.togglePin(rate),
+                moveDirections: pinned.getMoveDirections(rate),
+                onMove: (direction) => pinned.move(rate, direction),
+              }}
             />
           ))}
       </List.Section>
 
       <List.Section title={categoryLabel[Category.ALL]}>
         {category === Category.ALL &&
-          filteredRates.map((item) => (
-            <List.Item
-              key={item.id}
-              id={item.id}
-              icon={getFlagImage(item.currencyA.code)}
-              title={getTitle(item.currencyA, item.currencyB)}
-              subtitle={getSubtitle(item)}
-              accessories={getAccessories(item)}
-              actions={<RateActions item={item} isPinned={false} onPin={onPin} />}
+          otherRates.map((rate) => (
+            <RateListItem
+              key={rate.id}
+              rate={rate}
+              previous={previous}
+              pin={{ isPinned: false, onTogglePin: () => pinned.togglePin(rate) }}
             />
           ))}
       </List.Section>
     </List>
   );
-}
-
-function CategoryDropdown(props: { onCategoryChange: (newValue: string) => void }) {
-  const { onCategoryChange } = props;
-  const categories = Object.values(Category);
-
-  return (
-    <List.Dropdown tooltip="Select Category" storeValue onChange={(newValue) => onCategoryChange(newValue)}>
-      {categories.map((category) => (
-        <List.Dropdown.Item key={category} title={categoryLabel[category]} value={category} />
-      ))}
-    </List.Dropdown>
-  );
-}
-
-function getTitle(currencyA: Currency, currencyB: Currency) {
-  return `${currencyA.code} – ${currencyB.code}`;
-}
-
-function getSubtitle(rate: CurrencyRate) {
-  return `${rate.rateCross || `${rate.rateBuy} / ${rate.rateSell}`}`;
-}
-
-function getAccessories(rate: CurrencyRate): List.Item.Accessory[] {
-  return [{ text: `${rate.currencyA.name} – ${rate.currencyB.name}` }];
 }
