@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Statuz MCP Server] - {PR_MERGE_DATE}
+
+- Add Statuz to the official registry: schedule and publish posts and threads to X, Bluesky, Mastodon, LinkedIn and Reddit (beta), each checked against the network's limits before it's saved. Hosted Streamable HTTP server at https://api.statuz.cloud/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Statuz Cloud account is required.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
