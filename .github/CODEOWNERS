@@ -2154,7 +2154,7 @@
 /extensions/page-scanner                                            @sbd530
 /extensions/pagerduty                                               @horimislime @xmok @erecarte-twilio
 /extensions/pagespeed                                               @vorillaz @pernielsentikaer
-/extensions/palette-colors                                          @douglas-pires @elibattistoni
+/extensions/palette-colors                                          @elibattistoni @douglas-pires
 /extensions/palette-picker                                          @juliusmarminge
 /extensions/pandas-documentation-search                             @Faria22
 /extensions/pangram-ai-detector                                     @mygirleatsmayo
