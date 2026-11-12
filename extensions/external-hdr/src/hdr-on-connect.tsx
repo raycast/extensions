@@ -13,7 +13,7 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { type Display, listDisplays, setHdr } from "./hdr";
-import { type Rule, readRules, writeRules, writeSeen } from "./lib/rules";
+import { type Rule, readRules, readSeen, writeRules, writeSeen } from "./lib/rules";
 
 function autoApplySubtitle(rules: Rule[]): string {
   if (rules.length === 0) return "Auto-apply: off";
@@ -58,9 +58,12 @@ export default function HdrOnConnectCommand() {
       // in System Settings while this screen stayed open.
       await setHdr(display.id, hdr ? "on" : "off");
 
-      // Mark the currently connected displays as handled so a stale snapshot
-      // cannot make the background command apply this rule a second time.
-      await writeSeen((displays ?? [display]).map((candidate) => ({ uuid: candidate.uuid, id: candidate.id })));
+      // Mark only this display as handled. Writing the whole connected list
+      // would swallow another monitor's pending rule or failed retry.
+      const seen = await readSeen();
+      const entries = new Map((seen ?? []).map((entry) => [entry.uuid, entry.id]));
+      entries.set(display.uuid, display.id);
+      await writeSeen([...entries].map(([uuid, id]) => ({ uuid, id })));
 
       await showHUD(`HDR ${hdr ? "on" : "off"} when ${display.name} connects`);
     } catch (error) {
