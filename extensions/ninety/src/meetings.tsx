@@ -101,7 +101,11 @@ function PastMeetingDetail({ meeting, teamName }: { meeting: PastMeeting; teamNa
             text={meeting.durationSeconds ? formatDuration(meeting.durationSeconds) : "Not recorded"}
           />
           {presenter ? (
-            <List.Item.Detail.Metadata.Label title="Presenter" text={presenter} icon={avatar(presenter)} />
+            <List.Item.Detail.Metadata.Label
+              title="Presenter"
+              text={presenter}
+              icon={avatar(presenter, data?.presenter?.id ?? meeting.presenterId)}
+            />
           ) : null}
           <List.Item.Detail.Metadata.Label
             title="Average Rating"
@@ -135,14 +139,14 @@ function UpcomingDetail({ meeting, teamName }: { meeting: NextMeeting; teamName?
             <List.Item.Detail.Metadata.Label
               title="Presenter"
               text={personName(meeting.presenter)}
-              icon={avatar(personName(meeting.presenter))}
+              icon={avatar(personName(meeting.presenter), meeting.presenter.id)}
             />
           ) : null}
           {meeting.scribe ? (
             <List.Item.Detail.Metadata.Label
               title="Scribe"
               text={personName(meeting.scribe)}
-              icon={avatar(personName(meeting.scribe))}
+              icon={avatar(personName(meeting.scribe), meeting.scribe.id)}
             />
           ) : null}
           {meeting.attendees.length ? (
@@ -189,10 +193,6 @@ export default function Command() {
     <Action
       title={showDetail ? "Hide Details" : "Show Details"}
       icon={Icon.Sidebar}
-      shortcut={{
-        macOS: { modifiers: ["cmd"], key: "d" },
-        Windows: { modifiers: ["ctrl"], key: "d" },
-      }}
       onAction={() => setShowDetail((v) => !v)}
     />
   );
@@ -223,7 +223,7 @@ export default function Command() {
             : compact<List.Item.Accessory>([
                 live ? { tag: { value: "Happening Now", color: Color.Green } } : undefined,
                 { date: new Date(meeting.scheduledDate), tooltip: formatDateTime(meeting.scheduledDate) },
-                ownerAccessory(presenter),
+                ownerAccessory(presenter, meeting.presenter?.id),
               ])
         }
         detail={<UpcomingDetail meeting={meeting} teamName={team} />}
@@ -283,7 +283,7 @@ export default function Command() {
                   ? { icon: Icon.Star, text: String(meeting.averageRating), tooltip: "Average rating" }
                   : undefined,
                 { date: new Date(meeting.date), tooltip: formatDateTime(meeting.date) },
-                ownerAccessory(presenter),
+                ownerAccessory(presenter, meeting.presenterId),
               ])
         }
         detail={

@@ -24,13 +24,20 @@ export function useAvatar() {
   const { userName } = useUsers();
   const myName = userId ? userName(userId) : undefined;
 
-  const avatar = (name?: string): Image.ImageLike | undefined => {
+  /**
+   * `ownerId` decides whether the item is yours, so a coworker with your name keeps their initials.
+   * Only the team Scorecard leaves it out (Ninety returns just the owner's name there), and then
+   * the name is compared instead.
+   */
+  const isMe = (name: string, ownerId?: string) => (ownerId ? ownerId === userId : name === myName);
+
+  const avatar = (name?: string, ownerId?: string): Image.ImageLike | undefined => {
     if (!name) return undefined;
-    if (!myName || name !== myName) return getAvatarIcon(name);
+    if (!isMe(name, ownerId)) return getAvatarIcon(name);
     return url ? { source: url, mask: Image.Mask.Circle, fallback: ME_ICON } : ME_ICON;
   };
-  const ownerAccessory = (name?: string): List.Item.Accessory | undefined =>
-    name ? { icon: avatar(name), tooltip: name } : undefined;
+  const ownerAccessory = (name?: string, ownerId?: string): List.Item.Accessory | undefined =>
+    name ? { icon: avatar(name, ownerId), tooltip: name } : undefined;
 
   return { avatar, ownerAccessory };
 }

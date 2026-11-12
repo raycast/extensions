@@ -180,7 +180,7 @@ export default function Command() {
                     : compact<List.Item.Accessory>([
                         todo.comments?.length ? { icon: Icon.Bubble, text: String(todo.comments.length) } : undefined,
                         dueDateAccessory(todo.dueDate, todo.completed),
-                        ownerAccessory(owner),
+                        ownerAccessory(owner, todo.userId),
                       ])
                 }
                 detail={
@@ -192,7 +192,7 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Label
                           title="Owner"
                           text={userName(todo.userId) ?? "—"}
-                          icon={avatar(userName(todo.userId))}
+                          icon={avatar(userName(todo.userId), todo.userId)}
                         />
                         <List.Item.Detail.Metadata.Label title="Due" text={formatDate(todo.dueDate) || "—"} />
                         <List.Item.Detail.Metadata.Label title="Created" text={formatDate(todo.createdDate)} />
@@ -206,10 +206,6 @@ export default function Command() {
                       <Action
                         title={showDetail ? "Hide Details" : "Show Details"}
                         icon={Icon.Sidebar}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd"], key: "d" },
-                          Windows: { modifiers: ["ctrl"], key: "d" },
-                        }}
                         onAction={() => setShowDetail((v) => !v)}
                       />
                       <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.todo(todo)} />

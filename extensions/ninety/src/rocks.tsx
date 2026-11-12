@@ -203,7 +203,7 @@ export default function Command() {
                             ? { tag: "Company & Dept", tooltip: "Company and Department Rock" }
                             : undefined,
                           dueDateAccessory(rock.dueDate, rock.completed),
-                          ownerAccessory(owner),
+                          ownerAccessory(owner, rock.userId),
                         ])
                   }
                   detail={
@@ -218,7 +218,11 @@ export default function Command() {
                               color={rockStatus(rock.statusCode).color}
                             />
                           </List.Item.Detail.Metadata.TagList>
-                          <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} icon={avatar(owner)} />
+                          <List.Item.Detail.Metadata.Label
+                            title="Owner"
+                            text={owner ?? "—"}
+                            icon={avatar(owner, rock.userId)}
+                          />
                           <List.Item.Detail.Metadata.Label title="Team" text={team ?? "—"} />
                           <List.Item.Detail.Metadata.Label title="Due" text={formatDate(rock.dueDate)} />
                           <List.Item.Detail.Metadata.Label
@@ -243,10 +247,6 @@ export default function Command() {
                         <Action
                           title={showDetail ? "Hide Details" : "Show Details"}
                           icon={Icon.Sidebar}
-                          shortcut={{
-                            macOS: { modifiers: ["cmd"], key: "d" },
-                            Windows: { modifiers: ["ctrl"], key: "d" },
-                          }}
                           onAction={() => setShowDetail((v) => !v)}
                         />
                         <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.rock(rock)} />
@@ -326,7 +326,7 @@ export default function Command() {
                           title="Refresh"
                           icon={Icon.ArrowClockwise}
                           shortcut={Keyboard.Shortcut.Common.Refresh}
-                          onAction={() => revalidate()}
+                          onAction={() => milestonesChanged()}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>

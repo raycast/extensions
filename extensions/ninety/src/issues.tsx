@@ -172,7 +172,7 @@ export default function Command() {
                             : undefined,
                           priorityAccessory(issue.priority),
                           issue.createdDate ? { date: new Date(issue.createdDate), tooltip: "Created" } : undefined,
-                          ownerAccessory(owner),
+                          ownerAccessory(owner, issue.userId),
                         ])
                   }
                   detail={
@@ -181,7 +181,11 @@ export default function Command() {
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label title="List" text={intervalTitle(interval)} />
-                          <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} icon={avatar(owner)} />
+                          <List.Item.Detail.Metadata.Label
+                            title="Owner"
+                            text={owner ?? "—"}
+                            icon={avatar(owner, issue.userId)}
+                          />
                           <List.Item.Detail.Metadata.Label
                             title="Priority"
                             text={issue.priority ? `${issue.priority} of 5` : "None"}
@@ -197,10 +201,6 @@ export default function Command() {
                         <Action
                           title={showDetail ? "Hide Details" : "Show Details"}
                           icon={Icon.Sidebar}
-                          shortcut={{
-                            macOS: { modifiers: ["cmd"], key: "d" },
-                            Windows: { modifiers: ["ctrl"], key: "d" },
-                          }}
                           onAction={() => setShowDetail((v) => !v)}
                         />
                         <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.issue(issue)} />

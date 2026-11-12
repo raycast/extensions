@@ -147,7 +147,7 @@ export default function Command() {
                       headline.completed ? { tag: { value: "Discussed", color: Color.SecondaryText } } : undefined,
                       from ? { icon: Icon.TwoPeople, text: from, tooltip: "Cascaded from" } : undefined,
                       headline.createdDate ? { date: new Date(headline.createdDate) } : undefined,
-                      ownerAccessory(owner),
+                      ownerAccessory(owner, headline.userId),
                     ])
               }
               detail={
@@ -155,7 +155,11 @@ export default function Command() {
                   markdown={headlineMarkdown(headline)}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} icon={avatar(owner)} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Owner"
+                        text={owner ?? "—"}
+                        icon={avatar(owner, headline.userId)}
+                      />
                       {from ? <List.Item.Detail.Metadata.Label title="Cascaded From" text={from} /> : null}
                       <List.Item.Detail.Metadata.Label title="Created" text={formatDate(headline.createdDate)} />
                     </List.Item.Detail.Metadata>
@@ -168,10 +172,6 @@ export default function Command() {
                     <Action
                       title={showDetail ? "Hide Details" : "Show Details"}
                       icon={Icon.Sidebar}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "d" },
-                        Windows: { modifiers: ["ctrl"], key: "d" },
-                      }}
                       onAction={() => setShowDetail((v) => !v)}
                     />
                     <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.headline(headline)} />

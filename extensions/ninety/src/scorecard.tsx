@@ -259,10 +259,6 @@ export default function Command() {
                       <Action
                         title={showDetail ? "Hide Details" : "Show Details"}
                         icon={Icon.Sidebar}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd"], key: "d" },
-                          Windows: { modifiers: ["ctrl"], key: "d" },
-                        }}
                         onAction={() => setShowDetail((v) => !v)}
                       />
                       <Action.OpenInBrowser
