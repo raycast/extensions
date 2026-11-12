@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>explainshell.com - tar xzvf archive.tar.gz</title>
+        <link rel="icon" href="/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Resolve theme before loading CSS to prevent flash -->
+        <script>
+          (function() {
+            var t = localStorage.getItem('theme')
+              || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default');
+            var dark = t === 'dark';
+            var bs = dark ? '//maxcdn.bootstrapcdn.com/bootswatch/2.3.1/cyborg/bootstrap.min.css' : '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css';
+            var hl = dark ? '//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css' : '//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css';
+            document.write('<link href="' + bs + '" rel="stylesheet" media="screen" id="bootstrapCSS">');
+            document.write('<link href="' + hl + '" rel="stylesheet" id="hljsCSS">');
+            document.documentElement.setAttribute('data-theme', t);
+          })();
+        </script>
+        <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+        <link href="/static/css/es.css" rel="stylesheet" media="screen">
+        <link href='//fonts.googleapis.com/css?family=Berkshire+Swash' rel='stylesheet' type='text/css'>
+        
+    </head>
+    <body><a href="https://explainshell.com/cdn-cgi/content?id=IxClvK6.u.oqLSENfqgUCFe_JrD_kgfrecdLbQ0Qtng-1794492529.9385462-1.2.1.1-mcSIoEz6gEBNEasIFg0q3EORnv_r9O05HU.7mMHeb5TTg_KEbNmUusuvbvHPtxWQ" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
+        <script>document.body.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'default');</script>
+        <div class="container">
+            <div class="small-push"></div>
+            <div class="header">
+                <div class="text-center logo">
+                    <a href="/">
+                        explain<span class="shell">shell</span>.<span class="dotcom">com</span>
+                    </a>
+                </div>
+                <div style="position: relative;">
+                    <ul class="inline menu">
+                      <li><form action='/explain' method='get'><input id="top-search" name='cmd' type="text" autocapitalize="off" autocorrect="off" placeholder="explain..."></input></form></li>
+                    </ul>
+                    <div class="menu-icons">
+                      <a href="https://github.com/idank/explainshell" title="GitHub"><i class="icon-github"></i></a>
+                      <div id="settingsContainer" class="dropdown">
+                        <a href="#" data-toggle="dropdown" title="Settings"><i class="icon-cog"></i></a>
+                        <ul class="dropdown-menu pull-right" role="menu">
+                          <li class="dropdown-header">Theme</li>
+                          <li><a tabindex="-1" href="#" data-theme-name="default">Light</a></li>
+                          <li><a tabindex="-1" href="#" data-theme-name="dark">Dark</a></li>
+                        </ul>
+                      </div>
+                    </div>
+                </div>
+                <div class="small-push"></div>
+                <div class="text-center">
+                    
+                </div>
+            </div>
+            
+            <div id="navigate" style="position: relative;" class="small-push"></div>
+            <!--<span style="background-color:white;position: fixed; bottom:0; right:0;" id="coords"></span>-->
+            <div class="push"></div>
+            <div id="bump-fixer">
+                <div id="command-wrapper">
+                    <svg id="canvas">
+                    </svg>
+                    <div id="command">
+                    <span class="dropdown">
+                    <span style="word-spacing: 0px;">
+                    <b class="caret" data-toggle="dropdown"></b>
+                    <span class="command0 simplecommandstart" helpref="help-0"><a href="/explain/1/tar">tar(1)</a></span>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      
+                      <li class="dropdown-header">other manpages</li>
+                      <li><a tabindex="-1" rel="nofollow" href="/explain?cmd=bsdtar.1%20xzvf%20archive.tar.gz">bsdtar(1)</a></li>
+                      
+                      
+                      <li class="dropdown-header">distro</li>
+                      
+                      
+                      <li><a tabindex="-1" href="/explain/arch/latest?cmd=tar%20xzvf%20archive.tar.gz">arch latest</a></li>
+                      
+                      
+                      
+                      <li class="active-distro">ubuntu 26.04</li>
+                      
+                      
+
+                    </ul>
+                    </span>
+                </span> <span class="command0" helpref="help-1">x</span><span class="command0" helpref="help-2">z</span><span class="command0" helpref="help-3">v</span><span class="command0" helpref="help-4">f archive.tar.gz</span>
+                    </div>
+                    <div style="height: 5px;"></div>
+                    <div style="height: 100px;"></div>
+                </div>
+            </div>
+            <div>
+                <table id="help" width="100%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="help-box" id="help-0"><p>an archiving utility</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-1"><p><strong>-x</strong>, <strong>--extract</strong>, <strong>--get</strong></p>
+<p>Extract files from an archive.  Arguments are optional.  When given, they specify names of the archive members to be extracted.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-2"><p><strong>-z</strong>, <strong>--gzip</strong>, <strong>--gunzip</strong>, <strong>--ungzip</strong></p>
+<p>Filter the archive through
+<strong>gzip</strong>(1).</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-3"><p><strong>-v</strong>, <strong>--verbose</strong></p>
+<p>Verbosely list files processed.  Each instance of this option on the command line increases the verbosity level by one.  The maximum verbosity level is 3.  For a detailed discussion of how various verbosity levels affect tar's output, please refer to <strong>GNU Tar</strong> Manual, subsection 2.5.2 &quot;<strong>The '--verbose' Option</strong>&quot;.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-4"><p><strong>-f</strong>, <strong>--file</strong>=<em>ARCHIVE</em></p>
+<p>Use archive file or device <em>ARCHIVE</em>.  If this option is not given, <strong>tar</strong> will first examine the environment variable `TAPE'. If it is set, its value will be used as the archive name.  Otherwise, <strong>tar</strong> will assume the compiled-in default.  The default value can be inspected either using the
+<strong>--show-defaults</strong> option, or at the end of the <strong>tar --help</strong> output.</p>
+<p>An archive name that has a colon in it specifies a file or device on a remote machine.  The part before the colon is taken as the machine name or IP address, and the part after it as the file or device pathname, e.g.:</p>
+<blockquote>
+<p>--file=remotehost:/dev/sr0</p>
+</blockquote>
+<p>An optional username can be prefixed to the hostname, placing a <strong>@</strong> sign between them.</p>
+<p>By default, the remote host is accessed via the
+<strong>rsh</strong>(1) command.  Nowadays it is common to use
+<strong>ssh</strong>(1) instead.  You can do so by giving the following command line option:</p>
+<blockquote>
+<p>--rsh-command=/usr/bin/ssh</p>
+</blockquote>
+<p>The remote machine should have the
+<strong>rmt</strong>(8) command installed.  If its pathname does not match <strong>tar</strong>'s default, you can inform <strong>tar</strong> about the correct pathname using the
+<strong>--rmt-command</strong> option.</p>
+</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+        <div class="push"></div><div class="text-center"><small>
+
+source manpages: 
+<a href="https://manpages.ubuntu.com/manpages/resolute/en/man1/tar.1.html">tar</a>
+
+</small></div>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="/static/js/es.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.1.6/d3.min.js"></script>
+        <script type="text/javascript">
+            var $window = $(window),
+                helppres = $('#help .help-box');
+
+            adjustcommandfontsize();
+            currentgroup = initialize();
+            navigation();
+
+            $(document).ready(function() {
+                // set the query in the top search box from the url
+                var cmd = new URLSearchParams(window.location.search).get('cmd');
+                if (cmd) {
+                    document.getElementById("top-search").value = cmd;
+                }
+
+                // when #command-wrapper position is changed to fixed, it'll be removed
+                // from the normal flow, and everything below it will up. we use this div
+                // to prevent that.
+                document.getElementById('bump-fixer').style.height = document.getElementById("command-wrapper").offsetHeight + 'px';
+
+                $('#command-wrapper').affix({
+                    offset: { top: $('#command-wrapper').offset().top-10 }
+                });
+
+                drawgrouplines(currentgroup.commandselector);
+
+                function throttle(fn, ms) {
+                    var last = 0;
+                    return function() {
+                        var now = Date.now();
+                        if (now - last >= ms) { last = now; fn(); }
+                    };
+                }
+                var throttled = throttle(function() {
+                    draw()
+                }, 10);
+
+                $window.scroll(throttled);
+                $window.resize(throttled);
+            });
+        </script>
+    <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5961c681af0b512',t:'MTc5NDQ5MjUyOQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5961c681af0b512',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
