@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { ChangeModelAction } from "./components/change-model-action";
@@ -77,13 +77,9 @@ function SearchThreads() {
           }
           actions={
             <ActionPanel>
-              <CreateThreadAction />
-              <Action
-                title="Refresh Threads"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={revalidate}
-              />
+              {/* The first two actions get ↵ and ⌘↵, so they carry no shortcuts of their own. */}
+              <CreateThreadAction withShortcut={false} />
+              <Action title="Refresh Threads" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <DemoDataAction onChange={revalidate} />
             </ActionPanel>
           }
@@ -133,12 +129,8 @@ function LoadErrorView({ error, onRetry }: { error: Error; onRetry: () => void }
               onAction={() => openInDelta().catch((e) => showDeltaFailure(e, "Couldn't open Delta"))}
             />
           )}
-          <Action
-            title="Try Again"
-            icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={onRetry}
-          />
+          {/* Always first or second, so ↵ or ⌘↵ runs it. */}
+          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
           <DemoDataAction onChange={onRetry} />
         </ActionPanel>
       }
@@ -153,7 +145,7 @@ function AskDeltaItem(props: { question: string; isShowingDetail: boolean; onTog
   const keywords = extractKeywords(question);
   const explanation =
     keywords.length > 0
-      ? `Press ↵ and Delta answers from the threads that mention ${keywords.map((keyword) => `\`${keyword}\``).join(", ")}.\n\nModel: ${getModelName(model)}. Press ⌘⇧M to change it.`
+      ? `Press ↵ and Delta answers from the threads that mention ${keywords.map((keyword) => `\`${keyword}\``).join(", ")}.\n\nModel: ${getModelName(model)}. Press ⌘↵ to change it.`
       : "Delta picks the threads to read by the specific words in a question, and this one has none yet. Add a project, feature, error or file name.";
 
   return (
@@ -169,13 +161,14 @@ function AskDeltaItem(props: { question: string; isShowingDetail: boolean; onTog
             icon={Icon.Stars}
             target={<ThreadAnswer question={question} navigationTitle="Ask Delta" />}
           />
+          {/* Second, so ⌘↵ opens it. */}
+          <ChangeModelAction withShortcut={false} />
           <Action
             title={isShowingDetail ? "Hide Details" : "Show Details"}
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={onToggleDetail}
           />
-          <ChangeModelAction />
           <CreateThreadAction />
         </ActionPanel>
       }

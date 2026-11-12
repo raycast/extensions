@@ -11,6 +11,10 @@ type State = { stored: string | undefined } | undefined;
 let state: State;
 let loading: Promise<void> | undefined;
 let lastWrite: Promise<void> = Promise.resolve();
+/** What LocalStorage holds, as far as this command knows; a failed save falls back to it. */
+let saved: State;
+/** Increases with every choice, so a failed save can tell whether a newer choice is pending. */
+let choiceCount = 0;
 const listeners = new Set<() => void>();
 
 function setState(next: State) {
@@ -35,9 +39,10 @@ function load() {
   loading ??= LocalStorage.getItem<string>(ANSWER_MODEL_KEY)
     .catch(() => undefined)
     .then((item) => {
+      saved ??= { stored: decode(item) };
       // A choice made while loading wins over what was stored.
       if (!state) {
-        setState({ stored: decode(item) });
+        setState(saved);
       }
     });
 }
@@ -52,10 +57,10 @@ function subscribe(listener: () => void) {
 
 /**
  * Saves the choice; `undefined` means Delta's default. Screens update before the write finishes;
- * if it fails, the previous choice comes back and the returned promise rejects.
+ * if it fails, the last saved choice comes back and the returned promise rejects.
  */
 async function setModel(model: string | undefined): Promise<void> {
-  const previous = state;
+  const choice = ++choiceCount;
   const stored = model ?? "";
   setState({ stored });
   // Writes are queued so the last choice is also the last one written.
@@ -63,10 +68,11 @@ async function setModel(model: string | undefined): Promise<void> {
   lastWrite = write.catch(() => undefined);
   try {
     await write;
+    saved = { stored };
   } catch (error) {
-    // Unless a later choice has replaced it meanwhile.
-    if (state?.stored === stored) {
-      setState(previous);
+    // A newer choice is still being saved; it decides what's shown once it finishes.
+    if (choice === choiceCount) {
+      setState(saved ?? { stored: undefined });
     }
     throw error;
   }

@@ -96,12 +96,12 @@ export function ThreadActions({ thread, threads, detail }: ThreadActionsProps) {
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Open in Delta" icon={Icon.AppWindow} onAction={() => openThreadInDelta(thread)} />
-        {/* Second action, so Raycast already gives it ⌘↵. */}
+        {/* The second action gets ⌘↵ from Raycast, which hides any shortcut of its own. */}
         {webUrl && <Action.OpenInBrowser url={webUrl} />}
         <Action.Push
           title="Ask About Thread"
           icon={Icon.Stars}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          shortcut={webUrl ? { modifiers: ["cmd", "shift"], key: "i" } : undefined}
           target={<AskAboutThreads threads={[{ id: thread.id, name: title }]} />}
         />
         {detail && (
@@ -171,13 +171,16 @@ export function ThreadActions({ thread, threads, detail }: ThreadActionsProps) {
   );
 }
 
-/** Opens the Create Thread command; shared by every panel in Search Threads. */
-export function CreateThreadAction() {
+/**
+ * Opens the Create Thread command; shared by every panel in Search Threads. Pass
+ * `withShortcut={false}` when it's one of a panel's first two actions, which get ↵ and ⌘↵ instead.
+ */
+export function CreateThreadAction({ withShortcut = true }: { withShortcut?: boolean }) {
   return (
     <Action
       title="Create Thread"
       icon={Icon.Plus}
-      shortcut={Keyboard.Shortcut.Common.New}
+      shortcut={withShortcut ? Keyboard.Shortcut.Common.New : undefined}
       onAction={() =>
         launchCommand({ name: "create-thread", type: LaunchType.UserInitiated }).catch((error) =>
           showDeltaFailure(error, "Couldn't open Create Thread"),

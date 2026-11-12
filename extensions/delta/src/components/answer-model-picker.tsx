@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { useAnswerModel } from "../hooks/use-answer-model";
@@ -49,12 +49,7 @@ export function AnswerModelPicker({ isFirstChoice = false, navigationTitle }: An
         icon={Icon.Checkmark}
         onAction={() => choose(model)}
       />
-      <Action
-        title="Rescan Threads"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={rescan}
-      />
+      <Action title="Rescan Threads" icon={Icon.ArrowClockwise} onAction={rescan} />
     </ActionPanel>
   );
 

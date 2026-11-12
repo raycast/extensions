@@ -44,7 +44,7 @@ export function AskAboutThreads({ threads }: { threads: QuerySource[] }) {
           }
         }}
       />
-      <ChangeModelAction />
+      <ChangeModelAction withShortcut={false} />
     </ActionPanel>
   );
 

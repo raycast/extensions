@@ -72,6 +72,24 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
   }
 
   const sources = getAnswerSources(result, threads);
+  const shows = {
+    copy: !!result?.answer,
+    open: sources.length > 0,
+    followUp: !!result && sources.length > 0,
+    createThread: !!result?.answer,
+    askAgain: !cannotAsk && !isAsking,
+  };
+  // Raycast gives the first two actions ↵ and ⌘↵ and hides any shortcut of their own.
+  type AnswerAction = keyof typeof shows | "changeModel";
+  const order = Object.keys(shows) as (keyof typeof shows)[];
+  // How many shown actions come before this one; Change Answer Model is always last.
+  const position = (action: AnswerAction) => {
+    const before = action === "changeModel" ? order : order.slice(0, order.indexOf(action));
+    return before.filter((key) => shows[key]).length;
+  };
+  const isAmongFirstTwo = (action: AnswerAction) => position(action) < 2;
+  const shortcutFor = (action: AnswerAction, shortcut: Keyboard.Shortcut) =>
+    isAmongFirstTwo(action) ? undefined : shortcut;
 
   return (
     <Detail
@@ -88,7 +106,7 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
       })}
       actions={
         <ActionPanel>
-          {result?.answer && <Action.CopyToClipboard title="Copy Answer" content={result.answer} />}
+          {shows.copy && result && <Action.CopyToClipboard title="Copy Answer" content={result.answer} />}
           {sources.length === 1 && (
             <Action
               title={threads.length === 1 ? "Open Thread in Delta" : "Open Source Thread in Delta"}
@@ -108,20 +126,20 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
               ))}
             </ActionPanel.Submenu>
           )}
-          {result && sources.length > 0 && (
+          {shows.followUp && (
             <Action.Push
               title="Ask Follow-Up"
               icon={Icon.SpeechBubble}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+              shortcut={shortcutFor("followUp", { modifiers: ["cmd", "shift"], key: "i" })}
               // A new question to the same threads; Delta doesn't see the previous answer.
               target={<AskAboutThreads threads={sources} />}
             />
           )}
-          {result?.answer && (
+          {shows.createThread && result && (
             <Action
               title="Create Thread from Answer"
               icon={Icon.Plus}
-              shortcut={Keyboard.Shortcut.Common.New}
+              shortcut={shortcutFor("createThread", Keyboard.Shortcut.Common.New)}
               onAction={() =>
                 launchCommand({
                   name: "create-thread",
@@ -131,15 +149,15 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
               }
             />
           )}
-          {!cannotAsk && !isAsking && (
+          {shows.askAgain && (
             <Action
               title="Ask Again"
               icon={Icon.ArrowClockwise}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
+              shortcut={shortcutFor("askAgain", Keyboard.Shortcut.Common.Refresh)}
               onAction={askAgain}
             />
           )}
-          {!cannotAsk && <ChangeModelAction />}
+          {!cannotAsk && <ChangeModelAction withShortcut={!isAmongFirstTwo("changeModel")} />}
         </ActionPanel>
       }
     />
