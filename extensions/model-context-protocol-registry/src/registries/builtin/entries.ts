@@ -427,7 +427,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Mobile attribution for subscription apps: ask which ads and creators bring installs, trials and paying subscribers. Hosted remote Streamable HTTP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in with dynamic client registration and PKCE, no API key to paste. Needs an Airbridge account.",
     icon: "https://www.airbridge.io/apple-icon.png",
-    homepage: "https://www.airbridge.io/en/product/airbridge-ai?utm_source=raycast&utm_medium=listing&utm_campaign=get_found_w46&utm_content=airbridge_mcp",
+    homepage:
+      "https://www.airbridge.io/en/product/airbridge-ai?utm_source=raycast&utm_medium=listing&utm_campaign=get_found_w46&utm_content=airbridge_mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.airbridge.io/mcp"],
