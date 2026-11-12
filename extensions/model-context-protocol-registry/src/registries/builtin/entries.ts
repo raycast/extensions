@@ -1678,6 +1678,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "mailveri",
+    title: "MailVeri",
+    description:
+      "Verify email addresses before you send. Checks syntax, MX records and the mailbox, and flags disposable, role, catch-all and full-inbox addresses. Each result has a status (VALID, INVALID, DISPOSABLE, ROLE_ACCOUNT, CATCH_ALL, FULL_INBOX or UNKNOWN), a quality score from 0 to 100 and a forwarding flag. Also reads your credit balance and runs bulk batches (queue, check status, download results, delete). 6 tools. Local stdio server `mailveri-mcp` (MIT) from PyPI through `uvx`; needs a MailVeri API key set as `MAILVERI_API_KEY`. New accounts get 1,000 free credits, and UNKNOWN results use no credit.",
+    icon: "https://mailveri.com/apple-touch-icon.png",
+    homepage: "https://mailveri.com/docs/mcp",
+    configuration: {
+      command: "uvx",
+      args: ["mailveri-mcp"],
+      env: {
+        MAILVERI_API_KEY: "YOUR_MAILVERI_API_KEY",
+      },
+    },
+  },
+  {
     name: "makeviral",
     title: "MakeViral",
     description:

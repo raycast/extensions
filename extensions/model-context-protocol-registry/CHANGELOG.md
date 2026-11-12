@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MailVeri MCP Server] - {PR_MERGE_DATE}
+
+- Add MailVeri to the official registry: verify email addresses before sending, with a status, a 0-100 quality score and a forwarding flag for each address, plus credit balance and bulk batch tools. 6 tools. Local stdio server `mailveri-mcp` from PyPI through `uvx`, configured with a `MAILVERI_API_KEY` environment variable.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
