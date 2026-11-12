@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "excession-labs-cve",
+    title: "Excession Labs CVE intelligence",
+    description:
+      "Search CVEs by text, vendor, product, package, ecosystem or a literal source version. Read CVE details, source references, affected-software evidence and available CISA KEV and dated FIRST EPSS data. Check source coverage and collection health, page through hosted revisions, or read changes after a saved cursor. Six read-only tools. Version filters match source assertions; they do not evaluate installed-version applicability. Free hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy and require Node.js.",
+    icon: "https://excessionlabs.ai/icon-512.png",
+    homepage: "https://excessionlabs.ai/cve-intelligence/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://excessionlabs.ai/mcp/cve"],
+    },
+    remoteUrl: "https://excessionlabs.ai/mcp/cve",
+  },
+  {
     name: "mobile-joe",
     title: "Mobile Joe",
     description:
