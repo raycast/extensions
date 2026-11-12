@@ -28,6 +28,16 @@ const DAY_MS = 86_400_000;
 
 const bare = (url: string) => url.toLowerCase().replace(/^[a-z]+:\/\/(www\.)?/, "");
 
+// Same page? Host is case-insensitive, path and query are not; scheme, www and trailing slash don't matter.
+function pageKey(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.host.replace(/^www\./, "") + (u.pathname + u.search + u.hash).replace(/\/$/, "");
+  } catch {
+    return url;
+  }
+}
+
 function popularity(visits: number, typed: number, lastMs: number, now: number): number {
   const days = Math.max(0, (now - lastMs) / DAY_MS);
   // Typed visits count double, like Chromium's omnibox; a month-old site weighs half.
@@ -49,8 +59,8 @@ function matchLevel(q: string, url: string, title: string): number {
 /** Address the user probably typed directly, or null if it reads like a search query. */
 export function asUrl(q: string): string | null {
   if (/^[a-z][a-z0-9+.-]*:\/\/\S+$/i.test(q)) return q;
-  if (/^(localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/\S*)?$/i.test(q)) return `http://${q}`;
-  if (/^[^\s/.]+(\.[^\s/.]+)*\.\p{L}{2,}(:\d+)?(\/\S*)?$/u.test(q)) return `https://${q}`;
+  if (/^(localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?([/?#]\S*)?$/i.test(q)) return `http://${q}`;
+  if (/^[^\s/.?#]+(\.[^\s/.?#]+)*\.\p{L}{2,}(:\d+)?([/?#]\S*)?$/u.test(q)) return `https://${q}`;
   return null;
 }
 
@@ -128,7 +138,7 @@ export function suggest(query: string, rows: Row[], searchUrl: string, now = Dat
     subtitle: "Search",
   };
   const extra: Suggestion[] = [
-    ...(direct && !history.some((h) => bare(h.url).replace(/\/$/, "") === bare(direct).replace(/\/$/, ""))
+    ...(direct && !history.some((h) => pageKey(h.url) === pageKey(direct))
       ? [{ kind: "url" as const, url: direct, title: direct, subtitle: "Open address" }]
       : []),
     search,

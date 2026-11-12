@@ -61,4 +61,17 @@ test("asUrl", () => {
   assert.equal(asUrl("яндекс.рф"), "https://яндекс.рф");
   assert.equal(asUrl("cook rice"), null);
   assert.equal(asUrl("node"), null);
+  assert.equal(asUrl("example.com?mode=preview"), "https://example.com?mode=preview");
+  assert.equal(asUrl("example.com#section"), "https://example.com#section");
+  assert.equal(asUrl("localhost?x=1"), "http://localhost?x=1");
+});
+
+test("typed path keeps its case: history /abc does not swallow /ABC", () => {
+  const list = suggest("example.com/ABC", [row("https://example.com/abc", "abc", 5)], S, NOW);
+  assert.ok(list.some((s) => s.kind === "url" && s.url === "https://example.com/ABC"));
+});
+
+test("typed address already in history is not offered twice", () => {
+  const list = suggest("EXAMPLE.com/abc", [row("https://example.com/abc", "abc", 5)], S, NOW);
+  assert.ok(!list.some((s) => s.kind === "url"));
 });

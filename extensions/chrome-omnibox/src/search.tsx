@@ -10,11 +10,11 @@ import {
   open,
   popToRoot,
 } from "@raycast/api";
-import { executeSQL, useSQL } from "@raycast/utils";
+import { executeSQL, usePromise, useSQL } from "@raycast/utils";
 import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Row, Suggestion, suggest } from "./rank";
 
 const SEARCH_URL = "https://www.google.com/search?q=%s";
@@ -152,19 +152,12 @@ async function loadFavicons(profileDir: string, origins: string[]): Promise<Reco
 }
 
 function useFavicons(profileDir: string | undefined, items: Suggestion[]): Record<string, string> {
-  const [icons, setIcons] = useState<Record<string, string>>({});
-  const asked = useRef(new Set<string>());
-  const missing = [...new Set(items.filter((s) => s.kind === "history").map((s) => originOf(s.url)))].filter(
-    (o) => o && !asked.current.has(o),
-  );
-  useEffect(() => {
-    if (!profileDir || missing.length === 0) return;
-    missing.forEach((o) => asked.current.add(o));
-    loadFavicons(profileDir, missing)
-      .then((found) => setIcons((prev) => ({ ...prev, ...found })))
-      .catch(() => undefined); // icons are cosmetic; generic globe stays
-  }, [profileDir, missing.join("\n")]);
-  return icons;
+  const origins = [...new Set(items.filter((s) => s.kind === "history").map((s) => originOf(s.url)))].filter(Boolean);
+  const { data } = usePromise(loadFavicons, [profileDir ?? "", origins], {
+    execute: !!profileDir && origins.length > 0,
+    onError: () => undefined, // icons are cosmetic; generic globe stays
+  });
+  return data ?? {};
 }
 
 const icon = (s: Suggestion, favicons: Record<string, string>): Image.ImageLike =>
@@ -181,7 +174,9 @@ const detected = detect();
 export default function Command() {
   const [query, setQuery] = useState("");
   const history = detected ? join(detected.dir, "History") : "";
-  const { data, isLoading, permissionView } = useSQL<Row>(history, candidatesSql(query), { execute: !!detected });
+  const { data, isLoading, error, revalidate, permissionView } = useSQL<Row>(history, candidatesSql(query), {
+    execute: !!detected,
+  });
 
   const items = suggest(query, data ?? [], SEARCH_URL);
   const favicons = useFavicons(detected?.dir, items);
@@ -200,6 +195,18 @@ export default function Command() {
         <List.EmptyView
           title="No Chrome or Chromium browser history found"
           description={BROWSERS.map((b) => b.names[0]).join(", ")}
+        />
+      )}
+      {error && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Cannot read browser history"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
         />
       )}
       {items.map((s) => (
