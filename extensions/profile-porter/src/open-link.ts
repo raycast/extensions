@@ -1,7 +1,7 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { asLink, porterLink, send } from "./porter";
 
-export default async function Command(props: LaunchProps<{ arguments: { url: string } }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenLink }>) {
   const link = asLink(props.arguments.url);
   if (!link) {
     await showToast({ style: Toast.Style.Failure, title: "That isn't a link", message: props.arguments.url });

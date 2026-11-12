@@ -1,4 +1,5 @@
 import { getApplications, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -52,16 +53,21 @@ export function porterLink(
   return `profileporter://${action}${query ? `?${query}` : ""}`;
 }
 
-/** Hands a profileporter:// link to the app; a notice when it isn't there. */
+/** Hands a profileporter:// link to the app; a notice when it isn't there or macOS can't open it. */
 export async function send(link: string): Promise<boolean> {
-  if (!(await appPath())) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Profile Porter isn't installed",
-      message: "profileporter.com",
-    });
+  try {
+    if (!(await appPath())) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Profile Porter isn't installed",
+        message: "profileporter.com",
+      });
+      return false;
+    }
+    await open(link);
+    return true;
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't reach Profile Porter" });
     return false;
   }
-  await open(link);
-  return true;
 }

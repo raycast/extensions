@@ -1,32 +1,22 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  LaunchProps,
-  List,
-  closeMainWindow,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, LaunchProps, List, closeMainWindow } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { asLink, porterLink, Profile, profiles, send } from "./porter";
 
-export default function Command(props: LaunchProps<{ arguments: { url?: string } }>) {
-  const [all, setAll] = useState<Profile[]>();
+export default function Command(props: LaunchProps<{ arguments: Arguments.OpenInProfile }>) {
+  const {
+    data: all,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(profiles, [], {
+    onError: async (e) => {
+      await showFailureToast(e, { title: "Couldn't list the profiles" });
+    },
+  });
   const [link, setLink] = useState<string | undefined>(asLink(props.arguments.url));
 
   useEffect(() => {
-    profiles()
-      .then(setAll)
-      .catch((error) => {
-        setAll([]);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't list the profiles",
-          message: String(error.message ?? error),
-        });
-      });
     // No link typed: the one on the clipboard, if that's what it holds.
     if (!link) Clipboard.readText().then((text) => setLink(asLink(text)));
   }, []);
@@ -39,11 +29,26 @@ export default function Command(props: LaunchProps<{ arguments: { url?: string }
 
   const what = link ? `Open ${link.replace(/^https?:\/\//, "")}` : "Open a Window";
   return (
-    <List isLoading={all === undefined} searchBarPlaceholder={link ? `Open ${link} in…` : "Open a window of…"}>
-      <List.EmptyView
-        title="No browser profiles found"
-        description="Open Profile Porter once, so it can find your browsers."
-      />
+    <List isLoading={isLoading} searchBarPlaceholder={link ? `Open ${link} in…` : "Open a window of…"}>
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't list the profiles"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        !isLoading && (
+          <List.EmptyView
+            title="No browser profiles found"
+            description="Open Profile Porter once, so it can find your browsers."
+          />
+        )
+      )}
       {(all ?? []).map((p) => (
         <List.Item
           key={p.key}
@@ -59,7 +64,6 @@ export default function Command(props: LaunchProps<{ arguments: { url?: string }
                 <Action
                   title={link ? "Open in a Private Window" : "Open a Private Window"}
                   icon={Icon.EyeDisabled}
-                  shortcut={{ modifiers: ["shift"], key: "return" }}
                   onAction={() => openIn(p, true)}
                 />
               )}

@@ -10,6 +10,6 @@ Install [Profile Porter](https://profileporter.com) and open it once, so it can 
 
 ## Commands
 
-- **Open in Profile**: lists your browser profiles. ↩ opens the link you typed, or the link on your clipboard, in that profile; with no link it opens a window of the profile. ⇧↩ opens it in a private window.
+- **Open in Profile**: lists your browser profiles. ↩ opens the link you typed, or the link on your clipboard, in that profile; with no link it opens a window of the profile. ⌘↩ opens it in a private window.
 - **Open Link in the Right Profile**: hands a link to Profile Porter, which opens it in the profile you use that site in (or asks, the first time).
 - **Search Sites and Pages**: shows Profile Porter's panel with what you typed: the profile each site is used in, and the pages you visited.
