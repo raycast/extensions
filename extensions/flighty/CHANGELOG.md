@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [Handle Unreadable Flights] - {PR_MERGE_DATE}
+## [Handle Unreadable Flights] - 2026-11-12
 
 - Keep readable flights available when another saved flight cannot be parsed
 - Warn about incomplete results in View Flights and AI tools, with field details to help report parsing issues
