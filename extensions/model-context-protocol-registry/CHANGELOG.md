@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AlphaGrowth MCP Server] - 2026-11-12
+
+- Add AlphaGrowth to the official registry: free, read-only crypto data (project metrics and TVL history, chains, fees and revenue, funding rounds and investors, DeFi yield pools, token unlocks and DAO treasuries). 27 tools. Hosted Streamable HTTP server at https://alphagrowth.io/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add HoneyVid MCP Server] - 2026-11-11
 
 - Add HoneyVid to the official registry: find trending AI video templates and put a person, pet or character from a photo into them, or generate videos and images with Kling, Veo and Seedance, with a credit quote before every job. Hosted Streamable HTTP server at https://honeyvid.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a HoneyVid account and paid credits.
