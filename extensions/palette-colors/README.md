@@ -22,7 +22,7 @@ Create, manage, and organize color palettes directly in Raycast, with AI-powered
 
 ## Requirements
 
-- macOS 12 or later.
+- macOS 12 or later, or Windows.
 - A **Raycast Pro** subscription is required for the _Create Colors with AI_ command (it uses Raycast's built-in AI). The other three commands work on any Raycast plan.
 
 ## History
