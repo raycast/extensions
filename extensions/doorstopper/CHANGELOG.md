@@ -1,6 +1,6 @@
 # Doorstopper Changelog
 
-## [Fix Enable For in Menu Bar] - {PR_MERGE_DATE}
+## [Fix Enable For in Menu Bar] - 2026-11-12
 
 - Fixed Enable For in the menu bar failing with "Run Doorstopper Status Menu Bar once and keep it enabled in Raycast" even though the menu bar was running.
 
