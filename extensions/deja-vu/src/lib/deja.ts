@@ -44,11 +44,7 @@ function normalizeHit(raw: unknown): DejaSessionHit {
   const snippets = Array.isArray(item.snippets) ? item.snippets : undefined;
   const firstSnippet = snippets?.find((s): s is string => typeof s === "string" && s.length > 0);
   const fallbackSnippet =
-    typeof item.snippet === "string"
-      ? item.snippet
-      : typeof session.snippet === "string"
-        ? session.snippet
-        : undefined;
+    typeof item.snippet === "string" ? item.snippet : typeof session.snippet === "string" ? session.snippet : undefined;
   return {
     harness: String(session.harness || ""),
     id: String(session.id || ""),
