@@ -1,4 +1,4 @@
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-12
 
 - Search App Store icons by name with region switch
 - Download PNG to ~/Downloads or copy image
