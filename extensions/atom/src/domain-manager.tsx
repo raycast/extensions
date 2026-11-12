@@ -94,14 +94,7 @@ export default function DomainManager() {
 }
 
 function ManageNameservers({ domainName }: { domainName: string }) {
-  const { isLoading, data } = useFetch(`${API_URL}/domains/${domainName}/nameservers`, {
-    headers: API_HEADERS,
-    parseResponse: parseAtomResponse<AtomNameservers>,
-    initialData: [],
-    keepPreviousData: false,
-  });
-
-  const { handleSubmit, itemProps, values } = useForm<{ type: string; nameservers: string }>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<{ type: string; nameservers: string }>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating");
       try {
@@ -121,14 +114,21 @@ function ManageNameservers({ domainName }: { domainName: string }) {
         showError(error);
       }
     },
-    initialValues: {
-      type: data.type,
-      nameservers: data.type === "custom" ? data.nameservers?.join("\n") : undefined,
-    },
     validation: {
       nameservers(value) {
         if (values.type === "custom" && !value) return "The item is required";
       },
+    },
+  });
+
+  const { isLoading } = useFetch(`${API_URL}/domains/${domainName}/nameservers`, {
+    headers: API_HEADERS,
+    parseResponse: parseAtomResponse<AtomNameservers>,
+    initialData: [],
+    keepPreviousData: false,
+    onData(data) {
+      setValue("type", data.type);
+      if (data.type === "custom") setValue("nameservers", data.nameservers.join("\n"));
     },
   });
 
@@ -147,6 +147,7 @@ ns2.atom.com`,
   return (
     <Form
       isLoading={isLoading}
+      navigationTitle={`Manage Domains / ${domainName} / Nameservers`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Save" onSubmit={handleSubmit} />
@@ -219,7 +220,7 @@ function ManageDNS({ domainName }: { domainName: string }) {
   };
 
   return (
-    <List isLoading={isLoading} navigationTitle={`Manage Domains / DNS / ${domainName}`}>
+    <List isLoading={isLoading} navigationTitle={`Manage Domains / ${domainName} / DNS`}>
       {records.map((record) => (
         <List.Item
           key={record.id}
