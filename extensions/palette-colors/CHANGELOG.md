@@ -1,6 +1,6 @@
 # Color Palette Manager Changelog
 
-## [Windows Support and Ownership Transfer] - {PR_MERGE_DATE}
+## [Windows Support and Ownership Transfer] - 2026-11-12
 
 - Ownership of the extension has been transferred to @elibattistoni.
 - Added Windows support with platform-appropriate keyboard shortcuts for palette actions.
