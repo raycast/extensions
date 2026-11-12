@@ -10,7 +10,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "hoy-planes",
     title: "Hoy Planes",
     description:
-      "What's on in 12 Spanish provinces: concerts, theatre and free plans by date, topic, price and distance. Search the daily-updated listings of the Hoy Planes network (Hoy Madrid, Hoy Barcelona, Hoy Valencia, Hoy Sevilla and eight more), open a plan's dates, address and full description, and list the provinces, topics and occasions. Every plan links to its page on the website, where tickets are bought. Listings are in Spanish. 3 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+      "What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. Search the daily-updated listings of the Hoy Planes network (Hoy Madrid, Hoy Barcelona, Hoy Valencia, Hoy Sevilla and eight more), open a plan's dates, address and full description, and list the provinces, topics and occasions. Every plan links to its page on the website, where tickets are bought. Listings are in Spanish. 3 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
     icon: "https://www.hoyplanes.com/conector/icono-512.png",
     homepage: "https://www.hoyplanes.com/mcp/",
     configuration: {
