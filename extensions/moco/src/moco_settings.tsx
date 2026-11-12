@@ -1,4 +1,6 @@
 import {
+  Alert,
+  confirmAlert,
   Action,
   ActionPanel,
   Form,
@@ -9,11 +11,12 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 import { fetchProjects } from "./commands/projects/api";
 import { Project } from "./commands/projects/types";
 import {
+  isAvailableTimerProject,
   JiraDefault,
   makeJiraDefault,
   makeTimerDefault,
@@ -102,11 +105,7 @@ function RuleForm({
         await onSaved();
         pop();
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Could not save defaults",
-          message: error instanceof Error ? error.message : "Try again.",
-        });
+        await showFailureToast(error, { title: "Could not save defaults" });
       }
     },
   });
@@ -231,7 +230,7 @@ async function loadSettings() {
     loadTimerDefault(),
     loadBrowserConfig(),
   ]);
-  return { rules, projects, defaults, config };
+  return { rules, projects: projects.filter(isAvailableTimerProject), defaults, config };
 }
 
 export default function Command() {
@@ -247,7 +246,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="MOCO Settings"
       searchBarPlaceholder="Find a setting or Jira rule…"
       actions={<ActionPanel>{add}</ActionPanel>}
     >
@@ -274,8 +272,16 @@ export default function Command() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={async () => {
-                      await removeTimerDefault();
-                      revalidate();
+                      if (
+                        await confirmAlert({
+                          title: "Clear Timer Defaults?",
+                          message: "New plain timers will ask you to choose a project and role.",
+                          primaryAction: { title: "Clear Defaults", style: Alert.ActionStyle.Destructive },
+                        })
+                      ) {
+                        await removeTimerDefault();
+                        revalidate();
+                      }
                     }}
                   />
                 ) : null}
@@ -326,8 +332,16 @@ export default function Command() {
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={async () => {
-                    await removeJiraDefault(rule);
-                    await revalidate();
+                    if (
+                      await confirmAlert({
+                        title: `Remove ${rule.prefix}-* Defaults?`,
+                        message: `Tickets on ${rule.host} will use the general timer defaults.`,
+                        primaryAction: { title: "Remove Defaults", style: Alert.ActionStyle.Destructive },
+                      })
+                    ) {
+                      await removeJiraDefault(rule);
+                      revalidate();
+                    }
                   }}
                 />
               </ActionPanel>

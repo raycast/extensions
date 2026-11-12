@@ -1,12 +1,10 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { getFrontmostApplication, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { browserConfigKey, BROWSERS, BrowserConfig, chooseBrowser, parseBrowserConfig } from "./browser-config";
 import { CURRENT_BROWSER_TAB_SCRIPT } from "./browser-script";
 import { decodeSafariTab, extractJiraIssue, JiraIssue } from "./jira";
 
-const executeFile = promisify(execFile);
-const configKey = () => browserConfigKey(getPreferenceValues<{ url_prefix: string }>().url_prefix);
+const configKey = () => browserConfigKey(getPreferenceValues<Preferences>().url_prefix);
 
 export async function loadBrowserConfig() {
   return parseBrowserConfig(await LocalStorage.getItem(configKey()));
@@ -26,12 +24,13 @@ export async function detectCurrentJira(): Promise<{ issue?: JiraIssue; notice: 
       return {
         notice: "",
       };
-    const { stdout } = await executeFile(
-      "/usr/bin/osascript",
-      ["-l", "JavaScript", "-e", CURRENT_BROWSER_TAB_SCRIPT, browser.id],
-      { timeout: 15000, maxBuffer: 128 * 1024, encoding: "utf8" },
-    );
-    const tab = decodeSafariTab(stdout);
+    const output = await runAppleScript(CURRENT_BROWSER_TAB_SCRIPT, [browser.id], {
+      language: "JavaScript",
+      timeout: 15000,
+      // The script returns a JSON string, rather than an AppleScript list/record.
+      humanReadableOutput: true,
+    });
+    const tab = decodeSafariTab(output);
     try {
       return { issue: extractJiraIssue(tab, config.jiraDomains), notice: "" };
     } catch {

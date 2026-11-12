@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Form, useNavigation, Icon, showToast, Toast } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { Task } from "../../tasks/types";
 import { startActivity } from "../api";
 import { fetchProjects } from "../../projects/api";
@@ -9,6 +9,7 @@ import { localDate, parseHours, validateTime } from "../utils";
 import { jiraActivityLink, JiraIssue } from "../../../utils/jira";
 import { makeTimerDefault, scopeForIssue } from "../../../utils/jira-defaults";
 import { JiraTicketTime } from "./JiraTicketTime";
+import { fetchJiraTicketTime } from "../jira-time-api";
 
 interface ActivityStartProps {
   task?: Task;
@@ -21,6 +22,7 @@ interface ActivityStartProps {
   contextNotice?: string;
   onClearJira?: () => void;
   onSaveDefaults?: (projectId: string, taskId: string) => Promise<void>;
+  isRoot?: boolean;
   // Called after a successful submit. Defaults to popping the form.
   onSubmitted?: () => Promise<void>;
 }
@@ -44,11 +46,28 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
   defaultScopeLabel = "for plain timers",
   contextNotice,
   onClearJira,
+  isRoot = false,
   onSubmitted,
 }) => {
   const navi = useNavigation();
   const [rememberDefault, setRememberDefault] = useState(true);
-  const [ticketTimeRefresh, setTicketTimeRefresh] = useState(0);
+  const abortable = useRef<AbortController | null>(null);
+  const {
+    data: ticketTime,
+    isLoading: isLoadingTicketTime,
+    error: ticketTimeError,
+    revalidate: refreshTicketTime,
+  } = usePromise(
+    (issue?: JiraIssue) => (issue ? fetchJiraTicketTime(issue, abortable.current?.signal) : Promise.resolve(undefined)),
+    [jiraIssue],
+    {
+      execute: Boolean(jiraIssue),
+      abortable,
+      onError: () => {
+        /* Show a sanitized inline unavailable state instead of a request-error toast. */
+      },
+    },
+  );
   // With a given task the dropdowns are hidden, so the projects are not needed.
   const { data: fetchedProjects = [], isLoading } = useCachedPromise(fetchProjects, [], {
     execute: task === undefined && assignedProjects === undefined,
@@ -63,11 +82,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
       await onSaveDefaults(projectId, taskId);
       return true;
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not save timer defaults",
-        message: error instanceof Error ? error.message : "Try again.",
-      });
+      await showFailureToast(error, { title: "Could not save timer defaults" });
       return false;
     }
   };
@@ -91,8 +106,8 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
       if (initialSelection) {
         try {
           makeTimerDefault(Number(values.projectDropdown), Number(values.taskDropdown), projects);
-        } catch {
-          await showToast({ style: Toast.Style.Failure, title: "Choose an available project and role / service" });
+        } catch (error) {
+          await showFailureToast(error, { title: "Choose an available project and role / service" });
           return;
         }
         if (rememberDefault && !(await saveDefaults(values.projectDropdown, values.taskDropdown))) return;
@@ -146,7 +161,13 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
     <Form
       isLoading={isLoading}
       navigationTitle={
-        jiraIssue ? `MOCO · ${jiraIssue.key}` : task ? `${task.projectName}/${task.name}` : "New Activity"
+        isRoot
+          ? undefined
+          : jiraIssue
+            ? `MOCO · ${jiraIssue.key}`
+            : task
+              ? `${task.projectName}/${task.name}`
+              : "New Activity"
       }
       actions={
         <ActionPanel>
@@ -167,7 +188,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
               title="Refresh Jira Ticket Time"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => setTicketTimeRefresh((n) => n + 1)}
+              onAction={refreshTicketTime}
             />
           ) : null}
           {onClearJira ? (
@@ -194,7 +215,9 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
       {jiraIssue ? (
         <Form.Description title="Ticket" text={`${jiraIssue.key} · ${new URL(jiraIssue.url).hostname}`} />
       ) : null}
-      {jiraIssue ? <JiraTicketTime key={jiraIssue.url} issue={jiraIssue} refresh={ticketTimeRefresh} /> : null}
+      {jiraIssue ? (
+        <JiraTicketTime summary={ticketTime} isLoading={isLoadingTicketTime} failed={Boolean(ticketTimeError)} />
+      ) : null}
       {contextNotice ? <Form.Description title="Browser" text={contextNotice} /> : null}
       {initialSelection?.notice ? <Form.Description title="Saved Defaults" text={initialSelection.notice} /> : null}
       {jiraIssue ? <Form.Separator /> : null}

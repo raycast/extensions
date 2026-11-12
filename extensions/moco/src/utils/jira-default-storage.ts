@@ -9,7 +9,7 @@ import {
   timerDefaultKey,
 } from "./jira-defaults";
 
-const tenant = () => getPreferenceValues<{ url_prefix: string }>().url_prefix;
+const tenant = () => getPreferenceValues<Preferences>().url_prefix;
 
 export async function loadJiraDefault(scope: JiraScope): Promise<JiraDefault | undefined> {
   return parseJiraDefault(await LocalStorage.getItem(jiraDefaultKey(tenant(), scope)));

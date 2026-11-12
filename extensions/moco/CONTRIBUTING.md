@@ -17,10 +17,10 @@ npm run dev          # builds, loads into Raycast and rebuilds on save
 Use Node.js 24 or newer for the fixture tests (they use Node's TypeScript support). Run these checks and test your change in Raycast under `npm run dev`.
 
 ```bash
+npm run build       # generates the manifest preference types before checking TypeScript
 npm test
 npm run typecheck
 npm run lint
-npm run build
 ```
 
 Add an entry at the top of `CHANGELOG.md` in this format:

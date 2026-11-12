@@ -8,6 +8,7 @@ import {
   selectTimerDefaults,
   timerDefaultKey,
   jiraDefaultKey,
+  isAvailableTimerProject,
 } from "../src/utils/jira-defaults.ts";
 
 const projects = [
@@ -17,6 +18,26 @@ const projects = [
 const scope = { host: "your-team.atlassian.net", prefix: "PROJ" };
 const defaults = makeTimerDefault(1, 10, projects);
 const rule = makeJiraDefault(scope, 2, 20, projects);
+
+test("disabled project assignments cannot be restored or saved as plain defaults", () => {
+  const assigned = projects.map((p) => ({ ...p, contract: { active: false } }));
+  const selected = resolveTimerDefault(defaults, assigned);
+  assert.equal(selected.projectId, "");
+  assert.equal(selected.taskId, "");
+  assert.match(selected.notice, /project is no longer available/);
+  assert.throws(() => makeTimerDefault(1, 10, assigned), /Choose an available/);
+  assert.equal(assigned.filter(isAvailableTimerProject).length, 0);
+  assert.equal(isAvailableTimerProject({ ...projects[0], contract: { active: true } }), true);
+});
+
+test("a disabled assignment in a Jira rule requires repair instead of falling back", () => {
+  const assigned = projects.map((p) => (p.id === 2 ? { ...p, contract: { active: false } } : p));
+  const selected = selectTimerDefaults(scope, rule, defaults, assigned);
+  assert.equal(selected.source, "jira");
+  assert.equal(selected.projectId, "");
+  assert.equal(selected.taskId, "");
+  assert.throws(() => makeJiraDefault(scope, 2, 20, assigned), /Choose an available/);
+});
 
 test("plain timers restore their saved project and role without Jira", () => {
   const selected = selectTimerDefaults(undefined, undefined, defaults, projects);

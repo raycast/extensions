@@ -17,6 +17,7 @@ interface AssignedProject {
   id: number;
   name: string;
   active?: boolean;
+  contract?: { active: boolean };
   tasks: { id: number; name: string; active?: boolean }[];
 }
 
@@ -56,10 +57,14 @@ export function makeJiraDefault(
 }
 
 export function makeTimerDefault(projectId: number, taskId: number, projects: AssignedProject[]): TimerDefault {
-  const project = projects.find((p) => p.id === projectId && p.active !== false);
+  const project = projects.find((p) => p.id === projectId && isAvailableTimerProject(p));
   const task = project?.tasks.find((t) => t.id === taskId && t.active !== false);
   if (!project || !task) throw new Error("Choose an available MOCO project and role / service belonging to it.");
   return { version: 1, projectId, taskId, projectName: project.name, taskName: task.name };
+}
+
+export function isAvailableTimerProject(project: AssignedProject): boolean {
+  return project.active !== false && project.contract?.active !== false;
 }
 
 export function parseTimerDefault(value: unknown): TimerDefault | undefined {
@@ -128,7 +133,7 @@ export function resolveJiraDefault(scope: JiraScope, rule: JiraDefault | undefin
 
 export function resolveTimerDefault(rule: TimerDefault | undefined, projects: AssignedProject[]) {
   if (!rule) return { projectId: "", taskId: "", notice: "" };
-  const project = projects.find((p) => p.id === rule.projectId && p.active !== false);
+  const project = projects.find((p) => p.id === rule.projectId && isAvailableTimerProject(p));
   if (!project)
     return {
       projectId: "",

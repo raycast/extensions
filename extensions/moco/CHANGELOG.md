@@ -5,7 +5,7 @@
 - Added default projects/services and Jira project rules in MOCO Settings by @lenda-arcs.
 - Added opt-in Jira ticket detection from Safari and Chromium browsers to Start New Timer by @lenda-arcs.
 - Added native Jira links and previous recorded ticket time, with a compact timer form and refresh action by @lenda-arcs.
-- Updated the Raycast SDK and supporting dependencies, and added regression tests by @lenda-arcs.
+- Updated the Raycast SDK and supporting dependencies by @lenda-arcs.
 
 ## [v1.2.0] - 2026-10-15
 
@@ -24,18 +24,14 @@
 - Fixed malformed API base URLs
 
 ## [v1.1.3] - 2025-12-12
-
-- Added copy actions for project name and ID by @el-schneider
+ - Added copy actions for project name and ID by @el-schneider
 
 ## [v1.1.2] - 2023-06-28
-
-- Made the Hourly Rate field optional by @TheFRedFox
-- Fixed Spelling error in activity start error message by @TheFRedFox
+ - Made the Hourly Rate field optional by @TheFRedFox
+ - Fixed Spelling error in activity start error message by @TheFRedFox
 
 ## [v1.1.1] - 2023-04-05
-
 - Hours worked can now be entered in a non decimal way reliably
 
 ## [Initial Version] - 2023-02-23
-
 - Initial release with basic functionality
