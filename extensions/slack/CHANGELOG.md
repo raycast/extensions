@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Navigation and Search Reliability] - {PR_MERGE_DATE}
+## [Navigation and Search Reliability] - 2026-11-12
 
 - Add an **Open Links In** preference to choose the Slack app or browser when automatic app detection is incorrect.
 - Recognize renamed and alternate Slack installations and open native links through the system's registered Slack handler.
