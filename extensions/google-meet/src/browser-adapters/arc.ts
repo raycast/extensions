@@ -4,7 +4,8 @@ import { getArcFamilyTabsScript, getSystemEventsWindowCountScript, UNSCRIPTABLE_
 import type { MeetingUrlSource } from "./types";
 
 /**
- * Arc and Dia (both built by The Browser Company) share the same nested
+ * Arc and Dia (both built by The Browser Company), and Ardia, whose
+ * scripting dictionary mirrors Dia's, share the same nested
  * `tell window i` scripting quirk, and both routinely fail to report the
  * active tab of a window that is otherwise perfectly normal — `URL of active
  * tab` raises `-1728` while a tab is opening, and for windows whose active
@@ -22,7 +23,7 @@ import type { MeetingUrlSource } from "./types";
  * Little Arc either isn't enumerated by Arc's `windows` list at all, or is
  * enumerated and errors on `active tab` exactly like a normal window does.
  */
-export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource {
+export function createArcFamilyAdapter(appName: "Arc" | "Dia" | "Ardia"): MeetingUrlSource {
   // Evidence accumulated across every poll, used only to explain an expired
   // deadline. Judging by a single poll — even the last one — would resurrect
   // the false positive this adapter exists to avoid: an ordinary window
