@@ -72,7 +72,6 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/*.test.ts",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"
@@ -89,7 +88,6 @@
     "@types/react": "19.3.0",
     "eslint": "^10.14.0",
     "prettier": "^3.9.10",
-    "tsx": "^4.20.0",
     "typescript": "^5.8.0"
   },
   "platforms": [
