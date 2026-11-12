@@ -32,7 +32,7 @@ It needs no SIP changes, entitlements, administrator rights, or TCC permissions,
 
 - Switching HDR makes the panel change modes: about a second of black screen, and windows may reposition once.
 - `MonitorPanel` is private and undocumented. A future macOS could remove it; there is no public replacement.
-- Auto-apply checks once a minute and only while Raycast is running. A display unplugged and replugged between two checks is still handled on the next one.
+- Auto-apply checks once a minute and only while Raycast is running. A reconnect between two checks is detected when macOS assigns the display a new system ID, which it usually does; a reconnect that keeps the same ID within the interval can be missed.
 - Rules are keyed by the display's UUID, so two monitors with the same name are handled separately.
 - The display name comes from the monitor's EDID, the same string System Settings shows.
 

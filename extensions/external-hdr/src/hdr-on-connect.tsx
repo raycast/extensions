@@ -1,8 +1,19 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, showHUD, updateCommandMetadata } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  confirmAlert,
+  showHUD,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { type Display, listDisplays, setHdr } from "./hdr";
-import { type Rule, readRules, readSeen, writeRules, writeSeen } from "./lib/rules";
+import { type Rule, readRules, writeRules, writeSeen } from "./lib/rules";
 
 function autoApplySubtitle(rules: Rule[]): string {
   if (rules.length === 0) return "Auto-apply: off";
@@ -43,17 +54,13 @@ export default function HdrOnConnectCommand() {
       next.push({ uuid: display.uuid, display: display.name, hdr });
       await writeRules(next);
 
-      // Saving a rule for a connected display applies it right away.
-      if (display.hdr !== hdr) {
-        await setHdr(display.id, hdr ? "on" : "off");
-      }
+      // Apply unconditionally: the view's snapshot may be stale if HDR changed
+      // in System Settings while this screen stayed open.
+      await setHdr(display.id, hdr ? "on" : "off");
 
-      // Remember every currently connected display so only this rule counts as
-      // new; on a first run this prevents other connected rules from firing.
-      const seen = await readSeen();
-      const seenUuids = new Set(seen ?? (displays ?? []).map((candidate) => candidate.uuid));
-      seenUuids.add(display.uuid);
-      await writeSeen([...seenUuids]);
+      // Mark the currently connected displays as handled so a stale snapshot
+      // cannot make the background command apply this rule a second time.
+      await writeSeen((displays ?? [display]).map((candidate) => ({ uuid: candidate.uuid, id: candidate.id })));
 
       await showHUD(`HDR ${hdr ? "on" : "off"} when ${display.name} connects`);
     } catch (error) {
@@ -76,6 +83,13 @@ export default function HdrOnConnectCommand() {
   }
 
   async function clearRules(): Promise<void> {
+    const confirmed = await confirmAlert({
+      title: "Clear all HDR rules?",
+      message: "Every display rule will be deleted. This cannot be undone.",
+      primaryAction: { title: "Clear All Rules", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
     try {
       await writeRules([]);
       await showHUD("Cleared all HDR auto-apply rules");
