@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "npkill",
+  "title": "Npkill",
+  "description": "Discover development artifacts with npkill, review project activity and risk, and clean selected directories.",
+  "icon": "npkill-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scan-artifacts",
+      "title": "Scan Development Artifacts",
+      "subtitle": "npkill",
+      "description": "Find development dependencies, build artifacts, and caches using npkill profiles; review and clean selected directories.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "npkill": "1.0.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json",
+    "demo": "tsx scripts/create-demo-fixtures.ts",
+    "benchmark": "tsx scripts/benchmark-scan.ts",
+    "evals": "ray evals -I --exit-on-error"
+  },
+  "preferences": [
+    {
+      "name": "sortOrder",
+      "title": "Default Sort Order",
+      "description": "Initial sort order for development artifacts.",
+      "type": "dropdown",
+      "required": false,
+      "default": "largest",
+      "data": [
+        {
+          "title": "Largest First",
+          "value": "largest"
+        },
+        {
+          "title": "Smallest First",
+          "value": "smallest"
+        },
+        {
+          "title": "Oldest Activity First",
+          "value": "oldest"
+        },
+        {
+          "title": "Newest Activity First",
+          "value": "newest"
+        },
+        {
+          "title": "Path",
+          "value": "path"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-artifacts",
+      "title": "Search Development Artifacts",
+      "description": "Scan for development artifacts with npkill and filter by path, size, inactivity, or risk. Read-only; reports estimates and incomplete results."
+    },
+    {
+      "name": "check-setup",
+      "title": "Check Npkill Setup",
+      "description": "Check npkill and Node compatibility, the saved root, profiles, and scan settings without scanning or changing files."
+    },
+    {
+      "name": "open-cleanup",
+      "title": "Open Cleanup Command",
+      "description": "Open the native Scan Development Artifacts command for user review and confirmation. Does not select, move, or delete files."
+    }
+  ]
+}
