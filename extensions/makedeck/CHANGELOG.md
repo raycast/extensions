@@ -1,6 +1,6 @@
 # Makedeck Changelog
 
-## [Services outside makedeck] - {PR_MERGE_DATE}
+## [Services outside makedeck] - 2026-11-12
 
 - Shows dev services started outside makedeck (e.g. by a coding agent) in their project, marked "outside makedeck", with their ports.
 - Shows their log if their output goes to a file, and lets you stop them.
