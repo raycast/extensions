@@ -1,9 +1,9 @@
 // Release sources: github.com/sushilk1991/raycast-local-search; both models are revision-pinned.
-export const HELPER_VERSION = "0.2.1";
+export const HELPER_VERSION = "0.2.2";
 export const HELPER = {
   url: `https://github.com/sushilk1991/raycast-local-search/releases/download/v${HELPER_VERSION}/local-search-helper-${HELPER_VERSION}-darwin-arm64.tar.gz`,
-  bytes: 40610575,
-  sha256: "4c406e8279fd0c3aa4c460c59f771f84dcfb28f2c01532fb1958b952cbaac346",
+  bytes: 40625094,
+  sha256: "db68469790a1ae3bb593785fd85b2be67bbf4a838270397fa8cd4e8bf23b05db",
 };
 const MODEL_REVISION = "bfcd298762cc34d0357ece5ebdd31791a3a374d8";
 const MODEL_BASE = `https://huggingface.co/ggml-org/embeddinggemma-2-GGUF/resolve/${MODEL_REVISION}`;
