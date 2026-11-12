@@ -27,8 +27,9 @@ export interface Note {
   formattedTags: string;
   wordCount: number;
   // Bear 2 embeds images as relative links, `![](name.png)`; this maps each attached file's name
-  // to its absolute path, for the attachments that exist on disk (see resolveBearImages).
-  imagePaths: Record<string, string>;
+  // to its absolute path, for the attachments that exist on disk (see resolveBearImages). A Map, not
+  // a plain object, so that a file named like an Object property ("constructor") is not found.
+  imagePaths: Map<string, string>;
 }
 
 const BEAR_DB_PATH =
@@ -111,7 +112,7 @@ export class BearDb {
       encrypted: row.encrypted === 1,
       pinned: row.pinned === 1,
       wordCount: [...text.matchAll(/\b\w+\b/g)].length,
-      imagePaths: {},
+      imagePaths: new Map(),
     };
   }
 
@@ -215,7 +216,7 @@ export class BearDb {
       const name = row.name as string | null;
       if (!note || !name || !row.file_id) continue;
       const path = `${BEAR_NOTE_IMAGES_PATH}/${row.file_id}/${name}`;
-      if (existsSync(path)) note.imagePaths[name.normalize("NFC")] = path;
+      if (existsSync(path)) note.imagePaths.set(name.normalize("NFC"), path);
     }
     statement.free();
     return notes;
