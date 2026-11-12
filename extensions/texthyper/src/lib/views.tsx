@@ -2,7 +2,7 @@
 
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getFavicon, showFailureToast, usePromise } from "@raycast/utils";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { SignedOutError } from "./api";
 import { loadLibrary, saveLibrary, syncLibrary } from "./library";
 import type { Article, HighlightColor, Library } from "./types";
@@ -28,9 +28,12 @@ export const HIGHLIGHT_COLORS: Record<HighlightColor, { name: string; color: Col
 // showing, because the hook drops its data when the request fails.
 export function useLibrary(report: (error: unknown, title?: string) => void) {
   const [kept, setKept] = useState<Library>();
-  // An edit made here, tied to the library it was applied to. A newer sync
-  // (a different object) drops it.
-  const [override, setOverride] = useState<{ anchor: Library | undefined; library: Library }>();
+  const [, setRevision] = useState(0);
+  // The copy edits build on. Updated as each edit finishes, so a second edit
+  // that was already in flight still sees the first one.
+  const latest = useRef<Library>(undefined);
+  const baseSeen = useRef<Library>(undefined);
+  const writes = useRef(Promise.resolve());
 
   const stored = usePromise(loadLibrary, [], {
     onError(error) {
@@ -56,18 +59,28 @@ export function useLibrary(report: (error: unknown, title?: string) => void) {
   });
 
   const cached = stored.data && stored.data.cursor > 0 ? stored.data : undefined;
-  const anchor = synced ?? kept;
-  const library = override && override.anchor === anchor ? override.library : (anchor ?? cached);
+  // A new sync replaces local edits. The same object, kept after a failed
+  // refresh, does not.
+  const base = synced ?? kept ?? cached;
+  if (base !== baseSeen.current) {
+    baseSeen.current = base;
+    latest.current = base;
+  }
+  const library = latest.current;
 
-  const update = useCallback(
-    async (change: (library: Library) => Library) => {
-      if (!library) return;
-      const next = change(library);
-      await saveLibrary(next);
-      setOverride({ anchor, library: next });
-    },
-    [library, anchor],
-  );
+  const update = useCallback(async (change: (library: Library) => Library) => {
+    const current = latest.current;
+    if (!current) return;
+    const next = change(current);
+    latest.current = next;
+    setRevision((revision) => revision + 1);
+    const write = writes.current.then(() => saveLibrary(next));
+    writes.current = write.then(
+      () => undefined,
+      () => undefined,
+    );
+    await write;
+  }, []);
 
   const refresh = useCallback(() => {
     revalidate();
