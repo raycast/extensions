@@ -35,6 +35,9 @@ export type StartActivityRequest = {
   hours: number | "";
   projectID?: number | null;
   taskID: number;
+  remote_service?: string;
+  remote_id?: string;
+  remote_url?: string;
 };
 
 // Only the given fields are sent to MOCO.
