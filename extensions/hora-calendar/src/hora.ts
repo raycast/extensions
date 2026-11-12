@@ -83,15 +83,22 @@ async function orderedCandidates(): Promise<string[]> {
   if (installed.length < 2) return installed;
 
   try {
-    const answer = await runAppleScript(
-      `return {${installed.map((id) => `running of application id ${quote(id)}`).join(", ")}}`,
-      { humanReadableOutput: true, timeout: 5_000 },
-    );
-    const isRunning = answer.split(",").map((value) => value.trim() === "true");
+    const isRunning = await runningFlags(installed);
     return [...installed.filter((_, i) => isRunning[i]), ...installed.filter((_, i) => !isRunning[i])];
   } catch {
     return installed;
   }
+}
+
+async function runningFlags(ids: string[]): Promise<boolean[]> {
+  const answer = await runAppleScript(
+    `return {${ids.map((id) => `running of application id ${quote(id)}`).join(", ")}}`,
+    {
+      humanReadableOutput: true,
+      timeout: 5_000,
+    },
+  );
+  return answer.split(",").map((value) => value.trim() === "true");
 }
 
 /** The hora this session has settled on, if it has settled on one. */
@@ -127,14 +134,15 @@ function dateLiteral(variable: string, date: Date): string {
  * Runs one command against hora and parses its JSON answer.
  *
  * `preamble` holds any statements that must run outside the `tell` block,
- * which in practice means date variables.
+ * which in practice means date variables. `only` pins the builds to try, for
+ * callers that must not wake a closed one.
  */
-async function tellHora<T>(command: string, preamble = ""): Promise<T> {
+async function tellHora<T>(command: string, preamble = "", only?: string[]): Promise<T> {
   // More than one hora can be installed — a Setapp copy beside a Direct one,
   // or an old build somebody never removed. Only the ones from 1.1.5 carry a
   // dictionary, so walk the list until one answers rather than betting the
   // whole command on the first that happens to be there.
-  const candidates = cachedBundleID ? [cachedBundleID] : await orderedCandidates();
+  const candidates = only ?? (cachedBundleID ? [cachedBundleID] : await orderedCandidates());
   let lastOutdated: HoraOutdatedError | undefined;
 
   for (const bundleID of candidates) {
@@ -248,6 +256,21 @@ export interface CreatedTask {
   notes?: string;
 }
 
+export interface FocusStatus {
+  state: "idle" | "running" | "paused";
+  phase: "focus" | "break";
+  remainingSeconds: number;
+  endsAt: string | null;
+  title: string | null;
+  isBlock: boolean;
+}
+
+export interface FreeTime {
+  slots: { start: string; end: string }[];
+  /** The slots written out for pasting into a message. */
+  text: string;
+}
+
 // MARK: - Commands
 
 /** Creates the event straight away. hora stays closed. */
@@ -306,12 +329,13 @@ export async function addTask(input: {
 }
 
 export async function upcomingEvents(
-  options: { limit?: number; withMeetingLinks?: boolean } = {},
+  options: { limit?: number; withMeetingLinks?: boolean; ending?: Date } = {},
 ): Promise<HoraEvent[]> {
   const parts = ["upcoming events"];
+  if (options.ending) parts.push("ending endDate");
   if (options.limit) parts.push(`limited to ${options.limit}`);
   if (options.withMeetingLinks) parts.push("with meeting links");
-  return tellHora<HoraEvent[]>(parts.join(" "));
+  return tellHora<HoraEvent[]>(parts.join(" "), options.ending && dateLiteral("endDate", options.ending));
 }
 
 export async function joinConference(eventID: string): Promise<{ conferenceLink: string; title: string }> {
@@ -324,4 +348,61 @@ export async function listCalendars(): Promise<HoraCalendar[]> {
 
 export async function listTaskLists(): Promise<HoraTaskList[]> {
   return tellHora<HoraTaskList[]>("list task lists");
+}
+
+export async function respondToEvent(eventID: string, response: "accepted" | "declined" | "tentative"): Promise<void> {
+  await tellHora(`respond to event ${quote(eventID)} response ${response}`);
+}
+
+/** Guests are never notified: a stray Raycast keystroke should not email anyone. */
+export async function deleteEvent(eventID: string): Promise<void> {
+  await tellHora(`delete event ${quote(eventID)} notifying guests false`);
+}
+
+// MARK: - Focus and availability (hora 3.0.2+)
+
+/**
+ * hora 3.0.2 added these commands. An older hora fails them the same way it
+ * fails everything it does not know, which `translate` reads as "predates
+ * 1.1.5" — wrong for a 3.0.1 that scripts fine, so say what is actually missing.
+ */
+async function tellNewHora<T>(command: string, preamble = "", only?: string[]): Promise<T> {
+  try {
+    return await tellHora<T>(command, preamble, only);
+  } catch (error) {
+    if (error instanceof HoraOutdatedError) {
+      throw new HoraOutdatedError("Update hora Calendar to 3.0.2 or later to use this command.");
+    }
+    throw error;
+  }
+}
+
+/** Numbers are pasted into the script, so refuse anything but a whole number. */
+function whole(value: number, name: string, min = 1): number {
+  if (!Number.isInteger(value) || value < min) throw new Error(`${name} must be a whole number of at least ${min}.`);
+  return value;
+}
+
+export async function focusStatus(): Promise<FocusStatus> {
+  return tellNewHora<FocusStatus>("focus status");
+}
+
+export async function startFocus(minutes?: number): Promise<FocusStatus & { started: boolean }> {
+  const duration = minutes === undefined ? "" : ` for minutes ${whole(minutes, "Minutes")}`;
+  return tellNewHora(`start focus${duration}`);
+}
+
+export async function stopFocus(): Promise<FocusStatus & { stopped: boolean }> {
+  return tellNewHora("stop focus");
+}
+
+export async function findFreeTime(
+  options: { lasting?: number; daysAhead?: number; fromHour?: number; toHour?: number } = {},
+): Promise<FreeTime> {
+  const parts = ["find free time"];
+  if (options.lasting !== undefined) parts.push(`lasting ${whole(options.lasting, "Duration")}`);
+  if (options.daysAhead !== undefined) parts.push(`days ahead ${whole(options.daysAhead, "Days ahead")}`);
+  if (options.fromHour !== undefined) parts.push(`from hour ${whole(options.fromHour, "Start hour", 0)}`);
+  if (options.toHour !== undefined) parts.push(`to hour ${whole(options.toHour, "End hour", 0)}`);
+  return tellNewHora(parts.join(" "));
 }

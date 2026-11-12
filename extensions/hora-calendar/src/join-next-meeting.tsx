@@ -1,18 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-  Toast,
-  closeMainWindow,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { joinEvent } from "./actions";
 import { showFailure } from "./feedback";
-import { HoraEvent, HoraNotInstalledError, HoraOutdatedError, joinConference, upcomingEvents } from "./hora";
+import { HoraEvent, HoraNotInstalledError, HoraOutdatedError, upcomingEvents } from "./hora";
 import { HoraRequired } from "./hora-required";
 
 export default function Command() {
@@ -34,18 +24,6 @@ export default function Command() {
   if (error instanceof HoraNotInstalledError) return <HoraRequired reason="missing" />;
   if (error instanceof HoraOutdatedError) return <HoraRequired reason="outdated" />;
 
-  async function join(event: HoraEvent) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Opening…" });
-    try {
-      await joinConference(event.id);
-      await closeMainWindow();
-      toast.style = Toast.Style.Success;
-      toast.title = `Joining ${event.title}`;
-    } catch (failure) {
-      await showFailure(failure, "Could not join the meeting");
-    }
-  }
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your meetings">
       <List.EmptyView
@@ -64,7 +42,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action title="Join Meeting" icon={Icon.Video} onAction={() => join(event)} />
+              <Action title="Join Meeting" icon={Icon.Video} onAction={() => joinEvent(event)} />
               {event.conferenceLink && (
                 <Action.CopyToClipboard
                   title="Copy Meeting Link"
@@ -96,6 +74,6 @@ function relativeWhen(event: HoraEvent, locale: string): string {
 
   const isToday = start.toDateString() === new Date().toDateString();
   return isToday
-    ? start.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
-    : start.toLocaleString(locale, { weekday: "short", hour: "2-digit", minute: "2-digit" });
+    ? start.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" })
+    : start.toLocaleString(locale, { weekday: "short", hour: "numeric", minute: "2-digit" });
 }
