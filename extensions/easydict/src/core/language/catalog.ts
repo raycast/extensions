@@ -585,6 +585,7 @@ export const languageCatalog = {
       francLangCode: "fas",
       baiduLangCode: "per",
     },
+    wiktionary: { names: ["Persian"], codes: ["fa", "fa-ira"] },
   },
   hi: {
     langEnglishName: "Hindi",

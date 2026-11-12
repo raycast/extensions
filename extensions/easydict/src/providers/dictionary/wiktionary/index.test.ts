@@ -372,6 +372,16 @@ describe("Wiktionary dictionary", () => {
     );
   });
 
+  it("shows an Iranian Persian translation for an English lookup targeting Persian", async () => {
+    const result = await new WiktionaryDictionaryProvider().request({
+      word: "house",
+      fromLanguage: "en",
+      toLanguage: "fa",
+    });
+
+    expect(result.content.sections[0]).toMatchObject({ kind: "translation", text: expect.stringContaining("خانِه") });
+  });
+
   it("keeps English definitions without presenting them as missing Danish translations", async () => {
     activePages["title=house&action=raw"] = () => "==English==\n===Noun===\n";
     const result = await new WiktionaryDictionaryProvider().request({
