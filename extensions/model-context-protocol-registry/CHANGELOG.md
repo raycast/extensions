@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add a11y-toolkit MCP Server] - 2026-11-12
+## [Add a11y-toolkit MCP Server] - {PR_MERGE_DATE}
 
 - Add a11y-toolkit to the community registry: WCAG 2.2 accessibility for coding agents with 37 tools that audit a URL, an HTML string or a rendered page, sample real text-over-image contrast pixel by pixel, walk Tab to find keyboard traps, judge form errors by really submitting invalid data, read what a screen reader would announce and run blindfold task journeys; plus nearest-passing-color fixes, deterministic autofixes, EAA / RD 1112 statements, VPAT 2.5, OpenACR and SHA-256-sealed evidence packs. Local stdio server installed from PyPI through `uvx` (requires uv); zero core dependencies, no account and no API keys, English and Spanish output, no telemetry.
 
