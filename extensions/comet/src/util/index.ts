@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import {
   DEFAULT_COMET_PROFILE_ID,
   defaultCometProfilePath,
@@ -369,12 +369,13 @@ export const getHistory = async (profile?: string, query?: string): Promise<Hist
     try {
       // Create temporary copy to avoid database locks
       const tempDbPath = `${dbPath}.tmp.${Date.now()}`;
-      execSync(`cp "${dbPath}" "${tempDbPath}"`, { timeout: 5000 });
+      fs.copyFileSync(dbPath, tempDbPath);
 
-      const output = execSync(`sqlite3 -separator "|" "${tempDbPath}" "${sqlQuery.replace(/"/g, '""')}"`, {
-        encoding: "utf8" as BufferEncoding,
+      // Pass the query as an argument, not through a shell, so it reaches SQLite unchanged
+      const output = execFileSync("sqlite3", ["-separator", "|", tempDbPath, sqlQuery], {
+        encoding: "utf8",
         timeout: 10000,
-      }) as string;
+      });
 
       // Clean up
       fs.unlinkSync(tempDbPath);
