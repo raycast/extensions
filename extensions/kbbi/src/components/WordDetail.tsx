@@ -33,7 +33,7 @@ function relatedGroups(lemma: Lemma): RelatedGroup[] {
 }
 
 export default function WordDetail({ word }: { word: string }) {
-  const { data, isLoading, error } = useFetch(lemmaUrl(word), {
+  const { data, isLoading, error, revalidate } = useFetch(lemmaUrl(word), {
     parseResponse: parseLemmaResponse,
     keepPreviousData: false,
   });
@@ -66,6 +66,7 @@ export default function WordDetail({ word }: { word: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            {error && !data && <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />}
             {data && <Action.CopyToClipboard title="Copy Definitions" content={lemmaToPlainText(data)} />}
             <Action.CopyToClipboard title="Copy Word" content={word} shortcut={Keyboard.Shortcut.Common.Copy} />
             <Action.OpenInBrowser title="Open in KBBI Website" url={kbbiWebsiteUrl(word)} />

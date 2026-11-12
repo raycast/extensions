@@ -26,7 +26,6 @@
     {
       "name": "search-word",
       "title": "Search Word",
-      "subtitle": "KBBI",
       "description": "Search Indonesian words and view their definitions in KBBI.",
       "mode": "view"
     }

@@ -8,7 +8,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const query = searchText.trim();
 
-  const { data, isLoading } = useFetch(searchUrl(query), {
+  const { data, isLoading, error, revalidate } = useFetch(searchUrl(query), {
     parseResponse: parseSearchResponse,
     execute: query.length > 0,
     keepPreviousData: true,
@@ -30,7 +30,18 @@ export default function Command() {
           title="Search KBBI"
           description="Type an Indonesian word to look up its definition"
         />
-      ) : isLoading ? null : (
+      ) : isLoading ? null : error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Search KBBI"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No Words Found"

@@ -13,10 +13,6 @@ Look up Indonesian word definitions from the **Kamus Besar Bahasa Indonesia (KBB
 
 No API key or setup is required.
 
-## Contributing
-
-Contributions are welcome. This extension's source code lives in the [raycast/extensions](https://github.com/raycast/extensions) repository under [`extensions/kbbi`](https://github.com/raycast/extensions/tree/main/extensions/kbbi). To propose a change, open a pull request there by following Raycast's [contribution guide](https://developers.raycast.com/basics/contribute-to-an-extension) and [extension guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store).
-
 ## Credits
 
 Dictionary data comes from the unofficial KBBI API by [**@raf555**](https://github.com/raf555): [raf555/kbbi-api](https://github.com/raf555/kbbi-api), hosted at `https://kbbi.raf555.dev`. Thanks to raf555 for building and hosting it.
