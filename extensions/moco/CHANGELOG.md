@@ -5,6 +5,7 @@
 - Added default projects/services and Jira project rules in MOCO Settings by @lenda-arcs.
 - Added opt-in Jira ticket detection from Safari and Chromium browsers to Start New Timer by @lenda-arcs.
 - Added native Jira links and previous recorded ticket time, with a compact timer form and refresh action by @lenda-arcs.
+- Fixed a failed activity refresh keeping a successfully saved timer form open by @lenda-arcs.
 - Updated the Raycast SDK and supporting dependencies by @lenda-arcs.
 
 ## [v1.2.0] - 2026-10-15

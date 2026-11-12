@@ -26,6 +26,8 @@ You can also choose them in the timer form and leave **Remember for plain timers
 
 Browser detection is **off by default**. To enable it, open **MOCO Settings → Browser and Jira Detection** and turn on automatic detection. Then **Start New Timer** can prefill `#PROJ-123 Summary` and attach MOCO's native Jira ticket link.
 
+![Timer with a Jira ticket, saved project and service, and recorded ticket time (demonstration data)](./media/moco-jira-timer.png)
+
 - **Active browser** uses the app you were in before opening Raycast. It reads only that browser's current tab in its frontmost window. It does not search background browsers, other tabs or all Profiles.
 - Choose a fixed browser, such as **Safari**, to read that browser's current tab even when starting a timer from another app.
 - Supported browsers: Safari, Safari Technology Preview, Arc, Chrome, Brave, Edge, Vivaldi and Chromium. Firefox detection is not implemented; plain timers still work.
@@ -53,3 +55,5 @@ The total uses `worked_seconds`, falling back to `seconds` or decimal `hours` fo
 ## Settings
 
 **MOCO Settings** also links to the built-in connection preferences for the MOCO instance/API key and to **Menu Bar Options** for customer layout and today's time total.
+
+![Timer defaults, browser settings and Jira project rules (demonstration data)](./media/moco-settings.png)
