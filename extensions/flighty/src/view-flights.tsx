@@ -12,7 +12,7 @@ dayjs.extend(timezone)
 const timeFormat = 'h:mma'
 
 export default function () {
-    const {isLoading, error, data: allFlights, permissionView} = useFlights()
+    const {isLoading, error, data: allFlights, permissionView, warning} = useFlights()
     const allYears = getAllYears(allFlights)
     const [filter, setFilter] = useState<{type: 'future'} | {type: 'all'} | {type: 'year'; year: string}>({type: 'future'})
 
@@ -55,6 +55,21 @@ export default function () {
                 </List.Dropdown>
             }
         >
+            {warning && (
+                <List.Section>
+                    <List.Item
+                        id="parse-warning"
+                        icon={Icon.Warning}
+                        title="Some Flights Could Not Be Loaded"
+                        detail={<List.Item.Detail markdown={warning} />}
+                        actions={
+                            <ActionPanel>
+                                <Action.CopyToClipboard title="Copy Error Details" content={warning} />
+                            </ActionPanel>
+                        }
+                    />
+                </List.Section>
+            )}
             <List.Section title={filteredFlights ? `${filteredFlights.length} Flights` : undefined}>
                 {filteredFlights?.map((flight) => {
                     const link = `https://live.flighty.app/${flight.id}`
