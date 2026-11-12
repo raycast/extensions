@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Show Bear 2 images in note previews] - {PR_MERGE_DATE}
+
+- Images embedded in Bear 2 notes now show in the Search Notes detail and the note preview, instead of failing to load: [#33454](https://github.com/raycast/extensions/issues/33454)
+- An image whose file is missing shows a short placeholder instead of a broken image
+
 ## [Fix non-Latin search] - 2026-10-12
 
 - Search is now case-insensitive for non-Latin text such as Cyrillic: [#32214](https://github.com/raycast/extensions/issues/32214)
