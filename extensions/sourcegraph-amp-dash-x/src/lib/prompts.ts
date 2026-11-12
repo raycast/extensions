@@ -18,9 +18,7 @@ export async function getPrompts(): Promise<Prompt[]> {
     const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
     if (!stored) return [];
 
-    const prompts = JSON.parse(stored) as Array<
-      Omit<Prompt, "updatedAt"> & { updatedAt: string }
-    >;
+    const prompts = JSON.parse(stored) as Array<Omit<Prompt, "updatedAt"> & { updatedAt: string }>;
     return prompts.map((p) => ({
       ...p,
       updatedAt: new Date(p.updatedAt),
@@ -31,9 +29,7 @@ export async function getPrompts(): Promise<Prompt[]> {
   }
 }
 
-export async function savePrompt(
-  prompt: Omit<Prompt, "id" | "updatedAt">,
-): Promise<Prompt> {
+export async function savePrompt(prompt: Omit<Prompt, "id" | "updatedAt">): Promise<Prompt> {
   const newPrompt: Prompt = {
     ...prompt,
     id: Math.random().toString(36).substring(2) + Date.now().toString(36),
@@ -47,10 +43,7 @@ export async function savePrompt(
   return newPrompt;
 }
 
-export async function updatePrompt(
-  id: string,
-  updates: Partial<Omit<Prompt, "id">>,
-): Promise<Prompt | null> {
+export async function updatePrompt(id: string, updates: Partial<Omit<Prompt, "id">>): Promise<Prompt | null> {
   const prompts = await getPrompts();
   const index = prompts.findIndex((p) => p.id === id);
 
@@ -129,9 +122,7 @@ export async function deleteCategory(category: string): Promise<boolean> {
   // Update prompts that use this category to "General"
   const prompts = await getPrompts();
   const updatedPrompts = prompts.map((p) =>
-    p.category === category
-      ? { ...p, category: "General", updatedAt: new Date() }
-      : p,
+    p.category === category ? { ...p, category: "General", updatedAt: new Date() } : p,
   );
 
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrompts));
@@ -139,10 +130,7 @@ export async function deleteCategory(category: string): Promise<boolean> {
   return true;
 }
 
-export async function updateCategory(
-  oldName: string,
-  newName: string,
-): Promise<boolean> {
+export async function updateCategory(oldName: string, newName: string): Promise<boolean> {
   if (oldName === "General" || !newName.trim()) return false;
 
   const categories = await getCategories();
@@ -155,9 +143,7 @@ export async function updateCategory(
   // Update prompts that use this category
   const prompts = await getPrompts();
   const updatedPrompts = prompts.map((p) =>
-    p.category === oldName
-      ? { ...p, category: trimmedNewName, updatedAt: new Date() }
-      : p,
+    p.category === oldName ? { ...p, category: trimmedNewName, updatedAt: new Date() } : p,
   );
 
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrompts));
@@ -166,13 +152,7 @@ export async function updateCategory(
 }
 
 // Default data for first-time users
-const DEFAULT_CATEGORIES = [
-  "Project Setup",
-  "Git Operations",
-  "Documentation",
-  "Code Quality",
-  "General",
-];
+const DEFAULT_CATEGORIES = ["Project Setup", "Git Operations", "Documentation", "Code Quality", "General"];
 
 const DEFAULT_PROMPTS: Omit<Prompt, "id" | "updatedAt">[] = [
   {
@@ -190,57 +170,49 @@ const DEFAULT_PROMPTS: Omit<Prompt, "id" | "updatedAt">[] = [
   },
   {
     title: "Commit All Changes",
-    prompt:
-      "Review all changes and create a descriptive commit message, then commit all staged and unstaged changes",
+    prompt: "Review all changes and create a descriptive commit message, then commit all staged and unstaged changes",
     category: "Git Operations",
     description: "Smart commit with descriptive message",
   },
   {
     title: "Create .gitignore",
-    prompt:
-      "Create an appropriate .gitignore file for this project based on the technology stack",
+    prompt: "Create an appropriate .gitignore file for this project based on the technology stack",
     category: "Project Setup",
     description: "Generate technology-appropriate .gitignore",
   },
   {
     title: "Add Documentation",
-    prompt:
-      "Add comprehensive documentation comments to the selected code or current file",
+    prompt: "Add comprehensive documentation comments to the selected code or current file",
     category: "Documentation",
     description: "Generate code comments and docs",
   },
   {
     title: "Create Changelog",
-    prompt:
-      "Create a CHANGELOG.md file with a list of changes and version numbers",
+    prompt: "Create a CHANGELOG.md file with a list of changes and version numbers",
     category: "Documentation",
     description: "Create CHANGELOG.md",
   },
   {
     title: "Update Changelog",
-    prompt:
-      "Update the CHANGELOG.md file with the latest changes and version number",
+    prompt: "Update the CHANGELOG.md file with the latest changes and version number",
     category: "Documentation",
     description: "Update CHANGELOG.md",
   },
   {
     title: "Fix Linting Issues",
-    prompt:
-      "Identify and fix all linting/formatting issues in the current file or project",
+    prompt: "Identify and fix all linting/formatting issues in the current file or project",
     category: "Code Quality",
     description: "Auto-fix common lint problems",
   },
   {
     title: "Write Tests",
-    prompt:
-      "Generate comprehensive test files for the current code following best practices",
+    prompt: "Generate comprehensive test files for the current code following best practices",
     category: "Code Quality",
     description: "Generate test files for code",
   },
   {
     title: "Explain Code",
-    prompt:
-      "Provide a clear explanation of what the selected code does and how it works",
+    prompt: "Provide a clear explanation of what the selected code does and how it works",
     category: "General",
     description: "Explain selected code functionality",
   },
@@ -259,10 +231,7 @@ export async function initializeDefaults(): Promise<void> {
     if (isInitialized) return;
 
     // Set up default categories
-    await LocalStorage.setItem(
-      CATEGORIES_KEY,
-      JSON.stringify(DEFAULT_CATEGORIES),
-    );
+    await LocalStorage.setItem(CATEGORIES_KEY, JSON.stringify(DEFAULT_CATEGORIES));
 
     // Set up default prompts
     const defaultPrompts: Prompt[] = DEFAULT_PROMPTS.map((prompt) => ({
