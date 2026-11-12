@@ -35,6 +35,9 @@ export default function SnowReport({ launchContext }: Props) {
   const store = useResorts();
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState(launchContext?.resortId);
+  // The resort opened from the menu bar is selected once it appears. After that the list owns selection,
+  // since feeding every move back as selectedItemId makes Raycast recenter the list.
+  const [launchId, setLaunchId] = useState(launchContext?.resortId);
 
   const index = useMemo(() => buildIndex(store.resorts), [store.resorts]);
   const results = useMemo(() => searchResorts(index, searchText), [index, searchText]);
@@ -102,8 +105,11 @@ export default function SnowReport({ launchContext }: Props) {
       throttle
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search resorts by name, country or region"
-      selectedItemId={selectedId}
-      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
+      selectedItemId={launchId}
+      onSelectionChange={(id) => {
+        setSelectedId(id ?? undefined);
+        if (id === launchId) setLaunchId(undefined);
+      }}
     >
       {searchText ? (
         <List.Section title="Results" subtitle={results.length === 50 ? "first 50" : String(results.length)}>
