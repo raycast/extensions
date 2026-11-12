@@ -24,7 +24,8 @@
       "name": "menu-bar",
       "title": "HDR Displays",
       "description": "See and change HDR state from the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "10m"
     },
     {
       "name": "hdr-on-connect",
@@ -32,6 +33,13 @@
       "subtitle": "Auto-apply rules",
       "description": "Choose which displays get HDR applied automatically when connected",
       "mode": "view"
+    },
+    {
+      "name": "watch-displays",
+      "title": "Apply HDR Rules",
+      "description": "Applies saved HDR rules when a display connects. Open once to enable its background refresh.",
+      "mode": "no-view",
+      "interval": "1m"
     }
   ],
   "preferences": [

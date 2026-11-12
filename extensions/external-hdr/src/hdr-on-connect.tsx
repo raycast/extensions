@@ -1,41 +1,15 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  Toast,
-  showHUD,
-  showToast,
-  updateCommandMetadata,
-  Keyboard,
-} from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showHUD, updateCommandMetadata } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
-import { isAgentInstalled, readRules, syncAgent, uninstallAgent, writeRules, type Rule } from "./lib/agent";
-import { type Display, listDisplays } from "./lib/hdrctl";
+import { type Display, listDisplays, setHdr } from "./hdr";
+import { type Rule, readRules, readSeen, writeRules, writeSeen } from "./lib/rules";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-function sameDisplay(a: string, b: string): boolean {
-  return a.trim().toLowerCase() === b.trim().toLowerCase();
-}
-
-function ruleFor(rules: Rule[], displayName: string): Rule | undefined {
-  return rules.find((rule) => sameDisplay(rule.display, displayName));
-}
-
-function autoApplySubtitle(rules: Rule[], agentInstalled: boolean | undefined): string {
+function autoApplySubtitle(rules: Rule[]): string {
   if (rules.length === 0) return "Auto-apply: off";
-  if (agentInstalled === false) return "Auto-apply: watcher not running";
-
   if (rules.length === 1) {
     const rule = rules[0];
     return `Auto-apply: HDR ${rule.hdr ? "on" : "off"} — ${rule.display}`;
   }
-
   return `Auto-apply: ${rules.length} displays`;
 }
 
@@ -47,10 +21,9 @@ export default function HdrOnConnectCommand() {
     revalidate: revalidateDisplays,
   } = useCachedPromise(listDisplays);
   const { data: rulesFile, revalidate: revalidateRules } = useCachedPromise(readRules);
-  const { data: agentInstalled, revalidate: revalidateAgent } = useCachedPromise(isAgentInstalled);
 
   const rules = rulesFile?.rules ?? [];
-  const subtitle = rulesFile === undefined ? undefined : autoApplySubtitle(rules, agentInstalled);
+  const subtitle = rulesFile === undefined ? undefined : autoApplySubtitle(rules);
 
   // Root-search label: says whether auto-apply is armed, without opening the view.
   useEffect(() => {
@@ -59,65 +32,66 @@ export default function HdrOnConnectCommand() {
   }, [subtitle]);
 
   function refreshAll(): void {
-    revalidateDisplays();
-    revalidateRules();
-    revalidateAgent();
+    void revalidateDisplays();
+    void revalidateRules();
   }
 
   async function setRule(display: Display, hdr: boolean): Promise<void> {
     try {
       const current = await readRules();
-      const next = current.rules.filter((rule) => !sameDisplay(rule.display, display.name));
-      next.push({ display: display.name, hdr });
+      const next = current.rules.filter((rule) => rule.uuid !== display.uuid);
+      next.push({ uuid: display.uuid, display: display.name, hdr });
       await writeRules(next);
-      await syncAgent();
+
+      // Saving a rule for a connected display applies it right away.
+      if (display.hdr !== hdr) {
+        await setHdr(display.id, hdr ? "on" : "off");
+      }
+
+      // Remember every currently connected display so only this rule counts as
+      // new; on a first run this prevents other connected rules from firing.
+      const seen = await readSeen();
+      const seenUuids = new Set(seen ?? (displays ?? []).map((candidate) => candidate.uuid));
+      seenUuids.add(display.uuid);
+      await writeSeen([...seenUuids]);
+
       await showHUD(`HDR ${hdr ? "on" : "off"} when ${display.name} connects`);
-      refreshAll();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't set HDR on connect",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Couldn't set HDR on connect" });
+    } finally {
       refreshAll();
     }
   }
 
-  async function removeRule(display: Display): Promise<void> {
+  async function removeRule(rule: Rule): Promise<void> {
     try {
       const current = await readRules();
-      await writeRules(current.rules.filter((rule) => !sameDisplay(rule.display, display.name)));
-      await syncAgent();
-      await showHUD(`Removed the HDR rule for ${display.name}`);
-      refreshAll();
+      await writeRules(current.rules.filter((candidate) => candidate.uuid !== rule.uuid));
+      await showHUD(`Removed the HDR rule for ${rule.display}`);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't remove the rule",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Couldn't remove the rule" });
+    } finally {
       refreshAll();
     }
   }
 
-  async function removeWatcher(): Promise<void> {
+  async function clearRules(): Promise<void> {
     try {
       await writeRules([]);
-      await uninstallAgent();
-      await showHUD("Watcher removed. HDR on Connect is off.");
-      refreshAll();
+      await showHUD("Cleared all HDR auto-apply rules");
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't remove the watcher",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Couldn't clear the rules" });
+    } finally {
       refreshAll();
     }
   }
 
+  const connectedUuids = new Set((displays ?? []).map((display) => display.uuid));
+  const ruleableDisplays = (displays ?? []).filter((display) => !display.builtin && display.hdrCapable);
+  const savedRules = rules.filter((rule) => !connectedUuids.has(rule.uuid));
+
   const showError = Boolean(displaysError) && (displays?.length ?? 0) === 0;
-  const showEmpty = !showError && !isLoading && (displays?.length ?? 0) === 0;
+  const showEmpty = !showError && !isLoading && ruleableDisplays.length === 0 && savedRules.length === 0;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search displays">
@@ -125,64 +99,79 @@ export default function HdrOnConnectCommand() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Couldn't Read Displays"
-          description={errorMessage(displaysError)}
+          description={displaysError instanceof Error ? displaysError.message : String(displaysError)}
           actions={
             <ActionPanel>
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refreshAll} />
+              <Action
+                title="Clear All Rules"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => void clearRules()}
+              />
             </ActionPanel>
           }
         />
       ) : showEmpty ? (
         <List.EmptyView
           icon={Icon.Monitor}
-          title="No Displays Found"
-          description="Connect a display, then refresh."
+          title={displays && displays.length > 0 ? "No HDR-Capable Displays" : "No Displays Found"}
+          description={
+            displays && displays.length > 0
+              ? "Connect an external HDR-capable display, then refresh."
+              : "Connect a display, then refresh."
+          }
           actions={
             <ActionPanel>
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshAll} />
+              <Action
+                title="Clear All Rules"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => void clearRules()}
+              />
             </ActionPanel>
           }
         />
       ) : (
-        <List.Section
-          title="Displays"
-          subtitle="Rules apply when a display connects. The watcher is opt-in and uses no CPU while idle."
-        >
-          {(displays ?? []).map((display) => {
-            const rule = ruleFor(rules, display.name);
-            const canRule = display.hdrCapable && !display.builtin;
+        <>
+          {ruleableDisplays.length > 0 ? (
+            <List.Section
+              title="Displays"
+              subtitle="Rules apply when a display connects. Press ⌘R after connecting or disconnecting a display."
+            >
+              {ruleableDisplays.map((display) => {
+                const rule = rules.find((candidate) => candidate.uuid === display.uuid);
 
-            const accessories: List.Item.Accessory[] = [
-              {
-                tag: {
-                  value: display.hdr ? "HDR On" : "HDR Off",
-                  color: display.hdr ? Color.Blue : Color.SecondaryText,
-                },
-              },
-            ];
-            if (rule) {
-              accessories.push({
-                tag: {
-                  value: `On connect: ${rule.hdr ? "On" : "Off"}`,
-                  color: rule.hdr ? Color.Green : Color.Orange,
-                },
-              });
-            }
+                const accessories: List.Item.Accessory[] = [
+                  {
+                    tag: {
+                      value: display.hdr ? "HDR On" : "HDR Off",
+                      color: display.hdr ? Color.Blue : Color.SecondaryText,
+                    },
+                  },
+                ];
+                if (rule) {
+                  accessories.push({
+                    tag: {
+                      value: `On connect: ${rule.hdr ? "On" : "Off"}`,
+                      color: rule.hdr ? Color.Green : Color.Orange,
+                    },
+                  });
+                }
 
-            return (
-              <List.Item
-                key={display.id}
-                icon={{
-                  source: display.builtin ? Icon.Desktop : Icon.Monitor,
-                  tintColor: display.hdr ? Color.Blue : Color.SecondaryText,
-                }}
-                title={display.name}
-                subtitle={display.builtin ? "Built-in" : display.hdrCapable ? "HDR capable" : "No HDR support"}
-                accessories={accessories}
-                actions={
-                  <ActionPanel>
-                    {canRule ? (
-                      <>
+                return (
+                  <List.Item
+                    key={display.uuid}
+                    icon={{
+                      source: Icon.Monitor,
+                      tintColor: display.hdr ? Color.Blue : Color.SecondaryText,
+                    }}
+                    title={display.name}
+                    subtitle="HDR capable"
+                    accessories={accessories}
+                    actions={
+                      <ActionPanel>
                         <Action
                           title="Apply HDR on When Connected"
                           icon={Icon.Checkmark}
@@ -198,31 +187,72 @@ export default function HdrOnConnectCommand() {
                             title="Remove Rule"
                             icon={Icon.Trash}
                             style={Action.Style.Destructive}
-                            onAction={() => void removeRule(display)}
+                            onAction={() => void removeRule(rule)}
                           />
                         ) : null}
-                      </>
-                    ) : null}
-                    {agentInstalled ? (
+                        <Action
+                          title="Clear All Rules"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          onAction={() => void clearRules()}
+                        />
+                        <Action
+                          title="Refresh"
+                          icon={Icon.ArrowClockwise}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          onAction={refreshAll}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          ) : null}
+
+          {savedRules.length > 0 ? (
+            <List.Section title="Saved Rules" subtitle="Rules whose display is not connected right now.">
+              {savedRules.map((rule) => (
+                <List.Item
+                  key={rule.uuid}
+                  icon={{ source: Icon.Monitor, tintColor: Color.SecondaryText }}
+                  title={rule.display}
+                  subtitle="Not connected"
+                  accessories={[
+                    {
+                      tag: {
+                        value: `On connect: ${rule.hdr ? "On" : "Off"}`,
+                        color: rule.hdr ? Color.Green : Color.Orange,
+                      },
+                    },
+                  ]}
+                  actions={
+                    <ActionPanel>
                       <Action
-                        title="Remove Watcher Agent"
+                        title="Remove Rule"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        onAction={() => void removeWatcher()}
+                        onAction={() => void removeRule(rule)}
                       />
-                    ) : null}
-                    <Action
-                      title="Refresh"
-                      icon={Icon.ArrowClockwise}
-                      shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={refreshAll}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
+                      <Action
+                        title="Clear All Rules"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        onAction={() => void clearRules()}
+                      />
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={refreshAll}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          ) : null}
+        </>
       )}
     </List>
   );
