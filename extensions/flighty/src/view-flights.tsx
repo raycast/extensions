@@ -4,6 +4,7 @@ import dayjs, {type Dayjs} from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import {getAllYears, useFlights} from './use-flights'
+import {matchesFlightListSearch} from './flight-list-search'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -14,9 +15,11 @@ const timeFormat = 'h:mma'
 export default function () {
     const {isLoading, error, data: allFlights, permissionView, warning} = useFlights()
     const allYears = getAllYears(allFlights)
+    const [searchText, setSearchText] = useState('')
     const [filter, setFilter] = useState<{type: 'future'} | {type: 'all'} | {type: 'year'; year: string}>({type: 'future'})
 
     const filteredFlights = allFlights?.filter((flight) => {
+        if (!matchesFlightListSearch(flight, searchText)) return false
         if (filter.type === 'future') return dayjs.unix(flight.depTimeOriginal).isAfter(dayjs())
         if (filter.type === 'all') return true
         const depTime = dayjs.unix(flight.depTimeOriginal)
@@ -31,6 +34,9 @@ export default function () {
     return (
         <List
             isLoading={isLoading}
+            filtering={false}
+            searchText={searchText}
+            onSearchTextChange={setSearchText}
             navigationTitle="Flights"
             isShowingDetail={error === undefined}
             searchBarAccessory={
@@ -105,24 +111,6 @@ export default function () {
                             }}
                             title={`${flight.airlineIata} ${flight.number}`}
                             accessories={[{text: depDate}]}
-                            keywords={[
-                                flight.number,
-                                flight.airlineIata,
-                                flight.airlineIcao,
-                                flight.airlineName,
-
-                                flight.depAirportIata,
-                                flight.depCity,
-                                flight.arrAirportIata,
-                                flight.arrCity,
-
-                                flight.aircraftIata,
-                                flight.aircraftIcao,
-                                flight.aircraftName,
-                                flight.aircraftTailNumber,
-
-                                flight.pnr,
-                            ].filter((s) => s !== null)}
                             actions={
                                 <ActionPanel title="Flight">
                                     <Action.OpenInBrowser title="Open in Flighty" url={link} />
