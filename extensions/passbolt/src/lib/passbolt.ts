@@ -149,9 +149,9 @@ export class PassboltClient {
 
   private async request(
     path: string,
-    options: RequestInit & { includeErrorMessage?: boolean } = {},
+    options: RequestInit & { includeErrorMessage?: boolean; allowNotFound?: boolean } = {},
   ): Promise<Response> {
-    const { includeErrorMessage = false, ...requestOptions } = options;
+    const { includeErrorMessage = false, allowNotFound = false, ...requestOptions } = options;
     const url = `${this.baseUrl}${path}`;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -208,7 +208,7 @@ export class PassboltClient {
       }
     }
 
-    if (!response.ok && response.status !== 403) {
+    if (!response.ok && response.status !== 403 && !(allowNotFound && response.status === 404)) {
       // The response body is deliberately not logged: it can echo request content.
       const message = includeErrorMessage ? await this.creationErrorMessage(response) : undefined;
       if (!includeErrorMessage) await response.body?.cancel().catch(() => {});
@@ -639,9 +639,12 @@ export class PassboltClient {
     // Ensure we're authenticated before fetching secret
     await this.authenticate();
 
-    const res = await this.request(`/secrets/resource/${resourceId}.json`, { signal });
+    const res = await this.request(`/secrets/resource/${encodeURIComponent(resourceId)}.json`, { signal });
+    if (!res.ok) throw new Error(`Unable to fetch secret (HTTP ${res.status}).`);
     const json = (await res.json()) as PassboltResponse<Secret>;
-    return json.body;
+    const secret = ownSecret(resourceId, json.body);
+    if (!secret || typeof secret.data !== "string") throw new Error("Invalid secret response from Passbolt.");
+    return secret;
   }
 
   public async decryptSecretData(encryptedData: string): Promise<string> {
@@ -656,17 +659,72 @@ export class PassboltClient {
     return decrypted;
   }
 
-  public async decryptSecret(encryptedData: string) {
+  public async decryptPasswordData(
+    encryptedData: string,
+    resourceTypeId?: string,
+  ): Promise<{ password: string; description?: string }> {
     const decrypted = await this.decryptSecretData(encryptedData);
-    // Password-copy actions extract only the password; Authenticator needs the complete secret object.
-    try {
-      const secretData = JSON.parse(decrypted as string);
-      // Return just the password field if it exists, otherwise return the whole decrypted data
-      return secretData.password || (decrypted as string);
-    } catch {
-      // If it's not JSON, return as-is
-      return decrypted as string;
+    const type = resourceTypeId
+      ? (await this.getResourceTypes()).find((type) => type.id === resourceTypeId)
+      : undefined;
+    // Migrated password-string entries contain literal text, even when that text
+    // happens to be valid JSON. Never reinterpret their password as an object.
+    let definition = type?.definition;
+    if (typeof definition === "string") {
+      try {
+        definition = JSON.parse(definition);
+      } catch {
+        definition = undefined;
+      }
     }
+    const stringSchema = (definition as { secret?: { type?: string } } | undefined)?.secret?.type === "string";
+    if (stringSchema || (type && ["password", "password-string", "v5-password-string"].includes(type.slug))) {
+      return { password: decrypted };
+    }
+    let secret: unknown;
+    try {
+      secret = JSON.parse(decrypted);
+    } catch {
+      if (type?.slug.startsWith("v5-") || type?.slug === "password-and-description") {
+        throw new Error("Invalid password payload. Check that this entry opens in Passbolt.");
+      }
+      return { password: decrypted };
+    }
+    if (secret && typeof secret === "object" && !Array.isArray(secret)) {
+      const data = secret as Record<string, unknown>;
+      if (data.object_type !== undefined && data.object_type !== "PASSBOLT_SECRET_DATA") {
+        throw new Error("Unexpected secret object type.");
+      }
+      if (typeof data.password !== "string") throw new Error("This entry does not contain a password.");
+      return {
+        password: data.password,
+        description: typeof data.description === "string" ? data.description : undefined,
+      };
+    }
+    if (type?.slug.startsWith("v5-") || type?.slug === "password-and-description") {
+      throw new Error("This entry does not contain a password.");
+    }
+    return { password: decrypted };
+  }
+
+  public async decryptSecret(encryptedData: string, resourceTypeId?: string): Promise<string> {
+    return (await this.decryptPasswordData(encryptedData, resourceTypeId)).password;
+  }
+
+  private async metadataSettings<T>(path: string): Promise<T | undefined> {
+    const response = await this.request(path, { allowNotFound: true });
+    // Only an absent endpoint indicates an old server. Network, permission and
+    // validation failures must not silently turn into permission to use v4/user keys.
+    if (response.status === 404) {
+      await response.body?.cancel().catch(() => {});
+      return undefined;
+    }
+    if (!response.ok) throw new Error(`Unable to read Passbolt metadata settings (HTTP ${response.status}).`);
+    const json = (await response.json()) as PassboltResponse<T>;
+    if (!json.body || typeof json.body !== "object" || Array.isArray(json.body)) {
+      throw new Error("Invalid Passbolt metadata settings response.");
+    }
+    return json.body;
   }
 
   public async getResourceTypes() {
@@ -717,28 +775,11 @@ export class PassboltClient {
     const types = await this.getResourceTypes();
     // Servers before Passbolt 4.10 have no metadata settings endpoint; the available
     // resource types are then the only source of truth for the supported format.
-    let settings:
-      | {
-          default_resource_types?: string;
-          allow_creation_of_v5_resources?: boolean;
-          allow_creation_of_v4_resources?: boolean;
-        }
-      | undefined;
-    try {
-      const settingsResponse = await this.request("/metadata/types/settings.json");
-      if (settingsResponse.ok) {
-        settings =
-          (
-            (await settingsResponse.json()) as PassboltResponse<{
-              default_resource_types?: string;
-              allow_creation_of_v5_resources?: boolean;
-              allow_creation_of_v4_resources?: boolean;
-            }>
-          ).body ?? undefined;
-      }
-    } catch {
-      settings = undefined;
-    }
+    const settings = await this.metadataSettings<{
+      default_resource_types?: string;
+      allow_creation_of_v5_resources?: boolean;
+      allow_creation_of_v4_resources?: boolean;
+    }>("/metadata/types/settings.json");
     const hasType = (slug: string) => types.some((type) => type.slug === slug);
     const canCreateV5 = settings
       ? settings.allow_creation_of_v5_resources === true ||
@@ -765,27 +806,27 @@ export class PassboltClient {
     const userPublicKey = userPrivateKey.toPublic();
     const encryptedSecret = await openpgp.encrypt({
       message: await openpgp.createMessage({
-        text: useV5 ? JSON.stringify({ object_type: "PASSBOLT_SECRET_DATA", password: data.password }) : data.password,
+        text: JSON.stringify(
+          useV5
+            ? { object_type: "PASSBOLT_SECRET_DATA", password: data.password }
+            : { password: data.password, description: data.description || null },
+        ),
       }),
       encryptionKeys: userPublicKey,
       signingKeys: userPrivateKey,
     });
     let payload;
     if (useV5) {
-      // Personal metadata keys are the Passbolt default; without the settings endpoint
-      // (older servers) assume the default instead of failing the whole creation.
-      let personalKeysAllowed = true;
-      try {
-        const keySettingsResponse = await this.request("/metadata/keys/settings.json");
-        if (keySettingsResponse.ok) {
-          const { body: keySettings } = (await keySettingsResponse.json()) as PassboltResponse<{
-            allow_usage_of_personal_keys?: boolean;
-          }>;
-          personalKeysAllowed = keySettings?.allow_usage_of_personal_keys !== false;
-        }
-      } catch {
-        personalKeysAllowed = true;
+      const keySettings = await this.metadataSettings<{ allow_usage_of_personal_keys?: boolean }>(
+        "/metadata/keys/settings.json",
+      );
+      if (
+        keySettings?.allow_usage_of_personal_keys !== undefined &&
+        typeof keySettings.allow_usage_of_personal_keys !== "boolean"
+      ) {
+        throw new Error("Invalid Passbolt personal metadata key setting.");
       }
+      const personalKeysAllowed = keySettings?.allow_usage_of_personal_keys !== false;
       let metadataKeyType: "user_key" | "shared_key" = "user_key";
       let metadataKeyId: string | null = null;
       let metadataPublicKey = userPublicKey;
@@ -801,23 +842,47 @@ export class PassboltClient {
           metadataKeyId = null;
         }
       } else {
-        const keysResponse = await this.request("/metadata/keys.json");
+        const keysResponse = await this.request("/metadata/keys.json?filter[deleted]=0&filter[expired]=0");
         if (!keysResponse.ok) throw new Error("Unable to load a shared metadata key from Passbolt");
         const { body: keys } = (await keysResponse.json()) as PassboltResponse<
-          { id: string; armored_key?: string; created?: string }[]
+          {
+            id: string;
+            armored_key?: string;
+            created?: string;
+            deleted?: string | null;
+            expired?: string | null;
+            fingerprint?: string;
+          }[]
         >;
         const key = Array.isArray(keys)
           ? keys
-              .filter((key) => key.id && key.armored_key)
+              .filter((key) => key.id && key.armored_key && !key.deleted && !key.expired)
               .sort((a, b) => (b.created ?? "").localeCompare(a.created ?? ""))[0]
           : undefined;
         if (!key?.armored_key)
           throw new Error("No shared metadata key is available. Ask your Passbolt administrator to configure one.");
         try {
           metadataPublicKey = await openpgp.readKey({ armoredKey: key.armored_key });
+          if (key.fingerprint && metadataPublicKey.getFingerprint().toLowerCase() !== key.fingerprint.toLowerCase()) {
+            throw new Error("Metadata key fingerprint mismatch");
+          }
         } catch {
           throw new Error(
             "The shared metadata key is invalid. Ask your Passbolt administrator to configure a valid key.",
+          );
+        }
+        // A public key alone is not enough: the user must be able to decrypt its
+        // trusted private-key envelope, or the new entry would be unreadable.
+        this.metadataDecryptor.clearSharedKeys();
+        try {
+          const verifiedKey = await this.metadataDecryptor.getVerifiedSharedPublicKey(key.id);
+          if (verifiedKey.getFingerprint() !== metadataPublicKey.getFingerprint()) {
+            throw new Error("Shared metadata key mismatch");
+          }
+          metadataPublicKey = verifiedKey;
+        } catch {
+          throw new Error(
+            "Cannot verify or decrypt the shared metadata key. Open your vault in Passbolt to receive and trust the key before creating a password.",
           );
         }
         metadataKeyType = "shared_key";
@@ -852,7 +917,6 @@ export class PassboltClient {
         name: data.name,
         username: data.username,
         uri: data.uri,
-        description: data.description,
         resource_type_id: passwordType.id,
         folder_parent_id: null,
         personal: true,

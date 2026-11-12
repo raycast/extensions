@@ -221,6 +221,10 @@ export class MetadataDecryptor {
     }
   }
 
+  public async getVerifiedSharedPublicKey(id: string): Promise<openpgp.PublicKey> {
+    return (await this.getDecryptedSharedKey(id)).toPublic();
+  }
+
   private async decryptSharedKey(id: string): Promise<openpgp.PrivateKey> {
     const userKey = await this.getUserKey();
     const { userId, keys } = await this.getSharedKeys();
