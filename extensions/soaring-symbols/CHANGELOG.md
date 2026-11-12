@@ -1,6 +1,6 @@
 # Soaring Symbols Changelog
 
-## [Boarding Pass] - {PR_MERGE_DATE}
+## [Boarding Pass] - 2026-11-12
 
 - Airline Information shows the callsign, hubs, founding year and former names, or the years flown for airlines that have ceased.
 - Search both commands by callsign or former name: T'way Air finds Trinity Airways.
