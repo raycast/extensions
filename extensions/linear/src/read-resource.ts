@@ -37,8 +37,11 @@ export default withLinear(async ({ uri }: Input) =>
         status,
         lead,
         teams: teams.nodes.map(teamRef),
+        teamsPageInfo: { hasNextPage: teams.pageInfo.hasNextPage },
         members: members.nodes.map(userRef),
+        membersPageInfo: { hasNextPage: members.pageInfo.hasNextPage },
         milestones: milestones.nodes.map(serializeMilestone),
+        milestonesPageInfo: { hasNextPage: milestones.pageInfo.hasNextPage },
       };
     },
   }),
