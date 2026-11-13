@@ -22,8 +22,15 @@ export function getOwnerChange(
   return previousOwner === getClientFingerprint(response.clientId) ? "same" : "other";
 }
 
+/**
+ * Called after `purgeOwnerData`, so every open view drops the previous person's data it holds in memory (e.g. the
+ * budgets, or the saved statistics filters) instead of showing it, or writing it back.
+ */
+export const purgeListeners = new Set<() => void>();
+
 /** Removes the stored statements and the other data of the previous person (see `PERSONAL_STORAGE_KEYS`). */
 export async function purgeOwnerData() {
   await removeStatements();
   await Promise.all(PERSONAL_STORAGE_KEYS.map((key) => LocalStorage.removeItem(key)));
+  purgeListeners.forEach((listener) => listener());
 }

@@ -64,6 +64,10 @@ export function useStatistics(
     sync,
     statistics,
     tokenError: clientInfo.tokenError ?? sync.tokenError ?? statements.tokenError,
+    /** Why the accounts couldn't be loaded, other than the token. The cached ones are still shown, if any. */
+    error: clientInfo.tokenError ? undefined : clientInfo.error,
+    /** Requests the accounts again, e.g. after `error`. */
+    retry: clientInfo.revalidate,
     isLoading: clientInfo.isLoading || statements.isLoading || sync.isLoading,
   };
 }

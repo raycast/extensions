@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, environment } from "@raycast/api";
 import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ApiError } from "../../api/monobank";
 import { STORAGE_KEYS } from "../../data/constants";
 import { shortcuts } from "../../data/shortcuts";
 import { useLocalStorage, useStatistics } from "../../hooks";
@@ -277,6 +278,39 @@ export default function StatisticsView() {
     </ActionPanel.Section>
   );
 
+  function renderEmptyView() {
+    if (tokenError) return <TokenErrorEmptyView tokenError={tokenError} purpose="see your statistics" />;
+    if (isLoading || accounts.length) return null;
+
+    if (data.error) {
+      const { error } = data;
+      return (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Couldn't Load Accounts"
+          description={
+            (error instanceof ApiError ? error.description : undefined) ??
+            (error instanceof Error ? error.message : undefined)
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={data.retry} />
+              {commonActions}
+            </ActionPanel>
+          }
+        />
+      );
+    }
+
+    return (
+      <List.EmptyView
+        icon={Icon.PieChart}
+        title="No Accounts"
+        description="Statistics count your monobank cards and FOP accounts."
+      />
+    );
+  }
+
   const shownRows = rows.filter((row) => !excluded.includes(row.key)).length;
 
   return (
@@ -298,18 +332,7 @@ export default function StatisticsView() {
         </List.Dropdown>
       }
     >
-      {tokenError ? (
-        <TokenErrorEmptyView tokenError={tokenError} purpose="see your statistics" />
-      ) : (
-        !isLoading &&
-        !accounts.length && (
-          <List.EmptyView
-            icon={Icon.PieChart}
-            title="No Accounts"
-            description="Statistics count your monobank cards and FOP accounts."
-          />
-        )
-      )}
+      {renderEmptyView()}
 
       {!tokenError && (
         <>
@@ -329,7 +352,8 @@ export default function StatisticsView() {
                   icon={icon}
                   title={row.title}
                   keywords={row.keywords}
-                  accessories={[{ text: { value: amount, color: isOff ? Color.SecondaryText : Color.PrimaryText } }]}
+                  // Not an accessory: Raycast hides those while the detail is shown.
+                  subtitle={amount}
                   detail={renderDetail(isOff ? undefined : getSliceKey(row, index), renderRowFigures(row, isOff))}
                   actions={
                     <ActionPanel>
@@ -338,13 +362,6 @@ export default function StatisticsView() {
                           title={`${isOff ? "Show" : "Hide"} ${viewInfo.rowName}`}
                           icon={isOff ? Icon.Eye : Icon.EyeDisabled}
                           onAction={() => toggleRow(row.key)}
-                        />
-                        <Action
-                          title={`Show Only This ${viewInfo.rowName}`}
-                          icon={Icon.Filter}
-                          onAction={() =>
-                            setExcluded(rows.filter((item) => item.key !== row.key).map((item) => item.key))
-                          }
                         />
                         <Action.Push
                           title="Show Transactions"
@@ -359,6 +376,13 @@ export default function StatisticsView() {
                               period={period}
                               accountIds={[...enabledIds]}
                             />
+                          }
+                        />
+                        <Action
+                          title={`Show Only This ${viewInfo.rowName}`}
+                          icon={Icon.Filter}
+                          onAction={() =>
+                            setExcluded(rows.filter((item) => item.key !== row.key).map((item) => item.key))
                           }
                         />
                         {shownRows < rows.length && (
@@ -391,7 +415,7 @@ export default function StatisticsView() {
                   icon={isOff ? OFF_ICON : { source: Icon.CheckCircle, tintColor: Color.Green }}
                   title={getStatementItemTitle(account)}
                   keywords={[account.currency.code, account.type, ...account.maskedPan]}
-                  accessories={[{ text: { value: amount, color: isOff ? Color.SecondaryText : Color.PrimaryText } }]}
+                  subtitle={amount}
                   detail={renderDetail(undefined, renderAccountFigures(account, isOff, totals))}
                   actions={
                     <ActionPanel>
@@ -400,6 +424,12 @@ export default function StatisticsView() {
                           title={`${isOff ? "Show" : "Hide"} Account`}
                           icon={isOff ? Icon.Eye : Icon.EyeDisabled}
                           onAction={() => toggleAccount(account.id)}
+                        />
+                        <Action.Push
+                          title="View Statement"
+                          icon={Icon.List}
+                          shortcut={shortcuts.viewStatement}
+                          target={<StatementView account={account} />}
                         />
                         <Action
                           title="Show Only This Account"
@@ -413,12 +443,6 @@ export default function StatisticsView() {
                             onAction={() => setAccountIds(new Set(accounts.map((item) => item.id)))}
                           />
                         )}
-                        <Action.Push
-                          title="View Statement"
-                          icon={Icon.List}
-                          shortcut={shortcuts.viewStatement}
-                          target={<StatementView account={account} />}
-                        />
                       </ActionPanel.Section>
                       {commonActions}
                     </ActionPanel>

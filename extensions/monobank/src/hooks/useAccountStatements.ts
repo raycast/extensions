@@ -15,9 +15,10 @@ import {
 } from "../services/statement";
 import { Account, AccountOrJar, Period, Transaction } from "../types";
 import { getStatementItemTitle } from "../utils/accounts";
+import { getPayoutJarTitles } from "../utils/savings";
 import { resolvePeriod } from "../utils/statement";
 import { CancelledError, withRateLimit } from "./rateLimit";
-import { useJarTitles } from "./useClientInfo";
+import { addJarTitles, useJarTitles } from "./useClientInfo";
 
 /**
  * Called with an account's id after its stored statement changes, so every view showing it in the command reads it
@@ -204,6 +205,12 @@ export function useAccountStatements<T extends AccountOrJar = Account>(
       }),
     [],
   );
+
+  // Learns the jars that paid out in a statement a sync just downloaded. Again when the jar titles change, in case a
+  // client info request that was running replaced the history without them.
+  useEffect(() => {
+    if (statements) addJarTitles(Object.values(statements).flatMap((statement) => getPayoutJarTitles(statement.items)));
+  }, [statements, jarTitles]);
 
   const tokenError = getTokenError(error);
 

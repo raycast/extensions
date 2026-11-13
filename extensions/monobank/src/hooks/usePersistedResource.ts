@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Cached } from "../services/storage";
 import { useLocalStorage } from "./useLocalStorage";
 
@@ -7,6 +7,11 @@ import { useLocalStorage } from "./useLocalStorage";
  * budget accounts in "Show Statement") share one request instead of each spending the rate limit.
  */
 const pendingFetches = new Map<string, { promise: Promise<unknown>; startedAt: number }>();
+
+type ForcedFetchListener = (pending: { promise: Promise<unknown>; startedAt: number }) => void;
+
+/** Every instance by fetch key, so a fetch one of them forces (see `revalidate`) updates all of them. */
+const forcedFetchListeners = new Map<string, Set<ForcedFetchListener>>();
 
 /**
  * Data cached in LocalStorage and refetched once the cache is older than `ttl`.
@@ -36,34 +41,58 @@ export function usePersistedResource<T extends object>(options: {
 
   const isOtherScope = scope !== undefined && data.scope !== scope;
 
-  // Runs once, right after the cached value has been read.
-  useEffect(() => {
-    if (isLoadingFromStorage) return;
+  const fetchKey = `${key}|${scope ?? ""}`;
 
-    const now = Date.now();
-    if (!isOtherScope && now - data.lastUpdated <= ttl) return;
-
+  /** Shows the result of `pending` once it settles. */
+  function track(pending: { promise: Promise<unknown>; startedAt: number }) {
     setIsFetching(true);
     setError(undefined);
 
-    const fetchKey = `${key}|${scope ?? ""}`;
-    let pending = pendingFetches.get(fetchKey);
-    if (!pending || now - pending.startedAt > ttl) {
-      pending = { promise: fetch(data), startedAt: now };
-      pendingFetches.set(fetchKey, pending);
-    }
-
     (pending.promise as Promise<T>)
-      .then((fresh) => setData({ ...fresh, lastUpdated: now, scope }))
+      .then((fresh) => setData({ ...fresh, lastUpdated: pending.startedAt, scope }))
       .catch((error) => {
         console.error(error);
         setError(error);
         if (!shouldRetryNextLaunch?.(error)) {
-          setData((prev) => ({ ...prev, lastUpdated: now }));
+          setData((prev) => ({ ...prev, lastUpdated: pending.startedAt }));
         }
       })
       .finally(() => setIsFetching(false));
+  }
+
+  /** Fetches when the cache is stale, or always with `force`, which every instance with the same key then shows. */
+  function load(force: boolean) {
+    const now = Date.now();
+    if (!force && !isOtherScope && now - data.lastUpdated <= ttl) return;
+
+    let pending = pendingFetches.get(fetchKey);
+    // A forced fetch doesn't reuse a pending one, which may be the failed fetch it retries.
+    if (force || !pending || now - pending.startedAt > ttl) {
+      pending = { promise: fetch(data), startedAt: now };
+      pendingFetches.set(fetchKey, pending);
+    }
+
+    if (force) forcedFetchListeners.get(fetchKey)?.forEach((listener) => listener(pending));
+    else track(pending);
+  }
+
+  // Runs once, right after the cached value has been read.
+  useEffect(() => {
+    if (!isLoadingFromStorage) load(false);
   }, [isLoadingFromStorage]);
+
+  const latestTrack = useRef(track);
+  latestTrack.current = track;
+
+  useEffect(() => {
+    const listener: ForcedFetchListener = (pending) => latestTrack.current(pending);
+    const listeners = forcedFetchListeners.get(fetchKey) ?? new Set();
+    listeners.add(listener);
+    forcedFetchListeners.set(fetchKey, listeners);
+    return () => {
+      listeners.delete(listener);
+    };
+  }, [fetchKey]);
 
   return {
     data: isOtherScope ? initialValue : data,
@@ -75,5 +104,7 @@ export function usePersistedResource<T extends object>(options: {
     isLoadingFromStorage,
     isError: error !== undefined,
     error,
+    /** Fetches again now, whatever the cache's age, e.g. to retry a failed fetch. */
+    revalidate: () => load(true),
   };
 }
