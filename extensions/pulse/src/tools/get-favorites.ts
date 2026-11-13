@@ -1,5 +1,6 @@
-import { favoriteCurrency, loadFavorites } from "../lib/favorites";
+import { loadFavorites } from "../lib/favorites";
 import { fetchRows } from "../lib/quotes";
+import { instrumentCurrency } from "../lib/symbols";
 import { describeInstrument } from "../lib/tool-support";
 
 /**
@@ -22,10 +23,13 @@ export default async function tool() {
       return {
         ...describeInstrument(favorite),
         price: row?.price ?? null,
-        currency: row?.currency ?? favoriteCurrency(favorite),
+        currency: row?.currency ?? instrumentCurrency(favorite),
         changePercent: row?.changePercent === null || !row ? null : Number(row.changePercent.toFixed(2)),
       };
     }),
+    // List prices carry no session or delay; get-quotes has them.
+    freshness:
+      "These prices follow each exchange's delay and may be from a closed market. Call get-quotes for the symbols you discuss to get their session, delay and last trade time.",
     note:
       pricingError ??
       (rows?.failed.length ? `${rows.failed.join(" and ")} did not answer, so some prices are missing.` : undefined),

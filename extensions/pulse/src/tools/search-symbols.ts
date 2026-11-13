@@ -34,7 +34,11 @@ export default async function tool(input: Input) {
   // A ticker the catalog does not list can still be priced by its source.
   const typed = typedInstrument(query, index);
   const unlisted =
-    typed && /[./^=]/.test(query) && !hits.some((hit) => hit.symbol === typed.symbol) && hits.length < limit;
+    typed &&
+    (markets.length === 0 || markets.includes(typed.market)) &&
+    /[./^=]/.test(query) &&
+    !hits.some((hit) => hit.symbol === typed.symbol) &&
+    hits.length < limit;
   const results = [...hits, ...(unlisted && typed ? [typed] : [])].map(describeInstrument);
   return {
     results,

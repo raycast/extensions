@@ -11,7 +11,7 @@ import {
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { chartMarkdown, chartSvg } from "./lib/chart";
 import { addFavorites, loadFavorites, moveFavorite, removeFavorites } from "./lib/favorites";
@@ -24,7 +24,7 @@ import {
   INDICES,
   Instrument,
   Language,
-  MARKET_CURRENCIES,
+  instrumentCurrency,
   MARKET_FILTERS,
   MARKET_LABELS,
   PULSE_FOR_MAC_URL,
@@ -40,6 +40,7 @@ const FAVORITE_ACCESSORY: List.Item.Accessory = {
   icon: { source: Icon.Star, tintColor: Color.Yellow },
   tooltip: "Favorite",
 };
+const FAVORITE_ICON = { value: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" };
 
 const changeColor = (value: number | null | undefined) =>
   value === null || value === undefined ? Color.SecondaryText : value >= 0 ? Color.Green : Color.Red;
@@ -155,11 +156,7 @@ export default function Command() {
       await showToast({ style: Toast.Style.Success, title: success, message: instrument.symbol });
       refreshMenuBar();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not update favorites",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Could not update favorites" });
     }
   };
 
@@ -206,31 +203,26 @@ export default function Command() {
         <List.Section key={section.title} title={section.items.length ? section.title : undefined}>
           {section.items.map((instrument) => {
             const row = rows?.[instrument.symbol];
+            // Outside its own section a favorite is starred: in the icon while the chart hides accessories.
+            const starred = favoriteSymbols.has(instrument.symbol) && section.title !== FAVORITES_SECTION;
             return (
               <List.Item
                 key={`${section.title}:${instrument.symbol}`}
                 id={`${section.title}:${instrument.symbol}`}
-                icon={icon(instrument)}
+                icon={showingDetail && starred ? FAVORITE_ICON : icon(instrument)}
                 title={instrument.symbol}
                 subtitle={
                   instrument.name === instrument.symbol ? (instrument.exchange ?? "Yahoo Finance") : instrument.name
                 }
                 accessories={
                   showingDetail
-                    ? favoriteSymbols.has(instrument.symbol) && section.title !== FAVORITES_SECTION
-                      ? [FAVORITE_ACCESSORY]
-                      : undefined
+                    ? undefined
                     : [
-                        ...(favoriteSymbols.has(instrument.symbol) && section.title !== FAVORITES_SECTION
-                          ? [FAVORITE_ACCESSORY]
-                          : []),
+                        ...(starred ? [FAVORITE_ACCESSORY] : []),
                         { tag: { value: marketTag(instrument), color: Color.SecondaryText } },
                         row
                           ? {
-                              text: formatPrice(
-                                row.price,
-                                row.currency ?? MARKET_CURRENCIES[instrument.market] ?? null,
-                              ),
+                              text: formatPrice(row.price, row.currency ?? instrumentCurrency(instrument)),
                             }
                           : { text: { value: "—", color: Color.SecondaryText } },
                         { text: { value: formatChange(row?.changePercent), color: changeColor(row?.changePercent) } },

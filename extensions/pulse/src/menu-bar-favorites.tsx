@@ -11,11 +11,11 @@ import {
   open,
   openCommandPreferences,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { Favorite, favoriteCurrency, loadFavorites } from "./lib/favorites";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Favorite, loadFavorites } from "./lib/favorites";
 import { formatChange, formatNumber, formatPrice, formatTimestamp } from "./lib/format";
 import { RowQuote, fetchRows } from "./lib/quotes";
-import { quotePageUrl } from "./lib/symbols";
+import { instrumentCurrency, quotePageUrl } from "./lib/symbols";
 
 type TitleStyle = Preferences.MenuBarFavorites["titleStyle"];
 
@@ -26,7 +26,7 @@ function menuBarTitle(
   row: RowQuote | undefined,
 ): string | undefined {
   if (!favorite || style === "icon") return undefined;
-  const price = row ? formatNumber(row.price, row.currency ?? favoriteCurrency(favorite)) : "—";
+  const price = row ? formatNumber(row.price, row.currency ?? instrumentCurrency(favorite)) : "—";
   const arrow =
     row?.changePercent === null || row?.changePercent === undefined ? "" : row.changePercent >= 0 ? "▲" : "▼";
   const change = `${arrow}${formatChange(row?.changePercent).replace(/^[+-]/, "")}`;
@@ -48,6 +48,14 @@ function changeIcon(row: RowQuote | undefined): Image.ImageLike {
 }
 
 const DIGITS: Keyboard.KeyEquivalent[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+async function openSearch() {
+  try {
+    await launchCommand({ name: "search-symbol", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open Search Symbol" });
+  }
+}
 
 export default function Command() {
   const { titleStyle } = getPreferenceValues<Preferences.MenuBarFavorites>();
@@ -80,17 +88,13 @@ export default function Command() {
       {favorites && favorites.length === 0 ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item title="No favorites yet" />
-          <MenuBarExtra.Item
-            title="Add Favorites in Search Symbol…"
-            icon={Icon.Star}
-            onAction={() => launchCommand({ name: "search-symbol", type: LaunchType.UserInitiated })}
-          />
+          <MenuBarExtra.Item title="Add Favorites in Search Symbol…" icon={Icon.Star} onAction={openSearch} />
         </MenuBarExtra.Section>
       ) : (
         <MenuBarExtra.Section title="Favorites">
           {(favorites ?? []).map((favorite, position) => {
             const row = rows[favorite.symbol];
-            const currency = row?.currency ?? favoriteCurrency(favorite);
+            const currency = row?.currency ?? instrumentCurrency(favorite);
             return (
               <MenuBarExtra.Item
                 key={favorite.symbol}
@@ -123,7 +127,7 @@ export default function Command() {
           title="Search Symbol…"
           icon={Icon.MagnifyingGlass}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
-          onAction={() => launchCommand({ name: "search-symbol", type: LaunchType.UserInitiated })}
+          onAction={openSearch}
         />
         {symbols.length > 0 && (
           <MenuBarExtra.Item

@@ -85,6 +85,18 @@ export function isCryptoPair(symbol: string): boolean {
 }
 
 /**
+ * The currency an instrument trades in when its source leaves it out, or null when Pulse cannot tell.
+ * A ticker typed by hand without a known suffix (`EURUSD=X`, an unsupported exchange) only falls back
+ * to the US market, so its currency is left unknown rather than guessed as USD.
+ */
+export function instrumentCurrency(instrument: Instrument): string | null {
+  if (isCryptoPair(instrument.symbol)) return instrument.symbol.split("/")[1];
+  const typedFallback =
+    instrument.market === "us" && instrument.exchange === null && instrument.name === instrument.symbol;
+  return typedFallback ? null : (MARKET_CURRENCIES[instrument.market] ?? null);
+}
+
+/**
  * A ticker typed by hand, as Yahoo spells it, or null when it cannot be one.
  * `600519.SH` becomes `600519.SS` and `700.HK` becomes `0700.HK`.
  */
