@@ -91,6 +91,8 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
   const scanning = scan.status === "preparing" || scan.status === "scanning";
   useEffect(() => {
     setSelected(new Set());
+    setQuery("");
+    setFilter("all");
   }, [options]);
 
   async function refresh() {
@@ -234,6 +236,7 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
   const summary = `${statusText} · ${scan.artifacts.length} directories · ${estimatedTotal(scan.artifacts)}`;
   return (
     <List
+      navigationTitle={`Scan: ${options.root}`}
       isLoading={scanning || busy}
       filtering={false}
       searchText={query}
@@ -354,8 +357,8 @@ function ArtifactList({ options, onSave }: { options: ScanOptions; onSave: (valu
         }
         description={
           scanning
-            ? "Results appear as npkill estimates their size and project activity."
-            : "Change the search or filter, configure another directory, or refresh the scan."
+            ? `Scanning ${options.root}. Results appear as npkill estimates their size and project activity.`
+            : `Scanning is limited to ${options.root}. Change the search or filter, or use Configure Scan to choose another directory.`
         }
         actions={<ActionPanel>{commonActions}</ActionPanel>}
       />

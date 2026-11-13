@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { homedir } from "node:os";
 import { LineBuffer, parseRecord, parseStderr } from "../src/services/json-stream";
 import { buildArguments, validateVersions } from "../src/services/npkill-cli";
 import { planCleanup } from "../src/services/cleanup";
@@ -152,4 +153,13 @@ test("5,000 streamed candidates remain searchable and sortable", () => {
   const result = visibleArtifacts(items, "project-49", "all", "largest");
   assert.equal(result[0].size, 4999);
   assert.equal(result.length, 111);
+});
+
+test("tilde path searches match canonical paths beneath Projects/PER", () => {
+  const home = homedir();
+  const item = artifact(`${home}/Projects/PER/site-26/node_modules`, 100, null);
+  const other = artifact(`${home}/Projects/RAY/app/node_modules`, 100, null);
+  assert.deepEqual(visibleArtifacts([item, other], " ~/Projects/PER ", "all", "path"), [item]);
+  assert.deepEqual(visibleArtifacts([item, other], `${home}/Projects/PER`, "all", "path"), [item]);
+  assert.deepEqual(visibleArtifacts([item, other], "PER/site-26", "all", "path"), [item]);
 });

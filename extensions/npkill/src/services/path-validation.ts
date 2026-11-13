@@ -45,7 +45,7 @@ function sameIdentity(expected: DirectoryIdentity[], actual: DirectoryIdentity[]
 }
 
 export async function validateRoot(input: string): Promise<ScanRoot> {
-  const expanded = expandPath(input);
+  const expanded = expandPath(input.trim());
   if (!isAbsolute(expanded) || expanded.includes("\0")) throw new Error("Choose an absolute scan directory.");
   const path = await realpath(expanded);
   if (path === parse(path).root) throw new Error("Choose a project directory, not the filesystem root.");

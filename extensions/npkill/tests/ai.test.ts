@@ -3,7 +3,7 @@ import { access, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promise
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
-import { checkSetup, searchArtifacts, searchOptions } from "../src/services/ai-search";
+import { ArtifactSearch, checkSetup, searchArtifacts, searchOptions } from "../src/services/ai-search";
 import { decodeScanSettings, parseScanSettings } from "../src/services/scan-settings";
 import { scan } from "../src/services/scan-manager";
 import { Artifact, ScanOptions } from "../src/types";
@@ -182,4 +182,25 @@ test("AI search and setup work with real npkill without deleting fixture content
   assert.equal(report.results.length, 1);
   assert.equal(report.results[0].path, target);
   await access(file);
+});
+
+test("AI null optional fields behave like omitted fields instead of failing or applying filters", async () => {
+  const input = {
+    query: null,
+    directory: null,
+    profiles: null,
+    minimumSizeBytes: null,
+    minimumInactiveDays: null,
+    risk: null,
+    sort: null,
+    limit: null,
+  } as unknown as ArtifactSearch;
+  assert.deepEqual(searchOptions(input, saved), saved);
+  assert.deepEqual(searchOptions({ directory: "", profiles: "  " }, saved), saved);
+  assert.equal(searchOptions({ directory: "~/Projects/PER", profiles: "" }).profiles, "node");
+  const items = [artifact("unknown", null, null), artifact("zero", 0, 0)];
+  const report = await searchArtifacts(input, saved, { run: runner(items) });
+  assert.equal(report.scanComplete, true);
+  assert.equal(report.returnedCount, 2);
+  assert.equal(report.limit, 30);
 });

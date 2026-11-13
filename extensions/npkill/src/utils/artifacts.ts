@@ -1,4 +1,5 @@
 import { Artifact } from "../types";
+import { expandPath } from "../services/path-validation";
 
 export const filters = {
   all: "All Results",
@@ -47,7 +48,7 @@ export function visibleArtifacts(
   sort: Sort,
   now = Date.now(),
 ): Artifact[] {
-  const query = search.trim().toLocaleLowerCase();
+  const query = expandPath(search.trim()).toLocaleLowerCase();
   const age = filter.startsWith("days") ? Number(filter.slice(4)) * 86_400_000 : 0;
   return items
     .filter((item) => {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { chmod, mkdir, mkdtemp, realpath, rm, writeFile, readFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { homedir, tmpdir } from "node:os";
+import { join, relative, resolve } from "node:path";
 import test, { TestContext } from "node:test";
 import { scan } from "../src/services/scan-manager";
 import { cliEnvironment, readVersion } from "../src/services/npkill-cli";
@@ -30,6 +30,23 @@ async function fakeCli(root: string, body: string) {
   await chmod(path, 0o755);
   return path;
 }
+
+test("real CLI discovers nested Projects/PER artifacts from a parent root expressed with tilde", async (t) => {
+  const root = await fixture(t);
+  const path = join(root, "Projects", "PER", "site-26", "node_modules");
+  await mkdir(path, { recursive: true });
+  await writeFile(join(path, "data.txt"), "fixture");
+  const found: Artifact[] = [];
+  await scan(options(` ~/${relative(homedir(), root)} `), new AbortController().signal, {
+    onRoot: (value) => assert.equal(value.path, root),
+    onArtifact: (item) => found.push(item),
+    onWarning: (message) => assert.fail(message),
+  });
+  assert.deepEqual(
+    found.map((item) => item.path),
+    [path],
+  );
+});
 
 test(
   "real npkill 1.0.0 streams Node, Python, Rust, and custom profiles with .npkillrc exclusions",

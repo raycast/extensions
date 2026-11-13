@@ -89,9 +89,9 @@
       "description": "Check npkill and Node compatibility, the saved root, profiles, and scan settings without scanning or changing files."
     },
     {
-      "name": "open-cleanup",
-      "title": "Open Cleanup Command",
-      "description": "Open the native Scan Development Artifacts command for user review and confirmation. Does not select, move, or delete files."
+      "name": "trash-artifacts",
+      "title": "Move Artifacts to Trash",
+      "description": "Move exact paths returned by a recent search to Trash after Raycast confirmation. Revalidates directories and returns per-path outcomes without opening a command."
     }
   ]
 }

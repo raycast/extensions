@@ -1,5 +1,5 @@
 import { basename, dirname } from "node:path";
-import { Artifact, ScanOptions } from "../types";
+import { Artifact, ScanOptions, ScanRoot } from "../types";
 import { buildArguments, detectCli } from "./npkill-cli";
 import { scan } from "./scan-manager";
 import { validateRoot } from "./path-validation";
@@ -17,6 +17,7 @@ export interface ArtifactSearch {
 }
 
 export interface ArtifactSearchReport {
+  scanId?: string;
   root: string;
   profiles: string[];
   includeSensitiveResults: boolean;
@@ -49,7 +50,7 @@ export interface ArtifactSearchReport {
 }
 
 export const CLEANUP_GUIDANCE =
-  "Open Scan Development Artifacts in Raycast, configure the same directory and profiles, review fresh results, and confirm the exact paths there. AI tools cannot move or delete files.";
+  "To move discovered artifacts to Trash, pass the scanId and exact paths returned by search-artifacts to trash-artifacts. Raycast asks for confirmation first. Sizes are estimates; moving to Trash does not immediately release disk space.";
 
 function validateInput(input: ArtifactSearch): void {
   for (const key of ["query", "directory", "profiles"] as const) {
@@ -72,15 +73,17 @@ function validateInput(input: ArtifactSearch): void {
 }
 
 export function searchOptions(input: ArtifactSearch, saved?: ScanOptions): ScanOptions {
+  // AI calls can encode omitted optional fields as null.
+  input = Object.fromEntries(Object.entries(input).filter(([, value]) => value !== null));
   validateInput(input);
-  const root = input.directory ?? saved?.root;
+  const root = input.directory?.trim() || saved?.root;
   if (!root?.trim())
     throw new Error(
       "Choose a directory in Scan Development Artifacts first, or provide an explicit directory. No scan root is assumed.",
     );
   return {
     root,
-    profiles: input.profiles ?? saved?.profiles ?? "node",
+    profiles: input.profiles?.trim() || saved?.profiles || "node",
     executable: saved?.executable ?? "",
     config: saved?.config ?? "",
     exclusions: saved?.exclusions ?? "",
@@ -92,8 +95,14 @@ export function searchOptions(input: ArtifactSearch, saved?: ScanOptions): ScanO
 export async function searchArtifacts(
   input: ArtifactSearch,
   saved?: ScanOptions,
-  execution: { run?: typeof scan; timeoutMs?: number; maxCandidates?: number } = {},
+  execution: {
+    run?: typeof scan;
+    timeoutMs?: number;
+    maxCandidates?: number;
+    saveSnapshot?: (root: ScanRoot, artifacts: Artifact[]) => Promise<string>;
+  } = {},
 ): Promise<ArtifactSearchReport> {
+  input = Object.fromEntries(Object.entries(input).filter(([, value]) => value !== null));
   const options = searchOptions(input, saved);
   buildArguments(options);
   const limit = input.limit ?? 30;
@@ -109,12 +118,14 @@ export async function searchArtifacts(
   const warnings: string[] = [];
   let warningCount = 0;
   let root = options.root;
+  let scanRoot: ScanRoot | undefined;
   let error: string | null = null;
   const startedAt = new Date().toISOString();
   try {
     const result = await (execution.run ?? scan)(options, controller.signal, {
       onRoot: (value) => {
         root = value.path;
+        scanRoot = value;
       },
       onArtifact: (artifact) => {
         if (controller.signal.aborted || artifacts.has(artifact.path)) return;
@@ -156,6 +167,10 @@ export async function searchArtifacts(
     return !input.risk || input.risk === "all" || item.risk === input.risk;
   });
   return {
+    scanId:
+      scanRoot && matches.length && execution.saveSnapshot
+        ? await execution.saveSnapshot(scanRoot, matches.slice(0, limit))
+        : undefined,
     root,
     profiles: options.profiles.split(",").map((value) => value.trim()),
     includeSensitiveResults: options.includeSensitive,

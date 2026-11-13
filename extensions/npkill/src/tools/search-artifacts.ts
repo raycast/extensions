@@ -1,9 +1,11 @@
-import { LocalStorage } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
+import { join } from "node:path";
+import { saveSnapshot } from "../services/ai-cleanup";
 import { searchArtifacts } from "../services/ai-search";
 import { decodeScanSettings, SETTINGS_KEY } from "../services/scan-settings";
 
 type Input = {
-  /** Contiguous text to match in the project name or full path. Omit to show all matching candidates. */
+  /** Contiguous text to match in the project name or full path, including ~/ paths. Omit to show all matching candidates. */
   query?: string;
   /** Explicit user-provided absolute or ~/ directory. Omit to use the saved scan root; never invent a root. */
   directory?: string;
@@ -23,5 +25,7 @@ type Input = {
 
 /** Run a fresh read-only npkill scan. Returns estimated sizes, project activity, risk, and explicit completeness metadata. Never deletes files. */
 export default async function tool(input: Input) {
-  return searchArtifacts(input, decodeScanSettings(await LocalStorage.getItem<string>(SETTINGS_KEY)));
+  return searchArtifacts(input, decodeScanSettings(await LocalStorage.getItem<string>(SETTINGS_KEY)), {
+    saveSnapshot: (root, artifacts) => saveSnapshot(join(environment.supportPath, "ai-scans"), root, artifacts),
+  });
 }

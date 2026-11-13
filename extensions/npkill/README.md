@@ -45,7 +45,7 @@ The executable's directory, Raycast's inherited PATH, Homebrew locations, `~/.vo
 ## Reviewing results
 
 - Results arrive incrementally as npkill finishes their size and project activity calculations.
-- Search matches a contiguous part of the full path, including project names. The list shows paths relative to the selected root; full paths are available in details, tooltips, Finder, and Copy Path.
+- Search matches a contiguous part of the full path, including project names and paths beginning with `~/`. The active scan root appears in the navigation title. Searching filters the current scan; use **Configure Scan** to scan another directory. The list shows paths relative to the selected root; full paths are available in details, tooltips, Finder, and Copy Path.
 - Filter by size, inactivity, or risk without rescanning. Sort by size, project activity, or path.
 - **Unknown** activity stays unknown and does not match inactivity filters. Unknown sizes sort last.
 - **Review** means npkill returned no specific sensitive-folder warning. It is not a safety guarantee. **Unknown** risk means upstream did not provide analysis.
@@ -93,6 +93,7 @@ Mention **@npkill** in Raycast AI Chat, or open **Ask Npkill**. Example prompts:
 - “Find the 5 largest development artifacts in my saved scan location.”
 - “Find Node and Python artifacts larger than 1 GB and inactive more than 90 days in ~/Developer.”
 - “Check whether npkill is installed and my scan is configured.”
+- “Move Node artifacts inactive more than 90 days in ~/Developer to Trash.”
 
 **Search Development Artifacts** runs a fresh read-only scan using the same CLI adapter, saved root, profiles, exclusions, and sensitive-results setting as the native command. An explicitly supplied directory or profile list overrides those two settings for that search only. Executable paths, config files, and sensitive-result inclusion cannot be changed by the AI.
 
@@ -100,7 +101,9 @@ Search supports path text, minimum estimated size, minimum project inactivity, r
 
 **Check Npkill Setup** checks CLI/Node compatibility and saved settings without scanning. When no directory has been saved or supplied, the search tool asks for one instead of assuming a root. Custom profiles and config contents are validated by npkill when scanning.
 
-**Open Cleanup Command** opens **Scan Development Artifacts** with its saved settings when you ask AI to clean artifacts. It does not select, move, or delete files; review fresh results and confirm the exact paths in the native command. If your AI search used different settings, select that directory and those profiles in Configure Scan. AI-returned estimates are never guaranteed reclaimed space.
+**Move Artifacts to Trash** performs cleanup directly from AI Chat. Search returns a `scanId` and exact candidate paths. When you request cleanup, Raycast shows the selected paths, estimated sizes, and risk labels for confirmation before moving them to Trash. The tool revalidates the original directory identities and reports each path as trashed, missing, or failed. It never permanently deletes files or empties Trash.
+
+Scan snapshots are stored locally for up to 30 minutes of validity and can authorize one cleanup operation. Expired metadata is removed on later searches. Only returned paths from that scan can be selected; invented paths, overlapping directories, changed identities, and reused scan IDs are rejected. Search again before further cleanup. AI-returned estimates are never guaranteed reclaimed space.
 
 Scanning itself remains local. **When you invoke an AI tool, its returned paths, metadata, settings, and diagnostic messages are provided to your selected Raycast AI model.** File contents are not returned. Use the native command if you want to keep those results outside AI conversations.
 
