@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cover-art-search",
+  "title": "Cover Art Search",
+  "description": "Search IMDb for movie, TV, anime, and game cover art, copy it, or send it straight to Capacities",
+  "icon": "extension-icon.png",
+  "author": "louay.md",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "keywords": [
+    "imdb",
+    "poster",
+    "cover",
+    "capacities",
+    "movies",
+    "image"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-cover-art",
+      "title": "Search Cover Art",
+      "description": "Search IMDb for movie, TV, anime, and game cover art",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@capacities/api": "^1.1.3",
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0",
+    "file-type": "^22.0.2",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "capacitiesApiToken",
+      "type": "password",
+      "required": false,
+      "title": "Capacities API Token",
+      "placeholder": "Personal access token",
+      "description": "Optional. Personal access token used to add cover images to your Capacities space. Generate one in the Capacities app under Settings → Capacities API (needs api:read and api:write scopes). Leave blank to use the extension for search and clipboard only."
+    },
+    {
+      "name": "capacitiesObjectType",
+      "type": "textfield",
+      "required": false,
+      "default": "Media",
+      "title": "Object Type(s)",
+      "placeholder": "Media, Games",
+      "description": "Choose all object types that should be matched across your Capacities space, separated by commas, exactly as they appear in the app (e.g. Movies, Games)."
+    },
+    {
+      "name": "capacitiesCoverProperty",
+      "type": "textfield",
+      "required": false,
+      "default": "Cover image",
+      "title": "Cover Property",
+      "placeholder": "Cover image",
+      "description": "Name of the property on each object type that should point at the cover image. Default is always 'Cover image'."
+    },
+    {
+      "name": "capacitiesImageCollection",
+      "type": "textfield",
+      "required": false,
+      "title": "Image Collection",
+      "placeholder": "Cover Images",
+      "description": "Optional. Name of an image collection to file the uploaded cover into (e.g. Cover Images)."
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

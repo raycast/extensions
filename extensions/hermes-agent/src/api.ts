@@ -25,8 +25,65 @@ interface StreamDelta {
   }[];
 }
 
+interface ModelsList {
+  data?: { id?: string }[];
+}
+
 export function getPreferences<T extends Preferences = Preferences>() {
   return getPreferenceValues<T>();
+}
+
+function endpointBase(endpoint: string): string {
+  return endpoint.replace(/\/+$/, "");
+}
+
+function authHeaders(token?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+function modelIdsFromList(data: ModelsList): string[] {
+  return (data.data || [])
+    .map((model) => model.id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+}
+
+export function pickAdvertisedModel(ids: string[]): string {
+  if (ids.includes("hermes-agent")) {
+    return "hermes-agent";
+  }
+  return ids[0] || "hermes-agent";
+}
+
+/**
+ * Prefer an explicit preference. Otherwise use a model advertised by
+ * GET /v1/models (hermes-agent when present, else the first id).
+ */
+export async function resolveModelName(prefs: Preferences): Promise<string> {
+  const configured = (prefs.modelName || "").trim();
+  if (configured) {
+    return configured;
+  }
+
+  try {
+    const response = await fetch(`${endpointBase(prefs.endpoint)}/v1/models`, {
+      method: "GET",
+      headers: authHeaders(prefs.token),
+    });
+    if (response.ok) {
+      const data = (await response.json()) as ModelsList;
+      return pickAdvertisedModel(modelIdsFromList(data));
+    }
+  } catch {
+    // Fall through to the Hermes default.
+  }
+
+  return "hermes-agent";
 }
 
 export async function sendMessage(
@@ -34,8 +91,8 @@ export async function sendMessage(
   onStream?: (chunk: string) => void,
 ): Promise<string> {
   const prefs = getPreferences();
-  const url = `${prefs.endpoint}/v1/chat/completions`;
-  const modelName = prefs.modelName || "hermes-agent";
+  const url = `${endpointBase(prefs.endpoint)}/v1/chat/completions`;
+  const modelName = await resolveModelName(prefs);
 
   const body = {
     model: modelName,
@@ -45,10 +102,7 @@ export async function sendMessage(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${prefs.token}`,
-    },
+    headers: authHeaders(prefs.token),
     body: JSON.stringify(body),
   });
 

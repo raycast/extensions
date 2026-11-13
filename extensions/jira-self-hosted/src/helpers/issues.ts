@@ -135,7 +135,7 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   const customFieldsKeys = Object.keys(issue?.fields).filter((field) => field.startsWith("customfield_"));
   const supportedCustomFields = Object.values(CustomFieldSchema);
 
-  const customFieldsWithValueKeys = customFieldsKeys.filter((key) => !!issue.fields[key]);
+  const customFieldsWithValueKeys = customFieldsKeys.filter((key) => !!issue.fields[key] && issue.schema?.[key]);
 
   const { showTextareaCustomFields = true } = getPreferenceValues<Preferences>();
 

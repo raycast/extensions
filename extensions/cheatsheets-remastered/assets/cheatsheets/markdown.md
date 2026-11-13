@@ -1,13 +1,10 @@
 ---
 title: Markdown
 category: Markup
-prism_languages:
-  - markdown
-updated: 2020-07-01T00:00:00.000Z
+layout: 2017/sheet
+prism_languages: [markdown]
+updated: 2020-07-01
 weight: -1
-tech: markdown
-status: active
-lastReviewed: '2025-09-05'
 ---
 
 ## Reference
@@ -108,11 +105,6 @@ ___bold italic___
 ```markdown
 ![Image alt text][img]
 [img]: http://foo.com/img.jpg
-```
-
-```markdown
-![Image alt text][img_base64]
-[img_base64]: <data:image/png;base64,...>
 ```
 
 ### Code

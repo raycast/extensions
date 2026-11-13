@@ -20,7 +20,7 @@ function CopyPrivateKeyAction() {
         "Getting private key..."
       );
       if (privateKey) {
-        await Clipboard.copy(privateKey, { transient: getTransientCopyPreference("other") });
+        await Clipboard.copy(privateKey, { concealed: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied private key to clipboard");
       }
     } catch (error) {

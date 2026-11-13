@@ -5,6 +5,9 @@
   "description": "Create, access, and modify issues and sprints.",
   "icon": "icon.png",
   "author": "ernest0n",
+  "contributors": [
+    "Astatine-213"
+  ],
   "access": "public",
   "categories": [
     "Productivity"
@@ -144,26 +147,11 @@
       "placeholder": "https://jira.company.com"
     },
     {
-      "name": "username",
-      "title": "Username",
-      "description": "Your Jira username (login name)",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "token",
-      "title": "Password / API Token",
-      "description": "Your Jira password or Personal Access Token",
-      "type": "password",
-      "required": true
-    },
-    {
       "name": "authType",
-      "title": "Auth Type",
+      "title": "Authentication Method",
       "description": "Basic encodes username + password/token as Base64. Bearer sends a Personal Access Token directly (Jira Data Center 9+).",
       "type": "dropdown",
-      "required": false,
-      "default": "basic",
+      "required": true,
       "data": [
         {
           "title": "Basic (username + password/token)",
@@ -174,6 +162,20 @@
           "value": "bearer"
         }
       ]
+    },
+    {
+      "name": "token",
+      "title": "Password / API Token",
+      "description": "For Basic authentication, enter your password or API token. For Bearer authentication, enter your Personal Access Token.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "username",
+      "title": "Username (Basic only)",
+      "description": "Required for Basic authentication. Leave blank when using Bearer authentication.",
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "insecureSSL",
@@ -237,7 +239,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mjs"
   },
   "platforms": [
     "macOS",

@@ -20,14 +20,18 @@ export interface StatsData {
 }
 
 export async function checkNumber(number: string, signal?: AbortSignal): Promise<CheckResult> {
+  signal?.throwIfAborted();
   const res = await fetch(`${API_BASE}/check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ number }),
     signal,
   });
+  signal?.throwIfAborted();
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  return (await res.json()) as CheckResult;
+  const result = (await res.json()) as CheckResult;
+  signal?.throwIfAborted();
+  return result;
 }
 
 export async function fetchStats(signal?: AbortSignal): Promise<StatsData> {

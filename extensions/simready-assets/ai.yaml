@@ -1,0 +1,187 @@
+instructions: |
+  Use these tools to browse NVIDIA's SimReady Assets dataset on Hugging Face. Refer to it as "SimReady Assets" and credit NVIDIA when introducing results.
+  Use search-assets for names, types, or variants. Search matches every keyword in an asset name, not semantic descriptions. Translate natural-language requests into short keywords such as "banana" or "coffee cup". Omit query to browse the catalog. If there are no matches, say so and try fewer relevant keywords when useful; never invent an asset.
+  Use list-asset-types to discover available type filters and counts. Types are derived from folder names, not verified simulation capabilities. Pass the returned type to search-assets.
+  Use exact asset IDs from search-assets or the user's explicit ID for get-asset-details and list-asset-files. Do not guess IDs from display titles.
+  Use get-asset-details for folder sizes, licenses, previews, root model links, or a command for downloading one asset folder. If there are more than 20 root models, use list-asset-files with group Models to see the rest. Missing license or preview values mean unavailable; do not fill them in from assumptions. Do not infer physics support, dimensions, or simulator compatibility from an asset's name.
+  Use list-asset-files for individual files, sizes, groups, and download URLs. Filter by group or query where possible. For more results, pass nextOffset with the same filters. Report totals separately from the number of returned results, and never describe a partial page as the entire catalog or file list.
+  Present asset and file pages as Markdown links using returned URLs. For preview requests, use previewUrl when available. Keep result lists concise.
+  All tools are read-only and only retrieve listings and small metadata. They do not open browsers, download model or texture content, or execute commands. To open an asset, provide its returned Hugging Face link. For download requests, provide returned individual download URLs or the asset-folder command and its CLI prerequisite; never claim a download has completed. Do not run the command through another tool unless the user separately asks to execute it.
+  USD files may depend on textures, materials, and payloads. Recommend the single-asset folder command when a user needs a complete usable asset, preserving its structure. Do not suggest cloning or downloading the entire dataset for an individual asset request.
+
+evals:
+  - input: "@simready-assets Find banana assets and give me links to browse them."
+    mocks:
+      search-assets:
+        source: &source
+          name: SimReady Assets
+          publisher: NVIDIA
+          url: https://huggingface.co/datasets/nvidia/simready-assets
+        query: banana
+        type: null
+        catalogSize: 2603
+        total: 1
+        returned: 1
+        offset: 0
+        limit: 20
+        hasMore: false
+        nextOffset: null
+        results:
+          - id: food_produce_banana_m01
+            title: Food produce banana m01
+            type: Food
+            url: https://huggingface.co/datasets/nvidia/simready-assets/tree/main/food_produce_banana_m01
+    expected:
+      - callsTool:
+          name: search-assets
+          arguments:
+            query:
+              includes: banana
+      - includes: NVIDIA
+      - includes: https://huggingface.co/datasets/nvidia/simready-assets/tree/main/food_produce_banana_m01
+
+  - input: "@simready-assets Which asset types are available, and how many assets are in each?"
+    mocks:
+      list-asset-types:
+        source: *source
+        catalogSize: 601
+        totalTypes: 2
+        returned: 2
+        types:
+          - type: Body Part
+            count: 67
+          - type: Food
+            count: 534
+    expected:
+      - callsTool: list-asset-types
+      - includes: Body Part
+      - includes: Food
+      - includes: "534"
+
+  - input: "@simready-assets Show the size and license of food_produce_banana_m01 and give me the command to download just this complete asset folder."
+    mocks:
+      get-asset-details:
+        source: *source
+        id: food_produce_banana_m01
+        title: Food produce banana m01
+        type: Food
+        url: https://huggingface.co/datasets/nvidia/simready-assets/tree/main/food_produce_banana_m01
+        fileCount: 46
+        totalSizeBytes: 7134517
+        totalSize: 6.8 MB
+        license: CC-BY-4.0
+        licenseUrl: https://huggingface.co/datasets/nvidia/simready-assets/blob/main/food_produce_banana_m01/.metadata/LICENSE.txt
+        previewUrl: null
+        modelCount: 1
+        models:
+          - path: food_produce_banana_m01/simready_usd/sm_food_produce_banana_m01_01.usd
+            relativePath: simready_usd/sm_food_produce_banana_m01_01.usd
+            group: Models
+            sizeBytes: 21622
+            size: 21.1 KB
+            url: https://huggingface.co/datasets/nvidia/simready-assets/blob/main/food_produce_banana_m01/simready_usd/sm_food_produce_banana_m01_01.usd
+            downloadUrl: https://huggingface.co/datasets/nvidia/simready-assets/resolve/main/food_produce_banana_m01/simready_usd/sm_food_produce_banana_m01_01.usd?download=true
+        fileGroups:
+          - group: Models
+            count: 1
+            sizeBytes: 21622
+        download:
+          command: "hf download nvidia/simready-assets --repo-type dataset --revision main --include 'food_produce_banana_m01/**' --local-dir ./simready-assets"
+          shell: POSIX shell (macOS/Linux)
+          directory: ./simready-assets/food_produce_banana_m01/
+          cliInstallationUrl: https://huggingface.co/docs/huggingface_hub/en/guides/cli#getting-started
+          note: Run this yourself with the Hugging Face CLI installed. Only this asset folder is included. Preserve its structure for textures and payloads. No files have been downloaded by this tool.
+    expected:
+      - callsTool:
+          name: get-asset-details
+          arguments:
+            assetId: food_produce_banana_m01
+      - includes: CC-BY-4.0
+      - includes: 6.8 MB
+      - includes: --include 'food_produce_banana_m01/**'
+      - meetsCriteria: Provides a command for the user to run with the Hugging Face CLI, explains keeping dependencies together, and does not claim that any files have already been downloaded.
+
+  - input: "@simready-assets List the texture files in food_produce_banana_m01 with individual download links."
+    mocks:
+      list-asset-files:
+        source: *source
+        assetId: food_produce_banana_m01
+        assetUrl: https://huggingface.co/datasets/nvidia/simready-assets/tree/main/food_produce_banana_m01
+        fileCount: 46
+        query: ""
+        group: Textures
+        total: 1
+        returned: 1
+        offset: 0
+        limit: 50
+        hasMore: false
+        nextOffset: null
+        results:
+          - path: food_produce_banana_m01/simready_usd/Textures/t_banana_yellow_m01_alb.png
+            relativePath: simready_usd/Textures/t_banana_yellow_m01_alb.png
+            group: Textures
+            sizeBytes: 367509
+            size: 358.9 KB
+            url: https://huggingface.co/datasets/nvidia/simready-assets/blob/main/food_produce_banana_m01/simready_usd/Textures/t_banana_yellow_m01_alb.png
+            downloadUrl: https://huggingface.co/datasets/nvidia/simready-assets/resolve/main/food_produce_banana_m01/simready_usd/Textures/t_banana_yellow_m01_alb.png?download=true
+    expected:
+      - callsTool:
+          name: list-asset-files
+          arguments:
+            assetId: food_produce_banana_m01
+            group: Textures
+      - includes: t_banana_yellow_m01_alb.png?download=true
+      - meetsCriteria: Provides a download link without claiming to have downloaded the texture.
+
+  - input: "@simready-assets Search for the exact keyword zxqvunknown. If nothing matches, just tell me."
+    usedAsExample: false
+    mocks:
+      search-assets:
+        source: *source
+        query: zxqvunknown
+        type: null
+        catalogSize: 2603
+        total: 0
+        returned: 0
+        offset: 0
+        limit: 20
+        hasMore: false
+        nextOffset: null
+        results: []
+    expected:
+      - callsTool:
+          name: search-assets
+          arguments:
+            query: zxqvunknown
+      - not:
+          callsTool: get-asset-details
+      - meetsCriteria: Says there are no matching assets and does not invent a result or an asset link.
+
+  - input: "@simready-assets Browse the next page of Food assets, using offset 20 and limit 10 with no keyword filter."
+    usedAsExample: false
+    mocks:
+      search-assets:
+        source: *source
+        query: ""
+        type: Food
+        catalogSize: 2603
+        total: 21
+        returned: 1
+        offset: 20
+        limit: 10
+        hasMore: false
+        nextOffset: null
+        results:
+          - id: food_produce_banana_m01
+            title: Food produce banana m01
+            type: Food
+            url: https://huggingface.co/datasets/nvidia/simready-assets/tree/main/food_produce_banana_m01
+    expected:
+      - callsTool:
+          name: search-assets
+          arguments:
+            type:
+              matches: ^[Ff][Oo][Oo][Dd]$
+            offset: 20
+            limit: 10
+      - includes: food_produce_banana_m01

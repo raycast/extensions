@@ -2,11 +2,6 @@
 
 Search and manage your Proton Pass items directly from Raycast.
 
-## Project Notes
-
-- This extension is maintained as an independent `proton-pass` implementation.
-- It uses local `pass-cli` execution, local caching, and command-specific flows implemented in this repository.
-
 ## Setup
 
 This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
@@ -15,7 +10,7 @@ This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
 
 The extension automatically downloads and installs the Proton Pass CLI on first use. No manual installation required!
 
-If you prefer to install manually, you can use Homebrew:
+If you prefer to install manually on macOS, you can use Homebrew:
 
 ```bash
 brew install protonmail/proton/pass-cli
@@ -33,6 +28,8 @@ pass-cli login
 
 This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
 
+You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. The login keeps going if Raycast closes while you're in the browser, and the extension picks it up when you come back. After a login done elsewhere, such as in the terminal, Check Again (⌘R) picks up the new session. To log out, use Logout in the Login command.
+
 Optional: use terminal prompts with interactive login:
 
 ```bash
@@ -47,14 +44,54 @@ Test that the CLI is working:
 pass-cli vault list
 ```
 
+## Browse Items
+
+Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
+
 ## Preferences
 
-- **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Default Password Length**: Length for generated passwords (default: 20)
-- **Default Password Type**: Random characters or memorable passphrase
-- **Transient Clipboard**: Clear password from clipboard after pasting
-- **Background Refresh**: Automatically refresh cached vault and item data
-- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
+- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
+- **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
+- **Fill Login**: Press Return after the password, to submit the login form (off by default)
+- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
+- **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
+- **Item List**:
+  - Refresh items in the background, even when the cache is still fresh
+  - Suggest logins for the active browser tab (requires the Raycast browser extension)
+  - Show website icons instead of initials, in Browse Items and Get TOTP Code, from the Favicon Provider chosen in Raycast's Advanced settings, which receives the domains (off by default). With no provider chosen there, initials show
+
+### Browse Items
+
+- **Sort items by**: Order of the items: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) changes it until the window closes
+- **Sort vaults by**: Order of the vaults in the vault list and the vault menu: name (default), item count or most used. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes
+
+### Generate Password
+
+Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
+
+- **Password Type**: Random password or passphrase (default: random)
+- **Random: Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Random: Characters**: Uppercase letters, symbols and numbers, all on by default
+- **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Passphrase: Options**: Capitalize words and include numbers, both on by default
+
+### Get TOTP Code
+
+- **Codes**: Hide codes behind dots, until Show Codes (⌘H) shows them while the command stays open. Copying still works (off by default)
+- **Sort items by**: Order of the codes, as in Browse Items but set apart. The vault menu lists vaults by name
+
+## Filling Logins (macOS)
+
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.
+
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
+
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
+
+Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+
+To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
 
 ## Troubleshooting
 
@@ -65,6 +102,14 @@ If you see keyring-related errors, try:
 ```bash
 pass-cli logout --force
 export PROTON_PASS_KEY_PROVIDER=fs
+pass-cli login
+```
+
+On Windows, if session persistence through Windows Credential Manager reports a `keyring_error`, retry from PowerShell:
+
+```powershell
+pass-cli logout --force
+$env:PROTON_PASS_KEY_PROVIDER = "fs"
 pass-cli login
 ```
 

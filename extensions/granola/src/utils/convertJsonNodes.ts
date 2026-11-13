@@ -7,13 +7,13 @@ export function convertNodeToMarkdown(node: ContentNode): string {
 
   switch (node.type) {
     case "paragraph":
-      return node.content?.map(convertNodeToMarkdown).join(" ") + newLine;
+      return (node.content?.map(convertNodeToMarkdown).join(" ") ?? "") + newLine;
     case "heading":
-      return `${"#".repeat(node.attrs?.level || 1)} ${node.content?.map(convertNodeToMarkdown).join(" ")} ${newLine}`;
+      return `${"#".repeat(node.attrs?.level || 1)} ${node.content?.map(convertNodeToMarkdown).join(" ") ?? ""} ${newLine}`;
     case "bulletList":
-      return node.content?.map(convertNodeToMarkdown).join("") + newLine;
+      return (node.content?.map(convertNodeToMarkdown).join("") ?? "") + newLine;
     case "listItem":
-      return `- ${node.content?.map(convertNodeToMarkdown).join(" ")} ${newLine}`;
+      return `- ${node.content?.map(convertNodeToMarkdown).join(" ") ?? ""} ${newLine}`;
     case "text":
       return node.text || "";
     case "horizontalRule":

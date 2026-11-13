@@ -9,7 +9,7 @@ Two commands for comparing text and JSON directly in Raycast — everything runs
 
 ### Check Diff
 
-Compare any two plain-text snippets line by line. Paste an original and a changed version — additions are marked with `>>>` and removals with `<<<`. If both inputs are identical, a toast will let you know.
+Compare any two plain-text snippets line by line. Paste an original and a changed version — additions are marked with `+` and removals with `-`. If both inputs are identical, a toast will let you know.
 
 ### Compare JSON
 

@@ -1,25 +1,31 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 
+import { LibraryListItem } from "./components/library-list-item";
 import { searchLibraries } from "./lib/context7";
-import { createSearchContextDeeplink } from "./lib/deeplink";
-import { isAbortError, toErrorMessage } from "./lib/error-utils";
-import { getFavoriteLibraries, toggleFavoriteLibrary } from "./lib/favorites";
-import { SearchDocumentationView } from "./search-documentation";
-import type { FavoriteLibrary, LibrarySummary } from "./lib/types";
+import { isAbortError, showErrorToast } from "./lib/error-utils";
+import { getMyLibraries } from "./lib/my-libraries";
+import { LIBRARY_SORT_OPTIONS, sortLibraries, type LibrarySort } from "./lib/library-sort";
+import type { LibrarySummary, SavedLibrary } from "./lib/types";
 
 const SEARCH_DEBOUNCE_MS = 250;
 
+/** Shown before the user types, so the first screen is a starting point rather than an empty box. */
+const SUGGESTED_SEARCHES = ["raycast", "react", "next.js", "tailwind", "typescript", "supabase"];
+
 export default function SearchLibrariesCommand() {
   const [searchText, setSearchText] = useState("");
-  const [favorites, setFavorites] = useState<FavoriteLibrary[]>([]);
+  const [libraries, setLibraries] = useState<SavedLibrary[]>([]);
   const [results, setResults] = useState<LibrarySummary[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
-  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [sort, setSort] = useState<LibrarySort>("relevance");
+  const [wasFiltered, setWasFiltered] = useState(false);
+  /** The query whose results are currently on screen. Anything else means a search is in flight. */
+  const [settledQuery, setSettledQuery] = useState("");
 
   useEffect(() => {
-    void refreshFavorites();
+    void refreshLibraries();
   }, []);
 
   useEffect(() => {
@@ -28,30 +34,37 @@ export default function SearchLibrariesCommand() {
     if (!trimmedSearchText) {
       setResults([]);
       setErrorMessage(undefined);
-      setIsLoadingResults(false);
+      setSettledQuery("");
+      setIsLoading(false);
       return;
     }
+
+    // Set before the debounce, not inside it: for the first 250 ms there is no request yet,
+    // and leaving isLoading false there is what let the empty state flash "No Matching
+    // Libraries" before the search had even been issued.
+    setIsLoading(true);
 
     const abortController = new AbortController();
     const timeoutId = setTimeout(() => {
       void (async () => {
-        setIsLoadingResults(true);
+        setIsLoading(true);
         setErrorMessage(undefined);
 
         try {
-          const libraries = await searchLibraries(trimmedSearchText, abortController.signal);
-          setResults(libraries);
+          const result = await searchLibraries(trimmedSearchText, abortController.signal);
+          setResults(result.libraries);
+          setWasFiltered(result.searchFilterApplied);
+          setSettledQuery(trimmedSearchText);
         } catch (error) {
           if (isAbortError(error)) {
             return;
           }
 
-          const message = toErrorMessage(error);
           setResults([]);
-          setErrorMessage(message);
-          await showFailureToast("Search failed", message);
+          setSettledQuery(trimmedSearchText);
+          setErrorMessage(await showErrorToast("Search Failed", error));
         } finally {
-          setIsLoadingResults(false);
+          setIsLoading(false);
         }
       })();
     }, SEARCH_DEBOUNCE_MS);
@@ -62,242 +75,120 @@ export default function SearchLibrariesCommand() {
     };
   }, [searchText]);
 
-  const favoriteIds = new Set(favorites.map((favorite) => favorite.id));
-  const showingFavorites = searchText.trim().length === 0;
+  const savedIds = useMemo(() => new Set(libraries.map((library) => library.id)), [libraries]);
+  const hasQuery = searchText.trim().length > 0;
+  // Covers the debounce window as well as the request itself, so the empty state never claims
+  // "no results" for a query that has not been answered yet.
+  const isSearchPending = hasQuery && settledQuery !== searchText.trim();
+  const sortedResults = useMemo(() => sortLibraries(results, sort), [results, sort]);
 
   return (
     <List
-      isLoading={isLoadingFavorites || isLoadingResults}
+      isLoading={isLoading}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Context7 libraries..."
-    >
-      <List.EmptyView
-        title={getEmptyTitle(showingFavorites, favorites.length, errorMessage)}
-        description={getEmptyDescription(showingFavorites, errorMessage)}
-      />
-
-      {showingFavorites ? (
-        <List.Section title="Favorites" subtitle={favorites.length.toString()}>
-          {favorites.map((library) => (
-            <LibraryListItem key={library.id} library={library} isFavorite={true} onFavoriteChange={refreshFavorites} />
+      searchBarAccessory={
+        <List.Dropdown tooltip="Sort By" value={sort} storeValue onChange={(value) => setSort(value as LibrarySort)}>
+          {LIBRARY_SORT_OPTIONS.map((option) => (
+            <List.Dropdown.Item key={option.value} title={option.title} value={option.value} />
           ))}
-        </List.Section>
+        </List.Dropdown>
+      }
+    >
+      {!hasQuery ? (
+        <>
+          {/* Above the suggestions: a library you chose is a better starting point than a generic term. */}
+          {libraries.length > 0 && (
+            <List.Section title="My Libraries" subtitle={libraries.length.toString()}>
+              {libraries.map((library) => (
+                <LibraryListItem key={library.id} library={library} isSaved={true} onSavedChange={refreshLibraries} />
+              ))}
+            </List.Section>
+          )}
+          <List.Section title="Suggested Searches">
+            {SUGGESTED_SEARCHES.map((suggestion) => (
+              <List.Item
+                key={suggestion}
+                title={suggestion}
+                icon={Icon.MagnifyingGlass}
+                actions={
+                  <ActionPanel>
+                    <Action title="Search" icon={Icon.MagnifyingGlass} onAction={() => setSearchText(suggestion)} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
       ) : (
-        <List.Section title="Results" subtitle={results.length.toString()}>
-          {results.map((library) => (
+        <List.Section title="Results" subtitle={sortedResults.length.toString()}>
+          {sortedResults.map((library) => (
             <LibraryListItem
               key={library.id}
               library={library}
-              isFavorite={favoriteIds.has(library.id)}
-              onFavoriteChange={refreshFavorites}
+              isSaved={savedIds.has(library.id)}
+              onSavedChange={refreshLibraries}
             />
           ))}
         </List.Section>
       )}
+
+      <List.EmptyView
+        icon={errorMessage ? Icon.Warning : Icon.MagnifyingGlass}
+        title={isSearchPending ? "Searching Context7…" : getEmptyTitle(errorMessage, wasFiltered)}
+        description={
+          isSearchPending
+            ? `Looking for “${searchText.trim()}”.`
+            : getEmptyDescription(searchText, errorMessage, wasFiltered)
+        }
+        actions={
+          <ActionPanel>
+            {hasQuery && !isSearchPending ? (
+              <>
+                <Action.OpenInBrowser
+                  title="Search on Context7"
+                  icon={Icon.Globe}
+                  url={`https://context7.com/?q=${encodeURIComponent(searchText.trim())}`}
+                />
+                <Action.OpenInBrowser
+                  title="Add a Library to Context7"
+                  icon={Icon.Plus}
+                  url="https://context7.com/add-library"
+                />
+              </>
+            ) : null}
+          </ActionPanel>
+        }
+      />
     </List>
   );
 
-  async function refreshFavorites() {
-    setIsLoadingFavorites(true);
+  function getEmptyTitle(errorMessage: string | undefined, wasFiltered: boolean) {
+    if (errorMessage) {
+      return "Could Not Load Libraries";
+    }
 
+    return wasFiltered ? "Results Were Filtered" : "No Matching Libraries";
+  }
+
+  function getEmptyDescription(searchText: string, errorMessage: string | undefined, wasFiltered: boolean) {
+    if (errorMessage) {
+      return errorMessage;
+    }
+
+    if (wasFiltered) {
+      return "Your Context7 teamspace policy filtered every result for this search.";
+    }
+
+    return `Context7 has nothing indexed for "${searchText.trim()}" — it may not be in the index yet.`;
+  }
+
+  async function refreshLibraries() {
     try {
-      setFavorites(await getFavoriteLibraries());
-    } finally {
-      setIsLoadingFavorites(false);
+      setLibraries(await getMyLibraries());
+    } catch (error) {
+      await showErrorToast("Could Not Load My Libraries", error);
     }
   }
-}
-
-function LibraryListItem(props: {
-  library: LibrarySummary;
-  isFavorite: boolean;
-  onFavoriteChange: () => Promise<void>;
-}) {
-  const { library, isFavorite, onFavoriteChange } = props;
-  const quicklinkName = `Search Documentation in ${library.name}`;
-
-  return (
-    <List.Item
-      title={library.name}
-      subtitle={formatLibraryIdentifier(library.id)}
-      icon={getLibraryIcon(library.id)}
-      accessories={buildLibraryAccessories(library)}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Push
-              title="Search Documentation"
-              icon={Icon.MagnifyingGlass}
-              target={<SearchDocumentationView libraryId={library.id} />}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              title={isFavorite ? "Remove Favorite" : "Add Favorite"}
-              icon={isFavorite ? Icon.StarDisabled : Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              onAction={() => handleToggleFavorite(library, onFavoriteChange)}
-            />
-            <Action.CreateQuicklink
-              title="Create Quicklink"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-              quicklink={{
-                link: createSearchContextDeeplink(library),
-                name: quicklinkName,
-              }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-async function handleToggleFavorite(library: LibrarySummary, onFavoriteChange: () => Promise<void>) {
-  try {
-    await toggleFavoriteLibrary(library);
-    await onFavoriteChange();
-  } catch (error) {
-    await showFailureToast("Could not update favorites", toErrorMessage(error));
-  }
-}
-
-function buildLibraryAccessories(library: LibrarySummary) {
-  const accessories: List.Item.Accessory[] = [];
-
-  const trustScore = buildTrustScoreAccessory(library.trustScore);
-  if (trustScore) {
-    accessories.push(trustScore);
-  }
-
-  if (typeof library.totalSnippets === "number") {
-    accessories.push({
-      icon: Icon.CodeBlock,
-      text: formatCompactNumber(library.totalSnippets),
-      tooltip: `${library.totalSnippets.toLocaleString("en-US")} snippets`,
-    });
-  }
-
-  const updatedAt = buildUpdatedAtAccessory(library.lastUpdateDate);
-  if (updatedAt) {
-    accessories.push(updatedAt);
-  }
-
-  return accessories;
-}
-
-function buildUpdatedAtAccessory(lastUpdateDate?: string): List.Item.Accessory | undefined {
-  if (!lastUpdateDate) {
-    return undefined;
-  }
-
-  const parsedDate = new Date(lastUpdateDate);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return undefined;
-  }
-
-  return {
-    date: parsedDate,
-    tooltip: `Updated: ${new Intl.DateTimeFormat("en-US", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(parsedDate)}`,
-  };
-}
-
-function buildTrustScoreAccessory(trustScore?: number): List.Item.Accessory | undefined {
-  if (typeof trustScore !== "number") {
-    return undefined;
-  }
-
-  return {
-    tag: {
-      value: trustScore.toFixed(1),
-      color: getTrustScoreColor(trustScore),
-    },
-    tooltip: `Trust score: ${trustScore.toFixed(1)}`,
-  };
-}
-
-function formatCompactNumber(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    notation: value >= 1000 ? "compact" : "standard",
-    maximumFractionDigits: 1,
-  }).format(value);
-}
-
-function getTrustScoreColor(trustScore: number) {
-  if (trustScore >= 9) {
-    return Color.Green;
-  }
-
-  if (trustScore >= 7) {
-    return Color.Orange;
-  }
-
-  return Color.Red;
-}
-
-function getLibraryIcon(libraryId: string) {
-  if (libraryId.startsWith("/websites")) {
-    return Icon.Globe;
-  }
-
-  if (libraryId.startsWith("/llmstxt")) {
-    return Icon.TextDocument;
-  }
-
-  return Icon.Code;
-}
-
-function formatLibraryIdentifier(libraryId: string) {
-  if (libraryId.startsWith("/websites")) {
-    return libraryId.replace(/^\/websites\/?/, "");
-  }
-
-  if (libraryId.startsWith("/llmstxt")) {
-    return libraryId.replace(/^\/llmstxt\/?/, "");
-  }
-
-  return libraryId;
-}
-
-function getEmptyTitle(showingFavorites: boolean, favoriteCount: number, errorMessage?: string) {
-  if (errorMessage) {
-    return "Could Not Load Libraries";
-  }
-
-  if (showingFavorites && favoriteCount === 0) {
-    return "No Favorite Libraries";
-  }
-
-  if (showingFavorites) {
-    return "Favorite Libraries";
-  }
-
-  return "No Matching Libraries";
-}
-
-function getEmptyDescription(showingFavorites: boolean, errorMessage?: string) {
-  if (errorMessage) {
-    return errorMessage;
-  }
-
-  if (showingFavorites) {
-    return "Start typing to search Context7, or add favorites from the results.";
-  }
-
-  return "Try a more specific library name.";
-}
-
-async function showFailureToast(title: string, message: string) {
-  await showToast({
-    style: Toast.Style.Failure,
-    title,
-    message,
-  });
 }

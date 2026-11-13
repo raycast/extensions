@@ -135,6 +135,8 @@ interface AppSettings {
   stateOrder: string;
   defaultRepo: string;
   defaultBaseBranch: string;
+  /** When true, only show items assigned to me. Default true. */
+  assignedToMe: boolean;
 }
 
 const EMPTY_SETTINGS: AppSettings = {
@@ -144,6 +146,7 @@ const EMPTY_SETTINGS: AppSettings = {
   stateOrder: "",
   defaultRepo: "",
   defaultBaseBranch: "",
+  assignedToMe: true,
 };
 
 const STORAGE_KEYS = {
@@ -153,6 +156,7 @@ const STORAGE_KEYS = {
   stateOrder: "app.stateOrder",
   defaultRepo: "app.defaultRepo",
   defaultBaseBranch: "app.defaultBaseBranch",
+  assignedToMe: "app.assignedToMe",
   onboarded: "app.onboarded",
 };
 
@@ -160,13 +164,14 @@ async function readAppSettings(): Promise<{
   settings: AppSettings;
   onboarded: boolean;
 }> {
-  const [p, s, t, so, r, b, o] = await Promise.all([
+  const [p, s, t, so, r, b, am, o] = await Promise.all([
     LocalStorage.getItem<string>(STORAGE_KEYS.project),
     LocalStorage.getItem<string>(STORAGE_KEYS.states),
     LocalStorage.getItem<string>(STORAGE_KEYS.types),
     LocalStorage.getItem<string>(STORAGE_KEYS.stateOrder),
     LocalStorage.getItem<string>(STORAGE_KEYS.defaultRepo),
     LocalStorage.getItem<string>(STORAGE_KEYS.defaultBaseBranch),
+    LocalStorage.getItem<string>(STORAGE_KEYS.assignedToMe),
     LocalStorage.getItem<string>(STORAGE_KEYS.onboarded),
   ]);
   const tryParse = <T,>(v: string | undefined, fallback: T): T => {
@@ -185,6 +190,7 @@ async function readAppSettings(): Promise<{
       stateOrder: tryParse<string>(so, ""),
       defaultRepo: tryParse<string>(r, ""),
       defaultBaseBranch: tryParse<string>(b, ""),
+      assignedToMe: tryParse<boolean>(am, true),
     },
     onboarded: tryParse<boolean>(o, false),
   };
@@ -198,6 +204,7 @@ async function writeAppSettings(settings: AppSettings): Promise<void> {
     LocalStorage.setItem(STORAGE_KEYS.stateOrder, JSON.stringify(settings.stateOrder)),
     LocalStorage.setItem(STORAGE_KEYS.defaultRepo, JSON.stringify(settings.defaultRepo)),
     LocalStorage.setItem(STORAGE_KEYS.defaultBaseBranch, JSON.stringify(settings.defaultBaseBranch)),
+    LocalStorage.setItem(STORAGE_KEYS.assignedToMe, JSON.stringify(settings.assignedToMe)),
     LocalStorage.setItem(STORAGE_KEYS.onboarded, JSON.stringify(true)),
   ]);
 }
@@ -249,15 +256,17 @@ export default function Command() {
   const appStates = settings.states;
   const appTypes = settings.types;
   const appStateOrder = settings.stateOrder;
+  const appAssignedToMe = settings.assignedToMe;
 
   const { data, isLoading, revalidate, mutate } = useCachedPromise(
-    async (projectArg: string, statesArg: string, typesArg: string) =>
+    async (projectArg: string, statesArg: string, typesArg: string, assignedToMeArg: boolean) =>
       getMyWorkItems({
         project: projectArg || undefined,
         states: statesArg ? statesArg.split("|") : undefined,
         types: typesArg ? typesArg.split("|") : undefined,
+        assignedToMe: assignedToMeArg,
       }),
-    [appProject, appStates.join("|"), appTypes.join("|")],
+    [appProject, appStates.join("|"), appTypes.join("|"), appAssignedToMe],
     {
       initialData: [],
       keepPreviousData: true,
@@ -388,6 +397,19 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={<CreateWorkItemForm knownProjects={projects} onCreated={() => revalidate()} />}
               />
+              <Action.Push
+                title="Settings"
+                icon={Icon.Gear}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "," }}
+                target={
+                  <SetupView
+                    onSaved={(next) => {
+                      handleSettingsSaved(next);
+                      revalidate();
+                    }}
+                  />
+                }
+              />
             </ActionPanel>
           }
         />
@@ -408,6 +430,7 @@ export default function Command() {
               <WorkItemRow
                 key={item.id}
                 item={item}
+                showAssignee={!appAssignedToMe}
                 onChange={() => revalidate()}
                 onItemUpdated={onItemUpdated}
                 showDetail={showDetail}
@@ -446,6 +469,7 @@ function WorkItemRow({
   onSelectAllVisible,
   onClearSelection,
   onSettingsSaved,
+  showAssignee,
 }: {
   item: WorkItem;
   onChange: () => void;
@@ -460,6 +484,7 @@ function WorkItemRow({
   onSelectAllVisible: () => void;
   onClearSelection: () => void;
   onSettingsSaved: (s: AppSettings) => void;
+  showAssignee: boolean;
 }) {
   const typeAcc = getTypeAccessory(item.workItemType);
   const selectedCount = selectedItems.length;
@@ -480,6 +505,9 @@ function WorkItemRow({
             ]
           : []),
         ...(item.priority ? [{ text: `P${item.priority}` }] : []),
+        ...(showAssignee && item.assignedTo
+          ? [{ icon: Icon.Person, text: item.assignedTo, tooltip: `Assigned to ${item.assignedTo}` }]
+          : []),
         {
           tag: { value: item.state, color: getStateColor(item.state) },
         },
@@ -974,6 +1002,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const [types, setTypes] = useState<string[]>([]);
   const [defaultRepo, setDefaultRepo] = useState("");
   const [defaultBaseBranch, setDefaultBaseBranch] = useState("");
+  const [assignedToMe, setAssignedToMe] = useState(true);
   const [formInitialized, setFormInitialized] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -987,6 +1016,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
       setTypes(settings.types);
       setDefaultRepo(settings.defaultRepo);
       setDefaultBaseBranch(settings.defaultBaseBranch);
+      setAssignedToMe(settings.assignedToMe);
       setFormInitialized(true);
     });
     return () => {
@@ -1031,6 +1061,17 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const branchList = branches ?? [];
 
   const handleSubmit = async () => {
+    // Mirror the query-layer guard in buildWorkItemsWiql: browsing everyone's
+    // items needs a bounding filter, otherwise the next query would throw and
+    // leave the list empty/stale despite a "saved" toast.
+    if (!assignedToMe && !project.trim() && states.length === 0 && types.length === 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Add a bounding filter",
+        message: "To show items not assigned to you, pick a project, state, or type first.",
+      });
+      return;
+    }
     setSubmitting(true);
     const next: AppSettings = {
       project: project.trim(),
@@ -1039,6 +1080,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
       stateOrder: stateOrder.trim(),
       defaultRepo: defaultRepo.trim(),
       defaultBaseBranch: defaultBaseBranch.trim(),
+      assignedToMe,
     };
     try {
       await writeAppSettings(next);
@@ -1131,6 +1173,14 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
           <Form.Dropdown.Item key={p} value={p} title={p} />
         ))}
       </Form.Dropdown>
+      <Form.Checkbox
+        id="assignedToMe"
+        title="Assignment"
+        label="Only show items assigned to me"
+        info="When on, the list is scoped to items assigned to you. Turn off to see everyone's items — a project, state, or type filter is required to keep the result set bounded."
+        value={assignedToMe}
+        onChange={setAssignedToMe}
+      />
       <Form.TagPicker
         id="states"
         title="States to Show"

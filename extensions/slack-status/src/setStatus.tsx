@@ -52,7 +52,12 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
 
         if (!presetToLaunch) {
           console.error("No preset found with id: ", presetId);
-          showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
+          showFailureToast(
+            new Error("This preset no longer exists. Pick one from the list or update your quicklink."),
+            {
+              title: "Preset not found",
+            },
+          );
         } else {
           await setStatusToPreset({ preset: presetToLaunch, slack, mutate });
           popToRoot();

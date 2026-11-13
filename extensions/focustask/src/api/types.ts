@@ -10,6 +10,7 @@ export interface Task {
   listId: string | null
   url: string
   visibleInDefaultFrame: boolean
+  status: TaskStatus
 }
 
 export type TaskStatus = "current" | "next" | "icebox"

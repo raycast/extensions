@@ -22,7 +22,6 @@ import { RemoteFetchAction, RemotePullAction } from "../actions/RemoteActions";
 import { RepositoryContext, NavigationContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
-import { basename } from "path";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 import { GravatarIcon } from "../icons/GravatarIcon";
 
@@ -39,10 +38,14 @@ export function CommitsView(context: RepositoryContext & NavigationContext) {
       isLoading={context.commits.isLoading}
       pagination={context.commits.pagination}
       navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
-      searchBarPlaceholder="Search commits by message, sha, author, tags, files..."
+      searchBarPlaceholder="Search commits by message, SHA..."
       selectedItemId={selectedCommitId || undefined}
       isShowingDetail={toggleDetailController.isShowingDetail}
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
+      filtering={false}
+      throttle
+      searchText={context.commits.searchText}
+      onSearchTextChange={context.commits.setSearchText}
     >
       {context.commits.error ? (
         <List.EmptyView
@@ -59,11 +62,32 @@ export function CommitsView(context: RepositoryContext & NavigationContext) {
             </ActionPanel>
           }
         />
+      ) : context.commits.isLoading &&
+        context.commits.data.length === 0 &&
+        context.commits.searchText.trim().length > 0 ? (
+        <List.EmptyView
+          title="Searching commits"
+          description="Search is still in progress..."
+          icon={Icon.MagnifyingGlass}
+          actions={
+            <ActionPanel>
+              <SharedActionsSection
+                toggleDetailController={toggleDetailController}
+                toggleMetadataController={toggleMetadataController}
+                {...context}
+              />
+            </ActionPanel>
+          }
+        />
       ) : !context.commits.isLoading && context.commits.data.length === 0 ? (
         <List.EmptyView
-          title="No commits"
-          description="No commits in this branch."
-          icon={`git-commit.svg`}
+          title={context.commits.searchText.trim() ? "No matching commits" : "No commits"}
+          description={
+            context.commits.searchText.trim()
+              ? `No commits match "${context.commits.searchText.trim()}".`
+              : "No commits in this branch."
+          }
+          icon={context.commits.searchText.trim() ? Icon.MagnifyingGlass : `git-commit.svg`}
           actions={
             <ActionPanel>
               <SharedActionsSection
@@ -224,15 +248,6 @@ function CommitListItem(
       title={context.commit.message}
       icon={icon}
       accessories={accessories}
-      keywords={[
-        context.commit.hash,
-        context.commit.shortHash,
-        context.commit.body,
-        ...context.commit.author.split(" "),
-        context.commit.authorEmail,
-        ...context.commit.tags,
-        ...(context.commit.changedFiles?.map((fileChanges) => basename(fileChanges.path)) || []),
-      ].filter((keyword): keyword is string => Boolean(keyword))}
       detail={
         <List.Item.Detail
           markdown={commitBodyMarkdown}

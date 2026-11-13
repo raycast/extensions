@@ -7,5 +7,5 @@ import { getIcon } from "./icons";
 export function getTeamIcon(team: TeamResult, organization?: OrganizationResult) {
   const fallbackIcon = organization?.logoUrl ? encodeURI(organization.logoUrl) : Icon.TwoPeople;
 
-  return getIcon({ icon: team.icon, color: team.color, fallbackIcon });
+  return getIcon({ icon: team.icon ?? undefined, color: team.color ?? undefined, fallbackIcon });
 }

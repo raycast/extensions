@@ -5,7 +5,7 @@ import mime from "mime-types";
 import { tmpdir } from "os";
 import { getCachedImagePath, setCachedImagePath } from "./cache";
 import { DOWNLOAD_TIMEOUT, HEADERS, ImageLayouts, ImageLicenses, MAX_DOWNLOAD_SIZE } from "./consts";
-import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
+import { DuckDuckGoImage, imageNextSearch, imageSearch, imageSearchBrowserURL, ImageSearchResult } from "./search";
 
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
@@ -28,6 +28,11 @@ interface SearchImageParams {
   cursor?: ImageSearchCursor;
   signal?: AbortSignal;
   layout?: ImageLayouts;
+}
+
+export function getImageSearchBrowserURL(query: string, layout?: ImageLayouts) {
+  const { moderate, locale, license } = getPreferenceValues<Preferences.SearchImage>();
+  return imageSearchBrowserURL(query, { moderate, locale, filters: { layout, license: license as ImageLicenses } });
 }
 
 export async function searchImage({ query, cursor, signal, layout }: SearchImageParams): Promise<ImageSearchResult> {

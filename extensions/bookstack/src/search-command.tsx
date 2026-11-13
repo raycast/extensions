@@ -1,6 +1,6 @@
 // src/search-command.tsx
 import React, { useState, useEffect } from "react";
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Keyboard } from "@raycast/api";
 import { searchBookStack, SearchResultItem } from "./bookstack-api";
 import { stripHtmlTags } from "./utils";
 
@@ -43,6 +43,7 @@ export default function SearchDocumentation() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={item.url} title="Open URL" />
+              <Action.CopyToClipboard title="Copy Link" content={item.url} shortcut={Keyboard.Shortcut.Common.Copy} />
             </ActionPanel>
           }
         />

@@ -1,0 +1,15 @@
+# Raycast
+.raycast-swift-build
+.swiftpm
+raycast-env.d.ts
+compiled_raycast_swift
+dist
+
+# Dependencies
+node_modules
+
+# Logs
+*.log
+
+# macOS
+.DS_Store

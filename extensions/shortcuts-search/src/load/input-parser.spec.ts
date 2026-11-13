@@ -22,6 +22,22 @@ describe("Parses shortcut correctly", () => {
     expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
   });
 
+  it("Parses app with windowsAppId", () => {
+    const inputApp = generateInputAppWithShortcut({ windowsAppId: "some-windows-app-id" });
+    const expectedApplication = generateExpectedAppWithShortcut({ windowsAppId: "some-windows-app-id" });
+
+    expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
+  });
+
+  it("Parses app without windowsAppId", () => {
+    const inputApp = generateInputAppWithShortcut();
+    inputApp.windowsAppId = undefined;
+    const expectedApplication = generateExpectedAppWithShortcut();
+    expectedApplication.windowsAppId = undefined;
+
+    expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
+  });
+
   it("Parses shortcut without modifiers", () => {
     const expectedShortcutSequence: AtomicShortcut[] = [
       {
@@ -109,6 +125,7 @@ describe("Parses shortcut correctly", () => {
 
 function generateInputAppWithShortcut(override?: {
   appBundleId?: string;
+  windowsAppId?: string;
   appName?: string;
   slug?: string;
   keymapTitle?: string;
@@ -119,6 +136,7 @@ function generateInputAppWithShortcut(override?: {
 }): InputApp {
   return {
     bundleId: override?.appBundleId ?? "some-bundle-id",
+    windowsAppId: override?.windowsAppId,
     name: override?.appName ?? "some-name",
     slug: override?.slug ?? "some-slug",
     keymaps: [
@@ -143,11 +161,13 @@ function generateInputAppWithShortcut(override?: {
 
 function generateExpectedAppWithShortcut(override?: {
   appBundleId?: string;
+  windowsAppId?: string;
   comment?: string;
   shortcutSequence?: AtomicShortcut[];
 }): Application {
   return {
     bundleId: override?.appBundleId ?? "some-bundle-id",
+    windowsAppId: override?.windowsAppId,
     name: "some-name",
     slug: "some-slug",
     keymaps: [

@@ -6,7 +6,7 @@ Recognize the song currently playing around you from Raycast using a macOS Short
 
 - Raycast provides the UI and actions.
 - A macOS Shortcut named `RaycastShazam-v1.1` performs the recognition.
-- The Shortcut writes a JSON result to the Clipboard.
+- The Shortcut returns a JSON result (it also copies it to the Clipboard).
 - The extension reads that result and displays the song details.
 
 ## Requirements

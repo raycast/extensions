@@ -1,50 +1,35 @@
 # Caschys Blog
 
-The official Raycast extension for the German tech blog Caschys Blog (www.stadt-bremerhaven.de)
+Read and search Caschys Blog from Raycast. The extension uses the public RSS feed at `stadt-bremerhaven.de`.
 
-## Features
+## Commands
 
-- Browse the latest articles from Caschys Blog
-- Search through articles by title, description, author, and categories
-- View article details with formatted content
-- Submit tips to the blog
-- Quick actions for opening articles in browser and copying links
-- AI-powered assistant for natural language interaction
-- AI assistant supports questions in multiple languages
-- Direct access to the blog website with a single command
+- **Latest Articles** loads up to the configured limit, filters by category, searches the loaded set, and opens a cleaned article view.
+- **Search Article Archive** queries the public WordPress search feed instead of limiting results to recently loaded posts.
+- **Submit Tip** prepares an email draft for `tipp@stadt-bremerhaven.de`. The extension never sends it.
+- **Open Caschys Blog** opens the website in the default browser.
 
-## Installation
+## Raycast AI tools
 
-1. Install [Raycast](https://raycast.com/)
-2. Search for "Caschys Blog" in the Raycast Store
-3. Click Install
+- Search the public WordPress feed, including posts older than the local recent-article cache.
+- Retrieve the latest articles.
+- Prepare a tip email draft for review.
 
-## Usage
+AI results contain cleaned feed excerpts. The assistant instructions require returned feed data and links, and tell the model not to invent missing article content.
 
-The extension provides the following commands:
+Article results are cached for ten minutes. If a refresh fails, the extension keeps the last cached result available.
 
-- **Latest Articles**: Browse and search through the most recent articles
-- **Submit Tip**: Send a tip to Caschys Blog
-- **Open Caschys Blog**: Quickly open the Caschys Blog website in your default browser
-- **Ask Caschys Blog**: Chat with the AI assistant to search for articles, get the latest news, or submit tips using natural language
+## Development
 
-### AI Assistant
+```bash
+npm ci
+npm test
+npm run test:live
+npm run check
+```
 
-The AI assistant allows you to interact with Caschys Blog using natural language. You can:
-
-- Search for articles on specific topics
-- Get the latest articles from the blog
-- Submit tips to the blog
-- Ask questions in any language - the assistant will respond in the same language
-
-Example queries:
-- "Show me the latest articles from Caschys Blog"
-- "Search for articles about iPhone"
-- "I want to submit a tip about a new tech product"
-- "Zeige mir die neuesten Artikel" (German)
-- "Buscar artículos sobre Android" (Spanish)
-
+`test:live` reads the public RSS and search feeds. It does not publish or modify blog content.
 
 ## License
 
-MIT License
+MIT

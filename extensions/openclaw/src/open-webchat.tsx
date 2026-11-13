@@ -3,16 +3,16 @@ import { getPreferences } from "./api";
 
 export default async function Command() {
   try {
-    const prefs = getPreferences<Preferences>();
-    // The webchat is typically served from the gateway endpoint
-    const webchatUrl = prefs.endpoint.replace(/\/+$/, "");
-    await open(webchatUrl);
+    const preferences = getPreferences();
+    await open(preferences.webUrl);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Error",
+      title: "Could Not Open Control UI",
       message:
-        error instanceof Error ? error.message : "Failed to open webchat",
+        error instanceof Error
+          ? error.message
+          : "The configured Gateway URL is unavailable.",
     });
   }
 }

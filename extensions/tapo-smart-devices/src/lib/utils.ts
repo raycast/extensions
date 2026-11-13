@@ -1,7 +1,7 @@
 import { isAvailableDevice } from "./devices";
 import { AvailableDevice, Device } from "./types";
 
-export const normaliseMacAddress = (macAddress: string): string => macAddress.replace(/:/g, "").toUpperCase();
+export const normaliseMacAddress = (macAddress: string): string => macAddress.replace(/[:-]/g, "").toUpperCase();
 
 export const isWindows = process.platform === "win32";
 

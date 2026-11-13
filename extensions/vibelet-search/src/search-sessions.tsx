@@ -1,34 +1,78 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  popToRoot,
-  closeMainWindow,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, environment, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
-import { loadAllSessionMetas, loadSessionMessages, searchSessionContent } from "./parsers";
-import { getResumeCommand, openInApp, openResumeInTerminal, sourceFamily } from "./terminal";
-import {
-  findMatchIndex,
-  formatRelativeTime,
-  formatSessionMarkdown,
-  formatSessionPlainText,
-  renderMessage,
-} from "./format-session";
+import * as path from "path";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { SessionActions } from "./components/session-actions";
+import { findMatchIndex, formatRelativeTime, formatSessionMarkdown, renderMessage } from "./format";
+import { ensureContentIndex, searchContentIndex, sessionKeyOf, type IndexedMessageHit } from "./index";
+import { loadSessionMessages } from "./load-messages";
+import { loadAllSessionMetas, type SessionLoadResult } from "./scanners";
 import { SOURCE_BADGE, SOURCE_LABEL } from "./source-display";
 import type { SessionMeta, SessionSource } from "./types";
 
 const SOURCE_ORDER: SessionSource[] = ["claude-cli", "claude-app", "codex-cli", "codex-app"];
 
+/**
+ * Filter selectable via `cmd+K` (List.Dropdown). "claude"/"codex" merge the cli+app pair;
+ * `project:<path>` filters to one project directory.
+ */
+type FilterKey = "all" | "claude" | "codex" | SessionSource | `project:${string}`;
+
+function matchesFilter(meta: SessionMeta, filter: FilterKey): boolean {
+  switch (filter) {
+    case "all":
+      return true;
+    case "claude":
+      return meta.source === "claude-cli" || meta.source === "claude-app";
+    case "codex":
+      return meta.source === "codex-cli" || meta.source === "codex-app";
+    default:
+      if (filter.startsWith("project:")) {
+        return meta.projectPath === filter.slice("project:".length);
+      }
+      return meta.source === filter;
+  }
+}
+
+/** Show the last two path segments so long cwd strings fit in a dropdown item / row. */
+function shortPath(p: string): string {
+  const parts = p.split("/").filter(Boolean);
+  return parts.slice(-2).join("/");
+}
+
+function sourceIcon(source: SessionSource): { source: Icon; tintColor: Color } {
+  switch (source) {
+    case "claude-cli":
+      return { source: Icon.Terminal, tintColor: Color.Orange };
+    case "claude-app":
+      return { source: Icon.AppWindow, tintColor: Color.Purple };
+    case "codex-cli":
+      return { source: Icon.Code, tintColor: Color.Green };
+    case "codex-app":
+      return { source: Icon.AppWindow, tintColor: Color.Blue };
+  }
+}
+
 const DETAIL_TRUNCATE_BYTES = 3000;
 
-function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
+/** Caches (meta + content index) live here; delete to rebuild everything from scratch. */
+const CACHE_DIR = path.join(environment.supportPath, "cache");
+
+// Cap the initial render at 200 items to keep Raycast's List responsive.
+// Users with thousands of sessions can still find anything via the search bar — search
+// scans the full meta list (titles) and full file contents (via the content index), not just the visible window.
+const MAX_DISPLAY = 200;
+const CONTENT_SEARCH_LIMIT = 100;
+
+/** Debounce content search so fast typing doesn't spawn a ripgrep per keystroke. */
+const SEARCH_DEBOUNCE_MS = 150;
+
+function dirtySignature(sd: SessionLoadResult | undefined): number {
+  if (!sd) return 0;
+  return sd.changedKeys.length + sd.removedKeys.length;
+}
+
+function SessionDetail({ meta, query, focusIndex }: { meta: SessionMeta; query?: string; focusIndex?: number }) {
   // Pass meta.id as args so useCachedPromise's cache key is unique per session.
   // Without this, navigating between sessions would briefly show the previous session's messages.
   const { data: messages, isLoading } = useCachedPromise(
@@ -51,9 +95,11 @@ function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
     if (!messages) return headerOnly + (isLoading ? "*Loading conversation…*" : "*No conversation messages found.*");
     if (messages.length === 0) return headerOnly + "*No conversation messages found.*";
 
-    const matchIdx = query ? findMatchIndex(messages, query) : -1;
+    // A content-index hit carries the exact message index (seq contract); fall back to a
+    // linear scan for title hits.
+    const matchIdx = focusIndex ?? (query ? findMatchIndex(messages, query) : -1);
 
-    if (matchIdx >= 0) {
+    if (matchIdx >= 0 && matchIdx < messages.length) {
       const contextStart = Math.max(0, matchIdx - 1);
       const contextEnd = Math.min(messages.length, matchIdx + 2);
       const matchContext = messages
@@ -80,50 +126,7 @@ function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
     }
 
     return formatSessionMarkdown(meta, messages, { query, truncate: DETAIL_TRUNCATE_BYTES });
-  }, [isLoading, meta, messages, query]);
-
-  // Full untruncated markdown for "Copy Full Conversation"
-  const fullMarkdown = useMemo(
-    () => (messages && messages.length > 0 ? formatSessionMarkdown(meta, messages) : ""),
-    [meta, messages],
-  );
-  const fullPlainText = useMemo(
-    () => (messages && messages.length > 0 ? formatSessionPlainText(meta, messages) : ""),
-    [meta, messages],
-  );
-
-  const isAppSource = meta.source === "claude-app" || meta.source === "codex-app";
-  const appName = sourceFamily(meta.source) === "claude" ? "Claude" : "Codex";
-
-  const openInAppAction = (
-    <Action
-      title={`Open in ${appName}`}
-      icon={Icon.AppWindow}
-      onAction={async () => {
-        try {
-          await openInApp(meta);
-          await closeMainWindow();
-        } catch (e) {
-          showToast({ style: Toast.Style.Failure, title: `Failed to open ${appName}`, message: String(e) });
-        }
-      }}
-    />
-  );
-
-  const openInTerminalAction = (
-    <Action
-      title="Resume in Terminal"
-      icon={Icon.Terminal}
-      onAction={async () => {
-        try {
-          await openResumeInTerminal(meta);
-          await closeMainWindow();
-        } catch (e) {
-          showToast({ style: Toast.Style.Failure, title: "Failed to open terminal", message: String(e) });
-        }
-      }}
-    />
-  );
+  }, [isLoading, meta, messages, query, focusIndex]);
 
   return (
     <Detail
@@ -131,129 +134,119 @@ function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          {isAppSource ? openInAppAction : openInTerminalAction}
-          {isAppSource ? openInTerminalAction : openInAppAction}
-          <Action.CopyToClipboard
-            title="Copy Resume Command"
-            content={getResumeCommand(meta)}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Dangerous Resume Command"
-            content={getResumeCommand(meta, undefined, { skipPermissions: true })}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Markdown"
-            content={fullMarkdown}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Plain Text"
-            content={fullPlainText}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          />
-          {meta.projectPath ? <Action.ShowInFinder path={meta.projectPath} title="Open Project in Finder" /> : null}
-          {/* eslint-disable @raycast/prefer-title-case */}
-          <Action.CopyToClipboard
-            content={meta.id}
-            title="Copy Session ID"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-          {/* eslint-enable @raycast/prefer-title-case */}
-          {meta.projectPath ? <Action.CopyToClipboard content={meta.projectPath} title="Copy Project Path" /> : null}
+          <SessionActions meta={meta} />
         </ActionPanel>
       }
     />
   );
 }
 
-// Cap the initial render at 200 items to keep Raycast's List responsive.
-// Users with thousands of sessions can still find anything via the search bar — search
-// scans the full meta list (titles) and full file contents (via ripgrep), not just the visible window.
-const MAX_DISPLAY = 200;
-const CONTENT_SEARCH_LIMIT = 100;
-
 export default function SearchSessions() {
   const [searchText, setSearchText] = useState("");
+  // Debounced copy of the query for content search only — title filtering stays instant.
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  // Source/agent filter, toggled via `cmd+K`.
+  const [filter, setFilter] = useState<FilterKey>("all");
 
-  const { data: allMetas, isLoading: isLoadingMetas } = useCachedPromise(
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(searchText), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [searchText]);
+
+  const { data: sessionData, isLoading: isLoadingMetas } = useCachedPromise(
     async () => {
       try {
-        return await loadAllSessionMetas();
+        return await loadAllSessionMetas({ cacheDir: CACHE_DIR });
       } catch (e) {
         showToast({ style: Toast.Style.Failure, title: "Failed to load sessions", message: String(e) });
-        return [];
+        return { metas: [], changedKeys: [], removedKeys: [] } as SessionLoadResult;
       }
     },
     [],
     { keepPreviousData: true },
   );
 
-  // Content search runs ripgrep asynchronously so the worker event loop stays free for IPC.
-  // useCachedPromise dedupes by args (searchText) — typing "abc" doesn't fan out into stale runs.
+  // The content-search closure needs the freshest metas/dirty even when the promise is
+  // cached — keep a ref so we never index a stale snapshot.
+  const sessionDataRef = useRef(sessionData);
+  sessionDataRef.current = sessionData;
+
+  // Content search runs against the merged index asynchronously so the worker event loop
+  // stays free for IPC. ensureContentIndex is a no-op unless metas/dirty changed.
   const { data: contentMatches } = useCachedPromise(
-    async (q: string, hasMetas: boolean): Promise<Array<[string, string]>> => {
-      if (!q.trim() || q.length < 2 || !hasMetas) return [];
+    async (q: string, metaCount: number, dirtySig: number): Promise<IndexedMessageHit[]> => {
+      void dirtySig; // dependency sentinel — forces a re-run whenever metas changed
+      if (!q.trim() || q.length < 2 || metaCount === 0) return [];
+      const sd = sessionDataRef.current;
+      if (!sd || sd.metas.length === 0) return [];
       try {
-        return await searchSessionContent(q, CONTENT_SEARCH_LIMIT);
+        await ensureContentIndex(CACHE_DIR, sd.metas, { changedKeys: sd.changedKeys, removedKeys: sd.removedKeys });
+        return await searchContentIndex(CACHE_DIR, q, CONTENT_SEARCH_LIMIT);
       } catch (e) {
         showToast({ style: Toast.Style.Failure, title: "Content search unavailable", message: String(e) });
         return [];
       }
     },
-    [searchText, !!allMetas],
+    // dirtySignature in the deps makes the promise re-run (and rebuild the index) whenever
+    // metas changed, even if the debounced query didn't.
+    [debouncedQuery, sessionData?.metas.length ?? 0, dirtySignature(sessionData)],
   );
 
-  // O(1) filePath -> meta lookup, used for merging content-search results into the list
-  const metaByFilePath = useMemo(() => {
+  // O(1) sessionKey -> meta lookup, used for merging content-search hits into the list.
+  const metaByKey = useMemo(() => {
     const m = new Map<string, SessionMeta>();
-    for (const meta of allMetas ?? []) m.set(meta.filePath, meta);
+    for (const meta of sessionData?.metas ?? []) m.set(sessionKeyOf(meta), meta);
     return m;
-  }, [allMetas]);
+  }, [sessionData]);
+
+  // Projects for the cmd+K filter, most-populated first, capped so the dropdown stays light.
+  const projects = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const m of sessionData?.metas ?? []) {
+      if (!m.projectPath) continue;
+      counts.set(m.projectPath, (counts.get(m.projectPath) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([p]) => p);
+  }, [sessionData]);
 
   const filteredSessions = useMemo(() => {
-    if (!allMetas) return [];
+    const allMetas = sessionData?.metas ?? [];
+    // Apply the cmd+K source/agent filter first, so search + cap both operate on the scoped set.
+    const scoped = allMetas.filter((m) => matchesFilter(m, filter));
+    type Rendered = SessionMeta & { matchSnippet?: string; focusIndex?: number };
 
     if (!searchText.trim()) {
-      return allMetas.slice(0, MAX_DISPLAY).map((m) => ({ ...m, matchSnippet: undefined }));
+      return scoped.slice(0, MAX_DISPLAY) as Rendered[];
     }
 
     const lowerQuery = searchText.toLowerCase();
     const seen = new Set<string>();
-    const results: (SessionMeta & { matchSnippet?: string })[] = [];
+    const results: Rendered[] = [];
 
     // Title matches first
-    for (const meta of allMetas) {
+    for (const meta of scoped) {
       if (meta.title.toLowerCase().includes(lowerQuery)) {
-        results.push({ ...meta, matchSnippet: undefined });
-        seen.add(meta.id);
+        results.push(meta);
+        seen.add(sessionKeyOf(meta));
       }
     }
 
-    // Then content matches (keyed by filePath, O(1) lookup via metaByFilePath)
+    // Then content matches (keyed by sessionKey, O(1) lookup via metaByKey), scoped by the filter too
     if (contentMatches) {
-      for (const [filePath, snippet] of contentMatches) {
-        const meta = metaByFilePath.get(filePath);
-        if (meta && !seen.has(meta.id)) {
-          results.push({ ...meta, matchSnippet: snippet });
-          seen.add(meta.id);
+      for (const hit of contentMatches) {
+        const meta = metaByKey.get(hit.sessionKey);
+        if (meta && matchesFilter(meta, filter) && !seen.has(hit.sessionKey)) {
+          results.push({ ...meta, matchSnippet: hit.snippet, focusIndex: hit.msgIndex });
+          seen.add(hit.sessionKey);
         }
       }
     }
 
     return results;
-  }, [allMetas, searchText, contentMatches, metaByFilePath]);
-
-  const sectionsBySource = useMemo(() => {
-    const grouped = new Map<SessionSource, (SessionMeta & { matchSnippet?: string })[]>();
-    for (const session of filteredSessions) {
-      const list = grouped.get(session.source) ?? [];
-      list.push(session);
-      grouped.set(session.source, list);
-    }
-    return grouped;
-  }, [filteredSessions]);
+  }, [sessionData, searchText, contentMatches, metaByKey, filter]);
 
   return (
     <List
@@ -261,154 +254,74 @@ export default function SearchSessions() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search sessions by title or content..."
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter Sessions" storeValue onChange={(v) => setFilter(v as FilterKey)}>
+          <List.Dropdown.Item title="All Sessions" value="all" icon={Icon.AppWindow} />
+          <List.Dropdown.Section title="Agent">
+            <List.Dropdown.Item title="Claude" value="claude" icon={sourceIcon("claude-cli")} />
+            <List.Dropdown.Item title="Codex" value="codex" icon={sourceIcon("codex-cli")} />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Source">
+            {SOURCE_ORDER.map((s) => (
+              <List.Dropdown.Item key={s} title={SOURCE_LABEL[s]} value={s} icon={sourceIcon(s)} />
+            ))}
+          </List.Dropdown.Section>
+          {projects.length > 0 && (
+            <List.Dropdown.Section title="Project">
+              {projects.map((p) => (
+                <List.Dropdown.Item key={p} title={shortPath(p)} value={`project:${p}`} icon={Icon.Folder} />
+              ))}
+            </List.Dropdown.Section>
+          )}
+        </List.Dropdown>
+      }
       throttle
     >
-      {SOURCE_ORDER.map((source) => {
-        const items = sectionsBySource.get(source);
-        if (!items || items.length === 0) return null;
-        return (
-          <List.Section key={source} title={SOURCE_LABEL[source]} subtitle={`${items.length} sessions`}>
-            {items.map((session) => (
-              <SessionItem
-                key={`${session.source}:${session.id}`}
-                meta={session}
-                matchSnippet={session.matchSnippet}
-                query={searchText}
-              />
-            ))}
-          </List.Section>
-        );
-      })}
+      {filteredSessions.map((session) => (
+        <SessionItem
+          key={`${session.source}:${session.id}`}
+          meta={session}
+          matchSnippet={session.matchSnippet}
+          focusIndex={session.focusIndex}
+          query={searchText}
+        />
+      ))}
     </List>
   );
 }
 
-function SessionItem({ meta, matchSnippet, query }: { meta: SessionMeta; matchSnippet?: string; query: string }) {
-  const icon = (() => {
-    switch (meta.source) {
-      case "claude-cli":
-        return { source: Icon.Terminal, tintColor: Color.Orange };
-      case "claude-app":
-        return { source: Icon.AppWindow, tintColor: Color.Purple };
-      case "codex-cli":
-        return { source: Icon.Code, tintColor: Color.Green };
-      case "codex-app":
-        return { source: Icon.AppWindow, tintColor: Color.Blue };
-    }
-  })();
-
+function SessionItem({
+  meta,
+  matchSnippet,
+  focusIndex,
+  query,
+}: {
+  meta: SessionMeta;
+  matchSnippet?: string;
+  focusIndex?: number;
+  query: string;
+}) {
   const detailQuery = matchSnippet ? query : undefined;
-  const isAppSource = meta.source === "claude-app" || meta.source === "codex-app";
-  const appName = sourceFamily(meta.source) === "claude" ? "Claude" : "Codex";
-
-  const openInAppAction = (
-    <Action
-      title={`Open in ${appName}`}
-      icon={Icon.AppWindow}
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
-      onAction={async () => {
-        try {
-          await openInApp(meta);
-          await closeMainWindow();
-          await popToRoot();
-        } catch (e) {
-          showToast({ style: Toast.Style.Failure, title: `Failed to open ${appName}`, message: String(e) });
-        }
-      }}
-    />
-  );
-
-  const openInTerminalAction = (
-    <Action
-      title="Resume in Terminal"
-      icon={Icon.Terminal}
-      shortcut={{ modifiers: ["cmd"], key: "t" }}
-      onAction={async () => {
-        try {
-          await openResumeInTerminal(meta);
-          await closeMainWindow();
-          await popToRoot();
-        } catch (e) {
-          showToast({ style: Toast.Style.Failure, title: "Failed to open terminal", message: String(e) });
-        }
-      }}
-    />
-  );
 
   return (
     <List.Item
-      icon={icon}
+      icon={sourceIcon(meta.source)}
       title={meta.title}
       subtitle={matchSnippet || meta.projectPath}
-      accessories={[{ text: formatRelativeTime(meta.timestamp) }]}
+      accessories={[
+        // During a content search the subtitle is the snippet, so surface the project separately.
+        ...(matchSnippet && meta.projectPath ? [{ text: shortPath(meta.projectPath) }] : []),
+        { text: SOURCE_LABEL[meta.source] },
+        { text: formatRelativeTime(meta.timestamp) },
+      ]}
       actions={
         <ActionPanel>
           <Action.Push
             title={matchSnippet ? "View Matched Context" : "View Conversation"}
             icon={Icon.Eye}
-            target={<SessionDetail meta={meta} query={detailQuery} />}
+            target={<SessionDetail meta={meta} query={detailQuery} focusIndex={focusIndex} />}
           />
-          {isAppSource ? openInAppAction : openInTerminalAction}
-          {isAppSource ? openInTerminalAction : openInAppAction}
-          <Action.CopyToClipboard
-            title="Copy Resume Command"
-            content={getResumeCommand(meta)}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Dangerous Resume Command"
-            content={getResumeCommand(meta, undefined, { skipPermissions: true })}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          />
-          <Action
-            title="Copy Markdown"
-            icon={Icon.Document}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-            onAction={async () => {
-              try {
-                const messages = await loadSessionMessages(meta);
-                if (messages.length === 0) {
-                  showToast({ style: Toast.Style.Failure, title: "Empty session" });
-                  return;
-                }
-                const md = formatSessionMarkdown(meta, messages);
-                const { Clipboard } = await import("@raycast/api");
-                await Clipboard.copy(md);
-                showToast({ style: Toast.Style.Success, title: `Copied ${messages.length} messages` });
-              } catch (e) {
-                showToast({ style: Toast.Style.Failure, title: "Failed to copy", message: String(e) });
-              }
-            }}
-          />
-          <Action
-            title="Copy Plain Text"
-            icon={Icon.Text}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            onAction={async () => {
-              try {
-                const messages = await loadSessionMessages(meta);
-                if (messages.length === 0) {
-                  showToast({ style: Toast.Style.Failure, title: "Empty session" });
-                  return;
-                }
-                const txt = formatSessionPlainText(meta, messages);
-                const { Clipboard } = await import("@raycast/api");
-                await Clipboard.copy(txt);
-                showToast({ style: Toast.Style.Success, title: `Copied ${messages.length} messages` });
-              } catch (e) {
-                showToast({ style: Toast.Style.Failure, title: "Failed to copy", message: String(e) });
-              }
-            }}
-          />
-          {meta.projectPath ? <Action.ShowInFinder path={meta.projectPath} title="Open Project in Finder" /> : null}
-          {/* eslint-disable @raycast/prefer-title-case */}
-          <Action.CopyToClipboard
-            title="Copy Session ID"
-            content={meta.id}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-          {/* eslint-enable @raycast/prefer-title-case */}
-          {meta.projectPath ? <Action.CopyToClipboard title="Copy Project Path" content={meta.projectPath} /> : null}
+          <SessionActions meta={meta} shortcuts />
         </ActionPanel>
       }
     />

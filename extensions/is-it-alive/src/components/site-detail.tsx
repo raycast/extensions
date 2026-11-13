@@ -1,5 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import type { StatusSnapshot } from "@/types";
+import { useCachedPromise } from "@raycast/utils";
+import { fetchSnapshot } from "@/adapters";
+import type { MonitoredSite, StatusSnapshot } from "@/types";
 import {
   componentStatusLabel,
   componentStatusListIcon,
@@ -13,7 +15,7 @@ import {
 import { formatUptimePercent } from "@/lib/snapshot-text";
 
 interface SiteDetailProps {
-  snapshot: StatusSnapshot;
+  site: MonitoredSite;
 }
 
 function buildIncidentMarkdown(
@@ -60,7 +62,34 @@ function buildOverviewMarkdown(snapshot: StatusSnapshot): string {
   return `${uptimeMarkdown}\n\n---\n\n${incidentsMarkdown}`;
 }
 
-export function SiteDetail({ snapshot }: SiteDetailProps) {
+export function SiteDetail({ site }: SiteDetailProps) {
+  const {
+    data: snapshot,
+    isLoading,
+    error,
+  } = useCachedPromise(
+    async (monitored: MonitoredSite) =>
+      fetchSnapshot({
+        url: monitored.url,
+        provider: monitored.provider,
+        monitoredRegions: monitored.monitoredRegions,
+      }),
+    [site],
+  );
+
+  if (!snapshot) {
+    return (
+      <List isLoading={isLoading} navigationTitle={site.name}>
+        <List.EmptyView
+          title={error ? "Failed to load status" : "Loading status..."}
+          description={
+            error instanceof Error ? error.message : "Fetching the status page."
+          }
+        />
+      </List>
+    );
+  }
+
   const overviewIcon = snapshot.error
     ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
     : indicatorListIcon(snapshot.indicator);

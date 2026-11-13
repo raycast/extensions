@@ -1,7 +1,5 @@
 ## macOS 系统翻译
 
-> 此功能为实验性功能，可能不太稳定，甚至不一定能用。😅
-
 ![easydict-3-apple](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-apple-1658322875.png)
 
 ## 系统要求
@@ -40,4 +38,4 @@ https://www.icloud.com/shortcuts/776f8a1d8e43471885e8a505eb9a9deb
 
 ## 参考·感谢
 
-- [如何在 Bob 中使用 macOS 系统翻译？](https://ripperhe.gitee.io/bob/#/faq/use-apple-translate?id=如何在-bob-中使用-macos-系统翻译？)
+- [如何在 Bob 中使用 macOS 系统翻译？](https://bobtranslate.com/faq/use-apple-translate.html)

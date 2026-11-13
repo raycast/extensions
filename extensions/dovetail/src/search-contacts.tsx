@@ -6,6 +6,26 @@ import { useSearch } from "./hooks/useSearch";
 
 const OPTION_COLORS = ["#4F8FFF", "#FFD700", "#FF69B4", "#00C49A", "#FF7043", "#A259FF", "#FFB300", "#00B8D9"];
 
+// getAvatarIcon's default palette is hex colors, and hex colors contain a literal "#" — inside
+// an un-encoded `data:image/svg+xml,` URI that character starts a fragment, which can truncate
+// the SVG before its closing tag and render as a broken image. rgb() colors avoid "#" entirely.
+const AVATAR_COLORS = [
+  "rgb(79, 143, 255)",
+  "rgb(255, 105, 180)",
+  "rgb(0, 196, 154)",
+  "rgb(255, 112, 67)",
+  "rgb(162, 89, 255)",
+  "rgb(255, 179, 0)",
+  "rgb(0, 184, 217)",
+  "rgb(220, 130, 154)",
+];
+
+function avatarColorFor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash + name.charCodeAt(i)) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[hash];
+}
+
 export default function SearchContacts() {
   const { data, isLoading, numberOfResults, onQueryChange, pagination } = useSearch(endpoints.contacts);
 
@@ -26,7 +46,10 @@ export default function SearchContacts() {
               key={item.id}
               id={item.id}
               title={item.name || "Untitled contact"}
-              icon={getAvatarIcon(item.name || "")}
+              icon={getAvatarIcon(item.name || "?", {
+                background: avatarColorFor(item.name || item.id),
+                gradient: false,
+              })}
               detail={
                 <List.Item.Detail
                   metadata={

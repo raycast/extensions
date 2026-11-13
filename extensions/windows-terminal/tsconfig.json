@@ -10,7 +10,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node"]
   }
 }

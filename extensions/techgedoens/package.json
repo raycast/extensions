@@ -1,0 +1,446 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "techgedoens",
+  "title": "Techgedöns.de",
+  "description": "The official Raycast extension for the German tech blog Techgedöns.de",
+  "icon": "icon.png",
+  "author": "Marcelismus",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "allArticlesInitialFilter",
+      "title": "Initial Article Filter",
+      "description": "Selects the read status shown when opening All Articles.",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Articles",
+          "value": "all"
+        },
+        {
+          "title": "Unread Articles",
+          "value": "unread"
+        },
+        {
+          "title": "Read Articles",
+          "value": "read"
+        },
+        {
+          "title": "Last Used",
+          "value": "last"
+        }
+      ]
+    },
+    {
+      "name": "articleEnterAction",
+      "title": "Return Key Action",
+      "description": "Selects whether Return shows the article in Raycast or opens it in the default browser.",
+      "type": "dropdown",
+      "required": false,
+      "default": "reader",
+      "data": [
+        {
+          "title": "Read in Raycast",
+          "value": "reader"
+        },
+        {
+          "title": "Open in Default Browser",
+          "value": "browser"
+        }
+      ]
+    },
+    {
+      "name": "archiveRetention",
+      "title": "Keep Articles",
+      "description": "Selects when stored articles are removed from the complete article list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "month",
+      "data": [
+        {
+          "title": "One Week",
+          "value": "week"
+        },
+        {
+          "title": "One Month",
+          "value": "month"
+        },
+        {
+          "title": "One Year",
+          "value": "year"
+        },
+        {
+          "title": "Never Delete",
+          "value": "never"
+        }
+      ]
+    },
+    {
+      "name": "archivePageSize",
+      "title": "Articles per Load",
+      "description": "Selects how many articles are initially shown and loaded at the end of the list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "15 Articles",
+          "value": "15"
+        },
+        {
+          "title": "30 Articles",
+          "value": "30"
+        },
+        {
+          "title": "45 Articles",
+          "value": "45"
+        },
+        {
+          "title": "60 Articles",
+          "value": "60"
+        },
+        {
+          "title": "90 Articles",
+          "value": "90"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayArticleCount",
+      "title": "Menu Bar Article Count",
+      "description": "Selects how many articles are shown in each menu bar section.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "3 Articles",
+          "value": "3"
+        },
+        {
+          "title": "5 Articles",
+          "value": "5"
+        },
+        {
+          "title": "10 Articles",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayTitleLength",
+      "title": "Menu Bar Title Length",
+      "description": "Selects the maximum article title length shown in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Very Short (Max. 40 Characters)",
+          "value": "very-short"
+        },
+        {
+          "title": "Short (Max. 55 Characters)",
+          "value": "short"
+        },
+        {
+          "title": "Medium (56-70 Characters)",
+          "value": "medium"
+        },
+        {
+          "title": "Long (71-90 Characters)",
+          "value": "long"
+        },
+        {
+          "title": "Full Title",
+          "value": "full"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayUnreadOnly",
+      "title": "Menu Bar Article Filter",
+      "description": "Only shows unread articles in the Latest Articles and Favorites sections.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Only show unread articles"
+    },
+    {
+      "name": "menuBarDisplayUnreadCounter",
+      "title": "Menu Bar Unread Counter",
+      "description": "Selects when the unread counter is shown in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "always",
+      "data": [
+        {
+          "title": "Always Show",
+          "value": "always"
+        },
+        {
+          "title": "Hide When Zero",
+          "value": "hide-zero"
+        },
+        {
+          "title": "Always Hide",
+          "value": "hidden"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayPublicationDate",
+      "title": "Menu Bar Article Details",
+      "description": "Shows the publication date next to each article in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show publication date"
+    },
+    {
+      "name": "menuBarDisplayCategory",
+      "title": "",
+      "description": "Shows the category next to each article in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show category"
+    }
+  ],
+  "commands": [
+    {
+      "name": "latest-articles",
+      "title": "Latest Articles",
+      "subtitle": "Techgedöns.de",
+      "description": "Lists the latest articles from Techgedoens.de",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "blog",
+        "rss"
+      ]
+    },
+    {
+      "name": "next-unread-article",
+      "title": "Next Unread Article",
+      "subtitle": "Techgedöns.de",
+      "description": "Opens the next unread Techgedöns article",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "nextUnreadArticleOrder",
+          "title": "Unread Article Order",
+          "description": "Selects whether the oldest or newest unread article opens first.",
+          "type": "dropdown",
+          "required": false,
+          "default": "oldest",
+          "data": [
+            {
+              "title": "Oldest First",
+              "value": "oldest"
+            },
+            {
+              "title": "Newest First",
+              "value": "newest"
+            }
+          ]
+        }
+      ],
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "ungelesen",
+        "nächster",
+        "next",
+        "unread"
+      ]
+    },
+    {
+      "name": "all-articles",
+      "title": "All Articles",
+      "subtitle": "Techgedöns.de",
+      "description": "Shows the saved article archive with read status and topic filters",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedöns",
+        "artikel",
+        "archiv",
+        "gelesen",
+        "ungelesen",
+        "rss"
+      ]
+    },
+    {
+      "name": "saved-articles",
+      "title": "Favorites",
+      "subtitle": "Techgedöns.de",
+      "description": "Shows saved Techgedöns articles",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedöns",
+        "artikel",
+        "favoriten",
+        "gespeichert",
+        "leseliste"
+      ]
+    },
+    {
+      "name": "search-selected-text",
+      "title": "Search Selected Text",
+      "subtitle": "Techgedöns.de",
+      "description": "Searches Techgedöns.de for text selected in the frontmost application",
+      "mode": "no-view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "auswahl",
+        "markierter text",
+        "suchen",
+        "selected text",
+        "search"
+      ]
+    },
+    {
+      "name": "search-techgedoens",
+      "title": "Search Techgedöns",
+      "subtitle": "Techgedöns.de",
+      "description": "Searches the complete Techgedöns.de article archive",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "suchen",
+        "archive",
+        "search",
+        "rss"
+      ]
+    },
+    {
+      "name": "refresh-articles",
+      "title": "Refresh Articles",
+      "subtitle": "Techgedöns.de",
+      "description": "Silently refreshes the local Techgedoens.de article cache",
+      "mode": "no-view",
+      "interval": "1h",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "aktualisieren",
+        "rss"
+      ]
+    },
+    {
+      "name": "open-techgedoens",
+      "title": "Open Techgedöns.de",
+      "subtitle": "Techgedöns.de",
+      "description": "Opens Techgedöns.de in the default browser",
+      "mode": "no-view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "öffnen",
+        "website",
+        "browser"
+      ]
+    },
+    {
+      "name": "menu-bar-articles",
+      "title": "Techgedöns Menu Bar",
+      "subtitle": "Techgedöns.de",
+      "description": "Shows the unread count and latest articles in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "disabledByDefault": true,
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "ungelesen",
+        "menüleiste",
+        "menu bar"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "description": "Searches the public Techgedöns.de archive and returns the five most relevant articles with their full RSS content"
+    },
+    {
+      "name": "get-latest-articles",
+      "title": "Get Latest Articles",
+      "description": "Returns the five latest articles published on Techgedöns.de"
+    },
+    {
+      "name": "get-article",
+      "title": "Get Article",
+      "description": "Loads a specific Techgedöns.de article by its exact title or URL"
+    },
+    {
+      "name": "get-unread-articles",
+      "title": "Get Unread Articles",
+      "description": "Returns unread articles from the user's local Techgedöns archive, optionally filtered by topic; use nextOffset to continue through longer lists"
+    },
+    {
+      "name": "get-favorite-articles",
+      "title": "Get Favorite Articles",
+      "description": "Returns favorite articles from the user's local Techgedöns archive, optionally filtered by topic; use nextOffset to continue through longer lists"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "rss-parser": "^3.13.0",
+    "turndown": "^7.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/turndown": "5.0.6",
+    "eslint": "^10.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}

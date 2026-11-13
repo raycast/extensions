@@ -60,7 +60,7 @@ export async function apfelExplainDirectory(dirPath: string): Promise<string> {
   const snapshot = escapeForShell(buildSnapshot(dirPath));
 
   return await runAppleScript(
-    `do shell script "echo '${snapshot}' | ${getApfelPath()} -s '${SUMMARIZE_SYSTEM_PROMPT}'"`,
+    `do shell script "printf '%s' '${snapshot}' | ${getApfelPath()} -s '${SUMMARIZE_SYSTEM_PROMPT}'"`,
     { timeout: 60000 },
   );
 }

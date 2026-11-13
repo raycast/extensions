@@ -22,6 +22,7 @@ export const STORAGE_KEYS = {
   SELECTED_PROJECT_SLUG: "convex-selected-project-slug",
   SELECTED_DEPLOYMENT_NAME: "convex-selected-deployment-name",
   SELECTED_DEPLOYMENT_TYPE: "convex-selected-deployment-type",
+  SELECTED_DEPLOYMENT_URL: "convex-selected-deployment-url",
   DEPLOY_KEY: "convex-deploy-key",
   DEPLOY_KEY_URL: "convex-deploy-key-url",
 } as const;

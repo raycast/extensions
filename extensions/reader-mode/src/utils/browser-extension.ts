@@ -7,12 +7,12 @@
  */
 
 import { BrowserExtension } from "@raycast/api";
-import { urlLog } from "./logger";
-import { parseArticle } from "./readability";
-import { formatArticle } from "./markdown";
-import { getBrowserTabsSafe, hasBrowserExtension, withTimeout } from "./host-api";
-import { BrowserTab, BrowserContentResult, TabContentResult } from "../types/browser";
 import { ArticleState } from "../types/article";
+import { BrowserContentResult, BrowserTab, TabContentResult } from "../types/browser";
+import { getBrowserTabsSafe, hasBrowserExtension, withTimeout } from "./host-api";
+import { urlLog } from "./logger";
+import { formatArticle } from "./markdown";
+import { parseArticle } from "./readability";
 
 /**
  * Check if the browser extension is available.
@@ -265,9 +265,9 @@ export async function getContentFromTab(
     return { success: false, error: "The Raycast browser extension is not available." };
   }
 
-  const startTime = Date.now();
+  const startTime = performance.now();
   try {
-    urlLog.log("fetch:extension:calling-api", { url, tabId, timestamp: startTime });
+    urlLog.log("fetch:extension:calling-api", { url, tabId });
 
     // Transferring a full page can legitimately take longer than a metadata call,
     // so this gets its own budget rather than the short URL-resolution one.
@@ -278,7 +278,7 @@ export async function getContentFromTab(
       "getContent",
     );
 
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
     urlLog.log("fetch:extension:api-returned", { url, tabId, durationMs: duration, hasContent: !!html });
 
     if (!html || html.trim().length === 0) {

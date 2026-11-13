@@ -8,7 +8,7 @@ import useErrorHandling from './hooks/useErrorHandling';
 export default function ViewStats() {
   const { data, isLoading, error } = useCachedPromise(statisticActions.getCollectionStatsHTML);
   const { turndown } = useTurndown();
-  const { handleError, errorMarkdown } = useErrorHandling();
+  const { handleError, errorMarkdown } = useErrorHandling(error);
 
   useEffect(() => {
     if (!error) return;

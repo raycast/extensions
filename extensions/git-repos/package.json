@@ -152,14 +152,13 @@
     "@raycast/utils": "^2.2.3",
     "default-browser": "^5.5.0",
     "get-installed-browsers": "^0.1.7",
-    "parse-git-config": "^3.0.0",
-    "parse-github-url": "^1.0.3"
+    "git-url-parse": "^16.1.0",
+    "parse-git-config": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
     "@types/node": "25.5.0",
     "@types/parse-git-config": "^3.0.4",
-    "@types/parse-github-url": "^1.0.3",
     "@types/react": "19.2.14",
     "eslint": "^10.1.0",
     "prettier": "^3.8.1",

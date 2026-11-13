@@ -51,14 +51,13 @@ describe("prepareAgentPane", () => {
     await expect(prepareAgentPane("new-workspace", { name: "Review", environment: [] })).resolves.toBe("pane-created");
   });
 
-  it("uses the pane returned by a split instead of inferring from focus", async () => {
+  it("splits the snapshotted focused pane explicitly", async () => {
     vi.mocked(getSnapshot).mockResolvedValue({ ...snapshot, focused_pane_id: "pane-current" });
     vi.mocked(runHerdrJson).mockResolvedValue({ pane: createdPane });
 
     await expect(prepareAgentPane("split-right", { name: "Review", environment: [] })).resolves.toBe("pane-created");
     const [args] = vi.mocked(runHerdrJson).mock.calls[0];
-    expect(args).toEqual(expect.arrayContaining(["pane", "split", "--direction", "right"]));
-    expect(args).not.toContain("pane-current");
+    expect(args).toEqual(expect.arrayContaining(["pane", "split", "pane-current", "--direction", "right"]));
   });
 
   it("throws when splitting without a focused pane", async () => {

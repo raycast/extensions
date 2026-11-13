@@ -79,6 +79,7 @@
     }
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

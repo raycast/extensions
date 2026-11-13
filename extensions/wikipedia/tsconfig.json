@@ -1,15 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": [
-    "src/**/*",
-    "raycast-env.d.ts"
-  ],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": [
-      "ES2021",
-      "dom",
-      "ES2021.String"
-    ],
+    "lib": ["ES2022", "dom", "ES2021.String"],
     "module": "commonjs",
     "target": "ES2021",
     "strict": true,
@@ -19,11 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
+      "@/*": ["./src/*"]
     }
   }
 }

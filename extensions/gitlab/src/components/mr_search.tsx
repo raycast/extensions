@@ -141,7 +141,7 @@ export function SearchMyMergeRequests(props: { project?: Project } = {}) {
     ? useState<Project | undefined>(props.project)
     : useCachedState<Project | undefined>("mr-search-project", undefined);
 
-  const { projects: myprojects } = useMyProjects("", !props.project);
+  const { projects: myprojects } = useMyProjects(!props.project);
   const [mrState, setMrState] = useCachedState<MRState>("mr-search-state", MRState.opened);
   const [scope, setScope] = useCachedState<MRScope>("mr-search-scope", MRScope.all);
   const [orderBy, setOrderBy] = useCachedState<MRSearchOrderBy>("mr-search-order-by", MR_DEFAULT_ORDER_BY);

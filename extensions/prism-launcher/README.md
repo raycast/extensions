@@ -10,9 +10,11 @@ Launch and manage your Minecraft Prism Launcher instances straight from Raycast.
 - Open Minecraft Folder
 - Join Server: browse servers within an instance and join directly
 - Favorite Servers: see all favorited servers across all instances, with instance name
+- Minecraft Screenshots: browse an instance's screenshots in a gallery, copy, save, open or delete them
 
 ## Commands
 
 - Launch Instance (`index`): Manage and launch Prism Launcher instances
 - Join Server (`join-server`): View servers per selected instance, join or favorite
 - Favorite Servers (`favorite-servers`): Aggregated list of all favorited servers from all instances
+- Minecraft Screenshots (`minecraft-screenshots`): Pick an instance and browse its screenshots in a gallery view

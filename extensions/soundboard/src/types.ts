@@ -4,4 +4,5 @@ export interface Item {
   path: string[];
   favourite: string;
   last_favourite?: string;
+  icon?: string;
 }

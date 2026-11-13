@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { exists, getOpenWindowIds, shellEscape } from "./utils";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { pathToFileURL } from "node:url";
+import { exists, shellEscape } from "./utils";
 import path from "path";
 import { isPosixShell } from "./shell";
 
@@ -43,32 +46,30 @@ describe("shellEscape", () => {
   });
 });
 
-describe("getOpenWindowIds", () => {
-  it("should extract session and window IDs from a valid DB", () => {
-    const dbPath = path.resolve(__dirname, "../../test/fixtures/gram-db-v30.sqlite");
-
-    // This assumes your sample data script inserted these keys into kv_store
-    const result = getOpenWindowIds(dbPath);
-
-    expect(result.sessionId).toBeDefined();
-    expect(result.windowIds).toBeInstanceOf(Set);
-  });
-});
-
 describe("exists", () => {
+  let tempDir: string;
+  let filePath: string;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(path.join(tmpdir(), "gram-exists-"));
+    filePath = path.join(tempDir, "existing-file");
+    writeFileSync(filePath, "test");
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
   it("should return true for an existing file path", () => {
-    const dbPath = path.resolve(__dirname, "../../test/fixtures/gram-db-v30.sqlite");
-    expect(exists(dbPath)).toBe(true);
+    expect(exists(filePath)).toBe(true);
   });
 
   it("should return false for a non-existent path", () => {
-    expect(exists("/tmp/this-file-definitely-does-not-exist-12345")).toBe(false);
+    expect(exists(path.join(tempDir, "missing-file"))).toBe(false);
   });
 
   it("should handle file:// URLs", () => {
-    const dbPath = path.resolve(__dirname, "../../test/fixtures/gram-db-v30.sqlite");
-    const fileUrl = `file://${dbPath}`;
-    expect(exists(fileUrl)).toBe(true);
+    expect(exists(pathToFileURL(filePath).href)).toBe(true);
   });
 });
 

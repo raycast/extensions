@@ -40,4 +40,4 @@ Starting from v1.2.0, the extension supports displaying branches for both Git an
 
 ## 💬 Support
 
-For questions, contact [author](https://github.com/tofrankie/raycast-wechat-devtool) on GitHub.
+For questions, contact [author](https://github.com/tofrankie/raycast-collection) on GitHub.

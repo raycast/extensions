@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, Keyboard } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { domainPageUrl, logoUrl, searchIntegrations, surfaceApiUrl, type SearchResult, type SurfaceKind } from "./api";
 import { SurfaceDetail } from "./surface-detail";
 
@@ -16,18 +16,23 @@ const KINDS: SurfaceKind[] = ["mcp", "openapi", "graphql", "cli"];
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [kind, setKind] = useState<SurfaceKind | "all">("all");
+  const abortable = useRef<AbortController | null>(null);
 
   const { data, isLoading } = useCachedPromise(
     async (query: string, selectedKind: SurfaceKind | "all") => {
-      const response = await searchIntegrations({
-        query: query.trim(),
-        kind: selectedKind === "all" ? undefined : selectedKind,
-        limit: 30,
-      });
+      const response = await searchIntegrations(
+        {
+          query: query.trim(),
+          kind: selectedKind === "all" ? undefined : selectedKind,
+          limit: 30,
+        },
+        abortable.current?.signal,
+      );
       return response.results;
     },
     [searchText, kind],
     {
+      abortable,
       keepPreviousData: true,
       onError: (error) => {
         showFailureToast(error, { title: "Could not search integrations.sh" });

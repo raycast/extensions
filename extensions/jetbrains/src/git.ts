@@ -1,9 +1,9 @@
-import { readFile, stat } from "fs/promises";
-import { dirname, isAbsolute, resolve } from "path";
-import { homedir } from "os";
+import { readFile, stat } from "node:fs/promises";
+import { dirname, isAbsolute, parse, resolve } from "node:path";
+import { homedir } from "node:os";
 
 async function findGitDir(startDir: string): Promise<string | undefined> {
-  const stopAt = new Set([homedir(), "/"]);
+  const stopAt = new Set([homedir(), parse(startDir).root]);
   let current = startDir;
   while (true) {
     const candidate = resolve(current, ".git");

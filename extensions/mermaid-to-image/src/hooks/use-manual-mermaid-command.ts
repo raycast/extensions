@@ -20,7 +20,6 @@ import { resolveClipboardOnlyManualInput, resolveManualInput } from "../utils/ma
 import { type ResolvedMermaidInput } from "../utils/mermaid-input";
 import { runManualDiagramGeneration } from "../utils/manual-command-service";
 import { createManualCommandController } from "../utils/manual-command-controller";
-import { Preferences } from "../types";
 
 export interface ManualMermaidCommandActions {
   runFromSelection: () => Promise<void>;

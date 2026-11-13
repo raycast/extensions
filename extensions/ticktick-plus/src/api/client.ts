@@ -1,4 +1,5 @@
 import { authorize, provider } from "./oauth";
+import { TickTickApiError } from "./errors";
 
 const BASE_URL = "https://api.ticktick.com";
 
@@ -40,13 +41,16 @@ async function request<T>(method: string, path: string, body?: unknown, options?
       token = await authorize();
       response = await doFetch(token);
     } else {
-      throw new Error(`TickTick API error 401: endpoint ${path} is not available through the public OAuth API`);
+      throw new TickTickApiError(
+        401,
+        `TickTick API error 401: endpoint ${path} is not available through the public OAuth API`,
+      );
     }
   }
 
   if (!response.ok) {
     const text = await response.text().catch(() => response.statusText);
-    throw new Error(`TickTick API error ${response.status}: ${text}`);
+    throw new TickTickApiError(response.status, `TickTick API error ${response.status}: ${text}`);
   }
 
   const text = await response.text();

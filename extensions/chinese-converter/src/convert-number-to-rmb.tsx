@@ -90,7 +90,7 @@ export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: 
               <ActionPanel.Section title="Feedback">
                 <Action.OpenInBrowser
                   title="Report Issue"
-                  url="https://github.com/tofrankie/raycast-chinese-converter/issues"
+                  url="https://github.com/tofrankie/raycast-collection/issues"
                 />
                 <Action
                   title="Contact Author"

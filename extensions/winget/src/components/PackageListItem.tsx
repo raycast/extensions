@@ -1,8 +1,9 @@
 /**
- * One package row, shared by all list views. Icon priority is
+ * One package row, shared by all list views. Accessory icon priority is
  * pinned > update available > installed > none, with per-view suppression:
  * Installed/Upgradable views don't show the implicit Installed check. Version
- * is shown only when the display name is ambiguous in the current list.
+ * is shown as a right-side accessory, only when the display name is ambiguous
+ * in the current list.
  */
 
 import { Color, Icon, List } from "@raycast/api";
@@ -10,6 +11,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { type WingetPackageDetails } from "../cli/types";
 import { type OperationGate } from "../core/operations";
 import { type DetailTarget } from "../hooks/useDetails";
+import { packageIcon } from "../hooks/usePackageIcons";
 import { type PackageInfo } from "../utils/packages";
 
 import { type ViewKind } from "./PackageActions";
@@ -40,40 +42,54 @@ function isOperatingOn(gate: OperationGate, pkg: PackageInfo): boolean {
   return current.id === pkg.id && current.source === pkg.source;
 }
 
-function accessories(pkg: PackageInfo, viewKind: ViewKind, gate: OperationGate): List.Item.Accessory[] {
+function statusAccessory(pkg: PackageInfo, viewKind: ViewKind, gate: OperationGate): List.Item.Accessory | null {
   if (isOperatingOn(gate, pkg)) {
-    return [
-      {
-        icon: { source: Icon.CircleProgress, tintColor: Color.Blue },
-        tooltip: "Operation in progress",
-      },
-    ];
+    return {
+      icon: { source: Icon.CircleProgress, tintColor: Color.Blue },
+      tooltip: "Operation in progress",
+    };
   }
   if (pkg.isPinned) {
-    return [
-      {
-        icon: { source: Icon.Pin, tintColor: Color.Orange },
-        tooltip: "Pinned",
-      },
-    ];
+    return {
+      icon: { source: Icon.Pin, tintColor: Color.Orange },
+      tooltip: "Pinned",
+    };
   }
   if (pkg.hasUpdate) {
-    return [
-      {
-        icon: { source: Icon.ArrowUp, tintColor: Color.Green },
-        tooltip: `Update: ${pkg.availableVersion}`,
-      },
-    ];
+    return pkg.updatePreviouslyFailed
+      ? {
+          icon: { source: Icon.ArrowUp, tintColor: Color.SecondaryText },
+          tooltip: `Update: ${pkg.availableVersion} — this version failed to apply, so Upgrade All skips it. Upgrade manually to retry`,
+        }
+      : {
+          icon: { source: Icon.ArrowUp, tintColor: Color.Green },
+          tooltip: `Update: ${pkg.availableVersion}`,
+        };
   }
   if (pkg.isInstalled && viewKind === "search") {
-    return [
-      {
-        icon: { source: Icon.CheckCircle, tintColor: Color.Blue },
-        tooltip: "Installed",
-      },
-    ];
+    return {
+      icon: { source: Icon.CheckCircle, tintColor: Color.Blue },
+      tooltip: "Installed",
+    };
   }
-  return [];
+  return null;
+}
+
+function accessories(
+  pkg: PackageInfo,
+  viewKind: ViewKind,
+  gate: OperationGate,
+  showVersion: boolean,
+): List.Item.Accessory[] {
+  const status = statusAccessory(pkg, viewKind, gate);
+  const result: List.Item.Accessory[] = [];
+  if (showVersion) {
+    result.push({ text: pkg.installedVersion ?? pkg.version });
+  }
+  if (status) {
+    result.push(status);
+  }
+  return result;
 }
 
 function PackageListItem({
@@ -91,9 +107,9 @@ function PackageListItem({
     <List.Item
       id={itemId}
       title={pkg.name}
-      subtitle={duplicateNames.has(pkg.name) ? (pkg.installedVersion ?? pkg.version) : undefined}
+      icon={packageIcon(pkg.id)}
       keywords={[pkg.id]}
-      accessories={accessories(pkg, viewKind, gate)}
+      accessories={accessories(pkg, viewKind, gate, duplicateNames.has(pkg.name))}
       detail={
         <List.Item.Detail
           isLoading={isSelected && detailsLoading}

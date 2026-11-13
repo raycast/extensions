@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { getFoldersWithCache } from "../utils/folderHelpers";
 import { getDocumentsListStripped, getSharedDocuments } from "../utils/fetchData";
 import { Doc } from "../utils/types";
@@ -83,6 +84,7 @@ type Meeting = {
  * to retrieve full content for individual meetings.
  */
 export default async function tool(input: Input): Promise<Meeting[]> {
+  await getAccessToken();
   const source = input.source || "my-notes";
 
   // Fetch documents based on source filter

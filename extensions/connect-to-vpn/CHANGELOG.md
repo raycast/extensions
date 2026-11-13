@@ -1,5 +1,40 @@
 # Connect to VPN Changelog
 
+## [Fixes and Improvements] - 2026-10-13
+
+- Keep VPN discovery and toggling independent of favorites storage; repair favorites in memory and save only user edits.
+- Clarify extension and command descriptions, service filtering, and sorting preferences.
+- Search services by name or type, refresh from an empty list with a keyboard shortcut, and see connected VPN names in the menu bar tooltip.
+- Fix silent toggle failures when no VPN is selected or the saved VPN is missing, unavailable, or already connecting or disconnecting.
+- Append an action to choose the VPN used by Toggle Last Used, with confirmation before changing the shortcut target.
+- Show shortcut feedback after requesting a connection change, and prevent repeated requests while macOS still reports the previous status.
+- Discover added and removed services when refreshing, and remove redundant menu bar status checks.
+- Preserve temporarily missing favorites and protect saved choices from concurrent refreshes and edits.
+- Keep favorites attached to their service when macOS network order changes, preserve manual favorite order, and fix duplicate or hidden-service entries.
+- Retain legacy numeric favorite records without guessing their VPN; favorites from older versions need to be selected again.
+- Save favorites and their order together, and append favorites with missing saved positions when repairing older data.
+- Move visible favorites past hidden unavailable favorites without changing the hidden entries' saved positions.
+- Include disabled VPN configurations and physical services such as Wi-Fi, Bluetooth PAN, and Thunderbolt Bridge when non-VPN filtering is turned off.
+- Retry menu bar refresh signals after busy or interrupted refreshes, but wait for the scheduled refresh after a failure. Explain when a manual refresh cannot run.
+- Repair tied favorite positions so favorites can be reordered, and keep setup guidance out of empty search results.
+- Show setup guidance when filtering hides all services, and keep refresh errors visible alongside previously loaded statuses.
+- Recover from malformed saved data and temporary status-check failures.
+
+## [Bug fix] - 2026-09-21
+
+- Tint the menu bar icon with the menu bar text colour, so it no longer stays black on a dark menu bar
+- Check service status without blocking, so the background refresh no longer stalls the extension for close to two seconds every 30 seconds
+- Stop the menu bar from signalling itself, which made it refresh every service in a loop and log a failed attempt to launch itself
+- Stop holding a command open while a connection is being set up, which made Raycast report an unloaded worker when another action ran at the same time
+- Mark a service as Connecting or Disconnecting while it changes, in both the menu bar and the list
+- Show a connection or disconnection about 160 ms sooner on average
+- Read every VPN status from one `scutil` call instead of one `networksetup` call per service, which cuts loading from around 350 ms to under 50 ms and spawns two processes instead of ten
+- Skip the duplicate refresh the menu bar did on every launch
+- Treat an unrecognised status from `networksetup` as invalid
+- Remember the last used service under its real name, so a service with quotes in its name can be toggled
+- Show the error toast once per error instead of on every re-render
+- Update to Raycast API 2
+
 ## [New Additions] 2025-04-05
 
 - Implemented a new command to toggle the last used VPN connection

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "central-icons",
+  "title": "Central Icons",
+  "description": "Browse, search and export all Central icons — copy or paste SVG, code snippets, or export SVG files.",
+  "icon": "icon.png",
+  "author": "tamino-martinius",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "description": "Browse and search all Central icons and export them as SVG or code snippets.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "licenseKey",
+      "type": "password",
+      "required": false,
+      "title": "License Key",
+      "description": "Your Central Icons license key (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX). Unlocks unlimited copies — without it, you get 10 free copies. Buy one at centralicons.com."
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "description": "The action triggered when pressing Enter on an icon.",
+      "default": "copy-svg",
+      "data": [
+        {
+          "title": "Copy SVG",
+          "value": "copy-svg"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "paste-svg"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copy-name"
+        },
+        {
+          "title": "Copy React Snippet",
+          "value": "copy-react"
+        }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Columns",
+      "description": "Number of columns in the icon grid.",
+      "default": "8",
+      "data": [
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "fill",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Style",
+      "description": "Icon style used when the extension launches (can be changed per session via the Style submenu).",
+      "default": "outlined",
+      "data": [
+        {
+          "title": "Outlined",
+          "value": "outlined"
+        },
+        {
+          "title": "Filled",
+          "value": "filled"
+        }
+      ]
+    },
+    {
+      "name": "stroke",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Stroke Width",
+      "description": "Stroke width used when the extension launches.",
+      "default": "1.5",
+      "data": [
+        {
+          "title": "1px",
+          "value": "1"
+        },
+        {
+          "title": "1.5px",
+          "value": "1.5"
+        },
+        {
+          "title": "2px",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "name": "radius",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Corner Radius",
+      "description": "Corner radius used when the extension launches.",
+      "default": "2",
+      "data": [
+        {
+          "title": "0 (sharp)",
+          "value": "0"
+        },
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3 (round)",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "join",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Line Join",
+      "description": "Line join used when the extension launches.",
+      "default": "round",
+      "data": [
+        {
+          "title": "Round",
+          "value": "round"
+        },
+        {
+          "title": "Square",
+          "value": "square"
+        }
+      ]
+    },
+    {
+      "name": "masking",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Masking",
+      "description": "Masked icons render uniformly with semi-transparent colors (overlap-safe); raw keeps separate paths. Used when the extension launches.",
+      "default": "raw",
+      "data": [
+        {
+          "title": "Raw",
+          "value": "raw"
+        },
+        {
+          "title": "Masked",
+          "value": "masked"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

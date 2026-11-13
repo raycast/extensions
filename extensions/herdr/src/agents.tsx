@@ -3,9 +3,9 @@ import { useState } from "react";
 import { AgentActions } from "./components/resource-actions";
 import { StartAgentForm } from "./components/start-agent-form";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
-import { agentIcon } from "./lib/agent-appearance";
+import { agentIcon, agentName } from "./lib/agent-appearance";
 import type { AgentStatus } from "./lib/types";
-import { ErrorView, shortcuts, statusIcon, statusTitle } from "./lib/ui";
+import { ErrorView, ManageSessionsAction, shortcuts, statusIcon, statusTitle } from "./lib/ui";
 
 type Filter = "all" | AgentStatus;
 
@@ -19,7 +19,22 @@ export default function Command() {
   return (
     <List
       isLoading={snapshot.isLoading}
-      searchBarPlaceholder="Search agents, names, projects, paths…"
+      searchBarPlaceholder={
+        snapshot.session
+          ? `Search agents, names, projects, paths in ${snapshot.session}…`
+          : "Search agents, names, projects, paths…"
+      }
+      actions={
+        <ActionPanel>
+          <ManageSessionsAction />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={shortcuts.refresh}
+            onAction={snapshot.revalidate}
+          />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <List.Dropdown tooltip="Filter Agents" value={filter} onChange={(value) => setFilter(value as Filter)}>
           <List.Dropdown.Item value="all" title="All Agents" />
@@ -47,11 +62,11 @@ export default function Command() {
       {agents.map((agent) => {
         const workspace = snapshot.data?.workspaces.find((item) => item.workspace_id === agent.workspace_id);
         const tab = snapshot.data?.tabs.find((item) => item.tab_id === agent.tab_id);
-        const name = agent.name || agent.display_agent || agent.agent || agent.pane_id;
+        const name = agentName(agent);
         return (
           <List.Item
             key={agent.pane_id}
-            icon={agentIcon(agent.agent || agent.display_agent)}
+            icon={agentIcon(agent.agent)}
             title={name}
             subtitle={`${workspace?.label || agent.workspace_id} › ${tab?.label || agent.tab_id}`}
             keywords={[
@@ -88,6 +103,7 @@ export default function Command() {
                   shortcut={shortcuts.refresh}
                   onAction={snapshot.revalidate}
                 />
+                <ManageSessionsAction />
               </ActionPanel>
             }
           />

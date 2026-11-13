@@ -35,6 +35,13 @@
       "subtitle": "Prism Launcher",
       "description": "View and manage favorite servers from all instances",
       "mode": "view"
+    },
+    {
+      "name": "minecraft-screenshots",
+      "title": "Minecraft Screenshots",
+      "subtitle": "Prism Launcher",
+      "description": "Browse, copy, save and manage screenshots from an instance",
+      "mode": "view"
     }
   ],
   "preferences": [

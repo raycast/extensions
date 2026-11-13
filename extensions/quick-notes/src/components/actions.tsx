@@ -9,27 +9,29 @@ import {
   open,
   openExtensionPreferences,
   AI,
+  Keyboard,
+  Color,
 } from "@raycast/api";
 import { preferences } from "../services/config";
 import CreateEditNoteForm from "./createEditNoteForm";
-import CreateTag from "./createTag";
+import CreateEditTagForm from "./createEditTagForm";
+import DeleteAllNotesAction from "./deleteAllNotesAction";
 import DeleteNoteAction from "./deleteNoteAction";
-import { clearNoteSummary, getSortHumanReadable, getTintColor, setNoteSummary } from "../utils/utils";
-import { notesAtom, Sort, sortArr, tagsAtom } from "../services/atoms";
+import { clearNoteSummary, getTintColor, setNoteSummary } from "../utils/utils";
+import { notesAtom, Sort, sortOptions, tagsAtom } from "../services/atoms";
 import { useAtom } from "jotai";
-import DeleteTags from "./deleteTags";
 import { useCachedState } from "@raycast/utils";
 import { useResetAtom } from "jotai/utils";
 import slugify from "slugify";
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 
 const Actions = ({
   noNotes,
-  onTagFilter,
   onApplyTag,
   isDraft = false,
   title,
+  icon,
   note,
   tags,
   createdAt,
@@ -39,6 +41,7 @@ const Actions = ({
   onApplyTag: (tag: string, noteBody?: string) => void;
   isDraft?: boolean;
   title?: string;
+  icon?: string;
   note?: string;
   tags?: string[];
   createdAt?: Date;
@@ -49,22 +52,49 @@ const Actions = ({
 
   const resetNotes = useResetAtom(notesAtom);
 
-  const askAI = async () => {
-    let allData = "";
-    const answer = AI.ask(
-      note
-        ? `Summarize the note here: ${note}. Be concise and informative. Avoid any conversational tone and DO NOT include the original text in the summary. The output will be displayed at the top of the note. Do NOT put any headings or titles in the summary, including something like "summary:".`
-        : "",
+  if (noNotes) {
+    return (
+      <ActionPanel>
+        <Action.Push
+          title="New Note"
+          icon={{ source: Icon.PlusSquare, tintColor: getTintColor("green") }}
+          target={<CreateEditNoteForm isDraft={true} />}
+          shortcut={Keyboard.Shortcut.Common.New}
+        />
+      </ActionPanel>
     );
-    answer.on("data", async (data) => {
-      allData += data;
-      setNoteSummary(allData, createdAt);
-      resetNotes();
+  }
+
+  const askAI = async () => {
+    const toast = await showToast({
+      title: "Generating AI summary…",
+      message: "Please wait",
+      style: Toast.Style.Animated,
     });
 
-    await answer;
+    try {
+      let allData = "";
+      const answer = AI.ask(
+        note
+          ? `Summarize the note here: ${note}. Be concise and informative. Avoid any conversational tone and DO NOT include the original text in the summary. The output will be displayed at the top of the note. Do NOT put any headings or titles in the summary, including something like "summary:".`
+          : "",
+      );
+      answer.on("data", async (data) => {
+        allData += data;
+        setNoteSummary(allData, createdAt);
+        resetNotes();
+      });
 
-    await showToast({ title: "AI Summary Generated" });
+      await answer;
+
+      toast.title = "AI summary generated";
+      toast.message = "";
+      toast.style = Toast.Style.Success;
+    } catch {
+      toast.title = "Failed to generate AI summary";
+      toast.message = "Please try again";
+      toast.style = Toast.Style.Failure;
+    }
   };
 
   return (
@@ -76,13 +106,21 @@ const Actions = ({
               title="Edit Note"
               icon={{ source: Icon.Pencil, tintColor: getTintColor("sky") }}
               target={
-                <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
+                <CreateEditNoteForm
+                  isDraft={isDraft}
+                  title={title}
+                  icon={icon}
+                  note={note}
+                  tags={tags}
+                  createdAt={createdAt}
+                />
               }
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action
               title="Copy Note"
               icon={{ source: Icon.CopyClipboard, tintColor: getTintColor("turquoise") }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               onAction={() => {
                 Clipboard.copy(note ?? "").then(() => {
                   showToast({ style: Toast.Style.Success, title: "Note Copied" });
@@ -92,7 +130,7 @@ const Actions = ({
             <Action
               title="Open Note Externally"
               icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
               onAction={async () => {
                 const openPreferencesAction = {
                   title: "Open Extension Settings",
@@ -138,9 +176,10 @@ const Actions = ({
           title="New Note"
           icon={{ source: Icon.PlusSquare, tintColor: getTintColor("green") }}
           target={<CreateEditNoteForm isDraft={true} />}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
         />
         {!noNotes && <DeleteNoteAction createdAt={createdAt} />}
+        {!noNotes && <DeleteAllNotesAction />}
       </ActionPanel.Section>
       {environment.canAccess(AI) && (
         <ActionPanel.Section>
@@ -148,7 +187,10 @@ const Actions = ({
             title="Summarize with AI"
             icon={{ source: Icon.SpeechBubbleActive, tintColor: getTintColor("sky") }}
             onAction={async () => await askAI()}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "a" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+            }}
           />
           <Action
             title="Clear AI Summary"
@@ -157,7 +199,10 @@ const Actions = ({
               clearNoteSummary(createdAt);
               resetNotes();
             }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "a" },
+              Windows: { modifiers: ["ctrl", "alt"], key: "a" },
+            }}
           />
         </ActionPanel.Section>
       )}
@@ -166,7 +211,10 @@ const Actions = ({
           <ActionPanel.Submenu
             title="Apply / Remove Tag"
             icon={{ source: Icon.Tag, tintColor: getTintColor("turquoise") }}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "t" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+            }}
           >
             {allTags.map((tag, i) => (
               <Action
@@ -183,60 +231,39 @@ const Actions = ({
         <Action.Push
           title="New Tag"
           icon={{ source: Icon.PlusSquare, tintColor: getTintColor("turquoise") }}
-          target={<CreateTag />}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-        />
-        <ActionPanel.Submenu
-          title="Filter Tag"
-          icon={{ source: Icon.Filter, tintColor: getTintColor("turquoise") }}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-        >
-          {allTags &&
-            allTags.length > 0 &&
-            allTags.map((tag, i) => (
-              <Action
-                key={i}
-                icon={{ source: "dot.png", tintColor: getTintColor(tag.color) ?? "blue" }}
-                title={tag.name}
-                onAction={() => {
-                  onTagFilter(tag.name);
-                }}
-              />
-            ))}
-          <Action
-            title="All Notes"
-            icon={{ source: Icon.BulletPoints, tintColor: getTintColor("turquoise") }}
-            onAction={() => onTagFilter("")}
-          />
-          <Action.Push title="Create" icon={Icon.Plus} target={<CreateTag />} />
-        </ActionPanel.Submenu>
-        <Action.Push
-          title="Delete Tags"
-          icon={{ source: Icon.Trash, tintColor: getTintColor("red") }}
-          target={<DeleteTags />}
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "t" }}
+          target={<CreateEditTagForm />}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "n" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+          }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
-          title="Toggle Menu"
+          title="Toggle Info Panel"
           icon={{ source: Icon.AppWindowSidebarRight, tintColor: getTintColor("indigo") }}
           onAction={() => setMenu((prev) => !prev)}
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "i" },
+            Windows: { modifiers: ["ctrl"], key: "i" },
+          }}
         />
         <ActionPanel.Submenu
           title="Sort"
           icon={{ source: Icon.Filter, tintColor: getTintColor("indigo") }}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          shortcut={Keyboard.Shortcut.Common.Save}
         >
-          {sortArr.map((s, i) => (
-            <Action
-              key={i}
-              icon={s === sort ? { source: Icon.ArrowRightCircle, tintColor: "teal" } : undefined}
-              title={getSortHumanReadable(s)}
-              onAction={() => setSort(s)}
-            />
-          ))}
+          {(Object.keys(sortOptions) as Sort[]).map((key) => {
+            const option = sortOptions[key];
+            return (
+              <Action
+                key={key}
+                icon={{ source: option.icon, tintColor: key === sort ? Color.Green : undefined }}
+                title={option.title}
+                onAction={() => setSort(key)}
+              />
+            );
+          })}
         </ActionPanel.Submenu>
       </ActionPanel.Section>
     </ActionPanel>

@@ -9,11 +9,12 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { usePost } from "../hooks/use-post";
 import { deletePost, updatePost } from "../lib/notra";
 import { CONTENT_TYPE_LABELS } from "../schemas";
-import { getErrorMessage, notraUrl } from "../utils";
+import { getErrorMessage, notraOrganizationUrl } from "../utils";
 import { EditPostForm } from "./edit-post-form";
 
 export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMutated?: () => Promise<void> | void }) {
@@ -100,20 +101,19 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
             <ActionPanel.Section>
               <Action.Push
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<EditPostForm onPostUpdated={refreshPostState} post={post} />}
                 title="Edit Post"
               />
               <Action
                 icon={post.status === "published" ? Icon.Pencil : Icon.Upload}
                 onAction={handleStatusChange}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 title={post.status === "published" ? "Move to Draft" : "Publish Post"}
               />
               <Action
                 icon={Icon.Trash}
                 onAction={handleDelete}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 title="Delete Post"
               />
@@ -122,24 +122,22 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
               <Action.OpenInBrowser
                 icon={Icon.Globe}
                 title="View on Notra"
-                url={
-                  organization ? notraUrl(`/${organization.slug}/content/${post.id}`) : notraUrl(`/content/${post.id}`)
-                }
+                url={notraOrganizationUrl(`/content/${post.id}`, organization?.slug)}
               />
               <Action
                 icon={Icon.ArrowClockwise}
                 onAction={() => revalidate()}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 title="Refresh"
               />
               <Action.CopyToClipboard
                 content={post.markdown}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
                 title="Copy Markdown"
               />
               <Action.CopyToClipboard
-                content={notraUrl(`/content/${post.id}`)}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
+                content={notraOrganizationUrl(`/content/${post.id}`, organization?.slug)}
+                shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
                 title="Copy Link"
               />
             </ActionPanel.Section>

@@ -7,7 +7,7 @@ const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
  * Local copy of the array guard (mirrors `asArray` in ./index).
  *
  * Kept local ON PURPOSE: index.ts imports this module for the menu-bar scan, so importing
- * back from ./index would create a cycle and leave one module partially initialised at
+ * back from ./index would create a cycle and leave one module partially initialized at
  * eval time. Four lines of duplication is the cheaper trade. If this file grows, move
  * both copies to a dependency-free primitives module rather than adding the import back.
  */
@@ -42,6 +42,7 @@ query StoreUpdatePRs($first: Int!) {
         title
         url
         mergedAt
+        updatedAt
         headRefName
         author { login url avatarUrl }
         labels(first: 20) { nodes { name } }
@@ -55,6 +56,7 @@ interface GraphQLPRNode {
   title: string;
   url: string;
   mergedAt: string | null;
+  updatedAt: string;
   headRefName: string | null;
   author: { login: string; url: string; avatarUrl: string } | null;
   labels: { nodes: { name: string }[] | null } | null;
@@ -84,6 +86,7 @@ function toGitHubPR(node: GraphQLPRNode): GitHubPR {
     title: node.title ?? "",
     html_url: node.url,
     merged_at: node.mergedAt,
+    updated_at: node.updatedAt,
     user: {
       login: node.author?.login ?? "ghost",
       html_url: node.author?.url ?? "",

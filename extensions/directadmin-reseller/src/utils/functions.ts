@@ -6,6 +6,7 @@ import {
   RESELLER_USERNAME,
   TITLES_FOR_KEYS,
 } from "./constants";
+import { Panel } from "../types/panel";
 
 function splitAndTitleCase(text: string) {
   const words = text.split("_");
@@ -43,17 +44,20 @@ export function getTextAndIconFromVal(val: string | boolean) {
   return { text, icon };
 }
 
-export function generateApiToken(userToImpersonate = "") {
+export function generateApiToken(userToImpersonate = "", panel?: Panel) {
+  const token = panel ? btoa(`${panel.reseller_username}:${panel.reseller_password}`) : RESELLER_API_TOKEN;
   return userToImpersonate === ""
-    ? RESELLER_API_TOKEN
-    : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+    ? token
+    : btoa(
+        `${panel?.reseller_username || RESELLER_USERNAME}|${userToImpersonate}:${panel?.reseller_password || RESELLER_PASSWORD}`,
+      );
 }
 
 export function isInvalidUrl() {
   try {
     new URL(DIRECTADMIN_URL);
     return false;
-  } catch (error) {
+  } catch {
     return true;
   }
 }

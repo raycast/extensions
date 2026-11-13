@@ -1,5 +1,19 @@
 # Changelog
 
+## [Find Issues by Exact Key] - 2026-11-06
+
+- Find issues outside the selected project or custom JQL filter by entering their full key in the Issue dropdown.
+- Keep exact matches first and search loaded issues by key or title, ignoring case and accents.
+- Prevent stale lookup results and failed searches from logging time against the wrong issue.
+
+## [Restore Jira Cloud Search and Manage Worklogs] - 2026-10-08
+
+- Restore Jira Cloud issue search using the enhanced JQL endpoint and cursor pagination, while retaining Jira Server support.
+- Add View Logged Time with monthly totals, hour and text filters, and reminders for weekdays below the configured daily threshold.
+- Add actions to edit, delete, and log more time, with the selected day prefilled and totals refreshed after changes.
+- Load every issue and worklog page, include weekend entries in totals, and surface failed requests instead of showing incomplete totals.
+- Preserve rich-text comments when editing only time or date, validate complete duration inputs, and fix project selection during loading.
+
 ## [Custom JQL and Default Project Preference] - 2024-12-05
 
 - Removed Only My Issues preference.

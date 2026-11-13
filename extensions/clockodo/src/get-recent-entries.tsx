@@ -73,7 +73,7 @@ export default function Command() {
                         customersId: entry.customersId,
                         servicesId: entry.servicesId,
                         text: entry.text,
-                        billable: entry.billable === Billability.Billed ? Billability.Billable : entry.billable,
+                        billable: getRestartBillability(entry.billable),
                       }),
                     );
                     await showHUD("Clock started", {
@@ -95,3 +95,15 @@ export default function Command() {
     </List>
   );
 }
+
+const getRestartBillability = (billability: TimeEntry["billable"]) => {
+  if (billability === Billability.NotAvailable) {
+    return undefined;
+  }
+
+  if (billability === Billability.Billed) {
+    return Billability.Billable;
+  }
+
+  return billability;
+};

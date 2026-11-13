@@ -1,443 +1,89 @@
 import {
-  ActionPanel,
   List,
+  ActionPanel,
   Action,
   Icon,
+  Color,
+  Keyboard,
   showToast,
   Toast,
   confirmAlert,
   Alert,
   Form,
   getPreferenceValues,
+  openExtensionPreferences,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { execSync, execFileSync } from "child_process";
-import * as fs from "fs";
-import * as os from "os";
+import { useState, useEffect, useRef } from "react";
+import * as net from "net";
+import {
+  DNSPreset,
+  NetworkInfo,
+  getActiveNetworkService,
+  getNetworkInterfaceForService,
+  getPresets,
+  getPreset,
+  addPreset,
+  deletePreset,
+  getNetworkInterfaceDetails,
+  getNetworkInfo,
+  setDNSFromPreset,
+  resetDNS,
+  validateNetworkServiceName,
+  validateServers,
+  DEFAULT_NETWORK_SERVICE,
+  DEFAULT_NETWORK_INTERFACE,
+} from "./dns-utils";
 
-// Preferences type is auto-generated in raycast-env.d.ts — no manual interface needed.
-
-interface DNSPreset {
-  name: string;
-  servers: string;
-  description?: string;
-}
-
-interface NetworkInfo {
-  service: string;
-  manualDNS: string[];
-  activeDNS: string[];
-  isDHCP: boolean;
-}
-
-const PRESETS_FILE = `${os.homedir()}/.dns_presets`;
-
-// Module-level placeholder; will be updated in useEffect to avoid blocking UI
-let NETWORK_SERVICE = "Wi-Fi";
-
-/**
- * Validate network service name against a safe pattern.
- * Prevents shell injection via service names with special characters.
- * Allows word characters, hyphens, spaces, and forward slashes (valid in macOS service names).
- * Blocks shell-sensitive characters: ', ", `, $, \
- */
-function validateNetworkServiceName(serviceName: string): boolean {
-  return /^[\w\- /]+$/.test(serviceName);
-}
-
-/**
- * Get the active network service (e.g., "Wi-Fi", "Ethernet").
- * Detects the default interface via route and maps it to the macOS hardware port name.
- * Falls back to "Wi-Fi" if detection fails.
- */
-function getActiveNetworkService(): string {
-  try {
-    const iface = execSync("route get default 2>/dev/null | awk '/interface: /{print $2}'", {
-      encoding: "utf-8",
-    }).trim();
-    if (!iface) return "Wi-Fi";
-
-    const hwports = execSync("networksetup -listallhardwareports", {
-      encoding: "utf-8",
-    });
-
-    const lines = hwports.split(/\r?\n/);
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.startsWith("Device:")) {
-        const dev = line.split("Device:")[1].trim();
-        if (dev === iface) {
-          const prev = (lines[i - 1] || "").trim();
-          if (prev.startsWith("Hardware Port:")) {
-            const serviceName = prev.split("Hardware Port:")[1].trim();
-            // Validate before returning to prevent injection
-            if (validateNetworkServiceName(serviceName)) {
-              return serviceName;
-            }
-          }
-        }
-      }
-    }
-  } catch {
-    // Silently fall back
-  }
-  return "Wi-Fi";
-}
-
-// Default descriptions for known presets — used to migrate old files
-const DEFAULT_DESCRIPTIONS: { [key: string]: string } = {
-  cloudflare: "Cloudflare - Fast & Privacy",
-  quad9: "Quad9 - Blocks malware & phishing",
-  opendns: "OpenDNS - Filtering & protection",
-};
-
-// No Touch ID / passwordless sudo code kept — keep extension safe for sharing
-
-/**
- * Initialize presets file with default presets if it doesn't exist
- */
-function initPresetsFile(): void {
-  if (!fs.existsSync(PRESETS_FILE)) {
-    const defaultPresets = `# DNS Presets
-# Format: name=servers:description
-# Example: cloudflare=1.1.1.1,1.0.0.1:Fast DNS with privacy
-cloudflare=1.1.1.1,1.0.0.1:Cloudflare - Fast & Privacy
-quad9=9.9.9.9,149.112.112.112:Quad9 - Blocks malware & phishing
-opendns=208.67.222.222,208.67.220.220:OpenDNS - Filtering & protection
-`;
-    fs.writeFileSync(PRESETS_FILE, defaultPresets, { mode: 0o600 });
-  }
-}
-
-/**
- * Parse a preset line: name=servers:description
- */
-function parsePresetLine(line: string): DNSPreset | null {
-  line = line.trim();
-  if (!line || line.startsWith("#")) return null;
-
-  const eqIndex = line.indexOf("=");
-  if (eqIndex === -1) return null;
-
-  const name = line.substring(0, eqIndex);
-  const rest = line.substring(eqIndex + 1);
-
-  // Validate preset name (no spaces or equals signs allowed)
-  if (!/^[^\s=]+$/.test(name)) {
-    return null; // Skip invalid preset names
-  }
-
-  const colonIndex = rest.indexOf(":");
-  let servers: string;
-  let description: string | undefined;
-
-  if (colonIndex === -1) {
-    servers = rest;
-  } else {
-    servers = rest.substring(0, colonIndex);
-    description = rest.substring(colonIndex + 1).trim();
-  }
-
-  if (!name || !servers) return null;
-  return { name, servers, description: description || undefined };
-}
-
-/**
- * Migrate old presets file to add descriptions if missing
- */
-function migratePresetsFile(): void {
-  if (!fs.existsSync(PRESETS_FILE)) return;
-
-  const content = fs.readFileSync(PRESETS_FILE, "utf-8");
-  const lines = content.split("\n");
-  let needsUpdate = false;
-
-  const updatedLines = lines.map((line) => {
-    const preset = parsePresetLine(line);
-    if (!preset) return line; // Keep comments and blank lines as-is
-
-    // If preset has no description and we have a default, add it
-    if (!preset.description && DEFAULT_DESCRIPTIONS[preset.name]) {
-      needsUpdate = true;
-      return `${preset.name}=${preset.servers}:${DEFAULT_DESCRIPTIONS[preset.name]}`;
-    }
-    return line;
-  });
-
-  if (needsUpdate) {
-    fs.writeFileSync(PRESETS_FILE, updatedLines.join("\n"), { mode: 0o600 });
-  }
-}
-
-/**
- * Get all DNS presets
- */
-function getPresets(): DNSPreset[] {
-  initPresetsFile();
-  migratePresetsFile();
-
-  const content = fs.readFileSync(PRESETS_FILE, "utf-8");
-  const presets: DNSPreset[] = [];
-
-  content.split("\n").forEach((line) => {
-    const preset = parsePresetLine(line);
-    if (preset) presets.push(preset);
-  });
-
-  return presets;
-}
-
-/**
- * Get a specific preset by name
- */
-function getPreset(name: string): string | null {
-  const presets = getPresets();
-  const preset = presets.find((p) => p.name === name);
-  return preset ? preset.servers : null;
-}
-
-/**
- * Add or update a preset
- */
-function addPreset(name: string, servers: string, description?: string): void {
-  initPresetsFile();
-
-  const content = fs.readFileSync(PRESETS_FILE, "utf-8");
-  const lines = content.split("\n");
-
-  // Format the preset line
-  const presetLine = description ? `${name}=${servers}:${description}` : `${name}=${servers}`;
-
-  // Find and replace if exists
-  let found = false;
-  const updatedLines = lines.map((line) => {
-    const preset = parsePresetLine(line);
-    if (preset && preset.name === name) {
-      found = true;
-      return presetLine;
-    }
-    return line;
-  });
-
-  if (!found) {
-    updatedLines.push(presetLine);
-  }
-
-  fs.writeFileSync(PRESETS_FILE, updatedLines.join("\n"), { mode: 0o600 });
-}
-
-/**
- * Delete a preset
- */
-function deletePreset(name: string): void {
-  initPresetsFile();
-
-  const content = fs.readFileSync(PRESETS_FILE, "utf-8");
-  const lines = content.split("\n");
-
-  const filtered = lines.filter((line) => {
-    const preset = parsePresetLine(line);
-    if (!preset) return true; // Keep comments and blank lines
-    return preset.name !== name;
-  });
-
-  fs.writeFileSync(PRESETS_FILE, filtered.join("\n"), { mode: 0o600 });
-}
-
-/**
- * Get manually configured DNS servers (empty if using DHCP)
- */
-function getManualDNS(): string[] {
-  try {
-    const output = execSync(`networksetup -getdnsservers "${NETWORK_SERVICE}"`, {
-      encoding: "utf-8",
-    });
-
-    if (output.includes("aren't any DNS Servers set") || output.trim() === "") {
-      return [];
-    }
-
-    return output
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith("*"));
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Get active DNS servers (what the system is actually using, including DHCP-assigned)
- */
-function getActiveDNS(): string[] {
-  try {
-    const output = execSync("scutil --dns", { encoding: "utf-8" });
-    const nameservers = new Set<string>();
-
-    // Extract nameserver IPs from scutil output
-    const lines = output.split("\n");
-    lines.forEach((line) => {
-      const match = line.match(/nameserver\[\d+\]\s*:\s*([\d.]+)/);
-      if (match) {
-        nameservers.add(match[1]);
-      }
-    });
-
-    return Array.from(nameservers);
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Get network interface details (IP, subnet, gateway, etc.)
- */
-function getNetworkInterfaceDetails(): { [key: string]: string } {
-  try {
-    const details: { [key: string]: string } = {};
-
-    // Get IPv4 address and subnet
-    const ipinfo = execSync(`networksetup -getinfo "${NETWORK_SERVICE}" 2>/dev/null || echo ""`, { encoding: "utf-8" });
-    ipinfo.split("\n").forEach((line) => {
-      const match = line.match(/^([^:]+):\s*(.*)$/);
-      if (match) {
-        const [, key, value] = match;
-        if (value.trim()) {
-          details[key.trim()] = value.trim();
-        }
-      }
-    });
-
-    // Get hardware (MAC) address
-    try {
-      const mac = execSync(
-        `ifconfig $(networksetup -listnetworkserviceorder | grep "${NETWORK_SERVICE}" | grep -oE "en[0-9]+") | grep ether | awk '{print $2}'`,
-        { encoding: "utf-8" },
-      ).trim();
-      if (mac) details["MAC Address"] = mac;
-    } catch {
-      // Silently ignore if we can't get MAC
-    }
-
-    return details;
-  } catch {
-    return {};
-  }
-}
-
-/**
- * Get network information
- */
-function getNetworkInfo(): NetworkInfo {
-  const manualDNS = getManualDNS();
-  const activeDNS = getActiveDNS();
-  const isDHCP = manualDNS.length === 0;
-
-  return {
-    service: NETWORK_SERVICE,
-    manualDNS,
-    activeDNS,
-    isDHCP,
-  };
-}
-
-/**
- * Run a command with admin privileges via the native macOS auth dialog.
- * This uses AppleScript's `do shell script ... with administrator privileges` which
- * triggers the system authorization UI. On some macOS versions and settings this
- * will present Touch ID as an option; behavior depends on system configuration.
- */
-function runWithAdmin(command: string): void {
-  // Encode the command to base64 to avoid shell quoting/escaping issues.
-  const b64 = Buffer.from(command, "utf8").toString("base64");
-  const script = `do shell script "echo '${b64}' | base64 -D | sh" with administrator privileges`;
-  execFileSync("/usr/bin/osascript", ["-e", script]);
-}
-
-/**
- * Set DNS to specific servers
- */
-function setDNS(servers: string[]): void {
-  // Validate network service name (prevents shell injection via preferences)
-  if (!validateNetworkServiceName(NETWORK_SERVICE)) {
-    throw new Error(`Invalid network service name: "${NETWORK_SERVICE}". Service name may have been tampered with.`);
-  }
-
-  // Validate all IPs before execution (defense in depth - prevents shell injection)
-  const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-  for (const ip of servers) {
-    if (!ipRegex.test(ip)) {
-      throw new Error(`Invalid IP address: "${ip}". Preset file may have been tampered with.`);
-    }
-    const parts = ip.split(".").map(Number);
-    if (parts.some((p) => p < 0 || p > 255)) {
-      throw new Error(`Invalid IP address: "${ip}". Preset file may have been tampered with.`);
-    }
-  }
-
-  // Use the absolute path to networksetup since `do shell script` has a minimal PATH
-  const networksetup = "/usr/sbin/networksetup";
-  if (servers.length === 0) {
-    // Reset to DHCP
-    runWithAdmin(`${networksetup} -setdnsservers '${NETWORK_SERVICE}' empty`);
-  } else {
-    const dnsArgs = servers.map((s) => `'${s}'`).join(" ");
-    runWithAdmin(`${networksetup} -setdnsservers '${NETWORK_SERVICE}' ${dnsArgs}`);
-  }
-}
-
-/**
- * Set DNS from a preset
- */
-function setDNSFromPreset(presetName: string): void {
-  const servers = getPreset(presetName);
-  if (!servers) {
-    throw new Error(`Preset "${presetName}" not found`);
-  }
-
-  const serverArray = servers.split(",").map((s) => s.trim());
-  setDNS(serverArray);
-}
-
-/**
- * Reset DNS to DHCP
- */
-function resetDNS(): void {
-  setDNS([]);
-}
+let NETWORK_SERVICE = DEFAULT_NETWORK_SERVICE;
+let NETWORK_INTERFACE = DEFAULT_NETWORK_INTERFACE;
 
 /**
  * List view showing all network interface info — press Enter on any row to copy.
  */
-function NetworkDetailsView() {
+function NetworkDetailsView({ service, device }: { service: string; device: string }) {
   const [details, setDetails] = useState<{ [key: string]: string }>({});
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    try {
-      const fetchedDetails = getNetworkInterfaceDetails();
-      const fetchedNetworkInfo = getNetworkInfo();
-      setDetails(fetchedDetails);
-      setNetworkInfo(fetchedNetworkInfo);
-    } catch (error) {
-      // Silently handle errors
-      console.error("Failed to fetch network details:", error);
-    } finally {
-      setIsLoading(false);
+    let isCancelled = false;
+    async function load() {
+      setIsLoading(true);
+      try {
+        const [fetchedDetails, fetchedNetworkInfo] = await Promise.all([
+          getNetworkInterfaceDetails(service, device),
+          getNetworkInfo(service),
+        ]);
+        if (!isCancelled) {
+          setDetails(fetchedDetails);
+          setNetworkInfo(fetchedNetworkInfo);
+        }
+      } catch (error) {
+        console.error("Failed to fetch network details:", error);
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
     }
-  }, []);
+
+    load();
+    return () => {
+      isCancelled = true;
+    };
+  }, [service, device]);
 
   // Helper to safely pull a value from the networksetup -getinfo output
   const get = (key: string): string | undefined => {
-    const v = details[key];
-    if (!v || v.toLowerCase() === "none") return undefined;
-    return v;
+    const val = details[key]?.trim();
+    if (!val || val.toLowerCase() === "none") {
+      return undefined;
+    }
+    return val;
   };
 
-  // Helper to render a row with primary "Copy" action on Enter
-  function InfoItem({
+  const InfoItem = ({
     icon,
     title,
     value,
@@ -447,69 +93,78 @@ function NetworkDetailsView() {
     title: string;
     value: string;
     extraActions?: React.ReactNode;
-  }) {
-    return (
-      <List.Item
-        icon={icon}
-        title={title}
-        accessories={[{ text: value }]}
-        actions={
-          <ActionPanel>
+  }) => (
+    <List.Item
+      icon={icon}
+      title={title}
+      accessories={[{ text: value }]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
             <Action.CopyToClipboard title={`Copy ${title}`} content={value} />
             {extraActions}
-          </ActionPanel>
-        }
-      />
-    );
-  }
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
 
   const activeDNS = networkInfo?.activeDNS.join(", ") || "";
 
   if (isLoading) {
-    return <List navigationTitle={`${NETWORK_SERVICE} Details`} isLoading={true} />;
+    return <List navigationTitle={`${service} Details`} isLoading={true} />;
   }
 
   return (
-    <List navigationTitle={`${NETWORK_SERVICE} Details`} searchBarPlaceholder="Search network info...">
+    <List navigationTitle={`${service} Details`} searchBarPlaceholder="Search network info...">
       {/* DNS Section */}
       <List.Section title="DNS">
         <List.Item
-          icon={networkInfo?.isDHCP ? Icon.Globe : Icon.Lock}
+          icon={{
+            source: networkInfo?.isDHCP ? Icon.Globe : Icon.Lock,
+            tintColor: networkInfo?.isDHCP ? Color.Blue : Color.Orange,
+          }}
           title="DNS Source"
           accessories={[
             {
               tag: {
-                value: networkInfo?.isDHCP ? "DHCP" : "Manual",
-                color: networkInfo?.isDHCP ? "#3b82f6" : "#f59e0b",
+                value: networkInfo?.isUnknown ? "Unknown" : networkInfo?.isDHCP ? "DHCP" : "Manual",
+                color: networkInfo?.isUnknown ? Color.SecondaryText : networkInfo?.isDHCP ? Color.Blue : Color.Orange,
               },
             },
           ]}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard
+                title="Copy DNS Source"
+                content={networkInfo?.isUnknown ? "Unknown" : networkInfo?.isDHCP ? "DHCP" : "Manual"}
+              />
+            </ActionPanel>
+          }
         />
         {activeDNS && <InfoItem icon={Icon.Network} title="Active DNS Servers" value={activeDNS} />}
       </List.Section>
 
-      {/* IPv4 Section */}
-      <List.Section title="IPv4">
-        {get("IP address") && <InfoItem icon={Icon.Pin} title="IP Address" value={get("IP address")!} />}
-        {get("Subnet mask") && <InfoItem icon={Icon.Filter} title="Subnet Mask" value={get("Subnet mask")!} />}
+      {/* Interface Details Section */}
+      <List.Section title="Interface Details">
+        <InfoItem icon={Icon.ComputerChip} title="Network Service" value={service} />
+        {device && <InfoItem icon={Icon.HardDrive} title="BSD Device" value={device} />}
+        {get("IP address") && <InfoItem icon={Icon.Globe} title="IP Address" value={get("IP address")!} />}
+        {get("Subnet mask") && <InfoItem icon={Icon.Layers} title="Subnet Mask" value={get("Subnet mask")!} />}
         {get("Router") && (
           <InfoItem
-            icon={Icon.House}
+            icon={Icon.Wifi}
             title="Router"
             value={get("Router")!}
             extraActions={
-              /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(get("Router")!) ? (
+              net.isIP(get("Router")!) ? (
                 <Action.OpenInBrowser title="Open Router in Browser" url={`http://${get("Router")}`} />
               ) : undefined
             }
           />
         )}
-      </List.Section>
-
-      {/* Hardware Section */}
-      <List.Section title="Hardware">
+        {get("MAC Address") && <InfoItem icon={Icon.Fingerprint} title="MAC Address" value={get("MAC Address")!} />}
         {get("Wi-Fi ID") && <InfoItem icon={Icon.Wifi} title="Wi-Fi ID" value={get("Wi-Fi ID")!} />}
-        {get("MAC Address") && <InfoItem icon={Icon.Link} title="MAC Address" value={get("MAC Address")!} />}
         {get("Ethernet Address") && (
           <InfoItem icon={Icon.Link} title="Ethernet Address" value={get("Ethernet Address")!} />
         )}
@@ -518,9 +173,22 @@ function NetworkDetailsView() {
       {/* IPv6 Section */}
       {(get("IPv6") || get("IPv6 IP address") || get("IPv6 Router")) && (
         <List.Section title="IPv6">
-          {get("IPv6") && <InfoItem icon={Icon.Globe} title="IPv6" value={get("IPv6")!} />}
-          {get("IPv6 IP address") && <InfoItem icon={Icon.Pin} title="IPv6 Address" value={get("IPv6 IP address")!} />}
-          {get("IPv6 Router") && <InfoItem icon={Icon.House} title="IPv6 Router" value={get("IPv6 Router")!} />}
+          {get("IPv6") && <InfoItem icon={Icon.Network} title="IPv6 Configuration" value={get("IPv6")!} />}
+          {get("IPv6 IP address") && (
+            <InfoItem icon={Icon.Globe} title="IPv6 Address" value={get("IPv6 IP address")!} />
+          )}
+          {get("IPv6 Router") && (
+            <InfoItem
+              icon={Icon.Wifi}
+              title="IPv6 Router"
+              value={get("IPv6 Router")!}
+              extraActions={
+                net.isIP(get("IPv6 Router")!) ? (
+                  <Action.OpenInBrowser title="Open Router in Browser" url={`http://[${get("IPv6 Router")}]`} />
+                ) : undefined
+              }
+            />
+          )}
         </List.Section>
       )}
     </List>
@@ -531,6 +199,7 @@ function NetworkDetailsView() {
  * Form to add or edit a DNS preset
  */
 function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSaved: () => void }) {
+  const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [serversError, setServersError] = useState<string | undefined>();
   const isEditing = !!existing;
@@ -538,62 +207,83 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
   function validateName(value: string | undefined): string | undefined {
     if (!value || value.trim().length === 0) return "Name is required";
     if (/[=\s]/.test(value)) return "Name cannot contain spaces or '='";
-    // If creating new (not editing) and name already exists
-    if (!isEditing && getPreset(value.trim())) {
-      return `Preset "${value.trim()}" already exists`;
-    }
-    return undefined;
-  }
-
-  function validateServers(value: string | undefined): string | undefined {
-    if (!value || value.trim().length === 0) return "At least one DNS server is required";
-    const servers = value
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-    for (const ip of servers) {
-      if (!ipRegex.test(ip)) {
-        return `Invalid IP: "${ip}"`;
+    const trimmed = value.trim();
+    // Disallow existing name unless editing and keeping the same name
+    try {
+      if ((!isEditing || trimmed !== existing?.name) && getPreset(trimmed)) {
+        return `Preset "${trimmed}" already exists`;
       }
-      const parts = ip.split(".").map(Number);
-      if (parts.some((p) => p < 0 || p > 255)) {
-        return `Invalid IP: "${ip}"`;
-      }
+    } catch (error) {
+      return error instanceof Error ? error.message : "Could not read saved presets";
     }
     return undefined;
   }
 
   async function handleSubmit(values: { name: string; servers: string; description?: string }) {
     const trimmedName = values.name.trim();
-    const trimmedServers = values.servers
+    const serverParts = values.servers
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean)
-      .join(",");
+      .filter(Boolean);
+    const trimmedServers = serverParts.join(",");
     const trimmedDescription = values.description?.trim();
 
     const nameErr = validateName(trimmedName);
-    const serverErr = validateServers(trimmedServers);
+    const serversErr = validateServers(values.servers);
 
-    if (nameErr || serverErr) {
-      setNameError(nameErr);
-      setServersError(serverErr);
+    setNameError(nameErr);
+    setServersError(serversErr);
+
+    if (nameErr || serversErr) {
       return;
     }
 
     try {
-      // If editing and the name changed, delete the old preset first
-      if (isEditing && existing && existing.name !== trimmedName) {
-        deletePreset(existing.name);
-      }
+      // Save new/renamed preset first before deleting old one to prevent data loss if write fails
       addPreset(trimmedName, trimmedServers, trimmedDescription);
+      if (isEditing && existing && existing.name !== trimmedName) {
+        const oldName = existing.name;
+        try {
+          deletePreset(oldName);
+        } catch (cleanupErr) {
+          console.error("Failed to delete old preset during rename:", cleanupErr);
+          onSaved();
+          const detail = cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `Could not remove "${oldName}"`,
+            message: `"${trimmedName}" was saved. ${detail}`,
+            primaryAction: {
+              title: "Remove Old Preset",
+              onAction: async () => {
+                try {
+                  deletePreset(oldName);
+                  onSaved();
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: `Removed "${oldName}"`,
+                  });
+                } catch (retryErr) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: `Could not remove "${oldName}"`,
+                    message: retryErr instanceof Error ? retryErr.message : String(retryErr),
+                  });
+                }
+              },
+            },
+          });
+          pop();
+          return;
+        }
+      }
       await showToast({
         style: Toast.Style.Success,
         title: isEditing ? `Updated "${trimmedName}"` : `Added "${trimmedName}"`,
         message: trimmedServers,
       });
       onSaved();
+      pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -605,14 +295,10 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
 
   return (
     <Form
-      navigationTitle={isEditing ? `Edit "${existing!.name}"` : "Add DNS Preset"}
+      navigationTitle={isEditing ? `Edit "${existing.name}"` : "Add DNS Preset"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={isEditing ? "Save Changes" : "Add Preset"}
-            icon={isEditing ? Icon.Check : Icon.Plus}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={isEditing ? "Save Changes" : "Add Preset"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -620,26 +306,24 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
         id="name"
         title="Preset Name"
         placeholder="e.g. cloudflare, home, work"
+        autoFocus
         defaultValue={existing?.name}
         error={nameError}
         onChange={() => setNameError(undefined)}
-        onBlur={(e) => setNameError(validateName(e.target.value))}
       />
       <Form.TextField
         id="servers"
         title="DNS Servers"
-        placeholder="1.1.1.1, 1.0.0.1"
-        info="Comma-separated list of IPv4 addresses"
+        placeholder="1.1.1.1, 1.0.0.1 or 2606:4700:4700::1111"
+        info="Comma-separated list of IPv4 or IPv6 addresses"
         defaultValue={existing?.servers}
         error={serversError}
         onChange={() => setServersError(undefined)}
-        onBlur={(e) => setServersError(validateServers(e.target.value))}
       />
       <Form.TextField
         id="description"
         title="Description"
-        placeholder="e.g. Filters ads & malware, Family-friendly"
-        info="Optional. A short note about what this preset does."
+        placeholder="e.g. Fast & private, no logging (optional)"
         defaultValue={existing?.description}
       />
     </Form>
@@ -648,50 +332,148 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
 
 export default function Command() {
   const [presets, setPresets] = useState<DNSPreset[]>([]);
+  const [presetsError, setPresetsError] = useState<string | undefined>();
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [networkService, setNetworkService] = useState<string>(NETWORK_SERVICE);
+  const [networkInterface, setNetworkInterface] = useState<string>(NETWORK_INTERFACE);
+  const [isServiceResolved, setIsServiceResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const requestIdRef = useRef(0);
 
-  function refresh() {
-    // Defer I/O operations to next event loop tick to allow React to render loading state first
-    setTimeout(() => {
-      setIsLoading(true);
-      try {
-        setPresets(getPresets());
-        setNetworkInfo(getNetworkInfo());
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load DNS info",
-          message: error instanceof Error ? error.message : String(error),
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }, 0);
-  }
-
-  useEffect(() => {
-    // Update network service asynchronously (avoiding blocking startup)
+  async function resolveService(): Promise<{ service: string; device: string }> {
     try {
       const prefs = getPreferenceValues<Preferences>();
       if (prefs.networkService && prefs.networkService.trim() !== "") {
         const trimmedService = prefs.networkService.trim();
         // Validate service name before using it
         if (validateNetworkServiceName(trimmedService)) {
+          const device = (await getNetworkInterfaceForService(trimmedService)) ?? DEFAULT_NETWORK_INTERFACE;
           NETWORK_SERVICE = trimmedService;
+          NETWORK_INTERFACE = device;
+          return { service: trimmedService, device };
         } else {
-          throw new Error(`Invalid network service name in preferences: "${trimmedService}". Falling back to Wi-Fi.`);
+          throw new Error(
+            `Invalid network service name in preferences: "${trimmedService}". Falling back to auto-detect.`,
+          );
         }
-      } else {
-        NETWORK_SERVICE = getActiveNetworkService();
       }
     } catch (error) {
-      // Keep the default "Wi-Fi" if detection or validation fails
-      console.error("Network service detection error:", error);
-      NETWORK_SERVICE = "Wi-Fi";
+      console.error("Network service preference error:", error);
     }
 
-    refresh();
+    const detected = await getActiveNetworkService();
+    NETWORK_SERVICE = detected.service;
+    NETWORK_INTERFACE = detected.device;
+    return detected;
+  }
+
+  async function ensureActiveService(): Promise<{ service: string; device: string }> {
+    if (isServiceResolved && networkService) {
+      return { service: networkService, device: networkInterface };
+    }
+    const resolved = await resolveService();
+    setNetworkService(resolved.service);
+    setNetworkInterface(resolved.device);
+    setIsServiceResolved(true);
+    return resolved;
+  }
+
+  async function refresh(resolved?: { service: string; device: string }) {
+    const currentId = ++requestIdRef.current;
+    setIsLoading(true);
+    try {
+      let target = resolved;
+
+      if (!target) {
+        if (isServiceResolved && networkService) {
+          target = { service: networkService, device: networkInterface };
+        } else {
+          const detected = await resolveService();
+          target = detected;
+          if (currentId === requestIdRef.current) {
+            setNetworkService(detected.service);
+            setNetworkInterface(detected.device);
+            setIsServiceResolved(true);
+          }
+        }
+      }
+
+      let loadedPresets: DNSPreset[] = [];
+      let presetLoadError: string | undefined;
+      try {
+        loadedPresets = getPresets();
+      } catch (error) {
+        presetLoadError = error instanceof Error ? error.message : String(error);
+      }
+      const loadedInfo = await getNetworkInfo(target.service);
+      if (currentId === requestIdRef.current) {
+        setNetworkService(target.service);
+        setNetworkInterface(target.device);
+        setIsServiceResolved(true);
+        setPresets(loadedPresets);
+        setPresetsError(presetLoadError);
+        setNetworkInfo(loadedInfo);
+      }
+    } catch (error) {
+      if (currentId === requestIdRef.current) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load DNS info",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    } finally {
+      if (currentId === requestIdRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function init() {
+      const currentId = ++requestIdRef.current;
+      setIsLoading(true);
+      try {
+        const { service, device } = await resolveService();
+        let loadedPresets: DNSPreset[] = [];
+        let presetLoadError: string | undefined;
+        try {
+          loadedPresets = getPresets();
+        } catch (error) {
+          presetLoadError = error instanceof Error ? error.message : String(error);
+        }
+        const loadedInfo = await getNetworkInfo(service);
+
+        if (!isCancelled && currentId === requestIdRef.current) {
+          setNetworkService(service);
+          setNetworkInterface(device);
+          setIsServiceResolved(true);
+          setPresets(loadedPresets);
+          setPresetsError(presetLoadError);
+          setNetworkInfo(loadedInfo);
+        }
+      } catch (error) {
+        if (!isCancelled && currentId === requestIdRef.current) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load DNS info",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      } finally {
+        if (!isCancelled && currentId === requestIdRef.current) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    init();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   async function handleSetPreset(preset: DNSPreset) {
@@ -700,13 +482,14 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: `Setting DNS to ${preset.name}...`,
       });
-      setDNSFromPreset(preset.name);
+      const activeService = await ensureActiveService();
+      await setDNSFromPreset(preset.name, activeService.service);
       await showToast({
         style: Toast.Style.Success,
         title: `DNS set to ${preset.name}`,
         message: preset.servers,
       });
-      refresh();
+      await refresh(activeService);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -722,12 +505,13 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: "Resetting DNS to DHCP...",
       });
-      resetDNS();
+      const activeService = await ensureActiveService();
+      await resetDNS(activeService.service);
       await showToast({
         style: Toast.Style.Success,
         title: "DNS reset to DHCP",
       });
-      refresh();
+      await refresh(activeService);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -738,20 +522,23 @@ export default function Command() {
   }
 
   async function handleDelete(preset: DNSPreset) {
-    const confirmed = await confirmAlert({
-      title: `Delete preset "${preset.name}"?`,
-      message: `This will remove ${preset.servers} from your presets.`,
-      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-    });
+    const options: Alert.Options = {
+      title: `Delete "${preset.name}"?`,
+      message: `Are you sure you want to remove the preset "${preset.name}" (${preset.servers})?`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
 
-    if (confirmed) {
+    if (await confirmAlert(options)) {
       try {
         deletePreset(preset.name);
         await showToast({
           style: Toast.Style.Success,
           title: `Deleted "${preset.name}"`,
         });
-        refresh();
+        await refresh();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -763,27 +550,86 @@ export default function Command() {
   }
 
   const activeDNSText = networkInfo?.activeDNS.length ? networkInfo.activeDNS.join(", ") : "None detected";
-  const dnsSourceTag = networkInfo?.isDHCP ? "DHCP" : "Manual";
+  const dnsSourceTag = !networkInfo
+    ? "Detecting"
+    : networkInfo.isUnknown
+      ? "Unknown"
+      : networkInfo.isDHCP
+        ? "DHCP"
+        : "Manual";
+  const dnsSourceColor =
+    !networkInfo || networkInfo.isUnknown ? Color.SecondaryText : networkInfo.isDHCP ? Color.Blue : Color.Orange;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search presets...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search presets or IP addresses...">
+      <List.EmptyView
+        icon={Icon.Network}
+        title="No Presets Found"
+        description="Add a DNS preset to quickly toggle nameservers or reset to DHCP."
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Add DNS Preset"
+              icon={Icon.Plus}
+              target={<AddEditPresetForm onSaved={() => refresh()} />}
+            />
+            {isServiceResolved && <Action title="Reset to DHCP" icon={Icon.XMarkCircle} onAction={handleReset} />}
+          </ActionPanel>
+        }
+      />
+
       {/* Network Interface — click for full details */}
-      <List.Section title="Network">
+      <List.Section title="Current Connection">
         <List.Item
-          icon={networkInfo?.isDHCP ? Icon.Globe : Icon.Lock}
-          title="Network Interface in Use"
-          subtitle={networkInfo?.service ?? ""}
-          accessories={[{ text: activeDNSText }, { tag: dnsSourceTag }]}
+          icon={{
+            source: !networkInfo ? Icon.CircleProgress : networkInfo.isDHCP ? Icon.Globe : Icon.Lock,
+            tintColor: dnsSourceColor,
+          }}
+          title="Active Network Service"
+          subtitle={networkInfo?.service ?? "Detecting..."}
+          accessories={[
+            ...(networkInfo ? [{ text: activeDNSText }] : []),
+            {
+              tag: {
+                value: dnsSourceTag,
+                color: dnsSourceColor,
+              },
+            },
+            ...(isServiceResolved && networkInterface ? [{ tag: networkInterface }] : []),
+          ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Network Details" icon={Icon.Info} target={<NetworkDetailsView />} />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
-              <Action
-                title="Reset to DHCP"
-                icon={Icon.XMarkCircle}
-                onAction={handleReset}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
+              <ActionPanel.Section title="Network Details">
+                {isServiceResolved && (
+                  <Action.Push
+                    title="Show Network Details"
+                    icon={Icon.Info}
+                    target={<NetworkDetailsView service={networkService} device={networkInterface} />}
+                  />
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Active DNS"
+                  content={activeDNSText}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Network Controls">
+                {isServiceResolved && (
+                  <Action
+                    title="Reset to DHCP"
+                    icon={Icon.XMarkCircle}
+                    onAction={handleReset}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
+                )}
+                <Action
+                  title="Refresh Network Info"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => refresh()}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                />
+                <Action title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -792,84 +638,142 @@ export default function Command() {
       {/* Quick Actions */}
       <List.Section title="Quick Actions">
         <List.Item
-          icon={Icon.Plus}
+          icon={{ source: Icon.Plus, tintColor: Color.Blue }}
           title="Add DNS Preset"
           subtitle="Create a new preset to quickly switch to"
           actions={
             <ActionPanel>
-              <Action.Push title="Add Preset" icon={Icon.Plus} target={<AddEditPresetForm onSaved={refresh} />} />
+              <Action.Push
+                title="Add Preset"
+                icon={Icon.Plus}
+                target={<AddEditPresetForm onSaved={() => refresh()} />}
+              />
             </ActionPanel>
           }
         />
-        <List.Item
-          icon={Icon.XMarkCircle}
-          title="Reset to DHCP"
-          subtitle="Remove manual DNS and use automatic settings"
-          actions={
-            <ActionPanel>
-              <Action title="Reset to DHCP" icon={Icon.XMarkCircle} onAction={handleReset} />
-            </ActionPanel>
-          }
-        />
+        {isServiceResolved && (
+          <List.Item
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Orange }}
+            title="Reset to DHCP"
+            subtitle="Remove manual DNS and use automatic settings"
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Reset to DHCP"
+                  icon={Icon.XMarkCircle}
+                  onAction={handleReset}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
       </List.Section>
 
-      {/* Presets Section */}
+      {/* Presets List */}
       <List.Section title="DNS Presets">
+        {presetsError && (
+          <List.Item
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+            title="Could not read saved presets"
+            subtitle={presetsError}
+          />
+        )}
         {presets.map((preset) => {
           const serverArray = preset.servers.split(",").map((s) => s.trim());
           const isActive =
-            !networkInfo?.isDHCP &&
-            serverArray.length === networkInfo?.manualDNS.length &&
-            serverArray.every((ip) => networkInfo?.manualDNS.includes(ip));
+            networkInfo &&
+            !networkInfo.isDHCP &&
+            serverArray.length === networkInfo.manualDNS.length &&
+            serverArray.every((server) => networkInfo.manualDNS.includes(server));
 
           const accessories: List.Item.Accessory[] = [];
           if (preset.description) {
-            // Show the IP servers as a secondary accessory when there's a description
             accessories.push({ text: preset.servers });
           }
           if (isActive) {
-            accessories.push({ tag: "Active" });
+            accessories.push({ tag: { value: "Active", color: Color.Green } });
           }
 
           return (
             <List.Item
               key={preset.name}
-              icon={isActive ? Icon.CheckCircle : Icon.Circle}
+              icon={{
+                source: isActive ? Icon.CheckCircle : Icon.Circle,
+                tintColor: isActive ? Color.Green : Color.SecondaryText,
+              }}
               title={preset.name}
               subtitle={preset.description || preset.servers}
+              keywords={[...serverArray, ...(preset.description ? preset.description.split(" ") : [])]}
               accessories={accessories}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={`Set DNS to ${preset.name}`}
-                    icon={Icon.Network}
-                    onAction={() => handleSetPreset(preset)}
-                  />
-                  <Action.Push
-                    title="Edit Preset"
-                    icon={Icon.Pencil}
-                    target={<AddEditPresetForm existing={preset} onSaved={refresh} />}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  />
-                  <Action.Push
-                    title="Add New Preset"
-                    icon={Icon.Plus}
-                    target={<AddEditPresetForm onSaved={refresh} />}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  />
-                  <Action
-                    title="Reset to DHCP"
-                    icon={Icon.XMarkCircle}
-                    onAction={handleReset}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                  <Action
-                    title="Delete Preset"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => handleDelete(preset)}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  />
+                  <ActionPanel.Section title="Apply">
+                    {isServiceResolved && (
+                      <Action
+                        title={`Set DNS to ${preset.name}`}
+                        icon={Icon.Network}
+                        onAction={() => handleSetPreset(preset)}
+                      />
+                    )}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard
+                      title="Copy DNS Servers"
+                      content={preset.servers}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Preset Name"
+                      content={preset.name}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Manage Presets">
+                    <Action.Push
+                      title="Edit Preset"
+                      icon={Icon.Pencil}
+                      target={<AddEditPresetForm existing={preset} onSaved={() => refresh()} />}
+                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    />
+                    <Action.Push
+                      title="Add New Preset"
+                      icon={Icon.Plus}
+                      target={<AddEditPresetForm onSaved={() => refresh()} />}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    />
+                    <Action
+                      title="Delete Preset"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={() => handleDelete(preset)}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Network">
+                    {isServiceResolved && (
+                      <Action.Push
+                        title="Show Network Details"
+                        icon={Icon.Info}
+                        target={<NetworkDetailsView service={networkService} device={networkInterface} />}
+                        shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      />
+                    )}
+                    {isServiceResolved && (
+                      <Action
+                        title="Reset to DHCP"
+                        icon={Icon.XMarkCircle}
+                        onAction={handleReset}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                    )}
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      onAction={() => refresh()}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

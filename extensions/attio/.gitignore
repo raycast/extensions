@@ -12,3 +12,11 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+.claude
+.superpowers
+.github/.private
+
+# local secrets — never commit
+.env
+.env.*
+!.env.example

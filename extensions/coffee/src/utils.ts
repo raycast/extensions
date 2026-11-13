@@ -1,45 +1,201 @@
-import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
-import { execSync, spawn } from "node:child_process";
+import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { Schedule } from "./interfaces";
+import {
+  windowsGetCaffeinationState,
+  windowsStartCaffeinate,
+  windowsStopCaffeinate,
+  windowsStopCaffeinateIfMatches,
+} from "./windowsApi";
+import { parseCaffeinateTimeout } from "./duration";
+import { getUserStopDecision } from "./userStopPolicy";
+import {
+  CaffeinationReason,
+  CaffeinationState,
+  ConditionalStopResult,
+  getMacCaffeinationState,
+  LegacySession,
+  parseReason,
+  startMacCaffeinate,
+  stopMacCaffeinate,
+  stopMacCaffeinateIfMatches,
+  stopMacLegacyCaffeinate,
+} from "./caffeination";
 
-export type { Schedule };
+export type { Schedule, CaffeinationReason, CaffeinationState, LegacySession };
 
 type Updates = {
   menubar: boolean;
   status: boolean;
 };
 
-export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
+const CAFFEINATION_REASON_KEY = "caffeinationReason";
+
+async function setWindowsCaffeinationReason(sessionId: string, reason?: CaffeinationReason) {
+  await LocalStorage.setItem(CAFFEINATION_REASON_KEY, JSON.stringify({ sessionId, reason }));
+}
+
+async function getWindowsCaffeinationReason(sessionId: string | null): Promise<CaffeinationReason | undefined> {
+  const raw = await LocalStorage.getItem<string>(CAFFEINATION_REASON_KEY);
+  if (!raw || !sessionId) return undefined;
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (!value || typeof value !== "object" || !("sessionId" in value) || value.sessionId !== sessionId)
+      return undefined;
+    return "reason" in value ? parseReason(value.reason) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function getCaffeinationState(): Promise<CaffeinationState> {
+  if (process.platform !== "win32") return getMacCaffeinationState();
+  const state = await windowsGetCaffeinationState();
+  return { ...state, reason: state.isManaged ? await getWindowsCaffeinationReason(state.sessionId) : undefined };
+}
+
+/** Apply the same schedule policy before any user-requested stop or optimistic update. */
+export async function prepareUserStop() {
+  const decision = getUserStopDecision(
+    await getSchedule(),
+    getPreferenceValues<Preferences>().decaffeinatePausesSchedules,
+  );
+  if (!decision.allowed) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Caffeination schedule running",
+      message: "Pause to decaffeinate",
+      primaryAction: {
+        title: "Open Schedules",
+        onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+      },
+    });
+  }
+  return decision;
+}
+
+export function stoppedCaffeinationMessage(state: CaffeinationState, schedulePaused = false): string {
+  const message = schedulePaused ? "Coffee caffeination stopped (schedule paused)" : "Coffee caffeination stopped";
+  return state.externalCount ? `${message}; external caffeination remains active` : message;
+}
+
+export async function startCaffeinate(
+  updates: Updates,
+  hudMessage?: string,
+  additionalArgs?: string,
+  reason?: CaffeinationReason,
+) {
+  parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
+  if (process.platform === "win32") {
+    const sessionId = await windowsStartCaffeinate(additionalArgs);
+    await setWindowsCaffeinationReason(sessionId, reason);
+  } else {
+    const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
+    await startMacCaffeinate(args, reason);
+  }
+
+  // showHUD closes the window and Raycast 2 unloads view commands, so spawn
+  // and persist must finish first. Don't await menu-bar/status refreshes
+  // before the HUD — they run in their own processes once launchCommand is called.
+  const refresh = update(updates);
   if (hudMessage) {
     await showHUD(hudMessage);
   }
-  await stopCaffeinate({ menubar: false, status: false });
-
-  const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-  const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
-  child.unref();
-
-  await update(updates, true);
+  await refresh;
 }
 
-export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
-  if (hudMessage) {
-    await showHUD(hudMessage);
+export async function stopCaffeinate(
+  updates: Updates,
+  showFeedback = false,
+  options?: { pauseRunningSchedule?: boolean },
+) {
+  const pausedSchedule = options?.pauseRunningSchedule ? await pauseRunningSchedule() : undefined;
+  let state: CaffeinationState;
+  try {
+    if (process.platform === "win32") {
+      await windowsStopCaffeinate();
+      state = await getCaffeinationState();
+    } else {
+      state = await stopMacCaffeinate();
+    }
+  } catch (e) {
+    if (pausedSchedule) await restorePausedSchedule(pausedSchedule);
+    throw e;
   }
-  execSync("/usr/bin/killall caffeinate || true");
-  await update(updates, false);
+  // Windows reasons are tied to worker identity. Leave them in place so a
+  // concurrent replacement cannot lose its metadata during this stop's cleanup.
+  if (process.platform !== "win32") await LocalStorage.removeItem(CAFFEINATION_REASON_KEY);
+
+  const refresh = update(updates);
+  if (showFeedback) {
+    await showHUD(stoppedCaffeinationMessage(state, Boolean(pausedSchedule)));
+  }
+  await refresh;
+  return state;
 }
 
-async function update(updates: Updates, caffeinated: boolean) {
+async function pauseRunningSchedule(): Promise<Schedule | undefined> {
+  const schedule = await getSchedule();
+  if (!schedule || !isTodaysSchedule(schedule) || !schedule.IsRunning) return undefined;
+  await changeScheduleState("decaffeinate", schedule);
+  return schedule;
+}
+
+async function restorePausedSchedule(schedule: Schedule) {
+  schedule.IsManuallyDecafed = false;
+  schedule.IsRunning = true;
+  await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+}
+
+/** Stop a session started by Coffee before this version tracked ownership (macOS only). */
+export async function stopLegacyCaffeinate(
+  updates: Updates,
+  legacy: LegacySession,
+  options?: { pauseRunningSchedule?: boolean },
+) {
+  const pausedSchedule = options?.pauseRunningSchedule ? await pauseRunningSchedule() : undefined;
+  let state: CaffeinationState;
+  try {
+    state = await stopMacLegacyCaffeinate(legacy);
+  } catch (e) {
+    if (pausedSchedule) await restorePausedSchedule(pausedSchedule);
+    throw e;
+  }
+  await update(updates);
+  return state;
+}
+
+/** Schedule expiry must not stop a session that replaced the one it observed. */
+export async function stopCaffeinateIfMatches(
+  updates: Updates,
+  expectedSessionId: string,
+): Promise<ConditionalStopResult> {
+  let result: ConditionalStopResult;
+  if (process.platform === "win32") {
+    const state = await getCaffeinationState();
+    if (state.sessionId !== expectedSessionId || state.reason?.kind !== "schedule") return { stopped: false, state };
+    const stopped = await windowsStopCaffeinateIfMatches(expectedSessionId);
+    result = { stopped, state: await getCaffeinationState() };
+  } else {
+    result = await stopMacCaffeinateIfMatches(expectedSessionId);
+  }
+  // The conditional path deliberately does not clear shared Windows reason
+  // metadata: a replacement may already have saved its own bound reason.
+  if (result.stopped) await update(updates);
+  return result;
+}
+
+async function update(updates: Updates) {
+  const tasks: Promise<void>[] = [];
   if (updates.menubar) {
-    await tryLaunchCommand("index", { caffeinated });
+    tasks.push(tryLaunchCommand("index", {}));
   }
   if (updates.status) {
-    await tryLaunchCommand("status", { caffeinated });
+    tasks.push(tryLaunchCommand("status", { skipScheduleMonitorHeartbeat: true }));
   }
+  await Promise.all(tasks);
 }
 
-async function tryLaunchCommand(commandName: string, context: { caffeinated: boolean }) {
+async function tryLaunchCommand(commandName: string, context: { skipScheduleMonitorHeartbeat?: boolean }) {
   try {
     await launchCommand({ name: commandName, type: LaunchType.Background, context });
   } catch {
@@ -54,6 +210,7 @@ function generateArgs(additionalArgs?: string) {
   if (preferences.preventDisplay) flags.push("d");
   if (preferences.preventDisk) flags.push("m");
   if (preferences.preventSystem) flags.push("i");
+  if (preferences.preventSleepOnAC) flags.push("s");
 
   const parts = [];
   if (flags.length > 0) parts.push(`-${flags.join("")}`);
@@ -62,13 +219,12 @@ function generateArgs(additionalArgs?: string) {
   return parts.join(" ");
 }
 
-export function isCaffeinateRunning(): boolean {
-  try {
-    execSync("pgrep caffeinate");
-    return true;
-  } catch {
-    return false;
-  }
+export function deviceName(): "PC" | "Mac" {
+  return process.platform === "win32" ? "PC" : "Mac";
+}
+
+export async function isCoffeeRunning(): Promise<boolean> {
+  return (await getCaffeinationState()).isManaged;
 }
 
 export function numberToDayString(dayIndex: number): string {
@@ -76,18 +232,44 @@ export function numberToDayString(dayIndex: number): string {
   return daysOfWeek[dayIndex];
 }
 
-export async function getSchedule() {
+export async function getSchedule(): Promise<Schedule | undefined> {
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
 
-  const getSchedule: string | undefined = await LocalStorage.getItem(currentDayString);
-  if (getSchedule === undefined) return undefined;
-
-  const schedule: Schedule = JSON.parse(getSchedule);
-  return schedule;
+  const stored = await LocalStorage.getItem(currentDayString);
+  return parseSchedule(stored);
 }
 
-export async function changeScheduleState(operation: string, schedule: Schedule) {
+export function parseSchedule(value: unknown): Schedule | undefined {
+  if (typeof value !== "string") return undefined;
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return undefined;
+    const schedule = parsed as Record<string, unknown>;
+    if (
+      typeof schedule.day === "string" &&
+      typeof schedule.from === "string" &&
+      typeof schedule.to === "string" &&
+      typeof schedule.IsManuallyDecafed === "boolean" &&
+      typeof schedule.IsRunning === "boolean"
+    ) {
+      return {
+        day: schedule.day,
+        from: schedule.from,
+        to: schedule.to,
+        IsManuallyDecafed: schedule.IsManuallyDecafed,
+        IsRunning: schedule.IsRunning,
+      };
+    }
+  } catch {
+    // Ignore unrelated local storage values.
+  }
+
+  return undefined;
+}
+
+export async function changeScheduleState(operation: "caffeinate" | "decaffeinate", schedule: Schedule) {
   switch (operation) {
     case "caffeinate": {
       schedule.IsManuallyDecafed = false;

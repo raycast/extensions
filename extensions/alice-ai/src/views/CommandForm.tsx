@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { AvailableModels } from "../lib/OpenAI";
+import ModelSettingsFields from "../components/ModelSettingsFields";
+import { AvailableModels, DefaultModel, Model, getReasoningLevel } from "../lib/OpenAI";
 import { useActionsState } from "../store/actions";
 import { Action as ActionModel } from "../types";
 import { Colors } from "../utils";
@@ -10,13 +11,19 @@ interface Props {
   afterSubmit?: () => void;
 }
 
+type ActionFormValues = Omit<ActionModel, "model" | "reasoningLevel"> & {
+  model: string;
+  reasoningLevel: string;
+};
+
 const initialValues: ActionModel = {
   id: "",
   name: "",
   color: Colors.Blue,
   description: "",
   systemPrompt: "",
-  model: "gpt-4o-mini",
+  model: DefaultModel,
+  reasoningLevel: "default",
   temperature: "0.7",
   maxTokens: "-1",
   favorite: false,
@@ -27,18 +34,24 @@ export default function CommandForm({ id, afterSubmit }: Props) {
   const editAction = useActionsState((state) => state.editAction);
   const addAction = useActionsState((state) => state.addAction);
 
-  const { handleSubmit, itemProps } = useForm({
-    initialValues: action || initialValues,
+  const { handleSubmit, itemProps } = useForm<ActionFormValues>({
+    initialValues: {
+      ...initialValues,
+      ...action,
+      reasoningLevel: getReasoningLevel(action?.model ?? DefaultModel, action?.reasoningLevel),
+    },
     onSubmit: (values) => {
+      const model = values.model as Model;
+      const savedAction: ActionModel = { ...values, model, reasoningLevel: getReasoningLevel(model, values.reasoningLevel) };
       if (action && action.id) {
-        editAction({ ...values, id: action.id });
+        editAction({ ...savedAction, id: action.id });
         showToast({
           title: "Action updated",
           message: `The action "${values.name}" was successfully updated.`,
           style: Toast.Style.Success,
         });
       } else {
-        addAction(values);
+        addAction(savedAction);
         showToast({
           title: "Action created",
           message: `The action "${values.name}" was successfully created.`,
@@ -69,7 +82,7 @@ export default function CommandForm({ id, afterSubmit }: Props) {
           return "Model is required";
         }
 
-        if (value && !AvailableModels[value]) {
+        if (value && !AvailableModels[value as Model]) {
           return "Invalid model";
         }
       },
@@ -111,18 +124,11 @@ export default function CommandForm({ id, afterSubmit }: Props) {
       <Form.TextField title="Name" placeholder="Enter action name" {...itemProps.name} />
       <Form.TextArea title="Description" placeholder="Enter action description" {...itemProps.description} />
       <Form.TextArea title="System Prompt" placeholder="Enter system prompt" {...itemProps.systemPrompt} />
-      {/* @ts-expect-error The type of the model is Model, whereas the event dropdown is always a string. */}
-      <Form.Dropdown title="Model" {...itemProps.model}>
-        {Object.entries(AvailableModels).map(([model, name]) => (
-          <Form.Dropdown.Item key={model} value={model} title={name} />
-        ))}
-      </Form.Dropdown>
-      <Form.TextField title="Temperature" placeholder="Enter temperature" {...itemProps.temperature} />
-      <Form.TextField
-        title="Max Tokens"
-        placeholder="Enter max tokens"
-        info="The maximum number of tokens to generate. Set -1 for unlimited."
-        {...itemProps.maxTokens}
+      <ModelSettingsFields
+        model={itemProps.model}
+        reasoningLevel={itemProps.reasoningLevel}
+        temperature={itemProps.temperature}
+        maxTokens={itemProps.maxTokens}
       />
     </Form>
   );

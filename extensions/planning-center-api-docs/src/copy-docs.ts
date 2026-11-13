@@ -20,6 +20,13 @@ interface URLParameterDoc {
   value?: string | null;
   description?: string | null;
   example?: string | null;
+  can_assign_on_create?: boolean;
+  can_assign_on_update?: boolean;
+}
+
+interface EdgeScope {
+  name: string;
+  scope_help?: string | null;
 }
 
 interface EdgeDoc {
@@ -27,6 +34,27 @@ interface EdgeDoc {
   details?: string | null;
   path: string;
   deprecated?: boolean;
+  filters?: string[] | null;
+  scopes?: EdgeScope[] | null;
+}
+
+interface RelationshipDoc {
+  name: string;
+  association?: string | null;
+  graph_type?: string | null;
+  note?: string | null;
+}
+
+interface PermissionsDoc {
+  can_create?: boolean;
+  can_update?: boolean;
+  can_destroy?: boolean;
+  read?: string | null;
+  create?: string | null;
+  update?: string | null;
+  destroy?: string | null;
+  create_assignable?: string[] | null;
+  update_assignable?: string[] | null;
 }
 
 interface ActionDoc {
@@ -52,6 +80,8 @@ interface VertexDoc {
   };
   relationships: {
     attributes?: { data: DocNode<AttributeDoc>[] };
+    relationships?: { data: DocNode<RelationshipDoc>[] };
+    permissions?: { data: DocNode<PermissionsDoc> };
     can_query?: { data: DocNode<URLParameterDoc>[] };
     can_include?: { data: DocNode<URLParameterDoc>[] };
     can_order?: { data: DocNode<URLParameterDoc>[] };
@@ -59,6 +89,7 @@ interface VertexDoc {
     inbound_edges?: { data: DocNode<EdgeDoc>[] };
     actions?: { data: DocNode<ActionDoc>[] };
     per_page?: { data: DocNode<URLParameterDoc> };
+    offset?: { data: DocNode<URLParameterDoc> };
   };
 }
 
@@ -92,6 +123,31 @@ function buildMarkdown(vertex: VertexDoc, appTitle: string, version: string): st
 
   if (info.path) sections.push(`Base endpoint: \`${info.path}\``);
 
+  const perms = rels.permissions?.data?.attributes;
+  if (info.path) {
+    const resourcePath = `${info.path}/{id}`;
+    const withNote = (verb: string, path: string, note?: string | null) =>
+      `- ${verb}: \`${path}\`${note ? ` — ${cell(note)}` : ""}`;
+    const endpoints = [
+      !info.resource_only && withNote("Listing", `GET ${info.path}`, perms?.read),
+      !info.collection_only && withNote("Reading", `GET ${resourcePath}`, perms?.read),
+      perms?.can_create && withNote("Creating", `POST ${info.path}`, perms.create),
+      perms?.can_update && withNote("Updating", `PATCH ${resourcePath}`, perms.update),
+      perms?.can_destroy && withNote("Deleting", `DELETE ${resourcePath}`, perms.destroy),
+    ].filter(Boolean) as string[];
+    if (endpoints.length) {
+      let endpointSection = `## Endpoints\n\n` + endpoints.join("\n");
+      const assignable = (label: string, names?: string[] | null) =>
+        names?.length ? `Assignable attributes on ${label}: ${names.map((n) => `\`${n}\``).join(", ")}.` : null;
+      const assignableLines = [
+        assignable("create", perms?.create_assignable),
+        assignable("update", perms?.update_assignable),
+      ].filter(Boolean) as string[];
+      if (assignableLines.length) endpointSection += `\n\n` + assignableLines.join("\n\n");
+      sections.push(endpointSection);
+    }
+  }
+
   const attrs = rels.attributes?.data ?? [];
   if (attrs.length) {
     sections.push(
@@ -102,6 +158,22 @@ function buildMarkdown(vertex: VertexDoc, appTitle: string, version: string): st
             `\`${a.name}\``,
             cell(a.type_annotation?.name),
             cell([a.description, a.note].filter(Boolean).join(" — ")),
+          ]),
+        ),
+    );
+  }
+
+  const relationships = rels.relationships?.data ?? [];
+  if (relationships.length) {
+    sections.push(
+      `## Relationships\n\n` +
+        table(
+          ["Name", "Association", "Type", "Note"],
+          relationships.map(({ attributes: r }) => [
+            `\`${r.name}\``,
+            cell(r.association),
+            cell(r.graph_type),
+            cell(r.note),
           ]),
         ),
     );
@@ -127,7 +199,19 @@ function buildMarkdown(vertex: VertexDoc, appTitle: string, version: string): st
   if (includes.length) {
     sections.push(
       `## Includable Associations\n\n` +
-        includes.map(({ attributes: i }) => `- \`?include=${i.value || i.name}\` — ${cell(i.description)}`).join("\n"),
+        includes
+          .map(({ attributes: i }) => {
+            const assignable =
+              i.can_assign_on_create && i.can_assign_on_update
+                ? " (assignable on create and update)"
+                : i.can_assign_on_create
+                  ? " (assignable on create)"
+                  : i.can_assign_on_update
+                    ? " (assignable on update)"
+                    : "";
+            return `- \`?include=${i.value || i.name}\` — ${cell(i.description)}${assignable}`;
+          })
+          .join("\n"),
     );
   }
 
@@ -140,20 +224,22 @@ function buildMarkdown(vertex: VertexDoc, appTitle: string, version: string): st
     );
   }
 
+  const edgeLine = ({ attributes: e }: DocNode<EdgeDoc>): string => {
+    let line = `- \`${e.name}\`: \`${e.path}\``;
+    if (e.filters?.length) line += ` — filters: ${e.filters.map((f) => `\`${f}\``).join(", ")}`;
+    const helps = (e.scopes ?? []).filter((s) => s.scope_help);
+    for (const s of helps) line += `\n  - \`${s.name}\`: ${cell(s.scope_help)}`;
+    return line;
+  };
+
   const outbound = (rels.outbound_edges?.data ?? []).filter(({ attributes: e }) => !e.deprecated);
   if (outbound.length) {
-    sections.push(
-      `## Associations (Outbound Edges)\n\n` +
-        outbound.map(({ attributes: e }) => `- \`${e.name}\`: \`${e.path}\``).join("\n"),
-    );
+    sections.push(`## Associations (Outbound Edges)\n\n` + outbound.map(edgeLine).join("\n"));
   }
 
   const inbound = (rels.inbound_edges?.data ?? []).filter(({ attributes: e }) => !e.deprecated);
   if (inbound.length) {
-    sections.push(
-      `## Accessible From (Inbound Edges)\n\n` +
-        inbound.map(({ attributes: e }) => `- \`${e.name}\`: \`${e.path}\``).join("\n"),
-    );
+    sections.push(`## Accessible From (Inbound Edges)\n\n` + inbound.map(edgeLine).join("\n"));
   }
 
   const actions = rels.actions?.data ?? [];
@@ -169,8 +255,14 @@ function buildMarkdown(vertex: VertexDoc, appTitle: string, version: string): st
     );
   }
 
-  const perPage = rels.per_page?.data?.attributes;
-  if (perPage?.description) sections.push(`Pagination: \`per_page\` — ${cell(perPage.description)}.`);
+  const paginationParams = [rels.per_page?.data?.attributes, rels.offset?.data?.attributes].filter(
+    (p): p is URLParameterDoc => Boolean(p?.description),
+  );
+  if (paginationParams.length) {
+    sections.push(
+      `Pagination: ` + paginationParams.map((p) => `\`${p.parameter}\` — ${cell(p.description)}`).join("; ") + ".",
+    );
+  }
 
   if (info.example) {
     let example = info.example;

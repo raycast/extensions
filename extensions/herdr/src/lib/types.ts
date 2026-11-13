@@ -16,6 +16,7 @@ export interface WorkspaceInfo {
   tab_count: number;
   pane_count: number;
   agent_status?: AgentStatus;
+  tokens?: Record<string, string>;
   worktree?: {
     repo_key: string;
     repo_name: string;
@@ -49,11 +50,12 @@ export interface PaneInfo {
   agent?: string;
   name?: string;
   display_agent?: string;
-  title?: string;
+  label?: string;
   interactive_ready?: boolean;
   launch_pending?: boolean;
   agent_status?: AgentStatus;
   agent_session?: AgentSession;
+  tokens?: Record<string, string>;
   scroll?: {
     offset_from_bottom: number;
     max_offset_from_bottom: number;
@@ -106,6 +108,7 @@ export interface PromptHistoryItem {
 
 export const AGENT_KINDS = [
   "claude",
+  "antigravity",
   "codex",
   "gemini",
   "cursor",

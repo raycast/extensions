@@ -14,6 +14,8 @@ type EpisodeAction<T> = {
 type EpisodeActionPanelProps<T> = {
   item: T;
   actions: EpisodeAction<T>[];
+  /** Components placed after `actions`, in the panel and in the detail view (e.g. a submenu). */
+  extraActions?: (item: T) => ActionPanel.Props["children"];
   markdown: (item: T) => string;
   metadata: (item: T) => Detail.Props["metadata"];
   navigationTitle: (item: T) => string;
@@ -62,6 +64,7 @@ export const episodeTraktUrl = (slug: string | undefined, season: number, episod
 export const EpisodeActionPanel = <T,>({
   item,
   actions,
+  extraActions,
   markdown,
   metadata,
   navigationTitle,
@@ -84,6 +87,7 @@ export const EpisodeActionPanel = <T,>({
               <ActionPanel>
                 <ActionPanel.Section>
                   <EpisodeActionList item={detailItem} actions={actions} />
+                  {extraActions?.(detailItem)}
                 </ActionPanel.Section>
                 <EpisodeBrowserActions item={detailItem} traktUrl={traktUrl} imdbId={imdbId} />
               </ActionPanel>
@@ -92,6 +96,7 @@ export const EpisodeActionPanel = <T,>({
         }
       />
       <EpisodeActionList item={item} actions={actions} />
+      {extraActions?.(item)}
     </ActionPanel.Section>
     <EpisodeBrowserActions item={item} traktUrl={traktUrl} imdbId={imdbId} />
   </ActionPanel>

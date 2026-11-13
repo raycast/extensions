@@ -1,0 +1,83 @@
+{
+  "$comment": [
+    "Canonical Threads posts the live suite resolves against. Edit this file, not the test.",
+    "Run with: npm run test:live   (hits threads.com; excluded from `npm test`)",
+    "",
+    "Each entry:",
+    "  name    what the case is for \u2014 say what is DIFFERENT about it, not what it is",
+    "  url     any Threads link: canonical, ?xmt-decorated, or a /share/ short link",
+    "  code    the shortcode the url RESOLVES TO \u2014 the part after /post/ in the canonical URL.\n          For a /share/ link this is NOT the id in the share URL: /share/InQUBOY9S/\n          resolves to code DcTZYVBkhjU. Run `npm run test:live` after editing; the\n          suite rejects a share id pasted into this field.",
+    "  kinds   media the parser must find, in order: \"image\" | \"video\" | \"audio\"",
+    "          use [] for a post with no downloadable media, e.g. a text post",
+    "  covers  why this post earns a slot \u2014 the behaviour that regresses without it",
+    "",
+    "Prefer posts you own or that are unlikely to be deleted; a deleted post fails the",
+    "suite, which is a signal to swap it, not a code defect. When swapping, keep the",
+    "`covers` behaviour \u2014 replace like with like."
+  ],
+  "posts": [
+    {
+      "name": "canonical URL with an ?xmt tracking param",
+      "url": "https://www.threads.com/@muse/post/DdCYkFvlDvi?xmt=AQG0IBoXu948zvdFAd5P7OF8v1NKJKlG8shFYiWMVcGE9nc",
+      "code": "DdCYkFvlDvi",
+      "kinds": ["video"],
+      "covers": "tracking params must not break shortcode extraction"
+    },
+    {
+      "name": "/share/ link to a 2-item video carousel",
+      "url": "https://www.threads.com/share/D5fb90eNC/",
+      "code": "Dc1j54Rmhw4",
+      "kinds": ["video", "video"],
+      "covers": "share links resolve server-side to canonical; multi-item carousels"
+    },
+    {
+      "name": "/share/ link to a text-only post",
+      "url": "https://www.threads.com/share/E7_VP3FN2/",
+      "code": "DdCbtnaAQ3N",
+      "kinds": [],
+      "covers": "a post with no media resolves cleanly instead of erroring"
+    },
+    {
+      "name": "/share/ link to a single video (@raycastapp)",
+      "url": "https://www.threads.com/share/InQUBOY9S/",
+      "code": "DcTZYVBkhjU",
+      "kinds": ["video"],
+      "covers": "the ordinary single-video case; a share id that differs from the shortcode"
+    },
+    {
+      "name": "voice post",
+      "url": "https://www.threads.com/share/Fxvo2U7fV/",
+      "code": "DEvL0wTyGWx",
+      "kinds": ["audio"],
+      "covers": "audio lives at audio.audio_src, outside both versions arrays, and is served as video/mp4"
+    },
+    {
+      "name": "image-only post served as WebP",
+      "url": "https://www.threads.com/@zuck/post/Dcy_A8pGo-m",
+      "code": "Dcy_A8pGo-m",
+      "kinds": ["image"],
+      "covers": "a .jpg URL whose bytes are WebP \u2014 the extension must come from the header"
+    },
+    {
+      "name": "mixed carousel served as JPEG, with no Content-Length",
+      "url": "https://www.threads.com/share/EwJcdJ7Qk/",
+      "code": "DdFlcLfGi8a",
+      "kinds": ["image", "image", "video"],
+      "covers": "Threads serves image/jpeg on some posts and omits Content-Length; the progress toast falls back to bytes"
+    },
+    {
+      "name": "mixed carousel, video first",
+      "url": "https://www.threads.com/@zuck/post/DZ7eGA1G7wU",
+      "code": "DZ7eGA1G7wU",
+      "kinds": ["video", "image", "video"],
+      "covers": "carousel items keep payload order and mix kinds"
+    },
+    {
+      "name": "7-item carousel alternating image and video",
+      "url": "https://www.threads.com/share/GBTr14Iw7/",
+      "code": "DYm7T8XFQwp",
+      "kinds": ["image", "video", "image", "video", "image", "video", "image"],
+      "covers": "the largest carousel we test; proves order is preserved across many alternating kinds"
+    }
+  ]
+}

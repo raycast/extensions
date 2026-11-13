@@ -4,100 +4,74 @@ import { isValidBrewCaskToken } from "./brew";
 export function hasValidTargetVersion(
   targetVersion: string | null | undefined,
 ): boolean {
-  if (typeof targetVersion !== "string") {
-    return false;
-  }
-
+  if (typeof targetVersion !== "string") return false;
   const normalized = targetVersion.trim();
   return normalized !== "" && normalized !== "undefined";
 }
 
-export function isUpdatableApp(
-  app: Pick<
-    VessloApp,
-    | "targetVersion"
-    | "isVisibleInUpdates"
-    | "isDeleted"
-    | "isSkipped"
-    | "isIgnored"
-  >,
-): boolean {
-  if (app.isDeleted || app.isSkipped || app.isIgnored) return false;
+export function isUpdatableApp(app: VessloApp): boolean {
+  if (app.isDeleted || app.isIgnored || app.currentTargetSkipped === true) {
+    return false;
+  }
+  // Preserve export visibility even for an unrecognized action, for review.
   if (typeof app.isVisibleInUpdates === "boolean") {
     return app.isVisibleInUpdates;
   }
-  return hasValidTargetVersion(app.targetVersion);
+  if (app.exportContract !== "legacy") return false;
+  return !app.isSkipped && hasValidTargetVersion(app.targetVersion);
 }
 
-export type UpdateRouteGroup = "homebrew" | "sparkle" | "appStore" | "manual";
+export type UpdateRouteGroup =
+  | "homebrew"
+  | "sparkle"
+  | "appStore"
+  | "manual"
+  | "review";
 
-function hasCurrentRoutingContract(
-  app: Pick<VessloApp, "primaryActionKind" | "eligibilityKind">,
-): boolean {
-  return app.primaryActionKind !== null || app.eligibilityKind !== null;
-}
+export type ExecutableUpdateRoute = Exclude<UpdateRouteGroup, "review">;
 
-export function updateRouteGroup(
-  app: Pick<
-    VessloApp,
-    "isVisibleInUpdates" | "primaryActionKind" | "eligibilityKind" | "sources"
-  >,
-): UpdateRouteGroup {
+/** Exact action/eligibility pairs are the execution allowlist. */
+export function executableUpdateRoute(
+  app: VessloApp,
+): ExecutableUpdateRoute | null {
+  if (app.exportContract !== "current") return null;
   switch (app.primaryActionKind) {
     case "runBrew":
-      return "homebrew";
+      return app.eligibilityKind === "executableUpdate.homebrew" &&
+        isValidBrewCaskToken(app.homebrewCask)
+        ? "homebrew"
+        : null;
     case "runSparkle":
-      return "sparkle";
+      return app.eligibilityKind === "executableUpdate.sparkle"
+        ? "sparkle"
+        : null;
     case "runAppStore":
-    case "openAppStore":
-      return "appStore";
+      return app.eligibilityKind === "executableUpdate.appStore" &&
+        typeof app.appStoreId === "string" &&
+        /^\d+$/.test(app.appStoreId)
+        ? "appStore"
+        : null;
     case "openInstaller":
-      return "manual";
+      return app.eligibilityKind === "manualInstallerUpdate" ? "manual" : null;
+    default:
+      return null;
   }
+}
 
-  if (app.eligibilityKind === "manualInstallerUpdate") {
-    return "manual";
-  }
-  if (app.eligibilityKind?.startsWith("executableUpdate.homebrew")) {
-    return "homebrew";
-  }
-  if (app.eligibilityKind?.startsWith("executableUpdate.sparkle")) {
-    return "sparkle";
-  }
+export function updateRouteGroup(app: VessloApp): UpdateRouteGroup {
+  const route = executableUpdateRoute(app);
+  if (route) return route;
   if (
-    app.eligibilityKind?.startsWith("executableUpdate.appStore") ||
+    app.exportContract === "current" &&
+    app.primaryActionKind === "openAppStore" &&
     app.eligibilityKind === "appStoreManualUpdate"
   ) {
     return "appStore";
   }
-
-  if (hasCurrentRoutingContract(app)) {
-    return "manual";
-  }
-
-  if (app.sources.includes("Brew")) return "homebrew";
-  if (app.sources.includes("Sparkle")) return "sparkle";
-  if (app.sources.includes("App Store")) return "appStore";
-  return "manual";
+  return "review";
 }
 
-export function isHomebrewUpdateCandidate(
-  app: Pick<
-    VessloApp,
-    | "targetVersion"
-    | "isVisibleInUpdates"
-    | "isDeleted"
-    | "isSkipped"
-    | "isIgnored"
-    | "primaryActionKind"
-    | "eligibilityKind"
-    | "sources"
-    | "homebrewCask"
-  >,
-): boolean {
-  return (
-    isUpdatableApp(app) &&
-    updateRouteGroup(app) === "homebrew" &&
-    isValidBrewCaskToken(app.homebrewCask)
-  );
+/** A listing predicate, never execution authorization. Stale rows remain reviewable. */
+export function isHomebrewUpdateCandidate(app: VessloApp): boolean {
+  return isUpdatableApp(app) && executableUpdateRoute(app) === "homebrew";
 }

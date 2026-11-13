@@ -6,6 +6,7 @@ import {
   Color,
   Form,
   Image,
+  Keyboard,
   open,
   showToast,
   Toast,
@@ -66,12 +67,12 @@ export function BranchForm({ draftValues }: BranchFormProps) {
         if (branchName) {
           toast.primaryAction = {
             title: "Copy Branch Name",
-            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: () => branchName && Clipboard.copy(branchName),
           };
           toast.secondaryAction = {
             title: "Open in Browser",
-            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             onAction: async () => await open(`${values.repoUrl}/tree/${branchName}`),
           };
         }
@@ -113,8 +114,14 @@ export function BranchForm({ draftValues }: BranchFormProps) {
   const issues = data?.repository?.issues?.nodes?.filter((node) => node?.linkedBranches.totalCount == 0);
 
   useEffect(() => {
-    setValue("repoUrl", data?.repository?.url);
-    setValue("oid", data?.repository?.defaultBranchRef?.target?.oid);
+    const repoUrl = data?.repository?.url;
+    const oid = data?.repository?.defaultBranchRef?.target?.oid;
+    if (repoUrl) {
+      setValue("repoUrl", repoUrl);
+    }
+    if (oid) {
+      setValue("oid", oid);
+    }
   }, [data?.repository?.url, data?.repository?.defaultBranchRef?.target?.oid]);
 
   return (

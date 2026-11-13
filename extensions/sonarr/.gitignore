@@ -17,6 +17,7 @@ compiled_raycast_rust
 # Claude Code
 .claude/
 CLAUDE.md
+.agents/
 
 # misc
 .DS_Store

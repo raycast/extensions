@@ -26,6 +26,21 @@ export function OpenUrlAction({
   );
 }
 
+/** Uses the conventional modifier names on macOS and Windows. */
+export function platformShortcut(modifiers: Keyboard.KeyModifier[], key: Keyboard.KeyEquivalent): Keyboard.Shortcut {
+  return {
+    macOS: { modifiers, key },
+    Windows: {
+      modifiers: modifiers.map((modifier) => {
+        if (modifier === "cmd") return "ctrl";
+        if (modifier === "opt") return "alt";
+        return modifier;
+      }),
+      key,
+    },
+  };
+}
+
 export async function errorToast(error: unknown) {
   const errorText = (() => {
     if (typeof error === "string") {

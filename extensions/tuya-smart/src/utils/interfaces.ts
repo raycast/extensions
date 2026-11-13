@@ -34,6 +34,7 @@ export interface Preferences {
   accessId: string;
   accessSecret: string;
   region: string;
+  temperatureUnit?: "device" | "c" | "f";
 }
 
 export interface DevicesReponse {

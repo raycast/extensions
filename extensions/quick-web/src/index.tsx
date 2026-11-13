@@ -44,14 +44,13 @@ export default function Command(props: LaunchProps<{ arguments: Input }>) {
       for (const arg of allArgs) {
         allPromises.push(queryArgValueListErrIfNotExistOrEmpty(arg, allArgsMap.get(arg)));
       }
-      Promise.all(allPromises).then((results) => {
-        for (let i = 0; i < results.length; i++) {
-          const res = results[i];
-          if (res != undefined) {
-            arg2ValueListMap.set(allArgs[i], res);
-          }
+      const results = await Promise.all(allPromises);
+      for (let i = 0; i < results.length; i++) {
+        const res = results[i];
+        if (res != undefined) {
+          arg2ValueListMap.set(allArgs[i], res);
         }
-      });
+      }
 
       setArg2ValueListMap(arg2ValueListMap);
     }

@@ -7,7 +7,7 @@ Compress selected images with [TinyPNG](https://tinypng.com/).
 
 ## Setup
 
-Settings your [developer api token](https://tinypng.com/developers).
+Set your [developer API token](https://tinypng.com/developers).
 
 <img src="https://user-images.githubusercontent.com/11070996/185812420-ca730a35-ece3-4d65-8b7c-da606f220401.png" width="500">
 

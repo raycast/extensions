@@ -1,7 +1,15 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
-import { getCurrentInterval, isPaused, duration, preferences, progress, resetInterval } from "./lib/intervals";
+import { FocusText, IntervalTitles, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
+import {
+  getCurrentInterval,
+  getNextIntervalType,
+  isPaused,
+  duration,
+  preferences,
+  progress,
+  resetInterval,
+} from "./lib/intervals";
 import { secondsToTime } from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
 import { OAuthService, usePromise } from "@raycast/utils";
@@ -11,6 +19,7 @@ import {
   slackPauseInterval,
   slackResetInterval,
   slackRestartInterval,
+  slackSkipInterval,
 } from "./lib/slack/slackIntervals";
 
 const IconTint: Color.Dynamic = {
@@ -78,6 +87,14 @@ export default function TogglePomodoroTimer() {
       return;
     }
     await slackRestartInterval(token);
+    setCurrentInterval(getCurrentInterval());
+  }
+
+  async function onSkip() {
+    if (!token) {
+      return;
+    }
+    await slackSkipInterval(token);
     setCurrentInterval(getCurrentInterval());
   }
 
@@ -153,6 +170,13 @@ export default function TogglePomodoroTimer() {
             icon={Icon.Repeat}
             onAction={onRestart}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
+          />
+          <MenuBarExtra.Item
+            title="Skip to Next"
+            subtitle={IntervalTitles[getNextIntervalType(currentInterval.type)]}
+            icon={Icon.Forward}
+            onAction={onSkip}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
         </>
       ) : (

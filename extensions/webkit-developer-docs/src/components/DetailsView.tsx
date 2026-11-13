@@ -1,10 +1,9 @@
 import { List } from "@raycast/api";
 import { Doc } from "../types";
-import { JSDomConverter, Renderer } from "html2commonmark";
+import TurndownService from "turndown";
 
-const converter = new JSDomConverter();
-const renderer = new Renderer();
+const turndown = new TurndownService();
 
 export const DetailsView = ({ doc }: { doc: Doc }) => (
-  <List.Item.Detail markdown={doc.title + "\n\n" + renderer.render(converter.convert(doc.text))} />
+  <List.Item.Detail markdown={doc.title + "\n\n" + turndown.turndown(doc.text)} />
 );

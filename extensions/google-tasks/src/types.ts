@@ -1,9 +1,3 @@
-export enum Filter {
-  All = "all",
-  Open = "open",
-  Completed = "completed",
-}
-
 export interface Task {
   id: string;
   title: string;
@@ -11,17 +5,24 @@ export interface Task {
   due?: string;
   completed?: string;
   parent?: string;
+  position?: string;
   notes?: string;
-  children?: Task[];
 }
+
+export interface TaskList {
+  id: string;
+  title: string;
+}
+
+export interface TaskWithList extends Task {
+  listId: string;
+  listTitle: string;
+}
+
+export type EditableTask = Pick<Task, "id" | "title" | "notes"> & { due?: string | Date | null };
 
 export interface TaskForm {
   title: string;
   notes?: string;
   due: Date | null;
-}
-
-export interface TaskGroups {
-  name: string;
-  tasks: Task[];
 }

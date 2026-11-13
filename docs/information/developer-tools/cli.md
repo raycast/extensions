@@ -16,15 +16,19 @@ The CLI is part of the `@raycast/api` package and is automatically installed in 
 
 You can use `npx ray build -e dist` to validate that your extension builds properly.
 
+## Bundle
+
+`npx ray bundle` creates a `.rayext` zip archive containing the optimized extension build. The archive contains `package.json` and all built files at its root and defaults to `<extension-name>.rayext` in the current directory. Use `--output` or `-o` to choose another path.
+
 ## Development
 
 `npx ray develop` starts your extension in development mode. The mode includes the following:
 
 - Extension shows up at the top of the root search for quick access
-- Commands get automatically reloaded when you save your changes (you can toggle auto-reloading via Raycast Preferences > Advanced > "Auto-reload on save")
+- Commands get automatically reloaded when you save your changes (you can toggle auto-reloading in Raycast Settings > Extensions > Developer > "Auto-reload on save").
 - Error overlays include detailed stack traces for faster debugging
 - Log messages are displayed in the terminal
-- Status indicator is visible in the navigation title of the command to signal build errors
+- The command icon in the bottom-left shows when the extension is rebuilding or failed to build. Build errors include actions to open the source location in your editor or copy the diagnostic, while the last successful command keeps running.
 - Imports the extension to Raycast if it wasn't before
 
 ## Lint

@@ -1,5 +1,12 @@
 # Plexamp CHANGELOG
 
+## [Go to Album and Artist, Play Album from Track] - 2026-09-07
+
+- Added `Go to Album` (`Cmd+G`) and `Go to Artist` (`Cmd+Shift+G`) actions to every track row in `Browse Library`, `Search Library`, `Recently Played`, playlist track lists, and album track lists.
+- `Go to Album` opens the album's track list with the track pre-selected; `Go to Artist` opens the artist's release list with the album pre-selected in both list and grid view. `Now Playing`'s `Go to Album` and `Go to Artist` pre-select the same way.
+- Added `Play Album from This Track` and `Play Album from Start` to album track lists as the `Enter` and `Cmd+Enter` defaults; `Play in Plexamp`, `Add to Queue`, and `Play Next` (`Cmd+Shift+Enter`) for the single track remain in the action panel.
+- Outside album track lists the navigation actions sit after `Play Next`, so `Enter` still plays the track and `Cmd+Enter` still adds it to the queue.
+
 ## [Play Shortcut] - 2026-05-04
 
 - Added a `Cmd+Enter` shortcut to `Play in Plexamp` on album rows in artist views (list and grid) so an album can be played directly without first drilling into its tracks.

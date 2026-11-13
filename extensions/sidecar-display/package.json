@@ -1,0 +1,181 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sidecar-display",
+  "title": "Sidecar Display",
+  "description": "Connect your iPad over Sidecar and force it to extend instead of mirror, without touching your main display.",
+  "icon": "extension-icon.png",
+  "author": "chiptoma",
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "sidecar",
+    "ipad",
+    "display",
+    "extend",
+    "mirror",
+    "second screen",
+    "airplay"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "connect-sidecar",
+      "title": "Connect Sidecar",
+      "subtitle": "Sidecar Display",
+      "description": "Connect the iPad and force the configured display mode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect-sidecar",
+      "title": "Disconnect Sidecar",
+      "subtitle": "Sidecar Display",
+      "description": "Disconnect the iPad.",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-reconnect",
+      "title": "Auto-Reconnect Sidecar",
+      "subtitle": "Sidecar Display",
+      "description": "Restore the Sidecar link after it drops (e.g. waking from sleep, or plugging the cable back in). Enable background refresh on this command to keep the iPad connected; run it manually to reconnect now, which works regardless of the auto-reconnect switch or the transport setting.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "fix-mirroring",
+      "title": "Fix Mirroring",
+      "subtitle": "Sidecar Display",
+      "description": "Reconnect the main BetterDisplay virtual screen to clear macOS Sidecar's own mirror mode when the iPad connects showing a copy of your main screen. Briefly reshuffles the desktop. Needs the BetterDisplay app installed and running.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sidecar-status",
+      "title": "Sidecar Status",
+      "subtitle": "Sidecar Display",
+      "description": "Menu-bar item showing the iPad name, connection status, and whether the iPad is nearby, with connect, disconnect, and extend/mirror actions. Refreshes about every minute so the status stays live; turn Background Refresh off on this command if you would rather it only update when opened (friendlier to menu-bar managers like Bartender, and easier on battery).",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showDeviceName",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show iPad Name",
+      "label": "Show the iPad's name beside the menu-bar icon",
+      "description": "On: the name appears whenever the iPad is connected or nearby, and disappears when it is out of range. Off: icon only, which keeps a constant width — friendlier to menu-bar managers like Bartender or Ice.",
+      "default": false
+    },
+    {
+      "name": "fixMirrorAfterConnect",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-Fix Mirroring",
+      "label": "Fix mirroring automatically when the iPad connects",
+      "description": "If your iPad connects showing a copy of your main screen instead of extending it, this repairs it each time it newly attaches. macOS gives no way to detect that state, so it runs on every fresh connect rather than only when needed — which briefly reshuffles your desktop. Turn this off if your iPad only occasionally mirrors, and use the Fix Mirroring command by hand instead. Needs the BetterDisplay app installed AND running; skipped silently otherwise.",
+      "default": true
+    },
+    {
+      "name": "displayMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Display Mode",
+      "description": "What the iPad should do once connected. Extend gives you extra desktop space (the usual choice). Mirror shows a copy of your main display on the iPad.",
+      "default": "extend",
+      "data": [
+        {
+          "title": "Extend",
+          "value": "extend"
+        },
+        {
+          "title": "Mirror",
+          "value": "mirror"
+        }
+      ]
+    },
+    {
+      "name": "ipadName",
+      "type": "textfield",
+      "required": false,
+      "title": "iPad Name",
+      "description": "Leave empty and the iPad is detected automatically. Fill this in only if you have more than one Sidecar device and want to pin a specific one — the name must match exactly as macOS shows it.",
+      "placeholder": "Auto-detect"
+    },
+    {
+      "name": "enableAutoReconnect",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-Reconnect",
+      "label": "Reconnect the iPad automatically after the link drops",
+      "description": "Brings the iPad back on its own after a drop — for example when your Mac wakes from sleep. It only ever chases a link that dropped by itself; disconnecting on purpose is never fought. This preference is the default: the Auto-Reconnect item in the menu bar overrides it once you use it. Also needs Background Refresh enabled on the Auto-Reconnect Sidecar command in Raycast's settings.",
+      "default": true
+    },
+    {
+      "name": "autoReconnectTransport",
+      "type": "dropdown",
+      "required": false,
+      "title": "Auto-Reconnect When",
+      "description": "Which connections count as \"my iPad is here\" for automatic reconnects. Always reconnects whenever the iPad is detected. Cable Only reconnects just when it is plugged in, which is the closest thing to \"I am at my desk\" — being merely in range does not count, so it will not grab your iPad from across the room. Wi-Fi Only ignores the cable. This does not affect connecting by hand, which always works.",
+      "default": "any",
+      "data": [
+        {
+          "title": "Always",
+          "value": "any"
+        },
+        {
+          "title": "Cable Only",
+          "value": "cable"
+        },
+        {
+          "title": "Wi-Fi Only",
+          "value": "wireless"
+        }
+      ]
+    },
+    {
+      "name": "giveUpAfterHours",
+      "type": "textfield",
+      "required": false,
+      "title": "Give Up After (hours)",
+      "description": "How long to keep trying an iPad that appears to be nearby but refuses to connect, before stopping so macOS stops showing connection-failed notifications. This counts time actually spent trying: it does not advance while the iPad is out of range, while your Mac is asleep, or if the presence check cannot answer — so a trip or an overnight sleep never uses it up. Set to 0 to keep trying indefinitely.",
+      "placeholder": "24",
+      "default": "24"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "eslint-plugin-perfectionist": "^5.10.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "prettier": "^3.5.3",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build && npm run typecheck",
+    "build:test": "tsc -p tsconfig.test.json",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "npm run test:unit",
+    "test:unit": "npm run build:test && node --test .test-build/test/keepalive.test.js .test-build/test/transport.test.js .test-build/test/presence.test.js .test-build/test/resilience.test.js .test-build/test/messages.test.js .test-build/test/orchestration.test.js .test-build/test/virtualscreens.test.js",
+    "test:safety": "npm run test:unit && node --test .test-build/test/safety.test.js",
+    "test:hardware": "npm run test:safety && node --test .test-build/test/display-mode.test.js && node --test .test-build/test/lifecycle.test.js",
+    "verify": "npm run lint && npm run build && npm run test:unit",
+    "clean": "rm -rf .test-build dist compiled_raycast_swift raycast-env.d.ts swift/.build swift/.swiftpm swift/.raycast-swift-build",
+    "clean:swiftbuild": "rm -rf swift/.build swift/.raycast-swift-build swift/.swiftpm",
+    "preflight": "node scripts/preflight.js",
+    "store:check": "npm run build && npm run test:unit",
+    "publish": "npm run store:check && npm run preflight && npm run clean:swiftbuild && npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nERROR: This is a Raycast extension, not an npm package.\\nRun 'npm run publish' to submit it to the Raycast Store.\\n\\n\" && exit 1"
+  }
+}

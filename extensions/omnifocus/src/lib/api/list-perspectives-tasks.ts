@@ -17,6 +17,17 @@ function safeString(value) {
   return value !== undefined ? value.toString() : null;
 }
 
+// Planned dates require OmniFocus 4.7+ and a migrated database; the accessor throws otherwise.
+// Fall back to null so the rest of the task is still listed.
+function safePlannedDate(task) {
+  try {
+    const value = task.plannedDate ? task.plannedDate() : null;
+    return value ? safeString(value) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 const leaves = window
   .content()
   .leaves()
@@ -30,6 +41,7 @@ const leaves = window
         name: task.name(),
         flagged: task.flagged(),
         deferDate: task.deferDate() ? safeString(task.deferDate()) : null,
+        plannedDate: safePlannedDate(task),
         dueDate: task.dueDate() ? safeString(task.dueDate()) : null,
         dropped: task.dropped(),
         completed: task.completed(),

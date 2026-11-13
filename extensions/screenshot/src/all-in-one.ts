@@ -1,10 +1,14 @@
 import { closeMainWindow } from "@raycast/api";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFilePromise = promisify(execFile);
 
 export default async () => {
   await closeMainWindow();
   try {
-    await runAppleScript('tell application "Screenshot" to activate');
+    await execFilePromise("/usr/bin/open", ["-a", "Screenshot"]);
   } catch (error) {
     await showFailureToast(error, { title: "Could not launch Screenshot app" });
   }

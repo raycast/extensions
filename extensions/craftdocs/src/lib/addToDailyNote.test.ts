@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveAddToDailyNoteAction } from "./addToDailyNote";
+import { formatDailyNoteContent, resolveAddToDailyNoteAction } from "./addToDailyNote";
 
 describe("resolveAddToDailyNoteAction", () => {
   it("returns submit when required inputs are missing", () => {
@@ -16,5 +16,17 @@ describe("resolveAddToDailyNoteAction", () => {
     expect(resolveAddToDailyNoteAction({ content: "hello", spaceId: "space-1", dailyNoteBlockId: null })).toBe(
       "open-daily-note",
     );
+  });
+});
+
+describe("formatDailyNoteContent", () => {
+  const preferences = { contentPrefix: ": ", contentSuffix: "!", timeFormat: "HH:mm" } as Preferences;
+
+  it("wraps content with prefix and suffix", () => {
+    expect(formatDailyNoteContent("hi", { ...preferences, addTimestamp: false })).toBe(": hi!");
+  });
+
+  it("adds a bold timestamp when enabled", () => {
+    expect(formatDailyNoteContent("hi", { ...preferences, addTimestamp: true })).toMatch(/^\*\*\d{2}:\d{2}\*\*: hi!$/);
   });
 });

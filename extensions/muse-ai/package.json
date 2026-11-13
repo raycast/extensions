@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "muse-ai",
+  "title": "Muse AI",
+  "description": "Muse AI (Meta Model API) within Raycast — use Muse Spark in AI Chat, Quick AI and AI Commands",
+  "icon": "extension-icon.png",
+  "author": "alhassanaraouf",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-muse-ai",
+      "title": "Ask Muse AI",
+      "subtitle": "Meta Model API",
+      "description": "Ask questions using Muse Spark via Meta Model API, with conversation history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Model API Key",
+      "name": "MODEL_API_KEY",
+      "type": "password",
+      "required": true,
+      "description": "Meta Model API key from https://dev.meta.ai (looks like LLM|...). Stored only in Raycast preferences."
+    },
+    {
+      "title": "Muse Model",
+      "name": "MUSE_MODEL",
+      "type": "textfield",
+      "required": false,
+      "default": "muse-spark-1.3",
+      "description": "Default model for Ask Muse AI. The command lets you pick any available Muse Spark model; this is preselected, e.g. muse-spark-1.3"
+    }
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.0",
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.2.7",
+    "ai": "^7.0.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

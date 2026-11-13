@@ -32,12 +32,21 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
         taskDraft.tags.push(...tagsToCreate);
       }
       try {
-        const { error } = await addTask(taskDraft);
+        const { error, plannedDateUnsupported } = await addTask(taskDraft);
         if (!error) {
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Task added!",
-          });
+          if (plannedDateUnsupported) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Task added without a Planned Date",
+              message:
+                "Planned dates need OmniFocus 4.7 or later with a migrated database. Migrate it in OmniFocus Settings > Database, then set the date in OmniFocus.",
+            });
+          } else {
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Task added!",
+            });
+          }
           await popToRoot();
         } else {
           await showToast({
@@ -73,6 +82,12 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
         <Form.Checkbox title="Flagged" label="Flagged" {...itemProps.flagged} />
         <Form.Separator />
         <Form.DatePicker title="Defer Date" {...itemProps.deferDate} id="deferDate" type={Form.DatePicker.Type.Date} />
+        <Form.DatePicker
+          title="Planned Date"
+          {...itemProps.plannedDate}
+          id="plannedDate"
+          type={Form.DatePicker.Type.Date}
+        />
         <Form.DatePicker title="Due Date" {...itemProps.dueDate} id="dueDate" type={Form.DatePicker.Type.Date} />
         <Form.Separator />
         <Form.TagPicker title="Tags" {...itemProps.tags}>

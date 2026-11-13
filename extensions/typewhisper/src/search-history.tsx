@@ -10,9 +10,9 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { apiDelete, getBaseUrl, TypeWhisperError } from "./api";
+import { apiDelete, apiGet, TypeWhisperError } from "./api";
 import type { HistoryResponse } from "./types";
 
 const PAGE_SIZE = 50;
@@ -47,9 +47,13 @@ export default function Command() {
     params.set("q", searchText.trim());
   }
 
-  const { isLoading, data, revalidate } = useFetch<HistoryResponse>(
-    `${getBaseUrl()}/v1/history?${params.toString()}`,
-    { keepPreviousData: true },
+  const { isLoading, data, revalidate } = usePromise(
+    (query: string) =>
+      apiGet<HistoryResponse>(
+        "/v1/history",
+        Object.fromEntries(new URLSearchParams(query)),
+      ),
+    [params.toString()],
   );
 
   async function deleteEntry(id: string) {
@@ -181,7 +185,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy Raw Text"
                     content={entry.raw_text}
-                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    shortcut={Keyboard.Shortcut.Common.CopyName}
                   />
                 )}
                 {entry.app_url && (

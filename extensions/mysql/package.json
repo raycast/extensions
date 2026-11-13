@@ -1,0 +1,186 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mysql",
+  "title": "MySQL Client",
+  "description": "Connect to MySQL databases — run queries, browse schema, and manage multiple connection profiles.",
+  "icon": "app-icon.png",
+  "author": "itggood2420",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-query",
+      "title": "Run Query",
+      "subtitle": "MySQL",
+      "description": "Run a SQL query against a connection and view the results",
+      "mode": "view"
+    },
+    {
+      "name": "command-palette",
+      "title": "Common Commands",
+      "subtitle": "MySQL",
+      "description": "Run common MySQL commands such as Show Databases or Process List",
+      "mode": "view"
+    },
+    {
+      "name": "browse-schema",
+      "title": "Browse Schema",
+      "subtitle": "MySQL",
+      "description": "Browse databases, tables, and columns",
+      "mode": "view"
+    },
+    {
+      "name": "query-history",
+      "title": "Query History",
+      "subtitle": "MySQL",
+      "description": "Browse, re-run, and favorite recent queries",
+      "mode": "view"
+    },
+    {
+      "name": "manage-connections",
+      "title": "Manage Connections",
+      "subtitle": "MySQL",
+      "description": "Add and edit MySQL connection profiles and pick the default one",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "query",
+      "title": "Run MySQL Query",
+      "description": "Run a SQL query against the active MySQL connection and return the rows"
+    }
+  ],
+  "ai": {
+    "instructions": "You can query the user's MySQL database with the query tool. Statements run against the active connection (the default saved connection). Rules:\n- Prefer read-only statements: SELECT, SHOW, DESCRIBE, EXPLAIN.\n- Use LIMIT on SELECTs unless the user asks for everything.\n- Only run data- or schema-changing statements (INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE, CREATE, REPLACE, GRANT, REVOKE) when the user clearly asks; these require confirmation.\n- To list databases use `SHOW DATABASES`; tables `SHOW TABLES`; columns `SHOW COLUMNS FROM table` or query information_schema.\n- Summarize results concisely.",
+    "evals": [
+      {
+        "input": "@mysql list the tables in the database",
+        "mocks": {
+          "query": {
+            "connection": "local",
+            "rowCount": 2,
+            "durationMs": 4,
+            "rows": [{ "Tables_in_app": "users" }, { "Tables_in_app": "orders" }]
+          }
+        },
+        "expected": [{ "callsTool": "query" }]
+      },
+      {
+        "input": "@mysql describe the users table",
+        "mocks": {
+          "query": {
+            "connection": "local",
+            "rowCount": 3,
+            "durationMs": 3,
+            "rows": [
+              { "Field": "id", "Type": "int", "Null": "NO", "Key": "PRI" },
+              { "Field": "email", "Type": "varchar(255)", "Null": "NO", "Key": "UNI" },
+              { "Field": "status", "Type": "varchar(20)", "Null": "YES", "Key": "" }
+            ]
+          }
+        },
+        "expected": [{ "callsTool": "query" }]
+      },
+      {
+        "input": "@mysql show me 10 rows from the users table",
+        "mocks": {
+          "query": {
+            "connection": "local",
+            "rowCount": 2,
+            "durationMs": 5,
+            "rows": [
+              { "id": 1, "email": "a@example.com" },
+              { "id": 2, "email": "b@example.com" }
+            ]
+          }
+        },
+        "expected": [{ "callsTool": { "name": "query", "arguments": { "sql": { "includes": "SELECT" } } } }]
+      },
+      {
+        "input": "@mysql delete the user with id 5",
+        "mocks": {
+          "query": { "connection": "local", "durationMs": 6, "result": "1 row(s) affected" }
+        },
+        "expected": [
+          { "callsTool": { "name": "query", "arguments": { "sql": { "includes": "DELETE" } } } },
+          { "meetsCriteria": "Runs a DELETE statement, which is a data-changing query that requires confirmation." }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "defaultHost",
+      "type": "textfield",
+      "required": false,
+      "title": "Host",
+      "placeholder": "127.0.0.1",
+      "description": "Fallback connection used only when no connection has been saved yet. For anything beyond a plain local server, use the Manage Connections command."
+    },
+    {
+      "name": "defaultPort",
+      "type": "textfield",
+      "required": false,
+      "title": "Port",
+      "placeholder": "3306",
+      "description": "Port for the fallback connection (defaults to 3306)"
+    },
+    {
+      "name": "defaultUser",
+      "type": "textfield",
+      "required": false,
+      "title": "User",
+      "placeholder": "root",
+      "description": "Username for the fallback connection"
+    },
+    {
+      "name": "defaultPassword",
+      "type": "password",
+      "required": false,
+      "title": "Password",
+      "description": "Password for the fallback connection"
+    },
+    {
+      "name": "defaultSsl",
+      "type": "dropdown",
+      "required": false,
+      "title": "SSL",
+      "default": "off",
+      "description": "TLS mode for the fallback connection",
+      "data": [
+        { "title": "Off", "value": "off" },
+        { "title": "Require (validate certificate)", "value": "require" },
+        { "title": "Require (skip verification)", "value": "insecure" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "mysql2": "^3.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

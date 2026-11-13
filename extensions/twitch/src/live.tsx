@@ -2,6 +2,7 @@ import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/ap
 import { formatDate } from "./helpers/datetime";
 import useFollowedStreams from "./helpers/useFollowedStreams";
 import { useUserId } from "./helpers/useUserId";
+import { primaryActionStreamlink, watchStreamAction } from "./helpers/action";
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();
@@ -28,7 +29,11 @@ export default function main() {
               source: { dark: "TwitchGlitchWhite.png", light: "TwitchGlitchBlackOps.png" },
             }}
             onAction={() => {
-              open(`https://twitch.tv/${item.user_login}`);
+              if (primaryActionStreamlink) {
+                watchStreamAction(item.user_login);
+              } else {
+                open(`https://twitch.tv/${item.user_login}`);
+              }
             }}
             alternate={
               <MenuBarExtra.Item

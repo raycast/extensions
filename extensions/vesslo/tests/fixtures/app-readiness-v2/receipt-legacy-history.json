@@ -1,0 +1,47 @@
+{
+  "receipts": [
+    {
+      "expiresAt": "2026-09-13T00:00:00.000Z",
+      "phase": "cancelled",
+      "reason": "restarted",
+      "receivedAt": "2026-09-12T00:00:00.000Z",
+      "request": {
+        "completedCheckRevision": 41,
+        "createdAt": "2026-09-12T00:00:00.000Z",
+        "inventoryRevision": 70,
+        "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+        "requestId": "7A15D10E-07AE-59DD-87BF-1D0BD98A7A9F",
+        "schemaVersion": 1,
+        "source": "homebrew",
+        "targets": [
+          {
+            "appId": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+            "bundleId": "org.example.readiness.alpha",
+            "canonicalPath": "/Applications/FixtureAlpha.app",
+            "caskToken": "fixture-alpha",
+            "expectedTargetVersion": "2.0",
+            "installedVersion": "1.0"
+          }
+        ]
+      },
+      "revision": 2,
+      "schemaVersion": 1,
+      "targets": [
+        {
+          "phase": "cancelled",
+          "reason": "restarted",
+          "target": {
+            "appId": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+            "bundleId": "org.example.readiness.alpha",
+            "canonicalPath": "/Applications/FixtureAlpha.app",
+            "caskToken": "fixture-alpha",
+            "expectedTargetVersion": "2.0",
+            "installedVersion": "1.0"
+          }
+        }
+      ],
+      "updatedAt": "2026-09-12T00:00:10.000Z"
+    }
+  ],
+  "schemaVersion": 1
+}

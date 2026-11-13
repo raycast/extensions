@@ -1,5 +1,5 @@
 import { open } from "@raycast/api";
 
-export default function Overview() {
-  return open("https://app.zerion.io/explore/top-gainers?sort=relative_changes.1d%3Adesc");
+export default function TopGainers() {
+  return open("https://app.zerion.io/explore/top_movers?sort=top_gainers_1d");
 }

@@ -1,9 +1,9 @@
 import { Detail, Icon, Color } from "@raycast/api";
-import type { CheckTextResponse } from "../types";
+import type { AppliedCorrections, CheckTextResponse } from "../types";
 
 type ResultMetadataProps = {
   result: CheckTextResponse;
-  appliedSuggestions: Set<number>;
+  appliedSuggestions: AppliedCorrections;
 };
 
 /**
@@ -62,7 +62,10 @@ export function ResultMetadata({
 
           {result.matches.map((match, index) => {
             const isApplied = appliedSuggestions.has(index);
-            const replacement = match.replacements[0]?.value || "";
+            const replacement =
+              appliedSuggestions.get(index) ??
+              match.replacements[0]?.value ??
+              "";
             const original = match.context.text.slice(
               match.context.offset,
               match.context.offset + match.context.length,

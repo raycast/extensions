@@ -7,7 +7,6 @@ import { buildUserMessage, chatTransformer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
-import { useProxy } from "./useProxy";
 import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
 import { Stream } from "openai/streaming";
 
@@ -19,6 +18,20 @@ function hasUnsupportedReasoningEffortError(error: unknown): boolean {
   return (
     message.includes("unknown") ||
     message.includes("unsupported") ||
+    message.includes("not allowed") ||
+    message.includes("not permitted") ||
+    message.includes("unrecognized")
+  );
+}
+
+function hasUnsupportedTemperatureError(error: unknown): boolean {
+  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  if (!message.includes("temperature")) {
+    return false;
+  }
+  return (
+    message.includes("unsupported") ||
+    message.includes("does not support") ||
     message.includes("not allowed") ||
     message.includes("not permitted") ||
     message.includes("unrecognized")
@@ -47,7 +60,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
-  const proxy = useProxy();
   const chatGPT = useChatGPT();
 
   async function ask(question: string, files: string[], model: Model) {
@@ -89,7 +101,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     const { signal: abortSignal } = abortControllerRef.current;
     const headers = getHeaders();
     const requestOptions = {
-      httpAgent: proxy,
       // https://github.com/openai/openai-node/blob/master/examples/azure.ts
       // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
       query: { ...headers.params },
@@ -99,34 +110,51 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     const selectedReasoningEffort =
       model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
 
-    const createCompletion = (includeReasoningEffort: boolean) =>
+    const createCompletion = (includeReasoningEffort: boolean, includeTemperature: boolean) =>
       chatGPT.chat.completions.create(
         {
           model: model.option,
-          temperature: Number(model.temperature),
+          ...(includeTemperature ? { temperature: Number(model.temperature) } : {}),
           ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
           messages: [
-            ...chatTransformer([...data].reverse(), model.prompt),
+            ...chatTransformer(
+              [...data].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)),
+              model.prompt,
+            ),
             { role: "user", content: buildUserMessage(question, files) },
           ],
           stream: useStream,
         },
         requestOptions,
       );
+    let includeReasoningEffort = Boolean(selectedReasoningEffort);
+    let includeTemperature = true;
     let retriedWithoutReasoningEffort = false;
+    let retriedWithoutTemperature = false;
 
     try {
       let res: ChatCompletion | Stream<ChatCompletionChunk>;
-      try {
-        res = await createCompletion(Boolean(selectedReasoningEffort));
-      } catch (error) {
-        if (selectedReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
-          retriedWithoutReasoningEffort = true;
-          toast.title = "Reasoning effort not supported";
-          toast.message = "Retrying without effort setting...";
-          toast.style = Toast.Style.Animated;
-          res = await createCompletion(false);
-        } else {
+      for (;;) {
+        try {
+          res = await createCompletion(includeReasoningEffort, includeTemperature);
+          break;
+        } catch (error) {
+          if (includeReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
+            includeReasoningEffort = false;
+            retriedWithoutReasoningEffort = true;
+            toast.title = "Reasoning effort not supported";
+            toast.message = "Retrying without effort setting...";
+            toast.style = Toast.Style.Animated;
+            continue;
+          }
+          if (includeTemperature && hasUnsupportedTemperatureError(error)) {
+            includeTemperature = false;
+            retriedWithoutTemperature = true;
+            toast.title = "Temperature not supported";
+            toast.message = "Retrying with the model's default temperature...";
+            toast.style = Toast.Style.Animated;
+            continue;
+          }
           throw error;
         }
       }
@@ -177,9 +205,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         setIsAborted(true);
       } else {
         toast.title = "Got your answer!";
-        toast.message = retriedWithoutReasoningEffort
-          ? "Provider ignored the reasoning effort setting for this response."
-          : undefined;
+        toast.message =
+          [
+            retriedWithoutReasoningEffort ? "Provider ignored the reasoning effort setting for this response." : null,
+            retriedWithoutTemperature ? "Provider ignored the temperature setting for this response." : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined;
         toast.style = Toast.Style.Success;
       }
 

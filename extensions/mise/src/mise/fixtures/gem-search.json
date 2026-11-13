@@ -1,0 +1,26 @@
+[
+  {
+    "name": "rubocop",
+    "version": "1.91.0",
+    "info": "RuboCop is a Ruby code style checking and code formatting tool.\nIt aims to enforce the community-driven Ruby Style Guide.\n",
+    "project_uri": "https://rubygems.org/gems/rubocop",
+    "homepage_uri": "https://rubocop.org/",
+    "downloads": 745668796
+  },
+  {
+    "name": "rubocop-ast",
+    "version": "1.50.0",
+    "info": "    RuboCop's Node and NodePattern classes.\n",
+    "project_uri": "https://rubygems.org/gems/rubocop-ast",
+    "homepage_uri": "https://www.rubocop.org/",
+    "downloads": 562683343
+  },
+  {
+    "name": "rubocop-performance",
+    "version": "1.27.0",
+    "info": "A collection of RuboCop cops to check for performance optimizations\nin Ruby code.\n",
+    "project_uri": "https://rubygems.org/gems/rubocop-performance",
+    "homepage_uri": "https://docs.rubocop.org/rubocop-performance/",
+    "downloads": 327889516
+  }
+]

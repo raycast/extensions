@@ -879,7 +879,7 @@ export const expandTilde = (filePath: string) => {
     return filePath.replace(/^~(?=$|\/|\\)/, homedir);
   }
 
-  const regex = /(\/Users\/.*?)\/.*/;
+  const regex = /^(\/Users\/[^/]+)\/.*/;
   const match = filePath.match(regex);
   if (match) {
     return filePath.replace(match[1], homedir);

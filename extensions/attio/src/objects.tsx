@@ -1,72 +1,48 @@
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { attio, parseErrorMessage } from "./attio";
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  Icon,
-  Image,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import Records from "./records";
+import { failToast } from "@chrismessina/raycast-kit";
+import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import { createObject, listObjects } from "./api/endpoints";
+import { satisfied } from "./api/operations";
+import type { AttioObject } from "./api/types";
 import Attributes from "./attributes";
-import { PostV2ObjectsData } from "attio-js/dist/commonjs/models/operations/postv2objects";
+import { guard } from "./components/Guard";
+import { useAttio } from "./hooks/useAttio";
+import { getObjectTitle } from "./lib/display";
+import { isStandardObject, STANDARD_OBJECT_ICONS } from "./lib/record-icon";
 import OpenInAttio from "./open-in-attio";
-import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
+import Records from "./records";
 
-export const getObjectTitle = (object: ObjectT) =>
-  object.pluralNoun || object.singularNoun || object.apiSlug || object.id.objectId;
-const STANDARD_OBJECT_ICONS: Record<string, Image.ImageLike> = {
-  companies: { source: Icon.Building, tintColor: Color.Orange },
-  deals: Icon.BankNote,
-  people: { source: Icon.Person, tintColor: Color.Blue },
-  users: { source: Icon.Person, tintColor: Color.Green },
-  workspaces: Icon.AppWindowGrid2x2,
-};
-const isStandardObject = (object: ObjectT) => !!STANDARD_OBJECT_ICONS[object.apiSlug || ""];
 export default function Objects() {
-  const {
-    isLoading,
-    data: objects,
-    mutate,
-  } = useCachedPromise(
-    async () => {
-      const { data } = await attio.objects.list();
-      return data;
-    },
-    [],
-    { initialData: [] },
-  );
+  const h = useAttio("listObjects", async () => (await listObjects()).data, []);
+  const { isLoading, data: objects = [], revalidate, self } = h;
+  const canCreate = satisfied(self.granted, "object_configuration:read-write");
+
+  const g = guard(h.guardInput(objects.length > 0));
+  if (g) return g;
+
+  const newObjectAction = canCreate ? (
+    <Action.Push
+      icon={Icon.Plus}
+      title="New Custom Object"
+      target={<NewCustomObject onCreated={revalidate} />}
+      shortcut={Keyboard.Shortcut.Common.New}
+    />
+  ) : null;
+
   return (
-    <List isLoading={isLoading}>
-      {objects.map((object) => (
+    <List isLoading={isLoading || self.isLoading} actions={<ActionPanel>{newObjectAction}</ActionPanel>}>
+      {objects.map((object: AttioObject) => (
         <List.Item
-          key={object.id.objectId}
-          icon={STANDARD_OBJECT_ICONS[object.apiSlug || ""] || Icon.Box}
-          title={object.pluralNoun || ""}
-          accessories={[
-            {
-              tag: isStandardObject(object) ? "Standard" : { value: "Custom", color: Color.Blue },
-            },
-          ]}
+          key={object.id.object_id}
+          icon={STANDARD_OBJECT_ICONS[object.api_slug || ""] ?? Icon.Box}
+          title={getObjectTitle(object)}
+          accessories={[{ tag: isStandardObject(object) ? "Standard" : { value: "Custom", color: Color.Blue } }]}
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.Document} title="Records" target={<Records object={object} />} />
               <Action.Push icon={Icon.AppWindowGrid2x2} title="Attributes" target={<Attributes object={object} />} />
-              {object.apiSlug && (
-                <OpenInAttio route={isStandardObject(object) ? object.apiSlug : `custom/${object.apiSlug}`} />
-              )}
-              <Action.Push
-                icon={Icon.Plus}
-                title="New Custom Object"
-                target={<NewCustomObject />}
-                onPop={mutate}
-                shortcut={Keyboard.Shortcut.Common.New}
+              <OpenInAttio
+                route={isStandardObject(object) ? object.api_slug || "" : `custom/${object.api_slug || ""}`}
               />
             </ActionPanel>
           }
@@ -76,28 +52,26 @@ export default function Objects() {
   );
 }
 
-function NewCustomObject() {
+function NewCustomObject({ onCreated }: { onCreated: () => void }) {
   const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<PostV2ObjectsData>({
+  type Values = { plural_noun: string; singular_noun: string; api_slug: string };
+  const { handleSubmit, itemProps } = useForm<Values>({
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Creating", values.singularNoun);
+      const toast = await showToast(Toast.Style.Animated, "Creating", values.singular_noun);
       try {
-        await attio.objects.create({
-          data: values,
-        });
+        await createObject({ data: values });
         toast.style = Toast.Style.Success;
         toast.title = "Created";
+        onCreated();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = parseErrorMessage(error);
+        failToast(toast, error, { title: "Failed" });
       }
     },
     validation: {
-      pluralNoun: FormValidation.Required,
-      singularNoun: FormValidation.Required,
-      apiSlug: FormValidation.Required,
+      plural_noun: FormValidation.Required,
+      singular_noun: FormValidation.Required,
+      api_slug: FormValidation.Required,
     },
   });
   return (
@@ -108,15 +82,14 @@ function NewCustomObject() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Plural Noun" placeholder="e.g. Products" {...itemProps.pluralNoun} />
-      <Form.TextField title="Singular Noun" placeholder="e.g. Product" {...itemProps.singularNoun} />
+      <Form.TextField title="Plural Noun" placeholder="e.g. Products" {...itemProps.plural_noun} />
+      <Form.TextField title="Singular Noun" placeholder="e.g. Product" {...itemProps.singular_noun} />
       <Form.TextField
         title="Identifier / Slug"
         placeholder="e.g. product"
-        info="Slugs are used to identify your object in the URL and are formatted to only include lowercase letters, numbers, and underscores"
-        {...itemProps.apiSlug}
+        info="Lowercase letters, numbers, and underscores. Cannot be changed after creation."
+        {...itemProps.api_slug}
       />
-      <Form.Description text="Important: Once an object is created the slug cannot be changed." />
     </Form>
   );
 }

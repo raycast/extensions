@@ -1,0 +1,2 @@
+{"type":"session_meta","payload":{"id":"thread-exec-1","cwd":"/tmp/automation","source":"exec","thread_source":"user","timestamp":"2026-07-14T11:00:00.000Z"}}
+{"type":"event_msg","payload":{"type":"user_message","message":"Exec automation should be filtered"}}

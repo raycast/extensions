@@ -8,6 +8,16 @@ export interface GrokWebBillingSnapshot {
   resetsAt: Date | null;
 }
 
+export interface GrokResetCreditsSnapshot {
+  availableCount: number;
+  expiresAtList: string[];
+}
+
+interface GrokResetToken {
+  tokenId: string;
+  expiresAt: Date | null;
+}
+
 interface Fixed32Field {
   path: number[];
   value: number;
@@ -261,4 +271,128 @@ export function parseGrokWebBillingResponse(data: Uint8Array, now: Date = new Da
     usedPercent: parsedPercent ?? 0,
     resetsAt: reset,
   };
+}
+
+/**
+ * Decode grok.com `ConsumerUiSvc/GetRemainingResets`.
+ *
+ *     message ConsumerGetRemainingResetsResp { repeated ConsumerResetToken tokens = 10; }
+ *     message ConsumerResetToken {
+ *       string token_id = 10;
+ *       google.protobuf.Timestamp validity_start = 20;
+ *       google.protobuf.Timestamp validity_end = 30;
+ *     }
+ */
+export function parseGrokResetCreditsResponse(data: Uint8Array, now: Date = new Date()): GrokResetCreditsSnapshot {
+  validateGrpcWebTrailers(data);
+
+  let payloads = grpcWebDataFrames(data);
+  if (payloads.length === 0 && looksLikeProtobufPayload(data)) {
+    payloads = [data];
+  }
+  if (payloads.length === 0 && data.length > 0) {
+    throw new Error("Grok reset-credit response returned no protobuf payload");
+  }
+
+  const tokens: GrokResetToken[] = [];
+  for (const payload of payloads) {
+    tokens.push(...parseResetTokensMessage(payload));
+  }
+
+  const available = tokens.filter(
+    (token) => token.tokenId && (!token.expiresAt || token.expiresAt.getTime() > now.getTime()),
+  );
+  const expiresAtList = available
+    .map((token) => token.expiresAt)
+    .filter((date): date is Date => date !== null)
+    .map((date) => date.toISOString())
+    .sort((a, b) => Date.parse(a) - Date.parse(b));
+
+  return { availableCount: available.length, expiresAtList };
+}
+
+function parseResetTokensMessage(data: Uint8Array): GrokResetToken[] {
+  const tokens: GrokResetToken[] = [];
+  for (const field of readLengthDelimitedFields(data)) {
+    if (field.field !== 10) continue;
+    const token = parseResetToken(field.bytes);
+    if (token) tokens.push(token);
+  }
+  return tokens;
+}
+
+function parseResetToken(data: Uint8Array): GrokResetToken | null {
+  let tokenId = "";
+  let expiresAt: Date | null = null;
+  for (const field of readLengthDelimitedFields(data)) {
+    if (field.field === 10) {
+      const id = new TextDecoder("utf-8", { fatal: false }).decode(field.bytes).trim();
+      if (id) tokenId = id;
+    } else if (field.field === 30) {
+      expiresAt = parseProtobufTimestamp(field.bytes);
+    }
+  }
+  if (!tokenId) return null;
+  return { tokenId, expiresAt };
+}
+
+function parseProtobufTimestamp(data: Uint8Array): Date | null {
+  let seconds: number | null = null;
+  let nanos = 0;
+  const index = { value: 0 };
+  while (index.value < data.length) {
+    const key = readVarint(data, index);
+    if (key === null) return seconds === null ? null : new Date(seconds * 1000 + nanos / 1_000_000);
+    const field = key >>> 3;
+    const wire = key & 0x07;
+    if (wire === 0) {
+      const value = readVarint(data, index);
+      if (value === null) break;
+      if (field === 1) seconds = value;
+      if (field === 2) nanos = value;
+    } else if (wire === 2) {
+      const length = readVarint(data, index);
+      if (length === null || length > data.length - index.value) break;
+      index.value += length;
+    } else if (wire === 1) {
+      if (index.value + 8 > data.length) break;
+      index.value += 8;
+    } else if (wire === 5) {
+      if (index.value + 4 > data.length) break;
+      index.value += 4;
+    } else {
+      break;
+    }
+  }
+  if (seconds === null) return null;
+  return new Date(seconds * 1000 + nanos / 1_000_000);
+}
+
+function readLengthDelimitedFields(data: Uint8Array): Array<{ field: number; bytes: Uint8Array }> {
+  const fields: Array<{ field: number; bytes: Uint8Array }> = [];
+  const index = { value: 0 };
+  while (index.value < data.length) {
+    const key = readVarint(data, index);
+    if (key === null) break;
+    const field = key >>> 3;
+    const wire = key & 0x07;
+    if (wire === 0) {
+      if (readVarint(data, index) === null) break;
+    } else if (wire === 1) {
+      if (index.value + 8 > data.length) break;
+      index.value += 8;
+    } else if (wire === 2) {
+      const length = readVarint(data, index);
+      if (length === null || length > data.length - index.value) break;
+      const start = index.value;
+      index.value += length;
+      fields.push({ field, bytes: data.subarray(start, index.value) });
+    } else if (wire === 5) {
+      if (index.value + 4 > data.length) break;
+      index.value += 4;
+    } else {
+      break;
+    }
+  }
+  return fields;
 }

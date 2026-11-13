@@ -129,7 +129,11 @@ export async function openRecordingsFolder(): Promise<void> {
   await open(directory);
 }
 
-export async function toggleRecording(): Promise<void> {
+export type ToggleAction = "toggle" | "toggle-copy";
+
+export async function toggleRecording(
+  action: ToggleAction = "toggle",
+): Promise<ToggleAction> {
   if (!isBetterCaptureInstalled()) {
     throw new BetterCaptureError(
       "BetterCapture is not installed. Install it from https://bettercapture.app or run: brew install bettercapture",
@@ -137,12 +141,19 @@ export async function toggleRecording(): Promise<void> {
   }
 
   if (supportsUrlScheme()) {
-    await open("bettercapture://toggle");
-    return;
+    await open(`bettercapture://${action}`);
+    return action;
+  }
+
+  if (action === "toggle-copy") {
+    throw new BetterCaptureError(
+      "Toggle and Copy requires a newer version of BetterCapture with URL scheme support. Update BetterCapture from https://bettercapture.app or change the Toggle Action preference to Toggle Recording.",
+    );
   }
 
   await ensureBetterCaptureRunning();
   await relayShortcut("toggleRecording");
+  return "toggle";
 }
 
 export async function openRecordings(): Promise<void> {

@@ -106,7 +106,7 @@ export function AccountsList({ credentialId }: { credentialId?: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Accounts"
+      navigationTitle={credentialId ? "Accounts" : undefined}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Credential"

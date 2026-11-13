@@ -1,5 +1,28 @@
 # Xcode Changelog
 
+## [Easier Project Identification] - 2026-11-04
+
+- Remove the project file name from the path shown in Search Recent Projects.
+- Add a preference to show a colored directory tag instead of the path, with the full path as a tooltip. The tag shows the git root directory, or the parent directory for projects outside git, next to an icon for the directory type. This makes it easier to tell git worktrees apart.
+- Show workspaces embedded in a project or playground as that project or playground, instead of as a separate entry named "project" or "playground".
+
+## [Improve Xcode project discovery] - 2026-10-29
+
+- Include Xcode projects in hidden git worktrees
+
+## [Respect the Default Simulator Viewer] - 2026-10-10
+
+- Open simulators using the system's default `devices://` handler, with a fallback to Apple's Device Hub or Simulator.
+- Show the selected simulator when launching an app even if the simulator is already booted.
+
+## [Simulator Appearance & Device Hub Support] - 2026-09-24
+
+- Added "Toggle Dark/Light Mode" action for booted simulators (⌘D).
+- Updated `launchSimulatorApplication` to open Device Hub on Xcode 27+, falling back to Simulator.app.
+- Added "Booted" section at the top of the simulator list for quick access to running simulators.
+- Added "Recently Used" section showing the 5 most recently booted simulators, sorted by last usage.
+- Sort simulator groups by newest runtime first (e.g. iOS 27 before iOS 26).
+
 ## [Xcode 26 Assets] - 2025-09-15
 
 - Updated assets to match Xcode 26 

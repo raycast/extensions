@@ -1,0 +1,32 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+
+# Raycast/TypeScript command sources live under src/.
+# Root-level command bundles are generated artifacts and should not be committed.
+/copyFilePath.js
+/copyTrackInfo.js
+/next.js
+/nowPlaying.js
+/nowPlayingMenuBar.js
+/playlists.js
+/previous.js
+/revealInFinder.js
+/search.js
+/setRating.js
+/togglePlayPause.js
+/toggleRepeat.js
+/toggleShuffle.js
+/volumeDown.js
+/volumeUp.js

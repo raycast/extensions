@@ -9,7 +9,7 @@ import {
   useNavigation,
   getPreferenceValues,
 } from "@raycast/api";
-import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -33,6 +33,7 @@ import FormParentDropdown from "./FormParentDropdown";
 import FormUserDropdown from "./FormUserDropdown";
 import IssueDetail from "./IssueDetail";
 import IssueFormCustomFields from "./IssueFormCustomFields";
+import { useJiraCachedPromise, useJiraCachedState } from "../hooks/useJiraCache";
 
 export type IssueFormValues = {
   projectId: string;
@@ -59,18 +60,18 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { push } = useNavigation();
 
   const [projectQuery, setProjectQuery] = useState("");
-  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+  const { data: projects, isLoading: isLoadingProjects } = useJiraCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
     { keepPreviousData: true },
   );
 
-  const { data: users } = useCachedPromise(() => getUsers());
-  const { data: labels } = useCachedPromise(() => getLabels());
+  const { data: users } = useJiraCachedPromise(() => getUsers(), []);
+  const { data: labels } = useJiraCachedPromise(() => getLabels(), []);
 
   // There's a slight jump on issue types when launching the command since they're
   // retrieved based on the project. Let's cache the last project ID to avoid that
-  const [lastProject, setLastProject] = useCachedState<string>("last-project");
+  const [lastProject, setLastProject] = useJiraCachedState<string>("last-project");
 
   const [customFieldInitialValues, setCustomFieldInitialValues] = useState({});
   const [customFieldsValidation, setCustomFieldsValidation] = useState({});
@@ -166,7 +167,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
     setLastProject(values.projectId);
   }, [values.projectId]);
 
-  const { data: issueMetadataSummary } = useCachedPromise(
+  const { data: issueMetadataSummary } = useJiraCachedPromise(
     (projectId) => getCreateIssueMetadataSummary(projectId),
     [values.projectId],
     { execute: !!values.projectId },
@@ -178,7 +179,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   // It's safe to assume the issue types will always correspond to the first element
   const issueTypesSummary = issueMetadataSummary?.[0]?.issuetypes;
 
-  const { data: issueMetadata } = useCachedPromise(
+  const { data: issueMetadata } = useJiraCachedPromise(
     (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId),
     [values.projectId, values.issueTypeId],
     { execute: !!values.projectId && !!values.issueTypeId },

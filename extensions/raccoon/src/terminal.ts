@@ -1,0 +1,100 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { rememberYes } from "./once.ts";
+
+const run = promisify(execFile);
+
+/**
+ * One argument, safe inside a /bin/sh command line. Check names carry spaces
+ * and dots (".ssh Permissions"), and they arrive from the CLI's own JSON, so
+ * they are quoted rather than trusted.
+ */
+export function shellQuote(argument: string): string {
+	return `'${argument.replace(/'/g, `'\\''`)}'`;
+}
+
+/** One string literal, safe inside an AppleScript source. */
+export function appleScriptQuote(text: string): string {
+	return `"${text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+/**
+ * The command a fix runs in Terminal.
+ *
+ * `sudo` is not prepended: rcc asks for the rights it needs at the point it
+ * needs them, and a blanket sudo would run the checks as root as well.
+ */
+export function fixCommand(rcc: string, checkNames: string[]): string {
+	if (checkNames.length === 0) throw new Error("No check to fix.");
+	// One comma-separated list rather than one run per check: an audit takes
+	// about eight seconds, and fixing what is on screen would otherwise mean
+	// running it once per row. No check name contains a comma.
+	return [shellQuote(rcc), "audit", "--fix", "--force", "--fix-only", shellQuote(checkNames.join(","))].join(" ");
+}
+
+/**
+ * Whether this rcc understands --fix-only.
+ *
+ * Not a nicety: rcc 0.16.0 and earlier ignore an unknown flag rather than
+ * refusing it, so `--fix --force --fix-only "Stealth Mode"` applies every fix
+ * on the machine. Measured: seven fixes offered instead of one. A caller that
+ * cannot narrow the fix must not run it at all.
+ */
+export async function supportsFixOnly(rcc: string): Promise<boolean> {
+	return supportsAuditFlag(rcc, "--fix-only");
+}
+
+/**
+ * Whether this rcc's `audit` documents a flag.
+ *
+ * Asked of the binary rather than worked out from its version number, because
+ * the help is what the binary itself says it can do. A flag it does not know is
+ * not refused - it is ignored - so a caller that needs one has to check.
+ */
+export async function supportsAuditFlag(rcc: string, flag: string): Promise<boolean> {
+	// Remembered per binary and flag: asking is a process, and it was being
+	// spent on every single fix - `usableRcc()` asks before each one, so five
+	// checks fixed one at a time meant five `rcc audit --help` runs for an
+	// answer that cannot change while that binary is the one on disk.
+	return askOnce(`${rcc}\u0000${flag}`);
+}
+
+const askOnce = rememberYes(async (key: string) => {
+	const [rcc, flag] = key.split("\u0000");
+	try {
+		const { stdout } = await run(rcc, ["audit", "--help"], { timeout: 15_000 });
+		return stdout.includes(flag);
+	} catch {
+		return false;
+	}
+});
+
+/**
+ * Run a command in Terminal.app.
+ *
+ * A terminal rather than a pane inside Raycast because a fix needs
+ * administrator rights, and there is no tty behind a Raycast view for sudo to
+ * prompt on: Touch ID and the password prompt only exist here.
+ */
+export async function runInTerminal(command: string, exec: Exec = osascript): Promise<void> {
+	await exec("/usr/bin/osascript", ["-e", terminalScript(command)]);
+}
+
+/** How the AppleScript is run. Injectable so a test can read what was handed over. */
+export type Exec = (file: string, args: string[]) => Promise<unknown>;
+
+const osascript: Exec = (file, args) => run(file, args, { timeout: 15_000 });
+
+/**
+ * The AppleScript that opens Terminal on a command.
+ *
+ * Its own function because the command is a shell line built from what rcc
+ * reported, and it is about to be pasted inside an AppleScript string: two
+ * quoting contexts, one inside the other, and the inner one is what a test can
+ * actually hold to account.
+ */
+export function terminalScript(command: string): string {
+	return ['tell application "Terminal"', `  do script ${appleScriptQuote(command)}`, "  activate", "end tell"].join(
+		"\n",
+	);
+}

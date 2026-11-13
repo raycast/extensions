@@ -1,14 +1,18 @@
-import { getPreferenceValues } from "@raycast/api";
 import { format, formatDistanceToNow, isPast, isFuture } from "date-fns";
 import type { Image, Ratings } from "@/lib/types/episode";
-import type { SonarrPreferences } from "@/lib/types/preferences";
 import { CoverType } from "@/lib/types/episode";
+import type { InstanceState } from "@/lib/types/instance";
 
-export function getSonarrUrl(): string {
-  const preferences = getPreferenceValues<SonarrPreferences>();
-  const { http, host, port, base } = preferences;
-  const baseUrl = base ? `/${base.replace(/^\/|\/$/g, "")}` : "";
-  return `${http}://${host}:${port}${baseUrl}`;
+/**
+ * Names the instance being browsed in the search bar, but only when there is
+ * more than one to tell apart.
+ */
+export function getSearchPlaceholder(state: InstanceState, label: string = "Search series"): string {
+  if (state.instances.length > 1 && state.instance) {
+    return `${label} on ${state.instance.name}...`;
+  }
+
+  return `${label}...`;
 }
 
 export function formatSeriesTitle(title: string, year?: number): string {

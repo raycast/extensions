@@ -11,7 +11,8 @@
     "dgrzedzielski",
     "perasite",
     "hemang_kinra",
-    "kubarom"
+    "kubarom",
+    "muhammadrizo"
   ],
   "license": "MIT",
   "commands": [
@@ -37,7 +38,10 @@
       "required": false,
       "title": "Shell scripts location",
       "description": "Where are JetBrains Tools 'shell scripts' are installed (in Toolbox → Settings → Tools)",
-      "default": "/usr/local/bin",
+      "default": {
+        "macOS": "/usr/local/bin",
+        "Windows": "%LOCALAPPDATA%\\JetBrains\\Toolbox\\scripts"
+      },
       "placeholder": "/usr/local/bin"
     },
     {
@@ -46,35 +50,35 @@
       "required": false,
       "title": "Tools Install location",
       "description": "What is the JetBrains Tools install Location? (in Toolbox → Settings → Tools)",
-      "default": "/Applications/JetBrains Toolbox.app",
+      "default": {
+        "macOS": "/Applications/JetBrains Toolbox.app",
+        "Windows": "%LOCALAPPDATA%\\JetBrains\\Toolbox"
+      },
       "placeholder": "/Applications/JetBrains Toolbox.app"
     },
     {
       "name": "fallback",
       "type": "checkbox",
       "required": false,
-      "title": "Use protocol urls if missing shell scripts",
+      "label": "Use protocol urls if missing shell scripts",
       "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended)",
-      "default": false,
-      "label": "Enabled"
+      "default": false
     },
     {
       "name": "frecencySorting",
       "type": "checkbox",
       "required": false,
-      "title": "Use Frecency sorting for projects",
+      "label": "Use Frecency sorting for projects",
       "description": "Use Raycast's built in frecency sorting to order the list of projects",
-      "default": true,
-      "label": "Enabled"
+      "default": true
     },
     {
       "name": "showGitBranch",
       "type": "checkbox",
       "required": false,
-      "title": "Show Git Branch",
+      "label": "Show Git Branch",
       "description": "Show the current git branch next to projects that live in a git repository",
-      "default": true,
-      "label": "Enabled"
+      "default": true
     }
   ],
   "keywords": [
@@ -92,23 +96,22 @@
     "GoLand"
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^2.2.0",
-    "fast-glob": "^3.2.7",
-    "raycast-hooks": "^1.0.4",
-    "which": "^2.0.2",
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "fast-glob": "^3.3.3",
+    "which": "^7.0.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@types/glob": "^7.1.4",
-    "@types/which": "^2.0.1",
-    "@types/xml2js": "^0.4.9",
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/glob": "^9.0.0",
+    "@types/which": "^3.0.4",
+    "@types/xml2js": "^0.4.14",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -120,6 +123,10 @@
     "migrate": "ray migrate"
   },
   "platforms": [
-    "macOS"
-  ]
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "esbuild": true
+  }
 }

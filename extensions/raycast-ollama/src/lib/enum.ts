@@ -12,3 +12,9 @@ export enum ThinkingEffort {
   Medium = "medium",
   High = "high",
 }
+
+export enum PromptInputSource {
+  None = "None",
+  SelectedText = "SelectedText",
+  Clipboard = "Clipboard",
+}

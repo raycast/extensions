@@ -2,14 +2,14 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, showTo
 import { MutatePromise } from "@raycast/utils";
 
 import { deleteDocument, updateDocument } from "../../api/documents";
+import { DocumentWithContent } from "../../api/getDocumentContent";
+import { DocumentResult } from "../../api/getDocuments";
 import { ProjectResult } from "../../api/getProjects";
+import { InitiativeResult } from "../../api/initiatives";
 import { getErrorMessage } from "../../helpers/errors";
 import { getInitiativeIcon } from "../../helpers/initiatives";
 import { isLinearInstalled } from "../../helpers/isLinearInstalled";
 import { getProjectIcon } from "../../helpers/projects";
-import { DocumentWithContent } from "../../tools/get-document-content";
-import { DocumentResult } from "../../tools/get-documents";
-import { InitiativeResult } from "../../tools/get-initiatives";
 import OpenInLinear from "../OpenInLinear";
 
 export type DocumentActionsProps = {
@@ -19,6 +19,7 @@ export type DocumentActionsProps = {
   projects?: ProjectResult[];
   initiatives?: InitiativeResult[];
   deleteUnsupported?: boolean;
+  hideOpenInLinear?: boolean;
 };
 
 function MoveDocument({ doc, mutateDocs, projects, initiatives, mutateDoc }: DocumentActionsProps) {
@@ -183,10 +184,10 @@ function DeleteDocument({ doc, mutateDocs, deleteUnsupported }: DocumentActionsP
   );
 }
 
-export function DocumentActions({ doc, ...rest }: DocumentActionsProps) {
+export function DocumentActions({ doc, hideOpenInLinear, ...rest }: DocumentActionsProps) {
   return (
     <>
-      <OpenInLinear title="Open Document" url={doc.url} />
+      {hideOpenInLinear ? null : <OpenInLinear title="Open Document" url={doc.url} />}
 
       <ActionPanel.Section>
         <MoveDocument doc={doc} {...rest} />

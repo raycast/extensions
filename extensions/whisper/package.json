@@ -18,7 +18,7 @@
       "name": "whisper",
       "title": "Whisper",
       "subtitle": "Whisper",
-      "description": "Quickly create an encrypted secret link",
+      "description": "Quickly create an encrypted secret link using your default expiration and self-destruct settings",
       "keywords": [
         "secret",
         "password",
@@ -30,9 +30,9 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "text",
-          "placeholder": "secret 1h false",
-          "type": "text",
+          "name": "secret",
+          "placeholder": "Secret",
+          "type": "password",
           "required": true
         }
       ]
@@ -51,6 +51,38 @@
         "secure"
       ],
       "mode": "view"
+    },
+    {
+      "name": "whisper-selection",
+      "title": "Whisper Selected Text",
+      "subtitle": "Whisper",
+      "description": "Encrypt the selected text (or the clipboard) into a secret link using your default settings",
+      "keywords": [
+        "secret",
+        "password",
+        "encrypt",
+        "share",
+        "link",
+        "secure",
+        "selection",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "retrieve-secret",
+      "title": "Retrieve Secret",
+      "subtitle": "Whisper",
+      "description": "Open a Whisper link and decrypt the secret on this device",
+      "keywords": [
+        "secret",
+        "retrieve",
+        "decrypt",
+        "open",
+        "reveal",
+        "link"
+      ],
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -61,6 +93,41 @@
       "required": false,
       "default": "https://whisper.quentinvedrenne.com",
       "description": "URL of the Whisper server (for self-hosted instances)"
+    },
+    {
+      "name": "defaultDuration",
+      "title": "Default Expiration",
+      "type": "dropdown",
+      "required": false,
+      "default": "1h",
+      "description": "Used by Whisper, Whisper Selected Text, the AI tool and as the form's initial value",
+      "data": [
+        {
+          "title": "30 Minutes",
+          "value": "30m"
+        },
+        {
+          "title": "1 Hour",
+          "value": "1h"
+        },
+        {
+          "title": "24 Hours",
+          "value": "24h"
+        },
+        {
+          "title": "7 Days",
+          "value": "7d"
+        }
+      ]
+    },
+    {
+      "name": "defaultSelfDestruct",
+      "title": "Default Self-Destruct",
+      "label": "Delete secrets after the first view",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Used by Whisper, Whisper Selected Text, the AI tool and as the form's initial value"
     }
   ],
   "tools": [
@@ -76,7 +143,7 @@
         "input": "@create-secret Create a secret link for my-api-key and copy it to the clipboard.",
         "mocks": {
           "create-secret": [
-            "https://whisper.quentinvedrenne.com/s/abcd1234"
+            "https://whisper.quentinvedrenne.com/get_secret?shared_secret_id=6f1d2c3b-4a5e-4f60-9b7c-8d9e0f1a2b3c#k=YwVK0LTYDm7yxil3CKnKiU8-Mvsegmf8mxr8In4XmEI"
           ]
         },
         "expected": [
@@ -94,7 +161,7 @@
         "input": "@create-secret Create a secret for \"my-api-key\" that expires in 24h and can be viewed multiple times.",
         "mocks": {
           "create-secret": [
-            "https://whisper.quentinvedrenne.com/s/efgh5678"
+            "https://whisper.quentinvedrenne.com/get_secret?shared_secret_id=6f1d2c3b-4a5e-4f60-9b7c-8d9e0f1a2b3c#k=YwVK0LTYDm7yxil3CKnKiU8-Mvsegmf8mxr8In4XmEI"
           ]
         },
         "expected": [
@@ -114,7 +181,7 @@
         "input": "@create-secret Whisper my password: hunter2 7d false",
         "mocks": {
           "create-secret": [
-            "https://whisper.quentinvedrenne.com/s/ijkl9012"
+            "https://whisper.quentinvedrenne.com/get_secret?shared_secret_id=6f1d2c3b-4a5e-4f60-9b7c-8d9e0f1a2b3c#k=YwVK0LTYDm7yxil3CKnKiU8-Mvsegmf8mxr8In4XmEI"
           ]
         },
         "expected": [

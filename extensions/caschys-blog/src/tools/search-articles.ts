@@ -1,4 +1,4 @@
-import { fetchArticles, safeParseDate } from "../utils";
+import { safeParseDate, searchArticleFeed, truncateText } from "../utils";
 
 /**
  * Input parameters for the search-articles tool
@@ -8,6 +8,10 @@ type Input = {
    * The search query to find articles
    */
   query: string;
+  /**
+   * Maximum number of matching articles to return
+   */
+  limit?: number;
 };
 
 /**
@@ -23,32 +27,13 @@ type Input = {
 export default async function searchArticles(input: Input) {
   const { query } = input;
 
-  /**
-   * Fetch all articles from the blog
-   * Uses cached articles when available to improve performance
-   */
-  const articles = await fetchArticles(false);
-
-  /**
-   * Filter articles based on the query
-   * Searches in title, description, creator, and categories
-   * Case-insensitive search using toLowerCase()
-   */
-  const searchLower = query.toLowerCase();
-  const filteredArticles = articles.filter((article) => {
-    return (
-      article.title.toLowerCase().includes(searchLower) ||
-      article.description.toLowerCase().includes(searchLower) ||
-      (article.creator && article.creator.toLowerCase().includes(searchLower)) ||
-      (article.categories && article.categories.some((category) => category.toLowerCase().includes(searchLower)))
-    );
-  });
+  const articles = await searchArticleFeed(query, input.limit);
 
   /**
    * Sort articles by publication date (newest first)
    * Uses safeParseDate to handle potential invalid date strings
    */
-  const sortedArticles = [...filteredArticles].sort((a, b) => {
+  const sortedArticles = [...articles].sort((a, b) => {
     return safeParseDate(b.pubDate) - safeParseDate(a.pubDate);
   });
 
@@ -61,7 +46,7 @@ export default async function searchArticles(input: Input) {
       title: article.title,
       link: article.link,
       pubDate: article.pubDate,
-      description: article.description,
+      description: truncateText(article.description, 500),
       creator: article.creator || "Unknown",
       categories: article.categories || [],
     })),

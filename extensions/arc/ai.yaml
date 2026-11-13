@@ -1,0 +1,523 @@
+instructions: |
+  Arc is a web browser. A window contains spaces, and each space groups its own tabs (pinned, unpinned, or top app tabs).
+  Unless the user names another space, assume they mean the active space. Tools act on the active space by default, so only look up spaces when the request names one.
+  When the user refers to "this tab", "the current tab" or the page they are looking at, use get-focused-tab. It also returns the space of that tab.
+  Tab IDs come from get-tabs or get-focused-tab and space IDs come from get-spaces or get-active-space. Never invent an ID.
+  Only close the tabs the user explicitly asked to close. If select-tab or close-tab reports that a tab does not exist, tell the user instead of retrying with another tab.
+evals:
+  - input: "@arc open a new window"
+    expected:
+      - or:
+          - callsTool: new-window
+          - callsTool: new-blank-window
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-window: Successfully called "new-window"
+      new-blank-window: Successfully called "new-blank-window"
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+  - input: "@arc open a new window in space Work"
+    expected:
+      - callsTool:
+          name: new-window
+          arguments:
+            spaceId: "2"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-window: Successfully called "new-window"
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+  - input: "@arc open a new blank window"
+    expected:
+      - callsTool:
+          name: new-blank-window
+          arguments: {}
+    mocks:
+      new-blank-window: Successfully called "new-blank-window"
+  - input: "@arc open https://www.raycast.com/ in new little Arc window"
+    mocks:
+      new-little-arc:
+        url: https://www.raycast.com/
+    expected:
+      - callsTool:
+          name: new-little-arc
+          arguments:
+            url: https://www.raycast.com/
+  - input: "@arc google search for Raycast in the new little Arc window"
+    mocks:
+      new-little-arc: Successfully opened
+    expected:
+      - callsTool:
+          name: new-little-arc
+          arguments:
+            url:
+              - includes: google
+              - includes: Raycast
+  - input: "@arc search for Raycast in the new little Arc window using DuckDuckGo"
+    mocks:
+      new-little-arc:
+        url: https://duckduckgo.com/?q=Raycast
+    expected:
+      - callsTool:
+          name: new-little-arc
+          arguments:
+            url:
+              - includes: duckduckgo
+              - includes: Raycast
+  - input: "@arc open a new incognito window"
+    mocks:
+      new-incognito-window:
+        url: ""
+    expected:
+      - callsTool:
+          name: new-incognito-window
+          arguments: {}
+  - input: "@arc open https://www.raycast.com/ in new incognito window"
+    mocks:
+      new-incognito-window:
+        url: https://www.raycast.com/
+    expected:
+      - callsTool:
+          name: new-incognito-window
+          arguments:
+            url: https://www.raycast.com/
+  - input: "@arc google search for Raycast in the new incognito window"
+    expected:
+      - callsTool:
+          name: new-incognito-window
+          arguments:
+            url:
+              - includes: google
+              - includes: raycast
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-incognito-window: Successfully called "new-incognito-window"
+  - input: "@arc search for Raycast in the new incognito window using DuckDuckGo"
+    mocks:
+      new-incognito-window: Ok
+    expected:
+      - callsTool:
+          name: new-incognito-window
+          arguments:
+            url:
+              - includes: duckduckgo
+              - includes: raycast
+  - input: "@arc open a new tab"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-tab:
+        url: ""
+        space: ""
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments: {}
+  - input: "@arc open a new tab in Work"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-tab:
+        url: ""
+        space: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments:
+            spaceId: "2"
+  - input: "@arc open https://www.raycast.com/ in new tab"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-tab:
+        url: https://www.raycast.com/
+        space: ""
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments:
+            url: https://www.raycast.com/
+  - input: "@arc open https://www.raycast.com/,https://www.raycast.com/store in new tab"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-tab: Successfully opened
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments:
+            url:
+              includes: https://www.raycast.com/
+      - callsTool:
+          name: new-tab
+          arguments:
+            url:
+              includes: https://www.raycast.com/store
+  - input: "@arc open https://www.raycast.com/ in a new tab in the Work space"
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments:
+            url: https://www.raycast.com/
+            spaceId: "2"
+    mocks:
+      new-tab:
+        url: https://www.raycast.com/
+        spaceId: "2"
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+  - input: "@arc open https://www.raycast.com/ and https://www.raycast.com/store in new tabs in the Work space"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      new-tab: Successfully opened a new tab
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments:
+            url:
+              includes: https://www.raycast.com
+            spaceId: "2"
+      - callsTool:
+          name: new-tab
+          arguments:
+            url:
+              includes: https://www.raycast.com/store
+            spaceId: "2"
+  - input: "@arc what spaces do I have open?"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Travel
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Travel
+          id: 2
+          isActive: true
+        - title: AI
+          id: 3
+          isActive: false
+        - title: Demo
+          id: 4
+          isActive: false
+        - title: ""
+          id: 5
+          isActive: false
+    expected:
+      - callsTool:
+          name: get-spaces
+          arguments: {}
+  - input: "@arc select hackernews tab"
+    mocks:
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-tabs:
+        - id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+          location: unpinned
+          title: Raycast - Your shortcut to everything
+          url: https://www.raycast.com/
+        - id: E34EE895-6391-4672-94BF-BE6D91B1D7FC
+          location: unpinned
+          title: Chat Completions - OpenAI API
+          url: https://platform.openai.com/chat-completions
+        - id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+          location: unpinned
+          title: Hacker News
+          url: https://news.ycombinator.com/
+      select-tab: Successfully called "select-tab"
+    expected:
+      - callsTool:
+          arguments:
+            tabId: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+          name: select-tab
+      - includes: Hacker News
+  - input: "@arc open pinned tab"
+    mocks:
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-tabs:
+        - id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+          location: unpinned
+          title: Raycast - Your shortcut to everything
+          url: https://www.raycast.com/
+        - id: E34EE895-6391-4672-94BF-BE6D91B1D7FC
+          location: pinned
+          title: Chat Completions - OpenAI API
+          url: https://platform.openai.com
+        - id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+          location: unpinned
+          title: Hacker News
+          url: https://news.ycombinator.com/
+      select-tab: ok
+    expected:
+      - callsTool: get-tabs
+      - callsTool:
+          arguments:
+            tabId: E34EE895-6391-4672-94BF-BE6D91B1D7FC
+          name: select-tab
+  - input: "@arc write the content of unpinned tabs into a new note in @raycast-notes"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      get-tabs:
+        - id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+          location: pinned
+          title: Raycast - Your shortcut to everything
+          url: https://www.raycast.com/
+        - id: E34EE895-6391-4672-94BF-BE6D91B1D7FC
+          location: pinned
+          title: Chat Completions - OpenAI API
+          url: https://platform.openai.com
+        - id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+          location: pinned
+          title: Hacker News
+          url: https://news.ycombinator.com/
+    expected:
+      - callsTool:
+          name: get-tabs
+          arguments: {}
+  - input: "@arc search history"
+    mocks:
+      search-history: {}
+    expected:
+      - callsTool:
+          name: search-history
+          arguments: {}
+  - input: "@arc search 10 history"
+    mocks:
+      search-history: {}
+    expected:
+      - callsTool:
+          name: search-history
+          arguments: {}
+  - input: "@arc search history about Raycast"
+    mocks:
+      search-history:
+        searchText: Raycast
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            searchText: Raycast
+
+  - input: "@arc what tab am I on?"
+    mocks:
+      get-focused-tab:
+        id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+        title: Hacker News
+        url: https://news.ycombinator.com/
+        location: unpinned
+        spaceId: "2"
+        spaceName: Work
+    expected:
+      - callsTool:
+          name: get-focused-tab
+          arguments: {}
+      - includes: Hacker News
+  - input: "@arc which space is my current tab in?"
+    mocks:
+      get-focused-tab:
+        id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+        title: Hacker News
+        url: https://news.ycombinator.com/
+        location: unpinned
+        spaceId: "2"
+        spaceName: Work
+    expected:
+      - callsTool: get-focused-tab
+      - includes: Work
+  - input: "@arc close this tab"
+    mocks:
+      get-focused-tab:
+        id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+        title: Hacker News
+        url: https://news.ycombinator.com/
+        location: unpinned
+        spaceId: "2"
+        spaceName: Work
+      close-tab: Successfully called "close-tab"
+    expected:
+      - callsTool: get-focused-tab
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+  - input: "@arc close the Hacker News tab"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      get-focused-tab:
+        id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+        title: Raycast - Your shortcut to everything
+        url: https://www.raycast.com/
+        location: unpinned
+        spaceId: "2"
+        spaceName: Work
+      get-tabs:
+        - id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+          location: unpinned
+          title: Raycast - Your shortcut to everything
+          url: https://www.raycast.com/
+        - id: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+          location: unpinned
+          title: Hacker News
+          url: https://news.ycombinator.com/
+      close-tab: Successfully called "close-tab"
+    expected:
+      - callsTool: get-tabs
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
+  - input: "@arc switch to the Personal space"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      select-space: Successfully called "select-space"
+    expected:
+      - callsTool: get-spaces
+      - callsTool:
+          name: select-space
+          arguments:
+            spaceId: "1"
+  - input: "@arc which space am I in?"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+    expected:
+      - or:
+          - callsTool: get-active-space
+          - callsTool: get-spaces
+      - includes: Work
+  - input: "@arc list the tabs in my current space"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      get-tabs:
+        - id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+          location: unpinned
+          title: Raycast - Your shortcut to everything
+          url: https://www.raycast.com/
+    expected:
+      - callsTool:
+          name: get-tabs
+          arguments:
+            spaceId: "2"

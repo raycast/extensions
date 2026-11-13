@@ -8,7 +8,8 @@
   "contributors": [
     "anothertempore",
     "akshay_khade",
-    "teemu_suvinen"
+    "teemu_suvinen",
+    "0xdhrv"
   ],
   "pastContributors": [
     "danulqua"
@@ -20,9 +21,16 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "show-year-progress",
+      "title": "Year in Progress",
+      "description": "Display the current year's progress in the command subtitle. Add to Favorites to keep it visible in Raycast.",
+      "mode": "no-view",
+      "interval": "4h"
+    },
+    {
       "name": "year-in-progress",
       "title": "Progress",
-      "description": "Displays the year in progress inline.",
+      "description": "Display the selected calendar or custom progress in the command subtitle.",
       "mode": "no-view",
       "interval": "4h"
     },
@@ -77,25 +85,25 @@
           "title": "Saturday",
           "value": "6"
         }
-      ]
+      ],
+      "default": "1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2",
     "date-fns": "^2.29.3"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.12.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "typescript": "^5.9.3"
   },
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
@@ -103,6 +111,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

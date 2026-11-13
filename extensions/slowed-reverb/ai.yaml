@@ -1,0 +1,45 @@
+instructions: |
+  Slowed + Reverb works with local audio files. Use absolute paths supplied by the user or obtained from an explicit file selection. If no path is available, ask for it and wait before calling a tool. Never use an empty list or a placeholder path.
+  Use inspect-audio for metadata and render-audio to create audio files. A speed multiplier of 0.8 means 80% of the original speed. Use tempo to preserve pitch, slowed or nightcore to change pitch with speed, and convert for format-only requests.
+  Omit optional settings unless the user requests them. Render Audio asks for confirmation and saves new files. Report the returned output paths and any failures. If a batch partly succeeds, only retry failed files if the user requests it.
+evals:
+  - input: "@slowed-reverb How long is the audio at /Users/me/Music/demo.wav?"
+    mocks:
+      inspect-audio:
+        inputPath: /Users/me/Music/demo.wav
+        format: wav
+        durationSeconds: 24
+        sampleRateHz: 44100
+        channels: 2
+    expected:
+      - callsTool: inspect-audio
+      - not: { callsTool: render-audio }
+      - matches: "24"
+  - input: "@slowed-reverb Slow /Users/me/Music/demo.wav to 80% speed, keep the pitch, and save it as FLAC."
+    mocks:
+      render-audio:
+        - status: success
+          inputPath: /Users/me/Music/demo.wav
+          outputPath: /Users/me/Music/demo-tempo.flac
+    expected:
+      - callsTool:
+          name: render-audio
+          arguments:
+            "paths.0": /Users/me/Music/demo.wav
+            preset: tempo
+            speed: 0.8
+            format: flac
+  - input: '@slowed-reverb Add 65% reverb to C:\Music\demo.wav and save it as WAV.'
+    mocks:
+      render-audio:
+        - status: success
+          inputPath: 'C:\Music\demo.wav'
+          outputPath: 'C:\Music\demo-reverb.wav'
+    expected:
+      - callsTool:
+          name: render-audio
+          arguments:
+            "paths.0": 'C:\Music\demo.wav'
+            preset: reverb
+            reverb: 65
+            format: wav

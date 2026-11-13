@@ -1,68 +1,223 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcegraph-amp-dash-x",
-  "title": "Amp Dash X",
-  "description": "Organize and execute Amp prompts with execute mode (-x flag)",
-  "icon": "command-icon.png",
+  "title": "Amp",
+  "description": "Browse projects and threads, steer agents, start threads and saved prompts, talk to Puck, and open orb portals. Requires the Amp CLI and a signed-in Amp account.",
+  "icon": "amp-icon.png",
   "author": "jdorfman",
   "categories": [
     "Developer Tools",
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
+    {
+      "name": "browse",
+      "title": "Amp",
+      "subtitle": "Amp",
+      "description": "Your projects and threads: what is working, what is ready for you, and thread search.",
+      "mode": "view",
+      "keywords": [
+        "search threads",
+        "search projects",
+        "threads",
+        "projects",
+        "inbox"
+      ]
+    },
+    {
+      "name": "new-thread",
+      "title": "New Thread",
+      "subtitle": "Amp",
+      "description": "Compose a new Amp thread with a project, mode, and orb size.",
+      "mode": "view"
+    },
+    {
+      "name": "start-thread",
+      "title": "Start Thread",
+      "subtitle": "Amp",
+      "description": "Fire off an orb thread in your default project straight from the root search.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "project",
+          "placeholder": "Project (namespace/name)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask-puck",
+      "title": "Ask Puck",
+      "subtitle": "Amp",
+      "description": "Chat with Puck, your Amp assistant, in Raycast.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Ask Puck…",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "call-puck",
+      "title": "Call Puck",
+      "subtitle": "Amp",
+      "description": "Start a voice call with Puck via the Amp Mac app's Call Puck shortcut.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-portal",
+      "title": "Open Portal",
+      "subtitle": "Amp",
+      "description": "Open a portal of one of your running orbs, found in their transcripts.",
+      "mode": "view"
+    },
     {
       "name": "amp",
       "title": "Execute Amp Prompts",
-      "description": "Run saved Amp prompts with execute mode",
+      "subtitle": "Amp",
+      "description": "Run saved prompts as orb threads, or paste them as amp -x commands.",
       "mode": "view",
-      "icon": "command-icon.png"
+      "keywords": [
+        "prompts",
+        "dash x"
+      ]
     },
     {
       "name": "categories",
       "title": "Manage Prompt Categories",
-      "description": "Add, edit, and delete prompt categories",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "subtitle": "Amp",
+      "description": "Add, edit, and delete prompt categories.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Amp Menu Bar",
+      "subtitle": "Amp",
+      "description": "Agents working right now and threads ready for you, with a heads-up when one finishes.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "currently running",
+        "thread activity"
+      ]
     }
   ],
   "preferences": [
     {
       "name": "ampBinaryPath",
-      "type": "textfield",
-      "required": false,
       "title": "Amp Binary Path",
-      "description": "Path to the amp executable",
-      "default": "amp",
-      "placeholder": "amp"
+      "description": "Path to the amp binary. Leave empty to look in ~/.amp/bin, ~/.local/bin, Homebrew, and /usr/local/bin.",
+      "type": "textfield",
+      "placeholder": "~/.amp/bin/amp",
+      "required": false
     },
     {
       "name": "defaultFlags",
-      "type": "textfield",
-      "required": false,
       "title": "Default Flags",
-      "description": "Additional flags to pass to amp command",
-      "default": "",
-      "placeholder": "--verbose"
+      "description": "Extra flags for the amp -x commands that Paste Command and Copy Command build.",
+      "type": "textfield",
+      "placeholder": "--mode high",
+      "required": false
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Optional. Only needed when the CLI is not signed in. Create one at ampcode.com/settings/security.",
+      "type": "password",
+      "placeholder": "Amp access token",
+      "required": false
+    },
+    {
+      "name": "defaultProject",
+      "title": "Default Project",
+      "description": "Project for Start Thread when none is given, as namespace/name.",
+      "type": "textfield",
+      "placeholder": "namespace/name",
+      "required": false
+    },
+    {
+      "name": "defaultMode",
+      "title": "Default Mode",
+      "description": "Agent mode for new threads.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        },
+        {
+          "title": "Ultra",
+          "value": "ultra"
+        },
+        {
+          "title": "Claude Code",
+          "value": "claude-code"
+        }
+      ]
+    },
+    {
+      "name": "openIn",
+      "title": "Open Threads In",
+      "description": "Where thread links open.",
+      "type": "dropdown",
+      "required": false,
+      "default": "browser",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Amp for Mac",
+          "value": "app"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "pc-style"
+  ]
 }

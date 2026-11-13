@@ -1,6 +1,6 @@
 # Messages
 
-A great companion for Raycast users using the Messages app. 
+A great companion for Raycast users using the Messages app.
 
 This extension allows you to:
 
@@ -53,7 +53,7 @@ This is a weird one. If your group chat has a name, you can send messages from R
 
 ### Some of my group chats are not showing up
 
-Another weird one. Group chats with a name can't be opened from Raycast. Why? Because the `sms://` URL scheme doesn't support opening them by name or ID. While it's technically possible to open them with all the participants' phone numbers, this would create a new group chat besides the existing one that actually has a name. 
+Another weird one. Group chats with a name can't be opened from Raycast. Why? Because the `sms://` URL scheme doesn't support opening them by name or ID. While it's technically possible to open them with all the participants' phone numbers, this would create a new group chat besides the existing one that actually has a name.
 
 Let's take an example, you have a group chat named "Best Friends" with two of your friends:
 

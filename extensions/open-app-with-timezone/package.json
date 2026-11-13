@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-app-with-timezone",
+  "title": "App Time Zone Launcher",
+  "description": "Relaunch a macOS app with its own time zone, without changing the system time zone.",
+  "icon": "extension-icon.png",
+  "author": "aaron_ye",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "open-app-with-timezone",
+      "title": "Open App with Time Zone",
+      "description": "Search an app and press Enter to (re)launch it with its remembered time zone (system time zone by default).",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.5",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3"
+  }
+}

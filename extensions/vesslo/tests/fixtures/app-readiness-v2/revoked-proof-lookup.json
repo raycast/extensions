@@ -1,0 +1,19 @@
+{
+  "lookupEvidenceId": "80D15174-1AE7-5458-BEC3-052FA22988E6",
+  "readiness": {
+    "checkRevision": 41,
+    "inventoryRevision": 70,
+    "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+    "reason": "sourceFailed",
+    "source": "homebrew",
+    "state": "failed",
+    "target": {
+      "appId": "22C3432D-44D5-52C5-965E-04C440617C35",
+      "bundleId": "org.example.readiness.beta",
+      "canonicalPath": "/Applications/FixtureBeta.app",
+      "caskToken": "fixture-beta",
+      "expectedTargetVersion": "2.0",
+      "installedVersion": "1.0"
+    }
+  }
+}

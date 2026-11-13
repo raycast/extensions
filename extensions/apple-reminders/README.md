@@ -5,6 +5,18 @@ Manage Apple Reminders from within Raycast:
 - View, complete and update your reminders
 - Effortlessly create new reminders
 - Manage your reminders from the menu bar
+- See your next timed reminder and its countdown with the Next Reminder command
+- Show the upcoming reminder in the menu bar, the way Raycast shows calendar events
+
+## Search reminders
+
+In My Reminders, choose a list or smart view, then search by title, notes, tags, or priority. In All, you can also search by list name. Search words can match across these fields and ignore case and accents.
+
+The extension searches the full collection before returning up to 1,000 matching incomplete reminders and 1,000 matching completed reminders. If you reach that limit, narrow the search or select a list. Today includes overdue reminders and reminders due today across all lists.
+
+Press `Cmd + R` to refresh, including when the view is empty. If completed reminders are visible, Refresh reloads those too.
+
+The Get Reminders and Get Completed Reminders AI tools also accept `listId` and `searchText` to narrow results before the limit is applied.
 
 ## Saved Locations
 
@@ -95,3 +107,9 @@ You can disable this behavior by toggling on the "Don't use the AI" preference f
 > I can't see any reminders and get a `Failed to fetch latest data` error.
 
 Make sure Raycast has access to your reminders in `System Settings → Privacy & Security`.
+
+## Development checks
+
+Run `npm test` on macOS to run both the Node regression tests and the native Swift tests. The Swift tests require Xcode or the Swift toolchain and use in-memory reminders without reading or writing your reminder collection. Use `npm run test:node` or `npm run test:swift` to run either suite separately.
+
+Run `npm run lint`, `npx tsc --noEmit`, and `npm run build` before submitting changes.

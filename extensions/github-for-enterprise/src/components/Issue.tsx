@@ -1,4 +1,4 @@
-import { ActionPanel, Color, List, Action, Clipboard, Image } from "@raycast/api";
+import { ActionPanel, Color, List, Action, Clipboard, Icon, Image } from "@raycast/api";
 import { format } from "timeago.js";
 import CloseIssue from "./CloseIssue";
 import ReopenIssue from "./ReopenIssue";
@@ -39,7 +39,7 @@ export default function Issue(props: IssueOwnProps) {
               title="Show Details"
               target={<IssueDetail {...props} />}
               icon={{
-                source: "sidebar-right-16",
+                source: Icon.Sidebar,
                 tintColor: Color.PrimaryText,
               }}
             />
@@ -49,7 +49,7 @@ export default function Issue(props: IssueOwnProps) {
             <Action
               title="Copy Issue Number"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(`${number}`)}
@@ -57,7 +57,7 @@ export default function Issue(props: IssueOwnProps) {
             <Action
               title="Copy Issue URL"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(url)}

@@ -1,5 +1,9 @@
 # Flush DNS Changelog
 
+## [Touch ID Authentication] - 2026-08-12
+
+- Added Touch ID authentication for macOS DNS flushing while retaining the administrator password fallback ([#13104](https://github.com/raycast/extensions/issues/13104)).
+
 ## [macOS 26+ Support] - 2026-01-04
 
 - Added support for macOS Tahoe (26) and later versions.

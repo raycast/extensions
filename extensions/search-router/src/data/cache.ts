@@ -1,6 +1,7 @@
 import { environment, Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { builtinSearchEngines } from "./builtin-search-engines";
+import { getPrimarySearchEngine } from "./search-engines";
 import { getCustomSearchEngines } from "./custom-search-engines";
 import type { SearchEngine } from "../types";
 
@@ -14,20 +15,20 @@ const cache = new Cache({
   namespace: config.namespace,
 });
 
-export const getDefaultSearchEngine = () => {
-  const cacheValue = cache.get(config.cacheKey);
-  if (cacheValue) {
-    const savedEngine = JSON.parse(cacheValue) as SearchEngine;
-    // Check if the saved engine still exists (in case it was a custom engine that got deleted)
-    const customEngines = getCustomSearchEngines();
-    const existsInCustom = customEngines.some((engine) => engine.t === savedEngine.t);
-    const existsInBuiltIn = builtinSearchEngines.some((engine) => engine.t === savedEngine.t);
+// The saved default may name a deleted custom engine, so resolve it the same way searches do.
+export const resolveDefaultSearchEngine = (
+  savedEngine: SearchEngine | undefined,
+  customSearchEngines: SearchEngine[] = getCustomSearchEngines(),
+) =>
+  getPrimarySearchEngine(savedEngine?.t, customSearchEngines) ??
+  getPrimarySearchEngine(config.defaultSearchEngine?.t, customSearchEngines);
 
-    if (existsInCustom || existsInBuiltIn) {
-      return savedEngine;
-    }
-  }
-  return config.defaultSearchEngine;
+export const getDefaultSearchEngine = (customSearchEngines: SearchEngine[] = getCustomSearchEngines()) => {
+  const cacheValue = cache.get(config.cacheKey);
+  return resolveDefaultSearchEngine(
+    cacheValue ? (JSON.parse(cacheValue) as SearchEngine) : undefined,
+    customSearchEngines,
+  );
 };
 
 export const useDefaultSearchEngine = () => {

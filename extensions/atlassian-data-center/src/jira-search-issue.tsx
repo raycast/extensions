@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Keyboard } from "@raycast/api";
 
 import { SearchFilter, withQuery, CacheActions } from "@/components";
 import { JiraIssueTransitionForm, JiraWorklogForm } from "@/pages";
@@ -242,43 +242,55 @@ function JiraSearchIssues() {
                         icon={Icon.Pencil}
                         title="Edit in Browser"
                         url={item.editUrl}
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                       />
                     )}
                     <Action.Push
                       title="Create Worklog"
                       target={<JiraWorklogForm issueKey={item.key} onUpdate={refetchWithToast} />}
                       icon={Icon.Clock}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                      }}
                     />
                     <Action.Push
                       icon={Icon.Switch}
                       title="Transition Status"
                       target={<JiraIssueTransitionForm issueKey={item.key} onUpdate={refetchWithToast} />}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "t" },
+                        Windows: { modifiers: ["ctrl"], key: "t" },
+                      }}
                     />
                     <Action.CopyToClipboard
                       title="Copy URL"
                       content={item.url}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "c" },
+                        Windows: { modifiers: ["ctrl"], key: "c" },
+                      }}
                     />
                     <Action.CopyToClipboard
                       title="Copy Key"
                       content={item.key}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     {jql && (
                       <Action
                         title="Copy JQL"
                         icon={Icon.CopyClipboard}
                         onAction={() => copyJQL()}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "," },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                        }}
                       />
                     )}
                     <Action
                       icon={Icon.ArrowClockwise}
                       title="Refresh"
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={refetchWithToast}
                     />
                     <CacheActions />

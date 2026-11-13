@@ -10,7 +10,9 @@ export default function Command() {
 
   // State variables
   const [origin, setOrigin] = useState<OriginOption>(preferences.preferredOrigin); // Controls which origin option is selected
-  const [originAddress, setOriginAddress] = useState<string>(""); // Stores the origin address
+  const [originAddress, setOriginAddress] = useState<string>(
+    preferences.preferredOrigin === OriginOption.Home ? preferences.homeAddress : ""
+  ); // Stores the origin address
   const [destination, setDestination] = useState<string>(""); // Stores the destination address
   const [mode, setMode] = useState<string>(preferences.preferredMode); // Stores the selected transport mode
   const [isLoading, setIsLoading] = useState<boolean>(preferences.useSelected); // Controls loading state

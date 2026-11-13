@@ -2,7 +2,7 @@ import { Item, ItemDetail, Vault } from "./types";
 
 export const MOCK_VAULTS: Vault[] = [
   { shareId: "vault-1", name: "Personal", itemCount: 12, role: "owner" },
-  { shareId: "vault-2", name: "Work", itemCount: 8, role: "owner" },
+  { shareId: "vault-2", name: "Work", itemCount: 8, role: "owner", isShared: true },
   { shareId: "vault-3", name: "Family", itemCount: 5, role: "manager" },
   { shareId: "vault-4", name: "Shared Projects", itemCount: 3, role: "editor" },
 ];
@@ -17,6 +17,10 @@ export const MOCK_ITEMS: Item[] = [
     username: "johndoe",
     email: "john@example.com",
     hasTotp: true,
+    urls: ["https://github.com", "https://github.com/login"],
+    hasPassword: true,
+    hasNote: true,
+    modifiedAt: "2026-07-02T09:15:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -26,6 +30,10 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Personal",
     email: "john@example.com",
     hasTotp: false,
+    urls: ["https://netflix.com"],
+    hasPassword: true,
+    hasNote: false,
+    modifiedAt: "2026-03-18T20:40:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -35,6 +43,10 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Personal",
     username: "admin@company.io",
     hasTotp: true,
+    urls: ["https://console.aws.amazon.com"],
+    hasPassword: true,
+    hasNote: false,
+    modifiedAt: "2026-09-12T14:05:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -43,6 +55,8 @@ export const MOCK_ITEMS: Item[] = [
     type: "note",
     vaultName: "Personal",
     hasTotp: false,
+    hasNote: true,
+    modifiedAt: "2026-08-21T08:30:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -60,6 +74,10 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Work",
     email: "john@company.io",
     hasTotp: true,
+    urls: ["https://company.slack.com"],
+    hasPassword: true,
+    hasNote: false,
+    modifiedAt: "2026-09-25T11:00:00.000Z",
   },
   {
     shareId: "vault-2",
@@ -113,6 +131,28 @@ export const MOCK_ITEMS: Item[] = [
     email: "team@project.io",
     hasTotp: true,
   },
+  {
+    shareId: "item-share-1",
+    itemId: "item-13",
+    title: "Streaming Family Plan",
+    type: "login",
+    vaultName: "Shared with Me",
+    email: "family@example.com",
+    hasTotp: false,
+    urls: ["https://streaming.example.com"],
+    hasPassword: true,
+    sharedWithMe: true,
+  },
+  {
+    shareId: "item-share-2",
+    itemId: "item-14",
+    title: "Office Door Code",
+    type: "note",
+    vaultName: "Shared with Me",
+    hasTotp: false,
+    hasNote: true,
+    sharedWithMe: true,
+  },
 ];
 
 export const MOCK_ITEM_DETAILS: Record<string, ItemDetail> = {
@@ -128,6 +168,17 @@ export const MOCK_ITEM_DETAILS: Record<string, ItemDetail> = {
     urls: ["https://github.com", "https://github.com/login"],
     hasTotp: true,
     note: "Main development account",
+    // RFC 6238 test secret ("12345678901234567890"), not a real account.
+    totpUri: "otpauth://totp/GitHub:johndoe?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub",
+  },
+  "item-4": {
+    shareId: "vault-1",
+    itemId: "item-4",
+    title: "Private Notes",
+    type: "note",
+    vaultName: "Personal",
+    hasTotp: false,
+    note: "Wi-Fi guest password is on the fridge.\nRenew the passport before March.",
   },
   "item-2": {
     shareId: "vault-1",

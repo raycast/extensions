@@ -21,7 +21,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 
 // The fixture corpus is real captured HTML and is deliberately not committed. Without it the
-// suite still runs, but every test that checks behaviour against an actual paywalled page
+// suite still runs, but every test that checks behavior against an actual paywalled page
 // quietly skips — and a green run would then be claiming coverage it does not have. Say so.
 const fixtureDir = join(root, ".github", ".private", "tests");
 if (!existsSync(fixtureDir)) {

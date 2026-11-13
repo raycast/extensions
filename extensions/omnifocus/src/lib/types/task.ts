@@ -5,6 +5,7 @@ export type OmniFocusTask = {
   flagged: boolean;
   note?: string;
   deferDate?: Date;
+  plannedDate?: Date;
   dueDate?: Date;
   dropped: boolean;
   tags: string[];
@@ -16,6 +17,7 @@ export type CreateOmniFocusTaskOptions = {
   flagged?: boolean;
   note?: string;
   deferDate?: Date | null;
+  plannedDate?: Date | null;
   dueDate?: Date | null;
   projectName?: string;
   tags: string[];

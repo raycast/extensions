@@ -38,6 +38,29 @@ Open Raycast and run **View Pull Requests**. The command shows a list of open PR
 - **Mark as Read** — Use `CMD`/`CTRL` + `D` to mark a single item as read, `CMD`/`CTRL` + `S` to mark an entire PR as read, or mark all PRs as read with `CMD`/`CTRL` + `Shift` + `S`.
 - **Toggle Event Filters** — show/hide specific activity types.
 
+### PR Filters
+
+Use GitHub-style search filters to narrow **View Pull Requests** to a specific set. Click the search-bar dropdown to switch, create, edit, or delete filters.
+
+**Supported qualifiers:**
+
+- `assignee:username` — PRs assigned to you or a specific user
+- `author:username` — PRs opened by you or a specific user
+- `involves:username` — PRs where the user commented, reviewed, or was mentioned
+- `review-requested:username` — PRs where review is pending from you or a specific user
+- `label:name` — PRs with a specific label
+- `draft:true` or `draft:false` — show only drafts or non-drafts
+- `@me` — shorthand for your own GitHub login (auto-resolved once per session)
+
+**Modifiers:**
+
+- Negate any qualifier with a leading dash: `-author:bot` excludes bot-opened PRs
+- Combine multiple values per qualifier with commas: `assignee:alice,bob`
+- Repeat qualifiers: `label:bug label:urgent` (both labels)
+- Free-text words search the PR title: `ui layout` finds PRs with "ui" and "layout" in the title
+
+Filters are saved locally and applied during fetch — they don't waste your **Max Unread PRs** and **Max PRs to Scan** budget on excluded pull requests.
+
 ### Unread PR Alert (menu bar)
 
 Enable the **Unread PR Alert** command on MacOS to show a menu bar item with the number of PRs that have unread changes. It refreshes automatically every 5 minutes, immediately when you open or refresh **View Pull Requests**, and whenever you mark items, PRs, or everything as read — so the badge count stays in sync with what you have seen. It shares its data with **View Pull Requests**, so opening the main command shows already-cached data. Clicking a PR in the dropdown opens **View Pull Requests** with that PR expanded. The menu bar item disappears if there are no new unread changes.

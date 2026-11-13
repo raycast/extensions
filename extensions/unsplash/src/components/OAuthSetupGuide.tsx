@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { REDIRECT_URI } from "@/oauth";
+import { REGISTERED_REDIRECT_URI } from "@/oauth";
 
 interface Props {
   onConnect: () => Promise<void>;
@@ -19,7 +19,7 @@ ${connectError ? `> ⚠️ ${connectError}\n` : ""}Before connecting, add the re
 3. Add this URI **exactly**:
 
 \`\`\`
-${REDIRECT_URI}
+${REGISTERED_REDIRECT_URI}
 \`\`\`
 
 4. Enable permissions: **Public**, **Read user**, **Write likes**
@@ -43,7 +43,7 @@ ${REDIRECT_URI}
             url="https://unsplash.com/oauth/applications"
             icon={Icon.Globe}
           />
-          <Action.CopyToClipboard title="Copy Redirect URI" content={REDIRECT_URI} icon={Icon.Clipboard} />
+          <Action.CopyToClipboard title="Copy Redirect URI" content={REGISTERED_REDIRECT_URI} icon={Icon.Clipboard} />
         </ActionPanel>
       }
     />

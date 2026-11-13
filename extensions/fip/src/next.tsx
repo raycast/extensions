@@ -1,5 +1,5 @@
-import TrackMetadata from "./components/TrackMetadata";
+import { TrackDetail } from "./components/TrackDetail";
 
 export default function Command() {
-  return <TrackMetadata metadataKey={"next"} />;
+  return <TrackDetail position="next" />;
 }

@@ -6,16 +6,34 @@
   "icon": "logo.png",
   "license": "MIT",
   "author": "samuelkraft",
-  "platforms": ["macOS", "Windows"],
-  "categories": ["Productivity"],
-  "tags": ["shape", "calendar", "training", "workouts", "activities", "fitness", "endurance"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "tags": [
+    "shape",
+    "calendar",
+    "training",
+    "workouts",
+    "activities",
+    "fitness",
+    "endurance"
+  ],
   "commands": [
     {
       "name": "search-workouts",
       "title": "Search Activities",
       "description": "Search and browse your planned and completed activities",
       "mode": "view",
-      "keywords": ["shape", "activities", "workouts", "training"]
+      "keywords": [
+        "shape",
+        "activities",
+        "workouts",
+        "training"
+      ]
     },
     {
       "name": "today",
@@ -23,14 +41,38 @@
       "description": "Shows today's planned or completed workout",
       "mode": "no-view",
       "interval": "1h",
-      "keywords": ["shape", "today", "workout"]
+      "keywords": [
+        "shape",
+        "today",
+        "workout"
+      ]
     },
     {
       "name": "this-week",
       "title": "This Week",
       "description": "See your training plan for the current week",
       "mode": "view",
-      "keywords": ["shape", "week", "plan", "training"]
+      "keywords": [
+        "shape",
+        "week",
+        "plan",
+        "training"
+      ]
+    },
+    {
+      "name": "training-status",
+      "title": "Training Status",
+      "description": "See your readiness, training load, and health metrics",
+      "mode": "view",
+      "keywords": [
+        "shape",
+        "readiness",
+        "fitness",
+        "fatigue",
+        "form",
+        "load",
+        "health"
+      ]
     }
   ],
   "tools": [
@@ -38,6 +80,16 @@
       "name": "get-activities",
       "title": "Get Activities",
       "description": "Get activities from Shape Calendar for the current user, optionally filtered by date range, sport type, or completion status"
+    },
+    {
+      "name": "get-activity",
+      "title": "Get Activity",
+      "description": "Get a single activity from Shape Calendar by its ID, including description and structured steps. For a completed activity with plannedActivityId set, fetch that ID to read the original plan."
+    },
+    {
+      "name": "get-activity-details",
+      "title": "Get Activity Details",
+      "description": "Get the recorded time-series for one completed activity from Shape Calendar: heart rate, pace/speed, cadence, power, elevation, plus lap splits and time in each training zone. Only activities recorded by a connected device have this."
     },
     {
       "name": "get-latest-activity",
@@ -53,6 +105,11 @@
       "name": "create-activity",
       "title": "Create Activity",
       "description": "Create a new training activity in Shape Calendar. Requires date, title, and sport type. Distance is in meters, duration in seconds."
+    },
+    {
+      "name": "update-activity",
+      "title": "Update Activity",
+      "description": "Update a single activity in Shape Calendar by its ID. Pass only the fields to change. Distance is in meters, duration in seconds."
     },
     {
       "name": "delete-activity",
@@ -83,10 +140,20 @@
       "name": "unpair-activity",
       "title": "Unpair Activity",
       "description": "Unpair an activity from its partner in Shape Calendar. Pass either side of the pair — both rows will be unlinked."
+    },
+    {
+      "name": "get-health-metrics",
+      "title": "Get Health Metrics",
+      "description": "Get daily health metrics from Shape Calendar (sleep, HRV, resting heart rate, body battery, VO2max, weight, steps, blood pressure, etc.), merged across Garmin and Apple Health into one record per day"
+    },
+    {
+      "name": "get-training-status",
+      "title": "Get Training Status",
+      "description": "Get the user's current readiness, training load (fitness, fatigue, form, acute:chronic ratio) and the projected load of the coming week's planned workouts from Shape Calendar"
     }
   ],
   "ai": {
-    "instructions": "Help with Shape Calendar training tasks. Use get-activities for questions about past workouts or training over a specific period. Use get-latest-activity when asked about the most recent workout. Use get-upcoming-activities for questions about what's planned or coming up. Use create-activity to schedule a single workout. Use batch-create-activities when creating multiple workouts at once (e.g. a training plan or week of workouts). Use batch-update-activities to modify multiple activities at once (e.g. mark all as completed, reschedule a week). Use delete-activity to remove a single activity — always confirm with the user first and use get-activities to find the ID. Use batch-delete-activities to remove multiple activities at once. Use pair-activities to link a completed activity with the planned activity it fulfills — the completed one must have completed=true, the planned one must have completed=false. Use unpair-activity to break that link; pass either ID. An activity is already paired when its plannedActivityId or completedActivityId field is set. Paired planned activities are hidden from default list queries — pass includePaired=true to get-activities to surface them when needed (e.g. to find the planned ID before unpairing). Distance is always in meters, duration in seconds. Sport types are: run, bike, swim, hike, yoga, nordicski, strength, other. For structured interval workouts (e.g. 5x400m repeats), set target to 'steps' and include a steps array with warmup, interval, recovery, repeat, and cooldown steps. Only use steps for workouts with specific interval structure — not for simple runs or strength training. Keep titles short without distance/duration.",
+    "instructions": "Help with Shape Calendar training tasks. Use get-activities for questions about past workouts or training over a specific period. Use get-latest-activity when asked about the most recent workout. Use get-upcoming-activities for questions about what's planned or coming up. Use get-activity to read one activity in full, e.g. to read the plan behind a completed workout via its plannedActivityId. Use get-activity-details for questions a summary can't answer — pacing, heart rate over time, lap splits, time in zones; prefer its laps and zones over the raw arrays, and relay its message to the user when the recording is missing. Use get-health-metrics for sleep, HRV, resting heart rate, weight and other daily health data. Use get-training-status for 'should I train hard today', 'am I overtraining' or 'how is my fitness trending', and call it again after creating or rearranging planned workouts to check the projected load (a ratio above 1.5 is high). Use create-activity to schedule a single workout. Use update-activity to change a single existing activity (reschedule, rename, mark completed). Use batch-create-activities when creating multiple workouts at once (e.g. a training plan or week of workouts). Use batch-update-activities to modify multiple activities at once (e.g. mark all as completed, reschedule a week). Use delete-activity to remove a single activity — always confirm with the user first and use get-activities to find the ID. Use batch-delete-activities to remove multiple activities at once. Use pair-activities to link a completed activity with the planned activity it fulfills — the completed one must have completed=true, the planned one must have completed=false. Use unpair-activity to break that link; pass either ID. An activity is already paired when its plannedActivityId or completedActivityId field is set. Paired planned activities are hidden from default list queries — pass includePaired=true to get-activities to surface them when needed (e.g. to find the planned ID before unpairing). Distance is always in meters, duration in seconds. Sport types are: run, bike, swim, hike, yoga, tennis, skiing, nordicski, strength, surf, other. For structured interval workouts (e.g. 5x400m repeats), set target to 'steps' and include a steps array with warmup, interval, recovery, repeat, and cooldown steps. Only use steps for workouts with specific interval structure — not for simple runs or strength training. Keep titles short without distance/duration.",
     "evals": [
       {
         "input": "@shape-calendar what did I do this week?",
@@ -403,18 +470,131 @@
             "callsTool": "batch-delete-activities"
           }
         ]
+      },
+      {
+        "input": "@shape-calendar how did I sleep this week?",
+        "mocks": {
+          "get-health-metrics": {
+            "days": [
+              {
+                "date": "2026-03-27",
+                "sleepDurationSec": {
+                  "value": 27000,
+                  "source": "garmin"
+                },
+                "sleepScore": {
+                  "value": 82,
+                  "source": "garmin"
+                }
+              }
+            ],
+            "total": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-health-metrics"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar should I train hard today?",
+        "mocks": {
+          "get-training-status": {
+            "readiness": {
+              "score": 74,
+              "basis": "now"
+            },
+            "load": {
+              "fitness": 52,
+              "fatigue": 61,
+              "form": -9,
+              "ratio": 1.17
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-training-status"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar move my latest planned run to 2026-04-02",
+        "mocks": {
+          "get-upcoming-activities": [
+            {
+              "id": "abc-20",
+              "date": "2026-03-31",
+              "title": "Easy run",
+              "sportType": "run",
+              "completed": false
+            }
+          ],
+          "get-activities": [
+            {
+              "id": "abc-20",
+              "date": "2026-03-31",
+              "title": "Easy run",
+              "sportType": "run",
+              "completed": false
+            }
+          ],
+          "update-activity": {
+            "id": "abc-20",
+            "date": "2026-04-02",
+            "title": "Easy run",
+            "sportType": "run",
+            "completed": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "update-activity"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar how was my heart rate during my last run?",
+        "mocks": {
+          "get-latest-activity": {
+            "id": "abc-21",
+            "date": "2026-03-28",
+            "title": "Long run",
+            "sportType": "run",
+            "distance": 21000,
+            "duration": 6300,
+            "completed": true
+          },
+          "get-activity-details": {
+            "activityId": "abc-21",
+            "laps": [
+              {
+                "index": 1,
+                "distance": 1000,
+                "duration": 300,
+                "heartRate": 148
+              }
+            ],
+            "zones": {
+              "heartRate": [
+                {
+                  "zone": 2,
+                  "seconds": 4200
+                }
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-activity-details"
+          }
+        ]
       }
     ]
   },
   "preferences": [
-    {
-      "name": "apiToken",
-      "title": "API Token",
-      "description": "Your Shape Calendar API token (starts with shape_)",
-      "type": "password",
-      "required": true,
-      "placeholder": "shape_..."
-    },
     {
       "name": "distanceUnit",
       "title": "Distance Unit",
@@ -423,8 +603,14 @@
       "default": "km",
       "required": true,
       "data": [
-        { "value": "km", "title": "Kilometers" },
-        { "value": "mi", "title": "Miles" }
+        {
+          "value": "km",
+          "title": "Kilometers"
+        },
+        {
+          "value": "mi",
+          "title": "Miles"
+        }
       ]
     },
     {
@@ -435,8 +621,14 @@
       "default": "monday",
       "required": true,
       "data": [
-        { "value": "monday", "title": "Monday" },
-        { "value": "sunday", "title": "Sunday" }
+        {
+          "value": "monday",
+          "title": "Monday"
+        },
+        {
+          "value": "sunday",
+          "title": "Sunday"
+        }
       ]
     }
   ],

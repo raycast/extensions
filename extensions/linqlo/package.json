@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linqlo",
+  "version": "0.1.0",
+  "description": "Search your saved links, save clipboard URLs, and open Linqlo collections.",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "author": "ryohei-62",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "check-types": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "@raycast/utils": "2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.7",
+    "typescript": "^5.9.3"
+  },
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Linqlo",
+      "description": "Search, open, and copy links saved in your connected workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "save-clipboard-url",
+      "title": "Save Clipboard URL",
+      "subtitle": "Linqlo",
+      "description": "Save a URL from your clipboard to a Linqlo collection.",
+      "mode": "view"
+    },
+    {
+      "name": "open-collection",
+      "title": "Open Collection",
+      "subtitle": "Linqlo",
+      "description": "Find and open a Linqlo collection in your browser.",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Integration Key",
+      "description": "Create a Raycast key in Linqlo Settings → App integrations. Choose read and save access to save URLs.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "title": "Linqlo"
+}

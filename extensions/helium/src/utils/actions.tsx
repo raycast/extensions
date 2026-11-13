@@ -1,9 +1,53 @@
-import { Action, Icon, showToast, Toast, closeMainWindow } from "@raycast/api";
+import { showError, failToast } from "@chrismessina/raycast-kit";
+import { countOf, plural } from "@chrismessina/raycast-kit/plural";
+import { Action, Icon, Keyboard, showToast, Toast, closeMainWindow } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
-import { switchToHeliumTabById, closeHeliumTabById, openUrlInHelium } from "./applescript";
+import { closeHeliumTabById, createNewTab, isTabCloseAvailable, openUrlInHelium, switchToTab } from "./browser-control";
 import { getBrowserTabs } from "./browser";
 import { idsStillPresent } from "./pending-close";
+import { getHeliumAppTarget, isWindows } from "./platform";
+import { SHORTCUTS } from "./shortcuts";
+
+interface OpenInHeliumActionProps {
+  title: string;
+  url: string;
+  icon?: Icon;
+  shortcut?: Keyboard.Shortcut;
+}
+
+/**
+ * Open a URL in Helium.
+ *
+ * macOS hands this to `Action.Open` with the bundle id. Windows must not:
+ * Raycast launches the application with its own environment, in which
+ * `LOCALAPPDATA` points at `AppData\Local\Temp`, so Helium would start against
+ * a stray profile instead of the user's. Going through `openUrlInHelium` pins
+ * the profile explicitly — see `windows-browser.ts`.
+ */
+export function OpenInHeliumAction({ title, url, icon, shortcut }: OpenInHeliumActionProps) {
+  if (!isWindows) {
+    return (
+      <Action.Open title={title} target={url} application={getHeliumAppTarget()} icon={icon} shortcut={shortcut} />
+    );
+  }
+
+  return (
+    <Action
+      title={title}
+      icon={icon ?? Icon.Globe}
+      shortcut={shortcut}
+      onAction={async () => {
+        try {
+          await openUrlInHelium(url);
+          await closeMainWindow();
+        } catch (error) {
+          await showError(error, { title: "Failed to open in Helium" });
+        }
+      }}
+    />
+  );
+}
 
 interface BaseActionProps {
   tab: Tab;
@@ -16,11 +60,13 @@ interface MutationActionProps extends BaseActionProps {
 }
 
 /**
- * Action to switch to an existing tab using AppleScript.
+ * Action to focus an already open tab.
  *
- * Uses the stable Helium AppleScript `id` bridged at fetch time (see
- * {@link getBrowserTabs}) so we always target the exact tab the user picked,
- * even when several tabs share the same URL.
+ * macOS uses the stable Helium AppleScript `id` bridged at fetch time (see
+ * {@link getBrowserTabs}), so it always targets the exact tab the user picked,
+ * even when several tabs share the same URL. Windows has no such handle and
+ * matches on the tab title through the native accessibility helper. Failures
+ * leave the list open so the user can refresh and try again.
  */
 export function SwitchToTabAction({ tab }: BaseActionProps) {
   return (
@@ -29,22 +75,16 @@ export function SwitchToTabAction({ tab }: BaseActionProps) {
       icon={Icon.ArrowRight}
       onAction={async () => {
         try {
-          const switched = await switchToHeliumTabById(tab.id);
-          if (switched) {
+          if (await switchToTab(tab)) {
             await closeMainWindow();
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Tab not found",
-              message: "The tab may have been closed",
-            });
+            return;
           }
-        } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to switch to tab",
-            message: error instanceof Error ? error.message : String(error),
+
+          await showError(new Error("The tab may have been closed. Refresh the list and try again."), {
+            title: "Tab not found",
           });
+        } catch (error) {
+          await showError(error, { title: "Failed to switch to tab" });
         }
       }}
     />
@@ -59,17 +99,13 @@ export function OpenNewTabAction() {
     <Action
       title="Open New Tab"
       icon={Icon.PlusCircle}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={SHORTCUTS.newTab}
       onAction={async () => {
         try {
-          await openUrlInHelium("chrome://new-tab-page/");
+          await createNewTab();
           await closeMainWindow();
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to open new tab",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          await showError(error, { title: "Failed to open new tab" });
         }
       }}
     />
@@ -98,9 +134,9 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
     <Action
       title={`Reload ${subject}`}
       icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={async () => {
-        await showToast({
+        const toast = await showToast({
           style: Toast.Style.Animated,
           title: `Reloading ${subject.toLowerCase()}…`,
         });
@@ -111,11 +147,7 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
             title: `${subject} reloaded`,
           });
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: `Failed to reload ${subject.toLowerCase()}`,
-            message: error instanceof Error ? error.message : String(error),
-          });
+          failToast(toast, error, { title: `Failed to reload ${subject.toLowerCase()}` });
         }
       }}
     />
@@ -123,19 +155,24 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
 }
 
 /**
- * Action to close a tab with optimistic updates
+ * Action to close a tab with optimistic updates.
+ *
+ * Renders nothing on Windows, where tabs cannot be closed from outside the
+ * browser.
  */
 export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: MutationActionProps) {
+  if (!isTabCloseAvailable) return null;
+
   return (
     <Action
       title="Close Tab"
       icon={Icon.XMarkCircle}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+      shortcut={SHORTCUTS.closeTab}
       onAction={async () => {
         // Keep in-flight closes hidden even if another mutation revalidates first.
         pendingCloseIdsRef.current.add(tab.id);
 
-        await showToast({
+        const toast = await showToast({
           style: Toast.Style.Animated,
           title: "Closing tab",
         });
@@ -183,11 +220,7 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
             });
           }
 
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to close tab",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          failToast(toast, error, { title: "Failed to close tab" });
         }
       }}
     />
@@ -199,12 +232,11 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
  */
 export function OpenInNewTabAction({ tab }: BaseActionProps) {
   return (
-    <Action.Open
+    <OpenInHeliumAction
       title="Open in New Tab"
-      target={tab.url}
-      application="net.imput.helium"
-      icon={Icon.PlusCircle}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+      url={tab.url}
+      icon={Icon.PlusSquare}
+      shortcut={Keyboard.Shortcut.Common.Open}
     />
   );
 }
@@ -213,20 +245,14 @@ export function OpenInNewTabAction({ tab }: BaseActionProps) {
  * Action to copy URL to clipboard
  */
 export function CopyUrlAction({ tab }: BaseActionProps) {
-  return <Action.CopyToClipboard title="Copy URL" content={tab.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />;
+  return <Action.CopyToClipboard title="Copy URL" content={tab.url} shortcut={SHORTCUTS.copyUrl} />;
 }
 
 /**
  * Action to copy tab title to clipboard
  */
 export function CopyTitleAction({ tab }: BaseActionProps) {
-  return (
-    <Action.CopyToClipboard
-      title="Copy Title"
-      content={tab.title || ""}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-    />
-  );
+  return <Action.CopyToClipboard title="Copy Title" content={tab.title || ""} shortcut={SHORTCUTS.copyTitle} />;
 }
 
 /**
@@ -237,7 +263,7 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
     <Action.CopyToClipboard
       title="Copy as Markdown"
       content={`[${tab.title}](${tab.url})`}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+      shortcut={SHORTCUTS.copyAsMarkdown}
     />
   );
 }
@@ -254,6 +280,9 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
  * When used from a list that owns the tab cache, pass `mutate`, `revalidate`,
  * and `pendingCloseIdsRef` to apply an optimistic update and then reconcile
  * with the actual browser state after the closes finish.
+ *
+ * Renders nothing on Windows, where tabs cannot be closed from outside the
+ * browser.
  */
 interface DeduplicateTabsActionProps {
   tabs?: Tab[];
@@ -267,12 +296,15 @@ export function DeduplicateTabsAction({
   revalidate,
   pendingCloseIdsRef,
 }: DeduplicateTabsActionProps = {}) {
+  if (!isTabCloseAvailable) return null;
+
   return (
     <Action
       title="Deduplicate Tabs"
       icon={Icon.Filter}
-      shortcut={{ modifiers: ["cmd", "shift", "ctrl"], key: "w" }}
+      shortcut={SHORTCUTS.deduplicateTabs}
       onAction={async () => {
+        let toast: Toast | undefined;
         try {
           const currentTabs = tabs ?? (await getBrowserTabs());
 
@@ -289,9 +321,9 @@ export function DeduplicateTabsAction({
             return;
           }
 
-          await showToast({
+          toast = await showToast({
             style: Toast.Style.Animated,
-            title: `Closing ${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`,
+            title: `Closing ${countOf(duplicates.length, "duplicate tab")}`,
           });
 
           const duplicateIds = duplicates.map((t) => t.id);
@@ -338,19 +370,22 @@ export function DeduplicateTabsAction({
           }
 
           const closed = closedIds.length;
-          await showToast({
-            style: closed === duplicates.length ? Toast.Style.Success : Toast.Style.Failure,
-            title:
-              closed > 0
-                ? `Closed ${closed}/${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`
-                : "Failed to close duplicates",
-          });
+          const title = `Closed ${closed}/${duplicates.length} duplicate ${plural(duplicates.length, "tab")}`;
+          if (closed === duplicates.length) {
+            toast.style = Toast.Style.Success;
+            toast.title = title;
+          } else {
+            failToast(
+              toast,
+              new Error(`${countOf(duplicates.length - closed, "tab")} could not be closed. Refresh and try again.`),
+              {
+                title: closed > 0 ? title : "Failed to close duplicates",
+              },
+            );
+          }
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to deduplicate tabs",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          if (toast) failToast(toast, error, { title: "Failed to deduplicate tabs" });
+          else await showError(error, { title: "Failed to deduplicate tabs" });
         }
       }}
     />
@@ -376,11 +411,7 @@ export function OpenBookmarkAction({ bookmark }: BookmarkActionProps) {
           await openUrlInHelium(bookmark.url);
           await closeMainWindow();
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to open bookmark",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          await showError(error, { title: "Failed to open bookmark" });
         }
       }}
     />
@@ -392,12 +423,11 @@ export function OpenBookmarkAction({ bookmark }: BookmarkActionProps) {
  */
 export function OpenBookmarkInNewTabAction({ bookmark }: BookmarkActionProps) {
   return (
-    <Action.Open
+    <OpenInHeliumAction
       title="Open in New Tab"
-      target={bookmark.url}
-      application="net.imput.helium"
-      icon={Icon.PlusCircle}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+      url={bookmark.url}
+      icon={Icon.PlusSquare}
+      shortcut={SHORTCUTS.openInNewTab}
     />
   );
 }
@@ -406,20 +436,14 @@ export function OpenBookmarkInNewTabAction({ bookmark }: BookmarkActionProps) {
  * Action to copy bookmark URL
  */
 export function CopyBookmarkUrlAction({ bookmark }: BookmarkActionProps) {
-  return <Action.CopyToClipboard title="Copy URL" content={bookmark.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />;
+  return <Action.CopyToClipboard title="Copy URL" content={bookmark.url} shortcut={SHORTCUTS.copyUrl} />;
 }
 
 /**
  * Action to copy bookmark title
  */
 export function CopyBookmarkTitleAction({ bookmark }: BookmarkActionProps) {
-  return (
-    <Action.CopyToClipboard
-      title="Copy Title"
-      content={bookmark.title}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-    />
-  );
+  return <Action.CopyToClipboard title="Copy Title" content={bookmark.title} shortcut={SHORTCUTS.copyTitle} />;
 }
 
 /**
@@ -430,7 +454,7 @@ export function CopyBookmarkAsMarkdownAction({ bookmark }: BookmarkActionProps) 
     <Action.CopyToClipboard
       title="Copy as Markdown"
       content={`[${bookmark.title}](${bookmark.url})`}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+      shortcut={SHORTCUTS.copyAsMarkdown}
     />
   );
 }
@@ -449,8 +473,9 @@ interface QuicklinkActionProps {
 export function CreateQuicklinkAction({ url, name }: QuicklinkActionProps) {
   return (
     <Action.CreateQuicklink
+      icon={Icon.Quicklink}
       quicklink={{ link: url, name: name }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+      shortcut={SHORTCUTS.createQuicklink}
     />
   );
 }

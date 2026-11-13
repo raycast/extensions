@@ -33,13 +33,25 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-category-news",
+      "title": "Get Category News",
+      "description": "Get Kagi News stories for a specific category (e.g. World, Technology, France, Science), for today or an optional past date."
+    },
+    {
+      "name": "search-news",
+      "title": "Search News",
+      "description": "Search Kagi News for stories matching a free-text query, across all categories and, optionally, a specific date range."
+    }
+  ],
   "preferences": [
     {
       "name": "language",
       "type": "dropdown",
       "required": false,
       "title": "Language",
-      "description": "Article language",
+      "description": "Article language. Note: Kagi has temporarily disabled translations to manage costs, so only English and each article's original language currently display correctly. Other options are kept here and will work again once Kagi restores the feature.",
       "default": "default",
       "data": [
         {

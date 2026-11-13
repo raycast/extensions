@@ -30,6 +30,7 @@ export class iCloud2SARequiredError extends iCloudError {
 }
 
 export class iCloudServiceNotActivatedError extends iCloudAPIResponseError {}
+export class iCloudTermsError extends iCloudError {}
 export class iCloudFailedLoginError extends iCloudError {}
 export class iCloudSessionExpiredError extends iCloudError {}
 export class iCloud2FAError extends iCloudError {}

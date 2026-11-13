@@ -1,35 +1,26 @@
 import { ActionPanel, Action, List, Icon, Keyboard, Color } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
-import { NewSpaceForm } from "./NewSpaceForm";
+import { MovedToDesktopView } from "./MovedToDesktopView";
 import { SpaceItemActionPanel } from "../components/SpaceItemActionPanel";
+import { DesktopAppNudgeItem } from "../components/DesktopAppNudgeItem";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
-import { trpc } from "../utils/trpc.util";
 import { resolveSpaceIconUrl } from "../utils/space-icon.util";
-import { useCachedState } from "@raycast/utils";
-import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 
 function Body() {
-  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
-  const { data, isFetching, refetch: refetchMe, isLoading } = useMe();
+  const { data, isFetching, isLoading } = useMe();
   const spaces = useSortedSpaces(data?.associatedSpaces);
   const { enabledSpaceIds, confirmAndToggleEnableDisableSpace } = useEnabledSpaces();
-  const { data: authenticatedSpaceIds, refetch: refetchAuthenticatedSpaceIds } =
-    trpc.spaceAuth.listAuthenticatedSpaceIds.useQuery(undefined, {
-      enabled: !!sessionToken,
-    });
 
-  const refetch = async () => {
-    await Promise.all([refetchMe(), refetchAuthenticatedSpaceIds()]);
-  };
-
-  if (isLoading || !spaces || !enabledSpaceIds || !authenticatedSpaceIds) {
+  if (isLoading || !spaces || !enabledSpaceIds) {
     return <List isLoading />;
   }
 
   return (
     <List isLoading={isFetching}>
+      <DesktopAppNudgeItem />
+
       {spaces.length < 1 && (
         <List.Item
           title={"Create new Space"}
@@ -40,8 +31,9 @@ function Body() {
                 title="Select"
                 icon={Icon.Plus}
                 shortcut={Keyboard.Shortcut.Common.New}
-                target={<NewSpaceForm />}
-                onPop={() => refetch()}
+                target={
+                  <MovedToDesktopView title="New Space" lead="Spaces are created in the 1bookmark Desktop app." />
+                }
               />
             </ActionPanel>
           }
@@ -55,32 +47,17 @@ function Body() {
           subtitle={s.type === "PERSONAL" ? "This is a private space for you" : undefined}
           icon={resolveSpaceIconUrl(s.image) || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
           accessories={[
-            !authenticatedSpaceIds.includes(s.id)
-              ? {
-                  tag: {
-                    value: "Requires Re-Authentication",
-                    color: enabledSpaceIds.includes(s.id) ? Color.Orange : Color.SecondaryText,
-                  },
-                }
-              : {},
             {
               tag: {
                 value: enabledSpaceIds.includes(s.id) ? "Enabled" : "Disabled",
-                color: enabledSpaceIds.includes(s.id)
-                  ? authenticatedSpaceIds.includes(s.id)
-                    ? Color.Green
-                    : Color.SecondaryText
-                  : undefined,
+                color: enabledSpaceIds.includes(s.id) ? Color.Green : undefined,
               },
             },
           ]}
           actions={
             <SpaceItemActionPanel
               spaceId={s.id}
-              refetch={refetch}
-              type={s.type}
               enabled={enabledSpaceIds.includes(s.id)}
-              authenticated={authenticatedSpaceIds.includes(s.id)}
               toggleSpace={confirmAndToggleEnableDisableSpace}
             />
           }

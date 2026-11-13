@@ -21,6 +21,11 @@ function formatDate(dateString: string): string {
 }
 
 function DeviceListItem({ device }: { device: Device }) {
+  const logicalResolution =
+    device.logicalWidth !== null && device.logicalHeight !== null
+      ? `${device.logicalWidth}×${device.logicalHeight}`
+      : null;
+
   return (
     <List.Item
       key={device.id}
@@ -30,16 +35,17 @@ function DeviceListItem({ device }: { device: Device }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy Logical Resolution"
-              content={`${device.logicalWidth}×${device.logicalHeight}`}
-            />
+            {logicalResolution !== null && (
+              <Action.CopyToClipboard title="Copy Logical Resolution" content={logicalResolution} />
+            )}
             <Action.CopyToClipboard
               title="Copy Physical Resolution"
               content={`${device.physicalWidth}×${device.physicalHeight}`}
             />
             <Action.CopyToClipboard title="Copy PPI" content={String(device.ppi)} />
-            <Action.CopyToClipboard title="Copy Scale Factor" content={String(device.scaleFactor)} />
+            {device.scaleFactor !== null && (
+              <Action.CopyToClipboard title="Copy Scale Factor" content={String(device.scaleFactor)} />
+            )}
             <Action.CopyToClipboard title="Copy Device Name" content={device.name} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy All">
@@ -60,7 +66,7 @@ function DeviceListItem({ device }: { device: Device }) {
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label
                 title="Logical Resolution"
-                text={`${device.logicalWidth} × ${device.logicalHeight}`}
+                text={logicalResolution?.replace("×", " × ") ?? "Not yet verified"}
               />
               <List.Item.Detail.Metadata.Label
                 title="Physical Resolution"
@@ -68,7 +74,10 @@ function DeviceListItem({ device }: { device: Device }) {
               />
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="PPI" text={String(device.ppi)} />
-              <List.Item.Detail.Metadata.Label title="Scale Factor" text={`${device.scaleFactor}x`} />
+              <List.Item.Detail.Metadata.Label
+                title="Scale Factor"
+                text={device.scaleFactor !== null ? `${device.scaleFactor}x` : "Not yet verified"}
+              />
               <List.Item.Detail.Metadata.Label title="Screen Diagonal" text={device.screenDiagonal} />
               <List.Item.Detail.Metadata.Label title="Aspect Ratio" text={device.aspectRatio} />
               <List.Item.Detail.Metadata.Separator />

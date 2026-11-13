@@ -220,14 +220,20 @@ export default function RecentOTP() {
                 <Action
                   title={row.entry.pinned ? "Unpin" : "Pin"}
                   icon={row.entry.pinned ? Icon.PinDisabled : Icon.Pin}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+                  }}
                   onAction={() => handleTogglePin(row.entry.serviceId)}
                 />
                 <Action
                   title="Remove from Recents"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={{
+                    macOS: { modifiers: ["ctrl"], key: "x" },
+                    Windows: { modifiers: ["ctrl"], key: "x" },
+                  }}
                   onAction={() => handleRemove(row.entry.serviceId)}
                 />
               </ActionPanel>

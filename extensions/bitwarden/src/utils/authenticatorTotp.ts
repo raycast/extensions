@@ -13,6 +13,8 @@ const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
 const STEAM_CHARS = "23456789BCDFGHJKMNPQRTVWXY";
 const STEAM_PERIOD = 30;
 const SECRET_WHITESPACE = /\s/g;
+/** Matches otpauth URIs with no label path segment, e.g. `otpauth://totp?secret=...`. */
+const OTPAUTH_URI_WITHOUT_LABEL = /^(otpauth:\/\/(?:totp|hotp))\?/;
 
 type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
@@ -116,9 +118,17 @@ export function createTotpGenerator(opts: CreateTotpOptions): TotpGenerator {
   };
 }
 
+/**
+ * The label is optional in practice (Bitwarden itself accepts `otpauth://totp?secret=...`),
+ * but the URI parser requires the path segment, so an empty label is added.
+ */
+function normalizeOtpauthUri(uri: string): string {
+  return uri.replace(OTPAUTH_URI_WITHOUT_LABEL, "$1/?");
+}
+
 export function parseTotp(totpString: string): AuthenticatorOptions {
   if (totpString.includes("otpauth")) {
-    const [parsed, parseError] = tryCatch(() => parse(totpString));
+    const [parsed, parseError] = tryCatch(() => parse(normalizeOtpauthUri(totpString)));
     if (parseError) throw parseError;
     if (parsed.type !== "totp") throw new Error("Invalid authenticator key");
 

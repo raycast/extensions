@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Form,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
@@ -107,7 +108,7 @@ export default function ManageDictionary() {
     <Action.Push
       title="Add Word"
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
       target={<AddWordForm onAdd={load} />}
     />
   );

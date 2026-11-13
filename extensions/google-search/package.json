@@ -11,7 +11,8 @@
     "jlokos",
     "YourMCGeek",
     "alexi.build",
-    "tofrankie"
+    "tofrankie",
+    "chrismessina"
   ],
   "license": "MIT",
   "categories": [
@@ -22,13 +23,31 @@
       "name": "index",
       "title": "Google Search",
       "description": "Google search with autosuggestions",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "searchSelectText",
       "title": "Google Search Selected Text",
       "description": "Google search with selected text",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "useClipboardFallback",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use Clipboard Fallback",
+          "description": "When no text is selected, fall back to using clipboard content for search."
+        }
+      ]
     }
   ],
   "preferences": [
@@ -39,29 +58,19 @@
       "default": true,
       "label": "Remember Search History",
       "description": "Enable this checkbox to locally store Google search history."
-    },
-    {
-      "name": "useClipboardFallback",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Use Clipboard Fallback",
-      "description": "When no text is selected, fall back to using clipboard content for search."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.21",
-    "iconv-lite": "^0.7.0",
-    "nanoid": "^5.1.6",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.104.25",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^24.9.1",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.38.0",
-    "prettier": "^3.6.2",
-    "react": "^19.2.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "react": "^19.3.0",
     "typescript": "^5.9.3"
   },
   "scripts": {

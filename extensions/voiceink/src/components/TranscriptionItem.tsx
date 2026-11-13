@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import type { Transcription } from "../lib/types";
+import { copyAndConfirm, pasteToActiveApp } from "../lib/clipboard";
 import { formatRelativeTime, getDisplayText, truncateText } from "../lib/database";
 import { TranscriptionDetail } from "./TranscriptionDetail";
 
@@ -21,19 +22,19 @@ export function TranscriptionItem({ transcription }: Props) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => Clipboard.copy(displayText)} />
+            <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => copyAndConfirm(displayText)} />
             {hasEnhancement && (
               <Action
                 title="Copy Original Text"
                 icon={Icon.Clipboard}
-                onAction={() => Clipboard.copy(transcription.text)}
+                onAction={() => copyAndConfirm(transcription.text)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             )}
             <Action
               title="Paste Text"
               icon={Icon.TextCursor}
-              onAction={() => Clipboard.paste(displayText)}
+              onAction={() => pasteToActiveApp(displayText)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             />
           </ActionPanel.Section>

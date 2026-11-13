@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dbtcloud",
   "title": "dbt Cloud",
-  "description": "Helps you get information about your dbt Cloud jobs",
+  "description": "Browse dbt Cloud models, sources, lineage, jobs, and runs, and track job and model performance",
   "icon": "icon.png",
   "author": "zsombor-flds",
   "contributors": [
-    "xmok"
+    "xmok",
+    "gavin-burns-US"
   ],
   "categories": [
     "Data",
@@ -15,32 +16,328 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "quick_search",
+      "title": "Quick Search",
+      "subtitle": "dbt Cloud",
+      "description": "Search projects, jobs, environments, and runs in one place",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "find",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "catalog_index",
+      "title": "Browse Models (Catalog)",
+      "subtitle": "dbt Cloud",
+      "description": "Browse models with their columns, tests, lineage, and compiled SQL",
+      "mode": "view",
+      "keywords": [
+        "models",
+        "catalog",
+        "columns",
+        "schema",
+        "explorer",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "sources_index",
+      "title": "Browse Sources",
+      "subtitle": "dbt Cloud",
+      "description": "Browse sources with freshness status and downstream models",
+      "mode": "view",
+      "keywords": [
+        "sources",
+        "freshness",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "lineage_index",
+      "title": "Explore Lineage",
+      "subtitle": "dbt Cloud",
+      "description": "Explore upstream and downstream lineage for models and sources, with an interactive diagram",
+      "mode": "view",
+      "keywords": [
+        "lineage",
+        "dag",
+        "dependencies",
+        "upstream",
+        "downstream",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "trigger_job",
+      "title": "Trigger Job",
+      "subtitle": "dbt Cloud",
+      "description": "Trigger a job run, with confirmation",
+      "mode": "view",
+      "keywords": [
+        "run",
+        "trigger",
+        "execute",
+        "start",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
       "name": "runs_index",
       "title": "Show Job Runs",
       "subtitle": "dbt Cloud",
-      "description": "Show status information about dbt Cloud jobs",
-      "mode": "view"
+      "description": "Show recent job runs with status filtering, durations, and run details",
+      "mode": "view",
+      "keywords": [
+        "runs",
+        "history",
+        "status",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "projects_index",
+      "title": "Show Projects",
+      "subtitle": "dbt Cloud",
+      "description": "Browse projects with their repository and connection details",
+      "mode": "view",
+      "keywords": [
+        "projects",
+        "repositories",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "jobs_index",
+      "title": "Show Jobs",
+      "subtitle": "dbt Cloud",
+      "description": "Browse jobs by project, view their runs and performance, and trigger them",
+      "mode": "view",
+      "keywords": [
+        "jobs",
+        "schedules",
+        "triggers",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "environments_index",
+      "title": "Show Environments",
+      "subtitle": "dbt Cloud",
+      "description": "Browse environments and their jobs, models, and sources",
+      "mode": "view",
+      "keywords": [
+        "environments",
+        "deployment",
+        "production",
+        "staging",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "job_performance_index",
+      "title": "Show Job Performance",
+      "subtitle": "dbt Cloud",
+      "description": "See each job's success rate, run counts, and build durations over 7, 14, or 30 days",
+      "mode": "view",
+      "keywords": [
+        "performance",
+        "metrics",
+        "duration",
+        "success rate",
+        "dbt",
+        "dbt cloud"
+      ]
+    },
+    {
+      "name": "model_performance_index",
+      "title": "Show Model Performance",
+      "subtitle": "dbt Cloud",
+      "description": "Find the slowest models and see their execution time and status across runs",
+      "mode": "view",
+      "keywords": [
+        "models",
+        "performance",
+        "slow",
+        "execution time",
+        "dbt",
+        "dbt cloud"
+      ]
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+  "tools": [
+    {
+      "name": "search-models",
+      "title": "Search Models",
+      "description": "Search dbt models by name, description, or tags in the catalog"
+    },
+    {
+      "name": "get-model-details",
+      "title": "Get Model Details",
+      "description": "Get detailed information about a specific dbt model including columns, tests, and lineage"
+    },
+    {
+      "name": "search-sources",
+      "title": "Search Sources",
+      "description": "Search dbt sources by name or tag, with their freshness status"
+    },
+    {
+      "name": "get-lineage",
+      "title": "Get Lineage",
+      "description": "Get upstream and downstream lineage for a model or source"
+    },
+    {
+      "name": "list-jobs",
+      "title": "List Jobs",
+      "description": "List dbt Cloud jobs, optionally for one project"
+    },
+    {
+      "name": "get-job-runs",
+      "title": "Get Job Runs",
+      "description": "Get recent runs for a dbt Cloud job"
+    },
+    {
+      "name": "trigger-job",
+      "title": "Trigger Job",
+      "description": "Trigger a dbt Cloud job run"
+    },
+    {
+      "name": "list-environments",
+      "title": "List Environments",
+      "description": "List dbt Cloud environments with their project and deployment type"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant for dbt Cloud. When users ask about models, sources, jobs, or runs, use the appropriate tools to fetch information. Always format model and source names in backticks like `model_name`. When showing lineage, list upstream dependencies before downstream. For job operations, confirm the job name with the user before triggering. Use search-models to find models when the user mentions a partial name.",
+    "evals": [
+      {
+        "input": "@dbtcloud find models related to orders",
+        "expected": [
+          {
+            "callsTool": "search-models"
+          }
+        ],
+        "mocks": {
+          "search-models": {
+            "count": 2,
+            "models": [
+              {
+                "name": "orders",
+                "description": "Core orders table"
+              },
+              {
+                "name": "order_items",
+                "description": "Line items for orders"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcloud what are the upstream dependencies of fact_revenue?",
+        "expected": [
+          {
+            "callsTool": "get-lineage"
+          }
+        ],
+        "mocks": {
+          "get-lineage": {
+            "resource": {
+              "name": "fact_revenue",
+              "type": "model"
+            },
+            "upstream": [
+              {
+                "name": "stg_orders",
+                "type": "model"
+              },
+              {
+                "name": "raw.payments",
+                "type": "source"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcloud show me production jobs",
+        "expected": [
+          {
+            "callsTool": "list-jobs"
+          }
+        ],
+        "mocks": {
+          "list-jobs": {
+            "count": 3,
+            "jobs": [
+              {
+                "id": 123,
+                "name": "Daily Refresh",
+                "isScheduled": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcloud what columns are in the customers model?",
+        "expected": [
+          {
+            "callsTool": "get-model-details"
+          }
+        ],
+        "mocks": {
+          "get-model-details": {
+            "name": "customers",
+            "columns": [
+              {
+                "name": "customer_id",
+                "type": "INT64"
+              },
+              {
+                "name": "email",
+                "type": "STRING"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcloud trigger the nightly job",
+        "expected": [
+          {
+            "callsTool": "list-jobs"
+          },
+          {
+            "callsTool": "trigger-job"
+          }
+        ],
+        "mocks": {
+          "list-jobs": {
+            "jobs": [
+              {
+                "id": 456,
+                "name": "Nightly Build"
+              }
+            ]
+          },
+          "trigger-job": {
+            "success": true,
+            "runId": 789
+          }
+        }
+      }
+    ]
   },
   "preferences": [
     {
@@ -64,8 +361,16 @@
           "value": "https://emea.dbt.com"
         },
         {
+          "title": "Production (Europe) [w/ Account Prefix]",
+          "value": "https://{account_prefix}.eu1.dbt.com"
+        },
+        {
           "title": "Production (AU)",
           "value": "https://au.dbt.com"
+        },
+        {
+          "title": "Production (AU) [w/ Account Prefix]",
+          "value": "https://{account_prefix}.au1.dbt.com"
         }
       ]
     },
@@ -92,8 +397,36 @@
       "type": "password",
       "required": true,
       "placeholder": "dbt Cloud Account ID"
+    },
+    {
+      "name": "dbtCloudCustomDiscoveryUrl",
+      "title": "Custom Discovery API URL",
+      "description": "Leave empty: the Discovery API URL is derived from your endpoint. Only set this if the catalog and lineage commands cannot reach it, e.g. https://ab123.metadata.eu1.dbt.com/graphql",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty to derive from the endpoint"
     }
   ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
   "platforms": [
     "macOS"
   ]

@@ -1,4 +1,4 @@
-import { Action, Form, Icon } from "@raycast/api";
+import { Action, Form, Icon, openExtensionPreferences } from "@raycast/api";
 import { useTranslation } from "../hooks/useTranslation";
 
 /**
@@ -11,8 +11,22 @@ import { useTranslation } from "../hooks/useTranslation";
  * guaranteed to fail.
  */
 
-export function OfflineFormNotice({ offline, canStart }: { offline: boolean; canStart?: boolean }) {
+export function OfflineFormNotice({
+  offline,
+  canStart,
+  unauthorized,
+}: {
+  offline: boolean;
+  canStart?: boolean;
+  unauthorized?: boolean;
+}) {
   const { t } = useTranslation();
+  // Checked first: the two states are mutually exclusive, and a rejected key is
+  // the more specific diagnosis. Telling someone Karakeep "isn't running" when
+  // it is up and refusing their key sends them to Docker instead of Settings.
+  if (unauthorized) {
+    return <Form.Description title={t("connection.unauthorized")} text={t("connection.unauthorizedFormHint")} />;
+  }
   if (!offline) return null;
   // "Press ↵ to start it" is only true when the Start action is actually
   // offered. A hosted instance has nothing to start, so it gets the plain
@@ -53,4 +67,15 @@ export function StartKarakeepAction({
       onAction={onStart}
     />
   );
+}
+
+/**
+ * Render FIRST in the ActionPanel when the key was rejected — same contract as
+ * StartKarakeepAction, opposite cause. Submit cannot succeed until the key
+ * changes, so ↵ must go to the only thing that can fix it.
+ */
+export function OpenSettingsAction({ unauthorized }: { unauthorized: boolean }) {
+  const { t } = useTranslation();
+  if (!unauthorized) return null;
+  return <Action title={t("connection.openSettings")} icon={Icon.Gear} onAction={openExtensionPreferences} />;
 }

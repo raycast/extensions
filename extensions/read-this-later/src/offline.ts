@@ -96,7 +96,7 @@ export async function fetchArticle(
       BODY_TIMEOUT_MS,
     );
   } catch {
-    throw new Error("Couldn't reach the Research Sync service.");
+    throw new Error("Couldn't reach the Clipfile service.");
   }
 
   if (response.status === 404) return null;

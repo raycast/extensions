@@ -1,0 +1,48 @@
+{
+  "objects": [
+    {
+      "package": {
+        "name": "prettier",
+        "version": "3.9.7",
+        "description": "Prettier is an opinionated code formatter",
+        "links": {
+          "homepage": "https://prettier.io",
+          "repository": "git+https://github.com/prettier/prettier.git",
+          "bugs": "https://github.com/prettier/prettier/issues",
+          "npm": "https://www.npmjs.com/package/prettier"
+        }
+      },
+      "score": 2734.7107
+    },
+    {
+      "package": {
+        "name": "eslint-plugin-prettier",
+        "version": "5.5.6",
+        "description": "Runs prettier as an eslint rule",
+        "links": {
+          "homepage": "https://github.com/prettier/eslint-plugin-prettier#readme",
+          "repository": "git+https://github.com/prettier/eslint-plugin-prettier.git",
+          "bugs": "https://github.com/prettier/eslint-plugin-prettier/issues",
+          "npm": "https://www.npmjs.com/package/eslint-plugin-prettier"
+        }
+      },
+      "score": 477.47827
+    },
+    {
+      "package": {
+        "name": "eslint-config-prettier",
+        "version": "10.1.8",
+        "description": "Turns off all rules that are unnecessary or might conflict with Prettier.",
+        "links": {
+          "homepage": "https://github.com/prettier/eslint-config-prettier#readme",
+          "repository": "git+https://github.com/prettier/eslint-config-prettier.git",
+          "bugs": "https://github.com/prettier/eslint-config-prettier/issues",
+          "npm": "https://www.npmjs.com/package/eslint-config-prettier"
+        }
+      },
+      "score": 424.29413
+    }
+  ],
+  "total": 44337,
+  "time": "2026-09-16T17:29:22.962Z"
+}

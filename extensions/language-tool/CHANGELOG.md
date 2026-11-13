@@ -1,5 +1,23 @@
 # Changelog
 
+## [Check Selected Text] - 2026-09-02
+
+### Added
+- New "Check Selected Text" command: checks the text selected in any application, lists every correction it found, and replaces the selection once they have been reviewed
+- Corrections start out applied and are switched off one at a time, or given a different replacement where LanguageTool offers more than one
+- The result stays in view and is rewritten as corrections are toggled, with the correction in focus marked in place; hovering it shows the word it replaced
+- The checking language can be chosen when auto-detection gets it wrong, and the choice is remembered between runs
+
+## [Apply All Preferences in Check Text Instant] - 2026-08-26
+
+### Fixed
+- Check Text Instant now sends Mother Tongue, Preferred Variants, Enabled Rules, Enabled Categories, Disabled Categories and Enable Only Specified Rules, the six preferences it was silently leaving out. They are extension-wide preferences and Check Text already applied all of them.
+
+## [Fix Premium Accounts] - 2026-08-15
+
+### Fixed
+- Authenticated requests now go to the Premium API host. Filling in Username/Email and API Key previously made every check fail with "Credentials provided, but server isn't configured to support this", because the credentials were sent to the free endpoint, which rejects them.
+
 ## [1.1.0] - 2025-12-19
 
 ### Improved

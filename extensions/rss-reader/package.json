@@ -11,7 +11,10 @@
     "pomdtr",
     "xmok",
     "alexi.build",
-    "degouville"
+    "degouville",
+    "massimiliano_pasquini",
+    "ridemountainpig",
+    "Astatine-213"
   ],
   "commands": [
     {
@@ -34,6 +37,16 @@
       "subtitle": "RSS",
       "description": "Get the latest from all your favourite sources at once",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showSubtitle",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show Subtitle",
+      "description": "Uncheck if you want to hide subtitle on stories",
+      "required": false
     }
   ],
   "tools": [
@@ -215,6 +228,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test test/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

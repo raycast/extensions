@@ -1,43 +1,40 @@
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 import { SimplifiedPlaylistObject } from "../helpers/spotify.api";
-import getAllPlaylistItems from "../helpers/getAllPlaylistItems";
+import { playlistContainsTrack } from "../api/playlistContainsTrack";
 
 type UsePlaylistsContainingTrackProps = {
   playlists: SimplifiedPlaylistObject[];
   trackUri?: string;
-  options?: {
-    execute?: boolean;
-  };
+  options?: { execute?: boolean };
 };
 
-async function getPlaylistsContainingTrack(playlists: SimplifiedPlaylistObject[], trackUri: string): Promise<string[]> {
-  const results = await Promise.allSettled(
-    playlists.map(async (playlist) => {
-      const uris = await getAllPlaylistItems(playlist);
-      return { id: playlist.id as string, contains: uris.includes(trackUri) };
-    }),
-  );
-
-  const containingIds: string[] = [];
-  for (const result of results) {
-    if (result.status === "fulfilled" && result.value.contains) {
-      containingIds.push(result.value.id);
-    }
-  }
-  return containingIds;
-}
-
 export function usePlaylistsContainingTrack({ playlists, trackUri, options }: UsePlaylistsContainingTrackProps) {
-  const { data, isLoading, revalidate } = useCachedPromise(
-    (playlists: SimplifiedPlaylistObject[], trackUri: string) => getPlaylistsContainingTrack(playlists, trackUri),
-    [playlists, trackUri ?? ""],
-    {
-      execute: options?.execute !== false && playlists.length > 0 && !!trackUri,
+  const abortable = useRef<AbortController | null>(null);
+  const { data, isLoading, revalidate } = usePromise(
+    async (ids: string[], uri: string) => {
+      const signal = abortable.current?.signal;
+      const containingIds: string[] = [];
+      // These consumers display membership across the catalog. Walk it sequentially;
+      // each check discards its page before fetching the next one.
+      for (const id of ids) {
+        signal?.throwIfAborted();
+        try {
+          if (await playlistContainsTrack(id, uri, signal)) containingIds.push(id);
+        } catch (error) {
+          // Cancellation ends the whole walk; other failures affect only this playlist.
+          signal?.throwIfAborted();
+          console.error(`Could not check playlist ${id}`, error);
+        }
+      }
+      return { uri, ids: containingIds };
     },
+    [playlists.flatMap((playlist) => (playlist.id ? [playlist.id] : [])), trackUri ?? ""],
+    { execute: options?.execute !== false && playlists.length > 0 && !!trackUri, abortable },
   );
 
   return {
-    playlistsContainingTrack: data ?? [],
+    playlistsContainingTrack: data && data.uri === trackUri ? data.ids : [],
     playlistsContainingTrackIsLoading: isLoading,
     playlistsContainingTrackRevalidate: revalidate,
   };

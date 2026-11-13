@@ -9,6 +9,10 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search",

@@ -75,6 +75,10 @@
         {
           "title": "bun",
           "value": "bun"
+        },
+        {
+          "title": "Aube",
+          "value": "aube"
         }
       ],
       "title": "Default Package Manager",
@@ -102,6 +106,10 @@
         {
           "title": "bun",
           "value": "bun"
+        },
+        {
+          "title": "Aube",
+          "value": "aube"
         }
       ],
       "title": "Secondary Package Manager",

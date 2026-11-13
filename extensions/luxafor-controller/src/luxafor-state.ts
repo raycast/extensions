@@ -1,311 +1,146 @@
-// Global state manager for Luxafor device status
-// This ensures both the main UI and menubar share the same state
+// Only API acceptance is recorded. Nothing in this module observes the physical LED.
+export const BASE_COLOURS = {
+  red: "ff0000",
+  green: "00ff00",
+  yellow: "ffff00",
+  blue: "0000ff",
+  white: "ffffff",
+  cyan: "00ffff",
+  magenta: "ff00ff",
+} as const;
+export type BaseColour = keyof typeof BASE_COLOURS;
+export type Command = { kind: "solid" | "blink"; colour: string };
+export type Failure =
+  "configuration" | "busy" | "storage" | "http" | "application" | "response" | "timeout" | "network" | "cancelled";
+export type Attempt = {
+  command: Command;
+  startedAt: number;
+  finishedAt?: number;
+  outcome: "pending" | "accepted" | "failed" | "uncertain";
+  reason?: Failure;
+};
+export type SavedState = {
+  version: 2;
+  accepted?: { command: Command; acceptedAt: number };
+  attempt?: Attempt;
+  recent: string[];
+  legacyColour?: string;
+};
+export interface StateStore {
+  read(): Promise<SavedState>;
+  write(state: SavedState): Promise<void>;
+}
+export const emptyState = (): SavedState => ({ version: 2, recent: [] });
+export const isBaseColour = (value: string): value is BaseColour => Object.hasOwn(BASE_COLOURS, value);
 
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
-
-export interface DeviceStatus {
-  isOnline: boolean;
-  currentColor: string;
-  lastSeen: Date | null;
-  lastAction: string;
+export function normaliseHex(input: string): string | undefined {
+  const value = input.trim().replace(/^#/, "");
+  if (!/^(?:[a-f\d]{3}|[a-f\d]{6})$/i.test(value)) return undefined;
+  return (value.length === 3 ? [...value].map((c) => c + c).join("") : value).toLowerCase();
 }
 
-interface StoredStatus {
-  isOnline: boolean;
-  currentColor: string;
-  lastSeen: Date | null;
-  lastAction: string;
-  selectedColor: string | null;
-  lastUpdated: number;
+export function validCommand(value: unknown): value is Command {
+  if (!value || typeof value !== "object") return false;
+  const c = value as Command;
+  return (
+    (c.kind === "blink" && typeof c.colour === "string" && isBaseColour(c.colour)) ||
+    (c.kind === "solid" &&
+      typeof c.colour === "string" &&
+      (isBaseColour(c.colour) || c.colour === "off" || /^[a-f\d]{6}$/.test(c.colour)))
+  );
 }
 
-const STORAGE_KEY = "luxafor-global-status";
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const HEALTH_CHECK_INTERVAL = 30 * 1000; // 30 seconds
-
-class LuxaforStateManager {
-  private static instance: LuxaforStateManager;
-  private instanceId: string;
-  private status: DeviceStatus = {
-    isOnline: false,
-    currentColor: "unknown",
-    lastSeen: null,
-    lastAction: "",
-  };
-  private selectedColor: string | null = null;
-  private listeners: Set<(status: DeviceStatus) => void> = new Set();
-  private initialized = false;
-  private healthCheckInterval: NodeJS.Timeout | null = null;
-
-  private constructor() {
-    this.instanceId = Math.random().toString(36).substring(7);
-    this.loadFromStorage();
-    this.startHealthCheck();
-  }
-
-  static getInstance(): LuxaforStateManager {
-    if (!LuxaforStateManager.instance) {
-      LuxaforStateManager.instance = new LuxaforStateManager();
-    }
-    return LuxaforStateManager.instance;
-  }
-
-  private async startHealthCheck() {
-    // Check connection health every 30 seconds
-    this.healthCheckInterval = setInterval(async () => {
-      await this.checkConnectionHealth();
-    }, HEALTH_CHECK_INTERVAL);
-
-    // Also check immediately on startup
-    await this.checkConnectionHealth();
-  }
-
-  private async checkConnectionHealth() {
-    try {
-      // Get the userId from preferences
-      const preferences = getPreferenceValues<Preferences>();
-      if (!preferences.userId) {
-        // No userId configured, can't check device connectivity
-        if (this.status.isOnline) {
-          await this.setOnline(false);
-        }
-        return;
-      }
-
-      // Use a lightweight health check - ping the actual device endpoint
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-      const apiDomain = preferences.apiEndpoint === "co.uk" ? "co.uk" : "com";
-      await fetch(`https://api.luxafor.${apiDomain}/webhook/${preferences.userId}/status`, {
-        method: "GET",
-        mode: "no-cors",
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      // If we get here, the device endpoint is reachable
-      // Since the device is working (we can see successful color changes in logs),
-      // we should mark it as online
-      if (!this.status.isOnline) {
-        await this.setOnline(true);
-      }
-    } catch {
-      // Network error, but don't mark as offline if we have recent successful actions
-      // Check if we've had successful actions recently
-      const now = Date.now();
-      const lastSeenTime = this.status.lastSeen ? this.status.lastSeen.getTime() : 0;
-      const timeSinceLastAction = now - lastSeenTime;
-
-      // If we've had a successful action in the last 5 minutes, assume we're still online
-      if (timeSinceLastAction < 5 * 60 * 1000 && this.status.lastAction) {
-        if (!this.status.isOnline) {
-          await this.setOnline(true);
-        }
-      } else if (this.status.isOnline) {
-        await this.setOnline(false);
-      }
-    }
-  }
-
-  public async forceHealthCheck(): Promise<boolean> {
-    try {
-      // Get the userId from preferences
-      const preferences = getPreferenceValues<Preferences>();
-      if (!preferences.userId) {
-        await this.setOnline(false);
-        return false;
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      const apiDomain = preferences.apiEndpoint === "co.uk" ? "co.uk" : "com";
-      await fetch(`https://api.luxafor.${apiDomain}/webhook/${preferences.userId}/status`, {
-        method: "GET",
-        mode: "no-cors",
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      // If we can reach the device endpoint and have recent actions, we're online
-      const now = Date.now();
-      const lastSeenTime = this.status.lastSeen ? this.status.lastSeen.getTime() : 0;
-      const timeSinceLastAction = now - lastSeenTime;
-
-      const isOnline: boolean = timeSinceLastAction < 5 * 60 * 1000 && !!this.status.lastAction;
-      await this.setOnline(isOnline);
-      return isOnline;
-    } catch {
-      await this.setOnline(false);
-      return false;
-    }
-  }
-
-  public stopHealthCheck() {
-    if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
-      this.healthCheckInterval = null;
-    }
-  }
-
-  private async loadFromStorage() {
-    try {
-      const cached = await LocalStorage.getItem<string>(STORAGE_KEY);
-      if (cached) {
-        const parsed: StoredStatus = JSON.parse(cached);
-
-        // Always load the last known color regardless of cache duration
-        // This prevents flickering when the menubar is clicked
-        if (
-          parsed.currentColor &&
-          (parsed.currentColor === "red" ||
-            parsed.currentColor === "green" ||
-            parsed.currentColor === "blue" ||
-            parsed.currentColor === "yellow" ||
-            parsed.currentColor === "cyan" ||
-            parsed.currentColor === "magenta" ||
-            parsed.currentColor === "white" ||
-            parsed.currentColor === "off" ||
-            parsed.currentColor === "000000")
-        ) {
-          this.status.currentColor = parsed.currentColor;
-        }
-
-        // Check if other status info is still valid
-        const now = Date.now();
-        if (now - parsed.lastUpdated < CACHE_DURATION) {
-          this.status = {
-            ...this.status,
-            isOnline: parsed.isOnline,
-            lastSeen: parsed.lastSeen ? new Date(parsed.lastSeen) : null,
-            lastAction: parsed.lastAction,
-          };
-          this.selectedColor = parsed.selectedColor;
-        }
-      }
-    } catch {
-      // Silent error handling for storage loading
-    }
-    this.initialized = true;
-    this.notifyListeners();
-  }
-
-  private async saveToStorage() {
-    try {
-      const toStore: StoredStatus = {
-        isOnline: this.status.isOnline,
-        currentColor: this.status.currentColor,
-        lastSeen: this.status.lastSeen,
-        lastAction: this.status.lastAction,
-        selectedColor: this.selectedColor,
-        lastUpdated: Date.now(),
-      };
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
-    } catch {
-      // Silent error handling for storage saving
-    }
-  }
-
-  async waitForInitialization(): Promise<void> {
-    if (this.initialized) return;
-
-    return new Promise((resolve) => {
-      const checkInit = () => {
-        if (this.initialized) {
-          resolve();
-        } else {
-          setTimeout(checkInit, 10);
-        }
-      };
-      checkInit();
-    });
-  }
-
-  getStatus(): DeviceStatus {
-    return { ...this.status };
-  }
-
-  getSelectedColor(): string | null {
-    return this.selectedColor;
-  }
-
-  async updateStatus(newStatus: Partial<DeviceStatus>) {
-    this.status = { ...this.status, ...newStatus };
-    await this.saveToStorage();
-    this.notifyListeners();
-  }
-
-  async setColor(color: string, action: string) {
-    // Handle 000000 specially - treat it as off
-    if (color === "000000") {
-      this.status.currentColor = "off";
-    } else {
-      this.status.currentColor = color;
-    }
-
-    this.status.lastAction = action;
-    this.status.lastSeen = new Date();
-    this.status.isOnline = true;
-    this.selectedColor = color;
-
-    // Save to storage first
-    await this.saveToStorage();
-
-    // Force immediate notification to all listeners
-    this.notifyListeners();
-
-    // Also trigger a special "color change" event for immediate menubar updates
-    this.triggerColorChangeNotification();
-  }
-
-  private triggerColorChangeNotification() {
-    // This is a special method to ensure menubar gets immediate color updates
-    setTimeout(() => {
-      this.notifyListeners();
-    }, 50);
-  }
-
-  async setSelectedColor(color: string | null) {
-    this.selectedColor = color;
-    await this.saveToStorage();
-  }
-
-  async setOnline(online: boolean) {
-    this.status.isOnline = online;
-    this.status.lastSeen = new Date();
-    await this.saveToStorage();
-    this.notifyListeners();
-  }
-
-  async clearStorage() {
-    try {
-      await LocalStorage.removeItem(STORAGE_KEY);
-      this.selectedColor = null;
-    } catch {
-      // Silent error handling for storage clearing
-    }
-  }
-
-  subscribe(listener: (status: DeviceStatus) => void): () => void {
-    this.listeners.add(listener);
-    // Return unsubscribe function
-    return () => {
-      this.listeners.delete(listener);
-    };
-  }
-
-  private notifyListeners() {
-    this.listeners.forEach((listener) => {
-      try {
-        listener(this.getStatus());
-      } catch {
-        // Silent error handling for listener notifications
-      }
-    });
-  }
+export function colourHex(colour: string): string {
+  return isBaseColour(colour) ? BASE_COLOURS[colour] : colour === "off" ? "000000" : colour;
 }
 
-export const luxaforState = LuxaforStateManager.getInstance();
+export function colourLabel(colour: string): string {
+  if (colour === "off" || colour === "000000") return "Off";
+  const name = Object.entries(BASE_COLOURS).find(([, hex]) => hex === colour)?.[0];
+  const label = name ?? colour;
+  return isBaseColour(label) ? label[0].toUpperCase() + label.slice(1) : `#${label.toUpperCase()}`;
+}
+export const commandLabel = (command: Command) =>
+  `${command.kind === "blink" ? "Blink " : ""}${colourLabel(command.colour)}`;
+const timestamp = (value: unknown): value is number =>
+  typeof value === "number" && Number.isSafeInteger(value) && value > 0 && value <= Date.now() + 60_000;
+const failures: Failure[] = [
+  "configuration",
+  "busy",
+  "storage",
+  "http",
+  "application",
+  "response",
+  "timeout",
+  "network",
+  "cancelled",
+];
+const cleanCommand = (command: Command): Command => ({ kind: command.kind, colour: command.colour });
+
+// Reconstruct an allowlisted record: never retain arbitrary legacy messages, URLs or identifiers.
+export function decodeState(raw: unknown, legacy?: unknown): SavedState {
+  const state = emptyState();
+  try {
+    const data = typeof raw === "string" ? JSON.parse(raw) : undefined;
+    if (data?.version === 2) {
+      if (validCommand(data.accepted?.command) && timestamp(data.accepted?.acceptedAt)) {
+        state.accepted = { command: cleanCommand(data.accepted.command), acceptedAt: data.accepted.acceptedAt };
+      }
+      const a = data.attempt;
+      if (
+        validCommand(a?.command) &&
+        timestamp(a?.startedAt) &&
+        ["pending", "accepted", "failed", "uncertain"].includes(a?.outcome)
+      ) {
+        state.attempt = { command: cleanCommand(a.command), startedAt: a.startedAt, outcome: a.outcome };
+        if (timestamp(a.finishedAt)) state.attempt.finishedAt = a.finishedAt;
+        if (failures.includes(a.reason)) state.attempt.reason = a.reason;
+      }
+      if (Array.isArray(data.recent))
+        state.recent = [
+          ...new Set<string>(data.recent.filter((c: unknown) => typeof c === "string" && /^[a-f\d]{6}$/.test(c))),
+        ].slice(0, 5);
+      if (typeof data.legacyColour === "string" && /^[a-f\d]{6}$/.test(data.legacyColour))
+        state.legacyColour = data.legacyColour;
+      return state;
+    }
+    // Unknown future versions must not be interpreted as legacy success.
+    if (data) return state;
+  } catch {
+    /* Corrupt new data may still have a useful old colour choice. */
+  }
+  try {
+    const old = typeof legacy === "string" ? JSON.parse(legacy) : undefined;
+    for (const colour of [old?.selectedColor, old?.currentColor]) {
+      if (typeof colour !== "string") continue;
+      const hex = isBaseColour(colour) ? BASE_COLOURS[colour] : colour === "off" ? "000000" : normaliseHex(colour);
+      if (hex) {
+        state.legacyColour = hex;
+        break;
+      }
+    }
+  } catch {
+    /* Invalid legacy state is unknown, never online/offline. */
+  }
+  return state;
+}
+
+export function stateSummary(state: SavedState, now = Date.now()): string {
+  const accepted = state.accepted;
+  if (!accepted) return "No API-accepted command · physical state unknown";
+  const stale = now - accepted.acceptedAt > 5 * 60_000 ? " · stale history" : "";
+  return `Last API-accepted: ${commandLabel(accepted.command)} · ${new Date(accepted.acceptedAt).toLocaleString()}${stale}`;
+}
+
+export function attemptSummary(state: SavedState, now = Date.now()): string {
+  const attempt = state.attempt;
+  if (!attempt) return "Physical device state is unknown";
+  if (attempt.outcome === "pending")
+    return now - attempt.startedAt > 12_000
+      ? "Interrupted request · delivery unknown"
+      : "Request pending · physical state unknown";
+  if (attempt.outcome === "accepted") return "HTTP 200 with JSON · physical state unknown";
+  return attempt.outcome === "uncertain"
+    ? "Last request delivery uncertain · check the light before resending"
+    : "Last request failed · previous accepted command preserved";
+}

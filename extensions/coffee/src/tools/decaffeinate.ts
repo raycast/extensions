@@ -1,15 +1,14 @@
-import { stopCaffeinate, getSchedule } from "../utils";
+import { stopCaffeinate, stoppedCaffeinationMessage, prepareUserStop } from "../utils";
 
 /**
- * Turns off caffeination, allowing your Mac to go to sleep normally
+ * Stops Coffee-owned caffeination. External sleep prevention remains untouched.
+ * If a schedule is running, behavior depends on "Decaffeinate pauses running schedules" preference.
  */
 export default async function () {
-  const schedule = await getSchedule();
-  if (schedule?.IsRunning) {
-    throw new Error("Cannot decaffeinate while a schedule is running. Please pause the schedule first.");
-  }
-
-  await stopCaffeinate({ menubar: true, status: true }, undefined);
-
-  return "Mac sleep prevention has been disabled";
+  const decision = await prepareUserStop();
+  if (!decision.allowed) throw new Error("Caffeination schedule running");
+  const state = await stopCaffeinate({ menubar: true, status: true }, false, {
+    pauseRunningSchedule: decision.pauseRunningSchedule,
+  });
+  return stoppedCaffeinationMessage(state, decision.pauseRunningSchedule);
 }

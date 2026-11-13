@@ -1,47 +1,42 @@
-import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { getGithubToken } from "../preferences";
-import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
+import type { InstalledSkill, SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
-
-const LOCK_FILE = ".skill-lock.json";
-const AGENTS_DIR = ".agents";
-
-function getSkillLockPath(): string {
-  const xdgStateHome = process.env.XDG_STATE_HOME;
-  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
-  return join(homedir(), AGENTS_DIR, LOCK_FILE);
-}
-
-async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
-  try {
-    const raw = await readFile(getSkillLockPath(), "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
-      return parsed.skills as Record<string, SkillLockEntry>;
-    }
-    return {};
-  } catch {
-    return {};
-  }
-}
+import { withSkillsCliLock } from "./skills-cli-runner";
+import { readSkillLock, skillLockMetadata } from "./skill-lock";
+import { isVerifiedCliSkill, safeMutableAgents } from "./skill-ownership";
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
-  const [skills, lockEntries] = await Promise.all([listInstalledSkills(), readSkillLock()]);
-  return skills.map((skill) => {
-    const lock = lockEntries[skill.name];
-    if (!lock) return skill;
-    return {
-      ...skill,
-      source: lock.source,
-      sourceType: lock.sourceType,
-      sourceUrl: lock.sourceUrl ? stripGitSuffix(lock.sourceUrl) : undefined,
-      ref: lock.ref,
-      installedAt: lock.installedAt,
-      updatedAt: lock.updatedAt,
-    };
+  return (await getInstalledSkillsSnapshot()).skills;
+}
+
+async function getInstalledSkillsSnapshot(): Promise<{
+  skills: InstalledSkill[];
+  lockEntries: Record<string, SkillLockEntry>;
+}> {
+  return withSkillsCliLock(async (runLocked) => {
+    const skills = await listInstalledSkills(runLocked);
+    const lockEntries = await readSkillLock();
+    return { skills: await mergeLockEntries(skills, lockEntries), lockEntries };
   });
+}
+
+async function mergeLockEntries(
+  skills: InstalledSkill[],
+  lockEntries: Record<string, SkillLockEntry>,
+): Promise<InstalledSkill[]> {
+  return Promise.all(
+    skills.map(async (skill) => {
+      const lock = lockEntries[skill.name];
+      const verified = lock ? await isVerifiedCliSkill(skill, lock) : false;
+      if (!lock || (!verified && lock.sourceType !== "local")) return { ...skill, managedBySkillsCli: false };
+      return {
+        ...skill,
+        ...skillLockMetadata(lock),
+        managedBySkillsCli: verified,
+        mutableAgents: verified ? await safeMutableAgents(skill.name, skill.agents) : [],
+      };
+    }),
+  );
 }
 
 interface GitHubTreeResponse {
@@ -77,8 +72,7 @@ async function fetchRepoTree(source: string, token: string | undefined): Promise
  * Implemented against the GitHub Trees API rather than `npx skills check` because
  * the CLI's check command reinstalls outdated skills as a side effect since v1.5.0.
  */
-export async function checkForUpdates(): Promise<string[]> {
-  const lock = await readSkillLock();
+async function checkForUpdates(lock: Record<string, SkillLockEntry>): Promise<string[]> {
   const byRepo = new Map<string, Array<{ name: string; skillPath: string; expectedHash: string }>>();
 
   for (const [name, entry] of Object.entries(lock)) {
@@ -108,4 +102,11 @@ export async function checkForUpdates(): Promise<string[]> {
     }),
   );
   return results.flat();
+}
+
+export async function getInstalledSkillsWithUpdateStatus(): Promise<InstalledSkill[]> {
+  const { skills, lockEntries } = await getInstalledSkillsSnapshot();
+  const updatable = await checkForUpdates(lockEntries).catch((): string[] => []);
+  const updatableSet = new Set(updatable);
+  return skills.map((skill) => ({ ...skill, hasUpdate: skill.managedBySkillsCli && updatableSet.has(skill.name) }));
 }

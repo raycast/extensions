@@ -1,5 +1,25 @@
 # WinGet Changelog
 
+## [Resilience and UX Fixes] - 2026-08-19
+
+### Added
+- Package icons in every list, taken from the package's manifest or its homepage
+- Clean Index action, discarding the cached index and icons so both rebuild
+
+### Fixed
+- A package that winget still reports as installed right after its uninstaller claimed success (slow uninstallers) no longer lingers in lists for the whole cache window — the next view opening re-checks it
+- Package data queries that fail transiently are retried once before reporting an error
+- Upgrade All discloses when its pre-run refresh changed the number of updates compared to the list you launched it from
+- The "winget not found" error now distinguishes a missing installation from the known Raycast worker-environment issue, with the fitting remedy for each
+- Long installs (e.g. Visual Studio) are no longer stopped after 5 minutes of installer silence — the progress toast reports the silence instead, and cancelling stays available
+- The detail pane no longer briefly shows the previous package's details when moving between rows
+- The primary Upgrade action shows ↵ in the action panel instead of ⌘U
+
+### Changed
+- Upgrade All no longer retries an update whose exact offered version already failed for a reason tied to the installer (broken vendor packaging, technology mismatch, installer crash): the skip is disclosed, the row shows a dimmed update arrow, a manual Upgrade always retries, and the version is retried automatically once winget offers a different one. Failures caused by the environment (app in use, busy installer, no network, disk full, cancelled prompts) are never skipped
+- Install Version… gained a detail pane showing each version's own manifest (release date, publisher, license)
+- The version shown for same-named packages moved from beside the name to the right edge of the row, so long names no longer truncate against it
+
 ## [Stale Data Fixes] - 2026-07-27
 
 ### Fixed

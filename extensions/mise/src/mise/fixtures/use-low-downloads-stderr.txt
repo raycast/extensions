@@ -1,0 +1,7 @@
+mise by @jdx – installing 1 tool
+mise ✗ npm:agent-peek@0.6.0  779ms · failed: aube install failed: refusing to add agent-peek: only 17 weekly downloads (threshold: 1000)
+mise ████████████████ 1/1 · installed 0 tools · 1 failed in 781ms
+mise ERROR Failed to install npm:agent-peek@latest: aube install failed: refusing to add agent-peek: only 17 weekly downloads (threshold: 1000)
+  help: after verifying the package, set `allow_low_downloads = true` on `npm:agent-peek` to approve it
+mise ERROR Version: 2026.9.10 macos-arm64 (2026-09-16)
+mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information

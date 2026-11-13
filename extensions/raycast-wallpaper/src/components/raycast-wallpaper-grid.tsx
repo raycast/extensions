@@ -8,22 +8,23 @@ import { columns, layout } from "../types/preferences";
 
 export function RaycastWallpaperGrid(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
+  isLoading: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const { raycastWallpapers, setRefresh, selectedItem, setSelectedItem } = props;
+  const { isLoading, raycastWallpapers, setRefresh, selectedItem, setSelectedItem } = props;
 
   return (
     <Grid
-      isLoading={raycastWallpapers.length === 0}
+      isLoading={isLoading}
       columns={parseInt(columns)}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
       selectedItemId={selectedItem}
       onSelectionChange={(selected) => {
         if (selected) {
-          setSelectedItem(selectedItem);
+          setSelectedItem(selected);
         }
       }}
       searchBarPlaceholder={"Search wallpapers..."}

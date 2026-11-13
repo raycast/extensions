@@ -9,6 +9,7 @@ Search Leader Key configuration for shortcuts.
 ## Features
 
 - **Search Shortcuts**: A fuzzy-searchable list of all your configured shortcuts.
+- **Ask Leader Key**: Ask Raycast AI to find a configured shortcut.
 - **Configurable Path**: Set your own configuration file path in preferences.
 
 ## Configuration

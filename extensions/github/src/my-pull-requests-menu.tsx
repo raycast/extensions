@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues, Icon, launchCommand, LaunchType, open } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, launchCommand, LaunchType, open, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo } from "react";
 
@@ -158,7 +158,7 @@ function MyPullRequestsMenu() {
         <MenuBarItem
           title="Open My Pull Requests"
           icon={Icon.AppWindowList}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => launchMyPullRequestsCommand()}
         />
         <SortMenuBarAction {...{ sortQuery, setSortQuery, data: PR_SORT_TYPES_TO_QUERIES }} />

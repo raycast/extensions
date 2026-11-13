@@ -126,7 +126,7 @@ export async function getFunctions(
     throw new Error(`Failed to list functions: ${response.status}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as { value?: unknown };
   const apiSpec = data.value ?? data;
 
   return parseApiSpec(apiSpec);
@@ -157,13 +157,10 @@ function parseApiSpec(apiSpec: unknown): ModuleFunctions[] {
     if (rawFunctionType === "HttpAction") continue;
 
     const functionType = rawFunctionType.toLowerCase() as
-      | "query"
-      | "mutation"
-      | "action";
+      "query" | "mutation" | "action";
 
     const visibility = (fn as Record<string, unknown>).visibility as
-      | { kind: string }
-      | undefined;
+      { kind: string } | undefined;
     const visibilityKind =
       visibility?.kind === "public" ? "public" : "internal";
 
@@ -250,7 +247,7 @@ export async function getTables(
     throw new Error(`Failed to get tables: ${response.status}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as { value?: unknown };
 
   let tableNames: string[] = [];
 
@@ -295,8 +292,7 @@ export async function getDocuments(
     auth = deploymentNameOrAuth;
     tableName = accessTokenOrTableName;
     opts = tableNameOrOptions as
-      | { limit?: number; cursor?: string }
-      | undefined;
+      { limit?: number; cursor?: string } | undefined;
   }
 
   const url = getUrlFromAuth(auth);
@@ -332,8 +328,12 @@ export async function getDocuments(
     throw new Error(`Failed to get documents: ${response.status} ${errorText}`);
   }
 
-  const data = await response.json();
-  const result = data.value ?? data;
+  const data = (await response.json()) as { value?: unknown };
+  const result = (data.value ?? data) as {
+    page?: unknown;
+    isDone?: boolean;
+    continueCursor?: string | null;
+  };
 
   const documents = Array.isArray(result.page) ? result.page : [];
 
@@ -342,7 +342,7 @@ export async function getDocuments(
     nextCursor: result.isDone
       ? undefined
       : (result.continueCursor ?? undefined),
-    isDone: result.isDone,
+    isDone: result.isDone ?? true,
   };
 }
 
@@ -354,8 +354,7 @@ export async function runFunction(
   accessTokenOrFunctionPath: string,
   functionPathOrType?: string | ("query" | "mutation" | "action"),
   functionTypeOrArgs?:
-    | ("query" | "mutation" | "action")
-    | Record<string, unknown>,
+    ("query" | "mutation" | "action") | Record<string, unknown>,
   argsParam?: Record<string, unknown>,
 ): Promise<{ result: unknown; executionTime: number }> {
   // Support both old and new signatures
@@ -414,7 +413,11 @@ export async function runFunction(
     );
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    status?: string;
+    value?: unknown;
+    errorMessage?: string;
+  };
 
   if (data.status === "error" || data.errorMessage) {
     throw new Error(data.errorMessage || "Function execution failed");
@@ -546,7 +549,11 @@ export async function getLogs(
     throw new Error(`Failed to get logs: ${response.status} ${errorText}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    entries?: Record<string, unknown>[];
+    new_cursor?: string | number;
+    newCursor?: string | number;
+  };
   const entries = data.entries || [];
 
   const logs: LogEntry[] = entries.map((entry: Record<string, unknown>) => {
@@ -557,10 +564,7 @@ export async function getLogs(
 
     const rawType = (entry.udf_type || entry.udfType || "query") as string;
     const functionType = rawType.toLowerCase() as
-      | "query"
-      | "mutation"
-      | "action"
-      | "http";
+      "query" | "mutation" | "action" | "http";
 
     const functionPath = (entry.identifier ||
       entry.udf_path ||
@@ -610,9 +614,7 @@ export async function getLogs(
       null) as string | null;
     const caller = (entry.caller || undefined) as string | undefined;
     const environment = (entry.environment || undefined) as
-      | "isolate"
-      | "node"
-      | undefined;
+      "isolate" | "node" | undefined;
     const identityType = (entry.identity_type ||
       entry.identityType ||
       undefined) as string | undefined;
@@ -802,16 +804,6 @@ export function buildFunctionCallTree(logs: LogEntry[]): ExecutionNode[] {
   rootNodes.forEach(sortChildren);
 
   return rootNodes;
-}
-
-/**
- * Get all logs for a specific request
- */
-export function getLogsForRequest(
-  logs: LogEntry[],
-  requestId: string,
-): LogEntry[] {
-  return logs.filter((log) => log.requestId === requestId);
 }
 
 /**

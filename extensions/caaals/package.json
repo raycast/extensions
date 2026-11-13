@@ -65,9 +65,18 @@
           "required": false,
           "default": "full",
           "data": [
-            { "title": "Calories + label (743 left)", "value": "full" },
-            { "title": "Calories only (743)", "value": "number" },
-            { "title": "Icon only", "value": "icon" }
+            {
+              "title": "Calories + label (743 left)",
+              "value": "full"
+            },
+            {
+              "title": "Calories only (743)",
+              "value": "number"
+            },
+            {
+              "title": "Icon only",
+              "value": "icon"
+            }
           ]
         }
       ]
@@ -105,5 +114,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

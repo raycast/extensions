@@ -1,5 +1,143 @@
 # `Easydict` Changelog
 
+## [v3.5.0] - 2026-10-02
+
+### ✨ New Features
+
+#### Windows OCR Screenshot Translation
+
+- **OCR Translate** now works on Windows: drag-select a screen area, recognize the text locally with the built-in Windows OCR engine, and query it in Easydict. Install an OCR language pack in Windows Settings to recognize languages other than your Windows display language.
+- Added the **Select OCR Language** command to pin an installed Windows OCR language; the default **Automatic (Windows profile)** uses the OCR languages from your Windows language settings.
+
+Thanks to [@duckieeeduck](https://github.com/duckieeeduck) for the original Windows implementation ([raycast/extensions#30884](https://github.com/raycast/extensions/pull/30884))!
+
+### 🐞 Bug Fixes
+
+- Query Cache, AI Query Cache, AnkiConnect URL, and Anki Deck no longer appear in the first-run preferences form. These are optional settings, and leaving them empty falls back to their defaults.
+
+## [v3.4.0] - 2026-10-01
+
+### ✨ New Features
+
+#### Add Favorite Words to Anki
+
+- Added **Add to Anki** and **Add All to Anki** actions to Favorite Words, sending cards to Anki through the AnkiConnect add-on. Cards include the word, phonetic, pronunciation audio, translations, and dictionary explanations.
+- Added the **Add Favorites to Anki Automatically** preference (off by default). Removing a favorite does not delete its Anki card.
+
+Thanks to [@cassieliang6709](https://github.com/cassieliang6709) for contributing this feature!
+
+### 💎 Improvements
+
+- Improved content page rendering: headwords and pronunciations use a text layout that wraps naturally instead of a fixed-size image; saved favorites no longer repeat the language direction.
+- **Clear Query Cache** is hidden while both Query Cache and AI Query Cache are Off, since there is nothing to clear.
+- Favorites with unreadable saved data can be recovered or exported instead of being discarded.
+
+### 🐞 Bug Fixes
+
+- Fixed the Requery All Services shortcut conflict: read actions keep `Cmd+R` / `Cmd+Shift+R`, and Requery All Services uses `Cmd+Option+R` (`Ctrl+Alt+R` on Windows).
+  - Thanks to [@qizidog](https://github.com/qizidog)
+- Resolve the Serbian preference alias (`sr` → `sr-Latn`) when reading language preferences.
+- Keep the active query running when an AI provider falls back from unsupported JSON output.
+- Preserve AI model loading when a provider's catalog refreshes.
+
+## [v3.3.0] - 2026-09-19
+
+### ✨ New Features
+
+#### Optional Query Caching
+
+- Added local caching for completed dictionary lookups and translations, with separate **Query Cache** and **AI Query Cache** settings. Both default to **Off** and offer **Words Only** and **All Text** modes.
+- Language detection can reuse confirmed results for inputs covered by either cache setting.
+- Cached results show a clock indicator. Use **Requery All Services** to fetch fresh results, **Regenerate AI Result** to refresh one AI provider, or **Clear Query Cache** to remove cached results.
+
+### 💎 Improvements
+
+- Improved result previews, detailed views, and saved favorites with clearer headings, pronunciation and language direction, and compact tables for short word translations, word forms, and phrases.
+- Google Translate now supports full translations of text longer than 1,830 characters, with paragraph breaks preserved.
+
+### 🐞 Bug Fixes
+
+- Fixed Google Translate failures caused by the previous web translation endpoint.
+- Favorites now show language codes when **Flags are not languages** is enabled, keeping the source and target languages distinguishable.
+
+## [v3.2.0] - 2026-09-09
+
+### ⚠️ Behavioral Changes
+
+#### 🆕 Custom AI Providers
+
+- Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
+- **Existing settings migrate automatically.** Open Search Word or Manage Providers to convert configured OpenAI and Gemini settings into ordinary AI providers, preserving connection settings, enablement, and ordering. Previously imported providers keep their edits; previously retired providers stay removed.
+- **Manage AI providers in Manage Providers.** Old Extension Settings remain available as import sources, but no longer run separate providers. Editing, disabling, or deleting an AI provider does not restore an old service. Use **Add from Legacy OpenAI/Gemini Settings…** to create another copy, initially disabled.
+- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions or Cmd+Shift+Up/Down on macOS and Ctrl+Shift+Up/Down on Windows. The **Legacy Service List Order** preference only initializes this order until it is saved.
+
+### ✨ New Features
+
+#### AI-Generated Dictionary Entries
+
+- For each provider, choose Plain Translation or AI-Generated Dictionary Entry in Word & Term Results.
+- Dictionary mode applies to words and terms; other input remains plain translation. New or connection-related provider changes offer Test & Save by default, with Save Without Testing still available. JSON output defaults follow provider presets. Explicitly unsupported native JSON switches the provider to prompt-based output and shows a notice; malformed output is retried once without changing the setting. Dictionary generation may take longer.
+
+#### Chinese Stroke Order
+
+- Use **Show Stroke Order** from live or saved translation results to view stroke-order diagrams for Chinese characters.
+  - Thanks to [@MagEk1511](https://github.com/MagEk1511)
+
+## [v3.1.0] - 2026-08-12
+
+### ✨ New Features
+
+- Added favorite words: save translation results and browse/manage them in the favorites list.
+  - Thanks to [@TTsWorld](https://github.com/TTsWorld)
+
+### 🔧 Maintenance
+
+- Updated dependencies.
+
+## [v3.0.0] - 2026-08-11
+
+### ⚠️ Behavioral Changes
+
+- Removed the built-in system proxy detection and forwarding mechanism. If you rely on your operating system's proxy settings, please enable **Raycast → Settings → Advanced → Use System Proxy Settings**.
+- Renamed **Play Text** to **Read Text**. The shortcut is now `Cmd+R`, and **Read Result Text** now has its own shortcut: `Cmd+Shift+R`.
+
+### ✨ New Features
+
+- Added Windows support, including native TTS voice synthesis and cross-platform audio playback.
+- Added Traditional Chinese as a supported target language for DeepL.
+- Added an option to hide country/region emojis in language selectors and titles.
+- Added independent preference toggles for Tencent and Volcano language detection to improve API quota management.
+
+### 💎 Improvements
+
+#### Architecture & Performance
+
+- Rebuilt the underlying architecture to improve maintainability, extensibility, and long-term stability.
+- Refactored the audio system with unified management for downloading, playback, and speech synthesis.
+- Reorganized the project structure and reduced the extension size by removing unnecessary dependencies and replacing them with native implementations where appropriate.
+
+#### Translation Experience
+
+- Optimized OpenAI translation prompts for better translation quality with lower token usage.
+- Improved Youdao dictionary formatting.
+- Optimized the Linguee HTML parsing logic.
+- Improved language handling consistency across translation providers.
+
+#### Developer Experience
+
+- Improved project documentation and repository organization.
+- Introduced automated documentation generation to keep language support tables synchronized with the implementation.
+- Improved build tooling and development automation.
+
+### 🐞 Bug Fixes
+
+- Fixed a longstanding issue where the search text could briefly reappear after the extension resumed from the background.
+- Fixed Bing translation failures caused by excessive recursion in edge cases and resolved race conditions during concurrent requests.
+- Fixed playback conflicts and cache overwrite issues during consecutive audio playback for certain dictionaries.
+- Fixed DeepLX translate is always failed.
+- Fixed an issue where Georgian could be selected in preferences but failed to translate by properly implementing its internal language configuration.
+- Fixed an issue where single quotes in text were incorrectly escaped before being sent to Apple Translate.
+
 ## [v2.11.3] - 2026-05-15
 
 ### 💎 Improvement

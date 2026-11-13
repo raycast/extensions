@@ -1,6 +1,6 @@
 import { Color, Icon } from "@raycast/api";
 
-export const baseUrl = "https://betteruptime.com/api/v2";
+export const baseUrl = "https://incidents.betterstack.com/api/v2";
 
 export const statusMap = {
   paused: {

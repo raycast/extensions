@@ -61,6 +61,24 @@ export const cutoff = (str: string, cutoff: number) => {
 };
 
 /**
+ * Checks whether a string starts with a valid URL scheme.
+ * @param value The string to check.
+ * @returns Whether the string starts with a URL scheme.
+ */
+export const hasURLScheme = (value: string) => {
+  return /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value);
+};
+
+/**
+ * Encodes a URI without double-encoding valid percent-encoded octets.
+ * @param value The URI to encode.
+ * @returns The encoded URI.
+ */
+export const encodeURIOnce = (value: string) => {
+  return encodeURI(value).replace(/%25([\da-fA-F]{2})/g, "%$1");
+};
+
+/**
  * Pluralizes a string based on a count.
  * @param str The string to pluralize.
  * @param count The count to base the pluralization on.

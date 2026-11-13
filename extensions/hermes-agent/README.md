@@ -11,8 +11,9 @@ Chat with your local [Hermes Agent](https://github.com/nousresearch/hermes-agent
 
 ## Requirements
 
-- [Hermes Agent](https://github.com/nousresearch/hermes-agent) installed and running locally
-- Hermes API Server enabled
+- [Hermes Agent](https://github.com/nousresearch/hermes-agent) installed with its API server enabled, **or** any OpenAI-compatible HTTP API that implements `GET /v1/models` and `POST /v1/chat/completions`
+- API Token matching the server bearer (Hermes: `API_SERVER_KEY`)
+
 
 ## Setup
 

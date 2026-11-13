@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Cache,
   Icon,
   MenuBarExtra,
   open,
@@ -10,25 +9,19 @@ import {
   openExtensionPreferences,
   environment,
 } from "@raycast/api";
-import { getStories } from "./hackernews";
 import { Story } from "./types";
 import { getFavicon } from "@raycast/utils";
 import { showNotification } from "./lib/show-notification";
-
-const cache = new Cache();
-// Stories that the user clicked on
-const readKey = "read-stories";
-// Stories we've sent a notification about
-const notifiedKey = "notified-stories";
-// Stories that we've seen over the past week.
-// If we've seen something more than 24 hours ago, we remove it
-// This allows for stories posted e.g. 3 days ago to hit 500 points today
-// [{ story: {}, seen: 1234567890 }]
-const seenKey = "seen-stories";
-// To cache the points to clear cache when they change
-const prefKey = "preferences";
-
-const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+import {
+  getNotifiedStories,
+  getPointsFromContent,
+  getReadStories,
+  getRecentStories,
+  markStoriesRead,
+  refreshStories,
+  resetIfPointsChanged,
+  saveNotifiedStories,
+} from "./lib/stories";
 
 function getShortcut(index: number) {
   const key = index + 1;
@@ -39,26 +32,14 @@ function getShortcut(index: number) {
 
 export default function Command() {
   const { points, enableNotifications, useStoryIcon } = getPreferenceValues<Preferences>();
+  resetIfPointsChanged(points);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stories, setStories] = useState<Story[]>([]);
+  // Starting empty shows no stories and the all-read icon until the fetch finishes
+  const [stories, setStories] = useState<Story[]>(() => getRecentStories());
 
   // Memoize cache reads and parse operations
-  const readStories = useMemo(() => {
-    const cached = cache.get(readKey);
-    return new Set(JSON.parse(cached ?? "[]") as string[]);
-  }, []);
-
-  // Used for managing notifications so the user is only notified once
-  const notifiedStories = useMemo(() => {
-    const cached = cache.get(notifiedKey);
-    return new Set(JSON.parse(cached ?? "[]") as string[]);
-  }, []);
-
-  const seenStories = useMemo(() => {
-    const cached = cache.get(seenKey);
-    return JSON.parse(cached ?? "[]") as { story: Story; seen: number }[];
-  }, []);
+  const readStories = useMemo(() => getReadStories(), []);
 
   // Memoize unread count calculation
   const unreadCount = useMemo(
@@ -81,33 +62,17 @@ export default function Command() {
     [unreadCount, points],
   );
 
-  if (cache.get(prefKey) !== points) {
-    // if the points have changed, clear the cache
-    cache.clear();
-  }
-
   useEffect(() => {
     setError(null);
     setLoading(true);
-    // cache the points we used
-    cache.set(prefKey, points);
-    getStories(points || "500", { cache })
-      .then(async (stories) => {
-        const now = Date.now();
-        const seenStoriesMap = new Map(seenStories.map((s) => [s.story.external_url, s]));
-
-        // Get list of unseen stories (they aren't in the cache)
-        const unseenStories = stories
-          .filter((story) => !seenStoriesMap.has(story.external_url))
-          .map((story) => ({ story, seen: now }));
-
-        // Show a notification with the first story if there are unseen stories (and check there are seen stories to prevent notification on first load)
-        const show = unseenStories.length > 0 && seenStories.length > 0 && enableNotifications;
-        const { story: latest } = unseenStories?.[0] ?? {};
-        if (show && latest && !notifiedStories.has(latest.external_url)) {
+    refreshStories(points)
+      .then(async ({ recent, unseen, isFirstLoad }) => {
+        const latest = unseen[0];
+        const notifiedStories = getNotifiedStories();
+        if (enableNotifications && !isFirstLoad && latest && !notifiedStories.has(latest.external_url)) {
           // Only ever notify about a story once
           notifiedStories.add(latest.external_url);
-          cache.set(notifiedKey, JSON.stringify(Array.from(notifiedStories)));
+          saveNotifiedStories(notifiedStories);
           const icon = useStoryIcon ? await getFavicon(latest.url) : `${environment.assetsPath}/icon-128.png`;
           await showNotification({
             title: "Hacker News Top Stories",
@@ -116,12 +81,7 @@ export default function Command() {
             url: latest.external_url,
           });
         }
-
-        // merge everything now with a seen prop
-        const allStoriesSeen = [...seenStories, ...unseenStories].sort((a, b) => b.seen - a.seen);
-        cache.set(seenKey, JSON.stringify(allStoriesSeen));
-
-        return allStoriesSeen.filter(({ seen }) => now - seen < twentyFourHoursInMs).map(({ story }) => story);
+        return recent;
       })
       .then((stories) => setStories(stories))
       .catch((error) => setError(`Error: ${error.message}`))
@@ -142,7 +102,7 @@ export default function Command() {
               stories.forEach(({ external_url }) => {
                 readStories.add(external_url);
               });
-              cache.set(readKey, JSON.stringify(Array.from(readStories)));
+              markStoriesRead(stories.map(({ external_url }) => external_url));
               // force update the icon
               setStories((prev) => [...prev]);
             }}
@@ -172,11 +132,6 @@ const MenuItems = ({ error, stories, setStories, readStories, points }: MenuItem
   if (error) return <MenuBarExtra.Item title={error} />;
   if (stories.length === 0) return <MenuBarExtra.Item title={`No recent stories with ${points}+ points`} />;
 
-  const getPointsFromContent = (content: string) => {
-    const match = content.match(/Points: (\d+)/);
-    return match ? match[1] : null;
-  };
-
   return stories?.map((story: Story, index: number) => (
     <MenuBarExtra.Item
       key={story.external_url}
@@ -192,7 +147,7 @@ const MenuItems = ({ error, stories, setStories, readStories, points }: MenuItem
       shortcut={getShortcut(index)}
       onAction={() => {
         readStories.add(story.external_url);
-        cache.set(readKey, JSON.stringify(Array.from(readStories)));
+        markStoriesRead([story.external_url]);
         // force update the icon
         setStories((prev) => [...prev]);
         open(story.external_url);

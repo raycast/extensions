@@ -5,7 +5,7 @@
  * Supports both OAuth (BigBrain) and deploy key authentication modes.
  */
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   loadSession,
   clearSession,
@@ -16,7 +16,11 @@ import {
   type ConvexSession,
   type SelectedContext,
 } from "../lib/auth";
-import { getDeployKeyConfig, type DeployKeyConfig } from "../lib/deployKeyAuth";
+import {
+  getDeployKeyConfigAsync,
+  extractDeploymentTypeFromKey,
+  type DeployKeyConfig,
+} from "../lib/deployKeyAuth";
 
 export interface UseConvexAuthReturn {
   /** The current session (OAuth or deploy key) */
@@ -48,22 +52,26 @@ export function useConvexAuth(): UseConvexAuthReturn {
     projectSlug: null,
     deploymentName: null,
     deploymentType: null,
+    deploymentUrl: null,
   });
   const [isLoading, setIsLoading] = useState(true);
-
-  // Check deploy key mode on mount (sync, from preferences)
-  const deployKeyConfig = useMemo(() => getDeployKeyConfig(), []);
+  const [deployKeyConfig, setDeployKeyConfig] =
+    useState<DeployKeyConfig | null>(null);
   const usingDeployKey = deployKeyConfig !== null;
 
   // Load session on mount
   useEffect(() => {
     async function loadAuthState() {
       try {
-        // If using deploy key mode, skip OAuth session loading
-        if (usingDeployKey && deployKeyConfig) {
+        // Deploy key mode: checks LocalStorage (Configure Deploy Key command)
+        // first, then extension preferences
+        const config = await getDeployKeyConfigAsync();
+        if (config) {
+          setDeployKeyConfig(config);
+
           // Create a synthetic session from deploy key
           setSession({
-            accessToken: deployKeyConfig.deployKey,
+            accessToken: config.deployKey,
             tokenType: "DeployKey",
             // Deploy keys don't expire
             expiresAt: undefined,
@@ -75,8 +83,10 @@ export function useConvexAuth(): UseConvexAuthReturn {
             teamSlug: null,
             projectId: null,
             projectSlug: null,
-            deploymentName: deployKeyConfig.deploymentName,
-            deploymentType: "prod", // Assume prod for deploy key mode
+            deploymentName: config.deploymentName,
+            deploymentType:
+              extractDeploymentTypeFromKey(config.deployKey) ?? "prod",
+            deploymentUrl: config.deploymentUrl,
           });
 
           setIsLoading(false);
@@ -102,7 +112,7 @@ export function useConvexAuth(): UseConvexAuthReturn {
     }
 
     loadAuthState();
-  }, [usingDeployKey, deployKeyConfig]);
+  }, []);
 
   const login = useCallback(async () => {
     // No-op in deploy key mode
@@ -129,14 +139,19 @@ export function useConvexAuth(): UseConvexAuthReturn {
 
     await clearSession();
     setSession(null);
-    setSelectedContextState({
+    const clearedContext: SelectedContext = {
       teamId: null,
       teamSlug: null,
       projectId: null,
       projectSlug: null,
       deploymentName: null,
       deploymentType: null,
-    });
+      deploymentUrl: null,
+    };
+    setSelectedContextState(clearedContext);
+    // Persist the cleared selection: a later sign-in (possibly a different
+    // account) must not inherit the previous deployment context
+    await saveSelectedContext(clearedContext);
   }, [usingDeployKey]);
 
   const updateSelectedContext = useCallback(
@@ -148,6 +163,7 @@ export function useConvexAuth(): UseConvexAuthReturn {
           ...context,
           // Force deployment to stay the same
           deploymentName: deployKeyConfig.deploymentName,
+          deploymentUrl: deployKeyConfig.deploymentUrl,
         };
         const newContext = { ...selectedContext, ...restrictedContext };
         setSelectedContextState(newContext);

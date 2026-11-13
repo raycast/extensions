@@ -1,0 +1,17 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension/tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "lib": ["DOM", "ES2022"],
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "noImplicitOverride": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node"]
+  },
+  "include": ["src", "raycast-env.d.ts"]
+}

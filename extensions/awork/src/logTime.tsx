@@ -28,29 +28,35 @@ interface FormValues {
 }
 
 export const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
-  values.date = values.date ? values.date : new Date();
   if (!Array.isArray(tasks)) {
     return false;
   }
-  const task = tasks.filter((value) => value.id === values.taskId)[0];
-  const body = JSON.stringify({
-    note: values.note,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    typeOfWorkId: values.typeOfWorkId,
-    userId: (await LocalStorage.getItem<string>("userId"))?.valueOf(),
-    projectId: values.projectId !== "none" ? values.projectId : task.projectId,
-    taskId: values.taskId !== "none" ? values.taskId : undefined,
-    StartDateLocal: `${values.date?.getFullYear()}-${String(values.date?.getMonth() + 1).padStart(2, "0")}-${String(values.date?.getDate()).padStart(2, "0")}`,
-    StartTimeLocal: values.startTime
-      ? values.startTime.includes("now")
-        ? new Date().toLocaleTimeString("de-DE")
-        : values.startTime
-      : undefined,
-    Duration: convertDurationsToSeconds(values.duration),
-    isBillable: values.isBillable,
-  });
+  const date = values.date ?? new Date();
+  const task = tasks.find((value) => value.id === values.taskId);
+  const hasProject = values.projectId && values.projectId !== "none";
+  if (!hasProject && !task) {
+    showFailureToast(new Error("Please select a project or a task"), { title: "Couldn't log time" });
+    return false;
+  }
 
   try {
+    const body = JSON.stringify({
+      note: values.note,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      typeOfWorkId: values.typeOfWorkId,
+      userId: (await LocalStorage.getItem<string>("userId"))?.valueOf(),
+      projectId: hasProject ? values.projectId : task?.projectId,
+      taskId: values.taskId && values.taskId !== "none" ? values.taskId : undefined,
+      StartDateLocal: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+      StartTimeLocal: values.startTime
+        ? values.startTime.trim().toLowerCase() === "now"
+          ? new Date().toLocaleTimeString("de-DE")
+          : values.startTime
+        : undefined,
+      Duration: convertDurationsToSeconds(values.duration),
+      isBillable: values.isBillable,
+    });
+
     const response = await fetchWithTimeout(`${baseURI}/timeentries`, {
       method: "POST",
       headers: {
@@ -61,14 +67,14 @@ export const logTime = async (token: string, values: FormValues, tasks: task[] |
       redirect: "follow",
     });
     if (!response.ok) {
-      showFailureToast("Couldn't log time");
+      showFailureToast(new Error(`${response.status} ${response.statusText}`), { title: "Couldn't log time" });
       return false;
     } else {
       await showHUD("Successfully logged time");
       return true;
     }
   } catch (error) {
-    showFailureToast(error as Error);
+    showFailureToast(error, { title: "Couldn't log time" });
     console.error(error);
     return false;
   }
@@ -85,8 +91,10 @@ export default function Command(props: LaunchProps) {
   const { handleSubmit, itemProps, setValidationError, setValue, values } = useForm<FormValues>({
     onSubmit: async (values) => {
       if (Array.isArray(tasks)) {
-        await logTime(token?.accessToken as string, values, tasks);
-        pop();
+        const success = await logTime(token?.accessToken as string, values, tasks);
+        if (success) {
+          pop();
+        }
       } else {
         showToast({
           title: "Failed to log time",
@@ -102,7 +110,7 @@ export default function Command(props: LaunchProps) {
     },
     validation: {
       projectId: (value) => {
-        if ((!value || value === "none") && values.taskId === "none") {
+        if ((!value || value === "none") && (!values.taskId || values.taskId === "none")) {
           return "Please select a project";
         }
       },
@@ -151,7 +159,7 @@ export default function Command(props: LaunchProps) {
       },
     },
   );
-  const { data: typesOfWork, isLoading: isLoadingTypesOwWork } = useCachedPromise(
+  const { data: typesOfWork, isLoading: isLoadingTypesOfWork } = useCachedPromise(
     getTypesOfWork,
     [token?.accessToken as string],
     {
@@ -170,7 +178,7 @@ export default function Command(props: LaunchProps) {
   return (
     <Form
       enableDrafts={true}
-      isLoading={isLoadingTypesOwWork || isLoadingProjects || isLoadingTasks}
+      isLoading={isLoadingTypesOfWork || isLoadingProjects || isLoadingTasks}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -192,7 +200,7 @@ export default function Command(props: LaunchProps) {
           }
         }}
       >
-        <Form.Dropdown.Item key={"none"} title={"No Project"} value={"none"} />
+        <Form.Dropdown.Item key={"none"} title={"No project"} value={"none"} />
         {projects &&
           Array.isArray(projects) &&
           projects.map((project) => (
@@ -210,27 +218,29 @@ export default function Command(props: LaunchProps) {
         onChange={(taskId) => {
           if (taskId && Array.isArray(tasks)) {
             setValue("taskId", taskId);
-            const task = tasks.filter((value) => taskId === value.id)[0];
-            setValue("projectId", task?.projectId || "");
-            setValidationError("projectId", undefined);
-            if (task?.typeOfWorkId) {
-              setValue("typeOfWorkId", task.typeOfWorkId);
-            }
-            if (typeof task?.project.isBillableByDefault === "boolean") {
-              setValue("isBillable", task.project.isBillableByDefault);
+            const task = tasks.find((value) => taskId === value.id);
+            if (task) {
+              setValue("projectId", task.projectId);
+              setValidationError("projectId", undefined);
+              if (task.typeOfWorkId) {
+                setValue("typeOfWorkId", task.typeOfWorkId);
+              }
+              if (typeof task.project.isBillableByDefault === "boolean") {
+                setValue("isBillable", task.project.isBillableByDefault);
+              }
             }
           }
         }}
       >
-        <Form.Dropdown.Item key={"none"} title={"No Task"} value={"none"} />
+        <Form.Dropdown.Item key={"none"} title={"No task"} value={"none"} />
         {tasks &&
           Array.isArray(tasks) &&
           tasks
             .filter(
               (task) =>
-                !itemProps.projectId ||
+                !itemProps.projectId.value ||
                 itemProps.projectId.value === "none" ||
-                task.projectId.includes(itemProps.projectId.value || ""),
+                task.projectId === itemProps.projectId.value,
             )
             .map((task) => (
               <Form.Dropdown.Item
@@ -248,7 +258,7 @@ export default function Command(props: LaunchProps) {
             <Form.Dropdown.Item key={typeOfWork.id} title={typeOfWork.name} value={typeOfWork.id} />
           ))}
       </Form.Dropdown>
-      <Form.DatePicker type={Form.DatePicker.Type.Date} {...itemProps.date} />
+      <Form.DatePicker title="Date" type={Form.DatePicker.Type.Date} {...itemProps.date} />
       <Form.TextField
         title={"Start time"}
         {...itemProps.startTime}

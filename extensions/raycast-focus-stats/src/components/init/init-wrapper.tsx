@@ -14,7 +14,6 @@ export interface InitWrapperProps {
  * Wrapper component responsible for running some initial tasks to verify that all the necessary
  * parts to run the extension are available, namely:
  *
- * - The native binding for better-sqlite3 is available in the extension's support path
  * - Check that we're able to access the SQLite database used to track the focus sessions
  * - If necessary, migrate the database schema
  *

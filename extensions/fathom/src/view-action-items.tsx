@@ -1,9 +1,10 @@
-import { List, Icon } from "@raycast/api";
-import { useState, useMemo } from "react";
-import type { Meeting, ActionItem } from "./types/Types";
+import { countOf } from "@chrismessina/raycast-kit";
+import { useMemo, useState } from "react";
+import { Icon, List } from "@raycast/api";
+import { ActionItemActions } from "./actions/ActionItemActions";
 import { buildActionItemsCopyText } from "./components/ActionItems";
 import { useTeamColor } from "./hooks/useTeamColor";
-import { ActionItemActions } from "./actions/ActionItemActions";
+import type { ActionItem, Meeting } from "./types/Types";
 
 export function MeetingActionItemsDetail({ meeting }: { meeting: Meeting; recordingId?: string }) {
   // Use action items from the meeting object (already available)
@@ -68,7 +69,7 @@ export function MeetingActionItemsDetail({ meeting }: { meeting: Meeting; record
       ) : (
         <>
           {pending.length > 0 && (
-            <List.Section title="Pending" subtitle={`${pending.length} items`}>
+            <List.Section title="Pending" subtitle={countOf(pending.length, "item")}>
               {pending.map((item, index) => (
                 <ActionItemListItem key={`pending-${index}`} item={item} meeting={meeting} copyContent={copyContent} />
               ))}
@@ -76,7 +77,7 @@ export function MeetingActionItemsDetail({ meeting }: { meeting: Meeting; record
           )}
 
           {completed.length > 0 && (
-            <List.Section title="Completed" subtitle={`${completed.length} items`}>
+            <List.Section title="Completed" subtitle={countOf(completed.length, "item")}>
               {completed.map((item, index) => (
                 <ActionItemListItem
                   key={`completed-${index}`}

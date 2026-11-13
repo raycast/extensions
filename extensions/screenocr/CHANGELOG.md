@@ -1,5 +1,23 @@
 # ScreenOCR Changelog
 
+## [Clipboard Image OCR on macOS] - 2026-10-31
+
+- Added macOS support for **Recognize Text in Clipboard Image**, including copied image files, using Apple Vision with your recognition preferences.
+- Added an **After Recognition (macOS)** option for that command: copy the text (replaces the clipboard image) or paste it into the active app and restore the original clipboard contents.
+- Fixed macOS failures being copied as recognized text with a success toast. Errors now show a failure toast and nothing is copied.
+- Fixed cancelling a region selection: it is now silent and leaves the clipboard unchanged, including with **Keep image in clipboard** enabled, where a stale clipboard image could previously be recognized.
+- Added a "Recognizing…" progress notification while clipboard recognition runs.
+- Clarified that **Keep image in clipboard** and **Play sounds** apply to screen-capture commands only.
+
+## [Windows Support] - 2026-09-20
+
+- Added Windows support for region, full-desktop and clipboard-image recognition using the local Windows OCR engine.
+- Added installed Windows OCR-language selection with separate Windows and macOS preferences.
+- Added optional paste/copy-and-paste result actions on Windows; macOS retains its existing copy behavior.
+- Preserved existing command IDs and the cross-extension result shape; Windows callbacks distinguish cancellation and failure from recognized text.
+- Preserved the existing macOS Swift source, recognition settings and command behavior.
+- Kept barcode and QR-code recognition available on macOS with an explicit Windows limitation.
+
 ## [Fix macOS 26 (Tahoe) and macOS 27 (Golden Gate) Support] - 2026-07-23
 
 - Fixed all commands failing with "Failed to recognize text" on macOS 26 (Tahoe) and macOS 27 (Golden Gate). The system text recognition models log diagnostics to stdout, which the extension uses to return its result, corrupting the output; recognition now runs with stdout muted.

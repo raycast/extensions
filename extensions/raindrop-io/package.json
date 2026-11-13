@@ -276,9 +276,7 @@
               "name": "search-bookmarks",
               "arguments": {
                 "query": "TypeScript",
-                "tags": [
-                  "performance"
-                ]
+                "tags": "performance"
               }
             }
           }
@@ -312,10 +310,7 @@
               "arguments": {
                 "url": "https://blog.raycast.com/ai-guide",
                 "collectionId": 5,
-                "tags": [
-                  "ai",
-                  "raycast"
-                ]
+                "tags": "ai, raycast"
               }
             }
           }

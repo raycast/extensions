@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 260 270" role="img" aria-labelledby="title">
+  <title id="title">Roudou no Yoroi-san waves and nods with a work clipboard</title>
+  <ellipse cx="130" cy="249" rx="73" ry="9" fill="#f3c6bd" opacity="0.65"/>
+  <g stroke="#292321" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M99 220l-5 25h26l5 -26M135 219l5 26h26l-5 -25" fill="#c8c0b2"/>
+    <path d="M85 143Q130 130 175 143L181 213Q165 237 130 237Q95 237 79 213Z" fill="#c8c0b2"/>
+    <path d="M89 194Q130 206 172 194M85 210Q130 222 175 210" fill="none" stroke-width="3"/>
+    <g data-part="left-arm"><animateTransform attributeName="transform" type="rotate" values="0 86 157;0 86 157;18 86 157;-12 86 157;18 86 157;0 86 157;0 86 157" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="5.8s" repeatCount="indefinite"/>
+      <path d="M84 149Q66 148 62 168L51 169L49 146Q49 140 44 141L43 161L41 138Q40 133 36 137L36 161L32 141Q29 137 26 142L29 163Q19 154 19 164L24 181Q32 194 49 191L78 180Z" fill="#c8c0b2"/>
+      <path d="M28 171l21 -2m8 4 12 9" fill="none" stroke-width="2.5"/>
+    </g>
+    <g data-part="right-arm"><animateTransform attributeName="transform" type="rotate" values="0 177 157;0 177 157;-8 177 157;5 177 157;-8 177 157;0 177 157;0 177 157" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="5.8s" repeatCount="indefinite"/>
+      <path d="M177 151Q196 154 197 175L202 207Q198 219 188 212L174 176" fill="#c8c0b2"/>
+      <path d="M185 192l14 -3m-12 11 14 -3" fill="none" stroke-width="2.5"/>
+    </g>
+    <path d="M91 140Q67 137 61 157Q76 172 96 158M169 140Q193 137 199 157Q184 172 164 158" fill="#c8c0b2"/>
+    <g data-part="helmet"><animateTransform attributeName="transform" type="rotate" values="0 130 144;0 130 144;-4 130 144;0 130 144;4 130 144;0 130 144;0 130 144" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="5.8s" repeatCount="indefinite"/>
+      <path d="M78 105Q70 48 127 44Q185 44 183 105L177 134Q157 153 130 157Q99 152 82 134Z" fill="#c8c0b2"/>
+      <path d="M87 102Q83 76 109 66Q126 63 131 56Q138 66 151 68Q175 77 174 102M130 72v20m0 6v1" fill="none" stroke-width="3"/>
+      <path d="M86 107Q130 115 176 107L167 120Q152 129 131 119Q111 130 94 119Z" fill="#292321" stroke-width="2"/>
+      <path d="M112 132Q130 124 149 132L144 147H117Z" fill="#292321"/>
+      <path d="M119 134h5m8 0h5m5 0h2m-24 7h5m8 0h5" stroke="#fffdf7" stroke-width="2"/>
+      <path d="M119 128q11 -3 23 0M120 145h21" fill="none" stroke="#f2a7b3" stroke-width="2"/>
+    </g><g transform="rotate(-8 167 203)"><rect x="143" y="174" width="49" height="61" rx="4" fill="#a5896b"/><rect x="149" y="181" width="36" height="47" rx="1" fill="#fff9eb" stroke="none"/><rect x="158" y="170" width="19" height="9" rx="2" fill="#d4d6d9" stroke-width="2"/><path d="M154 191h23m-23 8h23m-23 8h17m-17 8h20" fill="none" stroke="#a9b3ad" stroke-width="2"/></g>
+  </g>
+</svg>

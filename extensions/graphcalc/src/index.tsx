@@ -1,6 +1,8 @@
 import {
   ActionPanel,
   Action,
+  Icon,
+  Keyboard,
   showToast,
   Toast,
   List,
@@ -79,6 +81,15 @@ export default function Command(
     });
   };
 
+  const handleDeleteFromHistory = (expr: string) => {
+    setHistory(renderHistory.filter((e) => e !== expr));
+    showToast({
+      style: Toast.Style.Success,
+      title: "Removed from History",
+      message: expr,
+    });
+  };
+
   const handleEditExpression = (expr: string) => {
     setExpression(expr);
   };
@@ -133,7 +144,14 @@ export default function Command(
           actions={
             <ActionPanel>
               <Action title="Plot Graph" onAction={handleSubmit} />
-              <Action title="Clear History" onAction={handleClearHistory} />
+              <ActionPanel.Section title="History">
+                <Action
+                  title="Clear History"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={handleClearHistory}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -144,13 +162,34 @@ export default function Command(
           title={expr}
           actions={
             <ActionPanel>
-              <Action title="Plot Graph" onAction={() => handleSelect(expr)} />
-              <Action title="Clear History" onAction={handleClearHistory} />
-              <Action
-                title="Edit Expression"
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-                onAction={() => handleEditExpression(expr)}
-              />
+              <ActionPanel.Section>
+                <Action
+                  title="Plot Graph"
+                  onAction={() => handleSelect(expr)}
+                />
+                <Action
+                  title="Edit Expression"
+                  icon={Icon.Pencil}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  onAction={() => handleEditExpression(expr)}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="History">
+                <Action
+                  title="Delete from History"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  // Raycast's standard remove shortcut: ⌃X on macOS, Ctrl+D on Windows.
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() => handleDeleteFromHistory(expr)}
+                />
+                <Action
+                  title="Clear History"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={handleClearHistory}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

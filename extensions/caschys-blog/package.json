@@ -16,28 +16,7 @@
       "title": "Latest Articles",
       "subtitle": "Caschys Blog",
       "description": "Shows the latest articles from Caschys Blog",
-      "mode": "view",
-      "script": "latest-articles.tsx",
-      "preferences": [
-        {
-          "name": "postsPerPage",
-          "type": "textfield",
-          "required": false,
-          "title": "Posts Per Page",
-          "description": "Number of posts to load per page (default: 30)",
-          "placeholder": "30",
-          "default": "30"
-        },
-        {
-          "name": "maxPosts",
-          "type": "textfield",
-          "required": false,
-          "title": "Maximum Posts",
-          "description": "Maximum number of posts to load in total (default: 90)",
-          "placeholder": "90",
-          "default": "90"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "submit-tip",
@@ -47,11 +26,38 @@
       "mode": "view"
     },
     {
+      "name": "search-blog",
+      "title": "Search Article Archive",
+      "subtitle": "Caschys Blog",
+      "description": "Search the public Caschys Blog article archive",
+      "mode": "view"
+    },
+    {
       "name": "open-website",
       "title": "Open Caschys Blog",
       "subtitle": "Caschys Blog",
       "description": "Opens the Caschys Blog website in your default browser",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "postsPerPage",
+      "type": "textfield",
+      "required": false,
+      "title": "Posts Per Page",
+      "description": "Number of posts to load per feed page (default: 30)",
+      "placeholder": "30",
+      "default": "30"
+    },
+    {
+      "name": "maxPosts",
+      "type": "textfield",
+      "required": false,
+      "title": "Maximum Posts",
+      "description": "Maximum number of recent posts to load (default: 90)",
+      "placeholder": "90",
+      "default": "90"
     }
   ],
   "tools": [
@@ -73,11 +79,11 @@
     {
       "name": "submit-tip",
       "title": "Submit Tip",
-      "description": "Submit a tip to Caschys Blog"
+      "description": "Prepare a tip as an email draft for review before sending"
     }
   ],
   "ai": {
-    "instructions": "You are an assistant for Caschys Blog, a popular German tech blog. You can help users search for articles, get the latest articles, and submit tips to the blog. When users first interact with you, use the welcome-message tool to provide a welcome message with sample queries and information about multilingual support. When users ask about tech news or articles, use the search-articles tool to find relevant content. When users want to see the latest articles, use the get-latest-articles tool. When users want to submit a tip to the blog, use the submit-tip tool to help them create and send their tip. Users can ask questions in any language, and you should respond in the same language they use.",
+    "instructions": "Use Caschys Blog's public article feed for searches and recent posts, and prepare tip email drafts only when requested. Use welcome-message when users ask what the extension can do. Use search-articles for topic searches and get-latest-articles for recent posts. Base article claims only on the returned feed data and include links when useful. If an excerpt is too short to answer, say so instead of inventing the missing article content. Use submit-tip only when the user asks to prepare a tip. The tool opens a draft in the user's mail app and never sends it automatically. Respond in the language used by the user.",
     "evals": [
       {
         "input": "@caschys-blog what can you help me with?",
@@ -86,9 +92,9 @@
             "features": [
               "Search for articles on specific topics",
               "Get the latest articles from the blog",
-              "Submit tips to the blog"
+              "Prepare tip email drafts"
             ],
-            "message": "Welcome to the Caschys Blog Assistant! I can help you search for articles, get the latest news, and submit tips to the blog.",
+            "message": "Welcome to the Caschys Blog Assistant. I can search articles, get the latest posts, and prepare tip email drafts for you to review.",
             "multilingual": "You can ask questions in any language, and I'll respond in the same language.",
             "sampleQueries": [
               {
@@ -136,14 +142,19 @@
       {
         "input": "@caschys-blog find articles about iPhone",
         "mocks": {
-          "search-articles": []
+          "search-articles": {
+            "articles": [],
+            "count": 0
+          }
         },
         "expected": [
           {
             "callsTool": {
               "name": "search-articles",
               "arguments": {
-                "query": "Find articles about iPhone"
+                "query": {
+                  "includes": "iPhone"
+                }
               }
             }
           }
@@ -152,7 +163,11 @@
       {
         "input": "@caschys-blog show me the latest articles",
         "mocks": {
-          "get-latest-articles": []
+          "get-latest-articles": {
+            "articles": [],
+            "count": 0,
+            "total": 0
+          }
         },
         "expected": [
           {
@@ -174,25 +189,34 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "2.3.1",
+    "@raycast/utils": "2.3.1",
+    "react": "19.3.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "^18.3.3",
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.20.2",
+    "@types/react": "19.3.0",
     "@types/xml2js": "^0.4.14",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
+    "test:live": "vitest run --config vitest.live.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

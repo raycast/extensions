@@ -4,7 +4,7 @@ import { ProcessInfo } from "../models/interfaces";
 export async function handleKill(
   process: ProcessInfo,
   killCallback: () => Promise<void>,
-  reloadCallback?: () => Promise<void>
+  reloadCallback?: () => Promise<void>,
 ) {
   try {
     await killCallback();

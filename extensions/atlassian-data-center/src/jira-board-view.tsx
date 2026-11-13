@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 
 import { withQuery, CacheActions } from "@/components";
 import { JiraIssueTransitionForm } from "@/pages";
@@ -229,25 +229,31 @@ function BoardIssueItem({ item, onRefetch }: BoardIssueItemProps) {
               icon={Icon.Pencil}
               title="Edit in Browser"
               url={item.editUrl}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
           )}
           <Action.Push
             title="Transition Status"
             target={<JiraIssueTransitionForm issueKey={item.key} onUpdate={onRefetch} />}
             icon={Icon.Switch}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "t" },
+              Windows: { modifiers: ["ctrl"], key: "t" },
+            }}
           />
-          <Action.CopyToClipboard title="Copy URL" shortcut={{ modifiers: ["cmd"], key: "c" }} content={item.url} />
           <Action.CopyToClipboard
-            title="Copy Key"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            content={item.key}
+            title="Copy URL"
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
+            content={item.url}
           />
+          <Action.CopyToClipboard title="Copy Key" shortcut={Keyboard.Shortcut.Common.Copy} content={item.key} />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onRefetch}
           />
           <CacheActions />

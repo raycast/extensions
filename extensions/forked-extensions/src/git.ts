@@ -7,6 +7,11 @@ import * as api from "./api.js";
 import { defaultGitExecutableFilePath, upstreamRepository } from "./constants.js";
 import { catchError } from "./errors.js";
 import operation from "./operation.js";
+import {
+  parseRepositoryMaintenanceStats,
+  RepositoryCleanupPreview,
+  RepositoryCleanupResult,
+} from "./repository-maintenance.js";
 import { ForkedExtension } from "./types.js";
 import {
   gitExecutableFilePath,
@@ -289,12 +294,15 @@ const updateFromRemoteMain = async (remote: string) => {
     "fetch",
     "--prune",
     "--no-tags",
+    // Submodule discovery can lazily fetch historical trees in a treeless clone.
+    "--no-recurse-submodules",
     `--filter=${partialCloneFilter}`,
     remote,
     `+refs/heads/${mainBranch}:refs/remotes/${remote}/${mainBranch}`,
   ]);
   if (currentBranch !== mainBranch) await git(["checkout", mainBranch]);
-  await git(["merge", "--ff-only", `${remote}/${mainBranch}`]);
+  // Diffstat reads changed blobs even outside the sparse checkout, downloading unrelated extensions.
+  await git(["merge", "--ff-only", "--no-stat", `${remote}/${mainBranch}`]);
   if (currentBranch !== mainBranch) await git(["checkout", currentBranch]);
 };
 
@@ -329,6 +337,43 @@ export const getManagedForkedRepository = async () => {
   await resolveRepositoryPath();
   if (!(await isManagedForkedRepository(repositoryPath))) return "";
   return getForkedRepository();
+};
+
+/** Gets the pack count and packed size for the managed repository. */
+export const getRepositoryMaintenanceStats = async () => {
+  const { output } = await git(["count-objects", "-v"]);
+  return parseRepositoryMaintenanceStats(output);
+};
+
+/** Validates the managed repository and captures the state shown before cleanup confirmation. */
+export const prepareRepositoryCleanup = async (): Promise<RepositoryCleanupPreview> => {
+  if (!(await checkIfGitIsValid())) {
+    throw new Error("Git executable not found. Configure it in Forked Extensions preferences.");
+  }
+
+  await resolveRepositoryPath();
+  if (!(await getManagedForkedRepository())) {
+    throw new Error("Managed repository not found. Run Manage Forked Extensions before cleaning it up.");
+  }
+
+  return {
+    repositoryPath,
+    statistics: await getRepositoryMaintenanceStats(),
+  };
+};
+
+/** Runs foreground Git maintenance and captures repository statistics before and after it. */
+export const cleanUpRepository = async (preview: RepositoryCleanupPreview): Promise<RepositoryCleanupResult> => {
+  if (preview.repositoryPath !== repositoryPath) {
+    throw new Error("Managed repository path changed after cleanup confirmation. Please try again.");
+  }
+
+  const before = await getRepositoryMaintenanceStats();
+  await git(["maintenance", "run", "--task=gc"]);
+  return {
+    before,
+    after: await getRepositoryMaintenanceStats(),
+  };
 };
 
 /**

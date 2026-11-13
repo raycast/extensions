@@ -1,5 +1,10 @@
 # Windows Default Wallpapers Changelog
 
-## [1.0.0] - 2025-12-12
+## [Enhancement] - 2026-09-03
 
-Initial version code
+- Add `Preview Wallpaper` action
+- Bump all dependencies to the latest
+
+## [Initial Release] - 2025-12-12
+
+Initial version

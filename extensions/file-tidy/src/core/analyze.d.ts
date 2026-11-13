@@ -1,4 +1,5 @@
 import type { TidyConfig } from "./config.js";
+import type { HashCacheEntry } from "./phash.js";
 import type { PlanEntry } from "./plan.js";
 import type { SourceFile } from "./scan.js";
 
@@ -12,6 +13,15 @@ export interface AnalyzeCounts {
   perceptual: number;
 }
 
+/**
+ * The perceptual-hash cache state gathered during analysis, for executePlan to
+ * persist once the run has actually happened — analyze() never writes to disk.
+ */
+export interface HashCacheState {
+  cache: Map<string, HashCacheEntry>;
+  images: SourceFile[];
+}
+
 export function analyze(input: {
   sourceDir: string;
   destDir: string;
@@ -23,4 +33,5 @@ export function analyze(input: {
   entries: PlanEntry[];
   sourceFiles: SourceFile[];
   counts: AnalyzeCounts;
+  hashCache: HashCacheState | null;
 }>;

@@ -3,7 +3,10 @@ import { getLanguagesForModel, LANGUAGE_MAP } from "../../src/lib/languages";
 
 describe("LANGUAGE_MAP", () => {
   it("contains auto entry", () => {
-    expect(LANGUAGE_MAP["auto"]).toEqual({ label: "Auto (detect)", native: "Auto (detect)" });
+    expect(LANGUAGE_MAP["auto"]).toEqual({
+      label: "Auto (detect)",
+      native: "Auto (detect)",
+    });
   });
   it("contains standard language entries", () => {
     expect(LANGUAGE_MAP["en"]).toBeDefined();
@@ -27,7 +30,7 @@ describe("getLanguagesForModel", () => {
 
   it("filters to supportedLanguages when provided", () => {
     const langs = getLanguagesForModel(["en", "de", "es", "fr"]);
-    const codes = langs.map(l => l.code);
+    const codes = langs.map((l) => l.code);
     expect(codes).toContain("auto");
     expect(codes).toContain("en");
     expect(codes).toContain("de");
@@ -43,6 +46,10 @@ describe("getLanguagesForModel", () => {
 
   it("each entry has code, label, native", () => {
     const langs = getLanguagesForModel(["en"]);
-    expect(langs[1]).toMatchObject({ code: "en", label: expect.any(String), native: expect.any(String) });
+    expect(langs[1]).toMatchObject({
+      code: "en",
+      label: expect.any(String),
+      native: expect.any(String),
+    });
   });
 });

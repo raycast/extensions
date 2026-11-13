@@ -12,7 +12,7 @@ export const defaultProfilePathIridium = ["Application Support", "Iridium", "Def
 export const defaultProfilePathOrion = ["Application Support", "Orion", "Defaults", "history"];
 export const defaultProfilePathSidekick = ["Application Support", "Sidekick", "Default", "History"];
 export const defaultProfilePathDia = ["Application Support", "Dia", "User Data", "Default", "History"];
-export const defaultProfilePathHelium = ["Application Support", "Helium", "Default", "History"];
+export const defaultProfilePathHelium = ["Application Support", "net.imput.helium", "Default", "History"];
 export const defaultProfilePathComet = ["Application Support", "Comet", "Default", "History"];
 export const defaultProfilePathChatGPTAtlas = [
   "Application Support",

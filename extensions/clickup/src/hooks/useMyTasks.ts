@@ -5,6 +5,8 @@ import { getClickUpClient } from "../api/clickup";
 import { ClickUpTask } from "../types/clickup";
 import { getMissingParentIds } from "../utils/task-helpers";
 
+export type MyTasksScope = "list" | "workspace";
+
 type FetchMyTasksResult = {
   assignedTaskIds: string[];
   tasks: ClickUpTask[];
@@ -18,21 +20,36 @@ type UseMyTasksResult = Pick<UseCachedPromiseReturnType<FetchMyTasksResult, neve
 };
 
 /**
- * Hook to fetch tasks assigned to the authenticated user
- * Also fetches parent tasks for context, even if not assigned
+ * Hook to fetch tasks assigned to the authenticated user, in the Default List or the whole Workspace
+ * Also fetches parent tasks for context, even if not assigned, unless only tasks with a due date are shown
  */
-export function useMyTasks(): UseMyTasksResult {
-  const { listId } = getPreferenceValues<Preferences>();
+export function useMyTasks(scope: MyTasksScope, dueDateOnly: boolean): UseMyTasksResult {
+  const { listId, teamId } = getPreferenceValues<Preferences>();
 
-  const fetchMyTasks = async (): Promise<FetchMyTasksResult> => {
+  const fetchMyTasks = async (scope: MyTasksScope, dueDateOnly: boolean): Promise<FetchMyTasksResult> => {
     const client = getClickUpClient();
     const user = await client.getAuthenticatedUser();
 
-    const assignedTasks = await client.getAllTasksFromListRecursively(listId, {
-      archived: false,
+    const params = {
       assignees: [user.id],
-    });
+      // due_date_gt=0 matches any due date, including overdue ones
+      due_date_gt: dueDateOnly ? 0 : undefined,
+    };
+    let fetchedTasks: ClickUpTask[];
+    if (scope === "workspace") {
+      if (!teamId) {
+        throw new Error("Set the Default Team ID (your Workspace ID) in the extension preferences to use this scope.");
+      }
+      fetchedTasks = await client.getAllTasksFromWorkspace(teamId, { ...params, subtasks: true });
+    } else {
+      fetchedTasks = await client.getAllTasksFromListRecursively(listId, { ...params, archived: false });
+    }
+    const assignedTasks = dueDateOnly ? fetchedTasks.filter((t) => t.due_date !== null) : fetchedTasks;
     const assignedTaskIds = new Set(assignedTasks.map((t) => t.id));
+
+    if (dueDateOnly) {
+      return { assignedTaskIds: Array.from(assignedTaskIds), tasks: assignedTasks, userName: user.username };
+    }
 
     const missingParentIds = getMissingParentIds(assignedTasks);
 
@@ -72,7 +89,7 @@ export function useMyTasks(): UseMyTasksResult {
     return { assignedTaskIds: Array.from(assignedTaskIds), tasks: allTasks, userName: user.username };
   };
 
-  const { data, error, isLoading } = useCachedPromise(fetchMyTasks, [], {
+  const { data, error, isLoading } = useCachedPromise(fetchMyTasks, [scope, dueDateOnly], {
     initialData: { assignedTaskIds: [], tasks: [], userName: "" },
   });
 

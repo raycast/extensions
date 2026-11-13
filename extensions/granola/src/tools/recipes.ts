@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { showFailureToast } from "@raycast/utils";
 import { getRecipesFromApi } from "../utils/fetchData";
 import { RecipesListResult, Recipe, DefaultRecipe } from "../utils/types";
@@ -27,6 +28,7 @@ function findRecipeBySlug(recipes: Recipe[], slug: string): Recipe | undefined {
 }
 
 export default async function tool(input: ListInput = {}): Promise<Recipe[] | Recipe | ListResult | []> {
+  await getAccessToken();
   return runRecipesTool(input);
 }
 

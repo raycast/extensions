@@ -114,11 +114,13 @@ export default function MyOncalls() {
 
   if (error) {
     return (
-      <List.EmptyView
-        icon={Icon.XMarkCircle}
-        title="Error"
-        description={error instanceof Error ? error.message : "Failed to load oncall data"}
-      />
+      <List>
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title="Error"
+          description={error instanceof Error ? error.message : "Failed to load oncall data"}
+        />
+      </List>
     );
   }
 

@@ -1,5 +1,16 @@
 # Ray Clicker Changelog
 
+## [Windows support and maintenance] - 2026-09-05
+
+- Enable Windows installation and add Control shortcuts with matching hints.
+- Update the Raycast API, remove unused utilities, and refresh the dependency lockfile.
+- Remove the action that launched the unavailable menu-bar command.
+- Confirm resets from upgrade actions and clear the combo timer when closing.
+- Fix idle autosave timing and prevent closing during startup from overwriting saved progress.
+- Serialize saves so delayed autosaves cannot overwrite later actions or resets.
+- Preserve reset state when closing before its storage write finishes.
+- Start idle timing after saved progress loads to avoid counting startup time twice.
+
 ## [Windows ready & package update] - 2025-12-16
 
 - Verified Windows support

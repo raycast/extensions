@@ -44,8 +44,11 @@
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/react-test-renderer": "19.0.0",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
+    "react": "19.0.0",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -54,6 +57,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsc --project tsconfig.test.json && node --experimental-strip-types --test tests/*.test.ts"
   }
 }

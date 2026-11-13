@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ldap-contacts",
+  "title": "LDAP Contacts",
+  "description": "Lookup names and telephone numbers within an LDAP (AD) directory",
+  "icon": "icon.png",
+  "author": "frdmn",
+  "contributors": [],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ldap-lookup",
+      "title": "LDAP Lookup",
+      "description": "Search for people by name or phone number in your LDAP directory",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ldapHost",
+      "title": "LDAP Host",
+      "description": "Hostname of your LDAP/AD server",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ldapSecurity",
+      "title": "Security",
+      "description": "How to connect to the directory server",
+      "type": "dropdown",
+      "required": false,
+      "default": "starttls",
+      "data": [
+        {
+          "title": "StartTLS (upgrade ldap:// to TLS)",
+          "value": "starttls"
+        },
+        {
+          "title": "LDAPS (ldaps://)",
+          "value": "ldaps"
+        },
+        {
+          "title": "Plain (ldap://, localhost only)",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "ldapPort",
+      "title": "LDAP Port",
+      "description": "Port of your LDAP/AD server. Leave empty to use 389, or 636 for LDAPS",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ldapUsername",
+      "title": "Username",
+      "description": "Bind DN or user principal name (e.g. ldap@company.ads)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ldapPassword",
+      "title": "Password",
+      "description": "Password for the bind user",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "ldapSearchBase",
+      "title": "Search Base",
+      "description": "Distinguished name to search within (e.g. OU=Frankfurt,DC=Company,DC=Ads)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "ldapTLSVerify",
+      "title": "Verify TLS Certificate",
+      "description": "Validate the server certificate against the system trust store and CA file below. Disable only for self-signed setups without a CA.",
+      "type": "checkbox",
+      "label": "Verify TLS Certificate",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ldapCACert",
+      "title": "TLS CA Certificate",
+      "description": "Path to a PEM file with the CA that signed your server certificate (for internal CAs)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "phonePrefix",
+      "title": "Phone Prefix",
+      "description": "Internal extension prefix stripped from results (e.g. 970)",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "ldapts": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "tsc -p tsconfig.test.json && node --test dist-tests/tests/*.test.js",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

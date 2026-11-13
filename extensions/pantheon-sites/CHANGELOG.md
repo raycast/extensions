@@ -1,5 +1,13 @@
 # com.matbrady.pantheon Changelog
 
+## [Uninitialized Site Fix] - 2026-11-13
+
+### Fixed
+
+- Crash when a site has no framework (created but never initialized); these now show a fallback icon and "Not initialized"
+- Framework variants like `wordpress_network` now show the correct icon
+- Sites on other frameworks (e.g. Next.js/`nodejs`, Backdrop) show a generic code icon instead of a broken image
+
 ## [Latest Changes] - 2026-05-11
 
 ### Added

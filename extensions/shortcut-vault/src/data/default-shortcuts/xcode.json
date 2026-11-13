@@ -1,0 +1,308 @@
+{
+  "ownerName": "Xcode",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/xcode_help-command_shortcuts/MenuCommands/MenuCommands014.html",
+  "shortcuts": [
+    {
+      "id": "preferences",
+      "commandName": "Open Preferences",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "new-tab",
+      "commandName": "New Tab",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "new-window",
+      "commandName": "New Window",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "new-file",
+      "commandName": "New File",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-project",
+      "commandName": "New Project",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-workspace",
+      "commandName": "New Workspace",
+      "modifiers": ["command", "control"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-group",
+      "commandName": "New Group",
+      "modifiers": ["command", "option"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "add-files",
+      "commandName": "Add Files",
+      "modifiers": ["command", "option"],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "open",
+      "commandName": "Open",
+      "modifiers": ["command"],
+      "key": "O",
+      "scope": "app"
+    },
+    {
+      "id": "open-quickly",
+      "commandName": "Open Quickly",
+      "modifiers": ["command", "shift"],
+      "key": "O",
+      "scope": "app"
+    },
+    {
+      "id": "save",
+      "commandName": "Save",
+      "modifiers": ["command"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "save-all",
+      "commandName": "Save All",
+      "modifiers": ["command", "option"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "find-in-workspace",
+      "commandName": "Find in Workspace",
+      "modifiers": ["command", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find-and-replace-workspace",
+      "commandName": "Find and Replace in Workspace",
+      "modifiers": ["command", "option", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find",
+      "commandName": "Find",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find-next",
+      "commandName": "Find Next",
+      "modifiers": ["command"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "find-previous",
+      "commandName": "Find Previous",
+      "modifiers": ["command", "shift"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "project-navigator",
+      "commandName": "Project Navigator",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "symbol-navigator",
+      "commandName": "Symbol Navigator",
+      "modifiers": ["command"],
+      "key": "2",
+      "scope": "app"
+    },
+    {
+      "id": "search-navigator",
+      "commandName": "Search Navigator",
+      "modifiers": ["command"],
+      "key": "3",
+      "scope": "app"
+    },
+    {
+      "id": "issue-navigator",
+      "commandName": "Issue Navigator",
+      "modifiers": ["command"],
+      "key": "4",
+      "scope": "app"
+    },
+    {
+      "id": "debug-navigator",
+      "commandName": "Debug Navigator",
+      "modifiers": ["command"],
+      "key": "5",
+      "scope": "app"
+    },
+    {
+      "id": "breakpoint-navigator",
+      "commandName": "Breakpoint Navigator",
+      "modifiers": ["command"],
+      "key": "6",
+      "scope": "app"
+    },
+    {
+      "id": "report-navigator",
+      "commandName": "Report Navigator",
+      "modifiers": ["command"],
+      "key": "7",
+      "scope": "app"
+    },
+    {
+      "id": "show-navigator",
+      "commandName": "Show Navigator",
+      "modifiers": ["command"],
+      "key": "0",
+      "scope": "app"
+    },
+    {
+      "id": "show-debug-area",
+      "commandName": "Show Debug Area",
+      "modifiers": ["command", "shift"],
+      "key": "Y",
+      "scope": "app"
+    },
+    {
+      "id": "reveal-in-project-navigator",
+      "commandName": "Reveal in Project Navigator",
+      "modifiers": ["command"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-selection",
+      "commandName": "Jump to Selection",
+      "modifiers": ["command"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-definition",
+      "commandName": "Jump to Definition",
+      "modifiers": ["command", "shift"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-next-placeholder",
+      "commandName": "Jump to Next Placeholder",
+      "modifiers": ["control"],
+      "key": "/",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-previous-placeholder",
+      "commandName": "Jump to Previous Placeholder",
+      "modifiers": ["control"],
+      "key": "?",
+      "scope": "app"
+    },
+    {
+      "id": "comment-selection",
+      "commandName": "Comment Selection",
+      "modifiers": ["command"],
+      "key": "/",
+      "scope": "app"
+    },
+    {
+      "id": "re-indent",
+      "commandName": "Re-Indent",
+      "modifiers": ["command", "control"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "shift-right",
+      "commandName": "Shift Right",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "shift-left",
+      "commandName": "Shift Left",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "move-line-up",
+      "commandName": "Move Line Up",
+      "modifiers": ["command", "option"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "move-line-down",
+      "commandName": "Move Line Down",
+      "modifiers": ["command", "option"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "fold",
+      "commandName": "Fold",
+      "modifiers": ["command", "option"],
+      "key": "Left",
+      "scope": "app"
+    },
+    {
+      "id": "unfold",
+      "commandName": "Unfold",
+      "modifiers": ["command", "option"],
+      "key": "Right",
+      "scope": "app"
+    },
+    {
+      "id": "build",
+      "commandName": "Build",
+      "modifiers": ["command"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "run",
+      "commandName": "Run",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "test",
+      "commandName": "Test",
+      "modifiers": ["command"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "stop",
+      "commandName": "Stop",
+      "modifiers": ["command"],
+      "key": ".",
+      "scope": "app"
+    }
+  ]
+}

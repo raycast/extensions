@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prismical",
+  "title": "Prismical",
+  "description": "Search, preview, and capture notes in your Prismical Cloud workspace.",
+  "icon": "prismical-icon-inset.png",
+  "author": "nch",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Prismical",
+      "description": "Find and preview your Prismical notes.",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "Prismical",
+      "mode": "view",
+      "description": "Capture a note in your Prismical workspace."
+    },
+    {
+      "name": "append-to-note",
+      "title": "Append to Note",
+      "subtitle": "Prismical",
+      "mode": "view",
+      "description": "Add text to an existing note."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "mdast-util-from-markdown": "^2.0.3",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-to-markdown": "^2.1.2",
+    "micromark-extension-gfm": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "^19.3.0",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "react-test-renderer": "^19.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts && vitest run tests/form.test.tsx"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "Prismical API Key",
+      "description": "Connect your Prismical account. In the Prismical app, go to Settings → API & MCP to create an API key.",
+      "required": true
+    }
+  ],
+  "keywords": [
+    "notes",
+    "meetings",
+    "transcription",
+    "capture"
+  ]
+}

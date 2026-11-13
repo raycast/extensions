@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { discoverDevicesMulticast, getDeviceInfoHTTP, getLocalIPs } from "./utils/localsend";
+import { discoverDevicesMulticast, getDeviceInfoHTTP, getLocalIPs, DiscoveryError } from "./utils/localsend";
 import { getFavoriteDevices, toggleFavoriteDevice, isFavoriteDevice } from "./utils/favorites";
 import { LocalSendDevice } from "./types";
 
@@ -38,10 +38,11 @@ export default function Command() {
         });
       }
     } catch (error) {
+      const portInUse = error instanceof DiscoveryError && error.code === "EADDRINUSE";
       await showToast({
         style: Toast.Style.Failure,
-        title: "Discovery failed",
-        message: error instanceof Error ? error.message : "Unknown error",
+        title: portInUse ? "Port 53317 is in use" : "Discovery failed",
+        message: portInUse ? "Is the LocalSend app running?" : error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -50,12 +51,12 @@ export default function Command() {
 
   const refreshDevice = async (device: LocalSendDevice) => {
     try {
-      const info = await getDeviceInfoHTTP(device.ip, device.port);
+      const info = await getDeviceInfoHTTP(device.ip, device.port, device.protocol);
       if (info) {
         const isFav = await isFavoriteDevice(device.fingerprint);
         setDevices((prev) =>
           prev.map((d) =>
-            d.ip === device.ip ? { ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
+            d.ip === device.ip ? { ...d, ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
           ),
         );
         await showToast({

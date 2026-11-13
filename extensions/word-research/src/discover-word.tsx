@@ -1,26 +1,84 @@
-import { Action, ActionPanel, Color, Detail } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Detail, Form, useNavigation } from "@raycast/api";
+import { useState } from "react";
+import { useDiscovery } from "./use-discovery";
 
 import { checkWord, formatDate } from "./api";
 
-export default function Command({ arguments: args }: { arguments: Arguments.DiscoverWord }) {
-  const input = args.word.trim();
-  // Allow Unicode letters, hyphens, and apostrophes to support words like "café", "co-operate", "it's"
-  const isValid = /^[\p{L}'-]+$/u.test(input);
-  const {
-    data: result,
-    isLoading,
-    error: fetchError,
-  } = usePromise(checkWord, [input], {
-    execute: isValid,
-  });
+function DiscoveryForm({ initialValue, onSubmit }: { initialValue: string; onSubmit: (next: string) => void }) {
+  const [draft, setDraft] = useState(initialValue);
+  const { pop } = useNavigation();
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Discover Word"
+            onSubmit={(values: { input: string }) => {
+              const next = values.input.trim();
+              if (!/^[\p{L}'-]+$/u.test(next)) return;
+              onSubmit(next);
+              pop();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="input"
+        title="Word"
+        value={draft}
+        onChange={setDraft}
+        error={
+          !/^[\p{L}'-]+$/u.test(draft.trim())
+            ? "Please enter a valid word (letters, hyphens, and apostrophes only)"
+            : undefined
+        }
+      />
+    </Form>
+  );
+}
 
-  const error = !isValid ? "Please enter a valid word (letters, hyphens, and apostrophes only)" : fetchError?.message;
+export default function Command({ arguments: args }: { arguments: Arguments.DiscoverWord }) {
+  const [input, setInput] = useState(args.word.trim());
+  const { push } = useNavigation();
+  const isValid = /^[\p{L}'-]+$/u.test(input);
+  const { state, cancel, retry } = useDiscovery(checkWord, input, isValid);
+  const isLoading = isValid && state.kind === "loading";
+  const result = state.kind === "success" ? state.result : undefined;
+  const error = !isValid
+    ? "Please enter a valid word (letters, hyphens, and apostrophes only)"
+    : state.kind === "error"
+      ? state.message
+      : undefined;
+  const edit = () => {
+    if (isLoading) cancel();
+    push(
+      <DiscoveryForm
+        initialValue={input}
+        onSubmit={(next) => {
+          setInput(next);
+          retry();
+        }}
+      />,
+    );
+  };
+  const discoveryActions = (
+    <ActionPanel.Section>
+      <Action title="Discover Another Word" onAction={edit} />
+      {isValid && <Action title="Retry Discovery" onAction={retry} />}
+    </ActionPanel.Section>
+  );
 
   if (isLoading) {
     return (
       <Detail
         isLoading
+        actions={
+          <ActionPanel>
+            <Action title="Cancel Discovery" onAction={cancel} />
+            <Action title="Discover Another Word" onAction={edit} />
+          </ActionPanel>
+        }
         markdown={`# Checking \`${input}\`\n\nSolving proof-of-work, then looking up this word in Word Research.`}
         metadata={
           <Detail.Metadata>
@@ -35,9 +93,12 @@ export default function Command({ arguments: args }: { arguments: Arguments.Disc
   if (error || !result) {
     return (
       <Detail
-        markdown={`# Error\n\n${error ?? "Something went wrong."}`}
+        markdown={
+          state.kind === "cancelled" ? "# Discovery Cancelled" : `# Error\n\n${error ?? "Something went wrong."}`
+        }
         actions={
           <ActionPanel>
+            {discoveryActions}
             <Action.OpenInBrowser title="Open Word Research" url="https://wordresearch.xyz" />
           </ActionPanel>
         }
@@ -93,6 +154,7 @@ export default function Command({ arguments: args }: { arguments: Arguments.Disc
       }
       actions={
         <ActionPanel>
+          {discoveryActions}
           <Action.CopyToClipboard title="Copy Word" content={result.word} />
           <Action.OpenInBrowser title="Open Word Research" url="https://wordresearch.xyz" />
           <Action.OpenInBrowser title="Open in Wiktionary" url={dictionaryUrl} />

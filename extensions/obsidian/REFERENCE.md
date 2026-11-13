@@ -131,6 +131,19 @@ Many commands use a note list.
   - [ ] prepend option -> prepends instead of appends text if enabled
   - [ ] silent mode -> does not switch between notes in Obsidian if enabled
 
+## Quick Capture Command
+
+- [ ] select the configured vault, or use the first available vault when omitted
+- [ ] configure only the routes in use with vault-relative paths to existing Markdown files
+- [ ] expand date templates such as `Daily Notes/{date}.md`
+- [ ] append Daily Note and Shopping as bullets, and To Do as an unchecked task
+- [ ] keep additional input lines indented within the same item
+- [ ] work without Advanced URI
+- [ ] reject blank text and unconfigured routes without changing files
+- [ ] reject missing targets without creating files
+- [ ] reject non-Markdown files and directories
+- [ ] reject absolute paths, traversal outside the vault, and symbolic links to outside or non-Markdown targets
+
 ## Append Task Command
 
 - [ ] see vault selection
@@ -162,15 +175,20 @@ Many commands use a note list.
 - [ ] name
   - [ ] no name provided -> create note with name "Untitled" (default preference)
   - [ ] name already exists -> confirm to override note
+  - [ ] canceling the override keeps the form open with the input
+  - [ ] name starting with a dot, containing `/` or `\`, or empty -> failure toast, form stays open, no file written
+  - [ ] name ending in `.md` -> saved without a doubled extension
   - [ ] see templates
 - [ ] path
   - [ ] path exists -> write note to path
   - [ ] path does not exist -> create entire path and write note to path
+  - [ ] path outside the vault (e.g. `../x`) -> failure toast, no file written
 - [ ] tags
   - [ ] select tags that are specified in the preferences
 - [ ] content
   - [ ] if empty -> create empty notes
   - [ ] see templates
+- [ ] write failure -> failure toast, form stays open with the input
 - [ ] preferences
   - [ ] blank note option -> skips form and directly creates empty note
   - [ ] open note on creation option (blank notes will always open Obsidian)

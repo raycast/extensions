@@ -1,0 +1,125 @@
+{
+  "node": [
+    {
+      "version": "22.21.0",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/22.21.0",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "22.21.1",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/22.21.1",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "22.22.0",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/22.22.0",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "22.22.1",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/22.22.1",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "24.3.0",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/24.3.0",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "24.13.0",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/24.13.0",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "24.13.1",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/24.13.1",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "24.21.0",
+      "requested_version": "lts",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/node/24.21.0",
+      "source": {
+        "type": "mise.toml",
+        "path": "/Users/lachlan/.config/mise/conf.d/tools.toml"
+      },
+      "installed": true,
+      "active": true
+    }
+  ],
+  "jq": [
+    {
+      "version": "1.8.1",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/jq/1.8.1",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "1.8.2",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/jq/1.8.2",
+      "installed": true,
+      "active": false
+    }
+  ],
+  "npm:wrangler": [
+    {
+      "version": "4.93.1",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/npm-wrangler/4.93.1",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "4.131.1",
+      "requested_version": "latest",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/npm-wrangler/4.131.1",
+      "source": {
+        "type": "mise.toml",
+        "path": "/Users/lachlan/.config/mise/config.local.toml"
+      },
+      "installed": true,
+      "active": true
+    }
+  ],
+  "rust": [
+    {
+      "version": "nightly-2026-01-16",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/rust/nightly-2026-01-16",
+      "symlinked_to": "/Users/lachlan/.local/share/mise/installs/rust/nightly-2026-01-16",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "1.95.0",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/rust/1.95.0",
+      "symlinked_to": "/Users/lachlan/.local/share/mise/installs/rust/1.95.0",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "1.96.0",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/rust/1.96.0",
+      "symlinked_to": "/Users/lachlan/.local/share/mise/installs/rust/1.96.0",
+      "installed": true,
+      "active": false
+    },
+    {
+      "version": "1.98.1",
+      "requested_version": "latest",
+      "install_path": "/Users/lachlan/.local/share/mise/installs/rust/1.98.1",
+      "source": {
+        "type": "mise.toml",
+        "path": "/Users/lachlan/.config/mise/conf.d/tools.toml"
+      },
+      "symlinked_to": "/Users/lachlan/.local/share/mise/installs/rust/1.98.1",
+      "installed": true,
+      "active": true
+    }
+  ]
+}

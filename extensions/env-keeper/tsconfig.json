@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "preserve",
+    // moduleResolution 必须是 bundler/node16 这类,node10 不认识 `node:path` 这种前缀;
+    // types 也必须显式写出来——TypeScript 6 下没有自动带上 @types/node,
+    // 缺了这两项 tsc 会报一堆"找不到 node 类型"的噪音,把真实错误淹掉
+    "moduleResolution": "bundler",
+    "types": ["node", "react"],
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
+}

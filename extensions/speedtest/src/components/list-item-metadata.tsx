@@ -9,21 +9,23 @@ import {
 import { getPrettyName, getPrettyValue, isObject, isResultViewIconsListKey } from "../lib/utils";
 import { InternetSpeed } from "./bandwidth/types";
 
-type MetadataValue = SpeedtestResultObjectValueType | Partial<SpeedtestResult> | InternetSpeed;
+export type MetadataValue = SpeedtestResultObjectValueType | Partial<SpeedtestResult> | InternetSpeed;
 
 type ListItemMetadataProps = {
   data: MetadataValue;
   type?: "result";
+  /** Optional markdown (e.g. generated SVG charts) rendered above the metadata table. */
+  markdown?: string;
 };
 
-type FlatMetadata = {
+export type FlatMetadata = {
   title: string;
   value: string;
   icon?: { source: Icon; tintColor: Color };
   isSeparator?: boolean;
 };
 
-const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
+export const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
   const items: FlatMetadata[] = [];
 
   Object.entries(data).forEach((keyValuePair, index) => {
@@ -57,7 +59,7 @@ const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
   return items;
 };
 
-const reorderResult = (data: SpeedtestResult): Partial<SpeedtestResult> => {
+export const reorderResult = (data: SpeedtestResult): Partial<SpeedtestResult> => {
   const { interface: isp, server, ping, download, upload, result } = data;
   return {
     interface: isp,
@@ -69,13 +71,14 @@ const reorderResult = (data: SpeedtestResult): Partial<SpeedtestResult> => {
   };
 };
 
-export const ListItemMetadata = ({ data, type }: ListItemMetadataProps) => {
+export const ListItemMetadata = ({ data, type, markdown }: ListItemMetadataProps) => {
   let renderData = data;
   if (type === "result") {
     renderData = reorderResult(data as SpeedtestResult);
   }
   return (
     <List.Item.Detail
+      markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
           {getFlatMetadata(renderData).map((el, i) =>

@@ -32,7 +32,9 @@ function RunningTimeEntry({
         subtitle={
           (runningTimeEntry.client_name ? runningTimeEntry.client_name + " | " : "") +
           (runningTimeEntry.project_name ? runningTimeEntry.project_name + " | " : "") +
-          dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
+          dayjs
+            .duration(Math.max(0, dayjs(currentTime).diff(runningTimeEntry.start)), "milliseconds")
+            .format("HH:mm:ss")
         }
         accessories={[
           ...runningTimeEntry.tags.map((tag) => ({ tag })),

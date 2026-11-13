@@ -1,3 +1,5 @@
+import { readCredentialFile } from "../agents/credential-check.ts";
+import type { CredentialCheck } from "../agents/credential-check.ts";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -301,5 +303,27 @@ export function applyGrokRefreshedTokens(
     accessToken: refreshed.accessToken,
     refreshToken: refreshed.refreshToken,
     expiresAt: refreshed.expiresAt,
+  };
+}
+
+/** Read login identity locally without refreshing tokens or contacting billing. */
+export async function checkGrokCredentials(filePath = getGrokAuthFilePath()): Promise<CredentialCheck> {
+  const result = await readCredentialFile(filePath);
+  if (result.status === "missing") return { status: "signed_out" };
+  if (result.status === "unverified") return result;
+  const preferred = selectPreferredEntry(result.value);
+  if (!preferred) {
+    return Object.keys(result.value).length ? { status: "unverified" } : { status: "signed_out" };
+  }
+  const credentials = credentialsFromEntry(preferred.scope, preferred.entry);
+  if (!credentials) return { status: "unverified" };
+  return {
+    status: "authenticated",
+    key: JSON.stringify([
+      credentials.scope,
+      credentials.userId,
+      credentials.teamId,
+      credentials.refreshToken ?? credentials.accessToken,
+    ]),
   };
 }

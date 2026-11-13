@@ -1,9 +1,9 @@
 import { Action, Color, Icon, List } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
 
 import { PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
+import { RevalidateList } from "../helpers";
 import {
   getCheckStateAccessory,
   getNumberOfComments,
@@ -11,7 +11,6 @@ import {
   getPullRequestStatus,
   getReviewDecision,
 } from "../helpers/pull-request";
-import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import PullRequestActions from "./PullRequestActions";
 import PullRequestDetail from "./PullRequestDetail";
@@ -20,7 +19,7 @@ import { SortActionProps } from "./SortAction";
 type PullRequestListItemProps = {
   pullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  mutateList?: RevalidateList;
   showAuthor?: boolean;
 };
 
