@@ -49,7 +49,7 @@ The executable's directory, Raycast's inherited PATH, Homebrew locations, `~/.vo
 - Filter by size, inactivity, or risk without rescanning. Sort by size, project activity, or path.
 - **Unknown** activity stays unknown and does not match inactivity filters. Unknown sizes sort last.
 - **Review** means npkill returned no specific sensitive-folder warning. It is not a safety guarantee. **Unknown** risk means upstream did not provide analysis.
-- Sensitive results are hidden unless you explicitly enable them, even when `.npkillrc` enables them. Cleaning them requires a second confirmation.
+- Sensitive results are hidden unless you explicitly enable them, even when `.npkillrc` enables them. Cleaning them in the native command requires a second confirmation. AI cleanup uses one confirmation showing the exact paths, estimated sizes, and risk labels.
 - **Stop Scan** (`⌘⌥S`) preserves partial results. **Refresh Scan** starts a new scan and clears selection.
 - Enter opens details. Destructive actions are never the default Enter action.
 
