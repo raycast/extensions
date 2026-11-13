@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add BuildBase Console MCP Server] - {PR_MERGE_DATE}
+## [Add BuildBase Console MCP Server] - 2026-11-13
 
 - Add BuildBase Console to the registry: manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted Streamable HTTP server at https://api.console.buildbase.app/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
