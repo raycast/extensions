@@ -7,6 +7,32 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "hoy-planes",
+    title: "Hoy Planes",
+    description:
+      "What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. Search the daily-updated listings of the Hoy Planes network (Hoy Madrid, Hoy Barcelona, Hoy Valencia, Hoy Sevilla and eight more), open a plan's dates, address and full description, and list the provinces, topics and occasions. Every plan links to its page on the website, where tickets are bought. Listings are in Spanish. 3 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.hoyplanes.com/conector/icono-512.png",
+    homepage: "https://www.hoyplanes.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.hoyplanes.com"],
+    },
+    remoteUrl: "https://mcp.hoyplanes.com",
+  },
+  {
+    name: "glucobeat",
+    title: "GlucoBeat",
+    description:
+      "Read and log your glucose, meals, insulin, exercise and sleep from FreeStyle Libre in GlucoBeat. Tell your assistant what you measured, ate or did and it is saved in your GlucoBeat diary at the time it happened; ask about your readings, time in range and statistics, or how a meal or a workout went, and the answer describes what happened in your data with counts and ranges. No predictions, doses or diagnoses: GlucoBeat is not a medical device. 17 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a GlucoBeat account is required. Logging and the last 3 days are free; full-history queries need Premium after 10 free days. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.glucobeat.com/icons/icon-512.png",
+    homepage: "https://www.glucobeat.com/en/ai-assistants/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.glucobeat.com"],
+    },
+    remoteUrl: "https://mcp.glucobeat.com",
+  },
+  {
     name: "freelance-link",
     title: "freelance.link",
     description:

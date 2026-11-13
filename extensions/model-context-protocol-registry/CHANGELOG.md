@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Hoy Planes and GlucoBeat MCP Servers] - 2026-11-13
+
+- Add Hoy Planes to the official registry: what's on in 12 Spanish provinces (concerts, theater and free plans by date, topic, price and distance), with 3 read-only tools. Hosted Streamable HTTP server at https://mcp.hoyplanes.com with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+- Add GlucoBeat to the official registry: read and log glucose, meals, insulin, exercise and sleep in a GlucoBeat diary. Hosted Streamable HTTP server at https://mcp.glucobeat.com with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GlucoBeat account.
+
 ## [Add freelance.link MCP Server] - 2026-11-13
 
 - Add freelance.link to the official registry: keep a freelancer's availability current from an AI agent by managing projects, absences and the waitlist. 11 tools. Hosted Streamable HTTP server at https://freelance.link/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A freelance.link account is required.
