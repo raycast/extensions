@@ -4,6 +4,30 @@
 
 - Add PlushSource to the official registry: search and compare the custom plush manufacturers listed in the PlushSource directory by country, minimum order quantity, certifications and OEM/ODM. Local stdio server `plushsource-mcp` through `npx`, with the dataset bundled, no network calls and no API key.
 
+## [Add a11y-toolkit MCP Server] - 2026-11-13
+
+- Add a11y-toolkit to the community registry: WCAG 2.2 accessibility for coding agents with 37 tools that audit a URL, an HTML string or a rendered page, sample real text-over-image contrast pixel by pixel, walk Tab to find keyboard traps, judge form errors by really submitting invalid data, read what a screen reader would announce and run blindfold task journeys; plus nearest-passing-color fixes, deterministic autofixes, EAA / RD 1112 statements, VPAT 2.5, OpenACR and SHA-256-sealed evidence packs. Local stdio server installed from PyPI through `uvx` (requires uv); zero core dependencies, no account and no API keys, English and Spanish output, no telemetry.
+
+## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-13
+
+- Update Multi Mail and Multi Calendar in the official registry to name Yahoo and AOL, which the hosted servers now connect.
+
+## [Add Statuz MCP Server] - 2026-11-13
+
+- Add Statuz to the official registry: schedule and publish posts and threads to X, Bluesky, Mastodon, LinkedIn and Reddit (beta), each checked against the network's limits before it's saved. Hosted Streamable HTTP server at https://api.statuz.cloud/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Statuz Cloud account is required.
+
+## [Add UberLLM MCP Server] - 2026-11-13
+
+- Add UberLLM to the official registry: list chat, image, video and music models with their prices, quote a request without spending, generate and edit images, start videos and wait for the job, and check the balance on one UberLLM API key (9 tools). Hosted Streamable HTTP server at https://api.uberllm.dev/mcp with an UberLLM API key as an `Authorization: Bearer` header through `mcp-remote`.
+
+## [Add Excession Labs CVE MCP Server] - 2026-11-13
+
+- Add Excession Labs CVE intelligence to the official registry: six read-only tools for CVE search, source software/version evidence, available CISA KEV and dated FIRST EPSS data, source health, hosted revisions and cursor-based changes. Free hosted Streamable HTTP server at https://excessionlabs.ai/mcp/cve with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add BuildBase Console MCP Server] - 2026-11-13
+
+- Add BuildBase Console to the registry: manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted Streamable HTTP server at https://api.console.buildbase.app/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
