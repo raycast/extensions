@@ -22,7 +22,8 @@
     "alexi.build",
     "samuelkraft",
     "ChrisPanTaken",
-    "nengqi"
+    "nengqi",
+    "sean_al-gattas"
   ],
   "pastContributors": [
     "mathieudutour",
@@ -207,6 +208,14 @@
       "subtitle": "Linear",
       "interval": "15m",
       "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Group notifications like Linear",
+          "name": "groupNotifications",
+          "description": "Show and count notification groups from your Linear inbox. Opening or marking a group as read applies to the whole group.",
+          "default": false,
+          "required": false
+        },
         {
           "type": "checkbox",
           "label": "Always Show",
@@ -592,7 +601,7 @@
   ],
   "dependencies": {
     "@linear/sdk": "^91.0.0",
-    "@raycast/api": "^2.10.0",
+    "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.23",
@@ -616,7 +625,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/documentCreator.test.mts tests/favorites.test.mts tests/issueTemplates.test.mts tests/mentions.test.mts",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/documentCreator.test.mts tests/favorites.test.mts tests/inboxNotifications.test.mts tests/issueTemplates.test.mts tests/mentions.test.mts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
