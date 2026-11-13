@@ -12,17 +12,11 @@ export const Search = () => {
   const [search, setSearch] = useState("");
   const [hovered, setHovered] = useState(0);
   const { showingDetail, toggleDetail } = useShowingDetail();
-  const {
-    data: foundGames,
-    isLoading: searching,
-    isError,
-    listStatus,
-  } = useGamesSearch({
+  const { data: foundGames, listStatus } = useGamesSearch({
     term: search,
     execute: search.trim().length >= MIN_QUERY_LENGTH,
   });
-  const { games: searchedGames, loading: detailsLoading } = useResultsWithDetails(foundGames);
-  const isLoading = searching || detailsLoading;
+  const { games: searchedGames, loading: isLoading } = useResultsWithDetails(foundGames);
   return (
     <List
       isLoading={isLoading}
@@ -38,7 +32,6 @@ export const Search = () => {
         searchedGames={searchedGames}
         isLoading={isLoading}
         listStatus={listStatus}
-        error={isError}
         hovered={hovered}
         showingDetail={showingDetail}
         onToggleDetail={toggleDetail}
@@ -52,7 +45,6 @@ export const SearchList = ({
   searchedGames,
   isLoading,
   listStatus,
-  error,
   hovered,
   showingDetail,
   onToggleDetail,
@@ -61,7 +53,6 @@ export const SearchList = ({
   searchedGames?: GameSimple[];
   isLoading: boolean;
   listStatus?: ListStatus;
-  error?: Error;
   hovered: number;
   showingDetail: boolean;
   onToggleDetail: () => void;
@@ -76,7 +67,6 @@ export const SearchList = ({
         query={search}
         isLoading={isLoading}
         listStatus={listStatus}
-        error={error}
       />
       <List.Section title="Search Results">
         {searchedGames?.map((game) => (

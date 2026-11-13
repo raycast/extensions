@@ -51,13 +51,21 @@ export async function searchGlossary(
 
 export async function searchDocs(
   query: string,
-  options?: { signal?: AbortSignal; timeoutMs?: number; version?: string; scopes?: string[] },
+  options?: {
+    signal?: AbortSignal;
+    timeoutMs?: number;
+    version?: string;
+    product?: "cms" | "commerce";
+    scopes?: string[];
+  },
 ): Promise<DocsSearchResult[]> {
   const trimmedQuery = query.trim();
   if (!trimmedQuery) return [];
 
   const params = new URLSearchParams({ query: trimmedQuery });
-  if (options?.version) {
+  // The API rejects `version` unless `product` is also sent.
+  if (options?.version && options.product) {
+    params.set("product", options.product);
     params.set("version", options.version);
   }
   for (const scope of options?.scopes ?? []) {
