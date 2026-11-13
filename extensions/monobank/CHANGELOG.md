@@ -1,6 +1,6 @@
 # monobank Changelog
 
-## [Visual Statistics, Family Subscriptions and Other Improvements] - {PR_MERGE_DATE}
+## [Visual Statistics, Family Subscriptions and Other Improvements] - 2026-11-13
 
 - Added the "Show Statistics" command: a chart of your cash flow across your cards and FOP accounts, with four views in the search bar: Expenses and Income by category, Savings by jar, and Own Transfers by card. Press `↵` on a category or an account to hide it or show it again, and the chart and the totals of income, spending, savings and net follow at once. Accounts in other currencies are converted to UAH at monobank's rates. Transfers between your own accounts and to or from your jars are recognised in the stored statements and kept out of spending and income. Top-ups of a jar you smashed before installing the extension are Savings too, in "Show Statement" as well, once its payout is in the stored history; a transfer to your own card in another bank can't be told apart, so it stays under "Money transfer"
 - See the transactions behind a number with "Show Transactions" (`⌘ ⇧ S`): on a category, jar or card in "Show Statistics", and on a budget in "Show Budgets" and "Manage Budgets…". The list has exactly the transactions counted, for the same period and accounts, with a total that equals the figure you came from. In a budget, transactions added by hand have an "Added" tag and excluded ones are listed under "Excluded", and Add to Budget, Remove from Budget and Move to Budget work there too
