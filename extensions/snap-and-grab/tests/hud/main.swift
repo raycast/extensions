@@ -54,3 +54,7 @@ for count in [1,3] {
 hud.update(files: Array(files.prefix(2)), available: 5, modifiersLabel: "⇧⌘")
 guard labelTexts(hud.panel.contentView!).contains("Press again for older · Release ⇧⌘ to copy") else { fatalError("HUD must follow custom modifier keys") }
 print("PASS: copy confirmation count, clipboard instructions, and custom shortcut labels")
+hud.updateFailure(title: "Screenshot wasn't saved", detail: "Check the screenshot folder or disk space.")
+let failureLabels = labelTexts(hud.panel.contentView!)
+guard failureLabels.contains("Screenshot wasn't saved"), failureLabels.contains("Check the screenshot folder or disk space."), !failureLabels.contains(where: { $0.hasSuffix(" copied") }) else { fatalError("Failure HUD must explain the problem without claiming success") }
+print("PASS: failure HUD explains the error without a copied confirmation")

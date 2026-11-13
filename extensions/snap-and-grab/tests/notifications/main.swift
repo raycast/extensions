@@ -1,6 +1,6 @@
 import Foundation
 import CoreGraphics
-let name = Notification.Name("com.alon.captureAndCopy.captureRequested")
+let name = Notification.Name("com.alon.snapAndGrab.captureRequested")
 let observer = DistributedNotificationCenter.default().addObserver(forName: name, object: NSUserName(), queue: .main) { _ in
     print("PASS: duplicate hotkey invocation reached active session without opening capture")
     exit(0)

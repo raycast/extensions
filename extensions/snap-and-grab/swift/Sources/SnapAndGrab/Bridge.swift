@@ -54,7 +54,21 @@ private func spawn(_ function: String, arguments: [String], supportPath: String,
 }
 
 @raycast func captureSession(folder: String, supportPath: String, previews: Bool, confirmationDuration: Double, initialFlags: UInt64, requestedAt: Double) throws {
-    try runCaptureSession(folderPath: folder, supportPath: supportPath, previews: previews, confirmationDuration: confirmationDuration, initialFlags: initialFlags, requestedAt: requestedAt)
+    do {
+        try runCaptureSession(folderPath: folder, supportPath: supportPath, previews: previews, confirmationDuration: confirmationDuration, initialFlags: initialFlags, requestedAt: requestedAt)
+    } catch {
+        trace("capture-setup-error \(error)")
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        let hud = SelectionHUD()
+        hud.updateFailure(title: "Couldn't start screenshot capture", detail: "Check screenshot folder access and try again.")
+        hud.show()
+        Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { _ in
+            hud.hide()
+            exit(1)
+        }
+        app.run()
+    }
 }
 
 @raycast func listScreenshots(folder: String, limit: Int) throws -> ScreenshotListing {

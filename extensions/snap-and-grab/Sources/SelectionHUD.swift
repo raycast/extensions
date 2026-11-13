@@ -98,6 +98,13 @@ final class SelectionHUD {
         panel.setAccessibilityLabel(title.stringValue + ". " + detail.stringValue)
     }
 
+    func updateFailure(title message: String, detail explanation: String) {
+        for view in previews.arrangedSubviews { previews.removeArrangedSubview(view); view.removeFromSuperview() }
+        title.stringValue = message
+        detail.stringValue = explanation
+        panel.setAccessibilityLabel(message + ". " + explanation)
+    }
+
     func show() {
         let mouse = NSEvent.mouseLocation
         let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) ?? NSScreen.main

@@ -97,8 +97,7 @@ final class CaptureCoordinator {
         do { try process.run() }
         catch {
             trace("capture-start-error \(error)")
-            _ = session.captureCompleted(file: nil, history: [])
-            finish()
+            showFailure(title: "Couldn't start screenshot capture", detail: "Try Capture and Copy again.")
         }
     }
 
@@ -110,7 +109,11 @@ final class CaptureCoordinator {
         if process.terminationStatus == 0 {
             do {
                 if try saveNewCapture(from: pasteboard, previousChangeCount: previous, to: file) { saved = file }
-            } catch { trace("capture-save-error \(error)") }
+            } catch {
+                trace("capture-save-error \(error)")
+                showFailure(title: "Screenshot wasn't saved", detail: "Check the screenshot folder or disk space.")
+                return
+            }
         }
         if saved != nil {
             do {
@@ -126,6 +129,21 @@ final class CaptureCoordinator {
         if session.captureCompleted(file: saved, history: history) { finish(); return }
         hud.update(files: session.files, available: session.availableCount, modifiersLabel: captureShortcut.label, message: historyMessage)
         hud.show()
+    }
+
+    private func showFailure(title: String, detail: String) {
+        ending = true
+        timer?.invalidate()
+        if let observer { DistributedNotificationCenter.default().removeObserver(observer) }
+        _ = lockFile(descriptor, LOCK_UN)
+        // Error feedback remains visible even when success confirmations are off.
+        transferComplete = true
+        hud.updateFailure(title: title, detail: detail)
+        hud.show()
+        Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { [self] _ in
+            hud.hide()
+            exit(1)
+        }
     }
 
     private func finish() {
@@ -156,7 +174,7 @@ final class CaptureCoordinator {
             }
         } catch {
             trace("clipboard-error \(error)")
-            exit(1)
+            showFailure(title: "Couldn't copy screenshots", detail: "Saved files remain in your screenshot folder.")
         }
     }
 }
