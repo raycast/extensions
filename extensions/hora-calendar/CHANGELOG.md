@@ -1,6 +1,6 @@
 # hora Calendar Changelog
 
-## [Focus, Agenda and Availability] - {PR_MERGE_DATE}
+## [Focus, Agenda and Availability] - 2026-11-13
 
 - Start Focus and Stop Focus — control hora's Focus session, with an optional length in minutes
 - Copy My Availability — copy your free time slots as text, with a choice of duration and days ahead
