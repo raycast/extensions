@@ -20,6 +20,15 @@ export type Cve = {
   nistUrl: string;
 };
 
+// A macOS InstallAssistant.pkg listed in SOFA's InstallationApps.
+export type Installer = {
+  name: string;
+  version: string;
+  build: string;
+  url: string;
+  size?: number;
+};
+
 export type PastRelease = {
   key: string;
   version: string;
@@ -28,6 +37,7 @@ export type PastRelease = {
   securityUrl?: string;
   // Shipped only to some devices, so it can be newer than the release shown on the main row.
   deviceSpecific: boolean;
+  installers: Installer[];
 };
 
 export type Release = {
@@ -44,9 +54,11 @@ export type Release = {
   securityUrl?: string;
   sofaUrl: string;
   earlierReleases: PastRelease[];
+  installers: Installer[];
 };
 
 type FeedEntry = { osVersion: string; latest: Record<string, unknown>; history: unknown };
+type Feed = { entries: FeedEntry[]; installationApps: unknown };
 
 // The feed is untrusted JSON, so every field is checked before use instead of trusting a type cast.
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -76,6 +88,35 @@ function safeUrl(value: unknown, host: string): string | undefined {
   }
 }
 
+// Downloads are only trusted from Apple's own https hosts.
+export function appleDownloadUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  try {
+    const url = new URL(value);
+    const appleHost = url.hostname === "apple.com" || url.hostname.endsWith(".apple.com");
+    return url.protocol === "https:" && appleHost && !url.username && !url.password ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// SOFA's LatestUMA and AllPreviousUMA, deduplicated by build.
+function toInstallers(installationApps: unknown, name: string): Installer[] {
+  if (!isRecord(installationApps)) return [];
+  const previous = Array.isArray(installationApps.AllPreviousUMA) ? installationApps.AllPreviousUMA : [];
+  const seen = new Set<string>();
+  return [installationApps.LatestUMA, ...previous].flatMap((item: unknown) => {
+    if (!isRecord(item)) return [];
+    const version = text(item.Version);
+    const build = text(item.Build);
+    const url = appleDownloadUrl(item.URL);
+    if (!version || !build || !url || seen.has(build)) return [];
+    seen.add(build);
+    const size = typeof item.Size === "number" && item.Size > 0 ? item.Size : undefined;
+    return { name, version, build, url, size };
+  });
+}
+
 // Exploited CVEs first, then newest CVE ID first.
 export function compareCves(a: Cve, b: Cve): number {
   return Number(b.exploited) - Number(a.exploited) || b.id.localeCompare(a.id, undefined, { numeric: true });
@@ -101,7 +142,12 @@ function toCves(latest: Record<string, unknown>): Cve[] {
 }
 
 // SOFA's SecurityReleases, newest first, without the release on the main row and without exact duplicates.
-function toEarlierReleases(history: unknown, latestVersion: string, latestBuild: string | undefined): PastRelease[] {
+function toEarlierReleases(
+  history: unknown,
+  latestVersion: string,
+  latestBuild: string | undefined,
+  installers: Installer[],
+): PastRelease[] {
   const seen = new Set<string>();
   let skippedLatest = false;
   return (Array.isArray(history) ? history : []).flatMap((item: unknown) => {
@@ -124,8 +170,16 @@ function toEarlierReleases(history: unknown, latestVersion: string, latestBuild:
       releaseDate,
       securityUrl: safeUrl(item.SecurityInfo, "support.apple.com"),
       deviceSpecific: item.DeviceScope === "device-specific",
+      installers: installersFor(installers, version, build ? [build] : []),
     };
   });
+}
+
+// Installers for a version, narrowed to the given builds when any of them has one.
+function installersFor(installers: Installer[], version: string, builds: string[]): Installer[] {
+  const sameVersion = installers.filter((installer) => installer.version === version);
+  const sameBuild = sameVersion.filter((installer) => builds.includes(installer.build));
+  return sameBuild.length ? sameBuild : sameVersion;
 }
 
 // Returns undefined for releases missing a version or valid date, so one bad entry doesn't break the list.
@@ -134,29 +188,32 @@ function toRelease(
   titlePrefix: string,
   sofaUrl: string,
   { latest, history }: FeedEntry,
+  allInstallers: Installer[] = [],
 ): Release | undefined {
   const version = text(latest.ProductVersion);
   const build = text(latest.Build);
   const releaseDate = text(latest.ReleaseDate);
   if (!version || !releaseDate || Number.isNaN(Date.parse(releaseDate))) return undefined;
   const allBuilds = texts(latest.AllBuilds);
+  const builds = allBuilds.length ? allBuilds : build ? [build] : [];
   return {
     key: `${platform}-${version}`,
     platform,
     title: `${titlePrefix} ${version}`,
     version,
     build,
-    allBuilds: allBuilds.length ? allBuilds : build ? [build] : [],
+    allBuilds: builds,
     releaseDate,
     cves: toCves(latest),
     exploitedCves: texts(latest.ActivelyExploitedCVEs),
     securityUrl: safeUrl(latest.SecurityInfo, "support.apple.com"),
     sofaUrl,
-    earlierReleases: toEarlierReleases(history, version, build),
+    earlierReleases: toEarlierReleases(history, version, build, allInstallers),
+    installers: installersFor(allInstallers, version, builds),
   };
 }
 
-async function fetchFeed(name: string): Promise<FeedEntry[]> {
+async function fetchFeed(name: string): Promise<Feed> {
   const response = await fetch(`${FEED_BASE}/${name}.json`);
   if (!response.ok) {
     throw new Error(`SOFA ${name} returned ${response.status} ${response.statusText}`);
@@ -165,12 +222,13 @@ async function fetchFeed(name: string): Promise<FeedEntry[]> {
   if (!isRecord(feed) || !Array.isArray(feed.OSVersions)) {
     throw new Error(`SOFA ${name} has an unexpected format`);
   }
-  return feed.OSVersions.flatMap((entry: unknown) => {
+  const entries = feed.OSVersions.flatMap((entry: unknown) => {
     const osVersion = isRecord(entry) ? text(entry.OSVersion) : undefined;
     return osVersion && isRecord(entry) && isRecord(entry.Latest)
       ? { osVersion, latest: entry.Latest, history: entry.SecurityReleases }
       : [];
   });
+  return { entries, installationApps: feed.InstallationApps };
 }
 
 function isRelease(release: Release | undefined): release is Release {
@@ -185,22 +243,23 @@ export async function fetchReleases(): Promise<Release[]> {
   ]);
 
   // macOS OSVersion looks like "Golden Gate 27"; the marketing name drives the SOFA page slug.
-  const macReleases = macos.map((entry) => {
+  const macReleases = macos.entries.map((entry) => {
     const { osVersion } = entry;
     const name = osVersion.replace(/\s*\d+$/, "");
     const slug = encodeURIComponent(name.toLowerCase().replace(/\s+/g, ""));
-    return toRelease("macOS", `macOS ${name}`, `${SITE_BASE}/macos/${slug}`, entry);
+    const installers = toInstallers(macos.installationApps, `macOS ${name}`);
+    return toRelease("macOS", `macOS ${name}`, `${SITE_BASE}/macos/${slug}`, entry, installers);
   });
 
   // SOFA publishes iOS and iPadOS as a single release, so both platforms share the same data.
   const mobileReleases = (["iOS", "iPadOS"] as const).flatMap((platform) =>
-    ios.map((entry) =>
+    ios.entries.map((entry) =>
       toRelease(platform, platform, `${SITE_BASE}/ios/ios${encodeURIComponent(entry.osVersion)}`, entry),
     ),
   );
 
   const numberedReleases = NUMBERED_FEEDS.flatMap(({ platform }, index) =>
-    numbered[index].map((entry) => {
+    numbered[index].entries.map((entry) => {
       const major = entry.osVersion.match(/\d+$/)?.[0] ?? "";
       const section = platform.toLowerCase();
       return toRelease(platform, platform, `${SITE_BASE}/${section}/${section}${major}`, entry);

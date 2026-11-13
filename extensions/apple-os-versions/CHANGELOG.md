@@ -22,10 +22,18 @@
 - Show CVEs (⌘⇧V) lists a release's patched CVEs, exploited ones first, with a search box, severity and CISA KEV tags, and links to NIST.
 - Search CVE (⌘⇧F) searches every CVE across all OS versions and shows which releases fix it.
 
+### Downloads
+
+- Download Firmware… (⌘⇧D) lists the restore images (.ipsw) for a version from [ipsw.me](https://ipsw.me), grouped by the devices that share them, with signing status and size. Downloads are checked against their SHA-256.
+- For macOS, Download Installer Package (⌘⇧I) saves Apple's full `InstallAssistant.pkg`, and Create Installer ISO (⌥⌘I) turns it into a bootable `.iso` the way Mist does. Building the ISO asks for your administrator password.
+- Both actions are also available on each entry in Earlier Releases.
+- Downloads run in the background, so they keep going after Raycast closes. They resume if interrupted and show a notification when finished. While the command is open, a toast shows progress and can cancel the download.
+
 ### Preferences
 
 - Primary Action chooses what Enter does: Copy Version, Copy Build, Show CVEs, Search CVE, Open Apple Security Notes, or Open in SOFA.
 - Refresh Data chooses how often SOFA data is downloaded: every time the command opens, or only when the saved data is older than 1, 4, or 12 hours, or a day. Refresh (⌘R) always updates immediately.
+- Download Location chooses where firmware and installers are saved (default `~/Downloads`).
 
 ### Security
 

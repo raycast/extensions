@@ -11,6 +11,7 @@ import {
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { ReactElement, useEffect, useState } from "react";
 import { CveList, CveSearch } from "./cve-list";
+import { DownloadActions } from "./download-actions";
 import { fetchReleases, formatDate, PastRelease, Platform, PLATFORMS, Release } from "./sofa";
 
 // SF Symbols rendered to assets/ (each has an @dark variant for the dark theme).
@@ -26,7 +27,7 @@ const PLATFORM_ICONS: Record<Platform, string> = {
 type ActionId = Preferences["primaryAction"];
 
 // Bump when the Release shape changes so cached data from older builds is ignored.
-const CACHE_VERSION = 5;
+const CACHE_VERSION = 6;
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -193,7 +194,16 @@ function ReleaseItem(props: {
           </ActionPanel.Section>
           <ActionPanel.Section>
             {others(["openSecurityNotes", "openSofa"])}
-            {release.earlierReleases.length > 0 && <EarlierReleasesMenu releases={release.earlierReleases} />}
+            {release.earlierReleases.length > 0 && <EarlierReleasesMenu release={release} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <DownloadActions
+              platform={release.platform}
+              title={release.title}
+              version={release.version}
+              installers={release.installers}
+              withShortcuts
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
@@ -221,7 +231,8 @@ function ReleaseItem(props: {
   );
 }
 
-function EarlierReleasesMenu({ releases }: { releases: PastRelease[] }) {
+function EarlierReleasesMenu({ release }: { release: Release }) {
+  const releases: PastRelease[] = release.earlierReleases;
   return (
     <ActionPanel.Submenu
       title="Earlier Releases…"
@@ -237,6 +248,12 @@ function EarlierReleasesMenu({ releases }: { releases: PastRelease[] }) {
           <Action.CopyToClipboard title="Copy Version" content={past.version} />
           {past.build && <Action.CopyToClipboard title="Copy Build" content={past.build} />}
           {past.securityUrl && <Action.OpenInBrowser title="Open Apple Security Notes" url={past.securityUrl} />}
+          <DownloadActions
+            platform={release.platform}
+            title={release.title.replace(release.version, past.version)}
+            version={past.version}
+            installers={past.installers}
+          />
         </ActionPanel.Submenu>
       ))}
     </ActionPanel.Submenu>
