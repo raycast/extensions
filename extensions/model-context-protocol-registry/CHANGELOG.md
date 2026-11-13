@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update TopxAI Models Server URL] - {PR_MERGE_DATE}
+
+- Move TopxAI Models to https://api.topxai.xyz/mcp/models. The old host now answers with a cross-host redirect, which drops the `Authorization` header, so the previous configuration fails with 401.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
