@@ -1,6 +1,6 @@
 # Highseat Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-13
 
 - View Sites, View Stats and View Goals commands
 - Live Visitors in the menu bar
