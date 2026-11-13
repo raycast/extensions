@@ -5,7 +5,14 @@ import {
   localListWarning,
   searchSteamGames,
 } from "../lib/games";
-import { changeVsLastWeek, getCurrentPlayers, getPlayerHistory, steamChartsUrl, windowStats } from "../lib/players";
+import {
+  changeVsLastWeek,
+  DAY,
+  getCurrentPlayers,
+  getPlayerHistory,
+  recentStats,
+  steamChartsUrl,
+} from "../lib/players";
 
 type Input = {
   /**
@@ -45,18 +52,23 @@ export default async function getPlayerCount(input: Input) {
 
   const [playingNow, history] = await Promise.all([getCurrentPlayers(game.appid), getPlayerHistory(game.appid)]);
   const points = history?.points ?? [];
+  const newest = points.at(-1)?.[0];
+  const stale = newest !== undefined && Date.now() - newest > DAY;
   return {
     game: { ...game, storeUrl: getSteamGameStoreUrl(game.appid), steamChartsUrl: steamChartsUrl(game.appid) },
     playingNow,
     peak24h: history?.peak24h,
     allTimePeak: history?.allTimePeak,
-    last7Days: windowStats(points, 7),
-    last30Days: windowStats(points, 30),
+    last7Days: recentStats(points, 7),
+    last30Days: recentStats(points, 30),
     changeVs7DaysAgoPct: round(changeVsLastWeek(points, playingNow)),
     months: history?.months.slice(0, 6),
     warnings: [
       playingNow === undefined ? "Steam has no live player count for this game." : undefined,
       history ? undefined : "SteamCharts has no player history for this game.",
+      stale
+        ? `SteamCharts has no player history since ${new Date(newest).toDateString()}, so the 7- and 30-day figures are missing or partial.`
+        : undefined,
       listWarning,
     ].filter((warning): warning is string => Boolean(warning)),
   };

@@ -31,7 +31,7 @@ export const RANGE_TITLES: Record<PlayerRange, string> = {
   max: "All Time",
 };
 
-const DAY = 24 * 60 * 60 * 1000;
+export const DAY = 24 * 60 * 60 * 1000;
 
 export const steamChartsUrl = (appid: number) => `https://steamcharts.com/app/${appid}`;
 export const steamDbChartsUrl = (appid: number) => `https://steamdb.info/app/${appid}/charts/`;
@@ -167,6 +167,10 @@ export function windowStats(points: PlayerPoint[], days?: number): WindowStats |
     low: Math.min(...counts),
   };
 }
+
+// For "last N days" answers: unlike the chart, the window ends now, so stale history gives nothing
+export const recentStats = (points: PlayerPoint[], days: number) =>
+  windowStats(points.filter(([ms]) => ms >= Date.now() - days * DAY));
 
 // Older chart points are monthly averages, so all-time figures come from the monthly table
 export function allTimeStats(history: PlayerHistory): WindowStats | undefined {

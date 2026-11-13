@@ -21,7 +21,7 @@ function movement(game: TopGame): List.Item.Accessory | undefined {
 
 export default function Command() {
   const [kind, setKind] = useCachedState<Kind>("most-played-kind", "now");
-  const { data, isLoading, error } = useCachedPromise(getTopGames, [kind], { keepPreviousData: true });
+  const { data, isLoading, error, revalidate } = useCachedPromise(getTopGames, [kind], { keepPreviousData: true });
   const { games, loading } = useResultsWithDetails(data);
 
   return (
@@ -40,6 +40,11 @@ export default function Command() {
           icon={Icon.ExclamationMark}
           title="Could Not Load the Most Played Games"
           description={error.message}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={revalidate} />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.EmptyView icon={Icon.TwoPeople} title={isLoading ? "Loading Most Played Games…" : "No Games"} />
