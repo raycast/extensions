@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Statuz MCP Server] - 2026-11-13
+
+- Add Statuz to the official registry: schedule and publish posts and threads to X, Bluesky, Mastodon, LinkedIn and Reddit (beta), each checked against the network's limits before it's saved. Hosted Streamable HTTP server at https://api.statuz.cloud/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Statuz Cloud account is required.
+
 ## [Add UberLLM MCP Server] - 2026-11-13
 
 - Add UberLLM to the official registry: list chat, image, video and music models with their prices, quote a request without spending, generate and edit images, start videos and wait for the job, and check the balance on one UberLLM API key (9 tools). Hosted Streamable HTTP server at https://api.uberllm.dev/mcp with an UberLLM API key as an `Authorization: Bearer` header through `mcp-remote`.
