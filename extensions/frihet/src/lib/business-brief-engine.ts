@@ -299,7 +299,14 @@ export async function generateOperationalBusinessBrief(
   client: BriefClientPort,
   options?: GenerateBriefOptions,
 ): Promise<OperationalBusinessBrief> {
-  const asOfDate = options?.asOfDate ?? new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const asOfDate =
+    options?.asOfDate ??
+    [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0"),
+    ].join("-");
   const periodMonth = asOfDate.slice(0, 7);
   const pageLimit = options?.pageLimit ?? 25;
   const maxCrmClients = options?.maxCrmClientsToInspect ?? 5;

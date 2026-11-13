@@ -8,8 +8,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { buildFrihetDeepLink, FrihetApiError } from "./lib/frihet-client.js";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FrihetApiError } from "./lib/frihet-client.js";
 import {
   clearActiveWorkspaceCache,
   createClientFromPreferences,
@@ -23,17 +23,32 @@ export default function SwitchWorkspaceCommand() {
   const [baseUrl, setBaseUrl] = useState<string>("https://api.frihet.io/v1");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FrihetApiError | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const loadWorkspaceStatus = useCallback(async (bypassCache = false) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setIsLoading(true);
     setError(null);
     try {
       const api = createClientFromPreferences();
       setTenantHash(api.tenantNamespace);
       setBaseUrl(api.baseUrl);
-      const ctx = await api.getBusinessContext({ bypassCache });
+      const ctx = await api.getBusinessContext({
+        bypassCache,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted || abortRef.current !== controller) return;
       setContext(ctx);
     } catch (err) {
+      if (
+        controller.signal.aborted ||
+        abortRef.current !== controller ||
+        (err instanceof FrihetApiError && err.errorCode === "request_aborted")
+      ) {
+        return;
+      }
       const apiErr =
         err instanceof FrihetApiError
           ? err
@@ -45,12 +60,15 @@ export default function SwitchWorkspaceCommand() {
       setContext(null);
       setError(apiErr);
     } finally {
-      setIsLoading(false);
+      if (!controller.signal.aborted && abortRef.current === controller) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     void loadWorkspaceStatus();
+    return () => abortRef.current?.abort();
   }, [loadWorkspaceStatus]);
 
   const stats = globalTenantCache.getStats();
@@ -65,17 +83,19 @@ export default function SwitchWorkspaceCommand() {
   const planName = context?.plan?.name ?? context?.plan?.tier ?? "—";
 
   const detailMarkdown = [
-    `# Workspace & Tenant Isolation (\`AUTH-02\`)`,
+    "# Connected Workspace",
     "",
-    `**Connected Business:** ${businessName}  `,
-    `**Tenant Cache Namespace (SHA-256):** \`${tenantHash}\`  `,
-    `**Cache Generation:** \`${stats.generation}\` · **Cached Entries:** \`${stats.cachedEntryCount}\`  `,
-    `**API Endpoint:** \`${baseUrl}\`  `,
+    `**${businessName}**  `,
+    `**Currency:** ${currency} · **Plan:** ${planName}  `,
+    `**Fiscal zone:** ${fiscalZone}`,
     "",
-    "## Cross-Workspace Safety Guarantee",
-    "- Every cached response and in-flight `AbortController` is bound to the SHA-256 fingerprint of `(apiBaseUrl, apiKey)`.",
-    "- Changing the API key in Raycast Extension Preferences or running **Purge Workspace Cache** immediately aborts all pending requests and wipes all cached records.",
-    "- Zero customer or financial records are ever persisted to unencrypted disk.",
+    "## Workspace Cache",
+    "Cached records stay in memory and are kept separate for each API key. Reopen the command after changing your key to connect to the new workspace.",
+    "",
+    "**Purge Workspace Cache** cancels pending requests, clears this command's cached records and refreshes the connection.",
+    "",
+    `**API:** ${baseUrl}  `,
+    `**Connection fingerprint:** \`${tenantHash}\``,
   ].join("\n");
 
   return (
@@ -88,13 +108,14 @@ export default function SwitchWorkspaceCommand() {
             tintColor: error ? Color.Red : Color.Green,
           }}
           title={businessName}
-          subtitle={`Namespace: ${tenantHash}`}
           accessories={[
             {
               tag: {
                 value: error
                   ? `Error ${error.statusCode}`
-                  : `${currency} · ${planName}`,
+                  : context
+                    ? "Connected"
+                    : "Connecting",
                 color: error ? Color.Red : Color.Green,
               },
             },
@@ -109,32 +130,11 @@ export default function SwitchWorkspaceCommand() {
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label
-                    title="Business Name"
-                    text={businessName}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Currency"
-                    text={currency}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Fiscal Zone"
-                    text={String(fiscalZone)}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Plan"
-                    text={String(planName)}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Tenant Namespace"
-                    text={tenantHash}
-                  />
-                  <List.Item.Detail.Metadata.Label
                     title="Cached Entries"
                     text={String(stats.cachedEntryCount)}
                   />
                   <List.Item.Detail.Metadata.Label
-                    title="Cache Generation"
+                    title="Generation"
                     text={String(stats.generation)}
                   />
                 </List.Item.Detail.Metadata>
@@ -165,7 +165,7 @@ export default function SwitchWorkspaceCommand() {
               />
               <Action.OpenInBrowser
                 title="Open Frihet API Key Settings"
-                url={buildFrihetDeepLink("dashboard")}
+                url="https://app.frihet.io/settings/api"
               />
             </ActionPanel>
           }

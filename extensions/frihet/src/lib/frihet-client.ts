@@ -493,6 +493,25 @@ export function formatProvenancedAmount(p: ProvenancedAmount): string {
   return `${p.amount.toFixed(2)} ${p.currency}`;
 }
 
+export function formatAmountSource(
+  provenance: ProvenancedAmount["provenance"],
+): string {
+  switch (provenance) {
+    case "stored_field":
+    case "stored":
+      return "Stored total";
+    case "derived_from_items":
+    case "derived_from_lines":
+      return "Calculated from line items";
+    case "business_context_summary":
+      return "Workspace summary";
+    case "mixed_currency_unconverted":
+      return "Separate currency totals";
+    case "unavailable":
+      return "Unavailable";
+  }
+}
+
 export function formatCurrencyAmount(
   amount: number | null | undefined,
   currency = "EUR",
@@ -572,8 +591,10 @@ export class FrihetRestClient {
   private readonly timeoutMs: number;
 
   constructor(options: FrihetClientOptions) {
+    this.cache = options.cache ?? globalTenantCache;
     const cleanKey = (options.apiKey ?? "").trim();
     if (!cleanKey) {
+      this.cache.activateNamespace("unauthenticated");
       throw new FrihetApiError(
         401,
         "missing_api_key",
@@ -581,10 +602,14 @@ export class FrihetRestClient {
       );
     }
     this.apiKey = cleanKey;
-    this.baseUrl = validateSafeApiBaseUrl(
-      options.apiBaseUrl ?? DEFAULT_API_BASE_URL,
-    );
-    this.cache = options.cache ?? globalTenantCache;
+    try {
+      this.baseUrl = validateSafeApiBaseUrl(
+        options.apiBaseUrl ?? DEFAULT_API_BASE_URL,
+      );
+    } catch (error) {
+      this.cache.activateNamespace("unauthenticated");
+      throw error;
+    }
     this.fetchImpl = options.fetchImpl ?? globalThis.fetch;
     this.timeoutMs = options.timeoutMs ?? REQUEST_TIMEOUT_MS;
     this.tenantNamespace = computeTenantNamespace(this.baseUrl, this.apiKey);

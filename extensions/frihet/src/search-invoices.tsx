@@ -12,6 +12,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   buildFrihetDeepLink,
+  formatAmountSource,
   formatCurrencyAmount,
   FrihetApiError,
   resolveDocumentAmount,
@@ -51,13 +52,14 @@ function renderInvoiceMarkdown(invoice: InvoiceRecord): string {
     `**Client:** ${invoice.clientName}  `,
     `**Status:** \`${(invoice.status ?? "draft").toUpperCase()}\`  `,
     `**Issue Date:** ${invoice.issueDate ?? "—"} · **Due Date:** ${invoice.dueDate ?? "—"}  `,
-    `**Total:** **${formatCurrencyAmount(resolved.amount, resolved.currency)}** _(${resolved.provenance}: ${resolved.formula})_`,
+    `**Total:** **${formatCurrencyAmount(resolved.amount, resolved.currency)}**  `,
+    `**Amount source:** ${formatAmountSource(resolved.provenance)}`,
     "",
   ];
 
   if (invoice.status === "draft" || !invoice.status) {
     lines.push(
-      "> **Draft Boundary:** This document is saved as a draft (`status: draft`). It has not been issued, emailed, or submitted to VeriFactu/AEAT, and does not count toward issued revenue.",
+      "> **Draft:** This document has not been issued and does not count toward issued revenue.",
       "",
     );
   }
@@ -86,7 +88,7 @@ function renderInvoiceMarkdown(invoice: InvoiceRecord): string {
     lines.push("");
   } else {
     lines.push(
-      "_Summary row loaded. Press **Enter** or select **Load Full Line Items** to fetch stored line items from `GET /v1/invoices/:id`._",
+      "_Select **Load Full Line Items** from Actions to see the complete invoice._",
       "",
     );
   }
@@ -302,8 +304,11 @@ export default function SearchInvoicesCommand() {
           );
           const amountTag =
             resolvedAmount.provenance === "unavailable"
-              ? "Select to compute total"
-              : `${formatCurrencyAmount(resolvedAmount.amount, resolvedAmount.currency)} (${resolvedAmount.provenance === "stored_field" || resolvedAmount.provenance === "stored" ? "stored" : "derived"})`;
+              ? "Amount unavailable"
+              : formatCurrencyAmount(
+                  resolvedAmount.amount,
+                  resolvedAmount.currency,
+                );
 
           return (
             <List.Item
@@ -311,12 +316,11 @@ export default function SearchInvoicesCommand() {
               id={inv.id}
               icon={{ source: Icon.Document, tintColor: badge.color }}
               title={docNum}
-              subtitle={inv.clientName}
               accessories={[
                 { tag: { value: badge.value, color: badge.color } },
                 {
                   text: amountTag,
-                  tooltip: `Amount provenance: ${resolvedAmount.formula}`,
+                  tooltip: formatAmountSource(resolvedAmount.provenance),
                 },
               ]}
               detail={
@@ -371,8 +375,8 @@ export default function SearchInvoicesCommand() {
                         }
                       />
                       <List.Item.Detail.Metadata.Label
-                        title="Amount Provenance"
-                        text={`${resolvedAmount.provenance} (${resolvedAmount.formula})`}
+                        title="Amount Source"
+                        text={formatAmountSource(resolvedAmount.provenance)}
                       />
                     </List.Item.Detail.Metadata>
                   }

@@ -30,19 +30,13 @@ function renderProductMarkdown(
 ): string {
   const active = isProductEffectivelyActive(product);
   const currency = product.currency ?? "EUR";
-  const statusDetail =
-    product.isActive === undefined
-      ? "Active (legacy record: `isActive` omitted)"
-      : product.isActive
-        ? "Active (`isActive: true`)"
-        : "Inactive (`isActive: false`)";
 
   const lines: string[] = [
     `# ${product.name}`,
     "",
     `**Unit Price:** **${formatCurrencyAmount(product.unitPrice, currency)}**  `,
     `**Tax Rate:** ${typeof product.taxRate === "number" ? `${product.taxRate}%` : "Workspace Default"}  `,
-    `**Status:** ${active ? "Active" : "Inactive"} — _${statusDetail}_  `,
+    `**Status:** ${active ? "Active" : "Inactive"}  `,
     ...(product.sku ? [`**SKU:** \`${product.sku}\`  `] : []),
     "",
   ];
