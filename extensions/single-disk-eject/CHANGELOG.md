@@ -1,5 +1,9 @@
 # Single Disk Eject Changelog
 
+## [Trim Ignored Volumes] - {PR_MERGE_DATE}
+
+- Trim each Ignored Volumes entry so "Macintosh HD, Recovery" hides every listed volume on macOS
+
 ## [Windows Ejection Rework] - 2026-04-20
 
 - Replaced deprecated `wmic` command with PowerShell/CIM cmdlets that should work on all modern Windows versions
