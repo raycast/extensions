@@ -119,6 +119,7 @@
 /extensions/apis-guru-search                                        @zebapy
 /extensions/app-creator                                             @EvanZhouDev
 /extensions/app-icon-generator                                      @hunter-ji @pernielsentikaer @0xdhrv
+/extensions/app-icons                                               @sherotree
 /extensions/app-keeper-manager                                      @onlysunjun
 /extensions/app-store-connect                                       @bangerang @danilorequena @chrismessina
 /extensions/app-tag-manager                                         @ZainCheung
@@ -1002,7 +1003,7 @@
 /extensions/fleeting                                                @0xdhrv
 /extensions/flibusta-search                                         @vladislav-yevtushenko
 /extensions/flight-miles-calculator                                 @DannySeidel @pernielsentikaer
-/extensions/flighty                                                 @hrishabhn @damian-duchnowski @effektsvk @samuelkraft
+/extensions/flighty                                                 @hrishabhn @damian-duchnowski @effektsvk @samuelkraft @0xdhrv
 /extensions/floaty                                                  @fayecat
 /extensions/flow                                                    @vimtor @tyuichis @05bmckay
 /extensions/flowspeech-tts                                          @waeckerlinfederowicz66-sketch
@@ -2864,7 +2865,7 @@
 /extensions/sound-search                                            @clins1994 @perfectbase @clins1994 @pernielsentikaer
 /extensions/soundboard                                              @pernielsentikaer @andreaselia @FrankreedX @jarntz @n0kovo @muhammadrizo-y
 /extensions/sourcegraph                                             @bobheadxi
-/extensions/sourcegraph-amp-dash-x                                  @jdorfman
+/extensions/sourcegraph-amp-dash-x                                  @jdorfman @pc-style
 /extensions/sourcetree                                              @i906 @xmok
 /extensions/sowiks                                                  @goliney-vasyl
 /extensions/spacejump                                               @PhilippSchickling

@@ -273,7 +273,6 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Vercel_Kimi_K3.1_Pro | Moonshot AI's frontier multimodal model for complex reasoning, coding, and long-horizon agentic work. |
 | Vercel_Gemma_4_31B | Google's open-weight dense model with vision and 140+ language support, tuned for output quality over throughput. |
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
-| Vercel_Inkling_Small | Thinking Machines' smaller, faster open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_DeepSeek_V4_Flash | DeepSeek's lightweight V4 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
 | Vercel_DeepSeek_V4.1_Flash | DeepSeek's lightweight V4.1 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
 | Vercel_DeepSeek_V4_Pro | DeepSeek's 1.6T parameter MoE model optimized for coding, reasoning, and agentic tasks with a 1M token context window. |

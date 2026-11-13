@@ -1,40 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {searchFlights, summarizeFlight} from '../src/flight-search.ts'
-import type {Flight} from '../src/flights.ts'
-
-const flight: Flight = {
-    id: 'a8e4d3fc-1e6c-47a2-92ec-2dbf476d20f1',
-    number: '1415',
-    airlineId: 'bb816a5a-6784-4b4b-a3c8-d174088f6e9c',
-    airlineIata: 'SK',
-    airlineIcao: 'SAS',
-    airlineName: 'Scandinavian Airlines',
-    depAirportIata: 'ARN',
-    depCity: 'Stockholm',
-    arrAirportIata: 'LHR',
-    arrCity: 'London',
-    aircraftIata: null,
-    aircraftIcao: null,
-    aircraftName: null,
-    aircraftTailNumber: null,
-    distance: 1460,
-    depTz: 'Europe/Stockholm',
-    depTimeOriginal: Date.parse('2026-10-23T22:30:00Z') / 1000,
-    depTimeEstimated: null,
-    depTimeActual: null,
-    depTerminal: '5',
-    depGate: null,
-    arrTz: 'Europe/London',
-    arrTimeOriginal: null,
-    arrTimeEstimated: null,
-    arrTimeActual: null,
-    arrTerminal: null,
-    arrGate: null,
-    arrBaggageBelt: null,
-    pnr: 'PRIVATE',
-    seatNumber: '12A',
-}
+import {flight} from './fixtures/flight.ts'
 
 test('matches flight numbers with spaces, case, and either airline code', () => {
     for (const query of ['SK1415', 'sk 1415', 'SAS 1415', '1415', 'Scandinavian']) {

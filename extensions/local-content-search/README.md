@@ -34,13 +34,14 @@ Selected folders -> native readers -> EmbeddingGemma 2 / Metal -> SQLite
                                +---- indexing yields -------+
 ```
 
-The per-user login service runs independently of Raycast. It reconciles changed files, coalesces watcher events, and rescans periodically. SQLite retains pending work across restarts. Disconnected folders and files temporarily evicted to cloud storage retain their indexed records; deleted files in accessible folders are removed. Cloud placeholders are not downloaded to refresh their contents.
+The per-user login service runs independently of Raycast. Filesystem watchers tell it when a selected folder changes; it then reconciles the index once the changes settle. It does not rescan on a short timer: a safety rescan runs every six hours (every fifteen minutes for a folder that cannot be watched), and after each scan the service rests for ten times as long as the scan took, up to thirty minutes. Scans read file names, sizes, and dates only, and ask iCloud Drive or another file provider nothing about files they will not index. SQLite retains pending work across restarts. Disconnected folders and files temporarily evicted to cloud storage retain their indexed records; deleted files in accessible folders are removed. Cloud placeholders are not downloaded to refresh their contents.
 
 - One native worker at a time; searches interrupt indexing.
 - Index workers use utility scheduling, reduced CPU priority, and at most four CPU threads. Builds use two compiler jobs.
 - macOS receives a 512 MB service-host budget and a configurable native-worker budget, 2 GB by default. RSS monitoring also stops over-budget workers; timeouts and cancellation reap stuck workers.
 - Low Power Mode and high memory pressure suspend indexing. A charger-only policy is available.
-- Text documents above 20 MB and images above 50 MB are skipped. Audio tracks above one hour, above the 256 MB WAV scratch budget, or without a 1 GB free-space reserve are skipped with an explicit reason. Hidden directories, app bundles, credentials/key files, generated dependencies, datasets, and online-only iCloud files are excluded by default.
+- Text documents above 20 MB and images above 50 MB are skipped. Audio tracks above one hour, above the 256 MB WAV scratch budget, or without a 1 GB free-space reserve are skipped with an explicit reason. Hidden directories, app bundles, credentials/key files, datasets, and online-only iCloud files are excluded by default.
+- Folders that hold other people's files or regenerable ones are never scanned, and changes inside them do not start a scan: dependency folders (`node_modules`, `site-packages`, `Pods`, `DerivedData`), Python environments, caches (by name, or marked with `CACHEDIR.TAG`), content-addressed stores such as a pnpm store, and folders marked `.metadata_never_index` or named `*.noindex`. Inside a code project, build output is skipped and screenshots are looked for up to four folders below the project root.
 
 Resource limits reduce risk; they cannot guarantee that macOS or a driver will never crash. Exclusions also cannot identify every sensitive file. Review the folders you select.
 

@@ -9,7 +9,8 @@ Browse and search a curated collection of airline branding assets — logos, ico
 A fast Raycast extension for exploring airline branding assets.
 
 - Browse curated airline logos, icons, and tails (SVG).
-- Fast search and filters (name, code, alliance, flag carriers).
+- Fast search and filters (name, code, callsign, alliance, flag carriers).
+- Airline details: codes, callsign, founding year, country, alliance and hubs, with airlines that no longer fly marked as ceased.
 - SVG actions: copy, download, monochrome variants.
 
 ## Issues

@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "mobile-joe",
+    title: "Mobile Joe",
+    description:
+      "Manage your mobile app's FAQs, translations, feature plans and in-app alerts from your AI agent. Maintain FAQs and their translations, curate the feature plans app users vote on, prepare and deliver targeted in-app alerts, and update app settings for apps that use the Mobile Joe iOS and Android SDKs. Prepares drafts and publishes or delivers only when asked. 33 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which apps and permissions to share. A Mobile Joe account is required (14-day free trial, no credit card).",
+    icon: "https://app.mobilejoe.dev/icon.png",
+    homepage: "https://docs.mobilejoe.dev/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.mobilejoe.dev/mcp"],
+    },
+    remoteUrl: "https://app.mobilejoe.dev/mcp",
+  },
+  {
     name: "alphagrowth",
     title: "AlphaGrowth",
     description:
@@ -420,6 +433,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.getmattered.com/mcp"],
     },
+  },
+  {
+    name: "airbridge",
+    title: "Airbridge",
+    description:
+      "Mobile attribution for subscription apps: ask which ads and creators bring installs, trials and paying subscribers. Hosted remote Streamable HTTP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in with dynamic client registration and PKCE, no API key to paste. Needs an Airbridge account.",
+    icon: "https://www.airbridge.io/apple-icon.png",
+    homepage:
+      "https://www.airbridge.io/en/product/airbridge-ai?utm_source=raycast&utm_medium=listing&utm_campaign=get_found_w46&utm_content=airbridge_mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.airbridge.io/mcp"],
+    },
+    remoteUrl: "https://mcp.airbridge.io/mcp",
   },
   {
     name: "airport-lounge-list",
