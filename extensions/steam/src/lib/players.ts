@@ -1,4 +1,5 @@
 import { steamFetch } from "./http";
+import { decodeHtml } from "./util";
 
 export type PlayerPoint = [ms: number, players: number];
 
@@ -90,15 +91,15 @@ const number = (text?: string) => {
   return text && Number.isFinite(value) && /\d/.test(text) ? value : undefined;
 };
 
+// Decode after stripping tags so a decoded &lt; can't form a tag; SteamCharts encodes "+" as &#43;
 const cellText = (html: string) =>
-  html
-    .replace(/<[^>]*>/g, " ")
+  decodeHtml(html.replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim();
 
 export function parseStatsPage(html: string) {
   const stats = [...html.matchAll(/class="app-stat"[\s\S]*?<span class="num">([^<]*)<\/span>/g)].map((match) =>
-    number(match[1]),
+    number(decodeHtml(match[1])),
   );
   const body = html.match(/<table class="common-table[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)?.[1] ?? "";
   const months: PlayerMonth[] = [];
