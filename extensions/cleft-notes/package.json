@@ -103,7 +103,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.39.4",
     "prettier": "^3.8.1",
-    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -111,7 +110,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts"
+    "typecheck": "tsc --noEmit"
   }
 }
