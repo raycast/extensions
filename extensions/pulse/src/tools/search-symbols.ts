@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { loadIndex, typedInstrument } from "../lib/load";
 import { readerLanguage } from "../lib/search";
 import { MARKET_FILTERS, MARKET_LABELS } from "../lib/symbols";
@@ -21,7 +22,9 @@ type Input = {
  */
 export default async function tool(input: Input) {
   const index = await loadIndex();
-  const language = readerLanguage("auto", input.query, Intl.DateTimeFormat().resolvedOptions().locale);
+  const { nameLanguage } = getPreferenceValues<Preferences>();
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  const language = readerLanguage(nameLanguage ?? "auto", input.query, locale);
   const markets = MARKET_FILTERS.find((entry) => entry.value === input.market)?.markets ?? [];
   const hits = index.search(input.query, { language, markets, limit: 10 }).map((hit) => hit.instrument);
   const typed = typedInstrument(input.query, index);

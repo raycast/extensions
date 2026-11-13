@@ -1,7 +1,8 @@
+import { getPreferenceValues } from "@raycast/api";
 import { loadIndex, typedInstrument } from "../lib/load";
 import { Quote, fetchQuote } from "../lib/quotes";
 import { SymbolIndex, readerLanguage } from "../lib/search";
-import { Instrument, quotePageUrl } from "../lib/symbols";
+import { Instrument, Language, quotePageUrl } from "../lib/symbols";
 
 type Input = {
   /**
@@ -18,10 +19,11 @@ type Input = {
  */
 export default async function tool(input: Input) {
   const index = await loadIndex();
+  const { nameLanguage } = getPreferenceValues<Preferences>();
   const locale = Intl.DateTimeFormat().resolvedOptions().locale;
   return Promise.all(
     input.symbols.slice(0, 10).map(async (query) => {
-      const instrument = resolve(index, query, readerLanguage("auto", query, locale));
+      const instrument = resolve(index, query, readerLanguage(nameLanguage ?? "auto", query, locale));
       if (!instrument) return { query, error: "No stock, index or crypto pair matches this." };
       try {
         return describe(instrument, await fetchQuote(instrument.symbol));
@@ -32,17 +34,21 @@ export default async function tool(input: Input) {
   );
 }
 
-function resolve(index: SymbolIndex, query: string, language: Parameters<SymbolIndex["lookup"]>[1]): Instrument | null {
-  const typed = typedInstrument(query.trim(), index);
-  // A full symbol ("2330.TW", "BTC/USDT", "^GSPC") is taken as given; a bare code ("BTC") goes
-  // through search, which ranks the coin ahead of the ETF that shares its ticker.
-  if (typed && /[./^=]/.test(query)) return index.lookup(typed.symbol, language) ?? typed;
-  return index.search(query, { language, limit: 1 })[0]?.instrument ?? typed;
+function resolve(index: SymbolIndex, query: string, language: Language): Instrument | null {
+  const trimmed = query.trim();
+  const typed = typedInstrument(trimmed, index);
+  // A full symbol ("2330.TW", "BTC/USDT", "^GSPC") is taken as given. A name with spaces or no
+  // symbol marks ("D.R. Horton", "BTC") goes through search, which ranks the coin ahead of
+  // the ETF that shares its ticker.
+  if (typed && /[./^=]/.test(trimmed) && !/\s/.test(trimmed)) return index.lookup(typed.symbol, language) ?? typed;
+  return index.search(trimmed, { language, limit: 1 })[0]?.instrument ?? typed;
 }
 
 const iso = (timestamp: number) => new Date(timestamp).toISOString();
-// Drop floating-point noise like 7.1200000000000045.
-const tidy = (value: number | null, digits = 6) => (value === null ? null : Number(value.toFixed(digits)));
+// Drop floating-point noise like 7.1200000000000045 and float32 values like 148.229995728,
+// keeping significant digits so a price of 0.00000012 BTC stays 0.00000012.
+const tidy = (value: number | null) => (value === null ? null : Number(value.toPrecision(8)));
+const percent = (value: number | null) => (value === null ? null : Number(value.toFixed(2)));
 
 function describe(instrument: Instrument, quote: Quote) {
   const crypto = quote.source === "Binance Spot";
@@ -58,7 +64,7 @@ function describe(instrument: Instrument, quote: Quote) {
     currency: quote.currency,
     price: quote.price,
     change: tidy(change),
-    changePercent: tidy(quote.changePercent, 2),
+    changePercent: percent(quote.changePercent),
     changeMeasuredAgainst: crypto ? "price 24 hours ago" : "previous close",
     open: tidy(quote.open),
     high: tidy(quote.high),
