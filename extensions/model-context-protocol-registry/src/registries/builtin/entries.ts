@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "rizamo",
+    title: "Rizamo",
+    description:
+      "Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads from your AI agent, see how they did, and answer comments and messages. Create posts now, at a time or in a profile's queue of posting times, read views, reach, engagement and every post ranked, see who your audience is, and reply to, hide or delete comments in one inbox. The server asks agents to show a post or reply and wait for your yes before it goes out. 57 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which profiles your agent can reach. A Rizamo account is required (free for 2 social accounts). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://rizamo.com/icon-512.png",
+    homepage: "https://rizamo.com/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rizamo.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rizamo.com/mcp",
+  },
+  {
     name: "hoy-planes",
     title: "Hoy Planes",
     description:
