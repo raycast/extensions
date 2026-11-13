@@ -188,6 +188,13 @@ func runCaptureSession(folderPath: String, supportPath: String, previews: Bool, 
     try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
     descriptor = Darwin.open(base.appendingPathComponent("batch.lock").path, O_CREAT | O_RDWR, 0o600)
     guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+    // Setup can throw before a coordinator exists. Close the descriptor on
+    // every return/throw so the bridge's error HUD cannot keep retries locked.
+    let sessionDescriptor = descriptor
+    defer {
+        Darwin.close(sessionDescriptor)
+        descriptor = -1
+    }
     _ = fcntl(descriptor, F_SETFD, FD_CLOEXEC)
     if lockFile(descriptor, LOCK_EX | LOCK_NB) != 0 {
         guard errno == EWOULDBLOCK else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }

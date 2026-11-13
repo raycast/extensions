@@ -4,6 +4,7 @@
 
 - TypeScript selection and preference tests.
 - Native selection/history/modifier/clipboard/HUD fixtures.
+- Cross-process setup-failure retry: the original helper stays alive while a second process acquires its released capture lock.
 - Cross-process multi-file clipboard transfer, including writer lifetime.
 - Raycast lint and icon validation.
 - Raycast production build, including packaged native executable.

@@ -30,12 +30,17 @@ $(BUILD)/test-hud: Sources/SelectionHUD.swift tests/hud/main.swift
 	@mkdir -p $(BUILD)
 	$(SWIFTC) -framework AppKit $^ -o $@
 
-test: $(BUILD)/test-batch $(BUILD)/test-history $(BUILD)/test-shortcut $(BUILD)/test-clipboard $(BUILD)/test-hud
+$(BUILD)/test-setup-lock: $(filter-out Sources/main.swift,$(SOURCES)) tests/setup-lock/main.swift
+	@mkdir -p $(BUILD)
+	$(SWIFTC) -framework AppKit $^ -o $@
+
+test: $(BUILD)/test-batch $(BUILD)/test-history $(BUILD)/test-shortcut $(BUILD)/test-clipboard $(BUILD)/test-hud $(BUILD)/test-setup-lock
 	$(BUILD)/test-batch
 	$(BUILD)/test-history
 	$(BUILD)/test-shortcut
 	$(BUILD)/test-clipboard
 	$(BUILD)/test-hud
+	$(BUILD)/test-setup-lock
 
 verify: build test
 	zsh -n scripts/capture-and-copy.sh
