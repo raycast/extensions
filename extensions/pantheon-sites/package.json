@@ -5,6 +5,9 @@
   "description": "List and manage Pantheon sites",
   "icon": "command-icon.png",
   "author": "matbrady",
+  "contributors": [
+    "bdimaggio"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
