@@ -11,6 +11,10 @@
 - Reorder pinned games with Move Up in Pinned and Move Down in Pinned
 - Launch games from My Games with ⌘Return, or switch Return and ⌘Return in preferences
 
+## [Web API Key Required] - 2026-11-13
+
+- The Web API Key is now required. Search runs only from the local game list, and the extension no longer uses its own search server
+
 ## [Local Search, Recommendations, and New AI Tools] - 2026-10-01
 
 - Fix game details showing "Game not found" for every game

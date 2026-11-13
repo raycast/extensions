@@ -21,7 +21,7 @@ type Input = {
 
 /**
  * Find games in the user's own Steam library that are like games they name, ranked by how closely their Steam tags match.
- * Use this when the user asks what to play next from games they own, or which of their games are like another game. Needs your Web API Key and Steam ID.
+ * Use this when the user asks what to play next from games they own, or which of their games are like another game. Needs your Steam ID.
  */
 export default async function recommendOwnedGamesTool(input: Input) {
   const { games: liked, unmatched, listWarning } = await resolveGames(input.games ?? "");

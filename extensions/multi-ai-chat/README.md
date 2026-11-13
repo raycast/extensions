@@ -27,6 +27,18 @@ If one tab fails to open, the extension records the failure and continues with t
 
 ### Saved Prompts
 
+Saved prompts sync automatically between Macs signed into the same iCloud
+Drive account. Each prompt is stored separately under
+`iCloud Drive/Raycast/Multi AI Chat/Presets` so unrelated edits do not create a
+shared-file conflict. Deletions are synchronized as tombstones to prevent an
+older Mac from restoring a removed prompt.
+
+If iCloud is unavailable, saved prompts remain usable on this Mac. You can
+create, edit, run, and delete them locally; a notification identifies changes
+whose iCloud sync is pending. Synchronization is retried the next time you use
+Saved Prompts. Simultaneous edits to the same prompt on different Macs are
+resolved to one version rather than merged.
+
 Search, run, create, edit, and delete reusable prompt templates. A saved prompt stores:
 
 - A name
@@ -41,7 +53,7 @@ Summarize the latest developments in {topic} for an audience of {audience}.
 
 Each unique argument becomes a field when the saved prompt runs. Repeated arguments reuse the same value.
 
-You can also create a Raycast Quicklink for a saved prompt. Saved prompts without arguments open the configured chats directly from their Quicklinks; saved prompts with arguments open a form first. Saved prompts are stored locally by Raycast.
+You can also create a Raycast Quicklink for a saved prompt. Saved prompts without arguments open the configured chats directly from their Quicklinks; saved prompts with arguments open a form first. Raycast LocalStorage remains the offline cache for synced prompts.
 
 ## Browser Preference
 

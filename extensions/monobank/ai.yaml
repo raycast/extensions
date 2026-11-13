@@ -1,0 +1,1230 @@
+instructions: |
+  ## Language and format
+  - Answer in the language of the user's question (Ukrainian or English).
+  - Always show amounts with their currency, and give links as markdown links.
+
+  ## Accounts and jars
+  - Account and jar names come from `get-accounts`. They are set by the user and can be in any language, so match the user's words by meaning, across languages and translations: "основний рахунок" ↔ "Primary" or "Main", "на машину" ↔ "New Car", "відпустка" ↔ "Vacation", "Primary account" ↔ "Основний". If several accounts or jars match equally well, ask which one the user means.
+  - Always look for an account or jar whose `name` matches the user's words before anything else. Words like "основний", "головний", "main" or "primary" are names when an account is called that, or a translation of it: "мій основний рахунок" with an account named "Primary" means that account, even when another account has `isDefault: true`.
+  - Only when no name matches (e.g. "основний" and no account is called Primary, Main or Основний), or the user says just "my account", "мій рахунок" or "my card", use the account with `isDefault: true`, and say which account you used.
+  - Jars are also called банки, баночки and збори. Every jar `get-accounts` returns is current and active. Mention the jars whose goal is already reached (`goalReached`).
+  - "Money I have" or "скільки в мене грошей" means `ownFunds` (balance minus the credit limit). Mention the credit limit separately when an account has one.
+
+  ## Transactions
+  - For statement questions (spending, income, deposits, transactions), call `get-transactions`. When the user names an account or jar, first call `get-accounts` and pass its `id` as `accountId`. Otherwise leave out `accountId`, and say which account was used.
+  - Pass relative periods as `period`, which is computed from today's date in code: "today"/"сьогодні" → `today`, "last week"/"this week"/"за тиждень"/"за останній тиждень" → `last7Days`, "this month"/"цього місяця" → `thisMonth`, "last month"/"минулого місяця" → `lastMonth`, "last 30 days"/"за останній місяць" → `last31Days`. Use `from`/`to` only for specific dates, e.g. "since November 3" or "з 1 по 15 жовтня". The result's `period` shows the dates covered.
+  - Call `get-transactions` with the dates the user asked for, whatever the length, e.g. "last 3 months"/"за останні 3 місяці" → `from` 3 months ago and no `to`. Transactions are stored as far back as the "Keep Statements For" preference, and a stored period can be any length. Any past date can be requested, not only the last 31 days.
+  - If the result has `periodTooLong`, don't give totals. Say monobank returns at most 31 days at once for periods before `storedSince`, offer the `suggested` period (e.g. "1 червня – 1 липня"), and ask whether to proceed with it or choose another end date. When they agree, call again with the suggested `from` and `to`. Never split a period into several calls.
+  - Use `type: "expense"` for spending (витрати, витратив) and `type: "income"` for deposits and top-ups (поповнення, надходження, зарахування, deposited).
+  - Answer totals from `totals` and `byCategory`, not by adding up `transactions`, which may be cut to `limit`. If `incomplete` is true, say the result only covers transactions since `loadedSince`.
+  - `byCategory` groups by category name and has both spending (`expenses`) and `income` per category. For income from one category, e.g. "how much did I get in transfers" or "скільки я отримав переказів", use `type: "income"` with `categories: ["Money transfer"]`.
+  - To filter by a category in the table below, pass its `mccCodes`: they cover related categories together, e.g. cafes and restaurants include bars and fast food. For other categories, pass `categories` with names from `byCategory` (English or Ukrainian). A transaction matching either is included. Merchant categories and their MCC codes for `mccCodes`:
+    - cafes and restaurants (кафе та ресторани): 5812, 5813, 5814
+    - groceries (продукти, супермаркети): 5411, 5422, 5441, 5451, 5462, 5499
+    - taxi: 4121; public transport: 4111, 4112, 4131
+    - fuel and car service (АЗС, пальне): 5541, 5542
+    - pharmacies and medicine (аптеки, медицина): 5912, 8011, 8021, 8062, 8099
+    - clothes: 5651, 5691, 5699
+    - digital goods, apps, games and subscriptions: 5815, 5816, 5817, 5818
+    - mobile and utilities: 4814, 4900
+    - transfers: 4829, 6538, 6540
+  - When unsure which codes fit a category, call `get-transactions` without `mccCodes` and pick the matching entries of `byCategory` (which has English and Ukrainian names). A repeated call for the same account and period within a minute is answered from the cache.
+  - monobank allows one statement request per minute, so a statement can take up to a minute to load.
+
+  ## Budgets
+  - Budgets are monthly spending limits in UAH for some categories, e.g. "Cafes & Restaurants: 5 000 ₴". They are counted for the calendar month across the budget accounts: the UAH cards the user chose in "Show Budgets" (by default, all personal UAH cards).
+  - For budget questions (бюджет, ліміт, "скільки ще можу витратити на…", "скільки лишилось на…", "am I over budget", "how much can I still spend on…"), call `get-budgets`. Use the current month by default; "last month"/"минулого місяця" → `month: "lastMonth"`. Leave `accountId` out to count every budget account; pass it (from `get-accounts`) only when the user asks about one account's share.
+  - Match the user's words to a budget by meaning, across languages: "кафе" ↔ "Cafes & Restaurants", "продукти" ↔ "Groceries".
+  - Answer with spent of the limit, what's `left` (or how much it's over by), and for the current month `perDayLeft` (how much per day until the month ends). Mention every budget with `status` "over" or "warning". Say how many and which cards were counted (`accounts`), and use `byAccount` when the user asks which card the spending was on. When `incomplete` is true, say the total may be low.
+  - When the user asks about a category that has no budget, answer the spending with `get-transactions` instead and mention that a budget can be set.
+  - To create or change a budget ("встанови бюджет", "set a budget", "зміни ліміт"), call `set-budget`; to remove one, call `delete-budget`. The user confirms in Raycast before anything is saved. Prefer a `preset` when one fits the category, else `mccCodes` from the table in Transactions, or `categories`. Limits are in UAH. To change an existing budget, pass its exact name from `get-budgets`.
+  - When `get-budgets` returns no budgets, say so and suggest creating one (mention a few `presets`) with you or in the "Show Budgets" command.
+
+  ## Subscriptions
+  - For subscriptions and other recurring charges (підписки, регулярні списання, регулярні платежі, "what subscriptions do I have", "what's charging me next week", "коли наступне списання за…", "how much do I pay for subscriptions", "скільки я плачу за підписки"), call `get-subscriptions`. It reads the stored statements of every card and FOP account, so it answers at once.
+  - Subscriptions are found in the stored history: weekly, monthly or quarterly charges of one merchant at about the same amount. Say so briefly. When `note` says the history is short, mention `historyFrom` and that some subscriptions may be missing.
+  - Give each subscription's `amount` with its `currency` and `nextExpected` as a date (e.g. "9 грудня" or "December 9"), relative to `today` when it's close ("tomorrow", "за 3 дні"). For "next week", list the active ones with `nextExpected` within 7 days of `today`. Mention the card (`account`) when the user has subscriptions on several cards, and `previousAmount` when the price changed. When `newPriceUnconfirmed` is true, say the price seems to have changed from `previousAmount` to `amount` on `priceChangedOn`, based on one charge so far, and that the user can confirm it in "Show Subscriptions".
+  - For a total, use `monthlyTotalUah` (active subscriptions per month in UAH at monobank's rates) and say it's approximate. Don't add up amounts in different currencies yourself.
+  - Subscriptions with `status: "possiblyCancelled"` missed their expected charge: list them separately as possibly cancelled, not as active, and leave them out of totals. `confidence: "likely"` means only two charges so far; mention it when relevant.
+  - When the list is empty, say no recurring charges were found in the stored history, and suggest running "Sync Statements" when `note` says there's no history.
+
+  ## Currencies
+  - Use ISO 4217 letter codes: гривня/гривні → UAH, долар → USD, євро → EUR, злотий → PLN, фунт → GBP, франк → CHF, крона → CZK.
+  - "How much is X UAH in USD" or "Скільки X гривень в доларах" means how many USD you get for X UAH: call `convert-currency` with `from: "UAH"`, `to: "USD"`. Give the result and the rate used.
+
+  ## Jar goals
+  - "How much is left to reach a jar's goal" is `remainingToGoal`.
+  - "Do I have enough money to reach jar A's goal" means: compare the jar's `remainingToGoal` with the user's own funds across all accounts. For a UAH jar, use `totals.accountsOwnFunds`, which already has every account converted to UAH. For a jar in another currency, convert with `convert-currency`. If it isn't enough, give the shortfall.
+
+evals:
+  - input: "@monobank Скільки 500 гривень в доларах?"
+    mocks:
+      convert-currency:
+        amount: 500
+        from: UAH
+        to: USD
+        result: 10.88
+        steps:
+          - from: UAH
+            to: USD
+            amount: 500
+            result: 10.88
+            rateType: sell
+            quote: "1 USD = 45.9495 UAH"
+            ratesDate: "2026-11-09T09:05"
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool:
+          name: convert-currency
+          arguments:
+            amount: 500
+            from: UAH
+            to: USD
+      - matches: "10[.,]88"
+
+  - input: "@monobank 15 dollars in euro."
+    mocks:
+      convert-currency:
+        amount: 15
+        from: USD
+        to: EUR
+        result: 13.36
+        steps:
+          - from: USD
+            to: EUR
+            amount: 15
+            result: 13.36
+            rateType: sell
+            quote: "1 EUR = 1.123 USD"
+            ratesDate: "2026-11-09T09:05"
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool:
+          name: convert-currency
+          arguments:
+            amount: 15
+            from: USD
+            to: EUR
+      - matches: "13[.,]36"
+
+  - input: '@monobank How much left to reach the "New Car" jar goal?'
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 18250.4
+            creditLimit: 0
+            ownFunds: 18250.4
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+        jars:
+          - id: jar-car
+            name: New Car
+            currency: UAH
+            balance: 120000
+            goal: 400000
+            remainingToGoal: 280000
+            progressPercent: 30
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/CAR0001
+          - id: jar-vacation
+            name: Vacation
+            currency: UAH
+            balance: 15000
+            goal: 30000
+            remainingToGoal: 15000
+            progressPercent: 50
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/VAC0001
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      - matches: "280[\\s,.  ]?000"
+
+  - input: "@monobank Дай посилання для поповнення мого основного рахунку"
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 3200
+            creditLimit: 0
+            ownFunds: 3200
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+          - id: acc-primary
+            name: Primary
+            customName: Primary
+            type: white
+            currency: UAH
+            balance: 45120.75
+            creditLimit: 0
+            ownFunds: 45120.75
+            cards: ["444111******5678"]
+            iban: UA000000000000000000000000002
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/PRIMARY0001
+        jars: []
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      - includes: "https://send.monobank.ua/PRIMARY0001"
+      - not:
+          includes: "https://send.monobank.ua/BLACK0001"
+
+  - input: "@monobank Скільки грошей я витратив в категорії кафе та ресторани за останній тиждень?"
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 18250.4
+            creditLimit: 0
+            ownFunds: 18250.4
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+        jars: []
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        period:
+          from: "2026-11-03T00:00"
+          to: "2026-11-09T12:00"
+        totals:
+          income: 0
+          expenses: 1770.5
+          net: -1770.5
+          cashback: 17.7
+          count: 6
+          holdCount: 0
+        byCategory:
+          - name: Cafe. Restaurants
+            nameUk: Кафе. Ресторани
+            group: Miscellaneous stores
+            mccCodes: [5812]
+            expenses: 1450.5
+            income: 0
+            count: 4
+          - name: Fast Food
+            nameUk: Фаст-фуд
+            group: Miscellaneous stores
+            mccCodes: [5814]
+            expenses: 320
+            income: 0
+            count: 2
+        transactions:
+          - time: "2026-11-08T19:42"
+            description: Пузата хата
+            amount: -540
+            category: Cafe. Restaurants
+            categoryUk: Кафе. Ресторани
+            mcc: 5812
+          - time: "2026-11-06T13:05"
+            description: McDonald's
+            amount: -185
+            category: Fast Food
+            categoryUk: Фаст-фуд
+            mcc: 5814
+        truncated: false
+        incomplete: false
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            type: expense
+            period: last7Days
+      - matches: "1[\\s,.  ]?770"
+
+  - input: "@monobank How much money has been deposited into my account in total this month?"
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 18250.4
+            creditLimit: 0
+            ownFunds: 18250.4
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+        jars: []
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        period:
+          from: "2026-11-01T00:00"
+          to: "2026-11-09T12:00"
+        totals:
+          income: 25300
+          expenses: 0
+          net: 25300
+          cashback: 0
+          count: 3
+          holdCount: 0
+        byCategory:
+          - name: Money transfer
+            nameUk: Переказ коштів
+            group: Service providers
+            mccCodes: [4829]
+            expenses: 0
+            income: 25300
+            count: 3
+        transactions:
+          - time: "2026-11-05T10:00"
+            description: Від Олени К.
+            amount: 300
+            category: Money transfer
+            categoryUk: Переказ коштів
+            mcc: 4829
+          - time: "2026-11-01T09:12"
+            description: Зарплата
+            amount: 25000
+            category: Money transfer
+            categoryUk: Переказ коштів
+            mcc: 4829
+        truncated: false
+        incomplete: false
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            type: income
+            period: thisMonth
+      - matches: "25[\\s,.  ]?300"
+      - includes: "Black card UAH"
+
+  - input: "@monobank Які у мене зараз є активні збори?"
+    mocks:
+      get-accounts:
+        accounts: []
+        jars:
+          - id: jar-car
+            name: New Car
+            currency: UAH
+            balance: 120000
+            goal: 400000
+            remainingToGoal: 280000
+            progressPercent: 30
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/CAR0001
+          - id: jar-drone
+            name: На дрон
+            description: Збираємо на FPV-дрон
+            currency: UAH
+            balance: 25000
+            goal: 25000
+            remainingToGoal: 0
+            progressPercent: 100
+            goalReached: true
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/DRONE0001
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      - includes: "New Car"
+      - includes: "На дрон"
+      # Mentions that «На дрон» reached its goal, in Ukrainian.
+      - matches: "[Дд]осяг|[Зз]ібран|[Вв]иконан|[Зз]аверш|100\\s?%"
+
+  - input: "@monobank Which jars do I currently have active?"
+    mocks:
+      get-accounts:
+        accounts: []
+        jars:
+          - id: jar-car
+            name: New Car
+            currency: UAH
+            balance: 120000
+            goal: 400000
+            remainingToGoal: 280000
+            progressPercent: 30
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/CAR0001
+          - id: jar-usd
+            name: Emergency fund
+            currency: USD
+            balance: 850
+            goal: null
+            remainingToGoal: null
+            progressPercent: null
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/EMERG0001
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      - includes: "New Car"
+      - includes: "Emergency fund"
+
+  - input: "@monobank Do I have enough money in my accounts to reach the goal in jar “A”? If not, how much more do I need?"
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 22000.45
+            creditLimit: 10000
+            ownFunds: 12000.45
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+          - id: acc-black-usd
+            name: Black card USD
+            type: black
+            currency: USD
+            balance: 500
+            creditLimit: 0
+            ownFunds: 500
+            cards: ["537541******9876"]
+            iban: UA000000000000000000000000003
+            isDefault: false
+            isPinned: false
+        jars:
+          - id: jar-a
+            name: A
+            currency: UAH
+            balance: 10000
+            goal: 60000
+            remainingToGoal: 50000
+            progressPercent: 16.7
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/A0001
+        totals:
+          currency: UAH
+          accountsOwnFunds: 34975.2
+          jars: 10000
+          note: Other currencies are converted at monobank's sell rate (cross rate where there is none). Items in a currency without a UAH rate are left out.
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+      convert-currency:
+        amount: 500
+        from: USD
+        to: UAH
+        result: 22765
+        steps:
+          - from: USD
+            to: UAH
+            amount: 500
+            result: 22765
+            rateType: buy
+            quote: "1 USD = 45.53 UAH"
+            ratesDate: "2026-11-09T09:05"
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      # 50 000 left minus 34 975.20 of own funds (totals), or minus 34 765.45 if the USD account is converted at the buy rate.
+      - matches: "15[\\s,.\u00a0\u202f]?(024|234)"
+
+  - input: "@monobank Скільки грошей на моєму основному рахунку?"
+    usedAsExample: false
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 3200
+            creditLimit: 0
+            ownFunds: 3200
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+          - id: acc-primary
+            name: Primary
+            customName: Primary
+            type: white
+            currency: UAH
+            balance: 55120.75
+            creditLimit: 10000
+            ownFunds: 45120.75
+            cards: ["444111******5678"]
+            iban: UA000000000000000000000000002
+            isDefault: false
+            isPinned: true
+            topUpUrl: https://send.monobank.ua/PRIMARY0001
+        jars: []
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      - matches: "45[\\s,.  ]?120"
+      - not:
+          matches: "(^|[^\\d])3[\\s,.\u00a0\u202f]?200"
+
+  - input: "@monobank Скільки вже зібрано на машину?"
+    usedAsExample: false
+    mocks:
+      get-accounts:
+        accounts: []
+        jars:
+          - id: jar-car
+            name: New Car
+            currency: UAH
+            balance: 120000
+            goal: 400000
+            remainingToGoal: 280000
+            progressPercent: 30
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/CAR0001
+          - id: jar-vacation
+            name: Vacation
+            currency: UAH
+            balance: 15000
+            goal: 30000
+            remainingToGoal: 15000
+            progressPercent: 50
+            goalReached: false
+            isDefault: false
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/jar/VAC0001
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      - matches: "120[\\s,.  ]?000"
+
+  - input: "@monobank How much is on my travel account?"
+    usedAsExample: false
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-travel-usd
+            name: Travel USD
+            customName: Travel USD
+            type: black
+            currency: USD
+            balance: 1200
+            creditLimit: 0
+            ownFunds: 1200
+            cards: ["537541******2222"]
+            iban: UA000000000000000000000000004
+            isDefault: false
+            isPinned: false
+          - id: acc-travel-eur
+            name: Travel EUR
+            customName: Travel EUR
+            type: black
+            currency: EUR
+            balance: 640
+            creditLimit: 0
+            ownFunds: 640
+            cards: ["537541******3333"]
+            iban: UA000000000000000000000000005
+            isDefault: false
+            isPinned: false
+        jars: []
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+    expected:
+      - callsTool: get-accounts
+      # Asks which one is meant, or gives both balances.
+      - or:
+          - matches: "\\?"
+          - matches: "1[\\s,.\u00a0\u202f]?200[\\s\\S]*640|640[\\s\\S]*1[\\s,.\u00a0\u202f]?200"
+
+  - input: "@monobank Show the last 5 transactions on my Primary account"
+    usedAsExample: false
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 3200
+            creditLimit: 0
+            ownFunds: 3200
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+          - id: acc-primary
+            name: Основний
+            customName: Основний
+            type: white
+            currency: UAH
+            balance: 45120.75
+            creditLimit: 0
+            ownFunds: 45120.75
+            cards: ["444111******5678"]
+            iban: UA000000000000000000000000002
+            isDefault: false
+            isPinned: false
+        jars: []
+        stale: false
+        updatedAt: "2026-11-09T09:10:00.000Z"
+      get-transactions:
+        account:
+          id: acc-primary
+          name: Основний
+          currency: UAH
+          isDefault: false
+          usedBecauseNoneWasNamed: false
+        period:
+          from: "2026-10-10T00:00"
+          to: "2026-11-09T12:00"
+        totals:
+          income: 0
+          expenses: 412
+          net: -412
+          cashback: 0
+          count: 2
+          holdCount: 0
+        byCategory: []
+        transactions:
+          - time: "2026-11-08T08:15"
+            description: Сільпо
+            amount: -312
+            category: Grocery
+            categoryUk: Продукти
+            mcc: 5411
+          - time: "2026-11-07T21:30"
+            description: Uklon
+            amount: -100
+            category: Taxi
+            categoryUk: Таксі
+            mcc: 4121
+        truncated: false
+        incomplete: false
+    expected:
+      - callsTool: get-accounts
+      - callsTool:
+          name: get-transactions
+          arguments:
+            accountId: acc-primary
+      - includes: "Сільпо"
+
+  - input: "@monobank Скільки ще можу витратити на кафе цього місяця?"
+    mocks:
+      get-budgets:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            updatedAt: "2026-11-10T12:00"
+            incomplete: false
+          - id: acc-white-uah
+            name: White card UAH
+            updatedAt: "2026-11-10T11:58"
+            incomplete: false
+        onlyAccountAsked: false
+        month: November
+        period:
+          from: "2026-11-01T00:00"
+          to: "2026-11-10T12:00"
+        budgets:
+          - id: budget-cafes
+            name: Cafes & Restaurants
+            categories: ["Cafe. Restaurants", "Bars", "Fast Food"]
+            limit: 5000
+            spent: 3240
+            left: 1760
+            percentUsed: 65
+            status: ok
+            perDayLeft: 83.81
+            projected: 9720
+            daysLeft: 21
+            byAccount:
+              - name: Black card UAH
+                spent: 2140
+              - name: White card UAH
+                spent: 1100
+          - id: budget-taxi
+            name: Taxi
+            categories: ["Taxi"]
+            limit: 1500
+            spent: 610
+            left: 890
+            percentUsed: 41
+            status: ok
+            perDayLeft: 42.38
+            projected: 1830
+            daysLeft: 21
+            byAccount:
+              - name: Black card UAH
+                spent: 610
+        incomplete: false
+        presets: ["Cafes & Restaurants", "Groceries", "Taxi", "Transport", "Car", "Health", "Clothes & Shoes", "Subscriptions & Games", "Entertainment", "Beauty", "Pets"]
+    expected:
+      - callsTool: get-budgets
+      - matches: "1[\\s,.  ]?760"
+
+  - input: "@monobank Am I over budget anywhere?"
+    mocks:
+      get-budgets:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            updatedAt: "2026-11-10T12:00"
+            incomplete: false
+          - id: acc-white-uah
+            name: White card UAH
+            updatedAt: "2026-11-10T11:58"
+            incomplete: false
+        onlyAccountAsked: false
+        month: November
+        period:
+          from: "2026-11-01T00:00"
+          to: "2026-11-10T12:00"
+        budgets:
+          - id: budget-groceries
+            name: Groceries
+            categories: ["Grocery", "Food stores", "Meat", "Sweets", "Farm goods", "Bakeries"]
+            limit: 12000
+            spent: 4100
+            left: 7900
+            percentUsed: 34
+            status: ok
+            perDayLeft: 376.19
+            projected: 12300
+            daysLeft: 21
+            byAccount:
+              - name: Black card UAH
+                spent: 2900
+              - name: White card UAH
+                spent: 1200
+          - id: budget-taxi
+            name: Taxi
+            categories: ["Taxi"]
+            limit: 1500
+            spent: 1820
+            left: -320
+            percentUsed: 121
+            status: over
+            perDayLeft: 0
+            projected: 5460
+            daysLeft: 21
+            byAccount:
+              - name: Black card UAH
+                spent: 1240
+              - name: White card UAH
+                spent: 580
+        incomplete: false
+        presets: ["Cafes & Restaurants", "Groceries", "Taxi", "Transport", "Car", "Health", "Clothes & Shoes", "Subscriptions & Games", "Entertainment", "Beauty", "Pets"]
+    expected:
+      - callsTool: get-budgets
+      - includes: "Taxi"
+      - matches: "320"
+
+  - input: "@monobank Встанови бюджет 5000 грн на таксі"
+    mocks:
+      get-budgets:
+        budgets: []
+        presets: ["Cafes & Restaurants", "Groceries", "Taxi", "Transport", "Car", "Health", "Clothes & Shoes", "Subscriptions & Games", "Entertainment", "Beauty", "Pets"]
+        note: The user has no budgets yet. Suggest creating one with set-budget (a preset fits common categories) or in the "Show Budgets" command.
+      set-budget:
+        created: true
+        budget:
+          id: budget-taxi
+          name: Таксі
+          categories: ["Taxi"]
+          limit: 5000
+        note: Budgets count the cards chosen in "Show Budgets", together. The user can see it there and in the Summary of "Show Statement" for This Month.
+    expected:
+      - callsTool:
+          name: set-budget
+          arguments:
+            limit: 5000
+
+  - input: "@monobank Delete my Pets budget"
+    mocks:
+      get-budgets:
+        budgets:
+          - id: budget-pets
+            name: Pets
+            categories: ["Pet supplies", "Veterinary Services"]
+            limit: 2000
+        presets: ["Cafes & Restaurants", "Groceries", "Taxi", "Transport", "Car", "Health", "Clothes & Shoes", "Subscriptions & Games", "Entertainment", "Beauty", "Pets"]
+      delete-budget:
+        deleted: Pets
+    expected:
+      - callsTool:
+          name: delete-budget
+          arguments:
+            name: Pets
+
+  - input: "@monobank Скільки я отримав переказів минулого місяця?"
+    mocks:
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        period:
+          from: "2026-10-01T00:00"
+          to: "2026-10-31T23:59"
+        totals:
+          income: 31450
+          expenses: 0
+          net: 31450
+          cashback: 0
+          count: 4
+          holdCount: 0
+        byCategory:
+          - name: Money transfer
+            nameUk: Переказ коштів
+            group: Service providers
+            mccCodes: [4829]
+            expenses: 0
+            income: 31450
+            count: 4
+        transactions:
+          - time: "2026-10-15T10:00"
+            description: Від Олени К.
+            amount: 1450
+            category: Money transfer
+            categoryUk: Переказ коштів
+            mcc: 4829
+          - time: "2026-10-10T09:12"
+            description: Зарплата
+            amount: 30000
+            category: Money transfer
+            categoryUk: Переказ коштів
+            mcc: 4829
+        truncated: false
+        incomplete: false
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            type: income
+            period: lastMonth
+      - matches: "31[\\s,.  ]?450"
+
+  - input: "@monobank How much did I spend on groceries this month?"
+    mocks:
+      get-accounts:
+        accounts:
+          - id: acc-black-uah
+            name: Black card UAH
+            type: black
+            currency: UAH
+            balance: 18250.4
+            creditLimit: 0
+            ownFunds: 18250.4
+            cards: ["537541******1234"]
+            iban: UA000000000000000000000000001
+            isDefault: true
+            isPinned: false
+            topUpUrl: https://send.monobank.ua/BLACK0001
+        jars: []
+        stale: false
+        updatedAt: "2026-11-10T09:10:00.000Z"
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        period:
+          from: "2026-11-01T00:00"
+          to: "2026-11-10T12:00"
+        totals:
+          income: 0
+          expenses: 4130.6
+          net: -4130.6
+          cashback: 41.3
+          count: 9
+          holdCount: 1
+        byCategory:
+          - name: Grocery
+            nameUk: Продукти
+            group: Retail outlets
+            mccCodes: [5411]
+            expenses: 3650.6
+            income: 0
+            count: 7
+          - name: Bakeries
+            nameUk: Пекарні
+            group: Retail outlets
+            mccCodes: [5462]
+            expenses: 480
+            income: 0
+            count: 2
+        transactions:
+          - time: "2026-11-09T18:20"
+            description: Сільпо
+            amount: -812.4
+            category: Grocery
+            categoryUk: Продукти
+            mcc: 5411
+        truncated: false
+        incomplete: false
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            type: expense
+            period: thisMonth
+      - matches: "4[\\s,.  ]?130"
+
+  - input: "@monobank Скільки я витратив з 1 червня по 30 серпня?"
+    mocks:
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        periodTooLong:
+          requested:
+            from: "2026-06-01T00:00"
+            to: "2026-08-30T23:59"
+          maxDays: 31
+          suggested:
+            from: "2026-06-01"
+            to: "2026-07-01"
+          storedSince: "2026-08-10"
+          note: "Transactions before `storedSince` (or all of them without it) load from monobank, at most 31 days at once. Don't give totals. Ask the user whether to use `suggested` (or another end date on or before it), and call again only after they answer. Don't split the period into several calls."
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            from: "2026-06-01"
+            to: "2026-08-30"
+      - matches: "31"
+      - matches: "липн|07"
+      - not:
+          matches: "₴|грн|UAH"
+
+  - input: "@monobank Скільки я витратив за останні 3 місяці?"
+    mocks:
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        period:
+          from: "2026-08-10T00:00"
+          to: "2026-11-10T12:00"
+        totals:
+          income: 0
+          expenses: 58312.7
+          net: -58312.7
+          cashback: 583.1
+          count: 214
+          holdCount: 2
+        byCategory:
+          - name: Grocery
+            nameUk: Продукти
+            group: Retail outlets
+            mccCodes: [5411]
+            expenses: 24310.5
+            income: 0
+            count: 96
+          - name: Cafe. Restaurants
+            nameUk: Кафе. Ресторани
+            group: Miscellaneous stores
+            mccCodes: [5812]
+            expenses: 14002.2
+            income: 0
+            count: 58
+        transactions:
+          - time: "2026-11-10T11:20"
+            description: Сільпо
+            amount: -412.3
+            category: Grocery
+            categoryUk: Продукти
+            mcc: 5411
+        truncated: true
+        incomplete: false
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            type: expense
+            from: "2026-08-10"
+      - matches: "58[\\s,.  ]?312"
+
+  - input: "@monobank How much did I spend in May?"
+    mocks:
+      get-transactions:
+        account:
+          id: acc-black-uah
+          name: Black card UAH
+          currency: UAH
+          isDefault: true
+          usedBecauseNoneWasNamed: true
+        period:
+          from: "2026-05-01T00:00"
+          to: "2026-05-31T23:59"
+        totals:
+          income: 0
+          expenses: 12840.3
+          net: -12840.3
+          cashback: 128.4
+          count: 41
+          holdCount: 0
+        byCategory:
+          - name: Grocery
+            nameUk: Продукти
+            group: Retail outlets
+            mccCodes: [5411]
+            expenses: 7420.1
+            income: 0
+            count: 22
+          - name: Cafe. Restaurants
+            nameUk: Кафе. Ресторани
+            group: Miscellaneous stores
+            mccCodes: [5812]
+            expenses: 5420.2
+            income: 0
+            count: 19
+        transactions:
+          - time: "2026-05-31T19:40"
+            description: Сільпо
+            amount: -640.5
+            category: Grocery
+            categoryUk: Продукти
+            mcc: 5411
+        truncated: true
+        incomplete: false
+    expected:
+      - callsTool:
+          name: get-transactions
+          arguments:
+            from: "2026-05-01"
+            to: "2026-05-31"
+      - matches: "12[\\s,.  ]?840"
+
+  - input: "@monobank What subscriptions do I have?"
+    mocks:
+      get-subscriptions:
+        subscriptions:
+          - name: Spotify
+            account: Platinum card USD
+            cadence: monthly
+            amount: 10.99
+            currency: EUR
+            accountAmount: 11.82
+            accountCurrency: USD
+            lastCharge: "2026-10-12T06:00"
+            nextExpected: "2026-11-12"
+            status: active
+            confidence: confirmed
+            monthlyCost: 10.99
+            category: Digital Goods – Media
+          - name: Netflix
+            account: Platinum card USD
+            cadence: monthly
+            amount: 17.99
+            currency: USD
+            accountAmount: 17.99
+            accountCurrency: USD
+            previousAmount: 15.49
+            lastCharge: "2026-11-07T06:00"
+            nextExpected: "2026-12-07"
+            status: active
+            confidence: likely
+            monthlyCost: 17.99
+            category: Digital Goods – Media
+          - name: ChatGPT
+            account: Black card UAH
+            cadence: monthly
+            amount: 20
+            currency: USD
+            accountAmount: 836.4
+            accountCurrency: UAH
+            lastCharge: "2026-11-09T04:00"
+            nextExpected: "2026-12-09"
+            status: active
+            confidence: confirmed
+            monthlyCost: 20
+            category: Computer software stores
+          - name: MEGOGO
+            account: Black card UAH
+            cadence: monthly
+            amount: 199
+            currency: UAH
+            accountAmount: 199
+            accountCurrency: UAH
+            lastCharge: "2026-10-05T08:00"
+            nextExpected: "2026-11-05"
+            status: possiblyCancelled
+            confidence: likely
+            monthlyCost: 199
+            category: Cable and other pay television services
+        monthlyTotalUah: 2534.7
+        accounts:
+          - name: Black card UAH
+            historyFrom: "2026-08-11"
+            updatedAt: "2026-11-11T09:00"
+          - name: Platinum card USD
+            historyFrom: "2026-08-11"
+            updatedAt: "2026-11-11T09:02"
+        today: "2026-11-11"
+        updatedAt: "2026-11-11T09:00"
+    expected:
+      - callsTool: get-subscriptions
+      - includes: "Netflix"
+      - includes: "ChatGPT"
+      - includes: "MEGOGO"
+
+  - input: "@monobank Коли наступне списання за Netflix?"
+    mocks:
+      get-subscriptions:
+        subscriptions:
+          - name: Netflix
+            account: Platinum card USD
+            cadence: monthly
+            amount: 17.99
+            currency: USD
+            accountAmount: 17.99
+            accountCurrency: USD
+            previousAmount: 15.49
+            lastCharge: "2026-11-07T06:00"
+            nextExpected: "2026-12-07"
+            status: active
+            confidence: confirmed
+            monthlyCost: 17.99
+            category: Digital Goods – Media
+          - name: Kyivstar
+            account: Black card UAH
+            cadence: monthly
+            amount: 250
+            currency: UAH
+            accountAmount: 250
+            accountCurrency: UAH
+            lastCharge: "2026-11-03T09:00"
+            nextExpected: "2026-12-03"
+            status: active
+            confidence: confirmed
+            monthlyCost: 250
+            category: Telecommunication services
+        monthlyTotalUah: 1008.1
+        accounts:
+          - name: Black card UAH
+            historyFrom: "2026-05-11"
+            updatedAt: "2026-11-11T09:00"
+          - name: Platinum card USD
+            historyFrom: "2026-05-11"
+            updatedAt: "2026-11-11T09:02"
+        today: "2026-11-11"
+        updatedAt: "2026-11-11T09:00"
+    expected:
+      - callsTool: get-subscriptions
+      - matches: "7[\\s ]*груд|07\\.12"
+      - matches: "17[.,]99"
+
+  - input: "@monobank How much do I pay for subscriptions per month?"
+    mocks:
+      get-subscriptions:
+        subscriptions:
+          - name: Kyivstar
+            account: Black card UAH
+            cadence: monthly
+            amount: 250
+            currency: UAH
+            accountAmount: 250
+            accountCurrency: UAH
+            lastCharge: "2026-11-03T09:00"
+            nextExpected: "2026-12-03"
+            status: active
+            confidence: confirmed
+            monthlyCost: 250
+            category: Telecommunication services
+          - name: Apple.com/bill
+            account: Black card UAH
+            cadence: monthly
+            amount: 9.99
+            currency: USD
+            accountAmount: 417.78
+            accountCurrency: UAH
+            lastCharge: "2026-10-22T05:00"
+            nextExpected: "2026-11-22"
+            status: active
+            confidence: confirmed
+            monthlyCost: 9.99
+            category: Digital Goods – Applications
+          - name: Spotify
+            account: Platinum card USD
+            cadence: monthly
+            amount: 10.99
+            currency: EUR
+            accountAmount: 11.82
+            accountCurrency: USD
+            lastCharge: "2026-10-12T06:00"
+            nextExpected: "2026-11-12"
+            status: active
+            confidence: confirmed
+            monthlyCost: 10.99
+            category: Digital Goods – Media
+        monthlyTotalUah: 1186.3
+        accounts:
+          - name: Black card UAH
+            historyFrom: "2026-08-11"
+            updatedAt: "2026-11-11T09:00"
+          - name: Platinum card USD
+            historyFrom: "2026-08-11"
+            updatedAt: "2026-11-11T09:02"
+        today: "2026-11-11"
+        updatedAt: "2026-11-11T09:00"
+    expected:
+      - callsTool: get-subscriptions
+      - matches: "1[\\s,.  ]?186"

@@ -43,7 +43,7 @@ export default function ManageMembers() {
       })) as PaginatedPayload<Member>;
       return {
         data: res.data,
-        hasMore: res.hasMore,
+        hasMore: res.hasNextPage,
         cursor: res.endCursor,
       };
     },

@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  LocalStorage,
-  confirmAlert,
-  environment,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, environment, openExtensionPreferences } from "@raycast/api";
 import { rm } from "fs/promises";
 import { join } from "path";
 import { useEffect, useMemo, useState } from "react";
@@ -28,24 +18,19 @@ import { MIN_QUERY_LENGTH } from "./components/SearchEmptyView";
 import { DefaultActions } from "./components/Actions";
 import { useIsLoggedIn, useKeyRejected, useShowingDetail } from "./lib/hooks";
 import { GameDataSimple } from "./types";
-import { WebApiKeyNotice } from "./errors";
+import { AccountNotice } from "./errors";
+import { hasSteamWebApiKey } from "./lib/users";
 
 export default function Command() {
   const [search, setSearch] = useState("");
   const [hovered, setHovered] = useState(0);
   const isLoggedIn = useIsLoggedIn();
   const { showingDetail, toggleDetail } = useShowingDetail();
-  const {
-    data: foundGames,
-    isLoading: searching,
-    isError: searchError,
-    listStatus,
-  } = useGamesSearch({
+  const { data: foundGames, listStatus } = useGamesSearch({
     term: search,
     execute: search.trim().length >= MIN_QUERY_LENGTH,
   });
-  const { games: searchedGames, loading: detailsLoading } = useResultsWithDetails(foundGames);
-  const searchLoading = searching || detailsLoading;
+  const { games: searchedGames, loading: searchLoading } = useResultsWithDetails(foundGames);
   const [recentlyViewed, setRecentlyViewed] = useState<GameDataSimple[]>();
 
   const { data: myGames, isLoading: myGamesLoading } = useMyGames();
@@ -68,24 +53,7 @@ export default function Command() {
     [myGames, firstSeen],
   );
   useBatchDetails([...(recentlyViewed ?? []), ...recentlyAdded, ...recentlyPlayed].map((game) => game.appid));
-  const [showKeyNotice, setShowKeyNotice] = useState(false);
   const keyRejected = useKeyRejected();
-
-  useEffect(() => {
-    if (getPreferenceValues<Preferences>().token?.trim()) return;
-    LocalStorage.getItem("key-notice-shown").then(async (shown) => {
-      // Dev builds show it on every open so the message can be checked without resetting storage
-      if (shown && !environment.isDevelopment) return;
-      await LocalStorage.setItem("key-notice-shown", true);
-      const addKey = await confirmAlert({
-        title: "Add a Steam Web API Key",
-        message: "A future version will require a Steam Web API key. Adding one now also makes search faster.",
-        primaryAction: { title: "Add a Key" },
-        dismissAction: { title: "Not Now" },
-      });
-      if (addKey) setShowKeyNotice(true);
-    });
-  }, []);
 
   useEffect(() => {
     // Older versions kept an SWR cache here that nothing reads any more
@@ -111,11 +79,7 @@ export default function Command() {
     return false;
   };
 
-  if (keyRejected) return <WebApiKeyNotice />;
-
-  if (showKeyNotice) {
-    return <WebApiKeyNotice onContinue={() => setShowKeyNotice(false)} />;
-  }
+  if (keyRejected || !hasSteamWebApiKey()) return <AccountNotice keyRejected={keyRejected} />;
 
   return (
     <List
@@ -133,7 +97,6 @@ export default function Command() {
           searchedGames={searchedGames}
           isLoading={searchLoading}
           listStatus={listStatus}
-          error={searchError}
           hovered={hovered}
           showingDetail={showingDetail}
           onToggleDetail={toggleDetail}
@@ -144,7 +107,7 @@ export default function Command() {
             <List.EmptyView
               icon={Icon.GameController}
               title="Search Steam Games"
-              description="Type a game title to search. Add your Web API Key and Steam ID in the preferences to see your own games."
+              description="Type a game title to search. Add your Steam ID in the preferences to see your own games."
               actions={
                 <ActionPanel>
                   <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />

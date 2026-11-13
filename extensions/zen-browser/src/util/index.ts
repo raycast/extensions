@@ -89,8 +89,11 @@ export const getShorcutsJsonPath = (): string => {
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "zen-keyboard-shortcuts.json");
 };
 
+// Escape ' for SQL and the LIKE wildcards % and _ (plus the escape char itself) so they match literally.
+export const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
+
 const whereClauses = (terms: string[]) => {
-  return terms.map((t) => `moz_places.title LIKE '%${t}%'`).join(" AND ");
+  return terms.map((t) => `moz_places.title LIKE '%${escapeLike(t)}%' ESCAPE '\\'`).join(" AND ");
 };
 
 export const getHistoryQuery = (query?: string, limitResults?: number) => {

@@ -148,7 +148,7 @@ function Command() {
         <List.Section title="History">
           {filteredHistory?.map((item) => (
             <HistoryListItem
-              key={`history-${item.id}`}
+              key={`history-${item.profileId ?? ""}-${item.id}`}
               item={item}
               searchText={searchText}
               onHistoryAction={revalidateTabs}

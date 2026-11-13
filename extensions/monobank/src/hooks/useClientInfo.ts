@@ -1,125 +1,67 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import api from "../api";
-import { Account, UserInfoResponse, Jar } from "../types";
-import { useLocalStorage } from "./useLocalStorage";
+import { useCallback, useMemo } from "react";
+import { toClientInfo } from "../api/mappers";
+import { getClientInfo, getTokenError, getTokenFingerprint } from "../api/monobank";
+import { CLIENT_INFO_TTL, STORAGE_KEYS } from "../data/constants";
+import { Account, ClientInfo } from "../types";
+import { getJarTitles } from "../utils/savings";
+import { usePersistedResource } from "./usePersistedResource";
 
-import { transformAccount, transformJar } from "../utils";
-
-interface LocalStorageUserInfoData {
+const initialValue: { clientInfo: ClientInfo } = {
   clientInfo: {
-    clientId: string;
-    name: string;
-    webHookUrl: string;
-    permissions: string;
-    accounts: Account[];
-    jars: Jar[];
-  };
-  lastUpdated: number;
-}
-
-const lsInitialValue: LocalStorageUserInfoData = {
-  clientInfo: {
-    clientId: "",
-    name: "",
-    webHookUrl: "",
-    permissions: "",
     accounts: [],
     jars: [],
   },
-  lastUpdated: 0,
 };
 
 export function useClientInfo() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const { token } = getPreferenceValues<Preferences>();
+  const tokenFingerprint = useMemo(() => getTokenFingerprint(token), [token]);
 
-  const {
-    data,
-    setData,
-    isLoading: isLoadingFromLS,
-  } = useLocalStorage<LocalStorageUserInfoData>("clientInfo", lsInitialValue);
+  const { data, setData, isLoading, isLoadingFromStorage, isError, error } = usePersistedResource({
+    key: STORAGE_KEYS.clientInfo,
+    initialValue,
+    ttl: CLIENT_INFO_TTL,
+    // Data cached for another token (or before there was any) is never shown.
+    scope: tokenFingerprint,
+    fetch: async (previous) => ({
+      clientInfo: toClientInfo(await getClientInfo(token), previous.clientInfo, tokenFingerprint),
+    }),
+    // A missing or rejected token isn't rate limited, so refetch as soon as the user fixes it.
+    shouldRetryNextLaunch: (error) => getTokenError(error) !== undefined,
+  });
 
-  const { token } = getPreferenceValues<{ token?: string }>();
-
-  useEffect(() => {
-    if (isLoadingFromLS) return;
-
-    const now = Date.now();
-    if (now - data.lastUpdated <= 1000 * 60) return;
-
-    fetchAccounts().then((clientInfo) => {
-      if (!clientInfo) {
-        setData({
-          clientInfo: { ...data.clientInfo, accounts: data.clientInfo.accounts, jars: data.clientInfo.jars },
-          lastUpdated: now,
-        });
-      } else {
-        const jars = clientInfo.jars?.map(transformJar) ?? [];
-
-        const accounts = clientInfo.accounts.map(transformAccount);
-        const updatedAccounts = accounts.map((account) => {
-          const savedAccount = data.clientInfo.accounts.find((savedAccount) => savedAccount.id === account.id);
-          if (!savedAccount) return account;
-
-          return {
-            ...account,
-            title: savedAccount.title,
-          };
-        });
-
-        setData({
-          clientInfo: { ...clientInfo, accounts: updatedAccounts, jars },
-          lastUpdated: now,
-        });
-      }
-    });
-  }, [isLoadingFromLS]);
-
-  async function fetchAccounts() {
-    setIsLoading(true);
-    setIsError(false);
-
-    try {
-      const response = await api.get<UserInfoResponse>("/personal/client-info", {
-        headers: {
-          "X-Token": token,
+  const updateAccount = useCallback(
+    (id: string, patch: Partial<Account>) => {
+      setData((prev) => ({
+        ...prev,
+        clientInfo: {
+          ...prev.clientInfo,
+          accounts: prev.clientInfo.accounts.map((account) => (account.id === id ? { ...account, ...patch } : account)),
         },
-      });
+      }));
+    },
+    [setData],
+  );
 
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function updateAccount(id: string, newData: Account) {
-    const accounts = data.clientInfo.accounts.map((account) => {
-      if (account.id !== id) return account;
-
-      return {
-        ...account,
-        ...newData,
-      };
-    });
-
-    setData((prev) => ({
-      ...prev,
-      clientInfo: {
-        ...prev.clientInfo,
-        accounts,
-      },
-    }));
-  }
+  const tokenError = getTokenError(error);
 
   return {
-    data: data.clientInfo,
-    setData,
+    // Without a token Monobank accepts, cached data can't be confirmed to belong to the user.
+    data: tokenError ? initialValue.clientInfo : data.clientInfo,
     updateAccount,
-    isLoading: isLoading || isLoadingFromLS,
+    isLoading,
+    /** Whether the cached accounts are still being read. Stays false while refetching. */
+    isLoadingFromStorage,
     isError,
+    error,
+    tokenError,
   };
+}
+
+/** The user's jar titles for `toTransaction`, so transfers to them are categorized as Savings. */
+export function useJarTitles() {
+  const { data } = useClientInfo();
+  const { jars, jarTitleHistory } = data;
+  return useMemo(() => getJarTitles({ accounts: [], jars, jarTitleHistory }), [jars, jarTitleHistory]);
 }

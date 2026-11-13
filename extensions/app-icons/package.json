@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-icons",
+  "title": "App Icons Finder",
+  "description": "Search the App Store and download official app icons as PNG.",
+  "icon": "icon.png",
+  "author": "uwarp",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-app-icons",
+      "title": "Search App Icons",
+      "description": "Find App Store icons and save them as PNG.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "country",
+      "title": "App Store Region",
+      "description": "Default storefront used for search.",
+      "type": "dropdown",
+      "required": false,
+      "default": "US",
+      "data": [
+        {
+          "title": "United States",
+          "value": "US"
+        },
+        {
+          "title": "China",
+          "value": "CN"
+        },
+        {
+          "title": "Hong Kong",
+          "value": "HK"
+        },
+        {
+          "title": "Taiwan",
+          "value": "TW"
+        },
+        {
+          "title": "Japan",
+          "value": "JP"
+        },
+        {
+          "title": "Korea",
+          "value": "KR"
+        },
+        {
+          "title": "United Kingdom",
+          "value": "GB"
+        },
+        {
+          "title": "Germany",
+          "value": "DE"
+        },
+        {
+          "title": "France",
+          "value": "FR"
+        },
+        {
+          "title": "Canada",
+          "value": "CA"
+        },
+        {
+          "title": "Australia",
+          "value": "AU"
+        },
+        {
+          "title": "Singapore",
+          "value": "SG"
+        },
+        {
+          "title": "India",
+          "value": "IN"
+        },
+        {
+          "title": "Brazil",
+          "value": "BR"
+        },
+        {
+          "title": "Spain",
+          "value": "ES"
+        },
+        {
+          "title": "Italy",
+          "value": "IT"
+        },
+        {
+          "title": "Mexico",
+          "value": "MX"
+        },
+        {
+          "title": "Netherlands",
+          "value": "NL"
+        },
+        {
+          "title": "Sweden",
+          "value": "SE"
+        },
+        {
+          "title": "Turkey",
+          "value": "TR"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.25",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix": "ray lint",
+    "fix-fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint"
+  }
+}

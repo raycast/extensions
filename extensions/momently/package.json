@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "momently",
+  "title": "Momently",
+  "description": "Create, browse and delete countdown events. Requires Momently for Mac with AppleScript support.",
+  "icon": "icon.png",
+  "author": "madza",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "Momently",
+      "description": "Create a new event in Momently.",
+      "mode": "view"
+    },
+    {
+      "name": "search-events",
+      "title": "Search Events",
+      "subtitle": "Momently",
+      "description": "Search your Momently events, open or delete them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "app",
+      "title": "App",
+      "description": "Which Momently build to talk to.",
+      "type": "dropdown",
+      "required": false,
+      "default": "rs.madza.Countdown",
+      "data": [
+        {
+          "title": "Momently",
+          "value": "rs.madza.Countdown"
+        },
+        {
+          "title": "Momently Dev",
+          "value": "rs.madza.Countdown.dev"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

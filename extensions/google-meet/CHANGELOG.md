@@ -1,5 +1,10 @@
 # Google Meet Changelog
 
+## [Yab Support] - 2026-11-11
+
+- Add Yab as a supported browser. Yab speaks the same AppleScript dictionary as Chrome, so the meeting opens in a tab of its own and the link is read from that tab. Previously, Yab as the default browser failed with `"yab" isn't a supported browser`.
+- Accept UUID tab ids from Chromium-based browsers that use them, alongside numeric ones.
+
 ## [Helium Support & Meet Link Detection Fix] - 2026-10-29
 
 - Add Helium as a supported browser. Helium is Chromium-based, so meeting links are read from its tabs the same way as Chrome, Brave, and Edge. Previously, Helium as the default browser failed with "isn't a supported browser".

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ludex",
+  "title": "Ludex",
+  "description": "Launch installed games and open their save, config or install folders",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-games",
+      "title": "Browse Games",
+      "description": "List installed games, launch them and open their save or config folders",
+      "mode": "view"
+    },
+    {
+      "name": "search-games",
+      "title": "Search Games",
+      "description": "Search all games in the Ludusavi manifest",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-cache",
+      "title": "Refresh Game Database",
+      "description": "Download the game save database again and rebuild its index",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-installed-games",
+      "title": "Refresh Installed Games",
+      "description": "Re-scan the stores and update the installed games cache",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "author": "Zeocadio",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Data"
+  ]
+}

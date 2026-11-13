@@ -1,54 +1,63 @@
 import fs from "fs";
 import { BookmarkDirectory, BookmarkItem } from "./types";
 import { parseBookmarkSearchQuery, matchesBookmarkQuery } from "./parsing";
-import { getBookmarksPath } from "../dia";
+import { getProfileFiles } from "../dia";
 import { BOOKMARK_FILE_NOT_FOUND_MESSAGE } from "./constants";
 
+const ROOT_NAMES: Record<string, string> = {
+  bookmark_bar: "Bookmarks Bar",
+  other: "Other Bookmarks",
+  synced: "Mobile Bookmarks",
+};
+
+function buildProfileRoots(bookmarksData: { roots?: Record<string, unknown> }): BookmarkDirectory[] {
+  const roots: BookmarkDirectory[] = [];
+  Object.entries(bookmarksData.roots ?? {}).forEach(([key, value]) => {
+    if (value && typeof value === "object" && "children" in value) {
+      const root = value as BookmarkDirectory;
+      roots.push({ ...root, name: ROOT_NAMES[key] ?? (root.name || key) });
+    }
+  });
+  return roots;
+}
+
+function prefixIds(node: BookmarkDirectory, prefix: string): BookmarkDirectory {
+  return { ...node, id: `${prefix}:${node.id}`, children: (node.children ?? []).map((c) => prefixIds(c, prefix)) };
+}
+
 /**
- * Read and parse bookmarks from Dia's Bookmarks file (tree structure)
+ * Read and parse bookmarks from every Dia profile's Bookmarks file (tree structure).
+ * With more than one profile, each profile's bookmarks sit under a folder named after it.
  */
 export async function getBookmarksTree(): Promise<BookmarkDirectory> {
-  const bookmarksFilePath = getBookmarksPath();
-  if (!fs.existsSync(bookmarksFilePath)) {
+  const sources = await getProfileFiles("Bookmarks");
+  if (sources.length === 0) {
     throw new Error(BOOKMARK_FILE_NOT_FOUND_MESSAGE);
   }
 
-  const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
-  const bookmarksData = JSON.parse(fileBuffer);
-
-  // Create a virtual root containing all bookmark roots
-  const virtualRoot: BookmarkDirectory = {
-    id: "root",
-    name: "Bookmarks",
-    type: "folder",
-    date_added: "0",
-    children: [],
-  };
-
-  // Add all roots as children
-  if (bookmarksData.roots) {
-    Object.entries(bookmarksData.roots).forEach(([key, value]) => {
-      if (value && typeof value === "object" && "children" in value) {
-        const root = value as BookmarkDirectory;
-        // Add the root with a friendly name
-        const friendlyName =
-          key === "bookmark_bar"
-            ? "Bookmarks Bar"
-            : key === "other"
-              ? "Other Bookmarks"
-              : key === "synced"
-                ? "Mobile Bookmarks"
-                : root.name || key;
-
-        virtualRoot.children.push({
-          ...root,
-          name: friendlyName,
-        });
-      }
-    });
+  const settled = await Promise.allSettled(
+    sources.map(async ({ profile, path }) => ({
+      profile,
+      roots: buildProfileRoots(JSON.parse(await fs.promises.readFile(path, { encoding: "utf-8" }))),
+    })),
+  );
+  const failures = settled.filter((result): result is PromiseRejectedResult => result.status === "rejected");
+  if (failures.length === settled.length) {
+    throw failures[0].reason;
   }
+  const perProfile = settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 
-  return virtualRoot;
+  const children: BookmarkDirectory[] =
+    perProfile.length === 1
+      ? perProfile[0].roots
+      : perProfile.map(({ profile, roots }) =>
+          prefixIds(
+            { id: profile.directory, name: profile.name, type: "folder", date_added: "0", children: roots },
+            profile.directory,
+          ),
+        );
+
+  return { id: "root", name: "Bookmarks", type: "folder", date_added: "0", children };
 }
 
 /**

@@ -43,7 +43,7 @@ async function refreshWithToast(key: string) {
 export const DefaultActions = () => {
   const { push, pop } = useNavigation();
   const { token, steamid } = getPreferenceValues<Preferences>();
-  const hasAccount = Boolean(token?.trim() && steamid?.trim());
+  const hasAccount = Boolean(steamid?.trim());
   // Reset to top level to avoid deeply nested navigation
   const replaceWith = (view: JSX.Element) => {
     pop();
@@ -76,9 +76,7 @@ export const DefaultActions = () => {
       ) : null}
       <Action icon={Icon.List} title="View Random Games" onAction={() => replaceWith(<RandomGamesList />)} />
       <Action icon={Icon.Gear} title="Open Extension Settings" onAction={openExtensionPreferences} />
-      {token?.trim() ? (
-        <Action icon={Icon.ArrowClockwise} title="Refresh Game List" onAction={() => refreshWithToast(token.trim())} />
-      ) : null}
+      <Action icon={Icon.ArrowClockwise} title="Refresh Game List" onAction={() => refreshWithToast(token.trim())} />
       <Action
         icon={Icon.XMarkCircle}
         title="Clear Recent History"

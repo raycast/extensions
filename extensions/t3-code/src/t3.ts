@@ -1,11 +1,12 @@
 import { execFile } from "node:child_process";
 import { access, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { extname, basename, join } from "node:path";
+import { extname, basename, isAbsolute, join } from "node:path";
 import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { getPreferenceValues } from "@raycast/api";
 import { openRpc, RpcConnection } from "./rpc";
+import { threadDeepLink } from "./thread-links";
 
 const run = promisify(execFile);
 
@@ -82,6 +83,7 @@ export type ShellSnapshot = {
 };
 
 type EnvironmentDescriptor = {
+  environmentId?: string;
   serverVersion?: string;
   /** Absent on servers that predate protocol v2. */
   orchestrationProtocolVersion?: number;
@@ -637,6 +639,32 @@ async function appName(): Promise<string> {
     : NIGHTLY_APP;
 }
 
+/** The URL handler belongs to the desktop app, which may differ from a custom server. */
+async function installedAppVersion(name: string): Promise<string | undefined> {
+  const bundles = isAbsolute(name)
+    ? [name]
+    : [
+        join("/Applications", `${name}.app`),
+        join(homedir(), "Applications", `${name}.app`),
+      ];
+  for (const bundle of bundles) {
+    try {
+      const { stdout } = await run("/usr/bin/plutil", [
+        "-extract",
+        "CFBundleShortVersionString",
+        "raw",
+        "-o",
+        "-",
+        join(bundle, "Contents", "Info.plist"),
+      ]);
+      return stdout.trim() || undefined;
+    } catch {
+      // Older or nonstandard installations retain the command-palette fallback.
+    }
+  }
+  return undefined;
+}
+
 const escapeForAppleScript = (value: string) =>
   value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
@@ -648,8 +676,7 @@ export type PaletteThread = {
   branch: string | null;
 };
 
-// Mirrors normalizeSearchText in T3's CommandPalette.logic.ts, so a match counted
-// here is a match the palette will list.
+// Legacy palette matching for desktop versions that predate thread deep links.
 const normalizeSearchText = (value: string) =>
   value
     .normalize("NFKD")
@@ -690,18 +717,23 @@ export function paletteThreads(snapshot: ShellSnapshot): PaletteThread[] {
   }));
 }
 
-/** The desktop app registers t3code:// for Clerk callbacks only: an external URL
- * reveals the window but never navigates. So focus the app and drive its own
- * command palette with the thread's title, project and branch. The query is typed
- * first, then matches are counted against a shell snapshot fetched at that moment,
- * so a thread created since the list loaded still counts. Enter is pressed only
- * when exactly one thread matches and T3 Code is still frontmost; otherwise the
- * palette is left as it is and the result says why, so the caller can tell the user. */
+/** Open supported desktops by ID; keep palette navigation for older installations. */
 export async function focusThread(
   target: PaletteThread,
 ): Promise<"opened" | "ambiguous" | "unfocused"> {
-  const query = paletteQuery(target);
   const name = await appName();
+  const { environmentId } = await serverDescriptor(await resolveOrigin());
+  const url = threadDeepLink(
+    environmentId,
+    target.id,
+    await installedAppVersion(name),
+  );
+  if (url) {
+    await run("/usr/bin/open", ["-a", name, url]);
+    return "opened";
+  }
+
+  const query = paletteQuery(target);
   await run("/usr/bin/open", ["-a", name]);
   await run("/usr/bin/osascript", [
     "-e",

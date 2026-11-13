@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { open } from "@raycast/api";
+import { confirmAlert, open, showToast } from "@raycast/api";
+import fs from "fs";
+import path from "path";
 import { createNote } from "../api/create-note";
 import { createTempVault } from "./helpers/createTemporaryVault";
 
@@ -33,12 +35,13 @@ vi.mock("@raycast/api", () => ({
   Icon: { ExclamationMark: "exclamation-mark" },
 }));
 
-describe("createNote openOnCreate", () => {
+describe("createNote", () => {
   let tempVault: ReturnType<typeof createTempVault>;
 
   beforeEach(() => {
     tempVault = createTempVault();
     vi.clearAllMocks();
+    mockPreferences.openOnCreate = true;
     vi.useFakeTimers();
   });
 
@@ -51,6 +54,7 @@ describe("createNote openOnCreate", () => {
     mockPreferences.openOnCreate = true;
     const saved = await createNote(tempVault.vault, { name: "New Note", path: "", content: "body", tags: [] });
     expect(saved).toBe(true);
+    expect(fs.readFileSync(path.join(tempVault.vault.path, "New Note.md"), "utf-8")).toBe("body");
     expect(open).toHaveBeenCalledTimes(1);
     const url = (open as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
     expect(url).toContain("obsidian://open?path=");
@@ -70,5 +74,102 @@ describe("createNote openOnCreate", () => {
     const saved = await createNote(tempVault.vault, { name: "Saved Note", path: "", content: "body", tags: [] });
     expect(saved).toBe(true);
     expect(open).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports directory creation failure without opening a note", async () => {
+    const saved = await createNote(tempVault.vault, { name: "New Note", path: "note1.md", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("# Note 1\nSome text.");
+    expect(open).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't create directories for the given path:",
+      message: tempVault.paths.note1Path,
+      style: "FAILURE",
+    });
+  });
+
+  it("reports file write failure after overwrite confirmation without opening a note", async () => {
+    const target = path.join(tempVault.vault.path, "Blocked.md");
+    fs.mkdirSync(target);
+
+    const saved = await createNote(tempVault.vault, { name: "Blocked", path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(confirmAlert).toHaveBeenCalledTimes(1);
+    expect(fs.statSync(target).isDirectory()).toBe(true);
+    expect(open).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't write to file:",
+      message: target,
+      style: "FAILURE",
+    });
+  });
+
+  it("leaves an existing note unchanged when overwrite is canceled", async () => {
+    vi.mocked(confirmAlert).mockResolvedValueOnce(false);
+
+    const saved = await createNote(tempVault.vault, { name: "note1", path: "", content: "replacement", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("# Note 1\nSome text.");
+    expect(open).not.toHaveBeenCalled();
+    expect(showToast).not.toHaveBeenCalled();
+  });
+
+  it("saves an existing note after overwrite confirmation", async () => {
+    const saved = await createNote(tempVault.vault, { name: "note1", path: "", content: "replacement", tags: [] });
+
+    expect(saved).toBe(true);
+    expect(confirmAlert).toHaveBeenCalledTimes(1);
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("replacement");
+    expect(open).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["...", "Note names can't start with a dot. Obsidian hides those files."],
+    ["Folder/Task", "Note names can't contain / or \\. Use the Path field for folders."],
+  ])("rejects the note name %s without writing", async (name, message) => {
+    const before = fs.readdirSync(tempVault.vault.path, { recursive: true });
+
+    const saved = await createNote(tempVault.vault, { name, path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(fs.readdirSync(tempVault.vault.path, { recursive: true })).toEqual(before);
+    expect(open).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({ title: "Couldn't create note", message, style: "FAILURE" });
+  });
+
+  it("rejects an empty name when the default name is empty", async () => {
+    const saved = await createNote(tempVault.vault, { name: "", path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't create note",
+      message: "Enter a note name.",
+      style: "FAILURE",
+    });
+  });
+
+  it("rejects a path outside the vault without writing", async () => {
+    const outside = path.join(path.dirname(tempVault.vault.path), "outside");
+
+    const saved = await createNote(tempVault.vault, { name: "Task", path: "../outside", content: "body", tags: [] });
+
+    expect(saved).toBe(false);
+    expect(fs.existsSync(outside)).toBe(false);
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't create note",
+      message: "The path must stay inside the vault.",
+      style: "FAILURE",
+    });
+  });
+
+  it("drops a trailing .md from the note name", async () => {
+    const saved = await createNote(tempVault.vault, { name: "Task.md", path: "", content: "body", tags: [] });
+
+    expect(saved).toBe(true);
+    expect(fs.readFileSync(path.join(tempVault.vault.path, "Task.md"), "utf-8")).toBe("body");
+    expect(fs.existsSync(path.join(tempVault.vault.path, "Task.md.md"))).toBe(false);
   });
 });

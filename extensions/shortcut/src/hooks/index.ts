@@ -11,6 +11,7 @@ import {
   Project,
   SearchResults,
   Story,
+  StorySearchResult,
   StorySlim,
   Workflow,
 } from "@useshortcut/client";
@@ -126,7 +127,7 @@ export const useStory = (storyId?: Story["id"]) => {
   );
 };
 
-export const useStoryWorkflow = (story?: Story | StorySlim) => {
+export const useStoryWorkflow = (story?: Story | StorySlim | StorySearchResult) => {
   const workflowMap = useWorkflowMap();
   const workflow = useMemo(() => {
     if (!story || !workflowMap) {
