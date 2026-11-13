@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add PlushSource MCP Server] - {PR_MERGE_DATE}
+
+- Add PlushSource to the official registry: search and compare the custom plush manufacturers listed in the PlushSource directory by country, minimum order quantity, certifications and OEM/ODM. Local stdio server `plushsource-mcp` through `npx`, with the dataset bundled, no network calls and no API key.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
