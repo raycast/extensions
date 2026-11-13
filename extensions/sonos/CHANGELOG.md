@@ -1,6 +1,6 @@
 # Sonos Changelog
 
-## [Fix] - 2026-11-13
+## [Fix] - {PR_MERGE_DATE}
 
 - Harden against event listener port conflicts when running multiple commands in quick succession.
 - Update the Sonos library to 2.7.0, which fixes empty group detection.
