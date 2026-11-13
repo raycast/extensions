@@ -17,25 +17,29 @@
       "name": "status",
       "title": "Completion Status",
       "description": "Read the native default completion setting and available model status",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Cotypist"
     },
     {
       "name": "enable-default",
       "title": "Enable Default Completions",
       "description": "Enable completions by default with native state verification",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Cotypist"
     },
     {
       "name": "disable-default",
       "title": "Disable Default Completions",
       "description": "Disable completions by default; individually enabled apps retain their overrides",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Cotypist"
     },
     {
       "name": "toggle-default",
       "title": "Toggle Default Completions",
       "description": "Toggle the native default completion setting with state verification",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Cotypist"
     }
   ],
   "preferences": [],
@@ -49,16 +53,13 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.4",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "vitest": "4.1.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run && npm run test:native",
-    "test:native": "node scripts/test-native.cjs"
+    "typecheck": "tsc --noEmit"
   }
 }

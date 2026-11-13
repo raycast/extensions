@@ -4,6 +4,7 @@ import ApplicationServices
 import Foundation
 import Security
 import Darwin
+import RaycastSwiftMacros
 
 let bundleID = "app.cotypist.Cotypist"
 let completionLabel = "Enable completions by default"
@@ -423,32 +424,40 @@ func execute(_ operation: String, context: RestoreContext) throws -> [String: An
     if let node = finalTree.nodes.first(where: { $0.role == kAXProgressIndicatorRole }), let value = try attribute(finalTree.elements[node.id], kAXValueAttribute) as? NSNumber { result["downloadProgress"] = value.doubleValue }
     return result
 }
-@main struct NativeRunner {
-    static func main() {
-        // flock spans every read, action, confirmation, and restoration across workers.
-        let lockURL = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent().appendingPathComponent("cotypist-accessibility.lock")
-        let descriptor = Darwin.open(lockURL.path, O_CREAT | O_RDWR | O_NOFOLLOW, S_IRUSR | S_IWUSR)
-        var result: [String: Any]
-        var status: Int32 = 0
-        if descriptor < 0 || flock(descriptor, LOCK_EX | LOCK_NB) != 0 {
-            result = ["ok": false, "error": "Another Cotypist control is running, or its operation lock could not be opened. Retry after it finishes.", "warnings": []]; status = 1
-        } else {
-            let context = RestoreContext()
-            // The wrapper always restores, including partial-open and failure paths.
-            do { result = try execute(CommandLine.arguments.dropFirst().first ?? "status", context: context) }
-            catch {
-                let cause = (error as? NativeFailure)?.message ?? "Cotypist's native operation could not be completed."
-                // Capture operation context before restoration changes phase.
-                result = ["ok": false, "error": "Operation failed: " + cause + " " + nativeDiagnostic(phase: diagnosticPhase, api: "operation")]
-                status = 1
-            }
-            context.restore()
-            result["warnings"] = context.warnings
-            _ = flock(descriptor, LOCK_UN)
+// Operation lock in the per-user temporary directory: the built helper lives in the
+// read-only extension bundle, so the lock cannot sit next to the binary.
+func lockPath() -> String? {
+    var directory = [CChar](repeating: 0, count: Int(PATH_MAX))
+    let length = confstr(_CS_DARWIN_USER_TEMP_DIR, &directory, directory.count)
+    guard length > 0, length <= directory.count else { return nil }
+    return String(cString: directory) + "/app.cotypist.raycast-accessibility.lock"
+}
+
+/// Runs one Cotypist operation and returns its JSON response. Failures are
+/// reported inside the JSON (`ok: false`) so restoration warnings are kept.
+@raycast func runControl(operation: String) -> String {
+    // flock spans every read, action, confirmation, and restoration across workers.
+    let descriptor: Int32 = lockPath().map { Darwin.open($0, O_CREAT | O_RDWR | O_NOFOLLOW, S_IRUSR | S_IWUSR) } ?? -1
+    var result: [String: Any]
+    if descriptor < 0 || flock(descriptor, LOCK_EX | LOCK_NB) != 0 {
+        result = ["ok": false, "error": "Another Cotypist control is running, or its operation lock could not be opened. Retry after it finishes.", "warnings": []]
+    } else {
+        let context = RestoreContext()
+        // The wrapper always restores, including partial-open and failure paths.
+        do { result = try execute(operation, context: context) }
+        catch {
+            let cause = (error as? NativeFailure)?.message ?? "Cotypist's native operation could not be completed."
+            // Capture operation context before restoration changes phase.
+            result = ["ok": false, "error": "Operation failed: " + cause + " " + nativeDiagnostic(phase: diagnosticPhase, api: "operation")]
         }
-        if descriptor >= 0 { Darwin.close(descriptor) }
-        let data = try! JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
-        print(String(data: data, encoding: .utf8)!)
-        exit(status)
+        context.restore()
+        result["warnings"] = context.warnings
+        _ = flock(descriptor, LOCK_UN)
     }
+    if descriptor >= 0 { Darwin.close(descriptor) }
+    guard let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]),
+          let text = String(data: data, encoding: .utf8) else {
+        return #"{"ok":false,"error":"Cotypist's native response could not be encoded.","warnings":[]}"#
+    }
+    return text
 }
