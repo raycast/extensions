@@ -1,6 +1,6 @@
 # Frihet ERP Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-13
 
 - Added **Business Brief** (`business-brief`) command with complete vs partial coverage validation, 4-way financial separation (paid revenue, open receivables, overdue exposure, deductible vs non-deductible expenses), and prioritized review items.
 - Added **Search Invoices** (`search-invoices`) command with status filter (`all`, `draft`, `sent`, `overdue`, `paid`, `cancelled`), VeriFactu state visibility, line-item detail breakdown, and deep-link navigation to `https://app.frihet.io`.
