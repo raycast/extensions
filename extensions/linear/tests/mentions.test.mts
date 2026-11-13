@@ -63,13 +63,12 @@ test("each query word can match a different name or email field in the server-si
   ]);
 });
 
-test("user mentions carry stable IDs, profile context, and avatars without SDK methods", () => {
+test("user mentions carry stable IDs, the name, and avatars without SDK methods", () => {
   const sdkUser = { ...user, _request: () => assert.fail("SDK method must not run") };
   const [mention] = toUserMentions([sdkUser], avatarOr("person"));
   assert.deepEqual(mention, {
     title: "Alice",
     uri: `linear://users/${userId}`,
-    description: "alice@example.com · Engineer",
     icon: user.avatarUrl,
   });
   assert.deepEqual(structuredClone(mention), mention);
@@ -78,20 +77,20 @@ test("user mentions carry stable IDs, profile context, and avatars without SDK m
     avatarOr("person"),
   );
   assert.equal(fallback.title, "Alice Smith");
-  assert.equal(fallback.description, "alice@example.com");
+  assert.equal("description" in fallback, false);
   assert.equal(fallback.icon, "person");
 });
 
-test("issue mentions show identifiers, status, project, and assignee", () => {
+test("issue mentions show the title with the identifier beside it", () => {
   const [mention] = toIssueMentions([issue], () => "document");
   assert.deepEqual(mention, {
-    title: "ENG-42 · Fix sign-in",
+    title: "Fix sign-in",
     uri: `linear://issues/${issueId}`,
-    description: "In Progress · Desktop · Alice",
+    description: "ENG-42",
     icon: "document",
   });
   const [unassigned] = toIssueMentions([{ ...issue, assignee: undefined, project: undefined }], () => "document");
-  assert.equal(unassigned.description, "In Progress");
+  assert.equal(unassigned.description, "ENG-42");
 });
 
 test("both mention lists are bounded and support no matches", () => {

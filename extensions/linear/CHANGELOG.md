@@ -4,7 +4,8 @@
 
 - Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name. Each project shows its own icon and color.
 - Mentioning a project gives AI its status, lead, teams, members, and milestones.
-- **Issues** mentions show each issue's status icon in its state color, and **Users** mentions show initials for people without an avatar.
+- **Issues** mentions show the issue title with its identifier beside it and its status icon in the state color.
+- **Users** mentions show just the name, with initials for people without an avatar.
 
 ## [Primary Action Preference] - 2026-10-29
 

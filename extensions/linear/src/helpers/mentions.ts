@@ -25,24 +25,29 @@ export function getUserMentionFilter(query: string) {
 
 type MentionUser = Pick<User, "id" | "name" | "displayName" | "email" | "title" | "avatarUrl">;
 
-/** A user row: the name, email and title, and the user's avatar, else initials as Linear shows them. */
+/**
+ * A user row as Linear's own mention menu shows it: the name and the avatar, else initials. The
+ * search still matches email, so typing one finds the person without the row repeating it.
+ */
 export function toUserMentions<T extends MentionUser>(users: readonly T[], icon: (user: T) => string) {
   return users.slice(0, 50).map((user) => ({
     title: user.displayName?.trim() || user.name || user.email,
     uri: `linear://users/${user.id}`,
-    description: [user.email, user.title].filter(Boolean).join(" · "),
     icon: icon(user),
   }));
 }
 
 type MentionIssue = Pick<IssueResult, "id" | "identifier" | "title" | "state" | "project" | "assignee">;
 
-/** An issue row, drawn with its status icon in its state's color as Linear lists it. */
+/**
+ * An issue row: its title, its identifier beside it, and its status as the icon in its state's
+ * color. Project and assignee reach AI through the issue read, not the row.
+ */
 export function toIssueMentions<T extends MentionIssue>(issues: readonly T[], icon: (issue: T) => string) {
   return issues.slice(0, 50).map((issue) => ({
-    title: `${issue.identifier} · ${issue.title}`,
+    title: issue.title,
+    description: issue.identifier,
     uri: `linear://issues/${issue.id}`,
-    description: [issue.state.name, issue.project?.name, issue.assignee?.displayName].filter(Boolean).join(" · "),
     icon: icon(issue),
   }));
 }
