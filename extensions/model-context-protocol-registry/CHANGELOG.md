@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add within MCP Server] - 2026-11-13
+## [Add within MCP Server] - {PR_MERGE_DATE}
 
 - Add within to the official registry: find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted Streamable HTTP server at https://shopwithin.co/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
