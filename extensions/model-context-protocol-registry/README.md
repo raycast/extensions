@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Rizamo](https://rizamo.com/agents/) | Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, see how they did, and answer comments and messages from your agent. 57 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a Rizamo account, free for 2 social accounts. |
 | [Hoy Planes](https://www.hoyplanes.com/mcp/) | What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. 3 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key. |
 | [GlucoBeat](https://www.glucobeat.com/en/ai-assistants/) | Read and log your glucose, meals, insulin, exercise and sleep from FreeStyle Libre in GlucoBeat. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with a GlucoBeat account. |
 | [freelance.link](https://freelance.link/mcp) | Keep your freelance.link availability current from your AI agent. Add, change and remove projects and absences, check when you are free again, confirm that your availability is still correct, and tell your waitlist when you have time. 11 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose what your agent may do. A freelance.link account is required (14-day free trial, no credit card). |
