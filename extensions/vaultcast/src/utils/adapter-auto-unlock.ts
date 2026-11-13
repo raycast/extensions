@@ -1,4 +1,5 @@
 import type { AdapterStatus, ItemAvailability, PasswordManagerAdapter, VaultItem } from "../types";
+import { SessionLockedError } from "./cli";
 import { peekCredentials } from "./credential-vault";
 
 const SESSION_LOCK_PATTERN = /session is locked|sessionlocked|unlock.{0,40}session/i;
@@ -8,6 +9,9 @@ function adapterNeedsAuth(status: AdapterStatus): boolean {
 }
 
 function isLikelySessionLockError(error: unknown): boolean {
+  if (error instanceof SessionLockedError) {
+    return true;
+  }
   const message = error instanceof Error ? error.message : String(error);
   return SESSION_LOCK_PATTERN.test(message);
 }

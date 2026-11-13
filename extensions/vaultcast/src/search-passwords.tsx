@@ -8,6 +8,7 @@ import {
   closeMainWindow,
   getPreferenceValues,
   open,
+  openExtensionPreferences,
   showToast,
   Toast,
   type Image,
@@ -714,6 +715,7 @@ export default function SearchPasswords() {
   }, [activeManagerId, allAdapters, preferences.sessionTimeoutMinutes]);
 
   const isAllSelected = activeManagerId === ALL_MANAGERS_ID;
+  const noManagersEnabled = !isLoadingAdapters && allAdapters.length === 0;
   const selectedEntry = adapterStatuses?.find((entry) => entry.adapter.id === activeManagerId);
   const selectedAdapter = selectedEntry?.adapter;
   const extensionSessionState = getExtensionSessionState();
@@ -1005,7 +1007,19 @@ export default function SearchPasswords() {
           description={unavailableSelection.status.ok ? undefined : unavailableSelection.status.reason}
         />
       )}
-      {!searchError && isAllSelected && scopeEntries.length === 0 && (
+      {noManagersEnabled && (
+        <List.EmptyView
+          icon={Icon.Gear}
+          title="No password managers enabled"
+          description="Enable at least one manager in the extension preferences"
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!searchError && !noManagersEnabled && isAllSelected && scopeEntries.length === 0 && (
         <List.EmptyView
           icon={Icon.Lock}
           title="No unlocked password managers"

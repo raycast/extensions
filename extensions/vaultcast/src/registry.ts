@@ -16,12 +16,23 @@ export function isAdapterSelectable(status: AdapterStatus): boolean {
 
 let adapterCache: PasswordManagerAdapter[] | undefined;
 
+/** Each built-in adapter has an "enable-<id>" checkbox preference (default on). */
+function isBuiltinAdapterEnabled(adapterId: string): boolean {
+  const preferences = getPreferenceValues<Preferences>() as unknown as Record<string, unknown>;
+  return preferences[`enable-${adapterId}`] !== false;
+}
+
+function enabledBuiltinAdapters(): PasswordManagerAdapter[] {
+  return builtinAdapters.filter((adapter) => isBuiltinAdapterEnabled(adapter.id));
+}
+
 export async function loadAdapters(): Promise<PasswordManagerAdapter[]> {
   if (adapterCache) {
     return adapterCache;
   }
 
   const externalAdapters = await loadExternalAdapters();
+  // Disabled built-ins still reserve their ID.
   const builtinIds = new Set(builtinAdapters.map((adapter) => adapter.id));
 
   const filteredExternal = externalAdapters.filter((adapter) => {
@@ -32,12 +43,12 @@ export async function loadAdapters(): Promise<PasswordManagerAdapter[]> {
     return true;
   });
 
-  adapterCache = [...builtinAdapters, ...filteredExternal].map(wrapAdapterWithAutoUnlock);
+  adapterCache = [...enabledBuiltinAdapters(), ...filteredExternal].map(wrapAdapterWithAutoUnlock);
   return adapterCache;
 }
 
 export function getAdapters(): PasswordManagerAdapter[] {
-  return adapterCache ?? builtinAdapters;
+  return adapterCache ?? enabledBuiltinAdapters();
 }
 
 export function getAdapter(id: string): PasswordManagerAdapter | undefined {

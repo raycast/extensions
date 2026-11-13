@@ -1,7 +1,7 @@
 import { execFile } from "child_process";
 import { existsSync } from "fs";
 import { homedir, platform } from "os";
-import { join } from "path";
+import { delimiter, dirname, join } from "path";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
@@ -83,6 +83,14 @@ export class CliError extends Error {
   }
 }
 
+/** The manager's vault is locked; `wrapAdapterWithAutoUnlock` re-authenticates and retries on it. */
+export class SessionLockedError extends Error {
+  constructor(message = "Session is locked.") {
+    super(message);
+    this.name = "SessionLockedError";
+  }
+}
+
 export async function resolveBinary(name: string, customPath?: string): Promise<string | undefined> {
   if (customPath) {
     if (existsSync(customPath)) {
@@ -103,19 +111,30 @@ export async function resolveBinary(name: string, customPath?: string): Promise<
   return findInPath(name);
 }
 
+// Raycast's PATH lacks Homebrew. Script CLIs (pass → gpg, getopt) find their siblings via the binary's dir.
+function binaryDirOnPath(binary: string): Record<string, string> {
+  if (isWindows) {
+    return {};
+  }
+  return { PATH: [dirname(binary), process.env.PATH].filter(Boolean).join(delimiter) };
+}
+
 export async function runCli(
   binary: string,
   args: string[],
-  options?: { env?: Record<string, string>; timeoutMs?: number },
+  options?: { env?: Record<string, string>; timeoutMs?: number; input?: string },
 ): Promise<string> {
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   try {
-    const { stdout, stderr } = await execFileAsync(binary, args, {
-      env: { ...process.env, ...options?.env },
+    const run = execFileAsync(binary, args, {
+      env: { ...process.env, ...binaryDirOnPath(binary), ...options?.env },
       timeout: timeoutMs,
       maxBuffer: 10 * 1024 * 1024,
     });
+    // Always close stdin: CLIs that prompt (lpass, dcli, keeper) would otherwise wait on the open pipe until the timeout.
+    run.child.stdin?.end(options?.input);
+    const { stdout, stderr } = await run;
 
     if (stderr?.trim()) {
       // Some CLIs write warnings to stderr; only treat as error if stdout is empty
@@ -143,6 +162,7 @@ export function parseJson<T>(stdout: string): T {
   try {
     return JSON.parse(stdout) as T;
   } catch {
-    throw new CliError(`Failed to parse CLI JSON output: ${stdout.slice(0, 200)}`);
+    // No stdout excerpt (nor the SyntaxError, which quotes it): the output may contain secrets.
+    throw new CliError(`Failed to parse CLI JSON output (${stdout.length} characters)`);
   }
 }

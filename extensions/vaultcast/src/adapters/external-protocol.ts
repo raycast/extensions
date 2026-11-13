@@ -94,7 +94,8 @@ export function parseExternalMessage(line: string): ExternalAdapterResponse {
   try {
     parsed = JSON.parse(trimmed) as unknown;
   } catch {
-    throw new ExternalAdapterError(`External adapter returned invalid JSON: ${trimmed.slice(0, 200)}`);
+    // No output excerpt: responses carry secrets.
+    throw new ExternalAdapterError(`External adapter returned invalid JSON (${trimmed.length} characters)`);
   }
 
   if (typeof parsed !== "object" || parsed === null || !("ok" in parsed)) {
@@ -112,7 +113,7 @@ export function parseExternalResponse(stdout: string): ExternalAdapterSuccessRes
 
   const line = trimmed.split("\n").find((entry) => entry.trim().startsWith("{"));
   if (!line) {
-    throw new ExternalAdapterError(`External adapter returned non-JSON output: ${trimmed.slice(0, 200)}`);
+    throw new ExternalAdapterError(`External adapter returned non-JSON output (${trimmed.length} characters)`);
   }
 
   const response = parseExternalMessage(line);

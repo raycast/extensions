@@ -6,74 +6,33 @@ Jeder Password Manager wird in **einer eigenen Datei** unter `src/adapters/` imp
 
 ### 1. Adapter-Datei anlegen
 
-Erstelle z. B. `src/adapters/1password.ts` und implementiere das `PasswordManagerAdapter`-Interface aus `src/types.ts`:
+Erstelle z. B. `src/adapters/mymanager.ts` und implementiere das `PasswordManagerAdapter`-Interface aus `src/types.ts`. Je nach Unlock-Modell eignet sich ein anderer Adapter als Vorlage:
 
-```typescript
-import type { AdapterStatus, PasswordManagerAdapter, VaultItem } from "../types";
-import { parseJson, resolveBinary, runCli } from "../utils/cli";
-import { getCliPathOverride } from "../registry";
+| Vorlage         | Unlock-Modell                                                                |
+| --------------- | ---------------------------------------------------------------------------- |
+| `bitwarden.ts`  | Master-Passwort → Session-Key der CLI, im Prozess-RAM gehalten               |
+| `keepassxc.ts`  | CLI ohne Session: Passwort im RAM, bei jedem Aufruf per stdin übergeben      |
+| `lastpass.ts`   | Login mit mehreren Feldern (E-Mail + Passwort), CLI-Agent hält den Schlüssel |
+| `1password.ts`  | Unlock komplett in der Desktop-App, kein `authenticate`                      |
+| `pass.ts`       | Unlock über gpg-agent; Liste aus dem Dateisystem, ohne zu entschlüsseln      |
+| `protonpass.ts` | Session-PIN über ein Pseudo-Terminal                                         |
 
-export const onePasswordAdapter: PasswordManagerAdapter = {
-  id: "1password",
-  name: "1Password",
-  cliBinary: "op",
+Regeln, die alle Adapter einhalten:
 
-  async isAvailable(): Promise<AdapterStatus> {
-    const binary = await resolveBinary(this.cliBinary, getCliPathOverride(this.id));
-    if (!binary) {
-      return { ok: false, reason: "1Password CLI (op) not found" };
-    }
-    try {
-      await runCli(binary, ["--version"]);
-      return { ok: true };
-    } catch (error) {
-      return {
-        ok: false,
-        reason: error instanceof Error ? error.message : "1Password CLI not ready",
-      };
-    }
-  },
-
-  async listItems(): Promise<VaultItem[]> {
-    // op item list --format json — volle Liste für lokales Filtern in der UI
-  },
-
-  async searchItems(query: string): Promise<VaultItem[]> {
-    // Optional: filterVaultItems(await listItems(), query)
-  },
-
-  async getPassword(item: VaultItem): Promise<string> {
-    // op read op://vault/item/password oder op item get --field password --reveal
-  },
-
-  async getUsername(item: VaultItem): Promise<string | undefined> {
-    // op item get <id> --field username
-  },
-
-  async getTotp(item: VaultItem): Promise<string | undefined> {
-    // op item get <id> --otp
-  },
-
-  async getUrl(item: VaultItem): Promise<string | undefined> {
-    // op item get <id> --field url oder aus Item-Metadaten
-  },
-
-  async openInManager(item: VaultItem): Promise<void> {
-    // z.B. open(`onepassword://open/i?a=...&v=...&i=...&h=...`)
-  },
-};
-```
-
-Siehe `protonpass.ts` für eine vollständige CLI-Implementierung und Referenztabelle.
+- Wirft eine CLI „gesperrt“, wirf `SessionLockedError` (`src/utils/cli.ts`). Dann entsperrt `wrapAdapterWithAutoUnlock` still mit den gemerkten Credentials und wiederholt den Aufruf.
+- Secrets nie trimmen: Passwörter dürfen Leerzeichen am Rand haben. Nur das abschließende Newline der CLI entfernen.
+- Prompts dürfen nicht blockieren: `runCli` schließt stdin immer. Fragt eine CLI trotzdem nach, schlägt sie fehl, statt zu hängen.
+- Fehlermeldungen vieler CLIs sind lokalisiert (z. B. keepassxc-cli). Dort auf Exit-Codes reagieren, nicht auf Text.
+- `getItemAvailability` implementieren, wenn es mit einem Aufruf geht. Sonst ruft die UI alle Getter einzeln auf, inklusive Passwort.
 
 ### 2. In der Registry registrieren
 
 In `src/adapters/index.ts` importieren und zur Liste hinzufügen:
 
 ```typescript
-import { onePasswordAdapter } from "./1password";
+import { myManagerAdapter } from "./mymanager";
 
-export const adapters: PasswordManagerAdapter[] = [protonPassAdapter, onePasswordAdapter];
+export const adapters: PasswordManagerAdapter[] = [protonPassAdapter, /* … */ myManagerAdapter];
 ```
 
 ### 3. CLI-Pfad konfigurieren (optional)
@@ -109,10 +68,16 @@ Beim Hinzufügen eines neuen Adapters den Eintrag im `data`-Array der Preference
 ## CLI-Hilfen
 
 - `resolveBinary(name, customPath?)` — Binary im PATH oder Override finden
-- `runCli(binary, args, options?)` — CLI ausführen mit Timeout und Fehlerbehandlung
+- `runCli(binary, args, options?)` — CLI ausführen mit Timeout und Fehlerbehandlung; `options.input` geht an stdin, `options.env` ergänzt die Umgebung. Das Verzeichnis der Binary kommt vorne in den `PATH` (Raycasts PATH enthält kein Homebrew)
+- `SessionLockedError` — signalisiert eine gesperrte Session für den Auto-Unlock
 - `parseJson<T>(stdout)` — JSON-Ausgabe parsen
 
 Alle in `src/utils/cli.ts`.
+
+## Testen ohne eigenen Account
+
+- **Kostenlos echt testbar:** Bitwarden (lokales [Vaultwarden](https://github.com/dani-garcia/vaultwarden) in Docker; `bw` verlangt HTTPS, also mit selbstsigniertem Zertifikat und `NODE_EXTRA_CA_CERTS`), KeePassXC (Test-`.kdbx` per `keepassxc-cli db-create`), pass (eigener `GNUPGHOME` + `PASSWORD_STORE_DIR`).
+- **Sonst:** eine Fake-CLI schreiben, die die dokumentierten Ausgaben liefert, und per **CLI Path Overrides** auf sie zeigen. Das prüft das Parsing, aber nicht das echte CLI-Verhalten. Die erste echte Prüfung macht jemand mit Account.
 
 ## Externe Adapter (Third-Party)
 

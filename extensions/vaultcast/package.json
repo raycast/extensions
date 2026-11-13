@@ -34,8 +34,108 @@
         {
           "title": "Proton Pass",
           "value": "protonpass"
+        },
+        {
+          "title": "Bitwarden",
+          "value": "bitwarden"
+        },
+        {
+          "title": "1Password",
+          "value": "1password"
+        },
+        {
+          "title": "KeePassXC",
+          "value": "keepassxc"
+        },
+        {
+          "title": "pass",
+          "value": "pass"
+        },
+        {
+          "title": "LastPass",
+          "value": "lastpass"
+        },
+        {
+          "title": "Dashlane",
+          "value": "dashlane"
+        },
+        {
+          "title": "Keeper",
+          "value": "keeper"
         }
       ]
+    },
+    {
+      "name": "enable-protonpass",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Enabled Managers",
+      "label": "Proton Pass",
+      "description": "Use the Proton Pass adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-bitwarden",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Bitwarden",
+      "description": "Use the Bitwarden adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-1password",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "1Password",
+      "description": "Use the 1Password adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-keepassxc",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "KeePassXC",
+      "description": "Use the KeePassXC adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-pass",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "pass",
+      "description": "Use the pass adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-lastpass",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "LastPass",
+      "description": "Use the LastPass adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-dashlane",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Dashlane",
+      "description": "Use the Dashlane adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-keeper",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Keeper",
+      "description": "Use the Keeper adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "keepassxcDatabase",
+      "type": "file",
+      "required": false,
+      "title": "KeePassXC Database",
+      "description": "The .kdbx file for the KeePassXC adapter. Databases secured with a key file or hardware key are not supported."
     },
     {
       "name": "externalAdaptersDirectory",
