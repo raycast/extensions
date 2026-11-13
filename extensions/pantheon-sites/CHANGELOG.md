@@ -1,6 +1,6 @@
 # com.matbrady.pantheon Changelog
 
-## [Uninitialized Site Fix] - {PR_MERGE_DATE}
+## [Uninitialized Site Fix] - 2026-11-13
 
 ### Fixed
 
