@@ -1810,7 +1810,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-calendar",
     title: "Multi Calendar",
     description:
-      "Your Outlook.com, Hotmail, Microsoft 365, Google, iCloud, Fastmail and other CalDAV calendars in Raycast - many accounts at once, one search for free time across all of them. Read events, find free time, create, move and cancel events and answer invitations, make booking links, booking pages and group polls, each account within the permissions its owner sets. No copy of the calendars is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Calendar connects your own Outlook.com, Hotmail, Microsoft 365, Google, iCloud (Apple Calendar), Yahoo, AOL, Fastmail and other CalDAV calendars to Raycast - many accounts at once, with free time found across all of them. Booking links, booking pages and group polls. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-512.png",
     homepage: "https://lumman.co/mcp/multi-calendar",
     configuration: {
@@ -1823,7 +1823,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-mail",
     title: "Multi Mail",
     description:
-      "Your Gmail, Outlook.com, Hotmail, Microsoft 365, iCloud, Fastmail and other IMAP mailboxes in Raycast - several at once, one search across all of them. Read threads, messages and attachments, draft, send and organise mail, each mailbox within the permissions its owner sets. No copy of the mail is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Mail connects your own Gmail, Outlook.com, Hotmail, Microsoft 365, Yahoo, AOL, iCloud, Fastmail and other IMAP email accounts to Raycast - several inboxes at once, with one search across all of them. Read, draft, send and clean out an inbox by sender. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-512.png",
     homepage: "https://lumman.co/mcp/multi-mail",
     configuration: {
