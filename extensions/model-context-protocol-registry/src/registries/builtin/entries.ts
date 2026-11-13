@@ -7,6 +7,32 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "excession-labs-cve",
+    title: "Excession Labs CVE intelligence",
+    description:
+      "Search CVEs by text, vendor, product, package, ecosystem or a literal source version. Read CVE details, source references, affected-software evidence and available CISA KEV and dated FIRST EPSS data. Check source coverage and collection health, page through hosted revisions, or read changes after a saved cursor. Six read-only tools. Version filters match source assertions; they do not evaluate installed-version applicability. Free hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy and require Node.js.",
+    icon: "https://excessionlabs.ai/icon-512.png",
+    homepage: "https://excessionlabs.ai/cve-intelligence/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://excessionlabs.ai/mcp/cve"],
+    },
+    remoteUrl: "https://excessionlabs.ai/mcp/cve",
+  },
+  {
+    name: "mobile-joe",
+    title: "Mobile Joe",
+    description:
+      "Manage your mobile app's FAQs, translations, feature plans and in-app alerts from your AI agent. Maintain FAQs and their translations, curate the feature plans app users vote on, prepare and deliver targeted in-app alerts, and update app settings for apps that use the Mobile Joe iOS and Android SDKs. Prepares drafts and publishes or delivers only when asked. 33 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which apps and permissions to share. A Mobile Joe account is required (14-day free trial, no credit card).",
+    icon: "https://app.mobilejoe.dev/icon.png",
+    homepage: "https://docs.mobilejoe.dev/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.mobilejoe.dev/mcp"],
+    },
+    remoteUrl: "https://app.mobilejoe.dev/mcp",
+  },
+  {
     name: "alphagrowth",
     title: "AlphaGrowth",
     description:
@@ -422,6 +448,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "airbridge",
+    title: "Airbridge",
+    description:
+      "Mobile attribution for subscription apps: ask which ads and creators bring installs, trials and paying subscribers. Hosted remote Streamable HTTP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in with dynamic client registration and PKCE, no API key to paste. Needs an Airbridge account.",
+    icon: "https://www.airbridge.io/apple-icon.png",
+    homepage:
+      "https://www.airbridge.io/en/product/airbridge-ai?utm_source=raycast&utm_medium=listing&utm_campaign=get_found_w46&utm_content=airbridge_mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.airbridge.io/mcp"],
+    },
+    remoteUrl: "https://mcp.airbridge.io/mcp",
+  },
+  {
     name: "airport-lounge-list",
     title: "Airport Lounge List",
     description:
@@ -640,6 +680,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         BRAVE_API_KEY: "YOUR_API_KEY_HERE",
       },
     },
+  },
+  {
+    name: "buildbase-console",
+    title: "BuildBase Console",
+    description:
+      "Manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/buildbase-app/mcp/main/assets/logo-400.png",
+    homepage: "https://docs.buildbase.app/console/ai-agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.console.buildbase.app/mcp"],
+    },
+    remoteUrl: "https://api.console.buildbase.app/mcp",
   },
   {
     name: "bulkpublish",
