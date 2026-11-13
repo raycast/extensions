@@ -388,6 +388,7 @@
 /extensions/cerebras                                                @EvanZhouDev
 /extensions/certificate-viewer                                      @gamerslouis
 /extensions/ceypay                                                  @kasuncfdo
+/extensions/chainscope                                              @auralshin
 /extensions/chainscout                                              @tom2drum
 /extensions/chakra-ui-docs                                          @pgvr @Ansub @StanleyDing @xmok
 /extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski @yug2005 @ridemountainpig @degouville @xmok @chrismessina @alexibuild @Just-Me-22
@@ -3385,7 +3386,7 @@
 /extensions/web3-profile                                            @peduarte
 /extensions/web3bio                                                 @picturepan2
 /extensions/webbites                                                @elrumo
-/extensions/webcull                                                 
+/extensions/webcull                                                 @growthboot
 /extensions/webdav-uploader                                         @i207M
 /extensions/webeep                                                  @05bmckay
 /extensions/webflow-sites                                           @vurhd @pernielsentikaer @xmok
