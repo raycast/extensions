@@ -6,7 +6,12 @@ import { isDefined } from "./utils";
 
 // Raycast commands can run in separate processes, so disable the SDK's service
 // event subscriptions before SonosManager adds listeners in @svrooij/sonos.
+// Otherwise every command process tries to bind the shared event listener port
+// (6329) and fails with EADDRINUSE when commands run in quick succession.
 process.env.SONOS_DISABLE_EVENTS = "true";
+// Belt and braces: if a subscription ever sneaks through anyway, make sure the
+// listener server never binds its port.
+process.env.SONOS_DISABLE_LISTENER = "true";
 
 export async function formatPlayingState(state: SonosState | null): Promise<string | null> {
   const playing = await isPlaying();
