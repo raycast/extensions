@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add freelance.link MCP Server] - {PR_MERGE_DATE}
+## [Add freelance.link MCP Server] - 2026-11-13
 
 - Add freelance.link to the official registry: keep a freelancer's availability current from an AI agent by managing projects, absences and the waitlist. 11 tools. Hosted Streamable HTTP server at https://freelance.link/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A freelance.link account is required.
 
