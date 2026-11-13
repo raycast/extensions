@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Rizamo MCP Server] - {PR_MERGE_DATE}
+## [Add Rizamo MCP Server] - 2026-11-13
 
 - Add Rizamo to the official registry: publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, read analytics and answer comments and messages from an AI agent. 57 tools. Hosted Streamable HTTP server at https://mcp.rizamo.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Rizamo account (free for 2 social accounts).
 
