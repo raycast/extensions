@@ -2,7 +2,7 @@
 
 ## [Project Mentions in AI Chat] - {PR_MERGE_DATE}
 
-- Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name.
+- Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name. Each project shows its own icon and color.
 - Mentioning a project gives AI its status, lead, teams, members, and milestones.
 
 ## [Primary Action Preference] - 2026-10-29

@@ -75,19 +75,34 @@ export function mergeMentionProjects<T extends { id: string }>(mine: readonly T[
   });
 }
 
-export function toProjectMentions(projects: readonly MentionProjectResult[], icon: string) {
+/** A project row: its name, its status, and its own icon in its own color, as Linear shows it. */
+export function toProjectMentions(
+  projects: readonly MentionProjectResult[],
+  icon: (project: MentionProjectResult) => string,
+) {
   return projects.slice(0, 50).map((project) => ({
     title: project.name,
     uri: `linear://projects/${project.id}`,
-    description: [
-      project.status?.name,
-      project.lead?.displayName,
-      project.teams.nodes.map((team) => team.key).join(", "),
-    ]
-      .filter(Boolean)
-      .join(" · "),
-    icon,
+    description: project.status?.name ?? "",
+    icon: icon(project),
   }));
+}
+
+const HEX_COLOR = /^#[0-9a-f]{3,8}$/i;
+
+/** The project's color when it is a hex color, the only form an SVG attribute safely takes. */
+export function projectIconColor(color: string | null | undefined) {
+  return color && HEX_COLOR.test(color) ? color.toLowerCase() : undefined;
+}
+
+/**
+ * Paints a single-color Linear icon in the project's color, as Linear tints it: every fill, stroke,
+ * and `--icon-color` becomes the color, and `none` stays transparent.
+ */
+export function tintProjectIconSvg(svg: string, color: string) {
+  return svg
+    .replace(/\b(fill|stroke)="(?!none")[^"]*"/gi, `$1="${color}"`)
+    .replace(/--icon-color:\s*#[0-9a-f]{3,8}/gi, `--icon-color: ${color}`);
 }
 
 type ResourceKind = "users" | "issues" | "projects";

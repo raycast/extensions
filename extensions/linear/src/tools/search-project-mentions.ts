@@ -1,5 +1,3 @@
-import { Icon } from "@raycast/api";
-
 import { getMentionProjects } from "../api/getProjects";
 import {
   ACTIVE_PROJECT_MENTION_FILTER,
@@ -8,6 +6,7 @@ import {
   mergeMentionProjects,
   toProjectMentions,
 } from "../helpers/mentions";
+import { getProjectMentionIcon } from "../helpers/projectMentionIcons";
 
 import { withLinear } from "./withLinear";
 
@@ -23,11 +22,11 @@ type Input = {
  */
 export default withLinear(async ({ query }: Input) => {
   if (query.trim()) {
-    return toProjectMentions(await getMentionProjects(getProjectMentionFilter(query)), Icon.Box);
+    return toProjectMentions(await getMentionProjects(getProjectMentionFilter(query)), getProjectMentionIcon);
   }
   const [mine, active] = await Promise.all([
     getMentionProjects(MY_PROJECT_MENTION_FILTER),
     getMentionProjects(ACTIVE_PROJECT_MENTION_FILTER),
   ]);
-  return toProjectMentions(mergeMentionProjects(mine, active), Icon.Box);
+  return toProjectMentions(mergeMentionProjects(mine, active), getProjectMentionIcon);
 });

@@ -5,7 +5,9 @@ import {
   getProjectMentionFilter,
   getUserMentionFilter,
   mergeMentionProjects,
+  projectIconColor,
   readMentionResource,
+  tintProjectIconSvg,
   toIssueMentions,
   toProjectMentions,
   toUserMentions,
@@ -190,22 +192,39 @@ const projectId = "33333333-3333-4333-8333-333333333333";
 const project = {
   id: projectId,
   name: "Desktop",
+  icon: "Rocket",
+  color: "#F2994A",
   status: { name: "In Progress", type: "started" },
-  lead: { displayName: "Alice" },
-  teams: { nodes: [{ key: "ENG" }, { key: "DES" }] },
 };
+const iconOf = (p: { icon?: string | null; color: string }) => `${p.icon}:${p.color}`;
 
-test("project mentions show status, lead, and teams", () => {
-  const [mention] = toProjectMentions([project], "box");
+test("project mentions show the name, the status, and the project's own icon", () => {
+  const [mention] = toProjectMentions([project], iconOf);
   assert.deepEqual(mention, {
     title: "Desktop",
     uri: `linear://projects/${projectId}`,
-    description: "In Progress · Alice · ENG, DES",
-    icon: "box",
+    description: "In Progress",
+    icon: "Rocket:#F2994A",
   });
-  const [bare] = toProjectMentions([{ ...project, status: null, lead: null, teams: { nodes: [] } }], "box");
+  const [bare] = toProjectMentions([{ ...project, status: null }], iconOf);
   assert.equal(bare.description, "");
-  assert.equal(toProjectMentions(Array.from({ length: 60 }, () => project), "box").length, 50);
+  assert.equal(toProjectMentions(Array.from({ length: 60 }, () => project), iconOf).length, 50);
+});
+
+test("project icons take the project's color on every painted fill and stroke, keeping transparency", () => {
+  const svg =
+    '<svg style="--icon-color: #5e5e5f;" fill="#5e5e5f"><path fill="none" stroke="#C3C4C6"/><path fill="#c3c4c6"/><path fill="black"/></svg>';
+  assert.equal(
+    tintProjectIconSvg(svg, "#f2994a"),
+    '<svg style="--icon-color: #f2994a;" fill="#f2994a"><path fill="none" stroke="#f2994a"/><path fill="#f2994a"/><path fill="#f2994a"/></svg>',
+  );
+});
+
+test("only a hex project color reaches an SVG", () => {
+  assert.equal(projectIconColor("#F2994A"), "#f2994a");
+  for (const color of [undefined, null, "", "orange", '#fff" onload="x', "#12"]) {
+    assert.equal(projectIconColor(color), undefined);
+  }
 });
 
 test("a project name search needs every word, in any status or team", () => {
@@ -222,7 +241,7 @@ test("the default project list puts yours first, then the others, without repeat
 });
 
 test("project URIs read the project alone", async () => {
-  const [mention] = toProjectMentions([project], "box");
+  const [mention] = toProjectMentions([project], iconOf);
   const resource = await readMentionResource(mention.uri, {
     users: async () => assert.fail("Must not read a user"),
     issues: async () => assert.fail("Must not read an issue"),
