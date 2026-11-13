@@ -22,6 +22,7 @@ import type {
   FigaTag,
 } from "./api/types";
 import { ExpensePaymentPermissionDetail, ReadCapabilityGate } from "./read-capability-gate";
+import { loadOptionalTags } from "./optional-tags";
 import {
   canRecordExpensePayments,
   canReadResource,
@@ -46,6 +47,7 @@ interface ExpenseCommandData {
   context: FigaWorkspaceContext;
   expenses?: FigaExpenseListResponse;
   tags?: FigaTag[];
+  tagsWarning?: string;
 }
 
 interface PaymentAttempt {
@@ -98,7 +100,7 @@ function ExpenseCommandView({
         <List.EmptyView
           icon={Icon.Receipt}
           title={getEmptyTitle(isLoading)}
-          description={buildEmptyDescription(statusFilter, monthLabel)}
+          description={[buildEmptyDescription(statusFilter, monthLabel), data?.tagsWarning].filter(Boolean).join(" ")}
           actions={<ListLevelActions data={data} onRefresh={revalidate} />}
         />
         <ExpenseListSection
@@ -124,9 +126,9 @@ async function loadExpenseCommandData(
 
   const [expenses, tags] = await Promise.all([
     getExpenses(buildExpenseListQuery(year, month, statusFilter)),
-    canReadResource(context, "tags") ? getTags() : undefined,
+    loadOptionalTags(canReadResource(context, "tags") ? getTags() : undefined),
   ]);
-  return { context, expenses, tags: tags?.tags };
+  return { context, expenses, ...tags };
 }
 
 function buildExpenseListQuery(year: number, month: number, statusFilter: ExpenseStatusFilter): FigaExpenseListQuery {
@@ -221,7 +223,7 @@ function ExpenseListSection({
   if (!data?.expenses) return null;
 
   return (
-    <List.Section title={buildSectionTitle(statusFilter, monthLabel, metadata)}>
+    <List.Section title={buildSectionTitle(statusFilter, monthLabel, metadata)} subtitle={data.tagsWarning}>
       {data.expenses.expenses.map((expense) => (
         <ExpenseListItem
           key={expense.id}

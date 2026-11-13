@@ -20,7 +20,6 @@ import type {
   FigaRecipientListResponse,
   FigaWorkspaceContext,
   FigaTag,
-  FigaTagListResponse,
 } from "./api/types";
 import {
   canReadResource,
@@ -31,6 +30,7 @@ import {
   getWorkspaceBaseCurrency,
 } from "./format";
 import { ExpenseWriteGate, ReadCapabilityGate } from "./read-capability-gate";
+import { loadOptionalTags } from "./optional-tags";
 
 const { Action, ActionPanel, Color, Detail, Form, Icon, Toast, openExtensionPreferences, showToast } = Raycast;
 const NO_RECIPIENT_VALUE = "__figa_no_recipient__";
@@ -43,7 +43,8 @@ interface CreateExpenseCommandData {
   context: FigaWorkspaceContext;
   categories?: FigaCategoryListResponse;
   recipients?: FigaRecipientListResponse;
-  tags?: FigaTagListResponse;
+  tags?: FigaTag[];
+  tagsWarning?: string;
 }
 
 interface CreateExpenseFormValues {
@@ -81,9 +82,9 @@ async function loadCreateExpenseData(): Promise<CreateExpenseCommandData> {
   const [categories, recipients, tags] = await Promise.all([
     getCategories(),
     getRecipients(),
-    canReadResource(context, "tags") ? getTags() : undefined,
+    loadOptionalTags(canReadResource(context, "tags") ? getTags() : undefined),
   ]);
-  return { context, categories, recipients, tags };
+  return { context, categories, recipients, ...tags };
 }
 
 function CreateExpenseCommandView({
@@ -135,6 +136,7 @@ function CreateExpenseContent({
       categories={references.categories}
       recipients={references.recipients}
       tags={references.tags}
+      tagsWarning={references.tagsWarning}
       onRefresh={onRetry}
     />
   );
@@ -145,6 +147,7 @@ function getLoadedReferences(data: CreateExpenseCommandData | undefined): {
   categories: FigaCategory[];
   recipients: FigaRecipient[];
   tags?: FigaTag[];
+  tagsWarning?: string;
 } | null {
   if (!data?.categories || !data.recipients) return null;
 
@@ -152,7 +155,8 @@ function getLoadedReferences(data: CreateExpenseCommandData | undefined): {
     context: data.context,
     categories: data.categories.categories,
     recipients: data.recipients.recipients,
-    tags: data.tags?.tags,
+    tags: data.tags,
+    tagsWarning: data.tagsWarning,
   };
 }
 
@@ -162,6 +166,7 @@ function CreateExpenseForm({
   categories,
   recipients,
   tags,
+  tagsWarning,
   onRefresh,
 }: {
   args: CreateExpenseArguments;
@@ -169,6 +174,7 @@ function CreateExpenseForm({
   categories: FigaCategory[];
   recipients: FigaRecipient[];
   tags?: FigaTag[];
+  tagsWarning?: string;
   onRefresh: () => void;
 }) {
   const initialValues = useMemo(() => buildInitialValues(args, context, categories), [args, context, categories]);
@@ -424,7 +430,11 @@ function CreateExpenseForm({
       ) : (
         <Form.Description
           title="Tags"
-          text="This key does not grant tags.read. You can still create an expense without tags."
+          text={
+            tagsWarning
+              ? `${tagsWarning} You can still create an expense without tags.`
+              : "This key does not grant tags.read. You can still create an expense without tags."
+          }
         />
       )}
       <Form.TextArea
