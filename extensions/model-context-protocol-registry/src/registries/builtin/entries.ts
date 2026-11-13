@@ -2008,6 +2008,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "plushsource",
+    title: "PlushSource",
+    description:
+      "Search and compare the custom plush manufacturers listed in the PlushSource directory: filter by country, minimum order quantity, certifications, products, design inputs and OEM/ODM, read every published fact for one manufacturer, or compare two to five side by side. Facts come from each manufacturer's own website and fields it does not publish are left empty; PlushSource does not audit manufacturers. 5 tools and an RFQ draft prompt. Local stdio server `plushsource-mcp` (MIT) through `npx`; the dataset is bundled, with no network calls, no account and no API key. Needs Node.js 20 or newer.",
+    icon: "https://raw.githubusercontent.com/quickman924/plushsource-mcp/main/assets/icon.png",
+    homepage: "https://plushsource.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "plushsource-mcp"],
+    },
+  },
+  {
     name: "postemi",
     title: "Postemi",
     description:
