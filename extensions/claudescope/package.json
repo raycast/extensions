@@ -38,6 +38,12 @@
       "mode": "view"
     },
     {
+      "name": "live-agents",
+      "title": "ClaudeScope Live Agents",
+      "description": "Watch live coding-agent sessions and see which ones are waiting for you",
+      "mode": "view"
+    },
+    {
       "name": "open-claudescope",
       "title": "Open ClaudeScope",
       "description": "Open the local ClaudeScope web app",
