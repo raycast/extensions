@@ -253,5 +253,8 @@
   },
   "ai": {
     "modelProvider": "models"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
