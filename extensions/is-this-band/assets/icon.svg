@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d0b2b"/>
+      <stop offset="1" stop-color="#0b0610"/>
+    </linearGradient>
+    <linearGradient id="pick" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#ff5c9e"/>
+      <stop offset="0.5" stop-color="#c43df0"/>
+      <stop offset="1" stop-color="#5a2df5"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#d13df0" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#d13df0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="240" r="210" fill="url(#glow)"/>
+
+  <path
+    d="M256 54
+       C 350 54, 442 150, 442 252
+       C 442 320, 330 410, 256 458
+       C 182 410, 70 320, 70 252
+       C 70 150, 162 54, 256 54 Z"
+    fill="url(#pick)"
+  />
+
+  <path
+    d="M136 178
+       C 168 124, 214 96, 268 90"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="13"
+    stroke-linecap="round"
+    opacity="0.28"
+  />
+
+  <text
+    x="256"
+    y="338"
+    text-anchor="middle"
+    font-family="Arial Black, Arial, Helvetica, sans-serif"
+    font-weight="900"
+    font-size="250"
+    fill="#160612"
+  >?</text>
+</svg>
