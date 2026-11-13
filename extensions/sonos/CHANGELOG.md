@@ -1,5 +1,13 @@
 # Sonos Changelog
 
+## [Fix] - 2026-11-13
+
+- Harden against event listener port conflicts when running multiple commands in quick succession.
+- Update the Sonos library to 2.7.0, which fixes empty group detection.
+- Show the actual track in Now Playing when Spotify Connect is the playback source.
+- Remove the Play / Pause background refresh and its Now Playing subtitle in favor of the Now Playing menu bar command.
+- Update the extension icon to the rounded Store style.
+
 ## [Fix] - 2026-08-21
 
 - Reduced background playback-state refreshes to once per minute.
