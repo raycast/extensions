@@ -1,6 +1,6 @@
 # ipdata IP Lookup Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-13
 
 - **Look Up IP**: look up an IPv4 or IPv6 address or a hostname, with the place, a street map and the location details, plus tabs for Raw JSON, Analysis, Scores, Flags, Blocklists, Connection, Operator and Owner.
 - **Look Up Selected IP** and **Look Up Clipboard IP**: city, country and operator in a HUD for the IP address in the selection or the clipboard.
