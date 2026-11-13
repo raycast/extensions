@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Non-Standard Publish Dates] - {PR_MERGE_DATE}
+## [Non-Standard Publish Dates] - 2026-11-13
 
 - Read publish dates that feeds nest in non-standard elements, such as Mikan Project's torrent element
 - Set a time zone per feed for dates that don't include one
