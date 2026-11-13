@@ -21,9 +21,7 @@ export function searchBookmarks(bookmarks: WebCullBookmark[], query: string): We
 
 function scoreBookmark(bookmark: WebCullBookmark, normalizedQuery: string): number {
   const searchText = normalize(
-    [bookmark.title, bookmark.url, bookmark.parentStackPath, ...(bookmark.tags || [])]
-      .filter(Boolean)
-      .join(" "),
+    [bookmark.title, bookmark.url, bookmark.parentStackPath, ...(bookmark.tags || [])].filter(Boolean).join(" "),
   );
 
   if (searchText.includes(normalizedQuery)) {

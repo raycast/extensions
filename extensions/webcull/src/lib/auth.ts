@@ -137,10 +137,7 @@ export async function postAuthenticatedWebCull(
   }
 }
 
-async function saveAuthToken(
-  response: WebCullAuthTokenResponse,
-  isCurrent: () => boolean,
-): Promise<void> {
+async function saveAuthToken(response: WebCullAuthTokenResponse, isCurrent: () => boolean): Promise<void> {
   const assertCurrent = () => {
     if (!isCurrent()) throw new AuthHandoffCancelledError();
   };
@@ -152,18 +149,13 @@ async function saveAuthToken(
   const { accounts } = await getSavedAuthAccounts();
   assertCurrent();
   const account = tokenResponseToAccount(response);
-  const replacedAccount = accounts.find(
-    (savedAccount) => savedAccount.accountId === account.accountId,
-  );
+  const replacedAccount = accounts.find((savedAccount) => savedAccount.accountId === account.accountId);
   if (replacedAccount && replacedAccount.token !== account.token) {
     await revokeAuthToken(replacedAccount.token);
     await removeAuthAccount(replacedAccount.accountId);
     assertCurrent();
   }
-  const nextAccounts = [
-    account,
-    ...accounts.filter((savedAccount) => savedAccount.accountId !== account.accountId),
-  ];
+  const nextAccounts = [account, ...accounts.filter((savedAccount) => savedAccount.accountId !== account.accountId)];
 
   await saveAccounts(nextAccounts);
   assertCurrent();
@@ -264,11 +256,7 @@ export async function redeemAuthHandoff(
         } finally {
           const account = tokenResponseToAccount(response);
           const { accounts } = await getSavedAuthAccounts();
-          if (
-            accounts.some(
-              (saved) => saved.accountId === account.accountId && saved.token === account.token,
-            )
-          ) {
+          if (accounts.some((saved) => saved.accountId === account.accountId && saved.token === account.token)) {
             await removeAuthAccount(account.accountId);
           }
         }
@@ -309,9 +297,7 @@ function parseSavedAccounts(raw: string | undefined): WebCullSavedAccount[] {
     if (!Array.isArray(parsed)) {
       return [];
     }
-    return parsed.filter((account) =>
-      Boolean(account.accountId && account.token && account.expires),
-    );
+    return parsed.filter((account) => Boolean(account.accountId && account.token && account.expires));
   } catch {
     return [];
   }

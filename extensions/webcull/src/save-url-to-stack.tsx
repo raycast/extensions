@@ -128,12 +128,7 @@ export default function SaveUrlToStack() {
           {needsReauth || capabilities?.needsAuth ? (
             <Action.Push
               title="Reconnect WebCull"
-              target={
-                <ConnectAccount
-                  reauthorize
-                  onConnected={() => setSetupAttempt((attempt) => attempt + 1)}
-                />
-              }
+              target={<ConnectAccount reauthorize onConnected={() => setSetupAttempt((attempt) => attempt + 1)} />}
             />
           ) : setupError ? (
             <Action title="Retry" onAction={() => setSetupAttempt((attempt) => attempt + 1)} />
@@ -162,10 +157,7 @@ export default function SaveUrlToStack() {
       {setupError ? (
         <Form.Description title="Could not load WebCull stacks" text={setupError} />
       ) : capabilities && !capabilities.bookmarkWrite ? (
-        <Form.Description
-          title="Status"
-          text={capabilities.reason || "Saving is not enabled for this account."}
-        />
+        <Form.Description title="Status" text={capabilities.reason || "Saving is not enabled for this account."} />
       ) : null}
     </Form>
   );

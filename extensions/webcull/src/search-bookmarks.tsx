@@ -119,12 +119,7 @@ export default function SearchBookmarks() {
               {reconnect ? (
                 <Action.Push
                   title="Reconnect WebCull"
-                  target={
-                    <ConnectAccount
-                      reauthorize
-                      onConnected={() => setSetupAttempt((attempt) => attempt + 1)}
-                    />
-                  }
+                  target={<ConnectAccount reauthorize onConnected={() => setSetupAttempt((attempt) => attempt + 1)} />}
                 />
               ) : (
                 <Action title="Retry" onAction={() => setSetupAttempt((attempt) => attempt + 1)} />
@@ -164,13 +159,7 @@ export default function SearchBookmarks() {
   );
 }
 
-function BookmarkActions({
-  bookmark,
-  onAuthError,
-}: {
-  bookmark: WebCullBookmark;
-  onAuthError: () => void;
-}) {
+function BookmarkActions({ bookmark, onAuthError }: { bookmark: WebCullBookmark; onAuthError: () => void }) {
   return (
     <ActionPanel>
       <Action.OpenInBrowser title="Open URL" url={bookmark.url} />

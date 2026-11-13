@@ -53,9 +53,7 @@ export async function postWebCull(
     throw new Error("Invalid JSON response from WebCull.");
   }
 
-  if (
-    ["token_required", "invalid_token", "token_expired_or_revoked"].includes(String(parsed.code))
-  ) {
+  if (["token_required", "invalid_token", "token_expired_or_revoked"].includes(String(parsed.code))) {
     throw new WebCullAuthError();
   }
 

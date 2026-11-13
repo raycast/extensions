@@ -1,9 +1,4 @@
-import {
-  WebCullBookmark,
-  WebCullCapabilityState,
-  WebCullSavePayload,
-  WebCullStack,
-} from "../types";
+import { WebCullBookmark, WebCullCapabilityState, WebCullSavePayload, WebCullStack } from "../types";
 import { folderUrl } from "./folderLink";
 import { getAuthState, postAuthenticatedWebCull, requireAuthToken } from "./auth";
 import { responseItems, responseMessage, WebCullAuthError } from "./http";
@@ -84,15 +79,10 @@ export async function searchWebCullBookmarks(
 
   return responseItems<CliBookmarkRow>(response)
     .filter((row: CliBookmarkRow) => row.type === "bookmark")
-    .map((row: CliBookmarkRow) =>
-      rowToBookmark(row, preferences.appBaseUrl, accountHash, accountId),
-    );
+    .map((row: CliBookmarkRow) => rowToBookmark(row, preferences.appBaseUrl, accountHash, accountId));
 }
 
-export async function getStacks(
-  preferences: WebCullPreferences,
-  accountId: string,
-): Promise<WebCullStack[]> {
+export async function getStacks(preferences: WebCullPreferences, accountId: string): Promise<WebCullStack[]> {
   const token = await requireAuthToken(accountId);
   await requireUnencryptedAccount(preferences, token);
   const response = await postAuthenticatedWebCull(
@@ -123,10 +113,7 @@ export async function getStacks(
   ];
 }
 
-export async function saveBookmark(
-  preferences: WebCullPreferences,
-  payload: WebCullSavePayload,
-): Promise<void> {
+export async function saveBookmark(preferences: WebCullPreferences, payload: WebCullSavePayload): Promise<void> {
   const url = payload.url.trim();
   if (!isSaveableUrl(url)) {
     throw new Error("Enter a full http:// or https:// URL without embedded credentials.");
@@ -195,16 +182,8 @@ function rowToBookmark(
 const ENCRYPTION_UNSUPPORTED =
   "Encrypted accounts are not supported in Raycast. Use WebCull directly for this account.";
 
-async function accountRequiresEncryption(
-  preferences: WebCullPreferences,
-  token: string,
-): Promise<boolean> {
-  const response = await postAuthenticatedWebCull(
-    preferences.apiBaseUrl,
-    "/raycast/metadata",
-    {},
-    token,
-  );
+async function accountRequiresEncryption(preferences: WebCullPreferences, token: string): Promise<boolean> {
+  const response = await postAuthenticatedWebCull(preferences.apiBaseUrl, "/raycast/metadata", {}, token);
   if (response.success !== "true") {
     throw new Error(responseMessage(response, "Could not check WebCull account support."));
   }
@@ -214,17 +193,12 @@ async function accountRequiresEncryption(
     !["true", "false"].includes(e2ee.e2ee_enabled as string) ||
     !["true", "false"].includes(e2ee.conversion_in_progress as string)
   ) {
-    throw new Error(
-      "Could not confirm WebCull account encryption status. Try again before searching or saving.",
-    );
+    throw new Error("Could not confirm WebCull account encryption status. Try again before searching or saving.");
   }
   return e2ee.e2ee_enabled === "true" || e2ee.conversion_in_progress === "true";
 }
 
-async function requireUnencryptedAccount(
-  preferences: WebCullPreferences,
-  token: string,
-): Promise<void> {
+async function requireUnencryptedAccount(preferences: WebCullPreferences, token: string): Promise<void> {
   if (await accountRequiresEncryption(preferences, token)) {
     throw new Error(ENCRYPTION_UNSUPPORTED);
   }

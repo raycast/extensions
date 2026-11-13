@@ -110,11 +110,7 @@ export default function ConnectAccount({
         return;
       }
 
-      const response = await redeemAuthHandoff(
-        currentHandoff.request,
-        currentHandoff.verifier,
-        isCurrent,
-      );
+      const response = await redeemAuthHandoff(currentHandoff.request, currentHandoff.verifier, isCurrent);
       if (!isCurrent()) return;
 
       if (response.success === "true") {
@@ -300,9 +296,7 @@ export default function ConnectAccount({
   return (
     <List>
       <List.Item
-        icon={
-          auth.connected ? Icon.CheckCircle : state === "error" ? Icon.ExclamationMark : Icon.Person
-        }
+        icon={auth.connected ? Icon.CheckCircle : state === "error" ? Icon.ExclamationMark : Icon.Person}
         title={title}
         subtitle={message}
         actions={
@@ -310,9 +304,7 @@ export default function ConnectAccount({
             {!auth.connected || reauthorize ? (
               <Action title="Open WebCull Login" icon={Icon.Link} onAction={beginConnect} />
             ) : null}
-            {handoff ? (
-              <Action.OpenInBrowser title="Open Approval Page" url={handoff.approvalUrl} />
-            ) : null}
+            {handoff ? <Action.OpenInBrowser title="Open Approval Page" url={handoff.approvalUrl} /> : null}
           </ActionPanel>
         }
       />
@@ -399,10 +391,7 @@ function SavedAccountsView({
                   icon={Icon.CheckCircle}
                   onAction={() => useAccount(account)}
                 />
-                <Action.Push
-                  title="Reconnect WebCull"
-                  target={<ConnectAccount reauthorize onConnected={reload} />}
-                />
+                <Action.Push title="Reconnect WebCull" target={<ConnectAccount reauthorize onConnected={reload} />} />
                 <Action
                   title="Log Out Saved Account"
                   icon={Icon.Trash}
