@@ -54,12 +54,12 @@
     {
       "name": "get-owned-games",
       "title": "Get Owned Games",
-      "description": "List the games you own on Steam with playtime and when each was last played. Needs your Web API Key and Steam ID."
+      "description": "List the games you own on Steam with playtime and when each was last played. Needs your Steam ID."
     },
     {
       "name": "get-recently-played-games",
       "title": "Get Recently Played Games",
-      "description": "List the games you played on Steam in the last two weeks. Needs your Web API Key and Steam ID."
+      "description": "List the games you played on Steam in the last two weeks. Needs your Steam ID."
     },
     {
       "name": "find-similar-games",
@@ -74,7 +74,7 @@
     {
       "name": "recommend-owned-games",
       "title": "Recommend Owned Games",
-      "description": "Find games in your library like games you name. Needs your Web API Key and Steam ID."
+      "description": "Find games in your library like games you name. Needs your Steam ID."
     },
     {
       "name": "get-game-news",
@@ -84,12 +84,12 @@
     {
       "name": "query-game-list",
       "title": "Query Game List",
-      "description": "List the newest or most recently updated apps on Steam. Needs your Web API Key."
+      "description": "List the newest or most recently updated apps on Steam."
     },
     {
       "name": "refresh-game-list",
       "title": "Refresh Game List",
-      "description": "Download the Steam game list again. Needs your Web API Key."
+      "description": "Download the Steam game list again."
     },
     {
       "name": "launch-game",
@@ -1340,9 +1340,9 @@
       "name": "token",
       "type": "password",
       "title": "Web API Key",
-      "description": "Enables local mode for fast searches: https://steamcommunity.com/dev/apikey",
+      "description": "Get one at https://steamcommunity.com/dev/apikey",
       "placeholder": "Web API Key",
-      "required": false
+      "required": true
     },
     {
       "name": "steamid",
