@@ -1,0 +1,16 @@
+.DS_Store
+.build/
+*.candidate
+capture-and-copy.candidate.sh
+tests/**/check
+tests/**/fixtures/
+tests/**/*.backup
+*.log
+.env
+.env.*
+node_modules/
+dist/
+.raycast-swift-build/
+swift/.build/
+swift/.swiftpm/
+assets/compiled_raycast_swift/

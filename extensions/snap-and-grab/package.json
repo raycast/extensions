@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snap-and-grab",
+  "title": "Snap & Grab",
+  "description": "Capture a screenshot, add recent shots with a few key taps, and copy the group.",
+  "icon": "icon.png",
+  "author": "hushhash",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "screenshot",
+    "clipboard",
+    "capture",
+    "history",
+    "images"
+  ],
+  "commands": [
+    {
+      "name": "capture",
+      "title": "Capture and Copy",
+      "description": "Capture an area or window, then add older screenshots before copying.",
+      "mode": "no-view"
+    },
+    {
+      "name": "select-recent",
+      "title": "Select Recent Screenshots",
+      "description": "Choose saved screenshots and copy them together without taking a new capture.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "screenshotFolder",
+      "title": "Screenshot Folder",
+      "description": "Leave empty to use your macOS screenshot location.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "confirmation",
+      "title": "Copy Confirmation",
+      "description": "How long the copied confirmation stays visible. Clipboard transfer is completed even when confirmation is off.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1.5",
+      "data": [
+        {
+          "title": "Off",
+          "value": "0"
+        },
+        {
+          "title": "Brief (1.5 seconds)",
+          "value": "1.5"
+        },
+        {
+          "title": "Extended (3 seconds)",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "showPreviews",
+      "title": "Thumbnail Previews",
+      "description": "Show screenshot previews in the selection and confirmation HUD.",
+      "type": "checkbox",
+      "label": "Show thumbnail previews",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --import tsx --test src/*.test.ts"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
