@@ -1,6 +1,6 @@
 # Day One Changelog
 
-## [2.0: Rebuilt on the New Day One CLI] - {PR_MERGE_DATE}
+## [2.0: Rebuilt on the New Day One CLI] - 2026-11-13
 
 - Version 2.0 needs the new Day One CLI and a sign-in, in place of the CLI built into the Day One Mac app. Run Doctor sets both up. Add Entry's Save and Open action is gone; open an entry from Search Entries instead.
 - Search your entries by meaning (on a Mac) with the new Search Entries command, filter by journal, tag, or place, and read them in a sidebar or in full with Go to Entry, no Day One app needed.
