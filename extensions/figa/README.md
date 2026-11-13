@@ -4,7 +4,7 @@ Keep recurring bills, subscriptions and one-time expenses in view without leavin
 
 ## What you can do
 
-- **Search Expenses** — find this month's expenses, filter paid or unpaid bills, and open an expense in Figa. Estimates, unknown amounts and payment windows stay clearly labelled. Assigned tags appear beside expenses and can be searched by name.
+- **Search Expenses** — find this month's expenses, filter paid or unpaid bills, and open an expense in Figa. Estimates, unknown amounts and payment windows stay clearly labeled. Assigned tags appear beside expenses and can be searched by name.
 - **Show Monthly Summary** — see seven months of known totals, estimates, paid amounts and confirmed unpaid bills in the workspace currency. Copy the current month's summary for your partner or team with a small “Prepared with Figa” link. Copying only puts text on your clipboard; nothing is sent automatically.
 - **Create Expense** — add a one-time expense with an amount, currency, date, category and optional recipient, existing workspace tags or note.
 - **Mark Expense Paid** — confirm a selected expense's payment status. For variable bills, confirm the actual amount in Figa first.

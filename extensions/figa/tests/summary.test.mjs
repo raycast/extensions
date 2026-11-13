@@ -47,6 +47,19 @@ test("zero known subtotal does not conceal unknown, hidden or unvalued paid expe
   assert.match(text, /estimated exchange rates/);
 });
 
+test("estimated exchange rates do not hide the warning about incomplete amounts", () => {
+  const item = {
+    ...month,
+    monetary: { baseCurrency: "USD", estimatedFxCount: 1, paidUnknownCount: 0 },
+  };
+  const incomplete = buildShareableMonthSummary({ ...item, isComplete: false }, "USD");
+  assert.match(incomplete, /Amounts are incomplete/);
+  assert.match(incomplete, /estimated exchange rates/);
+  const complete = buildShareableMonthSummary(item, "USD");
+  assert.doesNotMatch(complete, /Amounts are incomplete/);
+  assert.match(complete, /estimated exchange rates/);
+});
+
 test("list distinguishes an actual zero, a forecast and an unknown amount", () => {
   assert.match(formatExpenseAmount({ amount: 0 }, "USD"), /USD\s0\.00/);
   assert.equal(formatExpenseAmount({ amount: null }, "USD"), "Amount unknown");

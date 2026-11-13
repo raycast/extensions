@@ -24,7 +24,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               {data ? (
-                <Action.OpenInBrowser title="Manage Tags in Figa" url={getFigaTagsUrl(data.context.workspace.id)} />
+                <Action.OpenInBrowser
+                  icon={Icon.Link}
+                  title="Manage Tags in Figa"
+                  url={getFigaTagsUrl(data.context.workspace.id)}
+                />
               ) : null}
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
@@ -37,10 +41,18 @@ export default function Command() {
             icon={Icon.Tag}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open Tag in Figa" url={getFigaTagUrl(data.context.workspace.id, tag.id)} />
-                <Action.CopyToClipboard title="Copy Tag Name" content={tag.name} />
-                <Action.CopyToClipboard title="Copy Tag ID" content={tag.id} />
-                <Action.OpenInBrowser title="Manage Tags in Figa" url={getFigaTagsUrl(data.context.workspace.id)} />
+                <Action.OpenInBrowser
+                  icon={Icon.Link}
+                  title="Open Tag in Figa"
+                  url={getFigaTagUrl(data.context.workspace.id, tag.id)}
+                />
+                <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy Tag Name" content={tag.name} />
+                <Action.CopyToClipboard icon={Icon.Hashtag} title="Copy Tag ID" content={tag.id} />
+                <Action.OpenInBrowser
+                  icon={Icon.Link}
+                  title="Manage Tags in Figa"
+                  url={getFigaTagsUrl(data.context.workspace.id)}
+                />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
               </ActionPanel>
             }
