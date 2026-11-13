@@ -10,7 +10,7 @@ import { groupByMonth, humanizeEnum, summarizeDividends, type DividendSummary } 
 import { shortTicker } from "../lib/portfolio";
 import type { DividendItem } from "../lib/t212/types";
 import { ICONS } from "./icons";
-import { COPY_SHORTCUT, formatDate, HISTORY_CHART_HEIGHT, OpenInTrading212Action, RefreshAction } from "./shared";
+import { formatDate, HISTORY_CHART_HEIGHT, OpenInTrading212Action, RefreshAction } from "./shared";
 
 function SummaryDetail({
   summary,
@@ -107,7 +107,7 @@ export function DividendItems({
         actions={
           <ActionPanel>
             <OpenInTrading212Action />
-            <RefreshAction onRefresh={onRefresh} />
+            <RefreshAction onRefresh={onRefresh} second />
           </ActionPanel>
         }
       />
@@ -126,7 +126,7 @@ export function DividendItems({
                 actions={
                   <ActionPanel>
                     <OpenInTrading212Action />
-                    <Action.CopyToClipboard title="Copy Ticker" content={short} shortcut={COPY_SHORTCUT} />
+                    <Action.CopyToClipboard title="Copy Ticker" content={short} />
                     <RefreshAction onRefresh={onRefresh} />
                   </ActionPanel>
                 }

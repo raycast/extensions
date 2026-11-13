@@ -8,12 +8,13 @@ export function OpenInTrading212Action() {
   return <Action.OpenInBrowser title="Open in Trading 212" url={TRADING212_URL} />;
 }
 
-export function RefreshAction({ onRefresh }: { onRefresh: () => void }) {
+/** `second`: it's the panel's second action, which Raycast binds to ⌘↵ and shows no custom shortcut for. */
+export function RefreshAction({ onRefresh, second = false }: { onRefresh: () => void; second?: boolean }) {
   return (
     <Action
       title="Refresh"
       icon={Icon.ArrowClockwise}
-      shortcut={Keyboard.Shortcut.Common.Refresh}
+      shortcut={second ? undefined : Keyboard.Shortcut.Common.Refresh}
       onAction={onRefresh}
     />
   );

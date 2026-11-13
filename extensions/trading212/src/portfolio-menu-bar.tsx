@@ -1,4 +1,5 @@
 import { Color, Icon, Keyboard, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import "./hooks/locale";
 import { t212ErrorInfo } from "./components/error-view";
@@ -8,7 +9,7 @@ import { formatPct, formatRelativeMinutes } from "./lib/format";
 import { menuBarSummaryRows, menuBarTitle, shortTicker, topMovers, type MenuBarRow } from "./lib/portfolio";
 import { isRateLimited } from "./lib/t212/client";
 
-// Template-style glyph: tinted to the menu bar's text colour (black or white), transparent elsewhere.
+// Template-style glyph: tinted to the menu bar's text color (black or white), transparent elsewhere.
 const MENU_BAR_ICON = { source: "menubar.svg", tintColor: Color.PrimaryText };
 
 const TONE_ICON: Record<NonNullable<MenuBarRow["tone"]>, { source: Icon; tintColor: Color }> = {
@@ -17,11 +18,11 @@ const TONE_ICON: Record<NonNullable<MenuBarRow["tone"]>, { source: Icon; tintCol
 };
 
 function openPortfolio(ticker?: string) {
-  return launchCommand({
+  launchCommand({
     name: "portfolio",
     type: LaunchType.UserInitiated,
     ...(ticker ? { context: { ticker } } : {}),
-  });
+  }).catch((err: unknown) => showFailureToast(err, { title: "Couldn't open Portfolio" }));
 }
 
 export default function Command() {

@@ -6,7 +6,7 @@ import { chartTheme, type Appearance } from "./theme";
 const GAP = 4;
 
 /**
- * Net money deposited per month: this month in the accent colour, earlier months muted, months with
+ * Net money deposited per month: this month in the accent color, earlier months muted, months with
  * more withdrawn than deposited dipping below the axis in red. A dashed line marks the monthly
  * average (top-left legend) and this month's amount is labelled top-right.
  */

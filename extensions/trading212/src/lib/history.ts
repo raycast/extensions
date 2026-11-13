@@ -229,7 +229,7 @@ const STATUS_FROM_API: Record<string, OrderView["status"]> = {
 
 const STATUS: Record<OrderView["status"], string> = {
   filled: "Filled",
-  cancelled: "Cancelled",
+  cancelled: "Canceled",
   rejected: "Rejected",
   pending: "Pending",
 };

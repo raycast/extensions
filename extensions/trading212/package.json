@@ -5,6 +5,9 @@
   "description": "View your Trading 212 portfolio, positions with charts, and account history. Read-only.",
   "icon": "extension-icon.png",
   "author": "gorolmartin",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Finance"
   ],

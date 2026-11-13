@@ -107,7 +107,11 @@ export function OrderItems({
                   />
                 )}
                 <OpenInTrading212Action />
-                <Action.CopyToClipboard title="Copy Ticker" content={short} shortcut={COPY_SHORTCUT} />
+                <Action.CopyToClipboard
+                  title="Copy Ticker"
+                  content={short}
+                  shortcut={held ? COPY_SHORTCUT : undefined}
+                />
                 <RefreshAction onRefresh={onRefresh} />
               </ActionPanel>
             }

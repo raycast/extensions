@@ -18,7 +18,7 @@ function portfolioMarkdown(view: PortfolioView, appearance: Appearance): string 
     {
       label: "Total balance",
       amount: formatMoney(view.totalBalance, view.currency),
-      change: [{ text: ret, tone: directionOf(view.returnPct) }, { text: " all-time" }],
+      change: [{ text: ret, tone: directionOf(view.returnPct) }, { text: " return" }],
     },
     svg,
     TREEMAP_HEIGHT,

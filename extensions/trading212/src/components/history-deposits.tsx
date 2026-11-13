@@ -113,7 +113,7 @@ export function TransactionItems({
   const actions = (
     <ActionPanel>
       <OpenInTrading212Action />
-      <RefreshAction onRefresh={onRefresh} />
+      <RefreshAction onRefresh={onRefresh} second />
     </ActionPanel>
   );
 

@@ -80,8 +80,9 @@ export function buildPortfolioView(
     .map((p) => buildPositionView(p, holdingsValue, quotes[p.instrument.ticker]))
     .sort((a, b) => b.value - a.value);
 
-  const withToday = views.filter((v) => v.todayAmount !== null);
-  const todayAmount = withToday.length > 0 ? withToday.reduce((sum, v) => sum + (v.todayAmount ?? 0), 0) : null;
+  // Only a sum over every holding is the portfolio's day: a partial one can even flip its sign.
+  const complete = views.length > 0 && views.every((v) => v.todayAmount !== null);
+  const todayAmount = complete ? views.reduce((sum, v) => sum + (v.todayAmount ?? 0), 0) : null;
   const marketTimes = views
     .map((v) => quotes[v.ticker])
     .filter((q): q is DayQuote => q !== undefined && Number.isFinite(q.marketTime))
@@ -146,7 +147,7 @@ export interface MenuBarRow {
 }
 
 /**
- * Summary rows for the menu bar dropdown: Today (omitted without quotes) and All-time, percentage
+ * Summary rows for the menu bar dropdown: Today (omitted without quotes) and Return, percentage
  * first with whole amounts. The balance is only listed when the menu bar title hides it.
  */
 export function menuBarSummaryRows(view: PortfolioView, now: number, opts: { showBalance: boolean }): MenuBarRow[] {
@@ -161,6 +162,7 @@ export function menuBarSummaryRows(view: PortfolioView, now: number, opts: { sho
   if (view.todayAmount !== null && view.todayPct !== null) {
     rows.push({ title: todayLabel(view.todayAsOf, now), ...change(view.todayPct, view.todayAmount) });
   }
-  rows.push({ title: "All-time", ...change(view.returnPct, view.returnAmount) });
+  // Unrealized return on current holdings (sold positions aren't included), hence "Return", not "All-time".
+  rows.push({ title: "Return", ...change(view.returnPct, view.returnAmount) });
   return rows;
 }

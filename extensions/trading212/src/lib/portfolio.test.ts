@@ -111,6 +111,16 @@ describe("buildPortfolioView", () => {
     expect(v.positions.every((p) => p.todayPct === null && p.todayAmount === null && p.todayAsOf === null)).toBe(true);
   });
 
+  it("leaves the portfolio's today total out when any holding has no quote", () => {
+    // A partial sum can even flip the sign of the real day; per-position figures stay.
+    const { NVDA_US_EQ, ...partial } = quotes;
+    void NVDA_US_EQ;
+    const v = buildPortfolioView(summary, positions, partial);
+    expect(v.todayAmount).toBeNull();
+    expect(v.todayPct).toBeNull();
+    expect(v.positions.find((p) => p.ticker === "AAPL_US_EQ")?.todayPct).not.toBeNull();
+  });
+
   it("GBX position prices are in GBP", () => {
     const vuaa = view.positions[0];
     expect(vuaa.avgPrice).toBeCloseTo(95, 6);
@@ -197,11 +207,11 @@ describe("menuBarSummaryRows", () => {
   const now = new Date(2026, 10, 13, 22, 0).getTime();
   const change = (pct: number, amount: number) =>
     `${formatPct(pct, { signed: true })} · ${formatMoney(amount, view.currency, { signed: true, decimals: 0 })}`;
-  it("lists today and all-time: percentage first, whole amounts, coloured by direction", () => {
+  it("lists today and return: percentage first, whole amounts, colored by direction", () => {
     const rows = menuBarSummaryRows(view, view.todayAsOf ?? now, { showBalance: false });
-    expect(rows.map((r) => r.title)).toEqual(["Today", "All-time"]);
+    expect(rows.map((r) => r.title)).toEqual(["Today", "Return"]);
     expect(rows[0]).toEqual({ title: "Today", value: change(view.todayPct ?? 0, view.todayAmount ?? 0), tone: "up" });
-    expect(rows[1]).toEqual({ title: "All-time", value: change(view.returnPct, view.returnAmount), tone: "up" });
+    expect(rows[1]).toEqual({ title: "Return", value: change(view.returnPct, view.returnAmount), tone: "up" });
   });
   it("adds the balance first when the menu bar title hides it", () => {
     const rows = menuBarSummaryRows(view, now, { showBalance: true });
@@ -212,7 +222,7 @@ describe("menuBarSummaryRows", () => {
   });
   it("omits Today without data and labels an earlier session", () => {
     const none = buildPortfolioView(summary, positions, {});
-    expect(menuBarSummaryRows(none, now, { showBalance: false }).map((r) => r.title)).toEqual(["All-time"]);
+    expect(menuBarSummaryRows(none, now, { showBalance: false }).map((r) => r.title)).toEqual(["Return"]);
     const later = new Date(2026, 10, 15, 10, 0).getTime();
     const asOf = { ...view, todayAsOf: new Date(2026, 10, 13, 16, 30).getTime() };
     expect(menuBarSummaryRows(asOf, later, { showBalance: false })[0].title).toBe("Last session (Fri)");

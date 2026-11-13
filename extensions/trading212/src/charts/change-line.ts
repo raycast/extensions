@@ -3,8 +3,8 @@ import { escapeXml } from "./svg";
 import type { ChartTheme } from "./theme";
 
 /**
- * A one-line change summary ("+CZK 70,116.70 · +11.3% all-time") with the change in Raycast's
- * green/red and the rest muted. Markdown can't colour text, so it's drawn into the headline image.
+ * A one-line change summary ("+CZK 70,116.70 · +11.3% return") with the change in Raycast's
+ * green/red and the rest muted. Markdown can't color text, so it's drawn into the headline image.
  */
 export interface ChangeSegment {
   text: string;

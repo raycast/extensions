@@ -284,7 +284,7 @@ describe("orderView", () => {
     const v = orderView(order({ status: "CANCELLED", filledQuantity: undefined, quantity: 3 }, null), {});
     expect(v).toMatchObject({
       status: "cancelled",
-      statusLabel: "Cancelled",
+      statusLabel: "Canceled",
       shares: 3,
       fillPrice: null,
       total: null,

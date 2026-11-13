@@ -70,7 +70,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { ticker?: 
             actions={
               <ActionPanel>
                 <OpenInTrading212Action />
-                <RefreshAction onRefresh={revalidate} />
+                <RefreshAction onRefresh={revalidate} second />
               </ActionPanel>
             }
           />
@@ -110,7 +110,11 @@ export default function Command(props: LaunchProps<{ launchContext?: { ticker?: 
                         />
                       )}
                       <OpenInTrading212Action />
-                      <Action.CopyToClipboard title="Copy Ticker" content={short} shortcut={COPY_SHORTCUT} />
+                      <Action.CopyToClipboard
+                        title="Copy Ticker"
+                        content={short}
+                        shortcut={symbol ? COPY_SHORTCUT : undefined}
+                      />
                       <RefreshAction onRefresh={revalidate} />
                     </ActionPanel>
                   }

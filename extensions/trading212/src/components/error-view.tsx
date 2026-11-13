@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { missingScope, T212Error } from "../lib/t212/client";
 
 export function t212ErrorInfo(error: Error): { title: string; description?: string } {
@@ -37,14 +37,7 @@ export function T212ErrorEmptyView({ error, onRetry }: { error: Error; onRetry?:
       actions={
         <ActionPanel>
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          {onRetry && (
-            <Action
-              title="Retry"
-              icon={Icon.ArrowClockwise}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={onRetry}
-            />
-          )}
+          {onRetry && <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />}
         </ActionPanel>
       }
     />

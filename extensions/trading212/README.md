@@ -8,14 +8,14 @@ View your Trading 212 portfolio, position charts and account history in Raycast.
 
 A list of your positions with a detail pane on the right.
 
-- The top row shows your total balance, all-time return, and a portfolio map where tile size is position value and colour is total return.
+- The top row shows your total balance, the return on your current holdings, and a portfolio map where tile size is position value and color is total return.
 - Each position shows a price chart with your average buy price, today's change, value, return, shares, share of portfolio and the date you first held it.
 - Choose a chart range (1D, 1W, 1M, 1Y, 5Y) from the search bar dropdown.
 - Actions: open the instrument on Yahoo Finance, open Trading 212, copy the ticker, refresh.
 
 ### Portfolio Menu Bar
 
-Shows your portfolio value and today's change in the menu bar, refreshed every 10 minutes. The menu lists today's change, the all-time return and the top movers of the day. You can hide the amount in the extension preferences and show only the percentage; the balance then appears in the menu instead.
+Shows your portfolio value and today's change in the menu bar, refreshed every 10 minutes. The menu lists today's change, the return on current holdings and the top movers of the day. You can hide the amount in the extension preferences and show only the percentage; the balance then appears in the menu instead.
 
 ### History
 
