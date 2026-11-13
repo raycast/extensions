@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from "vitest";
 import { ParseError } from "../errors";
-import { parseBrewVulns, escapeMarkdown, osvLink, osvUrl, SEVERITY_RANK } from "./vulns";
+import { parseBrewVulns, escapeMarkdown, osvLink, osvUrl, SEVERITY_RANK, withCoverageDefaults } from "./vulns";
 
 const FIXTURE = JSON.stringify({
   findings: [
@@ -264,11 +264,46 @@ describe("parseBrewVulns", () => {
 
   it("returns an empty findings list, with skipped intact, when brew found nothing", () => {
     const parsed = parseBrewVulns(JSON.stringify({ findings: [], skipped_formulae: ["lame"] }));
-    expect(parsed).toEqual({ findings: [], skipped: ["lame"] });
+    expect(parsed).toEqual({ findings: [], skipped: ["lame"], unscanned: [], outdatedWithoutSbom: [] });
   });
 
-  it("defaults skipped_formulae to an empty array when absent", () => {
-    expect(parseBrewVulns(JSON.stringify({ findings: [] })).skipped).toEqual([]);
+  it("defaults the formula lists to empty arrays when absent", () => {
+    expect(parseBrewVulns(JSON.stringify({ findings: [] }))).toMatchObject({
+      skipped: [],
+      unscanned: [],
+      outdatedWithoutSbom: [],
+    });
+  });
+
+  it("reads the formulae brew checked against a newer version", () => {
+    const parsed = parseBrewVulns(JSON.stringify({ findings: [], outdated_without_sbom: ["openssl@3"] }));
+    expect(parsed.outdatedWithoutSbom).toEqual(["openssl@3"]);
+  });
+
+  it("lists the formulae brew didn't scan, sorted", () => {
+    const parsed = parseBrewVulns(
+      JSON.stringify({
+        findings: [],
+        skipped_formulae: [],
+        checked: 120,
+        complete: false,
+        outdated_without_sbom: [],
+        unscanned_formulae: { stripe: "untrusted_tap", "crowdin@4": "untrusted_tap", broken: "resolution_error" },
+      }),
+    );
+    expect(parsed.unscanned).toEqual([
+      { formula: "broken", reason: "resolution_error" },
+      { formula: "crowdin@4", reason: "untrusted_tap" },
+      { formula: "stripe", reason: "untrusted_tap" },
+    ]);
+  });
+
+  it.each([
+    ["an array", ["stripe"]],
+    ["null", null],
+    ["a string", "stripe"],
+  ])("ignores unscanned_formulae when it is %s", (_label, value) => {
+    expect(parseBrewVulns(JSON.stringify({ findings: [], unscanned_formulae: value })).unscanned).toEqual([]);
   });
 
   it.each([
@@ -327,5 +362,26 @@ describe("osvLink", () => {
   it("falls back to escaped plain text for an id that is not URL-safe", () => {
     expect(osvLink("CVE-1 ](javascript:alert(1))")).toBe("CVE-1 \\]\\(javascript:alert\\(1\\)\\)");
     expect(osvLink("")).toBe("");
+  });
+});
+
+describe("withCoverageDefaults", () => {
+  it("fills the coverage lists missing from results cached by an older version", () => {
+    expect(withCoverageDefaults({ findings: [], skipped: ["lame"] })).toEqual({
+      findings: [],
+      skipped: ["lame"],
+      unscanned: [],
+      outdatedWithoutSbom: [],
+    });
+  });
+
+  it("keeps coverage lists that are present", () => {
+    const unscanned = [{ formula: "stripe", reason: "untrusted_tap" }];
+    expect(withCoverageDefaults({ findings: [], skipped: [], unscanned, outdatedWithoutSbom: ["openssl@3"] })).toEqual({
+      findings: [],
+      skipped: [],
+      unscanned,
+      outdatedWithoutSbom: ["openssl@3"],
+    });
   });
 });

@@ -1,5 +1,11 @@
 # Tmux Sessioner Changelog
 
+## [Fix switching on tmux 3.8] - 2026-11-11
+
+### Fixed
+
+- Switching to a session or window failed on tmux 3.8 with "ambiguous command: switch, could be: switch-client, switch-mode". The extension now runs `tmux switch-client`, and selects the window in the session it just switched to.
+
 ## [Fix Save Tmux Sessions getting stuck] - 2026-10-14
 
 ### Fixed

@@ -1,9 +1,7 @@
 import { getMix } from "../player";
 import { categories } from "../sounds";
-
-/** Lists every available sound with its id, category, and whether it is playing or paused in the mix. */
 export default async function tool() {
-  const { sounds } = getMix();
+  const { sounds } = await getMix();
   return categories.map((c) => ({
     category: c.title,
     sounds: c.sounds.map((s) => ({

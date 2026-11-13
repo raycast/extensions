@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import type { ReactNode } from "react";
-import { clockPart, formatRange, humanDuration } from "../lib/format";
+import { allDayLabel, clockPart, formatEventTime, humanDuration } from "../lib/format";
 import {
   Area,
   ActivityType,
@@ -38,7 +38,7 @@ export function AgendaItem(props: {
     <List.Item
       icon={eventIcon(event)}
       title={event.name || "(untitled)"}
-      subtitle={isShowingDetail ? clockPart(event.start) : undefined}
+      subtitle={isShowingDetail ? (allDayLabel(event) ?? clockPart(event.start)) : undefined}
       keywords={eventKeywords(event, areas, activityTypes ?? [], calendars, defaultCalendarId)}
       accessories={isShowingDetail ? undefined : accessories(event, areas, calendars, defaultCalendarId)}
       detail={
@@ -76,7 +76,8 @@ export function BlockDetail(props: {
     .map((id) => mirrorLabel(id, event, calendars))
     .filter(Boolean)
     .join(", ");
-  const minutes = spanMinutes(event);
+  // An all-day row is always 24h on its day, so a duration adds nothing.
+  const minutes = allDayLabel(event) ? null : spanMinutes(event);
   const meeting = eventMeeting(event);
   const locationText = typeof event.location?.text === "string" ? event.location.text.trim() : "";
 
@@ -85,7 +86,7 @@ export function BlockDetail(props: {
       markdown={`# ${title}${notes ? `\n\n${notes}` : ""}`}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Time" text={formatRange(event)} />
+          <List.Item.Detail.Metadata.Label title="Time" text={formatEventTime(event)} />
           {minutes !== null ? <List.Item.Detail.Metadata.Label title="Duration" text={humanDuration(minutes)} /> : null}
           {meeting ? (
             <List.Item.Detail.Metadata.Link
@@ -153,7 +154,7 @@ function accessories(
   if (meeting) items.push({ icon: Icon.Video, tooltip: meeting.label ?? "Has a meeting link" });
   const source = homeCalendarLabel(event, calendars, defaultCalendarId);
   if (source) items.push({ icon: Icon.Calendar, tooltip: source });
-  items.push({ text: formatRange(event) });
+  items.push({ text: formatEventTime(event) });
   return items;
 }
 
@@ -168,7 +169,29 @@ function homeCalendarName(event: ScheduleEvent, calendars: Calendar[], defaultCa
   const homeId = homeCalendarId(event, defaultCalendarId);
   const home = homeId ? calendars.find((c) => c.id === homeId) : undefined;
   if (home) return home.name;
-  return event.source && event.source !== "reassign" ? event.source : "";
+  return event.source && event.source !== "reassign" ? sourceLabel(event.source) : "";
+}
+
+// The provider labels of the Reassign web app (`lib/event-sources/descriptors.ts`).
+const SOURCE_LABELS: Record<string, string> = {
+  apple_calendar: "Apple Calendar",
+  apple_health: "Apple Health",
+  apple_reminders: "Apple Reminders",
+  google: "Google Calendar",
+  google_health: "Google Health",
+  google_tasks: "Google Tasks",
+  linear: "Linear",
+  microsoft: "Outlook Calendar",
+  microsoft_todo: "Microsoft To Do",
+  ticktick: "TickTick",
+  todoist: "Todoist",
+};
+
+/** The display name of a sync source. An unknown key reads as words: "new_app" is "New app". */
+export function sourceLabel(source: string): string {
+  if (Object.hasOwn(SOURCE_LABELS, source)) return SOURCE_LABELS[source];
+  const words = source.replace(/[_-]+/g, " ").trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : source;
 }
 
 /**

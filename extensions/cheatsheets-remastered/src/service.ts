@@ -3,10 +3,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { DEFAULT_SHEET_METADATA, DefaultMetadata } from "./default-tags";
-import type { File, CustomCheatsheet, UserRepository, SheetType } from "./models";
+import type { File, CustomCheatsheet, UserRepository, SheetType, RepositorySheet } from "./models";
+import { repositoryMetadata } from "./markdown";
 import { libraryStore } from "./library-store";
 import { stateKey } from "./identity";
+import type { LocalMarkdown } from "./local-markdown";
 import { stageRepository, normaliseSubdirectory, SyncCancelledError } from "./repository-sync";
+
+class AlreadyImported extends Error {
+  constructor(readonly sheet: CustomCheatsheet) {
+    super("Already imported");
+  }
+}
 
 class Service {
   private static LOCAL_SHEETS_DIR = path.join(environment.assetsPath, "cheatsheets");
@@ -175,6 +183,37 @@ class Service {
       data.custom.push(sheet);
       return sheet;
     });
+  }
+  static async importCustomCheatsheet(
+    input: LocalMarkdown,
+    signal?: AbortSignal,
+  ): Promise<{ status: "created" | "duplicate"; sheet: CustomCheatsheet }> {
+    signal?.throwIfAborted();
+    if (!input.title.trim() || !input.content.trim()) throw new Error("Title and content are required");
+    try {
+      const sheet = await libraryStore.update((data) => {
+        signal?.throwIfAborted();
+        const existing = data.custom.find((sheet) => sheet.content === input.content);
+        // Throw before backup/write, while still holding the existing storage lock.
+        if (existing) throw new AlreadyImported(existing);
+        const now = Date.now();
+        const sheet: CustomCheatsheet = {
+          id: `custom-${randomUUID()}`,
+          title: input.title.trim(),
+          content: input.content,
+          tags: input.tags,
+          description: input.description,
+          createdAt: now,
+          updatedAt: now,
+        };
+        data.custom.push(sheet);
+        return sheet;
+      }, signal);
+      return { status: "created", sheet };
+    } catch (error) {
+      if (error instanceof AlreadyImported) return { status: "duplicate", sheet: error.sheet };
+      throw error;
+    }
   }
   static async updateCustomCheatsheet(
     id: string,
@@ -364,12 +403,22 @@ class Service {
       if (repo) repo.lastAccessedAt = Date.now();
     });
   }
-  static async getRepositoryCheatsheets(repositoryId?: string) {
+  static async getRepositoryCheatsheets(repositoryId?: string): Promise<RepositorySheet[]> {
     const data = await libraryStore.read();
-    return data.sheets.filter(
-      (s) =>
-        (!repositoryId || s.repositoryId === repositoryId) && data.repositories.some((r) => r.id === s.repositoryId),
-    );
+    return data.sheets
+      .filter(
+        (s) =>
+          (!repositoryId || s.repositoryId === repositoryId) && data.repositories.some((r) => r.id === s.repositoryId),
+      )
+      .map((sheet) => {
+        const metadata = repositoryMetadata(sheet.content);
+        return {
+          ...sheet,
+          title: metadata.title ?? sheet.title,
+          tags: metadata.tags,
+          description: metadata.description,
+        };
+      });
   }
   static async getMigrationWarnings() {
     return (await libraryStore.read()).unresolvedLegacyKeys;
@@ -438,4 +487,11 @@ class Service {
   }
 }
 export default Service;
-export type { File, CustomCheatsheet, FavoriteCheatsheet, UserRepository, RepositoryCheatsheet } from "./models";
+export type {
+  File,
+  CustomCheatsheet,
+  FavoriteCheatsheet,
+  UserRepository,
+  RepositoryCheatsheet,
+  RepositorySheet,
+} from "./models";

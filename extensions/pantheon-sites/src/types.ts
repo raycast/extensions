@@ -2,7 +2,8 @@ export interface Site {
   name: string;
   id: string;
   plan_name: string;
-  framework: string;
+  // null for sites that were created but never initialized
+  framework: string | null;
   region: string;
   owner: string;
   created: number;

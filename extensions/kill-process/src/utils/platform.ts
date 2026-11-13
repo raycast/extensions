@@ -11,7 +11,15 @@ type ProcessAction = "kill" | "restart";
 export type CommandSpec = {
   executable: string;
   args: string[];
+  env?: Record<string, string>;
 };
+
+/**
+ * Raycast starts extensions without a locale, and in the C locale macOS `ps` escapes non-ASCII
+ * bytes (`企业微信` prints as `M-dM-<M^AM-dM-8M^Z...`). A UTF-8 locale keeps names readable;
+ * en_US also keeps the decimal point in `pcpu` (fr_FR prints `27,0`).
+ */
+const MAC_PS_ENV = { LC_ALL: "en_US.UTF-8" };
 
 /**
  * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
@@ -90,6 +98,7 @@ export function getProcessListCommandSpec(): CommandSpec {
   return {
     executable: "ps",
     args: ["-eo", "pid,ppid,pcpu,rss,comm"],
+    env: MAC_PS_ENV,
   };
 }
 

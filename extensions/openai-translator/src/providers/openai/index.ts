@@ -1,10 +1,12 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { LocalStorage } from "@raycast/api";
 import { Provider, Message } from "../base";
 import { Prompt } from "../prompt";
 import { TranslateQuery, ProviderProps } from "../types";
 import { fetchSSE, SSETransform } from "../utils";
+import { canDrop, parseRejected, rejectedParam, withoutRejected } from "./rejected-params";
 /* @ts-expect-error: has no exported member 'compose' */
 import { compose } from "stream";
 
@@ -21,24 +23,44 @@ export default class extends Provider {
   }
 
   protected async *doTranslate(query: TranslateQuery, prompt: Prompt): AsyncGenerator<Message> {
-    const body = this.body(query, prompt);
+    const fullBody = this.body(query, prompt);
     const messages = this.messages(query, prompt);
     const headers = this.headers(query, prompt);
 
-    const isFirst = true;
-
     const messageParser = this.handleMessage(prompt);
 
-    body["messages"] = messages;
+    fullBody["messages"] = messages;
 
-    const options = {
-      ...this.options(query, prompt),
-      body: JSON.stringify(body),
-      headers,
-    };
-    const source = fetchSSE(`${this.entrypoint}`, options);
+    // Parameters this model rejected before, see rejected-params.ts.
+    const storageKey = `rejected-params:${this.entrypoint}:${this.model ?? ""}`;
+    const rejected = parseRejected(await LocalStorage.getItem<string>(storageKey));
 
-    yield* compose(source, new SSETransform(), messageParser);
+    for (;;) {
+      const body = withoutRejected(fullBody, rejected);
+      const options = {
+        ...this.options(query, prompt),
+        body: JSON.stringify(body),
+        headers,
+      };
+      const source = fetchSSE(`${this.entrypoint}`, options);
+
+      // fetchSSE throws the API error before the first chunk, so a retry never cuts into a stream.
+      let first: IteratorResult<any>;
+      try {
+        first = await source.next();
+      } catch (error) {
+        const param = rejectedParam(error);
+        if (param === undefined || !canDrop(body, param)) throw error;
+        rejected.push(param);
+        await LocalStorage.setItem(storageKey, JSON.stringify(rejected));
+        // fetchSSE only hears aborts that happen after it starts, so a cancel during the retry setup stops here.
+        if (query.signal.aborted) throw error;
+        continue;
+      }
+
+      yield* compose(prepend(first, source), new SSETransform(), messageParser);
+      return;
+    }
   }
 
   headers(query: TranslateQuery, prompt: Prompt): Record<string, string> {
@@ -137,5 +159,17 @@ export default class extends Provider {
       signal: query.signal,
       agent: query.agent,
     };
+  }
+}
+
+// Puts back the chunk read to check for an API error.
+async function* prepend<T>(first: IteratorResult<T>, rest: AsyncGenerator<T>): AsyncGenerator<T> {
+  try {
+    if (first.done) return;
+    yield first.value;
+    yield* rest;
+  } finally {
+    // Closes the response stream when the consumer stops early.
+    await rest.return(undefined);
   }
 }

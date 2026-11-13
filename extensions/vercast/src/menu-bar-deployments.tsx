@@ -9,11 +9,24 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import useVercel from "./hooks/use-vercel-info";
+import { useStatusSummary } from "./hooks/use-vercel-status";
 import { StateIcon } from "./pages/lists/deployments-list";
+import StatusSection from "./pages/menu-bar/status-section";
+import { hasOngoingIncident } from "./status/status-page";
 import { Deployment, Team } from "./types";
 import fromNow from "./utils/time";
 import { getDeploymentOwnerSlug } from "./utils/deployment-owner";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL, parseVercelResponse } from "./vercel";
+
+/**
+ * Branch, short commit and age. Two deployments of one branch can share name, branch and age, and the
+ * menu bar draws one of two identical items indented; the commit tells them apart.
+ */
+function deploymentSubtitle(deployment: Deployment): string {
+  const ref = deployment.meta?.githubCommitRef || deployment.gitSource?.ref;
+  const sha = (deployment.meta?.githubCommitSha || deployment.gitSource?.sha)?.slice(0, 7);
+  return [ref, sha, fromNow(deployment.createdAt, new Date())].filter(Boolean).join(" • ");
+}
 
 export default function MenuBarDeployments() {
   const { user, teams, selectedTeam } = useVercel();
@@ -39,13 +52,20 @@ export default function MenuBarDeployments() {
     keepPreviousData: true,
   });
 
+  // Vercel's public status page needs no token, so it loads even when the deployments cannot.
+  // A failure is shown inside the menu (StatusSection), not as a toast.
+  const status = useStatusSummary({ silent: true });
+  const statusAlert = status.data && hasOngoingIncident(status.data);
+
   const deployments = data || [];
 
   return (
     <MenuBarExtra
-      isLoading={isLoading}
+      isLoading={isLoading || status.isLoading}
       icon={{ source: { light: "vercel-light.svg", dark: "vercel-dark.svg" } }}
-      tooltip="Recent Deployments"
+      // The logo is an SVG that the menu bar does not tint, so an ongoing issue is flagged with text.
+      title={statusAlert ? "⚠︎" : undefined}
+      tooltip={status.data ? `Recent Deployments · Vercel: ${status.data.status.description}` : "Recent Deployments"}
     >
       <MenuBarExtra.Section title="Recent Deployments">
         {deployments.length === 0 && !isLoading ? (
@@ -55,11 +75,8 @@ export default function MenuBarDeployments() {
             <MenuBarExtra.Item
               key={deployment.uid}
               title={deployment.name}
-              subtitle={`${
-                deployment.meta?.githubCommitRef || deployment.gitSource?.ref
-                  ? `${deployment.meta?.githubCommitRef || deployment.gitSource?.ref} • `
-                  : ""
-              }${fromNow(deployment.createdAt, new Date())}`}
+              subtitle={deploymentSubtitle(deployment)}
+              tooltip={deployment.meta?.githubCommitMessage?.split("\n")[0]}
               icon={StateIcon(deployment.readyState || deployment.state)}
               onAction={() => {
                 if (user) {
@@ -77,6 +94,8 @@ export default function MenuBarDeployments() {
           ))
         )}
       </MenuBarExtra.Section>
+
+      <StatusSection summary={status.data} error={status.error} />
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

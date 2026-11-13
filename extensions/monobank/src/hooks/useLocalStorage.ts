@@ -1,43 +1,32 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-export function useLocalStorage<T>(key: string, initialValue?: T) {
+/** React state mirrored to LocalStorage as JSON under `key`. */
+export function useLocalStorage<T>(key: string, initialValue: T) {
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState(initialValue || ({} as T));
+  const [data, setData] = useState<T>(initialValue);
 
   useEffect(() => {
-    setIsLoading(true);
-    getLocalStorageValue()
-      .then((json) => {
-        if (!json && initialValue) {
-          setLocalStorageValue(initialValue);
-          setData(initialValue);
-          return;
-        }
+    let isCancelled = false;
 
-        setData(json as T);
+    LocalStorage.getItem<string>(key)
+      .then((json) => {
+        if (!isCancelled && json) setData(JSON.parse(json) as T);
       })
       .finally(() => {
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       });
-  }, []);
 
+    return () => {
+      isCancelled = true;
+    };
+  }, [key]);
+
+  // Persist only after the stored value has been read, so it is never overwritten by `initialValue`.
   useEffect(() => {
-    setLocalStorageValue(data);
-  }, [data]);
+    if (isLoading) return;
+    LocalStorage.setItem(key, JSON.stringify(data));
+  }, [key, data, isLoading]);
 
-  async function setLocalStorageValue(newValue: T) {
-    await LocalStorage.setItem(key, JSON.stringify(newValue));
-  }
-
-  async function getLocalStorageValue() {
-    const data = await LocalStorage.getItem<string>(key);
-    return data ? (JSON.parse(data) as T) : null;
-  }
-
-  return {
-    data,
-    setData,
-    isLoading,
-  };
+  return { data, setData, isLoading };
 }

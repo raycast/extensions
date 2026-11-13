@@ -12,16 +12,16 @@ type GetFiltersResponse = {
   values: Filter[];
   isLast?: boolean;
   total?: number;
+  maxResults?: number;
 };
 
 export async function getFilters(query: string) {
   const { sortByFavourite } = getPreferenceValues<Preferences.MyFilters>();
   const maxResults = 100;
   let startAt = 0;
-  let hasMore = true;
   const filters: Filter[] = [];
 
-  while (hasMore) {
+  while (true) {
     const params = {
       maxResults: String(maxResults),
       startAt: String(startAt),
@@ -33,17 +33,17 @@ export async function getFilters(query: string) {
     const result = await request<GetFiltersResponse>(`/filter/search`, { params });
     const values = result?.values ?? [];
     filters.push(...values);
+    startAt += values.length;
 
     if (
+      values.length === 0 ||
       result?.isLast === true ||
-      values.length < maxResults ||
-      (result?.total !== undefined && filters.length >= result.total)
+      (result?.total !== undefined && startAt >= result.total) ||
+      (result?.isLast === undefined &&
+        result?.total === undefined &&
+        values.length < (result?.maxResults ?? maxResults))
     ) {
-      hasMore = false;
-    } else {
-      startAt += values.length;
+      return filters;
     }
   }
-
-  return filters;
 }

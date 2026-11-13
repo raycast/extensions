@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { LaunchType, getPreferenceValues, launchCommand } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { accessSync, constants } from "node:fs";
 import { promisify } from "node:util";
@@ -158,15 +158,47 @@ export async function setFanSpeed(
   }
   const fanArgs = fanIndex === undefined ? [] : ["--fan", String(fanIndex)];
   await runSmctl(["fan", "set", String(rpm), ...fanArgs]);
+  await refreshToggleSubtitle();
 }
 
 /** Applies a fan profile. "auto" returns control to macOS. Requires the daemon. */
-export async function setFanProfile(profile: FanProfile): Promise<void> {
+export async function setFanProfile(
+  profile: FanProfile,
+  options: { refreshToggle?: boolean } = {},
+): Promise<void> {
   await runSmctl(["fan", "profile", profile]);
+  if (options.refreshToggle !== false) {
+    await refreshToggleSubtitle();
+  }
+}
+
+/**
+ * Asks the Toggle Fan Speed command to re-read the fans and update its
+ * subtitle. Ignored when that command is disabled or not yet activated.
+ */
+export async function refreshToggleSubtitle(): Promise<void> {
+  try {
+    await launchCommand({ name: "toggle-fans", type: LaunchType.Background });
+  } catch {
+    // The toggle command is optional; its interval refresh catches up.
+  }
 }
 
 export function formatRPM(rpm: number): string {
   return `${Math.round(rpm).toLocaleString("en-US")} RPM`;
+}
+
+/** Speed as a whole percentage of the fan's maximum RPM, clamped to 0–100. */
+export function percentOfMax(rpm: number, maximumRPM: number): number {
+  if (!Number.isFinite(rpm) || maximumRPM <= 0) {
+    return 0;
+  }
+  return Math.round(Math.min(Math.max(rpm / maximumRPM, 0), 1) * 100);
+}
+
+/** True when at least one fan is under manual control (not macOS). */
+export function isAnyFanManual(fans: readonly Fan[]): boolean {
+  return fans.some((fan) => fan.mode === "manual");
 }
 
 export interface RPMRange {
@@ -194,4 +226,41 @@ export function allowedRange(
     min: Math.max(...targeted.map((fan) => fan.minimumRPM)),
     max: Math.min(...targeted.map((fan) => fan.maximumRPM)),
   };
+}
+
+export type ToggleTarget = "full" | "quiet";
+
+export interface ToggleState {
+  readonly current: "Auto" | "Max" | "Manual";
+  readonly next: "Auto" | "Max" | "Quiet";
+  /**
+   * Shown next to the command in Raycast, e.g. "Auto · 31% → Max". The % is
+   * the highest target (not actual) speed: fans need seconds to spin up, and
+   * the target already shows where they are going.
+   */
+  readonly subtitle: string;
+}
+
+/** Current fan state and what Toggle Fan Speed will switch to. */
+export function describeToggle(
+  fans: readonly Fan[],
+  manualProfile: ToggleTarget,
+): ToggleState {
+  const manualCount = fans.filter((fan) => fan.mode === "manual").length;
+  // "Max" only when every fan is manual at its maximum; a mix of manual and
+  // auto fans (possible through the per-fan form) is "Manual".
+  const allAtMax =
+    fans.length > 0 &&
+    fans.every(
+      (fan) => fan.mode === "manual" && fan.targetRPM >= fan.maximumRPM - 50,
+    );
+  const current = manualCount === 0 ? "Auto" : allAtMax ? "Max" : "Manual";
+  const next =
+    current !== "Auto" ? "Auto" : manualProfile === "quiet" ? "Quiet" : "Max";
+  const highest = fans.length
+    ? Math.max(
+        ...fans.map((fan) => percentOfMax(fan.targetRPM, fan.maximumRPM)),
+      )
+    : 0;
+  return { current, next, subtitle: `${current} · ${highest}% → ${next}` };
 }

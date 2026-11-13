@@ -1,5 +1,18 @@
 # Reassign Changelog
 
+## [All-Day Events and New Sources] - 2026-11-11
+
+- Agenda and Search Blocks show an all-day event as "All day". On an event
+  of more than one day, the row also shows the day, for example "All day ·
+  Day 2 of 3".
+- An all-day row has no Move, Shift or End field, because Reassign keeps the
+  hours of an all-day event. Delete on an event of more than one day asks
+  first, and then removes all of its days.
+- When Reassign keeps the calendar event in place after a change, the toast
+  gives the reason from Reassign.
+- The Calendar label names Apple Calendar, Apple Reminders, Apple Health,
+  Google Health and the other sources, not their internal keys.
+
 ## [Initial Release] - 2026-11-02
 
 - First release.

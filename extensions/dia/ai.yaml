@@ -10,8 +10,18 @@ instructions: |
   # dia-ai-read
   Use get-focused-tab when the user refers to "this tab", "the current tab" or "the page I'm on", and get-tabs for questions about open tabs.
   Use search-history for pages the user visited before and search-bookmarks for saved bookmarks. Only pass searchText when the user names something to look for, and keep it to the essential keywords.
-  Never show tab or window IDs to the user unless they ask for them.
+  Never show tab, window or extension IDs to the user unless they ask for them.
   If get-tabs or get-focused-tab reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or saying there are no tabs.
+  # dia-ai-spaces
+  Raycast can't create, rename, delete or reorder Dia spaces, and no tool helps with it. When the user asks for one of these, reply that it can't be done from Raycast and that they can do it in Dia. Don't call switch-space or select-tab for such a request: going to the space first doesn't make the change possible.
+  Dia groups tabs into spaces, and each window shows one space at a time. get-tabs returns tabs from every space with their space name, and isActiveSpace says whether the tab's window is showing that space. For questions about the tabs in one space, pass that space to get-tabs.
+  select-tab, close-tab and get-tab-contents also find tabs in spaces a window isn't showing; select-tab switches the window to the tab's space.
+  Use get-spaces for questions about which spaces exist or which one is active. Use switch-space only when the user asks to go to, show or switch to a space, passing its name as the user said it. If switch-space reports there is no space with that name, tell the user which spaces exist instead of guessing.
+  # dia-ai-extensions
+  Raycast can't install, uninstall, remove, turn on or turn off Dia extensions. For those requests, call no tool: reply that it can't be done from Raycast and that the user can do it in Dia's extension settings. open-extension only opens an extension to use it.
+  Use get-extensions for questions about the browser extensions installed in Dia, and open-extension to open one, passing a short query matching its name (e.g. "1password"). Pass a space to open-extension only when the user names one or open-extension asks for it; without a space, it opens the extension in the space the user is in. If open-extension reports several matching extensions, ask the user which one they mean and retry with its extensionId. If it reports the extension is installed in several spaces, ask which space and retry with that space. When the user means the space they are in, take the active space from get-spaces.
+  A get-extensions group with availableInAllSpaces: true (and space: null) holds extensions that every space shares. Describe them as available in all spaces, never under a space name. Only name a space for a group that has one.
+  If open-extension reports that Raycast needs Accessibility access, relay its System Settings instructions instead of retrying or claiming the extension opened.
 
 evals:
   # dia-ai-actions
@@ -351,3 +361,418 @@ evals:
     expected:
       - callsTool: get-tabs
       - includes: "Automation"
+  # dia-ai-spaces
+  - input: "@dia what spaces do I have?"
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          color: "#4f7cff"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          color: "#ff7a45"
+          isActive: false
+          windowIds: []
+    expected:
+      - callsTool: get-spaces
+      - includes: "Personal"
+      - includes: "Work"
+  - input: "@dia switch to my Work space"
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      switch-space:
+        switchedTo: "Work"
+    expected:
+      - callsTool:
+          name: switch-space
+          arguments:
+            space:
+              includes: "work"
+  - input: "@dia what tabs are open in my Work space?"
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T4"
+          title: "Q4 Roadmap - Linear"
+          url: "https://linear.app/acme/project/q4-roadmap"
+          isPinned: false
+          isFocused: false
+          space: "Work"
+          isActiveSpace: false
+    expected:
+      - callsTool: get-tabs
+      - includes: "Roadmap"
+  - input: "@dia switch to my Figma tab"
+    mocks:
+      select-tab:
+        title: "Onboarding flow - Figma"
+        url: "https://www.figma.com/design/abc/onboarding-flow"
+        space: "Work"
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T6"
+          title: "Onboarding flow - Figma"
+          url: "https://www.figma.com/design/abc/onboarding-flow"
+          isPinned: false
+          isFocused: false
+          space: "Work"
+          isActiveSpace: false
+    expected:
+      - or:
+          - callsTool:
+              name: select-tab
+              arguments:
+                query:
+                  includes: "figma"
+          - callsTool:
+              name: select-tab
+              arguments:
+                tabId: "T6"
+  - input: "@dia switch to my Gaming space"
+    usedAsExample: false
+    mocks:
+      switch-space: 'Error: No Dia space is named "Gaming". The spaces are: Personal, Work.'
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+    expected:
+      - not:
+          callsTool:
+            name: switch-space
+            arguments:
+              space:
+                or:
+                  - "Personal"
+                  - "Work"
+      - includes: "Personal"
+      - includes: "Work"
+  - input: "@dia rename my Work space to Clients"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T1"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          space: "Personal"
+          isActiveSpace: true
+          isPinned: false
+          isFocused: true
+        - windowId: "W1"
+          tabId: "T2"
+          title: "Linear"
+          url: "https://linear.app/"
+          space: "Work"
+          isActiveSpace: false
+          isPinned: false
+          isFocused: false
+      switch-space:
+        switchedTo: "Work"
+      select-tab:
+        title: "Linear"
+        url: "https://linear.app/"
+        space: "Work"
+    expected:
+      - not:
+          callsTool: switch-space
+      - not:
+          callsTool: select-tab
+      - includes: "Dia"
+  # dia-ai-extensions
+  - input: "@dia which browser extensions do I have installed?"
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: "Personal"
+          isActive: true
+          extensions:
+            - id: "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
+              name: "1Password – Password Manager"
+              description: "The best way to experience 1Password in your browser."
+              enabled: true
+              pinned: true
+              builtIn: false
+              hasPopup: true
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              description: "A permission-less content blocker."
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+    expected:
+      - callsTool: get-extensions
+      - includes: "1Password"
+      - includes: "uBlock"
+  - input: "@dia what extensions do I have?"
+    mocks:
+      get-spaces:
+        - name: "Soundraw"
+          isActive: false
+          windowIds: []
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Worthwhile"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: null
+          availableInAllSpaces: true
+          extensions:
+            - id: "nngceckbapebfimnlniiiahkandclblb"
+              name: "Bitwarden Password Manager"
+              description: "At home, at work, or on the go, Bitwarden easily secures all your passwords, passkeys, and sensitive information."
+              enabled: true
+              pinned: true
+              builtIn: false
+              hasPopup: true
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              description: "A permission-less content blocker."
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+    expected:
+      - callsTool: get-extensions
+      - includes: "Bitwarden"
+      - includes: "uBlock"
+      - matches: "([Aa]ll|[Ee]very)[^.]{0,25}[Ss]paces?"
+      - not:
+          matches: "\\bWork\\b"
+  - input: "@dia open bitwarden"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Soundraw"
+          isActive: false
+          windowIds: []
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Worthwhile"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: null
+          availableInAllSpaces: true
+          extensions:
+            - id: "nngceckbapebfimnlniiiahkandclblb"
+              name: "Bitwarden Password Manager"
+              description: "At home, at work, or on the go, Bitwarden easily secures all your passwords, passkeys, and sensitive information."
+              enabled: true
+              pinned: true
+              builtIn: false
+              hasPopup: true
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              description: "A permission-less content blocker."
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+      open-extension:
+        opened: "Bitwarden Password Manager"
+        extensionId: "nngceckbapebfimnlniiiahkandclblb"
+        space: null
+        openedVia: "menu"
+    expected:
+      - or:
+          - callsTool:
+              name: open-extension
+              arguments:
+                query:
+                  includes: "bitwarden"
+          - callsTool:
+              name: open-extension
+              arguments:
+                extensionId: "nngceckbapebfimnlniiiahkandclblb"
+      - not:
+          callsTool:
+            name: open-extension
+            arguments:
+              space:
+                or:
+                  - "Soundraw"
+                  - "Personal"
+                  - "Worthwhile"
+                  - "Work"
+      - not:
+          callsTool: switch-space
+      - not:
+          matches: "\\bWork\\b"
+  - input: "@dia open 1Password"
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      open-extension:
+        opened: "1Password – Password Manager"
+        extensionId: "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
+        space: "Personal"
+        openedVia: "menu"
+    expected:
+      - or:
+          - callsTool:
+              name: open-extension
+              arguments:
+                query:
+                  includes: "1password"
+          - callsTool:
+              name: open-extension
+              arguments:
+                extensionId: "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
+  - input: "@dia open uBlock in my Work space"
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: "Personal"
+          isActive: true
+          extensions:
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+        - space: "Work"
+          isActive: false
+          extensions:
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+      open-extension:
+        opened: "uBlock Origin Lite"
+        extensionId: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+        space: "Work"
+        openedVia: "menu"
+    expected:
+      - callsTool:
+          name: open-extension
+          arguments:
+            space:
+              includes: "work"
+  - input: "@dia open the Google extension"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      open-extension: |-
+        Error: 2 extensions match "google". Ask the user which one they mean, then retry with its extensionId:
+        - Google Docs Offline [extensionId: ghbmnnjooekpmoecnnnilnnbdlolhkhi]
+        - Google Translate [extensionId: aapbdbdomjkkjkaonfhkkikfgjllcleb]
+    expected:
+      - callsTool:
+          name: open-extension
+          arguments:
+            query:
+              includes: "google"
+      - includes: "Docs"
+      - includes: "Translate"
+  - input: "@dia open 1Password"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      open-extension: "Error: Raycast needs Accessibility access to open Dia extensions. Enable Raycast in System Settings → Privacy & Security → Accessibility, then try again."
+    expected:
+      - callsTool: open-extension
+      - includes: "Accessibility"
+  - input: "@dia open Bitwarden"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      open-extension: "Error: Bitwarden Password Manager is installed in several spaces (Personal, Work). Nothing was opened. Ask the user which space to open it in, or use the active space from get-spaces if they mean the space they are in, then retry with that space."
+    expected:
+      - callsTool:
+          name: open-extension
+          arguments:
+            query:
+              includes: "bitwarden"
+      - includes: "Personal"
+      - includes: "Work"
+  - input: "@dia uninstall uBlock"
+    usedAsExample: false
+    mocks:
+      get-spaces:
+        - name: "Personal"
+          isActive: true
+          windowIds: ["W1"]
+        - name: "Work"
+          isActive: false
+          windowIds: []
+      get-extensions:
+        - space: "Personal"
+          isActive: true
+          extensions:
+            - id: "ddkjiahejlhfcafbddmgiahcphecmpfh"
+              name: "uBlock Origin Lite"
+              enabled: true
+              pinned: false
+              builtIn: false
+              hasPopup: true
+    expected:
+      - not:
+          callsTool:
+            name: open-extension
+      - includes: "settings"

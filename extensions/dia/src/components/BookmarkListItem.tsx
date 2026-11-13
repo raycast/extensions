@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open, Keyboard } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
 import { collectUrlsFromFolder } from "../bookmarks/utils";
 import { BookmarkItem } from "../bookmarks/types";
@@ -42,7 +42,7 @@ export function BookmarkListItem({
               <Action
                 title={`Open All ${urlCount} in Dia`}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
                 onAction={async () => {
                   for (const url of urls) {
                     await open(url, DIA_BUNDLE_ID);
@@ -71,13 +71,9 @@ export function BookmarkListItem({
         actions={
           <ActionPanel title={item.name}>
             <Action title="Open in Dia" icon={Icon.Globe} onAction={() => openInDia(url)} />
-            <Action.OpenInBrowser url={url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenInBrowser url={url} shortcut={Keyboard.Shortcut.Common.Open} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-            <Action.CopyToClipboard
-              title="Copy Title"
-              content={item.name}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy Title" content={item.name} shortcut={Keyboard.Shortcut.Common.Copy} />
           </ActionPanel>
         }
       />

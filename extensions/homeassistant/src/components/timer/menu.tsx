@@ -4,11 +4,11 @@ import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
 import { Icon, MenuBarExtra } from "@raycast/api";
-import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
+import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimer } from "./utils";
 
 function TimerStartMenubarItem(props: { state: State }) {
   const s = props.state;
-  if (!isTimerEditable(s)) {
+  if (!isTimer(s)) {
     return null;
   }
   const title = s.state === "active" ? "Restart" : "Start";
@@ -18,7 +18,7 @@ function TimerStartMenubarItem(props: { state: State }) {
 
 function TimerPauseMenubarItem(props: { state: State }) {
   const s = props.state;
-  if (!isTimerEditable(s) || s.state !== "active") {
+  if (!isTimer(s) || s.state !== "active") {
     return null;
   }
   return <MenuBarExtra.Item title="Pause" icon="pause.svg" onAction={() => callTimerPauseService(s)} />;
@@ -26,7 +26,7 @@ function TimerPauseMenubarItem(props: { state: State }) {
 
 function TimerCancelMenubarItem(props: { state: State }) {
   const s = props.state;
-  if (!isTimerEditable(s) || s.state !== "active") {
+  if (!isTimer(s) || s.state !== "active") {
     return null;
   }
   return <MenuBarExtra.Item title="Cancel" icon={Icon.XMarkCircle} onAction={() => callTimerCancelService(s)} />;
