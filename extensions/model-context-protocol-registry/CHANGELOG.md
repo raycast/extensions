@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add agentdrive MCP Server] - {PR_MERGE_DATE}
+
+- Add agentdrive to the official registry: persistent file storage for AI agents (save, list, read, link and delete files, each with a browser link a person can open). 5 tools. Hosted Streamable HTTP server at https://useagentdrive.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs an agentdrive account (free drive: 500 MB).
+
 ## [Add Rizamo MCP Server] - 2026-11-13
 
 - Add Rizamo to the official registry: publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, read analytics and answer comments and messages from an AI agent. 57 tools. Hosted Streamable HTTP server at https://mcp.rizamo.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Rizamo account (free for 2 social accounts).
