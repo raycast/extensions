@@ -96,6 +96,14 @@ export function getTokenFingerprint(token: string | undefined) {
 }
 
 /**
+ * Identifies the owner of a token by monobank's `clientId`, without storing the id itself. Two tokens of the same
+ * person have the same fingerprint, so data cached for one can be kept for the other.
+ */
+export function getClientFingerprint(clientId: string) {
+  return createHash("sha256").update(clientId).digest("hex");
+}
+
+/**
  * Returns the normalized token, or throws `MissingTokenError` / `InvalidTokenError`.
  * Lets callers detect token problems before spending a rate-limited request.
  */

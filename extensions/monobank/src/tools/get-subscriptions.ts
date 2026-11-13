@@ -1,7 +1,7 @@
 import { getDisplayNames, roundAmount, toLocalIso } from "../services/format";
 import { loadRates } from "../services/rates";
 import { getHistoryStart, loadStoredSubscriptions } from "../services/subscriptions";
-import { getMonthlyTotal, getSubscriptionTitle } from "../utils/subscriptions";
+import { getMonthlyTotal, getPerPersonAmount, getSubscriptionTitle } from "../utils/subscriptions";
 
 /** History shorter than this may miss subscriptions, since each one needs at least two charges. */
 const SHORT_HISTORY_DAYS = 60;
@@ -21,11 +21,13 @@ type Input = {
  * ChatGPT on a UAH card), `accountAmount` (the last charge in the account's currency), `lastCharge`, `nextExpected`
  * (local date), `monthlyCost` (in `currency`) and `previousAmount` and `priceChangedOn` after a price change.
  * `newPriceUnconfirmed: true` means the new price was charged only once, so it may be another purchase from the same
- * merchant rather than a price change.
+ * merchant rather than a price change. A family subscription the user shares has `seats` (how many people share it,
+ * including the user) and `perPersonAmount` (`amount` split between them, in `currency`).
  *
  * `status` is "active", or "possiblyCancelled" when the expected charge didn't come. `confidence` is "confirmed"
  * (3 or more charges) or "likely" (2 charges from a typical subscription merchant). `monthlyTotalUah` is the
- * monthly cost of the active ones in UAH at monobank's current rates.
+ * monthly cost of the active ones in UAH at monobank's current rates, at the full price of family subscriptions, since
+ * that's what the card pays.
  *
  * Use it for "what subscriptions do I have", "what's charging me next week", "коли наступне списання за…" and
  * "how much do I pay for subscriptions". Makes no statement requests: it reads the history "Sync Statements" stores
@@ -75,28 +77,33 @@ export default async function tool(input: Input) {
   }
 
   return {
-    subscriptions: shown.map((subscription) => ({
-      name: getSubscriptionTitle(subscription),
-      account: names.get(subscription.account.id),
-      cadence: subscription.cadence,
-      amount: roundAmount(subscription.amount, subscription.currency),
-      currency: subscription.currency.code,
-      accountAmount: roundAmount(subscription.accountAmount, subscription.account.currency),
-      accountCurrency: subscription.account.currency.code,
-      previousAmount:
-        subscription.previousAmount !== undefined
-          ? roundAmount(subscription.previousAmount, subscription.currency)
-          : undefined,
-      priceChangedOn:
-        subscription.priceChangedAt !== undefined ? toLocalIso(subscription.priceChangedAt).slice(0, 10) : undefined,
-      newPriceUnconfirmed: subscription.newPriceChargeId ? true : undefined,
-      lastCharge: toLocalIso(subscription.lastCharge),
-      nextExpected: toLocalIso(subscription.nextDate).slice(0, 10),
-      status: subscription.status === "late" ? "possiblyCancelled" : "active",
-      confidence: subscription.confidence,
-      monthlyCost: roundAmount(subscription.monthlyCost, subscription.currency),
-      category: subscription.category.name,
-    })),
+    subscriptions: shown.map((subscription) => {
+      const perPerson = getPerPersonAmount(subscription);
+      return {
+        name: getSubscriptionTitle(subscription),
+        account: names.get(subscription.account.id),
+        cadence: subscription.cadence,
+        amount: roundAmount(subscription.amount, subscription.currency),
+        currency: subscription.currency.code,
+        accountAmount: roundAmount(subscription.accountAmount, subscription.account.currency),
+        accountCurrency: subscription.account.currency.code,
+        previousAmount:
+          subscription.previousAmount !== undefined
+            ? roundAmount(subscription.previousAmount, subscription.currency)
+            : undefined,
+        priceChangedOn:
+          subscription.priceChangedAt !== undefined ? toLocalIso(subscription.priceChangedAt).slice(0, 10) : undefined,
+        newPriceUnconfirmed: subscription.newPriceChargeId ? true : undefined,
+        lastCharge: toLocalIso(subscription.lastCharge),
+        nextExpected: toLocalIso(subscription.nextDate).slice(0, 10),
+        status: subscription.status === "late" ? "possiblyCancelled" : "active",
+        confidence: subscription.confidence,
+        monthlyCost: roundAmount(subscription.monthlyCost, subscription.currency),
+        seats: subscription.seats,
+        perPersonAmount: perPerson !== undefined ? roundAmount(perPerson, subscription.currency) : undefined,
+        category: subscription.category.name,
+      };
+    }),
     monthlyTotalUah,
     accounts,
     today: toLocalIso(Math.floor(now / 1000)).slice(0, 10),

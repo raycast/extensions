@@ -140,23 +140,31 @@ export function formatDateTime(time: number) {
   return `${formatDate(new Date(time * 1000), { weekday: true, year: true })}, ${formatTime(time)}`;
 }
 
-export interface DaySection {
+export interface DaySection<T = Transaction> {
   /** The local date. */
   key: string;
   title: string;
-  transactions: Transaction[];
-  /** Income minus expenses of the day, in the account currency. */
+  items: T[];
+  /** The sum of the day's amounts: for transactions, income minus expenses in the account currency. */
   net: number;
 }
 
-/** Splits transactions (newest first) into days, keeping their order. */
-export function groupByDay(transactions: Transaction[], now = new Date()): DaySection[] {
+/**
+ * Splits `items` (newest first) into days, keeping their order. `getValues` tells an item's unix time and what it
+ * adds to its day's `net`; without it, the items are transactions.
+ */
+export function groupByDay<T = Transaction>(
+  items: T[],
+  getValues: (item: T) => { time: number; amount: number } = (item) => item as Transaction,
+  now = new Date(),
+): DaySection<T>[] {
   const today = startOfDay(now).getTime();
   const yesterday = daysAgo(now, 1).getTime();
-  const sections: DaySection[] = [];
+  const sections: DaySection<T>[] = [];
 
-  for (const transaction of transactions) {
-    const day = startOfDay(new Date(transaction.time * 1000));
+  for (const item of items) {
+    const { time, amount } = getValues(item);
+    const day = startOfDay(new Date(time * 1000));
     const key = `${day.getFullYear()}-${day.getMonth() + 1}-${day.getDate()}`;
     let section = sections[sections.length - 1];
 
@@ -167,12 +175,12 @@ export function groupByDay(transactions: Transaction[], now = new Date()): DaySe
           : day.getTime() === yesterday
             ? "Yesterday"
             : formatDate(day, { weekday: true, year: day.getFullYear() !== now.getFullYear() });
-      section = { key, title, transactions: [], net: 0 };
+      section = { key, title, items: [], net: 0 };
       sections.push(section);
     }
 
-    section.transactions.push(transaction);
-    section.net += transaction.amount;
+    section.items.push(item);
+    section.net += amount;
   }
 
   return sections;
@@ -286,19 +294,21 @@ function normalizeSearchText(text: string) {
 }
 
 /**
- * Transactions that contain every word of `query` in their search texts. An empty query returns `transactions`.
- * `getExtraTexts` adds texts that aren't part of the transaction, e.g. the "Subscription" tag.
+ * The items whose transaction contains every word of `query` in its search texts. An empty query returns `items`.
+ * `getExtraTexts` adds texts that aren't part of the transaction, e.g. the "Subscription" tag. `getTransaction`
+ * tells an item's transaction; without it, the items are transactions.
  */
-export function filterTransactions(
-  transactions: Transaction[],
+export function filterTransactions<T = Transaction>(
+  items: T[],
   query: string,
-  getExtraTexts?: (transaction: Transaction) => string[],
+  getExtraTexts?: (item: T) => string[],
+  getTransaction: (item: T) => Transaction = (item) => item as Transaction,
 ) {
   const terms = normalizeSearchText(query.trim()).split(/\s+/).filter(Boolean);
-  if (!terms.length) return transactions;
+  if (!terms.length) return items;
 
-  return transactions.filter((transaction) => {
-    const texts = [...getSearchTexts(transaction), ...(getExtraTexts?.(transaction) ?? [])];
+  return items.filter((item) => {
+    const texts = [...getSearchTexts(getTransaction(item)), ...(getExtraTexts?.(item) ?? [])];
     const text = normalizeSearchText(texts.join("\n"));
     return terms.every((term) => text.includes(term));
   });
@@ -370,14 +380,19 @@ export function getAmountColor(amount: number) {
 
 export const HOLD_TOOLTIP = "Not settled by the merchant's bank yet. The amount may still change.";
 
-/** `subscriptionTag`: from `getSubscriptionTag`, when the transaction is a charge of a subscription. */
+/**
+ * `tag` comes first, e.g. the one of `getSubscriptionTag` when the transaction is a charge of a subscription.
+ * `accountTitle` names the transaction's card before the amount, for lists of several accounts.
+ */
 export function getTransactionAccessories(
   transaction: Transaction,
-  subscriptionTag?: List.Item.Accessory,
+  options: { tag?: List.Item.Accessory; accountTitle?: string } = {},
 ): List.Item.Accessory[] {
+  const { tag, accountTitle } = options;
   return [
-    ...(subscriptionTag ? [subscriptionTag] : []),
+    ...(tag ? [tag] : []),
     ...(transaction.hold ? [{ tag: { value: "Hold", color: Color.SecondaryText }, tooltip: HOLD_TOOLTIP }] : []),
+    ...(accountTitle ? [{ tag: accountTitle, tooltip: "Account" }] : []),
     {
       text: {
         value: formatAmount(transaction.amount, transaction.currency, { signed: true }),

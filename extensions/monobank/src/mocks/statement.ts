@@ -1,5 +1,5 @@
 import { StatementItemResponse } from "../api/types";
-import { STATEMENT_PAGE_SIZE } from "../data/constants";
+import { BANK_REQUISITES, STATEMENT_PAGE_SIZE } from "../data/constants";
 import { createIban } from "./iban";
 import { MOCK_OWNER } from "./owner";
 import { Random, createId, createRandom } from "./random";
@@ -157,6 +157,40 @@ const VACATION_TOP_UP: [number, number] = [400, 800];
 const LAPTOP_TOP_UP: [number, number] = [300, 700];
 const SAFETY_TOP_UP: [number, number] = [3_000, 6_000];
 const WHITE_TOP_UP = 12_000;
+const SAFETY_WITHDRAWAL: [number, number] = [3_000, 9_000];
+
+/**
+ * A withdrawal from the safety jar to the black card, about once a month, so both statements show the same amount
+ * a few seconds apart: the amount and when it leaves the jar (seconds since midnight). Undefined on other days.
+ */
+function getSafetyWithdrawal(date: Date) {
+  const random = createRandom(`jarWithdrawal:${date.toDateString()}`);
+  if (!random.chance(0.03)) return undefined;
+  return {
+    amount: random.amount(SAFETY_WITHDRAWAL[0], SAFETY_WITHDRAWAL[1], 0),
+    at: random.int(9 * HOUR, 21 * HOUR),
+  };
+}
+
+const OLD_JAR_TOP_UP: [number, number] = [500, 1_500];
+/** The day the "Стара банка" jar was smashed: the last 5th before today, so its last top-ups are in Last Month. */
+const OLD_JAR_SMASHED = (() => {
+  const month = startOfMonthAgo(new Date().getDate() > 5 ? 0 : 1);
+  return new Date(month.getFullYear(), month.getMonth(), 5);
+})();
+
+function isBefore(date: Date, other: Date) {
+  return date.getTime() < other.getTime();
+}
+
+/** Everything the "Стара банка" jar collected: its top-ups since `EPOCH`. */
+function getOldJarPayout() {
+  let total = 0;
+  for (let date = new Date(EPOCH); isBefore(date, OLD_JAR_SMASHED); date.setDate(date.getDate() + 1)) {
+    if (date.getDate() === 8 || date.getDate() === 24) total += getJarTopUp("oldJar", date, OLD_JAR_TOP_UP);
+  }
+  return total;
+}
 
 const black: Profile = {
   id: MOCK_IDS.black,
@@ -239,7 +273,8 @@ const black: Profile = {
       ops.push({ description: employer, mcc: 4829, amount: 98_000, comment: "Заробітна плата", at: 10 * HOUR });
     if (day === 15) ops.push({ description: employer, mcc: 4829, amount: 82_000, comment: "Аванс", at: 10 * HOUR });
     if (day === 2 || day === 16) {
-      ops.push({ description: "На білу картку", mcc: 4829, amount: -WHITE_TOP_UP, at: 11 * HOUR });
+      // An outgoing transfer never says which card receives it; the white card's statement has the other side.
+      ops.push({ description: "Переказ на картку", mcc: 4829, amount: -WHITE_TOP_UP, at: 11 * HOUR });
     }
     if (day === 3) ops.push({ description: "Kyivstar", mcc: 4814, amount: -250, card: true, at: 9 * HOUR });
     if (day === 20)
@@ -271,6 +306,25 @@ const black: Profile = {
     }
     // Only mentions the "Долари" jar, so it stays a money transfer.
     if (day === 25) ops.push({ description: "Борг за долари", mcc: 4829, amount: -500, at: 13 * HOUR });
+    // The other side of a withdrawal from the safety jar: money of the user's own, not income.
+    const withdrawal = getSafetyWithdrawal(date);
+    if (withdrawal) {
+      ops.push({
+        description: "Часткове зняття банки «Подушка безпеки»",
+        mcc: 4829,
+        amount: withdrawal.amount,
+        at: withdrawal.at + 5,
+      });
+    }
+    // A jar smashed since: it's not among the mock jars, so only its payout tells that its top-ups were Savings.
+    if (isBefore(date, OLD_JAR_SMASHED)) {
+      if (day === 8 || day === 24) {
+        const amount = getJarTopUp("oldJar", date, OLD_JAR_TOP_UP);
+        ops.push({ description: "Поповнення «Стара банка»", mcc: 4829, amount: -amount, at: 14 * HOUR });
+      }
+    } else if (date.getTime() === OLD_JAR_SMASHED.getTime()) {
+      ops.push({ description: "Виплата банки «Стара банка»", mcc: 4829, amount: getOldJarPayout(), at: 15 * HOUR });
+    }
     return ops;
   },
 };
@@ -358,6 +412,9 @@ const iron: Profile = {
     date.getDate() === 25 ? [{ description: "Купівля валюти", mcc: 4829, amount: 300, at: 13 * HOUR }] : [],
 };
 
+/** The IBAN of the black card, as in the mock accounts. */
+const BLACK_IBAN = createIban(BANK_REQUISITES.mfo, "26200000000001");
+
 const clients = [
   { name: "ТОВ «БЕТА СОФТ»", edrpou: "43210987", iban: createIban("305299", "26001234500001") },
   { name: "ТОВ «ГАММА ПРОДАКШН»", edrpou: "44556677", iban: createIban("380805", "26007700012345") },
@@ -392,14 +449,17 @@ const fop: Profile = {
         };
       },
     },
-    merchant({
-      names: ["Переказ на власну картку"],
-      mcc: 4829,
-      range: [30_000, 60_000],
+    // A FOP statement names the receiver, so the IBAN tells that the card is the user's own.
+    {
       weight: 2,
-      transfer: true,
-      whole: true,
-    }),
+      build: (_, random) => ({
+        description: "Переказ на власну картку",
+        mcc: 4829,
+        amount: -random.amount(30_000, 60_000, 0),
+        counterName: MOCK_OWNER.name,
+        counterIban: BLACK_IBAN,
+      }),
+    },
   ],
   scheduled: (date) => {
     const ops: Op[] = [];
@@ -489,22 +549,21 @@ const jarSafety: Profile = {
   id: MOCK_IDS.jarSafety,
   currency: UAH,
   start: 25_000,
-  perDay: 0.03,
+  perDay: 0,
   floor: 0,
-  merchants: [
-    merchant({ names: ["На чорну картку"], mcc: 4829, range: [5_000, 15_000], weight: 1, transfer: true, whole: true }),
-  ],
-  scheduled: (date) =>
-    date.getDate() === 1 || date.getDate() === 15
-      ? [
-          {
-            description: "З чорної картки",
-            mcc: 4829,
-            amount: getJarTopUp(MOCK_IDS.jarSafety, date, SAFETY_TOP_UP),
-            at: 12 * HOUR,
-          },
-        ]
-      : [],
+  merchants: [],
+  scheduled: (date) => {
+    const ops: Op[] = [];
+    if (date.getDate() === 1 || date.getDate() === 15) {
+      const amount = getJarTopUp(MOCK_IDS.jarSafety, date, SAFETY_TOP_UP);
+      ops.push({ description: "З чорної картки", mcc: 4829, amount, at: 12 * HOUR });
+    }
+    const withdrawal = getSafetyWithdrawal(date);
+    if (withdrawal) {
+      ops.push({ description: "На чорну картку", mcc: 4829, amount: -withdrawal.amount, at: withdrawal.at });
+    }
+    return ops;
+  },
 };
 
 const jarUsd: Profile = {
@@ -686,6 +745,19 @@ export function getMockStatement(
   to: number | undefined,
   now: number,
 ): StatementItemResponse[] | undefined {
+  return collect(accountId, from, to, now, STATEMENT_PAGE_SIZE);
+}
+
+/**
+ * Every transaction of the account or jar from `from` (unix seconds) until `now` (unix ms), newest first, without
+ * the page limit of `getMockStatement`. For `MOCK_CONFIG.prefillStatements`. Undefined for an unknown account.
+ */
+export function getMockHistory(accountId: string, from: number, now: number) {
+  return collect(accountId, from, undefined, now, Infinity);
+}
+
+/** The transactions in `[from, to]`, newest first, at most `limit`. Card purchases of the last two days are holds. */
+function collect(accountId: string, from: number, to: number | undefined, now: number, limit: number) {
   const profile = getProfile(accountId);
   if (!profile) return undefined;
 
@@ -694,7 +766,7 @@ export function getMockStatement(
   const end = Math.min(to ?? nowSeconds, nowSeconds);
   const result: StatementItemResponse[] = [];
 
-  for (let i = items.length - 1; i >= 0 && result.length < STATEMENT_PAGE_SIZE; i--) {
+  for (let i = items.length - 1; i >= 0 && result.length < limit; i--) {
     const item = items[i];
     if (item.time > end) continue;
     if (item.time < from) break;

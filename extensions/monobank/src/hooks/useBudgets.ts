@@ -2,14 +2,18 @@ import { usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   BudgetInput,
+  TransactionBudgetChange,
+  clearBudgetCorrections,
   deleteBudget,
   moveBudget,
   readBudgetAccountIds,
   readBudgets,
+  setTransactionBudgets,
   upsertBudget,
   writeBudgetAccountIds,
 } from "../services/budgets";
-import { AccountType, Budget, MoveDirection } from "../types";
+import { purgeListeners } from "../services/owner";
+import { AccountType, Budget, MoveDirection, Transaction } from "../types";
 import { isBudgetEligible, resolveBudgetAccounts } from "../utils/budgets";
 import { useClientInfo } from "./useClientInfo";
 
@@ -45,6 +49,7 @@ export function useBudgets() {
     failureToastOptions: { title: "Failed to load budgets" },
   });
   useListener(listeners, revalidate);
+  useListener(purgeListeners, revalidate);
   const budgets = useMemo(() => data ?? [], [data]);
 
   const save = useCallback(async (input: BudgetInput) => {
@@ -63,7 +68,17 @@ export function useBudgets() {
     notifyChange();
   }, []);
 
-  return { budgets, isLoading, save, remove, move };
+  const setTransaction = useCallback(async (transaction: Transaction, changes: TransactionBudgetChange[]) => {
+    await setTransactionBudgets(transaction, changes);
+    notifyChange();
+  }, []);
+
+  const clearCorrections = useCallback(async (budget: Budget) => {
+    await clearBudgetCorrections(budget.id);
+    notifyChange();
+  }, []);
+
+  return { budgets, isLoading, save, remove, move, setTransactionBudgets: setTransaction, clearCorrections };
 }
 
 /** Like `listeners`, for the accounts budgets count. */
@@ -81,6 +96,7 @@ export function useBudgetAccounts() {
     failureToastOptions: { title: "Failed to load budget accounts" },
   });
   useListener(accountListeners, saved.revalidate);
+  useListener(purgeListeners, saved.revalidate);
   const savedIds = saved.data?.ids;
   // Ready once read, and still ready while it's read again after a change. A failed read counts the default ones.
   const isLoadingIds = !saved.data && !saved.error;

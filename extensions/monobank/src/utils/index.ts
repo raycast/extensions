@@ -8,3 +8,6 @@ export * from "./requisites";
 export * from "./budgets";
 export * from "./savings";
 export * from "./subscriptions";
+export * from "./flows";
+export * from "./chart";
+export * from "./statistics";

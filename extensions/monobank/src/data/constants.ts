@@ -23,7 +23,26 @@ export const STORAGE_KEYS = {
   subscriptionOverrides: `${STORAGE_PREFIX}subscriptionOverrides`,
   /** Held while a command changes `subscriptionOverrides` (see `withStorageLock`). */
   subscriptionOverridesLock: `${STORAGE_PREFIX}subscriptionOverrides:lock`,
+  /** What "Show Statistics" counts: the switched-on accounts and the switched-off rows (see `StatisticsFilters`). */
+  statisticsFilters: `${STORAGE_PREFIX}statisticsFilters`,
 } as const;
+
+/**
+ * The data of the person a token belongs to, besides the stored statements and the client info. It's removed when a
+ * token of another person replaces it (see `purgeOwnerData`). `statementRequestedAt` is included, so the old token's
+ * rate limit doesn't hold up the new one. Rates and the rate choices aren't personal, so they're kept.
+ */
+export const PERSONAL_STORAGE_KEYS = [
+  STORAGE_KEYS.pinnedAccounts,
+  STORAGE_KEYS.statementAccount,
+  STORAGE_KEYS.statementPeriod,
+  STORAGE_KEYS.statementRequestedAt,
+  STORAGE_KEYS.menuBarJar,
+  STORAGE_KEYS.budgets,
+  STORAGE_KEYS.budgetAccounts,
+  STORAGE_KEYS.subscriptionOverrides,
+  STORAGE_KEYS.statisticsFilters,
+] as const;
 
 /** The stored statement of one account or jar (see `StoredStatement`). */
 export function getStatementKey(accountId: string) {
@@ -127,6 +146,17 @@ export const SUBSCRIPTION_EXCLUDED_MCC: ReadonlySet<number> = new Set([4829, 601
  */
 export const SUBSCRIPTION_MCC: ReadonlySet<number> = new Set([4814, 4899, 5815, 5816, 5817, 5818, 5968, 7372]);
 
+/**
+ * How far apart, in seconds, the two sides of a transfer between the user's own accounts (or a card and a jar) can
+ * be to count as one transfer.
+ */
+export const OWN_TRANSFER_MAX_GAP = 120;
+/**
+ * How much the two sides of an own transfer between currencies can differ at today's rate, as a share of the
+ * amount received, when neither side tells the other's amount. The rate on the day of the transfer isn't known.
+ */
+export const OWN_TRANSFER_RATE_TOLERANCE = 0.05;
+
 /** Receipts are looked up on check.gov.ua by their number. It has no documented deep link. */
 export const CHECK_GOV_URL = "https://check.gov.ua/";
 
@@ -140,6 +170,8 @@ export const accountTypeColors: Record<AccountType, Color | string> = {
   fop: Color.Green,
   yellow: Color.Yellow,
   eAid: Color.Blue,
+  diia: Color.Purple,
+  madeInUkraine: Color.Orange,
 };
 
 /** Short names of account types, e.g. "Black" for an unnamed card in "Show Statement" ("Black *0001"). */
@@ -151,7 +183,21 @@ export const accountTypeTitles: Record<AccountType, string> = {
   fop: "FOP",
   yellow: "Yellow",
   eAid: "eAid",
+  diia: "Diia",
+  madeInUkraine: "National Cashback",
 };
+
+/**
+ * The order cards are listed in: iron, platinum and black (only in UAH), then white and yellow, then the others in
+ * monobank's order, black cards in other currencies among them.
+ */
+export const accountTypeOrder: AccountType[] = [
+  AccountType.IRON,
+  AccountType.PLATINUM,
+  AccountType.BLACK,
+  AccountType.WHITE,
+  AccountType.YELLOW,
+];
 
 /** The id of the USD – UAH rate (ISO 4217 numeric codes), the default rate in the menu bar. */
 export const USD_UAH_RATE_ID = "840-980";

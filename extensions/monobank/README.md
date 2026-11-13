@@ -26,12 +26,14 @@ View currency rates, all your accounts and their transactions in monobank, set m
 
 ## Setup
 
-The access token is required for the "Show Accounts", "Show Statement", "Show Budgets", "Show Subscriptions", "Sync Statements", "Jar Progress Menu Bar" and "Subscriptions Menu Bar" commands and for AI questions about your accounts, transactions, budgets and subscriptions. "Show Currency Rates" and currency questions work without it. To create an access token:
+The access token is required for the "Show Accounts", "Show Statement", "Show Budgets", "Show Subscriptions", "Show Statistics", "Sync Statements", "Jar Progress Menu Bar" and "Subscriptions Menu Bar" commands and for AI questions about your accounts, transactions, budgets and subscriptions. "Show Currency Rates" and currency questions work without it. To create an access token:
 
 1. Visit https://api.monobank.ua/
 2. Authenticate with your account
 3. Click "Activate"
 4. Copy generated access token and paste it into extension preferences
+
+When you replace the token with a new one for the same monobank account, your stored history, custom names, pins, budgets and subscription changes are kept. A token of another person removes them once monobank accepts it, while rates and pinned rates stay. A token monobank rejects changes nothing, so putting the old one back brings everything back.
 
 ## Show Accounts
 
@@ -107,7 +109,7 @@ Keeps your next subscription charge in the macOS menu bar, e.g. `Netflix · tomo
 
 ![Subscriptions Menu Bar with the next charge in the title](media/menu-bar-subscriptions.png)
 
-The "Menu Bar Title" preference sets what's shown next to the icon: the next charge (default), the next charge with its price (e.g. `Netflix · 349 ₴ · tomorrow`), the monthly total in UAH, how many charges are due in the next 7 days, or nothing. It reads the history "Sync Statements" stores, so it makes no statement requests, and renaming or hiding a subscription updates it right away.
+The "Menu Bar Title" preference sets what's shown next to the icon: the next charge (default), the next charge with its price (e.g. `Netflix · 349 ₴ · tomorrow`), the monthly total in UAH, how many charges are due in the next 7 days, or nothing. When several are due the same day, the title names the most expensive one and counts the others, e.g. `YouTube (+1) · 780 ₴ · tomorrow`, with their total price; in different currencies, the total is in UAH at monobank's rates, e.g. `≈ 780 ₴`. It reads the history "Sync Statements" stores, so it makes no statement requests, and renaming or hiding a subscription updates it right away.
 
 The menu bar commands are macOS only. The rate refreshes every 2 hours, and when you open its menu if the rates are older than 30 minutes. The jar refreshes every 10 minutes, and the subscriptions every hour. When monobank can't be reached, they keep showing the last loaded data and say when it was loaded.
 
@@ -122,6 +124,7 @@ Browse the transactions of a card, FOP account or jar. Pick the account in the s
   ![Change Period with a custom range](media/statement-period.png)
 
 - The first item summarizes the period: income, spending and how much of it went to subscriptions, cashback, your budgets (see "Budgets") and spending by category.
+- Top-ups of your own jars have the Savings category instead of "Money transfer", and aren't counted as spending. A jar you smashed is still recognised if the extension saw it before, or if its payout ("Виплата банки") is in the stored history of one of your cards; otherwise its top-ups stay under "Money transfer".
 - Toggle details (`⌘ ⇧ D`) to see a transaction's category, cashback, balance after it, comment, receipt number and counterparty.
 
   ![Details of a Netflix charge with its subscription](media/statement-details.png)
@@ -140,16 +143,18 @@ Set a monthly limit for one or more spending categories, e.g. "Cafes & Restauran
 
 ![Show Budgets with spending of this month](media/budgets.png)
 
-- **What counts**: spending in the budget's categories in the calendar month, across your budget accounts: all your personal UAH cards by default (not FOP or eAid accounts). Choose them with "Choose Accounts…" (`⌘ ⇧ O`) in "Show Budgets". USD and EUR cards and jars aren't counted. Transactions on hold count, and money coming back in a budget's categories, such as refunds, is subtracted.
+- **What counts**: spending in the budget's categories in the calendar month, across your budget accounts: all your personal UAH cards by default (not FOP accounts or the eAid and National Cashback cards). Choose them with "Choose Accounts…" (`⌘ ⇧ O`) in "Show Budgets". USD and EUR cards and jars aren't counted. Transactions on hold count, and money coming back in a budget's categories, such as refunds, is subtracted.
 - **Where**: the Summary in "Show Statement" shows your budgets for "This Month" and "Last Month" on your budget accounts, totaled across all of them, with a ring, spent of the limit, what's left and, for this month, how much you can spend per day. An orange or red mark on the Summary means a budget is near (80%) or over its limit. While searching, budgets still cover the whole month.
 
   ![Budgets in the Summary of Show Statement](media/statement-budgets.png)
 
-- **Manage**: use "Manage Budgets…" (`⌘ ⇧ U`) in "Show Statement", or the "Show Budgets" command. It shows saved spending right away, then updates the budget accounts not updated in the last 5 minutes, one request a minute. Switch between this and last month with `⌘ ⇧ P`, and see each budget's spending per card in the details. Create a budget from scratch or from a preset (Cafes & Restaurants, Groceries, Taxi, Transport, Car, Health, Clothes & Shoes, Subscriptions & Games, Entertainment, Beauty, Pets), then edit, reorder or delete it.
+- **Manage**: use "Manage Budgets…" (`⌘ ⇧ U`) in "Show Statement", or the "Show Budgets" command. It shows saved spending right away, then updates the budget accounts not updated in the last 5 minutes, one request a minute. Switch between this and last month with `⌘ ⇧ P`, and see each budget's spending per card in the details (`⌘ ⇧ D`). Enter copies a one-line summary of a budget, e.g. `Cafes, November: 3 766 / 5 000 ₴ (75%), 1 234 ₴ left, ≈ 62 ₴ a day for 20 days`, and `⌘ ↵` copies the amount left (or over). Create a budget from scratch or from a preset (Cafes & Restaurants, Groceries, Taxi, Transport, Car, Health, Clothes & Shoes, Subscriptions & Games, Entertainment, Beauty, Pets), then edit, reorder or delete it.
 
   ![Creating a budget from the Groceries preset](media/budget-form.png)
 
+- **Transactions behind a budget**: use "Show Transactions" (`⌘ ⇧ S`) on a budget, for this or last month, to see every transaction it counts across your budget accounts, with a total that equals "Spent". Transactions added by hand have an "Added" tag, and the ones you excluded are listed at the end under "Excluded".
 - **Categories** are merchant category names, searchable in English or Ukrainian. Categories you spent on recently are listed first.
+- **Corrections**: a merchant category doesn't always match what you bought, e.g. a meal at a grocery store, or rent paid as a money transfer. In "Show Statement" on a budget account, use "Add to Budget" to count a transaction in a budget whose categories don't include it, "Remove from Budget" to leave one out, or "Move to Budget" to take it out of the budgets that count it and put it in another in one step. Each budget keeps its own corrections, and editing its categories keeps them. The same actions work in a budget's "Show Transactions": "Remove from Budget" moves a transaction to "Excluded" and lowers the total at once, and "Add to Budget" there brings it back. The transaction's details list the budgets that count it, and "Show Budgets" shows how much was added by hand or excluded, with "Clear Corrections" to undo them all.
 
 ## Show Subscriptions
 
@@ -162,9 +167,26 @@ See your recurring charges, such as Netflix, Spotify, ChatGPT or your mobile pla
 - **Sections**: Upcoming (the next 7 days), Active, and Possibly Cancelled for subscriptions whose expected charge didn't come.
 - **History**: the command makes no requests when it opens. "Sync Statements" loads the history in the background, back to the "Keep Statements For" preference (3 months by default), and subscriptions show once a merchant has charged at least twice. Use Refresh (`⌘ R`) to update the last 31 days.
 - **Corrections**: rename a subscription with "Rename…" (`⌘ E`), or hide something that isn't one with "Not a Subscription" (`⌃ X`), here or on one of its charges in "Show Statement". Undo it from the toast, or later with "Show Hidden Subscriptions" (`⌘ ⇧ H`) and "Unhide".
-- Toggle details to see the monthly and yearly cost, the card, the category and every charge, or open the card's statement.
+- **Family subscriptions**: for a plan you share, use "Mark as Family…" (`⌘ ⇧ F`) and enter how many people share it, including you. Each person's share shows next to the price, in the details, in "Subscriptions Menu Bar" and in AI answers. Totals still count the full price, since that's what your card pays. Change it with "Edit Family Seats…", or undo it with "Not a Family Subscription".
+- Copy a subscription's amount with `⌘ ↵`, toggle details (`⌘ ⇧ D`) to see the monthly and yearly cost, the card, the category and every charge, or open the card's statement.
 
   ![Details of Netflix with a new price and its charges](media/subscriptions-details.png)
+
+## Show Statistics
+
+See where your money goes and where it comes from as a chart, across your cards and FOP accounts, like the statistics in the monobank app.
+
+- **Views**: pick one in the search bar (`⌘ P`): Expenses and Income by category, Savings by jar, and Own Transfers by the card the money went to. The chart shows the view you picked, and the totals of all four stay under it: Income, Spent, Saved, To Own Cards and Net (income minus spent and saved).
+- **Switch rows on and off**: press `↵` on a category, jar or card to hide it or show it again, or use "Show Only This" or "Show All" in the action panel. The chart and the totals follow at once. Hidden rows stay in the list in their place, so you can bring them back.
+- **Transactions behind a row**: use "Show Transactions" (`⌘ ⇧ S`) on a category, jar or card to see exactly the transactions it counts, for the same period and accounts, by day, with a total that equals the row's amount. Hidden rows open too. Search narrows the list and the total, and with several accounts each transaction names its card. "View Statement" (`⌘ ⇧ S`) there opens the card's statement, and on a budget account "Add to Budget", "Remove from Budget" and "Move to Budget" work as in "Show Statement".
+- **Accounts**: every card and FOP account is listed under the rows with its amount in the current view, and is switched on and off the same way. Personal UAH cards are on at first. Accounts in other currencies are converted to UAH at monobank's rates today, and the totals are then marked with `≈`. Open an account's transactions with "View Statement" (`⌘ ⇧ S`).
+- **Your own money moving around** isn't spending or income, so it's kept out of both. Top-ups of your jars are Savings, and money taken back from a jar shows as Withdrawn. Top-ups of a jar you smashed before the extension saw it count as Savings only while its payout ("Виплата банки") is in the stored history; otherwise they stay in Expenses under "Money transfer". A transfer between your own accounts shows under Own Transfers, counted once, on the account it left.
+- **How own transfers are recognised**: monobank doesn't mark them, so they're found in the statements stored on your device. Two transfers of the same amount on two of your accounts (or a card and a jar), one out and one in, at most 2 minutes apart, are one transfer; between currencies the amounts are compared at the transfer's own rate when monobank gives it, or within 5% at today's rate. On FOP accounts the counterparty's IBAN is checked against your accounts. When the other account's statement isn't stored for the period yet, the description is used for incoming money only, e.g. "З Білої картки", "З Дія.Картки" or "З доларової картки": an outgoing transfer is always "Переказ на картку", which doesn't say where it goes, so it stays in Expenses until the receiving card's statement is stored. A transfer to your own card in another bank looks like a transfer to anyone else, so it stays in Expenses or Income under "Money transfer"; hide that category to leave it out.
+- **Period**: This Month at first. Change it with "Change Period…" (`⌘ ⇧ P`), as in "Show Statement".
+- **Updating**: the command shows what's stored right away, then updates the switched-on accounts not updated in the last 5 minutes, one request a minute. "Sync Statements" keeps the statements of all your accounts and jars, which own transfers are recognised from. Use Refresh (`⌘ R`) to update the switched-on accounts now.
+- The view you picked, the rows you hid and the accounts you switched on are remembered.
+
+![Statistics for the selected categories and accounts](media/statistics.png)
 
 ## Sync Statements
 
