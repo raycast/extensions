@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Excession Labs CVE MCP Server] - 2026-11-13
+
+- Add Excession Labs CVE intelligence to the official registry: six read-only tools for CVE search, source software/version evidence, available CISA KEV and dated FIRST EPSS data, source health, hosted revisions and cursor-based changes. Free hosted Streamable HTTP server at https://excessionlabs.ai/mcp/cve with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add BuildBase Console MCP Server] - 2026-11-13
 
 - Add BuildBase Console to the registry: manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted Streamable HTTP server at https://api.console.buildbase.app/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
