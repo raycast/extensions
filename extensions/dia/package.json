@@ -98,8 +98,14 @@
           "required": false,
           "default": "name",
           "data": [
-            { "title": "Colored Name", "value": "name" },
-            { "title": "Colored Dot", "value": "dot" }
+            {
+              "title": "Colored Name",
+              "value": "name"
+            },
+            {
+              "title": "Colored Dot",
+              "value": "dot"
+            }
           ]
         }
       ]

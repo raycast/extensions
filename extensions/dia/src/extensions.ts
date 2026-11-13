@@ -122,11 +122,12 @@ async function readExtensions(profile: Profile): Promise<BrowserExtension[]> {
  * data, and one Chromium profile can back several spaces or all of them. For example, a setup with the spaces
  * Personal and Work can have a single `Default` profile, and the name in Local State's `info_cache` can be
  * the name of a space that was deleted long ago.
- * So a profile belongs to a space only when its name is the name of a current space. Any other profile is
- * shared by all spaces. When Dia has no window, the spaces are unknown: a single profile counts as shared,
- * and several profiles keep their names.
+ * A single profile is shared by all spaces, even when its name matches a current space. With several profiles,
+ * a profile is linked to a space when its name matches a current space; otherwise it is shared by all spaces.
+ * When Dia has no window, the spaces are unknown: several profiles keep their names.
  */
 function spaceOf(profile: Profile, profiles: Profile[], spaces: Spaces | undefined): string | undefined {
+  if (profiles.length === 1) return undefined;
   if (spaces?.names.length) return spaces.names.includes(profile.name) ? profile.name : undefined;
   return profiles.length > 1 ? profile.name : undefined;
 }
