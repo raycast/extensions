@@ -4,7 +4,7 @@ import type { ApiResult } from "highseat/api"
 import { useEffect, useState } from "react"
 import { RefreshAction, SitesEmptyView } from "./components/load-state"
 import { PeriodDropdown } from "./components/period-dropdown"
-import { getSiteIcon, Site, SiteOverview } from "./components/site-picker"
+import { getSiteIcon, SiteOverview } from "./components/site-picker"
 import { SiteStats } from "./components/site-stats"
 import { formatCount } from "./lib/format"
 import { api, APP_URL, disconnect, highseat } from "./lib/highseat"
@@ -14,7 +14,7 @@ import { DEFAULT_PERIOD, getCompare, getPeriodTitle } from "./lib/periods"
 type Overview = ApiResult<"/sites/{site}/overview">
 
 interface SiteDetailProps {
-  site: Site
+  site: SiteOverview
   period: string
   data?: Overview
   error?: Error
@@ -28,6 +28,7 @@ function SiteDetail({ site, period, data, error, isLoading }: SiteDetailProps) {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title={site.domain} text={getPeriodTitle(period)} />
+          <List.Item.Detail.Metadata.Label title="Visitors in the Last 24 Hours" text={formatCount(site.visitors)} />
           <List.Item.Detail.Metadata.Separator />
           {error && !data && (
             <List.Item.Detail.Metadata.Label title="Could not load" text={{ value: error.message, color: Color.Red }} />
@@ -73,7 +74,6 @@ function SiteItem({ site, period, isSelected, onRefresh }: SiteItemProps) {
       icon={getSiteIcon(site)}
       title={site.name}
       keywords={[site.domain]}
-      accessories={[{ text: formatCount(site.visitors), tooltip: "Visitors in the last 24 hours" }]}
       detail={<SiteDetail site={site} period={period} data={data} error={error} isLoading={isLoading} />}
       actions={
         <ActionPanel>
@@ -128,17 +128,9 @@ function ViewSites() {
       onSelectionChange={setSelectedId}
     >
       <SitesEmptyView error={error} isLoading={isLoading} onRefresh={revalidate} />
-      <List.Section title="Visitors in the Last 24 Hours">
-        {sites.map(site => (
-          <SiteItem
-            key={site.id}
-            site={site}
-            period={period}
-            isSelected={site.id === activeId}
-            onRefresh={revalidate}
-          />
-        ))}
-      </List.Section>
+      {sites.map(site => (
+        <SiteItem key={site.id} site={site} period={period} isSelected={site.id === activeId} onRefresh={revalidate} />
+      ))}
     </List>
   )
 }
