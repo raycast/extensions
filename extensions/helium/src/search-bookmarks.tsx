@@ -1,20 +1,9 @@
-import { List, ActionPanel, Icon, Action } from "@raycast/api";
-import { usePromise, getFavicon } from "@raycast/utils";
+import { List, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getBookmarks } from "./utils/bookmarks";
-import {
-  OpenBookmarkAction,
-  OpenBookmarkInNewTabAction,
-  CopyBookmarkUrlAction,
-  CopyBookmarkTitleAction,
-  CopyBookmarkAsMarkdownAction,
-  CreateQuicklinkAction,
-  DeduplicateTabsAction,
-  ReloadAction,
-} from "./utils/actions";
-import { Bookmark } from "./types";
+import { BookmarkListItem } from "./utils/list-items";
 import { filterSearchable } from "./utils/search";
-import { SHORTCUTS } from "./utils/shortcuts";
 
 export default function SearchBookmarks() {
   const [searchText, setSearchText] = useState("");
@@ -58,47 +47,5 @@ export default function SearchBookmarks() {
         <BookmarkListItem key={bookmark.id} bookmark={bookmark} revalidate={revalidate} />
       ))}
     </List>
-  );
-}
-
-function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revalidate: () => Promise<Bookmark[]> }) {
-  const accessories: List.Item.Accessory[] = [];
-
-  // Add folder information if available
-  if (bookmark.folder) {
-    accessories.push({
-      text: bookmark.folder,
-      icon: Icon.Folder,
-    });
-  }
-
-  return (
-    <List.Item
-      title={bookmark.title || "Untitled"}
-      subtitle={bookmark.url}
-      keywords={[bookmark.url, bookmark.title]}
-      icon={getFavicon(bookmark.url, { fallback: Icon.Bookmark })}
-      accessories={accessories}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <OpenBookmarkAction bookmark={bookmark} />
-            <OpenBookmarkInNewTabAction bookmark={bookmark} />
-          </ActionPanel.Section>
-          <CopyBookmarkUrlAction bookmark={bookmark} />
-          <CopyBookmarkTitleAction bookmark={bookmark} />
-          <CopyBookmarkAsMarkdownAction bookmark={bookmark} />
-          <CreateQuicklinkAction url={bookmark.url} name={bookmark.title || "Untitled"} />
-          <Action.Open
-            title="Open in Default Browser"
-            target={bookmark.url}
-            icon={Icon.Globe}
-            shortcut={SHORTCUTS.openInDefaultBrowser}
-          />
-          <DeduplicateTabsAction />
-          <ReloadAction subject="Bookmarks" revalidate={revalidate} />
-        </ActionPanel>
-      }
-    />
   );
 }

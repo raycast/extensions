@@ -2,7 +2,8 @@
 
 ## Project Structure & Module Organization
 - `package.json` is both the npm manifest and Raycast extension manifest. Add new commands there and keep command names aligned with `src/<command-name>.tsx`.
-- `src/*.tsx` contains Raycast command entrypoints such as `search-tabs.tsx`, `search-web.tsx`, `search-history.tsx`, and `open-new-tab.tsx`.
+- `src/*.tsx` contains Raycast command entrypoints such as `search-helium.tsx`, `search-tabs.tsx`, `search-web.tsx`, `search-history.tsx`, and `open-new-tab.tsx`.
+- `src/utils/list-items.tsx` holds the tab, bookmark, history, and suggestion list rows shared by the single-source commands and the unified `search-helium` command. Change row actions there so every command stays consistent.
 - `src/utils/` holds shared browser, AppleScript, search, bookmark, history, URL, suggestion, and action helpers. Put reusable logic here.
 - `src/utils/platform.ts` owns the macOS/Windows split (`isWindows`, Helium executable and profile-root discovery); `src/utils/browser-control.ts` dispatches every app-driving call to `applescript.ts` (macOS) or `windows-browser.ts` (Windows). Import browser behavior from `browser-control.ts`, never from `applescript.ts` directly, and check `isTabControlAvailable` instead of testing the platform inline.
 - `rust/src/browser.rs` owns Windows UI Automation tab switching and guarded new-tab input, exposed through synchronous `#[raycast]` functions in `rust/src/main.rs`. Match the full Helium executable path, skip web document trees, verify selection and focus, and preserve window placement. A configured custom User Data directory must bypass executable-only new-tab input and launch with `--user-data-dir`.
@@ -30,7 +31,7 @@
 - Use `useCachedBrowserTabs` for tab-list UIs so cached snapshots render immediately while fresh Helium reads update in the background.
 - Release pending-close tombstones only from confirmed fresh Helium tab reads, not from cached or optimistic snapshots.
 - Keep Helium profile access read-only. Use immutable/copy-safe reads for Chromium profile databases, and do not write `Web Data`, `Preferences`, or bang settings from the extension.
-- Treat browsing history as optional and keep it isolated to `search-history`. `search-web` must stay focused on bangs and provider-backed web results.
+- Treat browsing history as optional. Only `search-history` and the unified `search-helium` read it, and both must keep working when the History database is missing, unreadable, or needs permission: `search-helium` hides its History section rather than blocking tabs and bookmarks. `search-web` must stay focused on bangs and provider-backed web results.
 - Mirror Helium search and bang behavior from Helium profile/settings where determinable; fall back loudly and conservatively rather than guessing.
 
 ## Testing Guidelines

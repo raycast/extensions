@@ -1,5 +1,10 @@
 # Helium Changelog
 
+## [Search Helium] - {PR_MERGE_DATE}
+
+- **Search Helium**: New command that searches open tabs, bookmarks, browsing history and the web in one list, so a single hotkey covers everything in Helium. A dropdown narrows results to Open Tabs, Bookmarks, History or Search Web and remembers your choice. Typed URLs and bangs appear first, and history entries for pages that are already open are hidden.
+- History stays optional: if Helium's History database is missing or unreadable, Search Helium still shows tabs, bookmarks and web results.
+
 ## [Tab Switching and Action Improvements] - 2026-11-07
 
 - **Action panels**: Group Search Tabs actions into sections, update the Open in New Tab and Create Quicklink icons, and use Raycast's standard Open shortcut for Open in New Tab in Search Tabs

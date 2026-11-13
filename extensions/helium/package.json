@@ -9,7 +9,8 @@
     "mallsjr",
     "IslamTayeb",
     "ohivan",
-    "muhammadrizo"
+    "muhammadrizo",
+    "Reivaj"
   ],
   "platforms": [
     "macOS",
@@ -69,6 +70,12 @@
     }
   ],
   "commands": [
+    {
+      "name": "search-helium",
+      "title": "Search Helium",
+      "description": "Search open tabs, bookmarks, browsing history and the web in Helium browser",
+      "mode": "view"
+    },
     {
       "name": "search-tabs",
       "title": "Search Tabs",

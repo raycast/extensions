@@ -4,6 +4,7 @@ Navigate open tabs, browsing history, bookmarks, and the web in Helium browser.
 
 ## Features
 
+- **Search Helium** - Search open tabs, bookmarks, browsing history and the web from one command, with a dropdown to narrow results to a single source. Like Search Web, typed queries are sent to Helium's search provider for suggestions; pick a non-web filter to keep a search local
 - **Search Tabs** - Find and switch between open tabs
 - **Search Web** - Search using Helium's current provider and native bangs
 - **Search History** - Search Helium browsing history
@@ -14,6 +15,7 @@ Navigate open tabs, browsing history, bookmarks, and the web in Helium browser.
 
 | Command                                   | macOS | Windows                             |
 | ----------------------------------------- | ----- | ----------------------------------- |
+| Search Helium                             | ✅    | ✅ (tabs read-only, see below)      |
 | Search Web                                | ✅    | ✅                                  |
 | Search History                            | ✅    | ✅                                  |
 | Search Bookmarks                          | ✅    | ✅                                  |
