@@ -23,3 +23,13 @@ export const addedText = (seconds?: number) => (seconds ? `Added ${relativeDay(s
 export const playedText = (seconds?: number) => (seconds ? `Played ${relativeDay(seconds)}` : "Not played");
 export const playtimeText = (minutes: number) =>
   minutes >= 60 ? `${Math.round(minutes / 60).toLocaleString()}h` : minutes > 0 ? `${minutes}m` : "Not played";
+
+export function decodeHtml(input: string) {
+  return input
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)));
+}

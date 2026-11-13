@@ -1,6 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { GameDataSimple } from "../types";
 import { steamFetch } from "./http";
+import { decodeHtml } from "./util";
 
 type SteamApiErrorOptions = {
   status?: number;
@@ -581,16 +582,6 @@ function cleanHtmlText(input: string) {
   return decodeHtml(input.replace(/<[^>]*>/g, ""))
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function decodeHtml(input: string) {
-  return input
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)));
 }
 
 function trimErrorText(text: string) {
