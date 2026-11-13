@@ -27,9 +27,16 @@ export function parseMajorVersion(output: string): number {
 
 export function envelopeListArgs(major: number, account: string, pageSize: number, folder?: string): string[] {
   if (major >= 2) {
-    return ["envelope", "list", "--account", account, "--json", "--page-size", `${pageSize}`].concat(
-      folder ? ["--mailbox", folder] : [],
-    );
+    return [
+      "envelope",
+      "list",
+      "--account",
+      account,
+      "--json",
+      "--page-size",
+      `${pageSize}`,
+      "--has-attachment",
+    ].concat(folder ? ["--mailbox", folder] : []);
   }
   return ["envelope", "list", "--account", account, "--output", "json", "--page-size", `${pageSize}`].concat(
     folder ? ["--folder", folder] : [],
@@ -42,23 +49,38 @@ export function folderListArgs(major: number, account: string): string[] {
     : ["folder", "list", "--account", account, "--output", "json"];
 }
 
-export function messageDeleteArgs(major: number, account: string, id: string): string[] {
-  return major >= 2
-    ? ["message", "delete", id, "--account", account, "--json"]
-    : ["message", "delete", id, "--account", account, "--output", "json"];
+export function messageDeleteArgs(major: number, account: string, id: string, sourceFolder?: string): string[] {
+  if (major >= 2) {
+    return ["message", "delete", id, "--account", account, "--json"].concat(
+      sourceFolder ? ["--mailbox", sourceFolder] : [],
+    );
+  }
+  return ["message", "delete", id, "--account", account, "--output", "json"];
 }
 
-export function messageMoveArgs(major: number, account: string, id: string, targetFolder: string): string[] {
-  return major >= 2
-    ? ["message", "move", "--to", targetFolder, id, "--account", account, "--json"]
-    : ["message", "move", targetFolder, id, "--account", account, "--output", "json"];
+export function messageMoveArgs(
+  major: number,
+  account: string,
+  id: string,
+  targetFolder: string,
+  sourceFolder?: string,
+): string[] {
+  if (major >= 2) {
+    return ["message", "move", "--to", targetFolder, id, "--account", account, "--json"].concat(
+      sourceFolder ? ["--from", sourceFolder] : [],
+    );
+  }
+  return ["message", "move", targetFolder, id, "--account", account, "--output", "json"];
 }
 
-export function messageReadArgs(major: number, account: string, id: string): string[] {
+export function messageReadArgs(major: number, account: string, id: string, sourceFolder?: string): string[] {
   // v2 has no `--no-headers`, so read the JSON and take the text parts from it
-  return major >= 2
-    ? ["message", "read", id, "--account", account, "--json"]
-    : ["message", "read", "--no-headers", id, "--account", account];
+  if (major >= 2) {
+    return ["message", "read", id, "--account", account, "--json"].concat(
+      sourceFolder ? ["--mailbox", sourceFolder] : [],
+    );
+  }
+  return ["message", "read", "--no-headers", id, "--account", account];
 }
 
 const V2Message = z.object({

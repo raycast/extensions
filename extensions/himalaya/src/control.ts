@@ -90,6 +90,7 @@ export async function deleteEnvelopeAndRefresh(
   id: string,
   preferences: Preferences,
   onSuccess: () => void,
+  sourceFolder?: string,
 ): Promise<void> {
   try {
     // Show deleting toast
@@ -100,7 +101,7 @@ export async function deleteEnvelopeAndRefresh(
 
     // Execute delete command - wait for this to complete first
     const major = await getMajorVersion(preferences.binaryPath);
-    await execa(preferences.binaryPath, messageDeleteArgs(major, preferences.defaultAccount, id), {});
+    await execa(preferences.binaryPath, messageDeleteArgs(major, preferences.defaultAccount, id, sourceFolder), {});
 
     // Only after successful CLI deletion, update localStorage
     const { envelopes } = await loadEnvelopesFromStorage();
@@ -193,6 +194,7 @@ export async function moveEnvelopeAndRefresh(
   targetFolder: string,
   preferences: Preferences,
   onSuccess: () => void,
+  sourceFolder?: string,
 ): Promise<void> {
   try {
     // Show moving toast
@@ -203,7 +205,11 @@ export async function moveEnvelopeAndRefresh(
 
     // Execute move command - wait for this to complete first
     const major = await getMajorVersion(preferences.binaryPath);
-    await execa(preferences.binaryPath, messageMoveArgs(major, preferences.defaultAccount, id, targetFolder), {});
+    await execa(
+      preferences.binaryPath,
+      messageMoveArgs(major, preferences.defaultAccount, id, targetFolder, sourceFolder),
+      {},
+    );
 
     // Only after successful CLI move, update localStorage
     const { envelopes } = await loadEnvelopesFromStorage();
