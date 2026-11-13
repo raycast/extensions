@@ -1,5 +1,6 @@
 import { getSelectedFinderItems } from "@raycast/api";
-import { readFiles, readPalette, writeFiles } from "./native";
+import { readFiles, readPalette, writeConfirmedFiles, writeFiles } from "./native";
+import { ConfirmedFile } from "./confirmation-plan";
 import { aggregateTags, canonicalTags, FileBatch, Mutation, TaggedFile } from "./models";
 import { expandPath, matchesSearch, SearchInput } from "./query";
 import { findPaths, scopes } from "./spotlight";
@@ -102,4 +103,25 @@ export async function mutateFiles(
 export async function canonicalizeForFiles(tags: string[], files: TaggedFile[]) {
   const palette = await readPalette();
   return canonicalTags(tags, [...palette.tags, ...files.flatMap((file) => file.tags)]);
+}
+
+export async function mutateConfirmedFiles(files: ConfirmedFile[], kind: "add" | "remove", tags: string[]) {
+  const identities = new Map(files.map((file) => [file.path, file]));
+  return mutateInBatches(
+    files.map((file) => file.path),
+    { kind, tags },
+    async (paths) => {
+      const batch = await writeConfirmedFiles(
+        paths.map((path) => identities.get(path)!),
+        kind,
+        tags,
+      );
+      try {
+        rememberWrites(batch.files);
+      } catch {
+        /* A full cache must not turn successful writes into failures. */
+      }
+      return batch;
+    },
+  );
 }

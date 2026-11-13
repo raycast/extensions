@@ -1,6 +1,7 @@
 import Foundation
 import Darwin
 import UniformTypeIdentifiers
+import AppKit
 
 struct FinderTag: Codable, Equatable {
     let name: String
@@ -26,6 +27,12 @@ struct FileFailure: Codable {
 struct FileBatch: Codable {
     var files: [TaggedFile] = []
     var failures: [FileFailure] = []
+}
+
+struct ConfirmedFile: Codable {
+    let path: String
+    let device: String
+    let inode: String
 }
 
 struct TagCatalog: Codable {
@@ -161,7 +168,7 @@ func mergedRawTags(_ existing: [String], operation: TagOperation, palette: [Find
     }
 }
 
-func processFiles(_ paths: [String], operation: TagOperation, palette: [FinderTag]? = nil) -> FileBatch {
+func processFiles(_ paths: [String], operation: TagOperation, palette: [FinderTag]? = nil, expectedFiles: [String: ConfirmedFile]? = nil) -> FileBatch {
     let colors = palette ?? finderCatalog().tags
     var batch = FileBatch()
     for path in NSOrderedSet(array: paths).array.compactMap({ $0 as? String }) {
@@ -177,20 +184,38 @@ func processFiles(_ paths: [String], operation: TagOperation, palette: [FinderTa
             let descriptor = open(path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK)
             guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
             defer { close(descriptor) }
-            guard flock(descriptor, LOCK_EX) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+            let lock = if case .read = operation { LOCK_SH } else { LOCK_EX }
+            guard flock(descriptor, lock | LOCK_NB) == 0 else {
+                if errno == EWOULDBLOCK || errno == EAGAIN {
+                    throw TagStoreError.message("The file is locked by another operation. Retry after it finishes.")
+                }
+                throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno))
+            }
             defer { flock(descriptor, LOCK_UN) }
+            var fileStats = stat()
+            guard fstat(descriptor, &fileStats) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+            let fileType = fileStats.st_mode & S_IFMT
+            guard fileType == S_IFREG || fileType == S_IFDIR else { throw TagStoreError.message("Only regular files and folders can be tagged.") }
+            if let expectedFiles {
+                guard let expected = expectedFiles[path],
+                      expected.device == String(fileStats.st_dev), expected.inode == String(fileStats.st_ino) else {
+                    throw TagStoreError.message("The file changed since confirmation. Confirm it again.")
+                }
+            }
             var existing = try readRawTags(path, descriptor: descriptor)
             // A legacy Finder label can exist even when the tags attribute is empty or absent.
-            if existing.isEmpty {
-                let legacy = try URL(fileURLWithPath: path).resourceValues(forKeys: [.tagNamesKey, .labelNumberKey])
-                existing = (legacy.tagNames ?? []).map { "\($0)\n\(legacy.labelNumber ?? 0)" }
+            if existing.isEmpty, let info = try readAttribute(finderInfoAttribute, path: path, descriptor: descriptor) {
+                guard info.count == 32 else { throw TagStoreError.message("Finder information is unreadable. This file was left unchanged.") }
+                let color = Int((info[9] & 0x0e) >> 1)
+                let labels = NSWorkspace.shared.fileLabels
+                if color > 0, labels.indices.contains(color) { existing = ["\(labels[color])\n\(color)"] }
             }
             let next = try mergedRawTags(existing, operation: operation, palette: colors)
             let changed = existing != next
             if changed {
-                guard values.volumeIsLocal == true else { throw TagStoreError.message("Network volumes are skipped because Finder tags may not persist.") }
                 var stats = statfs()
-                guard statfs(path, &stats) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+                guard fstatfs(descriptor, &stats) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+                guard stats.f_flags & UInt32(MNT_LOCAL) != 0 else { throw TagStoreError.message("Network volumes are skipped because Finder tags may not persist.") }
                 let filesystem = withUnsafeBytes(of: &stats.f_fstypename) { buffer in
                     String(decoding: buffer.prefix(while: { $0 != 0 }), as: UTF8.self)
                 }

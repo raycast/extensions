@@ -81,4 +81,4 @@ npx ray evals -I --exit-on-error -s
 
 The native test creates 100 temporary files, verifies tags through Apple's resource API, checks byte-preserving colour handling, and removes its fixtures afterward. AI evals use mocked tool results, so they do not modify real files.
 
-See [VALIDATION.md](VALIDATION.md) for the spike findings and manual release checks. Store screenshots and submission are separate release steps.
+See [VALIDATION.md](VALIDATION.md) for automated checks and manual release checks. Store screenshots and submission are separate release steps.

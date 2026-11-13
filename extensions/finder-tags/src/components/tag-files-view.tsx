@@ -170,6 +170,8 @@ export default function TagFilesView({
                 onAction={async () => {
                   await selection.revalidate();
                   await catalog.revalidate();
+                  setUpdates([]);
+                  setFailures([]);
                 }}
               />
               {secondaryActions}

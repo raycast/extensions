@@ -11,7 +11,7 @@ test("a confirmed selection is frozen, serializable, and expires", () => {
   const plan = {
     createdAt: 1000,
     tags: ["Invoice"],
-    paths: [{ path: "/original-selection", device: 1, inode: 2 }],
+    paths: [{ path: "/original-selection", device: "1", inode: "9007199254740993" }],
     failures: [],
   };
   assert.deepEqual(readPlan(JSON.stringify(plan), 1001).paths, plan.paths);

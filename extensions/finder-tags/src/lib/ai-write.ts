@@ -1,7 +1,7 @@
 import { Cache, Tool } from "@raycast/api";
 import { lstat } from "node:fs/promises";
 import { canonicalTags, FileBatch, normalizeTags } from "./models";
-import { canonicalizeForFiles, loadCatalog, mutateFiles, readBatches, resolvePaths } from "./service";
+import { canonicalizeForFiles, loadCatalog, mutateConfirmedFiles, readBatches, resolvePaths } from "./service";
 import { planKey, readPlan, WriteInput, WritePlan } from "./confirmation-plan";
 
 const cache = new Cache({ namespace: "write-confirmations" });
@@ -37,8 +37,8 @@ export function writeConfirmation(kind: "add" | "remove"): Tool.Confirmation<Wri
     const plan: WritePlan = { createdAt: Date.now(), tags, paths: [], failures: [...current.failures] };
     for (const file of current.files) {
       try {
-        const info = await lstat(file.path);
-        plan.paths.push({ path: file.path, device: info.dev, inode: info.ino });
+        const info = await lstat(file.path, { bigint: true });
+        plan.paths.push({ path: file.path, device: info.dev.toString(), inode: info.ino.toString() });
       } catch (error) {
         plan.failures.push({ path: file.path, message: error instanceof Error ? error.message : String(error) });
       }
@@ -71,18 +71,6 @@ export async function executeWrite(kind: "add" | "remove", input: WriteInput): P
   const key = planKey(kind, input);
   const plan = readPlan(cache.get(key));
   cache.remove(key);
-  const paths: string[] = [];
-  const failures = [...plan.failures];
-  for (const file of plan.paths) {
-    try {
-      const current = await lstat(file.path);
-      if (current.dev !== file.device || current.ino !== file.inode)
-        throw new Error("The file changed since confirmation. Confirm it again.");
-      paths.push(file.path);
-    } catch (error) {
-      failures.push({ path: file.path, message: error instanceof Error ? error.message : String(error) });
-    }
-  }
-  const result = await mutateFiles(paths, { kind, tags: plan.tags });
-  return { files: result.files, failures: [...failures, ...result.failures] };
+  const result = await mutateConfirmedFiles(plan.paths, kind, plan.tags);
+  return { files: result.files, failures: [...plan.failures, ...result.failures] };
 }

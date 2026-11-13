@@ -3,10 +3,16 @@ import { z } from "zod";
 import { normalizeTags } from "./models";
 
 export type WriteInput = { tags: string[]; paths?: string[] };
+const confirmedFileSchema = z.object({
+  path: z.string(),
+  device: z.string().regex(/^\d+$/),
+  inode: z.string().regex(/^\d+$/),
+});
+export type ConfirmedFile = z.infer<typeof confirmedFileSchema>;
 export const planSchema = z.object({
   createdAt: z.number(),
   tags: z.array(z.string()),
-  paths: z.array(z.object({ path: z.string(), device: z.number(), inode: z.number() })),
+  paths: z.array(confirmedFileSchema),
   failures: z.array(z.object({ path: z.string(), message: z.string() })),
 });
 export type WritePlan = z.infer<typeof planSchema>;

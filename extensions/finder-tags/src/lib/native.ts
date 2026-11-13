@@ -1,5 +1,6 @@
 import { batchSchema, catalogSchema, FileBatch, Mutation } from "./models";
 import * as native from "swift:../../swift/finder-tags";
+import { ConfirmedFile } from "./confirmation-plan";
 
 // Parse the JSON boundary explicitly; Swift's generated declarations do not describe custom structs reliably.
 export async function readFiles(paths: string[]): Promise<FileBatch> {
@@ -12,6 +13,14 @@ export async function readPalette() {
 
 export async function volumePath(path: string): Promise<string> {
   return native.getVolumePath(path);
+}
+
+export async function writeConfirmedFiles(
+  files: ConfirmedFile[],
+  kind: "add" | "remove",
+  tags: string[],
+): Promise<FileBatch> {
+  return batchSchema.parse(JSON.parse(await native.mutateConfirmedFiles(JSON.stringify(files), kind, tags)));
 }
 
 export async function writeFiles(paths: string[], mutation: Mutation): Promise<FileBatch> {

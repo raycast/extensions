@@ -18,7 +18,7 @@ for index in 0..<100 {
 }
 
 let added = processFiles(paths, operation: .add(["invoice"]), palette: palette)
-expect(added.files.count == 100 && added.failures.isEmpty, "Tag 100 files without failures")
+expect(added.files.count == 100 && added.failures.isEmpty, "Tag 100 files without failures: \(added.failures.map { $0.message })")
 for path in paths {
     let raw = try readRawTags(path)
     expect(raw == ["Keep\n6", "Uncoloured", "Invoice\n4"], "Preserve raw existing tag values and use palette colour")
@@ -72,6 +72,46 @@ expect(linked.files.isEmpty && linked.failures.count == 1, "Skip symbolic links"
 let targetTags = try readRawTags(paths[1])
 expect(!targetTags.contains("unsafe\n0"), "Symbolic link target untouched")
 
+func confirmedFile(_ path: String) throws -> ConfirmedFile {
+    var stats = stat()
+    guard lstat(path, &stats) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+    return ConfirmedFile(path: path, device: String(stats.st_dev), inode: String(stats.st_ino))
+}
+
+let approved = try confirmedFile(paths[2])
+let confirmed = processFiles([approved.path], operation: .add(["Approved"]), palette: [], expectedFiles: [approved.path: approved])
+expect(confirmed.failures.isEmpty && confirmed.files.first?.tags.contains(FinderTag(name: "Approved", color: 0)) == true, "Write the confirmed file after checking its opened identity")
+let original = directory.appendingPathComponent("original-before-save.txt").path
+try FileManager.default.moveItem(atPath: approved.path, toPath: original)
+expect(FileManager.default.createFile(atPath: approved.path, contents: Data("replacement".utf8)), "Create an atomic-save replacement")
+try writeRawTags(["Replacement\n3"], to: approved.path)
+let replaced = processFiles([approved.path, paths[3]], operation: .add(["Unapproved"]), palette: [], expectedFiles: [approved.path: approved, paths[3]: try confirmedFile(paths[3])])
+expect(replaced.failures.count == 1 && replaced.failures.first?.path == approved.path && replaced.files.count == 1, "Skip a replacement and continue with another approved file")
+let replacementTags = try readRawTags(approved.path)
+let originalTags = try readRawTags(original)
+expect(replacementTags == ["Replacement\n3"] && !originalTags.contains("Unapproved\n0"), "Neither the replacement nor the moved original receives the rejected write")
+let unapproved = processFiles([paths[4]], operation: .add(["Unapproved"]), palette: [], expectedFiles: [:])
+expect(unapproved.files.isEmpty && unapproved.failures.count == 1, "A confirmed batch cannot write a file without an expected identity")
+let wrongDevice = ConfirmedFile(path: paths[4], device: "0", inode: try confirmedFile(paths[4]).inode)
+expect(processFiles([paths[4]], operation: .add(["Unapproved"]), palette: [], expectedFiles: [paths[4]: wrongDevice]).failures.count == 1, "Device identity is checked alongside the inode")
+
+let lockDescriptor = open(paths[5], O_RDONLY | O_NOFOLLOW)
+expect(lockDescriptor >= 0 && flock(lockDescriptor, LOCK_EX | LOCK_NB) == 0, "Hold a fixture's exclusive lock")
+let lockStart = Date()
+let lockedRead = processFiles([paths[5], paths[6]], operation: .read, palette: [])
+let lockedWrite = processFiles([paths[5], paths[6]], operation: .add(["Unlocked"]), palette: [])
+expect(Date().timeIntervalSince(lockStart) < 1, "A locked file never waits indefinitely")
+expect(lockedRead.failures.count == 1 && lockedRead.files.count == 1 && lockedRead.failures.first?.path == paths[5], "Reads skip a locked file and continue")
+expect(lockedWrite.failures.count == 1 && lockedWrite.files.count == 1 && lockedWrite.failures.first?.path == paths[5], "Writes skip a locked file and continue")
+flock(lockDescriptor, LOCK_UN)
+expect(flock(lockDescriptor, LOCK_SH | LOCK_NB) == 0, "Hold a fixture's shared lock")
+let sharedRead = processFiles([paths[5]], operation: .read, palette: [])
+let sharedWrite = processFiles([paths[5]], operation: .add(["Exclusive"]), palette: [])
+expect(sharedRead.failures.isEmpty && sharedRead.files.count == 1, "Readers can share a file lock")
+expect(sharedWrite.files.isEmpty && sharedWrite.failures.count == 1, "Writes require an exclusive lock")
+flock(lockDescriptor, LOCK_UN)
+close(lockDescriptor)
+
 let bad = processFiles([paths[1]], operation: .add(["fake\n6"]), palette: [])
 expect(bad.failures.count == 1, "Reject metadata suffix injection")
 let corrupt = directory.appendingPathComponent("corrupt.txt")
@@ -97,4 +137,4 @@ let folder = processFiles([directory.path], operation: .add(["Invoice"]), palett
 expect(folder.failures.isEmpty && folder.files.first?.tags.first?.name == "Invoice", "Tag folders as well as regular files")
 let mountPath = try volumeMountPath(directory.path)
 expect(mountPath.hasPrefix("/"), "Resolve a containing volume for Spotlight diagnostics")
-print("Passed native tests: 100-file round trip, colour and Finder-flag preservation, legacy-label removal, idempotency, rename and merge, partial failures, symlinks, validation, malformed metadata, and palette fallback.")
+print("Passed native tests: 100-file round trip, colour and Finder-flag preservation, legacy-label removal, idempotency, rename and merge, partial failures, symlinks, confirmed file identity, atomic replacement, nonblocking read/write locks, validation, malformed metadata, and palette fallback.")
