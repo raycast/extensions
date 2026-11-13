@@ -88,5 +88,5 @@ External adapters are standalone scripts that talk to the extension over stdio. 
 
 Put each adapter folder into `~/.config/vaultcast/adapters`. This is the default **External Adapters Directory**, so the adapter shows up without further configuration.
 
-- Protocol and authentication: [adapter documentation](https://github.com/Lorenzo-Se/raycast_pwm/blob/main/src/adapters/README.md)
+- Protocol and authentication: [adapter documentation](https://github.com/Lorenzo-Se/raycast_pwm/blob/81f49659af5702ed0bc021967f94f30e1390c73c/src/adapters/README.md#externe-adapter-third-party)
 - Reference adapter: [Proton Pass](https://github.com/Lorenzo-Se/raycast_pwm/blob/main/examples/external-adapter/protonpass/README.md)

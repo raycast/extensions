@@ -7,19 +7,11 @@ import type { AdapterStatus, AuthRequirements, ItemAvailability, PasswordManager
 import { CliError, resolveBinary, runCli, SessionLockedError } from "../utils/cli";
 import { filterVaultItems, sortVaultItems } from "../utils/items";
 
-// Installs from the DMG / MSI do not put the CLI on PATH.
-const BUNDLED_BINARIES = [
-  "/Applications/KeePassXC.app/Contents/MacOS/keepassxc-cli",
-  "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe",
-];
-
 /** Database password from the unlock form; lives only in this process's memory. keepassxc-cli has no session. */
 let databasePassword: string | undefined;
 
-async function getBinary(): Promise<string | undefined> {
-  const override = getCliPathOverride(keepassxcAdapter.id);
-  const found = await resolveBinary(keepassxcAdapter.cliBinary, override);
-  return found ?? (override ? undefined : BUNDLED_BINARIES.find((path) => existsSync(path)));
+function getBinary(): Promise<string | undefined> {
+  return resolveBinary(keepassxcAdapter.cliBinary, getCliPathOverride(keepassxcAdapter.id));
 }
 
 function getDatabasePath(): string | undefined {
@@ -146,12 +138,13 @@ export function parseKeepassXml(xml: string): KeepassxcEntry[] {
       groups.pop();
     } else if (name === "Entry" && historyDepth === 0 && entry) {
       const inRecycleBin = Boolean(recycleBinUuid) && groups.some((ancestor) => ancestor.uuid === recycleBinUuid);
-      const title = entry.strings.get("Title")?.trim() ?? "";
+      const rawTitle = entry.strings.get("Title") ?? "";
+      const title = rawTitle.trim();
       if (!inRecycleBin && title) {
-        // keepassxc-cli addresses entries by path below the root group, e.g. "Banking/Bank".
+        // keepassxc-cli addresses entries by their exact path below the root group, e.g. "Banking/Bank".
         const groupPath = groups.slice(1).map((ancestor) => ancestor.name ?? "");
         entries.push({
-          path: [...groupPath, title].join("/"),
+          path: [...groupPath, rawTitle].join("/"),
           title,
           group: groupPath.join("/") || undefined,
           username: entry.strings.get("UserName")?.trim() || undefined,

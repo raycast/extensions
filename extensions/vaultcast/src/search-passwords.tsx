@@ -889,7 +889,8 @@ export default function SearchPasswords() {
     return <List isLoading {...searchBarProps} />;
   }
 
-  if (!isLoadingAdapters && selectableAdapters.length === 0) {
+  // With every manager disabled, the List below shows the "No password managers enabled" recovery view instead.
+  if (!noManagersEnabled && selectableAdapters.length === 0) {
     const externalDirectory = getExternalAdaptersDirectoryForDisplay();
     const setupMarkdown = [
       "# No password manager available",
@@ -898,14 +899,12 @@ export default function SearchPasswords() {
       "",
       "## Registered adapters",
       "",
-      ...(allAdapters.length > 0
-        ? allAdapters.map((adapter) => {
-            const status = adapterStatuses?.find((entry) => entry.adapter.id === adapter.id)?.status;
-            const reason = status && !status.ok ? status.reason : "Unknown";
-            const kind = adapter.kind === "external" ? "external" : "built-in";
-            return `- **${adapter.name}** (${adapter.id}, ${kind}): ${reason}`;
-          })
-        : ["- No adapters registered"]),
+      ...allAdapters.map((adapter) => {
+        const status = adapterStatuses?.find((entry) => entry.adapter.id === adapter.id)?.status;
+        const reason = status && !status.ok ? status.reason : "Unknown";
+        const kind = adapter.kind === "external" ? "external" : "built-in";
+        return `- **${adapter.name}** (${adapter.id}, ${kind}): ${reason}`;
+      }),
       "",
       "## External adapters",
       "",

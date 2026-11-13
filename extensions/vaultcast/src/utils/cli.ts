@@ -24,10 +24,21 @@ function getSearchPaths(): string[] {
       paths.push(join(appData, "npm"));
     }
 
+    // The KeePassXC MSI does not put keepassxc-cli on PATH.
+    paths.push(join(process.env.ProgramFiles ?? "C:\\Program Files", "KeePassXC"));
+
     return paths;
   }
 
-  return [`${homedir()}/.local/bin`, "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"];
+  return [
+    `${homedir()}/.local/bin`,
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
+    // The KeePassXC DMG does not put keepassxc-cli on PATH.
+    "/Applications/KeePassXC.app/Contents/MacOS",
+  ];
 }
 
 function getCandidateNames(name: string): string[] {
