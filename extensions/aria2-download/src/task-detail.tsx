@@ -308,8 +308,16 @@ function metadataFor(task: Aria2Task) {
 }
 
 function TaskMetadataDetail({ gid }: { gid: string }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const refreshSeconds = Math.max(
+    1,
+    Number.parseInt(preferences.refreshInterval || "1", 10),
+  );
   const { pop } = useNavigation();
-  const { task, error, isLoading, refresh } = useTaskStatus(gid, 1);
+  const { task, error, isLoading, refresh } = useTaskStatus(
+    gid,
+    refreshSeconds,
+  );
 
   if (!task) {
     return (
