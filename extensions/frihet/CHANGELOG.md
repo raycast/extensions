@@ -1,5 +1,9 @@
 # Frihet ERP Changelog
 
+## [Store Listing Documentation] - {PR_MERGE_DATE}
+
+- Updated the README status to link to the published Raycast Store listing.
+
 ## [Initial Version] - 2026-11-13
 
 - Added **Business Brief** (`business-brief`) command with complete vs partial coverage validation, 4-way financial separation (paid revenue, open receivables, overdue exposure, deductible vs non-deductible expenses), and prioritized review items.
