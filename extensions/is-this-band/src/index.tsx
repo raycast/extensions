@@ -68,6 +68,7 @@ function BandListItem({ result, genre, onReload }: { result: BandResult; genre: 
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Verdict" content={result.verdict} />
           <Action.OpenInBrowser title={`Open on ${genre.siteName}`} url={result.url} />
+          {result.videoUrl && <Action.OpenInBrowser title="Play Video" icon={Icon.Video} url={result.videoUrl} />}
           {result.tweetUrl && (
             <Action.OpenInBrowser title="Tweet to Expedite Ruling" icon={Icon.SpeechBubble} url={result.tweetUrl} />
           )}
@@ -94,6 +95,13 @@ function BandDetail({ result }: { result: BandResult }) {
     sections.push(
       result.tweetUrl ? result.commentary.replace(/\bTweet\b/, `[Tweet](${result.tweetUrl})`) : result.commentary,
     );
+  }
+
+  if (result.videoUrl) {
+    const thumbnail = getVideoThumbnail(result.videoUrl);
+    if (thumbnail) {
+      sections.push(`[![Watch on YouTube](${thumbnail})](${result.videoUrl})`);
+    }
   }
 
   if (result.related) {
@@ -210,6 +218,15 @@ function getStatusAccessory(status: BandStatus, genre: Genre) {
       return { tag: { value: "UNKNOWN", color: Color.Orange } };
     default:
       return { tag: { value: "UNSURE", color: Color.Orange } };
+  }
+}
+
+function getVideoThumbnail(videoUrl: string): string | undefined {
+  try {
+    const videoId = new URL(videoUrl).searchParams.get("v");
+    return videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg?raycast-width=400` : undefined;
+  } catch {
+    return undefined;
   }
 }
 

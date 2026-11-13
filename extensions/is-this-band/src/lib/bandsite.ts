@@ -17,6 +17,8 @@ export interface BandResult {
   verdict: string;
   /** Optional extra commentary, e.g. "Sorry, to anyone over 30 they're pop-punk." */
   commentary?: string;
+  /** A YouTube video embedded in the commentary, when the site offers one. */
+  videoUrl?: string;
   /** A prefilled Twitter compose link from the commentary, when the site offers one. */
   tweetUrl?: string;
   /** A cross-reference to one of the site's sibling genre sites. */
@@ -32,6 +34,8 @@ const COMMENTARY_PATTERN = /<div class="col-xs-8 center">\s*<h4>([\s\S]*?)<\/h4>
 const RELATED_PATTERN = /<div class="col-xs-12 comment">[\s\S]*?<h5>([\s\S]*?)<\/h5>/i;
 const LINK_PATTERN = /<a\b[^>]*href=['"]([^'"]+)['"][^>]*>([\s\S]*?)<\/a>/i;
 const TWEET_LINK_PATTERN = /<a\b[^>]*href=['"]([^'"]*(?:twitter\.com|x\.com)[^'"]*)['"][^>]*>\s*Tweet\s*<\/a>/i;
+const YOUTUBE_EMBED_PATTERN =
+  /<iframe\b[^>]*src=['"][^'"]*youtube(?:-nocookie)?\.com\/embed\/([^?'"&/]+)[^'"]*['"][^>]*>/i;
 
 const NAMED_ENTITIES: Record<string, string> = {
   amp: "&",
@@ -82,6 +86,7 @@ export function parseBandPage(html: string, genre: Genre, band: string): BandRes
 
   const commentaryHtml = html.match(COMMENTARY_PATTERN)?.[1] ?? "";
   const commentary = toText(commentaryHtml);
+  const videoUrl = parseVideoUrl(commentaryHtml);
   const tweetUrl = parseTweetUrl(commentaryHtml);
   const related = parseRelated(html);
 
@@ -90,6 +95,7 @@ export function parseBandPage(html: string, genre: Genre, band: string): BandRes
     status: getStatus(verdict, genre),
     verdict,
     commentary: commentary || undefined,
+    videoUrl,
     tweetUrl,
     related,
     url: siteUrl(genre, band),
@@ -128,6 +134,11 @@ function parseRelated(html: string): RelatedVerdict | undefined {
     genre: toText(link[2]),
     url: link[1].replace(/^http:\/\//i, "https://"),
   };
+}
+
+function parseVideoUrl(html: string): string | undefined {
+  const videoId = html.match(YOUTUBE_EMBED_PATTERN)?.[1];
+  return videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}` : undefined;
 }
 
 function parseTweetUrl(html: string): string | undefined {
