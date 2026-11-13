@@ -66,7 +66,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 // Non-empty string with control characters removed (these values end up in the clipboard).
-function text(value: unknown): string | undefined {
+export function text(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   // eslint-disable-next-line no-control-regex
   const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, "").trim();
@@ -88,12 +88,18 @@ function safeUrl(value: unknown, host: string): string | undefined {
   }
 }
 
+// Domains Apple serves downloads from: installers come from swcdn.apple.com, and restore images
+// (.ipsw) from Apple's CDN at updates.cdn-apple.com.
+const APPLE_DOWNLOAD_DOMAINS = ["apple.com", "cdn-apple.com"];
+
 // Downloads are only trusted from Apple's own https hosts.
 export function appleDownloadUrl(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   try {
     const url = new URL(value);
-    const appleHost = url.hostname === "apple.com" || url.hostname.endsWith(".apple.com");
+    const appleHost = APPLE_DOWNLOAD_DOMAINS.some(
+      (domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`),
+    );
     return url.protocol === "https:" && appleHost && !url.username && !url.password ? url.href : undefined;
   } catch {
     return undefined;

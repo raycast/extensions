@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { formatBytes, startDownload } from "./downloads";
-import { appleDownloadUrl, Platform } from "./sofa";
+import { appleDownloadUrl, Platform, text as str } from "./sofa";
 
 const API_BASE = "https://api.ipsw.me/v4";
 
@@ -32,10 +32,6 @@ type Firmware = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function str(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
 async function getJson(url: string): Promise<unknown> {

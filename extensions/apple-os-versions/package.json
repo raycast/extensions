@@ -19,6 +19,12 @@
       "title": "Pomme Versions",
       "description": "Show the latest release of each macOS, iOS, iPadOS, watchOS, tvOS, and visionOS major version, and download its firmware or installer",
       "mode": "view"
+    },
+    {
+      "name": "pomme-downloads",
+      "title": "Pomme Downloads",
+      "description": "Show the progress of firmware and installer downloads, and cancel, retry, or remove them",
+      "mode": "view"
     }
   ],
   "preferences": [

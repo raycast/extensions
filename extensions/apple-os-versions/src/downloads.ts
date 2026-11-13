@@ -1,4 +1,13 @@
-import { environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  open,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { spawn } from "child_process";
 import { createHash } from "crypto";
 import fs from "fs";
@@ -16,7 +25,7 @@ export type DownloadRequest = {
   buildIso?: boolean;
 };
 
-type Status =
+export type Status =
   | { state: "downloading" | "building"; pid: number }
   | { state: "done" }
   | { state: "failed"; reason: string }
@@ -27,6 +36,28 @@ type Status =
 
 // How long a freshly spawned worker gets to write its first status before it counts as stopped.
 const START_TIMEOUT_MS = 15_000;
+
+// Saved next to each job's status file when it starts, so the Downloads list can show and retry it.
+type JobInfo = {
+  request: DownloadRequest;
+  dest: string;
+  target: string;
+  startedAt: number;
+};
+
+export type Job = JobInfo & {
+  id: string;
+  status: Status;
+  // Bytes on disk so far (the partial file while downloading).
+  downloadedBytes: number;
+  statusFile: string;
+  logFile: string;
+  partial: string;
+};
+
+function jobsDirectory(): string {
+  return path.join(environment.supportPath, "jobs");
+}
 
 export function formatBytes(bytes: number): string {
   if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
@@ -130,6 +161,19 @@ function fileSize(file: string): number {
   }
 }
 
+// A worker that has already reported failure may still hold the lock for a moment while it exits.
+// A retry waits briefly for that instead of attaching to the finished job and doing nothing.
+async function claimLockForStart(lockFile: string, statusFile: string): Promise<boolean> {
+  const deadline = Date.now() + 3000;
+  while (!claimLock(lockFile)) {
+    const status = readStatus(statusFile);
+    const finished = status.state === "failed" || status.state === "done";
+    if (!finished || Date.now() > deadline) return false;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return true;
+}
+
 export async function startDownload(request: DownloadRequest) {
   const directory = downloadDirectory();
   if (!fs.existsSync(directory)) {
@@ -152,7 +196,7 @@ export async function startDownload(request: DownloadRequest) {
     return;
   }
 
-  const jobsDir = path.join(environment.supportPath, "jobs");
+  const jobsDir = jobsDirectory();
   const cacheDir = path.join(environment.supportPath, "cache");
   fs.mkdirSync(jobsDir, { recursive: true });
   fs.mkdirSync(cacheDir, { recursive: true });
@@ -165,8 +209,10 @@ export async function startDownload(request: DownloadRequest) {
 
   // Only the caller that claims the lock starts a worker; everyone else just follows its progress.
   const lockFile = `${statusFile}.lock`;
-  if (claimLock(lockFile)) {
+  if (await claimLockForStart(lockFile, statusFile)) {
     fs.writeFileSync(statusFile, "");
+    const info: JobInfo = { request, dest, target, startedAt: Date.now() };
+    fs.writeFileSync(path.join(jobsDir, `${jobId}.json`), JSON.stringify(info));
     const args = [
       path.join(environment.assetsPath, "download.sh"),
       request.url,
@@ -201,7 +247,7 @@ async function trackProgress(job: {
     style: Toast.Style.Animated,
     title: request.buildIso ? "Downloading Installer" : "Downloading",
     message: path.basename(dest),
-    primaryAction: { title: "Show Download Folder", onAction: () => open(path.dirname(dest)) },
+    primaryAction: { title: "Show Downloads", onAction: showDownloads },
   });
 
   const showFailure = (title: string, message: string) => {
@@ -226,19 +272,7 @@ async function trackProgress(job: {
         ? `${Math.min(99, Math.floor((done / total) * 100))}% · ${formatBytes(done)} of ${formatBytes(total)}`
         : formatBytes(done);
       if (lastState !== "downloading") {
-        toast.secondaryAction = {
-          title: "Cancel Download",
-          onAction: () => {
-            // The script runs in its own process group, so this also stops curl.
-            try {
-              process.kill(-status.pid, "SIGTERM");
-            } catch {
-              // Already finished.
-            }
-            fs.rmSync(partial, { force: true });
-            fs.writeFileSync(statusFile, "failed Cancelled");
-          },
-        };
+        toast.secondaryAction = { title: "Cancel Download", onAction: () => cancelDownload({ statusFile, partial }) };
       }
     } else if (status.state === "building") {
       if (lastState !== "building") {
@@ -262,4 +296,110 @@ async function trackProgress(job: {
     }
     lastState = status.state;
   }, 1000);
+}
+
+// Opens the Downloads command; it can be launched from anywhere, including a toast.
+export async function showDownloads() {
+  try {
+    await launchCommand({ name: "pomme-downloads", type: LaunchType.UserInitiated });
+  } catch {
+    await showToast({ style: Toast.Style.Failure, title: "Couldn't Open Downloads" });
+  }
+}
+
+// Stops a download in progress. The status is read again at the moment of cancelling: the worker may
+// have moved on (to building as root, or finished) since the action was shown, and only a live
+// download is cancelled.
+export function cancelDownload({ statusFile, partial }: { statusFile: string; partial: string }): boolean {
+  const current = readStatus(statusFile);
+  if (current.state !== "downloading") return false;
+  // The script runs in its own process group, so this also stops curl.
+  try {
+    process.kill(-current.pid, "SIGTERM");
+  } catch {
+    // Already finished.
+  }
+  fs.rmSync(partial, { force: true });
+  fs.writeFileSync(statusFile, "failed Cancelled");
+  return true;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// The info file is our own, but it is still parsed defensively: a malformed one is skipped.
+function readJobInfo(file: string): JobInfo | undefined {
+  try {
+    const value: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (!isRecord(value) || !isRecord(value.request)) return undefined;
+    const { request, dest, target, startedAt } = value;
+    if (typeof request.url !== "string" || typeof request.fileName !== "string" || typeof request.title !== "string")
+      return undefined;
+    if (typeof dest !== "string" || typeof target !== "string" || typeof startedAt !== "number") return undefined;
+    return {
+      request: {
+        url: request.url,
+        fileName: request.fileName,
+        title: request.title,
+        size: typeof request.size === "number" ? request.size : undefined,
+        sha256: typeof request.sha256 === "string" ? request.sha256 : undefined,
+        buildIso: request.buildIso === true,
+      },
+      dest,
+      target,
+      startedAt,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+// Every download started from this extension, newest first.
+export function listJobs(): Job[] {
+  let names: string[];
+  try {
+    names = fs.readdirSync(jobsDirectory());
+  } catch {
+    return [];
+  }
+  return names
+    .filter((name) => /^[0-9a-f]{16}\.json$/.test(name))
+    .flatMap((name) => {
+      const id = name.slice(0, 16);
+      const info = readJobInfo(path.join(jobsDirectory(), name));
+      if (!info) return [];
+      const statusFile = path.join(jobsDirectory(), `${id}.status`);
+      const partial = `${info.target}.download`;
+      let status = readStatus(statusFile);
+      // A worker that never wrote its first status within the start window isn't coming back.
+      if (status.state === "none" && Date.now() - info.startedAt > START_TIMEOUT_MS) status = { state: "stopped" };
+      const downloadedBytes =
+        status.state === "done" ? fileSize(info.dest) : fileSize(partial) || fileSize(info.target);
+      return { ...info, id, status, downloadedBytes, statusFile, logFile: `${statusFile}.log`, partial };
+    })
+    .sort((a, b) => b.startedAt - a.startedAt);
+}
+
+export function isActive(job: Job): boolean {
+  return job.status.state === "downloading" || job.status.state === "building" || job.status.state === "none";
+}
+
+// Removes a job from the list. Unfinished jobs also lose their partial data, including the cached
+// installer package of a failed ISO build. A finished download's file is never touched.
+export function removeJob(job: Job) {
+  if (isActive(job)) return;
+  if (job.status.state !== "done") {
+    fs.rmSync(job.partial, { force: true });
+    if (job.request.buildIso) fs.rmSync(job.target, { force: true });
+  }
+  for (const file of [path.join(jobsDirectory(), `${job.id}.json`), job.statusFile, job.logFile]) {
+    fs.rmSync(file, { force: true });
+  }
+}
+
+// Size of the data that removing an unfinished job would delete.
+export function partialDataSize(job: Job): number {
+  if (job.status.state === "done") return 0;
+  return fileSize(job.partial) + (job.request.buildIso ? fileSize(job.target) : 0);
 }

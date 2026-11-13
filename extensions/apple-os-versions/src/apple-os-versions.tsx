@@ -12,6 +12,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { ReactElement, useEffect, useState } from "react";
 import { CveList, CveSearch } from "./cve-list";
 import { DownloadActions } from "./download-actions";
+import { DownloadsList } from "./downloads-list";
 import { fetchReleases, formatDate, PastRelease, Platform, PLATFORMS, Release } from "./sofa";
 
 // SF Symbols rendered to assets/ (each has an @dark variant for the dark theme).
@@ -203,6 +204,12 @@ function ReleaseItem(props: {
               version={release.version}
               installers={release.installers}
               withShortcuts
+            />
+            <Action.Push
+              title="Show Downloads"
+              icon={Icon.List}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
+              target={<DownloadsList />}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
