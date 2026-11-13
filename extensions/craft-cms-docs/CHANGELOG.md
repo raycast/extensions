@@ -1,5 +1,10 @@
 # Craft CMS Changelog
 
+## [Fix Versioned Docs Search] - 2026-11-13
+
+- Fixed CMS and Commerce docs searches failing after a change to the craftcms.com search API
+- Added Craft CMS 6.x to the version list in the README
+
 ## [Craft CMS 6.x Docs] - 2026-05-18
 
 - Craft CMS 6.x option now available for docs version
