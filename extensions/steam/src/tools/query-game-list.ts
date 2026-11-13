@@ -1,4 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
 import { cachedDetails, detailsWarning, fetchBatchDetails, storeFacts } from "../lib/details";
 import { getSteamGameStoreUrl, localListWarning } from "../lib/games";
 import { isIndexReady, latestApps } from "../lib/search-index";
@@ -17,12 +16,9 @@ type Input = {
 
 /**
  * List apps from the local Steam game list by when they appeared on Steam or were last updated there.
- * Use this when the user asks what's new on Steam, what was just added, or what changed since the game list was refreshed. Needs your Web API Key.
+ * Use this when the user asks what's new on Steam, what was just added, or what changed since the game list was refreshed.
  */
 export default async function queryGameListTool(input: Input) {
-  if (!getPreferenceValues<Preferences>().token?.trim()) {
-    throw new Error("The game list needs a Web API Key in the Steam extension preferences.");
-  }
   if (!isIndexReady()) {
     throw new Error("The Steam game list hasn't downloaded yet. Open Search Games once to download it.");
   }

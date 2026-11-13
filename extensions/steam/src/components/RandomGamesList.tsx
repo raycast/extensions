@@ -7,9 +7,8 @@ import { appidFromItemId } from "../lib/util";
 import { DynamicGameListItem } from "./ListItems";
 
 export const RandomGamesList = () => {
-  const { data: picked, isLoading: picking, listStatus } = useRandomGames();
-  const { games, loading: detailsLoading } = useResultsWithDetails(picked);
-  const isLoading = picking || detailsLoading;
+  const { data: picked, listStatus } = useRandomGames();
+  const { games, loading: isLoading } = useResultsWithDetails(picked);
   const [hovered, setHovered] = useState(0);
   const { data: myGames } = useMyGames();
   const owned = useOwnership(myGames);

@@ -1,5 +1,9 @@
 # Steam Changelog
 
+## [Web API Key Required] - {PR_MERGE_DATE}
+
+- The Web API Key is now required. Search runs only from the local game list, and the extension no longer uses its own search server
+
 ## [Local Search, Recommendations, and New AI Tools] - 2026-10-01
 
 - Fix game details showing "Game not found" for every game

@@ -1,7 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { WebApiKeyNotice } from "../errors";
+import { AccountNotice } from "../errors";
 import { useLibraryFirstSeen, useMyGames, useOwnership, useResultsWithDetails } from "../lib/fetcher";
 import { useIsLoggedIn } from "../lib/hooks";
 import { GameDataSimple } from "../types";
@@ -62,7 +62,7 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
     return undefined;
   };
 
-  if (!isLoggedIn) return <WebApiKeyNotice />;
+  if (!isLoggedIn) return <AccountNotice />;
   return (
     <List
       navigationTitle="My Games"

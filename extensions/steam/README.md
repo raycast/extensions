@@ -6,10 +6,10 @@ Search Steam games and users, browse your library, and ask Raycast AI for recomm
 
 ## Setup
 
-Both are optional, set in the extension preferences. A future version will require the key.
+Set both in the extension preferences.
 
-- **Web API Key** ([get one](https://steamcommunity.com/dev/apikey)): fast local search, Search Users, and your library.
-- **Steam ID**: your games. Accepts your Steam ID, profile URL, or custom URL name.
+- **Web API Key** (required, [get one](https://steamcommunity.com/dev/apikey)): downloads a list of every Steam game, so search runs on your Mac.
+- **Steam ID** (optional): your games. Accepts your Steam ID, profile URL, or custom URL name.
 
 ## Features
 
