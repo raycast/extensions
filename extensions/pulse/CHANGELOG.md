@@ -1,8 +1,7 @@
 # Pulse Changelog
 
-## [AI Tools and Price Colors] - {PR_MERGE_DATE}
+## [Price Colors] - {PR_MERGE_DATE}
 
-- Add AI tools: ask `@pulse` for a stock, index or crypto price, or to find a symbol by name.
 - Add a Price Colors preference to show gains in red, for stocks only or for everything.
 
 ## [Initial Version] - 2026-11-11

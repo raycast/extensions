@@ -13,11 +13,11 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { loadIndex, store, typedInstrument } from "./lib/load";
+import { CatalogStore } from "./lib/catalog";
 import { chartMarkdown, chartSvg } from "./lib/chart";
 import { SESSION_LABELS, formatChange, formatDelay, formatNumber, formatPrice, formatTimestamp } from "./lib/format";
 import { Quote, RowQuote, fetchBinanceRows, fetchQuote, fetchSparkQuotes } from "./lib/quotes";
-import { readerLanguage } from "./lib/search";
+import { SymbolIndex, readerLanguage } from "./lib/search";
 import {
   INDICES,
   Instrument,
@@ -25,13 +25,76 @@ import {
   MARKET_CURRENCIES,
   MARKET_FILTERS,
   MARKET_LABELS,
+  Market,
   PULSE_FOR_MAC_URL,
   isCryptoPair,
+  normalizeTypedSymbol,
   quotePageUrl,
 } from "./lib/symbols";
 
+const store = new CatalogStore(environment.supportPath);
 const SYSTEM_LOCALE = Intl.DateTimeFormat().resolvedOptions().locale;
 const RECENT_LIMIT = 12;
+
+/** The catalog and pair directory on disk, refreshed in the background once a day. */
+async function loadIndex(): Promise<SymbolIndex> {
+  const [catalog, pairs] = await Promise.all([store.loadCatalog(), store.loadPairs()]);
+  let document = catalog.value;
+  let directory = pairs.value;
+  const refreshes: Promise<void>[] = [];
+  if (store.isStale(catalog)) {
+    refreshes.push(
+      store.refreshCatalog(document).then((fresh) => {
+        document = fresh;
+      }),
+    );
+  }
+  if (store.isStale(pairs)) {
+    refreshes.push(
+      store.refreshPairs().then((fresh) => {
+        directory = fresh;
+      }),
+    );
+  }
+  if (!document) {
+    // Nothing to search yet: wait for the first download.
+    const results = await Promise.allSettled(refreshes);
+    const failed = results.find((result) => result.status === "rejected");
+    if (!document) throw failed?.reason ?? new Error("The symbol list could not be downloaded.");
+    return new SymbolIndex(document, directory);
+  }
+  if (refreshes.length) {
+    // The copy in hand answers now; a newer one is used from the next launch.
+    void Promise.allSettled(refreshes);
+  }
+  return new SymbolIndex(document, directory);
+}
+
+function typedInstrument(query: string, index: SymbolIndex | undefined): Instrument | null {
+  const symbol = normalizeTypedSymbol(query.replace(/\s+/g, ""));
+  if (!symbol || symbol.length < 2) return null;
+  if (isCryptoPair(symbol)) {
+    if (index && index.pairs.size > 0 && !index.pairs.has(symbol)) return null;
+    return { symbol, market: "crypto", kind: "crypto", name: symbol.split("/")[0], exchange: "Binance Spot" };
+  }
+  // A typed "^FTSE" is an index whatever its exchange, so the Indices filter keeps it.
+  if (symbol.startsWith("^")) return { symbol, market: "index", kind: "index", name: symbol, exchange: null };
+  const suffix = /\.([A-Z]+)$/.exec(symbol)?.[1];
+  const market = (suffix ? SUFFIX_MARKETS[suffix] : undefined) ?? "us";
+  return { symbol, market, kind: "equity", name: symbol, exchange: null };
+}
+
+// The Yahoo suffixes of the markets the filter offers, so a typed `7203.T` stays under Japan.
+const SUFFIX_MARKETS: Record<string, Market> = {
+  HK: "hk",
+  SS: "sh",
+  SZ: "sz",
+  T: "jp",
+  KS: "kr",
+  KQ: "kq",
+  TW: "tw",
+  TWO: "two",
+};
 
 // Most of Asia shows gains in red; crypto exchanges show them in green everywhere.
 function redForGains(instrument: Instrument): boolean {

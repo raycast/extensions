@@ -16,8 +16,6 @@ and today's chart.
 - **Filter by market** from the dropdown, and find recent symbols when the
   search bar is empty.
 
-- **Ask Raycast AI**: mention `@pulse` to ask things like "how is 台積電 doing
-  today?" or "compare BTC and ETH over the last 24 hours".
 - **Red or green for gains**: pick the colors your market uses in the
   preferences, for stocks only or for crypto as well.
 
