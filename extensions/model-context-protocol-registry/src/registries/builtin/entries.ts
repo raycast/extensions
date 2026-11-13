@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "within",
+    title: "within",
+    description:
+      "Find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://shopwithin.co/icons/icon-512.png",
+    homepage: "https://shopwithin.co/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://shopwithin.co/mcp"],
+    },
+    remoteUrl: "https://shopwithin.co/mcp",
+  },
+  {
     name: "mobile-joe",
     title: "Mobile Joe",
     description:
