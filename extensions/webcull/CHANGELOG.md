@@ -1,6 +1,6 @@
 # WebCull Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-13
 
 - Find saved WebCull links from Raycast and open or copy their URLs.
 - Open a result's parent folder in WebCull when you need the surrounding context.
