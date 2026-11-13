@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Image, Keyboard, List, Toast, showToast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   ClaudeScopeError,
@@ -28,11 +29,9 @@ const POLL_INTERVAL_MS = 5_000;
 const TICK_INTERVAL_MS = 1_000;
 const ALL_AGENTS = "all";
 
-interface LiveViewState {
-  response?: LiveResponse;
-  updatedAt?: number;
-  error?: Error;
-  loading: boolean;
+interface LiveSnapshot {
+  response: LiveResponse;
+  updatedAt: number;
 }
 
 function isNotRunning(error?: Error): boolean {
@@ -109,54 +108,49 @@ interface DetailProps {
 }
 
 export default function Command() {
-  const [state, setState] = useState<LiveViewState>({ loading: true });
+  // usePromise drops its data when a call fails; the last good response is
+  // kept here so a failed poll leaves the list on screen.
+  const [snapshot, setSnapshot] = useState<LiveSnapshot>();
   const [now, setNow] = useState(() => Date.now());
   const [showingDetail, setShowingDetail] = useState(false);
   const [agent, setAgent] = useState(ALL_AGENTS);
-  const inFlight = useRef<AbortController | undefined>(undefined);
+  const abortable = useRef<AbortController>(null);
   const paused = useRef(false);
+  const manual = useRef(false);
   const tickEvery = useRef(Number.POSITIVE_INFINITY);
 
-  const poll = useCallback(async (manual = false) => {
-    if (inFlight.current) return;
-    const controller = new AbortController();
-    inFlight.current = controller;
-    if (manual) setState((previous) => ({ ...previous, loading: true }));
-    try {
-      const response = await listLiveSessions(controller.signal);
-      if (!controller.signal.aborted) {
-        setNow(Date.now());
-        setState({ response, updatedAt: Date.now(), loading: false });
-      }
-    } catch (error) {
-      if (controller.signal.aborted) return;
-      paused.current = needsUserAction(error);
-      setState((previous) => ({
-        ...previous,
-        error: error instanceof Error ? error : new Error(String(error)),
-        loading: false,
-      }));
-    } finally {
-      if (inFlight.current === controller) inFlight.current = undefined;
-    }
-  }, []);
+  const { error, isLoading, revalidate } = usePromise(() => listLiveSessions(abortable.current?.signal), [], {
+    abortable,
+    onData: (response) => {
+      paused.current = false;
+      manual.current = false;
+      setNow(Date.now());
+      setSnapshot({ response, updatedAt: Date.now() });
+    },
+    // Handled in the view; also keeps usePromise from raising a toast per failed poll.
+    onError: (failure) => {
+      paused.current = needsUserAction(failure);
+      manual.current = false;
+    },
+  });
+
+  // revalidate aborts the call in flight, and one call can outlast several
+  // ticks on a busy daemon, so a tick only starts a call when none is running.
+  const loading = useRef(isLoading);
+  loading.current = isLoading;
 
   const refresh = useCallback(() => {
     paused.current = false;
-    void poll(true);
-  }, [poll]);
+    manual.current = true;
+    revalidate();
+  }, [revalidate]);
 
   useEffect(() => {
-    void poll();
     const timer = setInterval(() => {
-      if (!paused.current) void poll();
+      if (!paused.current && !loading.current) revalidate();
     }, POLL_INTERVAL_MS);
-    return () => {
-      clearInterval(timer);
-      inFlight.current?.abort();
-      inFlight.current = undefined;
-    };
-  }, [poll]);
+    return () => clearInterval(timer);
+  }, [revalidate]);
 
   useEffect(() => {
     const timer = setInterval(
@@ -181,7 +175,8 @@ export default function Command() {
     }
   }, [refresh]);
 
-  const { response, updatedAt, error } = state;
+  const response = snapshot?.response;
+  const updatedAt = snapshot?.updatedAt;
   // While polls fail the list is a snapshot: judge "stuck" at the time it was
   // taken, or every working row turns orange after three minutes of no updates.
   const observedAt = error && updatedAt !== undefined ? updatedAt : now;
@@ -422,7 +417,9 @@ export default function Command() {
 
   return (
     <List
-      isLoading={state.loading}
+      // Background polls stay silent: Raycast hides the action bar while a list
+      // is loading, so flagging every poll would make it flicker each 5 seconds.
+      isLoading={isLoading && ((snapshot === undefined && error === undefined) || manual.current)}
       isShowingDetail={showingDetail && hasAnySession}
       searchBarPlaceholder="Filter live sessions…"
       searchBarAccessory={
