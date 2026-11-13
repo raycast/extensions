@@ -1,19 +1,21 @@
 import { Clipboard, closeMainWindow, environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { execFile } from "node:child_process";
+import { runAppleScript } from "@raycast/utils";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { promisify } from "node:util";
 import { parseBusyEvents } from "./lib/ics";
-import { normalizeUrl, RawPreferences, toOptions } from "./lib/options";
+import { normalizeUrl, toOptions } from "./lib/options";
 import { buildPlan, rangeFor } from "./lib/plan";
 import { svgToPng } from "./lib/png";
 import { renderSvg } from "./lib/render";
 
-const run = promisify(execFile);
 const FETCH_TIMEOUT_MS = 15000;
+const COPY_PNG_SCRIPT = `
+on run argv
+  set the clipboard to (read (POSIX file (item 1 of argv)) as «class PNGf»)
+end run`;
 
 export default async function main() {
-  const prefs = getPreferenceValues<RawPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const toast = await showToast({ style: Toast.Style.Animated, title: "Loading calendar…" });
 
   try {
@@ -71,10 +73,7 @@ async function fetchIcs(url: string): Promise<string> {
  */
 async function copyImage(file: string) {
   try {
-    await run("/usr/bin/osascript", [
-      "-e",
-      `set the clipboard to (read (POSIX file ${JSON.stringify(file)}) as «class PNGf»)`,
-    ]);
+    await runAppleScript(COPY_PNG_SCRIPT, [file]);
   } catch {
     await Clipboard.copy({ file });
   }

@@ -4,15 +4,6 @@ Raycast command that renders a week view of your free time slots from a publishe
 
 ## Setup
 
-Requirements: Raycast and Node.js 22.22 or later.
-
-```bash
-npm install
-npm run dev
-```
-
-`npm run dev` registers the extension in Raycast. It stays there even after you stop the process.
-
 The first time you run **Copy Calendar Availability Image**, Raycast asks for the ICS link. Any published ICS calendar link works, for example:
 
 - **Outlook on the web:** Settings → Calendar → Shared calendars → Publish a calendar, next to the HTML link.
@@ -31,31 +22,15 @@ You can assign a hotkey in Raycast under Settings → Extensions → Calendar Av
 | Shortest Free Slot | 30 minutes |
 | Tentative Events: Treat as busy | on |
 | Weekend: Show Saturday and Sunday | off |
-| Image Language | English |
 
 ## Behavior
 
 - Only start, end and busy status are read. Titles never end up in the image.
 - Events marked as "free" or "working elsewhere" do not block time.
-- All-day events only block the day if they are marked as busy or out of office.
+- All-day events follow the same busy and tentative settings as timed events. Outlook creates them as free by default, so they only block the day if you change their status.
 - Elapsed time on the current day is grayed out; free slots start at the next quarter hour at the earliest.
 - Times are shown in the time zone of your Mac.
 - The most recent image is also saved as `availability.png` in the extension's support folder.
-
-## Tests
-
-```bash
-npm test
-```
-
-Runs the unit tests for the calendar logic in `test/*.test.ts` with Node's built-in test runner. The tests run in the `Europe/Berlin` time zone so that the daylight saving cases are reproducible.
-
-## Manual Run Without Raycast
-
-```bash
-npx esbuild test/run.ts --bundle --platform=node --outfile=.tmp/run.js
-node .tmp/run.js test/sample.ics .tmp/out.png 2026-11-10T10:20:00+01:00 de
-```
 
 ## Third-Party Licenses
 

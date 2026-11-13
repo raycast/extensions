@@ -513,6 +513,16 @@ describe("parseBusyEvents", () => {
       );
       assert.ok(events.every((e) => e.allDay));
     });
+
+    it("fails instead of silently cutting off a series with too many occurrences", () => {
+      const hourly = vevent(
+        "UID:h",
+        "RRULE:FREQ=HOURLY",
+        `DTSTART;${TZID}:20150105T090000`,
+        `DTEND;${TZID}:20150105T093000`,
+      );
+      assert.throws(() => parse(hourly), /too many occurrences/);
+    });
   });
 });
 

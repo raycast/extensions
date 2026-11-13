@@ -2,29 +2,16 @@ import { DayPlan, Interval, Options } from "./types";
 import { isoWeek } from "./plan";
 
 const T = {
-  de: {
-    title: "Verfügbarkeit",
-    week: "KW",
-    free: "frei",
-    busy: "belegt",
-    tentative: "unter Vorbehalt",
-    past: "vergangen",
-    asOf: "Stand",
-    tz: "Zeiten in",
-    locale: "de-DE",
-  },
-  en: {
-    title: "Availability",
-    week: "Week",
-    free: "free",
-    busy: "busy",
-    tentative: "tentative",
-    past: "past",
-    asOf: "As of",
-    tz: "Times in",
-    locale: "en-GB",
-  },
-} as const;
+  title: "Availability",
+  week: "Week",
+  free: "free",
+  busy: "busy",
+  tentative: "tentative",
+  past: "past",
+  asOf: "As of",
+  tz: "Times in",
+  locale: "en-GB",
+};
 
 const C = {
   bg: "#ffffff",
@@ -55,7 +42,7 @@ export function renderSvg(
   now: Date,
   opts: Options,
 ): { svg: string; width: number; height: number } {
-  const t = T[opts.language];
+  const t = T;
   const days = weeks[0].length;
   const colW = days > 5 ? 150 : 200;
   const hours = opts.endHour - opts.startHour;
@@ -116,7 +103,13 @@ export function renderSvg(
 
     week.forEach((day, di) => {
       const x = x0 + di * colW;
-      const y = (ms: number) => y0 + ((ms - day.windowStart) / (day.windowEnd - day.windowStart)) * gridH;
+      // Use the local clock like the hour lines do; elapsed time would shift blocks on days with a daylight saving change.
+      const y = (ms: number) => {
+        if (ms >= day.windowEnd) return y0 + gridH;
+        const d = new Date(ms);
+        const hour = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+        return y0 + Math.min(hours, Math.max(0, hour - opts.startHour)) * HOUR_H;
+      };
       const block = (iv: Interval, fill: string) =>
         `<rect x="${x + 1}" y="${r(y(iv.start))}" width="${colW - 1}" height="${r(y(iv.end) - y(iv.start))}" fill="${fill}"/>`;
 

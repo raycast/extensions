@@ -59,7 +59,6 @@ export function options(overrides: Partial<Options> = {}): Options {
     minSlotMinutes: 30,
     tentativeIsBusy: true,
     includeWeekend: false,
-    language: "en",
     ...overrides,
   };
 }

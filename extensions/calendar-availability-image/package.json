@@ -116,28 +116,11 @@
       "type": "checkbox",
       "required": false,
       "default": false
-    },
-    {
-      "name": "language",
-      "title": "Image Language",
-      "description": "Language of the labels in the image.",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Deutsch",
-          "value": "de"
-        }
-      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^2.12.0",
+    "@raycast/utils": "^2.3.3",
     "@resvg/resvg-wasm": "^2.6.2",
     "ical.js": "^2.2.1"
   },

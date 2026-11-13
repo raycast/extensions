@@ -7,8 +7,8 @@ import { svgToPng } from "../src/lib/png";
 import { renderSvg } from "../src/lib/render";
 
 async function main() {
-  const [icsPath, outPath, nowIso, lang] = process.argv.slice(2);
-  const opts = toOptions({ icsUrl: "", language: lang });
+  const [icsPath, outPath, nowIso] = process.argv.slice(2);
+  const opts = toOptions({ icsUrl: "" });
   const now = new Date(nowIso);
   const { start, end } = rangeFor(now, opts);
   const events = parseBusyEvents(readFileSync(icsPath, "utf8"), start, end);

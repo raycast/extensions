@@ -68,16 +68,11 @@ describe("renderSvg", () => {
     }
   });
 
-  it("uses the selected language", () => {
-    const en = render({ language: "en" }).svg;
-    assert.ok(en.includes(">Availability<"));
-    assert.ok(en.includes(">Week 46<"));
-    assert.ok(en.includes(">busy<"));
-
-    const de = render({ language: "de" }).svg;
-    assert.ok(de.includes(">Verfügbarkeit<"));
-    assert.ok(de.includes(">KW 46<"));
-    assert.ok(de.includes(">belegt<"));
+  it("labels the image in English", () => {
+    const { svg } = render();
+    assert.ok(svg.includes(">Availability<"));
+    assert.ok(svg.includes(">Week 46<"));
+    assert.ok(svg.includes(">busy<"));
   });
 
   it("labels the hours of the working day", () => {
@@ -124,6 +119,18 @@ describe("renderSvg", () => {
       count("#f3f4f6"),
       total((d) => (d.past ? 1 : 0)),
     );
+  });
+});
+
+describe("renderSvg on a day with a daylight saving change", () => {
+  it("places blocks on the local clock like the hour lines", () => {
+    const event = { start: local(2026, 10, 25, 9).getTime(), end: local(2026, 10, 25, 10).getTime() };
+    const { svg } = render(
+      { weeks: 1, includeWeekend: true, startHour: 0, endHour: 24 },
+      [{ ...event, tentative: false, allDay: false }],
+      local(2026, 10, 19, 7),
+    );
+    assert.ok(svg.includes('<rect x="981" y="502" width="149" height="40" fill="#c3c8d0"/>'));
   });
 });
 

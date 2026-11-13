@@ -8,7 +8,6 @@ export interface RawPreferences {
   minSlotMinutes?: string;
   tentativeIsBusy?: boolean;
   includeWeekend?: boolean;
-  language?: string;
 }
 
 export function toOptions(p: RawPreferences): Options {
@@ -21,7 +20,6 @@ export function toOptions(p: RawPreferences): Options {
     minSlotMinutes: clampInt(p.minSlotMinutes, 30, 5, 240),
     tentativeIsBusy: p.tentativeIsBusy ?? true,
     includeWeekend: p.includeWeekend ?? false,
-    language: p.language === "de" ? "de" : "en",
   };
 }
 

@@ -66,8 +66,12 @@ export function parseBusyEvents(icsText: string, rangeStart: Date, rangeEnd: Dat
     const it = ev.iterator();
     let next: ICAL.Time | null;
     let n = 0;
-    while ((next = it.next()) && n++ < MAX_ITERATIONS) {
+    while ((next = it.next())) {
       if (toLocalMs(next) >= to) break;
+      // Stopping silently would show the rest of the series as free time.
+      if (++n > MAX_ITERATIONS) {
+        throw new Error("A recurring event has too many occurrences to evaluate, so the image would be incomplete.");
+      }
       const occ = ev.getOccurrenceDetails(next);
       push(occ.item, occ.startDate, occ.endDate);
     }

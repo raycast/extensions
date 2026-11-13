@@ -1,5 +1,3 @@
-export type Lang = "de" | "en";
-
 export interface Options {
   weeks: number;
   startHour: number;
@@ -7,7 +5,6 @@ export interface Options {
   minSlotMinutes: number;
   tentativeIsBusy: boolean;
   includeWeekend: boolean;
-  language: Lang;
 }
 
 export interface Interval {

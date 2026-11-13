@@ -11,7 +11,6 @@ describe("toOptions", () => {
       minSlotMinutes: 30,
       tentativeIsBusy: true,
       includeWeekend: false,
-      language: "en",
     });
   });
 
@@ -24,7 +23,6 @@ describe("toOptions", () => {
       minSlotMinutes: "45",
       tentativeIsBusy: false,
       includeWeekend: true,
-      language: "de",
     });
     assert.deepEqual(o, {
       weeks: 4,
@@ -33,7 +31,6 @@ describe("toOptions", () => {
       minSlotMinutes: 45,
       tentativeIsBusy: false,
       includeWeekend: true,
-      language: "de",
     });
   });
 
@@ -60,10 +57,6 @@ describe("toOptions", () => {
 
   it("accepts hours with trailing text", () => {
     assert.equal(toOptions({ icsUrl: "", startHour: "9:30" }).startHour, 9);
-  });
-
-  it("uses English for unknown languages", () => {
-    assert.equal(toOptions({ icsUrl: "", language: "fr" }).language, "en");
   });
 });
 
