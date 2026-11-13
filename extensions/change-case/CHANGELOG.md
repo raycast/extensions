@@ -3,6 +3,7 @@
 ## [Fix text conversion and paste] - {PR_MERGE_DATE}
 
 - Normalize uppercase and mixed-case text in Capital Case, Title Case, and Sentence Case by default, while keeping spellings such as `iPhone` and `iOS` from Casing Exceptions.
+- Preserve Casing is now off for existing installs too; turn it back on in extension settings to keep the previous behavior.
 - Keep Paste available when Raycast cannot identify the active app.
 - Show feedback when a conversion produces nothing to paste, including when using direct commands and quicklinks.
 
