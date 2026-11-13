@@ -69,7 +69,7 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
           <ActionPanel.Section>
             <Action.CreateQuicklink
               quicklink={{ link: item.url, name: item.title }}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
           </ActionPanel.Section>
         </ActionPanel>

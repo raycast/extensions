@@ -1,27 +1,28 @@
 import { Action, ActionPanel, closeMainWindow, Color, getPreferenceValues, Icon, List, open } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import {
-  clickExtensionMenuItem,
+  extensionSettingsUrl,
   getExtensionProfiles,
-  openURLInProfile,
+  needsAccessibility as isAccessibilityError,
+  openExtension,
+  openURLInSpace,
+  spaceLabel,
   type BrowserExtension,
   type ExtensionProfile,
 } from "./extensions";
 import { getSpaceTint, truncateSpaceName } from "./utils";
 
-const ALL_PROFILES = "all";
-/** Prefix for a profile's dropdown value, so a profile named "all" can't collide with All Profiles. */
-const PROFILE_PREFIX = "profile:";
+const ALL_SPACES = "all";
+/** Prefix for a space's dropdown value, so a space named "all" can't collide with All Spaces. */
+const SPACE_PREFIX = "space:";
 const ACCESSIBILITY_SETTINGS_URL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
-
-const settingsUrl = (extension: BrowserExtension) => `chrome://extensions/?id=${extension.id}`;
 
 async function run(action: () => Promise<unknown>, failureTitle: string) {
   try {
     await closeMainWindow();
     await action();
   } catch (error) {
-    const needsAccessibility = /assistive access|-1719|-25211/.test(String(error));
+    const needsAccessibility = isAccessibilityError(error);
     await showFailureToast(error, {
       title: needsAccessibility ? "Raycast needs Accessibility access" : failureTitle,
       primaryAction: needsAccessibility
@@ -31,30 +32,27 @@ async function run(action: () => Promise<unknown>, failureTitle: string) {
   }
 }
 
-/** Picks the extension from Dia's Extensions menu, else opens its popup, else its settings page, in a tab. */
-async function openExtension(extension: BrowserExtension, profile: ExtensionProfile) {
-  if (await clickExtensionMenuItem(extension.name, profile.name)) return;
-  await openURLInProfile(extension.popupUrl ?? settingsUrl(extension), profile.name);
-}
-
 function ExtensionItem({ extension, profile }: { extension: BrowserExtension; profile: ExtensionProfile }) {
   const { popupUrl } = extension;
   const failureTitle = `Could not open ${extension.name}`;
-  const openInTab = (url: string) => run(() => openURLInProfile(url, profile.name), failureTitle);
+  const openInTab = (url: string) => run(() => openURLInSpace(url, profile.space), failureTitle);
   const accessories: List.Item.Accessory[] = [];
   if (!extension.enabled) accessories.push({ tag: { value: "Disabled", color: Color.SecondaryText } });
   if (extension.pinned) accessories.push({ icon: Icon.Tack, tooltip: "Pinned to toolbar" });
-  accessories.push({
-    tag: { value: truncateSpaceName(profile.name), color: getSpaceTint(profile.color) },
-    tooltip: profile.name,
-  });
+  // Extensions shared by all spaces get no space tag; their section says so
+  if (profile.space) {
+    accessories.push({
+      tag: { value: truncateSpaceName(profile.space), color: getSpaceTint(profile.color) },
+      tooltip: profile.space,
+    });
+  }
 
   return (
     <List.Item
       icon={extension.icon ? { source: extension.icon } : Icon.Plug}
       title={extension.name}
       subtitle={extension.description}
-      keywords={[extension.id, profile.name]}
+      keywords={[extension.id, ...(profile.space ? [profile.space] : [])]}
       accessories={accessories}
       actions={
         <ActionPanel title={extension.name}>
@@ -62,7 +60,7 @@ function ExtensionItem({ extension, profile }: { extension: BrowserExtension; pr
             <Action
               title="Open Extension"
               icon={Icon.Plug}
-              onAction={() => run(() => openExtension(extension, profile), failureTitle)}
+              onAction={() => run(() => openExtension(extension, profile.space), failureTitle)}
             />
           )}
           {extension.enabled && popupUrl && (
@@ -71,7 +69,7 @@ function ExtensionItem({ extension, profile }: { extension: BrowserExtension; pr
           <Action
             title="Show in Extension Settings"
             icon={Icon.List}
-            onAction={() => openInTab(settingsUrl(extension))}
+            onAction={() => openInTab(extensionSettingsUrl(extension))}
           />
           <Action.CopyToClipboard title="Copy Extension ID" content={extension.id} />
         </ActionPanel>
@@ -90,35 +88,39 @@ export default function Command() {
   } = useCachedPromise(getExtensionProfiles, [], {
     failureToastOptions: { title: "Could not read Dia extensions" },
   });
-  const [selected, setSelected] = useCachedState<string>("profile-filter", ALL_PROFILES);
+  const [selected, setSelected] = useCachedState<string>("space-filter", ALL_SPACES);
   const retryActions = (
     <ActionPanel>
       <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
     </ActionPanel>
   );
-  // Fall back to all profiles when the remembered profile was removed
-  const filter = profiles.some((profile) => PROFILE_PREFIX + profile.directory === selected) ? selected : ALL_PROFILES;
+  // Only spaces with their own Chromium profile can be filtered; shared extensions show under every space
+  const spaceProfiles = profiles.filter((profile) => profile.space);
+  // Fall back to all spaces when the remembered space was removed
+  const filter = spaceProfiles.some((profile) => SPACE_PREFIX + profile.space === selected) ? selected : ALL_SPACES;
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search extensions..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Profile" value={filter} onChange={setSelected}>
-          <List.Dropdown.Section>
-            <List.Dropdown.Item title="All Profiles" value={ALL_PROFILES} icon={Icon.PersonCircle} />
-          </List.Dropdown.Section>
-          <List.Dropdown.Section>
-            {profiles.map((profile) => (
-              <List.Dropdown.Item
-                key={profile.directory}
-                title={profile.isActive ? `${profile.name} (Active)` : profile.name}
-                value={PROFILE_PREFIX + profile.directory}
-                icon={{ source: Icon.CircleFilled, tintColor: getSpaceTint(profile.color) }}
-              />
-            ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        spaceProfiles.length > 0 ? (
+          <List.Dropdown tooltip="Filter by Space" value={filter} onChange={setSelected}>
+            <List.Dropdown.Section>
+              <List.Dropdown.Item title="All Spaces" value={ALL_SPACES} icon={Icon.PersonCircle} />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section>
+              {spaceProfiles.map((profile) => (
+                <List.Dropdown.Item
+                  key={profile.directory}
+                  title={profile.isActive ? `${profile.space} (Active)` : profile.space!}
+                  value={SPACE_PREFIX + profile.space}
+                  icon={{ source: Icon.CircleFilled, tintColor: getSpaceTint(profile.color) }}
+                />
+              ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        ) : undefined
       }
     >
       {error ? (
@@ -132,14 +134,15 @@ export default function Command() {
         <List.EmptyView icon={Icon.Plug} title="No extensions found" />
       )}
       {profiles
-        .filter((profile) => filter === ALL_PROFILES || PROFILE_PREFIX + profile.directory === filter)
+        .filter((profile) => filter === ALL_SPACES || !profile.space || SPACE_PREFIX + profile.space === filter)
         .map((profile) => {
+          const title = profile.space ?? "Available in All Spaces";
           if (profile.error) {
             return (
-              <List.Section key={profile.directory} title={profile.name}>
+              <List.Section key={profile.directory} title={title}>
                 <List.Item
                   icon={{ source: Icon.Warning, tintColor: Color.Orange }}
-                  title={`Could not read ${profile.name}`}
+                  title={`Could not read the extensions of ${spaceLabel(profile)}`}
                   subtitle={profile.error}
                   actions={retryActions}
                 />
@@ -147,13 +150,13 @@ export default function Command() {
             );
           }
           const extensions = profile.extensions.filter((extension) => showBuiltInExtensions || !extension.builtIn);
-          // Profiles without extensions get no section; they stay in the dropdown
+          // Spaces without extensions get no section; they stay in the dropdown
           if (extensions.length === 0) return null;
           const count = `${extensions.length} ${extensions.length === 1 ? "extension" : "extensions"}`;
           return (
             <List.Section
               key={profile.directory}
-              title={profile.name}
+              title={title}
               subtitle={profile.isActive ? `Active · ${count}` : count}
             >
               {extensions.map((extension) => (
