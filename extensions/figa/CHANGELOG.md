@@ -1,6 +1,6 @@
 # Figa Changelog
 
-## [Bills, Forecasts and Shareable Summaries] - {PR_MERGE_DATE}
+## [Bills, Forecasts and Shareable Summaries] - 2026-11-13
 
 - Use the current Figa brand icon and introduce a clearer Store overview with setup and product links.
 - Copy a month summary with a discreet Figa link, including estimates and incomplete-data notices.
