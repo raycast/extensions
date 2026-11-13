@@ -1,4 +1,5 @@
 import { getMentionProjects } from "../api/getProjects";
+import { getProjectMentionIcon } from "../helpers/mentionIcons";
 import {
   ACTIVE_PROJECT_MENTION_FILTER,
   MY_PROJECT_MENTION_FILTER,
@@ -6,7 +7,6 @@ import {
   mergeMentionProjects,
   toProjectMentions,
 } from "../helpers/mentions";
-import { getProjectMentionIcon } from "../helpers/projectMentionIcons";
 
 import { withLinear } from "./withLinear";
 

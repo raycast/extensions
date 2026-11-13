@@ -5,9 +5,9 @@ import {
   getProjectMentionFilter,
   getUserMentionFilter,
   mergeMentionProjects,
-  projectIconColor,
+  hexIconColor,
   readMentionResource,
-  tintProjectIconSvg,
+  tintIconSvg,
   toIssueMentions,
   toProjectMentions,
   toUserMentions,
@@ -31,6 +31,13 @@ const issue = {
   project: { id: "project", name: "Desktop", icon: undefined, color: "#ff0000" },
   assignee: { id: userId, displayName: "Alice", email: user.email, avatarUrl: user.avatarUrl },
 };
+
+const avatarOr = (fallback: string) => (u: { avatarUrl?: string }) => u.avatarUrl || fallback;
+
+test("issue rows take their icon from the issue itself, so each shows its own status", () => {
+  const [mention] = toIssueMentions([issue], (i) => `${i.state.type}:${i.state.color}`);
+  assert.equal(mention.icon, "started:#ff0000");
+});
 
 test("user searches exclude inactive accounts and apps, including the empty default search", () => {
   assert.deepEqual(getUserMentionFilter("  "), { active: { eq: true }, app: { eq: false } });
@@ -58,7 +65,7 @@ test("each query word can match a different name or email field in the server-si
 
 test("user mentions carry stable IDs, profile context, and avatars without SDK methods", () => {
   const sdkUser = { ...user, _request: () => assert.fail("SDK method must not run") };
-  const [mention] = toUserMentions([sdkUser], "person");
+  const [mention] = toUserMentions([sdkUser], avatarOr("person"));
   assert.deepEqual(mention, {
     title: "Alice",
     uri: `linear://users/${userId}`,
@@ -66,21 +73,24 @@ test("user mentions carry stable IDs, profile context, and avatars without SDK m
     icon: user.avatarUrl,
   });
   assert.deepEqual(structuredClone(mention), mention);
-  const [fallback] = toUserMentions([{ ...user, displayName: " ", title: undefined, avatarUrl: undefined }], "person");
+  const [fallback] = toUserMentions(
+    [{ ...user, displayName: " ", title: undefined, avatarUrl: undefined }],
+    avatarOr("person"),
+  );
   assert.equal(fallback.title, "Alice Smith");
   assert.equal(fallback.description, "alice@example.com");
   assert.equal(fallback.icon, "person");
 });
 
 test("issue mentions show identifiers, status, project, and assignee", () => {
-  const [mention] = toIssueMentions([issue], "document");
+  const [mention] = toIssueMentions([issue], () => "document");
   assert.deepEqual(mention, {
     title: "ENG-42 · Fix sign-in",
     uri: `linear://issues/${issueId}`,
     description: "In Progress · Desktop · Alice",
     icon: "document",
   });
-  const [unassigned] = toIssueMentions([{ ...issue, assignee: undefined, project: undefined }], "document");
+  const [unassigned] = toIssueMentions([{ ...issue, assignee: undefined, project: undefined }], () => "document");
   assert.equal(unassigned.description, "In Progress");
 });
 
@@ -88,24 +98,27 @@ test("both mention lists are bounded and support no matches", () => {
   assert.equal(
     toUserMentions(
       Array.from({ length: 60 }, () => user),
-      "person",
+      avatarOr("person"),
     ).length,
     50,
   );
   assert.equal(
     toIssueMentions(
       Array.from({ length: 60 }, () => issue),
-      "document",
+      () => "document",
     ).length,
     50,
   );
-  assert.deepEqual(toUserMentions([], "person"), []);
-  assert.deepEqual(toIssueMentions([], "document"), []);
+  assert.deepEqual(toUserMentions([], avatarOr("person")), []);
+  assert.deepEqual(
+    toIssueMentions([], () => "document"),
+    [],
+  );
 });
 
 test("user and issue search URIs route to fresh details without reading the other entity", async () => {
-  const [userMention] = toUserMentions([user], "person");
-  const [issueMention] = toIssueMentions([issue], "document");
+  const [userMention] = toUserMentions([user], avatarOr("person"));
+  const [issueMention] = toIssueMentions([issue], () => "document");
   const calls: string[] = [];
   const readers = {
     users: async (id: string) => {
@@ -208,22 +221,28 @@ test("project mentions show the name, the status, and the project's own icon", (
   });
   const [bare] = toProjectMentions([{ ...project, status: null }], iconOf);
   assert.equal(bare.description, "");
-  assert.equal(toProjectMentions(Array.from({ length: 60 }, () => project), iconOf).length, 50);
+  assert.equal(
+    toProjectMentions(
+      Array.from({ length: 60 }, () => project),
+      iconOf,
+    ).length,
+    50,
+  );
 });
 
 test("project icons take the project's color on every painted fill and stroke, keeping transparency", () => {
   const svg =
     '<svg style="--icon-color: #5e5e5f;" fill="#5e5e5f"><path fill="none" stroke="#C3C4C6"/><path fill="#c3c4c6"/><path fill="black"/></svg>';
   assert.equal(
-    tintProjectIconSvg(svg, "#f2994a"),
+    tintIconSvg(svg, "#f2994a"),
     '<svg style="--icon-color: #f2994a;" fill="#f2994a"><path fill="none" stroke="#f2994a"/><path fill="#f2994a"/><path fill="#f2994a"/></svg>',
   );
 });
 
 test("only a hex project color reaches an SVG", () => {
-  assert.equal(projectIconColor("#F2994A"), "#f2994a");
+  assert.equal(hexIconColor("#F2994A"), "#f2994a");
   for (const color of [undefined, null, "", "orange", '#fff" onload="x', "#12"]) {
-    assert.equal(projectIconColor(color), undefined);
+    assert.equal(hexIconColor(color), undefined);
   }
 });
 

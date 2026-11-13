@@ -25,23 +25,25 @@ export function getUserMentionFilter(query: string) {
 
 type MentionUser = Pick<User, "id" | "name" | "displayName" | "email" | "title" | "avatarUrl">;
 
-export function toUserMentions(users: readonly MentionUser[], fallbackIcon: string) {
+/** A user row: the name, email and title, and the user's avatar, else initials as Linear shows them. */
+export function toUserMentions<T extends MentionUser>(users: readonly T[], icon: (user: T) => string) {
   return users.slice(0, 50).map((user) => ({
     title: user.displayName?.trim() || user.name || user.email,
     uri: `linear://users/${user.id}`,
     description: [user.email, user.title].filter(Boolean).join(" · "),
-    icon: user.avatarUrl || fallbackIcon,
+    icon: icon(user),
   }));
 }
 
 type MentionIssue = Pick<IssueResult, "id" | "identifier" | "title" | "state" | "project" | "assignee">;
 
-export function toIssueMentions(issues: readonly MentionIssue[], icon: string) {
+/** An issue row, drawn with its status icon in its state's color as Linear lists it. */
+export function toIssueMentions<T extends MentionIssue>(issues: readonly T[], icon: (issue: T) => string) {
   return issues.slice(0, 50).map((issue) => ({
     title: `${issue.identifier} · ${issue.title}`,
     uri: `linear://issues/${issue.id}`,
     description: [issue.state.name, issue.project?.name, issue.assignee?.displayName].filter(Boolean).join(" · "),
-    icon,
+    icon: icon(issue),
   }));
 }
 
@@ -90,16 +92,16 @@ export function toProjectMentions(
 
 const HEX_COLOR = /^#[0-9a-f]{3,8}$/i;
 
-/** The project's color when it is a hex color, the only form an SVG attribute safely takes. */
-export function projectIconColor(color: string | null | undefined) {
+/** A Linear color when it is a hex color, the only form an SVG attribute safely takes. */
+export function hexIconColor(color: string | null | undefined) {
   return color && HEX_COLOR.test(color) ? color.toLowerCase() : undefined;
 }
 
 /**
- * Paints a single-color Linear icon in the project's color, as Linear tints it: every fill, stroke,
- * and `--icon-color` becomes the color, and `none` stays transparent.
+ * Paints a single-color Linear icon (a project's icon, an issue's status) in one color, as Linear
+ * tints it: every fill, stroke, and `--icon-color` becomes the color, and `none` stays transparent.
  */
-export function tintProjectIconSvg(svg: string, color: string) {
+export function tintIconSvg(svg: string, color: string) {
   return svg
     .replace(/\b(fill|stroke)="(?!none")[^"]*"/gi, `$1="${color}"`)
     .replace(/--icon-color:\s*#[0-9a-f]{3,8}/gi, `--icon-color: ${color}`);
