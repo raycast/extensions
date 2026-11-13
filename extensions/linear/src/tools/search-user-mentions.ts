@@ -1,6 +1,6 @@
 import { PaginationOrderBy } from "@linear/sdk";
-import { Icon } from "@raycast/api";
 
+import { getUserMentionIcon } from "../helpers/mentionIcons";
 import { getUserMentionFilter, toUserMentions } from "../helpers/mentions";
 
 import { client } from "./linearUtils";
@@ -17,5 +17,5 @@ export default withLinear(async ({ query }: Input) => {
     orderBy: PaginationOrderBy.UpdatedAt,
     filter: getUserMentionFilter(query),
   });
-  return toUserMentions(users.nodes, Icon.Person);
+  return toUserMentions(users.nodes, getUserMentionIcon);
 });

@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { GameData, GameDataSimple, GameSimple } from "../types";
-import { DefaultActions, LaunchActions } from "./Actions";
+import { DefaultActions, LaunchActions, LaunchGameAction } from "./Actions";
 import { GameDetails } from "./GameDetails";
 import { itemId, playtimeText } from "../lib/util";
 import { SteamGameError } from "../lib/games";
@@ -146,31 +146,41 @@ export const MyGamesListType = ({
   detail,
   owned,
   hide,
+  pinActions,
 }: {
   game: GameDataSimple;
   id?: string;
   detail?: string;
   owned?: Ownership;
   hide?: "isNew" | "recentlyPlayed";
-}) => (
-  <List.Item
-    id={id}
-    key={game.appid}
-    title={game.name}
-    icon={{
-      source: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`,
-    }}
-    accessories={[
-      ...(detail ? [{ text: detail }] : []),
-      ...ownedTags(owned && hide ? { ...owned, [hide]: false } : owned, { showOwned: false }),
-      releaseTag(cachedDetails(game.appid)?.data.release_date?.date) ?? {},
-    ]}
-    actions={
-      <ActionPanel>
-        <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-        <LaunchActions name={game.name} appid={game?.appid} />
-        <DefaultActions />
-      </ActionPanel>
-    }
-  />
-);
+  pinActions?: React.JSX.Element;
+}) => {
+  const { launchOnEnter } = getPreferenceValues<Preferences>();
+  // The first action gets Return and the second gets ⌘Return
+  const details = <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />;
+  const launch = <LaunchGameAction appid={game.appid} />;
+  return (
+    <List.Item
+      id={id}
+      key={game.appid}
+      title={game.name}
+      icon={{
+        source: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`,
+      }}
+      accessories={[
+        ...(detail ? [{ text: detail }] : []),
+        ...ownedTags(owned && hide ? { ...owned, [hide]: false } : owned, { showOwned: false }),
+        releaseTag(cachedDetails(game.appid)?.data.release_date?.date) ?? {},
+      ]}
+      actions={
+        <ActionPanel>
+          {launchOnEnter ? launch : details}
+          {launchOnEnter ? details : launch}
+          {pinActions && <ActionPanel.Section>{pinActions}</ActionPanel.Section>}
+          <LaunchActions name={game.name} appid={game.appid} showLaunch={false} />
+          <DefaultActions />
+        </ActionPanel>
+      }
+    />
+  );
+};

@@ -1,7 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 import { setTimeout } from "timers/promises";
 import { findTab, toAutomationError } from "../find-tab";
-import { escapeAppleScriptString } from "../utils";
 
 const DEFAULT_MAX_LENGTH = 20000;
 const MAX_LENGTH_CAP = 50000;
@@ -45,9 +44,10 @@ type PageText = { title: string; url: string; readyState: string; length: number
 export default async function tool(input: Input) {
   const maxLength = Math.min(Math.max(Math.floor(input.maxLength ?? DEFAULT_MAX_LENGTH), 1), MAX_LENGTH_CAP);
   const tab = await findTab(input);
-  const tabSpecifier = `tab id "${escapeAppleScriptString(tab.tabId)}" of window id "${escapeAppleScriptString(tab.windowId)}"`;
+  // A window's tabs only hold the space it shows, so a tab in another space is reached through its profile
+  const tabArgs = [tab.tabId, tab.windowId, tab.space && !tab.isActiveSpace ? tab.space : ""];
 
-  const stillLoading = await waitUntilLoaded(tabSpecifier).catch((error) => {
+  const stillLoading = await waitUntilLoaded(tabArgs).catch((error) => {
     throw toReadError(error, tab.title);
   });
 
@@ -69,9 +69,7 @@ export default async function tool(input: Input) {
 
   let result: string;
   try {
-    result = await runAppleScript(
-      `tell application "Dia" to execute ${tabSpecifier} javascript "${escapeAppleScriptString(javascript)}"`,
-    );
+    result = await runAppleScript(tabScript("execute _tab javascript (item 4 of argv)"), [...tabArgs, javascript]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("enable-applescript-javascript") || message.includes("-10006")) {
@@ -130,11 +128,33 @@ function toReadError(error: unknown, title: string): unknown {
   return toAutomationError(error);
 }
 
+/**
+ * AppleScript that runs `body` with `_tab` set to the tab. Run it with `[tabId, windowId, space]`, where `space` is
+ * empty for a tab in the space its window shows. Extra arguments follow as `item 4 of argv` and on.
+ */
+function tabScript(body: string) {
+  return `
+    on run argv
+      set _tabId to item 1 of argv
+      set _windowId to item 2 of argv
+      set _space to item 3 of argv
+      tell application "Dia"
+        if _space is "" then
+          set _tab to tab id _tabId of window id _windowId
+        else
+          set _tab to tab id _tabId of profile _space of window id _windowId
+        end if
+        ${body}
+      end tell
+    end run
+  `;
+}
+
 /** Waits for the tab to finish loading, up to a timeout. Returns whether it is still loading. */
-async function waitUntilLoaded(tabSpecifier: string): Promise<boolean> {
+async function waitUntilLoaded(tabArgs: string[]): Promise<boolean> {
   const deadline = Date.now() + LOADING_TIMEOUT_MS;
   for (;;) {
-    const loading = (await runAppleScript(`tell application "Dia" to return loading of ${tabSpecifier}`)).trim();
+    const loading = (await runAppleScript(tabScript("return loading of _tab"), tabArgs)).trim();
     if (loading !== "true") return false;
     if (Date.now() >= deadline) return true;
     await setTimeout(LOADING_POLL_MS);

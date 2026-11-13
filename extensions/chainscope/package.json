@@ -1,0 +1,238 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chainscope",
+  "title": "ChainScope",
+  "description": "Decode Ethereum and Solana transactions, calldata, and addresses from your clipboard, with ABI resolution, proxy and multisig detection, and event-log decoding.",
+  "icon": "icon.png",
+  "author": "auralshin",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "ethereum",
+    "evm",
+    "solana",
+    "decode",
+    "calldata",
+    "abi",
+    "transaction",
+    "multisig",
+    "web3",
+    "explorer"
+  ],
+  "commands": [
+    {
+      "name": "decode",
+      "title": "Decode",
+      "subtitle": "ChainScope",
+      "description": "Reads the clipboard and works out what you pasted (tx hash, calldata, address, ENS name, number, or Solana signature), then decodes it.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-units",
+      "title": "Convert Units",
+      "subtitle": "ChainScope",
+      "description": "wei, gwei, ether, hex to decimal, and bytes32 padding, updated as you type.",
+      "mode": "view"
+    },
+    {
+      "name": "hash-selector",
+      "title": "Hash & Selector",
+      "subtitle": "ChainScope",
+      "description": "keccak256 of a string and the 4-byte function selector / event topic for a signature.",
+      "mode": "view"
+    },
+    {
+      "name": "search-explorer",
+      "title": "Search Explorer",
+      "subtitle": "ChainScope",
+      "description": "Detects an address, tx hash, or block and opens it in a block explorer.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tokens",
+      "title": "Search Tokens",
+      "subtitle": "ChainScope",
+      "description": "Search popular tokens by symbol, name, or address across EVM chains and Solana, with verification and audit info.",
+      "mode": "view"
+    },
+    {
+      "name": "search-chains",
+      "title": "Search Chains",
+      "subtitle": "ChainScope",
+      "description": "Search every supported chain by name or id, including your custom chains. Copy the id or RPC, or open the explorer.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-networks",
+      "title": "Manage Networks",
+      "subtitle": "ChainScope",
+      "description": "Set an RPC for any network and add your own, each with its own ID, name, RPC, and token.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultChain",
+      "title": "EVM Default Chain",
+      "description": "Chain used for transactions, ABIs, and explorer links. For other chains and RPCs, use the Manage Networks command. A default set there wins over this one.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Ethereum Mainnet",
+          "value": "1"
+        },
+        {
+          "title": "Optimism",
+          "value": "10"
+        },
+        {
+          "title": "BNB Smart Chain",
+          "value": "56"
+        },
+        {
+          "title": "Polygon",
+          "value": "137"
+        },
+        {
+          "title": "Base",
+          "value": "8453"
+        },
+        {
+          "title": "Arbitrum One",
+          "value": "42161"
+        },
+        {
+          "title": "Sepolia (testnet)",
+          "value": "11155111"
+        }
+      ]
+    },
+    {
+      "name": "solanaCluster",
+      "title": "Solana Cluster",
+      "description": "Cluster used for Solana signatures, addresses, and Solscan links.",
+      "type": "dropdown",
+      "required": false,
+      "default": "mainnet-beta",
+      "data": [
+        {
+          "title": "Mainnet Beta",
+          "value": "mainnet-beta"
+        },
+        {
+          "title": "Devnet",
+          "value": "devnet"
+        },
+        {
+          "title": "Testnet",
+          "value": "testnet"
+        }
+      ]
+    },
+    {
+      "name": "solanaRpc",
+      "title": "Solana RPC URL",
+      "description": "Your own Solana RPC, used instead of the selected cluster's public one. Also works for SVM rollups like Eclipse.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://my-solana-rpc.example.com"
+    },
+    {
+      "name": "etherscanApiKey",
+      "title": "Etherscan API Key",
+      "description": "Optional. Tried first when set. Without a key, ABIs come from the sources below.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Optional"
+    },
+    {
+      "name": "useSourcify",
+      "title": "ABI Sources",
+      "label": "Sourcify",
+      "description": "Used in this order after Etherscan. A source you turn off receives none of your data.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "useBlockscout",
+      "title": "",
+      "label": "Blockscout",
+      "description": "Built in for Ethereum, Optimism, and Sepolia.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "useSignatureDb",
+      "title": "",
+      "label": "Signature Database",
+      "description": "Last resort for function and event names. Matches are marked best guess.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sourcifyUrl",
+      "title": "Sourcify URL",
+      "description": "Optional. Your own Sourcify server.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://sourcify.dev/server"
+    },
+    {
+      "name": "signatureDbUrl",
+      "title": "Signature Database URL",
+      "description": "Optional. Your own signature database.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.openchain.xyz/signature-database/v1/lookup"
+    },
+    {
+      "name": "tokenListUrl",
+      "title": "EVM Token List URL",
+      "description": "Optional. Any list in the Uniswap token list format.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://tokens.uniswap.org"
+    },
+    {
+      "name": "jupiterUrl",
+      "title": "Solana Token Search URL",
+      "description": "Optional. Your own Jupiter-compatible search.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://datapi.jup.ag/v1/assets/search"
+    }
+  ],
+  "dependencies": {
+    "@noble/curves": "^1.9.1",
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "bs58": "^6.0.0",
+    "viem": "^2.57.16"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

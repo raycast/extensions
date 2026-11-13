@@ -4,6 +4,8 @@ import { AREAS, ITEMS, SKILL_BY_ID, TASK_BY_ID, TASKS } from "../engine/data";
 import {
   count,
   damageAgainst,
+  enemyHitChance,
+  playerHitChance,
   fightDamage,
   hitDamage,
   levelOf,
@@ -13,7 +15,7 @@ import {
   taskRates,
   taskDurationMs,
 } from "../engine/engine";
-import { bar, formatBundle, formatDuration, formatRates } from "../engine/format";
+import { bar, formatBundle, formatDuration, formatNumber, formatRates } from "../engine/format";
 import {
   hasMastery,
   masteryLevel,
@@ -25,7 +27,13 @@ import {
   nodeHp,
   nodeMaxHp,
   nodeRespawnMs,
+  POOL_CHECKPOINTS,
+  poolMax,
+  poolShare,
+  poolXp,
+  spendCost,
 } from "../engine/mastery";
+import { riftScale } from "../engine/data";
 import { areaKills, areaOf, bossLockReason, counterTo, huntsOf, matchup } from "../engine/areas";
 import { GameState, DamageType, ItemId, SkillId, TaskDef } from "../engine/types";
 import { SKILL_ICON, RUN_CHOICES } from "./constants";
@@ -56,6 +64,7 @@ export function Tasks(props: {
   frame: number;
   onStart: (id: string, runs?: number) => void;
   onStop: () => void;
+  onSpend: (id: string) => void;
 }) {
   const { state, skill } = props;
   const level = levelOf(state, skill);
@@ -111,6 +120,13 @@ export function Tasks(props: {
                 ))}
               </ActionPanel.Submenu>
             )}
+            {spendCost(state, task) !== null && (
+              <Action
+                title={`Spend Mastery Pool (${formatNumber(spendCost(state, task) ?? 0)} XP)`}
+                icon={Icon.ArrowUpCircle}
+                onAction={() => props.onSpend(task.id)}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -131,7 +147,9 @@ export function Tasks(props: {
 
   return (
     <List.Section title={SKILL_BY_ID[skill].name} subtitle={`Level ${level}`}>
-      {TASKS.filter((t) => t.skill === skill).map(item)}
+      {TASKS.filter((t) => t.skill === skill)
+        .sort((a, b) => a.levelReq - b.levelReq)
+        .map(item)}
     </List.Section>
   );
 }
@@ -154,8 +172,14 @@ function masteryLines(state: GameState, task: TaskDef): string[] {
     ...(masterySpeed(level) < 1 ? [`${Math.round((1 - masterySpeed(level)) * 1000) / 10}% faster`] : []),
     ...(masteryYield(level) > 0 ? [`${Math.round(masteryYield(level) * 100)}% bonus yield`] : []),
   ];
+  const share = poolShare(state, task.skill);
+  const checkpoints = POOL_CHECKPOINTS.map((c) => {
+    const gives = [c.speed && `${c.speed * 100}% faster`, c.yield && `${c.yield * 100}% yield`].filter(Boolean);
+    return `${share >= c.at ? "✓" : "○"} ${c.at * 100}%: ${gives.join(", ")}`;
+  });
   return [
-    `- **Mastery ${level}:** ${level >= MASTERY_MAX ? "maxed" : `${Math.floor(xp - floor).toLocaleString("en-US")} / ${(next - floor).toLocaleString("en-US")} XP`}${bonuses.length ? ` (${bonuses.join(", ")})` : ""}`,
+    `- **Mastery pool:** ${formatNumber(Math.floor(poolXp(state, task.skill)))} / ${formatNumber(Math.round(poolMax(task.skill)))} XP across ${SKILL_BY_ID[task.skill].name} (${checkpoints.join(" · ")})`,
+    `- **Mastery ${level}:** ${level >= MASTERY_MAX ? "maxed" : `${formatNumber(Math.floor(xp - floor))} / ${formatNumber(next - floor)} XP`}${bonuses.length ? ` (${bonuses.join(", ")})` : ""}`,
   ];
 }
 
@@ -164,11 +188,9 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   if (active) lines.push(taskProgress(state, task), "");
   lines.push(`- **Time:** ${formatDuration(taskDurationMs(state, task))}`, `- **XP:** ${task.xp}`);
   const rates = taskRates(state, task);
-  lines.push(
-    `- **Per hour:** ${formatRates(rates.itemsPerHour)} · ${Math.round(rates.xpPerHour).toLocaleString("en-US")} XP`,
-  );
+  lines.push(`- **Per hour:** ${formatRates(rates.itemsPerHour)} · ${formatNumber(Math.round(rates.xpPerHour))} XP`);
   if (task.monster) lines.push(`- **HP lost per hour:** ~${Math.round(rates.hpLossPerHour)}`);
-  if (task.inputs) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
+  if (Object.keys(rates.inputsPerHour).length) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
   if (rates.nextLevelMs !== null) lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
   if (task.node) {
     const max = nodeMaxHp(state, task);
@@ -193,12 +215,14 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
     const area = areaOf(task.id);
     const mods = modifiers(state);
     const dealt = damageAgainst(state, task);
-    const rounds = Math.ceil(m.hp / dealt);
+    const hp = Math.round(m.hp * riftScale(state));
+    const rounds = Math.ceil(hp / dealt);
     const bossLock = bossLockReason(state, task);
     lines.push(
       `- **Kill time:** ${formatDuration(taskDurationMs(state, task))} (${rounds} round${rounds === 1 ? "" : "s"}), then the next one steps up`,
-      `- **Enemy:** ${m.name}, ${m.type} (${m.hp} HP, ${m.damage} dmg per hit)`,
+      `- **Enemy:** ${m.name}, ${m.type} (${hp} HP, ${Math.round(m.damage * riftScale(state))} dmg per hit)`,
       `- **Your damage:** ${dealt} per round${matchupNote(mods.weaponType, m.type, "deal")}`,
+      `- **Hit chance:** you ${Math.round(playerHitChance(state) * 100)}%, it ${Math.round(enemyHitChance(state, task) * 100)}%`,
       `- **Armor:** ${playerArmor(state)}, hit for ${hitDamage(state, task)}${matchupNote(m.type, mods.armorType, "take")}`,
       `- **Best against it:** ${counterTo(m.type)} weapon and armor`,
       `- **Expected HP loss:** ~${fightDamage(state, task)}`,

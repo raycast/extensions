@@ -6,31 +6,42 @@ type Props = {
   codeSnippets?: CodeSnippet[];
   problemMarkdown: string;
   isPaidOnly?: boolean;
-  linkUrl: string;
+  // Undefined until the problem has loaded, so no half-built URL is offered.
+  linkUrl?: string;
 };
+
+// Earlier versions stored "go", but LeetCode's langSlug for Go is "golang".
+function normalizeLanguage(language: string): string {
+  return language === 'go' ? 'golang' : language;
+}
 
 export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPaidOnly, linkUrl }: Props) {
   const preferences = getPreferenceValues<Preferences>();
+  const preferredLanguage = normalizeLanguage(preferences.defaultLanguage);
 
   const sortedSnippets = useMemo(() => {
     if (!codeSnippets) return [];
 
     return [...codeSnippets].sort((a, b) => {
-      const aIsDefault = a.langSlug === preferences.defaultLanguage;
-      const bIsDefault = b.langSlug === preferences.defaultLanguage;
+      const aIsDefault = a.langSlug === preferredLanguage;
+      const bIsDefault = b.langSlug === preferredLanguage;
 
       if (aIsDefault && !bIsDefault) return -1;
       if (!aIsDefault && bIsDefault) return 1;
 
       return a.lang.localeCompare(b.lang);
     });
-  }, [codeSnippets, preferences.defaultLanguage]);
+  }, [codeSnippets, preferredLanguage]);
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open in Browser" url={linkUrl} />
-      <Action.CopyToClipboard title="Copy Link to Clipboard" content={linkUrl} />
-      {!isPaidOnly && (
+      {linkUrl && (
+        <>
+          <Action.OpenInBrowser title="Open in Browser" url={linkUrl} />
+          <Action.CopyToClipboard title="Copy Link to Clipboard" content={linkUrl} />
+        </>
+      )}
+      {!isPaidOnly && problemMarkdown && (
         <Action.CopyToClipboard
           title="Copy Problem to Clipboard"
           content={problemMarkdown}
@@ -42,7 +53,7 @@ export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPai
           {sortedSnippets.map((snippet) => (
             <Action.CopyToClipboard
               key={snippet.langSlug}
-              title={`${snippet.langSlug === preferences.defaultLanguage ? '⭐ ' : ''}${snippet.lang} Code`}
+              title={`${snippet.langSlug === preferredLanguage ? '⭐ ' : ''}${snippet.lang}`}
               content={snippet.code}
             />
           ))}

@@ -2,8 +2,11 @@ import { countOf, showError } from "@chrismessina/raycast-kit";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, List } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
+import { catalogApp, findCatalogSite } from "./catalog";
 import { HistoryActionPanels } from "./components";
+import { addToMyApps } from "./helpers/add-to-my-apps";
 import { getAppFavicon } from "./helpers/apps";
+import { FIND_PROFILE_APP_ID } from "./helpers/findings";
 import {
   clearStarredHistoryItems,
   describeOpens,
@@ -15,7 +18,7 @@ import {
 } from "./helpers/history";
 import { openProfileWithFeedback } from "./helpers/open-profile";
 import { getMigratedAppId, saveHistorySearchText, STORAGE_KEYS } from "./helpers/storage";
-import { buildProfileUrl } from "./helpers/url";
+import { tryBuildAppProfileUrl } from "./helpers/url";
 import { useApps } from "./hooks/useApps";
 import { useHistory } from "./hooks/useHistory";
 import { formatRelativeDate } from "./utils/date";
@@ -54,17 +57,6 @@ function useRememberedSearchText(): [string, (text: string) => void] {
   return [typed ?? stored ?? "", setTyped];
 }
 
-/**
- * The profile's URL, or "" when the template no longer builds a valid one (Copy Profile URL is then hidden)
- */
-function profileUrlOrEmpty(urlTemplate: string, profile: string): string {
-  try {
-    return buildProfileUrl(urlTemplate, profile);
-  } catch {
-    return "";
-  }
-}
-
 export default function HistoryCommand() {
   const { history, isLoading: isLoadingHistory } = useHistory();
   const { entries, isLoading: isLoadingApps } = useApps();
@@ -93,9 +85,29 @@ export default function HistoryCommand() {
   const items = useMemo(() => {
     const apps = new Map(entries.map((entry) => [entry.value, entry]));
     return history.map((item) => {
-      const app = apps.get(item.app);
-      const url = app ? profileUrlOrEmpty(app.urlTemplate, item.profile) : "";
-      return { ...item, appName: app?.name ?? item.appName, favicon: app ? getAppFavicon(app) : Icon.Globe, url };
+      if (item.app === FIND_PROFILE_APP_ID) {
+        return {
+          ...item,
+          appName: "Find Profile",
+          favicon: Icon.MagnifyingGlass,
+          url: "",
+          isSearch: true,
+          catalogSite: undefined,
+        };
+      }
+      // A profile opened from Find Profile on a site that isn't in My Apps is recorded under the site's catalog ID
+      const site = apps.has(item.app) ? undefined : findCatalogSite(item.app);
+      const app = apps.get(item.app) ?? (site ? catalogApp(site) : undefined);
+      // "" hides Copy Profile URL when the template no longer builds a valid URL
+      const url = (app && tryBuildAppProfileUrl(app, item.profile)) ?? "";
+      return {
+        ...item,
+        appName: app?.name ?? item.appName,
+        favicon: app ? getAppFavicon(app) : Icon.Globe,
+        url,
+        catalogSite: site,
+        isSearch: false,
+      };
     });
   }, [history, entries]);
 
@@ -158,10 +170,13 @@ export default function HistoryCommand() {
                 ...(item.isStarred
                   ? [{ icon: { source: Icon.Star, tintColor: FAVORITE_COLOR }, tooltip: "Favorite" }]
                   : []),
-                { text: `${item.count}×`, tooltip: `Opened ${describeOpens(item.count)}` },
+                {
+                  text: `${item.count}×`,
+                  tooltip: `${item.isSearch ? "Searched" : "Opened"} ${describeOpens(item.count)}`,
+                },
                 {
                   text: formatRelativeDate(item.timestamp),
-                  tooltip: `Last opened ${new Date(item.timestamp).toLocaleString()}`,
+                  tooltip: `Last ${item.isSearch ? "searched" : "opened"} ${new Date(item.timestamp).toLocaleString()}`,
                 },
               ]}
               actions={
@@ -177,6 +192,7 @@ export default function HistoryCommand() {
                   onClearStarredProfiles={run("Couldn't Clear Favorites", clearStarredHistoryItems)}
                   onSetSearchText={setSearchText}
                   onSetAppFilter={setAppFilter}
+                  onAddToMyApps={item.catalogSite ? () => addToMyApps(item.catalogSite!) : undefined}
                 />
               }
             />

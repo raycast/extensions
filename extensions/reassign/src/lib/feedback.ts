@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { ApiError, ApiResult, undo } from "./api";
-import { batchFailure, BatchResultRow, ROW_REJECTED_MESSAGE, rowError } from "./envelope";
+import { batchFailure, BatchResultRow, receiptNotice, ROW_REJECTED_MESSAGE, rowError } from "./envelope";
 
 // Toast and error helpers shared by the mutating commands.
 
@@ -181,7 +181,9 @@ export async function runMutation<T>(
   const success = typeof successTitle === "function" ? successTitle(result.data) : { title: successTitle };
   toast.style = Toast.Style.Success;
   toast.title = success.title;
-  if (success.message) toast.message = success.message;
+  // The server notice says what happened to the calendar event, so it wins over the caller text.
+  const message = receiptNotice(receipt) ?? success.message;
+  if (message) toast.message = message;
   if (failed) toast.message = "Refresh to see the change.";
   if (token) applyUndoToast(toast, token, opts);
   return { ok: true, undoToken: token };

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Clipboard, Grid, Icon, Color, showToast, Toast } f
 import fs from "fs";
 import path from "path";
 import type { Airline } from "soaring-symbols";
-import { getAssetTiles } from "../utils/airlines";
+import { earlierMarks, getAssetTiles, markTitle } from "../utils/airlines";
 import { getSVGContent } from "../utils/fetch";
 
 const slugToName = (slug: string): string => {
@@ -22,13 +22,15 @@ const getDownloadsDir = (): string => {
   return path.join(home, "Downloads");
 };
 
+type Tile = ReturnType<typeof getAssetTiles>[number];
+
 export default function AirlineAssets(airline: Airline) {
-  const assets = getAssetTiles(airline).map(({ variant, url: source, mono }) => {
+  const renderTile = ({ variant, url: source, fileName, mono }: Tile) => {
     const tintColor = mono ? Color.PrimaryText : undefined;
 
     return (
       <Grid.Item
-        key={variant}
+        key={source}
         content={{ source, tintColor }}
         title={slugToName(variant)}
         actions={
@@ -57,10 +59,8 @@ export default function AirlineAssets(airline: Airline) {
                 onAction={async () => {
                   try {
                     const svg = await getSVGContent(source);
-                    const defaultFilename = `${airline.slug}-${variant}.svg`;
-
                     const downloadsDir = getDownloadsDir();
-                    const filePath = path.join(downloadsDir, defaultFilename);
+                    const filePath = path.join(downloadsDir, fileName);
 
                     // Validate basic SVG structure before writing
                     if (!isProbablySvg(svg)) {
@@ -88,7 +88,24 @@ export default function AirlineAssets(airline: Airline) {
         }
       />
     );
-  });
+  };
+
+  // With older marks, the current ones get a section of their own above them,
+  // newest first; without, the grid stays a plain list of tiles
+  const history = earlierMarks(airline);
+  const current = getAssetTiles(airline).map(renderTile);
+  const children = history.length
+    ? [
+        <Grid.Section key="current" title="Current">
+          {current}
+        </Grid.Section>,
+        ...history.map((mark) => (
+          <Grid.Section key={mark.since} title={markTitle(airline, mark)}>
+            {getAssetTiles(airline, mark).map(renderTile)}
+          </Grid.Section>
+        )),
+      ]
+    : current;
 
   return (
     <Grid
@@ -96,7 +113,7 @@ export default function AirlineAssets(airline: Airline) {
       inset={Grid.Inset.Small}
       throttle
       navigationTitle={`${airline.name} | Assets`}
-      children={assets}
+      children={children}
     />
   );
 }

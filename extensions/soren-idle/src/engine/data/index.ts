@@ -6,3 +6,5 @@ export * from "./bounties";
 export * from "./trade";
 export * from "./base";
 export * from "./game";
+export * from "./prestige";
+export * from "./collection";

@@ -55,7 +55,7 @@ export function SuggestionListItem({ suggestion, onSuggestionAction }: Suggestio
           <ActionPanel.Section>
             <Action.CreateQuicklink
               quicklink={{ link: suggestion.url, name: suggestion.query }}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
           </ActionPanel.Section>
         </ActionPanel>

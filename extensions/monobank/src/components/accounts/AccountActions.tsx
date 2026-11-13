@@ -1,114 +1,81 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { shortcuts } from "../../data/shortcuts";
+import { MOCK_API } from "../../mocks/config";
+import { MOCK_OWNER } from "../../mocks/owner";
 import { Account } from "../../types";
-import EditForm from "../../views/EditForm";
+import { formatRequisites, getSendUrl, hasTopUpPage } from "../../utils";
+import PinActionsSection, { PinProps } from "../PinActionsSection";
+import StatementView from "../statement/StatementView";
+import EditAccountForm from "./EditAccountForm";
 
+/** `ownerName` is the name monobank has for the account's owner, used in the requisites. */
 export default function AccountActions(props: {
   account: Account;
-  isPinned: boolean;
-  validRearrangeDirections?: { up: boolean; down: boolean };
-  onPin: (account: Account) => void;
-  onRearrange?: (account: Account, direction: "up" | "down") => void;
+  ownerName?: string;
+  pin: PinProps;
   onToggleDetails: () => void;
   onCopyTotal: () => void;
-  onEdit: (id: string, account: Account) => void;
+  onEdit: (id: string, patch: Pick<Account, "title">) => void;
 }) {
-  const { account, isPinned, validRearrangeDirections, onPin, onRearrange, onToggleDetails, onCopyTotal, onEdit } =
-    props;
-
-  const sendUrl = `https://send.monobank.ua/${account.sendId}`;
+  const { account, ownerName, pin, onToggleDetails, onCopyTotal, onEdit } = props;
+  // With mocks, copied requisites hold no personal data.
+  const { fullName, taxId } = MOCK_API ? MOCK_OWNER : getPreferenceValues<Preferences>();
+  const sendUrl = getSendUrl(account.sendId);
+  // The preference has the patronymic, which monobank's name doesn't.
+  const owner = { name: fullName?.trim() || ownerName, taxId };
+  // Without the top-up actions, the next two are first and take ⏎ and ⌘⏎ instead of their own shortcuts.
+  const isTopUpFirst = hasTopUpPage(account);
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {account.sendId && account.currency.code === "UAH" && (
+        {isTopUpFirst && (
           <>
             <Action.OpenInBrowser title="Open Top up Page" url={sendUrl} />
             <Action.CopyToClipboard title="Copy Top up Page URL" icon={Icon.Link} content={sendUrl} />
           </>
         )}
+        {/* Copy IBAN stays first after the top-up actions, as before "View Statement" was added. */}
         <Action.CopyToClipboard
           title="Copy IBAN"
           content={account.iban}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
-          }}
+          shortcut={isTopUpFirst ? shortcuts.copyIban : undefined}
+        />
+        <Action.Push
+          title="View Statement"
+          icon={Icon.List}
+          shortcut={isTopUpFirst ? shortcuts.viewStatement : undefined}
+          target={<StatementView account={account} />}
         />
         <Action.CopyToClipboard
-          title="Copy Balance"
-          content={account.balance}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "b" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "b" },
-          }}
+          title="Copy Requisites"
+          icon={Icon.Document}
+          shortcut={shortcuts.copyRequisites}
+          content={formatRequisites(account, owner, "uk")}
         />
-        <Action
-          title="Copy Total"
-          icon={Icon.CopyClipboard}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "t" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "t" },
-          }}
-          onAction={onCopyTotal}
+        <Action.CopyToClipboard
+          title="Copy Requisites in English"
+          icon={Icon.Document}
+          content={formatRequisites(account, owner, "en")}
         />
+        <Action.CopyToClipboard title="Copy Balance" content={account.balance} shortcut={shortcuts.copyBalance} />
+        <Action title="Copy Total" icon={Icon.CopyClipboard} shortcut={shortcuts.copyTotal} onAction={onCopyTotal} />
         <Action.Push
           title="Edit Account"
           icon={Icon.Pencil}
-          shortcut={{
-            macOS: { modifiers: ["cmd"], key: "e" },
-            Windows: { modifiers: ["ctrl"], key: "e" },
-          }}
-          target={<EditForm account={account} onEdit={onEdit} />}
+          shortcut={shortcuts.edit}
+          target={<EditAccountForm account={account} onEdit={onEdit} />}
         />
       </ActionPanel.Section>
 
-      <ActionPanel.Section>
+      <PinActionsSection {...pin}>
         <Action
           title="Toggle Details"
           icon={Icon.Sidebar}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "d" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "d" },
-          }}
+          shortcut={shortcuts.toggleDetails}
           onAction={onToggleDetails}
         />
-        <Action
-          title={!isPinned ? "Pin" : "Unpin"}
-          icon={!isPinned ? Icon.Pin : Icon.PinDisabled}
-          shortcut={{
-            macOS: { key: "p", modifiers: ["cmd", "shift"] },
-            Windows: { key: "p", modifiers: ["ctrl", "shift"] },
-          }}
-          onAction={() => onPin(account)}
-        />
-        {isPinned && onRearrange && (
-          <>
-            {validRearrangeDirections?.up && (
-              <Action
-                title="Move up in Pinned"
-                icon={Icon.ArrowUp}
-                shortcut={{
-                  macOS: { key: "arrowUp", modifiers: ["cmd", "opt"] },
-                  Windows: { key: "arrowUp", modifiers: ["ctrl", "alt"] },
-                }}
-                onAction={() => onRearrange(account, "up")}
-              />
-            )}
-
-            {validRearrangeDirections?.down && (
-              <Action
-                title="Move Down in Pinned"
-                icon={Icon.ArrowDown}
-                shortcut={{
-                  macOS: { key: "arrowDown", modifiers: ["cmd", "opt"] },
-                  Windows: { key: "arrowDown", modifiers: ["ctrl", "alt"] },
-                }}
-                onAction={() => onRearrange(account, "down")}
-              />
-            )}
-          </>
-        )}
-      </ActionPanel.Section>
+      </PinActionsSection>
     </ActionPanel>
   );
 }

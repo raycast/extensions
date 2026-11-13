@@ -31,6 +31,15 @@ function parseTimeout(value: string | undefined): number {
   return Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 120_000;
 }
 
+// framework can be null (uninitialized site), a variant like "drupal10" / "wordpress_network",
+// or a framework without a bundled icon (e.g. "nodejs", "backdrop").
+function frameworkIcon(framework: string | null) {
+  if (framework === null) return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+  if (framework.startsWith("wordpress")) return { source: "wordpress.svg", tintColor: Color.PrimaryText };
+  if (framework.startsWith("drupal")) return { source: "drupal.svg", tintColor: Color.PrimaryText };
+  return { source: Icon.Code, tintColor: Color.PrimaryText };
+}
+
 function getOrgLabel(orgName: string): string {
   return orgName.toLowerCase() === "team" ? "Personal" : orgName;
 }
@@ -172,7 +181,7 @@ export default function Command() {
 
             return (
               <List.Item
-                icon={{ source: `${sites[key].framework.replace(/\d+$/, "")}.svg`, tintColor: Color.PrimaryText }}
+                icon={frameworkIcon(sites[key].framework)}
                 title={sites[key].name}
                 key={sites[key].id}
                 accessories={[
@@ -204,11 +213,8 @@ export default function Command() {
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Framework"
-                          icon={{
-                            source: `${sites[key].framework.replace(/\d+$/, "")}.svg`,
-                            tintColor: Color.PrimaryText,
-                          }}
-                          text={`${sites[key].framework}`}
+                          icon={frameworkIcon(sites[key].framework)}
+                          text={sites[key].framework ?? "Not initialized"}
                         />
                       </List.Item.Detail.Metadata>
                     }

@@ -1,7 +1,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { diffDocs, groupByDocs, parseConfigReference, validateSettingValue } from "./settings";
+import {
+  choicesFor,
+  diffDocs,
+  groupByDocs,
+  parseConfigReference,
+  validateEdit,
+  validateSettingValue,
+} from "./settings";
 import type { Setting, SettingDoc } from "./settings";
 import snapshot from "./config-docs.json";
 
@@ -136,8 +143,53 @@ describe("bundled config-docs.json snapshot", () => {
     }
   });
 
-  it("lists allowed values for the enums the picker relies on", () => {
-    expect(settings["cursor-style"]?.values).toEqual(["block", "bar", "underline", "block_hollow"]);
-    expect(settings["new-tab-position"]?.values).toContain("after-current");
+  it("offers every listed enum value in the picker, and accepts each one", () => {
+    const enums = Object.entries(settings).filter(([, doc]) => doc.type === "enum" && doc.values);
+    expect(enums.length).toBeGreaterThan(0);
+    for (const [key, doc] of enums) {
+      const setting: Setting = { key, value: "", type: "string", text: "", customized: false };
+      expect(choicesFor(setting, doc), key).toEqual(doc.values);
+      for (const value of doc.values!) expect(validateSettingValue(value, doc), `${key}=${value}`).toBeUndefined();
+    }
+  });
+});
+
+describe("editing a setting", () => {
+  const enumDoc: SettingDoc = { section: "S", type: "enum", default: "a", description: "", values: ["a", "b"] };
+  const setting = (overrides: Partial<Setting> = {}): Setting => ({
+    key: "k",
+    value: "",
+    type: "string",
+    text: "a",
+    customized: false,
+    ...overrides,
+  });
+
+  it("keeps a customized value the reference doesn't list, first in the picker", () => {
+    expect(choicesFor(setting({ text: "alias", customized: true }), enumDoc)).toEqual(["alias", "a", "b"]);
+    expect(choicesFor(setting({ text: "alias" }), enumDoc)).toEqual(["a", "b"]);
+    expect(choicesFor(setting(), { ...enumDoc, type: "string" })).toBeUndefined();
+  });
+
+  it("always saves the current value unchanged, even one the reference rejects", () => {
+    expect(validateEdit("alias", setting({ text: "alias", customized: true }), enumDoc)).toBeUndefined();
+    expect(validateEdit("alias", setting(), enumDoc)).toBe("Use one of: a, b");
+  });
+
+  it("treats an empty value as a reset, never an error", () => {
+    expect(validateEdit("", setting(), enumDoc)).toBeUndefined();
+  });
+
+  it("checks numbers the reference doesn't document", () => {
+    expect(validateEdit("x", setting({ type: "number", text: "1" }), undefined)).toBe("Enter a number");
+    expect(validateEdit("2.5", setting({ type: "number", text: "1" }), undefined)).toBeUndefined();
+  });
+
+  it("accepts only themes Otty has, and none while the list is loading", () => {
+    expect(validateEdit("Nord", setting({ text: "Paper" }), undefined, { names: ["Paper", "Nord"] })).toBeUndefined();
+    expect(validateEdit("Nope", setting({ text: "Paper" }), undefined, { names: ["Paper"] })).toBe(
+      "Pick one of Otty's themes",
+    );
+    expect(validateEdit("Nord", setting({ text: "Paper" }), undefined, {})).toBe("Pick one of Otty's themes");
   });
 });

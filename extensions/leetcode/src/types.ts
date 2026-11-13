@@ -12,7 +12,7 @@ export type Problem = {
   stats: string;
   topicTags: {
     name: string;
-  };
+  }[];
   codeSnippets: CodeSnippet[];
 };
 
@@ -24,7 +24,7 @@ export type ProblemStats = {
 
 export type ProblemPreview = Pick<
   Problem,
-  'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats' | 'codeSnippets'
+  'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats'
 >;
 
 export type DailyChallenge = {
@@ -39,7 +39,7 @@ export type CodeSnippet = {
   code: string;
 };
 
-export type GraphQLResponse<T> = { data: T };
+export type GraphQLResponse<T> = { data: T; errors?: { message: string }[] };
 
 export type DailyChallengeResponse = GraphQLResponse<{
   dailyChallenge: DailyChallenge;
@@ -49,6 +49,21 @@ export type SearchProblemResponse = GraphQLResponse<{
   problemsetQuestionList: {
     total: number;
     data: ProblemPreview[];
+  } | null;
+}>;
+
+export type PanelSearchResponse = GraphQLResponse<{
+  problemsetPanelQuestionList: {
+    questions: {
+      difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+      questionFrontendId: string;
+      paidOnly: boolean;
+      title: string;
+      titleSlug: string;
+      acRate: number | null;
+    }[];
+    totalLength: number;
+    hasMore: boolean;
   } | null;
 }>;
 

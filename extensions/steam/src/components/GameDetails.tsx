@@ -1,9 +1,10 @@
 import { ActionPanel, Detail, LocalStorage } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { useGameData } from "../lib/fetcher";
 import { useIsLoggedIn } from "../lib/hooks";
 import { getHowLongToBeatUrl, getYouTubeUrl, SteamGameError } from "../lib/games";
+import { formatPlayers, getCurrentPlayers } from "../lib/players";
 import { GameDataSimple, GameSimple } from "../types";
 import { LaunchActions } from "./Actions";
 
@@ -11,6 +12,11 @@ export const GameDetails = ({ game }: { game: GameSimple | GameDataSimple }) => 
   const { data: gameData, isLoading, isError: error } = useGameData({ appid: game.appid });
   const once = useRef(false);
   const isLoggedIn = useIsLoggedIn();
+  // Hidden when Steam has no count, so a failure needs no message
+  const { data: playing } = useCachedPromise(getCurrentPlayers, [game.appid ?? 0], {
+    execute: Boolean(game.appid),
+    onError: () => undefined,
+  });
 
   const markdown = gameData
     ? `
@@ -68,6 +74,7 @@ ${gameData.short_description}
             {gameData?.release_date?.date ? (
               <Detail.Metadata.Label title="Release Date" text={gameData?.release_date?.date} />
             ) : null}
+            {playing !== undefined ? <Detail.Metadata.Label title="Playing Now" text={formatPlayers(playing)} /> : null}
             {gameData?.metacritic?.url ? (
               <Detail.Metadata.Link
                 title="Data"

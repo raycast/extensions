@@ -1,3 +1,5 @@
+import type { PlatformId } from "../catalog/platforms";
+
 /**
  * A social app/platform that can be used to open profiles
  */
@@ -7,6 +9,12 @@ export interface App {
   value: string;
   urlTemplate: string;
   placeholder: string;
+  /** The software the site runs, for a custom app on a Mastodon server, Discourse forum and so on */
+  platform?: PlatformId;
+  /** Hidden from Find Profile unless NSFW sites are included */
+  nsfw?: boolean;
+  /** On an ATProto app, the server a bare name belongs to: `example` means `example.bsky.social` */
+  handleDomain?: string;
 }
 
 /**
@@ -28,6 +36,9 @@ export interface AppSetting {
 export interface CustomAppInput {
   name: string;
   urlTemplate: string;
+  platform?: PlatformId;
+  nsfw?: boolean;
+  handleDomain?: string;
 }
 
 /**
@@ -69,5 +80,8 @@ export interface YAMLSettings {
     value: string;
     urlTemplate: string;
     visible: boolean;
+    platform?: PlatformId;
+    nsfw?: boolean;
+    handleDomain?: string;
   }>;
 }

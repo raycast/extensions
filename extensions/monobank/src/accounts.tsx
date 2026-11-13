@@ -1,22 +1,21 @@
 import { Clipboard, List, Toast, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Account, AccountType, Jar } from "./types";
-import { useLocalStorage, useCurrencyRates, useClientInfo } from "./hooks";
-
-import AccountDetail from "./components/accounts/AccountDetail";
-import AccountActions from "./components/accounts/AccountActions";
-import JarDetail from "./components/accounts/JarDetail";
-import JarActions from "./components/accounts/JarActions";
-
+import { AccountOrJar, AccountType } from "./types";
+import { useClientInfo, useCurrencyRates, usePinned } from "./hooks";
+import { STORAGE_KEYS } from "./data/constants";
+import CategoryDropdown from "./components/CategoryDropdown";
+import TokenErrorEmptyView, { showInvalidTokenToast } from "./components/TokenErrorEmptyView";
+import { PinProps } from "./components/PinActionsSection";
+import AccountListItem from "./components/accounts/AccountListItem";
+import JarListItem from "./components/accounts/JarListItem";
 import {
-  formatCurrency,
-  filterOutPinnedItems,
-  isAccount,
-  satisfiesTexts,
   calculateTotal,
-  getAccountAccessories,
-  getJarAccessories,
-  getFlagImage,
+  compareJarsByGoal,
+  filterOutPinnedItems,
+  formatCurrency,
+  getItemTitle,
+  isAccount,
+  matchesSearch,
 } from "./utils";
 
 enum Category {
@@ -31,63 +30,66 @@ const categoryLabel: Record<Category, string> = {
   [Category.ALL]: "All",
   [Category.PINNED]: "Pinned",
   [Category.CARD]: "Cards",
-  [Category.FOP]: "PEs",
+  [Category.FOP]: "FOP Accounts",
   [Category.JAR]: "Jars",
 };
+
+const categorySections = [
+  [Category.ALL, Category.PINNED],
+  [Category.CARD, Category.FOP, Category.JAR],
+].map((section) => section.map((value) => ({ value, title: categoryLabel[value] })));
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState<Category>(Category.ALL);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const { data: clientInfo, updateAccount, isLoading: isClientInfoLoading, isError: isAccountsError } = useClientInfo();
-  const { data: rates, isLoading: isRatesLoading, isError: isRatesError } = useCurrencyRates();
   const {
-    data: pinned,
-    setData: setPinned,
-    isLoading: isPinnedLoadingFromLS,
-  } = useLocalStorage<string[]>("pinnedAccounts", []);
+    data: clientInfo,
+    updateAccount,
+    isLoading: isClientInfoLoading,
+    isError: isAccountsError,
+    tokenError,
+  } = useClientInfo();
+  const { data: rates, isLoading: isRatesLoading, isError: isRatesError } = useCurrencyRates();
+  const pinned = usePinned<AccountOrJar>(STORAGE_KEYS.pinnedAccounts, getItemTitle);
   const { accounts, jars } = clientInfo;
 
   useEffect(() => {
-    if (isAccountsError || isRatesError) {
+    // A missing token isn't an error: the empty view explains what to do.
+    if (tokenError === "missing") return;
+
+    if (tokenError === "invalid") {
+      showInvalidTokenToast();
+    } else if (isAccountsError || isRatesError) {
       showToast({
         style: Toast.Style.Failure,
         title: "Something went wrong",
         message: isAccountsError ? "Failed to load accounts" : "Failed to load currency rates",
       });
     }
-  }, [isAccountsError, isRatesError]);
+  }, [tokenError, isAccountsError, isRatesError]);
 
-  function onCategoryChange(newValue: Category) {
-    setCategory(newValue);
+  const cards = accounts.filter((account) => account.type !== AccountType.FOP);
+  const fops = accounts.filter((account) => account.type === AccountType.FOP);
+  const sortedJars = [...jars].sort(compareJarsByGoal);
+  const allItems: AccountOrJar[] = [...cards, ...fops, ...sortedJars];
+
+  const pinnedItems = pinned.pinnedIds
+    .map((id) => allItems.find((item) => item.id === id))
+    .filter((item): item is AccountOrJar => !!item && matchesSearch(item, searchText));
+
+  function getUnpinnedItems<T extends AccountOrJar>(items: T[]) {
+    return filterOutPinnedItems({ category, items, pinned: pinned.pinnedIds }).filter((item) =>
+      matchesSearch(item, searchText),
+    );
   }
 
-  async function onPin(item: Account | Jar) {
-    const isPinned = pinned.some((pinnedAccount) => pinnedAccount === item.id);
-    if (isPinned) {
-      setPinned(pinned.filter((pinnedAccount) => pinnedAccount !== item.id));
-      await showToast(Toast.Style.Success, `Unpinned ${getTitle(item)}`);
-    } else {
-      setPinned([...pinned, item.id]);
-      await showToast(Toast.Style.Success, `Pinned ${getTitle(item)}`);
-    }
-  }
+  const totalAmount = calculateTotal(allItems, rates);
+  const commandTitle = "Show Accounts"; // title for "accounts" in package.json
+  const navigationTitle = `${commandTitle} (Total: ${formatCurrency(totalAmount, "UAH")})`;
 
-  async function onRearrange(item: Account | Jar, direction: "up" | "down") {
-    const accountIndex = pinned.findIndex((pinnedAccount) => pinnedAccount === item.id);
-    const newPinned = [...pinned];
-
-    if (direction === "up") {
-      newPinned[accountIndex] = newPinned[accountIndex - 1];
-      newPinned[accountIndex - 1] = item.id;
-      await showToast(Toast.Style.Success, `Moved up ${getTitle(item)}`);
-    } else {
-      newPinned[accountIndex] = newPinned[accountIndex + 1];
-      newPinned[accountIndex + 1] = item.id;
-      await showToast(Toast.Style.Success, `Moved down ${getTitle(item)}`);
-    }
-
-    setPinned(newPinned);
+  function isCategoryVisible(sectionCategory: Category) {
+    return category === Category.ALL || category === sectionCategory;
   }
 
   function toggleDetails() {
@@ -99,221 +101,60 @@ export default function Command() {
     await showHUD("Copied to Clipboard");
   }
 
-  function getValidRearrangeDirections(item: Account | Jar) {
+  function getPinProps(item: AccountOrJar, isInPinnedSection: boolean): PinProps {
+    const onTogglePin = () => pinned.togglePin(item);
+    if (!isInPinnedSection) return { isPinned: false, onTogglePin };
+
     return {
-      up: pinned.findIndex((pinnedAccount) => pinnedAccount === item.id) > 0,
-      down: pinned.findIndex((pinnedAccount) => pinnedAccount === item.id) < pinned.length - 1,
+      isPinned: true,
+      onTogglePin,
+      moveDirections: pinned.getMoveDirections(item),
+      onMove: (direction) => pinned.move(item, direction),
     };
   }
 
-  const cards = accounts.filter((account) => account.type !== AccountType.FOP);
-  const fops = accounts.filter((account) => account.type === AccountType.FOP);
+  function renderItem(item: AccountOrJar, isInPinnedSection = false) {
+    const commonProps = {
+      isShowingDetail,
+      pin: getPinProps(item, isInPinnedSection),
+      onToggleDetails: toggleDetails,
+      onCopyTotal,
+    };
 
-  const pinnedAccounts = pinned
-    .map((pinnedAccountId) => [...accounts, ...jars].find((account) => account.id === pinnedAccountId))
-    .filter((account) => {
-      if (!account) return false;
-
-      if (isAccount(account)) {
-        return satisfiesTexts(
-          searchText,
-          account.title,
-          account.currency.code,
-          account.type,
-          account.maskedPan.length ? account.maskedPan[0] : account.iban,
-        );
-      }
-
-      return satisfiesTexts(searchText, account.currency.code, account.title);
-    }) as (Account | Jar)[];
-
-  const filteredCards = filterOutPinnedItems({ category, items: cards, pinned }).filter((card) =>
-    satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0]),
-  );
-
-  const filteredFops = filterOutPinnedItems({ category, items: fops, pinned }).filter((fop) =>
-    satisfiesTexts(searchText, fop.title, fop.currency.code, fop.type, fop.iban),
-  );
-
-  const filteredJars = filterOutPinnedItems({ category, items: jars, pinned }).filter((jar) =>
-    satisfiesTexts(searchText, jar.title, jar.currency.code),
-  );
-
-  const totalAmount = calculateTotal([...cards, ...fops, ...jars], rates);
-  const commandTitle = "Show Accounts"; // title for "accounts" in package.json
-  const navigationTitle = `${commandTitle} (Total: ${formatCurrency(totalAmount, "UAH")})`;
-
-  const isLoading = isClientInfoLoading || isRatesLoading || isPinnedLoadingFromLS;
+    return isAccount(item) ? (
+      <AccountListItem
+        key={item.id}
+        account={item}
+        ownerName={clientInfo.name}
+        onEdit={updateAccount}
+        {...commonProps}
+      />
+    ) : (
+      <JarListItem key={item.id} jar={item} {...commonProps} />
+    );
+  }
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isClientInfoLoading || isRatesLoading || pinned.isLoading}
       isShowingDetail={isShowingDetail}
       navigationTitle={!isRatesError ? navigationTitle : undefined}
-      searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}
+      searchBarAccessory={<CategoryDropdown sections={categorySections} onChange={setCategory} />}
       onSearchTextChange={setSearchText}
     >
+      {tokenError && <TokenErrorEmptyView tokenError={tokenError} purpose="see your accounts" />}
       <List.Section title={categoryLabel[Category.PINNED]}>
-        {[Category.ALL, Category.PINNED].includes(category) &&
-          pinnedAccounts.map((account) => (
-            <List.Item
-              key={account.id}
-              id={account.id}
-              icon={getFlagImage(account.currency.code)}
-              title={getTitle(account)}
-              subtitle={getSubtitle(account)}
-              detail={
-                isShowingDetail ? (
-                  isAccount(account) ? (
-                    <AccountDetail account={account} />
-                  ) : (
-                    <JarDetail jar={account} />
-                  )
-                ) : null
-              }
-              accessories={
-                !isShowingDetail
-                  ? isAccount(account)
-                    ? getAccountAccessories(account)
-                    : getJarAccessories(account)
-                  : null
-              }
-              actions={
-                isAccount(account) ? (
-                  <AccountActions
-                    account={account}
-                    isPinned={true}
-                    validRearrangeDirections={getValidRearrangeDirections(account)}
-                    onPin={onPin}
-                    onRearrange={onRearrange}
-                    onToggleDetails={toggleDetails}
-                    onCopyTotal={onCopyTotal}
-                    onEdit={updateAccount}
-                  />
-                ) : (
-                  <JarActions
-                    jar={account}
-                    isPinned={true}
-                    validRearrangeDirections={getValidRearrangeDirections(account)}
-                    onPin={onPin}
-                    onRearrange={onRearrange}
-                    onToggleDetails={toggleDetails}
-                    onCopyTotal={onCopyTotal}
-                  />
-                )
-              }
-            />
-          ))}
+        {isCategoryVisible(Category.PINNED) && pinnedItems.map((item) => renderItem(item, true))}
       </List.Section>
-
       <List.Section title={categoryLabel[Category.CARD]}>
-        {[Category.ALL, Category.CARD].includes(category) &&
-          filteredCards.map((card) => (
-            <List.Item
-              key={card.id}
-              id={card.id}
-              icon={getFlagImage(card.currency.code)}
-              title={getTitle(card)}
-              subtitle={getSubtitle(card)}
-              detail={<AccountDetail account={card} />}
-              accessories={!isShowingDetail ? getAccountAccessories(card) : null}
-              actions={
-                <AccountActions
-                  account={card}
-                  isPinned={false}
-                  onPin={onPin}
-                  onToggleDetails={toggleDetails}
-                  onCopyTotal={onCopyTotal}
-                  onEdit={updateAccount}
-                />
-              }
-            />
-          ))}
+        {isCategoryVisible(Category.CARD) && getUnpinnedItems(cards).map((item) => renderItem(item))}
       </List.Section>
-
       <List.Section title={categoryLabel[Category.FOP]}>
-        {[Category.ALL, Category.FOP].includes(category) &&
-          filteredFops.map((fop) => (
-            <List.Item
-              key={fop.id}
-              id={fop.id}
-              icon={getFlagImage(fop.currency.code)}
-              title={getTitle(fop)}
-              subtitle={getSubtitle(fop)}
-              detail={<AccountDetail account={fop} />}
-              accessories={!isShowingDetail ? getAccountAccessories(fop) : null}
-              actions={
-                <AccountActions
-                  account={fop}
-                  isPinned={false}
-                  onPin={onPin}
-                  onToggleDetails={toggleDetails}
-                  onCopyTotal={onCopyTotal}
-                  onEdit={updateAccount}
-                />
-              }
-            />
-          ))}
+        {isCategoryVisible(Category.FOP) && getUnpinnedItems(fops).map((item) => renderItem(item))}
       </List.Section>
-
       <List.Section title={categoryLabel[Category.JAR]}>
-        {[Category.ALL, Category.JAR].includes(category) &&
-          filteredJars.map((jar) => (
-            <List.Item
-              key={jar.id}
-              id={jar.id}
-              icon={getFlagImage(jar.currency.code)}
-              title={getTitle(jar)}
-              subtitle={getSubtitle(jar)}
-              detail={<JarDetail jar={jar} />}
-              accessories={!isShowingDetail ? getJarAccessories(jar) : null}
-              actions={
-                <JarActions
-                  jar={jar}
-                  isPinned={false}
-                  onPin={onPin}
-                  onToggleDetails={toggleDetails}
-                  onCopyTotal={onCopyTotal}
-                />
-              }
-            />
-          ))}
+        {isCategoryVisible(Category.JAR) && getUnpinnedItems(sortedJars).map((item) => renderItem(item))}
       </List.Section>
     </List>
   );
-}
-
-function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => void }) {
-  const { onCategoryChange } = props;
-
-  const commonCategories = Object.values(Category).filter((category) =>
-    [Category.ALL, Category.PINNED].includes(category),
-  );
-  const otherCategories = Object.values(Category).filter((category) => !commonCategories.includes(category));
-
-  return (
-    <List.Dropdown tooltip="Select Category" storeValue onChange={(newValue) => onCategoryChange(newValue as Category)}>
-      <List.Dropdown.Section>{renderCategoryDropdownItems(commonCategories)}</List.Dropdown.Section>
-      <List.Dropdown.Section>{renderCategoryDropdownItems(otherCategories)}</List.Dropdown.Section>
-    </List.Dropdown>
-  );
-}
-
-function renderCategoryDropdownItems(categories: Category[]) {
-  return categories.map((category) => (
-    <List.Dropdown.Item key={category} title={categoryLabel[category]} value={category} />
-  ));
-}
-
-function getTitle(item: Account | Jar) {
-  if (isAccount(item)) {
-    const panOrIban = item.maskedPan.length ? item.maskedPan[0] : item.iban;
-    return `${item.title || panOrIban}`;
-  }
-
-  return item.title;
-}
-
-function getSubtitle(item: Account | Jar) {
-  return formatCurrency(item.balance, item.currency.code);
 }

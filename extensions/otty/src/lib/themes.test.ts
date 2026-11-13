@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildThemeCatalog, parseTheme, themePreviewSvg } from "./themes";
+import { buildThemeCatalog, parseTheme, previewFileName, themePreviewSvg } from "./themes";
 
 const PAPER = `[meta]
 name        = "Paper"
@@ -87,10 +87,18 @@ describe("buildThemeCatalog", () => {
 });
 
 describe("themePreviewSvg", () => {
-  it("paints the theme's background and accent", () => {
+  it("paints the window in the background color and the cursor dot in the accent", () => {
     const svg = themePreviewSvg(parseTheme(PAPER)!.colors!);
-    expect(svg).toContain('fill="#FCFBF9"');
-    expect(svg).toContain('fill="#2B5A38"');
-    expect(svg.startsWith("<svg")).toBe(true);
+    expect(svg).toMatch(/^<svg [^>]*><rect width="300" height="200" rx="16" fill="#FCFBF9"\/>/);
+    expect(svg).toContain('<circle cx="104" cy="98" r="6" fill="#2B5A38"/>');
+    expect(svg.endsWith("</svg>")).toBe(true);
+  });
+});
+
+describe("previewFileName", () => {
+  it("keeps names that slug alike apart", () => {
+    expect(previewFileName("My Theme")).toMatch(/^my-theme-[0-9a-f]{8}\.svg$/);
+    expect(previewFileName("My Theme")).not.toBe(previewFileName("My-Theme"));
+    expect(previewFileName("My Theme")).toBe(previewFileName("My Theme"));
   });
 });

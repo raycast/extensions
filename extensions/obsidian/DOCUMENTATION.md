@@ -20,7 +20,7 @@ const vault = vaults[0];
 
 const plugins = Vault.readCorePlugins();
 
-Vault.writeMarkdown(
+const saved = Vault.writeMarkdown(
   "some/path",
   "some name",
   "some text",
