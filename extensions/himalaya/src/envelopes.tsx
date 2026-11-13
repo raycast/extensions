@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color, useNavigation, Alert } from "@raycast/api";
+import { getMajorVersion, messageReadArgs, readMessageBody } from "./cli";
 import { Envelope, Flags, Folder } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
@@ -65,13 +66,14 @@ function MessageDetail({ envelope, onDelete }: { envelope: Envelope; onDelete: (
       setIsLoading(true);
 
       // Execute CLI command to get message body
+      const major = await getMajorVersion(preferences.binaryPath);
       const result = await execa(
         preferences.binaryPath,
-        ["message", "read", "--no-headers", envelope.id, "--account", preferences.defaultAccount],
+        messageReadArgs(major, preferences.defaultAccount, envelope.id, envelope.folder_name ?? undefined),
         {},
       );
 
-      setMessageBody(result.stdout);
+      setMessageBody(readMessageBody(major, result.stdout));
     } catch (error) {
       console.error("Error fetching message body:", error);
       setMessageBody("Error loading message body.");
@@ -111,12 +113,17 @@ ${messageBody}
             shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
             onAction={() => {
               const prefs = getPreferenceValues<Preferences>();
-              deleteEnvelopeAndRefresh(envelope.id, prefs, () => {
-                // Call the onDelete callback to refresh the list
-                onDelete();
-                // Pop back to the list view
-                pop();
-              });
+              deleteEnvelopeAndRefresh(
+                envelope.id,
+                prefs,
+                () => {
+                  // Call the onDelete callback to refresh the list
+                  onDelete();
+                  // Pop back to the list view
+                  pop();
+                },
+                envelope.folder_name ?? undefined,
+              );
             }}
           />
           <Action.Push
@@ -152,14 +159,20 @@ ${messageBody}
                           icon={{ source: Icon.Folder }}
                           onAction={() => {
                             const prefs = getPreferenceValues<Preferences>();
-                            moveEnvelopeAndRefresh(envelope.id, folder.name, prefs, () => {
-                              // Call the onDelete callback to refresh the list
-                              onDelete();
-                              // Pop back to the list view (this will pop the folder selection view)
-                              pop();
-                              // Pop one more time to go back to the envelope list (if we're in the detail view)
-                              pop();
-                            });
+                            moveEnvelopeAndRefresh(
+                              envelope.id,
+                              folder.name,
+                              prefs,
+                              () => {
+                                // Call the onDelete callback to refresh the list
+                                onDelete();
+                                // Pop back to the list view (this will pop the folder selection view)
+                                pop();
+                                // Pop one more time to go back to the envelope list (if we're in the detail view)
+                                pop();
+                              },
+                              envelope.folder_name ?? undefined,
+                            );
                           }}
                         />
                       </ActionPanel>
@@ -241,7 +254,7 @@ export default function EnvelopeList() {
   };
 
   // Handle deletion from the list view
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, sourceFolder?: string) => {
     if (
       await confirmAlert({
         title: "Delete Email",
@@ -253,13 +266,18 @@ export default function EnvelopeList() {
       })
     ) {
       // Perform the deletion and update UI only after CLI deletion succeeds
-      deleteEnvelopeAndRefresh(id, preferences, () => {
-        // Update local state from localStorage after successful deletion
-        loadEnvelopesFromStorage().then((data) => {
-          setEnvelopes(data.envelopes);
-          setLastSync(data.lastSync);
-        });
-      });
+      deleteEnvelopeAndRefresh(
+        id,
+        preferences,
+        () => {
+          // Update local state from localStorage after successful deletion
+          loadEnvelopesFromStorage().then((data) => {
+            setEnvelopes(data.envelopes);
+            setLastSync(data.lastSync);
+          });
+        },
+        sourceFolder,
+      );
     }
   };
 
@@ -385,7 +403,7 @@ export default function EnvelopeList() {
                     icon={{ source: Icon.Trash, tintColor: Color.Red }}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-                    onAction={() => handleDelete(envelope.id)}
+                    onAction={() => handleDelete(envelope.id, envelope.folder_name ?? undefined)}
                   />
                   <Action.Push
                     title="Move Email"
@@ -420,15 +438,21 @@ export default function EnvelopeList() {
                                   icon={{ source: Icon.Folder }}
                                   onAction={() => {
                                     const prefs = getPreferenceValues<Preferences>();
-                                    moveEnvelopeAndRefresh(envelope.id, folder.name, prefs, () => {
-                                      // Update local state from localStorage after successful deletion
-                                      loadEnvelopesFromStorage().then((data) => {
-                                        setEnvelopes(data.envelopes);
-                                        setLastSync(data.lastSync);
-                                      });
-                                      // Pop back to close the folder selection view
-                                      pop();
-                                    });
+                                    moveEnvelopeAndRefresh(
+                                      envelope.id,
+                                      folder.name,
+                                      prefs,
+                                      () => {
+                                        // Update local state from localStorage after successful deletion
+                                        loadEnvelopesFromStorage().then((data) => {
+                                          setEnvelopes(data.envelopes);
+                                          setLastSync(data.lastSync);
+                                        });
+                                        // Pop back to close the folder selection view
+                                        pop();
+                                      },
+                                      envelope.folder_name ?? undefined,
+                                    );
                                   }}
                                 />
                               </ActionPanel>

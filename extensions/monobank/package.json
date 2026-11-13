@@ -93,6 +93,13 @@
       "mode": "view"
     },
     {
+      "name": "statistics",
+      "title": "Show Statistics",
+      "subtitle": "monobank",
+      "description": "Spending, income, savings and transfers between your own accounts as a chart, by category and across your monobank cards.",
+      "mode": "view"
+    },
+    {
       "name": "sync-statements",
       "title": "Sync Statements",
       "subtitle": "monobank",
@@ -269,7 +276,7 @@
       "name": "token",
       "type": "password",
       "title": "Access Token",
-      "description": "Your monobank Access Token. Required for the \"Show Accounts\", \"Show Statement\", \"Show Budgets\", \"Show Subscriptions\", \"Sync Statements\", \"Jar Progress Menu Bar\" and \"Subscriptions Menu Bar\" commands and for AI questions about your accounts, transactions, budgets and subscriptions.",
+      "description": "Your monobank Access Token. Required for the \"Show Accounts\", \"Show Statement\", \"Show Budgets\", \"Show Subscriptions\", \"Show Statistics\", \"Sync Statements\", \"Jar Progress Menu Bar\" and \"Subscriptions Menu Bar\" commands and for AI questions about your accounts, transactions, budgets and subscriptions.",
       "placeholder": "Enter Your Access Token",
       "required": false
     },

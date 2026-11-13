@@ -42,4 +42,5 @@ export const shortcuts = {
   manageBudgets: cmdShift("u"),
   chooseAccounts: cmdShift("o"),
   showHidden: cmdShift("h"),
+  family: cmdShift("f"),
 } satisfies Record<string, Keyboard.Shortcut>;
