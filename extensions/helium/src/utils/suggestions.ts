@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import type { Suggestion } from "../types";
 import { resolveHeliumBang } from "./bangs";
@@ -5,6 +6,7 @@ import { getHeliumSearchEngine } from "./helium-profile";
 import {
   buildSearchUrl,
   FALLBACK_SUGGESTION_CONFIG,
+  getSearchEngineOverride,
   getSuggestionSourceConfig,
   searchEngineToConfig,
   type SearchEngineConfig,
@@ -12,10 +14,12 @@ import {
 import { isURL, normalizeURL } from "./url";
 
 /**
- * Get the current search engine configuration
+ * Get the current search engine configuration: the extension's "Search Engine"
+ * preference when set, otherwise the engine selected in Helium.
  */
 async function getSearchEngineConfig(): Promise<SearchEngineConfig> {
-  const engine = await getHeliumSearchEngine();
+  const override = getSearchEngineOverride(getPreferenceValues<Preferences>().searchEngine);
+  const engine = override ?? (await getHeliumSearchEngine());
   return searchEngineToConfig(engine);
 }
 

@@ -26,11 +26,15 @@
     {
       "name": "searchEngine",
       "title": "Search Engine",
-      "description": "Choose your preferred search engine for suggestions and searches",
+      "description": "Search engine for web searches and suggestions. \"Same as Helium\" follows the default search engine set in Helium's settings.",
       "type": "dropdown",
       "required": false,
-      "default": "google",
+      "default": "helium",
       "data": [
+        {
+          "title": "Same as Helium",
+          "value": "helium"
+        },
         {
           "title": "Google",
           "value": "google"

@@ -33,6 +33,7 @@
 - Keep Helium profile access read-only. Use immutable/copy-safe reads for Chromium profile databases, and do not write `Web Data`, `Preferences`, or bang settings from the extension.
 - Treat browsing history as optional. Only `search-history` and the unified `search-helium` read it, and both must keep working when the History database is missing, unreadable, or needs permission: `search-helium` hides its History section rather than blocking tabs and bookmarks. `search-web` must stay focused on bangs and provider-backed web results.
 - Mirror Helium search and bang behavior from Helium profile/settings where determinable; fall back loudly and conservatively rather than guessing.
+- Resolve Helium's search engine from `Preferences` (`default_search_provider_data.template_url_data`, then `mirrored_template_url_data`), then the `Web Data` keyword matching `default_search_provider.guid`, then DuckDuckGo (Helium's default). The extension's `searchEngine` preference overrides this only when set to something other than its "helium" default.
 
 ## Testing Guidelines
 - Add focused Vitest coverage for shared pure helpers and validate changes with `npm test`, `npm run lint`, `npm run build`, and `npm run dev`.
