@@ -27,7 +27,7 @@ The profile, repository list, and contribution calendar use GitHub's APIs. The a
 
 The streak statistics come from the daily contribution counts already returned by GitHub. The longest streak covers the returned calendar period. The current streak can continue through yesterday while today's activity is still incomplete. The recent total includes today and the preceding 29 dates. These calculations use calendar dates in UTC.
 
-Each section appears as soon as its data is available. A slow or failed request does not hide the other sections. Each GitHub request has a 15-second deadline, after which the affected section displays an error and can be retried with **⌘R**. Previously loaded data remains visible during a refresh.
+Each section appears as soon as its data is available. A slow or failed request does not hide the other sections. Each GitHub request has a 15-second deadline, after which the affected section displays an error and can be retried with **⌘R**. Previously loaded data remains visible during a refresh and after a failed refresh. If a refresh fails, the affected section displays an error alongside its cached data.
 
 If the contribution request fails, the view reports the failure instead of displaying zero contributions or generating example data.
 

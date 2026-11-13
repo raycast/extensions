@@ -110,6 +110,33 @@ test("A refresh keeps previously loaded content visible.", () => {
   assert.match(view.props.markdown, /loaded-repository/);
 });
 
+test("A failed refresh keeps cached sections visible alongside their errors.", () => {
+  const cachedContributions = {
+    contributionCalendar: {
+      totalContributions: 7,
+      weeks: [{ contributionDays: [{ date: "2026-11-13", count: 7, level: 4 }] }],
+    },
+  };
+  const view = render({
+    fetchUserProfile: { ...ready(profile), error: new Error("The profile refresh failed.") },
+    fetchUserRepositories: { ...ready(repositories), error: new Error("The repository refresh failed.") },
+    fetchContributionData: { ...ready(cachedContributions), error: new Error("The contribution refresh failed.") },
+  });
+
+  assert.match(view.props.markdown, /This biography has loaded/);
+  assert.match(view.props.markdown, /The profile refresh failed/);
+  assert.match(view.props.markdown, /loaded-repository/);
+  assert.match(view.props.markdown, /The repository refresh failed/);
+
+  const heatmap = view.props.markdown.match(/src="(data:image\/svg\+xml[^"]+)"/);
+  assert.ok(heatmap, "The cached contribution heatmap must remain visible.");
+  const svg = decodeURIComponent(heatmap[1].slice(heatmap[1].indexOf(",") + 1));
+  assert.match(svg, /7 contributions on 2026-11-13/);
+  assert.match(svg, />7<\/text>/);
+  assert.match(view.props.markdown, /The contribution refresh failed/);
+  assert.equal(view.props.isLoading, false);
+});
+
 test("An optional request failure leaves successful sections visible.", () => {
   const view = render({
     fetchUserProfile: ready(profile),
