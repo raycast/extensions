@@ -2728,6 +2728,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "uberllm",
+    title: "UberLLM",
+    description:
+      "Make images and videos and price AI model requests from your agent with one UberLLM API key. List the chat, image, video and music models you can call with their prices, read a model's options, get a quote without spending, generate and edit images, start a video and wait for the job, and check your balance. Spending tools take a max_cost limit, and failed requests are not billed. 9 tools. Prepaid credit from $5, no monthly fee. Hosted remote Streamable HTTP server through `mcp-remote`; UberLLM API key (uberllm.dev/signup) as an `Authorization: Bearer` header. Connecting and listing tools needs no key; every tool call does. Replace YOUR_UBERLLM_API_KEY in UBERLLM_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://uberllm.dev/favicon.svg",
+    homepage: "https://uberllm.dev/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.uberllm.dev/mcp", "--header", "Authorization:${UBERLLM_AUTH_HEADER}"],
+      env: {
+        UBERLLM_AUTH_HEADER: "Bearer YOUR_UBERLLM_API_KEY",
+      },
+    },
+  },
+  {
     name: "unblockingapi",
     title: "UnblockingAPI",
     description:
