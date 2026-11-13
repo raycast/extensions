@@ -1,5 +1,9 @@
 # Tuple Changelog
 
+## [Send Reactions] - {PR_MERGE_DATE}
+
+- Add Send Reaction to search and send the sound and webcam reactions supported by your installed Tuple CLI.
+
 ## [CLI Compatibility and Voice Notes] - 2026-11-10
 
 - Fix starting calls to contacts and connected machines with the current Tuple CLI.
