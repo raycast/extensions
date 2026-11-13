@@ -229,21 +229,10 @@ export default function Command() {
           : undefined
     : undefined;
 
-  const firstSection = sections
-    ? sections.idle.length > 0
-      ? "idle"
-      : sections.working.length > 0
-        ? "working"
-        : sections.other.length > 0
-          ? "other"
-          : sections.finished.length > 0
-            ? "finished"
-            : undefined
-    : undefined;
+  // The stale note sits on every section: search hides sections without a
+  // match, and saved rows must never look current while polls are failing.
   const sectionSubtitle = (section: "idle" | "working" | "other" | "finished") =>
-    [section === firstSection ? staleNote : undefined, section === truncatedSection ? truncatedNote : undefined]
-      .filter(Boolean)
-      .join(" · ") || undefined;
+    [staleNote, section === truncatedSection ? truncatedNote : undefined].filter(Boolean).join(" · ") || undefined;
 
   function rowActions(meta: LiveSessionMeta, session?: LiveSession) {
     return (
