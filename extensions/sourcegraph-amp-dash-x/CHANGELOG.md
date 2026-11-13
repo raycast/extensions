@@ -1,6 +1,6 @@
 # Amp Changelog
 
-## [Amp for Raycast] - {PR_MERGE_DATE}
+## [Amp for Raycast] - 2026-11-13
 
 Amp Dash X becomes **Amp**: the saved prompts stay, and the extension now covers threads, projects, Puck, and portals.
 
