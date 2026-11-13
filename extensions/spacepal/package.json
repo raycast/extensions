@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spacepal",
+  "title": "Spacepal",
+  "description": "Switch macOS Spaces by name, jump back to your last Space and send windows between Spaces with Spacepal.",
+  "icon": "icon.png",
+  "author": "Halberd",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "switch-space",
+      "title": "Switch Space",
+      "description": "Search your Spaces by name, note or app and switch.",
+      "mode": "view"
+    },
+    {
+      "name": "move-window",
+      "title": "Move Window to Space",
+      "description": "Send the front window to another Space.",
+      "mode": "view"
+    },
+    {
+      "name": "last-space",
+      "title": "Back to Last Space",
+      "description": "Return to the Space you were on before.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-overview",
+      "title": "Show Space Overview",
+      "description": "Open Spacepal's overview of every Space.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

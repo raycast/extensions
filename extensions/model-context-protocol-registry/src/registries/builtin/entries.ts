@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "excession-labs-cve",
+    title: "Excession Labs CVE intelligence",
+    description:
+      "Search CVEs by text, vendor, product, package, ecosystem or a literal source version. Read CVE details, source references, affected-software evidence and available CISA KEV and dated FIRST EPSS data. Check source coverage and collection health, page through hosted revisions, or read changes after a saved cursor. Six read-only tools. Version filters match source assertions; they do not evaluate installed-version applicability. Free hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy and require Node.js.",
+    icon: "https://excessionlabs.ai/icon-512.png",
+    homepage: "https://excessionlabs.ai/cve-intelligence/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://excessionlabs.ai/mcp/cve"],
+    },
+    remoteUrl: "https://excessionlabs.ai/mcp/cve",
+  },
+  {
     name: "mobile-joe",
     title: "Mobile Joe",
     description:
@@ -667,6 +680,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         BRAVE_API_KEY: "YOUR_API_KEY_HERE",
       },
     },
+  },
+  {
+    name: "buildbase-console",
+    title: "BuildBase Console",
+    description:
+      "Manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/buildbase-app/mcp/main/assets/logo-400.png",
+    homepage: "https://docs.buildbase.app/console/ai-agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.console.buildbase.app/mcp"],
+    },
+    remoteUrl: "https://api.console.buildbase.app/mcp",
   },
   {
     name: "bulkpublish",
@@ -1784,7 +1810,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-calendar",
     title: "Multi Calendar",
     description:
-      "Your Outlook.com, Hotmail, Microsoft 365, Google, iCloud, Fastmail and other CalDAV calendars in Raycast - many accounts at once, one search for free time across all of them. Read events, find free time, create, move and cancel events and answer invitations, make booking links, booking pages and group polls, each account within the permissions its owner sets. No copy of the calendars is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Calendar connects your own Outlook.com, Hotmail, Microsoft 365, Google, iCloud (Apple Calendar), Yahoo, AOL, Fastmail and other CalDAV calendars to Raycast - many accounts at once, with free time found across all of them. Booking links, booking pages and group polls. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-512.png",
     homepage: "https://lumman.co/mcp/multi-calendar",
     configuration: {
@@ -1797,7 +1823,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-mail",
     title: "Multi Mail",
     description:
-      "Your Gmail, Outlook.com, Hotmail, Microsoft 365, iCloud, Fastmail and other IMAP mailboxes in Raycast - several at once, one search across all of them. Read threads, messages and attachments, draft, send and organise mail, each mailbox within the permissions its owner sets. No copy of the mail is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Mail connects your own Gmail, Outlook.com, Hotmail, Microsoft 365, Yahoo, AOL, iCloud, Fastmail and other IMAP email accounts to Raycast - several inboxes at once, with one search across all of them. Read, draft, send and clean out an inbox by sender. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-512.png",
     homepage: "https://lumman.co/mcp/multi-mail",
     configuration: {
@@ -2487,6 +2513,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "statuz",
+    title: "Statuz",
+    description:
+      "Schedule and publish posts and threads to X, Bluesky, Mastodon, LinkedIn and Reddit (beta) from your agent: draft, schedule in plain words like \"tomorrow 9am\", list what goes out next, edit, and publish. Every post is checked against each network's limits before it's saved, and the same post never goes out twice. Hosted remote Streamable HTTP server at https://api.statuz.cloud/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Statuz Cloud account: drafts and scheduling are free, a published post costs $0.01 per account ($0.03 on X).",
+    icon: "https://statuz.app/assets/appIcon.png",
+    homepage: "https://statuz.app/docs/agents?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.statuz.cloud/mcp"],
+    },
+    remoteUrl: "https://api.statuz.cloud/mcp",
+  },
+  {
     name: "stripe",
     title: "Stripe",
     description:
@@ -2699,6 +2738,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://trvlrr.app/mcp"],
+    },
+  },
+  {
+    name: "uberllm",
+    title: "UberLLM",
+    description:
+      "Make images and videos and price AI model requests from your agent with one UberLLM API key. List the chat, image, video and music models you can call with their prices, read a model's options, get a quote without spending, generate and edit images, start a video and wait for the job, and check your balance. Spending tools take a max_cost limit, and failed requests are not billed. 9 tools. Prepaid credit from $5, no monthly fee. Hosted remote Streamable HTTP server through `mcp-remote`; UberLLM API key (uberllm.dev/signup) as an `Authorization: Bearer` header. Connecting and listing tools needs no key; every tool call does. Replace YOUR_UBERLLM_API_KEY in UBERLLM_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://uberllm.dev/favicon.svg",
+    homepage: "https://uberllm.dev/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.uberllm.dev/mcp", "--header", "Authorization:${UBERLLM_AUTH_HEADER}"],
+      env: {
+        UBERLLM_AUTH_HEADER: "Bearer YOUR_UBERLLM_API_KEY",
+      },
     },
   },
   {
