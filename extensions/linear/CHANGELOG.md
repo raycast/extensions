@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Project Mentions in AI Chat] - {PR_MERGE_DATE}
+
+- Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name.
+- Mentioning a project gives AI its status, lead, teams, members, and milestones.
+
 ## [Primary Action Preference] - 2026-10-29
 
 - Add a **Primary Action** preference to choose whether pressing Enter on an issue, project, document, or view shows its details or opens it in Linear.

@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getUserMentionFilter, readMentionResource, toIssueMentions, toUserMentions } from "../src/helpers/mentions.ts";
+import {
+  getProjectMentionFilter,
+  getUserMentionFilter,
+  mergeMentionProjects,
+  readMentionResource,
+  toIssueMentions,
+  toProjectMentions,
+  toUserMentions,
+} from "../src/helpers/mentions.ts";
 
 const userId = "11111111-1111-4111-8111-111111111111";
 const issueId = "22222222-2222-4222-8222-222222222222";
@@ -124,7 +132,7 @@ test("malformed or unrelated URIs fail before a Linear request", async () => {
   };
   for (const uri of [
     `https://example.com/issues/${issueId}`,
-    `linear://projects/${issueId}`,
+    `linear://teams/${issueId}`,
     "linear://issues/ENG-42",
     "linear://users/me",
     "linear://users/%2e%2e",
@@ -133,7 +141,7 @@ test("malformed or unrelated URIs fail before a Linear request", async () => {
     `linear://users/${userId}#fragment`,
   ]) {
     await assert.rejects(
-      readMentionResource(uri, { users: unavailable, issues: unavailable }),
+      readMentionResource(uri, { users: unavailable, issues: unavailable, projects: unavailable }),
       /Invalid Linear resource URI/,
     );
   }
@@ -176,4 +184,49 @@ test("resource read failures propagate instead of returning empty content", asyn
     }),
     (error) => error === failure,
   );
+});
+
+const projectId = "33333333-3333-4333-8333-333333333333";
+const project = {
+  id: projectId,
+  name: "Desktop",
+  status: { name: "In Progress", type: "started" },
+  lead: { displayName: "Alice" },
+  teams: { nodes: [{ key: "ENG" }, { key: "DES" }] },
+};
+
+test("project mentions show status, lead, and teams", () => {
+  const [mention] = toProjectMentions([project], "box");
+  assert.deepEqual(mention, {
+    title: "Desktop",
+    uri: `linear://projects/${projectId}`,
+    description: "In Progress · Alice · ENG, DES",
+    icon: "box",
+  });
+  const [bare] = toProjectMentions([{ ...project, status: null, lead: null, teams: { nodes: [] } }], "box");
+  assert.equal(bare.description, "");
+  assert.equal(toProjectMentions(Array.from({ length: 60 }, () => project), "box").length, 50);
+});
+
+test("a project name search needs every word, in any status or team", () => {
+  assert.deepEqual(getProjectMentionFilter("  desk   app "), {
+    and: [{ name: { containsIgnoreCase: "desk" } }, { name: { containsIgnoreCase: "app" } }],
+  });
+});
+
+test("the default project list puts yours first, then the others, without repeats", () => {
+  const ids = (projects: { id: string }[]) => projects.map((p) => p.id);
+  const merged = mergeMentionProjects([{ id: "b" }, { id: "a" }], [{ id: "a" }, { id: "c" }, { id: "b" }]);
+  assert.deepEqual(ids(merged), ["b", "a", "c"]);
+  assert.deepEqual(ids(mergeMentionProjects([], [{ id: "c" }])), ["c"]);
+});
+
+test("project URIs read the project alone", async () => {
+  const [mention] = toProjectMentions([project], "box");
+  const resource = await readMentionResource(mention.uri, {
+    users: async () => assert.fail("Must not read a user"),
+    issues: async () => assert.fail("Must not read an issue"),
+    projects: async (id: string) => ({ id, name: "Desktop", members: [{ id: userId, name: "Alice Smith" }] }),
+  });
+  assert.equal(JSON.parse(resource.text).members[0].name, "Alice Smith");
 });

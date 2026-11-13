@@ -320,6 +320,14 @@
       ]
     },
     {
+      "name": "search-project-mentions",
+      "title": "Projects",
+      "description": "Search Linear projects by name to mention in AI Chat. Shows your active projects first when the query is empty.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
       "name": "full-text-search-issues",
       "title": "Full Text Search Issues",
       "description": "Relevance-ranked keyword search across Linear issue content. Use it when the user searches by topic or phrase; it cannot filter by team or project, so check each result's scope. Use list-issues for structured criteria. Supports cursor pagination and returns nextCursor when more results are available."

@@ -1,4 +1,4 @@
-import { Project, ProjectStatus, ProjectUpdate, User } from "@linear/sdk";
+import { LinearClient, Project, ProjectStatus, ProjectUpdate, User } from "@linear/sdk";
 
 import { getLinearClient } from "../api/linearClient";
 
@@ -141,6 +141,49 @@ export async function getProjects({
     hasMore: !!projects?.pageInfo.hasNextPage,
     cursor: projects?.pageInfo.endCursor || null,
   };
+}
+
+type ProjectFilter = NonNullable<NonNullable<Parameters<LinearClient["projects"]>[0]>["filter"]>;
+
+/** What a project row in AI Chat's Projects mention search shows. */
+export type MentionProjectResult = Pick<Project, "id" | "name"> & {
+  status: Pick<ProjectStatus, "name" | "type"> | null;
+  lead: Pick<User, "displayName"> | null;
+  teams: { nodes: { key: string }[] };
+};
+
+/** Projects for AI Chat's Projects mention search, most recently updated first, in one request. */
+export async function getMentionProjects(filter: ProjectFilter, first = 50) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<
+    { projects: { nodes: MentionProjectResult[] } },
+    { filter: ProjectFilter; first: number }
+  >(
+    `
+      query($filter: ProjectFilter, $first: Int) {
+        projects(first: $first, filter: $filter, orderBy: updatedAt) {
+          nodes {
+            id
+            name
+            status {
+              name
+              type
+            }
+            lead {
+              displayName
+            }
+            teams {
+              nodes {
+                key
+              }
+            }
+          }
+        }
+      }
+    `,
+    { filter, first },
+  );
+  return data?.projects.nodes ?? [];
 }
 
 export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "body" | "url" | "health" | "createdAt"> & {
