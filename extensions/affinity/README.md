@@ -1,10 +1,15 @@
-# Affinity Document Inspector
+# Affinity
 
-Inspect the documents currently open in Affinity by Canva from Raycast. Search document titles, read dimensions, DPI, page and spread counts, selection count, and save state. Open a document’s layer inventory and copy layer names or document information.
+Find your Affinity files and inspect the documents currently open in Affinity by Canva from Raycast.
 
-The command runs a fixed, read-only script through Affinity’s own local MCP server. It does not change documents or selections, access files, use Canva AI, or send document data to a remote service.
+- **Search Affinity Files** finds Affinity Designer, Photo and Publisher files on your Mac with Spotlight, and opens, previews or reveals them. It works without any setup and does not need Affinity's MCP server.
+- **Inspect Documents** searches the titles of open documents and reads their dimensions, DPI, page and spread counts, selection count, and save state. Open a document's layer inventory and copy layer names or document information.
 
-## Setup
+Inspect Documents runs a fixed, read-only script through Affinity's own local MCP server. It does not change documents or selections, access files, use Canva AI, or send document data to a remote service.
+
+## Setup for Inspect Documents
+
+Only **Inspect Documents** needs these steps; **Search Affinity Files** works as soon as the extension is installed.
 
 1. Install a version of Affinity by Canva that includes its MCP server and JavaScript SDK. Affinity V2 is not supported.
 2. Open Affinity. In **Affinity → Settings → Model Context Protocol**, enable **Enable Affinity MCP**.
@@ -14,7 +19,7 @@ Only the MCP server is needed. Desktop file access, network access, saving scrip
 
 ## Commands and actions
 
-**Inspect Documents** searches open documents and displays their information. **Inspect Layers** displays their node names, nesting depth, visibility, and lock state. Copy actions copy information only when selected. **Refresh Documents** retrieves a new snapshot; the extension does not store or cache document contents.
+**Search Affinity Files** lists Affinity files found by Spotlight, with actions to open, preview with Quick Look, or reveal them in Finder. **Inspect Documents** searches open documents and displays their information. **Inspect Layers** displays their node names, nesting depth, visibility, and lock state. Copy actions copy information only when selected. **Refresh Documents** retrieves a new snapshot; the extension does not store or cache document contents.
 
 Layer lists include the document’s spread and group nodes. To keep large files responsive, inspection is limited to 5,000 nodes per document and 100 levels of nesting.
 
