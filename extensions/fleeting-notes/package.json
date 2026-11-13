@@ -46,13 +46,15 @@
           "type": "text",
           "required": true
         }
-      ]
+      ],
+      "subtitle": "Fleeting Notes"
     },
     {
       "name": "append-selection",
       "title": "Append Selected Text to Scratchpad",
       "description": "Append the text selected in the frontmost app to your scratchpad.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Fleeting Notes"
     }
   ],
   "preferences": [
@@ -76,15 +78,13 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.4",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.11"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit"
   }
 }

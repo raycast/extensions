@@ -20,7 +20,7 @@ The editor is Raycast's standard TextArea, not a separate floating window. It su
 | Action | Shortcut | Behavior |
 | --- | --- | --- |
 | Save and Close | ⌘↩ | Finishes saving and closes Raycast. |
-| Copy Scratchpad | ⇧⌘↩ | Copies the entire current text. |
+| Copy Scratchpad | ⇧⌘↩ | Copies the entire current text. This is the form's secondary action, so Raycast assigns ⇧⌘↩ automatically. |
 | Append Clipboard | ⇧⌘V | Adds clipboard text after the current text. Regular ⌘V still pastes at the cursor. |
 | Start New Scratchpad | ⌘N | Confirms, keeps the current pad as the previous pad, and clears the editor. |
 | Swap with Previous Scratchpad | ⇧⌘P | Restores the previous pad while preserving the current pad in that slot. |
