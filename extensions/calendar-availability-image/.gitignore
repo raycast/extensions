@@ -3,3 +3,4 @@ node_modules
 raycast-env.d.ts
 .tmp
 .DS_Store
+screenshots
