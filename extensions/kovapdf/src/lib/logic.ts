@@ -106,15 +106,36 @@ export async function compressFiles(
   for (let i = 0; i < pdfs.length; i++) {
     onProgress?.(i, pdfs.length);
     const src = pdfs[i]!;
-    const r = await client.run("compress", [src], { level });
-    const first = r.files[0];
-    if (!first) throw new Error("KovaPDF returned no file.");
-    const data = await first.bytes();
-    const out = outputPath(src, "compressed", disk.exists);
-    await disk.write(out, data);
-    saved.push({ path: out, bytes: data.length });
+    try {
+      const r = await client.run("compress", [src], { level });
+      const first = r.files[0];
+      if (!first) throw new Error("KovaPDF returned no file.");
+      const data = await first.bytes();
+      const out = outputPath(src, "compressed", disk.exists);
+      await disk.write(out, data);
+      saved.push({ path: out, bytes: data.length });
+    } catch (err) {
+      // Keep what is already saved on the error, so the command can say which PDFs are done.
+      if (!saved.length) throw err;
+      const e = err instanceof Error ? err : new Error(String(err));
+      throw Object.assign(e, { saved: [...saved], failedFile: src, total: pdfs.length });
+    }
   }
   return saved;
+}
+
+/** When compressing stopped part way: what was saved and which PDF failed. Undefined otherwise. */
+export function partialCompress(err: unknown): { title: string; message: string; firstSaved: string } | undefined {
+  const e = (err ?? {}) as { saved?: unknown; failedFile?: unknown; total?: unknown };
+  if (!Array.isArray(e.saved) || !e.saved.length || typeof e.failedFile !== "string") return undefined;
+  const saved = e.saved as Saved[];
+  const total = typeof e.total === "number" ? e.total : saved.length + 1;
+  const reason = friendlyError(err).message;
+  return {
+    title: `Compressed ${saved.length} of ${total}`,
+    message: `${path.basename(e.failedFile)} could not be compressed: ${reason} The others before it are saved next to their originals.`,
+    firstSaved: saved[0]!.path,
+  };
 }
 
 export function compressSummary(saved: Saved[]): string {

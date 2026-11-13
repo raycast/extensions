@@ -1,31 +1,28 @@
 import { Action, ActionPanel, Detail, getSelectedFinderItems } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import path from "node:path";
 import { friendlyError, pdfsOnly, SITE_URL, verifyMarkdown } from "./lib/logic";
 import { client } from "./lib/raycast";
 
+/** The report for the PDF selected in Finder, as Markdown. Never throws. */
+async function checkSelected(): Promise<string> {
+  try {
+    const items = await getSelectedFinderItems().catch(() => []);
+    const pdf = pdfsOnly(items.map((i) => i.path))[0];
+    if (!pdf) return "Select a PDF in Finder, then run Verify PDF Signature again.";
+    const report = await client().verify(pdf);
+    return verifyMarkdown(path.basename(pdf), report);
+  } catch (err) {
+    const f = friendlyError(err);
+    return `# ${f.title}\n\n${f.message}`;
+  }
+}
+
 export default function Command() {
-  const [markdown, setMarkdown] = useState<string>();
-  useEffect(() => {
-    (async () => {
-      try {
-        const items = await getSelectedFinderItems().catch(() => []);
-        const pdf = pdfsOnly(items.map((i) => i.path))[0];
-        if (!pdf) {
-          setMarkdown("Select a PDF in Finder, then run Verify PDF Signature again.");
-          return;
-        }
-        const report = await client().verify(pdf);
-        setMarkdown(verifyMarkdown(path.basename(pdf), report));
-      } catch (err) {
-        const f = friendlyError(err);
-        setMarkdown(`# ${f.title}\n\n${f.message}`);
-      }
-    })();
-  }, []);
+  const { data: markdown, isLoading } = usePromise(checkSelected);
   return (
     <Detail
-      isLoading={markdown === undefined}
+      isLoading={isLoading}
       markdown={markdown ?? "Checking the signatures with KovaPDF..."}
       actions={
         <ActionPanel>

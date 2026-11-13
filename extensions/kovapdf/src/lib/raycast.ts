@@ -3,7 +3,7 @@ import { friendlyError, SITE_URL } from "./logic";
 import { makeClient } from "./client";
 
 export function client() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return makeClient(apiKey);
 }
 

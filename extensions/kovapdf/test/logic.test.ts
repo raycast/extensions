@@ -10,6 +10,7 @@ import {
   byName,
   compressFiles,
   compressSummary,
+  partialCompress,
   friendlyError,
   mergeFiles,
   outputPath,
@@ -94,6 +95,34 @@ test("compress: each selected PDF, with the chosen level, saved next to it", asy
   await assert.rejects(compressFiles(client, disk, ["/d/notes.txt"], "basic"), /Select one or more PDF/);
 });
 
+test("compress: when a later PDF fails, the saved ones are reported", async () => {
+  let n = 0;
+  const { client } = fakeClient(() => {
+    n++;
+    if (n === 2) throw Object.assign(new Error("The file is too big."), { code: "too_big" });
+    return {};
+  });
+  const disk = memDisk();
+  const err = await compressFiles(client, disk, ["/d/a.pdf", "/d/b.pdf", "/d/c.pdf"], "basic").then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  const partial = partialCompress(err);
+  assert.ok(partial);
+  assert.equal(partial.title, "Compressed 1 of 3");
+  assert.match(partial.message, /^b\.pdf could not be compressed: The file is too big\./);
+  assert.equal(partial.firstSaved, "/d/a-compressed.pdf");
+  // A failure on the first PDF stays a plain error.
+  const { client: failing } = fakeClient(() => {
+    throw new Error("No.");
+  });
+  const first = await compressFiles(failing, memDisk(), ["/d/a.pdf"], "basic").then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  assert.equal(partialCompress(first), undefined);
+});
+
 test("merge: two or more PDFs in name order, saved next to the first", async () => {
   const { client, runs } = fakeClient();
   const disk = memDisk();
@@ -143,9 +172,11 @@ test("verify markdown shows file text as data", () => {
   assert.match(verifyMarkdown("x.pdf", { signatures: [] }), /No digital signatures/);
 });
 
-test("the version matches package.json", () => {
+test("the Store keeps the version: the manifest has none, the client header has its own", () => {
   const pkg = JSON.parse(readFileSync(path.join(__dirname, "../../package.json"), "utf8"));
-  assert.equal(pkg.version, EXTENSION_VERSION);
+  assert.equal(pkg.version, undefined);
+  assert.match(EXTENSION_VERSION, /^\d+\.\d+\.\d+$/);
+  assert.match(pkg.description, /Requires a KovaPDF account and API key\./);
   const prefs = pkg.preferences.find((p: { name: string }) => p.name === "apiKey");
   assert.equal(prefs.type, "password");
 });

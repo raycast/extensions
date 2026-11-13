@@ -42,4 +42,4 @@ The logic lives in `src/lib/logic.ts` and is tested without Raycast.
 
 ## License
 
-MIT for the code. The KovaPDF name, logo and icon are not covered: see LICENSE.
+MIT for the code. The KovaPDF name, logo and icon belong to KovaPDF and are not covered by that license.

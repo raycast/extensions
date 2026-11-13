@@ -2,13 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kovapdf",
   "title": "KovaPDF",
-  "description": "Compress and merge PDFs, check PDF signatures and convert Bijoy text to Unicode Bangla with KovaPDF.",
+  "description": "Compress and merge PDFs, check PDF signatures and convert Bijoy text to Unicode Bangla with KovaPDF. Requires a KovaPDF account and API key.",
   "icon": "icon.png",
   "author": "kovapdf",
   "categories": ["Productivity", "Documentation"],
   "license": "MIT",
   "platforms": ["macOS"],
-  "version": "1.0.0",
   "commands": [
     {
       "name": "compress-pdf",
@@ -80,7 +79,8 @@
   ],
   "dependencies": {
     "@kovapdf/sdk": "0.1.0",
-    "@raycast/api": "2.10.1"
+    "@raycast/api": "2.10.1",
+    "@raycast/utils": "2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
