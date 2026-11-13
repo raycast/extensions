@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [Web API Key Required] - {PR_MERGE_DATE}
+## [Web API Key Required] - 2026-11-13
 
 - The Web API Key is now required. Search runs only from the local game list, and the extension no longer uses its own search server
 
