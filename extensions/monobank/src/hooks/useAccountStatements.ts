@@ -13,7 +13,7 @@ import {
   readStoredStatement,
   saveResponse,
 } from "../services/statement";
-import { Account, Period, Transaction } from "../types";
+import { Account, AccountOrJar, Period, Transaction } from "../types";
 import { getStatementItemTitle } from "../utils/accounts";
 import { resolvePeriod } from "../utils/statement";
 import { CancelledError, withRateLimit } from "./rateLimit";
@@ -37,9 +37,9 @@ export function subscribeToStatements(listener: (accountId: string) => void) {
   };
 }
 
-/** The transactions of one account in the period. */
-export interface AccountStatementGroup {
-  account: Account;
+/** The transactions of one account (or jar) in the period. */
+export interface AccountStatementGroup<T extends AccountOrJar = Account> {
+  account: T;
   /** Transactions in the period, newest first. */
   transactions: Transaction[];
   /** Unix milliseconds of the account's last sync, or 0 when it was never synced. */
@@ -51,8 +51,8 @@ export interface AccountStatementGroup {
 }
 
 /**
- * The statements of `accounts` for `period`, e.g. for budgets or subscriptions. Nothing is loaded while either is
- * `undefined`.
+ * The statements of `accounts` (cards, FOP accounts or jars) for `period`, e.g. for budgets or subscriptions. Nothing
+ * is loaded while either is `undefined`.
  *
  * The stored statements show at once. With `sync`, each account whose statement is older than
  * `BUDGET_SYNC_MAX_AGE` (or misses part of the period) is then updated, one request at a time and the stalest
@@ -60,8 +60,8 @@ export interface AccountStatementGroup {
  *
  * `label` names what is updated in the toasts, e.g. "budgets" for "Updating budgets".
  */
-export function useAccountStatements(
-  accounts: Account[] | undefined,
+export function useAccountStatements<T extends AccountOrJar = Account>(
+  accounts: T[] | undefined,
   period: Period | undefined,
   { sync = false, label = "budgets" }: { sync?: boolean; label?: string } = {},
 ) {
@@ -207,7 +207,7 @@ export function useAccountStatements(
 
   const tokenError = getTokenError(error);
 
-  const groups = useMemo((): AccountStatementGroup[] => {
+  const groups = useMemo((): AccountStatementGroup<T>[] => {
     if (!accounts || !resolvedPeriod || !statements) return [];
     const now = Date.now();
 

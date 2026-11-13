@@ -16,12 +16,14 @@ import {
   formatPlainAmount,
   formatSyncTime,
   getMonthlyTotal,
+  getPerPersonAmount,
   getStatementItemTitle,
   getSubscriptionTitle,
   isUpcoming,
 } from "../../utils";
 import StatementView from "../statement/StatementView";
 import TokenErrorEmptyView, { showInvalidTokenToast } from "../TokenErrorEmptyView";
+import FamilySubscriptionForm from "./FamilySubscriptionForm";
 import RenameSubscriptionForm from "./RenameSubscriptionForm";
 
 const { Metadata } = List.Item.Detail;
@@ -125,6 +127,11 @@ export default function SubscriptionsView(props: { selectedKey?: string; navigat
         },
       },
     });
+  }
+
+  async function removeFamily(subscription: Subscription) {
+    await update(subscription, { seats: null });
+    await showToast(Toast.Style.Success, "Not a Family Subscription", getSubscriptionTitle(subscription));
   }
 
   async function restoreRejectedPriceChange(subscription: Subscription) {
@@ -238,16 +245,10 @@ export default function SubscriptionsView(props: { selectedKey?: string; navigat
                         shortcut={actionsBefore >= 2 ? shortcuts.viewStatement : undefined}
                         target={<StatementView account={subscription.account} />}
                       />
-                      <Action
-                        title="Toggle Details"
-                        icon={Icon.Sidebar}
-                        shortcut={actionsBefore >= 1 ? shortcuts.toggleDetails : undefined}
-                        onAction={() => setIsShowingDetail((value) => !value)}
-                      />
                       <Action.CopyToClipboard
                         title="Copy Amount"
                         content={formatPlainAmount(subscription.amount, subscription.currency)}
-                        shortcut={shortcuts.copyAmount}
+                        shortcut={actionsBefore >= 1 ? shortcuts.copyAmount : undefined}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
@@ -257,6 +258,19 @@ export default function SubscriptionsView(props: { selectedKey?: string; navigat
                         shortcut={shortcuts.edit}
                         target={<RenameSubscriptionForm subscription={subscription} onRename={update} />}
                       />
+                      <Action.Push
+                        title={subscription.seats ? "Edit Family Seats…" : "Mark as Family…"}
+                        icon={Icon.TwoPeople}
+                        shortcut={shortcuts.family}
+                        target={<FamilySubscriptionForm subscription={subscription} onSave={update} />}
+                      />
+                      {subscription.seats && (
+                        <Action
+                          title="Not a Family Subscription"
+                          icon={Icon.Person}
+                          onAction={() => removeFamily(subscription)}
+                        />
+                      )}
                       {subscription.hidden ? (
                         <Action
                           title="Unhide"
@@ -274,7 +288,16 @@ export default function SubscriptionsView(props: { selectedKey?: string; navigat
                         />
                       )}
                     </ActionPanel.Section>
-                    <ActionPanel.Section>{renderCommonActions(Infinity)}</ActionPanel.Section>
+                    <ActionPanel.Section>
+                      {renderCommonActions(Infinity)}
+                      {/* Never one of the first two actions, so it always has ⌘ ⇧ D, like everywhere else. */}
+                      <Action
+                        title="Toggle Details"
+                        icon={Icon.Sidebar}
+                        shortcut={shortcuts.toggleDetails}
+                        onAction={() => setIsShowingDetail((value) => !value)}
+                      />
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />
@@ -356,6 +379,14 @@ function getAccessories(
   }
 
   accessories.push({ text: formatAmount(subscription.amount, subscription.currency) });
+  const perPerson = getPerPersonAmount(subscription);
+  if (perPerson !== undefined) {
+    accessories.push({
+      icon: Icon.TwoPeople,
+      text: formatAmount(perPerson, subscription.currency),
+      tooltip: `Per person · ${subscription.seats} seats`,
+    });
+  }
   accessories.push(
     subscription.status === "late"
       ? {
@@ -370,7 +401,8 @@ function getAccessories(
 
 function SubscriptionDetail(props: { subscription: Subscription }) {
   const { subscription } = props;
-  const { amount, currency, previousAmount, monthlyCost, account, category } = subscription;
+  const { amount, currency, previousAmount, monthlyCost, account, category, seats } = subscription;
+  const perPerson = getPerPersonAmount(subscription);
   const isLate = subscription.status === "late";
   const nextDate = formatDate(new Date(subscription.nextDate * 1000), { weekday: true, year: true });
 
@@ -380,14 +412,17 @@ function SubscriptionDetail(props: { subscription: Subscription }) {
         // Keys include the text, so Raycast recreates a label whose text changed instead of truncating it.
         <Metadata>
           <Metadata.Label
-            key={`amount:${amount}:${previousAmount}`}
+            key={`amount:${amount}:${previousAmount}:${seats}`}
             title="Amount"
-            text={
-              previousAmount !== undefined
-                ? `${formatAmount(amount, currency)} · was ${formatAmount(previousAmount, currency)}`
-                : formatAmount(amount, currency)
-            }
+            text={[
+              formatAmount(amount, currency),
+              previousAmount !== undefined && `was ${formatAmount(previousAmount, currency)}`,
+              perPerson !== undefined && `${formatAmount(perPerson, currency)} per person`,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           />
+          {seats && <Metadata.Label key={`family:${seats}`} title="Family" text={`${seats} seats`} />}
           {currency.code !== account.currency.code && (
             <Metadata.Label
               key={`accountAmount:${subscription.accountAmount}`}
@@ -423,7 +458,15 @@ function SubscriptionDetail(props: { subscription: Subscription }) {
             text={isLate ? { value: `${nextDate} · possibly cancelled`, color: Color.Red } : nextDate}
           />
           <Metadata.Separator />
-          <Metadata.Label key={`monthly:${monthlyCost}`} title="Per Month" text={formatAmount(monthlyCost, currency)} />
+          <Metadata.Label
+            key={`monthly:${monthlyCost}:${seats}`}
+            title="Per Month"
+            text={
+              seats
+                ? `${formatAmount(monthlyCost, currency)} · ${formatAmount(monthlyCost / seats, currency)} per person`
+                : formatAmount(monthlyCost, currency)
+            }
+          />
           <Metadata.Label
             key={`yearly:${monthlyCost}`}
             title="Per Year"

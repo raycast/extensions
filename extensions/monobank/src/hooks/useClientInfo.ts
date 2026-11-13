@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useMemo } from "react";
-import { toClientInfo } from "../api/mappers";
-import { getClientInfo, getTokenError, getTokenFingerprint } from "../api/monobank";
+import { getTokenError, getTokenFingerprint } from "../api/monobank";
 import { CLIENT_INFO_TTL, STORAGE_KEYS } from "../data/constants";
+import { refreshClientInfo } from "../services/clientInfo";
 import { Account, ClientInfo } from "../types";
 import { getJarTitles } from "../utils/savings";
 import { usePersistedResource } from "./usePersistedResource";
@@ -24,9 +24,8 @@ export function useClientInfo() {
     ttl: CLIENT_INFO_TTL,
     // Data cached for another token (or before there was any) is never shown.
     scope: tokenFingerprint,
-    fetch: async (previous) => ({
-      clientInfo: toClientInfo(await getClientInfo(token), previous.clientInfo, tokenFingerprint),
-    }),
+    // Moves or removes the stored data when the token changed (see `refreshClientInfo`).
+    fetch: async () => ({ clientInfo: await refreshClientInfo(token) }),
     // A missing or rejected token isn't rate limited, so refetch as soon as the user fixes it.
     shouldRetryNextLaunch: (error) => getTokenError(error) !== undefined,
   });

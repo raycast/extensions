@@ -1,4 +1,5 @@
 import { Icon } from "@raycast/api";
+import { Account } from "./accounts";
 import { Currency } from "./common";
 
 /** A merchant category, resolved from an MCC. */
@@ -41,6 +42,14 @@ export interface Transaction {
   counterEdrpou?: string;
   counterIban?: string;
   counterName?: string;
+}
+
+/** A transaction a total counts, e.g. a statistics row or a budget, with the account it's on. */
+export interface CountedTransaction {
+  account: Account;
+  transaction: Transaction;
+  /** In UAH: what it adds to the total. Negative for a refund in a budget. */
+  amount: number;
 }
 
 export type PeriodPreset = "today" | "last7Days" | "thisMonth" | "lastMonth" | "last31Days";

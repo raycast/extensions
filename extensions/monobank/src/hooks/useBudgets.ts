@@ -2,14 +2,17 @@ import { usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   BudgetInput,
+  TransactionBudgetChange,
+  clearBudgetCorrections,
   deleteBudget,
   moveBudget,
   readBudgetAccountIds,
   readBudgets,
+  setTransactionBudgets,
   upsertBudget,
   writeBudgetAccountIds,
 } from "../services/budgets";
-import { AccountType, Budget, MoveDirection } from "../types";
+import { AccountType, Budget, MoveDirection, Transaction } from "../types";
 import { isBudgetEligible, resolveBudgetAccounts } from "../utils/budgets";
 import { useClientInfo } from "./useClientInfo";
 
@@ -63,7 +66,17 @@ export function useBudgets() {
     notifyChange();
   }, []);
 
-  return { budgets, isLoading, save, remove, move };
+  const setTransaction = useCallback(async (transaction: Transaction, changes: TransactionBudgetChange[]) => {
+    await setTransactionBudgets(transaction, changes);
+    notifyChange();
+  }, []);
+
+  const clearCorrections = useCallback(async (budget: Budget) => {
+    await clearBudgetCorrections(budget.id);
+    notifyChange();
+  }, []);
+
+  return { budgets, isLoading, save, remove, move, setTransactionBudgets: setTransaction, clearCorrections };
 }
 
 /** Like `listeners`, for the accounts budgets count. */

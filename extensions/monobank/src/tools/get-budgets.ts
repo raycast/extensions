@@ -31,6 +31,10 @@ type Input = {
  * lists the cards counted: say how many and which. Amounts are in UAH. Refunds reduce spending, and transactions on
  * hold count.
  *
+ * The user can correct a budget by hand in "Show Statement": `added` is the spending of the transactions added to it
+ * from other categories (already in `spent`), and `excluded` is what the transactions left out of its categories
+ * would have added. Both are for the month, with `count` transactions each.
+ *
  * `incomplete: true` means some card has transactions in the month that aren't loaded (see `accounts`). `presets`
  * are ready-made budgets for `set-budget`. Each card's month is loaded within monobank's statement rate limit of
  * one request per minute, so with several cards this can take a few minutes.
@@ -123,6 +127,8 @@ export default async function tool(input: Input) {
       projected: progress.projected !== undefined ? round(progress.projected) : undefined,
       daysLeft: progress.daysLeft,
       byAccount: progress.byAccount.map((item) => ({ name: names.get(item.accountId), spent: round(item.spent) })),
+      added: { spent: round(progress.added.spent), count: progress.added.count },
+      excluded: { amount: round(progress.excluded.amount), count: progress.excluded.count },
     })),
     incomplete: statements.some(({ statement }) => statement.incomplete),
     presets,
