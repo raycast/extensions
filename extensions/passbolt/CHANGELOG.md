@@ -1,5 +1,11 @@
 # Passbolt Changelog
 
+## [Create Password Works Again] - 2026-11-12
+
+- Create passwords with the v5 resource types and encrypted metadata and secret data.
+- Use personal or shared metadata keys, with legacy v4 creation when the server allows it.
+- Require a name and password, and show the server's error message when creation fails.
+
 ## [Current Website Matching] - 2026-10-21
 
 - Show passwords matching the current website above Favorites in Search Passwords, ordered by exact hostname, favorite status, and name.

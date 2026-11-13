@@ -23,7 +23,6 @@ export function appendText(notePath: string, content: string) {
   fs.appendFileSync(notePath, "\n" + content);
 }
 
-/** Gets the Obsidian Properties YAML frontmatter for a list of tags */
 export function createProperties(tags: string[]): string {
   let obsidianProperties = "";
   if (tags.length > 0) {
@@ -37,33 +36,31 @@ export function createProperties(tags: string[]): string {
   return obsidianProperties;
 }
 
-/** Writes a text to a markdown file at filePath with a given fileName. */
 export function writeMarkdown(
   filePath: string,
   fileName: string,
   text: string,
   onDirectoryCreationFailed?: (filePath: string) => void,
   onFileWriteFailed?: (filePath: string, fileName: string) => void
-) {
-  // First try creating the folder structure
+): boolean {
   try {
     fs.mkdirSync(filePath, { recursive: true });
   } catch {
     logger.warning("Failed to create directory structure");
     onDirectoryCreationFailed?.(filePath);
-    return;
+    return false;
   }
 
-  // Then try writing the markdown file
   try {
     fs.writeFileSync(path.join(filePath, fileName + ".md"), text);
   } catch {
     logger.warning("Failed to write file");
     onFileWriteFailed?.(filePath, fileName);
-    return;
+    return false;
   }
   logger.success(`Note created at "${filePath}/${fileName}" with content "${text}"`);
   showToast({ title: "Note created", style: Toast.Style.Success });
+  return true;
 }
 
 export function isNote(note: Note | undefined): note is Note {

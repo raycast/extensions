@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "atom",
+  "title": "Atom",
+  "description": "Manage Contact Profiles and Domains in atom.com",
+  "icon": "atom-logo.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "xxx...xxx",
+      "description": "Atom API Token",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-domain-availability",
+      "title": "Check Domain Availability",
+      "description": "Returns whether Atom can register the domain",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain_name",
+          "placeholder": "example.com",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "contact-profiles",
+      "title": "Contact Profiles",
+      "description": "Manage saved contact info for quick access",
+      "mode": "view"
+    },
+    {
+      "name": "domain-manager",
+      "title": "Domain Manager",
+      "description": "Domain Manager",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

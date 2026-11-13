@@ -1,4 +1,5 @@
 import { findVisibleApp, getAppEntries } from "../helpers/apps";
+import { FIND_PROFILE_APP_ID } from "../helpers/findings";
 import {
   describeOpens,
   filterHistoryByApp,
@@ -6,7 +7,7 @@ import {
   getStarredHistory,
   setHistoryItemStarred,
 } from "../helpers/history";
-import { cleanProfile } from "../helpers/url";
+import { completeHandle } from "../helpers/url";
 import { UsageHistoryItem } from "../types";
 import { formatRelativeDate } from "../utils/date";
 
@@ -51,7 +52,8 @@ export default async function getProfileHistory(args: HistoryToolArgs = {}): Pro
       return `App "${app}" is not available.`;
     }
 
-    const normalizedProfile = cleanProfile(profile);
+    // History holds the full handle on an ATProto app, so a bare name has to be completed to match it
+    const normalizedProfile = completeHandle(resolvedApp.handleDomain, profile);
     const label = `@${normalizedProfile} on ${resolvedApp.name}`;
     const changed = await setHistoryItemStarred(normalizedProfile, resolvedApp.value, action === "star");
     if (!changed) {
@@ -61,7 +63,10 @@ export default async function getProfileHistory(args: HistoryToolArgs = {}): Pro
   }
 
   if (action === "list_starred") {
-    const starredHistory = await getStarredHistory(app, limit);
+    // Searches are left out before the limit, so one can't take the place of a favorite profile
+    const starredHistory = (await getStarredHistory(app))
+      .filter((item) => item.app !== FIND_PROFILE_APP_ID)
+      .slice(0, limit);
 
     if (starredHistory.length === 0) {
       return app ? `No favorites found on ${app}.` : "No favorites found.";
@@ -72,7 +77,8 @@ export default async function getProfileHistory(args: HistoryToolArgs = {}): Pro
     return `${headerText}\n\n${historyLines.join("\n")}`;
   }
 
-  const history = await getHistory();
+  // Usernames searched with Find Profile aren't profiles on an app, so the AI can't open them
+  const history = (await getHistory()).filter((item) => item.app !== FIND_PROFILE_APP_ID);
   if (history.length === 0) {
     return "No profile history found.";
   }

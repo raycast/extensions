@@ -56,6 +56,10 @@ I highly recommend that you map the default Google Chrome profile shortcut (`⌘
 
 ![command shortcut](https://user-images.githubusercontent.com/2499356/182660159-9b373fe9-f9df-4edd-953d-925308c61b3e.jpg)
 
+## Brave and Brave Origin
+
+Pick **Brave Browser** or **Brave Origin** in the **Browser** preference. Profile discovery, bookmarks, Bring to Front and Move Current Tab all work the same way as with Chrome, because Brave ships Chrome's Profiles menu and AppleScript dictionary unchanged. The standalone Brave Origin app (`com.brave.Browser.origin`) keeps its own profiles under `~/Library/Application Support/BraveSoftware/Brave-Origin`.
+
 ## Settings
 
 If needed, set the URL for the new tab (default is `about:blank`) and your search engine in the extension setting (default is `google.com`).

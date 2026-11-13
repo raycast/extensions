@@ -11,20 +11,27 @@ jobs:
     if: ${{ !github.event.issue.pull_request && github.repository == 'raycast/extensions' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: oven-sh/setup-bun@v2
+      - name: Checkout bot scripts
+        uses: actions/checkout@v7
         with:
-          bun-version: latest
-      - name: Setup Bot
-        run: bun create github.com/raycast/github-action-bot
-        env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          ref: ${{ github.event.repository.default_branch }}
+          path: .bots
+          sparse-checkout: scripts/bots
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .bots/.node-version
+          cache: npm
+          cache-dependency-path: .bots/scripts/bots/package-lock.json
+      - name: Install bot dependencies
+        working-directory: .bots/scripts/bots
+        run: npm ci --omit=dev
       - name: Run bot
-        run: |
-          cd github-action-bot
-          bun run index.ts
+        working-directory: .bots/scripts/bots
+        run: node run.ts issue-bot.ts
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          SCRIPT: "scripts/bots/issue-bot.ts"
 
       - name: Set SHORT_SHA
         if: always()
@@ -34,7 +41,7 @@ jobs:
         if: failure()
         uses: raycast/github-actions/slack-send@master
         with:
-          webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
+          webhook: ${{ secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
           text: |
             :no_entry_sign: ${{ github.workflow }} has failed

@@ -1,10 +1,13 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { join } from "node:path";
 import { environment, LocalStorage } from "@raycast/api";
+import { isPlatformId } from "../catalog/platforms";
 import { App, AppSetting, UsageHistoryItem } from "../types";
+import { appExtras } from "../utils/app-extras";
 import { defaultApps } from "../utils/default-apps";
+import { isRecord } from "../utils/is-record";
 import { withFileLock } from "./file-lock";
-import { cleanProfile, generateAppValue } from "./url";
+import { cleanProfile, completeHandle, generateAppValue, isHandleDomain } from "./url";
 
 export const STORAGE_KEYS = {
   USAGE_HISTORY: "usageHistory",
@@ -20,11 +23,12 @@ export const STORAGE_KEYS = {
   LAST_SELECTED_APP: "lastSelectedApp",
   HISTORY_APP_FILTER: "history-app-filter",
   HISTORY_SEARCH_TEXT: "history-search-text",
+  // Find Profile Everywhere and Import from Catalog share it
 } as const;
 
 type DataKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 const PAIR_SEPARATOR = "::";
 
@@ -60,10 +64,6 @@ export function subscribeToStorage(keys: DataKey[], listener: Listener): () => v
 
 function notify(key: DataKey) {
   listeners.get(key)?.forEach((listener) => listener());
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function isApp(value: unknown): value is App {
@@ -145,7 +145,19 @@ async function writeJson(key: DataKey, value: unknown) {
 
 const readCustomApps = () =>
   readList(STORAGE_KEYS.CUSTOM_APPS, (value) =>
-    isApp(value) ? { ...value, placeholder: value.placeholder ?? "username" } : undefined,
+    isApp(value)
+      ? {
+          name: value.name,
+          value: value.value,
+          urlTemplate: value.urlTemplate,
+          placeholder: value.placeholder ?? "username",
+          ...appExtras({
+            platform: isPlatformId(value.platform) ? value.platform : undefined,
+            nsfw: value.nsfw === true,
+            handleDomain: isHandleDomain(value.handleDomain) ? value.handleDomain : undefined,
+          }),
+        }
+      : undefined,
   );
 const readAppSettings = () => readList(STORAGE_KEYS.APP_SETTINGS, (value) => (isAppSetting(value) ? value : undefined));
 /**
@@ -253,6 +265,30 @@ async function migrateCustomAppIds() {
   await LocalStorage.removeItem(STORAGE_KEYS.MIGRATION_PLAN);
 }
 
+/**
+ * Bluesky profiles opened before bare names were completed are stored as `example`; opening one now records
+ * `example.bsky.social`. Complete the old rows and favorites so they're the same entry. Rows that become one are
+ * merged by readUsageHistory, which adds up their opens. Safe to repeat.
+ */
+async function migrateBlueskyHandles() {
+  const handleDomain = defaultApps.find((app) => app.value === "bluesky")?.handleDomain;
+  if (!handleDomain) return;
+  const complete = (profile: string, app: string) =>
+    app === "bluesky" ? completeHandle(handleDomain, profile) : profile;
+  await putJson(
+    STORAGE_KEYS.USAGE_HISTORY,
+    (await readUsageHistory()).map((item) => ({ ...item, profile: complete(item.profile, item.app) })),
+  );
+  await putJson(STORAGE_KEYS.STARRED_HISTORY_ITEMS, [
+    ...new Set(
+      (await readStarredPairs()).map((pair) => {
+        const parts = splitPair(pair);
+        return parts ? getHistoryPairKey(complete(parts.profile, parts.app), parts.app) : pair;
+      }),
+    ),
+  ]);
+}
+
 async function readAliases(): Promise<Record<string, string>> {
   const stored = await readJson(STORAGE_KEYS.APP_ID_ALIASES);
   return isRecord(stored)
@@ -268,6 +304,7 @@ async function runMigrations() {
   if (version >= SCHEMA_VERSION) return;
 
   if (version < 2) await migrateCustomAppIds();
+  if (version < 3) await migrateBlueskyHandles();
   await putJson(STORAGE_KEYS.SCHEMA_VERSION, SCHEMA_VERSION);
 }
 

@@ -9,6 +9,12 @@
 - Ask Dia now says right away that it can't create, rename, delete or reorder spaces, because Dia doesn't allow it from other apps. You can do it in Dia.
 - Search Extensions and the extension tools no longer treat Dia's Chromium profile as a space. Extensions that all spaces share are listed as available in all spaces and open in the current space, instead of under an old profile name such as a deleted space, which Dia couldn't open.
 
+## [History and Bookmarks Across Profiles] - 2026-11-11
+
+- Search History, Search Dia and the history and bookmark AI tools now include every Dia profile (space), not only the last used one.
+- With more than one profile, history results show the profile name and bookmarks are grouped under a folder per profile.
+- A profile whose History or Bookmarks file can't be read no longer hides the others.
+
 ## [Search Extensions Command] - 2026-11-07
 
 - Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.

@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { getPassboltClient } from "./lib/passbolt";
 import { generatePassword, getDefaultPasswordOptions } from "./utils/password-generator";
@@ -7,10 +8,21 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
   const [client] = useState(() => getPassboltClient());
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  async function handleSubmit(values: {
+  const { handleSubmit, itemProps, setValue } = useForm<{
+    name: string;
+    username: string;
+    uri: string;
+    password: string;
+    description: string;
+  }>({
+    initialValues: { name: "", username: "", uri: "", password: "", description: "" },
+    validation: { name: FormValidation.Required, password: FormValidation.Required },
+    onSubmit: submitResource,
+  });
+
+  async function submitResource(values: {
     name: string;
     username: string;
     uri: string;
@@ -27,7 +39,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create password";
-      toast.message = String(error);
+      toast.message = error instanceof Error ? error.message : String(error);
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +48,7 @@ export default function Command() {
   function handleGeneratePassword() {
     const options = getDefaultPasswordOptions();
     const newPassword = generatePassword(options);
-    setPassword(newPassword);
+    setValue("password", newPassword);
     showToast({
       style: Toast.Style.Success,
       title: "Password generated!",
@@ -69,14 +81,14 @@ export default function Command() {
       <Form.Separator />
 
       <Form.TextField
-        id="name"
+        {...itemProps.name}
         title="Name"
         placeholder="e.g. Google Account"
         info="A descriptive name for this password"
       />
 
       <Form.TextField
-        id="username"
+        {...itemProps.username}
         title="Username"
         placeholder="e.g. user@example.com"
         info="Email or username for login"
@@ -84,26 +96,22 @@ export default function Command() {
 
       {showPassword ? (
         <Form.TextField
-          id="password"
+          {...itemProps.password}
           title="Password"
           placeholder="Enter or generate password"
-          value={password}
-          onChange={setPassword}
           info="Press Cmd+G to generate a secure password"
         />
       ) : (
         <Form.PasswordField
-          id="password"
+          {...itemProps.password}
           title="Password"
           placeholder="Enter or generate password"
-          value={password}
-          onChange={setPassword}
           info="Press Cmd+G to generate a secure password"
         />
       )}
 
       <Form.TextField
-        id="uri"
+        {...itemProps.uri}
         title="URI"
         placeholder="https://example.com"
         info="Website URL or application identifier"
@@ -112,7 +120,7 @@ export default function Command() {
       <Form.Separator />
 
       <Form.TextArea
-        id="description"
+        {...itemProps.description}
         title="Notes"
         placeholder="Optional notes or additional information"
         enableMarkdown
