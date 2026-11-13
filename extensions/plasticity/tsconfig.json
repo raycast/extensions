@@ -4,9 +4,6 @@
     "src/**/*",
     "raycast-env.d.ts"
   ],
-  "exclude": [
-    "tests"
-  ],
   "compilerOptions": {
     "lib": [
       "es2021"
