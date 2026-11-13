@@ -19,6 +19,11 @@ iso=${7:-}
 
 part="$dest.download"
 log="$status.log"
+lock="$status.lock"
+
+# The extension claims the lock before starting this script; release it however the script ends.
+trap 'rm -f "$lock"' EXIT
+trap 'exit 143' TERM INT HUP
 here=$(dirname "$0")
 
 notify() {
@@ -36,22 +41,25 @@ fail() {
 echo "downloading $$" >"$status"
 mkdir -p "$(dirname "$dest")" || fail "Couldn't create the download folder"
 
-# A partial file that is already complete makes curl's resume fail, so only resume when something is missing.
-current=$(stat -f %z "$part" 2>/dev/null || echo 0)
-if [ -z "$size" ] || [ "$current" != "$size" ]; then
-  curl --fail --location --silent --show-error --retry 3 --continue-at - --output "$part" "$url" 2>>"$log" ||
-    fail "$(tail -n 1 "$log")"
-fi
-
-if [ -n "$sha256" ]; then
-  actual=$(shasum -a 256 "$part" | awk '{print $1}')
-  if [ "$actual" != "$sha256" ]; then
-    rm -f "$part"
-    fail "Checksum mismatch, the file was deleted"
+# A finished file is only here when an earlier ISO build failed; it was verified then, so reuse it.
+if [ ! -f "$dest" ]; then
+  # A partial file that is already complete makes curl's resume fail, so only resume when something is missing.
+  current=$(stat -f %z "$part" 2>/dev/null || echo 0)
+  if [ -z "$size" ] || [ "$current" != "$size" ]; then
+    curl --fail --location --silent --show-error --retry 3 --continue-at - --output "$part" "$url" 2>>"$log" ||
+      fail "$(tail -n 1 "$log")"
   fi
-fi
 
-mv -f "$part" "$dest" || fail "Couldn't move the file into place"
+  if [ -n "$sha256" ]; then
+    actual=$(shasum -a 256 "$part" | awk '{print $1}')
+    if [ "$actual" != "$sha256" ]; then
+      rm -f "$part"
+      fail "Checksum mismatch, the file was deleted"
+    fi
+  fi
+
+  mv -f "$part" "$dest" || fail "Couldn't move the file into place"
+fi
 
 if [ -n "$iso" ]; then
   echo "building $$" >"$status"
@@ -64,13 +72,18 @@ if [ -n "$iso" ]; then
     -e 'end run' \
     "$here/make-iso.sh" "$dest" "$work/installer.iso" "$(id -u)" >>"$log" 2>&1
   result=$?
-  rm -f "$dest"
+  # On any failure the downloaded package is kept so a retry can go straight to building.
   if [ $result -ne 0 ] || [ ! -f "$work/installer.iso" ]; then
     rm -rf "$work"
+    # osascript reports error -128 when the password prompt is cancelled.
+    if grep -q -- "-128" "$log"; then
+      fail "Cancelled at the password prompt. Retry to build without downloading again"
+    fi
     fail "Couldn't build the ISO (see the log for details)"
   fi
   mkdir -p "$(dirname "$iso")" && mv -f "$work/installer.iso" "$iso" || { rm -rf "$work"; fail "Couldn't move the ISO into place"; }
   rm -rf "$work"
+  rm -f "$dest"
 fi
 
 echo "done" >"$status"
