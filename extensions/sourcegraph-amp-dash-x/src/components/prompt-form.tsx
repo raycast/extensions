@@ -1,18 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import React, { useState, useEffect } from "react";
-import {
-  savePrompt,
-  updatePrompt,
-  getCategories,
-  Prompt,
-} from "../lib/storage";
+import { savePrompt, updatePrompt, getCategories, Prompt } from "../lib/prompts";
 
 interface PromptFormProps {
   prompt?: Prompt;
@@ -81,10 +69,7 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
       onSave?.();
       pop();
     } catch (error) {
-      showToast(
-        Toast.Style.Failure,
-        `Failed to ${isEditing ? "update" : "save"} prompt`,
-      );
+      showToast(Toast.Style.Failure, `Failed to ${isEditing ? "update" : "save"} prompt`);
       console.error("Save error:", error);
     } finally {
       setIsLoading(false);
@@ -109,10 +94,7 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={isEditing ? "Update Prompt" : "Save Prompt"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={isEditing ? "Update Prompt" : "Save Prompt"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}
@@ -153,11 +135,7 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
         info="Group similar prompts together. Use 'Manage Categories' command to add/edit categories."
       >
         {categories.map((category) => (
-          <Form.Dropdown.Item
-            key={category}
-            value={category}
-            title={category}
-          />
+          <Form.Dropdown.Item key={category} value={category} title={category} />
         ))}
       </Form.Dropdown>
 
@@ -173,10 +151,7 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
         <>
           <Form.Separator />
 
-          <Form.Description
-            title="Existing Categories"
-            text={categories.join(", ")}
-          />
+          <Form.Description title="Existing Categories" text={categories.join(", ")} />
         </>
       )}
 
@@ -184,10 +159,7 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
         <>
           <Form.Separator />
 
-          <Form.Description
-            title="Last Updated"
-            text={prompt?.updatedAt.toLocaleString()}
-          />
+          <Form.Description title="Last Updated" text={prompt?.updatedAt.toLocaleString()} />
         </>
       )}
     </Form>
