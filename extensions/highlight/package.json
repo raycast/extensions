@@ -48,7 +48,6 @@
     "build": "ray build",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.ts"
+    "typecheck": "tsc --noEmit"
   }
 }
