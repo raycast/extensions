@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add PlushSource MCP Server] - {PR_MERGE_DATE}
+## [Add PlushSource MCP Server] - 2026-11-13
 
 - Add PlushSource to the official registry: search and compare the custom plush manufacturers listed in the PlushSource directory by country, minimum order quantity, certifications and OEM/ODM. Local stdio server `plushsource-mcp` through `npx`, with the dataset bundled, no network calls and no API key.
 
