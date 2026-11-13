@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kovapdf",
+  "title": "KovaPDF",
+  "description": "Compress and merge PDFs, check PDF signatures and convert Bijoy text to Unicode Bangla with KovaPDF.",
+  "icon": "icon.png",
+  "author": "kovapdf",
+  "categories": ["Productivity", "Documentation"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "compress-pdf",
+      "title": "Compress PDF",
+      "subtitle": "KovaPDF",
+      "description": "Makes the PDFs selected in Finder smaller. The smaller copy is saved next to each original.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "level",
+          "type": "dropdown",
+          "required": false,
+          "title": "Level",
+          "description": "Basic keeps good quality, Strong makes it smallest, Quality changes the least.",
+          "default": "basic",
+          "data": [
+            { "title": "Basic", "value": "basic" },
+            { "title": "Strong", "value": "strong" },
+            { "title": "Quality", "value": "quality" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "merge-pdfs",
+      "title": "Merge PDFs",
+      "subtitle": "KovaPDF",
+      "description": "Joins the PDFs selected in Finder into one, in name order. The merged PDF is saved next to the first.",
+      "mode": "no-view"
+    },
+    {
+      "name": "verify-signature",
+      "title": "Verify PDF Signature",
+      "subtitle": "KovaPDF",
+      "description": "Checks every digital signature in the PDF selected in Finder.",
+      "mode": "view"
+    },
+    {
+      "name": "bijoy-to-unicode",
+      "title": "Bijoy to Unicode",
+      "subtitle": "KovaPDF",
+      "description": "Converts the selected Bijoy text to Unicode Bangla, then pastes or copies it.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "output",
+          "type": "dropdown",
+          "required": false,
+          "title": "Result",
+          "description": "Paste the Unicode text in place of the selection, or copy it.",
+          "default": "paste",
+          "data": [
+            { "title": "Paste in place", "value": "paste" },
+            { "title": "Copy to clipboard", "value": "copy" }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "A key from your KovaPDF dashboard (Developer API), starting kova_live_ or kova_test_.",
+      "placeholder": "kova_live_..."
+    }
+  ],
+  "dependencies": {
+    "@kovapdf/sdk": "0.1.0",
+    "@raycast/api": "2.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "10.13.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist -I",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"require('fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test .test-dist/test/*.test.js"
+  }
+}
