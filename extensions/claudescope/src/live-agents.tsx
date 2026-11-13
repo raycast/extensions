@@ -211,7 +211,7 @@ export default function Command() {
       ].sort((left, right) => agentTag(left).value.localeCompare(agentTag(right).value))
     : [];
 
-  const staleTitle =
+  const staleNote =
     error && updatedAt !== undefined
       ? notRunning
         ? "Not updating — ClaudeScope is not running"
@@ -229,17 +229,33 @@ export default function Command() {
           : undefined
     : undefined;
 
+  const firstSection = sections
+    ? sections.idle.length > 0
+      ? "idle"
+      : sections.working.length > 0
+        ? "working"
+        : sections.other.length > 0
+          ? "other"
+          : sections.finished.length > 0
+            ? "finished"
+            : undefined
+    : undefined;
+  const sectionSubtitle = (section: "idle" | "working" | "other" | "finished") =>
+    [section === firstSection ? staleNote : undefined, section === truncatedSection ? truncatedNote : undefined]
+      .filter(Boolean)
+      .join(" · ") || undefined;
+
   function rowActions(meta: LiveSessionMeta, session?: LiveSession) {
     return (
       <ActionPanel>
         <Action title="Open Session in ClaudeScope" icon={Icon.ArrowRight} onAction={() => openWithFeedback(meta.id)} />
+        <Action.CopyToClipboard title="Copy Session ID" content={meta.id} />
         <Action
           title="Toggle Detail"
           icon={Icon.Sidebar}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
           onAction={() => setShowingDetail((value) => !value)}
         />
-        <Action.CopyToClipboard title="Copy Session ID" content={meta.id} />
         {session?.openTool ? (
           <Action.CopyToClipboard title="Copy Tool Input" content={toolInputText(session.openTool.input)} />
         ) : null}
@@ -338,7 +354,7 @@ export default function Command() {
   }
 
   let content: ReactNode;
-  if (error && (notRunning ? !hasAnySession : response === undefined)) {
+  if (error && !hasAnySession) {
     content = notRunning ? (
       <List.EmptyView
         icon={Icon.Power}
@@ -366,7 +382,10 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.Terminal}
         title="No Live Sessions"
-        description={`No coding-agent session wrote to its transcript in the last ${response?.windowMinutes ?? 15} minutes.`}
+        description={
+          staleNote ??
+          `No coding-agent session wrote to its transcript in the last ${response?.windowMinutes ?? 15} minutes.`
+        }
         actions={
           <ActionPanel>
             <Action
@@ -389,25 +408,24 @@ export default function Command() {
     content = (
       <>
         {sections.idle.length > 0 ? (
-          <List.Section
-            title="Idle — waiting for you"
-            subtitle={truncatedSection === "idle" ? truncatedNote : undefined}
-          >
+          <List.Section title="Idle — waiting for you" subtitle={sectionSubtitle("idle")}>
             {sections.idle.map(sessionItem)}
           </List.Section>
         ) : null}
         {sections.working.length > 0 ? (
-          <List.Section title="Working" subtitle={truncatedSection === "working" ? truncatedNote : undefined}>
+          <List.Section title="Working" subtitle={sectionSubtitle("working")}>
             {sections.working.map(sessionItem)}
           </List.Section>
         ) : null}
         {sections.other.length > 0 ? (
-          <List.Section title="Other" subtitle={truncatedSection === "other" ? truncatedNote : undefined}>
+          <List.Section title="Other" subtitle={sectionSubtitle("other")}>
             {sections.other.map(sessionItem)}
           </List.Section>
         ) : null}
         {sections.finished.length > 0 ? (
-          <List.Section title="Finished recently">{sections.finished.map(finishedItem)}</List.Section>
+          <List.Section title="Finished recently" subtitle={sectionSubtitle("finished")}>
+            {sections.finished.map(finishedItem)}
+          </List.Section>
         ) : null}
       </>
     );
@@ -417,7 +435,6 @@ export default function Command() {
     <List
       isLoading={state.loading}
       isShowingDetail={showingDetail && hasAnySession}
-      navigationTitle={staleTitle}
       searchBarPlaceholder="Filter live sessions…"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Agent" value={agent} onChange={setAgent}>
