@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [AI Tools for Spaces and Extensions] - {PR_MERGE_DATE}
+## [AI Tools for Spaces and Extensions] - 2026-11-13
 
 - Ask Dia can now see and switch spaces: the new Get Spaces tool lists the spaces in Dia's order and which ones are active, and Switch Space switches a window to another space.
 - Get Tabs now returns the tabs of every space, each with its space name, and can return the tabs of a single space. Select Tab, Close Tab and Get Tab Contents also find tabs in spaces a window isn't showing, and Select Tab switches the window to the tab's space.
