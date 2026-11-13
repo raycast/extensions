@@ -51,6 +51,14 @@
       "type": "textfield",
       "required": false,
       "placeholder": "/usr/local/bin/terminus"
+    },
+    {
+      "title": "Organization Filter",
+      "name": "organization",
+      "description": "Only list sites from this organization (name or UUID, passed as --org). Leave blank for all sites. Can make loading much faster for large accounts.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "my-agency"
     }
   ],
   "dependencies": {

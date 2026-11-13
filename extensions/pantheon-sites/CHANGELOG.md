@@ -1,5 +1,11 @@
 # com.matbrady.pantheon Changelog
 
+## [Organization Filter] - {PR_MERGE_DATE}
+
+### Added
+
+- "Organization Filter" preference to pass `--org` to `site:list`, for faster loads on large accounts
+
 ## [Uninitialized Site Fix] - 2026-11-13
 
 ### Fixed

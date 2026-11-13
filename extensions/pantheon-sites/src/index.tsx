@@ -23,6 +23,11 @@ function frameworkIcon(framework: string | null) {
   return { source: Icon.Code, tintColor: Color.PrimaryText };
 }
 
+function siteListArgs(organization: string | undefined): string {
+  const org = organization?.trim();
+  return org ? `site:list --org=${JSON.stringify(org)} --format=json` : "site:list --format=json";
+}
+
 function getOrgLabel(orgName: string): string {
   return orgName.toLowerCase() === "team" ? "Personal" : orgName;
 }
@@ -37,10 +42,13 @@ export default function Command() {
     shell: true,
   });
 
-  const { isLoading: sitesLoading, data } = useExec(terminusCmd(preferences.terminusPath, "site:list --format=json"), {
-    shell: true,
-    execute: !checkLoading && !checkError,
-  });
+  const { isLoading: sitesLoading, data } = useExec(
+    terminusCmd(preferences.terminusPath, siteListArgs(preferences.organization)),
+    {
+      shell: true,
+      execute: !checkLoading && !checkError,
+    },
+  );
 
   const isLoading = checkLoading || sitesLoading;
 
