@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [Player Counts] - {PR_MERGE_DATE}
+## [Player Counts] - 2026-11-13
 
 - Add a View Player Count action to every game (⌘⇧P), with the live count, 24-hour and all-time peaks, a chart for the last 48 hours, week, month, or all time, and a monthly table
 - Add a Most Played Games command: Steam's top 100 by players right now, or this week's top with rank changes
