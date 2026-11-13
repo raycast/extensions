@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Project Mentions and Mention Icons in AI Chat] - {PR_MERGE_DATE}
+## [Project Mentions and Mention Icons in AI Chat] - 2026-11-13
 
 - Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name. Each project shows its own icon and color.
 - Mentioning a project gives AI its status, lead, teams, members, and milestones.
