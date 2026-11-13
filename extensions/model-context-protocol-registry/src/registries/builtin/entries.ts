@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "ulisten",
+    title: "uListen",
+    description:
+      "Ask what was actually said on the podcasts uListen covers. Search its curated catalog of long-form YouTube podcasts by topic, person, show or a half-remembered quote, read speaker-labeled transcript passages, and get episode summaries and chapter summaries, with links to the minute it happened. Four read-only tools. Hosted Streamable HTTP server; no account, sign-in or API key.",
+    icon: "https://ulisten.ai/favicon.svg",
+    homepage: "https://ulisten.ai/connectors",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.ulisten.ai/"],
+    },
+    remoteUrl: "https://mcp.ulisten.ai/",
+  },
+  {
     name: "mobile-joe",
     title: "Mobile Joe",
     description:
