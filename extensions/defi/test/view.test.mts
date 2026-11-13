@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { parseWindows, parseWorkspaces } from "../src/parse.ts";
-import { stripColumns, stripImage } from "../src/strip.ts";
+import { stripColumns, stripImage, stripSVG } from "../src/strip.ts";
 import { formatShortcut } from "../src/shortcut.ts";
 import { suggestions } from "../src/suggest.ts";
 
@@ -29,6 +29,13 @@ test("the strip image draws one tile per tiled window and highlights one", () =>
   assert.equal(svg.match(/<rect /g)?.length, 5); // the desk and four windows
   assert.equal(svg.match(/fill="#0A84FF"/g)?.length, 1);
   assert.equal(stripImage(windows, "tools", undefined, true), "");
+});
+
+test("a tall stack keeps every tile visible", () => {
+  const stack = Array.from({ length: 12 }, (_, row) => ({ id: row, appName: "A", title: "", focused: false }));
+  const heights = [...stripSVG([stack], undefined, true).matchAll(/<rect x="[^"]+" y="[^"]+" width="[^"]+" height="([^"]+)"/g)];
+  assert.equal(heights.length, 12);
+  assert.ok(heights.every(([, height]) => Number(height) > 0));
 });
 
 test("search text becomes a command argument", () => {

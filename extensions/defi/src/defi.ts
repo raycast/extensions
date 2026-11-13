@@ -51,14 +51,16 @@ export function defi(...args: string[]): Promise<string> {
 
 // Close Raycast first so the command acts on the window that was focused before it.
 // Feedback is a HUD because the launcher window is already gone.
-export async function runAndClose(commands: string[][], hud?: string): Promise<void> {
+export async function runAndClose(commands: string[][], hud?: string): Promise<boolean> {
   await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   try {
     for (const args of commands) await defi(...args);
     if (hud) await showHUD(hud);
+    return true;
   } catch (error) {
     // A HUD holds one line, so keep the first sentence of Defi's reason.
     const message = error instanceof Error ? error.message : String(error);
     await showHUD(message.split(/(?<=[.!?])\s/)[0]);
+    return false;
   }
 }

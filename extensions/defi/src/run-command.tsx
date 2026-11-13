@@ -78,20 +78,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.RunCom
     setRecent([run, ...recent.filter((other) => recentKey(other) !== recentKey(run))].slice(0, recentLimit));
   };
 
-  const run = (entry: (typeof entries)[number]) => {
-    remember({ command: entry.command });
-    return runAndClose([entry.command.split(" ")], entry.hud);
+  const run = async (entry: (typeof entries)[number]) => {
+    if (await runAndClose([entry.command.split(" ")], entry.hud)) remember({ command: entry.command });
   };
 
   // Runs a suggestion, naming the window it moves from a fresh read.
   const runSuggestion = async (suggestion: Suggestion) => {
     const workspaceID =
       suggestion.kind === "width" || suggestion.kind === "height" ? undefined : suggestion.args.at(-1);
-    remember(workspaceID ? { workspaceID, action: suggestion.args[0] } : { suggestion });
     const app = suggestion.hud?.includes("{window}")
       ? (await desktop.fresh().catch(() => undefined))?.windows.find((window) => window.focused)?.appName
       : undefined;
-    await runAndClose([suggestion.args], suggestion.hud?.replace("{window}", app ?? "window"));
+    if (await runAndClose([suggestion.args], suggestion.hud?.replace("{window}", app ?? "window"))) {
+      remember(workspaceID ? { workspaceID, action: suggestion.args[0] } : { suggestion });
+    }
   };
 
   const suggestionItem = (suggestion: Suggestion, keyPrefix = "") => (

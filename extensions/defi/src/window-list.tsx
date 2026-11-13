@@ -98,8 +98,7 @@ export function WindowList({ initialSearch = "", workspaceID }: { initialSearch?
   // shortcut: acting on a window first focuses it, which shows its workspace; a CLI command
   // that takes a window ID would avoid that switch.
   const act = async (window: DefiWindow, then: string[][] = [], hud?: string) => {
-    await visitItem(window);
-    await runAndClose([["focus-window-id", String(window.id)], ...then], hud);
+    if (await runAndClose([["focus-window-id", String(window.id)], ...then], hud)) await visitItem(window);
   };
 
   const scopeMenu = workspaceID ? undefined : (

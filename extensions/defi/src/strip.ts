@@ -25,11 +25,13 @@ export function stripSVG(columns: DefiWindow[][], highlightID: number | undefine
   const width = Math.max(minWidth, column.inset * 2 + stripWidth);
   const left = (width - stripWidth) / 2;
   const tiles = columns.flatMap((windows, index) => {
-    const rowHeight = (column.height - column.gap * (windows.length - 1)) / Math.max(windows.length, 1);
+    // Gaps shrink in a tall stack so the tiles keep at least half the column.
+    const gap = Math.min(column.gap, column.height / (2 * Math.max(windows.length, 1)));
+    const rowHeight = (column.height - gap * (windows.length - 1)) / Math.max(windows.length, 1);
     return windows.map((window, row) => {
       const highlighted = window.id === highlightID;
       const x = left + index * (column.width + column.gap);
-      const y = column.inset + row * (rowHeight + column.gap);
+      const y = column.inset + row * (rowHeight + gap);
       const [fill, fillOpacity] = highlighted ? [colors.highlight, 1] : colors.window;
       const [stroke, strokeOpacity] = highlighted ? [colors.highlight, 1] : colors.stroke;
       return `<rect x="${x}" y="${y}" width="${column.width}" height="${rowHeight}" rx="6" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-opacity="${strokeOpacity}"/>`;

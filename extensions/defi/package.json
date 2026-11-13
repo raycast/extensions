@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defi",
   "title": "Defi",
-  "description": "Switch windows, jump between workspaces, and run Defi window manager commands",
+  "description": "Switch windows, jump between workspaces, and run commands in the Defi window manager. Requires Defi.app",
   "icon": "icon.png",
   "author": "qeude",
   "license": "MIT",
@@ -57,7 +57,7 @@
         {
           "name": "query",
           "type": "text",
-          "placeholder": "Width or workspace",
+          "placeholder": "Width or Workspace",
           "required": false
         }
       ]
