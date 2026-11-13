@@ -166,6 +166,7 @@ export const CHAR_LIMITS: Record<string, number> = {
   tiktok: 2200,
   linkedin: 3000,
   telegram: 4096,
+  youtube: 5000,
 };
 
 const URL_RE = /https?:\/\/\S+/g;
@@ -212,25 +213,73 @@ export function platformLabel(p: string): string {
   return PLATFORM_NAMES[p] ?? p.charAt(0).toUpperCase() + p.slice(1);
 }
 
-/** What media each network needs. Networks not listed can take text alone. */
-const MEDIA_RULES: Record<string, ("image" | "video")[]> = {
-  instagram: ["image", "video"],
-  pinterest: ["image", "video"],
-  snapchat: ["image", "video"],
-  tiktok: ["video"],
-  youtube: ["video"],
-};
+/**
+ * What each network takes in one post, matching what BulkPublish accepts for its post types.
+ * BulkPublish refuses the whole post when one channel can't take the attachments, so channels
+ * that can't are skipped before sending. Networks not listed take text alone and any attachment.
+ */
+interface MediaRule {
+  /** The post needs one of these: text alone can't be posted. */
+  needs?: ("image" | "video")[];
+  /** Most images in one post (0 = none). */
+  maxImages: number;
+  /** Takes a single video. */
+  video: boolean;
+  /** Post type to request when the network's default one doesn't take the attachment. */
+  types?: { image?: string; images?: string; video?: string };
+}
 
-/** Post type to request when the network's default post type doesn't take the attachment. */
-const POST_TYPE_FOR: Record<"image" | "video", Record<string, string>> = {
-  image: { threads: "image" },
-  video: { instagram: "reel", pinterest: "video_pin" },
+const MEDIA_RULES: Record<string, MediaRule> = {
+  x: { maxImages: 4, video: true },
+  instagram: {
+    needs: ["image", "video"],
+    maxImages: 10,
+    video: true,
+    types: { images: "carousel", video: "reel" },
+  },
+  facebook: { maxImages: 10, video: true },
+  tiktok: { needs: ["video"], maxImages: 0, video: true },
+  youtube: { needs: ["video"], maxImages: 0, video: true },
+  threads: { maxImages: 20, video: true, types: { image: "image", images: "carousel", video: "video" } },
+  bluesky: { maxImages: 4, video: true },
+  pinterest: {
+    needs: ["image", "video"],
+    maxImages: 5,
+    video: true,
+    types: { images: "carousel", video: "video_pin" },
+  },
+  gmb: { maxImages: 1, video: false },
+  linkedin: { maxImages: 20, video: true, types: { images: "multi_image" } },
+  mastodon: { maxImages: 4, video: true },
+  discord: { maxImages: 10, video: true },
+  telegram: { maxImages: 10, video: true },
+  tumblr: { maxImages: 30, video: true },
+  snapchat: { needs: ["image", "video"], maxImages: 1, video: true },
 };
 
 export function mediaNeedFor(platform: string): string | null {
-  const need = MEDIA_RULES[platform];
+  const need = MEDIA_RULES[platform]?.needs;
   if (!need) return null;
   return need.length > 1 ? "needs an image or a video" : `needs ${need[0] === "image" ? "an image" : "a video"}`;
+}
+
+/** Why a network can't take this post's attachments, or null when it can. */
+export function mediaProblemFor(platform: string, media: MediaKind, count: number): string | null {
+  const rule = MEDIA_RULES[platform];
+  if (!rule) return null;
+  if (rule.needs && !(media && count > 0 && rule.needs.includes(media))) return mediaNeedFor(platform);
+  if (media === "video" && !rule.video) return "can't take a video";
+  if (media === "image" && count > rule.maxImages)
+    return rule.maxImages === 1 ? "takes one image per post" : `takes up to ${rule.maxImages} images per post`;
+  return null;
+}
+
+/** The post type to request for these attachments, when the network's default type won't take them. */
+export function postTypeFor(platform: string, media: MediaKind, count: number): string | undefined {
+  const types = MEDIA_RULES[platform]?.types;
+  if (!types || !media || count < 1) return undefined;
+  if (media === "video") return types.video;
+  return count > 1 ? types.images : types.image;
 }
 
 const MIME: Record<string, string> = {
@@ -263,7 +312,7 @@ export interface Skipped {
 }
 
 /** Decide which chosen channels can take this post, and why the rest can't. */
-export function planTargets(channels: Channel[], ids: number[], media: MediaKind) {
+export function planTargets(channels: Channel[], ids: number[], media: MediaKind, count = media ? 1 : 0) {
   const byId = new Map(channels.map((c) => [c.id, c]));
   const targets: Channel[] = [];
   const skipped: Skipped[] = [];
@@ -274,9 +323,9 @@ export function planTargets(channels: Channel[], ids: number[], media: MediaKind
       skipped.push({ channel: c, reason: (c.problem ?? "can't be used").toLowerCase() });
       continue;
     }
-    const need = MEDIA_RULES[c.platform];
-    if (need && !(media && need.includes(media))) {
-      skipped.push({ channel: c, reason: mediaNeedFor(c.platform) ?? "needs media" });
+    const problem = mediaProblemFor(c.platform, media, count);
+    if (problem) {
+      skipped.push({ channel: c, reason: problem });
       continue;
     }
     targets.push(c);
@@ -303,11 +352,9 @@ export function buildPostBody(
   schedule?: { scheduledAt: string; timezone: string },
 ): PostBody {
   const postTypeOverrides: Record<string, string> = {};
-  if (mediaIds.length && media) {
-    for (const t of targets) {
-      const type = POST_TYPE_FOR[media][t.platform];
-      if (type) postTypeOverrides[t.platform] = type;
-    }
+  for (const t of targets) {
+    const type = postTypeFor(t.platform, media, mediaIds.length);
+    if (type) postTypeOverrides[t.platform] = type;
   }
   return {
     content,

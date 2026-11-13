@@ -23,6 +23,7 @@ Your key is kept in Raycast's preferences for this extension and is only sent to
 
 - **Add to Queue** uses the posting times you set up in BulkPublish, so you don't have to pick a time.
 - Networks that need media (TikTok and YouTube need a video; Instagram, Pinterest and Snapchat need an image or video) are skipped with a note when you post text only. Everything else still goes out.
+- The same goes for attachments a network can't take in one post: X, Bluesky and Mastodon take up to 4 images, Pinterest 5, Instagram 10, and Google Business and Snapchat one. Google Business doesn't take videos. Several images go out as a carousel where the network has one.
 - X and Mastodon count every link as 23 characters, and the counter does too.
 - If your team uses approvals, posts that need sign-off show as **Awaiting Approval** in Search Posts.
 - `⌘ ↵` toggles a detail pane with the full text, media and per-channel status in Search Posts and View Queue.

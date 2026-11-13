@@ -137,7 +137,7 @@ export function CreatePostForm({
   async function send(v: Values) {
     const ids = v.channelIds.map(Number);
     const media = mediaKindOfFiles(v.files);
-    const { targets, skipped } = planTargets(channels, ids, media);
+    const { targets, skipped } = planTargets(channels, ids, media, v.files.length);
     if (!targets.length) {
       await showToast({
         style: Toast.Style.Failure,
@@ -296,6 +296,7 @@ export function CreatePostForm({
     chosen,
     chosen.map((c) => c.id),
     mediaKindOfFiles(values.files ?? []),
+    (values.files ?? []).length,
   );
   const usable = channels.filter((c) => c.usable);
   const unusable = channels.filter((c) => !c.usable);

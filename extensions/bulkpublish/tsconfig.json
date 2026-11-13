@@ -11,7 +11,6 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "noEmit": true,
-    "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
