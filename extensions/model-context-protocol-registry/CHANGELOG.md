@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Multi Mail and Multi Calendar MCP Servers] - {PR_MERGE_DATE}
+## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-13
 
 - Update Multi Mail and Multi Calendar in the official registry to name Yahoo and AOL, which the hosted servers now connect.
 
