@@ -9,6 +9,8 @@ export interface ChartOptions {
   /** The span of the x-axis; a session still under way leaves the rest of the day empty. */
   window: [number, number] | null;
   appearance: "light" | "dark";
+  /** Draw a rising line in red and a falling one in green. */
+  redForGains?: boolean;
   /** Formats an axis time. */
   time: (timestamp: number) => string;
 }
@@ -32,7 +34,7 @@ export function chartSvg(options: ChartOptions): string | null {
   const colors = COLORS[appearance];
   const last = series[series.length - 1].price;
   const rising = reference ? last >= reference : last >= series[0].price;
-  const line = rising ? colors.up : colors.down;
+  const line = rising !== Boolean(options.redForGains) ? colors.up : colors.down;
 
   const prices = series.map((point) => point.price);
   const values = reference ? [...prices, reference] : prices;

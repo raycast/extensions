@@ -5,6 +5,9 @@
   "description": "Search stocks, indices and crypto across US, Hong Kong, China, Japan, Korea and Taiwan in five languages, with live prices and today's chart.",
   "icon": "extension-icon.png",
   "author": "fatwang266",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Finance"
   ],
@@ -32,6 +35,193 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-symbols",
+      "title": "Search Symbols",
+      "description": "Find stocks, ETFs, indices and Binance Spot crypto pairs by ticker or by company name in English, Chinese, Japanese or Korean, across the US, Hong Kong, China, Japan, Korea and Taiwan."
+    },
+    {
+      "name": "get-quote",
+      "title": "Get Quote",
+      "description": "Get the latest price, change, open, high, low, market session and a sample of today's prices for stocks, ETFs, indices and crypto pairs."
+    }
+  ],
+  "ai": {
+    "instructions": "Prices come from Yahoo Finance for stocks and indices and from Binance Spot for crypto. Always state the currency and the quote time, and mention when a stock quote is delayed or the market is closed. For crypto the change is over the last 24 hours, not since a close. Never give investment advice or predict prices.",
+    "evals": [
+      {
+        "input": "@pulse what is Apple trading at?",
+        "mocks": {
+          "search-symbols": [
+            {
+              "symbol": "AAPL",
+              "name": "Apple Inc.",
+              "type": "equity",
+              "market": "United States",
+              "exchange": "NASDAQ"
+            }
+          ],
+          "get-quote": [
+            {
+              "symbol": "AAPL",
+              "name": "Apple Inc.",
+              "type": "equity",
+              "exchange": "NasdaqGS",
+              "currency": "USD",
+              "price": 232.5,
+              "change": 2.1,
+              "changePercent": 0.91,
+              "changeMeasuredAgainst": "previous close",
+              "open": 230.9,
+              "high": 233.2,
+              "low": 230.1,
+              "previousClose": 230.4,
+              "session": "open",
+              "quoteTime": "2026-11-12T15:30:00.000Z",
+              "delayMinutes": 0,
+              "source": "Yahoo Finance",
+              "todaysPrices": [],
+              "url": "https://finance.yahoo.com/quote/AAPL"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quote",
+              "arguments": {
+                "symbols": {
+                  "includes": "AAPL"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@pulse 台積電今天漲多少？",
+        "mocks": {
+          "search-symbols": [
+            {
+              "symbol": "2330.TW",
+              "name": "台積電",
+              "type": "equity",
+              "market": "Taiwan",
+              "exchange": "TWSE"
+            }
+          ],
+          "get-quote": [
+            {
+              "symbol": "2330.TW",
+              "name": "台積電",
+              "type": "equity",
+              "exchange": "Taiwan",
+              "currency": "TWD",
+              "price": 1085,
+              "change": 15,
+              "changePercent": 1.4,
+              "changeMeasuredAgainst": "previous close",
+              "open": 1075,
+              "high": 1090,
+              "low": 1070,
+              "previousClose": 1070,
+              "session": "closed",
+              "quoteTime": "2026-11-12T05:30:00.000Z",
+              "delayMinutes": 20,
+              "source": "Yahoo Finance",
+              "todaysPrices": [],
+              "url": "https://finance.yahoo.com/quote/2330.TW"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-quote"
+          }
+        ]
+      },
+      {
+        "input": "@pulse compare bitcoin and ethereum over the last 24 hours",
+        "mocks": {
+          "search-symbols": [
+            {
+              "symbol": "BTC/USDT",
+              "name": "Bitcoin",
+              "type": "crypto",
+              "market": "Crypto",
+              "exchange": "Binance Spot"
+            },
+            {
+              "symbol": "ETH/USDT",
+              "name": "Ethereum",
+              "type": "crypto",
+              "market": "Crypto",
+              "exchange": "Binance Spot"
+            }
+          ],
+          "get-quote": [
+            {
+              "symbol": "BTC/USDT",
+              "name": "Bitcoin",
+              "type": "crypto",
+              "currency": "USDT",
+              "price": 98000,
+              "changePercent": -1.2,
+              "session": "24h",
+              "source": "Binance Spot"
+            },
+            {
+              "symbol": "ETH/USDT",
+              "name": "Ethereum",
+              "type": "crypto",
+              "currency": "USDT",
+              "price": 3500,
+              "changePercent": 2.4,
+              "session": "24h",
+              "source": "Binance Spot"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-quote"
+          }
+        ]
+      },
+      {
+        "input": "@pulse which Japanese car makers can I look up?",
+        "mocks": {
+          "search-symbols": [
+            {
+              "symbol": "7203.T",
+              "name": "Toyota Motor",
+              "type": "equity",
+              "market": "Japan",
+              "exchange": "Tokyo"
+            },
+            {
+              "symbol": "7267.T",
+              "name": "Honda Motor",
+              "type": "equity",
+              "market": "Japan",
+              "exchange": "Tokyo"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-symbols",
+              "arguments": {
+                "market": "jp"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "nameLanguage",
@@ -64,6 +254,28 @@
         {
           "title": "한국어",
           "value": "ko"
+        }
+      ]
+    },
+    {
+      "name": "priceColors",
+      "title": "Price Colors",
+      "description": "Which color marks a gain. Taiwan, China, Japan and Korea show gains in red; crypto exchanges show them in green.",
+      "type": "dropdown",
+      "required": false,
+      "default": "green-up",
+      "data": [
+        {
+          "title": "Green Up, Red Down",
+          "value": "green-up"
+        },
+        {
+          "title": "Red Up, Green Down",
+          "value": "red-up"
+        },
+        {
+          "title": "Red Up for Stocks, Green Up for Crypto",
+          "value": "red-up-stocks"
         }
       ]
     }
