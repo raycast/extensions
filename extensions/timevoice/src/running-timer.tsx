@@ -47,13 +47,19 @@ function RunningTimer() {
       title={
         running ? `${formatDuration(elapsedSeconds(running), false)} ${running.description ?? ""}`.trim() : undefined
       }
-      tooltip={running ? `Timevoice: ${running.description ?? "Timer running"}` : "Timevoice: no timer running"}
+      tooltip={
+        running
+          ? `Timevoice: ${running.description ?? "Timer running"}`
+          : error
+            ? "Timevoice: could not load"
+            : "Timevoice: no timer running"
+      }
     >
       {error && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
             icon={{ source: Icon.Warning, tintColor: Color.Red }}
-            title="Could not reach Timevoice"
+            title="Could not load Timevoice"
             subtitle={error.message}
           />
         </MenuBarExtra.Section>
@@ -68,9 +74,11 @@ function RunningTimer() {
           <MenuBarExtra.Item icon={Icon.Stop} title="Stop Timer" onAction={() => run(() => stopEntry(running.id))} />
         </MenuBarExtra.Section>
       ) : (
-        <MenuBarExtra.Section>
-          <MenuBarExtra.Item title="No timer running" />
-        </MenuBarExtra.Section>
+        !error && (
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item title="No timer running" />
+          </MenuBarExtra.Section>
+        )
       )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
