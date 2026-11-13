@@ -4,7 +4,7 @@ Control [Sunflower for Mac](https://sunflower.karakabakov.com/) from Raycast. Su
 
 ## What's new
 
-- A **Disks** section shows free space and usage for every mounted volume, colour-coded as it fills up.
+- A **Disks** section shows free space and usage for every mounted volume, color-coded as it fills up.
 
 ## Commands
 
