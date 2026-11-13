@@ -4,9 +4,28 @@ Capture a screenshot. Tap back for earlier ones. Copy the group.
 
 Snap & Grab is a macOS Raycast extension with native area/window capture, a thumbnail history picker, and a passive copied confirmation. It is being prepared for Store submission under `hushhash`; a Store listing is not live yet.
 
+## Set up your shortcuts
+
+Global hotkeys need a one-time setup in Raycast. Snap & Grab cannot assign them automatically; choose these suggestions or your own combinations.
+
+| Command                   | Suggested hotkey        |
+| ------------------------- | ----------------------- |
+| Capture and Copy          | ⌃⌘4 (Control+Command+4) |
+| Select Recent Screenshots | ⌃⌘5 (Control+Command+5) |
+
+In **Raycast v2**:
+
+1. Search for the command without running it.
+2. Press **⌘K**, open **Configure**, and choose **Set Hotkey**.
+3. Press your preferred key combination. Repeat for the other command.
+
+If another command already uses that combination, find that command, open the same hotkey control, and click **✕** to clear it before assigning the new binding. This also applies when moving from the old Capture and Copy Script Command.
+
+Inside **Select Recent Screenshots**, **Return** selects or deselects an image and **⌘Return** copies the selection. These controls work immediately, with no setup.
+
 ## Capture and Copy
 
-1. Find **Capture and Copy** in Raycast and use **Configure Command → Set Hotkey**. Control+Command+4 is a suggested starting point.
+1. Assign a hotkey to **Capture and Copy** using the setup steps above.
 2. Hold those modifiers, press the shortcut key, and draw an area. Press Space for window selection.
 3. Keep the modifiers held and press the shortcut key again to add the previous saved screenshot. Each extra press adds one older image.
 4. Check the count and thumbnails, then release the modifiers to copy.
@@ -25,8 +44,6 @@ Open **Select Recent Screenshots** to browse saved images without taking a new c
 - **Screenshot Folder:** leave empty to use your macOS screenshot location, or choose a folder.
 - **Copy Confirmation:** Off, Brief (1.5 seconds), or Extended (3 seconds). Clipboard transfer still completes when confirmation is off.
 - **Thumbnail Previews:** show or hide previews in the browser and native HUDs.
-
-Global hotkeys are assigned once by the user in Raycast; extensions cannot declare default global bindings. Suggested bindings are **Control+Command+4** for Capture and Copy and **Control+Command+5** for Select Recent Screenshots. Find either command, press Command+K, choose Configure Command → Set Hotkey, and record the combination. Inside Select Recent Screenshots, Return selects and Command+Return copies; these controls are shown at the top of the view. To use Command+Shift+4, first disable or reassign the conflicting macOS shortcut in System Settings → Keyboard → Keyboard Shortcuts → Screenshots. Native Screenshot may interpret held modifiers such as Shift while drawing; test the chosen gesture before replacing your normal workflow.
 
 ## Permissions and privacy
 
