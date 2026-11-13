@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Compare the Cloud MCP Server] - 2026-11-13
+
+- Add Compare the Cloud to the official registry: search and compare a UK B2B technology provider directory (20,000+ cloud, MSP, cybersecurity and AI vendors) and read Compare the Cloud articles, news and expert opinion. 10 read-only tools. Hosted Streamable HTTP server at https://mcp.comparethecloud.net/mcp with no sign-in and no API key needed, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Hoy Planes and GlucoBeat MCP Servers] - 2026-11-13
 
 - Add Hoy Planes to the official registry: what's on in 12 Spanish provinces (concerts, theater and free plans by date, topic, price and distance), with 3 read-only tools. Hosted Streamable HTTP server at https://mcp.hoyplanes.com with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
