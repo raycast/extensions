@@ -21,12 +21,10 @@ export type DownloadRequest = {
   title: string;
   size?: number;
   sha256?: string;
-  // Download the .pkg to the cache, then build a bootable ISO named `fileName` from it.
-  buildIso?: boolean;
 };
 
 export type Status =
-  | { state: "downloading" | "building"; pid: number }
+  | { state: "downloading"; pid: number }
   | { state: "done" }
   | { state: "failed"; reason: string }
   // The worker died without writing a final status (killed, crashed, or the Mac restarted).
@@ -41,7 +39,6 @@ const START_TIMEOUT_MS = 15_000;
 type JobInfo = {
   request: DownloadRequest;
   dest: string;
-  target: string;
   startedAt: number;
 };
 
@@ -98,7 +95,7 @@ function readStatus(file: string): Status {
     return { state: "none" };
   }
   const [state, ...rest] = line.split(" ");
-  if (state === "downloading" || state === "building") {
+  if (state === "downloading") {
     const pid = Number(rest[0]);
     return Number.isInteger(pid) && isAlive(pid) ? { state, pid } : { state: "stopped" };
   }
@@ -197,31 +194,26 @@ export async function startDownload(request: DownloadRequest) {
   }
 
   const jobsDir = jobsDirectory();
-  const cacheDir = path.join(environment.supportPath, "cache");
   fs.mkdirSync(jobsDir, { recursive: true });
-  fs.mkdirSync(cacheDir, { recursive: true });
 
   const jobId = createHash("sha256").update(dest).digest("hex").slice(0, 16);
   const statusFile = path.join(jobsDir, `${jobId}.status`);
   const logFile = `${statusFile}.log`;
-  // ISOs are built from a package kept outside the download folder, which root may not be allowed to read.
-  const target = request.buildIso ? path.join(cacheDir, `${jobId}.pkg`) : dest;
 
   // Only the caller that claims the lock starts a worker; everyone else just follows its progress.
   const lockFile = `${statusFile}.lock`;
   if (await claimLockForStart(lockFile, statusFile)) {
     fs.writeFileSync(statusFile, "");
-    const info: JobInfo = { request, dest, target, startedAt: Date.now() };
+    const info: JobInfo = { request, dest, startedAt: Date.now() };
     fs.writeFileSync(path.join(jobsDir, `${jobId}.json`), JSON.stringify(info));
     const args = [
       path.join(environment.assetsPath, "download.sh"),
       request.url,
-      target,
+      dest,
       request.size ? String(request.size) : "",
       request.sha256 ?? "",
       statusFile,
       request.title,
-      request.buildIso ? dest : "",
     ];
     // Detached so the download keeps going after Raycast unloads the command.
     const child = spawn("/bin/sh", args, { detached: true, stdio: "ignore" });
@@ -231,21 +223,15 @@ export async function startDownload(request: DownloadRequest) {
     else fs.rmSync(lockFile, { force: true });
   }
 
-  await trackProgress({ request, dest, target, statusFile, logFile });
+  await trackProgress({ request, dest, statusFile, logFile });
 }
 
-async function trackProgress(job: {
-  request: DownloadRequest;
-  dest: string;
-  target: string;
-  statusFile: string;
-  logFile: string;
-}) {
+async function trackProgress(job: { request: DownloadRequest; dest: string; statusFile: string; logFile: string }) {
   const { request, dest, statusFile, logFile } = job;
-  const partial = `${job.target}.download`;
+  const partial = `${dest}.download`;
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: request.buildIso ? "Downloading Installer" : "Downloading",
+    title: "Downloading",
     message: path.basename(dest),
     primaryAction: { title: "Show Downloads", onAction: showDownloads },
   });
@@ -273,12 +259,6 @@ async function trackProgress(job: {
         : formatBytes(done);
       if (lastState !== "downloading") {
         toast.secondaryAction = { title: "Cancel Download", onAction: () => cancelDownload({ statusFile, partial }) };
-      }
-    } else if (status.state === "building") {
-      if (lastState !== "building") {
-        toast.title = "Building Installer ISO";
-        toast.message = "Enter your password when asked. This can take several minutes.";
-        toast.secondaryAction = undefined;
       }
     } else if (status.state === "done") {
       clearInterval(timer);
@@ -308,8 +288,7 @@ export async function showDownloads() {
 }
 
 // Stops a download in progress. The status is read again at the moment of cancelling: the worker may
-// have moved on (to building as root, or finished) since the action was shown, and only a live
-// download is cancelled.
+// have finished since the action was shown, and only a live download is cancelled.
 export function cancelDownload({ statusFile, partial }: { statusFile: string; partial: string }): boolean {
   const current = readStatus(statusFile);
   if (current.state !== "downloading") return false;
@@ -333,10 +312,10 @@ function readJobInfo(file: string): JobInfo | undefined {
   try {
     const value: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
     if (!isRecord(value) || !isRecord(value.request)) return undefined;
-    const { request, dest, target, startedAt } = value;
+    const { request, dest, startedAt } = value;
     if (typeof request.url !== "string" || typeof request.fileName !== "string" || typeof request.title !== "string")
       return undefined;
-    if (typeof dest !== "string" || typeof target !== "string" || typeof startedAt !== "number") return undefined;
+    if (typeof dest !== "string" || typeof startedAt !== "number") return undefined;
     return {
       request: {
         url: request.url,
@@ -344,14 +323,46 @@ function readJobInfo(file: string): JobInfo | undefined {
         title: request.title,
         size: typeof request.size === "number" ? request.size : undefined,
         sha256: typeof request.sha256 === "string" ? request.sha256 : undefined,
-        buildIso: request.buildIso === true,
       },
       dest,
-      target,
       startedAt,
     };
   } catch {
     return undefined;
+  }
+}
+
+// Earlier versions could build installer ISOs, keeping the downloaded installer package (about
+// 15 GB) in a cache folder while they did. That option is gone, so its jobs are cleared out along
+// with the cached package, unless a worker still holds the job's lock. Returns true if the job was one.
+function removeIsoJob(id: string): boolean {
+  const infoFile = path.join(jobsDirectory(), `${id}.json`);
+  let value: unknown;
+  try {
+    value = JSON.parse(fs.readFileSync(infoFile, "utf8"));
+  } catch {
+    return false;
+  }
+  if (!isRecord(value) || !isRecord(value.request) || value.request.buildIso !== true) return false;
+  const statusFile = path.join(jobsDirectory(), `${id}.status`);
+  const cached = path.join(environment.supportPath, "cache", `${id}.pkg`);
+  deleteUnderLock(statusFile, () => [cached, `${cached}.download`, infoFile, statusFile, `${statusFile}.log`]);
+  return true;
+}
+
+// Deletes a job's files while holding its lock, so no retry can start on the same files meanwhile.
+// The status is read again under the lock: the job may have been retried since the caller looked.
+// Returns false, deleting nothing, if a worker holds the lock or the job is running again.
+function deleteUnderLock(statusFile: string, files: (state: Status["state"]) => string[]): boolean {
+  const lockFile = `${statusFile}.lock`;
+  if (!claimLock(lockFile)) return false;
+  try {
+    const { state } = readStatus(statusFile);
+    if (state === "downloading") return false;
+    for (const file of files(state)) fs.rmSync(file, { force: true });
+    return true;
+  } finally {
+    fs.rmSync(lockFile, { force: true });
   }
 }
 
@@ -367,39 +378,39 @@ export function listJobs(): Job[] {
     .filter((name) => /^[0-9a-f]{16}\.json$/.test(name))
     .flatMap((name) => {
       const id = name.slice(0, 16);
+      if (removeIsoJob(id)) return [];
       const info = readJobInfo(path.join(jobsDirectory(), name));
       if (!info) return [];
       const statusFile = path.join(jobsDirectory(), `${id}.status`);
-      const partial = `${info.target}.download`;
+      const partial = `${info.dest}.download`;
       let status = readStatus(statusFile);
       // A worker that never wrote its first status within the start window isn't coming back.
       if (status.state === "none" && Date.now() - info.startedAt > START_TIMEOUT_MS) status = { state: "stopped" };
-      const downloadedBytes =
-        status.state === "done" ? fileSize(info.dest) : fileSize(partial) || fileSize(info.target);
+      const downloadedBytes = status.state === "done" ? fileSize(info.dest) : fileSize(partial);
       return { ...info, id, status, downloadedBytes, statusFile, logFile: `${statusFile}.log`, partial };
     })
     .sort((a, b) => b.startedAt - a.startedAt);
 }
 
 export function isActive(job: Job): boolean {
-  return job.status.state === "downloading" || job.status.state === "building" || job.status.state === "none";
+  return job.status.state === "downloading" || job.status.state === "none";
 }
 
-// Removes a job from the list. Unfinished jobs also lose their partial data, including the cached
-// installer package of a failed ISO build. A finished download's file is never touched.
-export function removeJob(job: Job) {
-  if (isActive(job)) return;
-  if (job.status.state !== "done") {
-    fs.rmSync(job.partial, { force: true });
-    if (job.request.buildIso) fs.rmSync(job.target, { force: true });
-  }
-  for (const file of [path.join(jobsDirectory(), `${job.id}.json`), job.statusFile, job.logFile]) {
-    fs.rmSync(file, { force: true });
-  }
+// Removes a job from the list. Unfinished jobs also lose their partial data. A finished download's
+// file is never touched.
+// Returns false if the job is running (again), in which case nothing is removed.
+export function removeJob(job: Job): boolean {
+  if (isActive(job)) return false;
+  return deleteUnderLock(job.statusFile, (state) => [
+    ...(state === "done" ? [] : [job.partial]),
+    path.join(jobsDirectory(), `${job.id}.json`),
+    job.statusFile,
+    job.logFile,
+  ]);
 }
 
 // Size of the data that removing an unfinished job would delete.
 export function partialDataSize(job: Job): number {
   if (job.status.state === "done") return 0;
-  return fileSize(job.partial) + (job.request.buildIso ? fileSize(job.target) : 0);
+  return fileSize(job.partial);
 }

@@ -25,9 +25,9 @@
 ### Downloads
 
 - Download Firmware… (⌘⇧D) lists the restore images (.ipsw) for a version from [ipsw.me](https://ipsw.me), grouped by the devices that share them, with signing status and size. Downloads are checked against their SHA-256.
-- For macOS, Download Installer Package (⌘⇧I) saves Apple's full `InstallAssistant.pkg`, and Create Installer ISO (⌥⌘I) turns it into a bootable `.iso` the way Mist does. Building the ISO asks for your administrator password.
-- Both actions are also available on each entry in Earlier Releases.
-- The Pomme Downloads command, also available as Show Downloads (⌥⌘L), lists every download with live progress. From there you can cancel, retry, show it in Finder, open its log, or remove it, which also deletes any partial data.
+- For macOS, Download Installer Package (⌘⇧I) saves Apple's full `InstallAssistant.pkg`. Opening it puts the "Install macOS" app in Applications. No administrator password is needed.
+- Both download actions are also available on each entry in Earlier Releases.
+- The Pomme Downloads command, also available as Show Downloads (⌥⌘L), lists every download with live progress. From there you can cancel, retry, show it in Finder, open its log, or remove it, which also deletes any partial data. Clear Download History (⌃⇧X) empties the list, and Move All Downloaded Files to Trash deletes the files the extension saved. Both ask first.
 - Downloads run in the background, so they keep going after Raycast closes. They resume if interrupted. While the command is open, a toast shows progress and can cancel the download.
 
 ### Preferences
@@ -41,5 +41,4 @@
 - Links from the feed are only opened when they are `https` on the host the UI names (`support.apple.com`, `nvd.nist.gov`). Other NIST links fall back to the standard NVD URL.
 - Feed data is validated when it's loaded: malformed releases are skipped instead of crashing the list, control characters are stripped from text, and values placed in URLs are encoded.
 - Downloads only come from Apple over https, including every redirect. Installer packages must carry Apple's signature, and are deleted if they don't.
-- Building an ISO verifies Apple's signatures again as root, on a copy only root can write. Root never writes into a folder you can change.
 - Data is cached so the list opens instantly, and data cached by older versions of the extension is discarded automatically.

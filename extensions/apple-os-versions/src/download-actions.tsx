@@ -7,39 +7,13 @@ function installerBaseName(installer: Installer): string {
   return `Install ${installer.name} ${installer.version} (${installer.build})`;
 }
 
-function InstallerFormatActions({ installer, withShortcuts }: { installer: Installer; withShortcuts: boolean }) {
-  const label = `${installer.name} ${installer.version} (${installer.build})`;
-  return (
-    <>
-      <Action
-        title="Download Installer Package"
-        icon={Icon.Download}
-        shortcut={withShortcuts ? { modifiers: ["cmd", "shift"], key: "i" } : undefined}
-        onAction={() =>
-          startDownload({
-            url: installer.url,
-            fileName: `${installerBaseName(installer)}.pkg`,
-            title: `${label} installer`,
-            size: installer.size,
-          })
-        }
-      />
-      <Action
-        title="Create Installer ISO"
-        icon={Icon.Cd}
-        shortcut={withShortcuts ? { modifiers: ["cmd", "opt"], key: "i" } : undefined}
-        onAction={() =>
-          startDownload({
-            url: installer.url,
-            fileName: `${installerBaseName(installer)}.iso`,
-            title: `${label} ISO`,
-            size: installer.size,
-            buildIso: true,
-          })
-        }
-      />
-    </>
-  );
+function downloadInstaller(installer: Installer) {
+  return startDownload({
+    url: installer.url,
+    fileName: `${installerBaseName(installer)}.pkg`,
+    title: `${installer.name} ${installer.version} (${installer.build}) installer`,
+    size: installer.size,
+  });
 }
 
 // Firmware for every platform with restore images, plus full installers for macOS releases SOFA has one for.
@@ -61,21 +35,27 @@ export function DownloadActions(props: {
           target={<FirmwareList platform={props.platform} title={props.title} version={props.version} />}
         />
       )}
-      {installers.length === 1 && <InstallerFormatActions installer={installers[0]} withShortcuts={withShortcuts} />}
+      {installers.length === 1 && (
+        <Action
+          title="Download Installer Package"
+          icon={Icon.Download}
+          shortcut={withShortcuts ? { modifiers: ["cmd", "shift"], key: "i" } : undefined}
+          onAction={() => downloadInstaller(installers[0])}
+        />
+      )}
       {installers.length > 1 && (
         <ActionPanel.Submenu
-          title="Download Installer…"
+          title="Download Installer Package…"
           icon={Icon.Download}
           shortcut={withShortcuts ? { modifiers: ["cmd", "shift"], key: "i" } : undefined}
         >
           {installers.map((installer) => (
-            <ActionPanel.Submenu
+            <Action
               key={installer.build}
               icon={Icon.Tag}
-              title={`${installer.version} (${installer.build})${installer.size ? ` · ${formatBytes(installer.size)}` : ""}…`}
-            >
-              <InstallerFormatActions installer={installer} withShortcuts={false} />
-            </ActionPanel.Submenu>
+              title={`${installer.version} (${installer.build})${installer.size ? ` · ${formatBytes(installer.size)}` : ""}`}
+              onAction={() => downloadInstaller(installer)}
+            />
           ))}
         </ActionPanel.Submenu>
       )}

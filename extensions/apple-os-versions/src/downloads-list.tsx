@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showInFinder } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  showInFinder,
+  showToast,
+  Toast,
+  trash,
+} from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
@@ -47,13 +60,6 @@ function display(job: Job): Display {
         detail: amount,
       };
     }
-    case "building":
-      return {
-        icon: { source: Icon.Cd, tintColor: Color.Orange },
-        state: "Building ISO",
-        stateColor: Color.Orange,
-        detail: "Enter your password when asked",
-      };
     case "done":
       return fs.existsSync(job.dest)
         ? {
@@ -84,6 +90,27 @@ function display(job: Job): Display {
   }
 }
 
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
+
+// A finished download whose file is still where it was saved.
+function hasFile(job: Job): boolean {
+  return job.status.state === "done" && fs.existsSync(job.dest);
+}
+
+// Removes jobs and reports any that were retried in the meantime and so were left alone.
+async function removeJobs(jobs: Job[]) {
+  const kept = jobs.filter((job) => !removeJob(job)).length;
+  if (kept) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `${plural(kept, "download")} kept`,
+      message: "Retried while being removed, so left in the list",
+    });
+  }
+}
+
 async function confirmRemove(job: Job): Promise<boolean> {
   const size = partialDataSize(job);
   if (size === 0) return true;
@@ -107,10 +134,43 @@ export function DownloadsList() {
 
   const active = jobs.filter(isActive);
   const finished = jobs.filter((job) => !isActive(job));
-  const finishedRemovable = finished.filter((job) => job.status.state === "done");
+  const withFiles = finished.filter(hasFile);
 
-  const clearFinished = () => {
-    finishedRemovable.forEach(removeJob);
+  // Forgets every download that isn't running. Files in the download folder stay where they are.
+  const clearHistory = async () => {
+    const partial = finished.reduce((total, job) => total + partialDataSize(job), 0);
+    const confirmed = await confirmAlert({
+      title: "Clear Download History?",
+      message:
+        `Removes ${plural(finished.length, "download")} from the list` +
+        (partial ? ` and deletes ${formatBytes(partial)} of partially downloaded data` : "") +
+        ". Downloaded files stay in your download folder.",
+      primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    await removeJobs(finished);
+    refresh();
+  };
+
+  // Only files this extension downloaded, and still at the path it saved them to, go to the Trash.
+  const trashFiles = async (targets: Job[]) => {
+    const size = targets.reduce((total, job) => total + job.downloadedBytes, 0);
+    const confirmed = await confirmAlert({
+      title: targets.length === 1 ? "Move File to Trash?" : "Move Downloaded Files to Trash?",
+      message:
+        targets.length === 1
+          ? `Moves ${path.basename(targets[0].dest)} (${formatBytes(size)}) to the Trash and removes it from the list.`
+          : `Moves ${plural(targets.length, "file")} (${formatBytes(size)}) to the Trash and removes them from the list.`,
+      primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    try {
+      await trash(targets.map((job) => job.dest));
+      await removeJobs(targets);
+      await showToast({ style: Toast.Style.Success, title: `Moved ${plural(targets.length, "file")} to the Trash` });
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't Move to Trash", message: String(error) });
+    }
     refresh();
   };
 
@@ -127,13 +187,12 @@ export function DownloadsList() {
         key={job.id}
         icon={info.icon}
         title={path.basename(job.dest)}
-        subtitle={job.request.buildIso ? "Installer ISO" : undefined}
         keywords={[job.request.title]}
         accessories={accessories}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              {job.status.state === "done" && fs.existsSync(job.dest) && (
+              {hasFile(job) && (
                 <Action title="Show in Finder" icon={Icon.Finder} onAction={() => showInFinder(job.dest)} />
               )}
               {job.status.state === "downloading" && (
@@ -175,18 +234,36 @@ export function DownloadsList() {
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={async () => {
                     if (await confirmRemove(job)) {
-                      removeJob(job);
+                      await removeJobs([job]);
                       refresh();
                     }
                   }}
                 />
               )}
-              {finishedRemovable.length > 0 && (
+              {hasFile(job) && (
                 <Action
-                  title="Clear Completed Downloads"
+                  title="Move File to Trash"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => trashFiles([job])}
+                />
+              )}
+            </ActionPanel.Section>
+            <ActionPanel.Section title="All Downloads">
+              {finished.length > 0 && (
+                <Action
+                  title="Clear Download History"
                   icon={Icon.Eraser}
                   shortcut={Keyboard.Shortcut.Common.RemoveAll}
-                  onAction={clearFinished}
+                  onAction={clearHistory}
+                />
+              )}
+              {withFiles.length > 0 && (
+                <Action
+                  title="Move All Downloaded Files to Trash"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => trashFiles(withFiles)}
                 />
               )}
             </ActionPanel.Section>

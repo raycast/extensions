@@ -1,11 +1,10 @@
 #!/bin/sh
 # Downloads a file in the background so it survives Raycast closing the command.
-# Optionally builds a bootable installer ISO from a downloaded InstallAssistant.pkg.
 #
-# usage: download.sh <url> <destination> <size-or-empty> <sha256-or-empty> <status-file> <title> [iso-destination]
+# usage: download.sh <url> <destination> <size-or-empty> <sha256-or-empty> <status-file> <title>
 #
 # The status file holds one line that the extension reads for progress:
-#   downloading <pid> | building <pid> | done | failed <reason>
+#   downloading <pid> | done | failed <reason>
 
 set -u
 
@@ -15,7 +14,6 @@ size=$3
 sha256=$4
 status=$5
 title=$6
-iso=${7:-}
 
 part="$dest.download"
 log="$status.log"
@@ -29,7 +27,6 @@ release_lock() {
 }
 trap release_lock EXIT
 trap 'exit 143' TERM INT HUP
-here=$(dirname "$0")
 
 # The final status is written before the lock is released, so a retry never has its fresh status
 # overwritten. Progress and results are shown by the extension (its toast and the Downloads view).
@@ -50,7 +47,7 @@ is_apple_url() {
 }
 
 # Installer packages must carry Apple's signature. pkgutil exits 0 even when a package is unsigned,
-# so the status line is what counts. The root step repeats this check on its own copy.
+# so the status line is what counts.
 is_apple_pkg() {
   pkgutil --check-signature "$1" 2>>"$log" | grep -qx '[[:space:]]*Status: signed Apple Software'
 }
@@ -62,8 +59,8 @@ mkdir -p "$(dirname "$dest")" || fail "Couldn't create the download folder"
 
 is_apple_url "$url" || fail "Refusing to download from a non-Apple address"
 
-# A finished file is only here when an earlier ISO build failed. It is checked again below, and
-# the root step verifies its own copy, so reusing it can't smuggle in an unverified package.
+# The extension doesn't start a download whose file already exists. If one appears anyway, it is
+# kept but still has to pass the signature check below.
 if [ ! -f "$dest" ]; then
   # A partial file that is already complete makes curl's resume fail, so only resume when something is missing.
   current=$(stat -f %z "$part" 2>/dev/null || echo 0)
@@ -97,42 +94,6 @@ case "$dest" in
     fi
     ;;
 esac
-
-if [ -n "$iso" ]; then
-  echo "building $$" >"$status"
-  # Values are passed as arguments and quoted by AppleScript, never interpolated into the script.
-  # The root step builds the ISO in directories only it controls and prints where it left it.
-  built=$(osascript \
-    -e 'on run argv' \
-    -e 'do shell script "/bin/sh " & quoted form of item 1 of argv & " " & quoted form of item 2 of argv & " " & quoted form of item 3 of argv with prompt "Pomme Versions needs administrator access to build a bootable macOS installer ISO." with administrator privileges' \
-    -e 'end run' \
-    "$here/make-iso.sh" "$dest" "$(id -u)" 2>>"$log")
-  result=$?
-  # On any failure the downloaded package is kept so a retry can go straight to building.
-  if [ $result -ne 0 ]; then
-    # osascript reports error -128 when the password prompt is cancelled.
-    if grep -q -- "-128" "$log"; then
-      fail "Cancelled at the password prompt. Retry to build without downloading again"
-    fi
-    fail "Couldn't build the ISO (see the log for details)"
-  fi
-  # Only accept exactly /private/tmp/pomme-out.<letters and digits>/installer.iso, checked one
-  # component at a time (a case pattern's * would also match "/" and "..").
-  out=$(dirname "$built")
-  suffix=${out#/private/tmp/pomme-out.}
-  case "$suffix" in
-    '' | *[!A-Za-z0-9]*) fail "The ISO build returned an unexpected path" ;;
-  esac
-  if [ "$out" != "/private/tmp/pomme-out.$suffix" ] || [ "$built" != "$out/installer.iso" ]; then
-    fail "The ISO build returned an unexpected path"
-  fi
-  if [ ! -f "$built" ] || [ -L "$built" ] || [ ! -O "$built" ]; then
-    fail "The ISO build returned an unexpected file"
-  fi
-  mkdir -p "$(dirname "$iso")" && mv -f "$built" "$iso" || { rm -rf "$out"; fail "Couldn't move the ISO into place"; }
-  rm -rf "$out"
-  rm -f "$dest"
-fi
 
 echo "done" >"$status"
 release_lock

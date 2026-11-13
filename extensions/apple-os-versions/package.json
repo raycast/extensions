@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-os-versions",
   "title": "Pomme Versions",
-  "description": "Current macOS, iOS, iPadOS, watchOS, tvOS, and visionOS versions with release dates, builds, and patched CVEs. Download IPSW firmware and macOS installers as PKG or bootable ISO.",
+  "description": "Current macOS, iOS, iPadOS, watchOS, tvOS, and visionOS versions with release dates, builds, and patched CVEs. Download IPSW firmware and full macOS installer packages.",
   "icon": "pomme-versions-icon.png",
   "author": "seann",
   "platforms": [
@@ -95,7 +95,7 @@
     {
       "name": "downloadDirectory",
       "title": "Download Location",
-      "description": "Folder where firmware (.ipsw) and macOS installers (.pkg, .iso) are saved.",
+      "description": "Folder where firmware (.ipsw) and macOS installers (.pkg) are saved.",
       "type": "directory",
       "required": false,
       "default": "~/Downloads"
