@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix AI Chat Mention Icons] - 2026-11-12
+
+- Make pull request and issue icons readable in dark mode in the AI Chat `@` menu and mention pills.
+
 ## [Windows Action Shortcuts] - 2026-11-06
 
 - Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
