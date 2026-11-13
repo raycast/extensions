@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add BuildBase Console MCP Server] - 2026-11-13
+
+- Add BuildBase Console to the registry: manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted Streamable HTTP server at https://api.console.buildbase.app/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Mobile Joe MCP Server] - 2026-11-12
 
 - Add Mobile Joe to the official registry: manage a mobile app's FAQs and translations, feature plans and in-app alerts, and update app settings. 33 tools. Hosted Streamable HTTP server at https://app.mobilejoe.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Mobile Joe account is required.
