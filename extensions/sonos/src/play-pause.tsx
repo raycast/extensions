@@ -17,6 +17,16 @@ export default async function Command({ launchType }: LaunchProps) {
     }
   }
 
+  if (!coordinator && userInitiated) {
+    await tryLaunchCommand({
+      name: "set-group",
+      type: LaunchType.UserInitiated,
+      failureMessage: `Failed to launch "Set Active Group" automatically`,
+    });
+
+    return;
+  }
+
   if (coordinator && userInitiated) {
     try {
       await coordinator.TogglePlayback();
