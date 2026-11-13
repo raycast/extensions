@@ -1,6 +1,6 @@
 # Himalaya Changelog
 
-## [Support Himalaya v2] - {PR_MERGE_DATE}
+## [Support Himalaya v2] - 2026-11-13
 
 - Work with Himalaya CLI v2, which renamed `folder` to `mailbox`, replaced `--output json` with `--json` and changed its JSON output. Himalaya v1 keeps working.
 
