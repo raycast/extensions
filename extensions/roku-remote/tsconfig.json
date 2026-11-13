@@ -12,5 +12,5 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "raycast-env.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "raycast-env.d.ts"]
 }

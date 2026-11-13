@@ -40,7 +40,7 @@ Your Mac and Roku must be on the same reachable local network. If discovery retu
 | Increase / Decrease Roku Volume | Change volume by one step                                                                      |
 | Mute/Unmute Roku                | Toggle mute                                                                                    |
 | Go to Roku Home                 | Open the default TV's Home screen                                                              |
-| Power on Roku / Power off Roku  | Explicit power commands; waking can also use saved network hardware addresses                  |
+| Power On Roku / Power Off Roku  | Explicit power commands; waking can also use saved network hardware addresses                  |
 
 Assign Raycast hotkeys or aliases to the quick commands in Raycast Settings → Extensions. Inside the remote, move between controls with the arrow keys and press Return, or use the listed remote keys. Typing in the search bar sends keys to the TV rather than filtering controls. Command-R refreshes TV information or scans for devices in Manage Roku TVs.
 

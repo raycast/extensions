@@ -18,7 +18,8 @@
       "name": "roku-remote",
       "title": "Roku Remote",
       "description": "Keyboard-driven Roku remote: type W A S D to navigate, Space for OK, see what's playing, and launch apps in one keystroke.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "search-roku",
@@ -58,25 +59,29 @@
       "name": "roku-routines",
       "title": "Roku Routines",
       "description": "Create and run configurable TV routines with ordered steps, progress, and cancellation.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "tv-dashboard",
       "title": "Roku TV Dashboard",
       "description": "See the state and current app or input of your saved Roku devices.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "roku-command",
       "title": "Roku Instructions",
       "description": "Preview and run supported English instructions locally, without an AI subscription.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "restore-activity",
       "title": "Restore Previous Roku Activity",
       "description": "Return the default Roku to the app or input saved before the last switch.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "run-roku-routine",
@@ -90,67 +95,78 @@
           "type": "text",
           "required": true
         }
-      ]
+      ],
+      "subtitle": "Roku"
     },
     {
       "name": "manage-devices",
       "title": "Manage Roku TVs",
       "description": "Discover, add, name, and select your Roku TVs and players.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "launch-app",
       "title": "Launch Roku App",
       "description": "Browse and launch apps installed on your Roku.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "type-text",
       "title": "Type Text on Roku",
       "description": "Send text to the active text field on your Roku.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roku"
     },
     {
       "name": "play-pause",
       "title": "Play/Pause Roku",
       "description": "Send play/pause to the selected Roku.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "volume-up",
       "title": "Increase Roku Volume",
       "description": "Raise the volume one step on the selected Roku.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "volume-down",
       "title": "Decrease Roku Volume",
       "description": "Lower the volume one step on the selected Roku.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "mute",
       "title": "Mute/Unmute Roku",
       "description": "Toggle mute on the selected Roku.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "home",
       "title": "Go to Roku Home",
       "description": "Open the Home screen on the selected Roku.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "power-on",
-      "title": "Power on Roku",
+      "title": "Power On Roku",
       "description": "Wake the selected Roku TV or supported connected television.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     },
     {
       "name": "power-off",
-      "title": "Power off Roku",
+      "title": "Power Off Roku",
       "description": "Send power off to the selected Roku TV or supported television.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Roku"
     }
   ],
   "preferences": [
@@ -169,7 +185,6 @@
     "build": "ray build",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit",
     "publish": "ray publish"
   },
@@ -184,7 +199,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "tsx": "^4.20.0",
     "typescript": "^5.8.2"
   },
   "tools": [

@@ -18,5 +18,5 @@
 - **Decrease Roku Volume**: Lower the volume one step on the selected Roku.
 - **Mute/Unmute Roku**: Toggle mute on the selected Roku.
 - **Go to Roku Home**: Open the Home screen on the selected Roku.
-- **Power on Roku**: Wake the selected Roku TV or supported connected television.
-- **Power off Roku**: Send power off to the selected Roku TV or supported television.
+- **Power On Roku**: Wake the selected Roku TV or supported connected television.
+- **Power Off Roku**: Send power off to the selected Roku TV or supported television.
