@@ -103,12 +103,17 @@ export function renderSvg(
 
     week.forEach((day, di) => {
       const x = x0 + di * colW;
-      // Use the local clock like the hour lines do; elapsed time would shift blocks on days with a daylight saving change.
+      // Interpolate between the instants of the hour lines. Unlike elapsed time or the clock reading this
+      // stays aligned with the lines and still moves forward through the repeated hour when clocks go back.
+      const marks = Array.from({ length: hours + 1 }, (_, h) =>
+        new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), opts.startHour + h).getTime(),
+      );
       const y = (ms: number) => {
-        if (ms >= day.windowEnd) return y0 + gridH;
-        const d = new Date(ms);
-        const hour = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
-        return y0 + Math.min(hours, Math.max(0, hour - opts.startHour)) * HOUR_H;
+        if (ms <= marks[0]) return y0;
+        for (let h = 0; h < hours; h++) {
+          if (ms < marks[h + 1]) return y0 + (h + (ms - marks[h]) / (marks[h + 1] - marks[h])) * HOUR_H;
+        }
+        return y0 + gridH;
       };
       const block = (iv: Interval, fill: string) =>
         `<rect x="${x + 1}" y="${r(y(iv.start))}" width="${colW - 1}" height="${r(y(iv.end) - y(iv.start))}" fill="${fill}"/>`;

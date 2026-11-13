@@ -132,6 +132,17 @@ describe("renderSvg on a day with a daylight saving change", () => {
     );
     assert.ok(svg.includes('<rect x="981" y="502" width="149" height="40" fill="#c3c8d0"/>'));
   });
+
+  it("keeps blocks in order through the repeated hour when clocks go back", () => {
+    const event = { start: Date.parse("2026-10-25T00:45:00Z"), end: Date.parse("2026-10-25T01:15:00Z") };
+    const { svg } = render(
+      { weeks: 1, includeWeekend: true, startHour: 0, endHour: 24 },
+      [{ ...event, tentative: false, allDay: false }],
+      local(2026, 10, 19, 7),
+    );
+    assert.ok(svg.includes('<rect x="981" y="237" width="149" height="10" fill="#c3c8d0"/>'));
+    assert.ok(!/height="-/.test(svg));
+  });
 });
 
 describe("svgToPng", () => {
