@@ -21,8 +21,7 @@
       "title": "Play / Pause",
       "subtitle": "Sonos",
       "description": "Toggle the playback state of the active group",
-      "mode": "no-view",
-      "interval": "1m"
+      "mode": "no-view"
     },
     {
       "name": "set-group",
