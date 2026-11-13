@@ -4,6 +4,7 @@ import { useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getBookmarks } from "./utils/bookmarks";
 import { useHistorySearch } from "./utils/history";
+import { ReloadAction } from "./utils/actions";
 import { BookmarkListItem, HistoryListItem, SuggestionListItem, TabListItem } from "./utils/list-items";
 import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
 import { filterSearchable } from "./utils/search";
@@ -49,6 +50,7 @@ export default function SearchHelium(props: LaunchProps) {
   // Bookmarks: read once from the profile's Bookmarks file, filtered locally.
   const {
     data: bookmarks,
+    error: bookmarksError,
     isLoading: isLoadingBookmarks,
     revalidate: revalidateBookmarks,
   } = usePromise(getBookmarks, [], {
@@ -129,6 +131,17 @@ export default function SearchHelium(props: LaunchProps) {
             </ActionPanel>
           }
         />
+      ) : viewMode === "bookmarks" && bookmarksError ? (
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title="Failed to Load Bookmarks"
+          description="There was an error reading your Helium bookmarks file. Make sure Helium is installed, then reload."
+          actions={
+            <ActionPanel>
+              <ReloadAction subject="Bookmarks" revalidate={revalidateBookmarks} />
+            </ActionPanel>
+          }
+        />
       ) : viewMode === "history" && !isHistoryAvailable ? (
         <List.EmptyView
           icon={Icon.Clock}
@@ -181,7 +194,12 @@ export default function SearchHelium(props: LaunchProps) {
       {showBookmarks && filteredBookmarks.length > 0 && (
         <List.Section title="Bookmarks" subtitle={countOf(filteredBookmarks.length, "bookmark")}>
           {filteredBookmarks.map((bookmark) => (
-            <BookmarkListItem key={bookmark.id} bookmark={bookmark} revalidate={revalidateBookmarks} />
+            <BookmarkListItem
+              key={bookmark.id}
+              bookmark={bookmark}
+              revalidate={revalidateBookmarks}
+              tabContext={{ tabs: visibleTabs, mutate, revalidate, pendingCloseIdsRef }}
+            />
           ))}
         </List.Section>
       )}

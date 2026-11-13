@@ -71,9 +71,15 @@ export function TabListItem({ tab, tabs, mutate, revalidate, pendingCloseIdsRef 
 export function BookmarkListItem({
   bookmark,
   revalidate,
+  tabContext,
 }: {
   bookmark: Bookmark;
   revalidate: () => Promise<unknown> | void;
+  /**
+   * Tab list state from a view that also lists open tabs (Search Helium), so
+   * Deduplicate Tabs removes closed tabs from that list. Omit when no tabs are shown.
+   */
+  tabContext?: React.ComponentProps<typeof DeduplicateTabsAction>;
 }) {
   const accessories: List.Item.Accessory[] = [];
 
@@ -108,7 +114,7 @@ export function BookmarkListItem({
             icon={Icon.Globe}
             shortcut={SHORTCUTS.openInDefaultBrowser}
           />
-          <DeduplicateTabsAction />
+          <DeduplicateTabsAction {...tabContext} />
           <ReloadAction subject="Bookmarks" revalidate={revalidate} />
         </ActionPanel>
       }
