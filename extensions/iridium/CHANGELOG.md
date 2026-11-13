@@ -1,6 +1,6 @@
 # Iridium Changelog
 
-## [Fix history search with apostrophes] - {PR_MERGE_DATE}
+## [Fix history search with apostrophes] - 2026-11-13
 
 - Escape search terms in history search, so `'`, `%` and `_` are matched literally instead of breaking the query or acting as wildcards
 
