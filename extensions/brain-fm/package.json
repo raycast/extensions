@@ -104,7 +104,8 @@
           "label": "Show the track name while playing",
           "description": "Display the current track next to the icon while Brain.fm is playing."
         }
-      ]
+      ],
+      "subtitle": "Brain.fm"
     }
   ],
   "dependencies": {
@@ -116,9 +117,7 @@
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.39.4",
-    "linkedom": "^0.18.13",
     "prettier": "^3.8.1",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -126,7 +125,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts"
+    "typecheck": "tsc --noEmit"
   }
 }

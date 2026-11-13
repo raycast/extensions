@@ -16,10 +16,10 @@ Control your signed-in Brain.fm web player from Raycast on macOS.
 
 ## Setup
 
-1. Select **Dia** or **Google Chrome** in the extension preferences.
+1. Select your browser in the extension preferences: **Dia**, **Google Chrome**, **Brave**, **Microsoft Edge** or **Vivaldi**.
 2. Open [my.brain.fm](https://my.brain.fm/) in that browser and sign in using the normal Brain.fm flow. Start a session in the web player once.
 3. Keep one Brain.fm player tab open. Payment and login tabs are excluded. Multiple player tabs are rejected to avoid controlling the wrong session.
-4. Run **Now Playing**. macOS may ask you to allow Raycast to control the selected browser. Google Chrome also requires its **View → Developer → Allow JavaScript from Apple Events** setting. The extension does not change these permissions or settings for you.
+4. Run **Now Playing**. macOS may ask you to allow Raycast to control the selected browser. Google Chrome, Brave, Microsoft Edge and Vivaldi also require their **View → Developer → Allow JavaScript from Apple Events** setting. The extension does not change these permissions or settings for you.
 
 No Brain.fm password, session token, or API key is entered into Raycast. The extension reads and clicks only the official web player through the selected browser's documented AppleScript interface. It does not call private Brain.fm endpoints or internal player events.
 

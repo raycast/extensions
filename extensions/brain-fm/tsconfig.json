@@ -11,5 +11,5 @@
     "strict": true,
     "noEmit": true
   },
-  "include": ["src", "raycast-env.d.ts", "tests"]
+  "include": ["src", "raycast-env.d.ts"]
 }
