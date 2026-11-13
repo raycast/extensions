@@ -1,6 +1,6 @@
 # Frihet ERP for Raycast
 
-> **Raycast Store Status:** Initial extension submitted and under active review in [raycast/extensions#33017](https://github.com/raycast/extensions/pull/33017).
+> **Raycast Store Status:** Available in the [Raycast Store](https://www.raycast.com/viktor_berthelius/frihet).
 
 Search invoices, inspect client CRM timelines, browse products, and generate a deterministic operational business brief from [Frihet ERP](https://frihet.io) directly inside Raycast on macOS.
 
