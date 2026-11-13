@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalStorage, usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { fetchBandResult, siteUrl } from "./lib/bandsite";
 import type { BandResult, BandStatus, RelatedVerdict } from "./lib/bandsite";
 import { DEFAULT_GENRE, GENRES, getGenre } from "./lib/genres";
@@ -35,16 +35,14 @@ export default function Command() {
         </>
       ) : (
         <List.EmptyView
-          icon={error ? Icon.Warning : Icon.MagnifyingGlass}
-          title={error ? `Couldn't reach ${genre.siteName}` : isLoading ? "Consulting the council…" : "Which band?"}
+          icon={error && !isLoading ? Icon.Warning : Icon.MagnifyingGlass}
+          title={isLoading ? "Consulting the council…" : error ? `Couldn't reach ${genre.siteName}` : "Which band?"}
           description={
-            error ??
-            (isLoading
-              ? `Looking up ${query.trim()} on ${genre.domain}…`
-              : `Type a band name to find out whether they're ${genre.name.toLowerCase()}.`)
+            (isLoading ? `Looking up ${query.trim()} on ${genre.domain}…` : error) ??
+            `Type a band name to find out whether they're ${genre.name.toLowerCase()}.`
           }
           actions={
-            error ? (
+            error && !isLoading ? (
               <ActionPanel>
                 <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={reload} />
                 <Action.OpenInBrowser title={`Open ${genre.siteName}`} url={siteUrl(genre, query)} />
@@ -62,8 +60,7 @@ function BandListItem({ result, genre, onReload }: { result: BandResult; genre: 
     <List.Item
       icon={getStatusIcon(result.status, genre)}
       title={result.verdict}
-      accessories={[getStatusAccessory(result.status, genre)]}
-      detail={<BandDetail result={result} />}
+      detail={<BandDetail result={result} genre={genre} />}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Verdict" content={result.verdict} />
@@ -88,7 +85,7 @@ function BandListItem({ result, genre, onReload }: { result: BandResult; genre: 
   );
 }
 
-function BandDetail({ result }: { result: BandResult }) {
+function BandDetail({ result, genre }: { result: BandResult; genre: Genre }) {
   const sections = [`# ${result.verdict}`];
 
   if (result.commentary) {
@@ -108,7 +105,21 @@ function BandDetail({ result }: { result: BandResult }) {
     sections.push(`---\n\nAlso [${result.related.line}](${result.related.url})`);
   }
 
-  return <List.Item.Detail markdown={sections.join("\n\n")} />;
+  const status = getStatusTag(result.status, genre);
+
+  return (
+    <List.Item.Detail
+      markdown={sections.join("\n\n")}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Genre" text={genre.name} />
+          <List.Item.Detail.Metadata.TagList title="Status">
+            <List.Item.Detail.Metadata.TagList.Item text={status.value} color={status.color} />
+          </List.Item.Detail.Metadata.TagList>
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
 }
 
 function RelatedListItem({ related }: { related: RelatedVerdict }) {
@@ -119,10 +130,16 @@ function RelatedListItem({ related }: { related: RelatedVerdict }) {
       icon={Icon.Link}
       title={related.line}
       subtitle={`Also on ${host}`}
-      accessories={[{ tag: related.genre.toUpperCase() }]}
       detail={
         <List.Item.Detail
           markdown={`# ${related.line}\n\nThis band also shows up as **${related.genre}** on [${host}](${related.url}).`}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.TagList title="Genre">
+                <List.Item.Detail.Metadata.TagList.Item text={related.genre.toUpperCase()} />
+              </List.Item.Detail.Metadata.TagList>
+            </List.Item.Detail.Metadata>
+          }
         />
       }
       actions={
@@ -136,63 +153,29 @@ function RelatedListItem({ related }: { related: RelatedVerdict }) {
 }
 
 function useBandResult(genre: Genre, band: string) {
-  const [result, setResult] = useState<BandResult>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [reloadToken, setReloadToken] = useState(0);
-  const abortRef = useRef<AbortController | null>(null);
+  const [debouncedBand, setDebouncedBand] = useState("");
+  const abortable = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const trimmed = band.trim();
+    const timer = setTimeout(() => setDebouncedBand(band.trim()), 400);
+    return () => clearTimeout(timer);
+  }, [band]);
 
-    if (!trimmed) {
-      abortRef.current?.abort();
-      setResult(undefined);
-      setError(undefined);
-      setIsLoading(false);
-      return;
-    }
+  const { data, error, isLoading, revalidate } = usePromise(
+    (genre: Genre, band: string) => fetchBandResult(genre, band, abortable.current?.signal),
+    [genre, debouncedBand],
+    { abortable, execute: Boolean(debouncedBand) },
+  );
 
-    let cancelled = false;
-    setIsLoading(true);
-    setError(undefined);
-    setResult(undefined);
+  const currentBand = band.trim();
+  const isDebouncing = currentBand !== debouncedBand;
 
-    const timer = setTimeout(async () => {
-      const controller = new AbortController();
-      abortRef.current?.abort();
-      abortRef.current = controller;
-
-      try {
-        const nextResult = await fetchBandResult(genre, trimmed, controller.signal);
-        if (!cancelled) {
-          setResult(nextResult);
-          setIsLoading(false);
-        }
-      } catch (caught) {
-        if (cancelled || controller.signal.aborted) {
-          return;
-        }
-
-        setResult(undefined);
-        setError(caught instanceof Error ? caught.message : "Something went wrong.");
-        setIsLoading(false);
-      }
-    }, 400);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-      abortRef.current?.abort();
-    };
-  }, [genre, band, reloadToken]);
-
-  const reload = useCallback(() => {
-    setResult(undefined);
-    setReloadToken((token) => token + 1);
-  }, []);
-
-  return { result, error, isLoading, reload };
+  return {
+    result: !isDebouncing && data?.url === siteUrl(genre, currentBand) ? data : undefined,
+    error: !isDebouncing && debouncedBand ? error?.message : undefined,
+    isLoading: isDebouncing ? Boolean(currentBand) : isLoading,
+    reload: revalidate,
+  };
 }
 
 function getStatusIcon(status: BandStatus, genre: Genre) {
@@ -208,16 +191,16 @@ function getStatusIcon(status: BandStatus, genre: Genre) {
   }
 }
 
-function getStatusAccessory(status: BandStatus, genre: Genre) {
+function getStatusTag(status: BandStatus, genre: Genre): { value: string; color: Color } {
   switch (status) {
     case "yes":
-      return { tag: { value: genre.name.toUpperCase(), color: genre.color } };
+      return { value: genre.name.toUpperCase(), color: genre.color };
     case "no":
-      return { tag: { value: `NOT ${genre.name.toUpperCase()}`, color: Color.SecondaryText } };
+      return { value: `NOT ${genre.name.toUpperCase()}`, color: Color.SecondaryText };
     case "unknown":
-      return { tag: { value: "UNKNOWN", color: Color.Orange } };
+      return { value: "UNKNOWN", color: Color.Orange };
     default:
-      return { tag: { value: "UNSURE", color: Color.Orange } };
+      return { value: "UNSURE", color: Color.Orange };
   }
 }
 

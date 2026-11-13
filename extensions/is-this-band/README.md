@@ -27,19 +27,6 @@ A Raycast extension for the **Is This Band...?** family of sites. Find out wheth
 | Hardcore | [isthisbandhardcore.com](https://isthisbandhardcore.com/) |
 | Indie    | [isthisbandindie.com](https://isthisbandindie.com/)       |
 
-## Install from source
-
-This extension isn't published to the Raycast Store yet. Run it locally:
-
-```sh
-git clone https://github.com/wiggly-sheets/is-this-band-raycast-extension.git
-cd is-this-band-raycast-extension
-npm install
-npm run dev
-```
-
-Raycast will open the extension in development mode. Search for **Is This Band...?** to start.
-
 ## Usage
 
 1. Open the command and pick a genre from the dropdown next to the search bar.
@@ -66,44 +53,6 @@ The sites have no public API, so the extension requests each site's `?band=<name
 
 Results are not cached; each query is fetched fresh. Some sites still use the legacy `twitter.com/home?status=` link for prefilled tweets, so the extension converts that to X's supported `x.com/intent/post?text=` endpoint before opening it.
 
-## Development
-
-| Script             | Description                  |
-| ------------------ | ---------------------------- |
-| `npm run dev`      | Run the extension in Raycast |
-| `npm run build`    | Build the extension          |
-| `npm run lint`     | Lint the manifest and source |
-| `npm run fix-lint` | Auto-fix linting issues      |
-
-### Project structure
-
-```text
-src/
-  index.tsx       # List UI, genre dropdown, actions, fetch hook
-  lib/
-    bandsite.ts   # HTTP fetching and HTML parsing
-    genres.ts     # Genre and site configuration
-assets/
-  icon.svg        # Source icon
-  extension-icon.png
-```
-
-## Publishing to the Raycast Store
-
-When the extension is ready, publish through the Raycast CLI:
-
-```sh
-npm run lint
-npm run build
-npm run publish
-```
-
-The publish command forks `raycast/extensions`, copies the extension into the monorepo, and opens a pull request. Make sure the `author` field in `package.json` matches your Raycast username.
-
 ## Disclaimer
 
 This is an unofficial extension and is not affiliated with the Is This Band...? sites or X.
-
-## License
-
-[MIT](LICENSE)
