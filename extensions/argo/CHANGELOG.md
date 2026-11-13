@@ -1,6 +1,6 @@
 # Argo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-13
 
 - Parse Markdown block structure before escaping prose so list-contained code retains literal URLs and punctuation. Preserve nested lists, quoted code, table source cells and original copy text, with complete literal fallback for excessive nesting.
 
