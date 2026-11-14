@@ -1,5 +1,5 @@
 import { openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
-import { BinaryNotFoundError, startFloating } from "./pixtuoid";
+import { BinaryNotFoundError, predatesFloatingLaunch, startFloating } from "./pixtuoid";
 
 export default async function StartFloating() {
   try {
@@ -13,6 +13,12 @@ export default async function StartFloating() {
         message: "Set the binary path in extension preferences.",
       });
       await openExtensionPreferences();
+    } else if (predatesFloatingLaunch(e)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Pixtuoid is out of date",
+        message: "Update pixtuoid to start the floating window from Raycast.",
+      });
     } else {
       await showToast({
         style: Toast.Style.Failure,

@@ -6,18 +6,18 @@
  */
 
 /**
- * A serializable status row for `pixtuoid sources --json` — the STABLE wire
- * contract the Raycast extension parses (pinned by `source_status_json_shape`).
- * Deliberately a flat DTO, NOT the internal `ConnectionRow` (whose shape is a
- * UI concern free to change).
+ * The STABLE `pixtuoid sources --json` wire contract the Raycast extension
+ * parses. Deliberately a flat DTO, NOT the internal `ConnectionRow` (whose
+ * shape is a UI concern free to change).
  */
 export interface SourceStatus {
-  cli_present: boolean;
-  connected: boolean;
+  id: string;
   display_name: string;
+  connected: boolean;
+  cli_present: boolean;
   /**
-   * A health/issue summary (install-broken / decode-drift), or `null` when n/a.
+   * The source's worst issue as one line, or `null` if none was found: a broken
+   * install or decode drift, for connected sources only.
    */
   health?: string | null;
-  id: string;
 }
