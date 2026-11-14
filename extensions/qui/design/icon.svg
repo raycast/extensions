@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs>
+    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2C2C2F"/><stop offset="0.5" stop-color="#121213"/><stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A2A2D"/><stop offset="1" stop-color="#141415"/>
+    </linearGradient>
+    <linearGradient id="edgeTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.85" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.18"/>
+    </linearGradient>
+    <filter id="b2"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="b6"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="b12"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="b24"><feGaussianBlur stdDeviation="24"/></filter>
+
+    <path id="socket" d="M 118 196 Q 118 178 136 178 L 376 178 Q 394 178 394 196 L 394 336 Q 394 354 376 354 L 318 354 L 318 384 Q 318 398 304 398 L 208 398 Q 194 398 194 384 L 194 354 L 136 354 Q 118 354 118 336 Z"/>
+    <clipPath id="sc"><use href="#socket"/></clipPath>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000"/><stop offset="0.55" stop-color="#050506"/><stop offset="1" stop-color="#1E1E21"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5A3E10"/><stop offset="0.55" stop-color="#E2B357"/><stop offset="0.85" stop-color="#FFEBB5"/><stop offset="1" stop-color="#B98A35"/>
+    </linearGradient>
+    <radialGradient id="ledG" cx="0.45" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#F2FFF8"/><stop offset="0.35" stop-color="#5BF5A6"/><stop offset="1" stop-color="#0D7B45"/>
+    </radialGradient>
+    <radialGradient id="glowG" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#5BF5A6" stop-opacity="0.5"/><stop offset="1" stop-color="#5BF5A6" stop-opacity="0"/>
+    </radialGradient>
+</defs>
+  <!-- body: sides -->
+  <rect x="10" y="10" width="492" height="492" rx="120" fill="url(#side)"/>
+  <rect x="11" y="11" width="490" height="490" rx="119" fill="none" stroke="url(#edgeTop)" stroke-width="2.5"/>
+  <!-- top face with soft bevel -->
+  <rect x="40" y="34" width="432" height="420" rx="96" fill="#000" opacity="0.6" filter="url(#b12)"/>
+  <rect x="40" y="30" width="432" height="420" rx="96" fill="url(#face)"/>
+  <rect x="41" y="31" width="430" height="418" rx="95" fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="2" filter="url(#b2)"/>
+
+  <!-- socket lip -->
+  <use href="#socket" transform="translate(0 4)" fill="#FFFFFF" opacity="0.12" filter="url(#b2)"/>
+  <use href="#socket" fill="url(#floor)"/>
+  <g clip-path="url(#sc)">
+    <g fill="url(#gold)"><rect x="150" y="178" width="11" height="74" rx="3"/><rect x="180" y="178" width="11" height="74" rx="3"/><rect x="210" y="178" width="11" height="74" rx="3"/><rect x="240" y="178" width="11" height="74" rx="3"/><rect x="270" y="178" width="11" height="74" rx="3"/><rect x="300" y="178" width="11" height="74" rx="3"/><rect x="330" y="178" width="11" height="74" rx="3"/><rect x="360" y="178" width="11" height="74" rx="3"/></g>
+    <use href="#socket" fill="none" stroke="#000" stroke-width="36" filter="url(#b12)" opacity="0.95"/>
+  </g>
+  <!-- LEDs -->
+  <circle cx="150" cy="110" r="46" fill="url(#glowG)"/>
+  <circle cx="150" cy="110" r="13" fill="url(#ledG)"/>
+  <circle cx="150" cy="113" r="14" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.5"/>
+  <circle cx="362" cy="110" r="13" fill="#0A0A0B"/>
+  <circle cx="362" cy="113" r="14" fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="1.5"/>
+</svg>
