@@ -25,24 +25,7 @@ do not receive a new access grant. Existing unrelated ACL entries are preserved.
 
 The main window continues to the hosts list after access is verified. The menu
 bar provides the same enable action. The remote-update command requests access
-only when saved hosts exist and safely stops if authorization is cancelled.
-
-## Local development and verification
-
-From this extension directory:
-
-```sh
-npm ci
-npm test
-npm run build
-npm run dev
-```
-
-`npm run dev` registers the local development extension with Raycast. Open its
-**iHosts** command and choose **Enable Hosts Access** to authorize it at runtime.
-Building and running the tests does not grant access to the real hosts file.
-The regression tests mock privileged commands, compile the generated AppleScript
-without running it, and exercise an actual macOS ACL only on a temporary fixture.
+only when saved hosts exist and safely stops if authorization is canceled.
 
 ---
 
