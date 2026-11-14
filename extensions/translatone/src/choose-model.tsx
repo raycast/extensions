@@ -18,11 +18,7 @@ interface ChooseModelProps {
 }
 
 export function ChooseModel({ onChange }: ChooseModelProps) {
-  const {
-    data: settings,
-    error,
-    revalidate,
-  } = usePromise(() => loadProviderSettings(localStore), []);
+  const { data: settings, error, revalidate } = usePromise(() => loadProviderSettings(localStore), []);
   if (error) {
     if (!(error instanceof InvalidSettingsError)) {
       throw error;
@@ -30,11 +26,7 @@ export function ChooseModel({ onChange }: ChooseModelProps) {
     return <SettingsErrorView error={error} />;
   }
   return settings ? (
-    <ModelList
-      providers={enabledProviders(settings)}
-      onChange={onChange}
-      reloadSettings={() => void revalidate()}
-    />
+    <ModelList providers={enabledProviders(settings)} onChange={onChange} reloadSettings={() => void revalidate()} />
   ) : (
     <List isLoading />
   );
@@ -55,8 +47,7 @@ function ModelList({
     [providers],
   );
   const models = usePromise(
-    async (selected: ProviderConfig | undefined) =>
-      selected ? listModels(fetch, selected) : Promise.resolve([]),
+    async (selected: ProviderConfig | undefined) => (selected ? listModels(fetch, selected) : Promise.resolve([])),
     [provider],
   );
   const activeModel = active?.find(({ id }) => id === provider?.id)?.model;
@@ -74,11 +65,7 @@ function ModelList({
         title="Use Saved Model"
         icon={Icon.ArrowCounterClockwise}
         onAction={() =>
-          void changeModel(
-            provider.id,
-            () => clearModelChoice(localStore, provider.id),
-            `Back to ${provider.model}`,
-          )
+          void changeModel(provider.id, () => clearModelChoice(localStore, provider.id), `Back to ${provider.model}`)
         }
       />
       <Action.Push
@@ -132,7 +119,7 @@ function ModelList({
         <List.EmptyView
           icon={Icon.Warning}
           title="Could not load models"
-          description={`${describeError(models.error).message}. You can still type a model in the preferences.`}
+          description={`${describeError(models.error).message}. You can still enter a model in Manage Providers.`}
           actions={<ActionPanel>{commonActions}</ActionPanel>}
         />
       ) : (

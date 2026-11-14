@@ -1,17 +1,7 @@
 import { requestCompletion, type Fetch } from "./chat-client";
-import {
-  AllProvidersFailedError,
-  EmptyTextError,
-  NoProviderConfiguredError,
-  ProviderError,
-} from "./errors";
+import { AllProvidersFailedError, EmptyTextError, NoProviderConfiguredError, ProviderError } from "./errors";
 import type { ProviderConfig } from "./providers";
-import {
-  parseDirectionTag,
-  type Direction,
-  type TaggedReply,
-  type TranslationTarget,
-} from "./target";
+import { parseDirectionTag, type Direction, type TaggedReply, type TranslationTarget } from "./target";
 import { buildSystemPrompt, type ToneId } from "./tones";
 import { incrementUsage, readUsage, type KeyValueStore, type UsageSnapshot } from "./usage";
 
@@ -61,9 +51,7 @@ export async function translate(
   for (const provider of dependencies.providers) {
     const usage = await readUsage(dependencies.store, provider, now());
     if (usage.remaining === 0) {
-      skipped.push(
-        new ProviderError(provider.id, "limit_reached", `Used ${usage.used} of ${usage.limit}.`),
-      );
+      skipped.push(new ProviderError(provider.id, "limit_reached", `Used ${usage.used} of ${usage.limit}.`));
       continue;
     }
 
@@ -98,11 +86,7 @@ export async function translate(
   throw new AllProvidersFailedError(skipped);
 }
 
-export function visibleTranslation(
-  finished: string | undefined,
-  streamed: string,
-  isLoading: boolean,
-): string {
+export function visibleTranslation(finished: string | undefined, streamed: string, isLoading: boolean): string {
   if (isLoading && streamed !== "") {
     return streamed;
   }

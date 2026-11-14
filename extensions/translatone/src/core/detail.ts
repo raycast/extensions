@@ -27,12 +27,7 @@ const SETUP_VIEW: EmptyViewContent = {
     "Open Manage Providers to add your first provider or choose an enabled primary provider. Press ↵ to manage providers.",
 };
 
-export function formatDetailMarkdown({
-  translation,
-  original,
-  sourceLabel,
-  failed,
-}: DetailContent): string {
+export function formatDetailMarkdown({ translation, original, sourceLabel, failed }: DetailContent): string {
   const heading = sourceLabel ? `**Original** · ${sourceLabel}` : "**Original**";
   const quoted = original
     .split("\n")
@@ -42,9 +37,7 @@ export function formatDetailMarkdown({
 }
 
 export function formatClipboardPreview(text: string): string {
-  const fence = "`".repeat(
-    Math.max(3, ...Array.from(text.matchAll(/`+/g), (match) => match[0].length + 1)),
-  );
+  const fence = "`".repeat(Math.max(3, ...Array.from(text.matchAll(/`+/g), (match) => match[0].length + 1)));
   return [
     "**Clipboard preview**",
     "Press ↵ to translate. Nothing is sent from this preview until you submit it.",
@@ -53,10 +46,7 @@ export function formatClipboardPreview(text: string): string {
   ].join("\n\n");
 }
 
-export function emptyViewContent(
-  providerCount: number,
-  usageSummary: string | undefined,
-): EmptyViewContent {
+export function emptyViewContent(providerCount: number, usageSummary: string | undefined): EmptyViewContent {
   if (providerCount === 0) {
     return SETUP_VIEW;
   }
@@ -73,12 +63,7 @@ export function translationKey(
   tone: ToneId,
   providers: readonly ProviderConfig[],
 ): string {
-  const configuration = providers.map(({ id, baseUrl, model, apiKey }) => [
-    id,
-    baseUrl,
-    model,
-    apiKey,
-  ]);
+  const configuration = providers.map(({ id, baseUrl, model, apiKey }) => [id, baseUrl, model, apiKey]);
   const fingerprint = createHash("sha256").update(JSON.stringify(configuration)).digest("hex");
   return JSON.stringify([text.trim(), describeTarget(target), tone, fingerprint]);
 }
@@ -92,7 +77,5 @@ export function currentTranslation(
 }
 
 function placeholder(failed: boolean): string {
-  return failed
-    ? "**Couldn't translate this text.** Press ⌘R to retry, or ⌘K for more actions."
-    : "_Translating…_";
+  return failed ? "**Couldn't translate this text.** Press ⌘R to retry, or ⌘K for more actions." : "_Translating…_";
 }

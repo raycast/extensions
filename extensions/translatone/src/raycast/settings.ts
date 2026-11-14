@@ -7,13 +7,6 @@ import { languagePair, type TranslationTarget } from "../core/target";
 import { DEFAULT_TONE, resolveTone, type ToneId } from "../core/tones";
 import { localStore } from "./storage";
 
-interface RawPreferences {
-  readonly mainLanguage?: string;
-  readonly secondLanguage?: string;
-  readonly defaultTone?: string;
-  readonly primaryAction?: string;
-}
-
 export interface Settings {
   readonly providers: readonly ProviderConfig[];
   readonly defaultTone: ToneId;
@@ -24,7 +17,7 @@ export interface Settings {
 const SECOND_LANGUAGE = resolveLanguage("id", DEFAULT_LANGUAGE);
 
 export async function loadSettings(): Promise<Settings> {
-  const preferences = getPreferenceValues<RawPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const managed = await loadProviderSettings(localStore);
   return {
     providers: activeProviders(managed),

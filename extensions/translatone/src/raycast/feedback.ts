@@ -1,4 +1,5 @@
-import { Clipboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
+import { openCommand } from "./commands";
 import { buildDebugReport, redactSensitiveText, type DiagnosticContext } from "../core/diagnostics";
 import { describeError, type ErrorFix } from "../core/errors";
 
@@ -21,15 +22,12 @@ export async function showTranslationError(
   });
 }
 
-function fixAction(
-  fix: ErrorFix,
-  onRetry: (() => void) | undefined,
-): Toast.ActionOptions | undefined {
+function fixAction(fix: ErrorFix, onRetry: (() => void) | undefined): Toast.ActionOptions | undefined {
   if (fix === "open_preferences") {
     return {
       title: "Manage Providers",
       onAction: () => {
-        void launchCommand({ name: "manage-providers", type: LaunchType.UserInitiated });
+        void openCommand("manage-providers");
       },
     };
   }
@@ -43,9 +41,7 @@ function copyDebugInfoAction(report: string): Toast.ActionOptions {
   return {
     title: "Copy Debug Info",
     onAction: () => {
-      void Clipboard.copy(report).then(() =>
-        showToast({ style: Toast.Style.Success, title: "Debug info copied" }),
-      );
+      void Clipboard.copy(report).then(() => showToast({ style: Toast.Style.Success, title: "Debug info copied" }));
     },
   };
 }

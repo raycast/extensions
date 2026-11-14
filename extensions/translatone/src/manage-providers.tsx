@@ -38,23 +38,14 @@ export default function ManageProvidersCommand() {
 }
 
 export function ManageProviders({ onChange }: ManageProvidersProps) {
-  const { data, error, isLoading, revalidate } = usePromise(
-    () => loadProviderSettings(localStore),
-    [],
-  );
+  const { data, error, isLoading, revalidate } = usePromise(() => loadProviderSettings(localStore), []);
   const [busy, setBusy] = useState(false);
-  const available = PROVIDER_IDS.filter(
-    (id) => !data?.providers.some((provider) => provider.id === id),
-  );
+  const available = PROVIDER_IDS.filter((id) => !data?.providers.some((provider) => provider.id === id));
   const changed = async () => {
     await revalidate();
     onChange?.();
   };
-  const run = async (
-    work: () => Promise<unknown>,
-    title: string,
-    provider: ManagedProvider | undefined,
-  ) => {
+  const run = async (work: () => Promise<unknown>, title: string, provider: ManagedProvider | undefined) => {
     setBusy(true);
     try {
       await work();
@@ -84,7 +75,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
           icon={Icon.Warning}
           actions={
             <ActionPanel>
-              <Action title="Retry" onAction={() => void revalidate()} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
               <Action
                 title="Reset Provider Settings"
                 icon={Icon.Trash}
@@ -102,11 +93,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
                         },
                       })
                     ) {
-                      await run(
-                        () => resetProviderSettings(localStore),
-                        "Provider Settings Reset",
-                        undefined,
-                      );
+                      await run(() => resetProviderSettings(localStore), "Provider Settings Reset", undefined);
                     }
                   })()
                 }
@@ -137,19 +124,13 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
                 <Action.Push
                   title="Edit Provider"
                   icon={Icon.Pencil}
-                  target={
-                    <ProviderForm provider={provider} available={[provider.id]} onSave={changed} />
-                  }
+                  target={<ProviderForm provider={provider} available={[provider.id]} onSave={changed} />}
                 />
                 <Action
                   title="Test Connection"
                   icon={Icon.Network}
                   onAction={() =>
-                    void run(
-                      () => testProviderConnection(fetch, provider),
-                      "Connection Successful",
-                      provider,
-                    )
+                    void run(() => testProviderConnection(fetch, provider), "Connection Successful", provider)
                   }
                 />
                 {provider.enabled && data.primary !== provider.id ? (
@@ -157,11 +138,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
                     title="Set as Primary"
                     icon={Icon.Star}
                     onAction={() =>
-                      void run(
-                        () => setPrimaryProvider(localStore, provider.id),
-                        "Primary Provider Updated",
-                        provider,
-                      )
+                      void run(() => setPrimaryProvider(localStore, provider.id), "Primary Provider Updated", provider)
                     }
                   />
                 ) : null}
@@ -177,11 +154,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
                   }
                 />
                 <Action
-                  title={
-                    data.allowFallback
-                      ? "Turn off Automatic Fallback"
-                      : "Turn on Automatic Fallback"
-                  }
+                  title={data.allowFallback ? "Turn off Automatic Fallback" : "Turn on Automatic Fallback"}
                   icon={Icon.Switch}
                   onAction={() =>
                     void (async () => {
@@ -223,11 +196,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
                             },
                           })
                         ) {
-                          await run(
-                            () => removeProvider(localStore, provider.id),
-                            "Provider Removed",
-                            provider,
-                          );
+                          await run(() => removeProvider(localStore, provider.id), "Provider Removed", provider);
                         }
                       })()
                     }
@@ -239,9 +208,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
         ))
       )}
       {data && data.providers.length > 0 ? (
-        <List.Section
-          title={data.allowFallback ? "Automatic fallback is on" : "Automatic fallback is off"}
-        >
+        <List.Section title={data.allowFallback ? "Automatic fallback is on" : "Automatic fallback is off"}>
           <List.Item
             title="Provider Settings"
             subtitle="Disabling the primary stops translation until you choose another primary."
@@ -249,11 +216,7 @@ export function ManageProviders({ onChange }: ManageProvidersProps) {
             actions={
               <ActionPanel>
                 {addAction}
-                <Action
-                  title="Refresh Providers"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() => void revalidate()}
-                />
+                <Action title="Refresh Providers" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
               </ActionPanel>
             }
           />
@@ -305,13 +268,9 @@ function ProviderForm({ provider, available, onSave }: ProviderFormProps) {
       navigationTitle={provider ? "Edit Provider" : "Add Provider"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Provider"
-            icon={Icon.Checkmark}
-            onSubmit={() => void submit()}
-          />
+          <Action.SubmitForm title="Save Provider" icon={Icon.Checkmark} onSubmit={() => void submit()} />
           {PROVIDERS[id].keyUrl ? (
-            <Action.OpenInBrowser title="Get API Key" url={PROVIDERS[id].keyUrl} />
+            <Action.OpenInBrowser title="Get API Key" icon={Icon.Key} url={PROVIDERS[id].keyUrl} />
           ) : null}
         </ActionPanel>
       }
@@ -372,25 +331,15 @@ function ProviderForm({ provider, available, onSave }: ProviderFormProps) {
             : "Leave empty to use the default. Choose Model can change it later."
         }
       />
-      <Form.Checkbox
-        id="enabled"
-        label="Enable this provider"
-        value={enabled}
-        onChange={setEnabled}
-      />
+      <Form.Checkbox id="enabled" label="Enable this provider" value={enabled} onChange={setEnabled} />
       <Form.Description text="Credentials are stored in Raycast's encrypted local storage. Test Connection sends only a short synthetic prompt and may incur a provider charge." />
     </Form>
   );
 }
 
-async function reportProviderError(
-  error: unknown,
-  provider: ManagedProvider | undefined,
-): Promise<void> {
+async function reportProviderError(error: unknown, provider: ManagedProvider | undefined): Promise<void> {
   await showTranslationError(
-    error instanceof Error
-      ? error
-      : new InvalidSettingsError("Provider settings could not be updated."),
+    error instanceof Error ? error : new InvalidSettingsError("Provider settings could not be updated."),
     {
       command: "manage-providers",
       tone: "default",

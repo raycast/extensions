@@ -1,10 +1,5 @@
 import { describe, expect, setSystemTime, test } from "bun:test";
-import {
-  AllProvidersFailedError,
-  EmptyTextError,
-  NoProviderConfiguredError,
-  ProviderError,
-} from "../errors";
+import { AllProvidersFailedError, EmptyTextError, NoProviderConfiguredError, ProviderError } from "../errors";
 import { DEFAULT_LANGUAGE, resolveLanguage } from "../languages";
 import { languagePair, type TaggedReply } from "../target";
 import {
@@ -56,9 +51,7 @@ describe("visibleTranslation", () => {
 
 describe("translate", () => {
   test("uses the first provider and records its usage", async () => {
-    const { deps, calls } = dependencies(
-      new Map([["groq.test", async () => completionResponse("Hello")]]),
-    );
+    const { deps, calls } = dependencies(new Map([["groq.test", async () => completionResponse("Hello")]]));
 
     const result = await translate(request, deps);
 
@@ -70,18 +63,14 @@ describe("translate", () => {
   });
 
   test("returns the direction the model reports and strips its tag", async () => {
-    const { deps, calls } = dependencies(
-      new Map([["groq.test", async () => completionResponse("⟦id→en⟧\nHello")]]),
-    );
+    const { deps, calls } = dependencies(new Map([["groq.test", async () => completionResponse("⟦id→en⟧\nHello")]]));
 
     const result = await translate(request, deps);
 
     expect(result.text).toBe("Hello");
     expect(result.direction).toEqual({ source: "Indonesian", target: "English" });
     const body = calls[0]?.init.body;
-    expect(typeof body === "string" ? body : "").toContain(
-      "If it is English, translate it into Indonesian.",
-    );
+    expect(typeof body === "string" ? body : "").toContain("If it is English, translate it into Indonesian.");
   });
 
   test("streams partial translations with the tag hidden", async () => {
@@ -98,10 +87,7 @@ describe("translate", () => {
     );
     const partials: TaggedReply[] = [];
 
-    const result = await translate(
-      { ...request, onPartial: (partial) => partials.push(partial) },
-      deps,
-    );
+    const result = await translate({ ...request, onPartial: (partial) => partials.push(partial) }, deps);
 
     expect(partials.map((partial) => partial.text)).toEqual(["", "Hel", "Hello"]);
     expect(partials.at(-1)?.direction).toEqual({ source: "Indonesian", target: "English" });
@@ -109,9 +95,7 @@ describe("translate", () => {
   });
 
   test("has no direction when the model omits the tag", async () => {
-    const { deps } = dependencies(
-      new Map([["groq.test", async () => completionResponse("Hello")]]),
-    );
+    const { deps } = dependencies(new Map([["groq.test", async () => completionResponse("Hello")]]));
 
     expect((await translate(request, deps)).direction).toBeUndefined();
   });
@@ -131,9 +115,7 @@ describe("translate", () => {
   });
 
   test("skips a provider whose local quota is used up without calling it", async () => {
-    const { deps, store, calls } = dependencies(
-      new Map([["gemini.test", async () => completionResponse("Hello")]]),
-    );
+    const { deps, store, calls } = dependencies(new Map([["gemini.test", async () => completionResponse("Hello")]]));
     await store.setItem(usageKey(groq, NOW), "14400");
 
     const result = await translate(request, deps);
@@ -146,10 +128,7 @@ describe("translate", () => {
   test("falls back when the first provider no longer offers the model", async () => {
     const { deps } = dependencies(
       new Map([
-        [
-          "groq.test",
-          async () => Response.json({ error: { message: "no model" } }, { status: 404 }),
-        ],
+        ["groq.test", async () => Response.json({ error: { message: "no model" } }, { status: 404 })],
         ["gemini.test", async () => completionResponse("Hello")],
       ]),
     );
@@ -192,9 +171,7 @@ describe("translate", () => {
   });
 
   test("counts usage against the current day when no clock is given", async () => {
-    const { deps, store } = dependencies(
-      new Map([["groq.test", async () => completionResponse("Hello")]]),
-    );
+    const { deps, store } = dependencies(new Map([["groq.test", async () => completionResponse("Hello")]]));
     setSystemTime(NOW);
     try {
       await translate(request, { providers: deps.providers, store: deps.store, fetch: deps.fetch });
@@ -214,9 +191,7 @@ describe("translate", () => {
   test("rejects blank text before calling any provider", async () => {
     const { deps, calls } = dependencies(new Map());
 
-    expect(await rejectionOf(translate({ ...request, text: "   " }, deps))).toBeInstanceOf(
-      EmptyTextError,
-    );
+    expect(await rejectionOf(translate({ ...request, text: "   " }, deps))).toBeInstanceOf(EmptyTextError);
     expect(calls).toHaveLength(0);
   });
 });

@@ -74,9 +74,7 @@ describe("targetInstruction", () => {
   });
 
   test("translates into a fixed language", () => {
-    expect(targetInstruction({ kind: "fixed", language: japanese })).toBe(
-      "Translate the user's text into Japanese.",
-    );
+    expect(targetInstruction({ kind: "fixed", language: japanese })).toBe("Translate the user's text into Japanese.");
   });
 });
 
@@ -94,9 +92,7 @@ describe("directionTagInstruction", () => {
 
 describe("formatDirection", () => {
   test("shows the reported source and target", () => {
-    expect(formatDirection({ source: "Indonesian", target: "English" }, pair)).toBe(
-      "Indonesian → English",
-    );
+    expect(formatDirection({ source: "Indonesian", target: "English" }, pair)).toBe("Indonesian → English");
   });
 
   test("falls back to the requested target when the direction is unknown", () => {

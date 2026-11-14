@@ -33,11 +33,7 @@ export function usageKey(provider: ProviderConfig, now: Date): string {
   ].join(":");
 }
 
-export async function readUsage(
-  store: KeyValueStore,
-  provider: ProviderConfig,
-  now: Date,
-): Promise<UsageSnapshot> {
+export async function readUsage(store: KeyValueStore, provider: ProviderConfig, now: Date): Promise<UsageSnapshot> {
   const used = parseCount(await store.getItem(usageKey(provider, now)));
   return snapshot(provider, used);
 }
@@ -66,18 +62,15 @@ export function loadProviderUsage(
   providers: readonly ProviderConfig[],
   now: Date,
 ): Promise<ProviderUsage[]> {
-  return Promise.all(
-    providers.map(async (provider) => ({ provider, usage: await readUsage(store, provider, now) })),
-  );
+  return Promise.all(providers.map(async (provider) => ({ provider, usage: await readUsage(store, provider, now) })));
 }
 
 export function summarizeProviderUsage(overview: readonly ProviderUsage[]): string {
   if (overview.length === 0) {
-    return "No provider configured. Add an API key in the extension preferences.";
+    return "No provider configured. Add a connection in Manage Providers.";
   }
   const lines = overview.map(
-    ({ provider, usage }) =>
-      `${PROVIDERS[provider.id].name} · ${provider.model}: ${formatUsage(usage)}`,
+    ({ provider, usage }) => `${PROVIDERS[provider.id].name} · ${provider.model}: ${formatUsage(usage)}`,
   );
   if (lines.length === 1) {
     return lines.join("");

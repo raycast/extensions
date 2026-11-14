@@ -1,4 +1,4 @@
-import { getSelectedText, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { getSelectedText, showToast, Toast } from "@raycast/api";
 import type { Fetch } from "../core/chat-client";
 import { InvalidSettingsError } from "../core/errors";
 import { applyModelChoices } from "../core/models";
@@ -7,6 +7,7 @@ import { describeTarget } from "../core/target";
 import { TONES } from "../core/tones";
 import { translate } from "../core/translate";
 import { showTranslationError } from "./feedback";
+import { openCommand } from "./commands";
 import { deliverTranslation } from "./output";
 import { loadSettings, type Settings } from "./settings";
 import { localStore } from "./storage";
@@ -17,7 +18,7 @@ export async function translateSelectionInPlace(fetchFn: Fetch = fetch): Promise
     () => "",
   );
   if (text === "") {
-    await launchCommand({ name: "translate", type: LaunchType.UserInitiated });
+    await openCommand("translate");
     return;
   }
 
@@ -46,10 +47,7 @@ export async function translateSelectionInPlace(fetchFn: Fetch = fetch): Promise
   });
 
   try {
-    const result = await translate(
-      { text, tone, target },
-      { providers, store: localStore, fetch: fetchFn },
-    );
+    const result = await translate({ text, tone, target }, { providers, store: localStore, fetch: fetchFn });
     await deliverTranslation(
       "replace",
       result.text,

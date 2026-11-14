@@ -6,6 +6,7 @@ const NO_SELECTION = new Error("Unable to get selected text from frontmost appli
 class RaycastFake {
   preferences: Record<string, unknown> = {};
   selectedText: string | Error = NO_SELECTION;
+  launchError: unknown = undefined;
   readonly storage = new Map<string, string>();
   readonly toasts: Toast.Options[] = [];
   readonly clipboard: string[] = [];
@@ -16,6 +17,7 @@ class RaycastFake {
   reset(): void {
     this.preferences = {};
     this.selectedText = NO_SELECTION;
+    this.launchError = undefined;
     this.storage.clear();
     this.toasts.length = 0;
     this.clipboard.length = 0;
@@ -60,6 +62,9 @@ void mock.module("@raycast/api", () => ({
   LaunchType: { UserInitiated: "userInitiated", Background: "background" },
   launchCommand: (options: { name: string; type: string }) => {
     raycast.events.push(`launch:${options.name}:${options.type}`);
+    if (raycast.launchError !== undefined) {
+      return Promise.reject(raycast.launchError);
+    }
     return Promise.resolve();
   },
   showHUD: (title: string, options?: { popToRootType?: unknown }) => {

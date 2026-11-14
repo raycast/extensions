@@ -19,9 +19,7 @@ if (missing.length > 0) {
 async function readIgnorePatterns(): Promise<string[]> {
   const config: unknown = Bun.TOML.parse(await Bun.file("bunfig.toml").text());
   const patterns =
-    isRecord(config) && isRecord(config["test"])
-      ? config["test"]["coveragePathIgnorePatterns"]
-      : undefined;
+    isRecord(config) && isRecord(config["test"]) ? config["test"]["coveragePathIgnorePatterns"] : undefined;
   if (!Array.isArray(patterns) || !patterns.every((pattern) => typeof pattern === "string")) {
     throw new Error("bunfig.toml must define test.coveragePathIgnorePatterns as a string array");
   }

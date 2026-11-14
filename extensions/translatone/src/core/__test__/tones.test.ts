@@ -71,8 +71,6 @@ describe("meaning preservation", () => {
   });
 
   test.each(TONE_IDS)("the %s prompt keeps emojis, line breaks, lists, and links", (tone) => {
-    expect(buildSystemPrompt(tone, pair)).toContain(
-      "Keep existing emojis, line breaks, lists, and Markdown links",
-    );
+    expect(buildSystemPrompt(tone, pair)).toContain("Keep existing emojis, line breaks, lists, and Markdown links");
   });
 });

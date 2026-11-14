@@ -93,18 +93,10 @@ describe("describeError fix", () => {
     ["a missing provider", new NoProviderConfiguredError(), "open_preferences"],
     ["an invalid key", new ProviderError("groq", "unauthorized", "bad key"), "open_preferences"],
     ["a retired model", new ProviderError("groq", "model_unavailable", "gone"), "open_preferences"],
-    [
-      "a rejected request",
-      new ProviderError("groq", "request_rejected", "bad"),
-      "open_preferences",
-    ],
+    ["a rejected request", new ProviderError("groq", "request_rejected", "bad"), "open_preferences"],
     ["a rate limit", new ProviderError("groq", "rate_limited", "slow"), "retry"],
     ["a timeout", new ProviderError("groq", "timeout", "slow"), "retry"],
-    [
-      "exhausted providers",
-      new AllProvidersFailedError([new ProviderError("groq", "rate_limited", "slow")]),
-      "retry",
-    ],
+    ["exhausted providers", new AllProvidersFailedError([new ProviderError("groq", "rate_limited", "slow")]), "retry"],
     [
       "exhausted providers that are all misconfigured",
       new AllProvidersFailedError([new ProviderError("groq", "model_unavailable", "gone")]),

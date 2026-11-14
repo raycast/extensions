@@ -26,15 +26,11 @@ const DIRECTION_TAG = /^\s*⟦\s*([A-Za-z-]+)\s*(?:→|->|>)\s*([A-Za-z-]+)\s*�
 const INCOMPLETE_TAG = /^\s*⟦[^⟧]*$/;
 
 export function languagePair(main: Language, second: Language): TranslationTarget {
-  return main.code === second.code
-    ? { kind: "fixed", language: main }
-    : { kind: "pair", main, second };
+  return main.code === second.code ? { kind: "fixed", language: main } : { kind: "pair", main, second };
 }
 
 export function describeTarget(target: TranslationTarget): string {
-  return target.kind === "pair"
-    ? `Auto · ${target.main.name} ↔ ${target.second.name}`
-    : `→ ${target.language.name}`;
+  return target.kind === "pair" ? `Auto · ${target.main.name} ↔ ${target.second.name}` : `→ ${target.language.name}`;
 }
 
 export function targetOptions(defaultTarget: TranslationTarget): TargetOption[] {
@@ -44,10 +40,7 @@ export function targetOptions(defaultTarget: TranslationTarget): TargetOption[] 
   ];
 }
 
-export function resolveTarget(
-  value: string | undefined,
-  defaultTarget: TranslationTarget,
-): TranslationTarget {
+export function resolveTarget(value: string | undefined, defaultTarget: TranslationTarget): TranslationTarget {
   const language = LANGUAGES.find(({ code }) => code === value);
   return language ? { kind: "fixed", language } : defaultTarget;
 }
@@ -64,10 +57,7 @@ export function directionTagInstruction(): string {
   return `Start the reply with ⟦source→target⟧ using language codes (${codes}), for example ⟦id→en⟧, then a new line, then the translated text only, without quotes, notes, or explanations.`;
 }
 
-export function formatDirection(
-  direction: Direction | undefined,
-  requested: TranslationTarget,
-): string {
+export function formatDirection(direction: Direction | undefined, requested: TranslationTarget): string {
   return direction ? `${direction.source} → ${direction.target}` : describeTarget(requested);
 }
 
@@ -75,10 +65,7 @@ export function targetValue(target: TranslationTarget): string {
   return target.kind === "fixed" ? target.language.code : AUTO_TARGET;
 }
 
-export function swapTarget(
-  direction: Direction | undefined,
-  current: TranslationTarget,
-): TranslationTarget {
+export function swapTarget(direction: Direction | undefined, current: TranslationTarget): TranslationTarget {
   const source = LANGUAGES.find((language) => language.name === direction?.source);
   return source ? { kind: "fixed", language: source } : current;
 }

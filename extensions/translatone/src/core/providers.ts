@@ -103,10 +103,7 @@ export interface ProviderConfig {
   readonly apiKey: string | undefined;
 }
 
-export function providersAfter(
-  providers: readonly ProviderConfig[],
-  answered: ProviderId,
-): readonly ProviderConfig[] {
+export function providersAfter(providers: readonly ProviderConfig[], answered: ProviderId): readonly ProviderConfig[] {
   const index = providers.findIndex((provider) => provider.id === answered);
   if (index === -1) {
     return providers;

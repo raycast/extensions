@@ -42,11 +42,7 @@ export function initialSearchText(initial: InitialInput): string {
   return initial.source === "clipboard" ? "" : initial.text;
 }
 
-export function queryFor(
-  initial: InitialInput,
-  typed: string,
-  submittedClipboard: string | undefined,
-): string {
+export function queryFor(initial: InitialInput, typed: string, submittedClipboard: string | undefined): string {
   if (clean(typed) !== "") {
     return typed;
   }
@@ -58,9 +54,7 @@ export function clipboardPreview(
   typed: string,
   submittedClipboard: string | undefined,
 ): string | undefined {
-  return initial.source === "clipboard" &&
-    clean(typed) === "" &&
-    submittedClipboard !== initial.text
+  return initial.source === "clipboard" && clean(typed) === "" && submittedClipboard !== initial.text
     ? initial.text
     : undefined;
 }

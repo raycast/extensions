@@ -8,7 +8,7 @@ Translate selected, typed, or clipboard text with a tone in Raycast. Run **Manag
 
 - **Translate** opens the translation view. Selected text is translated on opening. Typed text is translated automatically after 700 ms without typing. If there is no selection, clipboard text is shown locally as a preview; choose **Translate Clipboard** to send it for translation. Clearing typed text returns to the clipboard preview, which requires that action again.
 - **Translate Selection** replaces selected text using your default tone. With no selection, it opens Translate. Allow Raycast access to selected text in macOS when prompted.
-- **Choose Model** lists models for a configured provider. A selected model overrides its preference; choose **Use Preference Model** to clear the override.
+- **Choose Model** lists models for a configured provider. A selected model overrides the model saved in Manage Providers; choose **Use Saved Model** to clear the override.
 
 In Translate, select Default for a faithful, natural translation, LinkedIn for a professional message, Email for a polite structured message, or Chat for a casual message. The view remembers your last tone; Translate Selection uses **Default Tone** in preferences.
 

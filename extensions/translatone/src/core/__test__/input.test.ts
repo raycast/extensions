@@ -14,8 +14,7 @@ import {
 
 function readers(selection: string | Error, clipboard: string | undefined): InputReaders {
   return {
-    readSelection: () =>
-      selection instanceof Error ? Promise.reject(selection) : Promise.resolve(selection),
+    readSelection: () => (selection instanceof Error ? Promise.reject(selection) : Promise.resolve(selection)),
     readClipboard: () => Promise.resolve(clipboard),
   };
 }
@@ -25,18 +24,8 @@ const noSelection = new Error("Unable to get selected text from frontmost applic
 describe("resolveInitialInput", () => {
   test.each([
     ["the selection", readers("  Halo dunia  ", "something else"), "Halo dunia", "selection"],
-    [
-      "the clipboard when nothing is selected",
-      readers(noSelection, "Copied text"),
-      "Copied text",
-      "clipboard",
-    ],
-    [
-      "the clipboard when the selection is blank",
-      readers("   ", "Copied text"),
-      "Copied text",
-      "clipboard",
-    ],
+    ["the clipboard when nothing is selected", readers(noSelection, "Copied text"), "Copied text", "clipboard"],
+    ["the clipboard when the selection is blank", readers("   ", "Copied text"), "Copied text", "clipboard"],
     [
       "the clipboard when the selection only echoes it",
       readers("Copied text", "Copied text"),

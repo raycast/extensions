@@ -1,10 +1,5 @@
 import { describe, expect, setSystemTime, test } from "bun:test";
-import {
-  buildDebugReport,
-  redactErrorCause,
-  redactSensitiveText,
-  type DiagnosticContext,
-} from "../diagnostics";
+import { buildDebugReport, redactErrorCause, redactSensitiveText, type DiagnosticContext } from "../diagnostics";
 import { AllProvidersFailedError, ProviderError } from "../errors";
 import { providerConfig } from "./test-helpers";
 
@@ -24,15 +19,13 @@ function report(error: unknown): unknown {
 
 describe("buildDebugReport", () => {
   test.each(["HTTPS", "HtTpS", "http"])("redacts credentials from a %s URL", (scheme) => {
-    expect(
-      redactSensitiveText(`${scheme}://user:password@example.test/v1?token=private#secret`, []),
-    ).toBe(`${scheme.toLowerCase()}://example.test/v1`);
+    expect(redactSensitiveText(`${scheme}://user:password@example.test/v1?token=private#secret`, [])).toBe(
+      `${scheme.toLowerCase()}://example.test/v1`,
+    );
   });
 
   test("redacts thrown values that are not Error objects", () => {
-    expect(redactErrorCause("Rejected groq-key", context.providers).message).toBe(
-      "Rejected [REDACTED]",
-    );
+    expect(redactErrorCause("Rejected groq-key", context.providers).message).toBe("Rejected [REDACTED]");
   });
   test("redacts malformed credential URLs without hiding the original failure", () => {
     expect(redactSensitiveText("Could not reach https://user:password@[invalid/v1", [])).toBe(
@@ -50,9 +43,7 @@ describe("buildDebugReport", () => {
       ],
     };
     const error = new ProviderError("custom", "unauthorized", "Rejected example/key+value", {
-      cause: new Error(
-        "https://user:password@example.test/v1?token=private#secret example%2Fkey%2Bvalue",
-      ),
+      cause: new Error("https://user:password@example.test/v1?token=private#secret example%2Fkey%2Bvalue"),
       requestId: "example/key+value",
     });
 

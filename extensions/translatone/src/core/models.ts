@@ -22,8 +22,7 @@ export async function listModels(fetchFn: Fetch, provider: ProviderConfig): Prom
       },
     );
   });
-  const requestId =
-    response.headers.get("x-request-id") ?? response.headers.get("request-id") ?? undefined;
+  const requestId = response.headers.get("x-request-id") ?? response.headers.get("request-id") ?? undefined;
   if (!response.ok) {
     throw await toHttpError(provider, response, requestId);
   }
@@ -49,11 +48,7 @@ export async function applyModelChoices(
   );
 }
 
-export function saveModelChoice(
-  store: KeyValueStore,
-  provider: ProviderId,
-  model: string,
-): Promise<void> {
+export function saveModelChoice(store: KeyValueStore, provider: ProviderId, model: string): Promise<void> {
   return store.setItem(modelChoiceKey(provider), model);
 }
 

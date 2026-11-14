@@ -1,13 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { MemoryStore, providerConfig } from "./test-helpers";
-import {
-  formatUsage,
-  incrementUsage,
-  loadProviderUsage,
-  readUsage,
-  summarizeProviderUsage,
-  usageKey,
-} from "../usage";
+import { formatUsage, incrementUsage, loadProviderUsage, readUsage, summarizeProviderUsage, usageKey } from "../usage";
 
 const NOW = new Date("2026-11-03T10:00:00Z");
 
@@ -126,22 +119,16 @@ describe("provider usage overview", () => {
   });
 
   test("explains how to configure a provider when none is set", () => {
-    expect(summarizeProviderUsage([])).toBe(
-      "No provider configured. Add an API key in the extension preferences.",
-    );
+    expect(summarizeProviderUsage([])).toBe("No provider configured. Add a connection in Manage Providers.");
   });
 });
 
 describe("formatUsage", () => {
   test("shows the limit when the provider has one", () => {
-    expect(formatUsage({ period: "day", used: 1420, limit: 14_400, remaining: 12_980 })).toBe(
-      "1,420 / 14,400 today",
-    );
+    expect(formatUsage({ period: "day", used: 1420, limit: 14_400, remaining: 12_980 })).toBe("1,420 / 14,400 today");
   });
 
   test("shows only the count for unlimited providers", () => {
-    expect(formatUsage({ period: "day", used: 3, limit: undefined, remaining: undefined })).toBe(
-      "3 today",
-    );
+    expect(formatUsage({ period: "day", used: 3, limit: undefined, remaining: undefined })).toBe("3 today");
   });
 });

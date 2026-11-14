@@ -74,9 +74,7 @@ describe("loadSettings", () => {
   test("offers every language in both language preferences", () => {
     for (const name of ["mainLanguage", "secondLanguage"]) {
       const preference = manifest.preferences.find((entry) => entry.name === name);
-      expect(preference?.data?.map((option) => option.value)).toEqual(
-        LANGUAGES.map(({ code }) => code),
-      );
+      expect(preference?.data?.map((option) => option.value)).toEqual(LANGUAGES.map(({ code }) => code));
     }
   });
 });

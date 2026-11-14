@@ -58,11 +58,7 @@ export async function loadProviderSettings(store: KeyValueStore): Promise<Provid
   } catch {
     throw invalidStoredSettings();
   }
-  if (
-    !isRecord(parsed) ||
-    !Array.isArray(parsed["providers"]) ||
-    typeof parsed["allowFallback"] !== "boolean"
-  ) {
+  if (!isRecord(parsed) || !Array.isArray(parsed["providers"]) || typeof parsed["allowFallback"] !== "boolean") {
     throw invalidStoredSettings();
   }
   const primary = parsed["primary"];
@@ -91,10 +87,7 @@ export function enabledProviders(settings: ProviderSettings): ManagedProvider[] 
   return settings.providers.filter((provider) => provider.enabled && hasCredentials(provider));
 }
 
-export async function saveProvider(
-  store: KeyValueStore,
-  provider: ManagedProvider,
-): Promise<ProviderSettings> {
+export async function saveProvider(store: KeyValueStore, provider: ManagedProvider): Promise<ProviderSettings> {
   const settings = await loadProviderSettings(store);
   const existing = settings.providers.some(({ id }) => id === provider.id);
   const providers = existing
@@ -108,10 +101,7 @@ export async function saveProvider(
   });
 }
 
-export async function removeProvider(
-  store: KeyValueStore,
-  id: ProviderId,
-): Promise<ProviderSettings> {
+export async function removeProvider(store: KeyValueStore, id: ProviderId): Promise<ProviderSettings> {
   const settings = await loadProviderSettings(store);
   await clearModelChoice(store, id);
   return persist(store, {
@@ -146,32 +136,19 @@ export async function setProviderEnabled(
   });
 }
 
-export async function setPrimaryProvider(
-  store: KeyValueStore,
-  id: ProviderId,
-): Promise<ProviderSettings> {
+export async function setPrimaryProvider(store: KeyValueStore, id: ProviderId): Promise<ProviderSettings> {
   const settings = await loadProviderSettings(store);
-  if (
-    !settings.providers.some(
-      (provider) => provider.id === id && provider.enabled && hasCredentials(provider),
-    )
-  ) {
+  if (!settings.providers.some((provider) => provider.id === id && provider.enabled && hasCredentials(provider))) {
     throw new InvalidSettingsError("Choose an enabled provider with valid settings as primary.");
   }
   return persist(store, { ...settings, primary: id });
 }
 
-export async function setProviderFallback(
-  store: KeyValueStore,
-  allowFallback: boolean,
-): Promise<ProviderSettings> {
+export async function setProviderFallback(store: KeyValueStore, allowFallback: boolean): Promise<ProviderSettings> {
   return persist(store, { ...(await loadProviderSettings(store)), allowFallback });
 }
 
-export async function testProviderConnection(
-  fetchFn: Fetch,
-  provider: ProviderConfig,
-): Promise<void> {
+export async function testProviderConnection(fetchFn: Fetch, provider: ProviderConfig): Promise<void> {
   if (!hasCredentials(provider)) {
     throw new InvalidSettingsError("Add an API key before testing this provider.");
   }
@@ -215,15 +192,10 @@ function readProvider(value: unknown): ManagedProvider {
 }
 
 function invalidStoredSettings(): InvalidSettingsError {
-  return new InvalidSettingsError(
-    "Saved provider settings are invalid. Open Manage Providers to review them.",
-  );
+  return new InvalidSettingsError("Saved provider settings are invalid. Open Manage Providers to review them.");
 }
 
-async function persist(
-  store: KeyValueStore,
-  settings: ProviderSettings,
-): Promise<ProviderSettings> {
+async function persist(store: KeyValueStore, settings: ProviderSettings): Promise<ProviderSettings> {
   await store.setItem(STORAGE_KEY, JSON.stringify(settings));
   return settings;
 }
@@ -231,7 +203,7 @@ async function persist(
 export function validateBaseUrl(baseUrl: string): string {
   if (!/^https?:\/\//i.test(baseUrl) || !URL.canParse(baseUrl)) {
     throw new InvalidSettingsError(
-      "Provider URL must be an absolute HTTP or HTTPS URL. Check the URL in preferences.",
+      "Provider URL must be an absolute HTTP or HTTPS URL. Check the URL in Manage Providers.",
     );
   }
   const url = new URL(baseUrl);
@@ -241,23 +213,15 @@ export function validateBaseUrl(baseUrl: string): string {
     );
   }
   if (baseUrl.includes("?")) {
-    throw new InvalidSettingsError(
-      "Provider URL cannot contain a query string. Use the API base URL instead.",
-    );
+    throw new InvalidSettingsError("Provider URL cannot contain a query string. Use the API base URL instead.");
   }
   if (baseUrl.includes("#")) {
-    throw new InvalidSettingsError(
-      "Provider URL cannot contain a fragment. Use the API base URL instead.",
-    );
+    throw new InvalidSettingsError("Provider URL cannot contain a fragment. Use the API base URL instead.");
   }
   const loopback =
-    url.hostname === "localhost" ||
-    url.hostname === "[::1]" ||
-    /^127\.\d+\.\d+\.\d+$/.test(url.hostname);
+    url.hostname === "localhost" || url.hostname === "[::1]" || /^127\.\d+\.\d+\.\d+$/.test(url.hostname);
   if (url.protocol === "http:" && !loopback) {
-    throw new InvalidSettingsError(
-      "Remote provider URLs require HTTPS. HTTP is allowed only for loopback addresses.",
-    );
+    throw new InvalidSettingsError("Remote provider URLs require HTTPS. HTTP is allowed only for loopback addresses.");
   }
   const normalized = url.toString().replace(/\/+$/, "");
   if (url.pathname.replace(/\/+$/, "").endsWith("/chat/completions")) {

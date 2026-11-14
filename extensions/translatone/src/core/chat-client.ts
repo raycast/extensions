@@ -45,26 +45,19 @@ export async function requestCompletion(
     timeoutMs,
   };
   const { onDelta } = options;
-  const response = await guardTransport(transport, () =>
-    send(fetchFn, request, transport, onDelta !== undefined),
-  );
-  const requestId =
-    response.headers.get("x-request-id") ?? response.headers.get("request-id") ?? undefined;
+  const response = await guardTransport(transport, () => send(fetchFn, request, transport, onDelta !== undefined));
+  const requestId = response.headers.get("x-request-id") ?? response.headers.get("request-id") ?? undefined;
 
   if (!response.ok) {
     throw await toHttpError(request.provider, response, requestId);
   }
 
-  const text = await guardTransport(transport, () =>
-    readText(response, onDelta, request.provider.id, requestId),
-  );
+  const text = await guardTransport(transport, () => readText(response, onDelta, request.provider.id, requestId));
   if (text === undefined) {
-    throw new ProviderError(
-      request.provider.id,
-      "bad_response",
-      "Response did not contain a translation.",
-      { status: response.status, requestId },
-    );
+    throw new ProviderError(request.provider.id, "bad_response", "Response did not contain a translation.", {
+      status: response.status,
+      requestId,
+    });
   }
   return { text, requestId };
 }
@@ -136,15 +129,10 @@ async function readText(
   const completed = await forEachEventData(response, (data) => {
     const event = parseJson(data);
     if (!isRecord(event)) {
-      throw new ProviderError(
-        provider,
-        "bad_response",
-        "Provider returned malformed stream data.",
-        {
-          status: response.status,
-          requestId,
-        },
-      );
+      throw new ProviderError(provider, "bad_response", "Provider returned malformed stream data.", {
+        status: response.status,
+        requestId,
+      });
     }
     if (event["error"] !== undefined) {
       throw new ProviderError(provider, "server", "Provider returned a stream error.", {
@@ -161,15 +149,10 @@ async function readText(
     return stopped;
   });
   if (!completed) {
-    throw new ProviderError(
-      provider,
-      "network",
-      "Translation stream ended before a completion signal.",
-      {
-        status: response.status,
-        requestId,
-      },
-    );
+    throw new ProviderError(provider, "network", "Translation stream ended before a completion signal.", {
+      status: response.status,
+      requestId,
+    });
   }
   const trimmed = text.trim();
   return trimmed === "" ? undefined : trimmed;
@@ -181,8 +164,7 @@ function validateCompletion(
   status: number,
   requestId: string | undefined,
 ): boolean {
-  const choices: readonly unknown[] =
-    isRecord(body) && Array.isArray(body["choices"]) ? body["choices"] : [];
+  const choices: readonly unknown[] = isRecord(body) && Array.isArray(body["choices"]) ? body["choices"] : [];
   const choice = choices[0];
   const reason = isRecord(choice) ? choice["finish_reason"] : undefined;
   if (reason !== undefined && reason !== null && reason !== "stop") {
@@ -198,10 +180,7 @@ function isEventStream(response: Response): boolean {
   return (response.headers.get("content-type") ?? "").includes("text/event-stream");
 }
 
-async function forEachEventData(
-  response: Response,
-  onData: (data: string) => boolean,
-): Promise<boolean> {
+async function forEachEventData(response: Response, onData: (data: string) => boolean): Promise<boolean> {
   let buffer = "";
   let completed = false;
   const emitLine = (line: string) => {
@@ -248,12 +227,10 @@ export async function toHttpError(
     0,
     MAX_ERROR_DETAIL_LENGTH,
   );
-  return new ProviderError(
-    provider.id,
-    reasonForStatus(response.status),
-    detail || `HTTP ${response.status}`,
-    { status: response.status, requestId },
-  );
+  return new ProviderError(provider.id, reasonForStatus(response.status), detail || `HTTP ${response.status}`, {
+    status: response.status,
+    requestId,
+  });
 }
 
 function providerErrorMessage(body: string): string | undefined {

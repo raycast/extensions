@@ -45,12 +45,7 @@ export class ProviderError extends Error {
   readonly status: number | undefined;
   readonly requestId: string | undefined;
 
-  constructor(
-    provider: ProviderId,
-    reason: ProviderErrorReason,
-    message: string,
-    details: ProviderErrorDetails = {},
-  ) {
+  constructor(provider: ProviderId, reason: ProviderErrorReason, message: string, details: ProviderErrorDetails = {}) {
     super(message, { cause: details.cause });
     this.provider = provider;
     this.reason = reason;
@@ -64,9 +59,7 @@ export class ProviderError extends Error {
 
   get summary(): string {
     const label =
-      this.reason === "network" && this.status !== undefined
-        ? "response interrupted"
-        : REASON_LABELS[this.reason];
+      this.reason === "network" && this.status !== undefined ? "response interrupted" : REASON_LABELS[this.reason];
     return `${PROVIDERS[this.provider].name}: ${label}`;
   }
 }
@@ -143,7 +136,5 @@ export function describeError(error: unknown): ErrorDescription {
 }
 
 function fixFor(failures: readonly ProviderError[]): ErrorFix {
-  return failures.every((failure) => SETUP_REASONS.has(failure.reason))
-    ? "open_preferences"
-    : "retry";
+  return failures.every((failure) => SETUP_REASONS.has(failure.reason)) ? "open_preferences" : "retry";
 }

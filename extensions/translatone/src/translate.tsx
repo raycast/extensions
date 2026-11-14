@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ManageProviders } from "./manage-providers";
 import { ChooseModel } from "./choose-model";
 import {
@@ -34,7 +34,8 @@ import {
   type TranslationTarget,
 } from "./core/target";
 import { isToneId, TONE_IDS, TONES, type ToneId } from "./core/tones";
-import { translate, visibleTranslation, type TranslationResult } from "./core/translate";
+import { visibleTranslation, type TranslationResult } from "./core/translate";
+import { runTranslationAttempt, startTranslationAttempt, type TranslationAttempt } from "./core/translation-attempt";
 import { formatUsage, loadProviderUsage, summarizeProviderUsage } from "./core/usage";
 import { showTranslationError } from "./raycast/feedback";
 import { readInitialInput } from "./raycast/input";
@@ -63,11 +64,7 @@ export default function TranslateCommand() {
     }
     return <SettingsErrorView error={error} />;
   }
-  return settings ? (
-    <Translate settings={settings} onSettingsChange={() => void revalidate()} />
-  ) : (
-    <List isLoading />
-  );
+  return settings ? <Translate settings={settings} onSettingsChange={() => void revalidate()} /> : <List isLoading />;
 }
 
 function Translate({
@@ -94,17 +91,11 @@ function Translate({
   });
 
   useEffect(() => {
-    const timer = setTimeout(
-      () => setQuery(queryFor(initialInput, text, submittedClipboard)),
-      TYPING_DELAY_MS,
-    );
+    const timer = setTimeout(() => setQuery(queryFor(initialInput, text, submittedClipboard)), TYPING_DELAY_MS);
     return () => clearTimeout(timer);
   }, [text, initialInput, submittedClipboard]);
 
-  const target = useMemo(
-    () => resolveTarget(selectedTarget, settings.target),
-    [selectedTarget, settings.target],
-  );
+  const target = useMemo(() => resolveTarget(selectedTarget, settings.target), [selectedTarget, settings.target]);
   const { data: providers } = usePromise(
     (configured: readonly ProviderConfig[]) => applyModelChoices(localStore, configured),
     [settings.providers],
@@ -126,9 +117,7 @@ function Translate({
     providerUsage ? summarizeProviderUsage(providerUsage) : undefined,
   );
   const hasQuery = query.trim() !== "" && !empty.needsSetup;
-  const preview = empty.needsSetup
-    ? undefined
-    : clipboardPreview(initialInput, text, submittedClipboard);
+  const preview = empty.needsSetup ? undefined : clipboardPreview(initialInput, text, submittedClipboard);
   const sourceLabel = describeInputSource(sourceOfSubmission(initialInput, query));
 
   const { result } = translation;
@@ -171,7 +160,7 @@ function Translate({
         <Action
           title="Swap Direction"
           icon={Icon.Switch}
-          shortcut={Keyboard.Shortcut.Common.Save}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
           onAction={() => setSelectedTarget(targetValue(swapTarget(result?.direction, target)))}
         />
         {translation.failed ? (
@@ -208,22 +197,14 @@ function Translate({
           icon={Icon.Key}
           target={<ManageProviders onChange={onSettingsChange} />}
         />
-        <Action
-          title="Open Preferences"
-          icon={Icon.Gear}
-          onAction={() => void openExtensionPreferences()}
-        />
+        <Action title="Open Preferences" icon={Icon.Gear} onAction={() => void openExtensionPreferences()} />
       </ActionPanel.Section>
     </ActionPanel>
   );
 
   const setupActions = (
     <ActionPanel>
-      <Action.Push
-        title="Manage Providers"
-        icon={Icon.Key}
-        target={<ManageProviders onChange={onSettingsChange} />}
-      />
+      <Action.Push title="Manage Providers" icon={Icon.Key} target={<ManageProviders onChange={onSettingsChange} />} />
       {keyPageLinks().map(({ title, url }) => (
         <Action.OpenInBrowser key={url} title={title} url={url} />
       ))}
@@ -309,10 +290,7 @@ interface TranslationMetadataProps {
 function TranslationMetadata({ result, target }: TranslationMetadataProps) {
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label
-        title="Direction"
-        text={formatDirection(result.direction, target)}
-      />
+      <List.Item.Detail.Metadata.Label title="Direction" text={formatDirection(result.direction, target)} />
       <List.Item.Detail.Metadata.Label
         title="Provider"
         text={`${PROVIDERS[result.provider.id].name} · ${result.provider.model}`}
@@ -335,11 +313,6 @@ interface Streamed {
   readonly text: string;
 }
 
-interface Attempt {
-  readonly key: string;
-  readonly providers: readonly ProviderConfig[];
-}
-
 function useTranslation(
   query: string,
   currentQuery: string,
@@ -347,79 +320,82 @@ function useTranslation(
   tone: ToneId,
   providers: readonly ProviderConfig[],
 ) {
-  const [cache, setCache] = useState<ReadonlyMap<string, TranslationResult>>(new Map());
+  const cache = useRef<ReadonlyMap<string, TranslationResult>>(new Map());
+  const abortable = useRef<AbortController | null>(null);
   const [streamed, setStreamed] = useState<Streamed>({ key: "", text: "" });
-  const [lastResult, setLastResult] = useState<TranslationResult | undefined>(undefined);
-  const [failedKey, setFailedKey] = useState<string | undefined>(undefined);
-  const [retry, setRetry] = useState<Attempt | undefined>(undefined);
-
+  const [attempt, setAttempt] = useState<TranslationAttempt | undefined>(undefined);
   const key = translationKey(query, target, tone, providers);
   const currentKey = translationKey(currentQuery, target, tone, providers);
-  const retrying = retry?.key === key ? retry : undefined;
-  const cached = retrying ? undefined : cache.get(key);
-  const isLoading = query.trim() !== "" && cached === undefined && failedKey !== key;
-  const result = currentTranslation(cached, key, currentKey);
-  const displayed = cached ?? (isLoading ? lastResult : undefined);
-
-  useEffect(() => {
-    if (!isLoading) {
-      return undefined;
-    }
-    const controller = new AbortController();
-    translate(
-      {
-        text: query,
-        tone,
-        target,
-        signal: controller.signal,
-        onPartial: (partial) => setStreamed({ key, text: partial.text }),
+  const generation = attempt?.key === key ? attempt.generation : 0;
+  const retry = () => setAttempt((previous) => startTranslationAttempt(key, providers, previous));
+  const { data, error, isLoading } = usePromise(
+    async (
+      text: string,
+      requestTarget: TranslationTarget,
+      requestTone: ToneId,
+      configuredProviders: readonly ProviderConfig[],
+      requestAttempt: TranslationAttempt | undefined,
+    ) => {
+      const signal = abortable.current?.signal;
+      const requestKey = translationKey(text, requestTarget, requestTone, configuredProviders);
+      return runTranslationAttempt(
+        {
+          text,
+          tone: requestTone,
+          target: requestTarget,
+          signal,
+          onPartial: (partial) => {
+            if (!signal?.aborted) {
+              setStreamed({ key: requestKey, text: partial.text });
+            }
+          },
+        },
+        { providers: configuredProviders, store: localStore, fetch },
+        cache.current,
+        requestAttempt,
+      );
+    },
+    [query, target, tone, providers, attempt],
+    {
+      abortable,
+      execute: query.trim() !== "" && providers.length > 0,
+      onWillExecute: () => setStreamed({ key: "", text: "" }),
+      onData: (completed) => {
+        cache.current = new Map(cache.current).set(completed.key, completed.result);
+        setAttempt(undefined);
       },
-      { providers: retrying?.providers ?? providers, store: localStore, fetch },
-    ).then(
-      (translated) => {
-        if (controller.signal.aborted) {
-          return undefined;
-        }
-        setCache((previous) => new Map(previous).set(key, translated));
-        setLastResult(translated);
-        setRetry(undefined);
-        return translated;
-      },
-      (error: unknown) => {
-        if (!controller.signal.aborted) {
-          setFailedKey(key);
-          void showTranslationError(
-            error,
-            {
-              command: "translate",
-              tone,
-              targetLanguage: formatDirection(undefined, target),
-              textLength: query.length,
-              providers,
-            },
-            () => setFailedKey(undefined),
-          );
-        }
-        return undefined;
-      },
-    );
-    return () => controller.abort();
-  }, [isLoading, key, query, tone, target, providers, retrying]);
+      onError: (failure) =>
+        showTranslationError(
+          failure,
+          {
+            command: "translate",
+            tone,
+            targetLanguage: formatDirection(undefined, target),
+            textLength: query.length,
+            providers: attempt?.key === key ? attempt.providers : providers,
+          },
+          retry,
+        ),
+    },
+  );
+  const result =
+    !isLoading && !error && data?.generation === generation
+      ? currentTranslation(data.result, data.key, currentKey)
+      : undefined;
 
   return {
     result,
     isLoading,
-    failed: failedKey === key && query.trim() !== "",
-    retry: () => setFailedKey(undefined),
+    failed: error !== undefined && !isLoading && query.trim() !== "",
+    retry,
     visibleText: visibleTranslation(
-      displayed?.text,
+      data?.key === key && data.generation === generation ? data.result.text : undefined,
       streamed.key === key ? streamed.text : "",
       isLoading,
     ),
     retryWithNextProvider: () => {
       if (result) {
-        setFailedKey(undefined);
-        setRetry({ key, providers: providersAfter(providers, result.provider.id) });
+        setAttempt((previous) => startTranslationAttempt(key, providersAfter(providers, result.provider.id), previous));
       }
     },
   };

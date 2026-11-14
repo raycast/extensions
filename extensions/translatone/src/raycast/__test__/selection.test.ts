@@ -122,9 +122,7 @@ describe("translateSelectionInPlace", () => {
     let attempts = 0;
     const flaky: Fetch = async () => {
       attempts += 1;
-      return attempts === 1
-        ? new Response("busy", { status: 503 })
-        : completionResponse("Hello world");
+      return attempts === 1 ? new Response("busy", { status: 503 }) : completionResponse("Hello world");
     };
 
     await translateSelectionInPlace(flaky);
@@ -135,6 +133,23 @@ describe("translateSelectionInPlace", () => {
 
     expect(raycast.events).toContain("paste:Hello world");
   });
+
+  test.each([new Error("Command is disabled"), "Command is disabled"])(
+    "explains when Translate cannot be opened instead of rejecting silently: %s",
+    async (failure) => {
+      raycast.launchError = failure;
+      const { fetch, calls } = groqAnswering("unused");
+
+      await translateSelectionInPlace(fetch);
+
+      expect(calls).toHaveLength(0);
+      expect(raycast.toasts[0]).toMatchObject({
+        style: "FAILURE",
+        title: "Could not open Translate",
+        message: expect.stringContaining("disabled"),
+      });
+    },
+  );
 
   test("reports a failure without touching the selection", async () => {
     raycast.selectedText = "Halo dunia";

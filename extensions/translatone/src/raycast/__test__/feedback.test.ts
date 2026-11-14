@@ -86,6 +86,20 @@ describe("showTranslationError", () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
+  test("explains when Manage Providers cannot be launched", async () => {
+    raycast.launchError = new Error("Command is disabled");
+    await showTranslationError(new NoProviderConfiguredError(), context);
+
+    trigger(raycast.toasts[0]?.primaryAction);
+    await Bun.sleep(0);
+
+    expect(raycast.toasts[1]).toMatchObject({
+      style: "FAILURE",
+      title: "Could not open Manage Providers",
+      message: expect.stringContaining("disabled"),
+    });
+  });
+
   test("redacts secrets before logging errors or showing generic error messages", async () => {
     await showTranslationError(
       new Error("Rejected groq-key at https://user:pass@test.invalid/v1?token=secret"),

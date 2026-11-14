@@ -50,7 +50,7 @@
       "name": "choose-model",
       "title": "Choose Model",
       "subtitle": "TranslaTone",
-      "description": "Pick a model from your provider's model list. Overrides the model set in preferences.",
+      "description": "Pick a model from your provider's model list. Overrides the model saved in Manage Providers.",
       "mode": "view"
     },
     {

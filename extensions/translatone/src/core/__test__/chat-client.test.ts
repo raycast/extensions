@@ -71,9 +71,7 @@ describe("requestCompletion", () => {
     const error = await captureError(
       requestCompletion(
         async () => {
-          throw new Error(
-            "Could not send example-key to https://user:pass@custom.test/v1?token=secret",
-          );
+          throw new Error("Could not send example-key to https://user:pass@custom.test/v1?token=secret");
         },
         { provider, systemPrompt: "system", text: "Hello" },
       ),
@@ -184,11 +182,7 @@ describe("requestCompletion", () => {
 
   test("reports a slow provider as a recoverable timeout", async () => {
     const error = await captureError(
-      requestCompletion(
-        hangingFetch,
-        { provider: groq, systemPrompt: "system", text: "Hello" },
-        { timeoutMs: 5 },
-      ),
+      requestCompletion(hangingFetch, { provider: groq, systemPrompt: "system", text: "Hello" }, { timeoutMs: 5 }),
     );
 
     expect(error.reason).toBe("timeout");
@@ -258,9 +252,7 @@ describe("requestCompletion streaming", () => {
   test("rejects a stream that ends without a completion marker", async () => {
     const { fetch } = respondWith(async () => streamResponse({ chunks: [sseEvent("Partial")] }));
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error.reason).toBe("network");
     expect(error.recoverable).toBe(true);
@@ -274,9 +266,7 @@ describe("requestCompletion streaming", () => {
         }),
     );
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error).toMatchObject({ reason: "network", status: 200, requestId: "stream_request" });
     expect(error.summary).toBe("Groq: response interrupted");
@@ -285,16 +275,11 @@ describe("requestCompletion streaming", () => {
   test("rejects a provider error event even after receiving text", async () => {
     const { fetch } = respondWith(async () =>
       streamResponse({
-        chunks: [
-          sseEvent("Partial"),
-          'data: {"error":{"message":"server failed"}}\n\ndata: [DONE]\n\n',
-        ],
+        chunks: [sseEvent("Partial"), 'data: {"error":{"message":"server failed"}}\n\ndata: [DONE]\n\n'],
       }),
     );
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error.reason).toBe("server");
     expect(error.recoverable).toBe(true);
@@ -305,9 +290,7 @@ describe("requestCompletion streaming", () => {
       streamResponse({ chunks: [sseEvent("Hello"), "data: {broken-json\n\ndata: [DONE]\n\n"] }),
     );
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error.reason).toBe("bad_response");
   });
@@ -322,9 +305,7 @@ describe("requestCompletion streaming", () => {
       }),
     );
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error.reason).toBe("bad_response");
   });
@@ -397,21 +378,15 @@ describe("requestCompletion streaming", () => {
   test("rejects a stream that carries no text", async () => {
     const { fetch } = respondWith(async () => streamResponse({ chunks: ["data: [DONE]\n\n"] }));
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error.reason).toBe("bad_response");
   });
 
   test("treats a dropped stream as a recoverable network failure", async () => {
-    const { fetch } = respondWith(async () =>
-      streamResponse({ chunks: [sseEvent("Hel")], ending: "error" }),
-    );
+    const { fetch } = respondWith(async () => streamResponse({ chunks: [sseEvent("Hel")], ending: "error" }));
 
-    const error = await captureError(
-      requestCompletion(fetch, request, { onDelta: () => undefined }),
-    );
+    const error = await captureError(requestCompletion(fetch, request, { onDelta: () => undefined }));
 
     expect(error.reason).toBe("network");
     expect(error.recoverable).toBe(true);

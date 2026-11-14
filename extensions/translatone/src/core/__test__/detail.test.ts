@@ -13,8 +13,7 @@ import type { TranslationResult } from "../translate";
 
 describe("formatClipboardPreview", () => {
   test("renders remote images, HTML, and fence characters as literal clipboard text", () => {
-    const text =
-      '```\n![image](https://example.test/track)\n<img src="https://example.test/track">';
+    const text = '```\n![image](https://example.test/track)\n<img src="https://example.test/track">';
 
     expect(formatClipboardPreview(text)).toBe(
       `**Clipboard preview**\n\nPress ↵ to translate. Nothing is sent from this preview until you submit it.\n\n**Original · From clipboard**\n\n\`\`\`\`\n${text}\n\`\`\`\``,
@@ -128,9 +127,7 @@ describe("translationKey", () => {
   const pair = languagePair(DEFAULT_LANGUAGE, resolveLanguage("id", DEFAULT_LANGUAGE));
 
   test("is the same for the same text, target, and tone", () => {
-    expect(translationKey(" Halo ", pair, "email", [])).toBe(
-      translationKey("Halo", pair, "email", []),
-    );
+    expect(translationKey(" Halo ", pair, "email", [])).toBe(translationKey("Halo", pair, "email", []));
   });
 
   test.each([

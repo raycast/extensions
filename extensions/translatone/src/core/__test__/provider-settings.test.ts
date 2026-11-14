@@ -39,9 +39,7 @@ describe("managed providers", () => {
     const provider = createProvider({ ...draft, apiKey });
     expect(provider.enabled).toBe(false);
     expect(provider.apiKey).toBeUndefined();
-    expect(
-      activeProviders({ providers: [provider], primary: "groq", allowFallback: true }),
-    ).toEqual([]);
+    expect(activeProviders({ providers: [provider], primary: "groq", allowFallback: true })).toEqual([]);
   });
 
   test.each(["custom", "ollama"])("supports keyless %s", (id) => {
@@ -84,10 +82,7 @@ describe("managed providers", () => {
     const store = new MemoryStore();
     await saveProvider(store, createProvider(draft));
     await store.setItem("model:groq", "old-model");
-    await saveProvider(
-      store,
-      createProvider({ ...draft, model: "updated", apiKey: "replacement" }),
-    );
+    await saveProvider(store, createProvider({ ...draft, model: "updated", apiKey: "replacement" }));
     const edited = await loadProviderSettings(store);
     expect(edited.providers).toHaveLength(1);
     expect(edited.providers[0]?.model).toBe("updated");
@@ -145,18 +140,13 @@ describe("managed providers", () => {
   test("rejects invalid provider types and incomplete Custom settings", () => {
     expect(() => createProvider({ ...draft, id: "invalid" })).toThrow("provider type");
     expect(() => createProvider({ ...draft, id: "custom", model: "test" })).toThrow("Base URL");
-    expect(() =>
-      createProvider({ ...draft, id: "custom", baseUrl: "https://example.test/v1" }),
-    ).toThrow("Model");
+    expect(() => createProvider({ ...draft, id: "custom", baseUrl: "https://example.test/v1" })).toThrow("Model");
   });
 
   test("rejects duplicate saved connections instead of choosing one", async () => {
     const store = new MemoryStore();
     const provider = createProvider(draft);
-    await store.setItem(
-      "providers:v1",
-      JSON.stringify({ providers: [provider, provider], allowFallback: false }),
-    );
+    await store.setItem("providers:v1", JSON.stringify({ providers: [provider, provider], allowFallback: false }));
     expect(await rejectionOf(loadProviderSettings(store))).toMatchObject({
       name: "InvalidSettingsError",
     });
@@ -172,12 +162,10 @@ describe("managed providers", () => {
   });
 
   test("does not send connection tests without a required API key", async () => {
-    const { fetch, calls } = scriptedFetch(
-      new Map([["api.groq.com", async () => completionResponse("OK")]]),
-    );
-    expect(
-      await rejectionOf(testProviderConnection(fetch, createProvider({ ...draft, apiKey: "" }))),
-    ).toMatchObject({ message: expect.stringContaining("API key") });
+    const { fetch, calls } = scriptedFetch(new Map([["api.groq.com", async () => completionResponse("OK")]]));
+    expect(await rejectionOf(testProviderConnection(fetch, createProvider({ ...draft, apiKey: "" })))).toMatchObject({
+      message: expect.stringContaining("API key"),
+    });
     expect(calls).toHaveLength(0);
   });
 
@@ -205,9 +193,7 @@ describe("managed providers", () => {
 
   test("connection test uses only a synthetic prompt with the selected provider", async () => {
     const provider = createProvider(draft);
-    const { fetch, calls } = scriptedFetch(
-      new Map([["api.groq.com", async () => completionResponse("OK")]]),
-    );
+    const { fetch, calls } = scriptedFetch(new Map([["api.groq.com", async () => completionResponse("OK")]]));
     await testProviderConnection(fetch, provider);
     expect(calls).toHaveLength(1);
     expect(calls[0]?.init.body).toContain("Reply with OK");

@@ -10,11 +10,7 @@ export interface DiagnosticContext {
   readonly providers: readonly ProviderConfig[];
 }
 
-export function buildDebugReport(
-  error: unknown,
-  context: DiagnosticContext,
-  now = new Date(),
-): string {
+export function buildDebugReport(error: unknown, context: DiagnosticContext, now = new Date()): string {
   const report = {
     timestamp: now.toISOString(),
     command: context.command,
@@ -31,8 +27,7 @@ export function buildDebugReport(
   };
   return JSON.stringify(
     report,
-    (_key, value: unknown) =>
-      typeof value === "string" ? redactSensitiveText(value, context.providers) : value,
+    (_key, value: unknown) => (typeof value === "string" ? redactSensitiveText(value, context.providers) : value),
     2,
   );
 }
@@ -48,16 +43,11 @@ export function redactSensitiveText(text: string, providers: readonly ProviderCo
   const keys = providers
     .flatMap(({ apiKey }) => (apiKey ? [apiKey, encodeURIComponent(apiKey)] : []))
     .toSorted((left, right) => right.length - left.length);
-  return keys.reduce(
-    (redacted, key) => redacted.replaceAll(key, "[REDACTED]"),
-    withoutUrlCredentials,
-  );
+  return keys.reduce((redacted, key) => redacted.replaceAll(key, "[REDACTED]"), withoutUrlCredentials);
 }
 
 export function redactErrorCause(error: unknown, providers: readonly ProviderConfig[]): Error {
-  return new Error(
-    redactSensitiveText(error instanceof Error ? error.message : String(error), providers),
-  );
+  return new Error(redactSensitiveText(error instanceof Error ? error.message : String(error), providers));
 }
 
 function serializeError(error: unknown): unknown {

@@ -134,10 +134,7 @@ describe("model choices", () => {
 
     await saveModelChoice(store, "openai", "gpt-5");
 
-    expect(await applyModelChoices(store, [openai, groq])).toEqual([
-      { ...openai, model: "gpt-5" },
-      groq,
-    ]);
+    expect(await applyModelChoices(store, [openai, groq])).toEqual([{ ...openai, model: "gpt-5" }, groq]);
   });
 
   test("go back to the preference model once cleared", async () => {
