@@ -43,12 +43,13 @@ export function execBinary(
 
 export async function runAppleScript(
   script: string,
+  args: string[] = [],
   language: "AppleScript" | "JavaScript" = "AppleScript",
 ): Promise<string> {
   try {
     // Native packaging tools also import this module outside Raycast's runtime.
     const { runAppleScript: runRaycastAppleScript } = await import("@raycast/utils");
-    const stdout = await runRaycastAppleScript(script, {
+    const stdout = await runRaycastAppleScript(script, args, {
       language,
       timeout: OSA_TIMEOUT_MS,
       humanReadableOutput: true,

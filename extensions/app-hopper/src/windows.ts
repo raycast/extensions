@@ -60,16 +60,19 @@ export async function activateRunningApplication(pid: number): Promise<void> {
   await runAppleScript(
     `
       ObjC.import("AppKit");
-      var app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(${pid});
-      if (!app || app.terminated) throw new Error("Application is no longer running. Refresh the list.");
-      if (app.hidden) app.unhide;
-      app.activateWithOptions($.NSApplicationActivateIgnoringOtherApps);
-      var deadline = $.NSProcessInfo.processInfo.systemUptime + 1.5;
-      while (!app.active && $.NSProcessInfo.processInfo.systemUptime < deadline) {
-        $.NSRunLoop.currentRunLoop.runUntilDate($.NSDate.dateWithTimeIntervalSinceNow(0.03));
+      function run(argv) {
+        var app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(argv[0]));
+        if (!app || app.terminated) throw new Error("Application is no longer running. Refresh the list.");
+        if (app.hidden) app.unhide;
+        app.activateWithOptions($.NSApplicationActivateIgnoringOtherApps);
+        var deadline = $.NSProcessInfo.processInfo.systemUptime + 1.5;
+        while (!app.active && $.NSProcessInfo.processInfo.systemUptime < deadline) {
+          $.NSRunLoop.currentRunLoop.runUntilDate($.NSDate.dateWithTimeIntervalSinceNow(0.03));
+        }
+        if (!app.active) throw new Error("Application did not become focused. Try again.");
       }
-      if (!app.active) throw new Error("Application did not become focused. Try again.");
     `,
+    [String(pid)],
     "JavaScript",
   );
 }
@@ -119,8 +122,8 @@ export async function getRunningApplicationMetadata(pids: number[]): Promise<Rec
       }
     }
 
-    function run() {
-      var pids = ${JSON.stringify(validPids)};
+    function run(argv) {
+      var pids = argv.map(Number);
       var result = [];
 
       for (var i = 0; i < pids.length; i++) {
@@ -144,7 +147,7 @@ export async function getRunningApplicationMetadata(pids: number[]): Promise<Rec
     }
   `;
 
-  const stdout = await runAppleScript(script, "JavaScript");
+  const stdout = await runAppleScript(script, validPids.map(String), "JavaScript");
   const parsed: unknown = JSON.parse(stdout);
   if (!Array.isArray(parsed)) {
     throw new Error("Invalid application metadata response");
@@ -177,48 +180,52 @@ export async function queryAXWindows(pid: number): Promise<AXWindow[]> {
   }
 
   const script = `
-    tell application "System Events"
-      set targetProcess to first application process whose unix id is ${pid}
+    use scripting additions
+    on run argv
+      set targetPid to (item 1 of argv) as integer
+      tell application "System Events"
+        set targetProcess to first application process whose unix id is targetPid
 
-      tell targetProcess
-        set allWindows to every window
-        set outputText to ""
-        set hiddenFlag to ""
-        try
-          set hiddenFlag to ((not (visible of targetProcess)) as text)
-        end try
-
-        repeat with i from 1 to (count of allWindows)
-          set targetWindow to item i of allWindows
-          set windowRole to ""
-          set windowSubrole to ""
-          set windowTitle to ""
-          set minimizedFlag to ""
-
+        tell targetProcess
+          set allWindows to every window
+          set outputText to ""
+          set hiddenFlag to ""
           try
-            set windowRole to (role of targetWindow) as text
-          end try
-          try
-            set windowSubrole to (subrole of targetWindow) as text
-          end try
-          try
-            set windowTitle to (name of targetWindow) as text
-          end try
-          try
-            set minimizedFlag to ((value of attribute "AXMinimized" of targetWindow) as text)
+            set hiddenFlag to ((not (visible of targetProcess)) as text)
           end try
 
-          if windowRole is "AXWindow" then
-            set outputText to outputText & "v2" & (ASCII character 31) & (i as text) & (ASCII character 31) & windowSubrole & (ASCII character 31) & minimizedFlag & (ASCII character 31) & hiddenFlag & (ASCII character 31) & windowTitle & (ASCII character 30)
-          end if
-        end repeat
+          repeat with i from 1 to (count of allWindows)
+            set targetWindow to item i of allWindows
+            set windowRole to ""
+            set windowSubrole to ""
+            set windowTitle to ""
+            set minimizedFlag to ""
 
-        return outputText
+            try
+              set windowRole to (role of targetWindow) as text
+            end try
+            try
+              set windowSubrole to (subrole of targetWindow) as text
+            end try
+            try
+              set windowTitle to (name of targetWindow) as text
+            end try
+            try
+              set minimizedFlag to ((value of attribute "AXMinimized" of targetWindow) as text)
+            end try
+
+            if windowRole is "AXWindow" then
+              set outputText to outputText & "v2" & (ASCII character 31) & (i as text) & (ASCII character 31) & windowSubrole & (ASCII character 31) & minimizedFlag & (ASCII character 31) & hiddenFlag & (ASCII character 31) & windowTitle & (ASCII character 30)
+            end if
+          end repeat
+
+          return outputText
+        end tell
       end tell
-    end tell
+    end run
   `;
 
-  const stdout = await runAppleScript(script);
+  const stdout = await runAppleScript(script, [String(pid)]);
   if (!stdout) return [];
 
   const windows = stdout
@@ -288,34 +295,41 @@ export async function raiseAXWindow(target: AXWindow): Promise<void> {
   }
 
   const script = `
-    tell application "System Events"
-      set targetProcess to first application process whose unix id is ${target.pid}
-      tell targetProcess
-        set allWindows to every window
-        if (count of allWindows) < ${target.index} then
-          error "Window no longer exists"
-        end if
-
-        set matchingWindows to every window whose name is ${JSON.stringify(target.title)} and subrole is ${JSON.stringify(target.subrole)}
-        if (count of matchingWindows) is not 1 then
-          error "Window identity is ambiguous. Refresh the list."
-        end if
-        set targetWindow to item ${target.index} of allWindows
-        if (name of targetWindow) is not ${JSON.stringify(target.title)} or (subrole of targetWindow) is not ${JSON.stringify(target.subrole)} then
-          error "Window changed or closed. Refresh the list."
-        end if
-        try
-          if (value of attribute "AXMinimized" of targetWindow) is true then
-            set value of attribute "AXMinimized" of targetWindow to false
+    use scripting additions
+    on run argv
+      set targetPid to (item 1 of argv) as integer
+      set targetIndex to (item 2 of argv) as integer
+      set expectedTitle to item 3 of argv
+      set expectedSubrole to item 4 of argv
+      tell application "System Events"
+        set targetProcess to first application process whose unix id is targetPid
+        tell targetProcess
+          set allWindows to every window
+          if (count of allWindows) < targetIndex then
+            error "Window no longer exists"
           end if
-        end try
-        set frontmost to true
-        perform action "AXRaise" of targetWindow
+
+          set matchingWindows to every window whose name is expectedTitle and subrole is expectedSubrole
+          if (count of matchingWindows) is not 1 then
+            error "Window identity is ambiguous. Refresh the list."
+          end if
+          set targetWindow to item targetIndex of allWindows
+          if (name of targetWindow) is not expectedTitle or (subrole of targetWindow) is not expectedSubrole then
+            error "Window changed or closed. Refresh the list."
+          end if
+          try
+            if (value of attribute "AXMinimized" of targetWindow) is true then
+              set value of attribute "AXMinimized" of targetWindow to false
+            end if
+          end try
+          set frontmost to true
+          perform action "AXRaise" of targetWindow
+        end tell
       end tell
-    end tell
+    end run
   `;
 
-  await runAppleScript(script);
+  await runAppleScript(script, [String(target.pid), String(target.index), target.title, target.subrole]);
 }
 
 /**

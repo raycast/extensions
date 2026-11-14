@@ -89,6 +89,7 @@ export function BrowserTabsView({
           actions={
             <ActionPanel>
               <Action
+                icon={Icon.ArrowRight}
                 title="Switch to Tab"
                 onAction={() => {
                   if (currentWindow) return switchBrowserTab(browser, currentWindow, tab);
@@ -161,6 +162,7 @@ export function BrowserWindowsView({
   function tabsAction(window: BrowserWindow) {
     return (
       <Action.Push
+        icon={Icon.List}
         title="Show Tabs"
         target={
           <BrowserTabsView
@@ -181,7 +183,11 @@ export function BrowserWindowsView({
         {...getBrowserTabProps(browser, window, tab)}
         actions={
           <ActionPanel>
-            <Action title="Switch to Tab" onAction={() => switchBrowserTab(browser, window, tab)} />
+            <Action
+              icon={Icon.ArrowRight}
+              title="Switch to Tab"
+              onAction={() => switchBrowserTab(browser, window, tab)}
+            />
             {!singleWindow && tabsAction(window)}
             {renderRefreshAction()}
             {browser.engine === "firefox" && (
@@ -235,7 +241,7 @@ export function BrowserWindowsView({
       searchBarPlaceholder={
         singleWindow ? "Search tabs or URLs..." : `Search ${browser.appName} windows, tabs or URLs...`
       }
-      isLoading={isLoading && windows.length === 0}
+      isLoading={isLoading}
       filtering={false}
     >
       {renderContents()}

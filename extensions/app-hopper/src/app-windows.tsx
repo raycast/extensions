@@ -88,7 +88,7 @@ export function AppWindowsView({
             accessories={getWindowAccessories(window)}
             actions={
               <ActionPanel>
-                <Action title="Focus Window" onAction={() => onFocus(window, removeWindow)} />
+                <Action icon={Icon.AppWindow} title="Focus Window" onAction={() => onFocus(window, removeWindow)} />
                 <Action
                   title="Refresh List"
                   icon={Icon.Repeat}
@@ -178,7 +178,7 @@ export function AXWindowsView({
             accessories={getWindowAccessories(window)}
             actions={
               <ActionPanel>
-                <Action title="Focus Window" onAction={() => onFocus(window)} />
+                <Action icon={Icon.AppWindow} title="Focus Window" onAction={() => onFocus(window)} />
                 {refreshAction}
               </ActionPanel>
             }

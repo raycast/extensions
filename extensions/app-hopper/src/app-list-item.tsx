@@ -17,10 +17,11 @@ interface PrimaryActionProps {
 function AppPrimaryAction({ app, target, actions, searchText }: PrimaryActionProps) {
   switch (target.kind) {
     case "application":
-      return <Action title={target.title} onAction={() => actions.activateApp(app)} />;
+      return <Action icon={Icon.AppWindow} title={target.title} onAction={() => actions.activateApp(app)} />;
     case "browser":
       return (
         <Action.Push
+          icon={Icon.Globe}
           title="Show Browser Tabs and Windows"
           target={
             <BrowserWindowsView
@@ -32,10 +33,13 @@ function AppPrimaryAction({ app, target, actions, searchText }: PrimaryActionPro
         />
       );
     case "ax-window":
-      return <Action title="Focus Window" onAction={() => actions.focusAXWindow(target.window)} />;
+      return (
+        <Action icon={Icon.AppWindow} title="Focus Window" onAction={() => actions.focusAXWindow(target.window)} />
+      );
     case "ax-windows":
       return (
         <Action.Push
+          icon={Icon.AppWindowList}
           title="Show Windows"
           target={
             <AXWindowsView
@@ -51,6 +55,7 @@ function AppPrimaryAction({ app, target, actions, searchText }: PrimaryActionPro
     case "windows":
       return (
         <Action.Push
+          icon={Icon.AppWindowList}
           title="Show Windows"
           target={
             <AppWindowsView

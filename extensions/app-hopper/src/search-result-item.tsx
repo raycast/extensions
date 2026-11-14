@@ -53,11 +53,15 @@ function UnavailableResultItem({ row: { item }, actions, actionsEnabled }: Resul
 function ContentPrimaryAction({ result, actions }: { result: ContentResult; actions: WindowActions }) {
   if (result.kind === "tab")
     return (
-      <Action title="Switch to Tab" onAction={() => switchBrowserTab(result.browser, result.window, result.tab)} />
+      <Action
+        icon={Icon.ArrowRight}
+        title="Switch to Tab"
+        onAction={() => switchBrowserTab(result.browser, result.window, result.tab)}
+      />
     );
   if (result.kind === "ax-window")
-    return <Action title="Focus Window" onAction={() => actions.focusAXWindow(result.window)} />;
-  return <Action title="Focus Window" onAction={() => actions.focusWindow(result.window)} />;
+    return <Action icon={Icon.AppWindow} title="Focus Window" onAction={() => actions.focusAXWindow(result.window)} />;
+  return <Action icon={Icon.AppWindow} title="Focus Window" onAction={() => actions.focusWindow(result.window)} />;
 }
 
 function ContentNavigationActions({
@@ -78,6 +82,7 @@ function ContentNavigationActions({
       <>
         {window && (
           <Action.Push
+            icon={Icon.List}
             title="Show Tabs"
             target={
               <BrowserTabsView
@@ -89,6 +94,7 @@ function ContentNavigationActions({
           />
         )}
         <Action.Push
+          icon={Icon.Globe}
           title="Show Browser Tabs and Windows"
           target={
             <BrowserWindowsView
@@ -104,6 +110,7 @@ function ContentNavigationActions({
   if (result.kind === "ax-window")
     return (
       <Action.Push
+        icon={Icon.AppWindowList}
         title="Show Windows"
         target={
           <AXWindowsView
@@ -118,6 +125,7 @@ function ContentNavigationActions({
     );
   return (
     <Action.Push
+      icon={Icon.AppWindowList}
       title="Show Windows"
       target={
         <AppWindowsView
