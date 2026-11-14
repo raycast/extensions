@@ -1,5 +1,11 @@
 # Ship24 Package Tracker Changelog
 
+## [1.1.3] - {PR_MERGE_DATE}
+
+### Added
+- Windows support (ref: [Issue #33167](https://github.com/raycast/extensions/issues/33167))
+- Added more `Keyboard` shortcuts
+
 ## [1.1.2] - 2025-12-01
 
 ### Fixed

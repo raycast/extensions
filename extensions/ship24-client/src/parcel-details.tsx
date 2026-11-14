@@ -12,6 +12,7 @@ import {
   confirmAlert,
   Alert,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ParcelWithStatus } from "./parcel-service";
@@ -163,6 +164,7 @@ export function ParcelDetails({ parcel, onRefresh, onRemovePackage }: ParcelDeta
           <Action
             title="Copy Tracking Number"
             icon={Icon.Clipboard}
+            shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={async () => {
               await Clipboard.copy(parcel.trackingNumber);
               await showHUD("Tracking number copied to clipboard");
@@ -171,13 +173,14 @@ export function ParcelDetails({ parcel, onRefresh, onRemovePackage }: ParcelDeta
           <Action
             title="Track on Ship24 Website"
             icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.Open}
             onAction={() => open(`https://www.ship24.com/tracking?p=${parcel.trackingNumber}`)}
           />
           <Action
             title="Remove Package"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={handleRemove}
           />
         </ActionPanel>
