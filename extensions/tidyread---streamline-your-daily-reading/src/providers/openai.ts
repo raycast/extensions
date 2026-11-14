@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import nodeFetch, { RequestInit } from "node-fetch";
 import { Provider, ProviderOptions } from "../types";
 // import { sendMessageToChatGPT } from "../utils/gpt";
 
@@ -22,10 +23,18 @@ class OpenaiProvider extends Provider {
       this.available = false;
       this.client = null;
     } else {
+      const agent = options.httpProxy ? new HttpsProxyAgent(options.httpProxy) : undefined;
       this.client = new OpenAI({
         baseURL: options.apiHost ? `${options.apiHost.replace(/\/$/, "")}/v1` : undefined,
-        httpAgent: options.httpProxy ? new HttpsProxyAgent(options.httpProxy) : undefined,
         apiKey: options.apiKey,
+        // The SDK uses the global fetch, which ignores Node agents, so send proxied requests through node-fetch.
+        fetch: agent
+          ? (url, init) =>
+              nodeFetch(typeof url === "string" ? url : "url" in url ? url.url : url.href, {
+                ...init,
+                agent,
+              } as RequestInit) as unknown as Promise<Response>
+          : undefined,
       });
     }
   }

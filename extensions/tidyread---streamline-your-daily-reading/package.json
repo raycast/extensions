@@ -84,7 +84,7 @@
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.12",
-    "openai": "^4.24.2",
+    "openai": "^7.54.0",
     "ordinal": "^1.0.3",
     "p-limit": "^4.0.0",
     "query-string": "^8.1.0",
