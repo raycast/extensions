@@ -6,31 +6,44 @@ import {
   checkSysHostAccess,
   getContentFromUrl,
   getSysHostAccess,
+  getSysHostPermissionErrorMessage,
   getSysHostFileHash,
   writeSysHostFile,
 } from "./utils/file";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function Command() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
+  const [hasHostAccess, setHasHostAccess] = useState(checkSysHostAccess);
+  const operationInProgress = useRef(false);
 
-  if (!checkSysHostAccess()) {
+  if (!hasHostAccess) {
     return (
       <MenuBarExtra
         icon={{
           source: "switch.png",
           tintColor: Color.PrimaryText,
         }}
+        isLoading={isLoadingState}
       >
+        <MenuBarExtra.Item title="Enable hosts editing for your macOS account" />
+        <MenuBarExtra.Item title="Other apps running as your account will also have access" />
         <MenuBarExtra.Item
-          title="Get write system hosts permission"
+          title={isLoadingState ? "Waiting for macOS authorization…" : "Enable Hosts Access"}
           icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
           onAction={async () => {
+            if (operationInProgress.current) return;
+            operationInProgress.current = true;
+            updateLoadingState(true);
             try {
               await getSysHostAccess();
-              await showHUD("Write Permission got");
+              setHasHostAccess(true);
+              await showHUD("Hosts access enabled");
             } catch (error) {
-              await showHUD("Failed to get Write Permission");
+              await showHUD(getSysHostPermissionErrorMessage(error));
+            } finally {
+              operationInProgress.current = false;
+              updateLoadingState(false);
             }
           }}
         />
@@ -40,6 +53,8 @@ export default function Command() {
   const hostCommonsState = getHostCommonsCache();
 
   async function onToggleItemState(id: string) {
+    if (operationInProgress.current) return;
+    operationInProgress.current = true;
     updateLoadingState(true);
     try {
       let target = hostCommonsState.find((item) => item.id === id && !item.isFolder);
@@ -57,9 +72,8 @@ export default function Command() {
       }
       if (!target) return;
       target.state = target.state === State.Enable ? State.Disable : State.Enable;
-      await saveHostCommons(hostCommonsState);
       let hostContents = "# iHost\n";
-      hostCommonsState.forEach(async (item) => {
+      for (const item of hostCommonsState) {
         if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {
           item.content = await getContentFromUrl(item.url);
         }
@@ -74,13 +88,15 @@ export default function Command() {
             }
           });
         }
-      });
+      }
+      await saveHostCommons(hostCommonsState);
       await writeSysHostFile(hostContents);
       await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
       await showHUD("Host state toggled");
     } catch (error) {
       await showHUD("opps! Something was wrong");
     } finally {
+      operationInProgress.current = false;
       updateLoadingState(false);
     }
   }

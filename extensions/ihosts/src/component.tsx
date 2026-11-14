@@ -2,7 +2,6 @@ import {
   Detail,
   ActionPanel,
   Action,
-  popToRoot,
   List,
   Color,
   Icon,
@@ -11,38 +10,57 @@ import {
   confirmAlert,
   showInFinder,
   showHUD,
+  showToast,
+  Toast,
   Alert,
 } from "@raycast/api";
 import { BackupSystemHostName, HostFolderMode, HostInactiveByFolderTip, State, SystemHostFilePath } from "./const";
-import { exportHost, getContentFromFile, getContentFromUrl, getSysHostAccess } from "./utils/file";
-import { Fragment, useState } from "react";
+import { exportHost, getContentFromFile, getSysHostAccess, getSysHostPermissionErrorMessage } from "./utils/file";
+import { useState } from "react";
 import { Action$ } from "raycast-toolkit";
 import path from "node:path";
 
-export function SysHostPermRequest() {
+export function SysHostPermRequest(props: { onGranted: () => void }) {
+  const [isGranting, setIsGranting] = useState(false);
+  const [permissionError, setPermissionError] = useState<string>();
   const md = `
-  # Hey!👋 Welcome to use iHosts 🎉🎉🎉 \n
-  You're one step away from using it! Please type ↩️ and allow iHosts to write to the **${SystemHostFilePath}** file~\n
-  ![](sys-host-prem.png)
+  # Enable hosts editing
+
+  Choose **Enable Hosts Access** to open the macOS administrator authentication dialog.
+  Enter an administrator password in that system dialog to let your account edit **${SystemHostFilePath}**.
+
+  The file stays owned by root. Write access for other local users is removed, and your account receives a specific access grant.
+  Other apps running as your account can also edit this file. iHosts does not receive or store your password.
+
+  ${isGranting ? "**Waiting for macOS authorization…**" : ""}
+  ${permissionError ? `**${permissionError}**` : ""}
   `;
   return (
     <Detail
       markdown={md}
+      isLoading={isGranting}
       actions={
         <ActionPanel>
-          <Action
-            title="Get Write Permission"
-            icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
-            onAction={async () => {
-              try {
-                await getSysHostAccess();
-                await showHUD("Write Permission got");
-                await popToRoot();
-              } catch (error) {
-                await showHUD("Failed to get Write Permission");
-              }
-            }}
-          ></Action>
+          {!isGranting && (
+            <Action
+              title="Enable Hosts Access"
+              icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
+              onAction={async () => {
+                if (isGranting) return;
+                setIsGranting(true);
+                setPermissionError(undefined);
+                try {
+                  await getSysHostAccess();
+                  await showToast({ title: "Hosts access enabled", style: Toast.Style.Success });
+                  props.onGranted();
+                } catch (error) {
+                  setPermissionError(getSysHostPermissionErrorMessage(error));
+                } finally {
+                  setIsGranting(false);
+                }
+              }}
+            ></Action>
+          )}
         </ActionPanel>
       }
     ></Detail>

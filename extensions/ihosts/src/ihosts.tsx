@@ -26,13 +26,15 @@ export default function Command() {
   const [foldersState, updateFoldersState] = useState<IHostCommon[]>([]);
   const [filterIdState, updateFilterIdState] = useState<string>("-1");
   const [hostBackupState, updateHostBackupState] = useState<IHostCommon | undefined>();
-  if (!checkSysHostAccess()) {
-    return <SysHostPermRequest />;
-  }
+  const [hasHostAccess, setHasHostAccess] = useState(checkSysHostAccess);
 
   useEffect(() => {
-    init();
-  }, []);
+    if (hasHostAccess) init();
+  }, [hasHostAccess]);
+
+  if (!hasHostAccess) {
+    return <SysHostPermRequest onGranted={() => setHasHostAccess(true)} />;
+  }
 
   async function init() {
     updateLoadingState(true);
