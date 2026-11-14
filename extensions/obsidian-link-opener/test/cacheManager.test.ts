@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Cache } from "@raycast/api";
 import { CacheManager } from "../src/services/cacheManager";
 import { NoteWithUrl } from "../src/types";
+import * as path from "path";
 
 // Mock Raycast API
 vi.mock("@raycast/api", () => ({
@@ -132,6 +133,8 @@ describe("CacheManager", () => {
 
   describe("setCachedNotes", () => {
     it("should store notes in cache with correct structure", async () => {
+      // CacheManager keys files by path.join, which uses the platform separator
+      const notePath = path.join("/test/vault", "note1.md");
       const notes: NoteWithUrl[] = [
         {
           id: "note1-homepage",
@@ -147,7 +150,7 @@ describe("CacheManager", () => {
 
       const directoryMtimes = { "/test/vault": Date.now() };
       const fileStats = new Map([
-        ["/test/vault/note1.md", { size: 100, mtime: Date.now() }],
+        [notePath, { size: 100, mtime: Date.now() }],
       ]);
 
       await cacheManager.setCachedNotes(
@@ -164,8 +167,8 @@ describe("CacheManager", () => {
       const cached = JSON.parse(value);
       expect(cached.version).toBe(1);
       expect(cached.vaultPath).toBe("/test/vault");
-      expect(cached.files["/test/vault/note1.md"]).toBeDefined();
-      expect(cached.files["/test/vault/note1.md"].urls).toHaveLength(1);
+      expect(cached.files[notePath]).toBeDefined();
+      expect(cached.files[notePath].urls).toHaveLength(1);
     });
   });
 
