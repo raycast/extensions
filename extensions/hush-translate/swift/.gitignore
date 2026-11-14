@@ -1,0 +1,5 @@
+.DS_Store
+.build/
+.swiftpm/
+Package.resolved
+.raycast-swift-build/
