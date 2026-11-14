@@ -1,0 +1,313 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "talkremind",
+  "title": "TalkRemind",
+  "description": "Pause TalkRemind, manage the apps it ignores and read your dictation statistics from Raycast. Requires the TalkRemind menu bar app.",
+  "icon": "talkremind-icon-full.png",
+  "author": "IngoJ",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pause-until",
+      "title": "Pause Until",
+      "subtitle": "TalkRemind",
+      "description": "Pause TalkRemind for a while or until a time, or resume it. Type a time like 15:30 or a length like 45m.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-pause",
+      "title": "Toggle Pause",
+      "subtitle": "TalkRemind",
+      "description": "Pause TalkRemind, or resume it when it is paused. Handy for a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "pauseFor",
+          "type": "dropdown",
+          "title": "Pause For",
+          "description": "How long this command pauses TalkRemind.",
+          "default": "30",
+          "required": false,
+          "data": [
+            {
+              "title": "30 Minutes",
+              "value": "30"
+            },
+            {
+              "title": "1 Hour",
+              "value": "60"
+            },
+            {
+              "title": "2 Hours",
+              "value": "120"
+            },
+            {
+              "title": "Until This Evening",
+              "value": "evening"
+            },
+            {
+              "title": "Until Tomorrow Morning",
+              "value": "tomorrow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "excluded-apps",
+      "title": "Excluded Apps",
+      "subtitle": "TalkRemind",
+      "description": "See which apps TalkRemind ignores, and exclude or include any installed app.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-frontmost-app",
+      "title": "Exclude or Include Frontmost App",
+      "subtitle": "TalkRemind",
+      "description": "Exclude the app you are in from TalkRemind, or include it again.",
+      "mode": "no-view"
+    },
+    {
+      "name": "statistics",
+      "title": "Statistics",
+      "subtitle": "TalkRemind",
+      "description": "Your dictation share today, this week and over the last 7 days, time saved and the apps TalkRemind reminded you in.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeAfterApply",
+      "type": "checkbox",
+      "title": "Window",
+      "label": "Close Raycast after a change",
+      "description": "Off keeps the list open so you can keep adjusting.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test \"test/*.test.ts\""
+  },
+  "tools": [
+    {
+      "name": "get-status",
+      "title": "Get Status",
+      "description": "Read whether TalkRemind is paused and until when, which apps it ignores, and a short statistics summary (today, this week, time saved, reminders today). Use get-usage for any analysis of typing and dictation habits."
+    },
+    {
+      "name": "get-usage",
+      "title": "Get Usage",
+      "description": "Read how much the user typed and dictated over the last N days (1 = today, 7, 30, up to 90): totals, day by day, and for every app the typed words, dictated words, dictation share, typing runs, reminders shown and how many of them were followed."
+    },
+    {
+      "name": "pause",
+      "title": "Pause TalkRemind",
+      "description": "Pause TalkRemind's reminders for a number of minutes (up to 7 days), until this evening, until tomorrow morning, or until further notice."
+    },
+    {
+      "name": "resume",
+      "title": "Resume TalkRemind",
+      "description": "End a pause so TalkRemind reminds again."
+    },
+    {
+      "name": "set-app-excluded",
+      "title": "Exclude or Include App",
+      "description": "Exclude an app from TalkRemind (no reminders, left out of the statistics) or include it again. Takes the app's name or bundle identifier."
+    }
+  ],
+  "ai": {
+    "instructions": "TalkRemind is a Mac menu bar app that reminds people to dictate instead of typing long text. Use get-usage to answer questions about habits: which apps get the most typing or dictation, how a period compares with another (call it again with a different number of days), which apps TalkRemind reminded in and how often the reminder was followed. Typing data is kept for 30 days, so longer periods only show dictation. Typed words are an estimate from characters. Excluded apps are left out of every figure. When asked for advice, base it on the numbers: apps with many typed words and a low dictation share are the best candidates for dictating more; apps with many reminders and few followed ones may suit exclusion; apps that already have a high share need no advice. Name the app, the numbers and one concrete suggestion. Do not invent figures, and say so when there is too little data. Use get-status for the pause state and the excluded apps. Only pause, resume, exclude or include when the user asks for it. A pause of more than 7 days is not possible; 'until further notice' is.",
+    "evals": [
+      {
+        "input": "@talkremind how much did I dictate today?",
+        "mocks": {
+          "get-usage": {
+            "periodDays": 1,
+            "total": {
+              "dictatedWords": 180,
+              "typedWords": 110,
+              "dictationSharePercent": 62
+            },
+            "perDay": [
+              {
+                "date": "2026-10-24",
+                "typedWords": 110,
+                "dictatedWords": 180,
+                "dictationSharePercent": 62
+              }
+            ],
+            "apps": [
+              {
+                "app": "Mail",
+                "typedWords": 70,
+                "dictatedWords": 120,
+                "dictationSharePercent": 63,
+                "typingRuns": 4,
+                "reminders": 3,
+                "remindersFollowed": 2
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-usage",
+              "arguments": {
+                "days": 1
+              }
+            }
+          },
+          {
+            "includes": "62"
+          }
+        ]
+      },
+      {
+        "input": "@talkremind in which apps should I dictate more, based on the last 30 days?",
+        "mocks": {
+          "get-usage": {
+            "periodDays": 30,
+            "total": {
+              "dictatedWords": 5200,
+              "typedWords": 9100,
+              "dictationSharePercent": 36
+            },
+            "perDay": [],
+            "apps": [
+              {
+                "app": "Mail",
+                "typedWords": 3200,
+                "dictatedWords": 300,
+                "dictationSharePercent": 9,
+                "typingRuns": 80,
+                "reminders": 22,
+                "remindersFollowed": 2
+              },
+              {
+                "app": "Slack",
+                "typedWords": 2100,
+                "dictatedWords": 1500,
+                "dictationSharePercent": 42,
+                "typingRuns": 150,
+                "reminders": 10,
+                "remindersFollowed": 6
+              },
+              {
+                "app": "Notes",
+                "typedWords": 400,
+                "dictatedWords": 2800,
+                "dictationSharePercent": 88,
+                "typingRuns": 20,
+                "reminders": 1,
+                "remindersFollowed": 1
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-usage",
+              "arguments": {
+                "days": 30
+              }
+            }
+          },
+          {
+            "includes": "Mail"
+          }
+        ]
+      },
+      {
+        "input": "@talkremind pause TalkRemind for 45 minutes",
+        "mocks": {
+          "pause": "Paused until 15:30."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "pause",
+              "arguments": {
+                "minutes": 45
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@talkremind stop reminding me in Mail",
+        "mocks": {
+          "set-app-excluded": "Mail is now excluded."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "set-app-excluded",
+              "arguments": {
+                "app": {
+                  "includes": "Mail"
+                },
+                "excluded": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@talkremind is TalkRemind paused right now?",
+        "mocks": {
+          "get-status": {
+            "paused": true,
+            "pausedUntil": "2026-10-24T18:00:00.000Z",
+            "excludedApps": [],
+            "today": {
+              "dictatedWords": 0,
+              "typedWords": 0,
+              "dictationSharePercent": null
+            },
+            "week": {
+              "dictatedWords": 0,
+              "typedWords": 0,
+              "dictationSharePercent": null
+            },
+            "last7Days": [],
+            "timeSavedThisWeekMinutes": null,
+            "remindedToday": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-status"
+          },
+          {
+            "includes": "paused"
+          }
+        ]
+      }
+    ]
+  }
+}
