@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -22,15 +22,18 @@ const execFileAsync = promisify(execFile);
 
 const HOME = os.homedir();
 const BASE_DIR = path.join(HOME, "Library", "Application Support", "App Hider");
-// Spotlight skips any folder whose name ends in ".noindex" (a reliable per-folder exclusion,
-// unlike .metadata_never_index, which only applies at a volume root).
+// Spotlight skips any folder whose name ends in ".noindex".
 const HOLDING_DIR = path.join(BASE_DIR, "Hidden.noindex");
-// Folder used by version 1 of this extension; migrated automatically.
+// Folder used by the first version of this extension; migrated automatically.
 const LEGACY_HOLDING_DIR = path.join(BASE_DIR, "Hidden");
 const REGISTRY = path.join(HOLDING_DIR, "registry.json");
 const APP_ROOTS = ["/Applications", path.join(HOME, "Applications")];
 const LSREGISTER =
   "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
+/** First macOS version without Launchpad (Tahoe): replaced by the Apps view in Spotlight. */
+const FIRST_MACOS_WITHOUT_LAUNCHPAD = 26;
+/** Leaves time to type the administrator password. */
+const ADMIN_PROMPT_TIMEOUT_MS = 5 * 60 * 1000;
 
 type RegistryEntry = {
   name: string;
@@ -88,6 +91,11 @@ function errorMessage(error: unknown): string {
   return err instanceof Error ? err.message : String(error);
 }
 
+function isUserCancel(error: unknown): boolean {
+  const text = `${(error as Error)?.message ?? ""} ${(error as { stderr?: string })?.stderr ?? ""}`;
+  return text.includes("-128") || /user cancel/i.test(text);
+}
+
 async function appRoots(): Promise<string[]> {
   const roots: string[] = [];
   for (const root of APP_ROOTS) {
@@ -98,6 +106,54 @@ async function appRoots(): Promise<string[]> {
     }
   }
   return roots;
+}
+
+/**
+ * Runs operations that read, move and write the registry one at a time, so two
+ * actions can never overwrite each other's records.
+ */
+let operationQueue: Promise<unknown> = Promise.resolve();
+
+function serialized<T>(task: () => Promise<T>): Promise<T> {
+  const result = operationQueue.then(task, task);
+  operationQueue = result.catch(() => undefined);
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Path validation
+// ---------------------------------------------------------------------------
+
+/** The source of a restore must be a real app bundle directly inside the hidden folder. */
+async function assertHiddenBundle(hiddenPath: string): Promise<void> {
+  const holding = await fs.realpath(HOLDING_DIR);
+  const stat = await fs.lstat(hiddenPath);
+  if (!stat.isDirectory() || !hiddenPath.toLowerCase().endsWith(".app")) {
+    throw new Error(`Not an app bundle: ${hiddenPath}`);
+  }
+  if (path.dirname(await fs.realpath(hiddenPath)) !== holding) {
+    throw new Error(`Not inside the hidden folder: ${hiddenPath}`);
+  }
+}
+
+/**
+ * The destination of a restore must be an .app path directly inside /Applications or
+ * ~/Applications. registry.json is user-writable, so its paths are never trusted.
+ */
+async function assertRestoreDestination(destination: string): Promise<void> {
+  const invalid = new Error(`Restore destination is not inside an Applications folder: ${destination}`);
+  if (
+    !path.isAbsolute(destination) ||
+    path.normalize(destination) !== destination ||
+    !destination.toLowerCase().endsWith(".app") ||
+    !APP_ROOTS.includes(path.dirname(destination))
+  ) {
+    throw invalid;
+  }
+  await fs.mkdir(path.dirname(destination), { recursive: true });
+  if (!(await appRoots()).includes(await fs.realpath(path.dirname(destination)))) {
+    throw invalid;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -122,28 +178,48 @@ async function readRegistry(): Promise<Registry> {
 }
 
 async function writeRegistry(registry: Registry): Promise<void> {
-  // Write to a temp file and rename, so a crash never leaves a half-written registry.
-  const tmp = `${REGISTRY}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(registry, null, 2), { mode: 0o600 });
-  await fs.rename(tmp, REGISTRY);
+  // Write to a unique temp file and rename, so a crash never leaves a half-written registry.
+  const tmp = `${REGISTRY}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    await fs.writeFile(tmp, JSON.stringify(registry, null, 2), { mode: 0o600 });
+    await fs.rename(tmp, REGISTRY);
+  } catch (error) {
+    await fs.rm(tmp, { force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
-let legacyChecked = false;
+/**
+ * Points records at Hidden.noindex when their bundle was moved there by a migration.
+ * Runs on every scan, so an interrupted migration repairs itself.
+ */
+async function repairLegacyRecords(): Promise<void> {
+  const registry = await readRegistry();
+  let changed = false;
+  for (const entry of Object.values(registry)) {
+    if (!entry.hiddenPath.startsWith(LEGACY_HOLDING_DIR + path.sep)) continue;
+    const migrated = path.join(HOLDING_DIR, path.relative(LEGACY_HOLDING_DIR, entry.hiddenPath));
+    if ((await exists(entry.hiddenPath)) || !(await exists(migrated))) continue;
+    entry.hiddenPath = migrated;
+    changed = true;
+    await unregisterFromLaunchServices(migrated);
+  }
+  if (changed) await writeRegistry(registry);
+}
 
 async function migrateLegacyFolder(): Promise<void> {
-  if (legacyChecked) return;
-  legacyChecked = true;
-  if (!(await exists(LEGACY_HOLDING_DIR)) || (await exists(HOLDING_DIR))) return;
-
-  await fs.rename(LEGACY_HOLDING_DIR, HOLDING_DIR);
-  const registry = await readRegistry();
-  for (const entry of Object.values(registry)) {
-    if (entry.hiddenPath.startsWith(LEGACY_HOLDING_DIR + path.sep)) {
-      entry.hiddenPath = path.join(HOLDING_DIR, path.relative(LEGACY_HOLDING_DIR, entry.hiddenPath));
-      await unregisterFromLaunchServices(entry.hiddenPath);
+  if ((await exists(LEGACY_HOLDING_DIR)) && !(await exists(HOLDING_DIR))) {
+    await fs.rename(LEGACY_HOLDING_DIR, HOLDING_DIR);
+    try {
+      await repairLegacyRecords();
+    } catch (error) {
+      // Put the folder back so the old records stay valid.
+      await fs.rename(HOLDING_DIR, LEGACY_HOLDING_DIR).catch(() => undefined);
+      throw error;
     }
+    return;
   }
-  await writeRegistry(registry);
+  await repairLegacyRecords();
 }
 
 /** Creates the holding folder with its Spotlight exclusion BEFORE anything is moved into it. */
@@ -157,7 +233,7 @@ async function ensureHoldingDir(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// LaunchServices
+// LaunchServices & Launchpad
 // ---------------------------------------------------------------------------
 
 /** Removes the app from LaunchServices (Launchpad / Apps, "Open With"). Best effort. */
@@ -169,13 +245,6 @@ async function unregisterFromLaunchServices(appPath: string): Promise<void> {
 async function registerWithLaunchServices(appPath: string): Promise<void> {
   await execFileAsync(LSREGISTER, ["-f", appPath]).catch(() => undefined);
 }
-
-type ExtensionPreferences = {
-  resetLaunchpad?: boolean;
-};
-
-/** First macOS version without Launchpad (Tahoe): replaced by the "Apps" view in Spotlight. */
-const FIRST_MACOS_WITHOUT_LAUNCHPAD = 26;
 
 let cachedMacOSMajor: number | undefined;
 
@@ -205,7 +274,7 @@ async function hasClassicLaunchpad(): Promise<boolean> {
  * Makes the app launcher forget moved apps.
  * - macOS 15 and older: Launchpad keeps its own database, so reset it and restart the Dock.
  *   Side effect: Launchpad folders and icon order are reset.
- * - macOS 26 and newer: there is no Launchpad. The "Apps" view lives in Spotlight, so
+ * - macOS 26 and newer: there is no Launchpad. The Apps view lives in Spotlight, so
  *   restart Spotlight to drop its cached app list.
  */
 async function refreshAppLauncher(): Promise<void> {
@@ -220,8 +289,7 @@ async function refreshAppLauncher(): Promise<void> {
 
 /** Refreshes the app launcher after hide/restore if enabled in the extension preferences. Best effort. */
 async function refreshLaunchpadIfEnabled(): Promise<void> {
-  const { resetLaunchpad: enabled = true } = getPreferenceValues<ExtensionPreferences>();
-  if (!enabled) return;
+  if (!getPreferenceValues<Preferences>().resetLaunchpad) return;
   await refreshAppLauncher().catch(() => undefined);
 }
 
@@ -254,15 +322,12 @@ async function readBundleId(appPath: string): Promise<string | undefined> {
 async function quitApp(appPath: string, name: string): Promise<void> {
   const bundleId = await readBundleId(appPath);
   if (bundleId) {
-    await execFileAsync("/usr/bin/osascript", [
-      "-e",
-      "on run argv",
-      "-e",
-      "tell application id (item 1 of argv) to quit",
-      "-e",
-      "end run",
-      bundleId,
-    ]).catch(() => undefined);
+    await runAppleScript(
+      `on run argv
+  tell application id (item 1 of argv) to quit
+end run`,
+      [bundleId],
+    ).catch(() => undefined);
   }
   for (let i = 0; i < 40; i++) {
     if (!(await isRunning(appPath))) return;
@@ -290,6 +355,7 @@ async function ensureNotRunning(appPath: string, name: string): Promise<void> {
 /**
  * Renames src → dst (atomic on one volume). Root-owned bundles (e.g. App Store apps)
  * can't be moved by a normal user, so in that case offer to move with administrator rights.
+ * Callers must validate both paths first.
  */
 async function moveBundle(src: string, dst: string): Promise<void> {
   try {
@@ -308,25 +374,36 @@ async function moveBundle(src: string, dst: string): Promise<void> {
   if (!ok) throw new CancelledError();
 
   try {
-    await execFileAsync("/usr/bin/osascript", [
-      "-e",
-      "on run argv",
-      "-e",
-      'do shell script "/bin/mv -n " & quoted form of (item 1 of argv) & " " & quoted form of (item 2 of argv) with administrator privileges',
-      "-e",
-      "end run",
-      src,
-      dst,
-    ]);
+    await runAppleScript(
+      `on run argv
+  do shell script "/bin/mv -n " & quoted form of (item 1 of argv) & " " & quoted form of (item 2 of argv) with administrator privileges
+end run`,
+      [src, dst],
+      { timeout: ADMIN_PROMPT_TIMEOUT_MS },
+    );
   } catch (error) {
-    const stderr = String((error as { stderr?: string }).stderr ?? "");
-    if (stderr.includes("-128")) throw new CancelledError();
-    throw Object.assign(new Error(stderr.trim() || "Move failed"), { code: "EPERM" });
+    if (isUserCancel(error)) throw new CancelledError();
+    throw Object.assign(new Error(errorMessage(error)), { code: "EPERM" });
   }
 
   if (!(await exists(dst)) || (await exists(src))) {
     throw Object.assign(new Error("Move failed"), { code: "EPERM" });
   }
+}
+
+/**
+ * Moves a bundle back after a failed registry save. If that fails too, tells the user
+ * where the app is now and how to recover it by hand.
+ */
+async function rollbackMove(from: string, to: string, cause: unknown): Promise<never> {
+  try {
+    await moveBundle(from, to);
+  } catch {
+    throw new Error(
+      `${errorMessage(cause)} The app could not be moved back and is now at "${from}". Move it to "${to}" in Finder to recover it.`,
+    );
+  }
+  throw cause;
 }
 
 // ---------------------------------------------------------------------------
@@ -399,8 +476,7 @@ async function hideApp(app: AppItem): Promise<void> {
     await writeRegistry(registry);
   } catch (error) {
     // Without a registry record the app would be lost to the UI: put it back.
-    await moveBundle(hiddenPath, app.path).catch(() => undefined);
-    throw error;
+    await rollbackMove(hiddenPath, app.path, error);
   }
 
   await unregisterFromLaunchServices(app.path);
@@ -410,22 +486,25 @@ async function hideApp(app: AppItem): Promise<void> {
 
 async function restoreApp(app: AppItem): Promise<void> {
   const registry = await readRegistry();
-  const entry = Object.values(registry).find((x) => x.hiddenPath === app.path);
-  if (!entry) throw new Error("No restore record was found for this app.");
+  const key = Object.keys(registry).find((k) => registry[k].hiddenPath === app.path);
+  if (!key) throw new Error("No restore record was found for this app.");
+  const entry = registry[key];
+
+  // Validate both ends before anything is moved, and before any administrator prompt.
+  await assertHiddenBundle(entry.hiddenPath);
+  await assertRestoreDestination(entry.originalPath);
   if (await exists(entry.originalPath)) {
     throw new Error(`Restore destination already exists: ${entry.originalPath}`);
   }
 
   await ensureNotRunning(entry.hiddenPath, entry.name);
-  await fs.mkdir(path.dirname(entry.originalPath), { recursive: true });
   await moveBundle(entry.hiddenPath, entry.originalPath);
 
   try {
-    delete registry[entry.originalPath];
+    delete registry[key];
     await writeRegistry(registry);
   } catch (error) {
-    await moveBundle(entry.originalPath, entry.hiddenPath).catch(() => undefined);
-    throw error;
+    await rollbackMove(entry.originalPath, entry.hiddenPath, error);
   }
 
   await registerWithLaunchServices(entry.originalPath);
@@ -449,41 +528,50 @@ async function launchApp(app: AppItem): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export default function Command() {
-  const [apps, setApps] = useState<AppItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  async function reload() {
-    setLoading(true);
-    try {
-      setApps(await scanApps());
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could not scan apps", message: errorMessage(error) });
-    } finally {
-      setLoading(false);
-    }
-  }
+  const {
+    data: apps = [],
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(() => serialized(scanApps), [], {
+    onError: (err) => showFailureToast(err, { title: "Could not scan apps", message: errorMessage(err) }),
+  });
 
   async function run(progress: string, success: string, failure: string, task: () => Promise<void>) {
     const toast = await showToast({ style: Toast.Style.Animated, title: progress });
     try {
-      await task();
+      await serialized(task);
       toast.style = Toast.Style.Success;
       toast.title = success;
-      await reload();
-    } catch (error) {
-      if (error instanceof CancelledError) {
+    } catch (err) {
+      if (err instanceof CancelledError) {
         await toast.hide();
         return;
       }
       toast.style = Toast.Style.Failure;
       toast.title = failure;
-      toast.message = errorMessage(error);
+      toast.message = errorMessage(err);
+    } finally {
+      revalidate();
     }
   }
 
-  useEffect(() => {
-    void reload();
-  }, []);
+  if (error && !isLoading) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load apps"
+          description={errorMessage(error)}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   const hidden = apps.filter((a) => a.status === "hidden");
   const missing = apps.filter((a) => a.status === "missing");
@@ -521,12 +609,8 @@ export default function Command() {
                     try {
                       await launchApp(app);
                       await showToast({ style: Toast.Style.Success, title: `Opening ${app.name}` });
-                    } catch (error) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Could not launch app",
-                        message: errorMessage(error),
-                      });
+                    } catch (err) {
+                      await showFailureToast(err, { title: "Could not launch app", message: errorMessage(err) });
                     }
                   }}
                 />
@@ -605,7 +689,7 @@ export default function Command() {
               title="Refresh List"
               icon={Icon.ArrowClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={reload}
+              onAction={revalidate}
             />
           </ActionPanel>
         }
@@ -614,8 +698,8 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search apps…">
-      {!loading && apps.length === 0 ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Search apps…">
+      {!isLoading && apps.length === 0 ? (
         <List.EmptyView
           title="No apps found"
           description="No top-level apps were found in /Applications or ~/Applications."

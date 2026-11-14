@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/extension-icon.png" width="128" height="128" alt="App Hider icon">
+  <img src="media/extension-icon.png" width="128" height="128" alt="App Hider icon">
 </p>
 
 <h1 align="center">App Hider for Raycast</h1>
@@ -11,8 +11,6 @@
 <p align="center">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-11%2B-000000?logo=apple&logoColor=white">
   <img alt="Raycast" src="https://img.shields.io/badge/Raycast-extension-FF6363?logo=raycast&logoColor=white">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
 ---
@@ -35,8 +33,6 @@ App Hider moves selected `.app` bundles out of `/Applications` into a hidden, Sp
 - [How it works](#how-it-works)
 - [Limitations](#limitations)
 - [Recovery](#recovery)
-- [Development](#development)
-- [License](#license)
 
 ## Features
 
@@ -54,22 +50,6 @@ App Hider moves selected `.app` bundles out of `/Applications` into a hidden, Sp
 ### From the Raycast Store
 
 Open Raycast, run **Store**, search for **App Hider** and press <kbd>↵</kbd> to install.
-
-### From source
-
-**Requirements:** [Raycast](https://raycast.com) and [Node.js](https://nodejs.org) 22 or newer.
-
-```bash
-git clone https://github.com/LeonidAlekseev/app-hider-raycast.git
-cd app-hider-raycast
-npm install
-npm run dev
-```
-
-Wait for the build to finish. **Manage Hidden Apps** then appears in Raycast. You can stop `npm run dev` with <kbd>Ctrl</kbd>+<kbd>C</kbd>, and the extension stays installed.
-
-> [!NOTE]
-> Keep the folder where it is. Raycast runs the extension from it.
 
 ### Grant permission
 
@@ -149,18 +129,3 @@ Drag the app back to its original location. `registry.json` in the same folder l
 
 > [!TIP]
 > Upgrading from the first version? The old `Hidden` folder is renamed to `Hidden.noindex` automatically on first launch.
-
-## Development
-
-```bash
-npm run dev       # develop with hot reload
-npm run build     # production build into dist/
-npm run lint      # lint with Raycast rules
-npm run fix-lint  # auto-fix lint issues
-```
-
-All logic lives in [`src/manage-apps.tsx`](src/manage-apps.tsx). The icon source is [`media/extension-icon.svg`](media/extension-icon.svg); export it to `assets/extension-icon.png` at 512×512.
-
-## License
-
-[MIT](LICENSE)
