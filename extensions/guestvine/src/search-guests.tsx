@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { Appearance, Guest, getAppearances, searchGuests, setupUrl, withSource } from "./api";
 
@@ -10,10 +10,15 @@ export default function Command() {
   const query = searchText.trim();
   const ready = query.length >= 2;
 
-  const { data: guests, isLoading } = useCachedPromise((q: string) => searchGuests(q), [query], {
+  const {
+    data: guests,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise((q: string) => searchGuests(q), [query], {
     execute: ready,
     keepPreviousData: true,
-    onError: (error) => showFailureToast(error, { title: "Couldn't search GuestVine" }),
+    failureToastOptions: { title: "Couldn't search GuestVine" },
   });
 
   return (
@@ -29,6 +34,8 @@ export default function Command() {
           title="Follow People, Not Shows"
           description="Type a name to see the podcasts they've been a guest on"
         />
+      ) : error && !guests?.length ? (
+        <ErrorView title="Couldn't Search GuestVine" error={error} onRetry={revalidate} />
       ) : (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
@@ -52,8 +59,8 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push title="Show Appearances" icon={Icon.List} target={<AppearancesList guest={guest} />} />
-                <FollowAction guest={guest} />
                 <Action.OpenInBrowser title="Open GuestVine Page" url={withSource(guest.page_url)} />
+                <FollowAction guest={guest} shortcut />
                 <Action.CopyToClipboard
                   title="Copy GuestVine Link"
                   content={guest.page_url}
@@ -67,13 +74,32 @@ export default function Command() {
   );
 }
 
-function FollowAction({ guest }: { guest: Guest }) {
+/**
+ * Raycast only shows custom shortcuts from the third action on (the first two
+ * are ↵ and ⌘↵), so callers pass `shortcut` only when it lands there.
+ */
+function FollowAction({ guest, shortcut = false }: { guest: Guest; shortcut?: boolean }) {
   return (
     <Action.OpenInBrowser
       title="Get New Appearances in My Podcast App"
       icon={Icon.Bell}
       url={setupUrl(guest.page_url)}
-      shortcut={Keyboard.Shortcut.Common.New}
+      shortcut={shortcut ? Keyboard.Shortcut.Common.New : undefined}
+    />
+  );
+}
+
+function ErrorView({ title, error, onRetry }: { title: string; error: Error; onRetry: () => void }) {
+  return (
+    <List.EmptyView
+      icon={Icon.Warning}
+      title={title}
+      description={error.message}
+      actions={
+        <ActionPanel>
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -81,14 +107,14 @@ function FollowAction({ guest }: { guest: Guest }) {
 function AppearancesList({ guest }: { guest: Guest }) {
   const [showingDetail, setShowingDetail] = useState(false);
 
-  const { data, isLoading, pagination } = useCachedPromise(
+  const { data, isLoading, pagination, error, revalidate } = useCachedPromise(
     (name: string) =>
       async ({ page }: { page: number }) => {
         const result = await getAppearances(name, { limit: PAGE_SIZE, offset: page * PAGE_SIZE });
         return { data: result.appearances, hasMore: result.appearances.length === PAGE_SIZE };
       },
     [guest.name],
-    { onError: (error) => showFailureToast(error, { title: "Couldn't load appearances" }) },
+    { failureToastOptions: { title: "Couldn't load appearances" } },
   );
 
   return (
@@ -99,17 +125,21 @@ function AppearancesList({ guest }: { guest: Guest }) {
       navigationTitle={guest.name}
       searchBarPlaceholder={`Filter ${guest.name}'s appearances by show or episode…`}
     >
-      <List.EmptyView
-        icon={Icon.Microphone}
-        title="No Guest Appearances Yet"
-        description="New ones are picked up as they're published. Press ⌘N to get them in your podcast app."
-        actions={
-          <ActionPanel>
-            <FollowAction guest={guest} />
-            <Action.OpenInBrowser title="Open GuestVine Page" url={withSource(guest.page_url)} />
-          </ActionPanel>
-        }
-      />
+      {error && !data?.length ? (
+        <ErrorView title="Couldn't Load Appearances" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Microphone}
+          title="No Guest Appearances Yet"
+          description="New ones are picked up as they're published. Press ↵ to get them in your podcast app."
+          actions={
+            <ActionPanel>
+              <FollowAction guest={guest} />
+              <Action.OpenInBrowser title="Open GuestVine Page" url={withSource(guest.page_url)} />
+            </ActionPanel>
+          }
+        />
+      )}
       {(data ?? []).map((appearance, index) => (
         <List.Item
           key={`${index}-${appearance.audio_url ?? appearance.episode}`}
@@ -123,12 +153,12 @@ function AppearancesList({ guest }: { guest: Guest }) {
             <ActionPanel>
               <ActionPanel.Section>
                 {appearance.audio_url && <Action.OpenInBrowser title="Open Episode" url={appearance.audio_url} />}
-                <FollowAction guest={guest} />
                 <Action.OpenInBrowser
                   title="Open GuestVine Page"
                   url={withSource(guest.page_url)}
-                  shortcut={Keyboard.Shortcut.Common.Open}
+                  shortcut={appearance.audio_url ? undefined : Keyboard.Shortcut.Common.Open}
                 />
+                <FollowAction guest={guest} shortcut={Boolean(appearance.audio_url)} />
                 <Action
                   title={showingDetail ? "Hide Details" : "Show Details"}
                   icon={Icon.Sidebar}
@@ -147,7 +177,10 @@ function AppearancesList({ guest }: { guest: Guest }) {
                 <Action.CopyToClipboard
                   title="Copy GuestVine Link"
                   content={guest.page_url}
-                  shortcut={Keyboard.Shortcut.Common.CopyName}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "l" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+                  }}
                 />
               </ActionPanel.Section>
             </ActionPanel>

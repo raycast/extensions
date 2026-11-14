@@ -25,7 +25,6 @@
     {
       "name": "search-guests",
       "title": "Search Podcast Guests",
-      "subtitle": "GuestVine",
       "description": "Search for a person and list the podcast episodes they recently appeared on as a guest.",
       "mode": "view"
     }
