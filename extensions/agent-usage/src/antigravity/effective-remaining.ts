@@ -1,4 +1,4 @@
-import type { AntigravityQuotaGroup } from "./types";
+import type { AntigravityQuotaGroup } from "./types.ts";
 
 // Third-party model families the Antigravity subscription surfaces as their own
 // quota group. These are optional add-ons with separately-allocated pools; their

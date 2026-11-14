@@ -1,18 +1,18 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { setBrightness } from "./utils/platform";
+import { showBrightnessFeedback } from "./utils/feedback";
 
 export default async function Command() {
+  const { closeRaycast = true, showDisplayName = true } = getPreferenceValues<Preferences.MaxBrightness>();
   try {
     const result = await setBrightness(100);
     if (!result) return;
 
-    if (result.displayName && result.brightness != null) {
-      await showHUD(`🚀 ${result.displayName}: ${result.brightness}%`);
-    } else if (result.displayName) {
-      await showHUD(`🚀 ${result.displayName}: Brightness to the max!`);
-    } else {
-      await showHUD("🚀 Brightness to the max!");
-    }
+    const message =
+      showDisplayName && result.displayName && result.brightness != null
+        ? `🚀 ${result.displayName}: ${result.brightness}%`
+        : "🚀 Brightness to the maximum!";
+    await showBrightnessFeedback(message, closeRaycast);
   } catch (error) {
     console.error("Failed to set max brightness:", error);
     await showToast({

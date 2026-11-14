@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { basename } from "path";
+import { OpenFolderAction } from "./utils/open-folder";
 import { clearRecentFolders, getRecentFolders } from "./utils/storage";
 
 export default function Command() {
@@ -27,7 +28,7 @@ export default function Command() {
             subtitle={path}
             actions={
               <ActionPanel>
-                <Action.Open title="Open in Finder" target={path} />
+                <OpenFolderAction title="Open in Finder" path={path} />
                 <Action.ShowInFinder title="Show in Finder" path={path} />
                 <Action.CopyToClipboard title="Copy Path" content={path} shortcut={{ modifiers: ["cmd"], key: "c" }} />
                 <Action

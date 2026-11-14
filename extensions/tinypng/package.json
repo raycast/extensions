@@ -7,7 +7,8 @@
   "author": "kawamataryo",
   "contributors": [
     "j3lte",
-    "thuggyduck"
+    "thuggyduck",
+    "muhammadrizo"
   ],
   "categories": [
     "Developer Tools"
@@ -121,28 +122,45 @@
       "default": "./compressed-images"
     },
     {
+      "title": "Resizing Destination Folder Path",
+      "name": "resizeDestinationFolderPath",
+      "description": "Set Destination Folder path used by the Resizing command. Specify an absolute path or a relative path from the target file.",
+      "type": "textfield",
+      "required": true,
+      "default": "./resized-images"
+    },
+    {
       "title": "Options",
+      "name": "saveSingleFileNextToOriginal",
+      "label": "Save Single File Next to Original",
+      "description": "When saving a single image, write the result next to the original file with a suffix (e.g. \"-compressed\") added to its name, instead of using the Destination Folder Path.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "overwrite",
+      "label": "Overwrite Original Image File",
       "description": "Whether to overwrite the original image file.",
       "type": "checkbox",
-      "label": "Overwrite Original Image File",
       "default": false,
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0",
     "node-fetch": "^3.3.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.0.1",
-    "@types/react": "19.2.17",
-    "eslint": "^10.6.0",
-    "prettier": "^3.9.1",
+    "@types/node": "26.3.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -154,6 +172,10 @@
     "test": "vitest"
   },
   "platforms": [
-    "macOS"
-  ]
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
 }

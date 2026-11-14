@@ -29,7 +29,7 @@ export interface CreateLinkResponse {
   success: true;
   linkId: string;
   duplicate?: boolean;
-  link: Link;
+  link?: Link;
 }
 
 export interface UpdateLinksResponse {
@@ -41,14 +41,14 @@ export interface UpdateLinkResponse {
   success: true;
   message: string;
   linkId: string;
-  link: Link;
+  link?: Link;
 }
 
 export interface DeleteLinkResponse {
   success: true;
   message: string;
   linkId: string;
-  link: Link;
+  link?: Link;
 }
 
 export interface ErrorResponse {
@@ -62,4 +62,7 @@ export interface FetchLinksParams {
   read?: "all" | "read" | "unread";
   sort?: "newest" | "oldest";
   search?: string;
+  favorite?: boolean;
+  tag?: string;
+  since?: string;
 }

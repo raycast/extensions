@@ -1,0 +1,7 @@
+node_modules/
+.raycast/
+dist/
+dist-tests/
+build/
+*.log
+.DS_Store

@@ -1,12 +1,25 @@
 import { LocalStorage, Clipboard } from "@raycast/api";
 import * as PImage from "pureimage";
-import { mkdir } from "fs/promises";
+import { mkdir, readFile, copyFile, rm } from "fs/promises";
 import { createWriteStream } from "fs";
 import path from "path";
-import { readFile } from "fs/promises";
 import { Signature } from "../types";
 
 const SIGNATURES_KEY = "esignature_signatures";
+
+const SIGNATURES_DIR = path.join(
+  process.env.HOME!,
+  "Library/Application Support/raycast/signatures",
+);
+
+// Only ever delete images this extension owns — legacy records may still
+// point at the user's original upload outside the support directory.
+function isExtensionOwnedImage(imagePath: string): boolean {
+  const relative = path.relative(SIGNATURES_DIR, path.resolve(imagePath));
+  return (
+    relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative)
+  );
+}
 
 export async function getSignatures(): Promise<Signature[]> {
   try {
@@ -19,14 +32,25 @@ export async function getSignatures(): Promise<Signature[]> {
 }
 
 export async function saveSignature(
-  signature: Omit<Signature, "id">,
+  signature: Omit<Signature, "id"> & { id?: string },
 ): Promise<void> {
   try {
     const signatures = await getSignatures();
+
+    // An id that matches an existing record means this is an edit: replace it
+    // in place rather than pushing a duplicate record (and a duplicate image).
+    const existingIndex = signature.id
+      ? signatures.findIndex((s) => s.id === signature.id)
+      : -1;
+    const existing = existingIndex >= 0 ? signatures[existingIndex] : undefined;
+
     const newSignature: Signature = {
       ...signature,
-      id: generateId(),
+      id: existing?.id ?? generateId(),
     };
+
+    const outDir = SIGNATURES_DIR;
+    await mkdir(outDir, { recursive: true });
 
     //  render to PNG and convert to image type
     if (signature.type === "text" && signature.content) {
@@ -61,11 +85,6 @@ export async function saveSignature(
       ctx.textBaseline = "top";
       ctx.fillText(text, padding, padding);
 
-      const outDir = path.join(
-        process.env.HOME!,
-        "Library/Application Support/raycast/signatures",
-      );
-      await mkdir(outDir, { recursive: true });
       const outPath = path.join(outDir, `${newSignature.id}.png`);
       await new Promise<void>((resolve, reject) => {
         const stream = createWriteStream(outPath);
@@ -74,10 +93,41 @@ export async function saveSignature(
 
       newSignature.imagePath = outPath;
       newSignature.type = "image";
+    } else if (signature.type === "image" && signature.imagePath) {
+      // BUG FIX: Copy the uploaded image into the safe Raycast directory
+      const sourcePath = path.resolve(signature.imagePath);
+      const extension = path.extname(signature.imagePath) || ".png";
+      const outPath = path.join(outDir, `${newSignature.id}${extension}`);
+      // Editing without picking a new file leaves the source pointing at the
+      // copy we already own, so there is nothing to copy. (macOS tolerates a
+      // file being copied onto itself; not worth depending on.)
+      if (sourcePath !== outPath) {
+        await copyFile(signature.imagePath, outPath);
+      }
+      newSignature.imagePath = outPath;
     }
 
-    signatures.push(newSignature);
+    if (existingIndex >= 0) {
+      signatures[existingIndex] = newSignature;
+    } else {
+      signatures.push(newSignature);
+    }
     await LocalStorage.setItem(SIGNATURES_KEY, JSON.stringify(signatures));
+
+    // An edit can leave the previous image behind — a different upload, or a
+    // switch from image to text that renders to a different extension.
+    // Best-effort for the same reason as in deleteSignature.
+    if (
+      existing?.imagePath &&
+      existing.imagePath !== newSignature.imagePath &&
+      isExtensionOwnedImage(existing.imagePath)
+    ) {
+      try {
+        await rm(existing.imagePath, { force: true });
+      } catch (error) {
+        console.error("Failed to remove replaced signature image:", error);
+      }
+    }
   } catch (error) {
     console.error("Failed to save signature:", error);
     throw error;
@@ -89,6 +139,22 @@ export async function deleteSignature(id: string): Promise<void> {
     const signatures = await getSignatures();
     const filtered = signatures.filter((s) => s.id !== id);
     await LocalStorage.setItem(SIGNATURES_KEY, JSON.stringify(filtered));
+
+    // Remove the image this extension wrote, so deleted signature data does
+    // not linger on disk. Do this after the record is gone: an orphaned file
+    // is recoverable, a record pointing at a missing file is not.
+    //
+    // Best-effort on purpose. The record is already deleted, so the operation
+    // has succeeded from the caller's point of view; throwing here would skip
+    // the caller's list refresh and leave a deleted signature on screen.
+    const removed = signatures.find((s) => s.id === id);
+    if (removed?.imagePath && isExtensionOwnedImage(removed.imagePath)) {
+      try {
+        await rm(removed.imagePath, { force: true });
+      } catch (error) {
+        console.error("Failed to delete signature image:", error);
+      }
+    }
   } catch (error) {
     console.error("Failed to delete signature:", error);
     throw error;

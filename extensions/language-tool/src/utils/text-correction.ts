@@ -1,4 +1,4 @@
-import type { CheckTextResponse } from "../types";
+import type { AppliedCorrections, CheckTextResponse, Match } from "../types";
 
 /**
  * Extracts newline characters from the end of a string
@@ -48,9 +48,17 @@ function adjustReplacementForNewline(
 }
 
 /**
+ * Returns the replacement a match suggests by default
+ */
+export function defaultReplacement(match: Match): string {
+  return match.replacements[0]?.value || "";
+}
+
+/**
  * Applies a single correction to the text
  * @param text - The current text state
  * @param match - The match to apply
+ * @param chosenReplacement - The replacement selected for this match
  * @param offset - Current offset adjustment from previous corrections
  * @returns Object with updated text and new offset
  */
@@ -59,11 +67,11 @@ function applySingleCorrection(
   match: {
     offset: number;
     length: number;
-    replacements: Array<{ value?: string }>;
   },
+  chosenReplacement: string,
   offset: number,
 ): { updatedText: string; newOffset: number } {
-  let replacement = match.replacements[0]?.value || "";
+  let replacement = chosenReplacement;
   const start = match.offset + offset;
   const end = start + match.length;
 
@@ -87,31 +95,37 @@ function applySingleCorrection(
  *
  * @param textChecked - Original text
  * @param result - API response with matches
- * @param appliedIndexes - Set of indexes of suggestions to apply
+ * @param applied - Chosen replacement per match index
  * @returns Text with corrections applied
  */
 export function calculateCorrectedText(
   textChecked: string,
   result: CheckTextResponse,
-  appliedIndexes: Set<number>,
+  applied: AppliedCorrections,
 ): string {
-  if (!result.matches || appliedIndexes.size === 0) {
+  if (!result.matches || applied.size === 0) {
     return textChecked;
   }
 
-  // Filter and sort matches by offset (must apply in order)
-  const sortedMatches = result.matches
-    .filter((_, index) => appliedIndexes.has(index))
-    .sort((a, b) => a.offset - b.offset);
+  // Keep each match paired with its chosen replacement, sorted by offset
+  // (corrections must be applied in order for the running offset to hold)
+  const sortedCorrections = result.matches
+    .map((match, index) => ({ match, replacement: applied.get(index) }))
+    .filter(
+      (entry): entry is { match: Match; replacement: string } =>
+        entry.replacement !== undefined,
+    )
+    .sort((a, b) => a.match.offset - b.match.offset);
 
   // Apply each correction sequentially
   let text = textChecked;
   let offset = 0;
 
-  for (const match of sortedMatches) {
+  for (const { match, replacement } of sortedCorrections) {
     const { updatedText, newOffset } = applySingleCorrection(
       text,
       match,
+      replacement,
       offset,
     );
     text = updatedText;
@@ -122,7 +136,21 @@ export function calculateCorrectedText(
 }
 
 /**
- * Applies ALL corrections from an API response
+ * Every match paired with the replacement it suggests by default
+ */
+export function allDefaultCorrections(
+  result: CheckTextResponse,
+): AppliedCorrections {
+  return new Map(
+    (result.matches || []).map((match, index) => [
+      index,
+      defaultReplacement(match),
+    ]),
+  );
+}
+
+/**
+ * Applies ALL corrections from an API response, each with its first replacement
  *
  * @param textChecked - Original text
  * @param result - API response
@@ -136,8 +164,9 @@ export function applyAllCorrections(
     return textChecked;
   }
 
-  // Create set with all indexes
-  const allIndexes = new Set(result.matches.map((_, index) => index));
-
-  return calculateCorrectedText(textChecked, result, allIndexes);
+  return calculateCorrectedText(
+    textChecked,
+    result,
+    allDefaultCorrections(result),
+  );
 }

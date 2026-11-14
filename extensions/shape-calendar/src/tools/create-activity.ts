@@ -18,8 +18,11 @@ type Input = {
     | "swim"
     | "hike"
     | "yoga"
+    | "tennis"
+    | "skiing"
     | "nordicski"
     | "strength"
+    | "surf"
     | "other";
   /**
    * Optional description or notes

@@ -179,6 +179,7 @@ const importCSVData = async (data: string[][], importMethod: string) => {
           indices.menubarDisplay == -1
             ? undefined
             : (row[indices.menubarDisplay] as GroupDisplaySetting) || GroupDisplaySetting.USE_PARENT,
+        preferredBrowser: indices.preferredBrowser == undefined ? undefined : row[indices.preferredBrowser],
       };
     });
     await importJSONData({ groups: newGroups }, importMethod);

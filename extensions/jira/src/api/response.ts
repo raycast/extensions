@@ -1,18 +1,18 @@
 import { type Response } from "node-fetch";
 
-import { getRateLimitErrorMessage } from "../helpers/errors";
+import { getRateLimitErrorMessage } from "../helpers/errors.ts";
 
 const HTML_RESPONSE_ERROR_MESSAGE = "Jira returned an HTML page instead of JSON. Please reconnect Jira and try again.";
 const AUTH_ERROR_MESSAGE =
   "Your Jira session has expired or was revoked. Please reconnect Jira in Raycast extension preferences and try again.";
 
 export class JiraApiError extends Error {
-  constructor(
-    message: string,
-    readonly status?: number,
-  ) {
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
     super(message);
     this.name = "JiraApiError";
+    this.status = status;
   }
 }
 

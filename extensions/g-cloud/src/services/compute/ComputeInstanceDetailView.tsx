@@ -6,16 +6,28 @@ import {
   Toast,
   showToast,
   confirmAlert,
-  popToRoot,
   Alert,
   Detail,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
-import { ReactElement, useMemo, useCallback } from "react";
+import { ReactElement, useMemo, useCallback, useEffect, useState } from "react";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { maskIPIfEnabled, maskEmailIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
+import {
+  ComputeLifecycleAction,
+  getInstanceLifecycleActions,
+  getInstanceStatusPresentation,
+  getInstanceTip,
+  getLifecycleActionConfirmation,
+  getLifecycleActionFailureTitle,
+  getLifecycleActionProgressToast,
+  getLifecycleActionSuccessToast,
+  getOptimisticStatusForAction,
+} from "./instanceLifecycle";
 
 interface ComputeInstanceDetailViewProps {
   instance: ComputeInstance;
@@ -30,37 +42,31 @@ export default function ComputeInstanceDetailView({
   onRefresh,
   projectId,
 }: ComputeInstanceDetailViewProps): ReactElement {
-  const zone = service.formatZone(instance.zone);
-  const machineType = service.formatMachineType(instance.machineType);
+  const [currentInstance, setCurrentInstance] = useState(instance);
   const { isEnabled: isStreamerMode } = useStreamerMode();
+  const zone = service.formatZone(currentInstance.zone);
+  const machineType = service.formatMachineType(currentInstance.machineType);
+  const lifecycleActions = getInstanceLifecycleActions(currentInstance.status);
+
+  useEffect(() => {
+    setCurrentInstance(instance);
+  }, [instance]);
 
   // Memoize status info to avoid re-rendering
   const statusInfo = useMemo(() => {
-    const lowerStatus = instance.status.toLowerCase();
-    let icon = { source: Icon.Circle, tintColor: Color.SecondaryText };
-    let color: Color = Color.SecondaryText;
-
-    if (lowerStatus === "running") {
-      icon = { source: Icon.CircleFilled, tintColor: Color.Green };
-      color = Color.Green;
-    } else if (lowerStatus === "terminated" || lowerStatus === "stopped") {
-      icon = { source: Icon.CircleFilled, tintColor: Color.Red };
-      color = Color.Red;
-    } else if (lowerStatus === "stopping" || lowerStatus === "starting") {
-      icon = { source: Icon.CircleFilled, tintColor: Color.Orange };
-      color = Color.Orange;
-    }
+    const presentation = getInstanceStatusPresentation(currentInstance.status);
+    const icon = { source: presentation.icon, tintColor: presentation.color };
 
     return (
       <Detail.Metadata.TagList title="Status">
-        <Detail.Metadata.TagList.Item text={instance.status} icon={icon} color={color} />
+        <Detail.Metadata.TagList.Item text={presentation.text} icon={icon} color={presentation.color} />
       </Detail.Metadata.TagList>
     );
-  }, [instance.status]);
+  }, [currentInstance.status]);
 
   // Memoize network interfaces to prevent re-renders
   const networkInterfaces = useMemo(() => {
-    return instance.networkInterfaces.map((nic, index) => {
+    return currentInstance.networkInterfaces.map((nic, index) => {
       return (
         <Detail.Metadata.Label
           key={`network-${index}`}
@@ -70,11 +76,11 @@ export default function ComputeInstanceDetailView({
         />
       );
     });
-  }, [instance.networkInterfaces, isStreamerMode]);
+  }, [currentInstance.networkInterfaces, isStreamerMode]);
 
   // Memoize external IPs
   const externalIPs = useMemo(() => {
-    return instance.networkInterfaces.map((nic, index) => {
+    return currentInstance.networkInterfaces.map((nic, index) => {
       const externalIP = nic.accessConfigs?.find((config) => config.natIP)?.natIP;
       if (!externalIP) return null;
 
@@ -87,11 +93,11 @@ export default function ComputeInstanceDetailView({
         />
       );
     });
-  }, [instance.networkInterfaces, isStreamerMode]);
+  }, [currentInstance.networkInterfaces, isStreamerMode]);
 
   // Memoize disks information
   const disksInfo = useMemo(() => {
-    return instance.disks.map((disk, index) => (
+    return currentInstance.disks.map((disk, index) => (
       <Detail.Metadata.Label
         key={`disk-${index}`}
         title={disk.deviceName}
@@ -99,59 +105,59 @@ export default function ComputeInstanceDetailView({
         icon={disk.boot ? { source: Icon.HardDrive, tintColor: Color.Green } : { source: Icon.HardDrive }}
       />
     ));
-  }, [instance.disks]);
+  }, [currentInstance.disks]);
 
   // Memoize tags
   const tagsSection = useMemo(() => {
-    if (!instance.tags?.items || instance.tags.items.length === 0) return null;
+    if (!currentInstance.tags?.items || currentInstance.tags.items.length === 0) return null;
 
     return (
       <>
         <Detail.Metadata.Separator />
         <Detail.Metadata.TagList title="Tags">
-          {instance.tags.items.map((tag, index) => {
+          {currentInstance.tags.items.map((tag, index) => {
             const colors = [Color.Blue, Color.Green, Color.Orange, Color.Purple, Color.Red];
             return <Detail.Metadata.TagList.Item key={tag} text={tag} color={colors[index % colors.length]} />;
           })}
         </Detail.Metadata.TagList>
       </>
     );
-  }, [instance.tags?.items]);
+  }, [currentInstance.tags?.items]);
 
   // Memoize labels
   const labelsSection = useMemo(() => {
-    if (!instance.labels || Object.keys(instance.labels).length === 0) return null;
+    if (!currentInstance.labels || Object.keys(currentInstance.labels).length === 0) return null;
 
     return (
       <>
         <Detail.Metadata.Separator />
         <Detail.Metadata.Label title="Labels" icon={{ source: Icon.Tag }} />
-        {Object.entries(instance.labels).map(([key, value], index) => (
+        {Object.entries(currentInstance.labels).map(([key, value], index) => (
           <Detail.Metadata.Label key={`label-${index}`} title={key} text={value} />
         ))}
       </>
     );
-  }, [instance.labels]);
+  }, [currentInstance.labels]);
 
   // Memoize the generated markdown content
   const markdown = useMemo(() => {
-    let md = `# ${instance.name}\n\n`;
+    let md = `# ${currentInstance.name}\n\n`;
 
     // Show status as colored text with markdown
-    md += `**Status:** \`${instance.status}\`\n\n`;
+    md += `**Status:** \`${currentInstance.status}\`\n\n`;
 
     // Machine type and created info with improved formatting
-    md += `#### ${machineType} in ${zone} · Created ${new Date(instance.creationTimestamp).toLocaleString()}\n\n`;
+    md += `#### ${machineType} in ${zone} · Created ${new Date(currentInstance.creationTimestamp).toLocaleString()}\n\n`;
 
     // Add quick access section for IPs
     md += `### Network Summary\n\n`;
 
     // Create a table for networks
-    if (instance.networkInterfaces && instance.networkInterfaces.length > 0) {
+    if (currentInstance.networkInterfaces && currentInstance.networkInterfaces.length > 0) {
       md += "| Interface | Internal IP | External IP | Network |\n";
       md += "|-----------|-------------|------------|----------|\n";
 
-      instance.networkInterfaces.forEach((nic, index) => {
+      currentInstance.networkInterfaces.forEach((nic, index) => {
         const network = nic.network.split("/").pop() || "";
         const external = nic.accessConfigs?.find((config) => config.natIP)?.natIP || "-";
         const maskedInternal = maskIPIfEnabled(nic.networkIP, isStreamerMode);
@@ -165,11 +171,11 @@ export default function ComputeInstanceDetailView({
     // Add disks information in a table
     md += `### Storage\n\n`;
 
-    if (instance.disks && instance.disks.length > 0) {
+    if (currentInstance.disks && currentInstance.disks.length > 0) {
       md += "| Name | Type | Mode | Boot | Auto-delete |\n";
       md += "|------|------|---------|------|------------|\n";
 
-      instance.disks.forEach((disk) => {
+      currentInstance.disks.forEach((disk) => {
         md += `| ${disk.deviceName} | ${disk.type} | ${disk.mode} | ${disk.boot ? "Yes" : "No"} | ${disk.autoDelete ? "Yes" : "No"} |\n`;
       });
 
@@ -177,9 +183,9 @@ export default function ComputeInstanceDetailView({
     }
 
     // Service accounts section with better formatting - using no emojis
-    if (instance.serviceAccounts && instance.serviceAccounts.length > 0) {
+    if (currentInstance.serviceAccounts && currentInstance.serviceAccounts.length > 0) {
       md += `## Service Accounts\n\n`;
-      instance.serviceAccounts.forEach((sa) => {
+      currentInstance.serviceAccounts.forEach((sa) => {
         md += `### ${maskEmailIfEnabled(sa.email, isStreamerMode)}\n\n`;
         md += "| Scope | Description |\n";
         md += "|-------|-------------|\n";
@@ -202,24 +208,24 @@ export default function ComputeInstanceDetailView({
 
     // Tags and labels section
     if (
-      (instance.tags?.items && instance.tags.items.length > 0) ||
-      (instance.labels && Object.keys(instance.labels).length > 0)
+      (currentInstance.tags?.items && currentInstance.tags.items.length > 0) ||
+      (currentInstance.labels && Object.keys(currentInstance.labels).length > 0)
     ) {
       md += `## Tags & Labels\n\n`;
 
-      if (instance.tags?.items && instance.tags.items.length > 0) {
+      if (currentInstance.tags?.items && currentInstance.tags.items.length > 0) {
         md += `### Tags\n\n`;
-        instance.tags.items.forEach((tag) => {
+        currentInstance.tags.items.forEach((tag) => {
           md += `- \`${tag}\`\n`;
         });
         md += "\n";
       }
 
-      if (instance.labels && Object.keys(instance.labels).length > 0) {
+      if (currentInstance.labels && Object.keys(currentInstance.labels).length > 0) {
         md += `### Labels\n\n`;
         md += "| Key | Value |\n";
         md += "|-----|-------|\n";
-        Object.entries(instance.labels).forEach(([key, value]) => {
+        Object.entries(currentInstance.labels).forEach(([key, value]) => {
           md += `| \`${key}\` | \`${value}\` |\n`;
         });
         md += "\n";
@@ -228,120 +234,157 @@ export default function ComputeInstanceDetailView({
 
     // Add quick actions section at the bottom
     md += `---\n\n`;
-    md += `**Tip:** Press ⌘+R to refresh instance details • Press ⌘+S to ${instance.status.toLowerCase() === "running" ? "stop" : "start"} instance\n`;
+    md += `**Tip:** ${getInstanceTip(currentInstance.status)}\n`;
 
     return md;
-  }, [instance, machineType, zone, isStreamerMode]);
+  }, [currentInstance, machineType, zone, isStreamerMode]);
 
   // Create action handlers with useCallback
   const copyInstanceName = useCallback(() => {
-    Clipboard.copy(instance.name);
+    Clipboard.copy(currentInstance.name);
     showToast({
       style: Toast.Style.Success,
       title: "Copied to clipboard",
-      message: instance.name,
+      message: currentInstance.name,
     });
-  }, [instance.name]);
+  }, [currentInstance.name]);
 
   const copyExternalIP = useCallback(() => {
-    const externalIP = instance.networkInterfaces[0].accessConfigs?.[0].natIP || "";
+    const externalIP = currentInstance.networkInterfaces[0].accessConfigs?.[0].natIP || "";
     Clipboard.copy(externalIP);
     showToast({
       style: Toast.Style.Success,
       title: "External IP copied",
       message: externalIP,
     });
-  }, [instance.networkInterfaces]);
+  }, [currentInstance.networkInterfaces]);
 
   const copyInternalIP = useCallback(() => {
-    const internalIP = instance.networkInterfaces[0]?.networkIP;
+    const internalIP = currentInstance.networkInterfaces[0]?.networkIP;
     Clipboard.copy(internalIP);
     showToast({
       style: Toast.Style.Success,
       title: "Internal IP copied",
       message: internalIP,
     });
-  }, [instance.networkInterfaces]);
+  }, [currentInstance.networkInterfaces]);
 
-  const handleStartInstance = useCallback(async () => {
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Starting ${instance.name}...`,
-        message: `Zone: ${zone}`,
-      });
-
-      await service.startInstance(instance.name, zone);
-      loadingToast.hide();
-
-      showToast({
-        style: Toast.Style.Success,
-        title: `Started ${instance.name}`,
-        message: "The instance should be running soon",
-      });
-
-      await onRefresh();
-      popToRoot();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to Start ${instance.name}`,
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }, [instance.name, zone, service, onRefresh, projectId]);
-
-  const handleStopInstance = useCallback(async () => {
-    const shouldProceed = await confirmAlert({
-      title: `Stop ${instance.name}?`,
-      message: "This will stop the virtual machine. Are you sure?",
-      primaryAction: {
-        title: "Stop",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (!shouldProceed) return;
-
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Stopping ${instance.name}...`,
-        message: `Zone: ${zone}`,
-      });
-
-      const result = await service.stopInstance(instance.name, zone);
-      loadingToast.hide();
-
-      if (result.isTimedOut) {
-        showToast({
-          style: Toast.Style.Success,
-          title: `Stopping ${instance.name}`,
-          message: "The instance is in the process of stopping. This may take several minutes to complete.",
-        });
-      } else {
-        showToast({
-          style: Toast.Style.Success,
-          title: `Stopped ${instance.name}`,
-          message: "The instance has been stopped",
+  const refreshCurrentInstance = useCallback(
+    async (showRefreshToast = false) => {
+      let loadingToast: Promise<{ hide: () => void }> | undefined;
+      if (showRefreshToast) {
+        loadingToast = showToast({
+          style: Toast.Style.Animated,
+          title: "Refreshing instance details...",
+          message: currentInstance.name,
         });
       }
 
-      await onRefresh();
-      popToRoot();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to Stop ${instance.name}`,
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }, [instance.name, zone, service, onRefresh]);
+      try {
+        const latestInstance = await service.getInstance(currentInstance.name, zone, { forceRefresh: true });
+        if (latestInstance) {
+          setCurrentInstance(latestInstance);
+        }
+        await onRefresh();
+
+        if (showRefreshToast) {
+          (await loadingToast)?.hide();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Instance refreshed",
+            message: currentInstance.name,
+          });
+        }
+      } catch (error) {
+        if (showRefreshToast) {
+          (await loadingToast)?.hide();
+        }
+        throw error;
+      }
+    },
+    [currentInstance.name, onRefresh, service, zone],
+  );
+
+  const executeLifecycleAction = useCallback(
+    (action: ComputeLifecycleAction) => {
+      switch (action) {
+        case "start":
+          return service.startInstance(currentInstance.name, zone);
+        case "resume":
+          return service.resumeInstance(currentInstance.name, zone);
+        case "stop":
+          return service.stopInstance(currentInstance.name, zone);
+        case "suspend":
+          return service.suspendInstance(currentInstance.name, zone);
+        case "restart":
+          return service.restartInstance(currentInstance.name, zone);
+      }
+    },
+    [currentInstance.name, service, zone],
+  );
+
+  const handleLifecycleAction = useCallback(
+    async (action: ComputeLifecycleAction) => {
+      const confirmation = getLifecycleActionConfirmation(action, currentInstance.name);
+      if (confirmation) {
+        const shouldProceed = await confirmAlert({
+          title: confirmation.title,
+          message: confirmation.message,
+          primaryAction: {
+            title: confirmation.actionTitle,
+            style: confirmation.isDestructive ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
+          },
+        });
+
+        if (!shouldProceed) return;
+      }
+
+      const previousInstance = currentInstance;
+
+      try {
+        setCurrentInstance((existing) => ({ ...existing, status: getOptimisticStatusForAction(action) }));
+
+        const progressToast = getLifecycleActionProgressToast(action, currentInstance.name, zone);
+        const loadingToast = await showToast({
+          style: Toast.Style.Animated,
+          title: progressToast.title,
+          message: progressToast.message,
+        });
+
+        const result = await executeLifecycleAction(action);
+        if (result.instance) {
+          setCurrentInstance(result.instance);
+        } else {
+          await refreshCurrentInstance(false);
+        }
+
+        loadingToast.hide();
+
+        const successToast = getLifecycleActionSuccessToast(action, currentInstance.name, result.isTimedOut);
+        showToast({
+          style: Toast.Style.Success,
+          title: successToast.title,
+          message: successToast.message,
+        });
+
+        await onRefresh();
+      } catch (error) {
+        setCurrentInstance(previousInstance);
+        const friendly = friendlyErrorMessage(error, getLifecycleActionFailureTitle(action));
+        showToast({
+          style: Toast.Style.Failure,
+          title: friendly.title,
+          message: friendly.message,
+        });
+      }
+    },
+    [currentInstance, executeLifecycleAction, onRefresh, refreshCurrentInstance, zone],
+  );
 
   const copyConnectionCommand = useCallback(() => {
     const zoneName = zone.split("/").pop() || zone;
-    const projectName = projectId || instance.id?.split("/")?.[1] || "";
-    const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${projectName}"`;
+    const projectName = projectId || currentInstance.id?.split("/")?.[1] || "";
+    const command = `gcloud compute ssh --zone="${zoneName}" "${currentInstance.name}" --project="${projectName}"`;
 
     Clipboard.copy(command);
     showToast({
@@ -349,12 +392,12 @@ export default function ComputeInstanceDetailView({
       title: "Connection command copied",
       message: "Paste in your terminal to connect",
     });
-  }, [instance, zone, projectId]);
+  }, [currentInstance, zone, projectId]);
 
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={`Instance: ${instance.name}`}
+      navigationTitle={`Instance: ${currentInstance.name}`}
       metadata={
         <Detail.Metadata>
           {/* Status */}
@@ -365,10 +408,14 @@ export default function ComputeInstanceDetailView({
           {/* Basic Information */}
           <Detail.Metadata.Label title="Machine Type" text={machineType} icon={{ source: Icon.Desktop }} />
           <Detail.Metadata.Label title="Zone" text={zone} icon={{ source: Icon.Globe }} />
-          <Detail.Metadata.Label title="CPU Platform" text={instance.cpuPlatform} icon={{ source: Icon.Terminal }} />
+          <Detail.Metadata.Label
+            title="CPU Platform"
+            text={currentInstance.cpuPlatform}
+            icon={{ source: Icon.Terminal }}
+          />
           <Detail.Metadata.Label
             title="Created"
-            text={new Date(instance.creationTimestamp).toLocaleString()}
+            text={new Date(currentInstance.creationTimestamp).toLocaleString()}
             icon={{ source: Icon.Calendar }}
           />
 
@@ -398,24 +445,24 @@ export default function ComputeInstanceDetailView({
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={() => refreshCurrentInstance(true)}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
             <Action
               title="Copy Instance Name"
               icon={Icon.Clipboard}
               onAction={copyInstanceName}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
-            {instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP && (
+            {currentInstance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP && (
               <Action title="Copy External IP" icon={Icon.Globe} onAction={copyExternalIP} />
             )}
-            {instance.networkInterfaces?.[0]?.networkIP && (
+            {currentInstance.networkInterfaces?.[0]?.networkIP && (
               <Action title="Copy Internal IP" icon={Icon.Network} onAction={copyInternalIP} />
             )}
           </ActionPanel.Section>
 
-          {instance.status.toLowerCase() === "running" && (
+          {currentInstance.status.toLowerCase() === "running" && (
             <ActionPanel.Section title="Connection">
               <Action
                 title="Copy Connection Command"
@@ -427,23 +474,21 @@ export default function ComputeInstanceDetailView({
           )}
 
           <ActionPanel.Section title="Power Actions">
-            {instance.status.toLowerCase() === "running" ? (
+            {lifecycleActions.map((action, index) => (
               <Action
-                title="Stop Instance"
-                icon={{ source: Icon.Stop, tintColor: Color.Red }}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
-                onAction={handleStopInstance}
+                key={action.kind}
+                title={action.title}
+                icon={{ source: action.icon, tintColor: action.tintColor }}
+                shortcut={
+                  index === 0
+                    ? { modifiers: ["cmd"], key: "s" }
+                    : action.kind === "restart"
+                      ? { modifiers: ["cmd", "shift"], key: "r" }
+                      : { modifiers: ["cmd", "shift"], key: "s" }
+                }
+                onAction={() => handleLifecycleAction(action.kind)}
               />
-            ) : (
-              instance.status.toLowerCase() !== "starting" && (
-                <Action
-                  title="Start Instance"
-                  icon={{ source: Icon.Play, tintColor: Color.Green }}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
-                  onAction={handleStartInstance}
-                />
-              )
-            )}
+            ))}
           </ActionPanel.Section>
           <ActionPanel.Section title="Privacy">
             <StreamerModeAction />

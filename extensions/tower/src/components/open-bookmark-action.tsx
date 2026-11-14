@@ -1,5 +1,6 @@
 import { Action, getPreferenceValues, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
+import type { ReactElement } from "react";
 import Bookmark from "../dtos/bookmark-dto";
 import TowerPreferences from "../interfaces/tower-preferences";
 
@@ -7,7 +8,7 @@ type OpenBookMarkActionProps = {
   bookmark: Bookmark;
 };
 
-const OpenBookMarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): JSX.Element => (
+const OpenBookMarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): ReactElement => (
   <Action
     {...props}
     icon={Icon.Link}

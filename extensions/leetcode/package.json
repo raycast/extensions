@@ -97,10 +97,14 @@
       "description": "Select your preferred programming language",
       "type": "dropdown",
       "required": false,
-      "default": "python",
+      "default": "python3",
       "data": [
         {
-          "title": "Python",
+          "title": "Python3",
+          "value": "python3"
+        },
+        {
+          "title": "Python 2",
           "value": "python"
         },
         {
@@ -128,20 +132,48 @@
           "value": "csharp"
         },
         {
-          "title": "Ruby",
-          "value": "ruby"
+          "title": "Go",
+          "value": "golang"
         },
         {
-          "title": "Swift",
-          "value": "swift"
+          "title": "Rust",
+          "value": "rust"
         },
         {
           "title": "Kotlin",
           "value": "kotlin"
         },
         {
-          "title": "Go",
-          "value": "go"
+          "title": "Swift",
+          "value": "swift"
+        },
+        {
+          "title": "Ruby",
+          "value": "ruby"
+        },
+        {
+          "title": "PHP",
+          "value": "php"
+        },
+        {
+          "title": "Dart",
+          "value": "dart"
+        },
+        {
+          "title": "Scala",
+          "value": "scala"
+        },
+        {
+          "title": "Elixir",
+          "value": "elixir"
+        },
+        {
+          "title": "Erlang",
+          "value": "erlang"
+        },
+        {
+          "title": "Racket",
+          "value": "racket"
         }
       ]
     },
@@ -162,6 +194,15 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "showTopicTags",
+      "title": "Topic Tags",
+      "label": "Show topic tags in the problem preview",
+      "description": "If enabled, the problem's topic tags (e.g. Array, Hash Table) are shown in the problem preview. Off by default because tags can hint at the solution.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "platforms": [

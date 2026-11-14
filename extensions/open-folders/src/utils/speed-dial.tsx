@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Grid, open } from "@raycast/api";
 import { basename } from "path";
+import { OpenFolderAction, openFolder } from "./open-folder";
 
-export function SpeedDialGrid({ items }: { items: (string | undefined)[] }) {
+export function SpeedDialGrid({ items, folders }: { items: (string | undefined)[]; folders?: boolean }) {
   const entries = items
     .filter((item): item is string => item !== undefined && item !== "")
     .map((path, index) => ({ index, path, name: basename(path) }));
@@ -17,7 +18,10 @@ export function SpeedDialGrid({ items }: { items: (string | undefined)[] }) {
         const num = Number.parseInt(text, 10);
         if (num >= 1 && num <= entries.length) {
           const entry = entries[num - 1];
-          if (entry) open(entry.path);
+          if (entry) {
+            if (folders) openFolder(entry.path);
+            else open(entry.path);
+          }
         }
       }}
     >
@@ -28,7 +32,11 @@ export function SpeedDialGrid({ items }: { items: (string | undefined)[] }) {
           content={{ fileIcon: entry.path }}
           actions={
             <ActionPanel>
-              <Action.Open title={`Open ${entry.name}`} target={entry.path} />
+              {folders ? (
+                <OpenFolderAction title={`Open ${entry.name}`} path={entry.path} />
+              ) : (
+                <Action.Open title={`Open ${entry.name}`} target={entry.path} />
+              )}
               <Action.ShowInFinder title="Show in Finder" path={entry.path} />
               <Action.CopyToClipboard
                 title="Copy Path"

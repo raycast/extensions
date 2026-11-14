@@ -39,18 +39,18 @@ export default function CreateNewGroup({ app, didCreateNewGroup }: Props) {
               },
             },
           });
+          const json = await response.json();
+          const newGroup = betaGroupSchema.safeParse(json.data);
           setIsLoading(false);
+          // Reported only after the group came back and parsed — a toast fired before
+          // this point would claim success for a group the UI never received.
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Created group",
+            title: "Beta Group Created",
+            message: values.name,
           });
-          if (response && response.ok) {
-            const json = await response.json();
-            const newGroup = betaGroupSchema.safeParse(json.data);
-            if (newGroup.success) {
-              didCreateNewGroup(json.data);
-            }
+          if (newGroup.success) {
+            didCreateNewGroup(newGroup.data);
           }
         } catch (error) {
           setIsLoading(false);

@@ -1,14 +1,16 @@
-import { Action, ActionPanel, Clipboard, Form, Keyboard, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Keyboard, Toast, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { createPaste } from "./api";
-import { addToHistory } from "./history";
+import { createAndCopyPaste } from "./copy-paste";
+import { LANGUAGES } from "./languages";
 
 interface FormValues {
   content: string;
+  language: string;
 }
 
 export default function CreatePaste() {
   const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: { language: getPreferenceValues<Preferences>().language ?? "" },
     validation: {
       content: FormValidation.Required,
     },
@@ -19,17 +21,16 @@ export default function CreatePaste() {
       });
 
       try {
-        const result = await createPaste(values.content);
-        await Clipboard.copy(result.url);
-        await addToHistory({ url: result.url, content: values.content, partial: result.partial });
+        const result = await createAndCopyPaste(values.content, values.language);
 
-        toast.style = result.partial ? Toast.Style.Failure : Toast.Style.Success;
+        toast.style = result.partial || !result.historySaved ? Toast.Style.Failure : Toast.Style.Success;
         toast.title = result.partial ? "Paste partially uploaded" : "Paste created";
         toast.message = result.partial
           ? `Content exceeded the size limit. Partial URL copied: ${result.url}`
           : `URL copied: ${result.url}`;
+        if (!result.historySaved) toast.message += " Local history could not be saved.";
 
-        if (!result.partial) {
+        if (!result.partial && result.historySaved) {
           await popToRoot();
         }
       } catch (error) {
@@ -49,6 +50,11 @@ export default function CreatePaste() {
       }
     >
       <Form.TextArea title="Content" placeholder="Paste text, logs, Markdown, or code…" {...itemProps.content} />
+      <Form.Dropdown title="Language" {...itemProps.language}>
+        {LANGUAGES.map((language) => (
+          <Form.Dropdown.Item key={language.value} title={language.title} value={language.value} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

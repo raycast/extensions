@@ -1,6 +1,8 @@
-import { Action, ActionPanel, Icon, Grid } from "@raycast/api";
+import { Action, ActionPanel, Icon, Grid, Keyboard } from "@raycast/api";
 import { useState, useMemo } from "react";
+import type { InstanceState } from "@/lib/types/instance";
 import type { SeriesFull } from "@/lib/types/series";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { useSeries } from "@/lib/hooks/useSonarrAPI";
 import {
   formatSeriesTitle,
@@ -9,15 +11,18 @@ import {
   getSeriesStatus,
   formatOverview,
   formatFileSize,
-  getSonarrUrl,
+  getSearchPlaceholder,
 } from "@/lib/utils/formatting";
+import { InstanceActions } from "@/lib/components/InstanceActions";
 import { SeriesDetail } from "@/lib/components/SeriesDetail";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 type FilterStatus = "all" | "available" | "missing";
 
 export default function Command() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
-  const { data, isLoading, mutate } = useSeries();
+  const instanceState = useInstance();
+  const { data, isLoading, mutate } = useSeries(instanceState.instance);
 
   const filteredSeries = useMemo(() => {
     if (!data) return [];
@@ -33,11 +38,20 @@ export default function Command() {
       .sort((a, b) => a.sortTitle.localeCompare(b.sortTitle));
   }, [data, filterStatus]);
 
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
+
   return (
     <Grid
+      actions={instancePanel}
       columns={5}
-      searchBarPlaceholder="Search series..."
-      isLoading={isLoading}
+      searchBarPlaceholder={getSearchPlaceholder(instanceState)}
+      isLoading={isLoading || instanceState.isLoading}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Filter by Status"
@@ -55,17 +69,26 @@ export default function Command() {
           title="No Series Found"
           description={filterStatus === "all" ? "Your library is empty" : "No series match this filter"}
           icon={Icon.Video}
+          actions={instancePanel}
         />
       )}
       {filteredSeries.map((series) => (
-        <SeriesGridItem key={series.id} series={series} onRefresh={mutate} />
+        <SeriesGridItem key={series.id} series={series} onRefresh={mutate} instanceState={instanceState} />
       ))}
     </Grid>
   );
 }
 
-function SeriesGridItem({ series, onRefresh }: { series: SeriesFull; onRefresh: () => void }) {
-  const sonarrUrl = getSonarrUrl();
+function SeriesGridItem({
+  series,
+  onRefresh,
+  instanceState,
+}: {
+  series: SeriesFull;
+  onRefresh: () => void;
+  instanceState: InstanceState;
+}) {
+  const sonarrUrl = instanceState.instance?.url ?? "";
 
   const poster = getSeriesPoster(series.images);
 
@@ -155,14 +178,14 @@ function SeriesGridItem({ series, onRefresh }: { series: SeriesFull; onRefresh: 
               title="View Details"
               icon={Icon.Eye}
               target={<SeriesDetail content={content} />}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Shortcuts.viewDetails}
             />
             {series.path && (
               <Action.CopyToClipboard
                 title="Copy Path"
                 content={series.path}
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Shortcuts.copyPath}
               />
             )}
           </ActionPanel.Section>
@@ -172,9 +195,11 @@ function SeriesGridItem({ series, onRefresh }: { series: SeriesFull; onRefresh: 
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

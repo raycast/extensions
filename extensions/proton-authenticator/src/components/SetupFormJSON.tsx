@@ -54,10 +54,7 @@ export default function SetupFormJSON({ onAccountsLoaded }: SetupFormJSONProps) 
       />
       <Form.Description
         title="How to get your JSON file"
-        text={`1. Open Proton Authenticator app
-2. Go to Settings > Export
-3. Select "Plain text" and save the JSON file
-4. Select the exported JSON file in the extension`}
+        text={`In Proton Authenticator, go to Settings > Export, choose "Plain text" and save the file. Then select it above.`}
       />
       <Form.Description
         title="Note"

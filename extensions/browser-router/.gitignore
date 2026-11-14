@@ -1,0 +1,54 @@
+# Dependencies
+node_modules
+node_modules/
+/.pnp
+.pnp.js
+
+# Raycast dev & runtime artifacts
+dev.log
+cli.pid
+*.log
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# Built bundles (Raycast builds these from src/ upon publishing)
+*.js.map
+search-router.js
+browser-router.js
+browser-router.js.map
+search-router.js
+browser-router.js
+browser-router.js.map.map
+dist/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment & debug logs
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# Private ideas & feature roadmap
+IDEAS.md
+ROADMAP.md
+
+# Generated profile badges cache (runtime-generated per user)
+assets/profiles/
+

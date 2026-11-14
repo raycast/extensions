@@ -5,24 +5,51 @@ export type Currency = {
   name: string;
 };
 
+// The web app's hidden and added codes (`lib/currencies.ts`): retired or
+// non-cash codes the package still lists, and current ones it lacks. The
+// server rejects anything not in CURRENCIES
+const HIDDEN = new Set([
+  "BGN",
+  "HRK",
+  "LTL",
+  "LVL",
+  "EEK",
+  "CUC",
+  "MRO",
+  "SLL",
+  "STD",
+  "VEF",
+  "ANG",
+  "BOV",
+  "CHE",
+  "CHW",
+  "CLF",
+  "COU",
+  "MXV",
+  "UYI",
+  "USS",
+  "USN",
+]);
+
+const ADDED: Currency[] = [
+  { code: "MRU", name: "Mauritanian Ouguiya" },
+  { code: "SLE", name: "Sierra Leonean Leone" },
+  { code: "VES", name: "Venezuelan Bolívar" },
+  { code: "XCG", name: "Caribbean Guilder" },
+  { code: "ZWG", name: "Zimbabwe Gold" },
+];
+
 const NAME_OVERRIDES: Record<string, string> = {
   USD: "US Dollar",
   GBP: "British Pound",
 };
 
-// Mirrors the web app's `components/ui/currency-select.tsx`: keep currencies
-// that have a code, name and symbol, dedupe by code, tidy a couple of major
-// names, then sort by name so both clients show an identical list. The symbol
-// is only ever a filter here, never displayed, so it isn't kept.
-export const CURRENCIES: Currency[] = (() => {
-  const byCode = new Map<string, Currency>();
-
-  for (const { code, name, symbol } of allCurrencies.all) {
-    if (!code || !name || !symbol) continue;
-    byCode.set(code, { code, name: NAME_OVERRIDES[code] ?? name });
-  }
-
-  return [...byCode.values()].sort((a, b) => a.name.localeCompare(b.name));
-})();
-
-export const CURRENCY_CODES = new Set(CURRENCIES.map((c) => c.code));
+// Same rules as the web app's `lib/currencies.ts`: currencies with a code,
+// name and symbol, minus HIDDEN, plus ADDED, sorted by name. The symbol is only
+// a filter here, never displayed, so it isn't kept.
+export const CURRENCIES: Currency[] = [
+  ...allCurrencies.all
+    .filter(({ code, name, symbol }) => code && name && symbol && !HIDDEN.has(code))
+    .map(({ code, name }) => ({ code, name: NAME_OVERRIDES[code] ?? name })),
+  ...ADDED,
+].sort((a, b) => a.name.localeCompare(b.name));

@@ -1,13 +1,13 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 
+import { DocumentEntity } from "../../api/getDocuments";
 import { ProjectResult } from "../../api/getProjects";
 import { getInitiativeIcon } from "../../helpers/initiatives";
 import { getProjectIcon } from "../../helpers/projects";
 import { useDocuments } from "../../hooks/useDocuments";
 import { useInitiatives } from "../../hooks/useInitiatives";
 import useProjects from "../../hooks/useProjects";
-import { DocumentEntity } from "../../tools/get-documents";
 
 import { Document } from "./Document";
 

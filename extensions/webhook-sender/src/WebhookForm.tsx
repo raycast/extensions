@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, Toast, showToast, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { HttpMethod, KeyValueField, SavedWebhook, ValueType, WebhookRequest } from "./types";
 import { addHistory, saveWebhook } from "./storage";
@@ -170,6 +170,19 @@ export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName 
       return;
     }
 
+    if (bodyMode === "raw" && rawJson.trim()) {
+      try {
+        JSON.parse(rawJson);
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid JSON in body",
+          message: "Please check your raw JSON",
+        });
+        return;
+      }
+    }
+
     const webhook: SavedWebhook = {
       id: initialSavedId ?? generateId(),
       name: saveName.trim(),
@@ -204,22 +217,17 @@ export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName 
           <Action
             title="Save Webhook"
             icon={Icon.Bookmark}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={Keyboard.Shortcut.Common.Save}
             onAction={handleSave}
           />
           {bodyMode === "key-value" && hasBody && (
-            <Action
-              title="Add Field"
-              icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              onAction={addField}
-            />
+            <Action title="Add Field" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New} onAction={addField} />
           )}
           {bodyMode === "key-value" && hasBody && fields.length > 1 && (
             <Action
               title={fieldToRemove ? "Remove Selected Field" : "Remove Last Field"}
               icon={Icon.Minus}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               style={Action.Style.Destructive}
               onAction={handleRemoveSelected}
             />
@@ -269,7 +277,7 @@ export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName 
                   title="Remove Field"
                   value={fieldToRemove}
                   onChange={setFieldToRemove}
-                  info="Select a field then press ⌘⇧D to remove it"
+                  info="Select a field then press ⌃X (Ctrl+D on Windows) to remove it"
                 >
                   <Form.Dropdown.Item value="" title="— select field to remove —" />
                   {fields.map((f, idx) => (
@@ -283,7 +291,7 @@ export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName 
               )}
               <Form.Description
                 title=""
-                text={`⌘N  add field${fields.length > 1 ? "  ·  ⌘⇧D  remove selected field" : ""}`}
+                text={`⌘N  add field${fields.length > 1 ? "  ·  ⌃X  remove selected field" : ""}`}
               />
               {jsonPreview && <Form.Description title="JSON Preview" text={jsonPreview} />}
             </>

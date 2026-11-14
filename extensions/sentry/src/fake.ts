@@ -2,9 +2,9 @@ import { faker } from "@faker-js/faker";
 import { Project, Issue, Organization, User } from "./types";
 
 function fakeOrganization(): Organization {
-  const name = faker.company.companyName();
+  const name = faker.company.name();
   return {
-    id: faker.datatype.uuid(),
+    id: faker.string.uuid(),
     name: name,
     slug: faker.helpers.slugify(name),
   };
@@ -13,11 +13,11 @@ function fakeOrganization(): Organization {
 function fakeProject(organization: Organization): Project {
   const name = faker.hacker.noun();
   return {
-    id: faker.datatype.uuid(),
+    id: faker.string.uuid(),
     name: name,
     organization: organization,
     slug: faker.helpers.slugify(name),
-    color: faker.internet.color(),
+    color: faker.color.rgb(),
     dateCreated: faker.date.recent().toUTCString(),
   };
 }
@@ -25,22 +25,22 @@ function fakeProject(organization: Organization): Project {
 function fakeUser(): User {
   return {
     type: "user",
-    id: faker.datatype.uuid(),
+    id: faker.string.uuid(),
     email: faker.internet.email(),
-    name: faker.name.findName(),
+    name: faker.person.fullName(),
   };
 }
 
 function fakeIssue(project: Project): Issue {
   return {
-    id: faker.datatype.uuid(),
-    count: faker.datatype.number(),
+    id: faker.string.uuid(),
+    count: faker.number.int({ max: 99999 }),
     lastSeen: faker.date.recent().toUTCString(),
-    level: faker.helpers.randomize(["info", "warning", "error"]),
+    level: faker.helpers.arrayElement(["info", "warning", "error"]),
     permalink: faker.internet.url(),
     title: faker.hacker.phrase(),
-    shortId: faker.datatype.string(5),
-    userCount: faker.datatype.number(),
+    shortId: faker.string.sample(5),
+    userCount: faker.number.int({ max: 99999 }),
     project: project,
     assignedTo: fakeUser(),
     culprit: faker.hacker.phrase(),

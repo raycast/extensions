@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Detail, environment } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { join } from "path";
@@ -6,7 +7,7 @@ import { getVersion } from "./arc";
 
 const MINIMUM_ARC_VERSION = "0.85.0";
 
-export function VersionCheck(props: { children: JSX.Element }) {
+export function VersionCheck(props: { children: ReactElement }) {
   const { data, isLoading } = useCachedPromise(getVersion);
 
   if (isLoading && !data) {

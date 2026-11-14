@@ -5,9 +5,6 @@
   "description": "View diagnostic information about your network to help figure out why it's playing up.",
   "icon": "command-icon.png",
   "author": "hmarr",
-  "contributors": [
-    "3e9b"
-  ],
   "categories": [
     "System"
   ],
@@ -44,5 +41,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,7 +1,9 @@
 import { List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
-import { useState, ReactElement } from "react";
-import { HistoryListEntry } from "./components";
+import { ReactElement } from "react";
+import { looksLikeUrl } from "./actions";
+import { HistoryListEntry, NewTabEntry } from "./components";
+import { useEditUrlInSearch } from "./hooks/useEditUrlInSearch";
 import { GroupedEntries, HistoryEntry } from "./interfaces";
 
 const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
@@ -21,7 +23,7 @@ const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
     : new Map<string, HistoryEntry[]>();
 
 export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>();
+  const { searchText, setSearchText, selectedItemId, editUrlInSearch } = useEditUrlInSearch();
   const { isLoading, errorView, data } = useHistorySearch(searchText);
 
   if (errorView) {
@@ -32,11 +34,22 @@ export default function Command(): ReactElement {
   const groups = Array.from(groupedEntries.keys());
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>
+    <List
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      selectedItemId={selectedItemId}
+      isLoading={isLoading}
+      throttle={true}
+    >
+      {looksLikeUrl(searchText ?? "") ? (
+        <List.Section title="Open URL" key="open-url">
+          <NewTabEntry searchText={searchText} />
+        </List.Section>
+      ) : null}
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <HistoryListEntry entry={e} key={e.id} />
+            <HistoryListEntry entry={e} key={e.id} onEditUrl={editUrlInSearch} />
           ))}
         </List.Section>
       ))}

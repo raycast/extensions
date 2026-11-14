@@ -7,7 +7,7 @@ Search LeetCode problem, view LeetCode daily challenge and view LeetCode problem
 - [x] Search LeetCode problem
 - [x] View LeetCode daily challenge
 - [x] View LeetCode problem
-  - [ ] Add configuration to show/hide problem topic
+  - [x] Add configuration to show/hide problem topic
 - [ ] View LeetCode problem solution
 - [ ] View LeetCode problem discussion
 - [ ] Copy problem default code definition to clipboard/file

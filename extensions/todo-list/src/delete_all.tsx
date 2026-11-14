@@ -1,3 +1,4 @@
+import { shortcut } from "./shortcuts";
 import { useAtom } from "jotai";
 import { todoAtom } from "./atoms";
 import { DEFAULT_SECTIONS } from "./config";
@@ -24,7 +25,7 @@ const DeleteAllAction = () => {
           },
         });
       }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      shortcut={shortcut("d", ["cmd", "shift"])}
       style={Action.Style.Destructive}
       title="Delete All Todos"
     />

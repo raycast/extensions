@@ -13,7 +13,7 @@ interface IncidentFormValues {
 }
 
 export function IncidentForm() {
-  const { requesterEmail } = getPreferenceValues<Preferences>();
+  const { requesterEmail, teamId } = getPreferenceValues<Preferences>();
   const [summaryError, setSummaryError] = useState<Optional<string>>(undefined);
 
   async function handleSubmit(values: IncidentFormValues) {
@@ -28,6 +28,7 @@ export function IncidentForm() {
         summary: values.summary.trim(),
         description: values.description.trim() || undefined,
         requesterEmail: values.requesterEmail.trim() || undefined,
+        teamId: teamId?.trim() || undefined,
         email: values.email,
         sms: values.sms,
         call: values.call,

@@ -72,5 +72,18 @@ describe("file", () => {
       expect(resultFiles.map((f) => path.basename(f))).not.toContain("file5.txt");
       expect(resultFiles.map((f) => path.basename(f))).not.toContain("file6.js");
     });
+
+    // A literal backslash can't be part of a file name on Windows, where it separates path segments.
+    it.skipIf(process.platform === "win32")("should keep backslashes in file names", async () => {
+      fs.writeFileSync(path.join(testDir, "subdir1", "Bad\\ note.md"), "content");
+
+      const resultFiles = await getFilePaths({
+        path: testDir,
+        includedFileExtensions: [".md"],
+      });
+
+      expect(resultFiles).toContain(path.join(testDir, "subdir1", "Bad\\ note.md"));
+      resultFiles.forEach((f) => expect(fs.existsSync(f)).toBe(true));
+    });
   });
 });

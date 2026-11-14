@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { DUPLICATES_DIR, REVIEW_DIR } from "./config.js";
+import { DUPLICATES_DIR, REVIEW_DIR, TIDY_DIR } from "./config.js";
 import { classify, subClassify } from "./scan.js";
 import { resolveDateBucket } from "./date.js";
 
@@ -123,14 +123,23 @@ function reserve(target, reserved) {
 /** The target itself if it's free, otherwise the first free "name (n).ext". */
 function reserveTarget(target, reserved) {
   const isFree = (candidate) => !reserved.has(reserveKey(candidate)) && !fs.existsSync(candidate);
-  if (isFree(target)) return reserve(target, reserved);
+  return reserve(firstFreeName(target, isFree), reserved);
+}
 
+/**
+ * The first name satisfying `isFree`: the target itself, or "name (n).ext"
+ * with the lowest free n. Planning and execution both resolve collisions
+ * through here, so the suffix format shown in the preview and the one written
+ * to disk can never drift apart.
+ */
+export function firstFreeName(target, isFree) {
+  if (isFree(target)) return target;
   const dir = path.dirname(target);
   const ext = path.extname(target);
   const base = path.basename(target, ext);
   for (let i = 1; ; i++) {
     const candidate = path.join(dir, `${base} (${i})${ext}`);
-    if (isFree(candidate)) return reserve(candidate, reserved);
+    if (isFree(candidate)) return candidate;
   }
 }
 
@@ -149,7 +158,7 @@ function validSegment(segment, label) {
     segment.includes("/") ||
     segment.includes("\\") ||
     path.basename(segment) !== segment ||
-    normalized === ".tidy" ||
+    normalized === TIDY_DIR ||
     // Control and format characters: a NUL makes every fs call throw a raw
     // TypeError halfway through executing the plan, and a bidi override makes
     // the folder name render as something other than what it is. Letters,

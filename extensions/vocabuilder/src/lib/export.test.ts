@@ -48,17 +48,69 @@ describe("formatJson", () => {
 });
 
 describe("formatAnki", () => {
-  it("includes header and word entries only", () => {
+  it("emits Basic-compatible directives and word entries only", () => {
     const result = formatAnki([word1, text1, word2]);
     const lines = result.split("\n");
     expect(lines[0]).toBe("#separator:Tab");
-    expect(lines[1]).toBe("#columns:Word\tTranslation\tPart of Speech\tExample\tExample Translation");
-    expect(lines[2]).toBe("apple\tяблуко\tnoun\tI ate an apple.\tЯ з'їв яблуко.");
-    expect(lines[3]).toBe("run\tбігти\tverb\tI run every day.\tЯ бігаю щодня.");
-    expect(lines[4]).toBe("");
-    expect(lines).toHaveLength(5);
+    expect(lines[1]).toBe("#html:true");
+    expect(lines[2]).toBe("#notetype:Basic");
+    expect(lines[3]).toBe("#columns:Front\tBack");
+    expect(lines[4]).toBe(
+      'apple\t<div style="font-size:1.3em"><b>яблуко</b> <i style="opacity:.6">(noun)</i></div><hr><div>I ate an apple.</div><div style="opacity:.7">Я з\'їв яблуко.</div>',
+    );
+    expect(lines[5]).toBe(
+      'run\t<div style="font-size:1.3em"><b>бігти</b> <i style="opacity:.6">(verb)</i></div><hr><div>I run every day.</div><div style="opacity:.7">Я бігаю щодня.</div>',
+    );
+    expect(lines[6]).toBe("");
+    expect(lines).toHaveLength(7);
   });
 
+  it("has 2 tab-separated columns per data row", () => {
+    const result = formatAnki([word1]);
+    const dataLines = result.split("\n").filter((l) => !l.startsWith("#") && l.length > 0);
+    for (const line of dataLines) {
+      expect(line.split("\t")).toHaveLength(2);
+    }
+  });
+
+  it("omits example block when both example fields are empty", () => {
+    const noExample: Translation = {
+      ...word1,
+      example: "",
+      exampleTranslation: "",
+    };
+    const result = formatAnki([noExample]);
+    const dataLines = result.split("\n").filter((l) => !l.startsWith("#") && l.length > 0);
+    expect(dataLines[0]).toBe(
+      'apple\t<div style="font-size:1.3em"><b>яблуко</b> <i style="opacity:.6">(noun)</i></div>',
+    );
+    expect(dataLines[0]).not.toContain("<hr>");
+  });
+
+  it("omits POS markup when partOfSpeech is empty", () => {
+    const noPos: Translation = { ...word1, partOfSpeech: "" };
+    const result = formatAnki([noPos]);
+    const dataLines = result.split("\n").filter((l) => !l.startsWith("#") && l.length > 0);
+    expect(dataLines[0]).not.toContain("<i");
+    expect(dataLines[0]).toContain("<b>яблуко</b></div>");
+  });
+
+  it("escapes HTML special characters in user content", () => {
+    const hostile: Translation = {
+      ...word1,
+      word: "R&B",
+      translation: "<script>alert(1)</script>",
+      example: "a < b && b > c",
+      exampleTranslation: "",
+      partOfSpeech: "",
+    };
+    const result = formatAnki([hostile]);
+    const dataLines = result.split("\n").filter((l) => !l.startsWith("#") && l.length > 0);
+    expect(dataLines[0]).toContain("R&amp;B");
+    expect(dataLines[0]).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(dataLines[0]).toContain("a &lt; b &amp;&amp; b &gt; c");
+    expect(dataLines[0]).not.toMatch(/<script>/);
+  });
   it("returns empty string when no words", () => {
     expect(formatAnki([text1])).toBe("");
     expect(formatAnki([])).toBe("");
@@ -74,7 +126,7 @@ describe("formatAnki", () => {
     const result = formatAnki([dirty]);
     const dataLines = result.split("\n").filter((l) => !l.startsWith("#") && l.length > 0);
     expect(dataLines).toHaveLength(1);
-    expect(dataLines[0].split("\t")).toHaveLength(5);
+    expect(dataLines[0].split("\t")).toHaveLength(2);
     expect(dataLines[0]).not.toMatch(/[\n\r]/);
   });
 });

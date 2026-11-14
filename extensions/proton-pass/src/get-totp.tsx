@@ -1,17 +1,74 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, Color, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import { listItems, getTotp, checkAuth } from "./lib/pass-cli";
-import { Item, PassCliError, PassCliErrorType } from "./lib/types";
-import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
-import { getCachedItems, setCachedItems } from "./lib/cache";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Color,
+  Icon,
+  showToast,
+  Toast,
+  Clipboard,
+  getPreferenceValues,
+  Keyboard,
+} from "@raycast/api";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useFrecencySorting } from "@raycast/utils";
+import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
+import { Item, PassCliError, PassCliErrorType, Vault } from "./lib/types";
+import {
+  getTotpRemainingSeconds,
+  formatTotpCode,
+  hiddenTotpCode,
+  TOTP_ICON,
+  totpProgressIcon,
+  totpTimerColor,
+} from "./lib/utils";
+import { itemKey, monospace } from "./lib/format";
+import { getListIcon } from "./lib/item-icon";
+import { platformShortcut } from "./lib/shortcuts";
+import { SortByMenu, compareNames, preferredSortOrder, sortItems } from "./lib/sort";
+import { ALL_VAULTS_VALUE, VaultDropdown } from "./lib/vault-dropdown";
+import { countItemsByVault } from "./lib/item-counts";
+import { listedUnder, SHARED_WITH_ME } from "./lib/shared-items";
+import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
+  currentTotpTimeStep?: number;
 }
 
 function getTotpTimeStep(): number {
   return Math.floor(Date.now() / 30_000);
+}
+
+function currentCode(item: TotpItem): string | undefined {
+  return item.currentTotpTimeStep === getTotpTimeStep() ? item.currentTotp : undefined;
+}
+
+/** The vaults that have codes, as listed, for the vault menu. */
+function vaultsWithCodes(items: TotpItem[]): Vault[] {
+  const vaults = new Map<string, Vault>();
+  for (const item of items) {
+    const shareId = listedUnder(item);
+    if (!vaults.has(shareId))
+      vaults.set(shareId, item.sharedWithMe ? SHARED_WITH_ME : { shareId, name: item.vaultName });
+  }
+  return Array.from(vaults.values());
+}
+
+async function loadCode(item: TotpItem): Promise<TotpItem> {
+  const timeStep = getTotpTimeStep();
+  // Generated here from the listing when possible: asking pass-cli meant one command per item every 30 seconds.
+  const local = localTotpCode(item.shareId, item.itemId);
+  if (local) return { ...item, currentTotp: local, currentTotpTimeStep: timeStep };
+  try {
+    const code = await getTotp(item.shareId, item.itemId);
+    return { ...item, currentTotp: timeStep === getTotpTimeStep() ? code : undefined, currentTotpTimeStep: timeStep };
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+    return { ...item, currentTotp: currentCode(item) };
+  }
 }
 
 export default function Command() {
@@ -25,6 +82,35 @@ export default function Command() {
   const itemsRef = useRef<TotpItem[]>([]);
   const currentTimeStepRef = useRef<number>(getTotpTimeStep());
   const isRefreshingRef = useRef(false);
+  const isListingRef = useRef(false);
+  const hasLoadedFromCache = useRef(false);
+  const loads = useMemo(createRequestTracker, []);
+  const cacheWrites = useMemo(createSerialQueue, []);
+  const showWebsiteIcons = preferences.showWebsiteIcons ?? false;
+  // With Hide Codes, dots stand for the codes until Show Codes, for as long as the command stays open.
+  const hideCodes = preferences.hideCodes ?? false;
+  const [areCodesShown, setAreCodesShown] = useState(false);
+  // As in Browse Items, whose use counts here too: copying a code there brings it up here, and the other way round.
+  const [sortOrder, setSortOrder] = useState(preferredSortOrder);
+  const { data: mostUsed, visitItem } = useFrecencySorting(items, {
+    key: itemKey,
+    namespace: "items",
+    sortUnvisited: compareNames,
+  });
+  const sortedItems = useMemo(() => sortItems(items, sortOrder, mostUsed), [items, sortOrder, mostUsed]);
+  // As in Browse Items, with the vaults that have codes, and the last selection restored.
+  const [selectedVaultId, setSelectedVaultId] = useState(ALL_VAULTS_VALUE);
+  const vaults = useMemo(() => vaultsWithCodes(items), [items]);
+  const itemCounts = useMemo(() => countItemsByVault(vaults, items), [vaults, items]);
+  const shownItems =
+    selectedVaultId === ALL_VAULTS_VALUE
+      ? sortedItems
+      : sortedItems.filter((item) => listedUnder(item) === selectedVaultId);
+  // As in Browse Items. Made once per list rather than on every second of the countdown.
+  const icons = useMemo(
+    () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
+    [items, showWebsiteIcons],
+  );
 
   useEffect(() => {
     loadTotpItems();
@@ -46,92 +132,139 @@ export default function Command() {
   }, []);
 
   async function loadTotpItems() {
-    setError(null);
-
-    const cachedItems = await getCachedItems();
-    if (cachedItems) {
-      const cachedTotpItems = cachedItems.filter((item) => item.hasTotp);
-      if (cachedTotpItems.length > 0) {
-        const itemsWithPlaceholder = cachedTotpItems.map((item) => ({
-          ...item,
-          currentTotp: undefined,
-        }));
-        setItems(itemsWithPlaceholder);
-        itemsRef.current = itemsWithPlaceholder;
-        setIsLoading(false);
-
-        const itemsWithTotp = await Promise.all(
-          cachedTotpItems.map(async (item) => {
-            try {
-              const totp = await getTotp(item.shareId, item.itemId);
-              return { ...item, currentTotp: totp };
-            } catch {
-              return { ...item, currentTotp: undefined };
-            }
-          }),
-        );
-        setItems(itemsWithTotp);
-        itemsRef.current = itemsWithTotp;
-      }
-    }
+    const isLatest = loads.start();
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error !== "not_authenticated") setError(null);
+    setIsLoading(true);
 
     try {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        setError("not_authenticated");
-        setIsLoading(false);
-        return;
+      const cachedItems = !hasLoadedFromCache.current ? (await getCachedItems())?.data : undefined;
+      if (!isLatest()) return;
+      hasLoadedFromCache.current = true;
+      if (cachedItems) {
+        const cachedTotpItems = cachedItems.filter((item) => item.hasTotp);
+        if (cachedTotpItems.length > 0) {
+          const itemsWithPlaceholder = cachedTotpItems.map((item) => ({
+            ...item,
+            currentTotp: undefined,
+          }));
+          setItems(itemsWithPlaceholder);
+          itemsRef.current = itemsWithPlaceholder;
+          setError(null);
+          // Their codes come with the listing below, which brings what's needed to generate them.
+        }
       }
 
-      const freshItems = await listItems();
-      await setCachedItems(freshItems);
+      isListingRef.current = true;
+      const { items: freshItems, failedVaults } = await listVaultsAndItems().finally(() => {
+        if (isLatest()) isListingRef.current = false;
+      });
+      if (!isLatest()) return;
 
-      const totpItems = freshItems.filter((item) => item.hasTotp);
-      const itemsWithTotp = await Promise.all(
-        totpItems.map(async (item) => {
-          try {
-            const totp = await getTotp(item.shareId, item.itemId);
-            return { ...item, currentTotp: totp };
-          } catch {
-            return { ...item, currentTotp: undefined };
-          }
-        }),
-      );
+      const {
+        items: nextItems,
+        isComplete,
+        failureMessage,
+      } = getRefreshResult(freshItems, itemsRef.current, failedVaults, (item) => item.hasTotp);
+      const totpItems: TotpItem[] = nextItems.filter((item) => item.hasTotp);
+      const codeTimeStep = getTotpTimeStep();
+      const itemsWithTotp = await Promise.all(totpItems.map(loadCode));
+      if (!isLatest()) return;
+      // Serialize complete cache writes so an older in-flight write cannot outlast a newer one.
+      if (isComplete) {
+        await cacheWrites.run(async () => {
+          if (isLatest()) await setCachedItems(freshItems, true);
+        });
+      }
+      if (!isLatest()) return;
 
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
+      setError(null);
+      if (codeTimeStep !== getTotpTimeStep()) refreshTotpCodes();
+      if (failureMessage) throw new Error(failureMessage);
+      if (failedVaults.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
+          message: failedVaults[0].message,
+          primaryAction: { title: "Retry", onAction: loadTotpItems },
+        });
+      }
     } catch (e: unknown) {
-      if (!cachedItems) {
+      if (!isLatest()) return;
+      if (e instanceof PassCliError && e.type === "not_authenticated") {
+        await resetSession();
+      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_installed")) {
+        // Without pass-cli, no code can load: the screen saying how to fix it comes first.
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {
           setError("unknown");
         }
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't Load TOTP Items",
+          message: e instanceof Error ? e.message : "Unknown error",
+          primaryAction: { title: "Retry", onAction: loadTotpItems },
+        });
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
+  async function resetSession() {
+    loads.start(); // Invalidate pending listings and queued cache writes from the ended session.
+    isListingRef.current = false;
+    itemsRef.current = [];
+    setItems([]);
+    setError("not_authenticated");
+    setIsLoading(false);
+    await cacheWrites.run(clearCache);
+  }
+
   async function refreshTotpCodes() {
-    if (isRefreshingRef.current) return;
+    // Codes can't be generated here before the listing, which brings them: until then, each would be asked of pass-cli.
+    if (isRefreshingRef.current || isListingRef.current) return;
 
     isRefreshingRef.current = true;
     setIsRefreshing(true);
     try {
-      const currentItems = itemsRef.current;
-      const updatedItems = await Promise.all(
-        currentItems.map(async (item) => {
-          try {
-            const totp = await getTotp(item.shareId, item.itemId);
-            return { ...item, currentTotp: totp };
-          } catch {
-            return item;
+      let retriedTimeStep = false;
+      while (true) {
+        const currentItems = itemsRef.current;
+        const codeTimeStep = getTotpTimeStep();
+        let updatedItems: TotpItem[];
+        try {
+          updatedItems = await Promise.all(currentItems.map(loadCode));
+        } catch (error) {
+          if (itemsRef.current !== currentItems) continue;
+          if (error instanceof PassCliError && error.type === "not_authenticated") {
+            await resetSession();
+            break;
           }
-        }),
-      );
-      setItems(updatedItems);
-      itemsRef.current = updatedItems;
+          throw error;
+        }
+        // Re-fetch if either the list or the time step changed while these requests were running.
+        if (itemsRef.current !== currentItems) continue;
+        if (codeTimeStep !== getTotpTimeStep() && !retriedTimeStep) {
+          retriedTimeStep = true;
+          continue;
+        }
+        setItems(updatedItems);
+        itemsRef.current = updatedItems;
+        if (codeTimeStep !== getTotpTimeStep()) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Couldn't Refresh TOTP Codes",
+            message: "The refresh took too long. Try refreshing again.",
+            primaryAction: { title: "Retry", onAction: refreshTotpCodes },
+          });
+        }
+        break;
+      }
     } finally {
       isRefreshingRef.current = false;
       setIsRefreshing(false);
@@ -141,57 +274,93 @@ export default function Command() {
   const errorView = renderErrorView(error, loadTotpItems, "Load TOTP Items");
   if (errorView) return errorView;
 
-  async function copyTotp(totp: string, title: string) {
-    await Clipboard.copy(totp, { transient: preferences.copyPasswordTransient ?? true });
-    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: title });
+  async function copyTotp(item: TotpItem) {
+    const currentItem = itemsRef.current.find(
+      (entry) => entry.shareId === item.shareId && entry.itemId === item.itemId,
+    );
+    const totp = currentItem && currentCode(currentItem);
+    if (!totp) {
+      showToast({ style: Toast.Style.Failure, title: "TOTP Code Expired", message: "Refresh to get a current code" });
+      refreshTotpCodes();
+      return;
+    }
+    await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
+    visitItem(item);
+    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: item.title });
   }
 
-  function getTimerColor(): Color {
-    if (remainingSeconds > 10) return Color.Green;
-    if (remainingSeconds > 5) return Color.Yellow;
-    return Color.Red;
-  }
+  const getTimerColor = () => totpTimerColor(remainingSeconds);
 
   return (
-    <List isLoading={isLoading || isRefreshing} searchBarPlaceholder="Search TOTP items...">
-      <List.Section title="TOTP Codes" subtitle={isRefreshing ? "Refreshing..." : `Refreshing in ${remainingSeconds}s`}>
-        {items.map((item) => (
+    <List
+      isLoading={isLoading || isRefreshing}
+      searchBarPlaceholder="Search TOTP items..."
+      searchBarAccessory={
+        <VaultDropdown
+          vaults={vaults}
+          itemCounts={itemCounts}
+          // By name: Sort vaults by is Browse Items' preference, which this command can't read.
+          order="name"
+          onVaultChange={setSelectedVaultId}
+        />
+      }
+    >
+      {shownItems.map((item) => {
+        const code = currentCode(item);
+        return (
           <List.Item
             key={`${item.shareId}-${item.itemId}`}
-            icon={getItemIcon(item.type)}
+            icon={icons.get(itemKey(item))}
             title={item.title}
             subtitle={item.vaultName}
             accessories={[
               {
-                tag: {
-                  value: item.currentTotp ? formatTotpCode(item.currentTotp) : "---",
-                  color: getTimerColor(),
-                },
+                // Said as in Browse Items' details.
+                tag: code
+                  ? {
+                      value: hideCodes && !areCodesShown ? hiddenTotpCode(code) : monospace(formatTotpCode(code)),
+                      color: getTimerColor(),
+                    }
+                  : { value: isLoading || isRefreshing ? "Loading…" : "Unavailable", color: Color.SecondaryText },
               },
-              { text: `${remainingSeconds}s`, icon: Icon.Clock },
+              // Fixed-width digits and a circle that empties: nothing moves as the seconds go by. Codes here follow the
+              // 30-second period of getTotpRemainingSeconds.
+              {
+                text: monospace(`${String(remainingSeconds).padStart(2, "0")}s`),
+                icon: totpProgressIcon(remainingSeconds, 30, getTimerColor()),
+              },
             ]}
             actions={
               <ActionPanel>
-                {item.currentTotp && (
+                {code && <Action title="Copy TOTP Code" icon={Icon.Clipboard} onAction={() => copyTotp(item)} />}
+                {hideCodes && (
                   <Action
-                    title="Copy TOTP Code"
-                    icon={Icon.Clipboard}
-                    onAction={() => copyTotp(item.currentTotp!, item.title)}
+                    title={areCodesShown ? "Hide Codes" : "Show Codes"}
+                    icon={areCodesShown ? Icon.EyeDisabled : Icon.Eye}
+                    shortcut={platformShortcut(["cmd"], "h")}
+                    onAction={() => setAreCodesShown((shown) => !shown)}
                   />
                 )}
+                <SortByMenu value={sortOrder} onChange={setSortOrder} />
                 <Action
                   title="Refresh Codes"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refreshTotpCodes}
                 />
               </ActionPanel>
             }
           />
-        ))}
-      </List.Section>
-      {items.length === 0 && !isLoading && !error && (
-        <List.EmptyView icon={Icon.Clock} title="No TOTP Items" description="None of your items have TOTP configured" />
+        );
+      })}
+      {shownItems.length === 0 && !isLoading && !error && (
+        <List.EmptyView
+          icon={TOTP_ICON}
+          title="No TOTP Items"
+          description={
+            items.length === 0 ? "None of your items have TOTP configured" : "None of this vault's items have TOTP"
+          }
+        />
       )}
     </List>
   );

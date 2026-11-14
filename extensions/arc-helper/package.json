@@ -16,14 +16,14 @@
       "name": "search-items",
       "title": "Search Items",
       "subtitle": "Arc Helper",
-      "description": "Search Arc Raiders items",
+      "description": "Search Arc Raiders items with crafting, recycling and drop info",
       "mode": "view"
     },
     {
       "name": "search-arcs",
       "title": "Search ARCs",
       "subtitle": "Arc Helper",
-      "description": "Browse ARC enemies and their descriptions",
+      "description": "Browse ARC enemies and their loot drops",
       "mode": "view"
     },
     {
@@ -44,7 +44,7 @@
       "name": "traders",
       "title": "Browse Traders",
       "subtitle": "Arc Helper",
-      "description": "Browse trader inventories",
+      "description": "Browse trader inventories and Ermal's barter offers",
       "mode": "view"
     },
     {
@@ -63,15 +63,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.13.9",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.9.9",
     "typescript": "^5.8.2"
   },
   "scripts": {

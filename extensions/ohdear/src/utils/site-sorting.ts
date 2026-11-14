@@ -1,12 +1,14 @@
-export function sortSites(sites: any) {
+import type { Site } from "../interface";
+
+export function sortSites(sites: Site[]) {
   const groupedSites = sites
-    .sort((a: any, b: any) => {
+    .sort((a, b) => {
       const textA = a.label.toUpperCase();
       const textB = b.label.toUpperCase();
 
       return textA < textB ? -1 : textA > textB ? 1 : 0;
     })
-    .reduce((site: any, curr: any) => {
+    .reduce<Record<string, Site[]>>((site, curr) => {
       const group = curr.group_name ? curr.group_name : "Ungrouped";
 
       if (!site[group]) {
@@ -19,7 +21,7 @@ export function sortSites(sites: any) {
     }, {});
 
   const groupedSiteEntries = groupedSites
-    ? Object.entries(groupedSites).sort((a: any, b: any) => {
+    ? Object.entries(groupedSites).sort((a, b) => {
         const textA = a[0].toUpperCase();
         const textB = b[0].toUpperCase();
 

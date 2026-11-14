@@ -4,6 +4,7 @@ export interface ParsedBatchItem {
   input: string;
   value: ParsedSchedule;
   inheritedDate: boolean;
+  unconfirmedRecordId?: string;
 }
 
 export interface ParsedBatchError {
@@ -18,10 +19,28 @@ export interface ParseBatchResult {
   tooManyItems: boolean;
 }
 
+export interface BatchRetrySnapshot {
+  sentence: string;
+  batch: ParseBatchResult;
+}
+
 export const MAX_BATCH_ITEMS = 3;
 const BATCH_TOKEN_PATTERN = /\s*(,|;|그리고|하고)\s*/gu;
 const DATE_TIME_CUE_AT_START_PATTERN =
-  /^(?:오늘|내일|모레|이번주|다음주|담주|다담주|다다음주|이번달|이달|다음달|담달|매\s*(?:일|주|월)|[월화수목금토일](?:요일|욜)|[0-9]{1,2}월\s*[0-9]{1,2}일|[0-9]{1,2}일\s*(?:안에|이내|내)|[0-9]{1,2}시간\s*(?:안에|이내|내)|(?:새벽|아침|점심|오전|오후|저녁|밤)\s*[0-9]{1,2}시|[0-9]{1,2}시|[0-9]{1,2}:[0-9]{2}|마감|기한|데드라인)/u;
+  /^(?:오늘|내일|모레|이번\s*주|다음\s*주|담\s*주|다담\s*주|다다음\s*주|이번\s*달|이\s*달|다음\s*달|담\s*달|매\s*(?:일|주|월)|[월화수목금토일](?:요일|욜)|(?:(?:내년|[0-9]{4}년)\s*)?[0-9]{1,2}월\s*[0-9]{1,2}일|[0-9]{1,2}일(?:\s*(?:안에|이내|내|까지는|전까지|전에|이전까지|이전|까지|전))?(?=\s|$)|[0-9]{1,2}시간\s*(?:안에|이내|내)|(?:새벽|아침|점심|오전|오후|저녁|밤)\s*[0-9]{1,2}시|[0-9]{1,2}시|[0-9]{1,2}:[0-9]{2}|마감|기한|데드라인)/u;
+
+export function buildBatchParseErrorMessage(errors: ParsedBatchError[]): string | undefined {
+  if (errors.length === 0) {
+    return undefined;
+  }
+
+  return errors
+    .map(({ input, error }) => {
+      const clause = input.trim();
+      return clause ? `[${clause}] ${error}` : error;
+    })
+    .join(" | ");
+}
 
 export function parseKoreanScheduleBatch(input: string, options: ParseOptions = {}): ParseBatchResult {
   const trimmed = input.trim();
@@ -89,6 +108,44 @@ export function parseKoreanScheduleBatch(input: string, options: ParseOptions = 
   };
 }
 
+export function parseKoreanScheduleBatchWithRetrySnapshot(
+  input: string,
+  retrySnapshot: BatchRetrySnapshot | undefined,
+  options: ParseOptions = {},
+): ParseBatchResult {
+  const parsed = parseKoreanScheduleBatch(input, options);
+  if (!retrySnapshot || parsed.items.length === 0) {
+    return parsed;
+  }
+
+  const snapshotItemsByInput = new Map<string, ParsedBatchItem[]>();
+  for (const item of retrySnapshot.batch.items) {
+    const key = normalizeRetryInput(item.input);
+    const matches = snapshotItemsByInput.get(key) ?? [];
+    matches.push(item);
+    snapshotItemsByInput.set(key, matches);
+  }
+
+  return {
+    ...parsed,
+    items: parsed.items.map((item) => {
+      const key = normalizeRetryInput(item.input);
+      const snapshotItem = snapshotItemsByInput.get(key)?.shift();
+      if (!snapshotItem) {
+        return item;
+      }
+      return {
+        ...snapshotItem,
+        input: item.input,
+        value: {
+          ...snapshotItem.value,
+          source: item.input,
+        },
+      };
+    }),
+  };
+}
+
 function splitIntoParts(input: string): string[] {
   const parts: string[] = [];
   let cursor = 0;
@@ -121,11 +178,7 @@ function splitIntoParts(input: string): string[] {
 }
 
 function shouldSplitByToken(token: string, remainingText: string): boolean {
-  if (token === "," || token === ";") {
-    return true;
-  }
-
-  if (token !== "그리고" && token !== "하고") {
+  if (token !== "," && token !== ";" && token !== "그리고" && token !== "하고") {
     return false;
   }
 
@@ -133,7 +186,7 @@ function shouldSplitByToken(token: string, remainingText: string): boolean {
 }
 
 function buildDateCue(date: Date): string {
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
 export function firstBatchParseResult(batch: ParseBatchResult): ParseResult | null {
@@ -146,4 +199,57 @@ export function firstBatchParseResult(batch: ParseBatchResult): ParseResult | nu
     return { ok: false, error: firstError.error };
   }
   return null;
+}
+
+export function buildBatchRetryInput(item: ParsedBatchItem): string {
+  if (item.value.recurrence) {
+    // The retry snapshot retains the resolved first occurrence while keeping recurrence text editable.
+    return item.input;
+  }
+
+  const { value } = item;
+  const date = buildDateCue(value.start);
+  const location = value.location ? ` 장소: ${value.location}` : "";
+
+  if (value.allDay) {
+    const deadlineSuffix = value.intent === "deadline" ? "까지" : "";
+    return `${date}${deadlineSuffix} ${value.title}${location}`;
+  }
+
+  const startTime = buildTimeCue(value.start);
+  const timeCue = value.intent === "deadline" ? `${startTime}까지` : `${startTime}부터 ${buildTimeCue(value.end)}까지`;
+  return `${date} ${timeCue} ${value.title}${location}`;
+}
+
+export function buildBatchRetrySnapshot(items: ParsedBatchItem[]): BatchRetrySnapshot {
+  const retryItems = items.map((item) => {
+    const input = buildBatchRetryInput(item);
+    return {
+      input,
+      value: {
+        ...item.value,
+        source: input,
+      },
+      inheritedDate: false,
+      unconfirmedRecordId: item.unconfirmedRecordId,
+    };
+  });
+
+  return {
+    sentence: retryItems.map((item) => item.input).join(", "),
+    batch: {
+      items: retryItems,
+      errors: [],
+      isBatch: retryItems.length > 1,
+      tooManyItems: false,
+    },
+  };
+}
+
+function buildTimeCue(date: Date): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function normalizeRetryInput(input: string): string {
+  return input.trim().replace(/\s+/gu, " ");
 }

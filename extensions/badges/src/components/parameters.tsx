@@ -131,7 +131,7 @@ export const Color = ({ badge, onChange }: ParameterProps) => {
 export const LabelColor = ({ badge, onChange }: ParameterProps) => {
   return (
     <>
-      {badge.label && (
+      {(badge.$icon || badge.label) && (
         <Detail.Metadata.TagList title="labelColor">
           <Detail.Metadata.TagList.Item
             text="default"

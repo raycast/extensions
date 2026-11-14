@@ -1,5 +1,20 @@
 # RSS Reader Changelog
 
+## [Non-Standard Publish Dates] - 2026-11-13
+
+- Read publish dates that feeds nest in non-standard elements, such as Mikan Project's torrent element
+- Set a time zone per feed for dates that don't include one
+
+## [Read State Fixes] - 2026-10-20
+
+- Keep read state for stories from Atom feeds and feeds without GUIDs
+- Match read state between the stories list and AI tools
+- Update the read indicator as soon as a story is opened
+
+## [Preference] - 2026-09-18
+
+- Added "Show Subtitle" Preference for hiding subtitle on stories
+
 ## [Duplicate Subscriptions] - 2026-04-13
 
 - Duplicate feed subscriptions to quickly create variations with different URLs

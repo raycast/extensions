@@ -1,14 +1,25 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { AirlineMeta } from "soaring-symbols";
-import { getFlagEmoji } from "./utils";
+import { ceasedLabel, getFlagEmoji, operatingYears } from "./utils";
+import type { Airline } from "soaring-symbols";
+import { groupAirlines, previewUrl, searchKeywords } from "./utils/airlines";
 import { fetchAirlines } from "./utils/fetch";
 import SearchBar from "./components/searchbar";
 
 export default function ViewAirlineInfo() {
-  const { isLoading, data = [] } = usePromise(fetchAirlines);
+  const { isLoading, data = [] } = useCachedPromise(fetchAirlines);
   const [alliance, setAlliance] = useState("All");
+  const [searchText, setSearchText] = useState("");
+
+  // Parents and subsidiaries come from the whole list, whatever the filter
+  const groups = useMemo(() => groupAirlines(data), [data]);
+
+  // Jump to a related airline: search for it with the alliance filter cleared
+  const showAirline = (name: string) => {
+    setAlliance("All");
+    setSearchText(name);
+  };
 
   const filteredAirlines = useMemo(() => {
     if (alliance === "All") return data;
@@ -20,47 +31,104 @@ export default function ViewAirlineInfo() {
       isLoading={isLoading}
       throttle
       isShowingDetail
+      filtering
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search airlines by name, IATA, or ICAO..."
       searchBarAccessory={<SearchBar type="list" selected={alliance} onSelect={setAlliance} />}
     >
-      {filteredAirlines.map((airline: AirlineMeta) => {
+      {filteredAirlines.map((airline: Airline) => {
         const flags = airline.country
           ?.split(",")
           .map((c) => getFlagEmoji(c))
           .join(" ");
 
-        const markdown = `
-<img src="https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/assets/${airline.slug}/logo.svg" alt="${airline.name}" width="200" height="200" />
-`;
+        const logo = previewUrl(airline, "logo");
+        const ceased = ceasedLabel(airline);
+        const years = operatingYears(airline);
+        const parent = groups.parents.get(airline.slug);
+        const owned = groups.subsidiaries.get(airline.slug) ?? [];
+        // Subsidiaries that no longer fly under it (Jetstar Pacific under
+        // Jetstar) get a row of their own
+        const successor = airline.successor ? groups.bySlug.get(airline.successor) : undefined;
+        const predecessors = (airline.predecessors ?? []).flatMap((slug) => groups.bySlug.get(slug) ?? []);
+        // Links to other airlines, one row per relation it has
+        const relatedRows = [
+          { title: "Part of", airlines: parent ? [parent] : [] },
+          { title: "Subsidiaries", airlines: owned.filter((sub) => !sub.defunct) },
+          { title: "Former Subsidiaries", airlines: owned.filter((sub) => sub.defunct) },
+          { title: "Succeeded By", airlines: successor ? [successor] : [] },
+          { title: "Preceded By", airlines: predecessors },
+        ].filter((row) => row.airlines.length > 0);
+
+        const markdown = logo ? `<img src="${logo}" alt="${airline.name}" width="200" height="200" />` : "";
 
         return (
           <List.Item
-            key={airline.iata || airline.slug}
+            key={airline.slug}
             title={airline.name}
             icon={{
-              source: `https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/assets/${airline.slug}/icon.svg`,
+              source: previewUrl(airline, "icon") ?? "",
               fallback: Icon.CircleProgress,
             }}
-            keywords={[airline.name, airline.icao, airline.iata, airline.slug].filter(Boolean)}
-            accessories={airline.flag_carrier ? [{ text: flags, tooltip: "Flag Carrier" }] : undefined}
+            keywords={searchKeywords(airline)}
             detail={
               <List.Item.Detail
                 markdown={markdown}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="IATA" text={airline.iata} />
-                    <List.Item.Detail.Metadata.Label title="ICAO" text={airline.icao} />
-                    <List.Item.Detail.Metadata.Label title="Country" text={airline.country} />
                     {airline.branding?.tagline && (
                       <List.Item.Detail.Metadata.Label title="Tagline" text={airline.branding.tagline} />
                     )}
-                    <List.Item.Detail.Metadata.Label title="Alliance" text={airline.alliance} />
-                    {airline.website && (
-                      <List.Item.Detail.Metadata.Link
-                        title="Website"
-                        text={airline.website.replace(/^https?:\/\//, "")}
-                        target={airline.website}
+                    {/* Status lives here: the detail pane hides List.Item accessories */}
+                    <List.Item.Detail.Metadata.TagList title="Status">
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={ceased ?? "Operating"}
+                        color={ceased ? Color.SecondaryText : Color.Green}
                       />
+                      {airline.flag_carrier && (
+                        <List.Item.Detail.Metadata.TagList.Item text={`${flags} Flag Carrier`} color={Color.Blue} />
+                      )}
+                    </List.Item.Detail.Metadata.TagList>
+                    <List.Item.Detail.Metadata.Label title="IATA" text={airline.iata} />
+                    <List.Item.Detail.Metadata.Label title="ICAO" text={airline.icao} />
+                    {airline.callsign && <List.Item.Detail.Metadata.Label title="Callsign" text={airline.callsign} />}
+                    {years && (
+                      <List.Item.Detail.Metadata.Label title={airline.ceased ? "Operated" : "Founded"} text={years} />
+                    )}
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Country" text={airline.country} />
+                    <List.Item.Detail.Metadata.Label title="Alliance" text={airline.alliance} />
+                    {airline.hubs?.length ? (
+                      <List.Item.Detail.Metadata.TagList title={airline.hubs.length > 1 ? "Hubs" : "Hub"}>
+                        {airline.hubs.map((hub) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={hub} text={hub} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : null}
+                    {airline.previous_names?.length ? (
+                      <List.Item.Detail.Metadata.Label title="Formerly" text={airline.previous_names.join(", ")} />
+                    ) : null}
+                    {relatedRows.map((row) => (
+                      <List.Item.Detail.Metadata.TagList key={row.title} title={row.title}>
+                        {row.airlines.map((other) => (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={other.slug}
+                            text={other.name}
+                            onAction={() => showAirline(other.name)}
+                          />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    ))}
+                    {airline.website && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Link
+                          title="Website"
+                          text={airline.website.replace(/^https?:\/\//, "")}
+                          target={airline.website}
+                        />
+                      </>
                     )}
                   </List.Item.Detail.Metadata>
                 }

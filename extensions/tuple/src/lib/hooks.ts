@@ -4,7 +4,7 @@ import { TupleErrorKind } from "./types";
 
 /**
  * Shared `useExec` options for every `tuple` invocation: PATH-injected env, a buffer large enough
- * for long transcripts (Node's 1 MB default truncates them), and the same 15 s timeout `runTuple`
+ * for long Capture output (Node's 1 MB default truncates it), and the same 15 s timeout `runTuple`
  * uses so a stalled daemon socket can't hold a read open indefinitely (the menu bar polls on a timer).
  */
 export function tupleExecOptions() {

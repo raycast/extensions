@@ -27,6 +27,14 @@
 //      to the entry detail modal; Enter on a list opens the list
 //      page.
 //
+// Empty-query state: a "Recently Added by You" section fills the view
+// with the caller's own newest entries via /api/v1/recent, workspace-
+// scoped by the same dropdown (rows are search-row-shaped since
+// list-repo migration 20261017000000, so EntrySearchRow renders them
+// unchanged, star toggle and all). When the caller has none (new
+// account, or nothing created since the web's created_by column
+// landed), the "Start typing to search" empty view shows as before.
+//
 // Detail-view toggle (Cmd+I, default ON): the panel opens with a
 // markdown preview of the selected entry on the right side — term +
 // type chip + short definition + long-form description, with the
@@ -58,6 +66,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import type { MutatePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
   apiBase,
@@ -71,6 +80,7 @@ import type {
   WorkspacesResponse,
   ListsResponse,
   ListRow,
+  RecentEntriesResponse,
   SearchEntryResult,
   Workspace,
 } from "./lib/api";
@@ -195,10 +205,54 @@ export default function SearchCommand() {
     },
   });
 
+  // Recently Added: the caller's own newest entries, filling the
+  // empty-query state instead of a bare "start typing" screen. Backed
+  // by /api/v1/recent (list-repo migration 20261017000000 widened its
+  // rows to the search-row shape precisely so EntrySearchRow renders
+  // them unchanged). The workspace dropdown scopes it exactly like
+  // search does. Only fetched while the query is empty; a non-empty
+  // query hands the view over to search. Errors degrade silently to
+  // the plain empty state: the workspaces fetch above already toasts
+  // the launch-time failure modes (bad token, server down), and a
+  // second toast for a decorative section would be noise.
+  const recentUrl = isAll
+    ? `${apiBase()}/api/v1/recent?limit=10`
+    : `${apiBase()}/api/v1/recent?limit=10&workspace_id=${workspaceId}`;
+
+  // NO keepPreviousData here, deliberately, unlike the search fetch
+  // above. That flag keeps the prior arguments' results on screen while
+  // a new request lands, which is right for search (the URL changes on
+  // every keystroke, so dropping data mid-type would flicker the whole
+  // list). This query's URL changes on exactly ONE event: a workspace
+  // switch. Keeping the previous data there would render the OLD
+  // workspace's entries under the NEW workspace selection, and since
+  // these rows carry live star / edit / note / report actions, the user
+  // could act on rows that aren't in the scope they're looking at.
+  // Without the flag, a switch to a workspace not yet loaded this
+  // session shows the loading state instead (isLoading covers it), and
+  // the two common paths stay flicker-free anyway because useFetch
+  // caches per arguments: clearing the search bar re-reads the same URL
+  // from cache, as does returning to a workspace viewed earlier.
+  const recentQuery = useFetch<RecentEntriesResponse>(recentUrl, {
+    headers: authHeaders(),
+    execute: !trimmed,
+    onError: () => {},
+  });
+
+  // Array.isArray guard per the house convention: useFetch's cache
+  // persists between command runs, so the first paint after a server
+  // redeploy can briefly serve a cached pre-migration shape.
+  const recentEntries =
+    !trimmed && Array.isArray(recentQuery.data?.entries)
+      ? recentQuery.data.entries
+      : [];
+
   const entries = searchQuery.data?.entries ?? [];
   const lists = searchQuery.data?.lists ?? [];
   const isLoading =
-    workspacesQuery.isLoading || (!!trimmed && searchQuery.isLoading);
+    workspacesQuery.isLoading ||
+    (!!trimmed && searchQuery.isLoading) ||
+    (!trimmed && recentQuery.isLoading);
 
   // Group entries by listId so each parent list owns a Section. Map
   // preserves insertion order, so sections appear in the order entries
@@ -253,16 +307,25 @@ export default function SearchCommand() {
   // round-trip. The mutate's optimisticUpdate runs synchronously
   // before the network call lands; if the API errors, mutate rolls
   // the local state back automatically and we surface a toast.
-  const toggleEntryStar = async (entry: SearchEntryResult) => {
+  // Generic over the response shape because two fetches host
+  // starrable rows: the search results and the Recently Added
+  // section. Each call site passes its own query's mutate.
+  const toggleEntryStar = async <T extends { entries: SearchEntryResult[] }>(
+    entry: SearchEntryResult,
+    mutate: MutatePromise<T | undefined>,
+  ) => {
     const willBeStarred = !entry.isStarred;
     try {
-      await searchQuery.mutate(
+      await mutate(
         apiFetch(`/api/v1/entries/${entry.id}/star`, {
           method: willBeStarred ? "POST" : "DELETE",
         }),
         {
           optimisticUpdate(current) {
             if (!current) return current;
+            // Cast because TS can't prove a spread-with-override
+            // still satisfies an arbitrary T; only `entries` is
+            // swapped, so it does.
             return {
               ...current,
               entries: current.entries.map((row) =>
@@ -270,7 +333,7 @@ export default function SearchCommand() {
                   ? { ...row, isStarred: willBeStarred }
                   : row,
               ),
-            };
+            } as T;
           },
         },
       );
@@ -293,7 +356,10 @@ export default function SearchCommand() {
       searchText={query}
       onSearchTextChange={setQuery}
       throttle
-      isShowingDetail={showingDetail && entries.length + lists.length > 0}
+      isShowingDetail={
+        showingDetail &&
+        (trimmed ? entries.length + lists.length > 0 : recentEntries.length > 0)
+      }
       searchBarPlaceholder="Search entries and lists…"
       searchBarAccessory={
         workspaces.length > 1 ? (
@@ -321,30 +387,35 @@ export default function SearchCommand() {
         ) : undefined
       }
     >
-      {entriesByList.map((bucket) => (
+      {/* Empty-query state: the caller's own newest entries, flat and
+          newest-first rather than grouped by list, because recency IS
+          the ordering claim and grouping would scramble it. The header
+          says "by You" on purpose: the endpoint filters on
+          created_by = caller (there is no updated_by column to widen
+          it), so on a shared team glossary this is your additions,
+          not an activity feed. Gated on !trimmed so the two modes
+          never mix; the search sections below are gated the same way
+          in reverse, which also stops keepPreviousData's stale rows
+          from lingering after the query is cleared. */}
+      {!trimmed && recentEntries.length > 0 && (
         <List.Section
-          key={`list-section-${bucket.listId}`}
-          title={
-            showWorkspaceInHeader
-              ? `${bucket.listName} · ${bucket.workspaceName}`
-              : bucket.listName
-          }
-          subtitle={String(bucket.entries.length)}
+          title="Recently Added by You"
+          subtitle={String(recentEntries.length)}
         >
-          {bucket.entries.map((e) => {
-            // Gate "Edit Entry" on the caller's role for this entry's
-            // list (from the lists fetch). Absent while lists load, or
-            // for a public list the caller only favorited (viewer) →
-            // no Edit action.
+          {recentEntries.map((e) => {
+            // Same Edit gate as the search rows: writable role on the
+            // entry's list, from the lists fetch. Recent entries are
+            // the caller's own creations so this is nearly always
+            // true, but a demotion to viewer since creating one isn't.
             const editableList = listsById.get(e.listId);
             const canEdit =
               !!editableList && WRITABLE_ROLES.has(editableList.effective_role);
             return (
               <EntrySearchRow
-                key={`entry-${e.id}`}
+                key={`recent-${e.id}`}
                 entry={e}
-                listIcon={bucket.listIcon}
-                listColor={bucket.listColor}
+                listIcon={e.listIcon}
+                listColor={e.listColor}
                 workspaceAvatarUrl={
                   workspacesById.get(e.workspaceId)?.avatar_url ?? null
                 }
@@ -356,77 +427,121 @@ export default function SearchCommand() {
                     ? editableList.tags
                     : []
                 }
-                onToggleStar={() => toggleEntryStar(e)}
-                onMutated={() => searchQuery.revalidate()}
+                onToggleStar={() => toggleEntryStar(e, recentQuery.mutate)}
+                onMutated={() => recentQuery.revalidate()}
               />
             );
           })}
         </List.Section>
-      ))}
+      )}
 
-      <List.Section
-        title="Lists"
-        subtitle={trimmed ? String(lists.length) : undefined}
-      >
-        {lists.map((l) => {
-          const vis = listVisibility(l.isPublic, l.workspaceType);
-          return (
-            <List.Item
-              key={`list-${l.id}`}
-              icon={iconForList({
-                icon: l.icon,
-                color: l.color,
-                name: l.name,
-                id: l.id,
-              })}
-              title={l.name}
-              subtitle={showingDetail ? undefined : (l.description ?? "")}
-              accessories={
-                showWorkspaceInHeader && !showingDetail
-                  ? [{ text: l.workspaceName }]
-                  : undefined
-              }
-              detail={
-                <List.Item.Detail
-                  markdown={[
-                    `## ${l.name}`,
-                    "",
-                    l.description ? l.description : "_No description._",
-                  ].join("\n")}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Link
-                        title="Open"
-                        text={apiHost()}
-                        target={`${apiBase()}/${l.id}`}
-                      />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label
-                        title="Visibility"
-                        text={vis.label}
-                        icon={vis.icon}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Workspace"
-                        text={l.workspaceName}
-                      />
-                    </List.Item.Detail.Metadata>
+      {!!trimmed &&
+        entriesByList.map((bucket) => (
+          <List.Section
+            key={`list-section-${bucket.listId}`}
+            title={
+              showWorkspaceInHeader
+                ? `${bucket.listName} · ${bucket.workspaceName}`
+                : bucket.listName
+            }
+            subtitle={String(bucket.entries.length)}
+          >
+            {bucket.entries.map((e) => {
+              // Gate "Edit Entry" on the caller's role for this entry's
+              // list (from the lists fetch). Absent while lists load, or
+              // for a public list the caller only favorited (viewer) →
+              // no Edit action.
+              const editableList = listsById.get(e.listId);
+              const canEdit =
+                !!editableList &&
+                WRITABLE_ROLES.has(editableList.effective_role);
+              return (
+                <EntrySearchRow
+                  key={`entry-${e.id}`}
+                  entry={e}
+                  listIcon={bucket.listIcon}
+                  listColor={bucket.listColor}
+                  workspaceAvatarUrl={
+                    workspacesById.get(e.workspaceId)?.avatar_url ?? null
                   }
+                  showingDetail={showingDetail}
+                  detailToggleAction={toggleDetailAction}
+                  canEdit={canEdit}
+                  listTags={
+                    editableList && Array.isArray(editableList.tags)
+                      ? editableList.tags
+                      : []
+                  }
+                  onToggleStar={() => toggleEntryStar(e, searchQuery.mutate)}
+                  onMutated={() => searchQuery.revalidate()}
                 />
-              }
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open List"
-                    url={`${apiBase()}/${l.id}`}
+              );
+            })}
+          </List.Section>
+        ))}
+
+      {!!trimmed && (
+        <List.Section title="Lists" subtitle={String(lists.length)}>
+          {lists.map((l) => {
+            const vis = listVisibility(l.isPublic, l.workspaceType);
+            return (
+              <List.Item
+                key={`list-${l.id}`}
+                icon={iconForList({
+                  icon: l.icon,
+                  color: l.color,
+                  name: l.name,
+                  id: l.id,
+                })}
+                title={l.name}
+                subtitle={showingDetail ? undefined : (l.description ?? "")}
+                accessories={
+                  showWorkspaceInHeader && !showingDetail
+                    ? [{ text: l.workspaceName }]
+                    : undefined
+                }
+                detail={
+                  <List.Item.Detail
+                    markdown={[
+                      `## ${l.name}`,
+                      "",
+                      l.description ? l.description : "_No description._",
+                    ].join("\n")}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Link
+                          title="Open"
+                          text={apiHost()}
+                          target={`${apiBase()}/${l.id}`}
+                        />
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label
+                          title="Visibility"
+                          text={vis.label}
+                          icon={vis.icon}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Workspace"
+                          text={l.workspaceName}
+                        />
+                      </List.Item.Detail.Metadata>
+                    }
                   />
-                  {toggleDetailAction}
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      title="Open List"
+                      url={`${apiBase()}/${l.id}`}
+                    />
+                    {toggleDetailAction}
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
 
       <List.EmptyView
         icon={Icon.MagnifyingGlass}

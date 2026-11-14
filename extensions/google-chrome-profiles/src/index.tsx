@@ -1,17 +1,19 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
+  confirmAlert,
   environment,
   getPreferenceValues,
   Icon,
   Image,
+  Keyboard,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -20,10 +22,10 @@ import {
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
   GoogleChromeBookmarkURL,
-  GoogleChromeInfoCache,
   GoogleChromeLocalState,
   getSelectedBrowser,
   Profile,
+  showDoneHUD,
 } from "./util/types";
 import {
   createBookmarkListItem,
@@ -31,13 +33,55 @@ import {
   isValidUrl,
   formatAsUrl,
   openGoogleChrome,
+  readChromeLocalState,
+  deleteChromeProfile,
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
+import { extractProfiles, filterProfiles, loadHiddenDirectories, saveHiddenDirectories } from "./util/profiles";
 import { getFavicon } from "@raycast/utils";
 
-const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserConfig }) => {
+const ProfileItem = (props: {
+  index: number;
+  profile: Profile;
+  browser: BrowserConfig;
+  hidden: boolean;
+  showHiddenAction?: ReactNode;
+  onToggleHidden: (profile: Profile) => Promise<void>;
+  onDelete: (profile: Profile) => Promise<void>;
+}) => {
   const { index, profile, browser } = props;
+  // Enter runs the first action, ⌘↵ the second.
+  const directSwitch = getPreferenceValues<ExtensionPreferences>().directSwitch === true;
+  const secondary: Keyboard.Shortcut = { modifiers: ["cmd"], key: "return" };
+
+  const showBookmarks = (
+    <Action.Push
+      key="bookmarks"
+      title="Show Bookmarks"
+      icon={Icon.Link}
+      shortcut={directSwitch ? secondary : undefined}
+      target={<ListBookmarks profile={profile} browser={browser} />}
+    />
+  );
+  const bringToFront = (
+    <Action
+      key="front"
+      title="Bring to Front"
+      icon={Icon.Window}
+      shortcut={directSwitch ? undefined : secondary}
+      onAction={async () => {
+        await openGoogleChrome(
+          profile,
+          ChromeAction.Focus,
+          async () => {
+            await showDoneHUD("Bringing to front...");
+          },
+          browser,
+        );
+      }}
+    />
+  );
 
   return (
     <List.Item
@@ -48,26 +92,7 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
       keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Show Bookmarks"
-            icon={Icon.Link}
-            target={<ListBookmarks profile={profile} browser={browser} />}
-          />
-          <Action
-            title="Bring to Front"
-            icon={Icon.Window}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={async () => {
-              await openGoogleChrome(
-                profile,
-                ChromeAction.Focus,
-                async () => {
-                  await showHUD("Bringing to front...");
-                },
-                browser,
-              );
-            }}
-          />
+          {directSwitch ? [bringToFront, showBookmarks] : [showBookmarks, bringToFront]}
           <Action
             title="New Window"
             icon={Icon.AppWindow}
@@ -77,12 +102,26 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
                 profile,
                 ChromeAction.NewWindow,
                 async () => {
-                  await showHUD("Opening new window...");
+                  await showDoneHUD("Opening new window...");
                 },
                 browser,
               );
             }}
           />
+          <Action
+            title="Delete Profile"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+            onAction={() => props.onDelete(profile)}
+          />
+          <Action
+            title={props.hidden ? "Unhide Profile" : "Hide Profile"}
+            icon={props.hidden ? Icon.Eye : Icon.EyeDisabled}
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            onAction={() => props.onToggleHidden(profile)}
+          />
+          {props.showHiddenAction}
         </ActionPanel>
       }
     />
@@ -91,18 +130,20 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
 
 export default function Command() {
   const browser = getSelectedBrowser();
+  const [searchText, setSearchText] = useState("");
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
+  const [hiddenDirectories, setHiddenDirectories] = useState<string[]>([]);
+  const [showHidden, setShowHidden] = useState(false);
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
     async function listProfiles() {
       try {
+        // Loaded before the profiles so hidden profiles never flash into the list.
+        setHiddenDirectories(await loadHiddenDirectories(browser));
         // for google-chrome-profiles-1.png:
         // 1. comment the code below:
-        const path = join(homedir(), browser.dataPath, "Local State");
-        const localStateFileBuffer = await readFile(path);
-        const localStateFileText = localStateFileBuffer.toString("utf-8");
-        setLocalState(JSON.parse(localStateFileText));
+        setLocalState((await readChromeLocalState(browser)).state);
         // 2. uncomment function _createDataSetForScreenshot1() at the bottom of the file
         // 3. uncomment code below:
         // setLocalState(_createDataSetForScreenshot1());
@@ -119,16 +160,96 @@ export default function Command() {
   }
 
   const infoCache = localState?.profile.info_cache;
-  const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
+  const profiles = infoCache && extractProfiles(infoCache);
+  const visibleProfiles = profiles?.filter((profile) => !hiddenDirectories.includes(profile.directory));
+  const hiddenProfiles = profiles?.filter((profile) => hiddenDirectories.includes(profile.directory)) ?? [];
+
+  const updateHiddenDirectories = async (directories: string[]) => {
+    const saved = await saveHiddenDirectories(browser, directories, profiles ?? []);
+    setHiddenDirectories(saved);
+    if (saved.length === 0) setShowHidden(false);
+  };
+
+  const toggleHidden = async (profile: Profile) => {
+    const hide = !hiddenDirectories.includes(profile.directory);
+    await updateHiddenDirectories(
+      hide
+        ? [...hiddenDirectories, profile.directory]
+        : hiddenDirectories.filter((directory) => directory !== profile.directory),
+    );
+    await showToast(Toast.Style.Success, `${hide ? "Hid" : "Unhid"} ${profile.name}`);
+  };
+
+  const showHiddenAction =
+    hiddenProfiles.length > 0 ? (
+      <Action
+        title={showHidden ? "Hide Hidden Profiles" : "Show Hidden Profiles"}
+        icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+        onAction={() => setShowHidden(!showHidden)}
+      />
+    ) : undefined;
+
+  const deleteProfile = async (profile: Profile) => {
+    if (
+      !(await confirmAlert({
+        title: `Delete “${profile.name}” profile?`,
+        message: "This permanently deletes its bookmarks, history, passwords, and other local data.",
+        primaryAction: { title: "Delete Profile", style: Alert.ActionStyle.Destructive },
+      }))
+    ) {
+      return;
+    }
+
+    try {
+      setLocalState(await deleteChromeProfile(profile, browser));
+      await updateHiddenDirectories(hiddenDirectories.filter((directory) => directory !== profile.directory));
+      await showToast(Toast.Style.Success, `Deleted ${profile.name}`);
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Could not delete profile",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  };
+
+  const visibleResults = visibleProfiles && filterProfiles(visibleProfiles, searchText);
+  const hiddenResults = filterProfiles(hiddenProfiles, searchText);
+  const allHidden = visibleProfiles?.length === 0;
+
+  const profileItems = (items: Profile[], hidden: boolean) =>
+    items.map((profile, index) => (
+      <ProfileItem
+        key={profile.directory}
+        index={index}
+        profile={profile}
+        browser={browser}
+        hidden={hidden}
+        showHiddenAction={showHiddenAction}
+        onToggleHidden={toggleHidden}
+        onDelete={deleteProfile}
+      />
+    ));
 
   return (
-    <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
-      {profiles &&
-        profiles
-          .sort(sortAlphabetically)
-          .map((profile, index) => (
-            <ProfileItem key={profile.directory} index={index} profile={profile} browser={browser} />
-          ))}
+    <List
+      isLoading={!profiles && !error}
+      searchBarPlaceholder="Search Profile"
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
+      {visibleResults && profileItems(visibleResults, false)}
+      {showHidden && <List.Section title="Hidden">{profileItems(hiddenResults, true)}</List.Section>}
+      {/* Keep "Show Hidden Profiles" available when no visible profiles match. */}
+      {!showHidden && visibleResults?.length === 0 && hiddenResults.length > 0 && (
+        <List.EmptyView
+          icon={Icon.EyeDisabled}
+          title={allHidden ? "All Profiles Are Hidden" : "Only Hidden Profiles Match"}
+          description={allHidden ? "Show hidden profiles to unhide one." : "Show hidden profiles to see them."}
+          actions={<ActionPanel>{showHiddenAction}</ActionPanel>}
+        />
+      )}
     </List>
   );
 }
@@ -136,28 +257,6 @@ export default function Command() {
 //------------
 // Utils
 //------------
-
-const extractProfileFromInfoCache =
-  (infoCache: GoogleChromeInfoCache) =>
-  (infoCacheKey: string): Profile => {
-    const profile = infoCache[infoCacheKey];
-
-    return {
-      directory: infoCacheKey,
-      name: profile.name,
-      ...(profile.gaia_name &&
-        profile.user_name &&
-        profile.last_downloaded_gaia_picture_url_with_size && {
-          ga: {
-            name: profile.gaia_name,
-            email: profile.user_name,
-            pictureURL: profile.last_downloaded_gaia_picture_url_with_size,
-          },
-        }),
-    };
-  };
-
-const sortAlphabetically = (a: Profile, b: Profile) => a.name.localeCompare(b.name);
 
 const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): GoogleChromeBookmarkURL[] =>
   folder.children.flatMap((e) => {
@@ -276,6 +375,7 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
       isLoading={!bookmarkFile && !error}
       searchBarPlaceholder={`Search Bookmark in ${props.profile.name}`}
       onSearchTextChange={onSearchTextChange}
+      filtering={false}
     >
       {!searchText && (
         <List.Section>
@@ -360,7 +460,16 @@ function newTabUrlWithQuery(searchText: string) {
 
 function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
   const context = encodeURIComponent(
-    JSON.stringify({ directory: props.profile.directory, name: props.profile.name, ...props.target }),
+    JSON.stringify({
+      directory: props.profile.directory,
+      name: props.profile.name,
+      // Carried across the deeplink so a Quicklink for a signed-in profile
+      // can match Chrome's Profiles menu without a Local State fallback
+      // read — see `openGoogleChrome`. (JSON.stringify drops it when
+      // undefined, so a local profile's deeplink stays unchanged.)
+      givenName: props.profile.givenName,
+      ...props.target,
+    }),
   );
   const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/frouo/${
     environment.extensionName
@@ -396,12 +505,12 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
       <Action
         title={`Open in ${props.browser.appName}`}
         icon={Icon.Globe}
-        onAction={() => {
-          openGoogleChrome(
+        onAction={async () => {
+          await openGoogleChrome(
             props.profile,
             props.target,
             async () => {
-              await showHUD(hudMessage);
+              await showDoneHUD(hudMessage);
             },
             props.browser,
           );

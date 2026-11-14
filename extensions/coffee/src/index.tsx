@@ -1,39 +1,31 @@
 import {
+  Alert,
   Color,
+  confirmAlert,
   Icon,
   LaunchProps,
   LaunchType,
   MenuBarExtra,
+  environment,
   getPreferenceValues,
   launchCommand,
-  showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
-
-function parseEtime(etime: string): number {
-  const parts = etime.split(":").reverse();
-  const seconds = parseInt(parts[0]) || 0;
-  const minutes = parseInt(parts[1]) || 0;
-
-  let hours = parts[2] ? parseInt(parts[2]) : 0;
-  let days = 0;
-
-  if (parts[2] && parts[2].includes("-")) {
-    const dayHour = parts[2].split("-");
-    days = parseInt(dayHour[0]) || 0;
-    hours = parseInt(dayHour[1]) || 0;
-  }
-
-  return seconds + minutes * 60 + hours * 3600 + days * 86400;
-}
-
-interface CaffeinateInfo {
-  isRunning: boolean;
-  totalSeconds: number | null;
-  startTime: number | null;
-}
+import {
+  formatDuration,
+  startCaffeinate,
+  stopCaffeinate,
+  deviceName,
+  prepareUserStop,
+  getCaffeinationState,
+  stopLegacyCaffeinate,
+  CaffeinationState,
+} from "./utils";
+import { maybeAutoCaffeinate } from "./status";
+import { useMenuVisibility } from "./hooks/useMenuVisibility";
 
 const DURATION_PRESETS: { label: string; seconds: number }[] = [
   { label: "10 Minutes", seconds: 10 * 60 },
@@ -45,69 +37,76 @@ const DURATION_PRESETS: { label: string; seconds: number }[] = [
   { label: "12 Hours", seconds: 12 * 3600 },
 ];
 
-function useCaffeinateInfo(execute: boolean) {
-  const { isLoading, data, mutate } = useExec("ps -o etime,args= -p $(pgrep caffeinate) 2>/dev/null", [], {
-    shell: true,
-    execute,
-    parseOutput: (output): CaffeinateInfo => {
-      const stdout = output.stdout.trim();
-      if (!stdout) {
-        return { isRunning: false, totalSeconds: null, startTime: null };
-      }
-
-      const lines = stdout.split("\n");
-      const [etime, ...cmdArgs] = lines[lines.length - 1].trim().split(/\s+/);
-
-      const secondsRunning = parseEtime(etime);
-      const timeoutMatch = cmdArgs.join(" ").match(/-t (\d+)/);
-      const totalSeconds = timeoutMatch ? parseInt(timeoutMatch[1]) : null;
-      const startTime = Date.now() - secondsRunning * 1000;
-
-      return { isRunning: true, totalSeconds, startTime };
-    },
-  });
-
-  return {
-    isLoading,
-    data: data ?? { isRunning: false, totalSeconds: null, startTime: null },
-    mutate,
-  };
+function useCaffeinateInfo() {
+  // Raycast relaunches the menu bar command on every click; the cached result
+  // keeps the menu populated while the fresh process scan runs.
+  const result = useCachedPromise(getCaffeinationState, [], { onError: () => {} });
+  const { revalidate } = result;
+  useEffect(() => {
+    const interval = setInterval(() => revalidate(), process.platform === "win32" ? 5000 : 60000);
+    return () => clearInterval(interval);
+  }, [revalidate]);
+  return result;
 }
 
+const EMPTY_STATE: CaffeinationState = {
+  isRunning: false,
+  isManaged: false,
+  sessionId: null,
+  externalCount: process.platform === "win32" ? null : 0,
+  totalSeconds: null,
+  startTime: null,
+};
+
 export default function Command(props: LaunchProps) {
-  const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
-
-  const { isLoading, data, mutate } = useCaffeinateInfo(true);
-
-  const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data.isRunning;
-  const caffeinateLoader = hasLaunchContext ? false : isLoading;
+  const [cachedCaffeinated, setCachedCaffeinated] = useCachedState<boolean>("caffeinateStatus");
+  const { isLoading, data: state, mutate, error } = useCaffeinateInfo();
+  const data = state ?? EMPTY_STATE;
+  // While loading, `state` may be the snapshot saved by an earlier launch. Rows can
+  // show it, but the icon and caffeinateStatus follow only this launch's own scan,
+  // falling back to the flag the start/stop handlers keep current.
+  const isFresh = Boolean(state) && !isLoading && !error;
+  const displayCaffeinateStatus = isFresh ? state?.isRunning : (cachedCaffeinated ?? state?.isRunning);
   const preferences = getPreferenceValues<Preferences.Index>();
+  const isHideEnabled = Boolean(preferences.hidenWhenDecaffeinated);
 
-  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
 
-  const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
+  useEffect(() => {
+    if (isFresh && state) setCachedCaffeinated(state.isRunning);
+  }, [isFresh, state, setCachedCaffeinated]);
+
+  const isUserInitiated = props.launchType === LaunchType.UserInitiated;
+  const { isVisible, keepVisibleAfterStop } = useMenuVisibility({
+    isRunning: displayCaffeinateStatus,
+    isUserInitiated,
+    initialUserInitiated: isUserInitiated || environment.launchType === LaunchType.UserInitiated,
+    hideWhenInactive: isHideEnabled,
+    isLoading,
+    hasError: Boolean(error),
+  });
 
   useEffect(() => {
-    setLocalCaffeinateStatus(null);
-  }, [caffeinateStatus]);
+    if (isLoading || error) return;
+    void maybeAutoCaffeinate().catch(console.error);
+  }, [isLoading, error]);
 
   useEffect(() => {
-    if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;
+    if (!data.isManaged || data.totalSeconds === null || data.startTime === null) return;
     const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
-  }, [displayCaffeinateStatus, data.totalSeconds, data.startTime]);
+  }, [data.isManaged, data.totalSeconds, data.startTime]);
 
   const liveRemaining = (() => {
-    if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return null;
+    if (!data.isManaged || data.totalSeconds === null || data.startTime === null) return null;
     const remain = data.totalSeconds - Math.floor((Date.now() - data.startTime) / 1000);
     return remain > 0 ? `${formatDuration(remain)} remain` : null;
   })();
 
-  const indefinitelyActive = displayCaffeinateStatus && data.totalSeconds === null;
+  const indefinitelyActive = data.isManaged && data.totalSeconds === null;
 
   const untilActive =
-    displayCaffeinateStatus &&
+    data.isManaged &&
     data.totalSeconds !== null &&
     data.startTime !== null &&
     !DURATION_PRESETS.some((p) => p.seconds === data.totalSeconds);
@@ -122,41 +121,148 @@ export default function Command(props: LaunchProps) {
   })();
 
   const handleStartFor = async (seconds: number | null, durationLabel: string) => {
-    setLocalCaffeinateStatus(true);
+    setCachedCaffeinated(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
+    const reason =
+      seconds === null
+        ? undefined
+        : { kind: "for" as const, endsAt: new Date(Date.now() + seconds * 1000).toISOString() };
     const hudMessage =
-      seconds === null ? `Caffeinating your Mac ${durationLabel}` : `Caffeinating your Mac for ${durationLabel}`;
-    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
-      optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
-    });
-  };
-
-  const handleDeactivate = async () => {
-    setLocalCaffeinateStatus(false);
-    await mutate(stopCaffeinate({ menubar: true, status: true }), {
-      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-    });
-    if (preferences.hidenWhenDecaffeinated) {
-      showHUD("Your Mac is now decaffeinated");
+      seconds === null
+        ? `Caffeinating your ${deviceName()} ${durationLabel}`
+        : `Caffeinating your ${deviceName()} for ${durationLabel}`;
+    try {
+      await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs, reason), {
+        optimisticUpdate: () => ({
+          ...data,
+          isRunning: true,
+          isManaged: true,
+          sessionId: null,
+          totalSeconds: seconds,
+          startTime: Date.now(),
+          reason,
+        }),
+      });
+    } catch (error) {
+      setCachedCaffeinated(data.isRunning);
+      await showToast({ style: Toast.Style.Failure, title: "Failed to caffeinate", message: String(error) });
     }
   };
 
-  if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
+  const handleStopLegacy = async () => {
+    const legacy = data.legacySession;
+    if (!legacy) return;
+    try {
+      // With no Coffee-managed session, this process may be what keeps a running
+      // schedule satisfied; stopping it is then a decaffeination like any other.
+      // With a managed session running, it is only a leftover and the schedule is untouched.
+      const decision = data.isManaged ? { allowed: true, pauseRunningSchedule: false } : await prepareUserStop();
+      if (!decision.allowed) return;
+      const confirmed = await confirmAlert({
+        title: "Stop this caffeinate process?",
+        message:
+          `Process ${legacy.pid} was already running when this version of Coffee first started, and it was ` +
+          "launched the way earlier versions of Coffee launched caffeinate. Coffee cannot confirm it started " +
+          "this process: a terminal or another app could have launched it the same way.",
+        primaryAction: { title: "Stop Process", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return;
+      const operation = stopLegacyCaffeinate({ menubar: true, status: true }, legacy, {
+        pauseRunningSchedule: decision.pauseRunningSchedule,
+      });
+      await mutate(operation);
+      const stopped = await operation;
+      setCachedCaffeinated(stopped.isRunning);
+      if (isHideEnabled && !stopped.isRunning) keepVisibleAfterStop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to stop caffeinate process",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
+  const legacySubtitle = (() => {
+    if (!data.legacySession) return undefined;
+    if (data.legacySession.endsAt === null) return "Started before update";
+    const remain = Math.floor((data.legacySession.endsAt - Date.now()) / 1000);
+    return remain > 0 ? `Started before update — ${formatDuration(remain)} remain` : "Started before update";
+  })();
+  const externalCount = (data.externalCount ?? 0) - (data.legacySession ? 1 : 0);
+  const externalSummary = `${externalCount} ${externalCount === 1 ? "process" : "processes"}`;
+
+  const handleDeactivate = async () => {
+    try {
+      const decision = await prepareUserStop();
+      if (!decision.allowed) return;
+      const operation = stopCaffeinate({ menubar: true, status: true }, isHideEnabled, {
+        pauseRunningSchedule: decision.pauseRunningSchedule,
+      });
+      await mutate(operation, {
+        optimisticUpdate: () => ({
+          ...data,
+          isRunning: Boolean(data.externalCount),
+          isManaged: false,
+          sessionId: null,
+          totalSeconds: null,
+          startTime: null,
+          reason: undefined,
+        }),
+      });
+      const stopped = await operation;
+      setCachedCaffeinated(stopped.isRunning);
+      if (isHideEnabled && !stopped.isRunning) keepVisibleAfterStop();
+    } catch {
+      setCachedCaffeinated(data.isRunning);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to decaffeinate",
+        message: "Caffeination may still be running",
+      });
+      return;
+    }
+  };
+
+  if (!isVisible) {
     return null;
   }
 
   return (
     <MenuBarExtra
-      isLoading={caffeinateLoader}
+      // Keep Raycast from unloading the command before its own scan has landed.
+      isLoading={isLoading}
       icon={
         displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
           : { source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }
       }
     >
-      {isLoading ? null : (
+      {error ? (
+        <MenuBarExtra.Item title="Caffeination status unavailable" />
+      ) : isLoading && !state ? null : (
         <>
-          {displayCaffeinateStatus && <MenuBarExtra.Item title="Decaffeinate" onAction={handleDeactivate} />}
+          {/* The menu renders cached state, then the fresh scan while it may be open.
+              Raycast leaves blank rows when an open menu inserts or removes rows, so
+              these rows always exist and only their text and action change. */}
+          {data.externalCount !== null &&
+            (data.legacySession ? (
+              <MenuBarExtra.Item
+                title="Stop Likely Coffee Session…"
+                subtitle={externalCount > 0 ? `${legacySubtitle} · ${externalCount} external` : legacySubtitle}
+                onAction={handleStopLegacy}
+              />
+            ) : (
+              // Keep a subtitle: Raycast blanks an open row whose subtitle is removed.
+              <MenuBarExtra.Item
+                title="External caffeination"
+                subtitle={externalCount > 0 ? externalSummary : "None"}
+              />
+            ))}
+          <MenuBarExtra.Item
+            title="Stop Coffee Caffeination"
+            onAction={data.isManaged ? handleDeactivate : undefined}
+          />
           <MenuBarExtra.Section title="Caffeinate">
             <MenuBarExtra.Item
               title="Indefinitely"
@@ -164,7 +270,7 @@ export default function Command(props: LaunchProps) {
               onAction={indefinitelyActive ? handleDeactivate : () => handleStartFor(null, "indefinitely")}
             />
             {DURATION_PRESETS.map(({ label, seconds }) => {
-              const isActive = displayCaffeinateStatus && data.totalSeconds === seconds;
+              const isActive = data.isManaged && data.totalSeconds === seconds;
               return (
                 <MenuBarExtra.Item
                   key={label}

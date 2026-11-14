@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
-import useSWR from "swr";
+import { useCachedPromise } from "@raycast/utils";
 import {
   formatPlaytimeHours,
   formatSteamTimestamp,
@@ -16,14 +16,11 @@ export const SteamUserDetails = ({
   steamid: string;
   initialProfile?: SteamUserProfile;
 }) => {
-  const { data, error, isLoading } = useSWR(
-    ["steam-user-profile", steamid],
-    () => getSteamUserProfile(steamid, { includeExtras: true }),
-    {
-      fallbackData: initialProfile,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
+  const { data, error, isLoading } = useCachedPromise(
+    (id: string) => getSteamUserProfile(id, { includeExtras: true }),
+    [steamid],
+    // The error Detail explains the failure, so skip the default toast
+    { initialData: initialProfile, onError: () => undefined },
   );
 
   if (error) {

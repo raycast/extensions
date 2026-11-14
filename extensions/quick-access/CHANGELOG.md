@@ -1,5 +1,10 @@
 # Quick Access Changelog
 
+## [Fix Pins Not Saving] - 2026-09-24
+
+- Fixed pins not being saved by the Pin command: pins are now stored before the Raycast window is closed
+- Fixed pinned folders all being given the same id
+
 ## [Update Icons] - 2024-07-25
 
 - Updated icons for extensions, commands and Menu bar

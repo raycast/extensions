@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Grid, Icon, launchCommand, LaunchType, useNavigation } from "@raycast/api";
 import { CharacterDetail, RemoveFromFavoritesAction } from "./components.js";
 import { getFavoriteCharacters, sortCharacters } from "./utils.js";
@@ -21,12 +21,10 @@ export default function Favorites() {
     loadFavorites();
   }, [loadFavorites]);
 
-  useEffect(() => {
-    if (favoriteCharacters) {
-      const sortedCharacters = sortCharacters(favoriteCharacters, sortCharactersBy);
-      setFavoriteCharacters(sortedCharacters);
-    }
-  }, [favoriteCharacters, sortCharactersBy]);
+  const sortedCharacters = useMemo(
+    () => sortCharacters(favoriteCharacters ?? [], sortCharactersBy),
+    [favoriteCharacters, sortCharactersBy],
+  );
 
   return (
     <Grid
@@ -40,10 +38,10 @@ export default function Favorites() {
       }
     >
       {favoriteCharacters?.length ? (
-        favoriteCharacters?.map((character) => (
+        sortedCharacters.map((character) => (
           <Grid.Item
-            id={character.Name}
-            key={character.Name}
+            id={`${character.Region}-${character.Name}`}
+            key={`${character.Region}-${character.Name}`}
             title={character.Name}
             subtitle={`Lv.${character.Level}`}
             content={{ value: character.CharacterImageURL, tooltip: `Lv.${character.Level}` }}
@@ -57,6 +55,7 @@ export default function Favorites() {
                       <CharacterDetail
                         checkLatest
                         characterData={character}
+                        onRefreshCharacter={loadFavorites}
                         onRemoveCharacter={() => {
                           loadFavorites();
                         }}

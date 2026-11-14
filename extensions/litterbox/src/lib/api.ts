@@ -1,5 +1,6 @@
 import { readFile } from "fs/promises";
 import * as path from "path";
+import { validateFileSize, validateUploadFile } from "./validation";
 
 const LITTERBOX_API = "https://litterbox.catbox.moe/resources/internals/api.php";
 
@@ -16,8 +17,11 @@ export const EXPIRY_OPTIONS: { value: ExpiryTime; label: string }[] = [
  * Upload a file to Litterbox. Returns the shareable URL (plain text response).
  */
 export async function uploadFile(filePath: string, time: ExpiryTime): Promise<string> {
+  await validateUploadFile(filePath);
   const buffer = await readFile(filePath);
   const filename = path.basename(filePath);
+  // Recheck after reading in case the file grew since preflight.
+  validateFileSize(buffer.byteLength, filename);
   const fileBytes = new Uint8Array(buffer);
   const form = new FormData();
   form.append("reqtype", "fileupload");

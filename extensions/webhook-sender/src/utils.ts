@@ -91,6 +91,8 @@ export function emptyField(): KeyValueField {
   return { id: generateId(), key: "", value: "", type: "string" };
 }
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export async function sendWebhook(
   request: WebhookRequest,
 ): Promise<{ status: number; body: string; responseTime: number }> {
@@ -100,20 +102,34 @@ export async function sendWebhook(
     ...(request.headers || {}),
   };
 
-  const start = Date.now();
-  const response = await fetch(request.url, {
-    method: request.method,
-    headers,
-    body,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  const responseTime = Date.now() - start;
+  const start = Date.now();
+  let response: Response;
+  let responseTime: number;
   let responseBody = "";
   try {
-    const text = await response.text();
-    responseBody = formatJson(text);
-  } catch {
-    responseBody = "(no body)";
+    response = await fetch(request.url, {
+      method: request.method,
+      headers,
+      body,
+      signal: controller.signal,
+    });
+    responseTime = Date.now() - start;
+    try {
+      responseBody = formatJson(await response.text());
+    } catch (err) {
+      if (controller.signal.aborted) throw err;
+      responseBody = "(no body)";
+    }
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   return { status: response.status, body: responseBody, responseTime };

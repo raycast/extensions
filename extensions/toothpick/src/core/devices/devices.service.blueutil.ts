@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { Device } from "./devices.model";
 import ApplescriptDevicesService from "./devices.service.applescript";
 import { getPreferenceValues } from "@raycast/api";
@@ -38,7 +38,7 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
     const applescriptDevices = super.getDevices();
     try {
       const blueutilOutput = JSON.parse(
-        execSync(`blueutil --paired --format json`, {
+        execFileSync("blueutil", ["--paired", "--format", "json"], {
           env: this.envVars,
         }).toString(),
       );
@@ -59,9 +59,9 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
 
   connectDevice(mac: string): boolean {
     try {
-      execSync(`blueutil --connect ${mac} --wait-connect ${mac} 5`, {
-        env: this.envVars,
-      });
+      if (!/^(?:[0-9A-F]{2}:){5}[0-9A-F]{2}$/i.test(mac)) return false;
+      execFileSync("blueutil", ["-p", "1"], { env: this.envVars });
+      execFileSync("blueutil", ["--connect", mac, "--wait-connect", mac, "5"], { env: this.envVars });
       return true;
     } catch {
       return false;
@@ -70,7 +70,8 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
 
   disconnectDevice(mac: string): boolean {
     try {
-      execSync(`blueutil --disconnect ${mac} --wait-disconnect ${mac} 5`, {
+      if (!/^(?:[0-9A-F]{2}:){5}[0-9A-F]{2}$/i.test(mac)) return false;
+      execFileSync("blueutil", ["--disconnect", mac, "--wait-disconnect", mac, "5"], {
         env: this.envVars,
       });
       return true;
@@ -80,7 +81,9 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
   }
 
   refreshBluetooth(): boolean {
-    execSync(`blueutil -p 0 && /bin/sleep 1 && blueutil -p 1`, { env: this.envVars });
+    execFileSync("blueutil", ["-p", "0"], { env: this.envVars });
+    execFileSync("/bin/sleep", ["1"]);
+    execFileSync("blueutil", ["-p", "1"], { env: this.envVars });
     return true;
   }
 }

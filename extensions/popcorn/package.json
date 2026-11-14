@@ -6,6 +6,7 @@
   "icon": "extension-icon.png",
   "author": "martipops",
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "search-streams",
@@ -30,7 +31,7 @@
           "title": "Default Streaming App",
           "description": "Default Streaming App to use for streaming",
           "placeholder": "Select a streaming app",
-          "default": "IINA"
+          "default": { "macOS": "IINA", "Windows": "VLC" }
         },
         {
           "name": "alternativeStreamingApps",
@@ -45,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.96.1",
+    "@raycast/api": "^1.104.25",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {

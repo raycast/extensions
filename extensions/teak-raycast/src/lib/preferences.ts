@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const getPreferences = (): Preferences => {
-  return getPreferenceValues<Preferences>();
-};
+export const grandfatheredApiKey = (): string | undefined =>
+  getPreferenceValues<Preferences>().apiKey?.trim() || undefined;

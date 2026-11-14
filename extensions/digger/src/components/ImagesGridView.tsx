@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
-import { Grid, ActionPanel, Action, Icon, Color, Keyboard } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { Action, ActionPanel, Color, Grid, Icon, Keyboard } from "@raycast/api";
+import { useGuardedImages } from "../hooks/useGuardedImages";
 import { ImageAsset, ImageAssetType } from "../types";
 import { resolveUrl } from "../utils/urlUtils";
 
@@ -90,8 +91,17 @@ export function ImagesGridView({ images, siteUrl }: ImagesGridViewProps) {
     return uniqueImages.filter((img) => img.type === typeFilter);
   }, [uniqueImages, typeFilter]);
 
+  // Every URL here came from the page. Passing one to Raycast as a tile source
+  // would let Raycast fetch it outside the network guard, so each is downloaded
+  // through the guard and shown from a local file instead (see fetchImageToFile).
+  const { images: loaded, isLoading } = useGuardedImages(
+    uniqueImages.map((img) => resolveUrl(img.src, siteUrl)),
+    siteUrl,
+  );
+
   return (
     <Grid
+      isLoading={isLoading}
       navigationTitle={`Images (${filteredImages.length})`}
       searchBarPlaceholder="Filter images..."
       columns={4}
@@ -111,15 +121,22 @@ export function ImagesGridView({ images, siteUrl }: ImagesGridViewProps) {
         const absoluteUrl = resolveUrl(img.src, siteUrl);
         const urlWithoutQuery = absoluteUrl.split("?")[0];
         const filename = urlWithoutQuery.split("/").pop() || img.src;
-        const subtitle = getTypeLabel(img.type) + (img.sizes ? ` • ${img.sizes}` : "");
+        const result = loaded.get(absoluteUrl);
+        const failed = result !== undefined && "error" in result;
+        // Past LIMITS.MAX_GUARDED_IMAGES an image is never downloaded; once loading
+        // is over, a missing result means that, not a failure — and it says so.
+        const skipped = !isLoading && result === undefined && !absoluteUrl.startsWith("data:");
+        const status = failed ? " • couldn't load" : skipped ? " • preview not loaded" : "";
+        const subtitle = getTypeLabel(img.type) + (img.sizes ? ` • ${img.sizes}` : "") + status;
 
         return (
           <Grid.Item
             key={index}
-            content={{
-              source: absoluteUrl,
-              fallback: getTypeIcon(img.type).source,
-            }}
+            content={
+              result && "path" in result
+                ? { source: result.path, fallback: getTypeIcon(img.type).source }
+                : getTypeIcon(img.type)
+            }
             title={filename.length > 30 ? filename.slice(0, 27) + "..." : filename}
             subtitle={subtitle}
             actions={

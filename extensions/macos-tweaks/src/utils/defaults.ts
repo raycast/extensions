@@ -4,9 +4,22 @@ import type { TweakDefinition, TweakState, TweakType, TweakValue } from "../type
 
 const execFileAsync = promisify(execFile);
 
-function coerceDefault(result: string, expectedType?: TweakType): TweakValue | undefined {
+/**
+ * `defaults read` prints non-ASCII characters as escape sequences: a value stored as “abc” comes
+ * back as the literal text \u201cabc\u201d. Left as-is it never matches the declared default, so
+ * the tweak would always read as modified and the escapes would show up in the UI.
+ */
+function decodeUnicodeEscapes(value: string): string {
+  return value.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+function coerceDefault(rawResult: string, expectedType?: TweakType): TweakValue | undefined {
   // Empty or multiline results (dicts/arrays) → treat as unreadable
-  if (result === "" || result.includes("\n")) return undefined;
+  if (rawResult === "" || rawResult.includes("\n")) return undefined;
+
+  // Decode before anything branches on the value: an enum whose values are strings returns
+  // early below, and would otherwise keep the raw \uXXXX text.
+  const result = decodeUnicodeEscapes(rawResult);
 
   // If we expect a number or enum with numeric values, parse as number first
   if (expectedType === "number" || expectedType === "enum") {

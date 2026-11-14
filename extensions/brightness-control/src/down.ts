@@ -1,17 +1,23 @@
-import { showHUD } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { adjustBrightness } from "./utils/platform";
+import { showBrightnessFeedback } from "./utils/feedback";
 
 export default async () => {
-  const result = await adjustBrightness(-10);
+  const { closeRaycast = true, showDisplayName = true, step = "10" } = getPreferenceValues<Preferences.Down>();
+  const amount = parseStep(step);
+  const result = await adjustBrightness(-amount);
   if (!result) return;
 
-  await showHUD(formatBrightnessHUD(result, "Brightness decreased"));
+  const message =
+    result.displayName && result.brightness != null
+      ? showDisplayName
+        ? `${result.displayName}: ${result.brightness}%`
+        : `Brightness set to ${result.brightness}%`
+      : "Brightness decreased";
+  await showBrightnessFeedback(message, closeRaycast);
 };
 
-function formatBrightnessHUD(result: { displayName?: string; brightness?: number }, fallback: string): string {
-  if (result.displayName && result.brightness != null) {
-    return `${result.displayName}: ${result.brightness}%`;
-  }
-
-  return fallback;
+function parseStep(step: string): number {
+  const amount = Number.parseInt(step, 10);
+  return Number.isInteger(amount) && amount > 0 ? amount : 10;
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "read-this-later",
-  "title": "Research Sync",
+  "title": "Clipfile",
   "description": "Browse and read your saved articles, and save the current browser tab.",
   "icon": "icon.png",
   "author": "shearm",
@@ -14,15 +14,15 @@
     {
       "name": "list-unread",
       "title": "Show Saved Links",
-      "subtitle": "Research Sync",
+      "subtitle": "Clipfile",
       "description": "Browse your saved articles, read them, and open them in your browser",
       "mode": "view"
     },
     {
       "name": "save-current-tab",
       "title": "Save Current Tab",
-      "subtitle": "Research Sync",
-      "description": "Save the URL of the frontmost browser tab to Research Sync",
+      "subtitle": "Clipfile",
+      "description": "Save the URL of the frontmost browser tab to Clipfile",
       "mode": "no-view"
     }
   ],
@@ -30,7 +30,7 @@
     {
       "name": "syncToken",
       "title": "Sync Token",
-      "description": "Bearer token for the Research Sync service (the same token your browser extension and iOS app use).",
+      "description": "Bearer token for the Clipfile service (the same token your browser extension and iOS app use).",
       "type": "password",
       "required": true
     }

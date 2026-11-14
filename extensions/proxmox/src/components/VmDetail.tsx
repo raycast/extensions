@@ -1,9 +1,9 @@
 import { List } from "@raycast/api";
-import { type PveVm, PveVmStatus, PveVmTypes } from "@/types";
+import { type PveVm, PveVmStatus, PveVmTypes, type WithServer } from "@/types";
 import { formatCPU, formatPercentage, formatShortTime, formatStorageSize } from "@/utils/format";
 
 type VmDetailProps = {
-  vm: PveVm;
+  vm: WithServer<PveVm>;
 };
 
 export const VmDetail = ({ vm }: VmDetailProps) => {
@@ -36,6 +36,7 @@ export const VmDetail = ({ vm }: VmDetailProps) => {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="ID" text={vm.vmid.toString()} />
+          <List.Item.Detail.Metadata.Label title="Server" text={vm.server.name} />
           <List.Item.Detail.Metadata.Label title="Node" text={vm.node} />
           <List.Item.Detail.Metadata.Label title="Status" text={vm.status} />
           <List.Item.Detail.Metadata.Separator />

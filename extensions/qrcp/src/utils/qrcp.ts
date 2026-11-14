@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage } from "http";
-import { networkInterfaces, homedir } from "os";
+import dgram from "dgram";
+import { homedir, networkInterfaces } from "os";
 import QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
@@ -402,7 +403,41 @@ export async function generateQRCode(url: string): Promise<string> {
   return await QRCode.toDataURL(url);
 }
 
-export function getLocalIp(): string {
+export async function getLocalIp(): Promise<string> {
+  const routeAddress = await new Promise<string | null>((resolve) => {
+    const socket = dgram.createSocket("udp4");
+    let finished = false;
+
+    const finish = (address: string | null) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      try {
+        socket.close();
+      } catch {
+        // ignore
+      }
+      resolve(address);
+    };
+
+    socket.once("error", () => finish(null));
+    socket.connect(53, "1.1.1.1", () => {
+      const address = socket.address();
+      if (typeof address === "object" && address.address) {
+        finish(address.address);
+      } else {
+        finish(null);
+      }
+    });
+
+    setTimeout(() => finish(null), 2000);
+  });
+
+  if (routeAddress && routeAddress !== "0.0.0.0") {
+    return routeAddress;
+  }
+
   const nets = networkInterfaces();
   for (const name of Object.keys(nets)) {
     for (const net of nets[name]!) {
@@ -411,6 +446,7 @@ export function getLocalIp(): string {
       }
     }
   }
+
   return "localhost";
 }
 
@@ -419,7 +455,7 @@ type ReceiveServerOptions = {
 };
 
 export async function startReceiveServer(options: ReceiveServerOptions = {}) {
-  const ip = getLocalIp();
+  const ip = await getLocalIp();
   const port = 0;
   let fileReceivedCallback: (fileName: string) => void = () => {};
   let deviceConnectedCallback: (ip: string) => void = () => {};
@@ -483,7 +519,7 @@ export async function startReceiveServer(options: ReceiveServerOptions = {}) {
 }
 
 export async function startSendServer(files: string[]) {
-  const ip = getLocalIp();
+  const ip = await getLocalIp();
   const port = 0;
   let downloadCallback: () => void = () => {};
   const downloadPageHtml = `<!DOCTYPE html>

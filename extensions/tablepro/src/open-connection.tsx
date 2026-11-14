@@ -10,7 +10,7 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { findConnection } from "./lib/connections";
 import { openConnectionDeeplink } from "./lib/deeplink";
-import { tableProInstalled } from "./lib/paths";
+import { findTablePro } from "./lib/app";
 
 interface Args {
   connection: string;
@@ -27,7 +27,7 @@ export default async function OpenConnection(
     });
     return;
   }
-  if (!tableProInstalled()) {
+  if (!(await findTablePro())) {
     await showToast({
       style: Toast.Style.Failure,
       title: "TablePro is not installed",

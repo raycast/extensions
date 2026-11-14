@@ -83,8 +83,18 @@ export default function Command() {
   // so next/previous land instantly instead of waiting out a poll. Without the engine there
   // is no event source (AppleScript-only providers), so fall back to periodic polling.
   const engineAvailable = data?.snapshot.engineAvailable ?? false;
+
+  const playing = data?.snapshot.sources.find((s) => s.isPlaying);
+  // Whether this render produces a menu-bar item at all. When it doesn't (nothing playing
+  // and the user hides the stopped state), Command() returns null below and Raycast has to
+  // "render empty" — and it waits for the command's runtime to go idle first. A live stream
+  // subprocess or poll timer would keep the runtime alive past Raycast's 5s budget and throw
+  // "renderEmpty timed out after 5000ms", so live updates must not run on the empty path.
+  const showMenu = isLoading || Boolean(playing) || prefs.showWhenStopped;
+
   useEffect(() => {
     if (environment.launchType === LaunchType.Background) return;
+    if (!showMenu) return;
     if (!engineAvailable) {
       const t = setInterval(() => revalidate(), OPEN_MENU_POLL_MS);
       return () => clearInterval(t);
@@ -101,15 +111,14 @@ export default function Command() {
       handle.stop();
       if (poll) clearInterval(poll);
     };
-  }, [revalidate, engineAvailable]);
+  }, [revalidate, engineAvailable, showMenu]);
 
-  const playing = data?.snapshot.sources.find((s) => s.isPlaying);
   const title =
     prefs.menuBarStyle === "iconAndTitle" && !data?.titleHidden && playing
       ? truncate(`${playing.title} – ${playing.artist ?? playing.appName}`, maxLen)
       : undefined;
 
-  if (!playing && !prefs.showWhenStopped && !isLoading) return null;
+  if (!showMenu) return null;
 
   return (
     <MenuBarExtra

@@ -55,15 +55,13 @@ export default function InviteTeamMember({ didInviteNewUser }: Props) {
           setIsLoading(false);
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Invite sent",
+            title: "Invitation Sent",
+            message: values.email,
           });
-          if (response && response.ok) {
-            const json = await response.json();
-            const invited = userInvitationsSchema.safeParse(json.data);
-            if (invited.success) {
-              didInviteNewUser(invited.data);
-            }
+          const json = await response.json();
+          const invited = userInvitationsSchema.safeParse(json.data);
+          if (invited.success) {
+            didInviteNewUser(invited.data);
           }
         } catch (error) {
           setIsLoading(false);

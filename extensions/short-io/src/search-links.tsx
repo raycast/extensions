@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { useState } from "react";
 import { formatISODate, isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
@@ -81,13 +81,13 @@ export default function SearchLinks() {
                   <Action.Push
                     icon={Icon.Pencil}
                     title={"Edit Link"}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<EditLink shortLink={value} mutate={mutate} />}
                   />
                   <Action
                     icon={Icon.Trash}
                     title={"Delete Link"}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={async () => {
                       await alertDialog(
                         Icon.Trash,

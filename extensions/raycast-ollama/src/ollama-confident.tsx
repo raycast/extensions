@@ -4,7 +4,7 @@ import { OllamaApiModelCapability } from "./lib/ollama/enum";
 import { CommandAnswer } from "./lib/settings/enum";
 import { AnswerView } from "./lib/ui/AnswerView/main";
 
-const pref = getPreferenceValues<Preferences>();
+const pref = getPreferenceValues<Preferences.OllamaConfident>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 export default function Command(): React.JSX.Element {
@@ -31,6 +31,7 @@ Rewritten text:`;
       prompt={p}
       creativity={Creativity.Low}
       capabilities={[OllamaApiModelCapability.COMPLETION]}
+      autoReplace={pref.ollamaAutoReplace}
     />
   );
 }

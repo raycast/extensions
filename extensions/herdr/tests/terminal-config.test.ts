@@ -37,6 +37,19 @@ describe("expandCustomLauncher", () => {
     ).toEqual(["launcher", ["--command", "'/path with space/herdr' 'agent' 'attach' 'reviewer'"]]);
   });
 
+  it("expands {command} embedded inside a larger word", () => {
+    expect(expandCustomLauncher(`sh -c "cd /work && {command}"`, "/opt/herdr", ["attach"])).toEqual([
+      "sh",
+      ["-c", "cd /work && '/opt/herdr' 'attach'"],
+    ]);
+  });
+
+  it("rejects {args} embedded inside a larger word", () => {
+    expect(() => expandCustomLauncher(`sh -c "{herdr} {args}"`, "/opt/herdr", ["attach"])).toThrow(
+      "standalone word",
+    );
+  });
+
   it("requires a command placeholder", () => {
     expect(() => expandCustomLauncher("terminal -e", "/herdr", [])).toThrow("must contain");
   });

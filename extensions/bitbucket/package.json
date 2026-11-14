@@ -4,6 +4,9 @@
   "title": "Bitbucket Search",
   "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
   "icon": "bitbucket-logo.png",
+  "categories": [
+    "Developer Tools"
+  ],
   "author": "Francois",
   "contributors": [
     "earmstrong42",
@@ -12,7 +15,9 @@
     "arpitdalal",
     "litomore",
     "AaronMoat",
-    "0xdhrv"
+    "0xdhrv",
+    "siuhinnn",
+    "baukeposthuma"
   ],
   "license": "MIT",
   "commands": [
@@ -28,7 +33,71 @@
       "title": "Search My Open Pull Requests",
       "subtitle": "Bitbucket",
       "description": "Showing open pull requests for the current user",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "0",
+          "description": "Speeds up this search by skipping repositories not updated within this many days. Set to 0 for no limit (scan every repository).",
+          "placeholder": "0 = no limit"
+        }
+      ]
+    },
+    {
+      "name": "searchAllPullRequests",
+      "title": "Search All Open Pull Requests",
+      "subtitle": "Bitbucket",
+      "description": "Showing all open pull requests in the workspace",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "0",
+          "description": "Speeds up this search by skipping repositories not updated within this many days. Set to 0 for no limit (scan every repository).",
+          "placeholder": "0 = no limit"
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "Bitbucket",
+      "description": "Shows Bitbucket notifications in the menu bar: review requests, approvals and requested changes, comments and mentions on pull requests, merged or declined pull requests, and failed pipelines.",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "alwaysShow",
+          "type": "checkbox",
+          "label": "Always Show",
+          "description": "Show the menu bar item even when you have no notifications.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCount",
+          "type": "checkbox",
+          "label": "Show Notification Count",
+          "description": "Show the notification count in the menu bar.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "30",
+          "description": "Skips repositories not updated within this many days to keep background refreshes fast. Set to 0 for no limit.",
+          "placeholder": "0 = no limit"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -53,18 +122,18 @@
       "type": "password",
       "title": "API Token",
       "required": true,
-      "description": "Generate an API token at https://id.atlassian.com/manage-profile/security/api-tokens with read:* scopes (or see README for specific scopes)",
+      "description": "Create an API token at https://id.atlassian.com/manage-profile/security/api-tokens. Required scopes: read:user:bitbucket, read:workspace:bitbucket, read:repository:bitbucket, read:pullrequest:bitbucket, read:pipeline:bitbucket (or simply read:*), plus write:pullrequest:bitbucket for review actions.",
       "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.3.2",
     "bitbucket": "^2.12.0",
     "dot-object": "^2.1.5",
     "node-fetch": "^3.3.2",
     "node-localstorage": "^3.0.5",
-    "swr": "2.3.6",
-    "zod": "^4.1.12"
+    "swr": "2.3.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

@@ -3,7 +3,7 @@ import { LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/ap
 import { iCloudService } from "../api/connect";
 import TwoFactorAuthForm from "./forms/TwoFactorAuthForm";
 import { LoginForm } from "./forms/LoginForm";
-import { iCloudError, iCloudFailedLoginError } from "../api/errors";
+import { iCloudError, iCloudFailedLoginError, iCloudTermsError } from "../api/errors";
 
 const AuthState = {
   UNAUTHENTICATED: 0,
@@ -86,7 +86,7 @@ export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }
         toast.title = "Logged in";
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "2FA failed";
+        toast.title = error instanceof iCloudTermsError ? "Action required at icloud.com" : "2FA failed";
         toast.message = (error as { message: string }).message;
       }
     }

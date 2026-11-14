@@ -1,5 +1,23 @@
 # R2 Uploader Changelog
 
+## [Batch Uploads and Search Improvements] - 2026-11-06
+
+- Support batch Finder uploads, streamed uploads, and checked public links.
+- Protect original files during image conversion and prevent temporary cleanup errors from interrupting batch uploads.
+- Keep files on all pages searchable and refresh extension screenshots.
+
+## [Fix Crash on Launch] - 2026-11-03
+
+- Upgrade `@raycast/api` to 2.10.1 so the build no longer generates broken `@smithy/core` subpath exports, fixing the `Package subpath './transport' is not defined by "exports"` error when running the extension
+- Align `@types/react` with the version bundled by `@raycast/api` so the build keeps type-checking
+
+## [WebP Conversion and Metadata Updates] - 2026-10-10
+
+- Add optional WebP conversion using the `cwebp` command
+- Update the Raycast extension author to `ypp`
+- Update extension metadata screenshots
+- R2 Public Domain is now required for copied links to point to the configured public URL
+
 ## [Browse R2 Files] - 2026-07-23
 
 - Add a **Browse R2 Files** command to navigate your bucket's folders, preview files (inline image preview via a short-lived signed URL, works even on private buckets), copy their link, and delete individual files with a confirmation prompt

@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Form,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useCachedPromise, useForm, usePromise } from "@raycast/utils";
 import { glimpse, ModelEntry } from "./glimpse";
 
@@ -73,7 +84,7 @@ export default function Command() {
           <Action.Push
             title="Configure & Start"
             icon={Icon.Gear}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
             target={<ConfigureForm status={data} onStarted={revalidate} />}
           />
           {apiBase && endpoint ? (
@@ -81,19 +92,22 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Base URL"
                 content={apiBase}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
               />
               <Action.CopyToClipboard
                 title="Copy Endpoint URL"
                 content={endpoint}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "." },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                }}
               />
             </ActionPanel.Section>
           ) : null}
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={() => revalidate()}
           />
         </ActionPanel>
@@ -113,7 +127,7 @@ function detailMarkdown(
 
 The local API is off.
 
-Turn it on to let other apps and scripts transcribe through Glimpse, using an OpenAI-compatible endpoint on your Mac.`;
+Turn it on to let other apps and scripts transcribe through Glimpse, using an OpenAI-compatible endpoint on this computer.`;
   }
 
   const curl = [

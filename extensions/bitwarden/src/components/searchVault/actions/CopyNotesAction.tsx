@@ -15,7 +15,7 @@ function CopyNotesAction() {
     try {
       const username = await getUpdatedVaultItem(selectedItem, (item) => item.notes, "Getting notes...");
       if (username) {
-        await Clipboard.copy(username, { transient: getTransientCopyPreference("other") });
+        await Clipboard.copy(username, { concealed: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied notes to clipboard");
       }
     } catch (error) {

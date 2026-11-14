@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "svg-new",
+  "title": "SVG.new",
+  "description": "Convert images to SVG vectors and remove backgrounds with SVG.new.",
+  "icon": "extension-icon.png",
+  "author": "svgnew",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-to-svg",
+      "title": "Convert Image to SVG",
+      "subtitle": "SVG.new",
+      "description": "Convert the image selected in Finder to an SVG saved next to it.",
+      "mode": "no-view",
+      "keywords": [
+        "vectorize",
+        "vector",
+        "trace",
+        "image to svg",
+        "png to svg",
+        "jpg to svg"
+      ]
+    },
+    {
+      "name": "convert-clipboard-to-svg",
+      "title": "Convert Clipboard Image to SVG",
+      "subtitle": "SVG.new",
+      "description": "Convert the image on the clipboard to an SVG, save it to Downloads and copy it.",
+      "mode": "no-view",
+      "keywords": [
+        "vectorize",
+        "vector",
+        "trace",
+        "clipboard",
+        "paste"
+      ]
+    },
+    {
+      "name": "remove-background",
+      "title": "Remove Background",
+      "subtitle": "SVG.new",
+      "description": "Remove the background from the image selected in Finder and save a transparent PNG and SVG next to it.",
+      "mode": "no-view",
+      "keywords": [
+        "background",
+        "remove bg",
+        "transparent",
+        "cutout"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your SVG.new API key from svg.new/account",
+      "placeholder": "svk_…",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

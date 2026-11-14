@@ -1,5 +1,9 @@
 # Clockodo Changelog
 
+## [Upgrade dependencies for v2 compatibility] - 2026-09-19
+
+- Upgrade all dependencies for v2 compatibility
+
 ## [Use shorter client name] - 2026-05-17
 
 - Use shorter client name to allow longer email addresses, see https://github.com/raycast/extensions/issues/28031

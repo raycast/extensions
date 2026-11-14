@@ -98,7 +98,7 @@
       "subtitle": "Laravel Herd",
       "description": "Opens the database of your most recent site.",
       "mode": "no-view",
-      "interval": "5s"
+      "interval": "1m"
     },
     {
       "name": "open-recent-site-tinker",
@@ -114,7 +114,7 @@
       "subtitle": "Laravel Herd",
       "description": "Opens the Log Viewer for your most recent site.",
       "mode": "no-view",
-      "interval": "5s"
+      "interval": "1m"
     },
     {
       "name": "open-docs",

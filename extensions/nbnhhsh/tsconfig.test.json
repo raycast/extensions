@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "rootDir": ".",
+    "outDir": "node_modules/.cache/nbnhhsh-tests"
+  },
+  "include": ["src/lib/lookup.ts", "tests/**/*.ts"]
+}

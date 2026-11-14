@@ -7,6 +7,7 @@ import { SiteCommands } from "../actions/SiteCommands";
 import { useSites } from "../../hooks/useSites";
 import { API_RATE_LIMIT } from "../../config";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
+import { repositoryLabel } from "../../lib/url";
 import { useEffect, useState } from "react";
 
 export const SitesList = ({ server }: { server: IServer }) => {
@@ -44,7 +45,7 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
       id={site.id.toString()}
       key={site.id}
       title={site?.name ?? "Site name undefined"}
-      subtitle={site.repository ?? site.app ?? ""}
+      subtitle={repositoryLabel(site.repository) || site.app_type || ""}
       icon={stateIcon}
       accessories={[{ text: stateText }]}
       actions={

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, clearSearchBar, Color, Icon, List, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import React, { useCallback } from "react";
 
@@ -55,31 +55,46 @@ const AutoCompleteList = (props: AutoCompleteListProps) => {
   const { query, setQuery } = props;
   const { push } = useNavigation();
   const matchedOptions = useAutoComplete({ query });
-  const onSelect = useCallback((expectQuery: string) => {
-    setQuery(expectQuery);
-  }, []);
-  const onConfirm = useCallback(async (expectQuery: string, callback?: () => void) => {
-    if (expectQuery.startsWith("-config")) {
-      push(<ConfigView />);
-    } else {
-      callback && callback();
-      await showToast({ title: "Success", message: `'${expectQuery}' done.` });
-      await clearSearchBar();
-    }
-  }, []);
+  const onSelect = useCallback(
+    (expectQuery: string) => {
+      setQuery(expectQuery);
+    },
+    [setQuery],
+  );
+  const onConfirm = useCallback(
+    async (expectQuery: string, callback?: () => void) => {
+      if (expectQuery.startsWith("-config")) {
+        push(<ConfigView />);
+      } else {
+        callback?.();
+        setQuery("");
+        await showToast({ title: "Success", message: `'${expectQuery.trim()}' done.` });
+      }
+    },
+    [push, setQuery],
+  );
   const renderAutoCompleteItems = (matchedOptions: QueryOptionResult[]) => {
     return (
       <List.Section title="Available config options" subtitle="enter to autocomplete">
-        {matchedOptions.map((option) => (
-          <ACListItem id={option.key} onAction={onSelect} {...option} />
+        {matchedOptions.map(({ key, ...option }) => (
+          <ACListItem key={key} id={key} onAction={onSelect} {...option} />
         ))}
       </List.Section>
     );
   };
   const renderExecuteItem = (matchedOption: QueryOptionResult) => {
-    const { icon, title, ...resOptions } = matchedOption;
+    const { icon, key, title, ...resOptions } = matchedOption;
     const executeTitle = `Confirm for [${title}]?`;
-    return <ACListItem icon={icon || Icon.Cog} onAction={onConfirm} title={executeTitle} {...resOptions} />;
+    return (
+      <ACListItem
+        key={key}
+        id={key}
+        icon={icon || Icon.Cog}
+        onAction={onConfirm}
+        title={executeTitle}
+        {...resOptions}
+      />
+    );
   };
   return matchedOptions.length
     ? matchedOptions[0].isFinal && query.trim() === matchedOptions[0].query.trim()
@@ -91,5 +106,5 @@ const AutoCompleteList = (props: AutoCompleteListProps) => {
 export default React.memo(
   AutoCompleteList,
   (prevProps, nextProps) =>
-    (!prevProps.query.startsWith("-") && !nextProps.query.startsWith("-")) || prevProps.query === nextProps.query
+    (!prevProps.query.startsWith("-") && !nextProps.query.startsWith("-")) || prevProps.query === nextProps.query,
 );

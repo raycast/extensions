@@ -22,7 +22,7 @@ export default function Command() {
   const throttledSearchText = useThrottle(searchText, { wait: 200 });
   const hasSearchText = throttledSearchText.trim().length > 0;
 
-  const { devices, permissionView, refreshDevices } = useDevices();
+  const { devices, isLoading: isLoadingTabs, permissionView, refreshDevices } = useDevices();
   const { bookmarks, hasPermission } = useBookmarks(false);
   const {
     data: historyEntries,
@@ -69,7 +69,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={!devices || !bookmarks || isLoadingHistory}
+      isLoading={isLoadingTabs || !bookmarks || isLoadingHistory}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search tabs, bookmarks and history"
     >

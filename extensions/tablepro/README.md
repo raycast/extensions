@@ -11,6 +11,12 @@
 
 The MCP server starts on demand. You don't need to enable it manually.
 
+The extension finds TablePro by its bundle ID, `com.TablePro`, so it works wherever the app is installed.
+
+## Preferences
+
+- **MCP Port**: the port of TablePro's MCP server. The default is `23508`. If that port is taken, TablePro runs the server on another port and shows it in its settings. Copy that port here.
+
 ## Commands
 
 - **Search Connections**: list saved connections, open one in TablePro, copy a deep link.
@@ -25,11 +31,11 @@ The MCP server starts on demand. You don't need to enable it manually.
 
 ## AI tools
 
-The extension exposes 10 tools to Raycast AI:
+The extension exposes 12 tools to Raycast AI:
 
 - `list-connections`, `list-databases`, `list-schemas`, `list-tables`, `describe-table`, `get-table-ddl`
 - `run-query`, with mutating SQL routed through `Tool.Confirmation` showing connection name and SQL preview
-- `explain-query`, `open-connection-window`, `search-history`
+- `explain-query`, `open-connection-window`, `search-history`, `get-connection-status`, `list-recent-tabs`
 
 Try `@tablepro show me users in prod` or `@tablepro how big is the orders table on staging`.
 
@@ -37,7 +43,7 @@ Try `@tablepro show me users in prod` or `@tablepro how big is the orders table 
 
 Each TablePro connection has an external-access setting (Blocked, Read-only, Read & Write). Tokens are issued with their own scope. The actual permission is the minimum of the two. A full-access token against a read-only connection cannot mutate.
 
-If TablePro returns 403 for a write query, the extension surfaces the error verbatim. Change the connection's external access in TablePro under the connection editor.
+If TablePro denies a query, the extension shows TablePro's message as Access denied. Change the connection's external access in TablePro under the connection editor.
 
 ## Pairing flow
 
@@ -46,24 +52,29 @@ The pairing flow uses PKCE so the local TablePro app and the extension agree on 
 1. Raycast generates a verifier (32 random bytes) and a SHA-256 challenge.
 2. Raycast opens `tablepro://integrations/pair?...` with the challenge and a `raycast://` callback.
 3. TablePro shows the approval sheet. On approve, TablePro mints a one-time code and opens the callback.
-4. The extension POSTs the code plus verifier to the local exchange endpoint at `127.0.0.1:<port>/v1/integrations/exchange` and receives the token.
+4. The extension POSTs the code plus verifier to the local exchange endpoint at `127.0.0.1:<MCP Port>/v1/integrations/exchange` and receives the token.
 5. The token is stored in Raycast's encrypted extension storage.
 
 The exchange endpoint takes no auth. The single-use code is the auth.
 
+Before the extension sends the code or the token, it checks without credentials that TablePro answers on the MCP Port. If another program answers there, nothing is sent.
+
 ## Privacy
 
 - Connection metadata (`name`, `host`, `port`, `type`) is read from `~/Library/Application Support/TablePro/connections.json`.
+- The TablePro version is read from the app's `Info.plist` with `/usr/bin/plutil`. No other TablePro file is read.
 - Passwords are never read by the extension. They live in the TablePro Keychain.
 - Query results are fetched on demand from the local MCP server at `127.0.0.1`.
 - The extension makes no third-party network requests.
 
 ## Troubleshooting
 
-- **TablePro is not installed**: install from tablepro.app or set the path in extension preferences.
+- **TablePro is not installed**: install from tablepro.app. The extension looks the app up by bundle ID, not by path.
+- **Update TablePro**: install TablePro 0.37.0 or later.
 - **TablePro is not running**: open TablePro. The MCP server starts on first request, you don't need to enable it.
+- **No answer on port 23508**: TablePro's MCP server runs on a different port. Copy the port TablePro shows in its settings into the MCP Port preference.
 - **The connection list is empty**: open TablePro at least once so it loads `~/Library/Application Support/TablePro/connections.json`. Connections you create later show up after the next list refresh.
-- **API token was revoked**: run Pair with TablePro again. Tokens revoked from inside TablePro (Settings > Integrations > Tokens) need a fresh pairing.
+- **API token was revoked** or **API token expired**: run Pair with TablePro again. Tokens revoked from inside TablePro (Settings > Integrations > Tokens) need a fresh pairing.
 - **Pairing got stuck**: close the Pair window and run the command again. Each run generates a fresh verifier, and verifiers expire after 5 minutes if the approval sheet is left open.
 - **"This connection is read-only" on a write query**: the connection's External Access is set to Read-only or Blocked, or your token's scope is read-only. Change either in TablePro under the connection editor or under Settings > Integrations > Tokens.
 - **A query times out**: TablePro hasn't connected to the database yet. Run **Open in TablePro** first, confirm the connection is live, then retry from Raycast.

@@ -1,3 +1,5 @@
+export const isMacOS = process.platform === "darwin";
+
 export function getRatingColor(rating: number) {
   if (rating >= 9) {
     return "🏆";

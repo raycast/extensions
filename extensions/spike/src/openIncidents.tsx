@@ -14,13 +14,8 @@ interface ActiveOncall {
   isCurrentlyOncall: boolean;
 }
 
-interface ApiResponse {
-  NACK_Incidents: Incident[];
-  ACK_Incidents: Incident[];
-}
-
 interface CombinedData {
-  incidents: ApiResponse;
+  incidents: Incident[];
   activeOncall: { oncallData: ActiveOncall };
 }
 
@@ -28,10 +23,13 @@ const truncate = (str: string, n: number) => (str && str.length > n ? str.substr
 
 export default function Command() {
   const fetchData = async (): Promise<CombinedData> => {
-    const [incidents, oncall] = await Promise.all([api.incidents.getOpenIncidents(1, 20), api.oncall.amIOncall()]);
+    const [incidentsResponse, oncall] = await Promise.all([
+      api.incidents.getOpenIncidents(1, 20),
+      api.oncall.amIOncall(),
+    ]);
 
     return {
-      incidents,
+      incidents: incidentsResponse.incidents ?? [],
       activeOncall: oncall,
     };
   };
@@ -44,10 +42,7 @@ export default function Command() {
     execute: true,
     keepPreviousData: true,
     initialData: {
-      incidents: {
-        NACK_Incidents: [] as Incident[],
-        ACK_Incidents: [] as Incident[],
-      },
+      incidents: [] as Incident[],
       activeOncall: {
         oncallData: {
           isCurrentlyOncall: false,
@@ -57,9 +52,7 @@ export default function Command() {
   });
 
   const incidents = useMemo(() => {
-    if (!data) return { triggered: [], acknowledged: [] };
-
-    const allIncidents = [...data.incidents.NACK_Incidents, ...data.incidents.ACK_Incidents];
+    const allIncidents = data?.incidents ?? [];
 
     return {
       triggered: allIncidents.filter((i) => i.status === "NACK"),
@@ -70,7 +63,7 @@ export default function Command() {
   const isOnCall = data?.activeOncall.oncallData.isCurrentlyOncall;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon="spike-logo-white.png" tooltip="Open incidents">
+    <MenuBarExtra isLoading={isLoading} icon="spike-menubar.png" tooltip="Open incidents">
       <MenuBarExtra.Item
         icon={{
           source: Icon.Dot,

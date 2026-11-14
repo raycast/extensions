@@ -22,6 +22,6 @@ function details(file: File) {
 }
 
 type Props = { file: File; loading: boolean };
-export default function FileItemDetail({ file, loading }: Props): JSX.Element {
+export default function FileItemDetail({ file, loading }: Props): React.JSX.Element {
   return <List.Item.Detail markdown={details(file)} isLoading={loading} />;
 }

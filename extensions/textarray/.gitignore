@@ -1,0 +1,9 @@
+# Raycast build output and deps
+node_modules
+dist
+.raycast-swift-build
+.swiftpm
+raycast-env.d.ts
+
+# Temp bundle entry (catalog.gen.js + catalog.gen.d.ts ARE committed)
+src/catalog.entry.ts

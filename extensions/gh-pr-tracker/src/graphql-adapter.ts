@@ -3,6 +3,7 @@ import type {
   GHCommit,
   GHIssueComment,
   GHIssueEvent,
+  GHLabel,
   GHReview,
   GHReviewComment,
   GHUser,
@@ -169,6 +170,30 @@ export function adaptPullRequest(node: PRNode, repo: string): AdaptResult {
   }
   note("commits", node.commits.nodes?.length ?? 0, node.commits.totalCount);
 
+  const assignees: GHUser[] = [];
+  for (const a of node.assignees.nodes ?? []) {
+    if (!a) continue;
+    assignees.push(toUser(a));
+  }
+  note("assignees", node.assignees.nodes?.length ?? 0, node.assignees.totalCount);
+
+  const requestedReviewers: GHUser[] = [];
+  for (const rr of node.reviewRequests?.nodes ?? []) {
+    if (!rr?.requestedReviewer) continue;
+    if (rr.requestedReviewer.__typename !== "User") continue; // Team-requested reviews are out of scope
+    requestedReviewers.push({ login: rr.requestedReviewer.login, avatar_url: rr.requestedReviewer.avatarUrl ?? "" });
+  }
+  note("reviewRequests", node.reviewRequests?.nodes?.length ?? 0, node.reviewRequests?.totalCount ?? 0);
+
+  const labels: GHLabel[] = [];
+  for (const l of node.labels?.nodes ?? []) {
+    if (!l) continue;
+    // GraphQL labels have no numeric database id in this fragment — `0` is the same placeholder
+    // already used for labels synthesized from timeline events below.
+    labels.push({ id: 0, name: l.name, color: l.color });
+  }
+  note("labels", node.labels?.nodes?.length ?? 0, node.labels?.totalCount ?? 0);
+
   // Timeline events carry no database id — getAllActivity derives synthetic keys from
   // (actor, createdAt, label), so `id` here is only a local uniqueness token.
   const events: GHIssueEvent[] = [];
@@ -234,6 +259,10 @@ export function adaptPullRequest(node: PRNode, repo: string): AdaptResult {
       user: toUser(node.author),
       comments: node.comments.totalCount,
       state: node.state.toLowerCase(),
+      assignees,
+      requested_reviewers: requestedReviewers,
+      labels,
+      draft: node.isDraft,
       repo,
       reviews,
       reviewComments,

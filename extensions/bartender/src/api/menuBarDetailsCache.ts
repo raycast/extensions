@@ -32,7 +32,8 @@ async function fetchBundleDisplayNameByAppPath(appPath: string): Promise<string 
       return undefined;
     }
     if (stdout.trim() !== "(null)") {
-      return stdout.trim();
+      // The display name includes ".app" when Finder is set to show all filename extensions
+      return stdout.trim().replace(/\.app$/, "");
     }
   } catch (error) {
     console.error("Error fetching bundle name from app path:", error);
@@ -69,6 +70,39 @@ function createAssetIcon(path: string): MenuBarDetail["icon"] {
     type: "asset",
     path,
   };
+}
+
+/**
+ * Bartender 7 identifies items differently than Bartender 5 and 6:
+ *   "plist:status:com.raycast.macos::Item-0"  (regular status item)
+ *   "slot:eu.exelban.Stats:eu.exelban.Stats:1"  (item placed in a Bartender slot)
+ *   "plist:module:WiFi"  (Apple's Control Center modules)
+ * This converts them into the older style (e.g. "com.raycast.macos-Item-0", "com.apple.controlcenter-WiFi")
+ * so the name and icon lookups below work for both.
+ */
+function normalizeMenuBarString(menuBarString: string): string {
+  const statusMatch = menuBarString.match(/^plist:status:(.+?)::(.*)$/);
+  if (statusMatch) {
+    const [, bundleId, itemName] = statusMatch;
+    if (bundleId === "com.apple.MenuBarAgent") {
+      return itemName === "com.apple.menuextra.controlcenter"
+        ? "com.apple.controlcenter-BentoBox"
+        : `com.apple.controlcenter-${itemName.split(".").pop()}`;
+    }
+    return `${bundleId}-${itemName}`;
+  }
+
+  const moduleMatch = menuBarString.match(/^plist:module:(.+)$/);
+  if (moduleMatch) {
+    return `com.apple.controlcenter-${moduleMatch[1]}`;
+  }
+
+  const slotMatch = menuBarString.match(/^slot:([^:]+):/);
+  if (slotMatch) {
+    return slotMatch[1];
+  }
+
+  return menuBarString;
 }
 
 function resolveSpecialMenuBarDetail(menuBarString: string): MenuBarDetail | null {
@@ -144,14 +178,16 @@ async function resolveMenuBarDetailWithCache(menuBarString: string): Promise<Men
     }
   }
 
-  const specialCase = resolveSpecialMenuBarDetail(menuBarString);
+  const lookupString = normalizeMenuBarString(menuBarString);
+
+  const specialCase = resolveSpecialMenuBarDetail(lookupString);
   if (specialCase) {
-    return cacheAndReturn(specialCase);
+    return cacheAndReturn({ ...specialCase, menuBarId: menuBarString });
   }
 
   // Try multiple iterations, working backwards from the full string
   // Example inputs: "com.sindresorhus.Dato-setapp-Dato", "org.pqrs.Karabiner-Menu-Item-0"
-  let currentString = menuBarString;
+  let currentString = lookupString;
 
   while (currentString.length > 0) {
     const path = await fetchAppPathByBundleId(currentString);

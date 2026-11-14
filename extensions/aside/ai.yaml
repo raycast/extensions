@@ -1,0 +1,240 @@
+instructions: |
+  Aside is a web browser. Its tab and window IDs are opaque, live-session handles and must not be inferred or reused across browser restarts. When the user identifies a tab by title, URL, topic, or description, call `get-tabs` first and pass the exact returned ID to `focus-tab`, `reload-tab`, or `close-tab`. A `get-tabs` result with `truncated: true` is incomplete: say that the result is incomplete, ask the user to refine the query or rerun with the maximum limit, and never focus, reload, or close until the complete result establishes a unique match. Use `get-active-tab` when the user explicitly refers to the current or active Aside tab. If multiple tabs match and the user's intent does not identify one, ask for clarification instead of guessing. `close-tab` and `deduplicate-tabs` are destructive and require their tool confirmations. These tools inspect browser metadata only; they do not read or summarize webpage contents.
+evals:
+  - input: "@aside what tabs do I have open about this extension?"
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 0
+        returned: 0
+        truncated: false
+        tabs: []
+    expected:
+      - callsTool:
+          name: get-tabs
+          arguments:
+            query:
+              includes: extension
+
+  - input: "@aside what is my active tab?"
+    mocks:
+      get-active-tab:
+        browserStatus: running
+        tab: null
+    expected:
+      - callsTool: get-active-tab
+
+  - input: "@aside open a new tab"
+    mocks:
+      new-tab:
+        ok: true
+        openedUrl: null
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments: {}
+
+  - input: "@aside open raycast.com in a new tab"
+    mocks:
+      new-tab:
+        ok: true
+        openedUrl: "https://raycast.com/"
+    expected:
+      - callsTool:
+          name: new-tab
+          arguments:
+            url:
+              includes: raycast.com
+
+  - input: "@aside open a new browser window"
+    mocks:
+      new-window:
+        ok: true
+        mode: normal
+    expected:
+      - callsTool: new-window
+
+  - input: "@aside open a new incognito window"
+    mocks:
+      new-incognito-window:
+        ok: true
+        mode: incognito
+    expected:
+      - callsTool: new-incognito-window
+
+  - input: "@aside switch to the GitHub repo tab"
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 2
+        returned: 2
+        truncated: false
+        tabs:
+          - { id: "tab-docs", title: "Raycast Docs", url: "https://developers.raycast.com", isPinned: false, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+          - { id: "tab-github", title: "Aside GitHub Repo", url: "https://github.com/example/aside", isPinned: true, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 2, windowMode: normal }
+      focus-tab:
+        tabId: "tab-github"
+        status: success
+    expected:
+      - callsTool: get-tabs
+      - callsTool:
+          name: focus-tab
+          arguments:
+            tabId:
+              eq: "tab-github"
+
+  - input: "@aside switch to the Release Dashboard tab"
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 3
+        returned: 1
+        truncated: true
+        tabs:
+          - { id: "release-dashboard-visible", title: "Release Dashboard", url: "https://example.com/releases", isPinned: false, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+    expected:
+      - callsTool: get-tabs
+      - matches: "([Ii]ncomplete|[Tt]runcat|[Nn]ot (the )?(complete|full)|[Mm]ore (matches|tabs)|[Oo]nly (returned|showing))"
+      - matches: "([Rr]efine|[Nn]arrow|[Bb]e more specific|[Ss]pecify|[Rr]erun|[Ss]earch again|[Ii]ncrease the limit|[Mm]aximum limit)"
+      - not:
+          callsTool: focus-tab
+      - not:
+          callsTool: reload-tab
+      - not:
+          callsTool: close-tab
+
+  - input: "@aside reload my Raycast docs tab"
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 1
+        returned: 1
+        truncated: false
+        tabs:
+          - { id: "tab-raycast-docs", title: "Raycast Docs", url: "https://developers.raycast.com", isPinned: false, isActive: true, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+      reload-tab:
+        tabId: "tab-raycast-docs"
+        status: success
+    expected:
+      - callsTool: get-tabs
+      - callsTool:
+          name: reload-tab
+          arguments:
+            tabId:
+              eq: "tab-raycast-docs"
+
+  - input: "@aside reload the current tab"
+    mocks:
+      get-active-tab:
+        browserStatus: running
+        tab: { id: "tab-current", title: "Current Tab", url: "https://example.com/current", isPinned: false, isActive: true, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+      reload-tab:
+        tabId: "tab-current"
+        status: success
+    expected:
+      - callsTool: get-active-tab
+      - callsTool:
+          name: reload-tab
+          arguments:
+            tabId:
+              eq: "tab-current"
+
+  - input: "@aside close my Raycast docs tab"
+    usedAsExample: false
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 1
+        returned: 1
+        truncated: false
+        tabs:
+          - { id: "tab-close-docs", title: "Raycast Docs", url: "https://developers.raycast.com", isPinned: false, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+      close-tab:
+        tabId: "tab-close-docs"
+        status: success
+    expected:
+      - callsTool: get-tabs
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId:
+              eq: "tab-close-docs"
+
+  - input: "@aside close the GitHub tab"
+    usedAsExample: false
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 2
+        returned: 2
+        truncated: false
+        tabs:
+          - { id: "github-one", title: "GitHub Issues", url: "https://github.com/example/aside/issues", isPinned: false, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+          - { id: "github-two", title: "GitHub Pull Requests", url: "https://github.com/example/aside/pulls", isPinned: false, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 2, windowMode: normal }
+      close-tab:
+        tabId: "github-one"
+        status: success
+    expected:
+      - callsTool: get-tabs
+      - matches: "(which|Which|specify|Specify|clarif|Clarif|distinguish|Distinguish)"
+      - not:
+          callsTool: close-tab
+
+  - input: "@aside search my history for MCP docs"
+    mocks:
+      search-history:
+        totalMatches: 0
+        returned: 0
+        truncated: false
+        entries: []
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            query:
+              includes: MCP docs
+
+  - input: "@aside find my bookmarks about Raycast"
+    mocks:
+      search-bookmarks:
+        totalMatches: 0
+        returned: 0
+        truncated: false
+        bookmarks: []
+    expected:
+      - callsTool:
+          name: search-bookmarks
+          arguments:
+            query:
+              includes: Raycast
+
+  - input: "@aside close duplicate tabs"
+    usedAsExample: false
+    mocks:
+      deduplicate-tabs:
+        duplicateCount: 2
+        closedCount: 2
+        failedIds: []
+    expected:
+      - callsTool: deduplicate-tabs
+
+  - input: "@aside switch to the tab titled Dashboard, not Dashboard Archive"
+    mocks:
+      get-tabs:
+        browserStatus: running
+        totalMatches: 2
+        returned: 2
+        truncated: false
+        tabs:
+          - { id: "dashboard-archive", title: "Dashboard Archive", url: "https://example.com/dashboard", isPinned: false, isActive: true, windowId: "window-1", windowIndex: 1, tabIndex: 1, windowMode: normal }
+          - { id: "dashboard-exact", title: "Dashboard", url: "https://example.com/dashboard", isPinned: false, isActive: false, windowId: "window-1", windowIndex: 1, tabIndex: 2, windowMode: normal }
+      focus-tab:
+        tabId: "dashboard-exact"
+        status: success
+    expected:
+      - callsTool: get-tabs
+      - callsTool:
+          name: focus-tab
+          arguments:
+            tabId:
+              eq: "dashboard-exact"

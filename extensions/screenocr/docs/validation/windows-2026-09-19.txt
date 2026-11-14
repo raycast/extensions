@@ -1,0 +1,123 @@
+**********************
+Windows PowerShell transcript start
+Start time: 20260919143855
+Username: [redacted]
+RunAs User: [redacted]
+Configuration Name: 
+Machine: [redacted] (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 3728
+PSVersion: 5.1.26100.7462
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.7462
+BuildVersion: 10.0.26100.7462
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Users\[redacted]\AppData\Local\Temp\screenocr-final-validation.txt
+71e27c858a555b6060e2e7b01a3a4a358291fabc
+ M assets/ocr.ps1
+ M src/ocr/macos.ts
+ M tests/windows-native.ps1
+
+
+
+Path : C:\Users\[redacted]\screenocr-test-20260919-111356\extensions\screenocr\assets\ocr.ps1
+Hash : DC53221C136305598BA3E16B2539942578168BD0843C7FABAFDA1E1BE8D91FE7
+
+Path : C:\Users\[redacted]\screenocr-test-20260919-111356\extensions\screenocr\src\ocr\macos.ts
+Hash : 0DE580A3798034BCC411AC6BF34517C0909A0F7F760ABC8874B942088278CB76
+
+Path : C:\Users\[redacted]\screenocr-test-20260919-111356\extensions\screenocr\tests\windows-native.ps1
+Hash : 0589DD53D166CCAFAB844858BDB369768CB9B1ED3274C76F745B022122782F7D
+
+
+
+
+> test
+> node --test tests/ocr.test.cjs
+
+✔ Windows preserves Unicode and real Error-prefixed OCR text (96.8708ms)
+✔ callback recognized skips ordinary clipboard actions (25.2579ms)
+✔ callback no-text skips ordinary clipboard actions (15.2476ms)
+✔ callback cancelled skips ordinary clipboard actions (13.2333ms)
+✔ callback error skips ordinary clipboard actions (15.1634ms)
+✔ failed callback delivery is reported and never retried (32.6859ms)
+✔ window-close failures reach a callback once without running recognition (13.9358ms)
+✔ ordinary cancellation has no output or notification (9.892ms)
+✔ ordinary result action copy has bounded clipboard effects (10.2678ms)
+✔ ordinary result action paste has bounded clipboard effects (9.5197ms)
+✔ ordinary result action both has bounded clipboard effects (8.5701ms)
+✔ ordinary result action undefined has bounded clipboard effects (12.1584ms)
+✔ ordinary result action invalid has bounded clipboard effects (8.523ms)
+✔ copy-and-paste reports partial failure without claiming success (10.4248ms)
+✔ failed copy prevents the paste half of copy-and-paste (10.6053ms)
+✔ disabled notifications suppress result messages without changing clipboard actions (8.2293ms)
+✔ area command invokes Windows without initializing Swift (44.1117ms)
+✔ fullscreen command invokes Windows without initializing Swift (19.8849ms)
+✔ clipboard command invokes Windows without initializing Swift (18.4565ms)
+✔ Windows process uses an absolute executable, safe argument array and bounded execution (9.2668ms)
+✔ Windows rejects invalid helper output "" (8.0324ms)
+✔ Windows rejects invalid helper output "noise\n{\"status\":\"recognized\",\"text\":\"secret\"}" (9.92ms)
+✔ Windows rejects invalid helper output "null" (8.1363ms)
+✔ Windows rejects invalid helper output "[]" (8.3163ms)
+✔ Windows rejects invalid helper output "{\"status\":\"recognized\",\"text\":\"\"}" (8.4971ms)
+✔ Windows rejects invalid helper output "{\"status\":\"recognized\",\"text\":\"  \"}" (8.5264ms)
+✔ Windows rejects invalid helper output "{\"status\":\"recognized\",\"text\":\"secret\",\"extra\":true}" (8.3276ms)
+✔ Windows rejects invalid helper output "{\"status\":\"no-text\",\"text\":\"stale\"}" (7.6996ms)
+✔ Windows maps process outcome {"code":2} safely (8.2534ms)
+✔ Windows maps process outcome {"code":3} safely (9.5917ms)
+✔ Windows maps process outcome {"code":4} safely (7.3483ms)
+✔ Windows maps process outcome {"code":4} safely (13.0696ms)
+✔ Windows maps process outcome {"code":4} safely (9.9017ms)
+✔ Windows maps process outcome {"code":4} safely (9.7541ms)
+✔ Windows maps process outcome {"code":4} safely (8.2481ms)
+✔ Windows maps process outcome {"code":4} safely (9.5021ms)
+✔ Windows maps process outcome {"code":6} safely (9.599ms)
+✔ Windows maps process outcome {"code":"ENOENT"} safely (8.7315ms)
+✔ Windows maps process outcome {"killed":true,"signal":"SIGTERM"} safely (8.2788ms)
+✔ Windows maps process outcome {"code":"ERR_CHILD_PROCESS_STDIO_MAXBUFFER","killed":true} safely (8.6114ms)
+✔ Windows maps process outcome {"code":5} safely (8.9083ms)
+✔ invalid saved language is rejected before PowerShell instead of falling back (18.6045ms)
+✔ Windows language selection and inventory preserve macOS selections (8.5276ms)
+✔ src/recognize-text.tsx retains macOS copy behavior and never invokes PowerShell (31.7113ms)
+✔ src/recognize-text-fullscreen.ts retains macOS copy behavior and never invokes PowerShell (25.6126ms)
+✔ src/detect-barcode.tsx retains macOS copy behavior and never invokes PowerShell (22.9922ms)
+✔ macOS OCR retains selected languages and the original raw Swift contract (24.7148ms)
+✔ clipboard command reports Windows limitation on macOS without native calls (12.3499ms)
+✔ barcode reports macOS limitation on Windows without loading Swift (12.209ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1105.3117
+Behavior-test exit code: 0
+
+> test:windows
+> powershell.exe -NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File tests/windows-native.ps1 -RequireOcr
+
+PASS helper parses as Windows PowerShell source
+PASS required helper functions are defined exactly once
+PASS CJK normalization removes only intra-script ASCII spaces
+PASS CJK normalization preserves meaningful boundaries
+PASS bitmap resize clamps zero-sized requests
+PASS language inventory uses one strict JSON protocol message
+PASS screen capture contention exits immediately without affecting non-capture modes
+PASS capture mutex accepts an abandoned owner while its named object remains alive
+PASS invalid language arguments are rejected before helper execution
+PASS another process can capture while the first bitmap is being recognized
+PASS Windows Runtime OCR types initialize
+PASS explicit OCR engines keep the selected installed language
+PASS a missing regional pack does not resolve to an installed sibling
+PASS WinRT recognizes known text from an in-memory bitmap
+RESULT pass=14 fail=0 skip=0
+Native-test exit code: 0
+**********************
+Windows PowerShell transcript end
+End time: 20260919143909
+**********************

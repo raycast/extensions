@@ -80,7 +80,7 @@ const buildSvgUri = (
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 };
 
-export const glyphToDataUri = (g: Glyph, color: string): string => {
+export const glyphToDataUri = (g: Glyph, color: string = "currentColor"): string => {
   const font = getFont();
   const fg = font.glyphs.get(g.glyphIndex);
   const ascender = font.ascender;
@@ -95,7 +95,7 @@ export const glyphToDataUri = (g: Glyph, color: string): string => {
   );
 };
 
-export const glyphToDetailUri = (g: Glyph, color: string): string => {
+export const glyphToDetailUri = (g: Glyph, color: string = "currentColor"): string => {
   const font = getFont();
   const fg = font.glyphs.get(g.glyphIndex);
   const pathData = fg.path.toPathData(0);

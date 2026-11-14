@@ -1,6 +1,6 @@
 # 2FAS Authenticator
 
-Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Raycast. No cloud, no network calls. Your secrets stay local in a Keychain-encrypted vault.
+Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Raycast. No cloud, no network calls. Your secrets stay local in an encrypted vault.
 
 <a href="https://www.raycast.com/Lock/2fas-authenticator"><img src="https://www.raycast.com/Lock/2fas-authenticator/install_button@2x.png" height="64" alt="Install 2FAS Authenticator" style="height: 64px;" /></a>
 
@@ -13,85 +13,126 @@ Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Ray
 
 ## Why
 
-2FAS is a great mobile authenticator, but it has no desktop app. This extension bridges that gap by importing your 2FAS export and generating TOTP codes locally on your Mac.
+This extension lets you access your 2FAS TOTP codes directly in Raycast by importing a 2FAS export and generating codes locally on your computer.
 
 ## Getting Started
 
 1. Open 2FAS on your phone
 2. Go to **Settings > 2FAS Backup > Export** and set a password
-3. Transfer the `.2fas` file to your Mac (AirDrop, iCloud Drive, etc.)
+3. Transfer the `.2fas` file to your computer
 4. In Raycast, run **Import Vault** and select the file
-5. Enter your export password. Done.
+5. Enter your export password
 6. Run **Search OTP** to find and copy codes
 
 ## Commands
 
-| Command      | Description                                         |
-| ------------ | --------------------------------------------------- |
-| Search OTP   | Search all services, copy codes with live countdown |
-| Recent OTP   | Access pinned and recently used services            |
-| Import Vault | Import a `.2fas` export file                        |
-| Setup        | View vault status and manage configuration          |
+| Command | Description |
+| --- | --- |
+| Search OTP | Search all services, copy codes with live countdown |
+| Recent OTP | Access pinned and recently used services |
+| Import Vault | Import a `.2fas` export file |
+| Setup | View vault status and manage configuration |
 
 ## Security Model
 
-| Layer           | Detail                                                                                                            |
-| --------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Vault key       | Random 256-bit key stored in macOS login Keychain via `/usr/bin/security`                                         |
-| Vault file      | AES-256-GCM encrypted at `~/Library/Application Support/Raycast/extensions/.../vault.enc` with `0600` permissions |
-| Import          | Decrypts `.2fas` in memory (PBKDF2 + AES-256-GCM), re-encrypts into local vault                                   |
-| Secrets at rest | No plaintext secrets on disk. Secrets exist only in memory during runtime                                         |
-| Network         | Zero network calls. Everything is offline                                                                         |
-| Clipboard       | Concealed copy. OTP codes are excluded from clipboard history                                                     |
-| Dependencies    | Zero external crypto dependencies. Node.js `crypto` module only                                                   |
+| Layer | Detail |
+| --- | --- |
+| Vault key | Random 256-bit key stored in the macOS Keychain on macOS or protected using Windows DPAPI (`CurrentUser`) on Windows |
+| Vault file | AES-256-GCM encrypted and stored in Raycast's extension support directory |
+| Import | Decrypts `.2fas` in memory (PBKDF2 + AES-256-GCM), then re-encrypts it into the local vault |
+| Secrets at rest | No plaintext TOTP secrets are stored on disk |
+| Network | Zero network calls. Everything is offline |
+| Clipboard | Concealed copy. OTP codes are excluded from Raycast clipboard history on supported platforms |
+| Dependencies | No external crypto dependencies. Uses the Node.js `crypto` module and platform-provided key protection |
+
+### Platform Key Storage
+
+On macOS, the vault encryption key is stored in the user's Keychain under:
+
+```text
+service=com.raycast.2fas-engine
+account=vault-key
+```
+
+On Windows, the vault encryption key is protected using Windows DPAPI with the `CurrentUser` scope. The protected key is stored separately as `vault-key.dpapi` in Raycast's extension support directory.
+
+The encrypted vault itself is stored separately as `vault.enc`.
 
 ### Known Limitations
 
-- The vault key is passed as a CLI argument to `/usr/bin/security` (briefly visible in the process list to same-user processes). This is an inherent limitation of the macOS `security` CLI.
-- Secrets remain in the Node.js heap for the lifetime of the extension process. JavaScript has no secure memory zeroing.
+- On macOS, the vault key is passed as a CLI argument to `/usr/bin/security` and is therefore briefly visible in the process argument vector to same-user processes. This limitation does not apply to the Windows implementation, where the key is passed to the DPAPI helper through standard input.
+- Windows DPAPI with `CurrentUser` protects the key against offline access and other Windows users, but it is not designed to protect against malicious code already running as the same logged-in user.
+- Secrets remain in the Node.js heap while the extension is using them. JavaScript does not provide reliable secure memory zeroing.
+
+See [SECURITY.md](SECURITY.md) for the full threat model and security details.
 
 ## Contributing
 
-Contributions are welcome. Please open an issue first to discuss what you'd like to change.
+Contributions are welcome. For significant changes, consider discussing the change with the extension maintainer first.
 
 ### Development Setup
 
+Requirements:
+
+- Raycast
+- Node.js 22.22.2 or newer
+- npm
+
+Clone the official Raycast extensions repository:
+
 ```bash
-# Clone the repo
-git clone https://github.com/LockeAG/raycast-2fas-authenticator.git
-cd raycast-2fas-authenticator
+git clone https://github.com/raycast/extensions.git
+cd extensions/extensions/2fas-authenticator
+```
 
-# Install dependencies
+Install dependencies:
+
+```bash
 npm install
+```
 
-# Start development mode (opens in Raycast)
+Start development mode:
+
+```bash
 npm run dev
+```
 
-# Build
+Build the extension:
+
+```bash
 npm run build
+```
 
-# Lint
+Run lint checks:
+
+```bash
 npm run lint
+```
 
-# Fix lint issues
+Fix lint issues:
+
+```bash
 npm run fix-lint
 ```
 
 ### Pull Request Guidelines
 
-1. Fork the repository and create your branch from `main`
-2. If you've added functionality, update the README if needed
-3. Make sure `npm run lint` passes
-4. Keep PRs focused. One feature or fix per PR.
-5. Write a clear description of what your change does and why
+1. Fork the `raycast/extensions` repository and create a branch from `main`
+2. Keep the pull request focused on one feature or fix
+3. Update the README and security documentation when behavior changes
+4. Update `CHANGELOG.md`
+5. Make sure `npm run build` passes
+6. Make sure `npm run lint` passes
+7. Describe what changed, why it changed, and how it was tested
 
 ### Reporting Bugs
 
-Open an issue with:
+When reporting a bug, include:
 
 - Steps to reproduce
 - Expected vs actual behavior
-- macOS version and Raycast version
+- Operating system and version
+- Raycast version
 
 ## License
 

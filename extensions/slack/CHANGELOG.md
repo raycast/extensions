@@ -1,5 +1,106 @@
 # Slack Changelog
 
+## [Navigation and Search Reliability] - 2026-11-12
+
+- Add an **Open Links In** preference to choose the Slack app or browser when automatic app detection is incorrect.
+- Recognize renamed and alternate Slack installations and open native links through the system's registered Slack handler.
+- Use the signed-in workspace when opening conversations, including Slack Connect users and shared channels.
+- Keep cached workspace navigation available when the connection fails, with a retry action; allow marking conversations as read independently of workspace lookup.
+- Handle missing or invalid profile metadata and message timestamps without passing invalid values to search results.
+- Load the Search Messages author menu only when opened, with searchable results limited to 100 at a time to reduce memory use in large workspaces.
+- Show the permissions Slack requires and the correct recovery steps for OAuth or personal access tokens, including errors while loading unread messages.
+
+## [Faster Channel Mentions] - 2026-11-02
+
+- The **Channels** mention search in AI Chat now reads the cached channel directory that Open Channel uses, instead of scanning every channel in the workspace on each keystroke. Your own channels are cached too, so the default list opens instantly.
+- A search that finds nothing in a cache older than a minute looks again, so newly created channels still show up.
+- Cache only the channel fields search needs, so the directory loads faster on large workspaces.
+
+## [Cache channel directory for instant local search] - 2026-11-01
+
+- Open Channel now filters locally as pages arrive instead of restarting a full `conversations.list` scan on each keystroke. The workspace channel and group directory is shared across all searches and refreshed in the background at most once per hour.
+
+## [Channel Mentions in AI Chat] - 2026-10-31
+
+- Add a **Channels** mention search to find public and private channels by name. Without a query it lists the channels you're a member of, and search results rank your own channels first.
+- Read the selected channel's current topic, purpose, member count, and Slack channel ID when sending a mention, so AI can read its history or search it without guessing the channel.
+
+## [User Mentions in AI Chat] - 2026-10-28
+
+- Add a **Users** mention search to find workspace members by name, username, email, or job title.
+- Read the selected person's current profile when sending a mention, including their Slack user ID and workspace.
+
+## [Profile photos in Find Users] - 2026-10-22
+
+- Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
+- Add a `hasCustomPhoto` flag so AI can tell an uploaded photo apart from Slack's default avatar.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Rename Channel AI Tool] - 2026-10-12
+
+- Add a **Rename Channel** AI tool that renames a channel by ID after confirmation. Names are converted to Slack's format (lowercase, hyphens instead of spaces), and common errors such as a taken name or missing permission are explained.
+
+## [Fix user search stalling] - 2026-10-10
+
+- Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
+- Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
+- Show the first page of people right away when opening the picker while the full list loads in the background.
+- Request smaller pages from Slack. Timeouts and server errors stop retrying after a few attempts so they show up instead of loading forever; rate limits still wait for Slack's retry delay.
+
+## [Add Canvas AI tools] - 2026-10-09
+
+- Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.
+- Request Slack's `canvases:read` and `canvases:write` OAuth scopes.
+
+## [Archive Channels AI Tool] - 2026-10-05
+
+- Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
+
+## [Fix Unread Messages configuration] - 2026-09-25
+
+- Fix selected conversations in the Unread Messages configuration sometimes being lost
+- Add a "Done" action to the configuration list to go back once you've picked your conversations
+
+## [Catch-up, Decisions, and Standup Skills] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.
+- Include source references and coverage limits, with Slack delivery only when requested.
+
+## [Quiet automatic rate-limit retries] - 2026-09-23
+
+- Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
+
+## [Fix recipient search, AI file uploads, and attachment downloads] - 2026-09-10
+
+- Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
+- Keep frequently opened **Open Channel** results visible when they fall outside the initial directory page by retaining the latest 100 visited rows and merging them into empty-query results before frecency sorting.
+- Continue member searches past hidden-profile matches so people whose visible names occur later in Slack's unordered directory can still be found.
+- Show channel search results independently of group DM name lookup.
+- Resolve direct messages when opening browser links or creating Quicklinks and Huddle links.
+- Correctly recognize Slack member IDs that begin with `W` so those people appear as message recipients instead of channels.
+- Show Slack's requested retry delay when API calls are rate-limited, then retry automatically instead of failing immediately.
+- Fix **Upload Files** failing with a bare `internal_error` when a message was attached, caused by Slack rejecting the newer `markdown` block in `files.completeUploadExternal`; the AI message signature now uses upload-safe blocks for file uploads.
+- Return an actionable message when Slack still responds with `internal_error` so the AI can recover instead of retrying blindly or re-encoding files.
+- Add a **Download Files** AI tool that saves Slack attachments to `~/Downloads` (or a chosen folder) by their file IDs.
+- Surface attachment metadata (id, name, mimetype, size) in **Read Conversation**, **Read Thread**, and **Get Channel History** so attachments can be discovered and downloaded.
+- Add a **Download Attachment** action to **Search Messages** results that saves the file and reveals it in Finder.
+- Request the `files:read` scope so private files can be downloaded; existing OAuth users will be asked to re-authorize.
+- Add `files:read` to the manual access-token setup instructions.
+
+## [Keep Set Status responsive in large workspaces] - 2026-08-29
+
+- Load custom workspace emojis only when opening the emoji picker and render them in bounded slices to prevent Set Status from exceeding the extension memory limit.
+
+## [Fix Search Emojis crash in large workspaces] - 2026-08-12
+
+- Fix a "Worker terminated due to reaching memory limit: JS heap out of memory" crash in the Search Emojis command by rendering emojis in slices with a "Show More" item instead of rendering every custom emoji at once.
+
+## [Add expiration argument to Set Status] - 2026-08-12
+
+- The **Set Status** command now accepts an optional `expiration` argument — any number of minutes, or `today` / `week` — so a deep link or Quicklink can set a self-clearing status in one step (e.g. `"expiration":"90"` for an hour and a half).
+
 ## [Broadcast Slack thread replies to channels] - 2026-07-21
 
 - Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.

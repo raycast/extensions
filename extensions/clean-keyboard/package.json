@@ -11,7 +11,9 @@
     "ridemountainpig",
     "litomore",
     "yusifaliyevpro",
-    "shivraj-roy"
+    "shivraj-roy",
+    "alexi.build",
+    "nawal"
   ],
   "platforms": [
     "macOS",
@@ -38,6 +40,52 @@
       ],
       "preferences": [
         {
+          "name": "defaultDuration",
+          "title": "Default Duration",
+          "description": "Lock the keyboard immediately for the chosen duration, or choose Always Ask to pick each time.",
+          "type": "dropdown",
+          "default": "always-ask",
+          "required": false,
+          "data": [
+            {
+              "title": "Always Ask",
+              "value": "always-ask"
+            },
+            {
+              "title": "15 Seconds",
+              "value": "15"
+            },
+            {
+              "title": "30 Seconds",
+              "value": "30"
+            },
+            {
+              "title": "1 Minute",
+              "value": "60"
+            },
+            {
+              "title": "2 Minutes",
+              "value": "120"
+            },
+            {
+              "title": "5 Minutes",
+              "value": "300"
+            },
+            {
+              "title": "1 Hour",
+              "value": "3600"
+            },
+            {
+              "title": "24 Hours",
+              "value": "86400"
+            },
+            {
+              "title": "Forever",
+              "value": "0"
+            }
+          ]
+        },
+        {
           "name": "lockFnKeys",
           "title": "Lock Function Row Keys",
           "description": "Also block function row keys while cleaning. Original setting is restored on unlock. macOS Tahoe (26+) only.",
@@ -47,6 +95,13 @@
           "required": false
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "lock-keyboard",
+      "title": "Lock Keyboard",
+      "description": "Lock the keyboard for cleaning for a chosen duration."
     }
   ],
   "dependencies": {
@@ -66,5 +121,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "lockMouse",
+      "title": "Lock Mouse Clicks",
+      "description": "Also block clicks and dragging while scrolling stays available. Unlock with Touch ID or hold both Command keys for 8 seconds. Requires Touch ID on macOS; ignored on Windows.",
+      "type": "checkbox",
+      "label": "Also lock mouse clicks (macOS, requires Touch ID)",
+      "default": false,
+      "required": false
+    }
+  ]
 }

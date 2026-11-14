@@ -119,5 +119,10 @@
     "@types/title": "^3.4.1",
     "eslint": "^8.51.0",
     "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "cross-spawn@5": "6.0.6"
   }
 }

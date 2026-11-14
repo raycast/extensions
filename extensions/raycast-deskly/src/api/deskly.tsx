@@ -1,11 +1,28 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { AuthData, Booking, BookingSeat, Information, Location, PresentPerson, Resource } from "../lib/types";
 import { pad2, toISODate } from "../lib/format";
-import { Jimp, JimpMime, rgbaToInt } from "jimp";
 
 const roomPlanImageCache = new Map<string, Promise<string | null>>();
 
 const INFORMATION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+// Returns the API URL with a clear error if it's not using https.
+// This ensures all authenticated requests are made over secure connections.
+function getApiUrl(): string {
+  const { apiUrl } = getPreferenceValues<Preferences>();
+  try {
+    const url = new URL(apiUrl);
+    if (url.protocol !== "https:") {
+      throw new Error(`API URL must use https:// — got "${apiUrl}". Update it in the extension preferences.`);
+    }
+    return apiUrl;
+  } catch (e) {
+    if (e instanceof TypeError) {
+      throw new Error(`API URL must be a valid URL — got "${apiUrl}". Update it in the extension preferences.`);
+    }
+    throw e;
+  }
+}
 
 // Seat-indicator overlay tunables (driven by the seatIndicatorSize / seatIndicatorColor preferences).
 // Size is a fraction of the room-plan image width; M is the default.
@@ -23,7 +40,7 @@ interface CachedInformation {
 }
 
 async function desklyFetch(path: string, init?: RequestInit): Promise<Response> {
-  const { apiUrl } = getPreferenceValues<Preferences>();
+  const apiUrl = getApiUrl();
   const authData = await fetchAccessToken();
   const { headers, ...rest } = init ?? {};
   return fetch(apiUrl + path, {
@@ -86,7 +103,8 @@ export async function fetchSpaces(): Promise<Location[]> {
   return data.locations;
 }
 
-export async function fetchAvailableSeats(
+/** Returns all seats for the room and timeframe, regardless of availability. */
+export async function fetchRoomSeats(
   roomId: string,
   dateStr: string,
   fromTime: string,
@@ -101,6 +119,16 @@ export async function fetchAvailableSeats(
     })
   );
   return (await response.json()) as Resource[];
+}
+
+export async function fetchAvailableSeats(
+  roomId: string,
+  dateStr: string,
+  fromTime: string,
+  untilTime: string
+): Promise<Resource[]> {
+  const seats = await fetchRoomSeats(roomId, dateStr, fromTime, untilTime);
+  return seats.filter((seat) => seat.availability !== "notAllowed" && seat.availability !== "occupied");
 }
 
 export async function bookSeat(date: Date, resourceId: string, fromTime: string, untilTime: string): Promise<void> {
@@ -148,11 +176,24 @@ export async function fetchPresentResources(locationId: string, date: string): P
 export async function checkInBooking(bookingId: string): Promise<void> {
   const res = await desklyFetch(`/en/api/dayBooking/${bookingId}/checkin`, { method: "PUT" });
   if (res.status === 403) throw new Error("Check-in is not available yet. Try again closer to your booking time.");
-  await assertOk(res);
+  if (!res.ok) {
+    const body = await res.text();
+    let title: string | undefined;
+    try {
+      title = (JSON.parse(body) as { title?: string }).title;
+    } catch {
+      // Non-JSON error body — fall through to the generic message below.
+    }
+    throw new Error(title ?? `${res.status} ${res.statusText}: ${body}`);
+  }
 }
 
 export async function deleteBooking(bookingId: string): Promise<void> {
   await assertOk(await desklyFetch(`/en/api/dayBooking/${bookingId}/delete`, { method: "DELETE" }));
+}
+
+function readPngDimensions(buffer: Buffer): { width: number; height: number } {
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
 }
 
 export function fetchRoomPlanImage(roomId: string, seat: BookingSeat): Promise<string | null> {
@@ -167,24 +208,21 @@ export function fetchRoomPlanImage(roomId: string, seat: BookingSeat): Promise<s
     if (!response.ok) return null;
 
     const buffer = Buffer.from(await response.arrayBuffer());
-    const image = await Jimp.fromBuffer(buffer);
+    const { width, height } = readPngDimensions(buffer);
 
+    // The seat indicator is drawn as an SVG overlay on top of the untouched PNG, so no image-processing
+    let overlay = "";
     if (seat.locationX != null && seat.locationY != null) {
       const sizeMultiplier = SEAT_INDICATOR_SIZE[preferences.seatIndicatorSize] ?? SEAT_INDICATOR_SIZE.M;
-      const r = Math.round(image.width * sizeMultiplier);
+      const r = Math.round(width * sizeMultiplier);
       const [cr, cg, cb] = SEAT_INDICATOR_COLOR[preferences.seatIndicatorColor] ?? SEAT_INDICATOR_COLOR.blue;
-      const color = rgbaToInt(cr, cg, cb, 255);
-      for (let y = Math.max(0, seat.locationY - r); y <= Math.min(image.height - 1, seat.locationY + r); y++) {
-        for (let x = Math.max(0, seat.locationX - r); x <= Math.min(image.width - 1, seat.locationX + r); x++) {
-          if ((x - seat.locationX) ** 2 + (y - seat.locationY) ** 2 <= r * r) {
-            image.setPixelColor(color, x, y);
-          }
-        }
-      }
+      overlay = `<circle cx="${seat.locationX}" cy="${seat.locationY}" r="${r}" fill="rgb(${cr},${cg},${cb})"/>`;
     }
 
-    const outBuffer = await image.getBuffer(JimpMime.png);
-    return `data:image/png;base64,${outBuffer.toString("base64")}`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><image width="${width}" height="${height}" href="data:image/png;base64,${buffer.toString(
+      "base64"
+    )}"/>${overlay}</svg>`;
+    return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
   })();
 
   promise.catch(() => roomPlanImageCache.delete(cacheKey));
@@ -194,6 +232,7 @@ export function fetchRoomPlanImage(roomId: string, seat: BookingSeat): Promise<s
 
 async function fetchAccessToken(): Promise<AuthData> {
   const preferences = getPreferenceValues<Preferences>();
+  const apiUrl = getApiUrl();
 
   const cached = await LocalStorage.getItem<string>("authData");
   const authData: AuthData | null = cached ? (JSON.parse(cached) as AuthData) : null;
@@ -202,7 +241,7 @@ async function fetchAccessToken(): Promise<AuthData> {
     return authData;
   }
 
-  const response = await fetch(preferences.apiUrl + "/en/api/authorize/refreshToken", {
+  const response = await fetch(apiUrl + "/en/api/authorize/refreshToken", {
     method: "POST",
     body: JSON.stringify({ refreshToken: preferences.refreshToken }),
     headers: {

@@ -30,7 +30,11 @@ export default function TwoFactorAuthForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit Code" onSubmit={handleSubmit} />
-          <Action title="Resend Code" onAction={resendCode} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+          <Action
+            title="Resend Code"
+            onAction={resendCode}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
+          />
         </ActionPanel>
       }
     >

@@ -1,23 +1,30 @@
 import { Detail, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchTypes } from "../../api";
-import { PokemonType } from "../../types";
+import { PokemonType, Type } from "../../types";
 import { calculateEffectiveness } from "../../utils";
 
 export default function WeaknessMetadata(props: {
   type?: string;
   types: PokemonType[];
+  allTypes?: Type[];
+  showNeutral?: boolean;
 }) {
   const TagListComponent =
     props.type === "detail"
       ? Detail.Metadata.TagList
       : List.Item.Detail.Metadata.TagList;
 
-  const { data: allTypes } = usePromise(fetchTypes);
+  // Only fetch when the caller didn't already provide the full type list.
+  const { data: fetchedTypes } = usePromise(fetchTypes, [], {
+    execute: !props.allTypes,
+  });
 
-  const { weak, resistant, immune } = calculateEffectiveness(
+  const allTypes = props.allTypes ?? fetchedTypes ?? [];
+
+  const { weak, normal, resistant, immune } = calculateEffectiveness(
     props.types,
-    allTypes || [],
+    allTypes,
   );
 
   const tagList = [];
@@ -32,9 +39,19 @@ export default function WeaknessMetadata(props: {
     );
   }
 
+  if (props.showNeutral && normal.length) {
+    tagList.push(
+      <TagListComponent title="Normal" key="normal">
+        {normal.map((props, index) => (
+          <TagListComponent.Item key={index} {...props} />
+        ))}
+      </TagListComponent>,
+    );
+  }
+
   if (immune.length) {
     tagList.push(
-      <TagListComponent title="Immunities" key="immute">
+      <TagListComponent title="Immunities" key="immune">
         {immune.map((props, index) => (
           <TagListComponent.Item key={index} {...props} />
         ))}

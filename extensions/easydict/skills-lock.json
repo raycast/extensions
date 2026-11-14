@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "raycast-extension": {
+      "source": "maxchang3/skills",
+      "sourceType": "github",
+      "skillPath": "raycast-extension/SKILL.md",
+      "computedHash": "b86e88424ac51f9870b2f78531cb3569df676c3f2fc1689d223a4c4d9ebd0396"
+    }
+  }
+}

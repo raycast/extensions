@@ -1,4 +1,4 @@
-import { BaseExtractor, ExtractorResult, ExtractorDocument, ExtractorElement } from "./_base";
+import { BaseExtractor, ExtractorDocument, ExtractorElement, ExtractorResult } from "./_base";
 
 /**
  * Extractor for Hacker News (news.ycombinator.com)

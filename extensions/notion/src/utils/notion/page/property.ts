@@ -23,30 +23,40 @@ export function formValueToPropertyValue(
 ): any {
   switch (type) {
     case "title":
+      return { title: markdownToRichText(value) };
     case "rich_text":
-      return markdownToRichText(value);
+      return { rich_text: markdownToRichText(value) };
     case "number":
-      return parseFloat(value);
+      return { number: parseFloat(value) };
     case "date": {
       if (!value) return;
       const time = subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString();
       if (Form.DatePicker.isFullDay(value)) {
-        return { start: time.split("T")[0] };
+        return { date: { start: time.split("T")[0] } };
       } else {
-        return { start: time, time_zone: getLocalTimezone() };
+        return { date: { start: time, time_zone: getLocalTimezone() } };
       }
     }
     case "select":
+      return { select: { id: value } };
     case "status":
-      return { id: value };
+      return { status: { id: value } };
     case "multi_select":
+      return { multi_select: value.map((id) => ({ id })) };
     case "relation":
+      return { relation: value.map((id) => ({ id })) };
     case "people":
-      return value.map((id) => ({ id }));
+      return { people: value.map((id) => ({ id })) };
+    case "checkbox":
+      return { checkbox: value };
+    case "url":
+      return { url: value };
+    case "email":
+      return { email: value };
+    case "phone_number":
+      return { phone_number: value };
     case "formula":
       return;
-    default:
-      return value;
   }
 }
 

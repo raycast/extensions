@@ -8,4 +8,6 @@ export type RegistryEntry = {
   icon?: Image.ImageLike;
   homepage?: string;
   configuration: MCPServerConfig;
+  /** Direct HTTP endpoint for Raycast; configuration remains the fallback for other clients. */
+  remoteUrl?: string;
 };

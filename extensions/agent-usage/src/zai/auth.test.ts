@@ -1,14 +1,20 @@
-import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import test from "node:test";
 
-function makeFakeShell(scriptBody: string): { dir: string; shellPath: string } {
+function makeFakeShell(outputLines: string[]): { dir: string; shellPath: string } {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "zai-auth-test-"));
-  const shellPath = path.join(dir, "fake-shell.sh");
-  fs.writeFileSync(shellPath, `#!/bin/sh\n${scriptBody}\n`, "utf-8");
-  fs.chmodSync(shellPath, 0o755);
+  const isWindows = process.platform === "win32";
+  const shellPath = path.join(dir, isWindows ? "fake-shell.cmd" : "fake-shell.sh");
+  const scriptBody = isWindows
+    ? `@echo off\r\n${outputLines.map((line) => `echo ${line}`).join("\r\n")}\r\n`
+    : `#!/bin/sh\n${outputLines.map((line) => `printf '%s\\n' '${line}'`).join("\n")}\n`;
+  fs.writeFileSync(shellPath, scriptBody, "utf-8");
+  if (!isWindows) {
+    fs.chmodSync(shellPath, 0o755);
+  }
   return { dir, shellPath };
 }
 
@@ -43,13 +49,13 @@ function withTestAuthFile<T>(run: () => Promise<T>): Promise<T> {
 }
 
 test("resolveZaiAuthTokens reads token from noisy login shell output", async () => {
-  const { resolveZaiAuthTokens } = await import("./auth");
+  const { resolveZaiAuthTokens } = await import("./auth.ts");
 
-  const { dir, shellPath } = makeFakeShell(`
-echo "loading shell plugins..."
-printf "__ZAI_API_KEY_START__shell-zai-token__ZAI_API_KEY_END__\\n"
-printf "__GLM_API_KEY_START__shell-glm-token__GLM_API_KEY_END__\\n"
-`);
+  const { dir, shellPath } = makeFakeShell([
+    "loading shell plugins...",
+    "__ZAI_API_KEY_START__shell-zai-token__ZAI_API_KEY_END__",
+    "__GLM_API_KEY_START__shell-glm-token__GLM_API_KEY_END__",
+  ]);
 
   try {
     await withTestAuthFile(async () => {
@@ -74,9 +80,9 @@ printf "__GLM_API_KEY_START__shell-glm-token__GLM_API_KEY_END__\\n"
 });
 
 test("resolveZaiAuthTokens prefers direct process env token", async () => {
-  const { resolveZaiAuthTokens } = await import("./auth");
+  const { resolveZaiAuthTokens } = await import("./auth.ts");
 
-  const { dir, shellPath } = makeFakeShell(`printf "__ZAI_API_KEY_START__shell-token__ZAI_API_KEY_END__\\n"`);
+  const { dir, shellPath } = makeFakeShell(["__ZAI_API_KEY_START__shell-token__ZAI_API_KEY_END__"]);
 
   try {
     await withTestAuthFile(async () => {
@@ -101,9 +107,9 @@ test("resolveZaiAuthTokens prefers direct process env token", async () => {
 });
 
 test("resolveZaiAuthTokens uses preference token when provided", async () => {
-  const { resolveZaiAuthTokens } = await import("./auth");
+  const { resolveZaiAuthTokens } = await import("./auth.ts");
 
-  const { dir, shellPath } = makeFakeShell("exit 0");
+  const { dir, shellPath } = makeFakeShell([]);
 
   try {
     await withEnv(
@@ -126,9 +132,9 @@ test("resolveZaiAuthTokens uses preference token when provided", async () => {
 });
 
 test("resolveZaiAuthTokens includes second preference token", async () => {
-  const { resolveZaiAuthTokens } = await import("./auth");
+  const { resolveZaiAuthTokens } = await import("./auth.ts");
 
-  const { dir, shellPath } = makeFakeShell("exit 0");
+  const { dir, shellPath } = makeFakeShell([]);
 
   try {
     await withEnv(
@@ -154,11 +160,9 @@ test("resolveZaiAuthTokens includes second preference token", async () => {
 });
 
 test("resolveZaiAuthTokens includes second preference token with auto-detected primary", async () => {
-  const { resolveZaiAuthTokens } = await import("./auth");
+  const { resolveZaiAuthTokens } = await import("./auth.ts");
 
-  const { dir, shellPath } = makeFakeShell(`
-printf "__ZAI_API_KEY_START__shell-zai-token__ZAI_API_KEY_END__\\n"
-`);
+  const { dir, shellPath } = makeFakeShell(["__ZAI_API_KEY_START__shell-zai-token__ZAI_API_KEY_END__"]);
 
   try {
     await withTestAuthFile(async () => {
@@ -185,9 +189,9 @@ printf "__ZAI_API_KEY_START__shell-zai-token__ZAI_API_KEY_END__\\n"
 });
 
 test("resolveZaiAuthTokens returns empty when no tokens found", async () => {
-  const { resolveZaiAuthTokens } = await import("./auth");
+  const { resolveZaiAuthTokens } = await import("./auth.ts");
 
-  const { dir, shellPath } = makeFakeShell("exit 0");
+  const { dir, shellPath } = makeFakeShell([]);
 
   try {
     await withTestAuthFile(async () => {

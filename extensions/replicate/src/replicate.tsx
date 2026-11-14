@@ -1,30 +1,23 @@
-import { ActionPanel, Action, getPreferenceValues, List, Icon } from "@raycast/api";
-import RenderForm from "./components/Form";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ManageAIModels } from "./views/ManageAIModels";
+import { ModelList } from "./views/ModelList";
 import ViewPredictions from "./viewPredictions";
 
 export default function Command() {
-  const { token } = getPreferenceValues();
-
   return (
     <>
       <List>
         <List.Item
-          icon={{
-            source:
-              "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
-          }}
+          icon={{ source: "replicate.png" }}
           title="Run a Model"
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<RenderForm token={token} modelName={"stable-diffusion"} />} />
+              <Action.Push icon={Icon.Play} title="Run a Model" target={<ModelList />} />
             </ActionPanel>
           }
         />
         <List.Item
-          icon={{
-            source:
-              "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
-          }}
+          icon={{ source: "replicate.png" }}
           title="View Predictions"
           actions={
             <ActionPanel>
@@ -33,23 +26,27 @@ export default function Command() {
           }
         />
         <List.Item
-          icon={{
-            source:
-              "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
-          }}
-          title="Explore Models"
-          accessories={[{ icon: Icon.ArrowNe }]}
+          icon={{ source: "replicate.png" }}
+          title="Raycast AI Models"
+          subtitle="Choose what Raycast AI offers"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Show Details" url={"https://replicate.com/collections/diffusion-models"} />
+              <Action.Push title="Raycast AI Models" target={<ManageAIModels />} />
             </ActionPanel>
           }
         />
         <List.Item
-          icon={{
-            source:
-              "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
-          }}
+          icon={{ source: "replicate.png" }}
+          title="Explore Models"
+          accessories={[{ icon: Icon.ArrowNe }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url="https://replicate.com/explore" />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          icon={{ source: "replicate.png" }}
           title="Dashboard"
           accessories={[{ icon: Icon.ArrowNe }]}
           actions={
@@ -59,10 +56,7 @@ export default function Command() {
           }
         />
         <List.Item
-          icon={{
-            source:
-              "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
-          }}
+          icon={{ source: "replicate.png" }}
           title="Docs"
           accessories={[{ icon: Icon.ArrowNe }]}
           actions={

@@ -1,7 +1,7 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { Device } from "./lib/types";
+import { Device, DeviceStatusEnum } from "./lib/types";
 import {
   getDeviceIcon,
   getDevices,
@@ -62,7 +62,11 @@ export default function Command() {
       {unavailableDevices.length && <MenuBarExtra.Item title="Unavailable" />}
       {unavailableDevices.map((device) => (
         <MenuBarExtra.Item
-          title={device.alias}
+          title={
+            device.availabilityStatus === DeviceStatusEnum.SignInFailed
+              ? `${device.alias} (Sign-in failed)`
+              : device.alias
+          }
           key={device.deviceId}
           icon={getDeviceIcon(device)}
           tooltip={device.name}

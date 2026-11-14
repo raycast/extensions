@@ -1,4 +1,4 @@
-import type { CodexUsage } from "./types";
+import type { CodexUsage } from "./types.ts";
 
 /**
  * The binding rate-limit constraint as a single "remaining" percentage for the

@@ -6,6 +6,7 @@ import type {
   IssueExtended,
   IssueTag,
   Project,
+  SearchSuggestion,
   User,
   WorkItem,
 } from "../interfaces";
@@ -20,6 +21,7 @@ import type {
   ReducedApiIssue,
   IssueWorkItemFields,
   UserFields,
+  SearchSuggestionsFields,
   IssueComment,
 } from "./youtrack-api-types";
 import {
@@ -30,6 +32,7 @@ import {
   issuesFields,
   issueWorkItemFields,
   projectFields,
+  searchSuggestionsFields,
   tagsFields,
   userFields,
   workItemFields,
@@ -79,6 +82,31 @@ export class YouTrackApi {
           })) ?? [],
       project: { name: issue.project!.name!, shortName: issue.project!.shortName!, id: issue.project!.id },
     }));
+  }
+
+  async fetchSearchSuggestions(query: string): Promise<SearchSuggestion[]> {
+    const data = await this.yt.Search.getSearchSuggestions<SearchSuggestionsFields>(
+      { query, caret: query.length },
+      { fields: searchSuggestionsFields },
+    );
+
+    return data.suggestions.flatMap((suggestion) => {
+      if (suggestion.completionStart === null || suggestion.completionEnd === null || suggestion.option === null) {
+        return [];
+      }
+
+      return [
+        {
+          completionStart: suggestion.completionStart,
+          completionEnd: suggestion.completionEnd,
+          description: suggestion.description ?? "",
+          group: suggestion.group ?? "",
+          option: suggestion.option,
+          prefix: suggestion.prefix ?? "",
+          suffix: suggestion.suffix ?? "",
+        },
+      ];
+    });
   }
 
   async fetchProjects(limit: number): Promise<Project[]> {

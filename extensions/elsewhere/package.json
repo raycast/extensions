@@ -2,12 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "elsewhere",
   "title": "Elsewhere",
-  "description": "Control Elsewhere's spatial soundscapes, Spaces, background music, and volume.",
+  "description": "Control spatial soundscapes, background music, playback, and volume.",
   "icon": "extension-icon.png",
   "author": "yannglt",
   "platforms": ["macOS"],
   "categories": ["Applications", "Media", "Productivity"],
-  "keywords": ["ambient", "focus", "soundscape", "spatial audio"],
+  "keywords": ["ambient", "ambience", "focus", "soundscape", "spatial audio", "background music", "ai"],
   "license": "MIT",
   "commands": [
     {
@@ -65,6 +65,28 @@
       "subtitle": "Elsewhere",
       "description": "Decrease Elsewhere's music volume by 10%.",
       "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "control-audio",
+      "title": "Control Audio",
+      "description": "Control spatial soundscapes, background music, playback, and volume."
+    },
+    {
+      "name": "create-space-from-prompt",
+      "title": "Create Space from Prompt",
+      "description": "Create a spatial soundscape preview from a natural-language description to review before saving."
+    },
+    {
+      "name": "switch-space",
+      "title": "Switch Spatial Soundscape",
+      "description": "Switch to an existing spatial soundscape by name."
+    },
+    {
+      "name": "switch-background-music",
+      "title": "Switch Background Music",
+      "description": "Switch to an existing background music track by name."
     }
   ],
   "dependencies": {

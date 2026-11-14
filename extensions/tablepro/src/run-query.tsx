@@ -14,13 +14,9 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import {
-  Connection,
-  QueryResult,
-  TableProNotInstalledError,
-} from "./lib/types";
+import { Connection, QueryResult } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
-import { tableProInstalled } from "./lib/paths";
+import { requireTablePro } from "./lib/app";
 import { ScenarioEmptyView } from "./lib/empty-state";
 import { classifyError } from "./lib/errors";
 import { executeQuery, ProgressEvent } from "./lib/mcp";
@@ -34,7 +30,7 @@ export default function RunQueryCommand() {
     error,
   } = useCachedPromise(
     async () => {
-      if (!tableProInstalled()) throw new TableProNotInstalledError();
+      await requireTablePro();
       return loadConnections();
     },
     [],

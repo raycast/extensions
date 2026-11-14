@@ -8,6 +8,7 @@ export interface ProcessInfo {
   pid: number;
   path?: string;
   name?: string;
+  commandLine?: string;
   parentPid?: number;
   parentPath?: string;
   user?: string;

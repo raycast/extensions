@@ -15,6 +15,26 @@ const hasMorePages = (pagination?: PaginationHeaders) =>
   (pagination?.["x-pagination-page"] ?? 0) < (pagination?.["x-pagination-page-count"] ?? 0);
 
 /**
+ * `/sync/progress/up_next_nitro` sends a fixed `X-Pagination-Page-Count` (1337, trakt-api#926),
+ * so a short page would still claim more pages. Clamp the count to the current page when the
+ * body holds fewer items than the page size Trakt served.
+ */
+export function capPageCountToServedItems(response: TraktApiResponse, requestedLimit: number): TraktApiResponse {
+  if (response.status !== 200 || !Array.isArray(response.body)) return response;
+
+  // `withPagination` reads the headers as a plain record (`TraktPaginationHeaderSchema.parse`),
+  // so they are a record here, not a `Headers` instance: there is no `.get`.
+  const headers = response.headers as unknown as Record<string, string | undefined>;
+  const servedLimit = Number(headers["x-pagination-limit"]) || requestedLimit;
+  if (response.body.length >= servedLimit) return response;
+
+  return {
+    ...response,
+    headers: { ...headers, "x-pagination-page-count": headers["x-pagination-page"] ?? "1" } as unknown as Headers,
+  };
+}
+
+/**
  * Fetches a single page of a single media type and tags each item with its `mediaType`.
  * The `Item` type is supplied by the caller because the ts-rest response body is a
  * status-discriminated union that can't be narrowed generically here.

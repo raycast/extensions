@@ -3,7 +3,7 @@
   "name": "sonos",
   "title": "Sonos",
   "description": "Control your Sonos system",
-  "icon": "sonos.png",
+  "icon": "sonos-icon-2.png",
   "author": "AntonNiklasson",
   "contributors": [
     "pastenes",
@@ -21,8 +21,7 @@
       "title": "Play / Pause",
       "subtitle": "Sonos",
       "description": "Toggle the playback state of the active group",
-      "mode": "no-view",
-      "interval": "5s"
+      "mode": "no-view"
     },
     {
       "name": "set-group",
@@ -97,7 +96,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.71.4",
-    "@svrooij/sonos": "2.6.0-beta.13",
+    "@svrooij/sonos": "2.7.0",
     "prettier-plugin-organize-imports": "^3.2.4"
   },
   "devDependencies": {
@@ -117,5 +116,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
+  }
 }

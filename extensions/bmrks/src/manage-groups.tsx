@@ -1,9 +1,9 @@
 import AuthenticatedView from "./components/authenticated-view";
 import { User } from "@supabase/supabase-js";
-import { useGroups } from "../lib/use-groups";
+import { useGroups } from "./lib/use-groups";
 import { FormValidation, useForm } from "@raycast/utils";
-import { createGroup, deleteGroup } from "../lib/db";
-import type { Group } from "../lib/db";
+import { createGroup, deleteGroup } from "./lib/db";
+import type { Group } from "./lib/db";
 
 import {
   Action,

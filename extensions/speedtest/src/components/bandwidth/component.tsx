@@ -10,10 +10,10 @@ type ListBandwidthItemProps = {
   isLoading: boolean;
   title: string;
   icon: Image.ImageLike;
-  actions?: JSX.Element;
+  actions?: React.ReactNode;
 };
 
-export const ListBandwidthItem = (props: ListBandwidthItemProps): JSX.Element => {
+export const ListBandwidthItem = (props: ListBandwidthItemProps) => {
   const { title, icon, speed, activity, isLoading, actions } = props;
   const [qualities, setQualities] = useState<string>("");
 

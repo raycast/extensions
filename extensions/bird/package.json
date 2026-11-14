@@ -78,7 +78,10 @@
     "typescript": "^5.2.2"
   },
   "overrides": {
-    "@types/react": "18.2.28"
+    "@types/react": "18.2.28",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "js-yaml@4": "4.3.2"
   },
   "platforms": [
     "macOS"

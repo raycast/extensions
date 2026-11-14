@@ -6,6 +6,12 @@ interface HostsListResponse {
   data: HostsItem[];
 }
 
+interface RefreshResponse {
+  success: boolean;
+  changed?: boolean;
+  message?: string;
+}
+
 interface CommonHostsItem {
   id: string;
   type: "local" | "remote" | "group" | "folder";
@@ -159,6 +165,30 @@ Checklist:
                   }
                 }}
               />
+              {item.type === "remote" && (
+                <Action
+                  icon={Icon.ArrowClockwise}
+                  title="Refresh"
+                  onAction={async () => {
+                    const toast = await showToast(Toast.Style.Animated, "Refreshing", item.title);
+                    try {
+                      const response = await refreshHost(item.id);
+                      const result = (await response.json()) as RefreshResponse;
+                      if (!response.ok || !result.success) {
+                        throw new Error(result.message || "Failed to refresh hosts");
+                      }
+                      await revalidate();
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Success";
+                      toast.message = `${item.title} refreshed`;
+                    } catch (error) {
+                      toast.style = Toast.Style.Failure;
+                      toast.title = "Failed";
+                      toast.message = error instanceof Error ? error.message : `Unable to refresh ${item.title}`;
+                    }
+                  }}
+                />
+              )}
             </ActionPanel>
           }
         />
@@ -186,6 +216,10 @@ function getSwitchHostsList() {
 
 function switchHost(id: string) {
   return fetch(`http://127.0.0.1:50761/api/toggle?id=${id}`, { method: "GET" });
+}
+
+function refreshHost(id: string) {
+  return fetch(`http://127.0.0.1:50761/api/refresh?id=${encodeURIComponent(id)}`, { method: "GET" });
 }
 
 function capitalize(str: string): string {

@@ -9,10 +9,15 @@ defaults described below without requiring any of this knowledge.
 
 ### What we defend against
 
-- **Coresident user-space processes** reading the vault file at rest.
-  Vault is AES-256-GCM encrypted; the key never lives in the file.
+- **Vault file disclosure on its own.**
+  The vault is AES-256-GCM encrypted and the encryption key is stored
+  separately, so copying or reading `vault.enc` alone does not reveal
+  the stored TOTP secrets.
 - **Disk loss / casual filesystem access** to `vault.enc`.
-  Without the macOS Keychain entry, the file is opaque ciphertext.
+  The encryption key is stored separately from the vault: in the
+  macOS Keychain on macOS, or protected with Windows DPAPI
+  (`CurrentUser`) on Windows. Without access to the protected key,
+  the vault is opaque ciphertext.
 - **Malicious or malformed `.2fas` files.**
   Import is bounded (5 MB), JSON-validated, and AES-GCM
   authenticated. Failed parses cannot corrupt or destroy an
@@ -23,30 +28,34 @@ defaults described below without requiring any of this knowledge.
   staging file and renamed into place.
 - **TOTP secret leakage via clipboard history.**
   All clipboard copies use `concealed: true`, which excludes the
-  payload from Raycast and macOS clipboard history.
+  payload from Raycast clipboard history on supported platforms.
 - **Vault corruption from interrupted writes.**
   Writes go to `vault.enc.new` first, then `renameSync` into place
   (atomic on the same filesystem).
 
 ### What we do NOT defend against
 
-- **Kernel-level adversary or root on the local machine.** Anyone
-  with root can read process memory, snoop on `/usr/bin/security`
-  invocations, or directly query the Keychain. The Keychain is
-  itself the trust anchor we borrow.
-- **Physical access with a logged-in macOS session.** A user already
-  authenticated to the macOS keychain can run the extension and
-  retrieve codes. This is the same threat boundary as the 2FAS app
-  on a phone you are holding.
+- **A fully compromised local user session or privileged attacker.**
+  An attacker with root/Administrator privileges, or code execution
+  as the current user, may be able to read process memory or invoke
+  the platform credential-protection mechanism directly. We rely on
+  the macOS Keychain and Windows DPAPI as platform trust anchors.
+- **Physical access to an unlocked user session.** A user who already
+  has access to the logged-in macOS or Windows session can run the
+  extension and retrieve codes.
 - **Disk forensics on a turned-off, encrypted disk.** Out of scope.
-  We trust FileVault.
+  We rely on the platform's full-disk encryption, such as FileVault
+  on macOS or BitLocker on Windows.
 - **A coresident process polling `argv` during the brief window
   `/usr/bin/security add-generic-password -w <key>` is running.**
   See "Known limitations" below.
 
 ## Known limitations
 
-### Vault key briefly visible in process argv
+### macOS vault key briefly visible in process argv
+This limitation applies only to macOS. On Windows, the vault key is
+passed to the PowerShell DPAPI helper through standard input and is
+not included in the process argument vector.
 
 The Apple `security(1)` CLI accepts the keychain item password as
 the `-w` argument. We invoke it via `child_process.execFileSync`,
@@ -74,8 +83,8 @@ high-value TOTP secrets on this machine.
 
 `Search OTP` and `Recent OTP` keep the decrypted services in
 process memory while the view is open so codes can refresh every
-second without prompting the Keychain repeatedly. The cache has a
-5-minute idle TTL.
+second without repeatedly accessing the platform key store. The cache
+has a 5-minute idle TTL.
 
 Use **Setup → Lock Vault Now** to clear the in-memory cache in the
 Setup process. Note that other already-open command windows
@@ -94,8 +103,8 @@ A new random key is generated only on first creation, where the file
 is written and the key is stored in sequence. A crash in that window
 loses nothing recoverable, since there was no prior vault. If the
 stored key is ever found corrupt, a re-import re-keys from scratch
-(the old ciphertext was already unreadable); any other Keychain
-failure aborts the re-import and leaves the existing vault untouched.
+(the old ciphertext was already unreadable); any other platform key
+storage failure aborts the re-import and leaves the existing vault untouched.
 
 ### PBKDF2 iteration count is inherited
 
@@ -109,9 +118,11 @@ itself, not by this extension. Use a strong export password.
 - **Vault at rest:** AES-256-GCM, 12-byte IV from
   `crypto.randomBytes`, 16-byte authentication tag verified on
   every load.
-- **Key storage:** 32 random bytes from `crypto.randomBytes`,
-  stored in the macOS user keychain under
+- **Key storage:** 32 random bytes from `crypto.randomBytes`.
+  On macOS, the key is stored in the user Keychain under
   `service=com.raycast.2fas-engine`, `account=vault-key`.
+  On Windows, the key is protected with DPAPI using the
+  `CurrentUser` scope and stored separately as `vault-key.dpapi`.
 - **TOTP:** RFC 6238, supporting SHA-1 / SHA-256 / SHA-512.
 - **Import decryption:** AES-256-GCM, with key derived via
   PBKDF2-SHA256 (10 000 iterations, 32-byte key) per the 2FAS

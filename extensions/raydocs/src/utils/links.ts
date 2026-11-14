@@ -1,58 +1,46 @@
-import { load } from "cheerio";
-import crypto from "crypto";
-import fetch from "node-fetch";
-import showdown from "showdown";
 import { Link } from "@/types";
 import { docsUrl, linksUrl, markdownUrl } from "@/utils/constants";
 
-const converter = new showdown.Converter();
+const HEADING = /^#{1,6}\s+(.*)$/;
+const RULE = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
+const LIST_LINK = /^\s*[-*+]\s+\[([^\]]*)\]\(([^)]+)\)/;
 
 export async function getLinks(): Promise<Link[]> {
-  try {
-    const res = await fetch(linksUrl);
-    const resText = await res.text();
+  const res = await fetch(linksUrl);
 
-    const html = converter.makeHtml(resText);
-
-    const $ = load(html);
-
-    let sectionTitle: string | undefined;
-
-    const menuItems: Link[] = $("body > *")
-      .map((_, element) => {
-        if (/h[1-6]/.test(element.name)) {
-          sectionTitle = $(element).text();
-          return;
-        }
-
-        if (/hr/.test(element.name)) {
-          sectionTitle = undefined;
-          return;
-        }
-
-        if (/ul/.test(element.name)) {
-          const links = $(element)
-            .find("li > a")
-            .map((_, link) => {
-              return {
-                id: crypto.randomUUID(),
-                sectionTitle,
-                title: $(link).text(),
-                url: parseUrl($(link).attr("href")),
-              };
-            })
-            .toArray();
-
-          return links;
-        }
-      })
-      .toArray();
-
-    return menuItems;
-  } catch (err) {
-    console.error(err);
-    return [];
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${linksUrl} (${res.status} ${res.statusText})`);
   }
+
+  const markdown = await res.text();
+
+  const links: Link[] = [];
+  let sectionTitle: string | undefined;
+
+  for (const line of markdown.split("\n")) {
+    if (RULE.test(line)) {
+      sectionTitle = undefined;
+      continue;
+    }
+
+    const heading = line.match(HEADING);
+    if (heading) {
+      sectionTitle = heading[1].trim();
+      continue;
+    }
+
+    const link = line.match(LIST_LINK);
+    if (link) {
+      links.push({
+        id: link[2],
+        sectionTitle,
+        title: link[1],
+        url: parseUrl(link[2]),
+      });
+    }
+  }
+
+  return links;
 }
 
 function parseUrl(url: string | undefined): Link["url"] {

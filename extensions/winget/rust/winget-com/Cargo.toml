@@ -1,0 +1,26 @@
+[package]
+name = "winget_com"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "winget_com"
+path = "src/winget_com.rs"
+
+[dependencies]
+image = { version = "0.25.10", default-features = false, features = ["gif", "ico", "jpeg", "png", "webp"] }
+raycast-rust-macros = { git = "https://github.com/raycast/extensions-rust-tools", package = "raycast-rust-macros", branch = "main" }
+raycast-rust-runtime = { git = "https://github.com/raycast/extensions-rust-tools", package = "raycast-rust-runtime", branch = "main" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+# native-tls means SChannel on Windows: pure bindings, no C to compile,
+# which keeps the crate cross-compilable from the extension CI's macOS runners.
+ureq = { version = "3.4.0", default-features = false, features = ["gzip", "native-tls"] }
+windows = { version = "0.62.2", features = ["Win32_System_Com"] }
+windows-collections = "0.3.2"
+windows-core = "0.62.2"
+windows-future = "0.3.2"
+
+[build-dependencies]
+windows-bindgen = "0.66.0"

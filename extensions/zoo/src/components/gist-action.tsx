@@ -185,7 +185,7 @@ export function GistAction(props: {
           quicklink={{ name: gistFileName, link: gist.html_url }}
         />
         <Action.OpenInBrowser
-          title={"Open in Ray.so"}
+          title={"Open in ray.so"}
           icon={Icon.RaycastLogoPos}
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           url={raySo(gistFileName, gistFileContent)}

@@ -23,7 +23,7 @@
       "title": "Current Desktop",
       "description": "Show the currently active desktop with live status.",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "rename-current-space",
@@ -90,13 +90,27 @@
   ],
   "preferences": [
     {
-      "name": "returnToOriginalSpace",
-      "title": "Return to Original Space",
-      "label": "Enable automatic return",
-      "description": "Automatically return to your original desktop after moving windows to a different desktop.",
-      "type": "checkbox",
+      "name": "communicationMethod",
+      "title": "Communication Method",
+      "label": "Choose how Raycast communicates with DesktopRenamer",
+      "description": "Automatic uses SpaceAPI first and falls back to AppleScript when needed.",
+      "type": "dropdown",
       "required": false,
-      "default": true
+      "default": "automatic",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "automatic"
+        },
+        {
+          "title": "SpaceAPI",
+          "value": "spaceapi"
+        },
+        {
+          "title": "AppleScript",
+          "value": "applescript"
+        }
+      ]
     }
   ],
   "dependencies": {

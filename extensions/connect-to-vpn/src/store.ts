@@ -1,11 +1,12 @@
 import { LocalStorage, environment, LaunchType, launchCommand } from "@raycast/api";
+import type { NetworkServiceStatus } from "./network-services";
 
 const VPN_STATUS_KEY = "vpn-connection-status";
 const MENUBAR_REFRESH_TIMESTAMP_KEY = "vpn-menubar-refresh-timestamp";
 
 export type VpnStatusUpdate = {
   serviceId: string;
-  status: "connected" | "disconnected" | "connecting" | "disconnecting" | "invalid";
+  status: NetworkServiceStatus;
   timestamp: number;
 };
 
@@ -13,14 +14,15 @@ export type VpnStatusUpdate = {
  * Updates the VPN status in shared storage
  */
 export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
-  await LocalStorage.setItem(VPN_STATUS_KEY, JSON.stringify(update));
-  // Always update the refresh timestamp when status changes
-  await updateMenuBarRefreshTimestamp();
-
-  // Force menubar refresh by relaunching the menubar command
-  // Only do this if we're not already in the menubar command
-  if (environment.launchType !== LaunchType.Background) {
+  try {
+    await LocalStorage.setItem(VPN_STATUS_KEY, JSON.stringify(update));
+    // A menu bar refresh must never trigger another refresh of itself.
+    if (environment.entryPointName === "menu-bar") return;
+    await updateMenuBarRefreshTimestamp();
     await forceMenuBarRefresh();
+  } catch (error) {
+    // The network request already succeeded. A refresh failure must not invite a retry.
+    console.error("Unable to share VPN status:", error);
   }
 }
 
@@ -29,7 +31,32 @@ export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
  */
 export async function getVpnStatus(): Promise<VpnStatusUpdate | null> {
   const status = await LocalStorage.getItem<string>(VPN_STATUS_KEY);
-  return status ? JSON.parse(status) : null;
+  if (!status) return null;
+  try {
+    const value: unknown = JSON.parse(status);
+    if (
+      typeof value !== "object" ||
+      value === null ||
+      !("serviceId" in value) ||
+      !("status" in value) ||
+      !("timestamp" in value)
+    )
+      return null;
+    if (typeof value.serviceId !== "string" || typeof value.timestamp !== "number" || !Number.isFinite(value.timestamp))
+      return null;
+    const state = value.status;
+    if (
+      state !== "connected" &&
+      state !== "disconnected" &&
+      state !== "connecting" &&
+      state !== "disconnecting" &&
+      state !== "invalid"
+    )
+      return null;
+    return { serviceId: value.serviceId, status: state, timestamp: value.timestamp };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -45,7 +72,8 @@ export async function updateMenuBarRefreshTimestamp(): Promise<void> {
  */
 export async function getMenuBarRefreshTimestamp(): Promise<number> {
   const timestamp = await LocalStorage.getItem<string>(MENUBAR_REFRESH_TIMESTAMP_KEY);
-  return timestamp ? parseInt(timestamp, 10) : 0;
+  const value = Number(timestamp);
+  return Number.isFinite(value) ? value : 0;
 }
 
 /**

@@ -26,6 +26,8 @@ const FILENAMES = {
   refreshLock: "refresh-lock.json",
   /** Timestamp of the newest acknowledged failure (last-failure surfacing). */
   failureAck: "failure-ack.json",
+  /** Resolved package icons, one file per package (see hooks/usePackageIcons). */
+  iconCache: "icons",
   /** Legacy v1 index file; migrated then deleted. */
   legacyIndex: "winget-package-index.json",
 } as const;

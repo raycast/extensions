@@ -6,39 +6,51 @@ import {
   UpdateLinksResponse,
   UpdateLinkResponse,
   DeleteLinkResponse,
-  ErrorResponse,
 } from "./types";
 
 const BASE_URL = "https://www.shiori.sh";
 
-function headers(): Record<string, string> {
-  const { apiKey } = getPreferenceValues();
-  return {
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  };
-}
+class ShioriRequestError extends Error {}
 
-async function request<T>(
-  path: string,
-  init?: { method?: string; body?: string; headers?: Record<string, string> },
-): Promise<T> {
-  const res = await globalThis.fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: { ...headers(), ...init?.headers },
-  });
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const { apiKey } = getPreferenceValues<Preferences>();
+  if (!apiKey.trim()) throw new Error("Add your Shiori API key in extension preferences.");
+  const timeout = AbortSignal.timeout(30_000);
+  const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
 
-  const body = (await res.json()) as T | ErrorResponse;
-
-  if (!res.ok || !(body as { success: boolean }).success) {
-    const msg = (body as ErrorResponse).error ?? `Request failed (${res.status})`;
-    throw new Error(msg);
+  try {
+    const res = await globalThis.fetch(`${BASE_URL}${path}`, {
+      ...init,
+      signal,
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    });
+    // Do not include response bodies or network errors, which could echo credentials.
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        throw new ShioriRequestError("Shiori authentication failed. Check your API key in extension preferences.");
+      }
+      if (res.status === 429) throw new ShioriRequestError("Shiori rate limit reached. Wait a minute before retrying.");
+      throw new ShioriRequestError(`Shiori request failed (${res.status}). Please try again.`);
+    }
+    let body;
+    try {
+      body = await res.json();
+    } catch {
+      throw new ShioriRequestError("Shiori returned an invalid response. Please try again.");
+    }
+    if (!body || typeof body !== "object" || !("success" in body) || body.success !== true)
+      throw new ShioriRequestError("Shiori could not complete the request.");
+    return body as T;
+  } catch (error) {
+    if (init.signal?.aborted) throw new DOMException("Request cancelled", "AbortError");
+    if (timeout.aborted)
+      throw new ShioriRequestError("Shiori request timed out. Check your library before retrying a save.");
+    if (error instanceof ShioriRequestError) throw error;
+    throw new Error("Could not connect to Shiori. Check your connection.");
   }
-
-  return body as T;
 }
 
-export async function fetchLinks(params: FetchLinksParams = {}): Promise<LinksResponse> {
+export async function fetchLinks(params: FetchLinksParams = {}, signal?: AbortSignal): Promise<LinksResponse> {
   const qs = new URLSearchParams();
   if (params.limit !== undefined) qs.set("limit", String(params.limit));
   if (params.offset !== undefined) qs.set("offset", String(params.offset));
@@ -46,15 +58,53 @@ export async function fetchLinks(params: FetchLinksParams = {}): Promise<LinksRe
   if (params.sort) qs.set("sort", params.sort);
   if (params.search) qs.set("search", params.search);
 
+  if (params.favorite !== undefined) qs.set("favorite", String(params.favorite));
+  if (params.tag?.trim()) qs.set("tag", params.tag.trim());
+  if (params.since?.trim()) qs.set("since", params.since.trim());
+
   const query = qs.toString();
-  return request<LinksResponse>(`/api/links${query ? `?${query}` : ""}`);
+  const response = await request<LinksResponse>(`/api/links${query ? `?${query}` : ""}`, { signal });
+  if (
+    !Array.isArray(response.links) ||
+    !Number.isSafeInteger(response.total) ||
+    response.total < 0 ||
+    response.links.some((link) => !link || typeof link.id !== "string" || typeof link.url !== "string")
+  ) {
+    throw new Error("Shiori returned an invalid links page. Please refresh.");
+  }
+  return response;
 }
 
 export async function createLink(url: string, title?: string, read?: boolean): Promise<CreateLinkResponse> {
-  return request<CreateLinkResponse>("/api/links", {
+  const result = await request<CreateLinkResponse>("/api/links", {
     method: "POST",
-    body: JSON.stringify({ url, ...(title && { title }), ...(read !== undefined && { read }) }),
+    body: JSON.stringify({
+      url: normalizeUrl(url),
+      ...(title?.trim() && { title: title.trim() }),
+      ...(read !== undefined && { read }),
+    }),
   });
+  if (typeof result.linkId !== "string" || !result.linkId) {
+    throw new Error("Shiori did not return a link ID. Check your library before retrying the save.");
+  }
+  return result;
+}
+
+export function normalizeUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) throw new Error("URL is required.");
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(trimmed);
+  const isHostWithPort = /^[^/:\s]+:\d+(?:[/?#]|$)/.test(trimmed);
+  const withScheme = hasScheme && !isHostWithPort ? trimmed : `https://${trimmed}`;
+  try {
+    const url = new URL(withScheme);
+    if (!["https:", "http:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
+      throw new Error();
+    }
+    return url.toString();
+  } catch {
+    throw new Error("Enter a valid HTTP or HTTPS URL without embedded credentials.");
+  }
 }
 
 export async function updateLinks(ids: string[], read: boolean): Promise<UpdateLinksResponse> {

@@ -13,8 +13,11 @@ type Input = {
       | "swim"
       | "hike"
       | "yoga"
+      | "tennis"
+      | "skiing"
       | "nordicski"
       | "strength"
+      | "surf"
       | "other";
     description?: string;
     distance?: number;

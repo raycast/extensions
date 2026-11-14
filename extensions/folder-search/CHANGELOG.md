@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [Finder Open Behavior] - 2026-08-29
+
+- **enhanced** Added "Open Behavior" preference to open folders in a new Finder window, a new tab, or the current tab
+
 ## [Enhancements] - 2025-06-18
 
 - **enhanced** Added "Open Folder After Move" preference to control whether destination folders open automatically after moving files. When disabled, files will be moved without opening the folder, keeping your workflow uninterrupted. Default is enabled

@@ -2,7 +2,7 @@
  * Action panel and status helpers for managing brew services.
  */
 
-import { Action, ActionPanel, Color, Icon, Image, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, Keyboard } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { homedir } from "os";
 import {
@@ -17,6 +17,7 @@ import {
   type Service,
   type ServiceAction,
 } from "../utils";
+import { ERROR_ICON, STATUS_COLOR, UP_TO_DATE_ICON } from "./palette";
 
 export type ServicesMutate = MutatePromise<Service[], undefined>;
 
@@ -24,16 +25,16 @@ export type ServicesMutate = MutatePromise<Service[], undefined>;
 export function serviceStatusIcon(status: string): Image.ImageLike {
   switch (status) {
     case "started":
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
+      return UP_TO_DATE_ICON;
     case "scheduled":
-      return { source: Icon.Clock, tintColor: Color.Blue };
+      return { source: Icon.Clock, tintColor: STATUS_COLOR.inProgress };
     case "stopped":
     case "none":
-      return { source: Icon.Circle, tintColor: Color.SecondaryText };
+      return { source: Icon.Circle, tintColor: STATUS_COLOR.muted };
     case "error":
-      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      return ERROR_ICON;
     default:
-      return { source: Icon.QuestionMarkCircle, tintColor: Color.Orange };
+      return { source: Icon.QuestionMarkCircle, tintColor: STATUS_COLOR.attention };
   }
 }
 

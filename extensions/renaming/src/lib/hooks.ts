@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
-import { basename, extname } from "path";
 import { FileItem, RenameRule, applyRulesToItem } from "./rules";
-import { stat } from "fs/promises";
+import { getFileInfo } from "./files";
 
+/**
+ * The whole Finder selection, files and folders alike. Callers narrow it to
+ * what they act on with `filterByScope` from `./selection`.
+ */
 export function useFileSelection() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,24 +15,16 @@ export function useFileSelection() {
     async function fetch() {
       try {
         const items = await getSelectedFinderItems();
-        const fileItems: FileItem[] = await Promise.all(
-          items.map(async (item) => {
-            const stats = await stat(item.path);
-            const name = basename(item.path);
-            const ext = stats.isDirectory() ? "" : extname(item.path);
-            const base = stats.isDirectory() ? name : basename(item.path, ext);
-
-            return {
-              originalPath: item.path,
-              name: base,
-              extension: ext,
-              isDirectory: stats.isDirectory(),
-            };
-          }),
-        );
+        const infos = await Promise.all(items.map((item) => getFileInfo(item.path)));
+        const fileItems: FileItem[] = infos.map((info) => ({
+          originalPath: info.path,
+          name: info.baseName,
+          extension: info.extension,
+          isDirectory: info.isDirectory,
+        }));
         setFiles(fileItems);
       } catch (e) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to read files", message: String(e) });
+        showToast({ style: Toast.Style.Failure, title: "Failed to read Finder selection", message: String(e) });
       } finally {
         setLoading(false);
       }

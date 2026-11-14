@@ -11,20 +11,30 @@ export default function Command() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchAndSetTodos = async () => {
       try {
         await wip.authorize();
+        if (cancelled) return;
         const fetchedTodos = await wip.fetchTodos(searchQuery);
-        setTodos(fetchedTodos);
-        setIsLoading(false);
+        if (!cancelled) setTodos(fetchedTodos);
       } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        showToast({ style: Toast.Style.Failure, title: String(error) });
+        if (!cancelled) {
+          console.error(error);
+          showToast({ style: Toast.Style.Failure, title: String(error) });
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
     };
     const debouncedFetch = debounce(fetchAndSetTodos, 300);
     debouncedFetch();
+
+    return () => {
+      cancelled = true;
+      debouncedFetch.cancel();
+    };
   }, [searchQuery]);
 
   if (isLoading) {

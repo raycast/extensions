@@ -1,5 +1,26 @@
 # Windows Terminal Changelog
 
+## [Fix PowerShell Detection] - 2026-11-03
+
+- Fixed Windows Terminal marking the PowerShell 7 profile "Profile no longer detected" (and then opening it in System32) when Terminal was first started from the extension. Raycast doesn't pass `ProgramFiles` to extensions, so the extension now restores it when launching `wt.exe`.
+
+## [Bug Fix] - 2026-10-15
+
+- Uses static path for `wt.exe` in case the alias is not in the path
+- Removed macOS logic since it's not needed
+- Added support for portable Windows Terminal setups
+
+## [Open with Terminal command] - 2026-09-27
+
+- Add `Open with Terminal` command that opens the selected file manager item in Terminal
+- Use `wt.exe` (for Terminal) so the default profile is used instead of CMD every time
+- Fix `Open in New Tab` action opening a new window
+- Bump all dependencies to the latest
+
+## [New Tab Menu Preference] - 2026-09-14
+
+- Added the `Use New Tab Menu order` preference. When enabled, profiles are filtered and ordered to match Windows Terminal's `newTabMenu` setting (`profile`, `matchProfiles`, `folder`, and `remainingProfiles` entries), instead of the raw `settings.json` list order.
+
 ## [Always Open Administrator in a Normal Window] - 2026-07-22
 
 - "Open as Administrator" now always launches into a regular window, regardless of the `Open profiles in quake window` preference. Elevated quake windows don't respond to Windows Terminal's global quake shortcut (Win+`), so routing admin through quake left users unable to summon the drop-down back once it lost focus. The separate "Open as Administrator (Non-Quake)" action added in the previous release is no longer needed and has been removed.

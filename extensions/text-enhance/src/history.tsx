@@ -11,7 +11,10 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { loadHistory, saveHistory, type HistoryEntry } from "./lib/storage";
+import { CompareDetail } from "./compare";
+import { loadHistory, saveHistory } from "./lib/history-storage";
+import type { HistoryEntry } from "./lib/storage";
+import { PROVIDER_OPTIONS, getDefaultProviderModel } from "./lib/providers";
 
 export default function HistoryCommand() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -21,6 +24,13 @@ export default function HistoryCommand() {
     async function bootstrap() {
       try {
         setHistory(await loadHistory());
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not load history",
+          message:
+            error instanceof Error ? error.message : "Unknown storage error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -177,6 +187,16 @@ function HistoryDetail(props: { entry: HistoryEntry }) {
               });
             }}
           />
+          <Action.Push
+            title="Compare with Original"
+            icon={Icon.Text}
+            target={
+              <CompareDetail
+                original={entry.values.draft}
+                result={entry.result}
+              />
+            }
+          />
         </ActionPanel>
       }
     />
@@ -284,6 +304,18 @@ function renderHistoryMarkdown(entry: HistoryEntry) {
 }
 
 function getModelTitle(entry: HistoryEntry) {
+  if (
+    entry.values.generationProvider &&
+    entry.values.generationProvider !== "raycast"
+  ) {
+    const provider = PROVIDER_OPTIONS.find(
+      (item) => item.id === entry.values.generationProvider,
+    );
+    const model =
+      entry.values.providerModel ||
+      getDefaultProviderModel(entry.values.generationProvider);
+    return `${provider?.name ?? entry.values.generationProvider} · ${model}`;
+  }
   return (
     {
       "claude-4-sonnet": "Claude 4 Sonnet",
@@ -296,6 +328,9 @@ function getModelTitle(entry: HistoryEntry) {
       "gpt-5": "GPT-5",
       "gpt-5.1": "GPT-5.1",
       "gpt-5.2": "GPT-5.2",
+      "gpt-5.3-instant": "GPT-5.3 Instant",
+      "gpt-5.4": "GPT-5.4",
+      automatic: "Automatic",
       "gpt-4.1": "GPT-4.1",
       "gpt-4.1-mini": "GPT-4.1 Mini",
       "gemini-2.5-flash": "Gemini 2.5 Flash",

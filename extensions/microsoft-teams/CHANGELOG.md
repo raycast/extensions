@@ -1,5 +1,16 @@
 # Microsoft Teams Changelog
 
+## [AI Tools and Reliability Improvements] - 2026-08-31
+
+- Added AI tools to search people and chats, read and update presence, and set or clear status messages.
+- Added AI tools for the signed-in profile, recent chats, chat messages, new-chat links, and audio or video call links.
+- Added Windows support across commands, OAuth, Teams navigation, and calling.
+- Replaced macOS-only call automation with Microsoft Teams deep links and added platform-native shortcuts.
+- Moved AI instructions and expanded eval coverage to `ai.yaml`.
+- Fixed Microsoft sign-in failing when the token response does not contain a valid access token ([#26688](https://github.com/raycast/extensions/issues/26688)).
+- Fixed audio and video calls on the current Microsoft Teams app while retaining support for classic Teams ([#25929](https://github.com/raycast/extensions/issues/25929)).
+- Improved extension descriptions and documented AI usage examples.
+
 ## [Update] - 2026-06-15
 
 # Features
@@ -19,7 +30,7 @@ Fixes
 
 # Features
 
-- Added ability to directly call with audio or video a user from a chat. 
+- Added ability to directly call with audio or video a user from a chat.
 - Added to `OneToOne` chats status icons based on the Microsoft Graph Presence API.
 
 ## [Update] - 2023-05-16

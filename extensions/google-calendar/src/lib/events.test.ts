@@ -1,7 +1,39 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { EventWithLabel } from "./calendar-resources";
-import { applyImportedEventLabel, buildEventResource, serializeEvent } from "./events";
+import { applyImportedEventLabel, buildAllDayDateRange, buildEventResource, serializeEvent } from "./events";
+
+describe("buildAllDayDateRange", () => {
+  it("creates a one-day range with an exclusive next-day API end date", () => {
+    assert.deepEqual(buildAllDayDateRange(new Date(2026, 6, 20)), {
+      start: { date: "2026-07-20" },
+      end: { date: "2026-07-21" },
+    });
+  });
+
+  it("converts an inclusive multi-day UI range to an exclusive API end date", () => {
+    assert.deepEqual(buildAllDayDateRange(new Date(2026, 6, 20), new Date(2026, 6, 22)), {
+      start: { date: "2026-07-20" },
+      end: { date: "2026-07-23" },
+    });
+  });
+
+  it("rejects an end date before the start date", () => {
+    assert.throws(
+      () => buildAllDayDateRange(new Date(2026, 6, 22), new Date(2026, 6, 20)),
+      /cannot be before the start date/,
+    );
+  });
+
+  it("does not affect timed event payloads", () => {
+    const event = buildEventResource(
+      { title: "Sync", startDate: "2026-07-20T10:00:00+02:00", duration: 45 },
+      { isCreate: true, defaultDurationMinutes: 30 },
+    );
+    assert.deepEqual(event.start, { dateTime: "2026-07-20T10:00:00+02:00" });
+    assert.deepEqual(event.end, { dateTime: "2026-07-20T08:45:00.000Z" });
+  });
+});
 
 describe("buildEventResource", () => {
   it("constructs timed and all-day schedules", () => {

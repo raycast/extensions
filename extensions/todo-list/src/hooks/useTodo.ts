@@ -9,7 +9,7 @@ import {
   editingDueDateAtom,
   editingDueDateValueAtom,
 } from "../atoms";
-import { compare, insertIntoSection, confetti } from "../utils";
+import { confetti } from "../utils";
 import { preferences } from "../config";
 
 import _ from "lodash";
@@ -24,26 +24,25 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   const [, setEditingDueDateValue] = useAtom(editingDueDateValueAtom);
   const [, setSearchBarText] = useAtom(searchBarTextAtom);
 
-  const setClone = () => {
-    setTodoSections(_.cloneDeep(todoSections));
+  const updateTodo = (update: (sections: TodoSections, todo: TodoItem) => void) => {
+    const sections = _.cloneDeep(todoSections);
+    update(sections, sections[sectionKey][idx]);
+    setTodoSections(sections);
   };
 
   const toggleCompleted = (completed: boolean) => {
-    todoSections[sectionKey][idx].completed = completed;
-    todoSections[sectionKey].splice(idx, 1);
-    todoSections[sectionKey] = [...insertIntoSection(todoSections[sectionKey], item, compare)];
-    setClone();
+    updateTodo((_sections, todo) => {
+      todo.completed = completed;
+    });
   };
 
   const moveToSection = (newSection: keyof TodoSections) => {
-    if (newSection === "completed") {
-      item.completed = true;
-    } else if (newSection === "todo") {
-      item.completed = false;
-    }
-    todoSections[newSection] = [...insertIntoSection(todoSections[newSection], item, compare)];
-    todoSections[sectionKey].splice(idx, 1);
-    setClone();
+    updateTodo((sections, todo) => {
+      if (newSection === "completed") todo.completed = true;
+      else if (newSection === "todo") todo.completed = false;
+      sections[sectionKey].splice(idx, 1);
+      sections[newSection].push(todo);
+    });
   };
 
   const unPin = () => {
@@ -79,8 +78,9 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   };
 
   const deleteTodo = () => {
-    todoSections[sectionKey].splice(idx, 1);
-    setClone();
+    updateTodo((sections) => {
+      sections[sectionKey].splice(idx, 1);
+    });
   };
 
   const editTodo = () => {
@@ -108,8 +108,9 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   };
 
   const setPriority = (priority?: 1 | 2 | 3) => {
-    item.priority = priority;
-    setClone();
+    updateTodo((_sections, todo) => {
+      todo.priority = priority;
+    });
   };
 
   return {

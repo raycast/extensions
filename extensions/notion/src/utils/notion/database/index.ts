@@ -1,4 +1,4 @@
-import { Client } from "@notionhq/client";
+import { Client, collectPaginatedAPI } from "@notionhq/client";
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
@@ -57,14 +57,14 @@ export async function fetchDatabase(pageId: string, silent: boolean = true) {
 export async function fetchDatabases() {
   try {
     const notion = getNotionClient();
-    const databases = await notion.search({
+    const databases = await collectPaginatedAPI(notion.search, {
       sort: {
         direction: "descending",
         timestamp: "last_edited_time",
       },
       filter: { property: "object", value: "data_source" },
     });
-    return databases.results
+    return databases
       .map((x) => (x.object === "data_source" && "last_edited_time" in x ? x : undefined))
       .filter(isNotNullOrUndefined)
       .map(
@@ -72,7 +72,7 @@ export async function fetchDatabases() {
           ({
             id: x.id,
             last_edited_time: new Date(x.last_edited_time).getTime(),
-            title: x.title[0]?.plain_text,
+            title: x.title.map((text) => text.plain_text).join("") || "Untitled",
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
             icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
             icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
@@ -126,9 +126,9 @@ export async function queryDatabase(
   try {
     const notion = getNotionClient();
     const dataSourceId = await resolveDataSourceId(notion, databaseId);
-    const database = await notion.dataSources.query({
+    const pages = await collectPaginatedAPI(notion.dataSources.query, {
       data_source_id: dataSourceId,
-      page_size: 20,
+      page_size: 100,
       sorts: [
         {
           direction: "descending",
@@ -149,7 +149,7 @@ export async function queryDatabase(
         : undefined,
     });
 
-    return database.results.map(pageMapper);
+    return pages.map(pageMapper);
   } catch (err) {
     return handleError(err, "Failed to query database", []);
   }
@@ -157,55 +157,14 @@ export async function queryDatabase(
 
 type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
-async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
-  try {
-    const dataSource = await notion.dataSources.retrieve({
-      data_source_id: databaseOrDataSourceId,
-    });
-
-    if ("parent" in dataSource && "database_id" in dataSource.parent) {
-      return dataSource.parent.database_id;
-    }
-  } catch {
-    // Not a valid data source id, try resolving from database metadata.
-  }
-
-  try {
-    const database = await notion.databases.retrieve({
-      database_id: databaseOrDataSourceId,
-    });
-
-    if ("data_sources" in database && database.data_sources[0]?.id) {
-      try {
-        const dataSource = await notion.dataSources.retrieve({
-          data_source_id: database.data_sources[0].id,
-        });
-        if ("parent" in dataSource && "database_id" in dataSource.parent) {
-          return dataSource.parent.database_id;
-        }
-      } catch {
-        // Fall through and use database id as a safe fallback.
-      }
-    }
-
-    if ("id" in database && database.id) {
-      return database.id;
-    }
-  } catch {
-    // Fall back to the provided id for workspaces still passing database ids.
-  }
-
-  return databaseOrDataSourceId;
-}
-
 export async function createDatabasePage(values: Form.Values) {
   try {
     const notion = getNotionClient();
     const { database, content, addDateDivider = false, ...props } = values;
-    const parentDatabaseId = await resolveParentDatabaseId(notion, database);
+    const dataSourceId = await resolveDataSourceId(notion, database);
 
     const arg: CreateRequest = {
-      parent: { database_id: parentDatabaseId },
+      parent: { data_source_id: dataSourceId },
       properties: {},
     };
 
@@ -223,7 +182,7 @@ export async function createDatabasePage(values: Form.Values) {
       const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
       const value = values[formId];
       if (value == "_select_null_") return;
-      if (!propId || !value) return;
+      if (!propId || value == null || value === "") return;
 
       const formatted = formValueToPropertyValue(type, value);
       if (formatted) arg.properties![propId] = formatted;

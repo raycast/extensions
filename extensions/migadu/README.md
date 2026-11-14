@@ -31,8 +31,6 @@ This is a Raycast extension for [Migadu](https://migadu.com/). With this extensi
     c. `Add DNS Records` in your domain's DNS (or set Nameservers as Migadu Nameservers)
     <img src="./assets/migadu-update-domain-dns-records.png" alt="Update Domain DNS Records" />
 
-    d. Enter `domain(s)` in Preferences OR at first prompt
-
 ## 🔧 Commands
 
 This extension provides the following commands:
@@ -58,3 +56,23 @@ This extension provides the following commands:
     - Create Rewrite
     - Update Rewrite
     - Delete Rewrite
+
+---
+
+### Looking for more email extensions? Try these:
+
+<a title="Install inbound Raycast Extension" href="https://www.raycast.com/xmok/inbound"><img src="https://www.raycast.com/xmok/inbound/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install mailersend Raycast Extension" href="https://www.raycast.com/xmok/mailersend"><img src="https://www.raycast.com/xmok/mailersend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install mxroute Raycast Extension" href="https://www.raycast.com/xmok/mxroute"><img src="https://www.raycast.com/xmok/mxroute/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install purelymail Raycast Extension" href="https://www.raycast.com/xmok/purelymail"><img src="https://www.raycast.com/xmok/purelymail/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install shroud-email Raycast Extension" href="https://www.raycast.com/xmok/shroud-email"><img src="https://www.raycast.com/xmok/shroud-email/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### Using email via a panel? Try these:
+
+<a title="Install cpanel Raycast Extension" href="https://www.raycast.com/xmok/cpanel"><img src="https://www.raycast.com/xmok/cpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install directadmin-reseller Raycast Extension" href="https://www.raycast.com/xmok/directadmin-reseller"><img src="https://www.raycast.com/xmok/directadmin-reseller/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### Interested in self-hosting? Try this:
+
+<a title="Install sendportal Raycast Extension" href="https://www.raycast.com/xmok/sendportal"><img src="https://www.raycast.com/xmok/sendportal/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

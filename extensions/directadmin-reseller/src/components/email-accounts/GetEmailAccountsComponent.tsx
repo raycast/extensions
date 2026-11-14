@@ -4,18 +4,24 @@ import { GetEmailAccountsResponse, SuccessResponse } from "../../types";
 import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import CreateEmailAccountComponent from "./CreateEmailAccountComponent";
 import ChangeEmailAccountPasswordComponent from "./ChangeEmailAccountPasswordComponent";
+import { Panel } from "../../types/panel";
 
 type GetEmailAccountsComponentProps = {
   domain: string;
   userToImpersonate?: string;
+  panel?: Panel;
 };
-export default function GetEmailAccountsComponent({ domain, userToImpersonate = "" }: GetEmailAccountsComponentProps) {
+export default function GetEmailAccountsComponent({
+  domain,
+  userToImpersonate = "",
+  panel,
+}: GetEmailAccountsComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [emailAccounts, setEmailAccounts] = useState<string[]>();
 
   async function getFromApi() {
     setIsLoading(true);
-    const response = await getEmailAccounts({ domain, action: "list" }, userToImpersonate);
+    const response = await getEmailAccounts({ domain, action: "list" }, userToImpersonate, panel);
     if (response.error === "0") {
       const data = response as GetEmailAccountsResponse;
       const list = data?.list || [];
@@ -50,7 +56,7 @@ export default function GetEmailAccountsComponent({ domain, userToImpersonate = 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Email Accounts">
       {emailAccounts &&
-        (emailAccounts.length === 0 ? (
+        (emailAccounts.length === 0 && !panel ? (
           <List.EmptyView
             actions={
               <ActionPanel>
@@ -76,43 +82,45 @@ export default function GetEmailAccountsComponent({ domain, userToImpersonate = 
               subtitle={`@${domain}`}
               icon={Icon.AtSymbol}
               actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Change Password"
-                    icon={Icon.Key}
-                    target={
-                      <ChangeEmailAccountPasswordComponent
-                        email={`${email}@${domain}`}
-                        onEmailAccountPasswordChanged={getFromApi}
-                        userToImpersonate={userToImpersonate}
-                      />
-                    }
-                  />
-                  <Action
-                    title="Delete Email Account"
-                    style={Action.Style.Destructive}
-                    icon={Icon.DeleteDocument}
-                    onAction={() => confirmAndDeleteEmailAccount(email)}
-                  />
-                  <ActionPanel.Section>
+                !panel && (
+                  <ActionPanel>
                     <Action.Push
-                      title="Create Email Account"
-                      icon={Icon.Plus}
+                      title="Change Password"
+                      icon={Icon.Key}
                       target={
-                        <CreateEmailAccountComponent
-                          domain={domain}
-                          onEmailAccountCreated={getFromApi}
+                        <ChangeEmailAccountPasswordComponent
+                          email={`${email}@${domain}`}
+                          onEmailAccountPasswordChanged={getFromApi}
                           userToImpersonate={userToImpersonate}
                         />
                       }
                     />
-                  </ActionPanel.Section>
-                </ActionPanel>
+                    <Action
+                      title="Delete Email Account"
+                      style={Action.Style.Destructive}
+                      icon={Icon.DeleteDocument}
+                      onAction={() => confirmAndDeleteEmailAccount(email)}
+                    />
+                    <ActionPanel.Section>
+                      <Action.Push
+                        title="Create Email Account"
+                        icon={Icon.Plus}
+                        target={
+                          <CreateEmailAccountComponent
+                            domain={domain}
+                            onEmailAccountCreated={getFromApi}
+                            userToImpersonate={userToImpersonate}
+                          />
+                        }
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                )
               }
             />
           ))
         ))}
-      {!isLoading && (
+      {!isLoading && !panel && (
         <List.Section title="Actions">
           <List.Item
             title="Create Email Account"

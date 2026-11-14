@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Action, ActionPanel, Form, Icon, Toast, getSelectedFinderItems, showInFinder, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "node:path";
-import { editMedia, type EditRequest } from "./utils/editMedia";
+import { EDIT_FRAME_RATES, editMedia, type EditRequest } from "./utils/editMedia";
+import { getMediaType } from "./types/media";
 
 type Operation = EditRequest["operation"];
 
@@ -16,12 +17,16 @@ export default function Command() {
   const [cropX, setCropX] = useState("0");
   const [cropY, setCropY] = useState("0");
   const [speed, setSpeed] = useState("1.25");
+  const [speedFrameRate, setSpeedFrameRate] = useState("original");
+  const [frameRate, setFrameRate] = useState("30");
+  const [removeAudio, setRemoveAudio] = useState(false);
   const [audioFormat, setAudioFormat] = useState<".mp3" | ".m4a" | ".wav" | ".flac">(".mp3");
   const [integratedLufs, setIntegratedLufs] = useState("-16");
   const [subtitleMode, setSubtitleMode] = useState<"burn" | "remove">("burn");
   const [subtitleFiles, setSubtitleFiles] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const abortController = useRef<AbortController | null>(null);
+  const isVideoInput = getMediaType(path.extname(files[0] ?? "")) === "video";
 
   useEffect(() => {
     getSelectedFinderItems()
@@ -42,7 +47,16 @@ export default function Command() {
         cropY: optionalNumber(cropY),
       };
     }
-    if (operation === "speed") return { operation, speed: Number(speed) };
+    if (operation === "speed") {
+      return {
+        operation,
+        speed: Number(speed),
+        frameRate: isVideoInput && speedFrameRate !== "original" ? Number(speedFrameRate) : undefined,
+        removeAudio: isVideoInput && removeAudio,
+      };
+    }
+    if (operation === "frame-rate") return { operation, frameRate: Number(frameRate), removeAudio };
+    if (operation === "remove-audio") return { operation };
     if (operation === "extract-audio") return { operation, audioFormat };
     if (operation === "normalize") return { operation, integratedLufs: Number(integratedLufs) };
     return { operation, mode: subtitleMode, subtitlePath: subtitleFiles[0] };
@@ -55,6 +69,10 @@ export default function Command() {
     cropX,
     cropY,
     speed,
+    speedFrameRate,
+    frameRate,
+    removeAudio,
+    isVideoInput,
     audioFormat,
     integratedLufs,
     subtitleMode,
@@ -127,6 +145,8 @@ export default function Command() {
       >
         <Form.Dropdown.Item value="resize-crop" title="Resize / Crop" />
         <Form.Dropdown.Item value="speed" title="Change Speed" />
+        <Form.Dropdown.Item value="frame-rate" title="Change Frame Rate" />
+        <Form.Dropdown.Item value="remove-audio" title="Remove Audio" />
         <Form.Dropdown.Item value="extract-audio" title="Extract Audio" />
         <Form.Dropdown.Item value="normalize" title="Normalize Audio" />
         <Form.Dropdown.Item value="subtitles" title="Subtitles" />
@@ -143,7 +163,31 @@ export default function Command() {
         </>
       )}
       {operation === "speed" && (
-        <Form.TextField id="speed" title="Playback Speed" placeholder="0.25 to 4" value={speed} onChange={setSpeed} />
+        <Form.TextField id="speed" title="Playback Speed" placeholder="0.25 to 40" value={speed} onChange={setSpeed} />
+      )}
+      {(operation === "frame-rate" || (operation === "speed" && isVideoInput)) && (
+        <>
+          <Form.Dropdown
+            id="frameRate"
+            title="Output Frame Rate"
+            value={operation === "speed" ? speedFrameRate : frameRate}
+            onChange={operation === "speed" ? setSpeedFrameRate : setFrameRate}
+          >
+            {operation === "speed" && <Form.Dropdown.Item value="original" title="Keep Original" />}
+            {EDIT_FRAME_RATES.map((rate) => (
+              <Form.Dropdown.Item key={rate} value={String(rate)} title={`${rate} fps`} />
+            ))}
+          </Form.Dropdown>
+          <Form.Checkbox
+            id="removeAudio"
+            label="Remove audio from the output video"
+            value={removeAudio}
+            onChange={setRemoveAudio}
+          />
+        </>
+      )}
+      {operation === "remove-audio" && (
+        <Form.Description text="Save a new MP4 video without audio. To also change speed or frame rate, use those operations and enable Remove Audio." />
       )}
       {operation === "extract-audio" && (
         <Form.Dropdown

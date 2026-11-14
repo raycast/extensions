@@ -20,18 +20,17 @@ import {
 } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { hostname } from "os";
-import { TableProNotInstalledError } from "./lib/types";
 import { loadConnections } from "./lib/connections";
-import { tableProInstalled } from "./lib/paths";
-import { pairDeeplink } from "./lib/deeplink";
+import { assertInstalledVersionSupported, requireTablePro } from "./lib/app";
+import { PairScope, pairDeeplink } from "./lib/deeplink";
 import { exchangePairingCode, resetClient } from "./lib/mcp";
 import {
-  PAIR_CALLBACK_URL,
   clearPendingVerifier,
   generatePKCE,
   isValidPairingCode,
   isVerifierExpired,
   loadPendingVerifier,
+  pairCallbackUrl,
   savePendingVerifier,
 } from "./lib/pairing";
 import {
@@ -39,10 +38,11 @@ import {
   clearApiToken,
   migrateApiTokenIfNeeded,
 } from "./lib/storage";
-import { classifyError } from "./lib/errors";
+import { classifyError, describeScenario } from "./lib/errors";
 
 interface LaunchContext {
   code?: string;
+  error?: string;
 }
 
 interface PairFormValues {
@@ -51,27 +51,46 @@ interface PairFormValues {
   connections: string[];
 }
 
-const SCOPE_OPTIONS = [
+const READ_ONLY = "readOnly";
+
+const SCOPE_OPTIONS: Array<{
+  value: typeof READ_ONLY | PairScope;
+  label: string;
+  hint: string;
+}> = [
   {
-    value: "read",
-    label: "Read-only",
+    value: READ_ONLY,
+    label: "Read Only",
     hint: "List connections, browse schema, run SELECT.",
   },
   {
-    value: "read-write",
-    label: "Read & write",
+    value: "readWrite",
+    label: "Read & Write",
     hint: "Adds INSERT, UPDATE, DELETE, MERGE.",
   },
   {
-    value: "full",
-    label: "Full access",
+    value: "fullAccess",
+    label: "Full Access",
     hint: "Adds DDL (CREATE, ALTER, DROP) and admin operations.",
   },
 ];
 
+function requestedScope(value: string): PairScope | undefined {
+  return value === "readWrite" || value === "fullAccess" ? value : undefined;
+}
+
+async function checkTablePro(): Promise<void> {
+  const app = await requireTablePro();
+  await assertInstalledVersionSupported(app);
+}
+
 export default function PairCommand(
   props: LaunchProps<{ launchContext: LaunchContext }>,
 ) {
+  const incomingError = props.launchContext?.error;
+  if (incomingError !== undefined) {
+    return <DeniedView error={incomingError} />;
+  }
   const incomingCode = props.launchContext?.code;
   if (incomingCode !== undefined) {
     if (!isValidPairingCode(incomingCode)) {
@@ -98,7 +117,7 @@ function PairForm() {
     error,
   } = useCachedPromise(
     async () => {
-      if (!tableProInstalled()) throw new TableProNotInstalledError();
+      await checkTablePro();
       return loadConnections();
     },
     [],
@@ -136,8 +155,8 @@ function PairForm() {
         await pairDeeplink({
           client: formValues.client,
           challenge,
-          redirect: PAIR_CALLBACK_URL,
-          scopes: [formValues.scope],
+          redirect: pairCallbackUrl(),
+          scope: requestedScope(formValues.scope),
           connectionIds:
             formValues.connections.length > 0
               ? formValues.connections
@@ -153,7 +172,7 @@ function PairForm() {
     },
     initialValues: {
       client: `Raycast on ${hostname()}`,
-      scope: "read",
+      scope: READ_ONLY,
       connections: [],
     },
     validation: {
@@ -173,7 +192,6 @@ function PairForm() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Pair with TablePro"
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -249,7 +267,7 @@ function ExchangeView({ code }: { code: string }) {
     ranRef.current = true;
     (async () => {
       try {
-        if (!tableProInstalled()) throw new TableProNotInstalledError();
+        await checkTablePro();
         const pending = await loadPendingVerifier();
         if (!pending) {
           throw new Error(
@@ -330,22 +348,22 @@ async function persistToken(token: string): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEYS.apiToken, token);
 }
 
+function DeniedView({ error }: { error: string }) {
+  useEffect(() => {
+    clearPendingVerifier().catch(() => undefined);
+  }, []);
+  const markdown =
+    error === "denied"
+      ? "# Pairing denied\n\nTablePro did not approve the request. Run Pair with TablePro to try again."
+      : "# Pairing failed\n\nTablePro did not issue a token. Run Pair with TablePro to try again.";
+  return <Detail markdown={markdown} />;
+}
+
 function renderErrorMarkdown(err: unknown): string {
   const scenario = classifyError(err);
-  switch (scenario.kind) {
-    case "not-installed":
-      return "# TablePro is not installed\n\nInstall TablePro from [tablepro.app](https://tablepro.app), then run this command again.";
-    case "mcp-not-running":
-      return "# TablePro is not running\n\nOpen TablePro and try again. The MCP server starts on demand.";
-    case "no-token":
-      return "# No token yet\n\nFinish the pairing flow to issue one.";
-    case "token-revoked":
-      return "# Token was revoked\n\nRun this command to issue a new one.";
-    case "remote-unsupported":
-      return "# Remote access not supported\n\nRaycast can only talk to TablePro on the local machine. Disable remote access in TablePro Settings and try again.";
-    case "access-denied":
-      return `# Access denied\n\n${scenario.message}`;
-    case "other":
-      return `# Pairing failed\n\n${scenario.message}`;
+  if (scenario.kind === "other") {
+    return `# Pairing failed\n\n${scenario.message}`;
   }
+  const { title, description } = describeScenario(scenario);
+  return `# ${title}\n\n${description}`;
 }

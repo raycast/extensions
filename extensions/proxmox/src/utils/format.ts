@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import type { PveServer } from "@/types";
 
 export function formatShortTime(time: number): string {
   const units = "smhdy";
@@ -55,8 +55,7 @@ export function formatCPU(maxcpu: number): string {
 export const formatNumberAsBoolean = (value: number | undefined): string =>
   typeof value === "number" ? (value === 1 ? "Yes" : "No") : "Unknown";
 
-export const formatBrowserUrl = (suffix: string) => {
-  const preferences = getPreferenceValues<Preferences>();
-  const url = new URL(suffix, preferences.serverUrl).toString();
+export const formatBrowserUrl = (server: PveServer, suffix: string) => {
+  const url = new URL(suffix, server.url).toString();
   return url;
 };

@@ -133,21 +133,13 @@ const WallpaperAppearance: AppearancedWallpaper[] = [
   },
 ];
 
-const getWallpaperAppearance = () => {
-  const customAppearance = cache.get(CacheKey.WALLPAPER_APPEARANCE);
-  const customWallpaperAppearance: AppearancedWallpaper[] = customAppearance ? JSON.parse(customAppearance) : [];
-  if (customWallpaperAppearance.length === 0) {
-    return WallpaperAppearance;
-  } else {
-    return WallpaperAppearance.map((item) => {
-      const customItem = customWallpaperAppearance.find((custom) => custom.title === item.title);
-      return customItem ? { ...item, appearance: customItem.appearance } : item;
-    });
-  }
-};
+const normalizeTitle = (title: string) => title.toLowerCase().replace(/_/g, " ");
 
 export const getAppearanceByTitle = (value: string): "light" | "dark" => {
-  const appearanceList = getWallpaperAppearance();
-  const wallpaper = appearanceList.find((item) => item.title === value);
-  return wallpaper ? wallpaper.appearance : "light";
+  const customAppearance = cache.get(CacheKey.WALLPAPER_APPEARANCE);
+  const customWallpapers: AppearancedWallpaper[] = customAppearance ? JSON.parse(customAppearance) : [];
+  const title = normalizeTitle(value);
+  const custom = customWallpapers.find((item) => normalizeTitle(item.title) === title);
+  const wallpaper = custom ?? WallpaperAppearance.find((item) => normalizeTitle(item.title) === title);
+  return wallpaper?.appearance ?? "light";
 };

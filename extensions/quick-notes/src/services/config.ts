@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import path from "path";
+import path from "node:path";
 
 export const TODO_FILE_PATH = path.join(environment.supportPath, "quick-notes.json");
 export const TAGS_FILE_PATH = path.join(environment.supportPath, "tags.json");
 
-export const preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues();

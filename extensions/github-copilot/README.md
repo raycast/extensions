@@ -7,12 +7,14 @@ Start and track [GitHub Copilot coding agent](https://docs.github.com/en/enterpr
 - **Create Task**: Kick off a Copilot coding agent job for a chosen repository and base branch using your prompt. The agent works in the background, opens a pull request and tags you for review.
 - **View Tasks**: Track the progress of tasks you've given to Copilot, with access to live agent logs. Available as a Raycast command, and from the menu bar.
 - **Copilot Usage**: View the remaining usage included in your GitHub Copilot subscription, including code completions, chat messages, and premium requests. Track your consumption and see when your allowance resets.
+- **Copilot Models**: Use the models available to your Copilot account in Raycast AI Chat, Quick AI, and AI Commands. Auto lets Copilot choose a model for you.
 - **AI Assistant**: Use the AI tools to help create tasks, search repositories, and get repository information through natural language.
 
 ### Requirements
 
-- **Access to [GitHub Copilot coding agent](https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/coding-agent/coding-agent)**, available for Copilot Pro, Pro+, Business and Enterpise users. If you're a Business or Enterprise subscriber, an administrator will have to [enable](https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/coding-agent/enable-coding-agent) the feature.
+- **Access to [GitHub Copilot coding agent](https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/coding-agent/coding-agent)**, available for Copilot Pro, Pro+, Business and Enterprise users. If you're a Business or Enterprise subscriber, an administrator will have to [enable](https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/coding-agent/enable-coding-agent) the feature.
 - **Authentication with your GitHub account with OAuth**: The first time you use the extension, you'll be asked to connect your account, providing `repo`, `workflow` and `read:org` permissions.
+- **Raycast Pro for Copilot Models**: Open any GitHub Copilot command to sign in before selecting a Copilot model in Raycast AI. The model picker shows only models made available to your account by GitHub.
 
 ### AI Tools
 

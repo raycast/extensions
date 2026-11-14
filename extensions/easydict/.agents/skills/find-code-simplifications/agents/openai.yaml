@@ -1,0 +1,7 @@
+interface:
+  display_name: "Find Code Simplifications"
+  short_description: "Find evidence-backed code simplifications"
+  default_prompt: "Use $find-code-simplifications to investigate this branch for meaningful code simplification opportunities."
+
+policy:
+  allow_implicit_invocation: false

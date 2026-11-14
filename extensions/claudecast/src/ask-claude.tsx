@@ -14,6 +14,7 @@ import {
 import { useState, useEffect } from "react";
 import { existsSync, mkdirSync } from "fs";
 import { homedir } from "os";
+import path from "path";
 import {
   ensureClaudeApiAuth,
   ensureClaudeInstalled,
@@ -27,12 +28,15 @@ import {
   CapturedContext,
 } from "./lib/context-capture";
 import { launchClaudeCode, expandTilde } from "./lib/terminal";
+import { shortcut } from "./lib/shortcuts";
+import { isWindows } from "./lib/platform";
 
 const PROJECT_PATH_STORAGE_KEY = "askClaudeProjectPath";
 
 const MODEL_OPTIONS = [
+  { title: "Fable (Long-Running Agents)", value: "fable" },
   { title: "Sonnet (Balanced)", value: "sonnet" },
-  { title: "Opus (Most Capable)", value: "opus" },
+  { title: "Opus (Complex Reasoning)", value: "opus" },
   { title: "Haiku (Fastest)", value: "haiku" },
 ];
 
@@ -61,6 +65,10 @@ export default function AskClaude() {
   }
 
   if (!claudeInstalled) {
+    const installCommand = isWindows()
+      ? "winget install Anthropic.ClaudeCode"
+      : "curl -fsSL https://claude.ai/install.sh | bash";
+    const shellLanguage = isWindows() ? "powershell" : "bash";
     return (
       <Detail
         markdown={`# Claude Code Not Found
@@ -71,19 +79,19 @@ Claude Code CLI is not installed or not in your PATH.
 
 Run the following command to install Claude Code:
 
-\`\`\`bash
-npm install -g @anthropic-ai/claude-code
+\`\`\`${shellLanguage}
+${installCommand}
 \`\`\`
 
 ## Authentication Setup
 
 After installation, you need to authenticate. Choose **one** of these options:
 
-### Option 1: Anthropic API Key (Pay-as-you-go)
+### Option 1: Anthropic API Key (Pay-As-You-Go)
 Best for: Developers who want direct API billing
 
 1. Get your API key from [console.anthropic.com](https://console.anthropic.com)
-2. Open ClaudeCast preferences (⌘+,)
+2. Open ClaudeCast preferences in Raycast
 3. Paste your API key in the "Anthropic API Key" field
 
 ### Option 2: OAuth Token (Claude Subscription)
@@ -92,7 +100,7 @@ Best for: Claude Pro/Team subscribers
 1. Run in terminal: \`claude setup-token\`
 2. Follow the prompts to authenticate
 3. Copy the generated token
-4. Open ClaudeCast preferences (⌘+,)
+4. Open ClaudeCast preferences in Raycast
 5. Paste the token in the "OAuth Token" field
 
 ---
@@ -105,7 +113,7 @@ Best for: Claude Pro/Team subscribers
             />
             <Action.CopyToClipboard
               title="Copy Install Command"
-              content="npm install -g @anthropic-ai/claude-code"
+              content={installCommand}
             />
             <Action.CopyToClipboard
               title="Copy Setup Token Command"
@@ -127,7 +135,7 @@ function AskClaudeForm() {
   const [isLoadingPath, setIsLoadingPath] = useState(true);
   const [isCapturingContext, setIsCapturingContext] = useState(false);
   const [context, setContext] = useState<CapturedContext | null>(null);
-  const defaultProjectPath = `${homedir()}/claudecast`;
+  const defaultProjectPath = path.join(homedir(), "claudecast");
   const [projectPath, setProjectPath] = useState(defaultProjectPath);
 
   // Load saved project path from LocalStorage on mount
@@ -286,13 +294,13 @@ function AskClaudeForm() {
           <Action
             title="Capture Context"
             icon={Icon.Download}
-            shortcut={{ modifiers: ["cmd"], key: "g" }}
+            shortcut={shortcut.primary("g")}
             onAction={handleCaptureContext}
           />
           <Action
             title="Open Full Session"
             icon={Icon.Terminal}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={shortcut.open}
             onAction={async () => {
               try {
                 const targetPath =
@@ -359,7 +367,7 @@ function AskClaudeForm() {
       ) : (
         <Form.Description
           title="Context"
-          text="Press ⌘G to capture context (adds your currently selected text and recent clipboard entry to the prompt)"
+          text="Use Capture Context to add your selected text and recent clipboard entry to the prompt."
         />
       )}
     </Form>
@@ -406,17 +414,17 @@ function ResponseView({
             <Action.CopyToClipboard
               title="Copy Response"
               content={response.result}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={shortcut.copy}
             />
             <Action.Paste
               title="Paste Response"
               content={response.result}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              shortcut={shortcut.primaryShift("v")}
             />
             <Action.CopyToClipboard
               title="Copy as Markdown"
               content={markdown}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={shortcut.primaryShift("c")}
             />
           </ActionPanel.Section>
 
@@ -424,7 +432,7 @@ function ResponseView({
             <Action
               title="Continue in Terminal"
               icon={Icon.Terminal}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={shortcut.primary("t")}
               onAction={async () => {
                 await launchClaudeCode({
                   projectPath,

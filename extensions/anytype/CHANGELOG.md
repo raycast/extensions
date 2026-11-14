@@ -1,5 +1,9 @@
 # Anytype Changelog
 
+## [Dependency Updates] - 2026-10-03
+
+- Update utilities and extension dependencies while retaining Raycast API v1 compatibility
+
 ## [Bug Fixes] - 2026-06-15
 
 - Fix channel icons not loading from the local gateway after it started requiring authentication

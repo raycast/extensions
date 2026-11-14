@@ -1,5 +1,43 @@
 # Browser Bookmarks Changelog
 
+## [Search Profiles] - 2026-10-26
+
+- Search 1.0.7 added profiles: each one has its own bookmarks, pins and spaces, and can be picked from the Select Profile submenu
+
+## [Support for Search] - 2026-10-24
+
+- Added support for the `Search` browser on macOS: its bookmarks, its pinned tabs, and its tab groups
+
+## [Search Matching] - 2026-10-15
+
+- Stopped the root folder name of Chromium browsers (such as "Bookmarks Bar") from fuzzy-matching searches such as "board"
+- Added a Search Strictness preference so short queries such as "erp" can skip loose matches
+
+## [Support for DuckDuckGo Browser] - 2026-10-01
+
+- Added support for the `DuckDuckGo` browser on macOS
+
+## [Copy Link Shortcut Preference] - 2026-09-25
+
+- Added a preference to choose the Copy Link shortcut: ⌘ C (Ctrl+C on Windows) or ⌘ ⌥ C (Ctrl+Alt+C on Windows)
+
+## [Bug Fix] - 2026-09-22
+
+- Fixed the new-tab keyboard shortcut and clarified the browser action icons
+
+## [Browser Opening and Favicons] - 2026-09-21
+
+- Added macOS actions to open bookmarks in a new browser tab or window, plus an option to replace the current tab
+- Improved Chromium favicons using local browser data and private-network fallbacks
+
+## [Added contributor] - 2026-09-07
+
+## [Updates] - 2026-09-06
+
+- Memoise the Chromium bookmark and folder lists so typing in the search bar no longer rewalks the bookmark tree for every browser
+- Find Brave Nightly, Vivaldi, Helium and Dia on Windows instead of only looking in the macOS application support folder
+- Look for Firefox and Zen profiles in the Windows roaming app data folder instead of only the macOS application support folder
+
 ## [Chrome Account Bookmarks] - 2026-05-20
 
 - Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`

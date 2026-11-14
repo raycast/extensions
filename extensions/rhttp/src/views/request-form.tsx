@@ -173,7 +173,7 @@ export function RequestForm({ collectionId, request: initialRequest }: RequestFo
               onAction={() => dispatch({ type: "ADD_HEADER" })}
               shortcut={{ macOS: { modifiers: ["cmd"], key: "h" }, windows: { modifiers: ["ctrl"], key: "h" } }}
             />
-            {activeHeaderIndex !== null && (
+            {activeHeaderIndex !== null ? (
               <Action
                 title="Remove Header"
                 icon={Icon.Trash}
@@ -186,6 +186,26 @@ export function RequestForm({ collectionId, request: initialRequest }: RequestFo
                 }}
                 shortcut={{ macOS: { modifiers: ["ctrl"], key: "h" }, windows: { modifiers: ["alt"], key: "h" } }}
               />
+            ) : (
+              dirtyRequest.headers.length > 0 && (
+                <ActionPanel.Submenu
+                  title="Remove Header"
+                  icon={Icon.Trash}
+                  shortcut={{ macOS: { modifiers: ["ctrl"], key: "h" }, windows: { modifiers: ["alt"], key: "h" } }}
+                >
+                  {dirtyRequest.headers.map((header, index) => (
+                    <Action
+                      key={index}
+                      title={`${index + 1}. ${header.key || "Untitled"}`}
+                      style={Action.Style.Destructive}
+                      onAction={() => {
+                        dispatch({ type: "REMOVE_HEADER", payload: { index } });
+                        void showToast({ style: Toast.Style.Success, title: "Header Removed" });
+                      }}
+                    />
+                  ))}
+                </ActionPanel.Submenu>
+              )
             )}
             <Action
               title="Add Response Action"

@@ -33,6 +33,15 @@ export const getPosterUrl = (images: ImagesResponse | undefined, fallback: "post
   return fallback;
 };
 
+/**
+ * Wide artwork for a 16/9 card: the title's fanart, then the episode still, then the poster.
+ * `episode.png` is the landscape placeholder when Trakt sends none of them.
+ */
+export const getBackdropUrl = (images: ImagesResponse | undefined, episodeImages?: ImagesResponse) => {
+  const url = images?.fanart?.[0] ?? episodeImages?.screenshot?.[0] ?? images?.poster?.[0];
+  return url ? `https://${url}` : "episode.png";
+};
+
 export const getScreenshotUrl = (images: ImagesResponse | undefined, fallback: "episode.png") => {
   if (images && images.screenshot && images.screenshot.length > 0) {
     return `https://${images.screenshot[0]}`;
@@ -76,4 +85,19 @@ export const getIMDbUrl = (imdbId: string, seasonNumber?: number): string => {
     return `${IMDB_APP_URL}/title/${imdbId}/episodes?season=${seasonNumber}`;
   }
   return `${IMDB_APP_URL}/title/${imdbId}`;
+};
+
+const watchedAtFormatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
+
+/**
+ * Trakt stores a watch marked "unknown date" as the Unix epoch (Trakt Web shows "January 1st, 1970").
+ * Say so instead of printing a date that never happened.
+ */
+export const formatWatchedAt = (watchedAt: string | undefined) => {
+  if (!watchedAt) return "";
+
+  const date = new Date(watchedAt);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.getTime() <= 0 ? "Unknown date" : watchedAtFormatter.format(date);
 };

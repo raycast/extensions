@@ -10,7 +10,10 @@ import { SeasonGrid } from "./components/season-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "./lib/constants";
 import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
+import { captureTopDetail } from "./lib/detail-stack";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
+import { hideRecommendation, markFirstEpisodeWatched } from "./lib/media-mutations";
+import { useWatchlistState } from "./lib/use-watchlist-ids";
 import { TraktMediaType, TraktMovieBaseItem, TraktShowBaseItem, withPagination } from "./lib/schema";
 
 export default function Command() {
@@ -18,6 +21,7 @@ export default function Command() {
   const [mediaType, setMediaType] = useState<TraktMediaType>("movie");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  const { setListed } = useWatchlistState();
   const {
     isLoading: isMovieLoading,
     data: movies,
@@ -130,6 +134,7 @@ export default function Command() {
         signal: abortable.current?.signal,
       },
     });
+    setListed("movie", movie.ids.trakt, true);
   }, []);
 
   const addMovieToHistory = useCallback(async (movie: TraktMovieBaseItem) => {
@@ -171,6 +176,7 @@ export default function Command() {
         signal: abortable.current?.signal,
       },
     });
+    setListed("show", show.ids.trakt, true);
   }, []);
 
   const addShowToHistory = useCallback(async (show: TraktShowBaseItem) => {
@@ -191,40 +197,23 @@ export default function Command() {
     });
   }, []);
 
-  const checkInFirstEpisodeToHistory = useCallback(async (show: TraktShowBaseItem) => {
-    const response = await traktClient.shows.getEpisode({
-      params: {
-        showid: show.ids.trakt,
-        seasonNumber: 1,
-        episodeNumber: 1,
-      },
-      query: {
-        extended: "full",
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
+  const markFirstEpisodeWatchedAction = useCallback(
+    (show: TraktShowBaseItem) =>
+      markFirstEpisodeWatched(traktClient, show.ids.trakt, { signal: abortable.current?.signal }),
+    [],
+  );
 
-    if (response.status !== 200) throw new Error("Failed to get first episode");
-    const firstEpisode = response.body;
+  const hideMovieRecommendation = useCallback(
+    (movie: TraktMovieBaseItem) =>
+      hideRecommendation(traktClient, "movie", movie.ids.trakt, { signal: abortable.current?.signal }),
+    [],
+  );
 
-    await traktClient.shows.checkInEpisode({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: firstEpisode.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
+  const hideShowRecommendation = useCallback(
+    (show: TraktShowBaseItem) =>
+      hideRecommendation(traktClient, "show", show.ids.trakt, { signal: abortable.current?.signal }),
+    [],
+  );
 
   const handleMovieAction = useCallback(
     async (movie: TraktMovieBaseItem, action: (movie: TraktMovieBaseItem) => Promise<void>, message: string) => {
@@ -324,6 +313,23 @@ export default function Command() {
                           shortcut={Keyboard.Shortcut.Common.Duplicate}
                           onAction={() => handleMovieAction(movie, addMovieToHistory, "Movie added to history")}
                         />
+                        <Action
+                          title="Not Interested"
+                          icon={Icon.EyeDisabled}
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          onAction={() => {
+                            const closeThisDetail = captureTopDetail();
+                            handleMovieAction(
+                              movie,
+                              async (item) => {
+                                await hideMovieRecommendation(item);
+                                closeThisDetail();
+                              },
+                              "Movie removed from recommendations",
+                            );
+                          }}
+                        />
                       </ActionPanel.Section>
                       <ActionPanel.Section>
                         <Action.OpenInBrowser
@@ -372,6 +378,13 @@ export default function Command() {
               shortcut={Keyboard.Shortcut.Common.Duplicate}
               onAction={() => handleMovieAction(item, addMovieToHistory, "Movie added to history")}
             />
+            <Action
+              title="Not Interested"
+              icon={Icon.EyeDisabled}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() => handleMovieAction(item, hideMovieRecommendation, "Movie removed from recommendations")}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       )}
@@ -403,10 +416,10 @@ export default function Command() {
               target={<SeasonGrid showId={item.ids.trakt} slug={item.ids.slug} imdbId={item.ids.imdb} />}
             />
             <Action
-              title="Check-In"
+              title="Mark First Episode as Watched"
               icon={Icon.Checkmark}
               shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-              onAction={() => handleShowAction(item, checkInFirstEpisodeToHistory, "First episode checked-in")}
+              onAction={() => handleShowAction(item, markFirstEpisodeWatchedAction, "First episode marked as watched")}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -433,6 +446,13 @@ export default function Command() {
               icon={Icon.Clock}
               shortcut={Keyboard.Shortcut.Common.Duplicate}
               onAction={() => handleShowAction(item, addShowToHistory, "Show added to history")}
+            />
+            <Action
+              title="Not Interested"
+              icon={Icon.EyeDisabled}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() => handleShowAction(item, hideShowRecommendation, "Show removed from recommendations")}
             />
           </ActionPanel.Section>
         </ActionPanel>

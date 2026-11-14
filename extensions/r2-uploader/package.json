@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "r2-uploader",
   "title": "Cloudflare R2 File Uploader",
-  "description": "Upload any files to Cloudflare R2 with optional AVIF conversion for images. After upload, the URL or Markdown link will be copied to clipboard.",
+  "description": "Upload files to Cloudflare R2, copy public links, and browse your bucket.",
   "icon": "extension-icon.png",
-  "author": "Silas",
+  "author": "ypp",
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -16,7 +16,7 @@
       "name": "r2-uploader",
       "title": "Upload File to R2",
       "subtitle": "Cloudflare R2",
-      "description": "Upload any files to Cloudflare R2 with optional AVIF conversion for images. After upload, the URL or Markdown link will be copied to clipboard.",
+      "description": "Upload selected Finder files to Cloudflare R2 and copy their public links. Optionally convert images to AVIF or WebP.",
       "mode": "no-view",
       "arguments": [
         {
@@ -72,8 +72,8 @@
       "name": "customDomain",
       "type": "textfield",
       "required": false,
-      "title": "Custom Domain",
-      "description": "Custom domain for accessing files (optional)",
+      "title": "Public Base URL",
+      "description": "Your bucket's public custom domain or https://pub-xxx.r2.dev URL. Required to upload and copy public links.",
       "placeholder": "https://cdn.example.com"
     },
     {
@@ -81,7 +81,7 @@
       "type": "textfield",
       "required": false,
       "title": "File Name Format",
-      "description": "Custom filename format (optional)",
+      "description": "Leave blank to add a unique timestamped suffix to each filename.",
       "placeholder": "{name}_{year}{month}{day}_{hours}{minutes}{seconds}"
     },
     {
@@ -106,7 +106,7 @@
       "type": "textfield",
       "required": false,
       "title": "AVIF Encoder Path",
-      "description": "Path to avifenc command (optional)",
+      "description": "Optional path to avifenc. Leave blank to look in Homebrew locations and on PATH.",
       "placeholder": "/opt/homebrew/bin/avifenc"
     },
     {
@@ -114,9 +114,35 @@
       "type": "textfield",
       "required": false,
       "title": "AVIF Quality",
-      "description": "Quality setting for AVIF conversion (0-100, default: 80)",
+      "description": "AVIF quality from 0 to 100 (default: 80).",
       "placeholder": "80",
       "default": "80"
+    },
+    {
+      "name": "convertToWebp",
+      "type": "checkbox",
+      "required": false,
+      "title": "Convert to WebP",
+      "description": "Convert images to WebP format before uploading",
+      "label": "Convert to WebP",
+      "default": false
+    },
+    {
+      "name": "webpQuality",
+      "type": "textfield",
+      "required": false,
+      "title": "WebP Quality",
+      "description": "Quality setting for WebP conversion (0-100, default: 80)",
+      "placeholder": "80",
+      "default": "80"
+    },
+    {
+      "name": "cwebpPath",
+      "type": "textfield",
+      "required": false,
+      "title": "WebP Encoder Path",
+      "description": "Path to cwebp command (optional)",
+      "placeholder": "/opt/homebrew/bin/cwebp"
     },
     {
       "name": "linkFormat",
@@ -144,14 +170,14 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
     "@aws-sdk/s3-request-presigner": "^3.864.0",
-    "@raycast/api": "^1.102.4",
+    "@raycast/api": "^2.10.1",
     "@raycast/utils": "^1.17.0",
     "dayjs": "^1.11.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/react": "19.3.0",
     "eslint": "^9.34.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

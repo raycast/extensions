@@ -6,7 +6,7 @@
   <img src="metadata/popcorn-3.png" width="30%" />
 </div>
 
-A Raycast extension that uses the Stremio API to search for movies and TV shows and stream them to local media players using Stremio addons. IINA is highly recommended for macOS users.
+A Raycast extension that uses the Stremio API to search for movies and TV shows and stream them to local media players using Stremio addons. IINA is highly recommended for macOS users, and VLC is recommended for Windows users.
 
 ## Features
 

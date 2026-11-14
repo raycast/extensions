@@ -1,24 +1,21 @@
-import { Clipboard, Color, Icon, MenuBarExtra, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Clipboard, Color, Icon, Image, MenuBarExtra, showHUD } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { captureContext } from "./lib/ai";
 import { useTupleJson } from "./lib/hooks";
 import {
   addToCall,
+  getActiveCall,
   classifyError,
-  getConnectPrompt,
   hangUpCall,
   muteCall,
-  startTranscription,
-  stopTranscription,
+  startCapture,
+  stopCapture,
   unmuteCall,
 } from "./lib/tuple";
-import { CallView, CallViewParticipant, Contact, TupleErrorKind } from "./lib/types";
+import { callPeople, CallViewParticipant, Contact, TupleErrorKind } from "./lib/types";
 
 export default function ActiveCallMenuBar() {
-  // The roster comes from `tuple call current` (normalized, self already excluded); online
-  // contacts for "Add Person" come from `tuple contacts list --status online`, fetched only while
-  // in a call. Neither reads the full `tuple state` blob. `call current` exits non-zero when not
-  // in a call, which classifyError maps to NoActiveCall — a normal state, not a failure.
-  const call = useTupleJson<CallView>(["call", "current"]);
+  const call = usePromise(getActiveCall, [], { onError: () => {} });
   const callError = call.error ? classifyError(call.error) : undefined;
   const noActiveCall = callError?.kind === TupleErrorKind.NoActiveCall;
   const realError = callError && !noActiveCall ? callError : undefined;
@@ -45,7 +42,7 @@ export default function ActiveCallMenuBar() {
     );
   }
 
-  const others = activeCall.participants;
+  const others = callPeople(activeCall.participants);
   const onlineContacts = contacts.data ?? [];
 
   return (
@@ -57,8 +54,16 @@ export default function ActiveCallMenuBar() {
     >
       {others.length > 0 && (
         <MenuBarExtra.Section title="In a Call">
-          {others.map((person) => (
-            <MenuBarExtra.Item key={person.id || person.email} title={personName(person)} icon={Icon.Person} />
+          {others.map((person, index) => (
+            <MenuBarExtra.Item
+              key={person.id || person.email || index}
+              title={personName(person)}
+              icon={
+                person.avatar_url
+                  ? { source: person.avatar_url, mask: Image.Mask.Circle, fallback: Icon.Person }
+                  : Icon.Person
+              }
+            />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -69,14 +74,18 @@ export default function ActiveCallMenuBar() {
           onAction={() => runAction(activeCall.muted ? unmuteCall : muteCall, call.revalidate)}
         />
         <MenuBarExtra.Item
-          title={activeCall.transcribing ? "Stop Transcription" : "Start Transcription"}
+          title={activeCall.transcribing ? "Stop Capture" : "Start Capture"}
           icon={activeCall.transcribing ? Icon.Stop : Icon.SpeechBubble}
-          onAction={() => runAction(activeCall.transcribing ? stopTranscription : startTranscription, call.revalidate)}
+          onAction={() => runAction(activeCall.transcribing ? stopCapture : startCapture, call.revalidate)}
         />
         <AddPersonSubmenu contacts={onlineContacts} onChange={call.revalidate} />
-        <MenuBarExtra.Item title="Copy AI Context" icon={Icon.Clipboard} onAction={copyCallContext} />
         <MenuBarExtra.Item
-          title="Hang Up"
+          title="Copy AI Context"
+          icon={Icon.Clipboard}
+          onAction={() => copyCallContext(activeCall.call_id)}
+        />
+        <MenuBarExtra.Item
+          title="Leave Call"
           icon={Icon.PhoneRinging}
           onAction={() => runAction(hangUpCall, call.revalidate)}
         />
@@ -97,7 +106,11 @@ function AddPersonSubmenu({ contacts, onChange }: { contacts: Contact[]; onChang
         <MenuBarExtra.Item
           key={contact.id}
           title={contact.full_name}
-          icon={Icon.Person}
+          icon={
+            contact.avatar_url
+              ? { source: contact.avatar_url, mask: Image.Mask.Circle, fallback: Icon.Person }
+              : Icon.Person
+          }
           onAction={() => runAction(() => addToCall(contact.email), onChange)}
         />
       ))}
@@ -106,9 +119,9 @@ function AddPersonSubmenu({ contacts, onChange }: { contacts: Contact[]; onChang
 }
 
 /** Copy an AI prompt describing the active call. Reached only from the in-call menu, so no idle guard. */
-async function copyCallContext() {
+async function copyCallContext(callId: string) {
   try {
-    const prompt = await getConnectPrompt();
+    const prompt = await captureContext(callId);
     await Clipboard.copy(prompt);
     await showHUD("Copied call context for AI");
   } catch (error) {

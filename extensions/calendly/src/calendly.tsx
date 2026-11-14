@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   List,
   ActionPanel,
@@ -10,47 +9,40 @@ import {
   Action,
   Clipboard,
   Image,
+  Keyboard,
 } from "@raycast/api";
-import {
-  Preferences,
-  CalendlyEventType,
-  createSingleUseLink,
-  useEventTypes,
-  useCurrentUser,
-  authorize,
-} from "./services/calendly";
+import { showFailureToast, useCachedPromise, withAccessToken } from "@raycast/utils";
+import { createSingleUseLink, listEventTypes } from "./api/event-types";
+import { getCurrentUser } from "./api/users";
+import { EventType } from "./api/types";
+import { calendlyOAuth } from "./oauth/calendly";
 
-export default function Calendly() {
-  // const [showError, setShowError] = useState(false);
-  const { user, error } = useCurrentUser();
-  const { defaultAction }: Preferences = getPreferenceValues();
-  const { eventTypes: items, isLoading, revalidate } = useEventTypes();
-
-  useEffect(() => {
-    (async () => {
-      await authorize();
-    })();
-  }, []);
+function Calendly() {
+  const { data: user, isLoading: isLoadingUser, revalidate: revalidateUser } = useCachedPromise(getCurrentUser, []);
+  const { defaultAction } = getPreferenceValues<Preferences.Calendly>();
+  const { data: items = [], isLoading, revalidate } = useCachedPromise(listEventTypes, []);
 
   function RefreshAction() {
     return (
       <Action
         title="Refresh Data"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={async () => {
-          const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing..." });
-          revalidate();
-          await toast.hide();
+          try {
+            const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing..." });
+            await Promise.all([revalidate(), revalidateUser()]);
+            await toast.hide();
+          } catch (error) {
+            await showFailureToast(error, { title: "Could Not Refresh Calendly" });
+          }
         }}
       />
     );
   }
 
-  console.log({ error });
-
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || isLoadingUser}>
       <List.Item
         title="Open Calendly Dashboard"
         icon={{
@@ -67,7 +59,7 @@ export default function Calendly() {
         <List.Item
           title="Copy My Link"
           subtitle={"/" + user.slug}
-          icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
+          icon={user.avatar_url ? { source: user.avatar_url, mask: Image.Mask.Circle } : Icon.Person}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy My Link" icon={Icon.Calendar} content={user.scheduling_url} />
@@ -120,23 +112,28 @@ export default function Calendly() {
   );
 }
 
-function CopyMeetingLinkAction({ event }: { event: CalendlyEventType }) {
+function CopyMeetingLinkAction({ event }: { event: EventType }) {
   return <Action.CopyToClipboard title="Copy Meeting URL" icon={Icon.Calendar} content={event.scheduling_url} />;
 }
 
-function CopyOneTimeLinkAction({ event }: { event: CalendlyEventType }) {
+function CopyOneTimeLinkAction({ event }: { event: EventType }) {
   return (
     <Action
       title="Copy Single Use Link"
       icon={Icon.Calendar}
       onAction={async () => {
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Generating Link..." });
-        await toast.show();
-        const data = await createSingleUseLink(event);
-        await Clipboard.copy(data.booking_url);
-        await toast.hide();
-        await showHUD("Single-use Link Copied to Clipboard 📋");
+        try {
+          const toast = await showToast({ style: Toast.Style.Animated, title: "Generating Link..." });
+          const data = await createSingleUseLink(event.uri);
+          await Clipboard.copy(data.booking_url);
+          await toast.hide();
+          await showHUD("Single-use Link Copied to Clipboard 📋");
+        } catch (error) {
+          await showFailureToast(error, { title: "Could Not Create Single-Use Link" });
+        }
       }}
     />
   );
 }
+
+export default withAccessToken(calendlyOAuth)(Calendly);

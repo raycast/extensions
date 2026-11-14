@@ -18,7 +18,7 @@ export default function UnsplashLikes() {
 }
 
 function LikesGrid() {
-  const { loading, likes } = useLikes();
+  const { loading, likes, pagination } = useLikes();
   const [unliked, setUnliked] = useState<string[]>([]);
 
   const filteredLikes = useMemo(
@@ -27,7 +27,12 @@ function LikesGrid() {
   );
 
   return (
-    <Grid isLoading={loading} columns={getGridColumns()} searchBarPlaceholder="Search your likes...">
+    <Grid
+      isLoading={loading}
+      columns={getGridColumns()}
+      searchBarPlaceholder="Search your likes..."
+      pagination={pagination}
+    >
       <Grid.EmptyView icon="empty-states-photos.png" />
       <Grid.Section title="Results" subtitle={String(filteredLikes.length)}>
         {filteredLikes.map((like) => (

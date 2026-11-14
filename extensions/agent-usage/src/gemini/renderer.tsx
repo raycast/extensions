@@ -1,26 +1,34 @@
 import { List } from "@raycast/api";
-import { GeminiUsage, GeminiError } from "./types";
-import type { Accessory } from "../agents/types";
+
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
+} from "../agents/ui.tsx";
+import type { GeminiUsage, GeminiError } from "./types.ts";
+
+function usageWord(mode: PercentageDisplayMode): string {
+  return mode === "used" ? "Used" : "Remaining";
+}
 
 export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiError | null): string {
   const fallback = formatErrorOrNoData("Gemini", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as GeminiUsage;
+  const mode = getPercentageDisplayMode();
 
   let text = `Gemini Usage`;
 
   if (u.proModel) {
     text += `\n\nPro Model: ${u.proModel.modelId}`;
-    text += `\nRemaining: ${u.proModel.percentLeft}% remaining`;
-    text += `\n${generateAsciiBar(u.proModel.percentLeft)}`;
+    text += `\n${usageWord(mode)}: ${formatPercentDisplay(u.proModel.percentLeft, mode)}`;
+    text += `\n${generateAsciiBar(toDisplayPercent(u.proModel.percentLeft, mode))}`;
     text += `\nResets In: ${u.proModel.resetsIn}`;
   } else {
     text += `\n\nPro Model: No quota data`;
@@ -28,8 +36,8 @@ export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiEr
 
   if (u.flashModel) {
     text += `\n\nFlash Model: ${u.flashModel.modelId}`;
-    text += `\nRemaining: ${u.flashModel.percentLeft}% remaining`;
-    text += `\n${generateAsciiBar(u.flashModel.percentLeft)}`;
+    text += `\n${usageWord(mode)}: ${formatPercentDisplay(u.flashModel.percentLeft, mode)}`;
+    text += `\n${generateAsciiBar(toDisplayPercent(u.flashModel.percentLeft, mode))}`;
     text += `\nResets In: ${u.flashModel.resetsIn}`;
   } else {
     text += `\n\nFlash Model: No quota data`;
@@ -42,6 +50,7 @@ export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as GeminiUsage;
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -49,8 +58,8 @@ export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError
         <>
           <List.Item.Detail.Metadata.Label title="Pro Model" text={u.proModel.modelId} />
           <List.Item.Detail.Metadata.Label
-            title="Remaining"
-            text={`${generateAsciiBar(u.proModel.percentLeft)} ${u.proModel.percentLeft}% remaining`}
+            title={usageWord(mode)}
+            text={`${generateAsciiBar(toDisplayPercent(u.proModel.percentLeft, mode))} ${formatPercentDisplay(u.proModel.percentLeft, mode)}`}
           />
           <List.Item.Detail.Metadata.Label title="Resets In" text={u.proModel.resetsIn} />
         </>
@@ -64,8 +73,8 @@ export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError
         <>
           <List.Item.Detail.Metadata.Label title="Flash Model" text={u.flashModel.modelId} />
           <List.Item.Detail.Metadata.Label
-            title="Remaining"
-            text={`${generateAsciiBar(u.flashModel.percentLeft)} ${u.flashModel.percentLeft}% remaining`}
+            title={usageWord(mode)}
+            text={`${generateAsciiBar(toDisplayPercent(u.flashModel.percentLeft, mode))} ${formatPercentDisplay(u.flashModel.percentLeft, mode)}`}
           />
           <List.Item.Detail.Metadata.Label title="Resets In" text={u.flashModel.resetsIn} />
         </>
@@ -105,21 +114,22 @@ export function getGeminiAccessory(
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
   if (usage.proModel) {
     const proPercent = usage.proModel.percentLeft;
-    const flashPercent = usage.flashModel?.percentLeft ?? "—";
+    const flashDisplay = usage.flashModel ? `${toDisplayPercent(usage.flashModel.percentLeft, mode)}%` : "—%";
     return {
       icon: generatePieIcon(proPercent),
-      text: `${proPercent}%`,
-      tooltip: `Pro: ${proPercent}% | Flash: ${flashPercent}%`,
+      text: `${toDisplayPercent(proPercent, mode)}%`,
+      tooltip: `Pro: ${toDisplayPercent(proPercent, mode)}% | Flash: ${flashDisplay}`,
     };
   }
 
   if (usage.flashModel) {
     return {
       icon: generatePieIcon(usage.flashModel.percentLeft),
-      text: `${usage.flashModel.percentLeft}%`,
-      tooltip: `Flash: ${usage.flashModel.percentLeft}%`,
+      text: `${toDisplayPercent(usage.flashModel.percentLeft, mode)}%`,
+      tooltip: `Flash: ${toDisplayPercent(usage.flashModel.percentLeft, mode)}%`,
     };
   }
 

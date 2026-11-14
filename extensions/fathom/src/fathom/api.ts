@@ -13,6 +13,12 @@ const INITIAL_RETRY_DELAY = 1000; // 1 second
 const MAX_RETRY_DELAY = 10000; // 10 seconds
 
 /**
+ * Per-request deadline. Generous enough for a large meetings page, short enough
+ * that a hung connection surfaces as an error rather than an endless spinner.
+ */
+const REQUEST_TIMEOUT_MS = 30000;
+
+/**
  * Sleep for a specified duration
  */
 function sleep(ms: number): Promise<void> {
@@ -30,21 +36,37 @@ function getRetryDelay(attempt: number): number {
 }
 
 /**
- * Authenticated GET request using API key.
+ * Authenticated request using API key.
  * Handles rate limiting with exponential backoff and retries.
+ *
+ * Errors are thrown with a `"CODE: message"` prefix, which `classifyError` in
+ * utils/errorHandling.ts matches on. Keep that protocol when adding codes.
  */
-async function authGet<T>(path: string, retryCount = 0): Promise<T> {
+async function authRequest<T>(method: "GET" | "POST", path: string, retryCount = 0): Promise<T> {
   const apiKey = getFathomApiKey();
 
-  logger.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
+  logger.log(`[API] 🌐 HTTP ${method} ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
 
-  const res = await fetch(`${BASE}${path}`, {
-    method: "GET",
-    headers: {
-      "X-Api-Key": apiKey,
-      "Content-Type": "application/json",
-    },
-  });
+  // Without a deadline a hung connection never settles, and a caller polling a
+  // download job would spin on a toast forever with no way to fail cleanly.
+  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      method,
+      headers: {
+        "X-Api-Key": apiKey,
+        "Content-Type": "application/json",
+      },
+      signal: timeout,
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+      throw new Error(`NETWORK: Fathom did not respond within ${REQUEST_TIMEOUT_MS / 1000} seconds.`);
+    }
+    throw error;
+  }
 
   if (!res.ok) {
     if (res.status === 401) {
@@ -60,7 +82,7 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
           `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
         );
         await sleep(retryDelay);
-        return authGet<T>(path, retryCount + 1);
+        return authRequest<T>(method, path, retryCount + 1);
       }
       logger.error(`[API] ❌ RATE LIMIT EXCEEDED on ${path} after ${MAX_RETRIES} retries`);
       throw new Error(
@@ -74,6 +96,11 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
     if (res.status === 403) {
       throw new Error(`PERMISSION: You don't have permission to access this resource.`);
     }
+    // 422 on the download endpoints means the recording has no downloadable
+    // media — a distinct, explainable condition rather than a generic failure.
+    if (res.status === 422) {
+      throw new Error(`NO_MEDIA: This recording has no downloadable media.`);
+    }
     if (res.status >= 500) {
       throw new Error(`NETWORK: Fathom service is temporarily unavailable. Please try again later.`);
     }
@@ -84,6 +111,20 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
   markApiKeyValid();
   logger.log(`[API] ✅ Success ${path}`);
   return data as T;
+}
+
+async function authGet<T>(path: string, retryCount = 0): Promise<T> {
+  return authRequest<T>("GET", path, retryCount);
+}
+
+/** Authenticated GET returning raw JSON. Exported for the downloads module. */
+export async function authGetJson<T>(path: string): Promise<T> {
+  return authRequest<T>("GET", path);
+}
+
+/** Authenticated POST. Fathom's download endpoint takes no body. */
+export async function authPost<T>(path: string): Promise<T> {
+  return authRequest<T>("POST", path);
 }
 
 // ─── Meetings ────────────────────────────────────────────────────────────────

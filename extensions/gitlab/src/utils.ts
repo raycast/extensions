@@ -44,20 +44,20 @@ export function getFirstChar(text: string): string {
   return firstChar ? String.fromCodePoint(firstChar) : "";
 }
 
-export function projectIcon(project: Project): Image.ImageLike {
-  const svgSource = () => {
-    return getSVGText(getFirstChar(project.name)) || GitLabIcons.project;
+export function projectIcon(project: Project, avatarSources: Record<string, string>): Image.ImageLike {
+  const textIcon = getSVGText(getFirstChar(project.name)) || GitLabIcons.project;
+  return {
+    source: avatarSources[projectIconUrl(project) ?? ""] ?? textIcon,
+    mask: Image.Mask.Circle,
+    fallback: textIcon,
   };
-  let result: string = GitLabIcons.project;
-  // TODO check also namespace for icon
-  if (project.avatar_url) {
-    result = project.avatar_url;
-  } else if (project.owner && project.owner.avatar_url) {
-    result = project.owner.avatar_url;
-  } else {
-    result = svgSource();
-  }
-  return { source: result, mask: Image.Mask.Circle, fallback: svgSource() };
+}
+
+/** Project title for dropdowns; drops the top-level group unless `showRepositoryGroupName` is enabled. */
+export function projectDropdownTitle(project: Project): string {
+  return getPreferences().showRepositoryGroupName
+    ? project.name_with_namespace
+    : project.name_with_namespace.split(" / ").slice(1).join(" / ") || project.name;
 }
 
 export function getIdFromGqlId(id: string): number {
@@ -158,6 +158,10 @@ export function capitalizeFirstLetter(name: string): string {
 export function toFormValues(values: Record<string, unknown>): Record<string, string> {
   const formValues: Record<string, string> = {};
   for (const [key, value] of Object.entries(values)) {
+    if (typeof value === "boolean") {
+      formValues[key] = String(value);
+      continue;
+    }
     if (value) {
       if (Array.isArray(value)) {
         if (value.length > 0) {
@@ -284,10 +288,10 @@ export function formatDurationHuman(totalSeconds: number): string {
 
 export interface Preferences {
   instance: string;
-  authType?: "pat" | "oauth";
-  token: string;
+  token?: string;
   oauthClientId?: string;
   artifactDownloadDirectory?: string;
+  showRepositoryGroupName: boolean;
   primaryaction: "browser" | "detail";
   poptoroot: boolean;
   includeEpicAncestor: boolean;
@@ -326,28 +330,22 @@ export function getInstance(preferences: Preferences = getPreferences()): string
   return (preferences.instance.trim() || DEFAULT_GITLAB_INSTANCE).replace(/\/+$/, "");
 }
 
-export function isOAuthEnabled(preferences: Preferences = getPreferences()): boolean {
-  return preferences.authType === "oauth";
+// A configured token wins over OAuth: it is the credential the user set explicitly,
+// so an upgrade never diverts them into a browser flow they did not ask for. Every
+// other case is OAuth, including "neither configured". `requireOAuthClientId` is
+// the single site that reports nothing being set.
+export function getPersonalAccessToken(preferences: Preferences = getPreferences()): string | undefined {
+  return preferences.token?.trim() || undefined;
 }
 
 export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {
   const clientId = preferences.oauthClientId?.trim();
   if (!clientId) {
     throw new Error(
-      "GitLab OAuth Application ID is not configured. Open the GitLab extension preferences and either set the Application ID or switch Authentication back to Personal Access Token.",
+      "GitLab authentication is not configured. Open the GitLab extension preferences and set either the API Token or the OAuth Application ID.",
     );
   }
   return clientId;
-}
-
-export function requirePersonalAccessToken(preferences: Preferences = getPreferences()): string {
-  const token = preferences.token?.trim();
-  if (!token) {
-    throw new Error(
-      "GitLab API Token is not configured. Open the GitLab extension preferences and either set the API Token or switch Authentication to OAuth.",
-    );
-  }
-  return token;
 }
 
 export function parseCommaSeparatedPreference(value: string | undefined): string[] {

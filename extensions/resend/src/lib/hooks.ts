@@ -91,15 +91,15 @@ export const useGetEmail = (id: string) => {
   return { email: data, ...rest };
 };
 
-export const useAudiences = () => {
+export const useSegments = () => {
   const { data, ...rest } = useCachedPromise(
     async () => {
-      await showToast(Toast.Style.Animated, "Processing...", "Fetching Audiences");
+      await showToast(Toast.Style.Animated, "Processing...", "Fetching Segments");
       const resend = getResend();
-      const res = await resend.audiences.list();
+      const res = await resend.segments.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
-      await showSuccessToast(data, "audience");
+      await showSuccessToast(data, "segment");
       return data;
     },
     [],
@@ -108,21 +108,21 @@ export const useAudiences = () => {
       onError,
     },
   );
-  return { audiences: data, ...rest };
+  return { segments: data, ...rest };
 };
-export const useContacts = (audienceId?: string) => {
+export const useContacts = (segmentId?: string) => {
   const { data, ...rest } = useCachedPromise(
-    async (audienceId?: string) => {
-      if (!audienceId) return [];
+    async (segmentId?: string) => {
+      if (!segmentId) return [];
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Contacts");
       const resend = getResend();
-      const res = await resend.contacts.list({ audienceId });
+      const res = await resend.contacts.list({ segmentId });
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
       await showSuccessToast(data, "contact");
       return data;
     },
-    [audienceId],
+    [segmentId],
     {
       initialData: [],
       onError,

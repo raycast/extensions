@@ -43,7 +43,7 @@ This is a Raycast extension for managing [desk.ly](https://desk.ly) desk-sharing
 - `deleteBooking(bookingId)` — DELETEs a booking
 - `checkInBooking(bookingId)` — POSTs a check-in for a booking
 - `fetchPresentResources(locationId, date)` — returns `PresentPerson[]` for who is booked at a location on a given date; used by `who-is-in-the-office`
-- `fetchRoomPlanImage(roomId, seat)` — fetches the room plan PNG, overlays a colored dot at the seat's `locationX`/`locationY` (color/size controlled by `seatIndicatorColor`/`seatIndicatorSize` preferences), and returns a base64 `data:` URI; results are in-memory cached per `roomId:seatId`
+- `fetchRoomPlanImage(roomId, seat)` — fetches the room plan PNG and wraps it in an SVG that overlays a colored dot at the seat's `locationX`/`locationY` (color/size controlled by `seatIndicatorColor`/`seatIndicatorSize` preferences); returns a `data:image/svg+xml;base64,` URI; results are in-memory cached per `roomId:seatId`. The PNG's width/height are read directly from its `IHDR` chunk instead of decoding the image (no pixel library involved — some Raycast-compatible hosts, e.g. Tinycast, don't fully shim `zlib`'s `Inflate`/`Deflate`, which a PNG decoder like Jimp needs)
 - `fetchInformation()` — returns user info including `accountInformation.maxBookingDays`, `user.primaryRoom`, and `availableLocations`; caches result in `LocalStorage`
 - `fetchAccessToken()` — exchanges the refresh token for a short-lived access token via `/en/api/authorize/refreshToken`; caches in `LocalStorage` with expiration tracking; called automatically before every authenticated request
 
@@ -112,6 +112,12 @@ Global preferences:
 The timeframe is selected interactively via an API-derived Timeframe dropdown (sourced from `information.availableLocations`), not from a preference.
 
 Prettier is configured for 120-character line width with double quotes (see [.prettierrc](.prettierrc)).
+
+## Changelog
+
+[CHANGELOG.md](CHANGELOG.md) entries are titled `## [<Version title>] - {PR_MERGE_DATE}`. Use the literal placeholder
+string `{PR_MERGE_DATE}` for the date — Raycast's publish process fills in the actual merge date automatically;
+do not hand-write a date.
 
 ## Documentation
 

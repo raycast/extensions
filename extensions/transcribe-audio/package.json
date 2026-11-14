@@ -1,0 +1,209 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "transcribe-audio",
+  "title": "Transcribe Audio",
+  "description": "Transcribe audio and video files with OpenAI, Deepgram, or ElevenLabs. Export to Markdown, plain text, or SRT. FFmpeg is used for format conversion when needed.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "mouxy",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix": "ray lint --fix",
+    "typecheck": "npx tsc --noEmit",
+    "test": "node --test --require tsx test/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.96.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "prettier": "^3.3.3",
+    "tsx": "^4.23.1",
+    "typescript": "^5.6.3"
+  },
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Used when OpenAI is selected as the transcription provider.",
+      "type": "password",
+      "required": false,
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "deepgramApiKey",
+      "title": "Deepgram API Key",
+      "description": "Used when Deepgram is selected as the transcription provider.",
+      "type": "password",
+      "required": false,
+      "placeholder": "..."
+    },
+    {
+      "name": "elevenlabsApiKey",
+      "title": "ElevenLabs API Key",
+      "description": "Used when ElevenLabs is selected as the transcription provider.",
+      "type": "password",
+      "required": false,
+      "placeholder": "..."
+    },
+    {
+      "name": "historyEnabled",
+      "title": "Save Transcription History",
+      "description": "Store recent transcriptions locally so they can be viewed again later.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Keep transcription history"
+    },
+    {
+      "name": "historyRetentionDays",
+      "title": "History Retention",
+      "description": "How long to keep saved transcriptions.",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "7 days",
+          "value": "7"
+        },
+        {
+          "title": "30 days",
+          "value": "30"
+        },
+        {
+          "title": "90 days",
+          "value": "90"
+        },
+        {
+          "title": "1 year",
+          "value": "365"
+        }
+      ]
+    },
+    {
+      "name": "historyMaxEntries",
+      "title": "Maximum History Entries",
+      "description": "Maximum number of transcriptions to keep.",
+      "type": "dropdown",
+      "required": false,
+      "default": "50",
+      "data": [
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "25",
+          "value": "25"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "transcribe",
+      "title": "Transcribe Audio",
+      "description": "Transcribe the selected audio or video file.",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "preferences": [
+        {
+          "name": "defaultProvider",
+          "title": "Default Provider",
+          "description": "Which provider to use by default.",
+          "type": "dropdown",
+          "required": true,
+          "default": "elevenlabs",
+          "data": [
+            {
+              "title": "ElevenLabs Scribe v2",
+              "value": "elevenlabs"
+            },
+            {
+              "title": "Deepgram Nova-3",
+              "value": "deepgram"
+            },
+            {
+              "title": "OpenAI gpt-4o-transcribe",
+              "value": "openai"
+            }
+          ]
+        },
+        {
+          "name": "defaultAudioType",
+          "title": "Default Audio Type",
+          "description": "What kind of recording this is by default.",
+          "type": "dropdown",
+          "required": true,
+          "default": "voice-note",
+          "data": [
+            {
+              "title": "Voice Note",
+              "value": "voice-note"
+            },
+            {
+              "title": "Meeting Recording",
+              "value": "meeting"
+            },
+            {
+              "title": "Interview",
+              "value": "interview"
+            },
+            {
+              "title": "Lecture / Talk",
+              "value": "lecture"
+            },
+            {
+              "title": "Voicemail / Call",
+              "value": "call"
+            },
+            {
+              "title": "Podcast / Media",
+              "value": "podcast"
+            }
+          ]
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Leave empty for automatic language detection. Use ISO 639-1 codes (e.g. en, pt, es) where supported.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "auto"
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Transcription History",
+      "description": "View and copy recent transcriptions.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -54,6 +54,7 @@ export default function Command(props: LaunchProps) {
   const immediatelyConvertToCase = props.launchContext?.case;
 
   const [content, setContent] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [frontmostApp, setFrontmostApp] = useState<Application>();
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
@@ -110,16 +111,20 @@ export default function Command(props: LaunchProps) {
   }, []);
 
   const refreshContent = async () => {
+    setIsLoading(true);
     try {
       setContent(props.fallbackText || (await readContent(preferredSource)));
     } catch (error) {
       if (error instanceof NoTextError) {
+        setContent("");
+      } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "Nothing to convert",
-          message: "Please ensure that text is either selected or copied",
+          title: "Failed to read text",
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -277,8 +282,25 @@ export default function Command(props: LaunchProps) {
     );
   };
 
+  if (!isLoading && !content) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Text}
+          title="Nothing to Convert"
+          description="Copy the text you want to convert, then run this command again."
+          actions={
+            <ActionPanel>
+              <Action title="Refresh Content" icon={Icon.RotateAntiClockwise} onAction={refreshContent} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
-    <List isShowingDetail={true} isLoading={!pinned || !recent} selectedItemId={recent[0]}>
+    <List isShowingDetail={true} isLoading={isLoading} selectedItemId={recent[0]}>
       <List.Section title="Pinned">
         {pinned
           ?.filter((key) => conversions[key])

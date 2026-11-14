@@ -10,10 +10,11 @@ const TodoSection = ({ sectionKey, selectedTag }: { sectionKey: keyof TodoSectio
   return (
     <List.Section title={SECTIONS_DATA[sectionKey].name}>
       {todoSections[sectionKey]
-        .sort(sortTodoItem)
-        .map((item, i) =>
+        .map((item, idx) => ({ item, idx }))
+        .sort((a, b) => sortTodoItem(a.item, b.item))
+        .map(({ item, idx }) =>
           selectedTag == item.tag || selectedTag == ALL_TAG_VALUE ? (
-            <SingleTodoItem idx={i} item={item} key={i} sectionKey={sectionKey} />
+            <SingleTodoItem idx={idx} item={item} key={idx} sectionKey={sectionKey} />
           ) : null,
         )}
     </List.Section>

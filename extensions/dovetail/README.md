@@ -1,6 +1,14 @@
 # Dovetail Extension
 
-Search for data and insights across your Dovetail workspace.
+Search, browse, and create content across your Dovetail workspace without leaving Raycast.
+
+- **Search Workspace** — full-text search across docs, data, projects, highlights, tags, channels, and more in one place
+- **Search Data**, **Search Docs**, **Search Projects**, **Search Contacts** — dedicated search for each resource
+- **Browse Folders** — navigate your workspace's folder hierarchy and drill into projects and channels
+- **Create Data Entry** — add a new data entry to a project without opening Dovetail
+- AI tools so Raycast AI can search your workspace, read doc/data content, and generate Dovetail's Magic Summarize output
+
+## Setup
 
 Manually create a personal access key in your Dovetail workspace by following the steps below.
 

@@ -56,6 +56,8 @@ export function useBrowserLink() {
           return runAppleScript(`tell application "Google Chrome" to return URL of active tab of front window`);
         case "com.brave.Browser":
           return runAppleScript(`tell application "Brave Browser" to return URL of active tab of front window`);
+        case "net.imput.helium":
+          return runAppleScript(`tell application "Helium" to return URL of active tab of front window`);
         case "com.apple.Safari":
           return runAppleScript(`tell application "Safari" to return URL of front document`);
         case "com.kagi.kagimacOS":

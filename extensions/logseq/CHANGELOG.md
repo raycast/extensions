@@ -22,7 +22,7 @@
 
 Add org files support for LogSearch by fetching preferred format from Logseq config
 
-## [Fix] - 20220-10-10
+## [Fix] - 2022-10-10
 - Fix Date incorrect for journals setup with EEEE for day name [Issue](https://github.com/raycast/extensions/issues/3033)
 
 ## [Support insert leading time and quick capture tag when using quick note] - 2022-07-27

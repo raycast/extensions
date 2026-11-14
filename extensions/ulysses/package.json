@@ -2,23 +2,85 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ulysses",
   "title": "Ulysses",
-  "description": "Use Ulysses with Raycast",
+  "description": "Capture text, keep a journal, and open Ulysses from Raycast",
   "icon": "command-icon.png",
   "author": "praveenjuge",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "writing",
+    "markdown",
+    "notes",
+    "journal"
+  ],
   "license": "MIT",
   "commands": [
     {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "Ulysses",
+      "description": "Write a new sheet with a title, text, group and format",
+      "icon": "quick-capture.png",
+      "mode": "view"
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text",
+      "subtitle": "Ulysses",
+      "description": "Save typed text, the selected text, or the clipboard as a new sheet",
+      "icon": "capture-text.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-journal-entry",
+      "title": "Create Journal Entry",
+      "subtitle": "Ulysses",
+      "description": "Create a sheet titled with today's date in your Journal group",
+      "icon": "create-journal-entry.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "entry",
+          "type": "text",
+          "placeholder": "Entry",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "journalGroup",
+          "title": "Journal Group",
+          "description": "The group for journal sheets: a name or a path like /Personal/Journal. It's created if it doesn't exist.",
+          "type": "textfield",
+          "default": "Journal",
+          "placeholder": "Journal",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "new-empty-sheet",
-      "title": "New Empty Sheet",
+      "title": "Create Empty Sheet",
       "subtitle": "Ulysses",
       "description": "Open a new empty sheet in Ulysses",
+      "icon": "new-empty-sheet.png",
       "mode": "no-view"
     },
     {
       "name": "new-group",
-      "title": "New Group",
+      "title": "Create Group",
       "subtitle": "Ulysses",
       "description": "Create a new group in Ulysses",
+      "icon": "new-group.png",
       "mode": "view"
     },
     {
@@ -26,6 +88,7 @@
       "title": "Open All",
       "subtitle": "Ulysses",
       "description": "See all sheets in Ulysses",
+      "icon": "open-all.png",
       "mode": "no-view"
     },
     {
@@ -33,6 +96,7 @@
       "title": "Open Recent",
       "subtitle": "Ulysses",
       "description": "See recently opened files in Ulysses",
+      "icon": "open-recent.png",
       "mode": "no-view"
     },
     {
@@ -40,26 +104,67 @@
       "title": "Open Favorites",
       "subtitle": "Ulysses",
       "description": "See your favorite sheets in Ulysses",
+      "icon": "open-favorites.png",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultGroup",
+      "title": "Default Group",
+      "description": "Group for new sheets: a name or a path like /Blog/Drafts. Leave empty to use the Inbox. If the group doesn't exist, sheets go to the Inbox.",
+      "type": "textfield",
+      "placeholder": "Inbox",
+      "required": false
+    },
+    {
+      "name": "format",
+      "title": "Text Format",
+      "description": "How Ulysses imports the text you capture.",
+      "type": "dropdown",
+      "default": "markdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "Plain Text",
+          "value": "text"
+        }
+      ]
+    },
+    {
+      "name": "showInUlysses",
+      "title": "After Saving",
+      "label": "Bring Ulysses to the front",
+      "description": "Show the new sheet, group or journal entry in Ulysses. Turn off to save in the background.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
-    "open": "^8.4.0"
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

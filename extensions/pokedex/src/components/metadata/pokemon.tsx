@@ -6,10 +6,9 @@ import TypeMetadata from "./type";
 export default function PokemonMetadata(props: {
   type?: string;
   pokemon: Pokemon;
-  mega?: boolean;
   formtypes?: PokemonType[];
 }) {
-  const { pokemon, mega, formtypes } = props;
+  const { pokemon, formtypes } = props;
 
   const Metadata =
     props.type === "detail" ? Detail.Metadata : List.Item.Detail.Metadata;
@@ -20,7 +19,7 @@ export default function PokemonMetadata(props: {
       types={formtypes || pokemon.pokemontypes}
       type="detail"
     />,
-    !mega && (
+    pokemon.pokemonabilities && pokemon.pokemonabilities.length > 0 && (
       <Detail.Metadata.TagList key="abilities" title="Abilities">
         {pokemon.pokemonabilities.map((ability) => {
           const abilityName = getLocalizedName(

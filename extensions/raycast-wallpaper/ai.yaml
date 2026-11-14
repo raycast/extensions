@@ -1,0 +1,67 @@
+instructions: |
+  Use list-wallpapers to find available official Raycast wallpapers before setting one.
+  Only use exact titles and image URLs returned by the tools. Show wallpaper links when listing options.
+  Only set a wallpaper when the user asks to change their desktop wallpaper.
+  If the requested wallpaper is unavailable, explain that and offer available options without setting one.
+  Apply to every monitor unless the user requests the current monitor.
+  Report success only after set-wallpaper succeeds. Report tool errors without claiming the wallpaper changed.
+
+evals:
+  - input: "@raycast-wallpaper List the available wallpapers"
+    mocks:
+      list-wallpapers:
+        - title: "Raycast Logo"
+          url: "https://www.raycast.com/wallpapers/raycast-logo.png"
+        - title: "Blossom"
+          url: "https://www.raycast.com/wallpapers/blossom.png"
+    expected:
+      - callsTool: "list-wallpapers"
+      - includes: "Raycast Logo"
+      - includes: "Blossom"
+      - not:
+          callsTool: "set-wallpaper"
+
+  - input: "@raycast-wallpaper Set my desktop wallpaper to Blossom on all monitors"
+    mocks:
+      list-wallpapers:
+        - title: "Blossom"
+          url: "https://www.raycast.com/wallpapers/blossom.png"
+      set-wallpaper:
+        title: "Blossom"
+        applyTo: "every"
+    expected:
+      - callsTool: "list-wallpapers"
+      - callsTool:
+          name: "set-wallpaper"
+          arguments:
+            title: "Blossom"
+            applyTo: "every"
+
+  - input: "@raycast-wallpaper Set Raycast Logo as my wallpaper on the current monitor only"
+    mocks:
+      list-wallpapers:
+        - title: "Raycast Logo"
+          url: "https://www.raycast.com/wallpapers/raycast-logo.png"
+      set-wallpaper:
+        title: "Raycast Logo"
+        applyTo: "current"
+    expected:
+      - callsTool: "list-wallpapers"
+      - callsTool:
+          name: "set-wallpaper"
+          arguments:
+            title: "Raycast Logo"
+            applyTo: "current"
+
+  - input: "@raycast-wallpaper Set my wallpaper to Missing Wallpaper"
+    usedAsExample: false
+    mocks:
+      list-wallpapers:
+        - title: "Blossom"
+          url: "https://www.raycast.com/wallpapers/blossom.png"
+    expected:
+      - callsTool: "list-wallpapers"
+      - not:
+          callsTool: "set-wallpaper"
+      - includes: "Missing Wallpaper"
+      - includes: "Blossom"

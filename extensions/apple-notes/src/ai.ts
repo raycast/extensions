@@ -1,16 +1,50 @@
 import { AI, closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import { createNote } from "./api/applescript";
+import { appendNoteBody, createNote } from "./api/applescript";
+import { getNotes } from "./api/getNotes";
 
 export default async (props: LaunchProps<{ arguments: Arguments.Ai }>) => {
   await closeMainWindow();
 
-  await showToast({ style: Toast.Style.Animated, title: "Creating a note" });
-
   const text = props.fallbackText || props.arguments.text;
-
   const instructions = props.arguments.instructions;
+  const noteQuery = props.arguments.note?.trim();
+
+  let targetNote: Awaited<ReturnType<typeof getNotes>>[number] | undefined;
+  if (noteQuery) {
+    await showToast({ style: Toast.Style.Animated, title: "Looking for note" });
+
+    // Exact title match is verified with Unicode-aware comparison, so it can't be missed
+    // regardless of how many notes exist or what script the title uses.
+    const exactMatches = await getNotes(10, [], noteQuery, true);
+
+    if (exactMatches.length === 1) {
+      targetNote = exactMatches[0];
+    }
+
+    if (exactMatches.length > 1) {
+      await showFailureToast(
+        new Error(`Multiple notes titled "${noteQuery}" were found. Please use a more specific title.`),
+        {
+          title: "Note title is ambiguous",
+        },
+      );
+      return;
+    }
+
+    if (!targetNote) {
+      await showFailureToast(new Error(`No note matching "${noteQuery}" was found.`), {
+        title: "Could not find note",
+      });
+      return;
+    }
+  }
+
+  await showToast({
+    style: Toast.Style.Animated,
+    title: targetNote ? "Adding to note" : "Creating a note",
+  });
 
   try {
     const result = await AI.ask(
@@ -25,8 +59,15 @@ Follow these instructions:
 ${instructions ? `- ${instructions}` : ""}
 `,
     );
-    await createNote(result);
+
+    if (targetNote) {
+      await appendNoteBody(targetNote.id, result);
+    } else {
+      await createNote(result);
+    }
   } catch (error) {
-    await showFailureToast(error, { title: "Could not create a new note." });
+    await showFailureToast(error, {
+      title: targetNote ? "Could not add to the note." : "Could not create a new note.",
+    });
   }
 };

@@ -1,0 +1,6 @@
+abbreviation,snippet,label
+;hello,"Hello from the work account.",Work greeting
+;meeting,"Meeting notes for %Y-%m-%d
+
+%|",Meeting notes
+;name,"Hello %filltext:name=Name%",Personalized greeting

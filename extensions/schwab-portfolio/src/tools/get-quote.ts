@@ -1,3 +1,8 @@
+/// <reference lib="es2023" />
+/// <reference types="typescript/lib/lib.es5" />
+
+// Raycast CLI 2.5 bundles TypeScript without its standard libraries.
+// Load the project library explicitly so tool schemas retain array types.
 import { withAccessToken } from "@raycast/utils";
 import { schwabOAuth } from "../lib/oauth";
 import { getQuotes } from "../lib/schwab-client";

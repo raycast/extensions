@@ -9,14 +9,14 @@ export const generateAccordanceAppleScript = (module: string, reference: string)
   const escapedReference = escapeForAppleScript(reference);
 
   return `
-    tell application "Accordance"
-      if not running then launch
-      try
+    try
+      tell application "Accordance"
+        if not running then launch
         set verseText to «event AccdTxRf» {"${escapedModule}", "${escapedReference}", true}
         return verseText
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
+      end tell
+    on error errorMessage number errorNumber
+      return "Error: [" & errorNumber & "] " & errorMessage
+    end try
   `.trim();
 };

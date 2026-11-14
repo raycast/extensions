@@ -1,26 +1,25 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "atlassian-data-center",
-  "version": "1.0.1",
-  "title": "Atlassian Data Center (Self-Hosted)",
+  "title": "Atlassian (Self-Hosted)",
+  "type": "module",
+  "version": "1.0.2",
   "description": "Search and manage Confluence contents and Jira issues",
   "icon": "logo-atlassian.png",
   "author": "tofrankie",
-  "homepage": "https://github.com/tofrankie/raycast-atlassian-data-center",
+  "license": "MIT",
+  "homepage": "https://github.com/tofrankie/raycast-collection/tree/main/extensions/atlassian-data-center",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tofrankie/raycast-atlassian-data-center.git"
+    "url": "git+https://github.com/tofrankie/raycast-collection.git",
+    "directory": "extensions/atlassian-data-center"
   },
   "bugs": {
-    "url": "https://github.com/tofrankie/raycast-atlassian-data-center/issues"
+    "url": "https://github.com/tofrankie/raycast-collection/issues"
   },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "categories": [
-    "Productivity",
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
   ],
   "keywords": [
     "atlassian",
@@ -28,178 +27,181 @@
     "confluence",
     "confluence data center",
     "jira",
-    "jira data center"
+    "jira data center",
+    "self-hosted"
   ],
-  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "test": "vitest",
-    "test:run": "vitest run"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^1.19.1",
-    "@tanstack/react-query": "~5.90.12",
-    "dayjs": "^1.11.19",
-    "ky": "^1.14.2"
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2",
+    "@tanstack/react-query": "^5.104.1",
+    "dayjs": "^1.11.23",
+    "ky": "^2.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
-    "type-fest": "^5.2.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "type-fest": "^5.10.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.6"
+    "vitest": "^5.0.3"
   },
   "preferences": [
     {
-      "type": "textfield",
       "name": "confluenceBaseUrl",
+      "type": "textfield",
+      "required": true,
       "title": "Confluence Base URL",
       "description": "Base URL of your Confluence site (e.g. https://confluence.example.com)",
-      "required": true,
       "placeholder": "e.g. https://confluence.example.com"
     },
     {
-      "type": "password",
       "name": "confluencePAT",
+      "type": "password",
+      "required": true,
       "title": "Confluence PAT",
       "description": "Personal Access Token for Confluence API authentication. Create it from: Profile → Personal Access Tokens → Create token",
-      "required": true,
       "placeholder": "Your Confluence Personal Access Token"
     },
     {
-      "type": "textfield",
       "name": "jiraBaseUrl",
+      "type": "textfield",
+      "required": true,
       "title": "Jira Base URL",
       "description": "Base URL of your Jira site (e.g. https://jira.example.com)",
-      "required": true,
       "placeholder": "e.g. https://jira.example.com"
     },
     {
-      "type": "password",
       "name": "jiraPAT",
+      "type": "password",
+      "required": true,
       "title": "Jira PAT",
       "description": "Personal Access Token for Jira API authentication. Create it from: Profile → Personal Access Tokens → Create token",
-      "required": true,
       "placeholder": "Your Jira Personal Access Token"
     },
     {
-      "type": "checkbox",
       "name": "replaceCurrentUser",
-      "title": "Replace currentUser",
-      "description": "Replace currentUser() with username when copying CQL/JQL",
-      "label": "Replace currentUser() with username when copying CQL/JQL",
+      "type": "checkbox",
       "required": true,
+      "title": "Replace currentUser",
+      "label": "Replace currentUser() with username when copying CQL/JQL",
+      "description": "Replace currentUser() with username when copying CQL/JQL",
       "default": true
     },
     {
-      "type": "textfield",
       "name": "paginationSize",
+      "type": "textfield",
+      "required": true,
       "title": "Results per Page",
       "description": "Number of search results per page. Default: 20",
-      "required": true,
-      "default": "20",
-      "placeholder": "20"
+      "placeholder": "20",
+      "default": "20"
     },
     {
-      "type": "textfield",
       "name": "jiraWorkingHoursPerDay",
+      "type": "textfield",
+      "required": true,
       "title": "Working Hours per Day",
       "description": "Working hours per day for worklog progress calculation. Default: 8h (max 1 decimal place)",
-      "required": true,
-      "default": "8",
-      "placeholder": "8"
+      "placeholder": "8",
+      "default": "8"
     },
     {
-      "type": "textfield",
       "name": "jiraWorkingDaysPerWeek",
+      "type": "textfield",
+      "required": true,
       "title": "Working Days per Week",
       "description": "Working days per week for worklog progress calculation. Default: 5",
-      "required": true,
-      "default": "5",
-      "placeholder": "5"
+      "placeholder": "5",
+      "default": "5"
     },
     {
-      "type": "checkbox",
       "name": "debugEnable",
-      "title": "Enable Debug",
-      "description": "Enable debug mode for troubleshooting",
-      "label": "Enable debug mode for troubleshooting",
+      "type": "checkbox",
       "required": true,
+      "title": "Enable Debug",
+      "label": "Enable debug mode for troubleshooting",
+      "description": "Enable debug mode for troubleshooting",
       "default": false
     }
   ],
   "commands": [
     {
       "name": "confluence-search-content",
+      "mode": "view",
       "title": "Search Contents",
       "subtitle": "Confluence",
-      "description": "Search Confluence contents, including pages, blog posts, comments, and attachments",
-      "mode": "view",
-      "icon": "logo-confluence.png"
+      "icon": "logo-confluence.png",
+      "description": "Search Confluence contents, including pages, blog posts, comments, and attachments"
     },
     {
       "name": "confluence-search-user",
+      "mode": "view",
       "title": "Search Users",
       "subtitle": "Confluence",
-      "description": "Search Confluence users",
-      "mode": "view",
-      "icon": "logo-confluence.png"
+      "icon": "logo-confluence.png",
+      "description": "Search Confluence users"
     },
     {
       "name": "confluence-search-space",
+      "mode": "view",
       "title": "Search Spaces",
       "subtitle": "Confluence",
-      "description": "Search Confluence spaces",
-      "mode": "view",
-      "icon": "logo-confluence.png"
+      "icon": "logo-confluence.png",
+      "description": "Search Confluence spaces"
     },
     {
       "name": "jira-search-issue",
+      "mode": "view",
       "title": "Search Issues",
       "subtitle": "Jira",
-      "description": "Search Jira issues",
-      "mode": "view",
-      "icon": "logo-jira.png"
+      "icon": "logo-jira.png",
+      "description": "Search Jira issues"
     },
     {
       "name": "jira-board-view",
+      "mode": "view",
       "title": "Board View",
       "subtitle": "Jira",
-      "description": "View Jira board",
-      "mode": "view",
-      "icon": "logo-jira.png"
+      "icon": "logo-jira.png",
+      "description": "View Jira board"
     },
     {
       "name": "jira-worklog-view",
+      "mode": "view",
       "title": "Worklog View",
       "subtitle": "Jira",
-      "description": "View Jira worklog",
-      "mode": "view",
-      "icon": "logo-jira.png"
+      "icon": "logo-jira.png",
+      "description": "View Jira worklog"
     },
     {
       "name": "jira-notification-view",
+      "mode": "view",
       "title": "Notification View",
       "subtitle": "Jira",
-      "description": "View Jira notifications",
-      "mode": "view",
-      "icon": "logo-jira.png"
+      "icon": "logo-jira.png",
+      "description": "View Jira notifications"
     },
     {
       "name": "jira-manage-field",
+      "mode": "view",
       "title": "Manage Fields",
       "subtitle": "Jira",
-      "description": "Manage custom fields for Jira issue search",
-      "mode": "view",
-      "icon": "logo-jira.png"
+      "icon": "logo-jira.png",
+      "description": "Manage custom fields for Jira issue search"
     }
   ]
 }

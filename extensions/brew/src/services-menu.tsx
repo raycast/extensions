@@ -13,6 +13,7 @@ import {
   brewServiceIsRunning,
   ensureError,
   getErrorMessage,
+  isBrewLockError,
   runServiceCommand,
   SERVICE_ACTION_COPY,
   type Service,
@@ -20,6 +21,7 @@ import {
 } from "./utils";
 import { useBrewServices } from "./hooks/useBrewServices";
 import { serviceStatusIcon, type ServicesMutate } from "./components/serviceActions";
+import { ERROR_ICON, WARNING_ICON } from "./components/palette";
 
 const MENU_ICON = { source: "services-menubar.svg", tintColor: Color.PrimaryText };
 
@@ -43,7 +45,7 @@ async function handleAction(action: ServiceAction, name: string, mutate: Service
 }
 
 export default function Command() {
-  const { isLoading, data, revalidate, mutate } = useBrewServices();
+  const { isLoading, data, error, revalidate, mutate } = useBrewServices();
 
   const services = data ?? [];
   const running = services.filter(brewServiceIsRunning);
@@ -77,7 +79,15 @@ export default function Command() {
         {services.map((service) => (
           <ServiceSubmenu key={service.name} service={service} mutate={mutate} />
         ))}
-        {!isLoading && services.length === 0 && <MenuBarExtra.Item title="No services found" />}
+        {error && (
+          <MenuBarExtra.Item
+            title={isBrewLockError(error) ? "Brew is Busy" : "Failed to fetch services"}
+            tooltip={getErrorMessage(error)}
+            icon={isBrewLockError(error) ? WARNING_ICON : ERROR_ICON}
+            onAction={() => revalidate()}
+          />
+        )}
+        {!isLoading && !error && services.length === 0 && <MenuBarExtra.Item title="No services found" />}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>

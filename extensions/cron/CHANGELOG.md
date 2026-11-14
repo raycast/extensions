@@ -1,5 +1,12 @@
 # Cron Changelog
 
+## [Windows Support & Bug Fixes] - 2026-08-16
+
+1. Add support for Raycast on Windows and update dependencies
+2. Fix calendar days, weekday names, and time rendering as clipped or invisible text
+3. Fix crash on the day details view when location or public holiday data is unavailable
+4. Fix public holidays not showing for single-digit months and days
+
 ## [Bug fixes] - 2024-10-01
 
 1. Fix the issue with the date not showing the correct day of the week

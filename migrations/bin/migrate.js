@@ -152,6 +152,7 @@ const migrationsToApply = migrations.filter((x) =>
 const realMigrations = migrationsToApply.filter((x) => {
   const migrationDir = path.join(migrationToolFolder, x);
   return (
+    fs.existsSync(path.join(migrationDir, "package-json.cjs")) ||
     fs.existsSync(path.join(migrationDir, "index.ts")) ||
     fs.existsSync(path.join(migrationDir, "command.sh")) ||
     (isWindows && fs.existsSync(path.join(migrationDir, "command.ps1")))
@@ -181,27 +182,44 @@ packageJSON.dependencies["@raycast/api"] = `^${
   migrationsToApply[migrationsToApply.length - 1]
 }`;
 
+// Apply dependency changes before installing the API so npm sees compatible peer versions.
+function applyPackageMigrations(manifest) {
+  for (const migration of migrationsToApply) {
+    const packageMigration = path.join(
+      migrationToolFolder,
+      migration,
+      "package-json.cjs"
+    );
+    if (fs.existsSync(packageMigration)) require(packageMigration)(manifest);
+  }
+}
+applyPackageMigrations(packageJSON);
+
 fs.writeFileSync(
   path.join(extensionPath, "package.json"),
   `${JSON.stringify(packageJSON, null, "  ")}\n`,
   "utf8"
 );
 
-new Promise((resolve, reject) => {
-  let stream = exec(
-    `npm install`,
-    { cwd: extensionPath },
-    (err, stdout, stderr) => {
-      if (err) {
-        reject(stderr);
-      } else {
-        resolve();
+function installDependencies() {
+  return new Promise((resolve, reject) => {
+    let stream = exec(
+      `npm install`,
+      { cwd: extensionPath },
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(stderr);
+        } else {
+          resolve();
+        }
       }
-    }
-  );
+    );
 
-  stream.stdout.pipe(process.stdout);
-})
+    stream.stdout.pipe(process.stdout);
+  });
+}
+
+installDependencies()
   .then(() => {
     return realMigrations.reduce((p, migration) => {
       return p.then(() => {
@@ -284,6 +302,21 @@ new Promise((resolve, reject) => {
         ]);
       });
     }, Promise.resolve());
+  })
+  .then(() => {
+    // Historical shell migrations can pin older dependencies; restore the final compatible versions.
+    const packagePath = path.join(extensionPath, "package.json");
+    const manifest = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+    const before = JSON.stringify(manifest);
+    applyPackageMigrations(manifest);
+    if (JSON.stringify(manifest) !== before) {
+      fs.writeFileSync(
+        packagePath,
+        `${JSON.stringify(manifest, null, "  ")}\n`,
+        "utf8"
+      );
+      return installDependencies();
+    }
   })
   .then(() => {
     console.log("");

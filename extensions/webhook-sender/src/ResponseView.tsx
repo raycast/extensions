@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { WebhookRequest } from "./types";
 import { buildBody } from "./utils";
 
@@ -104,16 +104,19 @@ ${formatSentBody(sentBody)}
             <Action
               title="Edit in Form"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               onAction={onEditInForm}
             />
           )}
-          <Action.CopyToClipboard title="Copy Response" content={body} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy Response" content={body} shortcut={Keyboard.Shortcut.Common.Copy} />
           {sentBody && (
             <Action.CopyToClipboard
               title="Copy Request Body"
               content={sentBody}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt"], key: "c" },
+                Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+              }}
             />
           )}
           <Action.CopyToClipboard title="Copy URL" content={request.url} />

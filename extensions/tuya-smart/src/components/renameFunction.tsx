@@ -10,10 +10,12 @@ interface Props {
 
 export default function RenameFunctionForm(props: Props) {
   const { pop } = useNavigation();
-  const [name, setName] = useState<string>("");
+  const currentName = props.command.name ?? props.command.code;
+  const [name, setName] = useState<string>(currentName);
 
-  const onSubmit = async ({ name }: { name: string }) => {
-    props.onAction({ result: true, command: { ...props.command, name } });
+  const onSubmit = ({ name: submitted }: { name: string }) => {
+    const trimmed = submitted.trim();
+    props.onAction({ result: true, command: { ...props.command, name: trimmed || currentName } });
     pop();
   };
 
@@ -25,7 +27,7 @@ export default function RenameFunctionForm(props: Props) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" value={name} onChange={setName} />
+      <Form.TextField id="name" title="Name" placeholder={currentName} value={name} onChange={setName} />
     </Form>
   );
 }

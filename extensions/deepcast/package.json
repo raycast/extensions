@@ -21,7 +21,9 @@
     "islam_hassan",
     "shashank_rm",
     "heyflorentin",
-    "ridemountainpig"
+    "ridemountainpig",
+    "12ian34",
+    "lambegraham"
   ],
   "platforms": [
     "macOS",
@@ -70,7 +72,7 @@
       "name": "norwegian",
       "title": "Translate into Norwegian",
       "subtitle": "Deepcast",
-      "description": "Translate text into Norwegian (Bokmål) using DeepL",
+      "description": "Translate text into Norwegian (Bokm\u00e5l) using DeepL",
       "mode": "no-view",
       "arguments": [
         {
@@ -116,6 +118,21 @@
       "title": "Translate into Turkish",
       "subtitle": "Deepcast",
       "description": "Translate text into Turkish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "thai",
+      "title": "Translate into Thai",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Thai using DeepL",
       "mode": "no-view",
       "arguments": [
         {
@@ -654,12 +671,16 @@
           "value": "KO"
         },
         {
-          "title": "Norwegian (Bokmål)",
+          "title": "Norwegian (Bokm\u00e5l)",
           "value": "NB"
         },
         {
           "title": "Turkish",
           "value": "TR"
+        },
+        {
+          "title": "Thai",
+          "value": "TH"
         }
       ],
       "default": "EN-US"
@@ -701,7 +722,8 @@
           "title": "Paste in Frontmost App",
           "value": "paste"
         }
-      ]
+      ],
+      "default": "clipboard"
     },
     {
       "description": "Show transliteration",
@@ -791,6 +813,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --experimental-test-module-mocks --test tests/*.test.ts"
   }
 }

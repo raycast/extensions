@@ -32,7 +32,7 @@ function CopyObjectStringFieldsActions<TValue extends Constraint>({
       const value = await getUpdatedVaultItem(selectedItem, (item) => selector(item)?.[field], `Getting ${field}...`);
       if (typeof value !== "string") throw new Error(`Value of ${field} is not a string`);
       if (value) {
-        await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
+        await Clipboard.copy(value, { concealed: getTransientCopyPreference("other") });
         await showCopySuccessMessage(`Copied ${label} to clipboard`);
       }
     } catch (error) {

@@ -1,10 +1,12 @@
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { SendEmailRequestForm } from "./utils/types";
 import React, { useState } from "react";
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Color,
+  confirmAlert,
   Detail,
   Form,
   Icon,
@@ -23,12 +25,13 @@ import ErrorComponent from "./components/ErrorComponent";
 import { onError, useEmails, useGetEmail } from "./lib/hooks";
 import { Attachment, CreateEmailOptions, Tag as EmailTag } from "resend";
 import { getResend, withResend } from "./lib/oauth";
+import { formatDefaultSender } from "./lib/sender";
 
 // Get preferences for sender information
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
 // Create default sender string from preferences
-const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
+const defaultSender = formatDefaultSender(preferences);
 
 export default withResend(Emails);
 function Emails() {
@@ -79,11 +82,16 @@ function Emails() {
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy ID To Clipboard" content={email.id} />
-                  <Action.Push icon={Icon.Eye} title="View Email" target={<ViewEmail id={email.id} />} />
+                  <Action.Push
+                    icon={Icon.Eye}
+                    title="View Email"
+                    target={<ViewEmail id={email.id} onEmailCanceled={mutate} />}
+                  />
                   <Action.OpenInBrowser
                     title="Open Email In Resend Dashboard"
                     url={`${RESEND_URL}emails/${email.id}`}
                   />
+                  <EmailActions emailId={email.id} isScheduled={email.last_event === "scheduled"} onCanceled={mutate} />
                   <ActionPanel.Section>
                     <Action.Push
                       title="Send New Email"
@@ -105,12 +113,90 @@ function Emails() {
   );
 }
 
-function ViewEmail({ id }: { id: string }) {
-  const { isLoading, email } = useGetEmail(id);
+function EmailActions({
+  emailId,
+  isScheduled,
+  onCanceled,
+}: {
+  emailId: string;
+  isScheduled: boolean;
+  onCanceled: () => Promise<unknown>;
+}) {
+  async function createShareLink() {
+    const confirmed = await confirmAlert({
+      title: "Create a Public Share Link?",
+      message: "Anyone with the link will be able to view this email until the link expires.",
+    });
+    if (!confirmed) return;
+
+    try {
+      const toast = await showToast(Toast.Style.Animated, "Creating Share Link");
+      const { data, error } = await getResend().emails.share(emailId, { expiresIn: "48 hours" });
+      if (error) throw new Error(error.message, { cause: error.name });
+
+      await Clipboard.copy(data.url);
+      toast.style = Toast.Style.Success;
+      toast.title = "Copied Share Link";
+      toast.message = "The link expires in 48 hours.";
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Create Share Link" });
+    }
+  }
+
+  async function cancelScheduledEmail() {
+    const confirmed = await confirmAlert({
+      title: "Cancel Scheduled Email?",
+      message: "This email will no longer be sent.",
+    });
+    if (!confirmed) return;
+
+    try {
+      const toast = await showToast(Toast.Style.Animated, "Canceling Email");
+      const { error } = await getResend().emails.cancel(emailId);
+      if (error) throw new Error(error.message, { cause: error.name });
+
+      await onCanceled();
+      toast.style = Toast.Style.Success;
+      toast.title = "Canceled Email";
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Cancel Email" });
+    }
+  }
+
+  return (
+    <>
+      <Action title="Create 48-Hour Share Link" icon={Icon.Link} onAction={createShareLink} />
+      {isScheduled && (
+        <Action
+          title="Cancel Scheduled Email"
+          icon={Icon.XMarkCircle}
+          style={Action.Style.Destructive}
+          onAction={cancelScheduledEmail}
+        />
+      )}
+    </>
+  );
+}
+
+function ViewEmail({ id, onEmailCanceled }: { id: string; onEmailCanceled: () => Promise<unknown> }) {
+  const { isLoading, email, mutate } = useGetEmail(id);
   return (
     <Detail
       isLoading={isLoading}
       markdown={email?.html || email?.text}
+      actions={
+        email && (
+          <ActionPanel>
+            <Action.CopyToClipboard title="Copy ID To Clipboard" content={email.id} />
+            <Action.OpenInBrowser title="Open Email In Resend Dashboard" url={`${RESEND_URL}emails/${email.id}`} />
+            <EmailActions
+              emailId={email.id}
+              isScheduled={email.last_event === "scheduled"}
+              onCanceled={() => Promise.all([mutate(), onEmailCanceled()])}
+            />
+          </ActionPanel>
+        )
+      }
       metadata={
         email && (
           <Detail.Metadata>

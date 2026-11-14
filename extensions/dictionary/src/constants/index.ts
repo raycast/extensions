@@ -14,6 +14,6 @@ export const knownPos: { [id: string]: string } = {
   adj: "adjective",
   v: "verb",
   adv: "adverb",
-  perp: "preposition",
+  prep: "preposition",
   conj: "conjunction",
 };

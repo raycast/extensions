@@ -1,4 +1,4 @@
-import { ActionPanel, Color, List, Action, Clipboard, Image } from "@raycast/api";
+import { ActionPanel, Color, List, Action, Clipboard, Icon, Image } from "@raycast/api";
 import { format } from "timeago.js";
 import AddPRReview from "./AddPRReview";
 import ClosePR from "./ClosePR";
@@ -44,7 +44,7 @@ export default function PullRequest(props: PullRequestOwnProps) {
               title="Show Details"
               target={<PullRequestDetail {...props} />}
               icon={{
-                source: "sidebar-right-16",
+                source: Icon.Sidebar,
                 tintColor: Color.PrimaryText,
               }}
             />
@@ -54,7 +54,7 @@ export default function PullRequest(props: PullRequestOwnProps) {
                 title="Add Review"
                 target={<AddPRReview id={id} title={title} />}
                 icon={{
-                  source: "doc-plaintext-16",
+                  source: Icon.Document,
                 }}
                 shortcut={{
                   modifiers: ["cmd", "shift"],
@@ -88,7 +88,7 @@ export default function PullRequest(props: PullRequestOwnProps) {
             <Action
               title="Copy Pull Request Number"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(`${number}`)}
@@ -96,7 +96,7 @@ export default function PullRequest(props: PullRequestOwnProps) {
             <Action
               title="Copy Pull Request URL"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(url)}

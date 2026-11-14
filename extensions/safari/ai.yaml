@@ -1,0 +1,713 @@
+instructions: |
+  Safari is Apple's web browser. A tab is identified by windowId and index, both starting at 1: windowId 1 is the frontmost window and index counts tabs from left to right. Take them from get-all-tabs or get-focused-tab and never invent them. For the current tab ("this tab", "this page"), call get-tab-contents or close-tab without a tab instead of looking up its position.
+  Use search-history for pages the user visited, search-bookmarks for saved bookmarks and search-reading-list for the Reading List. Only pass searchText when the user names something to look for, and keep it to the essential keywords. Pass searchLimit only when the user asks for a number of results. When a search result has truncated: true, say that more matches exist and offer to narrow the search.
+  If a search tool reports that Raycast needs Full Disk Access, tell the user how to grant it instead of retrying.
+  Use select-tab to switch to a tab. It brings that tab's window to the front, so the window becomes window 1 and other window IDs shift: call get-all-tabs again before reusing window IDs from earlier results.
+  open-url only opens http and https addresses. Pass the address as the user wrote it, including any port such as localhost:3000; do not add or change the scheme. It returns verified: true only when exactly one new tab opened on the requested site, and that tab is the one returned. If it returns verified: false, tell the user the reason it gives instead of claiming the page opened.
+  Use get-tab-contents to read a page before summarizing it or answering questions about it. Use type "source" only when the user asks about the HTML. When the user asks for only part of a page, such as the first 500 characters, pass that number as maxLength. If the result has truncated: true, say that the answer is based on the beginning of the page. If get-tab-contents reports that the page is still loading or has no text, tell the user instead of guessing what the page says.
+  If select-tab, close-tab or get-tab-contents reports that a tab does not exist, or that it moved or changed page, tell the user instead of retrying with another tab. Only close the tab the user explicitly asked to close.
+  close-tab only closes the tab shown in its confirmation. If it reports that there is no matching confirmation, nothing was closed: tell the user and let them ask again instead of calling close-tab again yourself.
+
+evals:
+  # evals moved from package.json
+  - input: "@safari Summarize this tab into 3 bullet points"
+    mocks:
+      get-focused-tab:
+        uuid: "1-1"
+        title: "Raycast - Supercharged productivity"
+        url: "https://www.raycast.com/"
+        window_id: 1
+        index: 1
+        is_local: true
+      get-tab-contents:
+        title: "Raycast - Supercharged productivity"
+        url: "https://www.raycast.com/"
+        windowId: 1
+        index: 1
+        type: "text"
+        loading: false
+        truncated: false
+        length: 34
+        content: "Raycast is very cool let's goooooo"
+    expected:
+      - callsTool: get-tab-contents
+  - input: "@safari open the latest item in my reading list"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-2"
+          title: "Meet the new Raycast Notes"
+          url: "https://www.raycast.com/blog/raycast-notes"
+          window_id: 1
+          index: 2
+          is_local: true
+      search-reading-list:
+        results:
+          - description: "Fast, light, and frictionless note-taking experience."
+            title: "Meet the new Raycast Notes"
+            url: "https://www.raycast.com/blog/raycast-notes"
+            domain: "raycast.com"
+            uuid: "XXXXXXXX-B021-4EAC-83E1-D1059804C2E5"
+        truncated: false
+    expected:
+      - callsTool: search-reading-list
+      - callsTool:
+          name: open-url
+          arguments:
+            url: "https://www.raycast.com/blog/raycast-notes"
+  - input: "@safari what is my latest bookmark?"
+    mocks:
+      search-bookmarks:
+        results:
+          - title: "Raycast"
+            folder: "BookmarksBar"
+            url: "https://raycast.com/"
+            domain: "raycast.com"
+            uuid: "XXXXXXXX-XXXX-4BA7-9E78-06E283535F16"
+        truncated: false
+    expected:
+      - callsTool: search-bookmarks
+  - input: "@safari find raycast in history"
+    mocks:
+      search-history:
+        results:
+          - id: 74
+            title: "Meet the new Raycast Notes - Raycast Blog"
+            lastVisited: "2025-02-06 20:22:18"
+            url: "https://www.raycast.com/blog/raycast-notes"
+          - id: 73
+            title: "Raycast - Your shortcut to everything"
+            lastVisited: "2025-02-05 19:30:25"
+            url: "https://www.raycast.com/"
+          - id: 72
+            title: ""
+            lastVisited: "2025-02-05 19:30:25"
+            url: "http://raycast.com/"
+        truncated: false
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            searchText: "raycast"
+  - input: "@safari show reading list"
+    mocks:
+      search-reading-list:
+        results:
+          - description: "Fast, light, and frictionless note-taking experience."
+            title: "Meet the new Raycast Notes"
+            url: "https://www.raycast.com/blog/raycast-notes"
+            domain: "raycast.com"
+            uuid: "964BBF14-XXXX-XXXX-83E1-D1059804C2E5"
+        truncated: false
+    expected:
+      - callsTool: search-reading-list
+  - input: "@safari show me all my open tabs"
+    mocks:
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Supercharged productivity"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "1-2"
+          title: "Raycast Extensions"
+          url: "https://www.raycast.com/extensions"
+          window_id: 1
+          index: 2
+          is_local: true
+    expected:
+      - callsTool: get-all-tabs
+  - input: "@safari get the content of the second tab in my first window"
+    mocks:
+      get-tab-contents:
+        title: "Raycast Extensions"
+        url: "https://www.raycast.com/extensions"
+        windowId: 1
+        index: 2
+        type: "text"
+        loading: false
+        truncated: false
+        length: 49
+        content: "This is the content of the Raycast Extensions tab"
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Supercharged productivity"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "1-2"
+          title: "Raycast Extensions"
+          url: "https://www.raycast.com/extensions"
+          window_id: 1
+          index: 2
+          is_local: true
+    expected:
+      - callsTool:
+          name: get-tab-contents
+          arguments:
+            tab.windowId: 1
+            tab.index: 2
+  - input: "@safari close the second tab in my first window"
+    mocks:
+      close-tab:
+        closedTab:
+          title: "Raycast Extensions"
+          url: "https://www.raycast.com/extensions"
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Supercharged productivity"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "1-2"
+          title: "Raycast Extensions"
+          url: "https://www.raycast.com/extensions"
+          window_id: 1
+          index: 2
+          is_local: true
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tab.windowId: 1
+            tab.index: 2
+  - input: "@safari close the current tab"
+    mocks:
+      close-tab:
+        closedTab:
+          title: "Raycast - Supercharged productivity"
+          url: "https://www.raycast.com/"
+    expected:
+      - callsTool: close-tab
+  - input: "@safari what tab am I currently on?"
+    mocks:
+      get-focused-tab:
+        uuid: "1-1"
+        title: "Raycast - Supercharged productivity"
+        url: "https://www.raycast.com/"
+        window_id: 1
+        index: 1
+        is_local: true
+    expected:
+      - callsTool: get-focused-tab
+  - input: "@safari show me the HTML source of the tab I'm currently viewing"
+    mocks:
+      get-tab-contents:
+        title: "Raycast"
+        url: "https://www.raycast.com/"
+        windowId: 1
+        index: 1
+        type: "source"
+        loading: false
+        truncated: false
+        length: 79
+        content: "<!DOCTYPE html><html><head><title>Raycast</title></head><body>...</body></html>"
+    expected:
+      - callsTool:
+          name: get-tab-contents
+          arguments:
+            type: "source"
+  # search, reading list and tab tools
+  - input: "@safari add https://www.raycast.com/blog to my reading list"
+    mocks:
+      add-to-reading-list: Successfully called "add-to-reading-list"
+    expected:
+      - callsTool:
+          name: add-to-reading-list
+          arguments:
+            url: "https://www.raycast.com/blog"
+  - input: "@safari what are the last 5 pages I visited?"
+    mocks:
+      search-history:
+        results:
+          - id: 74
+            title: "Meet the new Raycast Notes - Raycast Blog"
+            lastVisited: "2026-10-08 20:22:18"
+            url: "https://www.raycast.com/blog/raycast-notes"
+          - id: 73
+            title: "Hacker News"
+            lastVisited: "2026-10-08 20:10:02"
+            url: "https://news.ycombinator.com/"
+          - id: 72
+            title: "raycast/extensions"
+            lastVisited: "2026-10-08 19:58:41"
+            url: "https://github.com/raycast/extensions"
+          - id: 71
+            title: "Apple"
+            lastVisited: "2026-10-08 19:40:12"
+            url: "https://www.apple.com/"
+          - id: 70
+            title: "Swift.org"
+            lastVisited: "2026-10-08 19:31:55"
+            url: "https://www.swift.org/"
+        truncated: true
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            searchLimit: 5
+      - includes: "Hacker News"
+  - input: "@safari find github in my history"
+    mocks:
+      search-history:
+        results:
+          - id: 72
+            title: "raycast/extensions"
+            lastVisited: "2026-10-08 19:58:41"
+            url: "https://github.com/raycast/extensions"
+          - id: 65
+            title: "GitHub"
+            lastVisited: "2026-10-07 09:12:30"
+            url: "https://github.com/"
+        truncated: true
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            searchText:
+              includes: "github"
+      - or:
+          - includes: "more"
+          - includes: "More"
+          - includes: "additional"
+          - includes: "narrow"
+  - input: "@safari search my history for raycast"
+    mocks:
+      search-history: "Error: Raycast needs Full Disk Access to read your Safari history. Open System Settings › Privacy & Security › Full Disk Access, turn on Raycast, then try again."
+    expected:
+      - callsTool: search-history
+      - includes: "Full Disk Access"
+  - input: "@safari show me 10 of my recipe bookmarks"
+    mocks:
+      search-bookmarks:
+        results:
+          - uuid: "A1B2C3D4-0000-4000-8000-000000000001"
+            title: "Easy Weeknight Pasta"
+            url: "https://www.example.com/recipes/pasta"
+            domain: "example.com"
+            folder: "Recipes"
+        truncated: false
+    expected:
+      - callsTool:
+          name: search-bookmarks
+          arguments:
+            searchLimit: 10
+            searchText:
+              includes: "recipe"
+  - input: "@safari is there anything about Swift in my reading list?"
+    mocks:
+      search-reading-list:
+        results:
+          - uuid: "A1B2C3D4-0000-4000-8000-000000000002"
+            title: "What's new in Swift"
+            url: "https://www.swift.org/blog/"
+            domain: "swift.org"
+            dateAdded: "2026-10-01T08:00:00Z"
+            description: "The latest Swift release notes."
+        truncated: false
+    expected:
+      - callsTool:
+          name: search-reading-list
+          arguments:
+            searchText:
+              includes: "Swift"
+      - includes: "What's new in Swift"
+  - input: "@safari what's on the page I'm looking at?"
+    mocks:
+      get-focused-tab:
+        uuid: "1-2"
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        window_id: 1
+        index: 2
+        is_local: true
+      get-tab-contents:
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        windowId: 1
+        index: 2
+        type: "text"
+        loading: false
+        truncated: false
+        length: 65
+        content: "Hacker News. Show HN: A Raycast extension for Safari. 120 points."
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "Raycast extension"
+  - input: "@safari find my bookmarks about swift"
+    mocks:
+      search-bookmarks: "Error: Raycast needs Full Disk Access to read your Safari bookmarks. Open System Settings › Privacy & Security › Full Disk Access, turn on Raycast, then try again."
+    expected:
+      - callsTool: search-bookmarks
+      - includes: "Full Disk Access"
+  - input: "@safari what's in my reading list?"
+    mocks:
+      search-reading-list: "Error: Raycast needs Full Disk Access to read your Safari Reading List. Open System Settings › Privacy & Security › Full Disk Access, turn on Raycast, then try again."
+    expected:
+      - callsTool: search-reading-list
+      - includes: "Full Disk Access"
+  # select-tab, open-url and close-tab
+  - input: "@safari switch to my Hacker News tab"
+    mocks:
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "2-1"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          window_id: 2
+          index: 1
+          is_local: true
+      select-tab:
+        uuid: "1-1"
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        window_id: 1
+        index: 1
+        is_local: true
+    expected:
+      - callsTool: get-all-tabs
+      - callsTool:
+          name: select-tab
+          arguments:
+            windowId: 2
+            index: 1
+  - input: "@safari go to the third tab of my front window"
+    mocks:
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "1-2"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          window_id: 1
+          index: 2
+          is_local: true
+        - uuid: "1-3"
+          title: "Swift.org"
+          url: "https://www.swift.org/"
+          window_id: 1
+          index: 3
+          is_local: true
+      select-tab:
+        uuid: "1-3"
+        title: "Swift.org"
+        url: "https://www.swift.org/"
+        window_id: 1
+        index: 3
+        is_local: true
+    expected:
+      - callsTool:
+          name: select-tab
+          arguments:
+            windowId: 1
+            index: 3
+  - input: "@safari switch to tab 7 in my front window"
+    mocks:
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "1-2"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          window_id: 1
+          index: 2
+          is_local: true
+        - uuid: "1-3"
+          title: "Swift.org"
+          url: "https://www.swift.org/"
+          window_id: 1
+          index: 3
+          is_local: true
+      select-tab: "Error: Safari window 1 has no tab 7 (3 open). Use get-all-tabs to list the open tabs."
+    expected:
+      - or:
+          - callsTool: get-all-tabs
+          - callsTool: select-tab
+      - or:
+          - includes: "7"
+          - includes: "3"
+          - includes: "three"
+  - input: "@safari open raycast.com"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-4"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 4
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "raycast.com"
+  - input: "@safari open ftp://files.example.com/readme.txt"
+    mocks:
+      open-url: "Error: \"ftp://files.example.com/readme.txt\" is not a web URL. Only http:// and https:// addresses can be opened."
+    expected:
+      - callsTool: open-url
+      - includes: "http"
+  - input: "@safari close tab 9 in window 1"
+    mocks:
+      get-all-tabs:
+        - uuid: "1-1"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+        - uuid: "1-2"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          window_id: 1
+          index: 2
+          is_local: true
+        - uuid: "1-3"
+          title: "Swift.org"
+          url: "https://www.swift.org/"
+          window_id: 1
+          index: 3
+          is_local: true
+        - uuid: "1-4"
+          title: "Apple"
+          url: "https://www.apple.com/"
+          window_id: 1
+          index: 4
+          is_local: true
+      close-tab: "Error: Safari window 1 has no tab 9 (4 open). Use get-all-tabs to list the open tabs."
+    expected:
+      - or:
+          - callsTool: get-all-tabs
+          - callsTool:
+              name: close-tab
+              arguments:
+                tab.windowId: 1
+                tab.index: 9
+      - not:
+          callsTool:
+            name: close-tab
+            arguments:
+              tab.index: 4
+      - or:
+          - includes: "4"
+          - includes: "four"
+  - input: "@safari open localhost:3000"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-3"
+          title: "My App"
+          url: "http://localhost:3000/"
+          window_id: 1
+          index: 3
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "localhost:3000"
+  - input: "@safari open [::1]:3000"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-3"
+          title: "My App"
+          url: "http://[::1]:3000/"
+          window_id: 1
+          index: 3
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "[::1]:3000"
+  - input: "@safari open http://intranet/"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-3"
+          title: "Intranet"
+          url: "http://intranet/"
+          window_id: 1
+          index: 3
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "http://intranet"
+  - input: "@safari open https://www.raycast.com/blog"
+    mocks:
+      open-url:
+        verified: false
+        reason: "No new tab could be identified."
+        requestedUrl: "https://www.raycast.com/blog"
+    expected:
+      - callsTool: open-url
+      - or:
+          - includes: "did not"
+          - includes: "didn't"
+          - includes: "not open"
+          - includes: "couldn't"
+          - includes: "could not"
+          - includes: "wasn't able"
+          - includes: "no new tab"
+  - input: "@safari open https://news.ycombinator.com"
+    mocks:
+      open-url:
+        verified: false
+        reason: "Incomplete snapshot: Safari's tabs could not all be read before opening the page."
+        requestedUrl: "https://news.ycombinator.com/"
+    expected:
+      - callsTool: open-url
+      - or:
+          - includes: "could not"
+          - includes: "couldn't"
+          - includes: "not confirm"
+          - includes: "unable"
+          - includes: "not verif"
+  - input: "@safari close the current tab"
+    mocks:
+      close-tab: "Error: The tab \"Hacker News\" is no longer at position 2 of its window, or it now shows another page. Nothing was closed. Use get-all-tabs to find it again."
+    expected:
+      - callsTool: close-tab
+      - not:
+          callsTool: select-tab
+      - or:
+          - includes: "Nothing was closed"
+          - includes: "nothing was closed"
+          - includes: "not closed"
+          - includes: "wasn't closed"
+          - includes: "no longer"
+          - includes: "moved"
+          - includes: "changed"
+  - input: "@safari open https://www.swift.org"
+    mocks:
+      open-url:
+        verified: false
+        reason: "The new tab has no address yet."
+        requestedUrl: "https://www.swift.org/"
+        tab:
+          uuid: "1-4"
+          title: ""
+          url: ""
+          window_id: 1
+          index: 4
+          is_local: true
+    expected:
+      - callsTool: open-url
+      - not:
+          includes: "another site"
+      - or:
+          - includes: "address"
+          - includes: "loading"
+          - includes: "not confirm"
+          - includes: "couldn't confirm"
+          - includes: "could not confirm"
+  - input: "@safari close the tab in window 1 at index 3"
+    mocks:
+      close-tab: "Error: Nothing was closed: there is no matching confirmation for this tab (it is missing, expired, or was given for another tab). Ask to close the tab again."
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tab.windowId: 1
+            tab.index: 3
+      - or:
+          - includes: "Nothing was closed"
+          - includes: "nothing was closed"
+          - includes: "not closed"
+          - includes: "wasn't closed"
+          - includes: "confirm"
+  # get-tab-contents
+  - input: "@safari summarize this page in 3 bullet points"
+    mocks:
+      get-tab-contents:
+        title: "Meet the new Raycast Notes"
+        url: "https://www.raycast.com/blog/raycast-notes"
+        windowId: 1
+        index: 2
+        type: "text"
+        loading: false
+        truncated: false
+        length: 152
+        content: "Raycast Notes is a fast, light and frictionless note-taking experience. Notes open from anywhere with a hotkey, support Markdown, and sync across devices."
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "Markdown"
+  - input: "@safari what is this article about?"
+    mocks:
+      get-tab-contents:
+        title: "The Swift Programming Language"
+        url: "https://docs.swift.org/swift-book/"
+        windowId: 1
+        index: 1
+        type: "text"
+        loading: false
+        truncated: true
+        length: 184220
+        note: "Only the first 20000 of 184220 characters are included. Say that the answer is based on the beginning of the page."
+        content: "Swift is a fantastic way to write software for phones, desktops, servers, or anything else that runs code. It's a safe, fast, and interactive programming language."
+    expected:
+      - callsTool: get-tab-contents
+      - or:
+          - includes: "beginning"
+          - includes: "first part"
+          - includes: "truncated"
+          - includes: "partial"
+  - input: "@safari give me the first 500 characters of this page"
+    mocks:
+      get-tab-contents:
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        windowId: 1
+        index: 1
+        type: "text"
+        loading: false
+        truncated: true
+        length: 4310
+        note: "Only the first 500 of 4310 characters are included. Say that the answer is based on the beginning of the page."
+        content: "Hacker News new | past | comments | ask | show | jobs | submit. 1. Show HN: A Raycast extension for Safari."
+    expected:
+      - callsTool:
+          name: get-tab-contents
+          arguments:
+            maxLength: 500
+  - input: "@safari read the current tab"
+    mocks:
+      get-tab-contents: "Error: \"Raycast Blog\" is still loading. Try again in a moment."
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "loading"
+  - input: "@safari what does this page say?"
+    mocks:
+      get-tab-contents: "Error: Couldn't read \"https://app.example.com/\": the page has no visible text. It may still be loading, need JavaScript that is turned off in Safari, or be a Safari page such as the Start Page, which can't be read."
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "JavaScript"

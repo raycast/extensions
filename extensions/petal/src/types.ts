@@ -41,6 +41,18 @@ export interface PetalModel {
   provider: string;
   icon: string;
   size?: string;
-  supportsSmart: boolean;
   recommended?: boolean;
+  isDownloaded?: boolean;
+  supportsLiveTranscription?: boolean;
+}
+
+export interface PetalModelCatalogEntry {
+  id: string;
+  name: string;
+  summary: string;
+  provider: string;
+  size?: string | null;
+  isRecommended?: boolean;
+  isDownloaded?: boolean;
+  supportsLiveTranscription?: boolean;
 }

@@ -1,0 +1,572 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "companies-house",
+  "title": "Companies House",
+  "description": "Search the UK Companies House register — companies, officers, filings and charges.",
+  "icon": "extension-icon.png",
+  "author": "aic",
+  "categories": [
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "subtitle": "Companies House",
+      "description": "Search for UK companies by name or number.",
+      "mode": "view",
+      "keywords": [
+        "company",
+        "business",
+        "ltd",
+        "limited",
+        "registration"
+      ]
+    },
+    {
+      "name": "search-officers",
+      "title": "Search Officers",
+      "subtitle": "Companies House",
+      "description": "Search for company officers and directors by name.",
+      "mode": "view",
+      "keywords": [
+        "director",
+        "officer",
+        "secretary",
+        "person",
+        "appointment"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Companies House REST API key. Create a free application key in the developer dashboard.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your Companies House API key",
+      "link": "https://developer.company-information.service.gov.uk/manage-applications"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "description": "Search UK companies by name or number."
+    },
+    {
+      "name": "get-company",
+      "title": "Get Company",
+      "description": "Get a company's full Companies House profile by its company number."
+    },
+    {
+      "name": "get-officers",
+      "title": "Get Officers",
+      "description": "List a company's officers (directors, secretaries, members) by company number, each with the officer id needed to look up their other appointments."
+    },
+    {
+      "name": "search-officers",
+      "title": "Search Officers",
+      "description": "Search for company officers and directors by name."
+    },
+    {
+      "name": "get-officer-appointments",
+      "title": "Get Officer Appointments",
+      "description": "List all appointments for an officer across companies, by officer id."
+    },
+    {
+      "name": "get-filing-history",
+      "title": "Get Filing History",
+      "description": "List a company's recent filings by company number."
+    },
+    {
+      "name": "get-charges",
+      "title": "Get Charges",
+      "description": "List charges registered against a company by company number."
+    },
+    {
+      "name": "get-persons-with-significant-control",
+      "title": "Get Persons with Significant Control",
+      "description": "List a company's persons with significant control (beneficial owners) by company number. Explains an empty register: a market-listing exemption, a filed statement, or a genuine gap."
+    },
+    {
+      "name": "get-insolvency",
+      "title": "Get Insolvency",
+      "description": "Read a company's insolvency record by company number: cases, dates and appointed practitioners. Most companies have none."
+    },
+    {
+      "name": "get-disqualifications",
+      "title": "Get Disqualifications",
+      "description": "Search the register of disqualified directors by name. No match is the ordinary result and means nothing is recorded."
+    }
+  ],
+  "ai": {
+    "instructions": "Use these tools to answer questions about UK companies, their officers and their ownership, using Companies House data. A company number is 8 characters — eight digits, or two letters followed by six digits, e.g. OC394454. Search by name first, then pass the returned company number or officer id to the detail tools. Companies House does not verify what companies file, so report what the register says and never present it as verification, a credit check or clearance. An officer's date of birth is published as month and year only. Ceased and resigned entries stay on the register, so check the ceased or resigned date before describing anyone as current. Take counts from the register's own totals — total, active_count, resigned_count, ceased_count — rather than from the length of a list, because a tool returns one page. An absent record is a fact about the company, not a failure — say a company has no charges or no insolvency history rather than reporting an error. The disqualified directors register is a separate register with its own ids, so it can only be searched by name; an officer id from search-officers or get-officers will not resolve there. Different people share names, so always carry the caveat that a name match is not proof of identity.",
+    "evals": [
+      {
+        "input": "@companies-house what is the company number for Monzo Bank?",
+        "mocks": {
+          "search-companies": {
+            "total": 1,
+            "returned": 1,
+            "companies": [
+              {
+                "company_number": "09446231",
+                "name": "MONZO BANK LIMITED",
+                "status": "Active",
+                "type": "Private limited company",
+                "address": "Broadwalk House, 5 Appold Street, London, EC2A 2AG",
+                "incorporated": "6 Feb 2015"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-companies"
+          },
+          {
+            "includes": "09446231"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house who are the directors of Monzo Bank?",
+        "mocks": {
+          "search-companies": {
+            "total": 1,
+            "returned": 1,
+            "companies": [
+              {
+                "company_number": "09446231",
+                "name": "MONZO BANK LIMITED",
+                "status": "Active",
+                "type": "Private limited company",
+                "address": "Broadwalk House, 5 Appold Street, London, EC2A 2AG",
+                "incorporated": "6 Feb 2015"
+              }
+            ]
+          },
+          "get-officers": {
+            "total": 2,
+            "active_count": 1,
+            "resigned_count": 1,
+            "inactive_count": 0,
+            "returned": 2,
+            "officers": [
+              {
+                "name": "DOE, Jane",
+                "officer_id": "i01-NvuSb_IXaHc1mrh6CAmvi48",
+                "role": "Director",
+                "status": "Active",
+                "appointed": "3 Mar 2020",
+                "born": "March 1980",
+                "nationality": "British"
+              },
+              {
+                "name": "ROE, Richard",
+                "officer_id": "i02-QqZzT9kLmn3PqRs7TvWxYz01",
+                "role": "Director",
+                "status": "Resigned",
+                "appointed": "1 Jun 2016",
+                "resigned": "14 Nov 2021",
+                "born": "July 1975",
+                "nationality": "British"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-companies"
+          },
+          {
+            "callsTool": "get-officers"
+          },
+          {
+            "meetsCriteria": "Names Jane Doe as a current director and does not present Richard Roe as one, because he resigned"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house is company 09446231 still active?",
+        "mocks": {
+          "get-company": {
+            "company_number": "09446231",
+            "name": "MONZO BANK LIMITED",
+            "status": "Active",
+            "type": "Private limited company",
+            "incorporated": "6 Feb 2015",
+            "jurisdiction": "England & Wales",
+            "registered_office": "Broadwalk House, 5 Appold Street, London, EC2A 2AG",
+            "sic_codes": [
+              "64191 — Banks"
+            ],
+            "accounts_next_due": "31 Dec 2026",
+            "accounts_overdue": false,
+            "confirmation_statement_next_due": "20 Feb 2027",
+            "has_charges_record": false,
+            "has_insolvency_record": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-company",
+              "arguments": {
+                "companyNumber": "09446231"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "States the company is active"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house who are the current directors of company 09446231?",
+        "mocks": {
+          "get-officers": {
+            "total": 24,
+            "active_count": 1,
+            "resigned_count": 23,
+            "inactive_count": 0,
+            "returned": 20,
+            "officers": [
+              {
+                "name": "DOE, Jane",
+                "officer_id": "i01-NvuSb_IXaHc1mrh6CAmvi48",
+                "role": "Director",
+                "status": "Active",
+                "appointed": "3 Mar 2020",
+                "born": "March 1980",
+                "nationality": "British"
+              },
+              {
+                "name": "ROE, Richard",
+                "officer_id": "i02-QqZzT9kLmn3PqRs7TvWxYz01",
+                "role": "Director",
+                "status": "Resigned",
+                "appointed": "1 Jun 2016",
+                "resigned": "14 Nov 2021",
+                "born": "July 1975",
+                "nationality": "British"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-officers"
+          },
+          {
+            "includes": "Jane"
+          },
+          {
+            "meetsCriteria": "Does not describe Richard Roe as a current director, because he resigned"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house find the officer id for a director called Jane Doe",
+        "usedAsExample": false,
+        "mocks": {
+          "search-officers": {
+            "total": 1,
+            "returned": 1,
+            "officers": [
+              {
+                "name": "DOE, Jane",
+                "officer_id": "i01-NvuSb_IXaHc1mrh6CAmvi48",
+                "appointments": 3,
+                "born": "March 1980",
+                "address": "5 Appold Street, London, EC2A 2AG"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-officers"
+          },
+          {
+            "includes": "i01-NvuSb_IXaHc1mrh6CAmvi48"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house what other companies is officer i01-NvuSb_IXaHc1mrh6CAmvi48 involved in?",
+        "usedAsExample": false,
+        "mocks": {
+          "get-officer-appointments": {
+            "name": "DOE, Jane",
+            "total": 1,
+            "returned": 1,
+            "complete": true,
+            "appointments": [
+              {
+                "company": "EXAMPLE TRADING LIMITED",
+                "company_number": "01234567",
+                "company_status": "Active",
+                "role": "Director",
+                "appointed": "3 Mar 2020"
+              },
+              {
+                "company": "FORMER VENTURES LIMITED",
+                "company_number": "07654321",
+                "company_status": "Dissolved",
+                "role": "Director",
+                "appointed": "1 Jun 2012",
+                "resigned": "9 Sep 2018"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-officer-appointments",
+              "arguments": {
+                "officerId": "i01-NvuSb_IXaHc1mrh6CAmvi48"
+              }
+            }
+          },
+          {
+            "includes": "EXAMPLE TRADING"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house what has company 09446231 filed recently?",
+        "mocks": {
+          "get-filing-history": {
+            "total": 148,
+            "returned": 2,
+            "filings": [
+              {
+                "date": "2 Mar 2026",
+                "description": "Confirmation statement made on 1 March 2026 with no updates",
+                "category": "Confirmation statement",
+                "type": "CS01"
+              },
+              {
+                "date": "14 Jan 2026",
+                "description": "Group of companies' accounts made up to 31 December 2025",
+                "category": "Accounts",
+                "type": "AA"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-filing-history"
+          },
+          {
+            "includes": "Confirmation statement"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house does company 09446231 have any charges?",
+        "mocks": {
+          "get-charges": {
+            "total": 0,
+            "charges": [],
+            "note": "Companies House holds no charge records for this company."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-charges"
+          },
+          {
+            "meetsCriteria": "Says the company has no charges on the register, and does not describe the lookup as having failed"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house who are the beneficial owners of company OC394454?",
+        "mocks": {
+          "get-persons-with-significant-control": {
+            "total": 2,
+            "active_count": 1,
+            "ceased_count": 1,
+            "persons_with_significant_control": [
+              {
+                "name": "Mr John Smith",
+                "kind": "Individual",
+                "status": "Active",
+                "natures_of_control": [
+                  "Ownership of shares – 75% or more"
+                ],
+                "notified": "6 Apr 2016",
+                "nationality": "British",
+                "born": "May 1970"
+              },
+              {
+                "name": "Ms Ann Jones",
+                "kind": "Individual",
+                "status": "Ceased",
+                "natures_of_control": [
+                  "Ownership of shares – 25% to 50%"
+                ],
+                "notified": "6 Apr 2016",
+                "ceased": "1 Aug 2021",
+                "nationality": "British",
+                "born": "February 1968"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-persons-with-significant-control"
+          },
+          {
+            "includes": "John Smith"
+          },
+          {
+            "meetsCriteria": "Presents John Smith as a current controller and makes clear that Ann Jones has ceased"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house why does company 00617987 have no people with significant control?",
+        "mocks": {
+          "get-persons-with-significant-control": {
+            "total": 0,
+            "persons_with_significant_control": [],
+            "register_is_empty_because": "The company is exempt from the PSC requirements.",
+            "exempt_now": true,
+            "exemptions_in_force": [
+              "The company is exempt from the requirement to keep a PSC register as it has voting shares admitted to trading on a regulated market (from 6 Apr 2016)"
+            ],
+            "exemptions_that_have_ended": [],
+            "statements_filed": [],
+            "statements_withdrawn": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-persons-with-significant-control"
+          },
+          {
+            "meetsCriteria": "Explains the register is empty because the company is exempt, rather than saying it has no owners"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house has company 03782379 ever been in administration?",
+        "mocks": {
+          "get-insolvency": {
+            "proceedings_in_force": [
+              "Liquidation"
+            ],
+            "cases": [
+              {
+                "case_number": "1",
+                "type": "Compulsory liquidation",
+                "dates": [
+                  {
+                    "event": "Wound up on",
+                    "date": "15 Jan 2018"
+                  },
+                  {
+                    "event": "Case end date",
+                    "date": "2 Mar 2021"
+                  }
+                ],
+                "practitioners": [
+                  {
+                    "name": "Alex Practitioner",
+                    "role": "Liquidator",
+                    "appointed": "15 Jan 2018",
+                    "address": "1 Insolvency Way, Leeds, LS1 1AA"
+                  }
+                ],
+                "notes": []
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-insolvency"
+          },
+          {
+            "meetsCriteria": "Reports the compulsory liquidation on the register rather than describing it as an administration"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house is there a disqualified director called Aaron Donald Smith?",
+        "usedAsExample": false,
+        "mocks": {
+          "get-disqualifications": {
+            "total_matches": 1,
+            "detail_returned_for": 1,
+            "matches": [
+              {
+                "name": "Aaron Donald SMITH",
+                "register": "natural",
+                "born": "18 Oct 1987",
+                "address": "12 Example Street, Manchester, M1 1AA",
+                "nationality": "British",
+                "disqualifications": [
+                  {
+                    "type": "Undertaking",
+                    "from": "1 Feb 2020",
+                    "until": "1 Feb 2026",
+                    "reason": "Unfit conduct in relation to an insolvent company",
+                    "act": "Company Directors Disqualification Act 1986",
+                    "section": "6",
+                    "companies_named": [
+                      "EXAMPLE TRADING LIMITED"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "note": "Names in this register are not unique. Confirm the date of birth and address before treating a match as the same person, and treat no match as 'nothing recorded', not as a clean record."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-disqualifications"
+          },
+          {
+            "meetsCriteria": "Reports the match and makes clear that a name match is not proof it is the same person"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.0.3",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

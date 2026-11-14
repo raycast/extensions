@@ -1,29 +1,35 @@
 // This filename should be named `switch-to-channel.tsx` or something similar
 // but it's kept as `search.tsx` as changing the command's name will cause users to lose their keywords and aliases
-import { ActionPanel, Action, Icon, List, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  Clipboard,
+  Detail,
+  useNavigation,
+  showHUD,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState } from "react";
-import { User, useChannels } from "./shared/client";
+import { User, useDirectorySearch, useMe, type Channel, type Group } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
-import { useFrecencySorting } from "@raycast/utils";
-import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
-import { convertSlackEmojiToUnicode } from "./shared/utils";
-import { toZonedTime } from "date-fns-tz";
-import { differenceInMinutes } from "date-fns";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
+import { OpenChannelInSlack, OpenChatInSlack, RetrySlackConnection, useSlackApp } from "./shared/OpenInSlack";
+import { getStatusEmoji, getTimezoneMetadata } from "./shared/client/presentation";
 import SendMessage from "./send-message";
+import { directMessageAction } from "./shared/directMessageAction";
+import {
+  isSlackUserId,
+  mergeVisitedDirectoryItems,
+  rememberVisitedDirectoryItem,
+  visitedDirectoryItemsCacheKey,
+  visitedDirectoryItemsForWorkspace,
+} from "./shared/client/directory";
+
+type OpenChannelItem = User | Channel | Group;
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
-
-// See OpenInSlack.tsx — `application` hint is mac-only.
-const isMac = process.platform === "darwin";
-
-function getCoworkerTime(coworkerTimeZone: string): string {
-  const localTime = new Date();
-  const coworkerTime = toZonedTime(localTime, coworkerTimeZone);
-
-  const diffInMinutes = differenceInMinutes(coworkerTime, localTime);
-  const diffInHours = diffInMinutes / 60;
-  return `${diffInMinutes >= 0 ? "+" : "-"}${Math.abs(diffInHours) % 1 === 0 ? Math.abs(diffInHours) : Math.abs(diffInHours).toFixed(1)}h`;
-}
 
 function searchItemAccessories(
   statusEmoji: string | undefined,
@@ -31,37 +37,25 @@ function searchItemAccessories(
   statusExpiration: string | null,
   timezone: string,
 ) {
-  const searchMetadata: Array<{ icon: string | Icon; text: string; tooltip?: string | null | undefined }> = [
-    {
-      icon: convertSlackEmojiToUnicode(statusEmoji ?? ""),
+  const searchMetadata: List.Item.Accessory[] = [];
+  const icon = getStatusEmoji(statusEmoji);
+  if (icon || statusText) {
+    searchMetadata.push({
+      icon,
       text: statusText ?? "",
       tooltip: statusExpiration ? String(statusExpiration) : undefined,
-    },
-  ];
+    });
+  }
 
   if (displayExtraMetadata) {
-    searchMetadata.push({ icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") });
-
-    if (getCoworkerTime(timezone) !== "+0h") {
-      searchMetadata.push({ icon: Icon.Clock, text: getCoworkerTime(timezone) });
+    const metadata = getTimezoneMetadata(timezone);
+    if (metadata) {
+      searchMetadata.push({ icon: Icon.Globe, text: metadata.name });
+      if (metadata.offset) searchMetadata.push({ icon: Icon.Clock, text: metadata.offset });
     }
   }
 
   return searchMetadata;
-}
-
-function foldForSearch(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-}
-
-function matchesAllWords(text: string, searchText: string): boolean {
-  if (!searchText.trim()) return true;
-  const words = foldForSearch(searchText).split(/\s+/).filter(Boolean);
-  const folded = foldForSearch(text);
-  return words.every((word) => folded.includes(word));
 }
 
 function CopyIdAction({ id }: { id: string }) {
@@ -78,20 +72,55 @@ function CopyIdAction({ id }: { id: string }) {
 }
 
 function Search() {
+  const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
+  const { data: me, isLoading: isLoadingMe, error: workspaceError, revalidate: retryWorkspace } = useMe();
+  const workspaceId = me?.teamId;
+  const [recentItems, setRecentItems] = useCachedState<OpenChannelItem[]>(
+    visitedDirectoryItemsCacheKey(me?.teamId),
+    [],
+  );
   const { isAppInstalled, isLoading } = useSlackApp();
-  const { data, isLoading: isLoadingChannels } = useChannels();
+  const { data, isLoading: isLoadingChannels } = useDirectorySearch(searchText);
 
-  const channels = data?.flat();
+  const channels = mergeVisitedDirectoryItems(
+    data?.flat(),
+    visitedDirectoryItemsForWorkspace(recentItems, me?.teamId),
+    searchText,
+  );
 
-  const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
+  const {
+    data: recents,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(channels, {
+    key: (item) => item.id,
+    namespace: me?.teamId,
+  });
 
-  const filteredRecents = recents.filter((item) => matchesAllWords(item.name, searchText));
+  const rememberVisit = (item: OpenChannelItem) => {
+    if (me?.teamId) {
+      setRecentItems((items) => rememberVisitedDirectoryItem(items, item));
+    }
+    return visitItem(item);
+  };
 
   return (
-    <List isLoading={isLoading || isLoadingChannels} filtering={false} onSearchTextChange={setSearchText}>
-      {filteredRecents.map((item) => {
-        const isUser = item.id.startsWith("U");
+    <List
+      isLoading={isLoading || isLoadingChannels || isLoadingMe}
+      actions={
+        workspaceError || !workspaceId ? (
+          <ActionPanel>
+            <RetrySlackConnection retry={retryWorkspace} />
+          </ActionPanel>
+        ) : undefined
+      }
+      filtering={false}
+      throttle
+      onSearchTextChange={setSearchText}
+    >
+      {recents.map((item) => {
+        const isUser = isSlackUserId(item.id);
 
         if (isUser) {
           const {
@@ -102,7 +131,6 @@ function Search() {
             statusEmoji,
             statusText,
             statusExpiration,
-            teamId: workspaceId,
             conversationId,
             timezone,
           } = item as User;
@@ -115,39 +143,71 @@ function Search() {
               accessories={searchItemAccessories(statusEmoji, statusText, statusExpiration, timezone)}
               actions={
                 <ActionPanel>
-                  <OpenChatInSlack
-                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
-                  />
+                  {workspaceId ? (
+                    <OpenChatInSlack
+                      {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => rememberVisit(item) }}
+                    />
+                  ) : (
+                    <RetrySlackConnection retry={retryWorkspace} />
+                  )}
 
                   <Action.Push
                     title="Send Message"
                     icon={Icon.Message}
-                    target={<SendMessage recipient={userId} />}
+                    target={<SendMessage recipient={userId} recipientName={name} />}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
 
-                  <Action.CreateQuicklink
-                    quicklink={{
-                      name: `Open Chat with ${name}`,
-                      ...(isAppInstalled
-                        ? {
-                            link: `slack://user?team=${workspaceId}&id=${userId}`,
-                            ...(isMac ? { application: "Slack" } : {}),
-                          }
-                        : { link: `https://app.slack.com/client/${workspaceId}/${conversationId}` }),
-                    }}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                  />
+                  {workspaceId &&
+                    (isAppInstalled ? (
+                      <Action.CreateQuicklink
+                        quicklink={{
+                          name: `Open Chat with ${name}`,
+                          link: `slack://user?team=${workspaceId}&id=${userId}`,
+                        }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                      />
+                    ) : (
+                      <Action
+                        title="Create Quicklink"
+                        icon={Icon.Link}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                        onAction={() =>
+                          directMessageAction(userId, conversationId, async (id) => {
+                            const link = `https://app.slack.com/client/${workspaceId}/${id}`;
+                            push(
+                              <Detail
+                                markdown={`Create a Quicklink to open this Slack conversation in your browser.`}
+                                actions={
+                                  <ActionPanel>
+                                    <Action.CreateQuicklink quicklink={{ name: `Open Chat with ${name}`, link }} />
+                                  </ActionPanel>
+                                }
+                              />,
+                            );
+                          })
+                        }
+                      />
+                    ))}
 
-                  <Action.CopyToClipboard
-                    title="Copy Huddle Link"
-                    content={`https://app.slack.com/huddle/${workspaceId}/${conversationId}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                  />
+                  {workspaceId && (
+                    <Action
+                      title="Copy Huddle Link"
+                      icon={Icon.Clipboard}
+                      onAction={() =>
+                        directMessageAction(userId, conversationId, async (id) => {
+                          await Clipboard.copy(`https://app.slack.com/huddle/${workspaceId}/${id}`);
+                          await showHUD("Copied Huddle link");
+                        })
+                      }
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    />
+                  )}
 
                   <CopyIdAction id={userId} />
 
                   <ActionPanel.Section>
+                    {workspaceError && workspaceId ? <RetrySlackConnection retry={retryWorkspace} /> : null}
                     <Action
                       icon={Icon.ArrowCounterClockwise}
                       title="Reset Ranking"
@@ -159,7 +219,7 @@ function Search() {
             />
           );
         } else {
-          const { id: channelId, name, icon, teamId: workspaceId } = item;
+          const { id: channelId, name, icon } = item;
 
           return (
             <List.Item
@@ -168,26 +228,32 @@ function Search() {
               icon={icon}
               actions={
                 <ActionPanel>
-                  <OpenChannelInSlack
-                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => visitItem(item) }}
-                  />
+                  {workspaceId ? (
+                    <OpenChannelInSlack
+                      {...{ workspaceId, channelId, isAppInstalled, onAction: () => rememberVisit(item) }}
+                    />
+                  ) : (
+                    <RetrySlackConnection retry={retryWorkspace} />
+                  )}
 
-                  <Action.CreateQuicklink
-                    quicklink={{
-                      name: `Open #${name} Channel`,
-                      ...(isAppInstalled
-                        ? {
-                            link: `slack://channel?team=${workspaceId}&id=${channelId}`,
-                            ...(isMac ? { application: "Slack" } : {}),
-                          }
-                        : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
-                    }}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                  />
+                  {workspaceId && (
+                    <Action.CreateQuicklink
+                      quicklink={{
+                        name: `Open #${name} Channel`,
+                        ...(isAppInstalled
+                          ? {
+                              link: `slack://channel?team=${workspaceId}&id=${channelId}`,
+                            }
+                          : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
+                      }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    />
+                  )}
 
                   <CopyIdAction id={channelId} />
 
                   <ActionPanel.Section>
+                    {workspaceError && workspaceId ? <RetrySlackConnection retry={retryWorkspace} /> : null}
                     <Action
                       icon={Icon.ArrowCounterClockwise}
                       title="Reset Ranking"

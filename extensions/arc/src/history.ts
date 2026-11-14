@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
@@ -86,10 +87,10 @@ type HistorySqlRow = {
 export function useHistorySearch(
   searchText: string,
   limit?: number,
-): { data: HistoryEntry[] | undefined; isLoading: boolean; permissionView: JSX.Element | undefined } {
+): { data: HistoryEntry[] | undefined; isLoading: boolean; permissionView: ReactElement | null | undefined } {
   const escapedSearchText = searchText.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
-  let permissionView: JSX.Element | undefined;
+  let permissionView: ReactElement | null | undefined;
   let isLoading = false;
   const data: HistoryEntry[] = [];
   const multiProfile = profileHistoryDatabasePaths.length > 1;

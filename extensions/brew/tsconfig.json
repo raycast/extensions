@@ -1,10 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
+  "display": "Node 22",
   "include": ["src/**/*", "raycast-env.d.ts", "eslint.config.mjs"],
   "compilerOptions": {
     "lib": ["es2022", "dom"],
-    "module": "commonjs",
+    // stream-json 3.x / stream-chain 4.x are ESM and resolve only through their
+    // `exports` maps, which the default node10 resolution ignores. esbuild still
+    // emits CJS for `ray build`; this only governs type resolution.
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "es2020",
     "strict": true,
     "isolatedModules": true,

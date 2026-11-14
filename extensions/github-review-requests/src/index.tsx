@@ -1,9 +1,10 @@
+import { RequireGh } from "./attention/components/require-gh";
 import { Image, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { Actions } from "./actions";
 import { useSearch } from "./hooks/useSearch";
 
-export default function Command() {
+function SearchReviewRequests() {
   const [searchText, setSearchText] = useState<string>();
   const { result, loading, error } = useSearch(searchText);
 
@@ -46,5 +47,13 @@ export default function Command() {
         );
       })}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <RequireGh>
+      <SearchReviewRequests />
+    </RequireGh>
   );
 }

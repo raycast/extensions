@@ -13,20 +13,15 @@ const GET_UNLEASH_DATA_PATH = "/exa.language_server_pb.LanguageServerService/Get
 const DEFAULT_TIMEOUT_MS = 8000;
 
 export type ProbeErrorCode =
-  | "not_running"
-  | "missing_csrf"
-  | "port_detection_failed"
-  | "api_error"
-  | "network_error"
-  | "parse_error";
+  "not_running" | "missing_csrf" | "port_detection_failed" | "api_error" | "network_error" | "parse_error";
 
 export class AntigravityProbeError extends Error {
-  constructor(
-    public readonly code: ProbeErrorCode,
-    message: string,
-  ) {
+  public readonly code: ProbeErrorCode;
+
+  constructor(code: ProbeErrorCode, message: string) {
     super(message);
     this.name = "AntigravityProbeError";
+    this.code = code;
   }
 }
 
@@ -190,7 +185,7 @@ async function detectProcessInfoOnWindows(timeoutMs: number): Promise<ParseProce
       "-NoProfile",
       "-NonInteractive",
       "-Command",
-      "$ErrorActionPreference='Stop'; Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'language_server_windows*' -or $_.Name -like 'agy*' -or $_.CommandLine -match 'language_server_windows|antigravity|antigravity-cli|(^|[\\\\/\\s])agy(\\.exe)?($|\\s)|csrf_token' } | Select-Object ProcessId,Name,ExecutablePath,CommandLine | ConvertTo-Json -Compress",
+      "$ErrorActionPreference='Stop'; Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'language_server*' -or $_.Name -like 'agy*' -or $_.CommandLine -match 'language_server|antigravity|antigravity-cli|(^|[\\\\/\\s])agy(\\.exe)?($|\\s)|csrf_token' } | Select-Object ProcessId,Name,ExecutablePath,CommandLine | ConvertTo-Json -Compress",
     ],
     {
       timeout: timeoutMs,
@@ -627,9 +622,9 @@ function createAntigravityProcessCandidate(
 
 function isSupportedLanguageServerCommand(command: string): boolean {
   const lower = command.toLowerCase();
-  return (
-    lower.includes("language_server_macos") || lower.includes("language_server_windows") || isAgyCliExecutable(command)
-  );
+  // Antigravity 2.7+ ships the binary as plain `language_server` (older builds and
+  // Windows still use the `_macos` / `_windows` suffixes), so match the common prefix.
+  return lower.includes("language_server") || isAgyCliExecutable(command);
 }
 
 function isAntigravityCommandLine(command: string): boolean {

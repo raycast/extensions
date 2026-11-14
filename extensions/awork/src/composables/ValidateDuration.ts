@@ -27,8 +27,8 @@ export const convertDurationsToSeconds = (duration: string) => {
   } else if (duration.match(/^ *\d+:[0-5]\d *$/)) {
     const [hours, minutes] = duration.split(":").map((value) => Number(value));
     return hours * 60 * 60 + minutes * 60;
-  } else if (duration.match(/^ *\d*[,|.]\d+h? *$/)) {
-    return Number(duration.replace(",", ".").replace("h", "")) * 60 * 60;
+  } else if (duration.match(/^ *\d*[,.]\d+h? *$/)) {
+    return Math.round(Number(duration.replace(",", ".").replace("h", "")) * 60 * 60);
   }
   throw new Error("Invalid duration format");
 };

@@ -1,10 +1,7 @@
-import { Clipboard, closeMainWindow, Detail, LaunchProps, popToRoot, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { callbackLaunchCommand, LaunchOptions } from "raycast-cross-extension";
+import { closeMainWindow, Detail, LaunchProps, popToRoot, showHUD } from "@raycast/api";
+import { LaunchOptions } from "raycast-cross-extension";
 import { useEffect, useRef } from "react";
-import { addToHistory } from "./lib/history";
-import { Color } from "./lib/types";
-import { getFormattedColor, isMac } from "./lib/utils";
+import { pickAndHandleColor } from "./lib/pick-color";
 
 const COLOR_WHEEL_MARKDOWN = "![RGB Color Wheel](rgb-color-wheel.png)";
 
@@ -18,46 +15,13 @@ export default function Command({
 }>) {
   const hasInitialized = useRef(false);
   useEffect(() => {
-    async function pickAndHandleColor() {
+    async function pickFromWheel() {
       try {
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        let pickColor: () => Promise<Color | null | undefined>;
-        if (isMac) {
-          const { pickColor: pickColorSwift } = await import("swift:../swift/color-picker");
-          pickColor = pickColorSwift;
-        } else {
-          const { pick_color: pickColorRust } = await import("rust:../rust/color-picker");
-          // colorSpace is accessible in runtime, but typescript definitions are generated wrong by raycast/api
-          // hopefully will be fixed in future versions of raycast/api
-          pickColor = pickColorRust as () => Promise<Color | null | undefined>;
-        }
-        const pickedColor = await pickColor();
-        if (!pickedColor) {
-          return;
-        }
-
-        addToHistory(pickedColor);
-
-        const hex = getFormattedColor(pickedColor, "hex");
-        const formattedColor = getFormattedColor(pickedColor);
-        if (!formattedColor) {
-          throw new Error("Failed to format color");
-        }
-
-        if (launchContext?.callbackLaunchOptions) {
-          if (launchContext.copyToClipboard) {
-            await Clipboard.copy(formattedColor);
-          }
-          try {
-            await callbackLaunchCommand(launchContext.callbackLaunchOptions, { hex, formattedColor });
-          } catch (e) {
-            await showFailureToast(e);
-          }
-        } else {
-          await Clipboard.copy(formattedColor);
-          await showHUD(`Copied color ${formattedColor} to clipboard`);
+        const outcome = await pickAndHandleColor({ launchContext });
+        if (outcome === "copied") {
           await closeMainWindow();
           await popToRoot();
         }
@@ -67,7 +31,7 @@ export default function Command({
       }
     }
 
-    pickAndHandleColor();
+    pickFromWheel();
   }, []);
 
   return <Detail markdown={COLOR_WHEEL_MARKDOWN} />;

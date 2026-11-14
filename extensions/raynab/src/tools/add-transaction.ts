@@ -14,9 +14,9 @@ type TransactionInput = {
    */
   date?: string;
   /**
-   * The name of the payee
+   * Optional name of the payee
    */
-  payee_name: string;
+  payee_name?: string;
   /**
    * The amount of the transaction like $25.00
    */
@@ -77,8 +77,8 @@ function formatTransactionData(account: Account, input: TransactionInput) {
     throw new Error('Amount must be a valid number');
   }
 
-  if (!input.payee_name || typeof input.payee_name !== 'string') {
-    throw new Error('Payee name must be a non-empty string');
+  if (input.payee_name !== undefined && typeof input.payee_name !== 'string') {
+    throw new Error('Payee name must be a string');
   }
 
   let date = input.date;
@@ -102,7 +102,7 @@ function formatTransactionData(account: Account, input: TransactionInput) {
   return {
     account_id: account.id,
     amount: amount,
-    payee_name: input.payee_name,
+    payee_name: input.payee_name?.trim() || '',
     memo: input.memo || '',
     date: date,
   };
@@ -126,11 +126,15 @@ export const confirmation: Tool.Confirmation<TransactionInput> = async (input) =
     includeSymbol: true,
   });
 
+  const payeeName = input.payee_name?.trim();
+
   return {
     style: Action.Style.Regular,
-    message: `Are you sure you want to create a transaction for ${input.payee_name} with amount ${formattedAmount}?`,
+    message: payeeName
+      ? `Are you sure you want to create a transaction for ${payeeName} with amount ${formattedAmount}?`
+      : `Are you sure you want to create a transaction with amount ${formattedAmount}?`,
     info: [
-      { name: 'Payee', value: input.payee_name },
+      { name: 'Payee', value: payeeName || 'No Payee' },
       { name: 'Amount', value: formattedAmount },
       { name: 'Account', value: input.account_name || '' },
       { name: 'Memo', value: input.memo || '' },

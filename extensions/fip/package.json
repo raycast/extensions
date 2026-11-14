@@ -1,68 +1,65 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fip",
-  "title": "Fip",
-  "description": "Start and explore the fip radio directly from Raycast",
+  "title": "FIP",
+  "description": "Listen to FIP and its webradios, and see what they are playing, directly from Raycast",
   "icon": "favicon.png",
   "author": "louison",
   "categories": [
     "Media"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "now",
       "title": "Currently Playing Track",
-      "subtitle": "Fip Radio",
-      "description": "What's currently playing on fip radio",
+      "subtitle": "FIP",
+      "description": "Show the track currently playing on the last FIP radio you started",
       "mode": "view"
     },
     {
       "name": "prev",
       "title": "Previous Track",
-      "subtitle": "Fip Radio",
-      "description": "The last track played before the current one on fip radio",
+      "subtitle": "FIP",
+      "description": "Show the track played before the current one on the last FIP radio you started",
       "mode": "view"
     },
     {
       "name": "next",
       "title": "Next Track",
-      "subtitle": "Fip Radio",
-      "description": "The next track to by played by fip radio",
+      "subtitle": "FIP",
+      "description": "Show the next track announced on the last FIP radio you started",
       "mode": "view"
     },
     {
       "name": "start",
       "title": "Start Playing",
-      "subtitle": "Fip Radio",
-      "description": "Starts VLC and play the fip radio audio stream",
+      "subtitle": "FIP",
+      "description": "Play your default FIP radio in your default player",
       "mode": "no-view"
     },
     {
       "name": "stop",
       "title": "Stop Playing",
-      "subtitle": "Fip Radio",
-      "description": "Pause fip radio stream on VLC",
+      "subtitle": "FIP",
+      "description": "Stop the FIP radio stream in your default player",
       "mode": "no-view"
     },
     {
       "name": "choose_radio",
       "title": "Choose Radio",
-      "subtitle": "Fip Radio",
-      "description": "Choose a radio to play",
+      "subtitle": "FIP",
+      "description": "Pick FIP or one of its webradios and start playing it",
       "mode": "view"
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.58.0",
-    "@types/node-fetch": "^2.6.1",
-    "node-fetch": "^3.2.4",
-    "run-applescript": "^6.0.0"
-  },
   "preferences": [
     {
       "name": "defaultRadio",
-      "description": "The radio to play by default when you start the extension",
+      "description": "The radio Start Playing plays",
       "type": "dropdown",
       "required": false,
       "default": "FIP",
@@ -115,12 +112,16 @@
         {
           "title": "Metal",
           "value": "Metal"
+        },
+        {
+          "title": "Cultes",
+          "value": "Cultes"
         }
       ]
     },
     {
       "name": "defaultApp",
-      "description": "The app to use to play the radio",
+      "description": "The app that plays the radio stream",
       "type": "dropdown",
       "required": false,
       "default": "QuickTime Player",
@@ -137,23 +138,26 @@
       ]
     }
   ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  },
-  "platforms": [
-    "macOS"
-  ]
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

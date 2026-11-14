@@ -3,7 +3,7 @@ import { Clipboard } from "@raycast/api";
 import { closeMainWindow } from "@raycast/api";
 import { showToast } from "@raycast/api";
 import * as path from "path";
-import { getAdbDir, getDevices, existsAdb, getScreenshotSaveLocation } from "./android-utils";
+import { getAdbDir, getDevices, existsAdb, getScreenshotSaveLocation, shellQuote } from "./android-utils";
 import { ExecException, exec } from "child_process";
 import { useEffect, useState } from "react";
 type Values = {
@@ -16,8 +16,8 @@ async function onSubmit(values: Form.Values) {
   const adbCaptureFilename = `${Date.now()}.png`;
   const filePath = path.join(getScreenshotSaveLocation(), adbCaptureFilename);
   const adbDir = getAdbDir();
-  const adb = `${adbDir}/adb  -s ${device} `;
-  const shellscript = `${adb} exec-out screencap -p > ${filePath}`;
+  const adb = `${shellQuote(`${adbDir}/adb`)}  -s ${device} `;
+  const shellscript = `${adb} exec-out screencap -p > ${shellQuote(filePath)}`;
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `Capturing screen`,

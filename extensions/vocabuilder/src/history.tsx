@@ -11,6 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { posColor } from "./lib/colors";
+import { SHORTCUTS } from "./lib/shortcuts";
 import { useEffect, useState } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
 import LanguagePairDropdown from "./components/LanguagePairDropdown";
@@ -22,6 +23,10 @@ import { LanguagePair, storageKeyPrefix } from "./lib/languages";
 import { languagePairTitle, languagePairValue, swapLanguagePair } from "./lib/languageSession";
 import { clearHistory, deleteTranslation, getHistory } from "./lib/storage";
 import { Translation } from "./lib/types";
+
+// The thrown value is a raw fs error carrying the user's absolute Downloads
+// path. See AGENTS.md → Security Guardrails.
+const EXPORT_FAILED_MESSAGE = "Could not write the file to your Downloads folder.";
 
 function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
@@ -41,12 +46,7 @@ function relativeTime(timestamp: number): string {
 
 function ToggleLanguagesAction({ onAction }: { onAction: () => void }) {
   return (
-    <Action
-      title="Toggle Languages"
-      icon={Icon.Switch}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-      onAction={onAction}
-    />
+    <Action title="Toggle Languages" icon={Icon.Switch} shortcut={SHORTCUTS.toggleLanguages} onAction={onAction} />
   );
 }
 
@@ -198,7 +198,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
                 : { tag: { value: item.partOfSpeech, color: posColor(item.partOfSpeech) } },
               { text: relativeTime(item.timestamp) },
             ]}
-            detail={<TranslationDetail item={item} />}
+            detail={<TranslationDetail item={item} languagePair={languagePair} />}
             actions={
               <ActionPanel>
                 <Action
@@ -209,25 +209,25 @@ export default function History(props: { languagePair?: LanguagePair }) {
                 <Action.CopyToClipboard
                   title="Copy Translation"
                   content={item.translation}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={SHORTCUTS.copyTranslation}
                 />
                 <PronounceAction
                   word={item.word}
                   languageCode={languagePair.source.code}
                   title="Pronounce Word"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceWord}
                 />
                 <PronounceAction
                   word={item.translation}
                   languageCode={languagePair.target.code}
                   title="Pronounce Translation"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceTranslation}
                 />
                 <Action
                   title="Delete"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={SHORTCUTS.deleteEntry}
                   onAction={() => handleDelete(item.id)}
                 />
                 <ToggleLanguagesAction onAction={handleToggleLanguages} />
@@ -242,15 +242,19 @@ export default function History(props: { languagePair?: LanguagePair }) {
                         const filePath = exportToFile(content, "json");
                         await showInFinder(filePath);
                         await showToast({ style: Toast.Style.Success, title: "Exported", message: filePath });
-                      } catch (err) {
-                        await showToast({ style: Toast.Style.Failure, title: "Export failed", message: String(err) });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Export failed",
+                          message: EXPORT_FAILED_MESSAGE,
+                        });
                       }
                     }}
                   />
                   <Action
                     title="Export to Anki"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={SHORTCUTS.exportAnki}
                     onAction={async () => {
                       const content = formatAnki(history);
                       if (!content) {
@@ -265,15 +269,19 @@ export default function History(props: { languagePair?: LanguagePair }) {
                         const filePath = exportToFile(content, "anki");
                         await showInFinder(filePath);
                         await showToast({ style: Toast.Style.Success, title: "Exported for Anki", message: filePath });
-                      } catch (err) {
-                        await showToast({ style: Toast.Style.Failure, title: "Export failed", message: String(err) });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Export failed",
+                          message: EXPORT_FAILED_MESSAGE,
+                        });
                       }
                     }}
                   />
                   <Action
                     title="Export to Quizlet"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    shortcut={SHORTCUTS.exportQuizlet}
                     onAction={async () => {
                       const content = formatQuizlet(history);
                       if (!content) {
@@ -292,8 +300,12 @@ export default function History(props: { languagePair?: LanguagePair }) {
                           title: "Exported for Quizlet",
                           message: filePath,
                         });
-                      } catch (err) {
-                        await showToast({ style: Toast.Style.Failure, title: "Export failed", message: String(err) });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Export failed",
+                          message: EXPORT_FAILED_MESSAGE,
+                        });
                       }
                     }}
                   />
@@ -302,7 +314,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
                   title="Clear All History"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  shortcut={SHORTCUTS.clearAllHistory}
                   onAction={handleClearAll}
                 />
               </ActionPanel>

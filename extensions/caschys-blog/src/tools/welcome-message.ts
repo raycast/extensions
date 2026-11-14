@@ -20,11 +20,11 @@
 export default function welcomeMessage() {
   return {
     message:
-      "Welcome to the Caschys Blog Assistant! I can help you search for articles, get the latest news, and submit tips to the blog.",
+      "Welcome to the Caschys Blog Assistant. I can search articles, get the latest posts, and prepare tip email drafts for you to review.",
     features: [
       "Search for articles on specific topics",
       "Get the latest articles from the blog",
-      "Submit tips to the blog",
+      "Prepare tip email drafts",
     ],
     multilingual: "You can ask questions in any language, and I'll respond in the same language.",
     sampleQueries: [

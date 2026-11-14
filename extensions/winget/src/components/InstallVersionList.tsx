@@ -1,17 +1,22 @@
 /**
- * "Install Version…" subview: lists available versions (newest first),
- * installs the chosen one. Version-specific installs always add a blocking
- * pin afterwards — disclosed in the action title.
+ * "Install Version…" subview: lists available versions (newest first) with a
+ * detail pane fed by per-version manifests (`winget show --version`), lazily
+ * fetched for the selected row. Installs the chosen version; version-specific
+ * installs always add a blocking pin afterwards — disclosed in the action
+ * title.
  */
 
 import { useEffect, useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 
-import { showPackageVersions } from "../cli/commands";
+import { showPackageDetails, showPackageVersions } from "../cli/commands";
+import { type WingetPackageDetails } from "../cli/types";
 import { operationTitle } from "../core/feedback";
 import { useOperation } from "../hooks/useOperation";
 import { type PackageInfo } from "../utils/packages";
+
+import { detailMarkdown, PackageDetailMeta } from "./PackageDetailMeta";
 
 interface InstallVersionListProps {
   pkg: PackageInfo;
@@ -20,6 +25,10 @@ interface InstallVersionListProps {
 function InstallVersionList({ pkg }: InstallVersionListProps) {
   const [versions, setVersions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  // Per-version manifest details; a key is present once its fetch settled
+  // (null = winget had nothing / the fetch failed — render without metadata).
+  const [details, setDetails] = useState<Record<string, WingetPackageDetails | null>>({});
   const { pop } = useNavigation();
   const { gate, launchDetached, cancelActive } = useOperation();
 
@@ -45,10 +54,36 @@ function InstallVersionList({ pkg }: InstallVersionListProps) {
     return () => controller.abort();
   }, [pkg.id, pkg.source]);
 
+  useEffect(() => {
+    if (!selectedVersion || selectedVersion in details) {
+      return;
+    }
+    const controller = new AbortController();
+    const version = selectedVersion;
+    showPackageDetails(pkg.id, pkg.source, controller.signal, version)
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setDetails((prev) => ({ ...prev, [version]: result }));
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setDetails((prev) => ({ ...prev, [version]: null }));
+        }
+      });
+    return () => controller.abort();
+  }, [selectedVersion, pkg.id, pkg.source]);
+
   const busy = gate.status === "busy";
 
   return (
-    <List isLoading={isLoading} navigationTitle={`Install ${pkg.name}`} searchBarPlaceholder="Filter versions…">
+    <List
+      isLoading={isLoading}
+      navigationTitle={`Install ${pkg.name}`}
+      searchBarPlaceholder="Filter versions…"
+      isShowingDetail={versions.length > 0}
+      onSelectionChange={setSelectedVersion}
+    >
       {!isLoading && versions.length === 0 && (
         <List.EmptyView
           title="No Versions Found"
@@ -58,45 +93,65 @@ function InstallVersionList({ pkg }: InstallVersionListProps) {
       )}
       {versions.length > 0 && (
         <List.Section title={`Available Versions (${versions.length})`}>
-          {versions.map((version, index) => (
-            <List.Item
-              key={version}
-              title={version}
-              accessories={index === 0 ? [{ tag: { value: "Latest", color: Color.Green } }] : []}
-              actions={
-                <ActionPanel>
-                  {busy ? (
-                    <Action title="Cancel Operation" icon={Icon.XMarkCircle} onAction={() => void cancelActive()} />
-                  ) : (
-                    <Action
-                      title="Install and Pin Version"
-                      icon={Icon.Plus}
-                      onAction={async () => {
-                        const launched = await launchDetached({
-                          kind: "install-version",
-                          title: `${operationTitle("install", pkg.name)} ${version}`,
-                          target: {
-                            id: pkg.id,
-                            name: pkg.name,
-                            source: pkg.source,
-                          },
-                          version,
-                        });
-                        // A dispatched launch pops to root by itself; on a
-                        // busy-rejection keep the user where they were.
-                        if (launched) {
-                          pop();
-                        }
-                      }}
-                    />
-                  )}
-                  <ActionPanel.Section>
-                    <Action.CopyToClipboard title="Copy Version" content={version} />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
+          {versions.map((version, index) => {
+            const isSelected = selectedVersion === version;
+            const versionDetails = details[version] ?? undefined;
+            const detailsLoading = isSelected && !(version in details);
+            return (
+              <List.Item
+                key={version}
+                id={version}
+                title={version}
+                accessories={index === 0 ? [{ tag: { value: "Latest", color: Color.Green } }] : []}
+                detail={
+                  <List.Item.Detail
+                    isLoading={detailsLoading}
+                    markdown={isSelected ? detailMarkdown(versionDetails, detailsLoading) : undefined}
+                    metadata={
+                      isSelected ? (
+                        <PackageDetailMeta
+                          pkg={{ ...pkg, version, installedVersion: undefined, hasUpdate: false }}
+                          details={versionDetails}
+                        />
+                      ) : undefined
+                    }
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    {busy ? (
+                      <Action title="Cancel Operation" icon={Icon.XMarkCircle} onAction={() => void cancelActive()} />
+                    ) : (
+                      <Action
+                        title="Install and Pin Version"
+                        icon={Icon.Plus}
+                        onAction={async () => {
+                          const launched = await launchDetached({
+                            kind: "install-version",
+                            title: `${operationTitle("install", pkg.name)} ${version}`,
+                            target: {
+                              id: pkg.id,
+                              name: pkg.name,
+                              source: pkg.source,
+                            },
+                            version,
+                          });
+                          // A dispatched launch pops to root by itself; on a
+                          // busy-rejection keep the user where they were.
+                          if (launched) {
+                            pop();
+                          }
+                        }}
+                      />
+                    )}
+                    <ActionPanel.Section>
+                      <Action.CopyToClipboard title="Copy Version" content={version} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>

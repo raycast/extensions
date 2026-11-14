@@ -118,12 +118,15 @@ export async function getNotes(
   for (const filePath of filePaths) {
     const title = path.basename(filePath, path.extname(filePath));
     const relativePath = path.relative(vaultPath, filePath);
+    const stats = fs.statSync(filePath);
 
     notes.push({
       title: title,
       path: filePath,
-      lastModified: fs.statSync(filePath).mtime,
+      lastModified: stats.mtime,
       bookmarked: bookmarkedFilePaths.includes(relativePath),
+      createdAt: stats.birthtime,
+      fileSize: stats.size,
     });
   }
 
@@ -132,12 +135,15 @@ export async function getNotes(
   for (const canvasFilePath of canvasFilePaths) {
     const title = path.basename(canvasFilePath, path.extname(canvasFilePath));
     const relativePath = path.relative(vaultPath, canvasFilePath);
+    const stats = fs.statSync(canvasFilePath);
 
     notes.push({
       title: title,
       path: canvasFilePath,
-      lastModified: fs.statSync(canvasFilePath).mtime,
+      lastModified: stats.mtime,
       bookmarked: bookmarkedFilePaths.includes(relativePath),
+      createdAt: stats.birthtime,
+      fileSize: stats.size,
     });
   }
 

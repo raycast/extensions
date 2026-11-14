@@ -3,6 +3,7 @@
 
 import { List, Action, ActionPanel, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { useEffect } from "react";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useCategories } from "./hooks/useCategories";
 import { useFavoriteCategories } from "./hooks/useFavoriteCategories";
@@ -10,29 +11,28 @@ import { stripHtml } from "./utils";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
 import { ChaosIndexDetail } from "./views/ChaosIndexDetail";
-import { Category } from "./interfaces";
-
-// Extracted favorites action component
-function FavoritesAction({ category }: { category: Category | undefined }) {
-  const { isFavorite, toggleFavorite } = useFavoriteCategories();
-
-  if (!category) return null;
-
-  return (
-    <Action
-      title={isFavorite(category.id) ? "Remove from Favorites" : "Add to Favorites"}
-      icon={isFavorite(category.id) ? Icon.StarDisabled : { source: Icon.Star, tintColor: Color.Yellow }}
-      onAction={() => toggleFavorite(category.id)}
-    />
-  );
-}
+import { FavoritesAction } from "./components/FavoritesAction";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  // Persisted across days as the stable categoryId slug (e.g. "world"), never the per-batch id
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "");
 
   const { categories, isLoading: loadingCategories, error: categoriesError } = useCategories();
   const { isFavorite } = useFavoriteCategories();
+
+  // Resolve the persisted slug to this batch's actual category (and its per-batch id)
+  const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory);
+
+  // Fall back to World (or the first category) if the persisted selection doesn't match any
+  // category today - e.g. right after upgrading from a version that cached a different kind of
+  // identifier, or if a previously selected category simply isn't in today's batch.
+  useEffect(() => {
+    if (!loadingCategories && categories.length > 0 && !currentCategory) {
+      const fallback = categories.find((cat) => cat.categoryId === "world") || categories[0];
+      setSelectedCategory(fallback.categoryId);
+    }
+  }, [loadingCategories, categories, currentCategory, setSelectedCategory]);
 
   const {
     articles,
@@ -42,16 +42,13 @@ export default function Command() {
     error: contentError,
     isOnThisDay,
     isChaosIndex,
-  } = useCategoryFeed(selectedCategory, preferences.language);
+  } = useCategoryFeed(currentCategory?.id ?? "", preferences.language);
 
   // Sort categories: favorites first (alphabetically), then others (alphabetically)
   const sortedCategories = [
-    ...categories.filter((cat) => isFavorite(cat.id)).sort((a, b) => a.name.localeCompare(b.name)),
-    ...categories.filter((cat) => !isFavorite(cat.id)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => !isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
   ];
-
-  // Get current category for action
-  const currentCategory = categories.find((cat) => cat.id === selectedCategory);
 
   return (
     <List
@@ -64,10 +61,12 @@ export default function Command() {
         >
           {sortedCategories.map((category) => (
             <List.Dropdown.Item
-              key={category.id}
+              key={category.categoryId}
               title={category.name}
-              icon={isFavorite(category.id) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled}
-              value={category.id}
+              icon={
+                isFavorite(category.categoryId) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled
+              }
+              value={category.categoryId}
             />
           ))}
         </List.Dropdown>

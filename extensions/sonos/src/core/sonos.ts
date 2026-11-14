@@ -6,35 +6,48 @@ import { isDefined } from "./utils";
 
 // Raycast commands can run in separate processes, so disable the SDK's service
 // event subscriptions before SonosManager adds listeners in @svrooij/sonos.
+// Otherwise every command process tries to bind the shared event listener port
+// (6329) and fails with EADDRINUSE when commands run in quick succession.
 process.env.SONOS_DISABLE_EVENTS = "true";
+// Belt and braces: if a subscription ever sneaks through anyway, make sure the
+// listener server never binds its port.
+process.env.SONOS_DISABLE_LISTENER = "true";
 
-export async function formatPlayingState(state: SonosState | null): Promise<string | null> {
-  const playing = await isPlaying();
-  const icon = playing ? `▶︎` : `⏸︎`;
-
+export function formatPlayingState(state: SonosState | null): string | null {
   if (state === null) {
     return null;
   }
 
-  // This means some kind of track is playing
-  if (state.mediaInfo.CurrentURIMetaData === undefined) {
-    const track = state.positionInfo.TrackMetaData;
+  const icon = state.transportState === "PLAYING" ? `▶︎` : `⏸︎`;
 
+  const media = state.mediaInfo.CurrentURIMetaData;
+  const track = state.positionInfo.TrackMetaData;
+
+  // Spotify Connect (and other virtual line-in sources) report generic line-in
+  // meta data, where `Title` is the source app name. The actual track is in
+  // the position info's track meta data.
+  const isVirtualLineIn = typeof media === "object" && media.UpnpClass?.includes("linein") === true;
+
+  if (media === undefined || (isVirtualLineIn && typeof track === "object" && track.Title)) {
     if (typeof track === "string") {
       return `${icon} ${track}`;
     }
 
-    return `${icon} ${track.Title} - ${track.Artist}`;
+    if (typeof track === "object" && track.Title) {
+      return track.Artist ? `${icon} ${track.Title} - ${track.Artist}` : `${icon} ${track.Title}`;
+    }
   }
 
   // This means some kind of radio is playing
-  const media = state.mediaInfo.CurrentURIMetaData;
+  if (media !== undefined) {
+    if (typeof media === "string") {
+      return `${icon} ${media}`;
+    }
 
-  if (typeof media === "string") {
-    return `${icon} ${media}`;
+    return `${icon} ${media.Title}`;
   }
 
-  return `${icon} ${media.Title}`;
+  return null;
 }
 
 let manager: SonosManager | null = null;
@@ -69,11 +82,6 @@ export async function getLatestState(): Promise<SonosState | null> {
   const state = await storage.setState(coordinator);
 
   return state.sonosState;
-}
-
-export async function isPlaying() {
-  const state = await getLatestState();
-  return state?.transportState === "PLAYING";
 }
 
 export async function getAvailableGroups(): Promise<string[]> {

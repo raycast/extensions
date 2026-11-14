@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminalfinder",
   "title": "Terminal Finder",
-  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm, cmux) and vice versa",
+  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm, cmux, Tern) and vice versa",
   "icon": "command-icon.png",
   "author": "yedongze",
   "contributors": [
@@ -63,6 +63,13 @@
       "mode": "no-view"
     },
     {
+      "name": "clipboardToTern",
+      "title": "Clipboard → Tern",
+      "subtitle": "Open Path",
+      "description": "Open current Clipboard directory in Tern",
+      "mode": "no-view"
+    },
+    {
       "name": "finderToITerm",
       "title": "Finder → iTerm",
       "subtitle": "Open Path",
@@ -109,6 +116,13 @@
       "title": "Finder → Cmux",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in cmux",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToTern",
+      "title": "Finder → Tern",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Tern",
       "mode": "no-view"
     },
     {
@@ -161,6 +175,13 @@
       "mode": "no-view"
     },
     {
+      "name": "ternToFinder",
+      "title": "Tern → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Tern directory in Finder",
+      "mode": "no-view"
+    },
+    {
       "name": "index",
       "title": "X → Y",
       "subtitle": "Open Path",
@@ -202,6 +223,10 @@
               "value": "Terminal"
             },
             {
+              "title": "Tern",
+              "value": "Tern"
+            },
+            {
               "title": "Warp",
               "value": "Warp"
             },
@@ -240,6 +265,10 @@
             {
               "title": "Terminal",
               "value": "Terminal"
+            },
+            {
+              "title": "Tern",
+              "value": "Tern"
             },
             {
               "title": "Warp",

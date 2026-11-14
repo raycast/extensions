@@ -10,35 +10,44 @@ interface ResourceDetailProps {
 
 export default function ResourceDetail({ resource, client }: ResourceDetailProps) {
   const [password, setPassword] = useState<string | null>(null);
+  const [secureNotes, setSecureNotes] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+    setPassword(null);
+    setSecureNotes(undefined);
+    setIsLoading(true);
     async function fetchPassword() {
       try {
-        const secretRes = await client.getSecret(resource.id);
+        const secretRes = await client.getSecret(resource.id, controller.signal);
 
         if (!secretRes || !secretRes.data) {
           throw new Error("No secret data found");
         }
-        const decrypted = await client.decryptSecret(secretRes.data);
-        setPassword(decrypted);
+        const decrypted = await client.decryptPasswordData(secretRes.data, resource.resource_type_id);
+        if (controller.signal.aborted) return;
+        setPassword(decrypted.password);
+        setSecureNotes(decrypted.description);
       } catch (error) {
-        console.error("Decryption error:", error);
+        if (controller.signal.aborted) return;
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to decrypt password",
           message: String(error),
         });
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }
 
     fetchPassword();
-  }, [resource.id, client]);
+    return () => controller.abort();
+  }, [resource.id, resource.resource_type_id, client]);
 
   // Build markdown content
-  let markdown = `# ${resource.name}\n\n`;
+  const resourceName = resource.name || "Unnamed resource";
+  let markdown = `# ${resourceName}\n\n`;
 
   // Credentials section
   markdown += `## 🔐 Credentials\n\n`;
@@ -63,6 +72,8 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
     markdown += `${resource.description}\n\n`;
   }
 
+  if (secureNotes) markdown += `## 🔒 Secure Notes\n\n${secureNotes}\n\n`;
+
   // Tags section
   if (resource.tags && resource.tags.length > 0) {
     markdown += `## 🏷️ Tags\n\n`;
@@ -84,7 +95,7 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
     <Detail
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={resource.name}
+      navigationTitle={resourceName}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Username" text={resource.username || "—"} icon={Icon.Person} />
@@ -151,6 +162,9 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
               />
               <Action.CopyToClipboard title="Copy URI" content={resource.uri} icon={Icon.Link} />
             </ActionPanel.Section>
+          )}
+          {secureNotes && (
+            <Action.CopyToClipboard title="Copy Secure Notes" content={secureNotes} icon={Icon.Text} concealed={true} />
           )}
           {resource.description && (
             <ActionPanel.Section title="Notes">

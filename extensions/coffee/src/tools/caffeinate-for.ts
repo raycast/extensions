@@ -1,4 +1,5 @@
-import { startCaffeinate } from "../utils";
+import { startCaffeinate, deviceName } from "../utils";
+import { calculateDuration } from "../duration";
 
 type Input = {
   /**
@@ -16,7 +17,7 @@ type Input = {
 };
 
 /**
- * Prevents your Mac from going to sleep for a specified duration
+ * Prevents your computer from going to sleep for a specified duration
  */
 export default async function (input: Input) {
   const { hours = 0, minutes = 0, seconds = 0 } = input;
@@ -25,10 +26,13 @@ export default async function (input: Input) {
     throw new Error("Please specify a duration");
   }
 
-  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const totalSeconds = calculateDuration({ hours, minutes, seconds });
   const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
 
-  await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${totalSeconds}`);
+  await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${totalSeconds}`, {
+    kind: "for",
+    endsAt: new Date(Date.now() + totalSeconds * 1000).toISOString(),
+  });
 
-  return `Mac will stay awake for ${formattedTime}`;
+  return `${deviceName()} will stay awake for ${formattedTime}`;
 }

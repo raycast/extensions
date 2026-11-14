@@ -1,7 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 
-import { createQueryString, escapeAppleScriptString, runScript } from "../apple-script";
+import { createQueryString, escapeAppleScriptString, NOT_IN_LIBRARY_ERROR, runScript } from "../apple-script";
 
 import { general } from ".";
 
@@ -76,3 +76,39 @@ export const play =
 		`),
       ),
     );
+
+/** Play the library copy of a catalog album, matched by title + album artist
+ * (falling back to track artist for libraries where album artist is unset).
+ * Shares the "Raycast DJ" queue mechanism with `play`, but matches exactly —
+ * `contains` would also catch same-named albums by other artists. */
+export const playMatching =
+  (shuffle = false) =>
+  ({ title, artist }: { title: string; artist: string }) => {
+    const albumName = escapeAppleScriptString(title);
+    const artistName = escapeAppleScriptString(artist);
+    return pipe(
+      general.setShuffle(shuffle),
+      TE.chain(() =>
+        runScript(`
+			tell application "Music"
+				set albumTracks to (every track of library playlist 1 whose album is "${albumName}" and album artist is "${artistName}")
+				if (count of albumTracks) = 0 then
+					set albumTracks to (every track of library playlist 1 whose album is "${albumName}" and artist is "${artistName}")
+				end if
+				if (count of albumTracks) = 0 then error "Not found in library" number ${NOT_IN_LIBRARY_ERROR}
+				if (exists playlist "Raycast DJ") then
+					delete playlist "Raycast DJ"
+				end if
+				make new user playlist with properties {name:"Raycast DJ", shuffle:false, song repeat:one}
+				-- Music accepts a direct (every track whose …) query as the
+				-- duplicate source, but not the same tracks held in a list
+				-- variable, so copy them one at a time.
+				repeat with aTrack in albumTracks
+					duplicate aTrack to playlist "Raycast DJ"
+				end repeat
+				play playlist "Raycast DJ"
+			end tell
+		`),
+      ),
+    );
+  };

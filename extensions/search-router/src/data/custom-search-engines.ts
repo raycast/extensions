@@ -18,9 +18,9 @@ export const saveCustomSearchEngines = (engines: SearchEngine[]): void => {
   cache.set(CUSTOM_ENGINES_CACHE_KEY, JSON.stringify(engines));
 };
 
-export const addCustomSearchEngine = (engine: SearchEngine): void => {
+export const addCustomSearchEngine = (engine: SearchEngine, previousTrigger = engine.t): void => {
   const engines = getCustomSearchEngines();
-  const existingIndex = engines.findIndex((e) => e.t === engine.t);
+  const existingIndex = engines.findIndex((e) => e.t === previousTrigger);
 
   if (existingIndex >= 0) {
     engines[existingIndex] = engine;
@@ -35,9 +35,4 @@ export const removeCustomSearchEngine = (trigger: string): void => {
   const engines = getCustomSearchEngines();
   const filteredEngines = engines.filter((e) => e.t !== trigger);
   saveCustomSearchEngines(filteredEngines);
-};
-
-export const getCustomSearchEngine = (trigger: string): SearchEngine | undefined => {
-  const engines = getCustomSearchEngines();
-  return engines.find((e) => e.t === trigger);
 };

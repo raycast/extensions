@@ -14,6 +14,8 @@ import type { Position } from "../types/accounts";
 import type { QuoteData } from "../types/quotes";
 import { usePriceHistory } from "../hooks/usePriceHistory";
 import { useQuotes } from "../hooks/useQuotes";
+import { getPositionReturn } from "../lib/position-return";
+import { securityName } from "../lib/security-name";
 import { useWatchlist } from "../hooks/useWatchlist";
 import { PriceHistoryList } from "./PriceHistoryList";
 import { buildChartMarkdown } from "../lib/chart-builder";
@@ -66,18 +68,10 @@ export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDet
     currentPrice != null
       ? `## ${formatCurrency(currentPrice)} ${changeSign}${formatCurrency(dailyChange ?? 0)} (${formatPercent(dailyChangePct ?? 0)})`
       : "";
-  const markdown = `# ${symbol} — ${description}\n\n${priceHeader}\n\n${chartMarkdown}`;
+  const markdown = `# ${symbol} — ${securityName(description, position?.instrument.assetType ?? quote?.assetMainType)}\n\n${priceHeader}\n\n${chartMarkdown}`;
 
   const quantity = position ? position.longQuantity || position.shortQuantity || 0 : 0;
-  const averageCost = position
-    ? (position.averagePrice ?? position.averageLongPrice ?? position.taxLotAverageLongPrice)
-    : undefined;
-  const costBasis = averageCost != null ? averageCost * quantity : undefined;
-  const unrealizedPL =
-    position?.longOpenProfitLoss ??
-    (position?.marketValue != null && costBasis != null ? position.marketValue - costBasis : undefined);
-  const unrealizedPLPct =
-    unrealizedPL != null && costBasis != null && costBasis !== 0 ? (unrealizedPL / costBasis) * 100 : undefined;
+  const { averageCost, costBasis, unrealizedPL, unrealizedPLPct } = position ? getPositionReturn(position) : {};
 
   return (
     <Detail
@@ -85,6 +79,7 @@ export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDet
       markdown={markdown}
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Security" text={description} />
           {position && (
             <>
               <Detail.Metadata.Label
@@ -99,7 +94,7 @@ export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDet
               {unrealizedPL != null && (
                 <Detail.Metadata.TagList title="Unrealized P/L">
                   <Detail.Metadata.TagList.Item
-                    text={`${formatCurrency(unrealizedPL)} (${formatPercent(unrealizedPLPct ?? 0)})`}
+                    text={`${formatCurrency(unrealizedPL)} (${formatPercent(unrealizedPLPct)})`}
                     color={unrealizedPL >= 0 ? Color.Green : Color.Red}
                   />
                 </Detail.Metadata.TagList>

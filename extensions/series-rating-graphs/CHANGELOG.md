@@ -1,5 +1,11 @@
 # Series Rating Graphs Changelog
 
+## [Enhancement] - 2026-09-24
+
+- Add new detail view using markdown table
+- Add List item detail view
+- Bump all dependencies to the latest
+
 ## [Configurable API and improved error handling] - 2026-08-07
 
 - Switch default ratings API to IMDxAPI (https://api.tiffara.com)

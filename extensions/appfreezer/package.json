@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "appfreezer",
+  "title": "App Freezer",
+  "description": "Pause and resume macOS applications through the App Freezer native agent.",
+  "icon": "extension-icon.png",
+  "author": "changxu_song",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "keywords": [
+    "pause",
+    "resume",
+    "freeze",
+    "quit",
+    "force quit",
+    "applications",
+    "process",
+    "cpu",
+    "memory"
+  ],
+  "commands": [
+    {
+      "name": "resume-all",
+      "title": "Resume All Apps",
+      "subtitle": "App Freezer",
+      "description": "Resume every application paused by App Freezer",
+      "mode": "no-view"
+    },
+    {
+      "name": "quit-app",
+      "title": "Quit App",
+      "subtitle": "App Freezer",
+      "description": "Send a normal Quit request to an application",
+      "mode": "view"
+    },
+    {
+      "name": "force-quit-app",
+      "title": "Force Quit App",
+      "subtitle": "App Freezer",
+      "description": "Force quit an application after confirmation",
+      "mode": "view"
+    },
+    {
+      "name": "manage-applications",
+      "title": "Pause or Resume App",
+      "subtitle": "App Freezer",
+      "description": "Search for an application, then pause or resume it",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-applications",
+      "title": "List Applications",
+      "description": "List the applications App Freezer currently knows about, with their paused/running status and live CPU and memory usage. Read-only: never pauses, resumes, or quits anything."
+    }
+  ],
+  "ai": {
+    "instructions": "Use List Applications to answer questions about which applications are currently paused or running, and their CPU/memory usage, as reported by App Freezer. This tool is read-only and never pauses, resumes, or quits an application; if the user wants to change an application's state, tell them to use the Pause or Resume App, Quit App, Force Quit App, or Resume All Apps commands instead.",
+    "evals": [
+      {
+        "input": "@App Freezer Which apps are currently paused?",
+        "mocks": {
+          "list-applications": {
+            "generatedAt": "2026-07-30T12:00:00Z",
+            "count": 1,
+            "applications": [
+              {
+                "name": "Example",
+                "status": "paused",
+                "cpuPercent": 0,
+                "memoryPercent": 3.4
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-applications"
+          },
+          {
+            "includes": "Example"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint src tests && prettier --check 'src/**/*.{ts,tsx}' 'tests/**/*.ts'",
+    "fix-lint": "eslint src tests && prettier --write 'src/**/*.{ts,tsx}' 'tests/**/*.ts'",
+    "lint:store": "ray lint --exit-on-error",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.18",
+    "eslint": "^9.39.5",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  }
+}

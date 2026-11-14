@@ -1,5 +1,6 @@
 import { getHAAreas } from "@components/area/utils";
 import { getHADevices } from "@components/device/utils";
+import { filterHiddenEntities, useEntityOverrides } from "@lib/entity-overrides";
 import { State } from "@lib/haapi";
 import { useCachedState } from "@raycast/utils";
 import { Connection, entitiesColl, subscribeEntities } from "home-assistant-js-websocket";
@@ -127,4 +128,15 @@ export function useHAStates(): {
   }, []);
 
   return { states, error, isLoading };
+}
+
+export function useVisibleHAStates(): {
+  states?: State[];
+  error?: Error;
+  isLoading: boolean;
+} {
+  const { states, error, isLoading } = useHAStates();
+  const { hiddenEntityIds } = useEntityOverrides();
+  const visibleStates = filterHiddenEntities(states, hiddenEntityIds);
+  return { states: visibleStates, error, isLoading };
 }

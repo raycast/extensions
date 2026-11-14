@@ -43,7 +43,7 @@ const GOOGLEBOT_USER_AGENT =
   "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 ```
 
-Many paywalled sites serve full content to Googlebot for SEO indexing. This is our **first-line bypass** before hitting archive services.
+Many paywalled sites serve full content to Googlebot for SEO indexing.
 
 #### SMRY.ai Architecture
 
@@ -133,11 +133,14 @@ abstract class BaseExtractor {
 4. Extractor.isPaywalled() returns true
 5. Try Googlebot User-Agent fetch
    └─ Success? → Parse & display with "Retrieved via Googlebot" note
-6. Try archive.is
+6. Try Bingbot User-Agent fetch
+7. Try social media referrer
+8. Try WallHopper re-fetch
+9. Try archive.is
    └─ Success? → Parse & display with archive link annotation
-7. Try Wayback Machine
-   └─ Success? → Parse & display with archive link annotation
-8. All failed → Show paywall message with options
+10. Try Wayback Machine
+    └─ Success? → Parse & display with archive link annotation
+11. All failed → Show paywall message with options
 ```
 
 ### Flow 2: Subscriber (Has Browser Tab Open)
@@ -297,7 +300,7 @@ async function fetchFromWayback(url: string): Promise<ArchiveFetchResult> {
 ```typescript
 // Timeouts (archive services can be slow)
 export const FETCH_TIMEOUT_MS = 30000; // Normal fetch (existing)
-export const GOOGLEBOT_TIMEOUT_MS = 15000; // Googlebot fetch
+export const CRAWLER_TIMEOUT_MS = 15000; // Crawler-UA fetch (Googlebot, Bingbot)
 export const ARCHIVE_IS_TIMEOUT_MS = 45000; // archive.is can be slow
 export const WAYBACK_TIMEOUT_MS = 30000; // Wayback Machine
 
@@ -353,14 +356,22 @@ Article content...
 
 ### Actions
 
-New actions when paywall is detected:
+When a page isn't readable (`src/actions/NotReadableActions.tsx`):
 
-| Action                    | Shortcut | Description                       |
-| ------------------------- | -------- | --------------------------------- |
-| Import from Browser Tab   | `⌘I`     | Use authenticated browser session |
-| Open in Browser & Import  | `⌘O`     | Open URL, then import             |
-| Try Paywall Hopper        | `⌘P`     | Attempt bypass methods            |
-| Copy URL to Archived Copy | `⌘⇧C`    | Copy archive.is URL               |
+| Action             | Shortcut | Description                                  |
+| ------------------ | -------- | -------------------------------------------- |
+| Try Anyway         | `⇧⌘↵`    | Parse the page despite the readability check |
+| Try Paywall Hopper | `⌘P`     | Attempt bypass methods                       |
+| Open in Browser    | `⌘O`     | Open the original URL                        |
+| Copy URL           | `⇧⌘C`    | Copy the original URL                        |
+
+On an article retrieved from an archive (`src/actions/ArticleActions.tsx`):
+
+| Action            | Shortcut | Description                     |
+| ----------------- | -------- | ------------------------------- |
+| Copy Archived URL | `⇧⌘A`    | Copy the archive.is/Wayback URL |
+
+On Windows, `Ctrl` replaces `⌘`.
 
 ### Toast Notifications
 
@@ -380,7 +391,7 @@ export interface ArticleState {
 
   /** Source of archived content, if retrieved via Paywall Hopper */
   archiveSource?: {
-    service: "googlebot" | "archive.is" | "wayback" | "browser";
+    service: "googlebot" | "bingbot" | "social-referrer" | "wallhopper" | "archive.is" | "wayback" | "browser";
     url?: string; // URL to the archived copy
     timestamp?: string; // When the archive was captured
     retrievedAt: string; // When we fetched it

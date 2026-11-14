@@ -4,7 +4,6 @@ import {
   closeMainWindow,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -12,6 +11,8 @@ import { useCallback, useEffect, useState } from "react";
 import { getLanguagesForModel, LanguageOption } from "./lib/languages";
 import { getModelCapabilities } from "./lib/catalog";
 import { readSettings, writeSettings } from "./lib/settings";
+import { selectLanguageInHandy } from "./lib/handy";
+import { applyLiveOrRestart } from "./lib/apply-selection";
 
 export default function SelectLanguage() {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
@@ -53,13 +54,23 @@ export default function SelectLanguage() {
 
   async function handleSelect(lang: LanguageOption) {
     try {
-      writeSettings({ selected_language: lang.code });
-      setCurrentCode(lang.code);
+      const currentDisplay =
+        currentCode === "auto"
+          ? "Auto (detect)"
+          : `${lang.native} · ${lang.label}`;
       const display =
         lang.code === "auto"
           ? "Auto (detect)"
           : `${lang.native} · ${lang.label}`;
-      await showHUD(`Language set to ${display}`);
+      await applyLiveOrRestart({
+        isCurrent: lang.code === currentCode,
+        alreadyActiveMessage: `${currentDisplay} is already set`,
+        persist: () => writeSettings({ selected_language: lang.code }),
+        markCurrent: () => setCurrentCode(lang.code),
+        liveSwitch: () => selectLanguageInHandy(lang.label),
+        successMessage: `Language set to ${display}`,
+        failureTitle: "Couldn't switch language in Handy",
+      });
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

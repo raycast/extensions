@@ -10,9 +10,9 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { Connection, TableProNotInstalledError } from "./lib/types";
+import { Connection } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
-import { tableProInstalled } from "./lib/paths";
+import { requireTablePro } from "./lib/app";
 import { openConnectionDeeplink } from "./lib/deeplink";
 import { ScenarioEmptyView } from "./lib/empty-state";
 import { classifyError } from "./lib/errors";
@@ -26,7 +26,7 @@ export default function SearchConnections() {
     revalidate,
   } = useCachedPromise(
     async () => {
-      if (!tableProInstalled()) throw new TableProNotInstalledError();
+      await requireTablePro();
       return loadConnections();
     },
     [],

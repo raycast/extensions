@@ -1,20 +1,34 @@
-import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import { EpisodeActionPanel, episodeTraktUrl } from "./components/episode-actions";
 import { GenericGrid } from "./components/generic-grid";
+import { RemoveFromHistoryAction } from "./components/history-actions";
+import { RatingActions } from "./components/rating-actions";
 import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { createEpisodeMarkdown, createEpisodeMetadata } from "./lib/detail-helpers";
 import { getPosterUrl } from "./lib/helper";
+import { markEpisodeWatched } from "./lib/media-mutations";
 import { TraktShowHistoryListItem } from "./lib/schema";
 import { abortSearch, createSearchFetcher } from "./lib/search";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedState, useWatchedSync } from "./lib/use-watched";
+
+const episodeTarget = ({ show, episode }: TraktShowHistoryListItem) =>
+  ({ type: "episode", showId: show.ids.trakt, season: episode.season, number: episode.number }) as const;
+
+const episodeLabel = ({ show, episode }: TraktShowHistoryListItem) =>
+  `${show.title} S${episode.season}E${episode.number}`;
 
 export default function Command() {
   const abortable = useRef<AbortController | undefined>(undefined);
   const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  useRatingsSync();
+  useWatchedSync();
+  const { setWatched } = useWatchedState();
   const {
     isLoading,
     data: episodes,
@@ -38,36 +52,11 @@ export default function Command() {
     },
   );
 
-  const addEpisodeToHistory = useCallback(async (episode: TraktShowHistoryListItem) => {
-    await traktClient.shows.addEpisodeToHistory({
-      body: {
-        episodes: [
-          {
-            ids: { trakt: episode.episode.ids.trakt },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
+  const markWatched = useCallback(async (episode: TraktShowHistoryListItem) => {
+    await markEpisodeWatched(traktClient, episode.episode.ids.trakt, { signal: abortable.current?.signal });
+    setWatched(episodeTarget(episode), true);
   }, []);
-
-  const checkInEpisode = useCallback(async (episode: TraktShowHistoryListItem) => {
-    await traktClient.shows.checkInEpisode({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: episode.episode.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-    });
-  }, []);
+  const signal = () => abortable.current?.signal;
 
   const handleSearchTextChange = useCallback(abortSearch(abortable, setSearchText), []);
   const handleAction = useActionRunner<TraktShowHistoryListItem>({ setActionLoading });
@@ -104,17 +93,38 @@ export default function Command() {
           imdbId={(episode) => episode.episode.ids.imdb}
           actions={[
             {
-              title: "Check-In",
+              title: "Mark as Watched",
               icon: Icon.Checkmark,
-              onAction: (episode) => handleAction(episode, checkInEpisode, "Episode checked-in"),
-            },
-            {
-              title: "Add to History",
-              icon: Icon.Clock,
-              shortcut: Keyboard.Shortcut.Common.Duplicate,
-              onAction: (episode) => handleAction(episode, addEpisodeToHistory, "Episode added to history"),
+              onAction: (episode) =>
+                handleAction(
+                  episode,
+                  markWatched,
+                  `Marked "${episode.show.title}" S${episode.episode.season}E${episode.episode.number} as watched`,
+                ),
             },
           ]}
+          extraActions={(episode) => (
+            <>
+              <RemoveFromHistoryAction
+                item={episode}
+                target={episodeTarget(episode)}
+                traktId={episode.episode.ids.trakt}
+                title={episodeLabel(episode)}
+                client={traktClient}
+                signal={signal}
+                run={handleAction}
+              />
+              <RatingActions
+                item={episode}
+                type="episode"
+                traktId={episode.episode.ids.trakt}
+                title={episodeLabel(episode)}
+                client={traktClient}
+                signal={signal}
+                run={handleAction}
+              />
+            </>
+          )}
         />
       )}
     />
