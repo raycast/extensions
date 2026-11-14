@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "caffeine",
+  "title": "Caffeine",
+  "description": "Keep your Windows PC awake for a chosen duration or indefinitely without changing permanent Windows power settings.",
+  "icon": "icon.png",
+  "author": "afaan_mushtaq",
+  "contributors": [
+    "syed_hyder"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "caffeine",
+      "title": "Caffeine",
+      "icon": "icon.png",
+      "description": "Keep your Windows PC awake temporarily",
+      "mode": "view"
+    },
+    {
+      "name": "caffeine-tray",
+      "title": "Caffeine Status",
+      "icon": "icon.png",
+      "description": "Keep-awake status and quick controls in the system tray",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preventDisplaySleep",
+      "title": "Prevent Display Sleep",
+      "label": "Keep display awake in addition to system",
+      "description": "When enabled, prevents both the display and system from sleeping. When disabled, only the system is kept awake.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsc --outDir .tmp/dist && node tests/test_unit.js && node tests/test_caffeine_runtime.js",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
