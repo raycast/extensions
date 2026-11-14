@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macsync",
+  "title": "MacSync",
+  "description": "Sync your Dock, apps and settings across your Macs with MacSync",
+  "icon": "command-icon.png",
+  "author": "mehdi_saharkhiz",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-window",
+      "title": "Open Sync Window",
+      "description": "Open MacSync's window to review and apply changes from your other Macs",
+      "mode": "no-view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync Now",
+      "description": "Save this Mac's setup and check your other Macs. Changes nothing here.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pull",
+      "title": "Apply Dock Layout",
+      "description": "Preview the latest Dock layout, then apply it to this Mac",
+      "mode": "no-view"
+    },
+    {
+      "name": "undo",
+      "title": "Undo Last Apply",
+      "description": "Put the Dock back as it was before the last apply",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Show Status",
+      "description": "Show each Mac and whether it's in sync",
+      "mode": "no-view"
+    },
+    {
+      "name": "history",
+      "title": "Show History",
+      "description": "Open MacSync's history to go back to before any saved apply",
+      "mode": "no-view"
+    },
+    {
+      "name": "homebrew-updates",
+      "title": "Check Homebrew Updates",
+      "description": "See which Homebrew apps and tools, npm packages and uv tools have newer versions",
+      "mode": "no-view"
+    },
+    {
+      "name": "homebrew-upgrade",
+      "title": "Update Homebrew Apps",
+      "description": "Update every Homebrew app and tool, npm package and uv tool. Apps you have open wait.",
+      "mode": "no-view"
+    },
+    {
+      "name": "share",
+      "title": "Share My Setup",
+      "description": "Make a file a friend opens in MacSync to get your apps, tools, settings and config",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.4.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}
