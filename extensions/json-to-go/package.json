@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "json-to-go",
   "title": "json-to-go",
-  "description": "Translate JSON from clipboard into a Go type definition",
+  "description": "Convert JSON from your clipboard into a Go struct type definition.",
   "icon": "json.png",
   "author": "chyroc",
   "license": "MIT",

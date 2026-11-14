@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dribbble",
   "title": "Dribbble",
-  "description": "List Dribbble Shots",
+  "description": "Browse Dribbble shots. Currently unavailable because the API it used was shut down.",
   "icon": "icon.png",
   "author": "gebeto",
   "categories": [

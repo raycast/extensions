@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openrouter-quick-actions",
   "title": "Openrouter Quick Actions",
-  "description": "Performs one-shot actions using LLMs and OpenRouter",
+  "description": "Summarize, proofread or rewrite selected text with any LLM through OpenRouter, or run custom prompts and replace the selection.",
   "icon": "openrouter-quick-actions.png",
   "author": "hugo_gresse",
   "contributors": [],

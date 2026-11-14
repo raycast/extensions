@@ -3,7 +3,7 @@
   "name": "retool-documentation",
   "title": "Retool Documentation",
   "version": "1.0.0",
-  "description": "Search the Retool documentation from Raycast",
+  "description": "Search the Retool documentation and open pages in your browser.",
   "icon": "icon.png",
   "author": "andre347",
   "categories": [

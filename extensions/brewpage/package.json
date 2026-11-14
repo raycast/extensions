@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brewpage",
   "title": "BrewPage Publisher",
-  "description": "Publish selected HTML or Markdown and pasted reports as shareable BrewPage links.",
+  "description": "Publish HTML or Markdown files and pasted reports as shareable BrewPage links, public or unlisted, with optional password protection.",
   "icon": "icon.png",
   "author": "maksim_kochetkov",
   "platforms": [

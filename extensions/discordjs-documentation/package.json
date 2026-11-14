@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "discordjs-documentation",
   "title": "Discord.js Documentation",
-  "description": "Quickly search through discord.js documentation.",
+  "description": "Search the discord.js documentation with fuzzy search and browse methods and properties for stable, dev and other packages.",
   "icon": "command-icon.png",
   "author": "mah51",
   "categories": [

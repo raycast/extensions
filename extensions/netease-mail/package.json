@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netease-mail",
   "title": "NetEase Mail",
-  "description": "Read, search, verify codes, and send NetEase Mail from Raycast.",
+  "description": "Read and search NetEase Mail (163.com) messages, copy verification codes and send email via IMAP and SMTP on Windows.",
   "icon": "netease-mail.png",
   "author": "ctacta621",
   "license": "MIT",

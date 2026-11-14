@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "audio-writer",
   "title": "Audio Writer",
-  "description": "Transcribe it, refine it and structure it for you ✨",
+  "description": "Record voice notes, import audio files and view transcripts in the Audio Writer transcription app for Mac.",
   "icon": "audiowriter.png",
   "author": "pradeepb28",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "phpipam",
   "title": "phpIPAM",
-  "description": "Search and browse your phpIPAM instance: addresses, subnets, sections, VLANs and VRFs.",
+  "description": "Search your phpIPAM IP address management: addresses, subnets, sections, VLANs and VRFs, and copy the first free IP in a subnet.",
   "icon": "icon.png",
   "author": "frdmn",
   "categories": [

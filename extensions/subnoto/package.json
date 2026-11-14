@@ -3,7 +3,7 @@
   "name": "subnoto",
   "title": "Subnoto - Confidential Electronic Signature",
   "type": "module",
-  "description": "Send and manage documents for electronic signature in Subnoto from Raycast",
+  "description": "Upload PDF or Word documents to Subnoto for electronic signature, and browse your workspaces and envelopes.",
   "icon": "icon.png",
   "author": "corentin_mors",
   "categories": [

@@ -1,7 +1,7 @@
 {
   "name": "supabase-cron-monitor",
   "title": "Supabase Cron Monitor",
-  "description": "Monitor Supabase pg_cron jobs and run history.",
+  "description": "Monitor Supabase pg_cron jobs and their run history, and see cron job health in the Mac menu bar.",
   "version": "1.0.0",
   "author": "adrianmarten",
   "license": "MIT",

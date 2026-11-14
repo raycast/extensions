@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-gule-sider",
   "title": "Search Gule Sider",
-  "description": "Search Gule Sider for a phone number or person",
+  "description": "Look up a Norwegian phone number or person on Gule Sider, 1881 and 180.no.",
   "icon": "extension-icon.png",
   "categories": [
     "Web"

@@ -1,7 +1,7 @@
 {
   "name": "xiaohe-query",
   "title": "Xiaohe Query",
-  "description": "Query Xiaohe (Flypy) codes and decomposition for a single Chinese character.",
+  "description": "Look up the Xiaohe (Flypy) double pinyin code and shape decomposition of a Chinese character, with optional AI explanations.",
   "icon": "extension-icon.png",
   "author": "dongqing",
   "license": "MIT",

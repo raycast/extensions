@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi-force",
   "title": "MultiForce",
-  "description": "Allows a Salesforce Developer to access and authenticate orgs availabe via the SF command line tools.",
+  "description": "Save and log in to Salesforce orgs with the SF CLI: authenticate new orgs, organize environments and open them in the browser.",
   "icon": "multiforce-icon.png",
   "author": "brian_j_decoder22",
   "categories": [

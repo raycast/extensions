@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "no-as-a-service",
   "title": "No as a Service",
-  "description": "Get a random reason to say no. \n\nInspired by https://github.com/hotheadhacker/no-as-a-service",
+  "description": "Get a random creative excuse to say no to a request, then copy or paste it. Inspired by No as a Service.",
   "categories": [
     "Productivity",
     "Fun"

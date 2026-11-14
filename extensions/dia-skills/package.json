@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dia-skills",
   "title": "Dia Skills",
-  "description": "Import your favorite Dia skills into Raycast, so you can have the freedom to use whatever LLM you want, wherever you want, however you want.",
+  "description": "Import skills from the Dia browser into Raycast as AI commands by pasting a Dia skill URL.",
   "icon": "extension-icon.png",
   "author": "Visual-Studio-Coder",
   "contributors": [

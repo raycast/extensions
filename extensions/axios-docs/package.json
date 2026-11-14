@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "axios-docs",
   "title": "Axios Docs",
-  "description": "Quickly lookup Axios documentation",
+  "description": "Search the Axios documentation and quickly look up how to make HTTP requests with Axios.",
   "icon": "command-icon.png",
   "author": "denizyoldas",
   "contributors": [

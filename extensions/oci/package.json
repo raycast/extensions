@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oci",
   "title": "Oracle Cloud",
-  "description": "Manage Oracle Cloud Infrastructure",
+  "description": "Manage Oracle Cloud Infrastructure (OCI): view instances, Object Storage buckets and objects, NoSQL tables, vaults and secrets, and email domains.",
   "icon": "red-cloud-white-bg-blue-b.png",
   "author": "xmok",
   "platforms": [

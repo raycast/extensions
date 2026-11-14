@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gumroad",
   "title": "Gumroad Sales",
-  "description": "View your sales and products from Gumroad",
+  "description": "View your Gumroad sales and products, with details for each sale and product.",
   "icon": "icon.png",
   "author": "eddiesigner",
   "contributors": [

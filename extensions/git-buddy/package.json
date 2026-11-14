@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-buddy",
   "title": "Git Buddy",
-  "description": "An opinionated, AI-powered Git assistant for commit messages, PR descriptions, and branch management tasks.",
+  "description": "Write git commit messages and pull request descriptions with AI, and list and manage branches in your repository.",
   "icon": "command-icon.png",
   "author": "gianfranco",
   "categories": [

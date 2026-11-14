@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rg-adguard-links",
   "title": "RG AdGuard Links",
-  "description": "Convert Microsoft Store URLs to rg-adguard.net download links",
+  "description": "Convert Microsoft Store app URLs into direct download links via rg-adguard.net to download apps without the Store.",
   "icon": "icon.png",
   "author": "jergensturdley",
   "contributors": [

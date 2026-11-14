@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codexrunway-reset-tracker",
   "title": "CodexRunway Reset Tracker",
-  "description": "Track CodexRunway usage reset schedule and completion status right from the menu bar",
+  "description": "Track CodexRunway usage reset schedule and status in the menu bar, and browse the reset history.",
   "icon": "icon.png",
   "author": "evilmouth",
   "categories": [

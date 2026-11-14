@@ -4,7 +4,7 @@
   "private": true,
   "name": "lingo-rep-raycast",
   "title": "Lingorep - Translate, Repeat, Memorize",
-  "description": "Translate, save and repeat translations to increase your vocabulary",
+  "description": "Translate words and phrases into 100+ languages, save them, and review them later with spaced repetition to build vocabulary with LingoRep.",
   "icon": "command-icon.png",
   "author": "oleksandr_oliynyk",
   "categories": [

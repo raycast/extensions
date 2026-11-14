@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "android-screen-capture",
   "title": "Android Screen Capture",
-  "description": "Screenshot & screenrecords of Android via ADB",
+  "description": "Take screenshots and screen recordings of an Android device over ADB and copy them to your Mac clipboard.",
   "icon": "command-icon.png",
   "author": "chenhuazhao",
   "categories": [

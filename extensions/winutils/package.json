@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "name": "winutils",
   "title": "Winutils",
-  "description": "Launches ChrisTitusTech's WinUtil bootstrap from GitHub.",
+  "description": "Launch Chris Titus Tech's WinUtil Windows utility (debloat, tweaks and app installs) from its GitHub bootstrap script, with admin rights.",
   "icon": "favicons.png",
   "license": "MIT",
   "commands": [

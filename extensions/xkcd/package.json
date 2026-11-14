@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xkcd",
   "title": "XKCD Comics",
-  "description": "Browse the xkcd comics and keep track of the ones you've read.",
+  "description": "Browse xkcd comics, track the ones you've read, open a random unread comic and read its explanation on explain xkcd.",
   "icon": "icon.png",
   "author": "maggie",
   "contributors": [

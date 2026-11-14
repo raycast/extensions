@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "ableton-project-manager",
 	"title": "Ableton Project Manager",
-	"description": "Browse, organize, and listen to your Ableton Live projects",
+	"description": "Browse, tag and listen to your Ableton Live projects and bounces, and organize them into collections on your Mac.",
 	"icon": "icon.png",
 	"author": "iyek",
 	"platforms": [

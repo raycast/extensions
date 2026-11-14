@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-forge",
   "title": "Laravel Forge",
-  "description": "View and manage your Laravel Forge-managed servers",
+  "description": "Manage Laravel Forge servers and sites: deploy sites, read deployment logs, restart services, reboot servers, and see active deploys in the menu bar.",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
   "contributors": [

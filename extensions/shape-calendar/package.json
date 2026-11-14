@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shape-calendar",
   "title": "Shape Calendar",
-  "description": "Plan your active life with Shape Calendar — search, create, and manage your training activities",
+  "description": "Search and plan training activities in Shape Calendar, see today's workout and this week's plan, and check readiness and training load.",
   "icon": "logo.png",
   "license": "MIT",
   "author": "samuelkraft",

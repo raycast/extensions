@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webkit-developer-docs",
   "title": "WebKit Developer Documentation",
-  "description": "Search and view WebKit docs",
+  "description": "Search and read the WebKit developer documentation from docs.webkit.org.",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
   "categories": [

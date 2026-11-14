@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oh-my-zsh-git-alias",
   "title": "Oh My Zsh Git Alias",
-  "description": "Quick search git alias.",
+  "description": "Search Oh My Zsh Git plugin aliases and see the Git command each alias runs.",
   "icon": "icon.png",
   "author": "yufeikang",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lastfm",
   "title": "Last.fm",
-  "description": "Display your favourite, recently played tracks, your top albums and artists and more from Last.fm on Raycast!",
+  "description": "View your Last.fm now playing track, top and recent songs, top artists and albums, and show the current scrobble in the menu bar.",
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",

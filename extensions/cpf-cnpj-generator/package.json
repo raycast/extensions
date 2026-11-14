@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cpf-cnpj-generator",
   "title": "CPF/CNPJ Generator",
-  "description": "Generate CPF (Cadastro de Pessoa Físca) number or CNPJ (Cadastro Nacional de Pessoa Jurídica) number data for developers",
+  "description": "Generate valid random CPF and CNPJ numbers (Brazilian tax IDs) for testing, and copy or paste them into the frontmost app.",
   "icon": "icon.png",
   "author": "gstvds",
   "license": "MIT",

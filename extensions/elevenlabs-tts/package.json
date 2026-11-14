@@ -3,7 +3,7 @@
   "name": "elevenlabs-tts",
   "version": "1.2.0",
   "title": "ElevenLabs TTS",
-  "description": "Convert selected or copied text to lifelike speech using ElevenLabs' premium AI voices",
+  "description": "Read selected or copied text aloud with ElevenLabs AI text-to-speech voices, with adjustable voice stability and clarity.",
   "icon": "extension-icon.png",
   "author": "lachie_james",
   "contributors": [

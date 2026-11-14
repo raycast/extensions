@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion_researcher",
   "title": "Notion Researcher",
-  "description": "An extension to supercharge your research workflow with Notion",
+  "description": "Add arXiv research papers to a Notion database with metadata, references and AI explanations, and save concept explanations to Notion.",
   "icon": "command_icon.png",
   "author": "raz_gaon",
   "license": "MIT",

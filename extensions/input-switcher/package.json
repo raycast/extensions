@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "input-switcher",
   "title": "Keyboard Layout Switcher",
-  "description": "Extension to switch keyboard layouts",
+  "description": "Switch keyboard layouts and input sources on your Mac, or toggle to the next layout with a hotkey.",
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "license": "MIT",

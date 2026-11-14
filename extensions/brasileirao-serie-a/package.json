@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brasileirao-serie-a",
   "title": "Brasileirão Série A",
-  "description": "View the Brazilian first division upcoming matches, standings and results.",
+  "description": "See Brasileirão Série A fixtures, results and the league table for the Brazilian football first division.",
   "icon": "icon.png",
   "author": "willian",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dolar-hoy",
   "title": "Dolar Hoy Argentina",
-  "description": "US Dollars conversion to Argentine Pesos",
+  "description": "Check today's US dollar to Argentine peso rate (dólar blue and oficial), see historical rates, and convert between USD and ARS.",
   "icon": "app-icon.png",
   "author": "Gusta",
   "categories": [

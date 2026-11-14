@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitly-url-shortener",
   "title": "Bitly URL Shortener",
-  "description": "Quickly shorten the selected URL or current clipboard URL with Bitly",
+  "description": "Shorten the selected or copied URL with Bitly and copy the short link, and list the links you have shortened.",
   "icon": "command-icon.png",
   "categories": [
     "Communication"

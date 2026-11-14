@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pritunl",
   "title": "Connect Pritunl Vpn Tunnel",
-  "description": "Connects to VPN using Pritunl client",
+  "description": "Connect or disconnect a configured Pritunl VPN tunnel with one command.",
   "icon": "icon.png",
   "author": "maksym_prokopov",
   "categories": [

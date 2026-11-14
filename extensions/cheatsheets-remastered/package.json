@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cheatsheets-remastered",
   "title": "Cheatsheets Remastered",
-  "description": "Browse bundled developer references, personal Markdown and synced GitHub cheatsheets offline. Search, favorite and organize your sheets.",
+  "description": "Browse DevHints developer cheatsheets offline, write your own Markdown cheatsheets and sync cheatsheets from GitHub repositories.",
   "icon": "logo.png",
   "author": "smcnab1",
   "contributors": [],

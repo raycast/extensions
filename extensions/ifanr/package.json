@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ifanr",
   "title": "ifanr",
-  "description": "Read the latest news from ifanr",
+  "description": "Read the latest Chinese tech and gadget news from ifanr (爱范儿).",
   "icon": "icon.png",
   "author": "madcodelife",
   "categories": [

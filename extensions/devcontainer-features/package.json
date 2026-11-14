@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "devcontainer-features",
   "title": "DevContainer Features",
-  "description": "Search and browse devcontainer features from the official registry",
+  "description": "Search Dev Container features from the official registry, read their docs and options, and copy the feature reference.",
   "icon": "icon.png",
   "author": "keito4",
   "categories": [

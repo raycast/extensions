@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linkpilot",
   "title": "LinkPilot",
-  "description": "Share a password or API key as a link that opens once, and shorten URLs, without leaving Raycast",
+  "description": "Share a password or API key as an encrypted one-time secret link that self-destructs after one view, and shorten URLs.",
   "icon": "command-icon.png",
   "author": "tetracorellc",
   "categories": [

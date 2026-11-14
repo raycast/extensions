@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "image-diff-checker",
   "title": "Image Diff Checker",
-  "description": "Image Diff Checker compares two images and highlights the differences. It supports file formats such as JPEG, JPG, PNG, and GIF.",
+  "description": "Compare two images and highlight the pixel differences, for JPEG, PNG and GIF files, with an adjustable threshold.",
   "icon": "image-diff-checker-icon.png",
   "author": "yasuhiroyamamoto",
   "categories": [

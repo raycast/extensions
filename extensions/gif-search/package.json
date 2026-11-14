@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gif-search",
   "title": "GIF Search",
-  "description": "Search the Internet for animated GIFs",
+  "description": "Search animated GIFs from Giphy, Klipy and The Finer Gifs Club, and copy, paste or download them, with favorites and recent GIFs.",
   "icon": "command-icon.png",
   "author": "josephschmitt",
   "platforms": [

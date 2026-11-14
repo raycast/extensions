@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lokalise",
   "title": "Lokalise",
-  "description": "Manage Lokalise translations directly from Raycast. Add new translation keys, search and browse existing translations, and copy values to clipboard—all without leaving your workflow.",
+  "description": "Add Lokalise translation keys, search and browse translations, copy values, and let Raycast AI extract keys from design screenshots.",
   "icon": "lokalise.png",
   "author": "ikupenov",
   "platforms": [

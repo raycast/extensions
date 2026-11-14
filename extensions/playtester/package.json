@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "playtester",
   "title": "Playtester",
-  "description": "Discover alphas, betas, demos for upcoming indie games on Steam, Playstation, Xbox",
+  "description": "Discover alphas, betas and demos of upcoming indie games on Steam, PlayStation and Xbox, and suggest new games to Playtester.",
   "icon": "extension-icon.png",
   "owner": "playtesterhq",
   "access": "public",

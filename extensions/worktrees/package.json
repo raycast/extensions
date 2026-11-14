@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "worktrees",
   "title": "Git Worktrees",
-  "description": "View, add, and remove git worktrees.",
+  "description": "View and remove Git worktrees across your repos, and add new worktrees on a new branch from any starting branch.",
   "icon": "command-icon.png",
   "author": "canac",
   "categories": [

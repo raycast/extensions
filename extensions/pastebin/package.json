@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pastebin",
   "title": "Pastebin",
-  "description": "Create and manage Pastebin pastes",
+  "description": "Create, search and delete your Pastebin pastes, and set the syntax language, expiration and visibility of new pastes.",
   "icon": "pastebin.png",
   "author": "vimtor",
   "categories": [

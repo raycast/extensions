@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wordle",
   "title": "Wordle",
-  "description": "Play Wordle locally once a day.",
+  "description": "Play Wordle once a day offline in English or German and see your Wordle history.",
   "icon": "wordle-icon.png",
   "author": "chrisalxlng",
   "categories": [

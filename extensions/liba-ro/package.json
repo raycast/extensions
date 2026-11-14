@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "liba-ro_shortener",
   "title": "Liba.ro - URL Shortener",
-  "description": "The Libaro powered URL shortener\nShorten your URL in seconds",
+  "description": "Shorten long URLs in seconds with the liba.ro URL shortener by Libaro.",
   "icon": "logo.png",
   "author": "libaro",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ports",
   "title": "Port Manager",
-  "description": "Monitor and manage open ports on your system with the ability to kill processes using specific ports.",
+  "description": "List open TCP and UDP ports on Windows, see which process uses each port, and kill the process to free a port.",
   "icon": "extension.png",
   "license": "MIT",
   "type": "module",

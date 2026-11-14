@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zen-mode",
   "title": "Zen Mode",
-  "description": "Hide Everything. Mute Everything.",
+  "description": "Start, create and stop focus modes in the Zen Mode app on your Mac to hide apps and mute distractions.",
   "icon": "zenmode-icon.png",
   "author": "pradeepb28",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nature-remo",
   "title": "Nature Remo",
-  "description": "Control Nature Remo right from Raycast.",
+  "description": "Control your home appliances with Nature Remo, including air conditioners and infrared remote signals.",
   "icon": "nature-remo.png",
   "author": "uetchy",
   "scripts": {

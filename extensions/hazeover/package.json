@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hazeover",
   "title": "HazeOver Controls",
-  "description": "Control the HazeOver app.",
+  "description": "Toggle HazeOver window dimming on your Mac, change dimming intensity, and switch multi-window and multi-screen focus.",
   "icon": "hazeover-icon.png",
   "author": "ratoru",
   "license": "MIT",

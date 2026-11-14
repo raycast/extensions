@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chrome-profile-links",
   "title": "Chrome Profile Links",
-  "description": "Save links that open in a specific Google Chrome profile, or pick the profile every time you open them",
+  "description": "Save links that open in a specific Google Chrome profile, and search saved links and Chrome bookmarks to open them in the right profile.",
   "icon": "icon.png",
   "author": "h-tadashi",
   "categories": [

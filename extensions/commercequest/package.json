@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commercequest",
   "title": "CommerceQuest",
-  "description": "Access Spryker's CommerceQuest Forum",
+  "description": "Search Spryker's CommerceQuest community forum and preview posts.",
   "icon": "command-icon.png",
   "author": "skroll",
   "categories": [

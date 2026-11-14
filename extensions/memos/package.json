@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memos",
   "title": "Memos",
-  "description": "Manage Your Memos",
+  "description": "Send quick notes to your self-hosted Memos server, write memos in a form, and browse your memos list.",
   "icon": "logo.png",
   "author": "JakeYu",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "average-saham-indonesia",
   "title": "Average Saham Indonesia",
-  "description": "Calculate your Indonesian stock average price (Average Up / Average Down) instantly, right from Raycast.",
+  "description": "Calculate your new average price for Indonesian stocks (IDX) after buying more shares, for average up or average down.",
   "icon": "icon.png",
   "author": "uluumbch",
   "platforms": [

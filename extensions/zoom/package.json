@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoom",
   "title": "Zoom",
-  "description": "Start, schedule and join Zoom meetings.",
+  "description": "Start, schedule, join, edit and delete Zoom meetings, list upcoming meetings, and see this week's meetings in the menu bar, on Mac and Windows.",
   "icon": "zoom.png",
   "author": "thomaslombart",
   "owner": "raycast",

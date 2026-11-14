@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safe-secret",
   "title": "Safe Secret",
-  "description": "Safely share text over the web",
+  "description": "Share passwords and sensitive text securely over the web through a Safe Secret server link.",
   "icon": "command-icon.png",
   "author": "melonamin",
   "categories": [

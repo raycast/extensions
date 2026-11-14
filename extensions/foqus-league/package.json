@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "foqus-league",
   "title": "Foqus League",
-  "description": "Stats for Raycast Focus. Hours, streaks, weekly leagues and a shareable recap. Everything stays on your Mac.",
+  "description": "Track your Raycast Focus stats on your Mac: hours focused, streaks, weekly leagues and a shareable recap image, with today's time in the menu bar.",
   "icon": "icon.png",
   "author": "filipimiparebine",
   "categories": [

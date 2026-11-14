@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dotnet-api-browser",
   "title": ".NET API Browser",
-  "description": "Quickly search the .NET API catalog.",
+  "description": "Search the .NET API catalog on Microsoft Learn and open the documentation in your browser.",
   "icon": "dotnet-logo.png",
   "author": "vcsjones",
   "categories": [

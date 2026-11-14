@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "artificial-analysis-rankings",
   "title": "Artificial Analysis",
-  "description": "Quickly compare AI models ranked by Artificial Analysis Intelligence Index.",
+  "description": "Compare AI models from Artificial Analysis by intelligence, coding, speed, latency and token price, or put up to four models side by side.",
   "icon": "icon.png",
   "author": "NarenMedarametla",
   "license": "MIT",

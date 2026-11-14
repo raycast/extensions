@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "omni-news",
   "title": "Omni News",
-  "description": "Fetching news from omni.se",
+  "description": "Read the latest Swedish news from Omni (omni.se), with ads filtered out.",
   "icon": "omni_icon.png",
   "author": "MacRayCast",
   "categories": [

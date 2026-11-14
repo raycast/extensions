@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "decentraland",
   "title": "Decentraland",
-  "description": "Search and go directly to events and places in Decentraland",
+  "description": "Search current Decentraland events and districts and jump straight to them in the Decentraland metaverse.",
   "icon": "command-icon.png",
   "author": "fmiras",
   "contributors": [

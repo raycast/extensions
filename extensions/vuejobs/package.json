@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vuejobs",
   "title": "VueJobs",
-  "description": "Browse through our list of Vue.js jobs, find your perfect match and apply.Use the filter or search for more accurate results!",
+  "description": "Browse and search Vue.js job listings on VueJobs, filter them, and show the latest jobs in the Mac menu bar.",
   "icon": "vuejobs.png",
   "author": "abusiraj84",
   "categories": [

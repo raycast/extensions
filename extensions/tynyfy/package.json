@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tynyfy",
   "title": "Tynyfy - URL Shortener",
-  "description": "Shortens your boring long URLs",
+  "description": "Shorten the URL on your clipboard with the Tynyfy URL shortener.",
   "icon": "command-icon.png",
   "author": "kusthi",
   "categories": [

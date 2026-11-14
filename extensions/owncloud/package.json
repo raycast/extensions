@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "owncloud",
   "title": "ownCloud",
-  "description": "share files and folders, easy and secure",
+  "description": "Search files and folders in your ownCloud server.",
   "icon": "owncloud.png",
   "author": "xmok",
   "platforms": [

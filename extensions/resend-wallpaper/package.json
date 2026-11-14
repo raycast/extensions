@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "resend-wallpaper",
   "title": "Resend Wallpaper",
-  "description": "Get and set Resend official wallpapers.",
+  "description": "Browse and set official Resend wallpapers as your Mac desktop wallpaper, or switch to a random one automatically on a schedule.",
   "icon": "resend-icon.png",
   "author": "jopcmelo",
   "contributors": [

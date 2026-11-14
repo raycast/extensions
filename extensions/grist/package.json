@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grist",
   "title": "Grist",
-  "description": "Spreadsheet Software to End Data Chaos",
+  "description": "Browse Grist organizations, workspaces, documents, tables and records, and open them in Grist.",
   "icon": "grist.png",
   "author": "xmok",
   "platforms": [

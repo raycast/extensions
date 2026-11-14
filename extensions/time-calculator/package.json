@@ -3,7 +3,7 @@
   "name": "time-calculator",
   "title": "Time Addition Calculator",
   "author": "marc.cinema",
-  "description": "Calculate total hours from multiple time entries supporting both HH:MM and decimal formats",
+  "description": "Add up hours from multiple time entries in HH:MM or decimal format, and see the total in both formats for timesheets.",
   "icon": "icon.png",
   "categories": [
     "Productivity"

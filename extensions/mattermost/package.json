@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mattermost",
   "title": "Mattermost",
-  "description": "Search for chats, see unread messages, and set your presence status.",
+  "description": "Search Mattermost channels and direct messages and open them in the app, and set your custom status and presence.",
   "icon": "mattermost-icon-rounded.png",
   "author": "ernest0n",
   "contributors": [

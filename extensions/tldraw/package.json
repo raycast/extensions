@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldraw",
   "title": "tldraw",
-  "description": "Creates and persists tldraw projects",
+  "description": "Create new tldraw whiteboard projects, save existing ones, and open them from a list.",
   "icon": "tldraw-icon.png",
   "author": "zephraph",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bored",
   "title": "Bored",
-  "description": "Let's find you something to do!",
+  "description": "Get a random activity suggestion when you are bored, powered by the Bored API.",
   "icon": "logo.png",
   "author": "BossElijah",
   "categories": [

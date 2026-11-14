@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ollama",
   "title": "Ollama AI",
-  "description": "Perform Local Inference with Ollama",
+  "description": "Chat with local or remote Ollama AI models, rewrite and translate text, describe images, summarize websites and manage models.",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
   "contributors": [

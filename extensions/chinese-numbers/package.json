@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-numbers",
   "title": "Chinese Numbers",
-  "description": "Chinese Numbers is a Raycast Extension to convert Arabic numbers to Chinese numbers.",
+  "description": "Convert Arabic numbers to Chinese numerals in lowercase, uppercase (financial) or RMB currency amount format.",
   "icon": "chinese-numbers.png",
   "author": "raffeyang",
   "categories": [

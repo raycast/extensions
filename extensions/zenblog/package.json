@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zenblog",
   "title": "Zenblog",
-  "description": "A tiny blogging CMS",
+  "description": "Browse your Zenblog blogs' posts, categories, tags and authors, and view posts.",
   "icon": "zenblog.png",
   "author": "xmok",
   "platforms": [

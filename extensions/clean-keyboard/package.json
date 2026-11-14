@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clean-keyboard",
   "title": "Clean Keyboard",
-  "description": "Lock your keyboard to clean it easily",
+  "description": "Lock your keyboard for a set time so you can clean it without triggering key presses.",
   "icon": "extension_icon.png",
   "author": "ike-gg",
   "contributors": [

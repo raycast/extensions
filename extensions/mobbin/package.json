@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mobbin",
   "title": "Mobbin Search",
-  "description": "Search Mobbin screens, flows, and sections from Raycast.",
+  "description": "Search Mobbin for app screens, product flows and website sections in natural language or from selected text, for UI design inspiration.",
   "icon": "icon.png",
   "author": "noss",
   "license": "MIT",

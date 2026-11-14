@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deta-space",
   "title": "Deta Space",
-  "description": "Raycast Integration for Deta Space",
+  "description": "Search Deta Space Discovery apps, your Canvas, builder projects, collections and docs.",
   "icon": "icon.png",
   "categories": [
     "Web",

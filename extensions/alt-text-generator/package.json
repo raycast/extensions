@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alt-text-generator",
   "title": "Alt-Text Generator",
-  "description": "This extension makes it easy to generate descriptive alt-text for images. Simply provide an image URL, and the extension will make a call to the openai api to create a concise and descriptive alt text. This extension is Bring-Your-Own-Key (support for OpenAI only at the moment). If you don't have an API key yet, you can sign up for one at [OpenAI - Api Keys](https://platform.openai.com/api-keys).",
+  "description": "Generate image alt text with the OpenAI API from a Finder selection, image URL or clipboard image. Requires your own OpenAI API key.",
   "icon": "icon.png",
   "author": "jack_casica",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reflect-open",
   "title": "Reflect Open",
-  "description": "Quickly append thoughts and tasks to your Reflect Open daily note.",
+  "description": "Append notes and tasks to your Reflect Open daily note through its local capture inbox, no API key needed.",
   "icon": "reflect-open.png",
   "author": "jaseem_ts",
   "categories": [

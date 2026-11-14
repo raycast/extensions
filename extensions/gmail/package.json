@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gmail",
   "title": "Gmail",
-  "description": "Raycast Extension to manage Gmail",
+  "description": "Read, search and manage your Gmail inbox, drafts, archive, spam and trash, and see unread emails in the menu bar.",
   "icon": "gmail.png",
   "author": "tonka3000",
   "categories": [

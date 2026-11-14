@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jev",
   "title": "Jev",
-  "description": "Run saved checks, file documents into configured folders, and search browser bookmarks with TypeSafe Jev.",
+  "description": "Run saved text checks and categories, file documents into folders with undo, and search browser bookmarks by meaning with TypeSafe Jev.",
   "icon": "icon.png",
   "author": "Olli0103",
   "platforms": [

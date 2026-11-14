@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sendme",
   "title": "Sendme File Share",
-  "description": "Send and receive files peer-to-peer directly from Raycast with no intermediary servers or accounts required",
+  "description": "Send and receive files peer-to-peer with sendme tickets, with no servers or accounts required.",
   "icon": "command-icon.png",
   "author": "nazif_ishrak",
   "categories": [

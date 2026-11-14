@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-highlights",
   "title": "YouTube Highlights",
-  "description": "Capture and manage highlights from YouTube videos with timestamps",
+  "description": "Capture timestamped highlights and notes from the YouTube video in your browser, search them by video, and back up and sync your highlights.",
   "icon": "extension-icon-big.png",
   "author": "itskofio",
   "platforms": [

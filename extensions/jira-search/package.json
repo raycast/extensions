@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-search",
   "title": "Jira Search",
-  "description": "Search for Jira issues (more tolerant and powerful than built-in), projects, boards and filters.",
+  "description": "Search Jira issues by text, project, type and assignee with flexible syntax, and find Jira projects, boards and filters.",
   "icon": "command-icon.png",
   "author": "sven",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shortcut-library",
   "title": "Shortcut Library",
-  "description": "Your own custom keyboard shortcuts, grouped and fuzzy-searchable",
+  "description": "Keep a fuzzy-searchable library of your custom keyboard shortcuts, grouped by app, and import shortcut customizations from macOS app menus.",
   "keywords": [
     "shortcuts",
     "keyboard",

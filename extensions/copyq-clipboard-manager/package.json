@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copyq-clipboard-manager",
   "title": "CopyQ Clipboard Manager",
-  "description": "Lists CopyQ clipboard entries and allows user to paste them.",
+  "description": "Browse your CopyQ clipboard history by tab, preview entries and paste them into the active app.",
   "icon": "command-icon.png",
   "author": "andrewcincotta",
   "contributors": [

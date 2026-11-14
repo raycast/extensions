@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nanoid",
   "title": "Generate Nanoid",
-  "description": "A tiny, secure, URL friendly, unique string ID generator for JavaScript",
+  "description": "Generate a new Nano ID, a short, secure, URL-friendly unique string ID, and copy it to the clipboard.",
   "icon": "command-icon.png",
   "author": "roelvan",
   "contributors": [

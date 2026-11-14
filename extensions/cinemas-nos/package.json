@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cinemas-nos",
   "title": "Cinemas NOS",
-  "description": "Shows all movies and sessions in display by Cinemas NOS.",
+  "description": "Browse movies now showing and session times at Cinemas NOS in Portugal.",
   "icon": "command-icon.png",
   "author": "diogo_ferrer",
   "categories": [

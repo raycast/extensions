@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timely",
   "title": "Timely",
-  "description": "List and create Timely projects from Raycast.",
+  "description": "Search, open and create projects in Timely time tracking.",
   "icon": "timely-icon.png",
   "author": "Dohm",
   "platforms": [

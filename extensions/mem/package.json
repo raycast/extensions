@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mem",
   "title": "Mem",
-  "description": "Access Mem functionality through Raycast using the Mem API. The Mem API is still growing and is currently very limited.",
+  "description": "Create a new note in Mem with Markdown, optionally scheduled for later, using the Mem API.",
   "icon": "mem.png",
   "author": "brianfakhoury",
   "categories": [

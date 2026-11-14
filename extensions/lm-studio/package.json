@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lm-studio",
   "version": "1.0.0",
-  "description": "Chat with, manage, and search local AI models running in LM Studio.",
+  "description": "Chat with local AI models in LM Studio, transform selected text, load and download models, and search your notes, privately on your Mac.",
   "title": "LM Studio",
   "icon": "icon.png",
   "author": "vineeth_sai_narajala",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fetch",
   "title": "Fetch",
-  "description": "Download one or many files with curl: batch downloads, URL range patterns, and download history.",
+  "description": "Download files from a URL with curl: batch downloads from a list of URLs, numbered URL range patterns, and a download history.",
   "icon": "fetch-icon.png",
   "author": "chrismessina",
   "platforms": [

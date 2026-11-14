@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-studio",
   "title": "Screen Studio",
-  "description": "Raycast extension that allows controlling the Screen Studio app easily",
+  "description": "Control Screen Studio: start recording a display, window or area, finish, cancel or restart recordings, and copy projects as ZIP.",
   "icon": "command-icon.png",
   "author": "pie6k",
   "access": "public",

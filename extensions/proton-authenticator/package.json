@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proton-authenticator",
   "title": "Proton Authenticator",
-  "description": "Quick access to TOTP entries from Proton Authenticator",
+  "description": "View and copy TOTP 2FA codes from Proton Authenticator, read from its local database or a JSON export, with fuzzy search.",
   "icon": "proton-icon.png",
   "author": "Fared",
   "categories": [

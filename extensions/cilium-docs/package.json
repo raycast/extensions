@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cilium-docs",
   "title": "Cilium Docs",
-  "description": "An extension for Raycast that let's you access Cilium Docs through Raycast.",
+  "description": "Search the Cilium documentation and open pages in your browser.",
   "icon": "command-icon.png",
   "author": "dario_mader",
   "contributors": [

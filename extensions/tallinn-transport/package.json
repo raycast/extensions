@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tallinn-transport",
   "title": "Tallinn Transport",
-  "description": "Search routes, view real-time departures, and check announcements for Tallinn's public transport system",
+  "description": "See real-time bus and tram departures in Tallinn, search route times by stop and read public transport announcements.",
   "categories": [
     "Web"
   ],

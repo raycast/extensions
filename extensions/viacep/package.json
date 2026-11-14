@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "viacep",
   "title": "ViaCEP",
-  "description": "Find Brazilian addresses and postal codes",
+  "description": "Find Brazilian addresses by CEP postal code, or look up a CEP from an address, with the ViaCEP API.",
   "icon": "viacep-icon.png",
   "author": "xilopaint",
   "platforms": [

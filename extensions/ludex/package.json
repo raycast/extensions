@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ludex",
   "title": "Ludex",
-  "description": "Launch installed games and open their save, config or install folders",
+  "description": "Launch installed PC games and open their save, config or install folders, using the Ludusavi game save database. For Windows.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

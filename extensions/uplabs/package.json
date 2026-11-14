@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uplabs",
   "title": "UpLabs",
-  "description": "List UpLabs Inspirations",
+  "description": "Browse UpLabs design inspirations. The UpLabs API is no longer available, so this extension is deprecated.",
   "icon": "icon.png",
   "author": "gebeto",
   "categories": [

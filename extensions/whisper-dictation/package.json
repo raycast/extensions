@@ -2,7 +2,7 @@
   "name": "whisper-dictation",
   "version": "1.0.0",
   "title": "Whisper Dictation",
-  "description": "A powerful dictation tool that uses Whisper for speech-to-text transcription, with AI-powered refinement options.",
+  "description": "Dictate speech to text locally with whisper.cpp, refine the text with AI like Ollama, download Whisper models and browse dictation history.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "author": "finjo",

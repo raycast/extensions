@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "escape-regexp-characters",
   "title": "Escape RegExp Characters",
-  "description": "Escape RegExp special characters.",
+  "description": "Escape special characters in a string so it can be used in a regular expression (RegExp).",
   "icon": "command-icon.png",
   "author": "HerbertLu",
   "categories": [

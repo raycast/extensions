@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "single-focus",
   "title": "Single Focus",
-  "description": "Closes all the open apps except the frontmost one",
+  "description": "Quit all open apps on your Mac except the one in front, to focus on a single app.",
   "icon": "command-icon.png",
   "author": "Mmehdi06",
   "contributors": [

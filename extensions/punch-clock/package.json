@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "punch-clock",
   "title": "Punch Clock",
-  "description": "Track your working hours: set a total work time and break length, then watch a live countdown in the macOS menu bar.",
+  "description": "Track your working hours with a live countdown of remaining work and break time in the Mac menu bar.",
   "icon": "icon.png",
   "author": "FL0R1AN",
   "platforms": [

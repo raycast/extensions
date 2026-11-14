@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "substack",
   "title": "Substack",
-  "description": "Search Substack posts and profiles and create newsletter drafts from Raycast",
+  "description": "Search Substack posts and profiles, create and edit newsletter drafts from Markdown, and manage multiple Substack accounts.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "categories": [

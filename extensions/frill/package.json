@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frill",
   "title": "Frill",
-  "description": "Capture, organize, and announce product feedback in one place",
+  "description": "Manage Frill product feedback: ideas, announcements, statuses, topics and followers.",
   "icon": "frill.png",
   "author": "xmok",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "subscription-manager",
   "title": "Subscription Manager",
-  "description": "Track and manage all your recurring subscriptions",
+  "description": "Track recurring subscriptions in a billing calendar, see spending analytics, get reminders before bills and a monthly total in the menu bar.",
   "icon": "subscription-icon.png",
   "author": "shivraj-roy",
   "platforms": [

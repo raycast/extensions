@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nato-phonetic-alphabet",
   "title": "NATO Phonetic Alphabet",
-  "description": "For knowing and conveniently using the NATO phonetic alphabet.",
+  "description": "Spell words or sentences in the NATO phonetic alphabet (Alfa, Bravo, Charlie) and view the full alphabet.",
   "icon": "command-icon.png",
   "author": "jns",
   "contributors": [

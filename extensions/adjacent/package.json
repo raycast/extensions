@@ -3,7 +3,7 @@
   "name": "adjacent",
   "version": "0.1.0",
   "title": "Adjacent",
-  "description": "Browse, search, and read news on Adjacent prediction markets, indices, and rates.",
+  "description": "Browse and search prediction markets, indices and rates on Adjacent, read market news and see live index levels in the menu bar.",
   "icon": "icon.png",
   "author": "Lucas-Kohorst",
   "categories": [

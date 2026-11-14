@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dropshare",
   "title": "Dropshare",
-  "description": "Create screen captures and upload files with Dropshare",
+  "description": "Take screenshots and screen recordings, upload files and shorten URLs with Dropshare on your Mac.",
   "icon": "dropshare_512.png",
   "author": "tjosten",
   "categories": [

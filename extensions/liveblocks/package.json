@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "liveblocks",
   "title": "Liveblocks",
-  "description": "Exposes the Liveblocks API via a pleasant and easy to use UI.",
+  "description": "Search Liveblocks rooms and view active users, read or initialize room storage, broadcast events and get or send Yjs document updates.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dice-and-coin",
   "title": "Dice & Coin",
-  "description": "Quickly and easily make random decisions or generate a random number",
+  "description": "Flip a coin, roll a six-sided die or a custom die to make random decisions or pick a random number.",
   "icon": "dice.png",
   "author": "yonbergman",
   "contributors": ["xmok"],

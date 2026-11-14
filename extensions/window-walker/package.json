@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "window-walker",
   "title": "Window Walker",
-  "description": "Quickly switch between open windows. Search by app name or window title, minimize, close, or bring any window to the front.",
+  "description": "Switch between open windows on Windows by app name or title, like Alt-Tab, and minimize, close, pin or move windows to layouts.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

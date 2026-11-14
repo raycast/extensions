@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "daycal-google-calendar",
   "title": "DayCal - Google Calendar",
-  "description": "A fast Google Calendar schedule, menu bar, quick add, and event management extension for Raycast.",
+  "description": "View and manage your Google Calendar schedule, quick add events in natural language and see upcoming events in the Mac menu bar.",
   "icon": "daycal.png",
   "author": "jonah_tweed",
   "platforms": [

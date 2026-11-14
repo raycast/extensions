@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cl-indicators",
   "title": "Chilean Indicators",
-  "description": "Check Chilean financial indicators — Dólar, UF, Euro and UTM — powered by mindicador.cl",
+  "description": "Check Chilean financial indicators: Dólar, UF, Euro and UTM values in CLP from mindicador.cl, and copy them.",
   "icon": "icon.png",
   "author": "rodrigoherera",
   "categories": [

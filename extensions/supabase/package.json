@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "supabase",
   "title": "Supabase",
-  "description": "Browse and manage your Supabase projects and database branches",
+  "description": "Browse your Supabase projects and database branches across organizations, open them in the dashboard and copy project references and URLs.",
   "icon": "icon.png",
   "author": "keito4",
   "categories": [

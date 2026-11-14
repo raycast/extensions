@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anycoffee",
   "title": "Any Coffee",
-  "description": "Explore all the specialty coffee roasters.",
+  "description": "Search a directory of specialty coffee roasters and filter them by country.",
   "icon": "icon.png",
   "author": "aymericio",
   "categories": [

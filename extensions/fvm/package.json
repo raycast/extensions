@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fvm",
   "title": "FVM",
-  "description": "Easily manage Flutter SDK versions with FVM.",
+  "description": "Manage Flutter SDK versions with FVM: browse Flutter releases, install versions and see the SDKs cached on your Mac.",
   "icon": "flutter_logo.png",
   "author": "leoafarias",
   "categories": [

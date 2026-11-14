@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "layoutlock",
   "title": "LayoutLock",
-  "description": "Save and restore LayoutLock window layouts from Raycast.",
+  "description": "Save and restore macOS window layouts with the LayoutLock app.",
   "icon": "icon.png",
   "author": "brkgng",
   "access": "public",

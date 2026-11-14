@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nippon-colors",
   "title": "Nippon Colors",
-  "description": "explore nippon colors!",
+  "description": "Browse traditional Japanese colors from Nippon Colors and copy their HEX color codes.",
   "icon": "nippon_color_icon.png",
   "author": "nagauta",
   "categories": [

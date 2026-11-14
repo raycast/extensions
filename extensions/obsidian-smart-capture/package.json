@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian-smart-capture",
   "title": "Obsidian Smart Capture",
-  "description": "Smart capture anything into Obsidian",
+  "description": "Capture selected text, browser links and notes into Obsidian, append to notes or add tasks, using the Advanced URI plugin.",
   "icon": "command-icon.png",
   "author": "millin_gabani",
   "contributors": [

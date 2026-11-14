@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "advanced-replace",
   "title": "Advanced Replace",
-  "description": "Extract and replace text using custom regex.",
+  "description": "Find and replace text with saved regex rules, extract matches from the selection or clipboard, and run rules from hotkey quick slots.",
   "icon": "advanced-replace.png",
   "author": "rocksack",
   "categories": [

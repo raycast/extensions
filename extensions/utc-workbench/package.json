@@ -3,7 +3,7 @@
   "name": "utc-workbench",
   "version": "1.0.0",
   "title": "UTC Workbench",
-  "description": "Timestamp interpretation and timeline reconstruction for developer workflows",
+  "description": "Paste log lines to normalize timestamps from any format to UTC, build an incident timeline, and export it as JSON, CSV or Markdown.",
   "icon": "icon.png",
   "author": "dfrancour",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "productboard",
   "title": "Productboard",
-  "description": "Add and view notes in Productboard quickly. Supports markdown.",
+  "description": "View and add Markdown notes and view objectives in Productboard.",
   "icon": "logo.png",
   "author": "honzatmn",
   "contributors": [

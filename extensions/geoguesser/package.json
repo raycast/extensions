@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geoguesser",
   "title": "Geoguesser",
-  "description": "Allow you to check your profile, ranking and show you the current daily mission",
+  "description": "View your GeoGuessr profile and stats, today's daily challenge and your recent game history.",
   "icon": "gg-icon.png",
   "author": "boosteblume",
   "platforms": [

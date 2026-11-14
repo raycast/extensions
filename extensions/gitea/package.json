@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitea",
   "title": "Gitea",
-  "description": "Check your notifications and manage issues and pull requests.",
+  "description": "Check Gitea notifications, list and search your issues and pull requests, create issues, browse repositories, and see unread count in the menu bar.",
   "icon": "logo/gitea.png",
   "author": "mitsimi",
   "platforms": [

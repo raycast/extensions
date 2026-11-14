@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aspect-raytio",
   "title": "Aspect Raytio",
-  "description": "Calculate easily the aspect ratio for different sizes based on a width or height.",
+  "description": "Calculate aspect ratios and resize dimensions from a width or height, with default and custom ratios.",
   "icon": "icon.png",
   "author": "ickas",
   "categories": [

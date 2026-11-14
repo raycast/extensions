@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gemini-tts",
   "title": "Gemini TTS",
-  "description": "Read selected text aloud with Gemini TTS. Supports Gemini 3.1 Flash TTS Preview plus Gemini 2.5 Flash and Pro Preview TTS.",
+  "description": "Read selected text aloud with Google Gemini text-to-speech, choose voices, control speed, resume long readings, and see status in the menu bar.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [

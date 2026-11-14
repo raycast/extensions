@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "infiniterm",
   "title": "Infiniterm",
-  "description": "Open Finder folders in infiniterm, in a workspace you pick or a new one.",
+  "description": "Open Finder folders, files and git diffs in the infiniterm terminal as cards, send text or saved commands to cards and jump between workspaces.",
   "icon": "icon.png",
   "author": "tarikkavaz",
   "categories": [

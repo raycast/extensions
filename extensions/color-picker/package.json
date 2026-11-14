@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "color-picker",
   "title": "Color Picker",
-  "description": "Pick and organize colors, everywhere on your Mac",
+  "description": "Pick colors from anywhere on screen, copy them as HEX, RGB, HSL or OKLCH, convert and name colors, and save favorites in the menu bar.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "groundhog-day",
   "title": "Groundhog Day",
-  "description": "Free, accurate, and portable data on prognosticating groundhogs and their yearly predictions",
+  "description": "Browse prognosticating groundhogs like Punxsutawney Phil and their yearly Groundhog Day predictions, using groundhog-day.com data.",
   "icon": "groundhog.png",
   "author": "xmok",
   "categories": [

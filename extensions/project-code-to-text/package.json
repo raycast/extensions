@@ -1,7 +1,7 @@
 {
   "name": "project-code-to-text",
   "title": "Project Code to Text",
-  "description": "Consolidates project source code, structure, and metadata into a single text file optimized for AI analysis or archiving.",
+  "description": "Combine a project's source code, folder structure and metadata into one text file to paste into ChatGPT, Claude or other AI tools, or to archive.",
   "icon": "command-icon.png",
   "author": "borzov",
   "contributors": [

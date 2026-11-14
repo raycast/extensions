@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kafka-ui",
   "title": "Kafka UI",
-  "description": "Inspect Kafka consumer group lag, browse topics, and open Kafka UI dashboards. Powered by the Kafka UI open-source project.",
+  "description": "Inspect Apache Kafka consumer group lag per topic and partition, browse topics, and open dashboards through Kafka UI (Kafbat UI).",
   "icon": "command-icon.png",
   "author": "nirrosh",
   "license": "MIT",

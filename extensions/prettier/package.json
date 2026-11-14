@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prettier",
   "title": "Prettier Code",
-  "description": "Format code with Prettier",
+  "description": "Format JavaScript, TypeScript, JSON, CSS or HTML from your clipboard with Prettier and paste the formatted code.",
   "icon": "prettier-logo.png",
   "author": "lin",
   "contributors": [

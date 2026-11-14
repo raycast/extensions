@@ -3,7 +3,7 @@
   "name": "protondb",
   "title": "ProtonDB",
   "type": "module",
-  "description": "Browse game information for Proton, Linux, Steam Deck, and SteamOS.",
+  "description": "Check ProtonDB ratings to see how Steam games run on Linux, Proton, Steam Deck and SteamOS.",
   "icon": "protondb-icon.png",
   "author": "litomore",
   "platforms": [

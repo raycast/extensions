@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-camera-menu-bar",
   "title": "Open Camera Menu Bar",
-  "description": "Open the camera command from the menu bar",
+  "description": "Open Raycast's camera command from a Mac menu bar icon, to check your camera view quickly.",
   "icon": "command-icon.png",
   "author": "peduarte",
   "categories": [

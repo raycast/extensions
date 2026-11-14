@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "later",
   "title": "Read Later",
-  "description": "Read your tabs later",
+  "description": "Save your current browser tab to a read later list, add links manually, and mark them read or unread.",
   "icon": "command-icon.png",
   "author": "jimluo",
   "categories": [

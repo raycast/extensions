@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obs-control",
   "title": "OBS Control",
-  "description": "Control OBS Studio with websocket API",
+  "description": "Control OBS Studio via WebSocket: switch scenes, start or stop streaming and recording, and toggle the virtual camera, replay buffer and scene items.",
   "icon": "obs-control.png",
   "author": "Yukai",
   "contributors": [

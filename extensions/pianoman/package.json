@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pianoman",
   "title": "Pianoman",
-  "description": "Show piano chords and scales",
+  "description": "Look up piano chords and their inversions on a visual keyboard.",
   "icon": "pianoman.png",
   "author": "juhamust",
   "contributors": [

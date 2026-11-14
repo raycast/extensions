@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hexlify",
   "title": "Hexlify",
-  "description": "Convert between hex and binary representations",
+  "description": "Convert clipboard text to a hex string or decode a hex string back to text, and copy the result.",
   "icon": "command-icon.png",
   "author": "gkpln3",
   "license": "MIT",

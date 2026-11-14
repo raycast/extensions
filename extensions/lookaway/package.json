@@ -3,7 +3,7 @@
   "name": "lookaway",
   "version": "1.0.2",
   "title": "Lookaway",
-  "description": "Control the Lookaway app for managing breaks.",
+  "description": "Control the LookAway break reminder app on your Mac: start breaks, postpone breaks, and pause or resume work mode.",
   "icon": "lookaway-icon.png",
   "author": "kush",
   "contributors": [

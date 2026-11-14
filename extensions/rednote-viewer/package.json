@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rednote-viewer",
   "title": "RedNote Viewer",
-  "description": "Easy to view RedNote post in Raycast",
+  "description": "View RedNote (Xiaohongshu, 小红书) posts as in the browser. Requires your RedNote login cookie.",
   "icon": "rednote-viewer-icon.png",
   "author": "orangelckc",
   "contributors": [

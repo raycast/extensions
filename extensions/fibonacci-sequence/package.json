@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fibonacci-sequence",
   "title": "Fibonacci Sequence",
-  "description": "Gives you the fibonacci sequence for using in story points on engineering tickets",
+  "description": "Show the Fibonacci sequence for estimating story points on engineering tickets.",
   "icon": "command-icon.png",
   "author": "adambutler",
   "categories": [

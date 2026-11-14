@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-lighting-node-search",
   "title": "Search Lightning Nodes",
-  "description": "A Raycast extension for searching Lightning Nodes",
+  "description": "Search Bitcoin Lightning Network nodes by name using the Amboss API and view node details.",
   "icon": "command-icon.png",
   "author": "bufo24",
   "contributors": [

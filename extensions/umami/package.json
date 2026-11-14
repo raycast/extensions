@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "umami",
   "title": "Umami",
-  "description": "The modern analytics platform for effortless insights",
+  "description": "View your Umami analytics websites and stats, including in the menu bar, browse users and update your profile, for Umami Cloud or self-hosted.",
   "icon": "umami.png",
   "author": "xmok",
   "categories": [

@@ -5,7 +5,7 @@
   "categories": [
     "Security"
   ],
-  "description": "Secrets management on autopilot",
+  "description": "Manage Infisical projects and secrets: add, edit, delete and copy secrets per environment, or copy all as a .env file.",
   "icon": "infisical.png",
   "author": "xmok",
   "license": "MIT",

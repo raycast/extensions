@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mayar",
   "title": "Mayar",
-  "description": "Mayar Raycast Extensions",
+  "description": "Check your Mayar payment account balance and see recent transactions in the menu bar.",
   "icon": "mayar-command-icon.png",
   "author": "friantom",
   "categories": [

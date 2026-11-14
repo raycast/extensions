@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pip",
   "title": "PiP",
-  "description": "Watch video in Picture in Picture or Full Screen mode",
+  "description": "Play web videos in Picture in Picture or native full screen mode in Safari, Chrome, Edge and other Chromium or WebKit browsers.",
   "icon": "pip-icon.png",
   "author": "koinzhang",
   "license": "MIT",

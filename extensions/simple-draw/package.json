@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-draw",
   "title": "Simple Draw",
-  "description": "Annotate clipboard images with drawing tools",
+  "description": "Annotate clipboard images and screenshots on your Mac with freehand drawing, boxes, ovals, arrows and text labels.",
   "icon": "command-icon.png",
   "author": "duduzeta",
   "categories": [

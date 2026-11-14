@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "perry",
   "title": "Perry",
-  "description": "Execute SQL queries on PostgreSQL databases",
+  "description": "Run SQL queries on PostgreSQL databases with autocomplete, browse and filter tables, and save queries and query history.",
   "icon": "icon.png",
   "author": "vmotta8",
   "contributors": [

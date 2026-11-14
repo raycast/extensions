@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "android-adb-input",
   "title": "Android ADB Input",
-  "description": "Run Android `adb shell input text` command.",
+  "description": "Type text on a connected Android device or emulator with the adb shell input text command.",
   "icon": "command-icon.png",
   "author": "star_zero",
   "license": "MIT",

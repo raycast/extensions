@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "modrinth",
   "title": "Modrinth",
-  "description": "Your Minecraft modding companion - find mods, resource packs, and more",
+  "description": "Search and download Minecraft mods, resource packs, plugins, data packs, modpacks and shaders from Modrinth.",
   "icon": "modrinth-logo.png",
   "author": "soradotwav",
   "categories": [

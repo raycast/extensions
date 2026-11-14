@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "binge-clock",
   "title": "Binge Clock",
-  "description": "Find out how long it takes to watch every episode in a TV series or every movie in a marathon.",
+  "description": "Find out how long it takes to watch every episode of a TV series or every movie in a marathon.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

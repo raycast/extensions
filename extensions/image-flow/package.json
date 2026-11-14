@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "image-flow",
   "title": "Imageflow",
-  "description": "Image Flow is a powerful optimization tool for images and files, enabling you to process them efficiently with workflows.",
+  "description": "Resize, compress with TinyPNG, convert, rename and upload images to S3 using your own image processing workflows.",
   "icon": "icon.png",
   "author": "Godruoyi",
   "categories": ["Media", "Other"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "material-icons",
   "title": "Material Icons",
-  "description": "Search and preview Material Icons",
+  "description": "Search and preview Google Material Icons and download them as SVG or PNG for web, Android or iOS.",
   "icon": "command-icon.png",
   "author": "creasty",
   "contributors": [

@@ -1,7 +1,7 @@
 {
   "name": "notilight-controller",
   "title": "NotiLight Controller",
-  "description": "Control NotiLight app via deep links",
+  "description": "Control the NotiLight notification light app on Mac: start, stop or toggle monitoring, clear notifications and add apps.",
   "icon": "icon.png",
   "author": "shail_antani",
   "categories": [

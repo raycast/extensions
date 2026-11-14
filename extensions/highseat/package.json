@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "highseat",
   "title": "Highseat",
-  "description": "See your website analytics and manage notes, goals, funnels and reports from Raycast. Requires a Highseat account.",
+  "description": "See your Highseat website analytics: visitors, top pages, sources, countries and goals, with live visitors in the menu bar and chart notes.",
   "icon": "icon.png",
   "author": "piotrkulpinski",
   "owner": "highseat",

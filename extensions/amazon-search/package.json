@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "amazon-search",
   "title": "Amazon Search",
-  "description": "Amazon search with autosuggestions",
+  "description": "Search Amazon with autosuggestions and choose your Amazon marketplace, with recent searches saved.",
   "icon": "amazon-logo.png",
   "author": "xilopaint",
   "keywords": [

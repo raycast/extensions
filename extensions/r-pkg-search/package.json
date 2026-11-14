@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "r-pkg-search",
   "title": "Search R Packages",
-  "description": "Search and lookup information about R packages using r-pkg.org.",
+  "description": "Search R packages on CRAN via r-pkg.org (METACRAN), view descriptions and dependencies, and copy the install code.",
   "subtitle": "r-pkg.org",
   "icon": "r-pkg.png",
   "author": "grrrck",

@@ -3,7 +3,7 @@
   "version": "0.5.0",
   "name": "pieces-raycast",
   "title": "Pieces for Raycast",
-  "description": "Pieces for Developers Raycast Extension",
+  "description": "Save code snippets from the clipboard, selection, Finder files or browser history to Pieces for Developers, and search your saved materials.",
   "icon": "piecesVector.png",
   "author": "pieces_dev",
   "owner": "pieces",

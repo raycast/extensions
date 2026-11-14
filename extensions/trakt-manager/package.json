@@ -1,6 +1,6 @@
 {
   "name": "trakt-manager",
-  "description": "Control your Trakt account directly from Raycast",
+  "description": "Search movies and shows on Trakt, manage your watchlist, lists and history, continue watching, see the calendar, and get recommendations.",
   "author": "thesobercoder",
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "categories": [

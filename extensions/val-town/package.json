@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "val-town",
   "title": "Val Town",
-  "description": "Browse your vals, read their logs and traces, and allow Raycast AI to run the ones you choose",
+  "description": "Browse your Val Town vals, read their logs, traces and blob storage, run SQLite queries, and let Raycast AI run the vals you choose.",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
   "categories": [

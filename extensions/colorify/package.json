@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "colorify",
   "title": "Colorify - Generate Themes From Images",
-  "description": "Takes an image (such as your wallpaper) and generates a Raycast Theme out of it!",
+  "description": "Generate a Raycast theme from an image such as your wallpaper, in light or dark mode, with AI-assisted color picks.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
   "categories": [

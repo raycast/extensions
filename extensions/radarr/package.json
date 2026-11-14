@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "radarr",
   "title": "Radarr",
-  "description": "Manage your Radarr movie collection with powerful search, monitoring, and download management capabilities",
+  "description": "Search and add movies to Radarr, browse your library, see upcoming releases, missing and unmonitored movies, and manage the download queue.",
   "icon": "radarr.png",
   "author": "xjo_nd",
   "contributors": [

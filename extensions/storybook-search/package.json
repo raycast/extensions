@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "storybook-search",
   "title": "Storybook Search",
-  "description": "Search components in Storybook",
+  "description": "Search components and stories in your Storybook by title and open them.",
   "icon": "command-icon.png",
   "author": "nakaakist",
   "categories": [

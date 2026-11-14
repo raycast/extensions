@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "otty",
   "title": "Otty",
-  "description": "Control the Otty terminal from Raycast.",
+  "description": "Control the Otty terminal: switch tabs and panes, see coding agents waiting for input in the menu bar, open folders, run commands, SSH and change themes.",
   "icon": "command-icon.png",
   "author": "Ethan_Cao",
   "license": "MIT",

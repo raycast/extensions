@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "perplexity-api",
   "title": "Perplexity API",
-  "description": "Use the powerful models via Perplexity API from the comfort of Raycast.",
+  "description": "Chat with Perplexity API models, ask with web search, and summarize, rewrite, fix grammar, translate or change the tone of selected text.",
   "icon": "perplexity.png",
   "author": "ilian",
   "contributors": [

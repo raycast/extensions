@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-voice-studio",
   "title": "AI Voice Studio",
-  "description": "Read and generate speech from Raycast with Alibaba Cloud Qwen-TTS, Xiaomi MiMo, and OpenAI voices, speed control, and focused provider defaults.",
+  "description": "Read selected or clipboard text aloud with AI text to speech from Qwen-TTS, Xiaomi MiMo and OpenAI, with voice and speed controls.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [

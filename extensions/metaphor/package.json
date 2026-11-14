@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "metaphor",
   "title": "Metaphor",
-  "description": "Search with Metaphor",
+  "description": "Search the web with the Metaphor (now Exa) AI search API and find pages similar to a URL.",
   "icon": "command-icon.png",
   "author": "QIanGua",
   "license": "MIT",

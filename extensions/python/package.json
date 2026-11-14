@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "python",
   "title": "Python",
-  "description": "Search Python Packages on PyPi",
+  "description": "Search Python packages on PyPI and view package details, or launch the Python interpreter in your terminal.",
   "icon": "command-icon.png",
   "author": "ahmedivy",
   "categories": [

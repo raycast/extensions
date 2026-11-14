@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "porkbun",
   "title": "Porkbun",
-  "description": "Interact with Porkbun with the help of Raycast",
+  "description": "Manage Porkbun domains: create, edit and delete DNS records, manage URL forwarding, get SSL bundles, check TLD pricing and account balance.",
   "icon": "porkbun.png",
   "author": "xmok",
   "contributors": [

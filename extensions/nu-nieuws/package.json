@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nu-nieuws",
   "title": "NU Nieuws",
-  "description": "Used to display the latest (Dutch) news from nu.nl",
+  "description": "Read the latest Dutch news from NU.nl, filtered by category.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "categories": [

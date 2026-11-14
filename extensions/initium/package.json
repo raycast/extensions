@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "initium",
   "title": "Initium",
-  "description": "Show posts on theinitium.com",
+  "description": "Read the latest articles from Initium Media (theinitium.com) via its RSS feed.",
   "icon": "command-icon.png",
   "author": "unpopular",
   "categories": [

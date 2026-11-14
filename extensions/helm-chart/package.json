@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "helm-chart",
   "title": "Helm Chart",
-  "description": "Search in Helm Chart",
+  "description": "Search Helm charts on Artifact Hub (artifacthub.io) and open chart details.",
   "icon": "command-icon.png",
   "author": "eunchurn",
   "categories": [

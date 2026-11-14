@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cron",
   "title": "Cron",
-  "description": "A companion for Cron (cron.re)",
+  "description": "View a calendar with quick date navigation and check the current time in two time zones, a companion for Cron (cron.re).",
   "icon": "cron.png",
   "author": "astrit",
   "contributors": [

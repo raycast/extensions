@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shell",
   "title": "Shell",
-  "description": "Run shell commands from Raycast",
+  "description": "Run shell commands and see their output, or open them in iTerm, Warp, Ghostty, PowerShell or Command Prompt.",
   "icon": "bash-icon.png",
   "author": "asubbotin",
   "contributors": [

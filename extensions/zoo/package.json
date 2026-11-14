@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoo",
   "title": "Zoo - AI Prompt Library with Your Own Key",
-  "description": "Run GitHub Gist prompts on selected text with your own OpenAI, Gemini, Claude, or DeepSeek API key. No Raycast Pro is required.",
+  "description": "Run your GitHub Gist prompts on selected text with your own OpenAI, Gemini, Claude or DeepSeek API key, and create new prompt gists.",
   "icon": "zoo.png",
   "author": "ViGeng",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "digger",
   "title": "Digger",
-  "description": "Like dig but for the web. Comprehensive website intelligence and metadata extraction.",
+  "description": "Inspect any website like dig for the web: metadata, Open Graph tags, HTTP headers, structured data, discoverability and more, from a URL or browser tab.",
   "icon": "digger.png",
   "author": "chrismessina",
   "platforms": [

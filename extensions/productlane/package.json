@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "productlane",
   "title": "Productlane",
-  "description": "Quickly add insights to Productlane",
+  "description": "Submit customer feedback and product insights to your Productlane workspace.",
   "icon": "command-icon.png",
   "author": "dimagrossman",
   "contributors": [

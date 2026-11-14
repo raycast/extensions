@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rebaptize",
   "title": "Rebaptize - Rename",
-  "description": "Give your files a new name. Bulk rename, smart episode organizing, sort by date or GPS location",
+  "description": "Bulk rename files in Finder: TV show, anime and movie naming, find and replace with regex, change case, number files and sort photos.",
   "icon": "icon.png",
   "author": "miguel_caetano_dias",
   "categories": [

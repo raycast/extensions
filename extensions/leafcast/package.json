@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "leafcast",
   "title": "Leafcast",
-  "description": "Control your Nanoleaf panels with Raycast! Toggle power, set the current scene, and more.",
+  "description": "Control Nanoleaf light panels: toggle power, set brightness, colors and effects or scenes, and cycle through effects.",
   "icon": "command-icon.png",
   "author": "syropian",
   "categories": [

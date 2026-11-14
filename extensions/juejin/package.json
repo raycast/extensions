@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jue-jin",
   "title": "Juejin",
-  "description": "Display recommended articles under each category of Nuggets, and support the selection and switching of different types of articles",
+  "description": "Browse recommended articles on Juejin (掘金) by category and open them in your browser.",
   "icon": "icon.png",
   "author": "sharker_alice_sharker",
   "categories": [

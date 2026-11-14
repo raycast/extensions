@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "t3-chat",
   "title": "T3 Chat",
-  "description": "Query T3 Chat directly from Raycast",
+  "description": "Start a new T3 Chat conversation with your question and chosen AI model in the browser.",
   "icon": "raycast-t3-chat.png",
   "author": "Lermatroid",
   "contributors": [

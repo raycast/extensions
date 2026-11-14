@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-search-self-hosted",
   "title": "Jira Search (Self-Hosted)",
-  "description": "Search for Jira issues (more tolerant and powerful than built-in), projects, and boards on Jira Server instances.",
+  "description": "Search Jira Server and Data Center issues, projects and boards, and see issues assigned to you, with tolerant text search.",
   "icon": "command-icon.png",
   "author": "emanguy",
   "contributors": [

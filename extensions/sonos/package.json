@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonos",
   "title": "Sonos",
-  "description": "Control your Sonos system",
+  "description": "Control your Sonos speakers: play/pause, skip tracks, change volume, pick the active group, and show now playing in the Mac menu bar.",
   "icon": "sonos.png",
   "author": "AntonNiklasson",
   "contributors": [

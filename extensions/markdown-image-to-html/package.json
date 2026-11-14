@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-image-to-html",
   "title": "Markdown Image to HTML",
-  "description": "Transform a Markdown Image to HTML. This allows us to fix image size in Markdown base files.",
+  "description": "Convert a Markdown image to an HTML img tag with a set width, to control image size in Markdown files.",
   "icon": "command-icon.png",
   "author": "qeude",
   "contributors": [

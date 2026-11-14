@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-laravel-herd-site",
   "title": "Open Laravel Herd Site",
-  "description": "Lists all your Laravel Herd sites and allows you to open them in Visual Studio Code, Finder or your browser.",
+  "description": "List your Laravel Herd sites and open them in your code editor, browser or Finder.",
   "categories": [
     "Developer Tools",
     "Productivity"

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "password-link",
   "title": "Password.link",
-  "description": "Create and manage encrypted one-time secrets with client-side encryption using password.link",
+  "description": "Create encrypted one-time secrets with client-side encryption on password.link, request secrets from others, and manage your secrets.",
   "icon": "icon.png",
   "author": "taylor_drayson",
   "license": "MIT",

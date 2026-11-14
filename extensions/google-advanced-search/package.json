@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-advanced-search",
   "title": "Google Advanced Search",
-  "description": "Enhance your desktop with this Raycast extension that simplifies Google's advanced search, bringing features like exact matches and domain filtration directly to macOS—ideal for quick, precise searches without needing to remember complex search options.",
+  "description": "Run Google advanced searches with exact phrases, excluded words, site or domain, language, file type and usage rights filters.",
   "icon": "command-icon.png",
   "author": "developerlover",
   "categories": [

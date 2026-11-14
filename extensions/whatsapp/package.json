@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whatsapp",
   "title": "WhatsApp",
-  "description": "Open WhatsApp chats",
+  "description": "Save WhatsApp chats and groups and open them quickly, or import chats from the local WhatsApp database on Mac, with Raycast AI support.",
   "icon": "whatsapp.png",
   "author": "vimtor",
   "contributors": [

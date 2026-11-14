@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geoconverter",
   "title": "Coordinate Converter",
-  "description": "Convert coordinates between geodetic and projected coordinate systems",
+  "description": "Convert coordinates between latitude/longitude and projected systems like Web Mercator (EPSG:3857), UTM and other EPSG codes.",
   "icon": "icon.png",
   "author": "kylinwowo",
   "categories": ["Developer Tools", "Productivity"],

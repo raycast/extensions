@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "media-flow",
   "title": "MediaFlow",
-  "description": "Universal now-playing monitor and audio device switcher for macOS.",
+  "description": "See what's playing in Spotify, Apple Music or your browser from the Mac menu bar, control playback and switch audio input and output devices.",
   "icon": "icon.png",
   "author": "egorxyz",
   "license": "MIT",

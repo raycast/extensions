@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-inbox",
   "title": "Agent Inbox",
-  "description": "Subscribe to Claude Code and Codex sessions, get notified when they need your input, and jump back to the conversation.",
+  "description": "Subscribe to Claude Code and Codex sessions, get notified in the menu bar when they need your input, and jump back to the conversation.",
   "icon": "agent-inbox-icon.png",
   "author": "silencerichard",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dock",
   "title": "Dock",
-  "description": "Change the dock's position to the left, right, or bottom edge of the screen.",
+  "description": "Move the macOS Dock to the left, right or bottom of the screen with a command or from the menu bar.",
   "icon": "dock.png",
   "author": "pradeepb28",
   "contributors": [

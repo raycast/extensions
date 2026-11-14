@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "english-irregular-verbs",
   "title": "English Irregular Verbs",
-  "description": "Quickly look up English irregular verbs (base, past simple, past participle) with fuzzy search, UK/US variants and optional translations in 16 languages.",
+  "description": "Look up English irregular verbs (base, past simple, past participle) with fuzzy search, UK/US variants and translations in 16 languages.",
   "icon": "icon.png",
   "author": "oward",
   "repository": {

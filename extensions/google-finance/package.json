@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-finance",
   "title": "Google Finance",
-  "description": "Track stock prices powered by Google Finance",
+  "description": "Look up stock prices by ticker symbol from Google Finance across NASDAQ, NYSE and other exchanges, and save favorite stocks.",
   "icon": "extension-icon.png",
   "author": "kyle_samani",
   "contributors": [

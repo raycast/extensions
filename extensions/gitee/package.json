@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitee",
   "title": "Gitee",
-  "description": "Work with issues, search repositories and stay on top of notifications.",
+  "description": "Search Gitee repositories, list your repositories and issues, and check your Gitee notifications.",
   "icon": "gitee-icon.png",
   "author": "koinzhang",
   "categories": [

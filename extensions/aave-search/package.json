@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aave-search",
   "title": "Aave Contract Search",
-  "description": "Quickly search and access official Aave ecosystem smart contract addresses across multiple networks",
+  "description": "Search official Aave smart contract addresses across Ethereum, Polygon, Avalanche and other networks, and copy them in one step.",
   "icon": "icon.png",
   "author": "smbdy",
   "categories": [

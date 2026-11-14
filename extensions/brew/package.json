@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brew",
   "title": "Brew",
-  "description": "Search, install and manage Homebrew formulae and casks",
+  "description": "Search, install, upgrade and uninstall Homebrew formulae and casks on your Mac, manage services and taps, run brew doctor and check vulnerabilities.",
   "categories": [
     "Developer Tools",
     "System"

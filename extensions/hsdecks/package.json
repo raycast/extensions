@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hsdecks",
   "title": "Hearthstone Decks",
-  "description": "search the best Hearthstone decks from d0nkey.top",
+  "description": "Search top Hearthstone decks from d0nkey.top, overall or by class, and copy deck codes.",
   "icon": "hearthstone-icon.png",
   "author": "sergigp",
   "categories": ["Fun"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bluesky",
   "title": "Bluesky",
-  "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
+  "description": "Browse your Bluesky timeline, create posts, search people, and view notifications, including in the menu bar.",
   "icon": "bsky-logo-1.png",
   "author": "dharamkapila",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcetree",
   "title": "Sourcetree",
-  "description": "Search and open Sourcetree repositories",
+  "description": "Search your Sourcetree Git repositories and open them in Sourcetree.",
   "icon": "sourcetree_512x512x32.png",
   "author": "i906",
   "contributors": [

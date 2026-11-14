@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-hex",
   "title": "Search Hex",
-  "description": "A Raycast extension that enables you to quickly look up package information from Hex",
+  "description": "Search Hex.pm for Elixir and Erlang packages and view the latest version, releases, downloads, license and links.",
   "icon": "command-icon.png",
   "author": "jordelver",
   "categories": [

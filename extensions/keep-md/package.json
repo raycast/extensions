@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keep-md",
   "title": "Keep.md",
-  "description": "Search and manage bookmarks in Keep.md",
+  "description": "Search, open, edit and archive your Keep.md bookmarks by title, URL, notes or tags, and save new URLs to Keep.md.",
   "icon": "icon.png",
   "author": "perry",
   "platforms": [

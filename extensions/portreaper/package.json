@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "portreaper",
-  "description": "Find and kill orphaned dev-server processes — the same classification engine as the Portreaper desktop app.",
+  "description": "Find and kill orphaned dev server processes holding ports on your Mac, like leftover vite or node servers, and see all listening ports.",
   "categories": [
     "Developer Tools",
     "System"

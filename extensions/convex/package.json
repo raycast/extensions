@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convex",
   "title": "Convex",
-  "description": "Interact with your Convex projects directly from Raycast",
+  "description": "Manage Convex projects and deployments: browse table data, run functions, stream logs, view deployment health, search docs and install components.",
   "icon": "command-icon.png",
   "author": "devwithbobby",
   "contributors": [

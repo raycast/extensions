@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aven",
   "title": "Aven",
-  "description": "Raycast extension for the aven task manager.",
+  "description": "Add tasks to the aven local-first CLI task manager, choosing the workspace and project from a form.",
   "icon": "icon.png",
   "author": "Infonautica",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "attio",
   "title": "Attio",
-  "description": "The next gen of CRM",
+  "description": "Search and edit Attio CRM people, companies and deals, create records, and browse lists, notes, tasks, members and webhooks.",
   "icon": "attio.png",
   "author": "xmok",
   "platforms": [

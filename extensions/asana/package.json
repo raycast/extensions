@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asana",
   "title": "Asana",
-  "description": "Create, access, and modify tasks.",
+  "description": "Create Asana tasks and subtasks, browse My Tasks, and change assignees, due dates, projects, sections and tags.",
   "icon": "asana.png",
   "author": "thomaslombart",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ring-intercom",
   "title": "Ring Intercom",
-  "description": "Interact with your Ring Intercom device",
+  "description": "Unlock your door with your Ring Intercom without opening the Ring app.",
   "icon": "command-icon.png",
   "author": "stefanbd",
   "categories": [

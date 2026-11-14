@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fifteen-million-merits",
   "title": "Fifteen Million Merits",
-  "description": "A persistent counter that triggers Raycast Focus mode when activity exceeds a specific threshold.",
+  "description": "Turn on Raycast Focus to block distractions whenever no Claude or Cursor AI agent session is running, with a menu bar session counter.",
   "icon": "fifteen-million-merits.png",
   "author": "alexi.build",
   "platforms": [

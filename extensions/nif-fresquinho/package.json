@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nif-fresquinho",
   "title": "Portuguese Tax Number",
-  "description": "Copy a new Portuguese Tax Number to the clipboard",
+  "description": "Generate a random valid Portuguese tax number (NIF) and copy it to your clipboard.",
   "icon": "nif-icon.png",
   "author": "poor666",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windmill",
   "title": "Windmill",
-  "description": "Windmill Extension to run workflows directly from Raycast",
+  "description": "List and run Windmill flows, scripts and apps across your workspaces, and open past runs.",
   "icon": "windmill-logo.png",
   "author": "emiliobool",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "playback-duration-calculator",
   "title": "Playback Duration Calculator",
-  "description": "Find out how long your video or audio will take to finish based on your playback speed.",
+  "description": "Calculate how long a video or audio will take at a faster playback speed, the time saved, and when you'll finish.",
   "icon": "icon.png",
   "author": "nathanwijaya",
   "categories": [

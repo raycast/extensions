@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hacker-news",
   "title": "Hacker News",
-  "description": "Read the latest stories of Hacker News.",
+  "description": "Read Hacker News front page, newest, best, Ask HN and jobs stories, open comments and save articles to Readwise Reader.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cron-description",
   "title": "Cron Description",
-  "description": "Convert cron expressions into human readable descriptions",
+  "description": "Convert cron expressions into human-readable descriptions and see the next run times in your timezone.",
   "icon": "icon.png",
   "author": "niall-maloney",
   "contributors": [

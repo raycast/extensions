@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roblox-games",
   "title": "Roblox",
-  "description": "Searches for & launches Roblox places",
+  "description": "Search Roblox games (places) and launch them directly in Roblox.",
   "icon": "command-icon.png",
   "author": "TaylorRobinson",
   "license": "MIT",

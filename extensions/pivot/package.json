@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pivot",
   "title": "Pivot",
-  "description": "Bulk-change the default macOS app for many file extensions at once.",
+  "description": "Change the default macOS app for many file extensions at once, save extension presets, and undo the last change.",
   "icon": "command-icon.png",
   "author": "codythatsmee",
   "platforms": [

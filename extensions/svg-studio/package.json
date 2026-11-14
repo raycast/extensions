@@ -1,7 +1,7 @@
 {
   "name": "svg-studio",
   "title": "SVG Studio",
-  "description": "Powerful SVG previewer and editor with dark mode and PNG export.",
+  "description": "Preview and edit SVG code with a live preview, including AI-generated SVGs, and export it as PNG.",
   "icon": "icon.png",
   "author": "gaosunhao",
   "license": "MIT",

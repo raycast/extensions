@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "glean-search",
   "title": "Glean Search",
-  "description": "Search your company's knowledge base via Glean",
+  "description": "Search your company's knowledge base and documents in Glean using the Glean CLI.",
   "icon": "icon.png",
   "author": "faizhasim",
   "categories": [

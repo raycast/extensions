@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pestphp-documentation",
   "title": "Pest Documentation",
-  "description": "Pest Documentation Search",
+  "description": "Search the Pest PHP testing framework documentation and open pages in your browser.",
   "icon": "pestphp-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "developer-excuse",
   "title": "Developer Excuses",
-  "description": "Insert a random developer excuse for not doing your work.",
+  "description": "Paste a random developer excuse into the active window, from a list of over 250 excuses for not getting work done.",
   "icon": "excuse-icon.png",
   "author": "niemtec",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roll-d20",
   "title": "Roll D20",
-  "description": "Rolls a d20, in other words, displays a random number between 1 and 20.",
+  "description": "Roll a d20 die and show a random number between 1 and 20.",
   "icon": "command-icon.png",
   "author": "kayla",
   "categories": [

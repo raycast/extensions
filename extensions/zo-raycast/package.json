@@ -2,7 +2,7 @@
   "name": "zo-raycast",
   "title": "Zo",
   "version": "0.1.0",
-  "description": "Chat with Zo models, manage defaults, and review activity",
+  "description": "Chat with Zo AI models through the Zo API, browse models and set defaults, and review recent activity.",
   "icon": "icon.png",
   "screenshots": [
     "metadata/zo-chat.png",

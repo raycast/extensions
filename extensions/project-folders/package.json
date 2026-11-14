@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "project-folders",
   "title": "Project Folders",
-  "description": "Browse creative project folders and jump to Asana, Google Drive, and Frame.io links.",
+  "description": "Browse creative project folders on your Mac and open them in Finder or jump to their Asana, Google Drive and Frame.io links.",
   "icon": "command-icon.png",
   "author": "hugini",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "resend",
   "title": "Resend",
-  "description": "Manage email, contacts, domains, and developer resources with Resend",
+  "description": "Manage Resend email: send and view emails, read received emails, manage contacts and segments, add and verify domains, and manage API keys.",
   "icon": "resend-extension_icon.png",
   "access": "public",
   "owner": "resend",

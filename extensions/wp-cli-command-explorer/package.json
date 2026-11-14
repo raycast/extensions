@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wp-cli-command-explorer",
   "title": "WordPress WP-CLI Commands Explorer",
-  "description": "Browse and search WP-CLI commands with their descriptions and subcommands",
+  "description": "Browse and search WordPress WP-CLI commands and subcommands with descriptions, and copy them to the clipboard.",
   "icon": "command-icon.png",
   "author": "aslamdoctor",
   "categories": [

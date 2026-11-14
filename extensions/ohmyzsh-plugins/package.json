@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ohmyzsh-plugins",
   "title": "Oh My Zsh Plugins",
-  "description": "Oh My Zsh Plugins",
+  "description": "Search Oh My Zsh plugins and read their documentation.",
   "icon": "icon.png",
   "author": "k8scat",
   "categories": [

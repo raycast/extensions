@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-manager",
   "title": "File Manager",
-  "description": "Manage files from Raycast",
+  "description": "Browse files and folders on your Mac, open, Quick Look, rename, create or delete files, and copy file paths.",
   "icon": "command-icon.png",
   "author": "erics118",
   "contributors": [

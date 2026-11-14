@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-wallpaper",
   "title": "Raycast Wallpaper",
-  "description": "Get and set Raycast official wallpapers.",
+  "description": "Set official Raycast wallpapers as your desktop wallpaper, or switch to a random one automatically at set intervals.",
   "icon": "command-icon.png",
   "author": "koinzhang",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hardcover",
   "title": "Hardcover",
-  "description": "Search and manage books and lists.",
+  "description": "Search books on Hardcover, track want to read, currently reading, read and did not finish books, and create and manage book lists.",
   "icon": "hardcover-icon.png",
   "author": "hazelhedmine",
   "categories": [

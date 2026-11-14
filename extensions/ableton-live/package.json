@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ableton-live",
   "title": "Ableton Live",
-  "description": "Search and open recent Ableton Live Projects",
+  "description": "Search and open recent Ableton Live projects, and mark favorite projects for quick access.",
   "icon": "ableton-live-icon.png",
   "author": "dch09",
   "license": "MIT",

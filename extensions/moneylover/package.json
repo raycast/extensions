@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moneylover",
   "title": "MoneyLover",
-  "description": "MoneyLover is a personal finance app that helps you manage your money, budget, and track your spending.",
+  "description": "View your Money Lover wallets and balances, adjust balances and add transactions.",
   "icon": "moneylover-icon.png",
   "author": "lachero",
   "contributors": [

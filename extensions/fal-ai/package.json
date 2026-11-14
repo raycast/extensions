@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fal-ai",
   "title": "Fal.ai",
-  "description": "Generate and retrieve media from any fal.ai model.",
+  "description": "Generate images, video and other media with any fal.ai AI model, and view and download your past generations.",
   "icon": "fal.png",
   "author": "0xfreddy",
   "license": "MIT",

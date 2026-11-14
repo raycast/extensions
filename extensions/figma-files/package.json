@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figma-files-raycast-extension",
   "title": "Figma File Search",
-  "description": "Lists Figma files allowing you to search and navigate to them.",
+  "description": "Search your Figma files and projects across teams, star favorites, see recent files in the menu bar and open them in Figma.",
   "icon": "command-icon.png",
   "author": "michaelschultz",
   "contributors": [

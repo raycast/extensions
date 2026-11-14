@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mouseless",
-  "description": "Controls the Mouseless app. Only works when using Mouseless v1.0 or later.",
+  "description": "Control the Mouseless keyboard mouse app: show the overlay, enter free mode or open its settings. Requires Mouseless v1.0 or later.",
   "categories": [
     "Applications"
   ],

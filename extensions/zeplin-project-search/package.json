@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zeplin-project-raycast-extension",
   "title": "Zeplin Project Search",
-  "description": "List and Search Zeplin Projects",
+  "description": "List and search your Zeplin projects, open them in the web or Mac app, see recently viewed projects, and leave projects.",
   "icon": "command-icon.png",
   "author": "dorukgunes",
   "contributors": [

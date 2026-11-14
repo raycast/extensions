@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-hookmark",
   "title": "Hookmark Search",
-  "description": "Hookmark Search UI in Raycast",
+  "description": "Search Hookmark bookmarks, copy a link to the front window, hook it to a copied link, and show hooked items.",
   "icon": "command-icon.png",
   "author": "QIanGua",
   "version": "2.0.0",

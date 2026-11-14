@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "valkey-commands-search",
   "title": "Valkey Commands Search",
-  "description": "Searches Valkey commands.",
+  "description": "Search Valkey commands and open their documentation on the Valkey website.",
   "icon": "valkey-icon.png",
   "author": "poiuj",
   "categories": [

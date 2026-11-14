@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "invisible-text-detector",
   "title": "Invisible Text Detector",
-  "description": "Remove all hidden Unicode characters in your text, usually injected by LLMs.",
+  "description": "Detect and remove invisible Unicode characters like zero-width spaces from text, often added by ChatGPT and other LLMs, and normalize smart quotes.",
   "icon": "icon.png",
   "author": "garrett",
   "contributors": [

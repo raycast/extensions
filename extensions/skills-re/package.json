@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "skills-re",
-  "description": "Search and manage agent skills from skills.re.",
+  "description": "Search agent skills on skills.re by keyword or with AI, copy install commands and manage your saved skills.",
   "categories": [
     "Developer Tools",
     "Web"

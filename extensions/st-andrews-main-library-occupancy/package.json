@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "st-andrews-main-library-occupancy",
   "title": "Main Library in University of St Andrews",
-  "description": "How busy is the main library now?",
+  "description": "Check how busy the University of St Andrews Main Library is right now with live occupancy numbers.",
   "icon": "command-icon.png",
   "author": "Harry_Huang",
   "license": "MIT",

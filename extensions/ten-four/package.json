@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ten-four",
   "title": "Ten Four",
-  "description": "A shelf of clean, copyable snippets pushed from your terminal or Claude Code. \"10-4, copy that\": copy them out of Raycast with pristine formatting, no mangled line breaks.",
+  "description": "Keep a shelf of snippets pushed from your terminal or Claude Code, and copy them with clean formatting and no broken line breaks.",
   "icon": "icon.png",
   "author": "jaymcc",
   "license": "MIT",

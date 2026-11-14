@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-repos",
   "title": "Git Repos",
-  "description": "Quickly access your local git repositories and open them in your favorite editor or any app",
+  "description": "Find your local Git repositories and open them in your code editor or any app, and clone or safely remove repos.",
   "icon": "git-repos-icon.png",
   "author": "moored",
   "contributors": [

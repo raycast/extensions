@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ok-json",
   "title": "OK JSON",
-  "description": "Control OK JSON with Raycast",
+  "description": "View JSON from the clipboard, a URL or a cURL command in the OK JSON app, run custom scripts, and open its history and scripts panel.",
   "icon": "okjson.png",
   "author": "anybox",
   "categories": [

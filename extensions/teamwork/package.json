@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "title": "Teamwork",
-  "description": "Search Teamwork tasks and control your Teamwork timer from Raycast",
+  "description": "Search your assigned Teamwork tasks, start, pause, resume and log timers, and show running timers in the menu bar.",
   "icon": "icon.png",
   "categories": [
     "Productivity"

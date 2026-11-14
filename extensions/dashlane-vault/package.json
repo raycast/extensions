@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dashlane-vault",
   "title": "Dashlane Vault",
-  "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
+  "description": "Search passwords and secure notes in your Dashlane vault, copy fields and TOTP codes, sync the vault and manage devices using the Dashlane CLI.",
   "icon": "dashlane-512.png",
   "author": "tm.wrnr",
   "contributors": [

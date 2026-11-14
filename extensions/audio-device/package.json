@@ -1,7 +1,7 @@
 {
   "name": "audio-device",
   "title": "Set Audio Device",
-  "description": "Switch the active audio device of your mac.",
+  "description": "Switch audio input and output devices, set their volume, and keep your default device in place after sleep or Bluetooth reconnects.",
   "icon": "command-icon.png",
   "author": "benvp",
   "contributors": [

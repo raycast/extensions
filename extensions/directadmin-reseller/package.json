@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "directadmin-reseller",
   "title": "DirectAdmin Reseller",
-  "description": "Interact with DirectAdmin as a Reseller",
+  "description": "Manage a DirectAdmin reseller account: user accounts, packages, IPs, domains, email accounts and databases, across multiple panels.",
   "icon": "directadmin-reseller.png",
   "author": "xmok",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nhk-program-search",
   "title": "NHK Program Search",
-  "description": "Search NHK program guide by NHK API",
+  "description": "Search the NHK TV program guide by channel, genre or keyword using the NHK API, with a locally cached week of schedules.",
   "icon": "n-logo.png",
   "author": "sitogi",
   "categories": [

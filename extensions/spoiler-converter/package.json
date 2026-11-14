@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spoiler-converter",
   "title": "Discord Spoiler Spammer",
-  "description": "Discord Spoiler Spammer converts every character of the selected text into it's own spoiler. Laugh at your friends on Discord as they continue clicking to reveal the never ending spoilers!",
+  "description": "Turn selected text into Discord spoilers, one spoiler per character, to prank your friends.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "contributors": [

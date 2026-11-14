@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-password-generator",
   "title": "Random Password Generator",
-  "description": "Generate random password of different length",
+  "description": "Generate random passwords of any length, with options for uppercase letters, numbers and symbols, and copy them.",
   "icon": "icon.png",
   "author": "textnav",
   "license": "MIT",

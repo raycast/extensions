@@ -3,7 +3,7 @@
   "name": "viscosity",
   "type": "module",
   "title": "Viscosity",
-  "description": "Manage your Viscosity VPN connections directly from Raycast: list, connect, and disconnect with ease.",
+  "description": "List, connect and disconnect your Viscosity VPN connections, quick connect to your preferred VPN or disconnect all.",
   "icon": "extension-icon.png",
   "author": "yigitefe",
   "platforms": [

@@ -3,7 +3,7 @@
   "name": "pins",
   "title": "Pins",
   "version": "1.10.0",
-  "description": "Create pins for paths and URLs and display them in the menu bar",
+  "description": "Pin URLs, files, folders, apps and Terminal commands to your Mac menu bar, organize them in groups, and import or export your pins.",
   "keywords": [
     "pin",
     "menubar",

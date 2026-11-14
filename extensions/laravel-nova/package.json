@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-nova",
   "title": "Laravel Nova",
-  "description": "Laravel Nova Docs",
+  "description": "Search the Laravel Nova documentation by version and open pages in your browser.",
   "icon": "command-icon.png",
   "author": "plank-dev",
   "license": "MIT",

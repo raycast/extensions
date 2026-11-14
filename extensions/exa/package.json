@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "exa-search",
   "title": "Exa",
-  "description": "AI-powered search for precise, context-aware results",
+  "description": "Get answers with citations from Exa AI search, open the Exa search engine, and use AI tools for web search, deep research and URL content extraction.",
   "icon": "icon.png",
   "author": "thomas",
   "owner": "exa_ai",

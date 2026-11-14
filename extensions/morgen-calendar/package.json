@@ -3,7 +3,7 @@
   "name": "morgen-calendar",
   "type": "module",
   "title": "Morgen Calendar",
-  "description": "Create and manage Morgen calendar events and native tasks from Raycast.",
+  "description": "Create and browse Morgen calendar events, and create, view and complete native Morgen tasks on Windows.",
   "icon": "morgen-icon.png",
   "author": "ctacta621",
   "platforms": ["Windows"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nos-nieuws",
   "title": "NOS Nieuws",
-  "description": "Used to display the latest NOS nieuws from nos.nl",
+  "description": "Read the latest Dutch news and articles from NOS (nos.nl).",
   "icon": "command-icon.png",
   "author": "jorandob",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bundesliga",
   "title": "Bundesliga",
-  "description": "Stay up-to-date with the latest news, fixtures, results, and standings from the Bundesliga.",
+  "description": "Check Bundesliga tables, fixtures and results, and look up club profiles, squads and recent form for German football.",
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",

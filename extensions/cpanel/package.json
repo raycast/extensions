@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cpanel",
   "title": "cPanel",
-  "description": "View Domains, DNS Zones, Email Accounts, Databases, Files and more",
+  "description": "View cPanel domains and DNS zones, email and FTP accounts, MySQL or PostgreSQL databases and files, and manage API tokens.",
   "icon": "cpanel.png",
   "author": "xmok",
   "categories": [

@@ -3,7 +3,7 @@
   "name": "tim",
   "title": "Tim",
   "version": "1.0.0",
-  "description": "Manage your timers for Tim from Raycast",
+  "description": "Control the Tim time tracker on your Mac: start and stop timers, create and search tasks, view a daily overview, and import or export data.",
   "icon": "tim-icon.png",
   "author": "tm.wrnr",
   "categories": [

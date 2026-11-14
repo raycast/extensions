@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "image-host",
   "title": "Image Host",
-  "description": "Host an image on imgBB",
+  "description": "Upload an image to imgBB and copy its URL to your clipboard.",
   "icon": "logo.png",
   "author": "efeclk",
   "categories": [

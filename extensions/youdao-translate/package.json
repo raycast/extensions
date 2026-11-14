@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youdao-translate",
   "title": "Youdao Translate",
-  "description": "Translate text using Youdao",
+  "description": "Translate typed or selected text between 100+ languages with Youdao Translate (有道翻译).",
   "icon": "translate.png",
   "author": "tiancheng92",
   "license": "MIT",

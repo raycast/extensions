@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "charter",
   "title": "Charter - Chart and Diagram Catalog",
-  "description": "Browse chart and diagram types with Mermaid, shadcn and ECharts examples, docs and prompt snippets",
+  "description": "Browse chart and diagram types and copy Mermaid, shadcn and ECharts examples, docs links and AI prompt snippets.",
   "icon": "charter.png",
   "author": "aic",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vortex",
   "title": "Vortex",
-  "description": "The fastest way to use bitcoin on macOS",
+  "description": "Send and receive bitcoin over Lightning with a Nostr Wallet Connect (NWC) wallet, pay invoices, view transactions and redeem sats.",
   "icon": "vortex.png",
   "author": "saunter",
   "categories": [

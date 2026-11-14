@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipmate",
   "title": "Clipmate AI",
-  "description": "Save links to your Clipmate account",
+  "description": "Save links to your Clipmate AI collections, pick a collection or create a new one.",
   "icon": "clipmate.png",
   "access": "public",
   "author": "shvmmshr",

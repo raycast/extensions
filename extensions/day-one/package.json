@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "day-one",
   "title": "Day One",
-  "description": "Search, write, and sync your Day One journals and Daily Chat with the Day One CLI",
+  "description": "Search, write and sync Day One journal entries with the Day One CLI, add to Daily Chat, and use AI tools to read and create entries.",
   "icon": "day-one.png",
   "author": "AntonNiklasson",
   "contributors": [

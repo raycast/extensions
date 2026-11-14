@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-workspace",
   "title": "Google Workspace",
-  "description": "Access Google Drive files",
+  "description": "Search and download Google Drive files, create Google Docs, Sheets, Slides and Forms, and see starred files in the menu bar.",
   "icon": "google-logo.png",
   "owner": "raycast",
   "access": "public",

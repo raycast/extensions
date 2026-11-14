@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timers",
   "title": "Timers",
-  "description": "Start, stop, and save countdown timers, directly in Raycast, with no external dependencies.",
+  "description": "Start countdown timers and stopwatches on your Mac with preset or custom durations, alert sounds when time is up, and timers in the menu bar.",
   "icon": "command-icon.png",
   "author": "ThatNerd",
   "contributors": [

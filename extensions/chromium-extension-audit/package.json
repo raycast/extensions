@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chromium-extension-audit",
   "title": "Chromium Extensions Audit",
-  "description": "Audit Chromium browser extensions, understand their permissions, and monitor security-relevant changes locally.",
+  "description": "Audit Chrome, Edge, Brave and other Chromium browser extensions on your Mac, review their permissions, and monitor security-relevant changes.",
   "icon": "extension_icon.png",
   "author": "0xdhrv",
   "platforms": [

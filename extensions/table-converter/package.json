@@ -1,7 +1,7 @@
 {
   "name": "table-converter",
   "title": "Table Converter",
-  "description": "Convert tables from Clipboard to Markdown and vice versa.",
+  "description": "Convert tables between Markdown, JSON, CSV, HTML and Excel (tab-separated) formats from your clipboard, with automatic format detection.",
   "icon": "extension-icon.png",
   "author": "naserowaimer",
   "categories": [

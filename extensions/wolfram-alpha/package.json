@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wolfram-alpha",
   "title": "Wolfram Alpha",
-  "description": "Query Wolfram Alpha right from Raycast",
+  "description": "Ask Wolfram Alpha math, science, unit conversion and general knowledge questions and see the full visual result.",
   "icon": "command-icon.png",
   "author": "mathieudutour",
   "license": "MIT",

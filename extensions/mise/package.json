@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mise",
   "title": "Mise",
-  "description": "Search, install and upgrade the dev tools managed by mise.",
+  "description": "Search, install, upgrade and uninstall dev tools managed by mise (mise-en-place), set global versions, run tasks and see outdated tools in the menu bar.",
   "icon": "mise.png",
   "author": "lachieh",
   "platforms": [

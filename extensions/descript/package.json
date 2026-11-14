@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "descript",
   "title": "Descript",
-  "description": "Import media, browse projects, monitor jobs, and run Underlord prompts in Descript without leaving Raycast.",
+  "description": "Import Finder files into Descript projects, browse projects and compositions, run Underlord prompts, and track jobs in the menu bar.",
   "icon": "descript-icon.png",
   "author": "luarmr",
   "platforms": [

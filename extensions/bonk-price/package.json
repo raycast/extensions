@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bonk-price",
   "title": "BONK Price",
-  "description": "Shows the price of the BONK token on your macOS menu bar",
+  "description": "Show the live price of the BONK Solana token in your Mac menu bar, using CoinGecko data.",
   "icon": "icon.png",
   "author": "AnishDe12020",
   "categories": [

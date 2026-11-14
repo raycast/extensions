@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-math",
   "title": "Screen Math",
-  "description": "Perform rapid calculations using numbers on your screen",
+  "description": "Sum the numbers in a selected area of your Mac screen by capturing and reading them.",
   "icon": "screen-math.png",
   "author": "hcancelik",
   "categories": [

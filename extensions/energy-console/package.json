@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "energy-console",
   "title": "Energy Console",
-  "description": "Unofficial community tool to monitor and control compatible EcoFlow devices with your own API keys; not affiliated with or endorsed by EcoFlow.",
+  "description": "Monitor EcoFlow portable power stations, check battery level and power flow in the menu bar, and run device controls with your own API keys.",
   "icon": "extension-icon-v2.png",
   "author": "Olli0103",
   "platforms": [

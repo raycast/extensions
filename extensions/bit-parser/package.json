@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bit-parser",
   "title": "Bit Parser",
-  "description": "Inspect individual bits in fault codes, status words, and flags",
+  "description": "Inspect the individual bits of decimal, HEX or binary values, such as fault codes, status words and flags, in 8 to 64-bit widths.",
   "icon": "icon.png",
   "author": "TwoMental",
   "platforms": [

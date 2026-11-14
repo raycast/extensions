@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ligue-1",
   "title": "Ligue 1",
-  "description": "Staying up-to-date with the latest scores, and fixtures from the French top-flight football league in Raycast.",
+  "description": "Check Ligue 1 and Ligue 2 standings, fixtures and results, including past seasons, and browse French football clubs and player squads.",
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",

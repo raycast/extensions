@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "appwrite",
   "title": "Appwrite",
-  "description": "Add Projects and View Services",
+  "description": "Browse your Appwrite projects, self-hosted or cloud, and view their databases, users, storage files and sites.",
   "icon": "appwrite.png",
   "author": "xmok",
   "categories": [

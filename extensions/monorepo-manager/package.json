@@ -3,7 +3,7 @@
   "name": "monorepo-manager",
   "version": "0.0.1",
   "title": "Manage Monorepo Projects/Workspaces",
-  "description": "A Raycast extension helps to manage monorepo projects/workspaces in your machine. It also list all packages in each monorepo project/workspace",
+  "description": "Browse monorepo workspaces and their packages on your machine, and open them in VS Code, Terminal or other apps.",
   "icon": "command-icon.png",
   "author": "tung-dang",
   "categories": [

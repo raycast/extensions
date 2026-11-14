@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doubao-tts",
   "title": "Doubao TTS",
-  "description": "Read selected text aloud using Volcengine Doubao TTS with 160+ Chinese and English voices",
+  "description": "Read selected text aloud on Mac with Volcengine Doubao text-to-speech (TTS), with 160+ Chinese and English voices.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [

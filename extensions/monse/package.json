@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monse",
   "title": "Monse - Banking In Raycast",
-  "description": "Connect your bank account and see latest incomes, expenses, and details.",
+  "description": "View your latest bank transactions and account balances from Monse, edit transactions and update balances.",
   "icon": "commands-icon.png",
   "author": "Falcon",
   "categories": [

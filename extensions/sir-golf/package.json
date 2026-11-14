@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sir-golf",
   "title": "Sir.golf",
-  "description": "Live golf leaderboards (PGA Tour, LPGA, DP World Tour), the full tour schedule with every major badged and one-tap Add to Calendar, plus season rankings — by sir.golf. Free, no account, no API key.",
+  "description": "Live golf leaderboards for the PGA Tour, LPGA and DP World Tour, the full tour schedule with Add to Calendar, and season rankings.",
   "icon": "command-icon.png",
   "author": "julianpaul",
   "categories": [

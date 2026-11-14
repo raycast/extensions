@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jetpack-commands",
   "title": "Jetpack Commands",
-  "description": "Manage your Jetpack-connected WordPress sites.",
+  "description": "Manage Jetpack and WordPress.com sites: posts, pages, plugins, themes, users, domains, DNS, backups, stats, caching and SFTP/SSH settings.",
   "icon": "jetpack-logo.png",
   "author": "Automattic_Inc",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dictionary",
   "title": "Web Dictionaries",
-  "description": "Search any word with multiple online dictionaries or translation engines in one place—lightweight, zero dependencies.",
+  "description": "Look up words in Google Translate, Urban Dictionary and Youdao at once, including selected text, with definitions, examples and pronunciation.",
   "icon": "icon.png",
   "author": "DrChai",
   "platforms": [

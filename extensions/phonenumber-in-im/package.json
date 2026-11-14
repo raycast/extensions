@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "phonenumber-in-im",
   "title": "Fast Chat With Phone Number in IM Apps",
-  "description": "A Raycast extension enables faster chatting with a target phone number in IM apps like WhatsApp and Telegram, eliminating the need to add contacts beforehand.",
+  "description": "Start a WhatsApp or Telegram chat with any phone number without adding it to your contacts first.",
   "icon": "logo.png",
   "author": "timonpeng",
   "categories": [

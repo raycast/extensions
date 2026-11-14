@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "indiehackers",
   "title": "IndieHackers",
-  "description": "Browse IndieHackers",
+  "description": "Browse Indie Hackers posts by time, type or group via the IH RSS feed.",
   "icon": "indie-hackers.png",
   "author": "xmok",
   "categories": [

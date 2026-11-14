@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-office",
   "title": "Microsoft Office",
-  "description": "Command for Office Products",
+  "description": "Search and open your recent Microsoft Word, Excel and PowerPoint documents.",
   "icon": "msoffice.png",
   "author": "tonka3000",
   "platforms": [

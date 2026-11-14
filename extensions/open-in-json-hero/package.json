@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-in-json-hero",
   "title": "Open in JSON Hero",
-  "description": "Opens JSON in your pasteboard in JSON Hero",
+  "description": "Open JSON from your clipboard in JSON Hero, or in your own self-hosted JSON Hero instance.",
   "icon": "command-icon.png",
   "author": "maverickdotdev",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cacher",
   "title": "Cacher - Code Snippet Organizer",
-  "description": "Create and insert personal and team code snippets from anywhere.",
+  "description": "Search, insert and create personal and team code snippets from your Cacher snippet library.",
   "icon": "cacher.png",
   "author": "cacherapp",
   "categories": [

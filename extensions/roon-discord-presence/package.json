@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roon-discord-presence",
   "title": "Roon Discord Presence",
-  "description": "See what Roon is showing on your Discord status, and start, stop or restart roon-discord-presence.",
+  "description": "See the Roon track shown on your Discord Rich Presence status, and start, stop or restart the roon-discord-presence service from the menu bar.",
   "icon": "icon.png",
   "author": "alvinism",
   "categories": [

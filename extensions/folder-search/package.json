@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "folder-search",
   "title": "Folder Search",
-  "description": "Search for folders on your Mac",
+  "description": "Search folders on your Mac by name, open them in Finder or other apps, pin favorites, and move selected Finder files into any folder.",
   "icon": "folder-search.png",
   "keywords": [
     "folders",

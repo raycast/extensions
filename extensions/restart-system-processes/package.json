@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "restart-system-processes",
   "title": "Restart System Processes",
-  "description": "Restart system processes such as Finder, Dock, Menu Bar, Audio and more!",
+  "description": "Restart frozen Mac system processes like Finder, Dock, Menu Bar and Audio without rebooting.",
   "icon": "main-icon.png",
   "author": "muzhen_gaming",
   "contributors": [

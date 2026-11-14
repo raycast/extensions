@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bettertouchtool",
   "title": "BetterTouchTool",
-  "description": "Run BTT actions from Raycast",
+  "description": "Run BetterTouchTool named triggers and actions, browse triggers and variables, and search the BetterTouchTool clipboard manager.",
   "icon": "command-icon.png",
   "author": "dnnsmnstrr",
   "contributors": [

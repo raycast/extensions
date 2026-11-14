@@ -5,7 +5,7 @@
   "version": "1.2.4",
   "author": "advaitthakur",
   "license": "MIT",
-  "description": "Apex Connect+ remote control. Control your house with Raycast 🚀",
+  "description": "Control your ApexOS smart home with Apex Connect: lights, covers, climate, media players, cameras and sensors, with menu bar items.",
   "icon": "apex-connect.png",
   "platforms": ["macOS"],
   "commands": [

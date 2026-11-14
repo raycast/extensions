@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prowlarr",
   "title": "Prowlarr",
-  "description": "Search and add to download clients with Prowlarr",
+  "description": "Search torrent indexers with Prowlarr, copy download or magnet links, and send results to your download client.",
   "icon": "prowlarr.png",
   "author": "elcaten",
   "categories": [

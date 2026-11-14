@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "name": "gradient-generator",
   "title": "Gradient Generator",
-  "description": "Create, preview and save gradients locally; copy CSS, Tailwind and SwiftUI, or export PNG and SVG files.",
+  "description": "Create, preview and save color gradients, copy CSS, Tailwind or SwiftUI code, or export PNG and SVG files.",
   "icon": "icon.png",
   "author": "smcnab1",
   "contributors": [],

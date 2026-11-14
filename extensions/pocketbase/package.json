@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pocketbase",
   "title": "PocketBase",
-  "description": "Manage PocketBase",
+  "description": "Search PocketBase collections and records, and create, download or delete backups as an admin.",
   "icon": "pocketbase.png",
   "author": "xmok",
   "categories": [

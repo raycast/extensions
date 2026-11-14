@@ -4,7 +4,7 @@
   "name": "rhttp",
   "title": "rhttp",
   "version": "1.0.0",
-  "description": "Full-featured HTTP client with environments, variables, and request chaining",
+  "description": "Build and send HTTP requests (GET, POST, GraphQL and more) with environments, variables, request chaining, history and a JSON explorer, like Postman.",
   "icon": "icon.png",
   "author": "SebastianJarsve",
   "contributors": [

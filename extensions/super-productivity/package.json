@@ -4,7 +4,7 @@
   "engines": {
     "node": ">=20"
   },
-  "description": "Manage Super Productivity tasks, projects, tags, and time tracking from Raycast.",
+  "description": "Manage Super Productivity tasks, projects and tags, quick add tasks in natural language, track time, and show the current task in the menu bar.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

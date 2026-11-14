@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "printer-status",
   "title": "Printer Status",
-  "description": "Check printer status (page counts, ink levels, device info) via SNMP",
+  "description": "Check your printer's status, page counts, ink or toner levels and device info over the network via SNMP.",
   "icon": "printer-icon.png",
   "author": "pernielsentikaer",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "biaodian",
   "title": "Search Chinese Punctuation Marks",
-  "description": "Search Chinese Punctuation Marks",
+  "description": "Search Chinese punctuation marks (biaodian) like 。，、「」《》 and copy or paste them by typing their English equivalent.",
   "icon": "command-icon.png",
   "author": "gasolin",
   "license": "MIT",

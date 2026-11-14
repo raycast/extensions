@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hotcorner",
   "title": "HotCorner",
-  "description": "macOS Hot Corners quick settings",
+  "description": "Configure macOS Hot Corners actions quickly for each corner of the screen.",
   "icon": "hc.png",
   "author": "mmmarcus",
   "categories": [

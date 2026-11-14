@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira2git",
   "title": "Jira2Git",
-  "description": "The tool for making Jira and Git work together smoothly as silk for a better development experience.",
+  "description": "Turn a Jira issue URL into a Git branch name using the issue key and title, and copy it to the clipboard.",
   "icon": "Jira2Git.png",
   "author": "ipiranhaa",
   "categories": [

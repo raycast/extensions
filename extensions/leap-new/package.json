@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "leap-new",
   "title": "Leap.new",
-  "description": "Generate production-ready fullstack apps with leap.new AI platform",
+  "description": "Generate fullstack apps from a description with the leap.new AI app builder, with menu bar quick access.",
   "icon": "logo.png",
   "author": "andoutenc",
   "categories": [

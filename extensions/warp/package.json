@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Open Warp tabs, windows, and Tab Configs.",
+  "description": "Open Warp terminal tabs and windows, open folders or selected Finder items in Warp, and launch Warp Tab Configs and Launch Configurations.",
   "icon": "warp-icon.png",
   "author": "joetannenbaum",
   "contributors": [

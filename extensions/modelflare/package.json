@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "modelflare",
   "title": "Modelflare",
-  "description": "Ask any text model and generate images with one Modelflare Smart API Key for every model available to your account.",
+  "description": "Ask GPT, Claude, Gemini and other text models and generate images with one Modelflare Smart API Key.",
   "icon": "icon.png",
   "author": "modelflare",
   "categories": [

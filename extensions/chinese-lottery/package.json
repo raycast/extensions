@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-lottery",
   "title": "Chinese Lottery",
-  "description": "Check the results of China Welfare Lottery and Sports Lottery",
+  "description": "Check the latest China Welfare Lottery and Sports Lottery results, including Double Color Ball, Super Lotto, 3D and Seven Stars.",
   "icon": "lottery-cn.png",
   "author": "elonwoo",
   "contributors": [

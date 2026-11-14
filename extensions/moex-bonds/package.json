@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moex-bonds",
   "title": "MOEX Bonds",
-  "description": "Search Russian bonds on the Moscow Exchange by name, ticker or ISIN: price, yield, coupons, offer and maturity.",
+  "description": "Search Russian bonds on the Moscow Exchange (MOEX) by name, ticker or ISIN and see price, yield, coupons, offer and maturity dates.",
   "icon": "extension-icon.png",
   "author": "andrey_tolstikov",
   "categories": [

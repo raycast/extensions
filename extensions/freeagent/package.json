@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "freeagent",
   "title": "FreeAgent",
-  "description": "Interact with FreeAgent",
+  "description": "Manage FreeAgent accounting: list and create invoices, timeslips, tasks and expenses, view bank transactions and your tax timeline.",
   "icon": "icon.png",
   "author": "SteveEdson",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "devutils",
   "title": "DevUtils",
-  "description": "Navigate DevUtils faster with this All-in-one Toolbox for Developers",
+  "description": "Open DevUtils tools on your Mac for clipboard text: JSON format, Base64, JWT debugger, UUID, regex tester, hash generator, text diff and more.",
   "icon": "devutils.png",
   "author": "vietanhlehuu",
   "owner": "devutils",

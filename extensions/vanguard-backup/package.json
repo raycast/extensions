@@ -3,7 +3,7 @@
   "name": "vanguard-backup",
   "title": "Vanguard Backup",
   "categories": ["Developer Tools"],
-  "description": "Open Source Backup Solution",
+  "description": "Manage Vanguard Backup tasks, backup destinations and remote servers in your open source Vanguard instance.",
   "icon": "extension_icon.png",
   "author": "xmok",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nuget-package-explorer",
   "title": "NuGet Package Explorer",
-  "description": "Local NuGet package explorer",
+  "description": "Browse and search locally installed NuGet packages and open their folders in Finder.",
   "icon": "icon.png",
   "author": "gaoyang",
   "categories": [

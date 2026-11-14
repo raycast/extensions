@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qq-music-controls",
   "title": "QQ Music Controls",
-  "description": "Control the QQ Music app for macOS with your keyboard.",
+  "description": "Control the QQ Music app on Mac: play, pause, skip, like tracks, change volume, toggle lyrics and shuffle or repeat modes.",
   "categories": [
     "Media",
     "Other"

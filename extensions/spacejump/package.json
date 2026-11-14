@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spacejump",
   "title": "SpaceJump",
-  "description": "Switch and manage macOS desktop Spaces with SpaceJump",
+  "description": "Switch between macOS desktop Spaces by name or from a searchable list with SpaceJump. Requires the SpaceJump app.",
   "icon": "icon.png",
   "author": "IdeaBridge",
   "categories": [

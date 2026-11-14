@@ -3,7 +3,7 @@
   "name": "diff-anything",
   "type": "module",
   "title": "Diff Anything",
-  "description": "Compare two files, two folders, or two texts in the Diff Anything app on your Mac.",
+  "description": "Compare two files, two folders or two texts side by side in the Diff Anything app on your Mac, including Finder selections and clipboard text.",
   "icon": "icon.png",
   "author": "martingruner",
   "license": "MIT",

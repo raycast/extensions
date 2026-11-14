@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "octopus-energy",
   "title": "Octopus Energy",
-  "description": "Retrieve up-to-date Agile tariff prices for your region",
+  "description": "Get up-to-date Octopus Energy Agile tariff electricity prices for your UK region.",
   "icon": "icon.png",
   "author": "mike182uk",
   "categories": [

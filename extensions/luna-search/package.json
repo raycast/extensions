@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "luna-search",
   "title": "Luna Search",
-  "description": "Quickly find and open Luna Games",
+  "description": "Search and open games on Amazon Luna cloud gaming, with recent and trending games in the menu bar.",
   "icon": "command-icon.png",
   "author": "relevantsam",
   "categories": [

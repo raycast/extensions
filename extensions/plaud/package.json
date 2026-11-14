@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plaud",
   "title": "Plaud",
-  "description": "Browse your Plaud AI recorder notes and copy links to them",
+  "description": "Search and browse your Plaud AI voice recorder notes and copy links to them.",
   "icon": "icon.png",
   "author": "patricklenz",
   "categories": [

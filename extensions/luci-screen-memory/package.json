@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "luci-screen-memory",
   "title": "Luci Screen Memory",
-  "description": "Toggle Luci screen memory recording and monitor status",
+  "description": "Turn Luci screen memory recording on or off and see its recording status in your Mac menu bar.",
   "icon": "command-icon.png",
   "author": "fahd_badran",
   "categories": [

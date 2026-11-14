@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shortcut",
   "title": "Shortcut",
-  "description": "Raycast extension for Shortcut",
+  "description": "View assigned Shortcut stories, iterations and epics, search stories, and create new stories.",
   "icon": "command-icon.png",
   "author": "Yukai",
   "categories": [

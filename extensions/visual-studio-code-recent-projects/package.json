@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visual-studio-code",
   "title": "Visual Studio Code",
-  "description": "Control VS Code and compatible editors directly from Raycast",
+  "description": "Open recent projects in VS Code, Cursor, Windsurf, VSCodium and other compatible editors, run Command Palette commands, and manage extensions.",
   "icon": "icon.png",
   "author": "thomas",
   "categories": ["Developer Tools"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jsr",
   "title": "JSR",
-  "description": "Search through JSR, the Open Source Package Registry for Javascript/Typescript",
+  "description": "Search JavaScript and TypeScript packages on JSR, view package details, and copy install commands for npm, pnpm, Yarn, Deno and Bun.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "contributors": [

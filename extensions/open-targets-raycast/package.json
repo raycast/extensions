@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open_targets",
   "title": "Open Targets",
-  "description": "An (unofficial) entry point to the Open Targets ecosystem.",
+  "description": "Search the Open Targets Platform and Open Targets Genetics for targets, diseases and drugs, browse dataset schemas, and open the docs.",
   "categories": [
     "Data",
     "Applications",

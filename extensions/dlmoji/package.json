@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dlmoji",
   "title": "DLmoji",
-  "description": "Semantic search for Emojis, powered by Deep Learning and intelligent APIs",
+  "description": "Find emojis with semantic search in English or Chinese, and translate phrases into emojis using deep learning.",
   "icon": "dlmoji-icon.png",
   "author": "Hydrapse",
   "license": "MIT",

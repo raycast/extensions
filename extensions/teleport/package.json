@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teleport",
   "title": "Teleport",
-  "description": "Interact with teleport, the open infrastructure access platform",
+  "description": "Log in to Teleport, list servers, databases, apps and Kubernetes clusters, and connect via SSH or your database client.",
   "icon": "icon.png",
   "author": "lamberttraccard",
   "contributors": [

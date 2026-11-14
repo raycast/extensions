@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trello",
   "title": "Trello",
-  "description": "Manage Trello boards, lists, and cards from Raycast",
+  "description": "Search Trello boards and cards, see your assigned cards, create cards in any list, and move or delete cards.",
   "icon": "command-icon.png",
   "author": "ChrisChinchilla",
   "contributors": [

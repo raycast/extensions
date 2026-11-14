@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "noteplan-3",
   "title": "NotePlan 3",
-  "description": "Allows you to see your daily plan, search notes and launch straight into NotePlan.",
+  "description": "Search NotePlan 3 notes, see today's daily note and tasks, and open notes in NotePlan.",
   "icon": "command-icon.png",
   "author": "shakedlokits",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "eudic",
   "title": "Eudic",
-  "description": "Intetract with Eudic, seach any word via Raycast",
+  "description": "Look up words, search Wiki and hear pronunciations in the Eudic (欧路词典) dictionary app on Mac.",
   "icon": "eudic-icon.png",
   "author": "tears330",
   "categories": [

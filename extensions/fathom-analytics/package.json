@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fathom-analytics",
   "title": "Fathom Analytics",
-  "description": "Gain quick insights into your Fathom Analytics sites, check stats and open a browser directly to the dashboard or site.",
+  "description": "Check visitor and pageview stats for your Fathom Analytics sites, create or delete sites, and open the dashboard.",
   "icon": "icon.png",
   "author": "danielferguson",
   "categories": [

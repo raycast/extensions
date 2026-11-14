@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "placeholder",
   "title": "Placeholder",
-  "description": "Just add your desired image size (width & height), and you'll get a stylish placeholder.",
+  "description": "Get placeholder images from Lorem Picsum in any width and height, with blur and grayscale options, and copy the image or URL.",
   "icon": "placeholder-icon.png",
   "author": "koinzhang",
   "contributors": [

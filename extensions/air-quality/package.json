@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "air-quality",
   "title": "Air Quality",
-  "description": "An air quality information extension",
+  "description": "Check the air quality index (AQI) for your city or station from the World Air Quality Index, with a menu bar view.",
   "icon": "icon.png",
   "author": "earthpyy",
   "categories": [

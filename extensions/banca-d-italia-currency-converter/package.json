@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "banca-d-italia-currency-converter",
   "title": "Banca d'Italia Currency Converter",
-  "description": "Convert currencies based on the Banca d'Italia exchange rates.",
+  "description": "Convert currencies with official Banca d'Italia exchange rates for any date.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "license": "MIT",

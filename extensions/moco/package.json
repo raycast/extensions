@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moco",
   "title": "MOCO",
-  "description": "Provide Integration to MOCO timetracking.",
+  "description": "Track time in MOCO: start and edit timers, manage time bookings and today's activities, and see the running timer in the menu bar.",
   "icon": "MocoLogo.png",
   "author": "eviscares",
   "contributors": [

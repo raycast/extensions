@@ -1,7 +1,7 @@
 {
   "name": "area-code-lookup",
   "title": "Area & Country Codes",
-  "description": "Quickly lookup area codes and country codes to see location and current timezone",
+  "description": "Look up US and Canadian phone area codes and international country calling codes to see the location and current local time.",
   "icon": "extension-icon.png",
   "author": "dare",
   "license": "MIT",

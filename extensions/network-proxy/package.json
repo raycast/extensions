@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "network-proxy",
   "title": "Network Proxy",
-  "description": "View and manage network proxy settings on macOS",
+  "description": "View and edit your macOS HTTP, HTTPS and SOCKS proxy settings, and save and apply proxy configuration templates.",
   "icon": "proxy-icon.png",
   "author": "wuyuxiangX",
   "license": "MIT",

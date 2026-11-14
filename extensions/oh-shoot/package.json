@@ -3,7 +3,7 @@
   "name": "oh-shoot",
   "type": "module",
   "title": "Oh-Shoot",
-  "description": "Search your oh-shoot screenshots by their OCR text and jump straight back into the oh-shoot app.",
+  "description": "Search your oh-shoot screenshots by the text inside them (OCR), preview them, and open them in the oh-shoot app.",
   "icon": "command-icon.png",
   "author": "nico_pergande",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatwork-search",
   "title": "Chatwork Search",
-  "description": "Search chats through all the room",
+  "description": "Search messages, rooms and contacts across all your Chatwork chats.",
   "icon": "cw-icon.png",
   "author": "nagauta",
   "contributors": [

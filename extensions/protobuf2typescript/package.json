@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "protobuf2typescript",
   "title": "Protobuf2TypeScript",
-  "description": "A script which help front-end devloper to convert *.protobuf file into *.d.ts file.",
+  "description": "Convert Protocol Buffers (.proto) messages into TypeScript .d.ts type definitions, from a form or the clipboard.",
   "icon": "command-icon.png",
   "author": "7gugu",
   "keywords": ["protobuf", "protocol buffer", "typescript"],

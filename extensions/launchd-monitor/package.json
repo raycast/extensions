@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launchd-monitor",
   "title": "Launchd Monitor",
-  "description": "Monitor your macOS launchd jobs from the menu bar. See job status, last run times, failures, and re-run jobs on demand.",
+  "description": "Monitor macOS launchd jobs from the menu bar: see job status, last run times, failures and logs, and re-run jobs on demand.",
   "icon": "command-icon.png",
   "author": "wesbaker",
   "categories": [

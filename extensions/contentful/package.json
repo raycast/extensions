@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "contentful",
   "title": "Contentful",
-  "description": "Browse and search Contentful content and assets library",
+  "description": "Search Contentful content entries, media assets, users and roles in your space and open them in Contentful.",
   "icon": "icon.png",
   "author": "ewgenius",
   "contributors": [

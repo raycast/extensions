@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kimi",
   "title": "Kimi",
-  "description": "Interact with Moonshot AI's Kimi LLM directly from Raycast",
+  "description": "Chat with Moonshot AI's Kimi models, continue conversations, save answers, and customize models.",
   "icon": "icon.png",
   "author": "degouville",
   "categories": [

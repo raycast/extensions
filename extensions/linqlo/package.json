@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linqlo",
   "version": "0.1.0",
-  "description": "Search your saved links, save clipboard URLs, and open Linqlo collections.",
+  "description": "Search, open and copy your Linqlo bookmarks, save a URL from the clipboard to a collection, and open Linqlo collections.",
   "categories": [
     "Productivity",
     "Web"

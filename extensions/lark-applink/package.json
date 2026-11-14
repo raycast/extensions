@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lark-applink",
   "title": "Lark AppLink",
-  "description": "Open Lark AppLink",
+  "description": "Open Lark (Feishu) Calendar, Chat, To-dos and specific views directly with Lark AppLinks.",
   "icon": "logo.png",
   "author": "chyroc",
   "categories": [

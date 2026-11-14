@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docsearch",
   "title": "DocSearch",
-  "description": "Link all DocSearch into Raycast",
+  "description": "Search developer docs via Algolia DocSearch: React, Vue, Next.js, Tailwind CSS, TypeScript, Vite, Supabase, Laravel, Deno and 30+ more.",
   "icon": "docsearch.png",
   "author": "Fatpandac",
   "keywords": [

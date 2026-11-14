@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bilibili",
   "title": "Bilibili",
-  "description": "Get notify from bilibili",
+  "description": "Browse your Bilibili dynamic feed and recommended videos, search videos, get notified of new posts from people you follow, and view AI video summaries.",
   "icon": "bilibili.png",
   "author": "Fatpandac",
   "categories": [

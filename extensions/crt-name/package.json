@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crt-name",
   "title": "CRT Name",
-  "description": "Find subdomains indexed by crt.name and see when each one first appeared",
+  "description": "Find subdomains of a domain from crt.name's certificate transparency index and see when each hostname first appeared, on Mac and Windows.",
   "icon": "crt-name-icon.png",
   "author": "0xdhrv",
   "platforms": [

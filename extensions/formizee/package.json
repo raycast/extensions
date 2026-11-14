@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "formizee",
   "title": "Formizee",
-  "description": "The Open-Source Forms Platform",
+  "description": "Manage Formizee forms, view form submissions and manage API keys.",
   "icon": "formizee.png",
   "author": "xmok",
   "platforms": [

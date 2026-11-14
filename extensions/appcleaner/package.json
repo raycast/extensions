@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "appcleaner",
   "title": "App Cleaner",
-  "description": "Uninstall applications with AppCleaner, Pearcleaner, TrashMe 3 or App Cleaner & Uninstaller",
+  "description": "Uninstall Mac apps with AppCleaner, Pearcleaner, TrashMe 3, App Cleaner & Uninstaller, or another uninstaller app you choose.",
   "icon": "icon.png",
   "author": "dziad",
   "categories": [

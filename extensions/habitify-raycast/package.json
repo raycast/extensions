@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "habitify-raycast",
   "title": "Habitify",
-  "description": "Manage Habitify habits from Raycast.",
+  "description": "View and check off today's Habitify habits, see habits for the current time of day, browse by area and track daily stats and streaks.",
   "version": "0.1.0",
   "icon": "icon.png",
   "author": "razz13",

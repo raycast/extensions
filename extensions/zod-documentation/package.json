@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zod-documentation",
   "title": "Zod Docs",
-  "description": "Search Zod docs and open in the browser",
+  "description": "Search the Zod documentation for Zod 4 or Zod 3 and open pages in your browser.",
   "icon": "zod-4-logo.png",
   "author": "danieldeichfuss",
   "contributors": [

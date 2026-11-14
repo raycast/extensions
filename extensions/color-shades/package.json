@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "color-shades",
   "title": "Color Shades",
-  "description": "Generate color shades from a base color and manage your generated color shades palettes.",
+  "description": "Generate light and dark shades of a HEX color and save the generated color palettes.",
   "icon": "command-icon.png",
   "author": "qeude",
   "categories": [

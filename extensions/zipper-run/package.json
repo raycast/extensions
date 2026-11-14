@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zipper-run",
   "title": "Run Zipper Applet",
-  "description": "Run a zipper applet",
+  "description": "Run a Zipper.dev applet by slug and script name, fill in its inputs, and view the results.",
   "icon": "zipper-icon.png",
   "author": "ariel_conti",
   "contributors": [

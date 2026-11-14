@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sf-symbols-search",
   "title": "SF Symbols Search",
-  "description": "Search and copy SF Symbols",
+  "description": "Search Apple SF Symbols by name or category and copy or paste the symbol or its name, with pinned and recently used symbols.",
   "icon": "command-icon.png",
   "author": "jffrykkn",
   "contributors": [

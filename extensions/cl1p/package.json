@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cl1p",
   "title": "cl1p.net",
-  "description": "Save text to cl1p.net and copy the resulting URL",
+  "description": "Save text or selected text to a cl1p.net clipboard page and copy the share URL.",
   "icon": "icon.png",
   "author": "meslva",
   "license": "MIT",

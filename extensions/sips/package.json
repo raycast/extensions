@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sips",
   "title": "Image Modification",
-  "description": "Apply filters and transformations to various image formats, and convert between them.",
+  "description": "Resize, rotate, flip, convert and compress images on your Mac, remove backgrounds, strip EXIF data and apply filters, including WebP and AVIF.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [

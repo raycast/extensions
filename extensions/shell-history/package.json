@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shell-history",
   "title": "Shell History",
-  "description": "Search shell command history from zsh, bash, and fish.",
+  "description": "Search your zsh, bash and fish shell command history, and copy, paste or run commands in your terminal.",
   "icon": "shell-history-icon.png",
   "author": "koinzhang",
   "license": "MIT",

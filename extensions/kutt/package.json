@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kutt",
   "title": "Kutt",
-  "description": "Free & Open Source Modern URL Shortener",
+  "description": "Shorten URLs with Kutt, the open-source link shortener, and search, edit or delete your short links.",
   "icon": "kutt.png",
   "author": "xmok",
   "platforms": [

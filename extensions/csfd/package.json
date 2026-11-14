@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "csfd",
   "title": "ČSFD",
-  "description": "Search for movies/tv shows and other in Czech-Slovak Movie Database",
+  "description": "Search movies and TV shows on ČSFD (Czech-Slovak Film Database) and see ratings, cast and where to watch.",
   "icon": "icon-512.png",
   "author": "adam_vyborny",
   "categories": [

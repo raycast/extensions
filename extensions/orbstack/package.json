@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orbstack",
   "title": "OrbStack",
-  "description": "Manage OrbStack with Raycast",
+  "description": "Manage OrbStack Linux machines and Docker containers: start, stop, create and clone machines, and run commands in them with AI.",
   "icon": "orbstack.png",
   "author": "nicholasq",
   "contributors": [

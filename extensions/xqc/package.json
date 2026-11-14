@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xqc",
   "title": "xQc",
-  "description": "Search and Explore Vods for twitch.tv/xqc",
+  "description": "Search and watch past Twitch VODs from xQc's twitch.tv/xqc channel.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [

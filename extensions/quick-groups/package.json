@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-groups",
   "title": "Quick Groups",
-  "description": "Search and act on grouped reference data from local YAML files",
+  "description": "Search grouped reference data such as projects, machines or clients from local YAML files, and run actions on each record.",
   "icon": "reference-icon.png",
   "author": "neilbartlett",
   "categories": [

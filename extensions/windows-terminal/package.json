@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-terminal",
   "title": "Windows Terminal",
-  "description": "Launch and manage Windows Terminal instances",
+  "description": "Open Windows Terminal with any profile, or open the selected File Explorer item in Terminal.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

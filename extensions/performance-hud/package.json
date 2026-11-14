@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "performance-hud",
   "title": "Metal Performance HUD",
-  "description": "Toggle macOS's built-in Metal performance HUD",
+  "description": "Toggle the built-in macOS Metal Performance HUD to show FPS and GPU stats in Metal apps and games.",
   "icon": "metal_profiler.png",
   "author": "say4n",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "thingiverse",
   "title": "Thingiverse",
-  "description": "Browse Thingiverse",
+  "description": "Search Thingiverse for 3D printing models and view thing details using the official Thingiverse API.",
   "icon": "thingiverse-logo.png",
   "author": "mSarheed",
   "categories": [

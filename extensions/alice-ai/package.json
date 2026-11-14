@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alice-ai",
   "title": "Alice AI - Your Daily AI Actions Companion",
-  "description": "Alice helps with your daily tasks by providing quick access to reusable AI actions across OpenAI and Gemini models.",
+  "description": "Run reusable AI actions on selected text with OpenAI and Google Gemini models, create custom prompts and review response history.",
   "icon": "icon.png",
   "author": "quiknull",
   "categories": [

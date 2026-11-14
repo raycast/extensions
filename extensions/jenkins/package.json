@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jenkins",
   "title": "Jenkins",
-  "description": "Manage your Jenkins directly from Raycast.",
+  "description": "Manage Jenkins servers: search jobs, start builds, browse builds and console output, and open jobs in the browser.",
   "icon": "icon.png",
   "author": "k8scat",
   "contributors": [

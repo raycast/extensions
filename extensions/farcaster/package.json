@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "farcaster",
   "title": "Farcaster",
-  "description": "Most comprehensive extension for Farcaster. Search for casts, profiles and explore details.",
+  "description": "Search trending Farcaster casts by keyword and look up profiles by FID, username or display name, using the Neynar API.",
   "icon": "command-icon.png",
   "author": "artivilla",
   "categories": [

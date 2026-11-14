@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "headlines",
   "title": "Headlines",
-  "description": "Super breif news extension.",
+  "description": "Glance at brief top news and entertainment headlines.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

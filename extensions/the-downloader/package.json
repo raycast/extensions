@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-downloader",
   "title": "The Downloader",
-  "description": "Download videos, audio, image galleries, Spotify music and webpages — and chat with AI about any video, post or article.",
+  "description": "Download YouTube and other videos, audio, image galleries, Spotify music and webpages with yt-dlp, and chat with AI about any video or article.",
   "type": "module",
   "icon": "icon.png",
   "author": "Stheno",

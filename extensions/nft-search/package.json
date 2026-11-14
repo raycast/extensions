@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nft-search",
   "title": "NFT Search",
-  "description": "Seraching NFT real-time floor price and info by NFT collection name",
+  "description": "Search NFT collections by name and see real-time floor prices and collection info.",
   "icon": "command-icon.png",
   "author": "Glaze",
   "categories": [

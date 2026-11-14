@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-teams-keys",
   "title": "Microsoft Teams Keys",
-  "description": "Drive the Microsoft Teams desktop app from the keyboard without signing in: open a chat and type or send a message, control your meeting, share your screen, set your status, start calls and join or schedule meetings. Everything runs locally.",
+  "description": "Control the Microsoft Teams desktop app on Mac by keyboard: open chats, send messages, mute, share screen, set status and join meetings.",
   "icon": "icon.png",
   "author": "jnbp",
   "categories": [

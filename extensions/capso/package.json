@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "capso",
   "title": "Capso",
-  "description": "Trigger Capso captures, OCR, recordings, and history directly from Raycast.",
+  "description": "Take Capso screenshots of an area, window or full screen, scrolling captures, OCR text, screen recordings, translate text, and open capture history.",
   "icon": "capso.png",
   "author": "rcouto",
   "categories": [

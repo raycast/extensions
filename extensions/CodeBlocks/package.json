@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codeblocks",
   "title": "CodeBlocks",
-  "description": "Set or modify the programming language in markdown code blocks in batch.",
+  "description": "Set or change the programming language of Markdown code blocks in bulk, for developers who write a lot of Markdown.",
   "icon": "CodeBlocks.png",
   "author": "isfeng",
   "categories": [

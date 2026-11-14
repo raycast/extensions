@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shopinfo-app",
   "title": "Shopinfo.app",
-  "description": "Identify Shopify themes from your current browser tab using shopinfo.app's database",
+  "description": "Identify the Shopify theme of the store in your current browser tab with shopinfo.app, including theme version and update info.",
   "icon": "shopinfo-icon.png",
   "author": "trpage_dev",
   "license": "MIT",

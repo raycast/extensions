@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-pomodoro-notion",
   "title": "PomoNotion Raycast Extension",
-  "description": "A Raycast Pomodoro timer with Notion logging, ambient audio, and active-minute tracking.",
+  "description": "Run a Pomodoro timer on your Mac with work and break music and alarms, and log each work session to a Notion database.",
   "icon": "icon.png",
   "author": "hk_raycast",
   "license": "MIT",

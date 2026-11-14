@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tabby",
   "title": "Tabby",
-  "description": "Control Tabby terminal with Raycast",
+  "description": "Browse your Tabby terminal profiles and open one in a new Tabby tab, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "chupi",
   "license": "MIT",

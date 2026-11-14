@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "phare-io-uptime",
   "title": "Phare.io Uptime",
-  "description": "Manages and shows uptime status for services using Phare.io",
+  "description": "View Phare.io uptime monitors and their status, create new monitors, and pause or unpause them.",
   "icon": "phare.io-black.png",
   "author": "ApopeOS",
   "categories": [

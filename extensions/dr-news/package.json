@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dr-news",
   "title": "DR News",
-  "description": "Showcases news updates from DR, Denmark's premier broadcaster, categorized by various topics.",
+  "description": "Read the latest Danish news from DR (Danmarks Radio, dr.dk), sorted by topic.",
   "icon": "icon.png",
   "author": "kenanbendz",
   "contributors": [

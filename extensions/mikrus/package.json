@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mikrus",
   "title": "Mikrus",
-  "description": "Integration with mikr.us",
+  "description": "Manage your mikr.us VPS servers: view the server list, restart servers and extend them with amphetamine.",
   "icon": "icon.png",
   "author": "tkowalski29",
   "categories": [

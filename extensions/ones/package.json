@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ones",
   "title": "ONES",
-  "description": "Raycast Extension for ONES",
+  "description": "Search ONES Project tasks, projects, sprints and resources, search ONES Wiki spaces and pages, and log work hours.",
   "icon": "icon.png",
   "author": "k8scat",
   "license": "MIT",

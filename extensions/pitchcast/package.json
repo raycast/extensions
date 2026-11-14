@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pitchcast",
   "title": "Pitchcast - Pitchfork Reviews Search",
-  "description": "Search Pitchfork.com Reviews",
+  "description": "Search Pitchfork album reviews by artist or album and see scores, Best New Music badges, genre and author.",
   "icon": "pitchcast-icon.png",
   "author": "stuartromanek",
   "license": "MIT",

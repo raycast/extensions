@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tarot",
   "title": "Tarot",
-  "description": "Draw cards from a virtual tarot deck.",
+  "description": "Draw a card from a virtual tarot deck and read its meaning.",
   "icon": "command-icon.png",
   "author": "tsui_river",
   "categories": [

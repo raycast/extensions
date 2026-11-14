@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pokedex",
   "title": "Pokédex",
-  "description": "Explore the world of Pokémon with stunning visuals and detailed information in Raycast.",
+  "description": "Explore the Pokédex: Pokémon stats, abilities, moves, evolution chains and encounters, plus a type chart, weaknesses, natures and items.",
   "icon": "icon.png",
   "author": "anhthang",
   "contributors": [

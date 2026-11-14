@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iata-code-decoder",
   "title": "IATA Code Decoder",
-  "description": "Decodes IATA codes, helping you to identify airports, airlines and aircraft",
+  "description": "Look up IATA codes for airports, airlines and aircraft, such as SFO for San Francisco or 738 for the Boeing 737-800.",
   "icon": "command-icon.png",
   "author": "timrogers",
   "license": "MIT",

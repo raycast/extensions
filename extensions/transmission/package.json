@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transmission",
   "title": "Transmission",
-  "description": "View and manage torrents directly from Raycast.",
+  "description": "List, add, pause, resume and remove torrents in Transmission or transmission-daemon, and add torrents from magnet links.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "license": "MIT",

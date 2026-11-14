@@ -1,7 +1,7 @@
 {
   "name": "osquery",
   "title": "Osquery",
-  "description": "Schema-driven Osquery query lookup tool, easy way for table discovery and query building",
+  "description": "Search osquery tables and columns, find columns across tables, browse query templates and validate SQL against the schema.",
   "icon": "osquery.png",
   "author": "henry-st",
   "categories": [

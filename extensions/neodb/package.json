@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "neodb",
   "title": "NeoDB",
-  "description": "Search NeoDB items and view item details",
+  "description": "Search NeoDB for books, movies, TV shows, music and more, view item details, and browse your collections and reviews.",
   "icon": "command-icon.png",
   "author": "SevicheCC",
   "contributors": [

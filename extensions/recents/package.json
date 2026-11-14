@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recents",
   "title": "Recents",
-  "description": "Show Recently used files and folders in Raycast",
+  "description": "Show recently used files, folders, applications, documents and downloads on your Mac.",
   "icon": "recents.png",
   "author": "GastroGeek",
   "contributors": [

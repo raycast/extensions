@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "status-nerd",
   "title": "Status Nerd",
-  "description": "Set a funny status on Slack, GitLab and GitHub at once — pick services, roll a random one, or generate with AI.",
+  "description": "Set a funny status on Slack, GitLab and GitHub at once, pick a random one, generate one with AI or base it on your next meeting.",
   "icon": "icon.png",
   "author": "jan_werner",
   "categories": [

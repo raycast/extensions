@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "counter",
   "title": "Counter",
-  "description": "A simple counter, in the comfort of Raycast root!",
+  "description": "A simple counter: increment, decrement and reset a count with keyboard shortcuts.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
   "contributors": [

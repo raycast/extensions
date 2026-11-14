@@ -18,7 +18,7 @@
     "node-fetch": "^3.3.1",
     "node-html-markdown": "^1.2.2"
   },
-  "description": "Browse Feedly through Raycast",
+  "description": "Browse articles from your Feedly feeds and collections and open them in your browser.",
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",

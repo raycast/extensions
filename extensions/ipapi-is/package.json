@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ipapi-is",
   "title": "ipapi.is",
-  "description": "Lookup IP or ASN via ipapi.is",
+  "description": "Look up an IP address or ASN with ipapi.is to see location, company, datacenter and VPN or abuser flags, no API key needed.",
   "icon": "ipapi-is.png",
   "author": "xmok",
   "categories": [

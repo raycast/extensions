@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-tasks",
   "title": "Google Tasks",
-  "description": "Manage Google Tasks from Raycast, and ask Raycast AI about them.",
+  "description": "View, create and complete Google Tasks across your task lists, and ask Raycast AI to search, update or delete tasks.",
   "icon": "google-tasks.png",
   "author": "elliotdes",
   "contributors": [

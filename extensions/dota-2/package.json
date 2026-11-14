@@ -28,7 +28,7 @@
     "lodash.startcase": "^4.4.0",
     "zod": "^3.19.0"
   },
-  "description": "View various data about Dota 2, like heroes and their stats.",
+  "description": "Browse Dota 2 heroes and items with their stats and attributes.",
   "devDependencies": {
     "@types/lodash.startcase": "^4.4.7",
     "@types/node": "~18.7.16",

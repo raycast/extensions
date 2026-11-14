@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cyberchef",
   "title": "CyberChef",
-  "description": "The Cyber Swiss Army Knife - a web app for encryption, encoding, compression and data analysis",
+  "description": "Run CyberChef operations on selected text or clipboard: Base64, URL encode, JWT decode, JSON and CSV conversion, hashing, beautify, regex and more.",
   "icon": "command-icon.png",
   "author": "mblode",
   "contributors": [

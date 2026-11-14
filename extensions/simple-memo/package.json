@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-memo",
   "title": "Simple Memo",
-  "description": "A lightweight local memo extension for Raycast.",
+  "description": "Create, edit and search local Markdown memos, or save quick text memos without opening the editor.",
   "development": false,
   "icon": "icon.png",
   "author": "hyokwonkim",

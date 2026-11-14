@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "cometapi",
     "title": "CometAPI",
-    "description": "AI-powered text processing tools using CometAPI. Summarize, translate, rephrase, proofread text with advanced language models.",
+    "description": "Summarize, translate, rephrase and proofread selected text, ask AI questions and list available models using CometAPI.",
     "icon": "cometapi.png",
     "author": "mutewinter",
     "license": "MIT",

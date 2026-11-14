@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "instapaper",
   "title": "Instapaper",
-  "description": "Quick add links from your clipboard to Instapaper.",
+  "description": "Save the URL on your clipboard to Instapaper to read later.",
   "icon": "instapaper.png",
   "author": "suv",
   "categories": [

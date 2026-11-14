@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "folder-organizer",
   "title": "Folder Organizer",
-  "description": "Organize files in Downloads or any custom folder by automatically sorting them into categorized subfolders",
+  "description": "Organize your Downloads or any folder on your Mac by sorting files into subfolders by type, and delete empty folders.",
   "icon": "folder_organizer.png",
   "author": "madushanj",
   "keywords": [

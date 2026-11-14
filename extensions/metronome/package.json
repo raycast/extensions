@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "metronome",
   "title": "Metronome",
-  "description": "Based on an input (integer argument) BPM, you can get a metronome that plays a sound after a certain amount of time.",
+  "description": "Start a metronome at any BPM that keeps ticking in the background.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "categories": [

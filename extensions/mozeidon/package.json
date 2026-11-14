@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozeidon",
   "title": "Mozeidon",
-  "description": "Search, open tabs and bookmarks in Firefox via Mozeidon add-on",
+  "description": "Search and switch to Firefox tabs, recently closed tabs and bookmarks with the Mozeidon add-on, or start a new web search.",
   "icon": "firefox-logo.png",
   "author": "egovelox",
   "contributors": [],

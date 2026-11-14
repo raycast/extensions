@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cyberpanel",
   "title": "CyberPanel",
-  "description": "Interact with CyberPanel",
+  "description": "Manage CyberPanel websites, users, packages, databases, email and FTP accounts, DNS records and backups through the CyberPanel API.",
   "icon": "cyberpanel.png",
   "author": "xmok",
   "categories": [

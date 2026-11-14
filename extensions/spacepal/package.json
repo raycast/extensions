@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spacepal",
   "title": "Spacepal",
-  "description": "Switch macOS Spaces by name, jump back to your last Space and send windows between Spaces with Spacepal.",
+  "description": "Switch macOS Spaces by name, note or app, move the front window to another Space and jump back to your last Space with Spacepal.",
   "icon": "icon.png",
   "author": "Halberd",
   "categories": [

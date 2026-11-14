@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memory",
   "title": "Memory",
-  "description": "Knowledge Graph Memory for Raycast AI",
+  "description": "Give Raycast AI a persistent knowledge graph memory of entities, relations and observations, and view what it remembers.",
   "icon": "memory.png",
   "author": "EvanZhouDev",
   "categories": [

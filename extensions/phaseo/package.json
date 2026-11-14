@@ -4,7 +4,7 @@
   "version": "0.4.0",
   "private": true,
   "title": "Phaseo",
-  "description": "Explore Phaseo's AI model catalogue from Raycast",
+  "description": "Search and compare AI models in the Phaseo catalogue by model, organization or endpoint.",
   "icon": "icon.png",
   "author": "danielbutler1",
   "license": "MIT",

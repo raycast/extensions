@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smart-reply",
   "title": "Smart Reply - AI-Powered Multilingual Response Generator",
-  "description": "AI-powered multilingual translator and response generator with customizable languages and tones.",
+  "description": "Generate AI replies to selected text in any language and tone, with automatic language detection and translation, using Raycast AI or OpenAI.",
   "icon": "icon.png",
   "author": "kawamataryo",
   "contributors": [

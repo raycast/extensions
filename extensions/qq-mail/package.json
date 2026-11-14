@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qq-mail",
   "title": "QQ Mail",
-  "description": "View and manage your QQ Mail inbox",
+  "description": "Read and manage your QQ Mail inbox and folders, view attachments, and compose and send emails.",
   "icon": "icon.png",
   "author": "ariesly15",
   "platforms": [

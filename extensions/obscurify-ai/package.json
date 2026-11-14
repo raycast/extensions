@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obscurify-ai",
   "title": "Obscurify.ai",
-  "description": "Use 200+ Obscurify.ai models in Raycast AI Chat, Quick AI and AI Commands, over zero-data-retention routes.",
+  "description": "Use 200+ Obscurify.ai models like GPT, Claude, Gemini and DeepSeek in Raycast AI Chat, Quick AI and AI Commands, with zero data retention.",
   "icon": "icon.png",
   "author": "obscurify",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "icy-veins-quicklinks",
   "title": "Icy Veins Quicklinks",
-  "description": "Instantly navigate to Icy Veins World of Warcraft class and spec guides.",
+  "description": "Search and open Icy Veins World of Warcraft (WoW) class and spec guides, with stat priorities and favorites.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

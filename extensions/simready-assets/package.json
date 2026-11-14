@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simready-assets",
   "title": "SimReady Assets",
-  "description": "Browse, preview, and search NVIDIA's SimReady Assets on Hugging Face. Download only the assets you need.",
+  "description": "Search and preview NVIDIA SimReady 3D assets on Hugging Face, browse their files and download only the assets you need.",
   "icon": "extension_icon.png",
   "author": "0xdhrv",
   "platforms": [

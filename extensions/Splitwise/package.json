@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "splitwise",
   "title": "Splitwise",
-  "description": "View the balances and add expenses to Splitwise",
+  "description": "Add, view, edit and delete Splitwise expenses and split costs with friends and groups using your Splitwise account.",
   "icon": "command-icon.png",
   "author": "ilian",
   "contributors": [

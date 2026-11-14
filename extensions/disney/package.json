@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "disney",
   "title": "Disney",
-  "description": "Explore information about your beloved Disney characters by searching for them.",
+  "description": "Search Disney characters by name, film or TV show, save favourites for offline use, and open their Disney Wiki pages.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [

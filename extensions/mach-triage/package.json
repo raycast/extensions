@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mach-triage",
   "title": "Mach Triage",
-  "description": "Triage Jira, Linear, and GitHub tickets without leaving Raycast. Search, check your Today board, change status, add comments, and log work — all routed through the Mach Triage desktop app on your local machine. No cloud. No latency. No context switching.",
+  "description": "Search Jira, Linear and GitHub tickets and view your Today board through the local Mach Triage desktop app.",
   "icon": "icon.png",
   "author": "MikeWhob",
   "platforms": [

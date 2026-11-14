@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scrapbox-search",
   "title": "Scrapbox Search",
-  "description": "Search Scrapbox pages and open quickly.",
+  "description": "Search Scrapbox (Cosense) pages by keyword, including private projects, and open them.",
   "icon": "command-icon.png",
   "author": "zett-8",
   "categories": [

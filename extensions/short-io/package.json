@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "short-io",
   "title": "Short.io",
-  "description": "Shorten and search links with your own domain via Short.io",
+  "description": "Shorten links with your own domain on Short.io, set a default domain, and search your short links from Raycast or the menu bar.",
   "icon": "short-io-icon.png",
   "author": "koinzhang",
   "contributors": [

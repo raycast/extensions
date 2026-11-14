@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "framer-motion",
   "title": "Framer Motion",
-  "description": "Documentation for Framer Motion",
+  "description": "Search the Framer Motion documentation and copy Framer Motion utilities.",
   "icon": "command-icon.png",
   "author": "madebyankur",
   "categories": [

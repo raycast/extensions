@@ -3,7 +3,7 @@
   "name": "tourbox",
   "title": "TourBox",
   "type": "module",
-  "description": "Find Your Desired TourBox Preset",
+  "description": "Search TourBox presets shared by pros for any app or platform, on Mac and Windows.",
   "icon": "tourbox-icon.png",
   "author": "litomore",
   "platforms": [

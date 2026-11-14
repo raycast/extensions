@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unpackr",
   "title": "Unpackr",
-  "description": "Intelligently merges and organizes ZIP files with automatic deduplication. Works with Google Takeout or any ZIP files.",
+  "description": "Unzip and merge multiple ZIP files, such as Google Takeout archives, into one organized folder with automatic deduplication.",
   "icon": "command-icon.png",
   "author": "shak",
   "contributors": [

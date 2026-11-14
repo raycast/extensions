@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launchbar-file-manager",
   "title": "LaunchBar File Manager",
-  "description": "LaunchBar-style file browsing inside Raycast: drill with keyboard, preview, copy move rename trash.",
+  "description": "Browse files LaunchBar-style with the keyboard, preview them, and copy, move, rename or trash files, including the Finder selection.",
   "icon": "icon.png",
   "author": "imed",
   "license": "MIT",

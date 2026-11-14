@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "port-manager",
   "title": "Port Manager",
-  "description": "Find open ports and close them",
+  "description": "Find which process is using a port, list open TCP ports, kill the process listening on a port, and name ports, on Mac and Windows.",
   "categories": [
     "Developer Tools",
     "Productivity",

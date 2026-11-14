@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nixpkgs-search",
   "title": "NixPkgs Search",
-  "description": "Query NixPkgs like search.nixos.org",
+  "description": "Search Nix packages like search.nixos.org, view versions, licenses and homepages, and switch between NixOS branches.",
   "icon": "nix-snowflake.png",
   "author": "aiotter",
   "contributors": [

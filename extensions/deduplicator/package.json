@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deduplicator",
   "title": "Deduplicator",
-  "description": "A text tool for de-duplicating text content.",
+  "description": "Remove duplicate lines from text and copy the de-duplicated result.",
   "icon": "command-icon.png",
   "author": "HerbertLu",
   "categories": [

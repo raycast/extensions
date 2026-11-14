@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lightning-time",
   "title": "Lightning Time",
-  "description": "Convert from traditional time to Lightning Time ⚡",
+  "description": "Convert regular time to Lightning Time hexadecimal time and back, and get the three colors for a Lightning Time string.",
   "icon": "command-icon.png",
   "author": "MatthewStanciu",
   "categories": [

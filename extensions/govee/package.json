@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "govee",
   "title": "Govee",
-  "description": "Control your Govee Lights",
+  "description": "Control Govee lights over your local network: toggle, set brightness and color, and create scenarios for several devices.",
   "icon": "govee.png",
   "author": "j3lte",
   "categories": [

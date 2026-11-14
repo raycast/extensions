@@ -3,7 +3,7 @@
   "name": "openai-gpt",
   "version": "1.7.0",
   "title": "OpenAI GPT",
-  "description": "Interact with OpenAI GPT AI",
+  "description": "Send prompts to OpenAI GPT models with your own API key, tune temperature and tokens, and start from examples like summarizing or translation.",
   "icon": "openai-logo.png",
   "author": "simicvm",
   "contributors": [

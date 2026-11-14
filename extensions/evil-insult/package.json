@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "evil-insult",
   "title": "Evil Insult",
-  "description": "Generate Evil Insults",
+  "description": "Generate a random insult from the Evil Insult Generator.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "categories": [

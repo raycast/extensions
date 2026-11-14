@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "react-devtools",
   "title": "React DevTools",
-  "description": "Launch React DevTools command-line application",
+  "description": "Launch the standalone React DevTools app without opening a terminal.",
   "icon": "ReactDevTools.png",
   "author": "gutenye",
   "license": "MIT",

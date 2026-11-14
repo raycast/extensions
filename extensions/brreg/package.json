@@ -3,7 +3,7 @@
   "name": "brreg",
   "version": "1.0.1",
   "title": "The Brønnøysund Register Centre Search",
-  "description": "Search and retrieve information about Norwegian companies from the Central Coordinating Register for Legal Entities in Norway (Enhetsregisteret)",
+  "description": "Search Norwegian companies by name or organisation number in Brønnøysundregistrene (Enhetsregisteret), view company details and save favourites.",
   "icon": "icon.png",
   "author": "kakaoduft",
   "access": "public",

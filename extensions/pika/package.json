@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pika",
   "title": "Pika",
-  "description": "Beautify screenshots quickly using pika.style",
+  "description": "Beautify screenshots with pika.style: open an image file, image URL or website URL in Pika.",
   "icon": "pika-icon.png",
   "author": "rishi",
   "categories": [

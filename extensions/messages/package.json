@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "messages",
   "title": "Messages",
-  "description": "Quickly read your latest messages, open your chats, or send messages to your contacts.",
+  "description": "Read your latest iMessages and SMS, open chats, send messages, paste the latest OTP code and see unread messages in the Mac menu bar.",
   "icon": "apple-messages-icon.png",
   "author": "thomaslombart",
   "contributors": [

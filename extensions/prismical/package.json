@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prismical",
   "title": "Prismical",
-  "description": "Search, preview, and capture notes in your Prismical Cloud workspace.",
+  "description": "Search and preview notes in your Prismical Cloud workspace, create new notes and append text to existing ones.",
   "icon": "prismical-icon-inset.png",
   "author": "nch",
   "platforms": [

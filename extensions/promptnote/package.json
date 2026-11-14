@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "promptnote",
   "title": "PromptNote",
-  "description": "Manage your AI prompts with versioning and cloud sync",
+  "description": "Search, create and organize AI prompts in PromptNote with tags, favorites and versioning, and quickly capture snippets to notes.",
   "icon": "icon.png",
   "author": "dimpurr",
   "version": "1.0.0",

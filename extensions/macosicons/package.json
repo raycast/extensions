@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macosicons",
   "title": "macOSIcons.com",
-  "description": "Raycast extension for browsing and applying icons from macOSicons.com",
+  "description": "Search macOSicons.com for custom app icons, apply them to your Mac apps, download them, and manage icons you've applied.",
   "icon": "logo.png",
   "author": "shldk",
   "contributors": [

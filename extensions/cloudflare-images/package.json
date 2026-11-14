@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cloudflare-images",
   "title": "Cloudflare Images",
-  "description": "Upload images to Cloudflare Images from your clipboard, Finder, or anywhere on your Mac. Includes a browser for your uploaded images. Unofficial.",
+  "description": "Upload images to Cloudflare Images from your clipboard or Finder and paste the URL as Markdown, HTML or a signed link. Browse and delete uploads.",
   "icon": "icon.png",
   "author": "miguel_caetano_dias",
   "categories": [

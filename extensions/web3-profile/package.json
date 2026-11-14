@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "web3-profile",
   "title": "Web3 Profile",
-  "description": "Search for ENS names and view its profile — Avatar, description, social URLs and more!",
+  "description": "Search Ethereum ENS names and view their profile: avatar, description, address and social links.",
   "icon": "web3-profile-icon.png",
   "author": "peduarte",
   "categories": [

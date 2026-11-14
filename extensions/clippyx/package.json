@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clippyx",
   "title": "CLIPPyX",
-  "description": "CLIPPyX provides an OS-wide image search that supports semantic search in both image content and text on images",
+  "description": "Search your images by caption, by text inside them or by visual similarity using CLIPPyX semantic image search.",
   "icon": "CLIPPyX.png",
   "author": "0ssamaak0",
   "categories": [

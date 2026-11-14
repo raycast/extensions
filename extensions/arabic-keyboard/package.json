@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "arabic-keyboard",
   "title": "Arabic Keyboard",
-  "description": "Arabic Keyboard for Raycast",
+  "description": "Type Arabic letters and numbers from an on-screen Arabic keyboard grid and copy the text.",
   "icon": "icon.png",
   "author": "mSarheed",
   "categories": [

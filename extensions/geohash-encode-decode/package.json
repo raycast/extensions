@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geohash-encode-decode",
   "title": "Geohash",
-  "description": "Encode coordinates as geohash, or decode a geohash and get useful info",
+  "description": "Encode latitude and longitude as a geohash at any precision, or decode a geohash to its centroid, neighbors, GeoJSON and WKT polygon.",
   "icon": "command-icon.png",
   "author": "alrico88",
   "license": "MIT",

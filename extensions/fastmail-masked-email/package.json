@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fastmail-masked-email",
   "title": "Fastmail Masked Email",
-  "description": "Manage masked emails with Fastmail",
+  "description": "Create, list and manage Fastmail masked email addresses, with optional description and prefix, or quick-create one without prompts.",
   "icon": "mask.png",
   "author": "LightQuantum",
   "contributors": [

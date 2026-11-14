@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dice-tiles",
   "title": "Dice Tiles",
-  "description": "A minimalist dice-and-tiles elimination game. Roll dice, eliminate tiles matching their sum, and climb through reward tiers while tracking victories and defeats.",
+  "description": "Play a dice-and-tiles game: roll dice, eliminate tiles that match the sum, and climb reward tiers while tracking wins and losses.",
   "icon": "dice-tiles.png",
   "author": "julien_minniti",
   "contributors": [

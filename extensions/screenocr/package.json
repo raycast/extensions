@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenocr",
   "title": "ScreenOCR",
-  "description": "Extract text from screen captures and clipboard images locally via OCR",
+  "description": "Extract text from a screen area, the whole screen or a clipboard image with on-device OCR, and detect QR codes and barcodes on macOS.",
   "icon": "command-icon.png",
   "author": "huzef44",
   "contributors": [

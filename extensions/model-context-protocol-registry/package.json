@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "model-context-protocol-registry",
   "title": "Model Context Protocol Registry",
-  "description": "Find and install MCP servers in Raycast and other MCP clients like Claude or Cursor.",
+  "description": "Find and install MCP servers (Model Context Protocol) in Raycast, Claude, Cursor and other MCP clients from a registry.",
   "icon": "extension.png",
   "author": "thomas",
   "contributors": [

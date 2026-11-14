@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "syntax-fm",
   "title": "Syntax.fm",
-  "description": "Syntax.fm at your fingertips.",
+  "description": "Browse episodes of the Syntax.fm web development podcast, read show notes, and play them in Apple Music or watch on YouTube.",
   "icon": "icon.png",
   "author": "msmps",
   "categories": [

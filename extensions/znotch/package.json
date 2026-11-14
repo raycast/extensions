@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "znotch",
   "title": "Manage Macbook's Notch",
-  "description": "Visibility control of your macbook's notch",
+  "description": "Hide, show or toggle the MacBook notch with the free zNotch app.",
   "icon": "znotch-icon.png",
   "author": "zkondor",
   "categories": [

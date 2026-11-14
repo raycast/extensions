@@ -3,7 +3,7 @@
   "name": "large-type",
   "title": "Large Type",
   "version": "0.0.2",
-  "description": "Large Type allows you to show text in large characters across your screen",
+  "description": "Show text, your clipboard or selected text in large type across your screen, to share a phone number or password across a room.",
   "icon": "command-icon.png",
   "author": "gbarba",
   "contributors": [

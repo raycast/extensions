@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trackpad-mouse-tools",
   "title": "Trackpad & Mouse Tools",
-  "description": "Change trackpad and mouse settings without opening System Settings. Switch secondary click between two fingers and a corner with one hotkey, set mouse and trackpad speed, toggle tap to click, natural scrolling and three finger drag, adjust gestures, and left, right or middle click or hold a mouse button from a hotkey.",
+  "description": "Change Mac trackpad and mouse settings with hotkeys: secondary click, tap to click, natural scrolling, three finger drag and pointer speed.",
   "icon": "icon.png",
   "author": "jnbp",
   "license": "MIT",

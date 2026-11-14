@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "courtlistener-search",
   "title": "CourtListener Search",
-  "description": "Search CourtListener's free database of US court opinions and open, copy, or cite them without leaving Raycast.",
+  "description": "Search US court opinions and case law in the free CourtListener database, then open, copy or cite a case.",
   "icon": "icon.png",
   "author": "cro64",
   "categories": [

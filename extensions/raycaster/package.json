@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycaster",
   "title": "Raycaster",
-  "description": "Send casts to Farcaster from Raycast",
+  "description": "Send casts with images to Farcaster after authorizing with the Warpcast app.",
   "icon": "command-icon.png",
   "author": "stevedylandev",
   "categories": [

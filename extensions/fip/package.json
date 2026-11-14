@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fip",
   "title": "FIP",
-  "description": "Listen to FIP and its webradios, and see what they are playing, directly from Raycast",
+  "description": "Listen to FIP radio and its webradios from Radio France in QuickTime or VLC, and see the current, previous and next track.",
   "icon": "favicon.png",
   "author": "louison",
   "categories": [

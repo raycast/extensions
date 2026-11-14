@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mxroute",
   "title": "MXroute",
-  "description": "Email hosting for your domains",
+  "description": "Manage MXroute email hosting: domains, email accounts, forwarders, spam filters and DNS info.",
   "icon": "mxroute.png",
   "author": "xmok",
   "platforms": [

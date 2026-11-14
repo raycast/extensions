@@ -3,7 +3,7 @@
   "name": "vaulted",
   "version": "0.1.1",
   "title": "Vaulted — Secure Secret Sharing",
-  "description": "Zero-knowledge encrypted, self-destructing secret links from your launcher.",
+  "description": "Share passwords, API keys and secrets as zero-knowledge encrypted, self-destructing links with Vaulted, with view limits, expiry and passphrase.",
   "icon": "icon.png",
   "author": "maxim_novak",
   "license": "MIT",

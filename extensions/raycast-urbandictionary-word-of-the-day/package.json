@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-urbandictionary-word-of-the-day",
   "title": "Urban Dictionary Word of the Day",
-  "description": "UrbanDictionary's Word of the Day",
+  "description": "Get Urban Dictionary's word of the day and its definition, or a random Urban Dictionary word.",
   "icon": "command-icon.png",
   "author": "r0hin",
   "contributors": [

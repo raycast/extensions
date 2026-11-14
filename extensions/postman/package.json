@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postman",
   "title": "Postman",
-  "description": "Send GET requests in your postman collections.",
+  "description": "Pick a GET request from your Postman collections, send it and view the response.",
   "icon": "postman.png",
   "author": "tarikyildizci",
   "contributors": [

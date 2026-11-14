@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-gist",
   "title": "GitHub Gist",
-  "description": "Create, search and display GitHub gists.",
+  "description": "Search and view your GitHub gists, and create new gists from selected text or your clipboard.",
   "icon": "github.png",
   "author": "koinzhang",
   "contributors": [

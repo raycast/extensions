@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sesh",
   "title": "Sesh",
-  "description": "Smart, instant terminal session management.",
+  "description": "Switch between tmux sessions and windows with sesh, create sessions from zoxide directories and open Git worktrees from a GitHub issue or PR.",
   "icon": "command-icon.png",
   "author": "joshmedeski",
   "contributors": [

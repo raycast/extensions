@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "secret-browser-commands",
   "title": "Secret Browser Commands",
-  "description": "Access hidden Chromium browser features.",
+  "description": "Open hidden chrome:// internal pages and settings in Chrome, Edge, Brave, Arc, Vivaldi, Opera and other Chromium browsers.",
   "icon": "icon.png",
   "author": "chrismessina",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recent-excel",
   "title": "Recent Excel - Show Recent Excel Files",
-  "description": "Shows recent excel files",
+  "description": "Find recent Microsoft Excel files in your chosen folders and open them.",
   "icon": "command-icon.png",
   "author": "aradbm",
   "categories": [

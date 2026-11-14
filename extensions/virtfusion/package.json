@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "virtfusion",
   "title": "VirtFusion",
-  "description": "Manage Servers, SSH Keys",
+  "description": "Manage servers and SSH keys across multiple VirtFusion panels, view server details, storage and IPs, and change boot order, on Mac and Windows.",
   "icon": "virtfusion.png",
   "author": "xmok",
   "platforms": [

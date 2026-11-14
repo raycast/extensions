@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spark-mail",
   "title": "Spark Mail",
-  "description": "Search, browse, read, and compose Spark email from Raycast via the Spark CLI.",
+  "description": "Search, read and compose Spark Mail emails, browse your inbox, folders and contacts, and view your calendar via the Spark CLI.",
   "icon": "icon.png",
   "author": "keito4",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-lot-radio",
   "title": "The Lot Radio",
-  "description": "Play/pause the audio stream of The Lot Radio",
+  "description": "Play or pause The Lot Radio live stream from Brooklyn and see today's lineup.",
   "icon": "thelotradio-logo.png",
   "author": "evnm",
   "categories": [

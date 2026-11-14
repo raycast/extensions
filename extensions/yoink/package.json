@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yoink",
   "title": "Yoink",
-  "description": "Add selected or clipboard files to Yoink.",
+  "description": "Add files selected in Finder or copied to the clipboard to the Yoink shelf app on Mac.",
   "icon": "yoink-icon.png",
   "author": "koinzhang",
   "license": "MIT",

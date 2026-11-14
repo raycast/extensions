@@ -8,7 +8,7 @@
     "xilopaint",
     "muhammadrizo"
   ],
-  "description": "Browse, copy and modify Raycast icons.",
+  "description": "Search Raycast icons with optional AI search, copy them plain or colored, and create an extension icon, on Mac and Windows.",
   "icon": "icon.png",
   "license": "MIT",
   "commands": [

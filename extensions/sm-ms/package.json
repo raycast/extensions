@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sm-ms",
   "title": "SM.MS",
-  "description": "SM.MS image hosting service to upload and share images.",
+  "description": "Upload images to SM.MS image hosting from files or your clipboard, copy share links, and search or delete your uploaded images.",
   "icon": "sm-ms.png",
   "author": "koinzhang",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unify-path-separator",
   "title": "Unify Path Separator",
-  "description": "Unifies path selectors in path copied to clipboard",
+  "description": "Convert file path separators on your clipboard between forward slashes and backslashes, for Windows and Unix paths.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

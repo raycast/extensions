@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoho-mail",
   "title": "Zoho Mail",
-  "description": "Manage Zoho Mail - View Domains, Accounts, Emails and Content",
+  "description": "View your Zoho Mail accounts, emails and their content, mark emails read or unread, and list organization domains.",
   "icon": "zoho-mail.png",
   "author": "xmok",
   "platforms": [

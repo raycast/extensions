@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinker",
   "title": "Tinker",
-  "description": "Control Tinker from Raycast.",
+  "description": "Record a selected screen area or your last area with Tinker, and copy the latest Tinker recording to the clipboard.",
   "icon": "icon.png",
   "author": "jrl",
   "platforms": [

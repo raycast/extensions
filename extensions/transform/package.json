@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transform",
   "title": "Transform",
-  "description": "Transform text/code using a variety of methods",
+  "description": "Convert code and data between formats: JSON to TypeScript, Go structs, YAML or TOML, HTML to JSX or Markdown, CSS to JS objects and more.",
   "icon": "icon.png",
   "author": "Idered",
   "categories": [

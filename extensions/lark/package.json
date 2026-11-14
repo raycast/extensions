@@ -3,7 +3,7 @@
   "name": "lark",
   "title": "Lark Documents",
   "version": "0.0.10",
-  "description": "Quickly search documents from Feishu/Lark.",
+  "description": "Search and open Feishu/Lark documents and Minutes meeting recordings in your browser.",
   "keywords": [
     "feishu",
     "lark"

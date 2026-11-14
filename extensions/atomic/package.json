@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "atomic",
   "title": "Atomic Data",
-  "description": "Search inside your Atomic-Server data",
+  "description": "Search your Atomic Server data, preview titles, descriptions and classes, and open resources in your browser.",
   "icon": "command-icon.png",
   "author": "joepio",
   "license": "MIT",

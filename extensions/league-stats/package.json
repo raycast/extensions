@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "league-stats",
   "title": "League Stats",
-  "description": "Look up League of Legends players: ranked and recent win rates, recent matches with KDA, champions and items, and full match breakdowns.",
+  "description": "Look up League of Legends players by Riot ID: ranked and recent win rates, match history with KDA, champions and items, and full match details.",
   "icon": "icon.png",
   "author": "mert_tufekci",
   "categories": [

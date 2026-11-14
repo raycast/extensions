@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "forscore",
   "title": "forScore",
-  "description": "Manage forScore directly from Raycast",
+  "description": "Control forScore sheet music on Mac: turn pages, go to a page, move through setlist scores, and browse your score library.",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "platforms": [

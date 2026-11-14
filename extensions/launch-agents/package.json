@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launch-agents",
   "title": "Launch Agents",
-  "description": "Manage Launch Agents",
+  "description": "List, create, load, unload and remove macOS launch agents (launchd) that schedule tasks on your Mac.",
   "icon": "launch-icon.png",
   "author": "stevensd2m",
   "license": "MIT",

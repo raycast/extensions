@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "radicle",
   "title": "Radicle",
-  "description": "Interact with your Radicle storage.",
+  "description": "List the projects in your local Radicle storage, view README and repository ID, copy details and open them in the browser.",
   "icon": "radicle.png",
   "author": "sebastinez_rhizoma",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hostloc",
   "title": "hostloc",
-  "description": "You can quickly access the 20 latest posts of hostloc at the moment. Note: The hostloc home page can be reached by visiting https://www.hostloc.com/ through your browser.",
+  "description": "Read the 20 latest posts from hostloc, the Chinese VPS and web hosting forum.",
   "icon": "favicon.png",
   "author": "J3n5en",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-livewire",
   "title": "Laravel Livewire",
-  "description": "Quickly search through Laravel Livewire documentation and open it in the browser",
+  "description": "Search the Laravel Livewire documentation and open pages in your browser.",
   "icon": "livewire-icon-transparent.png",
   "author": "tafhyseni",
   "contributors": [

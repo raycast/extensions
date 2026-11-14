@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frp-client-manager",
   "title": "Frp Client Manager",
-  "description": "Manage a local frp client (frpc): service control, proxies, logs, config hot-reload, and version upgrades.",
+  "description": "Manage a local frp client (frpc) on your Mac: start, stop and restart it, view proxies and logs, edit and hot-reload frpc.toml.",
   "icon": "icon.png",
   "author": "DanielZHAO",
   "platforms": [

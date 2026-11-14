@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "betterdiscord-store",
   "title": "BetterDiscord Store",
-  "description": "Allows you to search and view BetterDiscord addons inside Raycast",
+  "description": "Search the BetterDiscord store for plugins and themes and view addon details.",
   "icon": "bd1.png",
   "author": "TheCommieAxolotl",
   "license": "MIT",

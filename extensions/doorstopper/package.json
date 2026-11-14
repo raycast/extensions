@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doorstopper",
   "title": "Doorstopper",
-  "description": "Prevent your MacBook from going to sleep when you close the lid, with timers, auto-off and a low battery cutoff",
+  "description": "Keep your MacBook awake with the lid closed, with timers, auto-off, a low battery cutoff and a menu bar status.",
   "categories": [
     "System"
   ],

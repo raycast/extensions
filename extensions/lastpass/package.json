@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lastpass",
   "title": "LastPass Credentials Search",
-  "description": "Search, view, and copy credentials from LastPass",
+  "description": "Search your LastPass vault and view and copy usernames and passwords using the LastPass CLI.",
   "icon": "lastpass.png",
   "author": "alex-popov-tech",
   "categories": [

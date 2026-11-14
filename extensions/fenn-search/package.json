@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fenn-search",
   "title": "Fenn Search",
-  "description": "Search text in videos, spoken words in audio, and content inside Sketch files and documents with Fenn.",
+  "description": "Search text in videos, spoken words in audio, and content inside Sketch files, PDFs and documents on your Mac with the Fenn app.",
   "icon": "icon.png",
   "author": "thoddnn",
   "license": "MIT",

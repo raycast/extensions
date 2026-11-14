@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tesla",
   "title": "Tesla",
-  "description": "Control and view your Tesla",
+  "description": "Control your Tesla via Tessie: climate, defrost, sentry mode, charging and charge port, honk and flash lights, and view status, drives and charges.",
   "icon": "icon.png",
   "author": "williamwelsh",
   "contributors": [

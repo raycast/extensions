@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "power-management",
     "title": "Power Management",
-    "description": "Change Power Management Settings of the system",
+    "description": "Turn Low Power Mode on or off on your Mac, view low power mode settings, and see its status in the menu bar, with optional Touch ID authentication.",
     "icon": "command-icon.png",
     "author": "sasivarnan",
     "contributors": [

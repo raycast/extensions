@@ -3,7 +3,7 @@
   "name": "flypy",
   "title": "Flypy Code Query",
   "version": "0.1.0",
-  "description": "Query Flypy(Xiaohe Double-Pin) Code",
+  "description": "Look up Flypy (Xiaohe Shuangpin, 小鹤双拼) input codes for Chinese characters and words.",
   "icon": "flypy.png",
   "author": "absir1949",
   "license": "MIT",

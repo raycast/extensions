@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-noble-quran",
   "title": "The Noble Quran",
-  "description": "Explore The Noble Quran",
+  "description": "Read the Noble Quran by surah and ayah, copy ayahs and links, and save favorite ayahs.",
   "icon": "quran_logo.png",
   "author": "BalliAsghar",
   "contributors": [

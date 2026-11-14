@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vitra",
   "title": "Vitra",
-  "description": "Requires the Vitra desktop app. Reads Vitra's local snapshot to show today's readiness, sleep and recovery from your Oura ring — no Oura credentials or setup in Raycast, and no network calls.",
+  "description": "See today's Oura ring readiness, sleep and recovery scores, HRV and resting heart rate from the Vitra desktop app's local snapshot.",
   "icon": "vitra.png",
   "author": "pedro_pt_thomaz",
   "categories": [

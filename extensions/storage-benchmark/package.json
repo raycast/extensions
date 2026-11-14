@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "storage-benchmark",
   "title": "Storage Benchmark",
-  "description": "Benchmark sequential read and write performance for local storage",
+  "description": "Benchmark sequential read and write speed of your Mac's disks and drives, and review results history by volume.",
   "icon": "icon.png",
   "author": "ricoloic",
   "license": "MIT",

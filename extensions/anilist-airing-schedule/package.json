@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anilist-airing-schedule",
   "title": "Anilist Airing Schedule",
-  "description": "Get airing schedule of anime from Anilist.co",
+  "description": "See the anime airing schedule from AniList and open episodes on available streaming sites.",
   "icon": "anilist-icon-512x512.png",
   "author": "yeskunall",
   "contributors": [

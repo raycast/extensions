@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bird",
   "title": "Bird",
-  "description": "View your X/Twitter bookmarks and likes using the bird CLI",
+  "description": "View your X (Twitter) bookmarks and likes and check your account info using the bird CLI.",
   "icon": "command-icon.png",
   "author": "mrmartineau",
   "license": "MIT",

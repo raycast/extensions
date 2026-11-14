@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bose-noise-cancelling",
   "title": "Bose Noise Cancelling",
-  "description": "Switch noise cancelling on Bose QuietComfort 35 II headphones",
+  "description": "Toggle noise cancelling on Bose QuietComfort 35 II headphones, or set it to high, low or off from your Mac.",
   "icon": "icon.png",
   "author": "eric-ostholm",
   "categories": [

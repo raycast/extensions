@@ -3,7 +3,7 @@
   "name": "raycast-timezone-converter",
   "title": "Timezone Converter",
   "version": "1.0.4",
-  "description": "Converts any time to any timezone",
+  "description": "Convert any time between time zones, compare a list of time zones, and see them on a world map.",
   "icon": "command-icon.png",
   "author": "joao.mainka",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clean-text",
   "title": "Clean Text",
-  "description": "Clean and format text with various text modification operations",
+  "description": "Clean up text copied from PDFs, OCR or websites: fix broken lines and spaces, unify quotes, and remove invisible characters.",
   "icon": "command-icon.png",
   "author": "GenuineCheddar",
   "categories": [

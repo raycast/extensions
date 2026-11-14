@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "projects",
   "title": "Projects",
-  "description": "Quickly access your local projects and open them in your favorite editor or any app.",
+  "description": "Find local Node, Maven, Gradle, Xcode, Tauri and Wails projects and open them in your favorite editor or any app.",
   "icon": "coding-folder.png",
   "author": "ajaypremshankar",
   "license": "MIT",

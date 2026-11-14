@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-browser",
   "title": "Agent Browser",
-  "description": "Control the agent-browser CLI from Raycast and Raycast AI",
+  "description": "Control agent-browser sessions from Raycast AI: open websites in Chromium or Dia, inspect pages, click elements and type text.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

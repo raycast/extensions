@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zen-browser",
   "title": "Zen Browser",
-  "description": "Search and open tabs from bookmarks and history in Zen Browser.",
+  "description": "Search Zen Browser history and bookmarks, open new tabs with your search engine, open workspaces and new or private windows.",
   "icon": "zen-logo.png",
   "author": "Keyruu",
   "contributors": [

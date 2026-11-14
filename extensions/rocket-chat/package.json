@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rocket-chat",
   "title": "Rocket.Chat",
-  "description": "Search for teams, channels, users and change your presence status.",
+  "description": "Search Rocket.Chat teams, channels and users and open them in your browser, or change your presence status.",
   "icon": "command-icon.png",
   "author": "alex-w0",
   "categories": [

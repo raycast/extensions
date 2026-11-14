@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "circle-ci",
   "title": "CircleCI Workflows",
-  "description": "This extension shows a list of your latest CircleCI workflows.\n\nIt requires a CircleCI API token which you can get on https://app.circleci.com/settings/user/tokens.\n.",
+  "description": "Search your CircleCI projects and view the status of their latest pipelines, workflows and jobs. Requires a CircleCI API token.",
   "icon": "circle-logo.png",
   "author": "qeude",
   "contributors": [

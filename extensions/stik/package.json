@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stik",
   "title": "Stik",
-  "description": "Quick capture and browse your Stik notes. Create, search, organize, and manage markdown notes stored locally on your machine.",
+  "description": "Quick capture, search and browse your Stik Markdown notes stored locally on your Mac, organized by folder.",
   "icon": "command-icon.png",
   "author": "0xMassi",
   "categories": [

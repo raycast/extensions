@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ducat",
   "title": "Ducat",
-  "description": "Add transactions to your Ducat account",
+  "description": "Record expenses and income in your Ducat budget account by typing them in plain language, like \"spent 8.75 on coffee\".",
   "icon": "ducat.png",
   "author": "rahulchowdhury",
   "platforms": [

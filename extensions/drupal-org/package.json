@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "drupal-org",
   "title": "Drupal.org",
-  "description": "Get information from drupal.org",
+  "description": "Search Drupal API documentation, Drupal change records and drupal.org projects such as modules and themes.",
   "icon": "drop-icon.png",
   "author": "hussainweb",
   "contributors": [

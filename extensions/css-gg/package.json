@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "css-gg",
   "title": "CSS.GG",
-  "description": "Open-source CSS, SVG and Figma UI Icons Available in SVG Sprite, styled-components, NPM & API",
+  "description": "Search 700+ open-source CSS.GG icons and 6,000 glyphs, and copy them as SVG or paste them into the active app.",
   "icon": "css-gg.png",
   "author": "astrit",
   "license": "MIT",

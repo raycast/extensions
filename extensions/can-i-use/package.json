@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "can-i-use",
   "title": "Can I Use",
-  "description": "Can I Use provides up-to-date browser support for front-end web technologies on desktop and mobile web browsers.",
+  "description": "Check Can I Use browser support for HTML, CSS and JavaScript features across desktop and mobile browsers, with Browserslist support.",
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [

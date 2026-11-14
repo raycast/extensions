@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cloudstash",
-  "description": "Save links to Cloudstash",
+  "description": "Save links to Cloudstash by pasting a URL or from your clipboard.",
   "categories": [
     "Productivity",
     "Web"

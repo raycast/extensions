@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "try-museum",
   "title": "Museum",
-  "description": "Find public domain artworks by color. Browse palettes, copy images, and discover art from museum collections.",
+  "description": "Find public domain artworks from museum collections by color, using HEX, RGB, HSL or a screen color, and browse palettes, copy or download images.",
   "icon": "museum-icon.png",
   "author": "0xdhrv",
   "platforms": [

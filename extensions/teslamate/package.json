@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teslamate",
   "title": "TeslaMate",
-  "description": "View your TeslaMate data in Raycast",
+  "description": "View your Tesla's TeslaMate data: a car overview and your last 50 charging sessions, via your Grafana instance.",
   "icon": "teslamate-logo.png",
   "author": "mSarheed",
   "categories": [

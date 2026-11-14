@@ -3,7 +3,7 @@
   "name": "pm2",
   "title": "PM2",
   "type": "module",
-  "description": "Advanced, production process manager for Node.js.",
+  "description": "List and manage PM2 Node.js processes: start, stop, restart, reload and delete them.",
   "icon": "pm2-icon.png",
   "author": "litomore",
   "contributors": [

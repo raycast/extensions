@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-fly",
   "title": "Fly.io",
-  "description": "View and modify your Fly.io applications",
+  "description": "List your Fly.io apps, view their details, copy hostnames and IP addresses, restart machines and open the Fly dashboard.",
   "categories": [
     "Developer Tools"
   ],

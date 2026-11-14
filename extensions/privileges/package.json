@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "privileges",
   "title": "Privileges",
-  "description": "Grant and revoke admin permission with SAP Privileges (https://github.com/SAP/macOS-enterprise-privileges). Not affiliated with SAP.",
+  "description": "Grant or revoke admin rights on your Mac with SAP Privileges, including admin access for just one minute.",
   "icon": "privileges.png",
   "author": "ph00lt0",
   "contributors": [

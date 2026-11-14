@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zadig",
   "title": "Zadig",
-  "description": "Search your Zadig workflow runs and environments, and manage sub-environments.",
+  "description": "Search Zadig workflow runs and environments, retry or cancel runs, create sub-environments, and add or restart services.",
   "icon": "icon.png",
   "author": "philly_cai",
   "categories": [

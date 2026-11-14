@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-clojuredocs",
   "title": "Search ClojureDocs Documentation",
-  "description": "Search and browse clojuredocs.org site.",
+  "description": "Search ClojureDocs documentation by var, namespace or docstring and open Clojure function docs and examples.",
   "icon": "clojure.png",
   "author": "danblancas",
   "categories": [

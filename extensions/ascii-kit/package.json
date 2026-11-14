@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ascii-kit",
   "title": "ASCII Kit",
-  "description": "Box-drawing glyphs, diagram templates and a live-preview composer for text diagrams in PRs, Slack and docs.",
+  "description": "Create ASCII and Unicode text diagrams: trees, tables, flowcharts and sequence diagrams with live preview, plus box-drawing characters and templates.",
   "keywords": [
     "ascii",
     "diagram",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude",
   "title": "Claude",
-  "description": "Interact with Anthropic's Claude API directly from Raycast",
+  "description": "Ask Anthropic's Claude AI questions with your own API key, continue conversations, save answers and set up custom models and prompts.",
   "icon": "icon.png",
   "author": "florisdobber",
   "contributors": [

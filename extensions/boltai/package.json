@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "boltai",
   "title": "BoltAI",
-  "description": "Ask your AI models, run AI Workflows on selected text, start chats and paste prompts with BoltAI.",
+  "description": "Ask BoltAI a question, run AI Workflows on selected text or the clipboard, start new chats and paste saved prompts.",
   "icon": "icon.png",
   "author": "daniel_nguyenx",
   "access": "public",

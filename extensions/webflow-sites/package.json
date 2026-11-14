@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webflow-sites",
   "title": "Webflow",
-  "description": "Supercharged productivity for Webflow. Bring Webflow to every corner of your OS. Open any project from anywhere. Site settings and more.",
+  "description": "Search your Webflow sites and open them in the Webflow Designer, as a live site, or in site settings and assets.",
   "icon": "webflow-logo.png",
   "author": "peeks",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "duden",
   "title": "Duden",
-  "description": "Search German words on Duden.de dictionary",
+  "description": "Search German words in the Duden.de dictionary and see meanings, spelling, grammar and other word details.",
   "icon": "dudenicon.png",
   "author": "c76b7srxxm",
   "platforms": [

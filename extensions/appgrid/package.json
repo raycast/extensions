@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "appgrid",
   "title": "AppGrid",
-  "description": "Smart app launcher with grid view and category grouping",
+  "description": "Launch Mac apps from a grid view that groups them into categories like Development, Productivity and Frequently Used.",
   "icon": "icon.png",
   "author": "jungwoon",
   "platforms": [

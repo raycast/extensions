@@ -3,7 +3,7 @@
   "name": "gistly",
   "version": "0.0.2",
   "title": "Gistly",
-  "description": "YouTube AI Summaries & Transcripts",
+  "description": "Get AI summaries, key insights and transcripts of YouTube videos with Gistly, including timestamped summaries.",
   "icon": "command-icon.png",
   "author": "rafal_zawadzki",
   "categories": [

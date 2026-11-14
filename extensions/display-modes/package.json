@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "display-modes",
   "title": "Display Modes",
-  "description": "Manage displays modes (resolution, refresh rate...).",
+  "description": "Change Mac display resolution and refresh rate for each monitor, quickly by height and Hz, or from the menu bar.",
   "icon": "command-icon.png",
   "author": "agustin.prats",
   "contributors": [

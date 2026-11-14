@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kimai",
   "title": "Kimai",
-  "description": "Add new Kimai time log from Raycast",
+  "description": "Log time to projects and activities in Kimai, stop the running timer, edit timesheets and see today's logged hours in the menu bar.",
   "icon": "kimai-icon.png",
   "author": "marinsokol",
   "contributors": [

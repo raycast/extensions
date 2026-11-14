@@ -3,7 +3,7 @@
   "name": "busycal",
   "version": "0.1.0",
   "title": "BusyCal",
-  "description": "Create BusyCal events and tasks, search your schedule, and find the next free slot.",
+  "description": "Create BusyCal events and tasks, including from natural language, search and browse upcoming items, and find your next free time slot.",
   "icon": "busycal-icon.png",
   "author": "beehive",
   "repository": {

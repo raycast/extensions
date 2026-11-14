@@ -3,7 +3,7 @@
   "name": "trovu",
   "version": "1.3.1",
   "title": "Trovu - Web Search Command Line",
-  "description": "Search 1000+ websites in a command-line way, with curated and personal shortcuts, organized by namespaces, allowing multiple and typed arguments, with full privacy.",
+  "description": "Search 1000+ websites with Trovu shortcuts from a command line, with curated and personal shortcuts and instant suggestions.",
   "icon": "command-icon.png",
   "author": "jorges",
   "access": "public",

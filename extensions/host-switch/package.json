@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "host-switch",
   "title": "Host Switch",
-  "description": "Quickly switch between hosts while preserving the url path",
+  "description": "Switch the current browser tab to a different host while keeping the URL path, in Arc, Brave, Chrome or Safari.",
   "icon": "icon.png",
   "author": "ewgenius",
   "contributors": [

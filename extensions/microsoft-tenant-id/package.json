@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-tenant-id",
   "title": "Microsoft Tenant ID",
-  "description": "Find the Microsoft Entra (Azure AD) tenant ID for a domain, email, or URL — or reverse-look up the organization behind a tenant ID.",
+  "description": "Find the Microsoft Entra ID (Azure AD) tenant ID for a domain, email or URL, or look up the organization behind a tenant ID.",
   "icon": "icon.png",
   "author": "Rediwed",
   "platforms": [

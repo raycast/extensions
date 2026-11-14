@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asset-catalog-extractor",
   "title": "Asset Catalog Extractor",
-  "description": "Quickly extract Asset Catalog files (.car) using Asset Catalog Tinkerer",
+  "description": "Extract images from Xcode Asset Catalog (.car) files on your Mac using Asset Catalog Tinkerer.",
   "icon": "act-icon.png",
   "author": "chrismessina",
   "contributors": [

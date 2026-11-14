@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youform",
   "title": "Youform",
-  "description": "Beautiful Forms. Unlimited possibilities",
+  "description": "Search your Youform forms and view their blocks and submissions.",
   "icon": "sunflower.png",
   "author": "xmok",
   "platforms": [

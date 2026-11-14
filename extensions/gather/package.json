@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gather",
   "title": "Gather",
-  "description": "Control Gather from Raycast",
+  "description": "Toggle your camera, microphone and availability status in Gather, or switch to away from keyboard mode in one step.",
   "icon": "command-icon.png",
   "author": "yannglt",
   "version": "1.0.2",

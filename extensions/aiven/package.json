@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aiven",
   "title": "Aiven",
-  "description": "Manage Aiven Projects and Services",
+  "description": "View your Aiven projects and their services, including service logs and backups.",
   "icon": "aiven.png",
   "author": "xmok",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uploadthing",
   "title": "UploadThing",
-  "description": "Upload files in a single click",
+  "description": "Upload files from disk or your clipboard to your UploadThing app and browse the files you've uploaded.",
   "icon": "icon.png",
   "author": "juliusmarminge",
   "contributors": [

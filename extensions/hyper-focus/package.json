@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hyper-focus",
   "title": "Hyper Focus",
-  "description": "Controls the hyper-focus command line daemon which blocks distracting websites and apps.",
+  "description": "Control the hyper-focus daemon that blocks distracting websites and apps: view the current schedule, pause focus and set overrides.",
   "icon": "command-icon.png",
   "author": "iloveitaly",
   "contributors": [

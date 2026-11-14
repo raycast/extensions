@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ui-component-search",
   "title": "UI Component Search",
-  "description": "Search and browse components across shadcn/ui, PrimeNG, Angular Material, spartan/ui, Taiga UI, Mantine, React Spectrum, and Chakra UI",
+  "description": "Search UI components across shadcn/ui, PrimeNG, Angular Material, spartan/ui, Taiga UI, Mantine, React Spectrum and Chakra UI, and open their docs.",
   "icon": "extension-icon.png",
   "author": "tomer_meirov",
   "platforms": [

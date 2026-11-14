@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anycap",
   "title": "Anycap",
-  "description": "Capture links and notes, search your library, and browse folders and collections in Anycap.",
+  "description": "Save links, notes, clipboard text and browser tabs to Anycap on your Mac, search your library, and browse folders and collections.",
   "icon": "icon.png",
   "author": "ipang",
   "categories": [

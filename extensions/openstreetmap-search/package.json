@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openstreetmap-search",
   "title": "OpenStreetMap Search",
-  "description": "Quickly open OpenStreetMaps directions, for example from your current location to your home.",
+  "description": "Search places on OpenStreetMap and open directions to a destination or to your home address.",
   "icon": "openstreetmap-icon.png",
   "author": "crisboarna",
   "license": "MIT",

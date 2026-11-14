@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simplebackups",
   "title": "SimpleBackups",
-  "description": "View and manage your backups from SimpleBackups.com",
+  "description": "View your SimpleBackups jobs, run or pause backups, check backup logs and download database and file backups.",
   "icon": "command-icon.png",
   "author": "islamessam",
   "categories": [

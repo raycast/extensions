@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apify",
   "title": "Apify",
-  "description": "Your full-stack platform for web scraping",
+  "description": "List your Apify web scraping Actors and runs, and view Actor and run details.",
   "icon": "apify.png",
   "author": "xmok",
   "license": "MIT",

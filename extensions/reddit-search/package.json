@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reddit-search",
   "title": "Reddit Search",
-  "description": "Search Reddit, Subreddits, or within Subreddits and list the results in Raycast.",
+  "description": "Search Reddit posts, find and favorite subreddits, and search within a subreddit, with sorting by relevance, hot, top or latest.",
   "icon": "reddit_icon_512.png",
   "author": "ewlcheng",
   "license": "MIT",

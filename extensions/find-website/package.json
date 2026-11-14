@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "find-website",
   "title": "Find Website",
-  "description": "Quickly find the website you are looking for.",
+  "description": "Search your recent and most visited websites in Chrome, Safari, Firefox, Arc, Brave, Edge, Opera and Vivaldi history.",
   "icon": "logo.png",
   "author": "nahuel_andreoli",
   "contributors": [

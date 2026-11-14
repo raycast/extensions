@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "literal",
   "title": "Literal",
-  "description": "Track and edit your reading progress from your command bar",
+  "description": "Search your Literal (literal.club) books by reading status, update your reading progress and write book reviews.",
   "icon": "command-icon.png",
   "author": "OkanBilal",
   "categories": [

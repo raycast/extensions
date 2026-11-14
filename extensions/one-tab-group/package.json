@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-tab-group",
   "title": "One Tab Group",
-  "description": "Search One Tab Group on Raycast",
+  "description": "Search your browser tabs, tab groups and saved sessions from the One Tab Group extension for Chromium browsers.",
   "icon": "icon-512.png",
   "author": "xiaoluoboding",
   "categories": [

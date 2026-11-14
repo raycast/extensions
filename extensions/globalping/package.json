@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "globalping",
   "title": "Globalping",
-  "description": "Run ping, traceroute, MTR, DNS and HTTP tests from 3700+ probes distributed worldwide. Powered by the Globalping network.",
+  "description": "Run ping, traceroute, MTR, DNS and HTTP tests from Globalping probes in thousands of locations worldwide and compare results.",
   "icon": "globalping.png",
   "author": "valentin_denis",
   "owner": "globalping",

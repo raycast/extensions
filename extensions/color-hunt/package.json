@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "color-hunt",
   "title": "Color Hunt",
-  "description": "Color Palettes for Designers and Artists",
+  "description": "Browse, search and filter hand-picked color palettes from Color Hunt and copy their colors.",
   "icon": "color-hunt-icon.png",
   "author": "Lemon",
   "license": "MIT",

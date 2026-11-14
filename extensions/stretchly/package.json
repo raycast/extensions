@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stretchly",
   "title": "Stretchly",
-  "description": "Fastest way to skip to breaks.",
+  "description": "Skip to the next mini break or long break in the Stretchly break reminder app.",
   "icon": "stretchly.png",
   "author": "u-ran",
   "categories": [

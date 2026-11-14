@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "winget",
   "title": "WinGet",
-  "description": "Search, install, and manage Windows packages with WinGet",
+  "description": "Search, install, upgrade and uninstall Windows packages with WinGet, list installed and upgradable apps, and export or import package lists.",
   "author": "eray_ercan",
   "contributors": [
     "ilia.raycast",

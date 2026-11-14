@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nativebase-docs",
   "title": "NativeBase Documention",
-  "description": "Search Nativebase documentation",
+  "description": "Search the NativeBase documentation by version and open docs pages.",
   "icon": "nativebase-logo.png",
   "author": "shubham",
   "license": "MIT",

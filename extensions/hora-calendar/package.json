@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hora-calendar",
   "title": "Hora Calendar",
-  "description": "The official hora Calendar extension. Create events and tasks in plain language, join your next meeting, run Focus and share your availability, without leaving Raycast.",
+  "description": "Create Google Calendar events and Google Tasks in plain language with hora, join your next meeting, run Focus sessions and copy your availability.",
   "icon": "icon.png",
   "author": "szamski",
   "platforms": [

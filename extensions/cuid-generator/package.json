@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cuid-generator",
   "title": "CUID Generator",
-  "description": "A quick way to generate CUIDs",
+  "description": "Generate a new CUID (collision-resistant ID) and copy it to the clipboard.",
   "icon": "command-icon.png",
   "author": "dgrcode",
   "categories": [

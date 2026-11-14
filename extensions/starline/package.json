@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "starline",
   "title": "Starline",
-  "description": "Manage your Starline devices. Requires developer account.",
+  "description": "Control StarLine car alarm devices: arm and disarm, start or stop the engine, sound the horn and update position. Requires a StarLine developer account.",
   "icon": "command-icon.png",
   "author": "sfominx",
   "categories": [

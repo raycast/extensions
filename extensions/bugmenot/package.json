@@ -3,7 +3,7 @@
   "name": "bugmenot",
   "title": "BugMeNot",
   "version": "1.0.0",
-  "description": "Find username/password on BugMeNot",
+  "description": "Find shared usernames and passwords for websites on BugMeNot, then copy or paste the login.",
   "icon": "icon.png",
   "author": "Yukai",
   "license": "MIT",

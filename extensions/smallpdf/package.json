@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smallpdf",
   "title": "Smallpdf",
-  "description": "Quick access to all the Smallpdf tools",
+  "description": "Open any Smallpdf tool, such as compress, convert, merge, split or translate PDF and chat with a PDF, from one list.",
   "icon": "smallpdf-logo.png",
   "author": "farisaziz12",
   "categories": [

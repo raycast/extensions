@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workflowy-inbox",
   "title": "Workflowy Inbox",
-  "description": "Quickly add items to your Workflowy inbox. (This is an independent extension and is not created by Workflowy.)",
+  "description": "Quickly send notes, tasks and links to your Workflowy inbox, and view your saved targets and items.",
   "icon": "send-to-workflowy.png",
   "author": "cameron_pak",
   "contributors": [

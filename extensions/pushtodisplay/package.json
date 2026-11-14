@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pushtodisplay",
   "title": "PushToDisplay",
-  "description": "Send real-time updates to your PushToDisplay boards",
+  "description": "Send real-time messages and styled updates to your PushToDisplay boards on TVs, dashboards or phones.",
   "icon": "command-icon.png",
   "author": "pushtodisplay",
   "categories": [

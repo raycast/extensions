@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nfl-information",
   "title": "NFL",
-  "description": "Fetches the NFL Schedule, News, and Team News",
+  "description": "See the weekly NFL schedule, the latest NFL news and news for a specific team.",
   "icon": "nfl-logo.png",
   "author": "kciarnie",
   "categories": [

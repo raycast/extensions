@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deutscherwetterdienst",
   "title": "Deutscher Wetterdienst",
-  "description": "Shows current rain radar by the Deutscher Wetter Dienst",
+  "description": "Show the current rain radar map from Deutscher Wetterdienst (DWD), the German weather service.",
   "icon": "command-icon.png",
   "author": "nicolai",
   "categories": [
