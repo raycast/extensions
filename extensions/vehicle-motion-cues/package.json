@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vehicle-motion-cues",
+  "title": "Vehicle Motion Cues",
+  "description": "Toggle Apple's built-in Vehicle Motion Cues on supported Mac laptops without opening System Settings.",
+  "icon": "extension-icon.png",
+  "author": "yashazare",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "accessibility",
+    "motion",
+    "vehicle",
+    "car",
+    "travel"
+  ],
+  "commands": [
+    {
+      "name": "toggle-motion-cues",
+      "title": "Toggle Vehicle Motion Cues",
+      "description": "Switch Apple's built-in Vehicle Motion Cues on or off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-on-motion-cues",
+      "title": "Turn on Vehicle Motion Cues",
+      "description": "Turn on Apple's built-in Vehicle Motion Cues.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off-motion-cues",
+      "title": "Turn off Vehicle Motion Cues",
+      "description": "Turn off Apple's built-in Vehicle Motion Cues.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
