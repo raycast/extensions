@@ -83,14 +83,12 @@ export default function Command({ launchContext }: CommandProps = {}) {
       {...search.listProps}
       searchBarPlaceholder="Search apps, windows, tabs or URLs..."
       searchBarAccessory={
-        search.hasQuery ? undefined : (
-          <List.Dropdown tooltip="Arrange Applications" {...search.arrangement}>
-            <List.Dropdown.Item title="Recently Used" value="recent" />
-            <List.Dropdown.Item title="Name A–Z" value="name" />
-            <List.Dropdown.Item title="Browsers & Apps" value="type" />
-            <List.Dropdown.Item title="By Space" value="space" />
-          </List.Dropdown>
-        )
+        <List.Dropdown tooltip="Arrange Applications" {...search.arrangement}>
+          <List.Dropdown.Item title="Recently Used" value="recent" />
+          <List.Dropdown.Item title="Name A–Z" value="name" />
+          <List.Dropdown.Item title="Browsers & Apps" value="type" />
+          <List.Dropdown.Item title="By Space" value="space" />
+        </List.Dropdown>
       }
     >
       {!search.hasResults ? (
