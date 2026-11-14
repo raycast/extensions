@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, getPreferenceValues, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import NoteActions, { createBasicNote } from "./note-actions";
@@ -12,41 +12,68 @@ interface SearchNotesArguments {
 export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesArguments }>) {
   const { searchQuery: initialSearchQuery } = props.arguments;
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
+  const [selectedId, setSelectedId] = useState<string>();
+  const [isSearching, setIsSearching] = useState(false);
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     if (db != null) {
-      setNotes(db.getNotes(searchQuery, selectedTag ?? undefined));
+      setIsSearching(true);
+      const timer = setTimeout(
+        () => {
+          try {
+            const results = db.getNotes(searchQuery, selectedTag ?? undefined);
+            setNotes(results);
+            setSelectedId((previous) => (results.some((note) => note.id === previous) ? previous : results[0]?.id));
+          } catch (error) {
+            showToast(Toast.Style.Failure, "Search failed", String(error));
+          } finally {
+            setIsSearching(false);
+          }
+        },
+        searchQuery ? 150 : 0,
+      );
+      return () => clearTimeout(timer);
     }
   }, [db, searchQuery, selectedTag]);
 
-  if (error) {
-    showToast(Toast.Style.Failure, "Something went wrong", error.message);
-  }
+  useEffect(() => {
+    if (error) showToast(Toast.Style.Failure, "Something went wrong", error.message);
+  }, [error]);
+
+  const selectedNote = notes?.find((note) => note.id === selectedId);
+  const preview = useMemo(
+    () => (selectedNote?.encrypted ? "*This note's content is encrypted*" : selectedNote?.text ?? ""),
+    [selectedNote],
+  );
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues<Preferences>().showPreviewInListView;
   const handleTagChange = (tag: string | null) => setSelectedTag(tag);
 
   return (
     <List
-      isLoading={notes == undefined}
+      isLoading={!error && (notes == undefined || isSearching)}
+      filtering={false}
+      selectedItemId={selectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       onSearchTextChange={setSearchQuery}
       searchText={searchQuery}
       searchBarPlaceholder="Search note text or id ..."
       isShowingDetail={showDetail}
-      throttle={true}
-      searchBarAccessory={<TagsDropdown onTagChange={handleTagChange} />}
+      throttle={false}
+      searchBarAccessory={<TagsDropdown db={db} onTagChange={handleTagChange} />}
     >
       {notes?.map((note) => (
         <List.Item
           key={note.id}
+          id={note.id}
           title={note.title === "" ? "Untitled Note" : note.encrypted ? "🔒 " + note.title : note.title}
           subtitle={showDetail ? undefined : note.formattedTags}
           icon={{ source: "command-icon.png" }}
           keywords={[note.id]}
-          actions={<NoteActions isNotePreview={false} note={note} />}
+          actions={note.id === selectedId ? <NoteActions isNotePreview={false} note={note} /> : undefined}
           accessories={
             showDetail
               ? undefined
@@ -58,10 +85,9 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
                 ]
           }
           detail={
-            <List.Item.Detail
-              markdown={note.encrypted ? "*This note's content is encrypted*" : note.text}
-              metadata={<NoteMetadata note={note} />}
-            />
+            showDetail && note.id === selectedId ? (
+              <List.Item.Detail markdown={preview} metadata={<NoteMetadata note={note} />} />
+            ) : undefined
           }
         />
       ))}

@@ -6,16 +6,24 @@ export function useBearDb(): [BearDb | undefined, Error | undefined] {
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
+    let disposed = false;
+    let connection: BearDb | undefined;
     const connect = async () => {
       try {
-        setDb(await loadDatabase());
+        connection = await loadDatabase();
+        if (disposed) connection.close();
+        else setDb(connection);
       } catch {
-        setError(new Error("Couldn't load Bear database. Make sure you have Bear installed."));
+        if (!disposed) setError(new Error("Couldn't load Bear database. Make sure you have Bear installed."));
       }
     };
     connect();
 
-    return () => db?.close();
+    return () => {
+      disposed = true;
+      connection?.close();
+      connection = undefined;
+    };
   }, []);
 
   return [db, error];
