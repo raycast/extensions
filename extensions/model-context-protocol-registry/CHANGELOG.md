@@ -2,7 +2,7 @@
 
 ## [Add OpenAny MCP Server] - 2026-11-11
 
-- Add OpenAny to the official registry: one MCP for 3,200+ APIs and 168+ AI models. Hosted Streamable HTTP server at https://mcp.openany.si with direct HTTP in Raycast, `mcp-remote` fallback for other clients. Browsing needs no key; only `run_api` needs an optional Bearer key.
+- Add OpenAny to the official registry: The B2A (business to agent) marketplace. One MCP endpoint for 3,200+ APIs and 168+ AI models. Browse free; pay per call. Hosted Streamable HTTP at https://mcp.openany.si.
 
 ## [Update deAPI MCP Server] - 2026-11-11
 
