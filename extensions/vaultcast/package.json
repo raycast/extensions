@@ -1,0 +1,223 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vaultcast",
+  "title": "Vaultcast",
+  "description": "Search, copy and paste credentials from CLI-based password managers",
+  "icon": "icon.png",
+  "author": "SemL",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-passwords",
+      "title": "Search Passwords",
+      "icon": "icon.png",
+      "description": "Search and copy credentials from configured password manager CLIs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultManagerId",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Manager",
+      "description": "Password manager to use by default. Choose \"Auto\" to use the first available adapter.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (first available)",
+          "value": "auto"
+        },
+        {
+          "title": "Proton Pass",
+          "value": "protonpass"
+        },
+        {
+          "title": "Bitwarden",
+          "value": "bitwarden"
+        },
+        {
+          "title": "1Password",
+          "value": "1password"
+        },
+        {
+          "title": "KeePassXC",
+          "value": "keepassxc"
+        },
+        {
+          "title": "pass",
+          "value": "pass"
+        },
+        {
+          "title": "LastPass",
+          "value": "lastpass"
+        },
+        {
+          "title": "Dashlane",
+          "value": "dashlane"
+        },
+        {
+          "title": "Keeper",
+          "value": "keeper"
+        }
+      ]
+    },
+    {
+      "name": "enable-protonpass",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Enabled Managers",
+      "label": "Proton Pass",
+      "description": "Use the Proton Pass adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-bitwarden",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Bitwarden",
+      "description": "Use the Bitwarden adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-1password",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "1Password",
+      "description": "Use the 1Password adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-keepassxc",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "KeePassXC",
+      "description": "Use the KeePassXC adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-pass",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "pass",
+      "description": "Use the pass adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-lastpass",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "LastPass",
+      "description": "Use the LastPass adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-dashlane",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Dashlane",
+      "description": "Use the Dashlane adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "enable-keeper",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Keeper",
+      "description": "Use the Keeper adapter. Disabled managers are neither checked nor shown."
+    },
+    {
+      "name": "keepassxcDatabase",
+      "type": "file",
+      "required": false,
+      "title": "KeePassXC Database",
+      "description": "The .kdbx file for the KeePassXC adapter. Databases secured with a key file or hardware key are not supported."
+    },
+    {
+      "name": "externalAdaptersDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "External Adapters Directory",
+      "description": "Folder containing third-party adapter subfolders (each with pwm-adapter.json). Defaults to ~/.config/vaultcast/adapters (%USERPROFILE%\\.config\\vaultcast\\adapters on Windows).",
+      "placeholder": "~/.config/vaultcast/adapters",
+      "default": "~/.config/vaultcast/adapters"
+    },
+    {
+      "name": "defaultManagerOverride",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Manager Override",
+      "description": "Optional adapter ID override (e.g. for external adapters). Takes precedence over the Default Manager dropdown.",
+      "placeholder": "bitwarden"
+    },
+    {
+      "name": "cliPathOverrides",
+      "type": "textfield",
+      "required": false,
+      "title": "CLI Path Overrides (JSON)",
+      "description": "Optional JSON map of adapter ID to CLI binary path, e.g. {\"1password\": \"/opt/homebrew/bin/op\"} on macOS or {\"protonpass\": \"C:\\\\Users\\\\you\\\\AppData\\\\Local\\\\Programs\\\\pass-cli\\\\pass-cli.exe\"} on Windows",
+      "placeholder": "{\"1password\": \"/opt/homebrew/bin/op\"}"
+    },
+    {
+      "name": "closeAfterCopy",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Close window after copying",
+      "description": "Close Raycast after copying a credential to the clipboard."
+    },
+    {
+      "name": "autoCopyTotpAfterPassword",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Auto-copy TOTP after password action",
+      "description": "After copying or pasting a password, automatically copy the TOTP code after 5 seconds."
+    },
+    {
+      "name": "enableExtensionSession",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable extension session",
+      "description": "Keep your master password/PIN in memory and re-unlock password managers automatically until the session times out or Raycast quits. Nothing is written to disk."
+    },
+    {
+      "name": "sessionTimeoutMinutes",
+      "type": "textfield",
+      "required": false,
+      "title": "Session Timeout (Minutes)",
+      "description": "Lock after this many minutes of inactivity (1–1440). With extension session: unlock with Touch ID (macOS) to resume. Without: unlock the password manager again.",
+      "default": "15",
+      "placeholder": "15"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

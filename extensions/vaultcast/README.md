@@ -1,0 +1,92 @@
+# Vaultcast
+
+**Vaultcast** is a [Raycast](https://raycast.com) extension to search, copy and paste credentials from any CLI-based password manager.
+
+The extension is built around a pluggable **adapter system**: built-in adapters ship with the extension, and third-party adapters can be added at runtime through a simple stdio protocol — no fork or rebuild required.
+
+![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Raycast](https://img.shields.io/badge/Raycast-extension-FF6363)
+
+## Features
+
+- **Fast vault search** across one or all configured password managers at once
+- **Copy or paste** passwords, usernames, emails and TOTP codes into the frontmost app
+- **Open in browser** or jump straight to the item in the password manager
+- **Multi-manager switcher** with available, locked and unavailable managers grouped
+- **Pluggable adapters** — add any password manager via an external script and a JSON manifest
+- **Extension session** — unlock once, then silently re-unlock managers until the session times out
+- **Touch ID / Apple Watch / device passcode** to resume a locked session (macOS)
+- **PIN unlock** for Proton Pass (6-digit session PIN)
+- **Optional TOTP auto-copy** a few seconds after copying a password
+
+### Supported password managers
+
+| Manager                                  | CLI             | Unlock                                     | Notes                                                                             |
+| ---------------------------------------- | --------------- | ------------------------------------------ | --------------------------------------------------------------------------------- |
+| [Proton Pass](https://proton.me/pass)    | `pass-cli`      | Session PIN in Raycast                     |                                                                                   |
+| [Bitwarden](https://bitwarden.com)       | `bw`            | Master password in Raycast                 | Log in once with `bw login`. Every `bw` call takes ~2–3 s                         |
+| [1Password](https://1password.com)       | `op`            | 1Password app (Touch ID)                   | Enable _Settings → Developer → Integrate with 1Password CLI_                      |
+| [KeePassXC](https://keepassxc.org)       | `keepassxc-cli` | Database password in Raycast               | Set the **KeePassXC Database** preference. No key files / YubiKeys                |
+| [pass](https://www.passwordstore.org)    | `pass`          | gpg-agent (pinentry-mac)                   | `~/.password-store`; TOTP needs [pass-otp](https://github.com/tadfisher/pass-otp) |
+| [LastPass](https://www.lastpass.com)     | `lpass`         | Email + master password in Raycast         | No TOTP (lpass can't generate codes). 2FA: `lpass login --trust` once             |
+| [Dashlane](https://www.dashlane.com)     | `dcli`          | Keychain (dcli default) or master password | Register the device once with `dcli sync`                                         |
+| [Keeper](https://www.keepersecurity.com) | `keeper`        | Persistent login                           | Set up persistent login once. Every call logs in and syncs (slow)                 |
+| _Your manager_                           | External        |                                            | Write an adapter — see [External adapters](#external-adapters)                    |
+
+## Requirements
+
+- [Raycast](https://raycast.com) on macOS or Windows
+- The CLI of your password manager (see the table above)
+
+## Installation
+
+Install **Vaultcast** from the [Raycast Store](https://www.raycast.com/SemL/vaultcast), then open Raycast and run **Search Passwords**.
+
+## Usage
+
+| Action         | macOS   | Windows    |
+| -------------- | ------- | ---------- |
+| Paste password | `⌘ ⇧ ↩` | `Ctrl ⇧ ↵` |
+| Copy password  | `⌘ ⇧ C` | `Ctrl ⇧ C` |
+| Copy email     | `⌘ C`   | `Ctrl C`   |
+| Copy TOTP      | `⌘ T`   | `Ctrl T`   |
+
+All other actions (open in browser, paste email, copy username, open in password manager, lock session, reload items) are available from the action panel (`⌘ K`).
+
+Use the dropdown in the search bar to switch between managers or to search **all managers** at once.
+
+## Configuration
+
+| Preference                           | Description                                                                                                                               |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Default Manager                      | Built-in adapter to use by default, or **Auto** for the first available one                                                               |
+| Default Manager Override             | Adapter ID to use as default (e.g. for external adapters). Takes precedence over the dropdown                                             |
+| Enabled Managers                     | One checkbox per built-in adapter (default: all on). Disabled managers are neither checked nor shown                                      |
+| KeePassXC Database                   | The `.kdbx` file used by the KeePassXC adapter                                                                                            |
+| External Adapters Directory          | Folder containing third-party adapters (default: `~/.config/vaultcast/adapters`)                                                          |
+| CLI Path Overrides (JSON)            | macOS: `{"1password": "/opt/homebrew/bin/op"}` · Windows: `{"protonpass": "%LOCALAPPDATA%\\Programs\\pass-cli\\pass-cli.exe"}`            |
+| Close window after copying           | Close Raycast after copying a credential (default: on)                                                                                    |
+| Auto-copy TOTP after password action | Copy the TOTP code 5 seconds after copying or pasting a password (default: off)                                                           |
+| Enable extension session             | Keep master password / PIN in the session helper's memory and re-unlock managers silently until timeout or Raycast quits (default: on)    |
+| Session Timeout (Minutes)            | Lock after 1–1440 minutes of inactivity (default: 15). With an extension session, resume via Touch ID; otherwise unlock the manager again |
+
+## Security
+
+- **No plaintext on disk.** Credentials for the extension session are held only in the memory of a detached session helper. Nothing is written to `/tmp`.
+- **Authenticated helper.** The extension and the session helper encrypt and authenticate every message with a random per-helper key, kept in Raycast's encrypted extension storage. Other local processes cannot query the helper, and a locked session releases credentials only after Touch ID or device authentication.
+- **Bound to Raycast.** The session helper survives extension remounts but exits automatically when Raycast quits.
+- **Short-lived clipboard.** Copied credentials are marked as concealed, so Raycast's clipboard history and other clipboard managers skip them, and the clipboard is cleared after 2 minutes unless you've copied something else since.
+- **Idle lock.** Sessions lock after the configured timeout; resuming requires biometric or device authentication.
+- **Unlocked manager sessions stay in memory.** Bitwarden's session key and the KeePassXC / Dashlane master password entered in Raycast live only in the extension's memory and are dropped on lock or timeout.
+- **No Keychain.** Credentials are never stored in the macOS Keychain. After Raycast quits, you unlock with your master password or PIN again.
+- **Biometrics via LocalAuthentication.** Touch ID only confirms your presence to resume a locked session. It is implemented in Swift (`swift/`) using Raycast's Swift integration.
+
+## External adapters
+
+External adapters are standalone scripts that talk to the extension over stdio. Each adapter lives in its own folder with a `pwm-adapter.json` manifest and a script.
+
+Put each adapter folder into `~/.config/vaultcast/adapters`. This is the default **External Adapters Directory**, so the adapter shows up without further configuration.
+
+- Protocol and authentication: [adapter documentation](https://github.com/Lorenzo-Se/raycast_pwm/blob/81f49659af5702ed0bc021967f94f30e1390c73c/src/adapters/README.md#externe-adapter-third-party)
+- Reference adapter: [Proton Pass](https://github.com/Lorenzo-Se/raycast_pwm/blob/main/examples/external-adapter/protonpass/README.md)
