@@ -8,14 +8,14 @@ const {
   CATALOG_STORAGE_KEY,
 } = require("../src/utils/model-catalog.ts");
 const { DEFAULT_MODEL, DEFAULT_COMMANDS } = require("../src/utils/model-defaults.ts");
-const { initialModelId, selectedChatModel } = require("../src/utils/model-selection.ts");
+const { initialModelId, selectedChatModel, availableChatModels } = require("../src/utils/model-selection.ts");
 const { validateTemperature } = require("../src/utils/model-validation.ts");
 const timestamp = "2026-09-10T12:00:00.000Z";
 const base = {
   ...DEFAULT_MODEL,
   id: "writer",
   name: "Writer",
-  option: "custom-chat",
+  option: "gpt-6-astra",
   prompt: "Explain clearly",
   temperature: "0.2",
   vision: true,
@@ -47,6 +47,33 @@ function storage(initial = {}) {
   };
 }
 const factory = (io) => createModelCatalog(io, () => new Date(timestamp));
+
+test("Ask lists available provider models and resolves a direct selection", async () => {
+  const store = factory(storage());
+  await store.load();
+  const snapshot = store.getSnapshot();
+  const options = ["gpt-6-astra", "gpt-6-sol", "gpt-6-luna"];
+  assert.deepEqual(
+    availableChatModels(snapshot, undefined, options).map((model) => model.id),
+    ["default", ...options],
+  );
+  assert.equal(selectedChatModel(snapshot, "gpt-6-astra", undefined, options).option, "gpt-6-astra");
+  assert.equal(selectedChatModel(snapshot, "gpt-5-nano", undefined, options).option, "gpt-6-luna");
+});
+
+test("saved built-in command selection remains Sol", async () => {
+  const command = DEFAULT_COMMANDS["default-summarize-webpage"];
+  const catalog = {
+    version: 1,
+    models: { default: DEFAULT_MODEL },
+    commands: { [command.id]: { ...command, model: "gpt-6-sol" } },
+  };
+  const io = storage({ [CATALOG_STORAGE_KEY]: JSON.stringify(catalog) });
+  const store = factory(io);
+  await store.load();
+  assert.equal(store.getSnapshot().catalog.commands[command.id].model, "gpt-6-sol");
+  assert.equal(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).commands[command.id].model, "gpt-6-sol");
+});
 async function configured(io = storage()) {
   const store = factory(io);
   await store.load();
@@ -55,7 +82,7 @@ async function configured(io = storage()) {
   return store;
 }
 
-test("legacy array models and commands migrate without changing their effective configuration or original storage", async () => {
+test("legacy array models and commands keep their model choices while preserving original storage", async () => {
   const legacy = {
     ...command,
     baseModelId: undefined,
@@ -96,11 +123,11 @@ test("old built-ins and user commands migrate independently without adding or le
     Object.entries(DEFAULT_COMMANDS).map(([id, cmd]) => [id, { ...cmd, configurationMode: undefined }]),
   );
   const firstId = Object.keys(oldCommands)[0];
-  oldCommands[firstId] = { ...oldCommands[firstId], model: "custom-builtin", temperature: "0", prompt: "" };
+  oldCommands[firstId] = { ...oldCommands[firstId], model: "gpt-6-luna", temperature: "0", prompt: "" };
   oldCommands.translate = {
     id: "translate",
     name: "Translate",
-    model: "translation-model",
+    model: "gpt-6-luna",
     temperature: "0.5",
     prompt: "Translate to English",
     contentSource: "clipboard",
@@ -137,7 +164,7 @@ test("a new command inherits all chat settings, including subsequent base model 
   store.subscribe(() => notifications.push(store.getSnapshot().models["command-rewrite"]));
   const updated = {
     ...base,
-    option: "next-model",
+    option: "gpt-6-luna",
     prompt: "New base prompt",
     temperature: "1.1",
     reasoningEffort: "low",
@@ -154,7 +181,7 @@ test("a new command inherits all chat settings, including subsequent base model 
       vision: model.vision,
     },
     {
-      option: "next-model",
+      option: "gpt-6-luna",
       prompt: "New base prompt",
       temperature: "1.1",
       effort: "low",
@@ -198,9 +225,9 @@ test("prompt override replaces the base prompt, permits an empty prompt, and can
 
 test("changing a command base immediately changes its effective model and preserves its source options", async () => {
   const store = await configured();
-  await store.saveModel({ ...base, id: "translator", option: "translation-model", prompt: "Translate only" });
+  await store.saveModel({ ...base, id: "translator", option: "gpt-6-luna", prompt: "Translate only" });
   await store.saveCommand({ ...command, baseModelId: "translator" });
-  assert.equal(store.getSnapshot().models["command-rewrite"].option, "translation-model");
+  assert.equal(store.getSnapshot().models["command-rewrite"].option, "gpt-6-luna");
   assert.equal(store.getSnapshot().models["command-rewrite"].prompt, "Translate only");
   assert.equal(store.getSnapshot().catalog.commands.rewrite.contentSource, "clipboard");
   assert.equal(store.getSnapshot().catalog.commands.rewrite.isDisplayInput, true);
@@ -226,8 +253,8 @@ test("older imports preserve missing referenced bases, replace other models and 
   const previous = store.getSnapshot().models["command-rewrite"];
   const baseId = store.getSnapshot().catalog.commands.rewrite.baseModelId;
   await store.importModels([
-    { ...DEFAULT_MODEL, option: "imported-default" },
-    { ...base, id: "imported", option: "imported-model" },
+    { ...DEFAULT_MODEL, option: "gpt-6-astra" },
+    { ...base, id: "imported", option: "gpt-6-luna" },
     { ...base, id: "command-rewrite", option: "obsolete-projection" },
   ]);
   const reloaded = factory(io);
@@ -235,14 +262,14 @@ test("older imports preserve missing referenced bases, replace other models and 
   assert.deepEqual(reloaded.getSnapshot().models["command-rewrite"], previous);
   assert.equal(reloaded.getSnapshot().catalog.models.unused, undefined);
   assert.equal(reloaded.getSnapshot().catalog.models["command-rewrite"], undefined);
-  assert.equal(reloaded.getSnapshot().catalog.models.imported.option, "imported-model");
-  assert.equal(reloaded.getSnapshot().catalog.models.default.option, "imported-default");
-  await reloaded.importModels({ [baseId]: { ...base, id: baseId, option: "updated-base" } });
-  assert.equal(reloaded.getSnapshot().models["command-rewrite"].option, "updated-base");
-  await reloaded.saveModel({ ...base, id: "default", option: "customized-default" });
+  assert.equal(reloaded.getSnapshot().catalog.models.imported.option, "gpt-6-luna");
+  assert.equal(reloaded.getSnapshot().catalog.models.default.option, "gpt-6-astra");
+  await reloaded.importModels({ [baseId]: { ...base, id: baseId, option: "gpt-6-sol" } });
+  assert.equal(reloaded.getSnapshot().models["command-rewrite"].option, "gpt-6-sol");
+  await reloaded.saveModel({ ...base, id: "default", option: "gpt-6-luna" });
   await reloaded.saveCommand({ ...command, baseModelId: "default" });
   await reloaded.importModels({ imported: { ...base, id: "imported" } });
-  assert.equal(reloaded.getSnapshot().models["command-rewrite"].option, "customized-default");
+  assert.equal(reloaded.getSnapshot().models["command-rewrite"].option, "gpt-6-luna");
 });
 
 test("failed persistence leaves the previous state intact and a retry succeeds", async () => {
@@ -412,9 +439,9 @@ test("ordinary Ask resolves old command cache to bases while command conversatio
   assert.equal(selectedChatModel(updated, base.id, conversationModel), base);
   const independent = chatCatalog({
     ...catalog,
-    commands: { rewrite: { ...rewrite, configurationMode: "independent", model: "command-only-model" } },
+    commands: { rewrite: { ...rewrite, configurationMode: "independent", model: "gpt-6-luna" } },
   });
-  assert.equal(selectedChatModel(independent, conversationModel.id, conversationModel).option, "command-only-model");
+  assert.equal(selectedChatModel(independent, conversationModel.id, conversationModel).option, "gpt-6-luna");
   assert.equal(selectedChatModel(independent, conversationModel.id), DEFAULT_MODEL);
   const removed = chatCatalog({ ...catalog, commands: {} });
   assert.equal(selectedChatModel(removed, conversationModel.id, conversationModel), conversationModel);
@@ -428,7 +455,7 @@ test("ordinary Ask resolves old command cache to bases while command conversatio
 
 test("loading and resetting a previously linked built-in preserves shared bases and restores independent defaults", async () => {
   const defaultCommand = Object.values(DEFAULT_COMMANDS)[0];
-  const savedBase = { ...base, option: "custom-default-model" };
+  const savedBase = { ...base, option: "gpt-6-astra" };
   const store = factory(
     storage({
       [CATALOG_STORAGE_KEY]: JSON.stringify({
@@ -444,7 +471,7 @@ test("loading and resetting a previously linked built-in preserves shared bases 
   await store.load();
   assert.equal(store.getSnapshot().models[`command-${defaultCommand.id}`].option, savedBase.option);
   await store.saveCommand(defaultCommand);
-  assert.equal(store.getSnapshot().models["command-rewrite"].option, "custom-default-model");
+  assert.equal(store.getSnapshot().models["command-rewrite"].option, "gpt-6-astra");
   assert.equal(store.getSnapshot().models[`command-${defaultCommand.id}`].option, defaultCommand.model);
   const size = Object.keys(store.getSnapshot().catalog.models).length;
   await store.saveCommand(defaultCommand);
@@ -460,7 +487,7 @@ test("independent commands own every setting without creating or depending on a 
   await store.saveCommand({
     ...command,
     configurationMode: "independent",
-    model: "standalone-model",
+    model: "gpt-6-luna",
     temperature: "0",
     prompt: "",
     enableReasoningEffortChange: true,
@@ -469,13 +496,13 @@ test("independent commands own every setting without creating or depending on a 
   });
   assert.deepEqual(Object.keys(store.getSnapshot().catalog.models), modelIds);
   assert.equal(store.getSnapshot().catalog.commands.rewrite.baseModelId, undefined);
-  await store.saveModel({ ...base, option: "changed-parent", vision: false });
+  await store.saveModel({ ...base, option: "gpt-6-sol", vision: false });
   await store.removeModel(base);
   await store.setModels(store.getSnapshot().catalog.models);
   const restarted = factory(io);
   await restarted.load();
   const result = restarted.resolveModel(restarted.getSnapshot().catalog.commands.rewrite);
-  assert.equal(result.option, "standalone-model");
+  assert.equal(result.option, "gpt-6-luna");
   assert.equal(result.temperature, "0");
   assert.equal(result.prompt, "");
   assert.equal(result.enableReasoningEffortChange, true);
@@ -508,7 +535,7 @@ test("each override wins independently, including false values, and clearing it 
     ...command,
     configurationMode: "inherit",
     overrideModel: true,
-    model: "own-model",
+    model: "gpt-6-luna",
     overrideTemperature: true,
     temperature: "0",
     overrideReasoning: true,
@@ -521,10 +548,10 @@ test("each override wins independently, including false values, and clearing it 
   };
   await store.saveCommand(overridden);
   assert.deepEqual(store.getSnapshot().catalog.models.writer, base);
-  const nextBase = { ...base, option: "new-base", temperature: "1.5", prompt: "New prompt", reasoningEffort: "low" };
+  const nextBase = { ...base, option: "gpt-6-sol", temperature: "1.5", prompt: "New prompt", reasoningEffort: "low" };
   await store.saveModel(nextBase);
   const cases = [
-    ["overrideModel", "option", "own-model", "new-base"],
+    ["overrideModel", "option", "gpt-6-luna", "gpt-6-sol"],
     ["overrideTemperature", "temperature", "0", "1.5"],
     ["overrideReasoning", "enableReasoningEffortChange", false, true],
     ["overrideReasoning", "reasoningEffort", "none", "low"],

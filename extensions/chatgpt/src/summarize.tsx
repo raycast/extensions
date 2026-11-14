@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { canAccessBrowserExtension } from "./utils/browser";
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -14,6 +15,14 @@ import { useBrowserContent } from "./hooks/useBrowser";
 import { CacheAdapter } from "./utils/cache";
 
 export default function Summarize() {
+  return (
+    <AuthGate>
+      <SummarizeContent />
+    </AuthGate>
+  );
+}
+
+function SummarizeContent() {
   if (!canAccessBrowserExtension()) {
     return (
       <List
