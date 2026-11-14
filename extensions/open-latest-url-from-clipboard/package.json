@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-latest-url-from-clipboard",
   "title": "Open Latest URL from Clipboard",
-  "description": "Opens the latest URL from Clipboard if one is found in the latest 6 entries",
+  "description": "Open the most recent URL in your clipboard history, including HTTP, mailto, tel and custom app deep links.",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [

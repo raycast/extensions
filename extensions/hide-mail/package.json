@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hide-mail",
   "title": "HideMail - Email Relay Service",
-  "description": "Hide Your Real Email Address and Protect Your Identity and Privacy. Create a different identity for each website to hide your real e-mail address. Never receive unwanted emails again! The first 15 mailboxes are free.",
+  "description": "Create random email aliases with HideMail to hide your real email address, copy them, add notes, and search or manage your aliases.",
   "icon": "Icon.png",
   "author": "Flatroy",
   "contributors": [

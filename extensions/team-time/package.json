@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "team-time",
   "title": "Team Time",
-  "description": "Allows you to see what time it is in different cities/countries",
+  "description": "See the current time across your team's cities and time zones, with labels, and show team flags and times in the menu bar.",
   "preferences": [
     {
       "name": "timeFormat",

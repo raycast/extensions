@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "e2b",
   "title": "E2B Code Interpreter",
-  "description": "E2B is a tool that allows you to execute code in a secure sandbox withing a Jupyter-like notebook cell and return result",
+  "description": "Run code in a secure E2B cloud sandbox, in a Jupyter-style notebook cell, and get the result back, including from Raycast AI.",
   "icon": "icon.png",
   "author": "mlejva",
   "owner": "e2b",

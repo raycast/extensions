@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "say-no-to-notch",
   "title": "Say No to Notch",
-  "description": "Control MacBook Notch via Say No to Notch",
+  "description": "Hide or show the MacBook notch with the Say No to Notch app, so menu bar icons are no longer hidden behind it.",
   "icon": "icon.png",
   "author": "honghao",
   "license": "MIT",

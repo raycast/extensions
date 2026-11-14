@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ploi",
   "title": "Ploi",
-  "description": "View and manage your ploi.io servers and sites",
+  "description": "Manage your Ploi servers and sites: view deployment status, trigger deploys, restart services and open SSH or SFTP connections.",
   "icon": "ploi-icon.png",
   "author": "ploi-deploy",
   "owner": "ploi",

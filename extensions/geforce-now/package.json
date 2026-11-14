@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geforce-now",
   "title": "GeForce NOW",
-  "description": "Launch your GeForce NOW games instantly",
+  "description": "Search and launch games from your NVIDIA GeForce NOW library on Windows.",
   "icon": "icon.png",
   "author": "NvIte0o0",
   "platforms": [

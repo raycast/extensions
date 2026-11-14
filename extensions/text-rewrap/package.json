@@ -3,7 +3,7 @@
   "name": "text-rewrap",
   "title": "Text Rewrap",
   "version": "0.0.0",
-  "description": "Rewraps Text at a given width",
+  "description": "Rewrap or unwrap text at a chosen line width, like 80 characters, from your clipboard, selection or a form, for git commits and Markdown.",
   "icon": "text-rewrap.png",
   "author": "rembridge",
   "platforms": [

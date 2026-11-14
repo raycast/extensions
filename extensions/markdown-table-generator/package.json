@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-table-generator",
   "title": "Markdown Table Generator",
-  "description": "Specify your width and height, and receive a markdown table that you can input your own values into.",
+  "description": "Generate an empty Markdown table with the number of rows and columns you choose, ready to fill in.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "categories": [

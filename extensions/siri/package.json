@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "siri",
   "title": "Siri",
-  "description": "Interact with Siri through Raycast",
+  "description": "Type a request to Siri on your Mac, or let Raycast AI send commands to Siri.",
   "icon": "siri-icon.png",
   "author": "EvanZhouDev",
   "categories": [

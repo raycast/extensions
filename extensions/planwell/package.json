@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "planwell",
   "title": "PlanWell",
-  "description": "Companion extension for PlanWell - the markdown-native teacher planning app. View today's classes, upcoming events, and todos. Requires a PlanWell vault (planwellmd.com).",
+  "description": "View today's classes, upcoming events and todos from your PlanWell teacher planning vault in Markdown.",
   "icon": "command-icon.png",
   "author": "Raynold",
   "categories": [

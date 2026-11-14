@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paste-rs",
   "title": "paste.rs",
-  "description": "Create anonymous paste.rs links from typed, selected, or clipboard text, and browse recent pastes.",
+  "description": "Create anonymous paste.rs links from typed, selected or clipboard text, browse and delete recent pastes, and create pastes with AI.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

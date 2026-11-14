@@ -3,7 +3,7 @@
   "name": "flutter-utils",
   "version": "0.5.5",
   "title": "Flutter Utils",
-  "description": "Quick commands for Flutter: run, pub get, clean, analyze, test, build, doctor",
+  "description": "Run common Flutter commands: flutter run, pub get, clean, analyze, test, build and doctor, with extra arguments.",
   "icon": "icon.png",
   "author": "ymunsch8",
   "platforms": [

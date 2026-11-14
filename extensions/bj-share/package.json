@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bj-share",
   "title": "BJ-Share",
-  "description": "This extension can provide quick access to BJ-Share torrents using RSS feed",
+  "description": "Search BJ-Share torrents from your RSS feeds, manage feed URLs, and download .torrent files to a chosen folder.",
   "icon": "favicon.png",
   "author": "alexandremt",
   "platforms": [

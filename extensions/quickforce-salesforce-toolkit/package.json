@@ -3,7 +3,7 @@
   "name": "quickforce-salesforce-toolkit",
   "title": "QuickForce - Salesforce Toolkit",
   "version": "1.0.0",
-  "description": "Keyboard-driven Salesforce toolkit for developers and admins: switch orgs instantly, run SOQL queries, jump to any Setup page, and manage users, all from Raycast.",
+  "description": "Salesforce toolkit for developers and admins: switch orgs, run SOQL queries, search and create records, manage users and open Setup pages.",
   "icon": "quickforce-icon.png",
   "author": "kelant",
   "platforms": [

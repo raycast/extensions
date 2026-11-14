@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prompt-builder",
   "title": "Prompt Builder",
-  "description": "Prompt Builder helps you craft clear, consistent AI prompts through a simple form. Define roles, tone, audience, and constraints to get better results faster. Then copy them instantly into your favorite AI tool.",
+  "description": "Build clear AI prompts with a form for role, task, tone, audience and constraints, save templates and copy the prompt.",
   "icon": "prompt-builder-icon.png",
   "author": "koala1206",
   "platforms": [

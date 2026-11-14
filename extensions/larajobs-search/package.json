@@ -3,7 +3,7 @@
   "name": "larajobs-search",
   "version": "1.0.1",
   "title": "Search LaraJobs",
-  "description": "Search jobs on Larajobs",
+  "description": "Search Laravel and PHP jobs on LaraJobs, filter by type, tag and salary, and see new jobs in the menu bar.",
   "icon": "extension_icon.png",
   "author": "Treblle",
   "contributors": [

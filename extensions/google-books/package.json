@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-books",
   "title": "Google Books",
-  "description": "Search Books with Google Books",
+  "description": "Search Google Books by keyword and view details like author, publisher, ISBN, page count and rating, in list or book cover view.",
   "icon": "google-books.png",
   "categories": [
     "Data"

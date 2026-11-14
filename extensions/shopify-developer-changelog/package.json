@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shopify-developer-changelog",
   "title": "Shopify Developer Changelog",
-  "description": "Most recent changes to Shopify's developer platform",
+  "description": "Read the latest updates to the Shopify developer platform changelog and open entries in your browser.",
   "icon": "shopify_glyph.png",
   "author": "sandypockets",
   "contributors": [

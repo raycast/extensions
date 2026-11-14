@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipboard-editor",
   "title": "Clipboard Editor",
-  "description": "Edit your clipboard text",
+  "description": "Edit the text on your clipboard and copy the result back.",
   "icon": "icon.png",
   "author": "pomdtr",
   "categories": [

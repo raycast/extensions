@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "haystack",
   "title": "Haystack",
-  "description": "Organize anything by capturing screenshots",
+  "description": "Capture screenshots and organize them into stacks of structured data extracted with OpenAI, and chat with your captures using AI.",
   "icon": "haystack-icon.png",
   "author": "dimuuu",
   "categories": [

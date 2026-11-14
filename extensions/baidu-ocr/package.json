@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "baidu-ocr",
   "title": "Baidu OCR",
-  "description": "Use Baidu OCR API to recognize text.",
+  "description": "Copy text from an image on your clipboard using the Baidu OCR API for text recognition.",
   "icon": "baidu-icon.png",
   "author": "Humber",
   "categories": [

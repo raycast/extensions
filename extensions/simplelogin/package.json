@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simplelogin",
   "title": "SimpleLogin",
-  "description": "Mange your SimpleLogin Account, view and create aliases",
+  "description": "Create SimpleLogin email aliases, including random aliases, and view and manage your existing aliases.",
   "icon": "simplelogin_logo.png",
   "author": "adrian-schnell",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "irish-rail",
   "title": "Irish Rail",
-  "description": "Irish Rail departure information",
+  "description": "See Irish Rail train departures due in the next 90 minutes by station and destination.",
   "icon": "command-icon.png",
   "author": "dave-kav",
   "license": "MIT",

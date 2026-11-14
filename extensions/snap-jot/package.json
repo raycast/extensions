@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snap-jot",
   "title": "SnapJot",
-  "description": "Create a memo with a timestamp",
+  "description": "Jot down timestamped memos into your notes files, add to or search your daily note, and search notes in a folder.",
   "icon": "command-icon.png",
   "author": "k41531",
   "contributors": [

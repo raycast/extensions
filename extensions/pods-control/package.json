@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pods-control",
   "title": "Pods Control",
-  "description": "Control AirPods and Beats listening modes and Conversation Awareness, and show the confirmed mode in command subtitles.",
+  "description": "Switch AirPods and Beats between Noise Cancellation, Transparency, Adaptive and Off, and toggle Conversation Awareness on Mac.",
   "icon": "pods-control.png",
   "author": "raulg",
   "platforms": [

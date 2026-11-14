@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shell-buddy",
   "title": "Shell Buddy",
-  "description": "Converts natural language prompts to shell commands with AI",
+  "description": "Turn natural language prompts into shell commands with AI, then copy the command or run it in the terminal.",
   "icon": "command-icon.png",
   "author": "jebraat",
   "categories": [

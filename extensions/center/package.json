@@ -3,7 +3,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "center",
   "title": "Center",
-  "description": "Interact with NFTs in any blockchain, right in your command bar.",
+  "description": "Search NFT collections and assets on any blockchain, view NFTs by owner ENS or wallet address, and see floor prices and transfer history.",
   "icon": "command-icon.png",
   "author": "enesozturk",
   "categories": [

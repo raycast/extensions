@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "arxiv",
   "title": "ArXiv Search",
-  "description": "Search arXiv papers, access multiple formats (PDF, TeX, HTML), and export citations in various academic styles.",
+  "description": "Search arXiv papers by title, author or abstract, filter by category, open PDF, TeX or HTML versions, and copy citations in academic styles.",
   "icon": "arxiv-icon.png",
   "author": "koayon",
   "contributors": [

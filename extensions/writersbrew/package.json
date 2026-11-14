@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "writersbrew",
   "title": "Writersbrew",
-  "description": "Meet the AI assistant that accelerates your reading & writing 2x faster & better",
+  "description": "Fix grammar, improve fluency, summarize, translate, explain code and write emails with the Writersbrew AI writing assistant for Mac.",
   "icon": "writers-app-icon.png",
   "author": "pradeepb28",
   "license": "MIT",

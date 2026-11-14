@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postey",
   "title": "Postey",
-  "description": "Create and manage social media drafts on Postey for X and LinkedIn.",
+  "description": "Create, view and schedule social media drafts and threads for X (Twitter) and LinkedIn on Postey, with AI tools to write drafts.",
   "icon": "icon.png",
   "author": "postey",
   "access": "public",

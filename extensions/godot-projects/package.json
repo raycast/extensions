@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "godot-projects",
   "title": "Godot Projects",
-  "description": "Search your Godot projects and open them in the editor, run them, or show them in Finder.",
+  "description": "Search your Godot Engine projects from the Project Manager and open them in the editor, run them, or show them in Finder.",
   "icon": "extension-icon.png",
   "author": "shanto462",
   "categories": [

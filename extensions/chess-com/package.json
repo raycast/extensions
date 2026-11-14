@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chess-com",
   "title": "Chess.com",
-  "description": "Quickly start games on Chess.com",
+  "description": "Start a new Chess.com game instantly in bullet, blitz, rapid or classical time controls from 1 to 60 minutes.",
   "icon": "command-icon.png",
   "author": "joshfarrant",
   "contributors": [

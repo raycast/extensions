@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian-bookmarks",
   "title": "Obsidian Bookmarks",
-  "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks. Supports Safari, Arc and other Chromium-based browsers",
+  "description": "Save the current browser tab as a bookmark note in your Obsidian vault and search your bookmarks, with support for Safari, Arc and Chromium browsers.",
   "icon": "obsidian-bookmarks.png",
   "author": "dru89",
   "contributors": [

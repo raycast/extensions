@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smartthings-connector",
   "title": "SmartThings Connector",
-  "description": "Integration with SmartThings to manage lights, scenes, and location modes.",
+  "description": "Control Samsung SmartThings devices: toggle lights, run scenes, switch location modes and view rooms and devices.",
   "icon": "smartthings_white.png",
   "author": "IngoJ",
   "categories": [

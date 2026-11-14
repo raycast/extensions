@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "razuna",
   "title": "Razuna - Add and Browse Files in Razuna",
-  "description": "Upload, search, and browse files in your Razuna workspace directly from Raycast.",
+  "description": "Browse, search and upload files in your Razuna digital asset management workspaces.",
   "icon": "command-icon.png",
   "author": "TheNitai",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "papago-translate",
   "title": "Papago Translate",
-  "description": "Language translation extension using Papago",
+  "description": "Translate between Korean, English and Japanese with Naver Papago, with automatic Korean-English detection and translation history.",
   "icon": "command-icon.png",
   "author": "rita_mordio",
   "contributors": [

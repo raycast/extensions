@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-login",
   "title": "SimpleLogin",
-  "description": "Create and manage email aliases with SimpleLogin to protect your inbox from spam and trackers",
+  "description": "Create random or custom SimpleLogin email aliases and view and search your aliases to protect your inbox from spam.",
   "icon": "icon.png",
   "author": "ciko",
   "platforms": [

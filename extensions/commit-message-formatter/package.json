@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commit-message-formatter",
   "title": "Commit Message Formatter",
-  "description": "Generate and format your commit message according to the selected text with LLM",
+  "description": "Generate Git commit messages from selected text with an OpenAI-compatible LLM, and search Conventional Commit types to copy or paste.",
   "icon": "icon.png",
   "author": "zrr1999",
   "contributors": [],

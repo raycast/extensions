@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-agency",
   "title": "AI Agency",
-  "description": "Browse AI Agency agents by division, view specialties and copy prompts.",
+  "description": "Browse AI agent prompts from the agency-agents GitHub repo by division, preview their specialties and copy prompts.",
   "icon": "ai-agency.png",
   "author": "marcin-91",
   "platforms": [

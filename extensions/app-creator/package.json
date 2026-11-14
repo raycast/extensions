@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app",
   "title": "App Creator",
-  "description": "Allow AI to make simple HTML apps",
+  "description": "Let Raycast AI create simple HTML apps, then list, open or delete the apps it made.",
   "icon": "app-creator.png",
   "author": "EvanZhouDev",
   "categories": [

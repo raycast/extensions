@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "passig",
   "title": "Passig",
-  "description": "Search, copy, paste and save passwords from your zero-knowledge Passig vault, right from Raycast.",
+  "description": "Search your Passig password vault and copy usernames, passwords and 2FA TOTP codes, generate passwords, save logins and import from other managers.",
   "icon": "icon.png",
   "author": "igsolutions",
   "categories": [

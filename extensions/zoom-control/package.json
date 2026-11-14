@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoom-meeting-control",
   "title": "Zoom Meeting Control",
-  "description": "Control current Zoom meeting",
+  "description": "Control your Zoom meeting: mute, start or stop video, share your screen, toggle chat, and start or leave meetings.",
   "icon": "zoom-control.png",
   "author": "prashantv",
   "contributors": [

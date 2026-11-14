@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pagerduty",
   "title": "PagerDuty",
-  "description": "Display PagerDuty incidents and helps updating status.",
+  "description": "View recent PagerDuty incidents and those assigned to you, acknowledge or resolve them, and see your on-call schedule.",
   "icon": "command-icon.png",
   "author": "horimislime",
   "contributors": [

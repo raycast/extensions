@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scoop",
   "title": "Scoop",
-  "description": "Manage Scoop, the command-line installer for Windows.",
+  "description": "Search, install, update and uninstall Scoop packages on Windows, see outdated apps, and manage Scoop buckets.",
   "icon": "scoop.png",
   "platforms": [
     "Windows"

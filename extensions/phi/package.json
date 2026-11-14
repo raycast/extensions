@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "phi",
   "title": "Phi",
-  "description": "Search and control live Phi Spaces and tabs.",
+  "description": "Search and switch Phi Browser spaces, tabs, bookmarks and history, run page actions, and open new tabs, windows or incognito spaces.",
   "icon": "icon.png",
   "author": "phibrowser",
   "license": "MIT",

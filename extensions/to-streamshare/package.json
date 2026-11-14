@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "streamshare-uploader",
   "title": "Streamshare Uploader",
-  "description": "Upload files to streamshare",
+  "description": "Upload files from Finder or the clipboard to streamshare, copy the share URL and view your upload history.",
   "icon": "logo.png",
   "author": "PandaDEV",
   "contributors": [

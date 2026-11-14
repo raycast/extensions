@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fizzy",
   "title": "Fizzy",
-  "description": "Kanban as it should be. Not as it has been.",
+  "description": "Manage Fizzy kanban boards and cards, users and notifications for your Fizzy instance, on Mac and Windows.",
   "icon": "fizzy.png",
   "author": "xmok",
   "platforms": [

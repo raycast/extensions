@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sketch",
   "title": "Sketch",
-  "description": "Frictionless Workspace Browsing",
+  "description": "Browse the documents and projects in your Sketch workspaces and open them in the Sketch app.",
   "icon": "icon.png",
   "author": "aesign",
   "license": "MIT",

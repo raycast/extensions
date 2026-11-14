@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ms-todo",
   "title": "Microsoft To Do via ms-todo",
-  "description": "Browse, search, and manage Microsoft To Do tasks through your local ms-todo cache",
+  "description": "Add, search, browse and complete Microsoft To Do tasks, including My Day, through the local ms-todo CLI.",
   "icon": "icon.png",
   "author": "bhekanik",
   "platforms": [

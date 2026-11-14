@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ebird",
   "title": "eBird",
-  "description": "Exploring bird species from eBird",
+  "description": "Search bird species from the eBird taxonomy, copy common names, and open species pages on eBird.",
   "icon": "command-icon.png",
   "author": "OozyGrub",
   "categories": [

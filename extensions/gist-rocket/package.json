@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gist-rocket",
   "title": "Gist Rocket",
-  "description": "Publish HTML or Markdown as a live web page in one keystroke. Powered by GitHub Gists.",
+  "description": "Publish HTML or Markdown from your clipboard or a file as a live web page with a shareable link, hosted on GitHub Gists.",
   "icon": "icon.png",
   "author": "tgrecojs",
   "categories": [

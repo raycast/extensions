@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tailscale",
   "title": "Tailscale",
-  "description": "List devices in your Tailnet and copy the IPv4, IPv6, or MagicDNS address to your clipboard.",
+  "description": "Manage Tailscale: list tailnet devices and copy IPs or MagicDNS names, connect or disconnect, switch accounts and exit nodes, and run netcheck.",
   "icon": "command-icon.png",
   "author": "samlinville",
   "owner": "tailscale",

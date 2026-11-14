@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dock-tinker",
   "title": "Dock Tinker",
-  "description": "Custom hidden preferences of Dock.",
+  "description": "Change hidden macOS Dock settings: add spacers, toggle auto-hide and its delay, set position, icon size and minimize effect, and hide recent apps.",
   "icon": "dock-tinker.png",
   "author": "koinzhang",
   "contributors": [

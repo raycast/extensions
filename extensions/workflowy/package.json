@@ -3,7 +3,7 @@
   "name": "workflowy",
   "version": "1.0.0",
   "title": "Workflowy",
-  "description": "Search, capture, and manage your Workflowy account from Raycast.",
+  "description": "Search Workflowy, quickly capture items or add them to Today, browse locations and tags, and complete tasks.",
   "icon": "workflowy-icon.png",
   "author": "rodolfo_lopez",
   "license": "MIT",

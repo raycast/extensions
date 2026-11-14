@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ohdear",
   "title": "Oh Dear",
-  "description": "Check the health of your Oh Dear monitors and add new ones from Raycast.",
+  "description": "Check uptime, SSL certificates, broken links, DNS and performance for your Oh Dear monitored sites, and add new sites.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "owner": "oh-dear",

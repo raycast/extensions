@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lorem-ipsum",
   "title": "Lorem Ipsum",
-  "description": "Generate placeholder content",
+  "description": "Generate Lorem Ipsum placeholder text as paragraphs, sentences or words and copy it to the clipboard, or generate placeholder text with AI.",
   "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
   "contributors": [

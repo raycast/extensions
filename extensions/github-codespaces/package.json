@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "github-codespaces",
 	"title": "GitHub Codespaces",
-	"description": "Manage and launch codespaces",
+	"description": "Open, create, rename, stop and delete GitHub Codespaces, change their machine type, and see active codespaces in the menu bar.",
 	"icon": "github.png",
 	"author": "michael.wang",
 	"categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "leave-time-calculator",
   "title": "Leave Time Calculator",
-  "description": "Calculate your leave time based on start time and break duration",
+  "description": "Calculate when you can leave work from your arrival time and break, and see remaining work hours and overtime at a glance.",
   "icon": "clock-icon.png",
   "author": "harunonsystem",
   "categories": [

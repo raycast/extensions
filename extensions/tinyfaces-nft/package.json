@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinyfaces-nft",
   "title": "TinyFaces NFT",
-  "description": "Explore the TinyFaces NFT Collection",
+  "description": "Browse and search the TinyFaces NFT collection by token and view traits like color, hat, face and glasses.",
   "icon": "icon.png",
   "author": "peduarte",
   "categories": [

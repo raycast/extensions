@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "web-audit",
   "title": "Web Audit",
-  "description": "Find SEO related data of any given webpage.",
+  "description": "Audit any webpage for SEO: check title, meta description, heading order and image alt tags, and get general website info.",
   "icon": "web-audit_icon.png",
   "author": "flornkm",
   "contributors": [

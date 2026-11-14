@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prisma-cli-commands",
   "title": "Prisma CLI Commands",
-  "description": "Quickly search and use Prisma CLI Commands along with command details.",
+  "description": "Search Prisma CLI commands with details and examples, and copy them.",
   "icon": "prisma-logo.png",
   "author": "raj_asha",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ip-finder",
   "title": "Ip Finder - Network Scanner",
-  "description": "Scan your local network to find assigned IPs and get recommendations for available addresses",
+  "description": "Scan your local network for assigned IP addresses, find available IPs to avoid conflicts, and scan custom subnets with CIDR notation.",
   "icon": "command-icon.png",
   "author": "swayam_mehta",
   "license": "MIT",

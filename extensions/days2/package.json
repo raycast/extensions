@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "days2",
   "title": "Days 2 - Google Calendar Countdown",
-  "description": "Countdown to all-day events from Google Calendar — see how many days until your next birthday, holiday, deadline, or milestone.",
+  "description": "Count down the days to birthdays, holidays, deadlines and other all-day events from your Google Calendar.",
   "icon": "icon.png",
   "author": "datboi",
   "categories": [

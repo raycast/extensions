@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cal-com-share-meeting-links",
   "title": "Cal.com",
-  "description": "Manage your Cal.com schedules, bookings, out-of-office, and meeting links from Raycast",
+  "description": "Share Cal.com meeting links, view bookings, manage availability schedules and out-of-office entries, and manage bookings with AI.",
   "icon": "logo.png",
   "author": "eluce2",
   "owner": "cal",

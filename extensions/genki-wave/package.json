@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "genki-wave",
   "title": "Genki Wave",
-  "description": "Use the buttons and swipes on your Genki Wave ring to dictate into any app, control slides and media, or run any Raycast command.",
+  "description": "Map the buttons and swipes on your Genki Wave ring to dictation, slide control, media and volume, keyboard keys or any Raycast command.",
   "icon": "icon.png",
   "author": "multivac61",
   "categories": [

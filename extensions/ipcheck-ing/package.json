@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ipcheck-ing",
   "title": "IPCheck",
-  "description": "Show your local and external IPs from multiple sources, look up the location and network behind any IP address, and keep your current IP in the menu bar",
+  "description": "Show your local and public IP addresses, look up the location, ISP and network of any IP, and keep your current IP in the menu bar.",
   "icon": "ipchecking.png",
   "author": "jason5ng32",
   "categories": [

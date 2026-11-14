@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zenmux-manager",
-  "description": "Monitor ZenMux usage, manage account links, and use ZenMux models in Raycast AI.",
+  "description": "Check your ZenMux subscription quota and pay-as-you-go balance, and ask Raycast AI about ZenMux account and docs.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

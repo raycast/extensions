@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "temporal",
   "title": "Temporal",
-  "description": "Search, view, and manage Temporal workflows from Raycast",
+  "description": "Search, start and manage Temporal workflows and schedules, view workflow history and stats, and switch server connections.",
   "icon": "icon.png",
   "author": "applauselab",
   "contributors": ["nikolaykolibarov"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easy-invoice",
   "title": "Easy Invoice",
-  "description": "Create and manage professional PDF invoices in seconds. Track clients, export records, and get paid faster.",
+  "description": "Create PDF invoices locally, manage clients, track draft, sent and paid status, and export invoice history as CSV or a PDF summary.",
   "icon": "command-icon.png",
   "author": "davidosull",
   "categories": [

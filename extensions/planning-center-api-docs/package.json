@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "planning-center-api-docs",
   "title": "Planning Center API Docs",
-  "description": "Quickly find and copy the docs you need for the Planning Center API.",
+  "description": "Search Planning Center (PCO) API documentation for 255+ endpoints across People, Services, Check-Ins, Giving and more, and copy docs, on Mac and Windows.",
   "icon": "pco-logo-blue.png",
   "author": "thomas.harmond",
   "platforms": [

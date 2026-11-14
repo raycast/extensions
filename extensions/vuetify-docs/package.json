@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vuetify-docs",
   "title": "Vuetify Docs",
-  "description": "Search all Vuetify components and open the official documentation directly from Raycast.",
+  "description": "Search Vuetify components and documentation and open the official docs in your browser.",
   "icon": "v-logo.png",
   "author": "jeffnawroth",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plex",
   "title": "Plex",
-  "description": "View the media in your Plex Media Server",
+  "description": "Browse the movies, shows and music in your Plex Media Server libraries and see active playback sessions.",
   "icon": "command-icon-plex.png",
   "author": "mSarheed",
   "contributors": [

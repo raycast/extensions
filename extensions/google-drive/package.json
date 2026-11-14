@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-drive",
   "title": "Google Drive",
-  "description": "Fuzzy search files in the mounted Google Drive",
+  "description": "Fuzzy search files in your locally mounted Google Drive folder on your Mac and open them.",
   "icon": "command-icon.png",
   "author": "vishaltelangre",
   "categories": [

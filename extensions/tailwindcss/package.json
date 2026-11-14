@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tailwindcss",
   "title": "Tailwind CSS",
-  "description": "Utilities to work with Tailwind CSS",
+  "description": "Search Tailwind CSS docs (v0 to v4), utility classes, the default color palette and Tailwind UI components, and copy classes and colors.",
   "icon": "tailwind-icon.png",
   "author": "vimtor",
   "contributors": [

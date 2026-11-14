@@ -3,7 +3,7 @@
   "name": "seventv-search",
   "version": "1.0.0",
   "title": "7TV Emotes Search",
-  "description": "Search, preview, copy, and paste emotes from 7TV, BetterTTV, and FrankerFaceZ.",
+  "description": "Search 7TV, BetterTTV and FrankerFaceZ emotes, browse channel and creator emotes, and copy or paste them as GIF or PNG.",
   "icon": "icon.png",
   "author": "nakama",
   "categories": [

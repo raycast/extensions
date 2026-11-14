@@ -3,7 +3,7 @@
   "name": "zero",
   "title": "Zero",
   "subtitle": "0.email",
-  "description": "0.email extension for Raycast",
+  "description": "Draft emails in the Zero (0.email) open source email app by asking Raycast AI in plain language.",
   "icon": "extension-icon.png",
   "author": "jlokos",
   "categories": [

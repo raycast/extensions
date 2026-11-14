@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "markdown-blog",
 	"title": "Markdown Blog Manager",
-	"description": "Create, browse and edit your file based Markdown blog.",
+	"description": "Create, browse and edit posts in your file-based Markdown blog.",
 	"icon": "mark.png",
 	"author": "pyronaur",
 	"categories": [

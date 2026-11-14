@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "virtualbox-power-switch",
   "title": "VirtualBox Power Switch",
-  "description": "List your VirtualBox VMs, turn them on/off, or delete them.",
+  "description": "List your VirtualBox virtual machines, start or stop them and delete VMs.",
   "icon": "command-icon.png",
   "author": "diogo_ferrer",
   "license": "MIT",

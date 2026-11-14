@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browsers-profiles",
   "version": "1.0.0",
-  "description": "Access your browsers profiles from Raycast",
+  "description": "Open Chrome, Firefox, Brave, Edge, Chromium and Vivaldi browser profiles by searching their names.",
   "categories": [
     "Productivity"
   ],

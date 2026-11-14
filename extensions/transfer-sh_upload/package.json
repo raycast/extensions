@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transfer-sh_upload",
   "title": "Transfer.sh Uploader",
-  "description": "Upload a file directly to a transfer.sh instance",
+  "description": "Upload a file selected in Finder to a transfer.sh instance and copy the share link.",
   "icon": "upload-dark.png",
   "author": "PandaDEV",
   "version": "1.0.3",

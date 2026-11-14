@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-npm",
   "title": "Search npm Packages",
-  "description": "Search for npm package information",
+  "description": "Search npm packages, view READMEs, bundle size from Bundlephobia and Snyk vulnerabilities, copy install commands and save favorites.",
   "subtitle": "npm",
   "icon": "command-icon.png",
   "author": "mrmartineau",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laby-net",
   "title": "Laby.net",
-  "description": "Search and view Minecraft user profiles and textures like skins and capes with data from laby.net.",
+  "description": "Search Minecraft player profiles by username and browse Minecraft skins and capes with data from laby.net.",
   "icon": "command-icon.png",
   "author": "niklaswa",
   "categories": [

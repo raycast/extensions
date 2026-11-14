@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toggle-desktop-visibility",
   "title": "Toggle Desktop Visibility",
-  "description": "Toggle Desktop file or folder visible and hidden",
+  "description": "Show or hide the files, folders and widgets on your Mac desktop with one command, for a clean desktop when sharing your screen.",
   "icon": "logo.png",
   "author": "Haojen",
   "contributors": [

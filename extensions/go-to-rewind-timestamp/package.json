@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "go-to-rewind-timestamp",
   "title": "Go to Rewind Timestamp",
-  "description": "Open Rewind AI at a specific timestamp",
+  "description": "Open your Rewind AI history at a time typed in natural language, like \"yesterday 8am\" or \"3 minutes ago\", or jump back to the last timestamp.",
   "icon": "rewind-ai.png",
   "author": "haseab_",
   "contributors": [

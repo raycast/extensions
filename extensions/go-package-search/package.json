@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "go-package-search",
   "title": "Go Package Search",
-  "description": "Quickly search packages on https://pkg.go.dev",
+  "description": "Search Go packages on pkg.go.dev and open their documentation.",
   "icon": "command-icon.png",
   "author": "bstncartwright",
   "contributors": [

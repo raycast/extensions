@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wave",
   "title": "Wave",
-  "description": "Manage your Wave Businesses",
+  "description": "View your Wave businesses, customers, products and services, create invoices, add customers and see customer statements.",
   "icon": "wave.png",
   "author": "xmok",
   "categories": [

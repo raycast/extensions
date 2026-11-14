@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "find-opengl-enum",
   "title": "Find OpenGL Enum",
-  "description": "convert any decimal/hexadecimal code into actual OpenGL enum",
+  "description": "Convert a decimal or hexadecimal value into its OpenGL enum name.",
   "icon": "command-icon.png",
   "author": "visual_eugen",
   "contributors": [

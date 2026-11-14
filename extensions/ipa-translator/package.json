@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ipa-translator",
   "title": "IPA Translator",
-  "description": "Converts text to IPA (International Phonetic Alphabet)",
+  "description": "Convert English, German, Danish, Swedish or Czech text to the International Phonetic Alphabet (IPA) and copy the result.",
   "icon": "logo.png",
   "author": "BossElijah",
   "categories": [

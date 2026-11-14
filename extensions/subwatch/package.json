@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "subwatch",
   "title": "Subwatch",
-  "description": "Turn subscription chaos into financial harmony",
+  "description": "Add, list and delete subscriptions in Subwatch to track your recurring payments.",
   "icon": "icon.png",
   "author": "nirgn",
   "categories": [

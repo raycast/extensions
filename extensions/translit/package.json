@@ -3,7 +3,7 @@
   "name": "translit",
   "title": "Translit",
   "version": "0.1.0",
-  "description": "Convert Latin characters to Cyrillic using phonetic transliteration",
+  "description": "Transliterate Latin characters to Russian Cyrillic phonetically as you type, and copy the result.",
   "icon": "extension-icon.png",
   "author": "tsibog",
   "categories": [

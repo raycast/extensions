@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "techgedoens",
   "title": "Techgedöns.de",
-  "description": "The official Raycast extension for the German tech blog Techgedöns.de",
+  "description": "Read, search and save articles from the German tech blog Techgedöns.de, track unread articles and see the latest posts in the menu bar.",
   "icon": "icon.png",
   "author": "Marcelismus",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-preview",
   "title": "Markdown Preview",
-  "description": "A simple way to preview markdown content",
+  "description": "Write Markdown and see a live GitHub Flavored Markdown preview, with character, word and line counts.",
   "icon": "md-preview-icon.png",
   "author": "xjo_nd",
   "license": "MIT",

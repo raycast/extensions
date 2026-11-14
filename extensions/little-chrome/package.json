@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "little-chrome",
   "title": "Little Chrome",
-  "description": "Open a URL or Google search in a minimal Chrome app window, like Little Arc.",
+  "description": "Open a URL or Google search in a minimal, chromeless Google Chrome window like Little Arc, with bookmark and history suggestions.",
   "icon": "icon.png",
   "author": "tompenguin",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simon",
   "title": "Simon",
-  "description": "Play a game of Simon.",
+  "description": "Play Simon, the memory game where you repeat a growing sequence of colors.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [

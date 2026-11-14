@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dovetail",
   "title": "Dovetail",
-  "description": "Search, browse, and create content across your Dovetail workspace.",
+  "description": "Search docs, data, projects and contacts in your Dovetail workspace, browse folders, add data entries and summarize insights with AI.",
   "icon": "dovetail_icon.png",
   "author": "barlow",
   "categories": [

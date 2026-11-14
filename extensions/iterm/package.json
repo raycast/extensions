@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iterm",
   "title": "iTerm",
-  "description": "Control iTerm with Raycast",
+  "description": "Open iTerm windows, tabs and split panes, open iTerm in the selected Finder folder, and switch sessions, profiles and color presets.",
   "icon": "command-icon.png",
   "author": "ron-myers",
   "contributors": [

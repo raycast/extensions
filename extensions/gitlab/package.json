@@ -5,7 +5,7 @@
  "version": "1.2.1",
  "author": "tonka3000",
  "license": "MIT",
- "description": "Create, search and modify issues, manage merge requests, projects and more.",
+ "description": "Search and create GitLab issues and merge requests, see todos, reviews, pipelines, epics and projects, and show issues and MRs in the menu bar.",
  "icon": "gitlab.png",
  "commands": [
   {

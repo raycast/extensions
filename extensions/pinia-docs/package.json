@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pinia-docs",
   "title": "Pinia Docs",
-  "description": "Quickly search Pinia docs from Raycast",
+  "description": "Search the Pinia documentation for Vue.js state management and open pages in your browser.",
   "icon": "p-logo.png",
   "author": "jeffnawroth",
   "categories": [

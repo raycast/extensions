@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "project-hub",
   "title": "Project Hub",
-  "description": "Quickly access all your project-related links from one place.",
+  "description": "Organize project links in one place: group links by project with favicons and colors, search them and open all of a project's links at once.",
   "icon": "icon.png",
   "author": "rodrigoarias",
   "categories": [

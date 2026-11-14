@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uk-bank-holidays",
   "title": "UK Bank Holidays",
-  "description": "Display the upcoming bank holiday information for England and Wales.",
+  "description": "See upcoming UK bank holidays for England and Wales, and check when the next bank holiday is.",
   "icon": "holidays-icon.png",
   "author": "kud",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitbucket-search-self-hosted",
   "title": "Bitbucket Search (Self-Hosted)",
-  "description": "The extension allow you to quickly access repositories and pull-requests in Bitbucket Server (Self-Hosted)",
+  "description": "Search repositories and see your open pull requests on a self-hosted Bitbucket Server instance.",
   "icon": "bitbucket-logo.png",
   "author": "yuercl",
   "contributors": [

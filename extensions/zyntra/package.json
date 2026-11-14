@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zyntra",
   "title": "Zyntra",
-  "description": "Unlimited mailboxes for QA teams",
+  "description": "View your Zyntra test email inboxes for QA, read emails and headers, add mailboxes and delete emails.",
   "icon": "zyntra.png",
   "author": "xmok",
   "platforms": [

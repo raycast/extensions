@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simulator-control",
   "title": "Simulator Control",
-  "description": "Control Apple Simulator devices",
+  "description": "Boot and shut down iOS and other Apple Simulator devices, and open their data and log folders, using simctl from Xcode.",
   "icon": "command-icon.png",
   "author": "noppefoxwolf",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "baalda",
   "title": "Baalda",
-  "description": "Manage your Baalda second brain from Raycast with note capture, search, folders, and AI tools.",
+  "description": "Capture, search and manage notes and folders in your Baalda second brain vaults, and let Raycast AI read and edit your notes.",
   "icon": "icon.png",
   "author": "owendavidprice",
   "platforms": ["macOS", "Windows"],

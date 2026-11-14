@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pitchfork",
   "title": "Pitchfork",
-  "description": "See Pitchfork Album Reviews",
+  "description": "Read the latest Pitchfork album reviews and open them in your browser.",
   "icon": "pitchfork_icon.png",
   "author": "koayon",
   "license": "MIT",

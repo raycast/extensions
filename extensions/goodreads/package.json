@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "goodreads",
   "title": "Goodreads",
-  "description": "Search Goodreads books, authors and more",
+  "description": "Search Goodreads books by title and authors by name, and view book details, ratings and author pages.",
   "icon": "goodreads-icon.png",
   "author": "puneeth",
   "contributors": [

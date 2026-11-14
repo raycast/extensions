@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uptime-robot",
   "title": "UptimeRobot",
-  "description": "View Monitors and Account Details",
+  "description": "View and create UptimeRobot monitors and check your UptimeRobot account details.",
   "icon": "up.png",
   "author": "xmok",
   "categories": [

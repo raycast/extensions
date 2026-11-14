@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "integrations-sh",
   "title": "Integrations.sh",
-  "description": "Search integrations.sh for MCP, OpenAPI, GraphQL, and CLI integration surfaces, and inspect setup and credentials per domain.",
+  "description": "Search integrations.sh for MCP, OpenAPI, GraphQL and CLI integrations, and see setup and credential instructions per domain.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

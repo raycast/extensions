@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "serialcast",
   "title": "SerialCast",
-  "description": "Control SerialPlotter through Raycast.",
+  "description": "Start, stop or toggle serial port monitoring in the SerialPlotter app on Mac.",
   "icon": "icon.png",
   "author": "asboy2035",
   "platforms": [

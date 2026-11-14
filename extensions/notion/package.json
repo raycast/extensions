@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
-  "description": "The fastest way to search, create and update Notion pages.",
+  "description": "Search, create and update Notion pages and databases, add text to pages, and quickly capture notes to Notion, with Raycast AI tools.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "owner": "notion",

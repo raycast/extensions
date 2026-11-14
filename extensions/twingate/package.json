@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twingate",
   "title": "Twingate",
-  "description": "Access your Twingate resources directly from Raycast",
+  "description": "Search and open your Twingate resources by name, address or alias, mark favorites, and see recently used resources.",
   "icon": "twingate-icon.png",
   "author": "guy_scher",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipyai",
   "title": "Clipyai",
-  "description": "AI-powered clipboard enhancement for productivity",
+  "description": "Process clipboard text and images with OpenAI GPT models: run quick actions with hotkeys, chat about clipboard content and keep an action history.",
   "icon": "clipyai-icon.png",
   "author": "strikeraryu",
   "license": "MIT",

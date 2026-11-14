@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-search",
   "title": "Word Search",
-  "description": "Search for synonyms, antonyms, spellings, rhymes and more",
+  "description": "Find synonyms, antonyms, rhymes, adjectives, correct spellings, words that sound alike and words with missing letters.",
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [

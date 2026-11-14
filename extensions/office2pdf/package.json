@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "office2pdf",
   "title": "Office2PDF",
-  "description": "Raycast extension to convert office files to pdf using CloudConvert api",
+  "description": "Convert Word, Excel and PowerPoint Office files to PDF with the CloudConvert API, including files selected in Finder.",
   "icon": "office2pdf.png",
   "author": "ARui",
   "categories": [

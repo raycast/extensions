@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt-atlas",
   "title": "ChatGPT Atlas",
-  "description": "Search your history of ChatGPT Atlas, OpenAI's new browser.",
+  "description": "Search your browsing history and bookmarks in ChatGPT Atlas, the web browser from OpenAI.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

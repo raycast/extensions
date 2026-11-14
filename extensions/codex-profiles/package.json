@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codex-profiles",
   "title": "Codex Profiles",
-  "description": "Switch ChatGPT between your local Codex profiles.",
+  "description": "Switch between separate local profiles in the ChatGPT Codex app to keep work and personal accounts side by side.",
   "icon": "icon.png",
   "author": "hamza_alchbli",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jules-agents",
   "title": "Jules Agents",
-  "description": "Create and manage async sessions with Google Jules Agents",
+  "description": "Launch and manage Google Jules coding agent sessions, browse sources, get AI summaries of session logs, and check sessions from the menu bar.",
   "icon": "icon.png",
   "author": "ihildy",
   "access": "public",

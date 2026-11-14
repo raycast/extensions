@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "datawrapper",
   "title": "Datawrapper",
-  "description": "An unofficial extension for searching your Datawrapper charts, viewing recent Datawrapper charts, and other handy functions.",
+  "description": "Search and view your Datawrapper charts, start a new chart, map or table, search Datawrapper Academy, and look up tooltip parser functions.",
   "icon": "icon.png",
   "author": "benkates",
   "categories": [

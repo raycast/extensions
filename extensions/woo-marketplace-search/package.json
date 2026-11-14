@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "woo-marketplace-search",
   "title": "Woo Marketplace Search",
-  "description": "Search WooCommerce themes, extensions, and documentation directly from Raycast",
+  "description": "Search WooCommerce Marketplace themes and extensions, and WooCommerce documentation, guides and blog posts.",
   "icon": "icon.png",
   "author": "shameemreza",
   "categories": [

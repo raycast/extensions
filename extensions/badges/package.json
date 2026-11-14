@@ -3,7 +3,7 @@
   "name": "badges",
   "title": "Badges - Shields.io",
   "type": "module",
-  "description": "Concise, consistent, and legible badges.",
+  "description": "Create Shields.io badges for your README: static, dynamic, endpoint and social badges with custom labels, colors and logos.",
   "icon": "badges-icon.png",
   "author": "litomore",
   "platforms": [

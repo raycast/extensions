@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qr-code-sharing",
   "title": "QR Code Sharing",
-  "description": "Shares information through QR codes and barcodes.",
+  "description": "Save things you share often, like an email, phone number, Wi-Fi password or link, and show them as QR codes or barcodes. Export entries as CSV.",
   "icon": "extension-icon.png",
   "author": "Francescoparadiso",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dotmate",
   "title": "Dotmate",
-  "description": "Dotfile Manager for Raycast",
+  "description": "Back up and restore dotfiles between your Mac and a dotfiles repo, and see the status and diffs of your config files.",
   "icon": "dotmate.png",
   "author": "knealking",
   "contributors": [

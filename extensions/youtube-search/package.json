@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-search",
   "title": "YouTube Search",
-  "description": "YouTube search with autosuggestions",
+  "description": "Search YouTube with autocomplete suggestions and search history, or search YouTube for the selected text.",
   "icon": "command-icon.png",
   "author": "muhammetakay",
   "license": "MIT",

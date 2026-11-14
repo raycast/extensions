@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qrcode-generator",
   "title": "QR Code Generator",
-  "description": "Generate QR codes from text or URLs.",
+  "description": "Generate QR codes as PNG or SVG from text, URLs, the clipboard or selected text, with custom colors, optional link shortening and UTM tags.",
   "icon": "command-icon.png",
   "author": "Melvynx",
   "contributors": [

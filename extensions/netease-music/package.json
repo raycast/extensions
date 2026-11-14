@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netease-music",
   "title": "NeteaseMusic",
-  "description": "Control the NeteaseMusic app with your keyboard",
+  "description": "Control NetEase Cloud Music on your Mac: play, pause, skip tracks, like or dislike songs, change volume and toggle lyrics.",
   "icon": "netease-music.png",
   "author": "chyroc",
   "contributors": [

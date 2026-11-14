@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fluent-outdoors",
   "title": "Fluent Outdoors",
-  "description": "Show maintenance status for outdoors activity tracks like skiing or skating. Backend system Fluent.",
+  "description": "Check maintenance status of ski and skating tracks in Finnish cities like Helsinki, Jyväskylä and Kuopio, from the Fluent outdoors service.",
   "icon": "fluent-outdoors.png",
   "author": "juhamust",
   "categories": [

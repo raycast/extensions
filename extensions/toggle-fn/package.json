@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toggle-fn",
   "title": "Toggle Fn",
-  "description": "Toggle the \"Use all F1, F2, etc. keys as standard function keys\" option in macOS System Preferences.",
+  "description": "Toggle the macOS setting to use F1, F2 and other keys as standard function keys.",
   "icon": "fn-key.png",
   "author": "elonwoo",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "number-research",
   "title": "Number Research",
-  "description": "Research numbers and discover if they have been searched before on numberresearch.xyz",
+  "description": "Check whether anyone has searched a number before on numberresearch.xyz, and see the number of the day and top numbers.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

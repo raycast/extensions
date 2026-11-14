@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-bard-ai",
   "title": "Google Bard",
-  "description": "Perform Actions with Google Bard",
+  "description": "Chat with Google Bard and use it to summarize, explain, fix grammar, change the tone of or comment selected text.",
   "icon": "bard.png",
   "author": "EvanZhouDev",
   "contributors": [

@@ -1,7 +1,7 @@
 {
   "name": "ticktick",
   "title": "TickTick",
-  "description": "Check and search tasks in TickTick via Raycast",
+  "description": "See TickTick tasks for today, the next 7 days and your inbox, search tasks and quickly add new ones in the TickTick Mac app, with AI tools.",
   "icon": "tick-logo.png",
   "author": "appest",
   "contributors": [

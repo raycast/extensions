@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "user-agent",
   "title": "User-Agent Parser",
-  "description": "Parses the User-Agent of the selected text",
+  "description": "Parse the User-Agent string in your selected text to see the browser, engine, OS, device and CPU, and copy it as JSON.",
   "icon": "parse-user-agent-icon.png",
   "author": "third774",
   "categories": [

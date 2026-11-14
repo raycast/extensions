@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ecosia-search",
   "title": "Ecosia Search",
-  "description": "Ecosia Search with autosuggestion",
+  "description": "Search the web with Ecosia, with search suggestions as you type.",
   "icon": "command-icon.png",
   "author": "mcocirio",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-meet",
   "title": "Google Meet",
-  "description": "Start a Google Meet directly from Raycast",
+  "description": "Start a new Google Meet meeting and copy the link in one step, optionally with a specific browser profile.",
   "icon": "google-meet-icon.png",
   "author": "vitoorgomes",
   "contributors": [

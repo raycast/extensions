@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "urban-dictionary",
   "title": "Urban Dictionary Search",
-  "description": "Search on Urban Dictionary",
+  "description": "Look up slang words and phrases on Urban Dictionary and read their definitions.",
   "icon": "urban.png",
   "author": "pernielsentikaer",
   "platforms": [

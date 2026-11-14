@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lock-time",
   "title": "Lock Time",
-  "description": "Quietly tracks how long your Mac stays locked and how long you stay focused between unlocks.",
+  "description": "Track how long your Mac stays locked and how long you stay focused between unlocks, with daily stats and a menu bar timer.",
   "icon": "icon.png",
   "author": "mai_yang",
   "categories": [

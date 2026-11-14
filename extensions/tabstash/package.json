@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tabstash",
   "title": "TabStash",
-  "description": "Search, browse, and capture bookmarks with TabStash",
+  "description": "Search and browse your TabStash bookmarks and save the current browser tab to your stash.",
   "icon": "icon.png",
   "author": "mkhnsn",
   "platforms": [

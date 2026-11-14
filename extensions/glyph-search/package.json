@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "glyph-search",
   "title": "Glyph Search",
-  "description": "Like the emoji picker, but for unicode glyphs",
+  "description": "Search and paste Unicode glyphs like arrows, Mac keyboard symbols (⌘ ⌥ ⇧) and stars, an alternative to the macOS Character Viewer.",
   "icon": "icon.png",
   "author": "gbgk",
   "license": "MIT",

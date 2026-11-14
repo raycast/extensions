@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typewhisper",
   "title": "TypeWhisper",
-  "description": "Voice dictation, transcription history, and profile management for TypeWhisper",
+  "description": "Control TypeWhisper voice dictation: dictate, transcribe audio files, record meetings, search transcription history, and manage the dictionary and models.",
   "icon": "icon.png",
   "author": "SeoFood",
   "categories": [

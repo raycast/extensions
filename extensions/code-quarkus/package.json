@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "code-quarkus",
   "title": "Code Quarkus",
-  "description": "Create new Quarkus project",
+  "description": "Generate a new Quarkus project with Maven or Gradle using code.quarkus.io, and find Quarkus extensions and their docs.",
   "icon": "quarkus.png",
   "author": "loic_magnette",
   "version": "0.4.2",

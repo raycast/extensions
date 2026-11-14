@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jellyfin",
   "title": "Jellyfin",
-  "description": "Find Movies and Shows on your Jellyfin Instance",
+  "description": "Search movies, shows and collections on your Jellyfin media server, and control scheduled tasks and recent sessions.",
   "icon": "command-icon.png",
   "author": "d2a",
   "categories": [

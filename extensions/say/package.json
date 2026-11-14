@@ -3,7 +3,7 @@
   "name": "say",
   "title": "Say - Text to Speech",
   "type": "module",
-  "description": "Use the built-in text-to-speech engine to say the text you provide.",
+  "description": "Read text aloud with the built-in text-to-speech (TTS) voices on Mac and Windows, including selected text, offline with no network needed.",
   "icon": "say-icon.png",
   "author": "litomore",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-svgo",
   "title": "SVGO",
-  "description": "Optimize SVG vector graphics files.",
+  "description": "Optimize SVG files selected in Finder or SVG code on your clipboard with SVGO, with configurable plugins.",
   "icon": "svgo.png",
   "author": "kaichi",
   "contributors": [

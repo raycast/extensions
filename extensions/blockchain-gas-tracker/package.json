@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blockchain-gas-tracker",
   "title": "Blockchain Gas Tracker",
-  "description": "Track and caculate blockchain gas fees right in your Raycast!",
+  "description": "Check current gas fees on Ethereum, Polygon and BNB Chain in gwei and USD, using Etherscan, PolygonScan and BscScan.",
   "icon": "gas_icon.png",
   "author": "Vonernue",
   "categories": [

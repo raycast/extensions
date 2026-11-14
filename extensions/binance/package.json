@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "binance",
   "title": "Binance Portfolio",
-  "description": "Track your Binance portfolio",
+  "description": "Check your Binance portfolio balances with the current USDT value of each cryptocurrency.",
   "icon": "binance-logo.png",
   "author": "grzegorzkrukowski",
   "license": "MIT",

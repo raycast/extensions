@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "podcasts-now",
   "title": "Podcasts Now",
-  "description": "Manage, explore, and listen to podcasts all in one place through Raycast.",
+  "description": "Subscribe to, browse and listen to podcasts, with playback controls in the Mac menu bar.",
   "icon": "command-icon.png",
   "author": "cloudy9101",
   "categories": [

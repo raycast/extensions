@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netnewswire",
   "title": "NetNewsWire",
-  "description": "NetNewsWire is a free and open source RSS reader for Mac, iPhone, and iPad",
+  "description": "Search feeds and articles in the NetNewsWire RSS reader on Mac, and mark articles as read or starred.",
   "icon": "nnw-6-icon-256.png",
   "author": "xmok",
   "platforms": [

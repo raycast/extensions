@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jump",
   "title": "Jump",
-  "description": "Jump to websites, folders, or files",
+  "description": "Jump to websites, folders, files or apps using short abbreviations that adapt to how often you visit them.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [

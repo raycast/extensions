@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coin-caster",
   "title": "Coin Caster",
-  "description": "Get the price for any crypto asset in Raycast",
+  "description": "Search crypto prices for any token, with market cap, volume, 24h change, price charts and a watchlist.",
   "icon": "coin-caster-logo.png",
   "author": "chase_manning",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monday-com",
   "title": "monday.com",
-  "description": "Quickly navigate to your latest monday.com boards and create items",
+  "description": "Open your recent monday.com boards, add items to a board, browse your team and open your account.",
   "icon": "command-icon.png",
   "author": "freak4pc",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slack-status",
   "title": "Slack Status",
-  "description": "Quickly change your Slack status",
+  "description": "Set your Slack status with presets or a custom emoji and text, clear it, and pause notifications, or set it with Raycast AI.",
   "icon": "slack-icon.png",
   "author": "petr",
   "contributors": [

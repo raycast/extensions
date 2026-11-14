@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fantasy-premier-league-rankings",
   "title": "Fantasy Premier League",
-  "description": "Your FPL team, gameweek history, fixtures, player stats, price changes and mini-leagues",
+  "description": "Check your Fantasy Premier League (FPL) team, live points, mini-league standings, fixtures, player stats and price changes.",
   "icon": "icon.png",
   "author": "hwb",
   "contributors": [

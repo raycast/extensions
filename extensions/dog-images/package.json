@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dog-images",
   "title": "Dog Images",
-  "description": "Get a random photo of a dog.",
+  "description": "Get a random dog photo, or pick a breed, using the Dog API.",
   "icon": "logo.png",
   "author": "BossElijah",
   "contributors": [

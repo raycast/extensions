@@ -1,7 +1,7 @@
 {
   "name": "bento",
   "title": "Bento Email",
-  "description": "Interact with Bento (bentonow.com) to add subscribers, view broadcasts, reports, and other utility features.",
+  "description": "Manage Bento email marketing: create subscribers, view broadcasts, tags, stats and report charts, validate emails and check blacklists.",
   "icon": "icon.png",
   "author": "zeromana",
   "categories": [

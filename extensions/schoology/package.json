@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "schoology",
   "title": "Schoology - Grade Viewer",
-  "description": "View your courselists, grades, graphs, and individual assignments quickly using Raycast.",
+  "description": "View your Schoology courses, grades and graded assignments, and get notified when a new grade is posted.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "pastContributors": [

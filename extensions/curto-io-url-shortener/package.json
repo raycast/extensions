@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "curto-io-url-shortener",
   "title": "curto.io URL Shortener",
-  "description": "Quickly shorten the current clipboard URL with curto.io",
+  "description": "Shorten the URL on your clipboard with curto.io and copy the short link.",
   "icon": "command-icon.png",
   "author": "birobirobiro",
   "license": "MIT",

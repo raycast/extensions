@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ngrok",
   "title": "Ngrok",
-  "description": "Serve Web Apps with one command\n\nngrok is a simplified API-first ingress-as-a-service that adds connectivity, security, and observability to your apps in one line",
+  "description": "Create and manage ngrok tunnels to put a localhost port on the internet, and view your active tunnels.",
   "icon": "command-icon.png",
   "author": "ubinatus",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defiscan",
   "title": "DefiScan.live",
-  "description": "Search on defiscan.live",
+  "description": "Search DefiScan.live for DeFiChain blocks, transactions, addresses and vaults.",
   "icon": "command-icon.png",
   "categories": [
     "Finance"

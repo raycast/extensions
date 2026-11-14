@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "folder-scope",
   "title": "Folder Scope",
-  "description": "Search the contents of files in your active Finder folder or any folder you select.",
+  "description": "Search text inside files in the active Finder folder or any folder you pick, using ripgrep, like grep or find in files.",
   "icon": "icon.png",
   "author": "omer_aydemir",
   "platforms": [

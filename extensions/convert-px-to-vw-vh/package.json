@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convert-px-to-vw-vh",
   "title": "Pixels to Viewport Width or Height",
-  "description": "Fast conversion of pixels to vw or vh depending on the size of your viewport.",
+  "description": "Convert pixels to vw or vh viewport units for your chosen viewport size, copy the result, and see past conversions in the menu bar.",
   "icon": "logo.png",
   "author": "Atiipik",
   "categories": [

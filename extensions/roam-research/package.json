@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roam-research",
   "title": "Roam Research",
-  "description": "Your Roam graphs at your fingertips! Quickly search, capture and navigate your Roam graphs.",
+  "description": "Search, capture and navigate your Roam Research graphs: quick capture with templates, random notes, and quicklinks to graphs and pages.",
   "icon": "icon.png",
   "author": "roamresearch",
   "contributors": [

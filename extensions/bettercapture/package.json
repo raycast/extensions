@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bettercapture",
-  "description": "Extension to manage BetterCapture",
+  "description": "Start or stop BetterCapture screen recordings and open the recordings folder in Finder.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

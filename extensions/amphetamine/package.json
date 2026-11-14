@@ -3,7 +3,7 @@
   "name": "amphetamine",
   "title": "Amphetamine",
   "version": "1.1.1",
-  "description": "Control Amphetamine sleep sessions from Raycast",
+  "description": "Start and end Amphetamine sessions to keep your Mac awake, set a duration or end time, and check remaining session time.",
   "icon": "icon.png",
   "author": "gstvds",
   "categories": [

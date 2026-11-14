@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "logos-launcher",
   "title": "Logos Launcher",
-  "description": "Opens books, verses or resources in Logos Bible Software",
+  "description": "Open Bible verses, search your library, run Bible searches, word studies and Exegetical Guides, and launch layouts and tools in Logos Bible Software.",
   "type": "module",
   "icon": "logos_resize.png",
   "author": "michael_marvive",

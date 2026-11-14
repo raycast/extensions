@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-diki",
   "title": "Diki Translate",
-  "description": "Diki Translate with autosuggestions",
+  "description": "Translate English and Polish words with the Diki.pl dictionary, with autosuggestions as you type.",
   "icon": "command-icon.png",
   "author": "blazej_kustra",
   "license": "MIT",

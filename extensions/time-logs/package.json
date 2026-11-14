@@ -3,7 +3,7 @@
   "name": "time-logs",
   "title": "Time Logs",
   "label": "Time Logs",
-  "description": "Track, manage, and export time logs on tasks and projects.",
+  "description": "Track time on tasks and projects with start and stop timers, a menu bar timer and Markdown export of your time logs.",
   "icon": "extension-icon.png",
   "author": "madebydamien",
   "categories": [

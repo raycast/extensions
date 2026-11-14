@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-search-by-usage",
   "title": "File Search by Usage",
-  "description": "Search local and cloud files in one place, ranked by usage.",
+  "description": "Search local and cloud files and folders on your Mac in one place, ranked by how often you open them, using an index built with fd.",
   "icon": "command-icon.png",
   "author": "raycast_file_search",
   "categories": [

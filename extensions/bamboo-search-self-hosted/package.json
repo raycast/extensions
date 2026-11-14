@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bamboo-self-hosted",
   "title": "Bamboo Search (Self Hosted)",
-  "description": "The extension allow you to quickly access projects, deploys and plans in Bamboo",
+  "description": "Search projects, build plans and deployments on a self-hosted Atlassian Bamboo server.",
   "icon": "bamboo-logo.png",
   "author": "axp-dev",
   "categories": [

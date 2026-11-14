@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "harpoon",
   "title": "Harpoon",
-  "description": "Tag frequently used applications and quickly switch between them. Inspired by The Primeagen's Harpoon plugin.",
+  "description": "Pin your most-used Mac apps to numbered positions and switch to them instantly with hotkeys, inspired by ThePrimeagen's Harpoon for Vim.",
   "icon": "harpoon-icon.png",
   "author": "brian_wang",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lodash",
   "title": "Lodash",
-  "description": "Search Lodash documentation",
+  "description": "Search the Lodash documentation for JavaScript utility functions.",
   "icon": "command-icon.png",
   "author": "vimtor",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readymetrics",
   "title": "Ready",
-  "description": "Lists upcoming and past check-ins in Ready",
+  "description": "List upcoming and past check-ins in Ready and open them in the app.",
   "icon": "readymetrics-icon.png",
   "access": "public",
   "author": "cfeigenbutz",

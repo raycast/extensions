@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spacetime-tracking",
   "title": "Spacetime Tracking",
-  "description": "Track how much time you spend in each macOS space, with inactivity detection and CSV export.",
+  "description": "Track how much time you spend in each macOS Space from the menu bar, name and switch Spaces, and export sessions to CSV.",
   "icon": "icon.png",
   "author": "olivier_bossel",
   "categories": [

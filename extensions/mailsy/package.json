@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailsy",
   "title": "Mailsy",
-  "description": "Quickly Generate Disposable Email Address and view received mails.",
+  "description": "Generate a disposable temporary email address and read the messages it receives, on Mac and Windows.",
   "icon": "send.png",
   "author": "BalliAsghar",
   "platforms": [

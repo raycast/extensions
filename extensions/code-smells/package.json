@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "code-smells",
   "title": "Code Smells Search",
-  "description": "Discover all code smells and how to solve them based on Code Smells Catalog created by Marcel J.",
+  "description": "Search the Code Smells Catalog to learn what each code smell is and how to refactor it.",
   "icon": "code_smell_icon.png",
   "author": "omorest",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "create-link",
   "title": "Create Link",
-  "description": "Copy browser-tab links in various formats or turn a clipboard URL into a rich title hyperlink for Slack.",
+  "description": "Copy the current browser tab link as Markdown, HTML, plain text or a custom format, or turn a clipboard URL into a titled Slack link.",
   "icon": "extension_icon.png",
   "author": "sinsky",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mbta-tracker",
   "title": "MBTA Tracker",
-  "description": "View departure times for saved stops along MBTA routes",
+  "description": "Check predicted MBTA departure times for Boston subway, bus and commuter rail stops, see service alerts, and save favorite stops.",
   "icon": "mbta-secondary-logo-circle.png",
   "author": "djpowers",
   "categories": [

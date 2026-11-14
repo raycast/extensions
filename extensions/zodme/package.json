@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zodme",
   "title": "Zodme",
-  "description": "Look up a zodiac sign from a birthday",
+  "description": "Find the zodiac sign for any birthday or date, with a short description of the sign's archetype.",
   "icon": "zodme-logo.png",
   "author": "camib0b",
   "platforms": [

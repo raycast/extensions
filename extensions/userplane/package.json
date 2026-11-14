@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "userplane",
   "title": "Userplane",
-  "description": "Create Userplane recording links, browse recordings and recording links, and open the Userplane dashboard — all from Raycast.",
+  "description": "Create Userplane screen recording links for customer support, browse recordings and links, and access Userplane from the menu bar.",
   "icon": "icon.png",
   "author": "wizenheimer",
   "version": "0.1.0",

@@ -3,7 +3,7 @@
   "name": "pick-your-wallpaper",
   "title": "Pick Your Wallpaper",
   "subtitle": "Wallpaper Management",
-  "description": "Lets you pick a wallpaper from a folder of finder.",
+  "description": "Change your Mac desktop wallpaper by picking an image from a folder, or let AI suggest and set a wallpaper based on mood or style.",
   "icon": "command-icon.png",
   "author": "hugomarfani",
   "contributors": [

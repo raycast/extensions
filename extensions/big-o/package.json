@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "big-o",
   "title": "Big-O",
-  "description": "A cheatsheet for Big-O notation",
+  "description": "View a Big-O notation cheat sheet of common time complexities, from O(1) to O(n!), and copy any of them.",
   "icon": "big-o-icon.png",
   "author": "shayneo",
   "categories": [

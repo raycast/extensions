@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonu-stream",
   "title": "Sonu",
-  "description": "Search sonu.stream for songs, artists, and vibes",
+  "description": "Deprecated: the sonu.stream API is no longer available, so this music search extension no longer works.",
   "icon": "raycast-sona-icon.png",
   "author": "bobringer",
   "categories": [

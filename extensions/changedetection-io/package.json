@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "changedetection-io",
   "title": "ChangeDetection.io",
-  "description": "Website Change Detection For Clever People",
+  "description": "Manage changedetection.io website change monitoring: list and create watches, preview changes, view diffs and history.",
   "icon": "changedetection.png",
   "author": "xmok",
   "contributors": [

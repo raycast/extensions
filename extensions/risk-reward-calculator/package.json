@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "risk-reward-calculator",
   "title": "Risk Reward Calculator",
-  "description": "This extension helps traders to calculate their position size based on entry, stop-loss, take-profit prices and the amount they risk.",
+  "description": "Calculate trading position size and risk/reward ratio from entry, stop-loss and take-profit prices and the amount you risk.",
   "icon": "command-icon.png",
   "author": "demirtarik",
   "categories": [

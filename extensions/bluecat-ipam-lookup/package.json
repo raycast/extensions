@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bluecat-ipam-lookup",
   "title": "BlueCat BAM Lookup",
-  "description": "Look up IP addresses, networks, and DNS records in BlueCat Address Manager",
+  "description": "Look up IP addresses, CIDR networks and DNS records in BlueCat Address Manager (BAM) and open the matching page in the web UI.",
   "icon": "bam-ip-lookup-icon-512.png",
   "author": "afly007",
   "platforms": [

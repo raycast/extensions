@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toggle-menu-bar",
   "title": "Toggle Menu Bar",
-  "description": "Switch between show/hide menu bar options",
+  "description": "Toggle auto-hide of the macOS menu bar between two modes, or pick one of the four menu bar visibility options.",
   "icon": "command-icon.png",
   "author": "iamyeizi",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yazio-tracker",
   "title": "Yazio Tracker",
-  "description": "View your daily goals and calories in Yazio, and log food directly from Raycast.",
+  "description": "View your daily calorie and macro goals and logged foods in Yazio, and log food to the Yazio calorie counter.",
   "icon": "yazio.png",
   "author": "zsombor_biro",
   "contributors": [

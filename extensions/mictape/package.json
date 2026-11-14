@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mictape",
   "title": "MicTape",
-  "description": "Record your microphone to .m4a files in folders you choose, with a menu bar timer",
+  "description": "Record your Mac microphone to .m4a files in folders you choose, with a menu bar timer, mic test and custom file naming, for lectures and meetings.",
   "icon": "icon.png",
   "author": "t4kamuna",
   "categories": [

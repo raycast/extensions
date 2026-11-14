@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "greip",
   "title": "Greip",
-  "description": "Use endpoint from greip.io directly from Raycast",
+  "description": "Look up your IP address and country details, and detect profanity in text, using the Greip API.",
   "icon": "greip.png",
   "author": "ghadeer",
   "contributors": [

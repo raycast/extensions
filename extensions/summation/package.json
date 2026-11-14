@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "summation",
   "title": "Summation - Sum Calculator",
-  "description": "Calculate the sum of a list of numbers in the selected text or clipboard.",
+  "description": "Sum a list of numbers from selected text or your clipboard, including decimal, binary, octal and hexadecimal numbers.",
   "icon": "summation-icon.png",
   "author": "monvelasquez",
   "categories": [

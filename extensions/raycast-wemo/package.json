@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-wemo",
   "title": "Wemo",
-  "description": "Control your Wemo devices from Raycast",
+  "description": "Find Wemo smart switches, light switches and dimmers on your network, toggle them on or off, and set dimmer brightness.",
   "icon": "command-icon.png",
   "author": "iamnatch",
   "typings": "./src/types.d.ts",

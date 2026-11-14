@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "espanso",
   "title": "Espanso",
-  "description": "The Raycast version of Espanso Search Bar",
+  "description": "Search and paste your Espanso text expansion matches, add new matches, and enable, disable or toggle Espanso on your Mac.",
   "type": "module",
   "icon": "espanso-logo.png",
   "author": "kud",

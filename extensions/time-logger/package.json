@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "time-logger",
   "title": "Google Calendar Epic Time Logger",
-  "description": "Helps you register your work to Google Calendar",
+  "description": "Log work on epics and activities as Google Calendar events with start and end times.",
   "icon": "command-icon.png",
   "author": "aramikuto",
   "license": "MIT",

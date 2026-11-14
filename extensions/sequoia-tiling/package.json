@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sequoia-tiling",
   "title": "Sequoia Window Tiling",
-  "description": "Map macOS Sequoia tiling commands to Raycast actions with friendly shortcuts.",
+  "description": "Tile windows with macOS Sequoia window tiling: halves, quarters, fill, center and two- or three-window layouts, each with its own hotkey.",
   "icon": "icon.png",
   "author": "yazanzaid00",
   "license": "MIT",

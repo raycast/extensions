@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "supernotes",
   "title": "Supernotes",
-  "description": "Interact with the Supernotes platform in Raycast.",
+  "description": "Create and search Supernotes cards, append to your daily card and send selected text or clipboard clippings to any card.",
   "icon": "supernotes-icon.png",
   "author": "connebs",
   "owner": "supernotes",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jsrepo",
   "title": "jsrepo",
-  "description": "Interact with jsrepo registries all without leaving Raycast.",
+  "description": "Search jsrepo registries, view their code blocks, and copy block code or the add command.",
   "icon": "jsrepo.png",
   "author": "ieedan",
   "categories": [

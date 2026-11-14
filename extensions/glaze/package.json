@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "glaze",
-  "description": "Browse Glaze projects and stores, launch installed apps, and prepare app ideas or changes with Raycast AI.",
+  "description": "Browse your Glaze projects, public and team app stores and installed apps, and draft new apps or changes with Raycast AI to send in Glaze.",
   "categories": [
     "Applications",
     "Productivity"

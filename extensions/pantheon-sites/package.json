@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pantheon-sites",
   "title": "Pantheon Sites",
-  "description": "List and manage Pantheon sites",
+  "description": "List your personal and organization Pantheon sites, view multidev environments, and run site Terminus commands via the Terminus CLI.",
   "icon": "command-icon.png",
   "author": "matbrady",
   "contributors": [

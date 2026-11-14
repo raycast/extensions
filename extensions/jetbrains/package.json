@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jetbrains",
   "title": "JetBrains Toolbox Recent Projects",
-  "description": "Search and open JetBrains Toolbox projects",
+  "description": "Search and open recent projects from JetBrains Toolbox in IntelliJ IDEA, WebStorm, PyCharm and other JetBrains IDEs, also from the menu bar.",
   "icon": "jb.png",
   "author": "gdsmith",
   "contributors": [

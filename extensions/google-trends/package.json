@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-trends",
   "title": "Google Trends",
-  "description": "Daily and real-time surge trends in Google trends",
+  "description": "See daily and real-time trending searches from Google Trends.",
   "icon": "Icon.png",
   "author": "Kang",
   "license": "MIT",

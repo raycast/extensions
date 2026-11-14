@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figa",
   "title": "Figa",
-  "description": "Track bills and expenses, check monthly forecasts, and mark confirmed bills paid from Raycast.",
+  "description": "Track bills and expenses in Figa: search and create expenses, review monthly totals and forecasts, and browse categories, recipients and tags.",
   "icon": "icon.png",
   "author": "figa",
   "platforms": [

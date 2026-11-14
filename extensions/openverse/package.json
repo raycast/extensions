@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "name": "openverse",
   "title": "Openverse",
-  "description": "Openverse is a search engine for openly-licensed media.",
+  "description": "Search openly licensed images on Openverse, view license and creator details, and copy, download or copy the attribution.",
   "icon": "openverse-icon.png",
   "author": "dhruvkb",
   "owner": "openverse",

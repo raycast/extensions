@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cc0-lib",
   "title": "CC0-LIB - Browse CC0 Content",
-  "description": "Browse library of CC0 content",
+  "description": "Browse random free CC0 images and content from the cc0-lib library and open them in your browser.",
   "icon": "cc0-lib-circle.png",
   "author": "0xN1",
   "categories": [

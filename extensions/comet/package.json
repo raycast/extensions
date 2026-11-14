@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "comet",
   "title": "Comet",
-  "description": "Search open tabs, bookmarks and history in Comet.",
+  "description": "Search open tabs, bookmarks and history in the Comet browser by Perplexity, and open new tabs, windows or incognito windows.",
   "icon": "comet-icon.png",
   "author": "xjo_nd",
   "contributors": [

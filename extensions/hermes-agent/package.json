@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hermes-agent",
   "title": "Hermes Agent",
-  "description": "Chat with your local Hermes AI assistant",
+  "description": "Chat with your local Hermes Agent AI assistant, ask about clipboard content, and summarize, translate or improve selected text.",
   "icon": "icon.png",
   "author": "dailin4321",
   "contributors": [

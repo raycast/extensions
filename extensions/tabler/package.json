@@ -3,7 +3,7 @@
   "name": "tabler",
   "title": "Tabler",
   "icon": "extension_icon.png",
-  "description": "Copy & Paste Tabler Icons",
+  "description": "Search Tabler Icons in outline or filled style, and copy or download the SVG, HTML character or icon name.",
   "author": "zavbala",
   "contributors": [
     "bensomething",

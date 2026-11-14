@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitter-trendscast",
   "title": "Show Trends From Twitter",
-  "description": "With these simple shortcuts, you can keep up with the latest trends from people you follow or any other trends on Twitter.",
+  "description": "Open Twitter (X) searches for top and popular tweets from people you follow, media from people you follow, and tweets from verified accounts.",
   "icon": "ext-icon.png",
   "author": "pradeepb28",
   "license": "MIT",

@@ -1,7 +1,7 @@
 {
   "name": "text-enhance",
   "title": "Text Enhance",
-  "description": "Enhance drafts with Raycast AI or your own API key, copy results, and refine with follow-up corrections.",
+  "description": "Rewrite and improve drafts with Raycast AI, OpenAI, Anthropic, Google Gemini or OpenRouter, adjust tone and purpose, and browse your history.",
   "version": "0.1.0",
   "author": "max13021302",
   "license": "MIT",

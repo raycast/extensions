@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postproxy",
   "title": "Postproxy",
-  "description": "Publish posts, manage comments, and answer DMs across your social profiles with Postproxy.",
+  "description": "Publish and schedule social media posts, reply to comments and direct messages, and check engagement across profiles with Postproxy.",
   "icon": "icon.png",
   "author": "dmitrysereda",
   "categories": ["Productivity", "Communication"],

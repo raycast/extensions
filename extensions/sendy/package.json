@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sendy",
   "title": "Sendy",
-  "description": "View Brands, Lists; Check Subscriber Status",
+  "description": "Browse your Sendy newsletter brands and their lists, and check a subscriber's status in a list.",
   "icon": "sendy.co.png",
   "author": "xmok",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vultr",
   "title": "Vultr",
-  "description": "Manage Users, View Account Information and Billing History",
+  "description": "View Vultr account info and bandwidth, billing history and invoices, and view, edit and add account users.",
   "icon": "vultr.png",
   "author": "xmok",
   "categories": [

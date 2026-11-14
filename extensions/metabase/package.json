@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "metabase",
   "title": "Metabase",
-  "description": "Search Metabase questions faster",
+  "description": "Search your Metabase saved questions, and use AI tools to list databases, run saved questions and run native SQL queries.",
   "icon": "extension.png",
   "author": "vimtor",
   "categories": [

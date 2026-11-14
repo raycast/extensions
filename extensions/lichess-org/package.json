@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lichess-org",
   "title": "Lichess.org",
-  "description": "Quickly start games on Lichess.org",
+  "description": "Start a new chess game on Lichess.org in your browser with one command.",
   "icon": "command-icon.png",
   "author": "ftonato",
   "categories": [

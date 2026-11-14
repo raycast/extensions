@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-reminder",
   "title": "Simple Reminder",
-  "description": "Set your reminders in natural language without the need to have any application installed.",
+  "description": "Set reminders in plain English, like \"remind me to call Jane at 6pm\", get notified on time, and see them in the Mac menu bar.",
   "icon": "logo.png",
   "author": "comoser",
   "contributors": [

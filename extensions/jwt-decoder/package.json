@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jwt-decoder",
   "title": "JWT Decoder",
-  "description": "Decode Your JSON Web Tokens - extract the header and data information from a JWT",
+  "description": "Decode a JWT (JSON Web Token) from your clipboard to view its header and payload, and edit, re-sign and verify tokens in a JWT debugger.",
   "icon": "icon.png",
   "author": "gdsmith",
   "contributors": [

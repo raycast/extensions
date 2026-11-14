@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memberstack",
   "title": "Memberstack",
-  "description": "List, Update or Delete Members",
+  "description": "List, update and delete members in your Memberstack account using the Memberstack API.",
   "icon": "memberstack.png",
   "author": "xmok",
   "categories": [

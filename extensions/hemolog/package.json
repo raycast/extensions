@@ -3,7 +3,7 @@
   "name": "hemolog",
   "title": "Hemolog",
   "version": "2.0.0",
-  "description": "View and log treatments with Hemolog.com",
+  "description": "View recent hemophilia treatments and log new ones to Hemolog.com.",
   "icon": "extension-icon.png",
   "author": "michaelschultz",
   "license": "MIT",

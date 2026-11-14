@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "end-of-life",
   "title": "End of Life",
-  "description": "An extension to bring endoflife.date into Raycast. Get End-of-life (EOL) and support information for various products",
+  "description": "Check end-of-life (EOL) dates and support lifecycles for software, languages, frameworks and products from endoflife.date.",
   "icon": "command-icon.png",
   "author": "csigritz",
   "contributors": [

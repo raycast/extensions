@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "regex-repl",
   "title": "RegEx REPL",
-  "description": "Quickly write and test Regular Expressions (RegEx)",
+  "description": "Write and test regular expressions (RegEx) against sample text with highlighted matches, and keep a history of your patterns.",
   "icon": "command-icon.png",
   "author": "hongkiulam",
   "contributors": [

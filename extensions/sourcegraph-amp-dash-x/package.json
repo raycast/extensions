@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcegraph-amp-dash-x",
   "title": "Amp",
-  "description": "Browse projects and threads, steer agents, start threads and saved prompts, talk to Puck, and open orb portals. Requires the Amp CLI and a signed-in Amp account.",
+  "description": "Browse Amp coding agent projects and threads, start threads and saved prompts, chat with Puck and see running agents in the menu bar.",
   "icon": "amp-icon.png",
   "author": "jdorfman",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "discogs",
   "title": "Discogs Database Search",
-  "description": "It will search discogs.com for a music release information specified by Label ID, Barcode, Artist or Album name",
+  "description": "Search the Discogs database for vinyl and other music releases by artist, album, catalog number or barcode, or look up the current Apple Music track.",
   "icon": "command-icon.png",
   "author": "vigosan",
   "contributors": ["FL0R1AN"],

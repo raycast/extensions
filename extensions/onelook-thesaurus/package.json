@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "onelook-thesaurus",
   "title": "OneLook Thesaurus",
-  "description": "A powerful English thesaurus and brainstorming tool that lets you describe what you're looking for in plain terms.",
+  "description": "Find synonyms, related words and words that match a description or pattern with the OneLook English thesaurus.",
   "icon": "command-icon.png",
   "author": "FelipeCortez",
   "categories": [

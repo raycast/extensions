@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "type-snob",
   "title": "Type Snob",
-  "description": "Copy correct typographic characters, like dashes, quote marks, and other special characters.",
+  "description": "Find and copy correct typographic characters like curly quotes, en and em dashes and math symbols, or their HTML entities.",
   "icon": "command-icon.png",
   "author": "sawyerh",
   "contributors": [

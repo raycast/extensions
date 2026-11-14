@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mite",
   "title": "Mite",
-  "description": "Interact with your mite account via Raycast",
+  "description": "Create mite time tracking entries for today, and set up fast entries for your usual project and service.",
   "icon": "mite.png",
   "author": "paolo_ricciuti",
   "contributors": [

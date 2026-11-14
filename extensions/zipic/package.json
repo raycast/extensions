@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zipic",
   "title": "Zipic",
-  "description": "Compress the selected images in Finder with Zipic.",
+  "description": "Compress, resize and convert images selected in Finder with the Zipic app, using its settings, custom options or presets.",
   "icon": "zipic-icon.png",
   "author": "okooo5km",
   "categories": [

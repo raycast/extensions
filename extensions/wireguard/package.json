@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wireguard",
   "title": "Wireguard",
-  "description": "Control Wireguard connections.",
+  "description": "Connect and disconnect WireGuard VPN tunnels on Mac, or disconnect all connections at once.",
   "icon": "wireguard.png",
   "author": "sbugzhu",
   "contributors": [

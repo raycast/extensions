@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminaldotshop",
   "title": "Terminal Shop",
-  "description": "The finest coffee for the finest people.",
+  "description": "Order coffee from Terminal Shop, including the Raycast Flow roast, and manage your cart, cards and shipping address.",
   "icon": "icon.png",
   "author": "thdxr",
   "access": "public",

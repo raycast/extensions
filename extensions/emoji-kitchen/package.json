@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emoji-kitchen",
   "title": "Emoji Mashups",
-  "description": "Discover and copy Google Emoji Kitchen mashups fast. Browse unique emoji combinations and use them as fun, expressive images in messages and posts. Copy/paste or save.",
+  "description": "Search Google Emoji Kitchen mashups, combine two emojis into a sticker image, and copy, paste or save it into Slack, iMessage or Discord.",
   "icon": "icon.png",
   "author": "corey_o_neal",
   "contributors": [

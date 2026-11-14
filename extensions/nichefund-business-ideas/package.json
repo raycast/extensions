@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nichefund-business-ideas",
   "title": "NicheFund Business Ideas",
-  "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
+  "description": "Browse NicheFund MicroSaaS idea teardowns, read the teardown of the day and discover random validated business ideas.",
   "icon": "extension_icon.png",
   "author": "backlooplabs",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "send-to-e-reader",
   "title": "Send to E-Reader",
-  "description": "Send ebooks to Kobo/Kindle devices through https://send.djazz.se/",
+  "description": "Send ebooks to your Kobo or Kindle e-reader through send.djazz.se.",
   "categories": [
     "Productivity"
   ],

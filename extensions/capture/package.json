@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "capture",
   "title": "Capture",
-  "description": "Quickly create records in Capture with Raycast.",
+  "description": "Create new records in your Capture (capture.so) inbox.",
   "icon": "command-icon.png",
   "author": "syhchen",
   "categories": [

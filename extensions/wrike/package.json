@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wrike",
   "title": "Wrike",
-  "description": "Interact with Wrike",
+  "description": "Search Wrike tasks by name, view task descriptions and copy or open task links.",
   "icon": "wrike_logo.png",
   "author": "Slus",
   "license": "MIT",

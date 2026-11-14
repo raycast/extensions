@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meteoblue-lookup",
   "title": "Meteoblue Lookup",
-  "description": "Check the weather via the Meteoblue API",
+  "description": "Check the weather forecast from Meteoblue: current conditions, hourly forecast for today, 5-day forecast and chance of rain.",
   "icon": "meteoblue-icon.png",
   "author": "fcarysnyder",
   "platforms": [

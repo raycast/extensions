@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "freesound",
   "title": "Freesound",
-  "description": "Search the Freesound Library",
+  "description": "Search sounds on Freesound, preview them and view details like duration, channels, bitrate and rating.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "categories": [

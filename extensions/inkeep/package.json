@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inkeep",
   "title": "Inkeep",
-  "description": "Interact with Inkeep Completions API to get AI-powered answers from your knowledge base.",
+  "description": "Ask questions and get AI answers from your Inkeep knowledge base using the Inkeep Completions API.",
   "icon": "icon.png",
   "author": "marcklingen",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "edgestore-raycast",
   "title": "EdgeStore",
-  "description": "Upload files and manage your EdgeStore account.",
+  "description": "Upload files to EdgeStore buckets and copy their URLs, and set up and manage your EdgeStore buckets.",
   "icon": "edgestore-logo.png",
   "author": "ravi_s",
   "platforms": [

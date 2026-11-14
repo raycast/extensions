@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "effect-docs",
 	"title": "Effect Docs",
-	"description": "Search Effect-TS documentation and API reference from Raycast",
+	"description": "Search Effect-TS guides and API reference documentation, and ask an AI assistant questions about Effect docs.",
 	"icon": "effect-icon.png",
 	"author": "rvaccone",
 	"platforms": [

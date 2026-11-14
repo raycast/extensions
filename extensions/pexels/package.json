@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pexels",
   "title": "Pexels",
-  "description": "Search photos, videos or collections on Pexels.",
+  "description": "Search Pexels for free stock photos, videos and collections, then download them or set photos as your wallpaper.",
   "icon": "pexels-icon.png",
   "author": "koinzhang",
   "categories": [

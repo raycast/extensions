@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "css-tricks",
   "title": "CSS Tricks",
-  "description": "Search on CSS Tricks",
+  "description": "Search CSS-Tricks articles and pages and open them in your browser.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "contributors": [

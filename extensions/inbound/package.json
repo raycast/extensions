@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inbound",
   "title": "Inbound",
-  "description": "Email API for Developers - Send, Receive & Reply",
+  "description": "Manage Inbound email API domains, addresses and endpoints, and send emails.",
   "icon": "icon.png",
   "author": "xmok",
   "platforms": [

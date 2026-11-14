@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "auth0-management",
   "title": "Auth0 Management",
-  "description": "Search and manage Auth0 users across multiple tenants",
+  "description": "Search Auth0 users and browse organizations, apps, APIs, database connections and logs across multiple tenants.",
   "icon": "auth0-512-transparent.png",
   "author": "ray_tan",
   "platforms": [

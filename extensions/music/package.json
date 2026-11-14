@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "music",
   "title": "Music",
-  "description": "Control the Apple Music app with your keyboard.",
+  "description": "Control Apple Music from your keyboard: play, pause, skip, search your library and the catalog, rate or add songs to playlists, with a menu bar player.",
   "icon": "icon.png",
   "author": "fedevitaledev",
   "contributors": [

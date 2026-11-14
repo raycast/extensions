@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepl-api-usage",
   "title": "DeepL API Usage",
-  "description": "Manage your DeepL API usage with ease.",
+  "description": "Check character usage for one or more DeepL API keys, and organize keys as in use or unused.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "contributors": [

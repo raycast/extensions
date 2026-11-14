@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "china-ip-address",
   "title": "China IP Address",
-  "description": "Get your China public network IP",
+  "description": "Look up your public IP address as seen from mainland China.",
   "icon": "command-icon.png",
   "author": "ErlichLiu",
   "categories": [

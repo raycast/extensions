@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "daisyui",
   "title": "daisyUI Colors & Components",
-  "description": "Access the daisyUI reference material from Raycast. All references are from the v5 beta!",
+  "description": "Browse daisyUI v5 colors and theme variations, and view component details and code snippets for Tailwind CSS projects.",
   "icon": "daisyui-icon.png",
   "author": "joeynotjoe_2",
   "categories": [

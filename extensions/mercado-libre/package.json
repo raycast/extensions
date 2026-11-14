@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mercado-libre",
   "title": "Mercado Libre",
-  "description": "Search Mercado Libre listings",
+  "description": "Search Mercado Libre listings in Latin American marketplaces.",
   "icon": "mercado-libre-logo.png",
   "author": "xilopaint",
   "categories": [

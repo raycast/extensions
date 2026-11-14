@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tasklink",
   "title": "Tasklink",
-  "description": "Converts issue tracker Ids into clickable links",
+  "description": "Turn Jira-style (ABC-123) and GitHub-style (#123) issue IDs in selected text into clickable HTML or Markdown links, or open them.",
   "icon": "command-icon.png",
   "author": "jrodalo",
   "categories": [

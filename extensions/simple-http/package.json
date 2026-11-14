@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-http",
   "title": "Simple Http",
-  "description": "A simplistic local Http server",
+  "description": "Start and stop a local HTTP server to serve a folder on your Mac, and check whether it is running.",
   "icon": "icon.png",
   "author": "roele",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fix-language",
   "title": "Fix Language",
-  "description": "Switch the language input source of the text when you type and forget to change the language.",
+  "description": "Fix text typed in the wrong keyboard layout by converting selected or clipboard text between Thai and English keyboard layouts.",
   "icon": "fix-language-icon.png",
   "author": "tin5451",
   "categories": [

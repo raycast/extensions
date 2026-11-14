@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wispr-flow",
   "title": "Wispr Flow",
-  "description": "Search transcription history, manage your custom dictionary, and control voice recording with Wispr Flow",
+  "description": "Search your Wispr Flow transcription history, manage your custom dictionary, toggle voice dictation and paste your last transcript.",
   "icon": "icon.png",
   "author": "carterm",
   "contributors": [

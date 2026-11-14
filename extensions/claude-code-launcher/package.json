@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-code-launcher",
   "title": "Claude Code Launcher",
-  "description": "Quickly open Claude Code in any directory with your preferred terminal.",
+  "description": "Open Claude Code in your saved project folders with your preferred terminal, and list, attach to, stop or delete Claude Code sessions.",
   "icon": "icon.png",
   "author": "stephendolan",
   "contributors": [

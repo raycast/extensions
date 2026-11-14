@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tokentrack",
-  "description": "Track Token Usage across AI editors - Codex, Claude Code, Cursor.",
+  "description": "Track token usage and spend for Claude Code, Codex and Cursor against your budgets, with a dashboard and menu bar view.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toggl-track",
   "title": "Toggl Track",
-  "description": "Start and stop time entries with Toggl Track",
+  "description": "Start and stop Toggl Track time entries, update recent entries, manage projects, clients and tags, and control timers from the menu bar.",
   "icon": "command-icon.png",
   "keywords": [
     "toggl",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "opsgenie",
   "title": "Opsgenie",
-  "description": "Manage Opsgenie alerts and incidents.",
+  "description": "View Opsgenie alerts and incidents, and acknowledge, snooze or close alerts.",
   "icon": "icon.png",
   "author": "ricoberger",
   "contributors": [

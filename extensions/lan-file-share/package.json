@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lan-file-share",
   "title": "LAN File Share",
-  "description": "Open a sharing session on your local network: hand out one link so anyone nearby can download and send files or drop you text, with nothing to install on their side.",
+  "description": "Share files and text over your local Wi-Fi network with one link or QR code; people nearby download and send files from a browser.",
   "icon": "icon.png",
   "author": "shaomai98",
   "license": "MIT",

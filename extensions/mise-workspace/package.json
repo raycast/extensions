@@ -3,7 +3,7 @@
   "name": "mise-workspace",
   "private": true,
   "title": "Mise Workspace",
-  "description": "Manage your Mise workspace from Raycast",
+  "description": "View and create tasks in Mise Workspace, see tasks grouped by assignee or assigned to you, and show them in the menu bar.",
   "icon": "mise.png",
   "author": "disinfeqt",
   "categories": [

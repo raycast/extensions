@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-graph",
   "title": "Open Graph",
-  "description": "Preview Open Graph meta tags of a website",
+  "description": "Preview the Open Graph and Twitter Card meta tags and social share image of any website URL.",
   "icon": "command-icon.png",
   "author": "1weiho",
   "contributors": [

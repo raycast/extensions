@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postiz",
   "title": "Postiz",
-  "description": "The All-in-One Social Media Management Tool",
+  "description": "Search your Postiz social media channels and scheduled posts, create draft posts and delete posts.",
   "icon": "postiz.png",
   "author": "xmok",
   "license": "MIT",

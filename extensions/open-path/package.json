@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-path",
   "title": "Open Path",
-  "description": "Open path and link from selection or clipboard in Finder, browsers, terminal, etc.",
+  "description": "Open file paths, URLs and email addresses from selected text or the clipboard in Finder, your browser, Terminal or another app.",
   "icon": "open-path.png",
   "author": "koinzhang",
   "categories": [

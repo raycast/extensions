@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monitor-mate",
   "title": "MonitorMate",
-  "description": "MonitorMate is a simple monitoring tool that helps you keep track of your resources uptime and downtime. It allows you to add resources to monitor and check their status. It also provides a dashboard to see the status of all your monitoring resources.",
+  "description": "Monitor website and server uptime: add URLs to watch, check their status, and see all resources on a dashboard.",
   "icon": "ikun.png",
   "author": "MuhaddiMu",
   "keywords": [

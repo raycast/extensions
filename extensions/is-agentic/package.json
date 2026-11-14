@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "is-agentic",
   "title": "Is Agentic",
-  "description": "Check how ready a website is for AI agents",
+  "description": "Check how ready a website is for AI agents with its Is Agentic score, failed checks and recommendations, and compare two sites.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

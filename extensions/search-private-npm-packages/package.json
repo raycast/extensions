@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-private-npm-packages",
   "title": "Private npm Packages Search",
-  "description": "Search private npm packages.",
+  "description": "Search private npm packages published under the user or organization accounts you track.",
   "icon": "npm-icon.png",
   "author": "HCJackyLee",
   "categories": [

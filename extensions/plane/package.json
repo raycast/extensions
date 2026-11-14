@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plane",
   "title": "Plane",
-  "description": "Explore work items in Plane and take actions on it",
+  "description": "Create, search, view and edit work items and search projects in Plane, the open-source project management tool.",
   "icon": "plane-icon.png",
   "author": "saurabhkmr98",
   "owner": "makeplane",

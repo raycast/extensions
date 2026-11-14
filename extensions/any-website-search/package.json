@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "any-website-search",
   "title": "Universal Website Search",
-  "description": "Search any site on the web",
+  "description": "Search any website from one place with Google search suggestions, and save your own list of sites to search.",
   "icon": "search-icon.png",
   "author": "pernielsentikaer",
   "contributors": [

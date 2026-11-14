@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "css-calculations",
   "title": "CSS Calculations",
-  "description": "Useful CSS Calculations in Web Development",
+  "description": "Generate responsive CSS clamp() values for fluid typography and spacing from px or rem values.",
   "icon": "css.png",
   "author": "teziovsky",
   "categories": [

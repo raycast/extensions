@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spokenly",
   "title": "Spokenly",
-  "description": "Control Spokenly speech-to-text: dictation, transcription history, file transcription, model selection, and quick commands",
+  "description": "Control Spokenly speech-to-text on your Mac: start dictation, search and paste transcripts, transcribe audio files, and switch transcription models.",
   "icon": "spokenly.png",
   "author": "mattiacolombomc",
   "contributors": [

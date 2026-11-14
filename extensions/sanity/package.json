@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sanity",
   "title": "Sanity",
-  "description": "Quickly search for Sanity projects you have access to",
+  "description": "Search the Sanity projects you have access to, using your Sanity CLI login.",
   "icon": "favicon-512.png",
   "author": "marcusforsberg",
   "contributors": [

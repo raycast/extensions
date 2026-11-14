@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "immich",
   "title": "Immich",
-  "description": "Self-hosted photo and video management solution",
+  "description": "Search and browse photos and videos in your self-hosted Immich library, download assets and manage API keys.",
   "icon": "immich_new.png",
   "author": "xmok",
   "contributors": [

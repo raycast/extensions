@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coinpaprika",
   "title": "Coinpaprika",
-  "description": "Cryptocurrency Prices & Statistics",
+  "description": "Check prices and statistics for the top 1,500 cryptocurrencies on Coinpaprika, and save favorite coins.",
   "icon": "cp_logo.png",
   "author": "gumbleliks",
   "categories": [

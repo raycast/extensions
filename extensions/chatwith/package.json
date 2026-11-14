@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatwith",
   "title": "Chatwith",
-  "description": "AI chatbot trained on your data and with access to automations.",
+  "description": "Ask questions to your Chatwith AI chatbot, trained on your website or docs and connected to automations, and get answers.",
   "icon": "command-icon.png",
   "author": "rafal_zawadzki",
   "categories": [

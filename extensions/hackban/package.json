@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hackban",
   "title": "Hackban",
-  "description": "See what's due, search your boards, and capture cards in Hackban, Hack Club's Trello, across every server you use.",
+  "description": "See due cards, search boards, browse lists and create cards in Hackban, Hack Club's self-hosted Trello, across multiple servers.",
   "icon": "icon.png",
   "author": "leowilkin",
   "categories": [

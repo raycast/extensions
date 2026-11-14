@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "archisteamfarm",
   "title": "ArchiSteamFarm",
-  "description": "Interact with your locally hosted ASF instance via Raycast!",
+  "description": "Manage bots on your local ArchiSteamFarm (ASF) instance and copy Steam 2FA codes from your ASF bots.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

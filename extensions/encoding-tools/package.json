@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "encoding-tools",
   "title": "Encoding Tools",
-  "description": "A toolbox for encoding, decoding, and hashing data in the clipboard.",
+  "description": "Hash clipboard text or files with MD5, SHA1, SHA256, SHA512 or bcrypt, and encode or decode Base64.",
   "icon": "command-icon.png",
   "author": "eth-p",
   "categories": [

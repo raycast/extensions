@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "neovim",
   "title": "Neovim",
-  "description": "Manage Neovim sessions, plugins, and keymaps from Raycast",
+  "description": "Open recent Neovim sessions, open Finder items in Neovim, list installed plugins and search keymaps from your running config.",
   "icon": "icon.png",
   "author": "RG-IL",
   "license": "MIT",

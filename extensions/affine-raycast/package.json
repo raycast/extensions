@@ -2,7 +2,7 @@
   "name": "affine",
   "title": "Affine",
   "type": "module",
-  "description": "Search and open AFFiNE workspaces and documents from Raycast. Uses AFFiNE GraphQL API.",
+  "description": "Search and open AFFiNE workspaces and documents, create new docs, and set up the AFFiNE MCP server for AI access.",
   "icon": "icon.png",
   "author": "yassine_souilmi",
   "license": "MIT",

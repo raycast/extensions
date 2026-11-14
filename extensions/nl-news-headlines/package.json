@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nl-news-headlines",
   "title": "NL News Headlines",
-  "description": "Provides news headlines about the Netherlands from websites reporting in Dutch or English",
+  "description": "Read news headlines about the Netherlands from Dutch and English sources like NL Times, DutchNews and NOS, and open articles.",
   "icon": "nl-news.png",
   "author": "ernest",
   "categories": [

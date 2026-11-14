@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macrumors",
   "title": "MacRumors",
-  "description": "Browse MacRumors headlines from the comfort of Raycast.",
+  "description": "Read the latest MacRumors headlines and Apple news, and open articles in your browser.",
   "icon": "macrumors-extension-icon.png",
   "author": "hughmcmillanv",
   "contributors": [

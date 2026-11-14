@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "matter",
   "title": "Matter",
-  "description": "View your saved for later articles in your Matter account.",
+  "description": "View your saved articles in Matter with word counts and reading time, favorite them, and bookmark URLs from the clipboard.",
   "icon": "logo.png",
   "author": "zan",
   "contributors": [

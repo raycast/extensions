@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "itch-io",
   "title": "itch.io",
-  "description": "Raycast Extension for itch.io, browse through milions of games made by indie developers!",
+  "description": "Search and browse popular indie games on itch.io by category, and view data on games you have uploaded.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

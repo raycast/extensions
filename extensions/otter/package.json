@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "otter",
   "title": "Otter Bookmarks",
-  "description": "Companion bookmarking utility for Otter bookmarks",
+  "description": "Search and add bookmarks in Otter, the self-hosted bookmark manager, and view recent bookmarks and top tags in the menu bar.",
   "subtitle": "Otter",
   "icon": "command-icon.png",
   "author": "mrmartineau",

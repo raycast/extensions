@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "libraries-io",
   "title": "Libraries.io",
-  "description": "Look up packages and dependency information via Libraries.io",
+  "description": "Search packages across npm, PyPI, Maven, RubyGems, Cargo and other package managers on Libraries.io, with versions, dependencies and subscriptions.",
   "icon": "libraries-io-icon.png",
   "author": "djpowers",
   "categories": [

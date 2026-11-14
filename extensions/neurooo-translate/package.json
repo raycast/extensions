@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "neurooo-translate",
   "title": "Neurooo Translate",
-  "description": "Smart translations with Neurooo.",
+  "description": "Translate text into other languages with Neurooo AI translation, choosing the target language and tone.",
   "icon": "command-icon.png",
   "author": "depsimon",
   "categories": [

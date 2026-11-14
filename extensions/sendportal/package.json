@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sendportal",
   "title": "SendPortal",
-  "description": "Open Source Email Marketing Software",
+  "description": "Manage SendPortal email marketing subscribers and email templates.",
   "icon": "sendportal.png",
   "author": "xmok",
   "platforms": [

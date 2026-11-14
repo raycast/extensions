@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-ansible-documentation",
   "title": "Search Ansible Documentation",
-  "description": "Search Ansible Offical Documentation",
+  "description": "Search the official Ansible documentation, then open pages in your browser or copy their URLs.",
   "icon": "command-icon.png",
   "author": "Kcih4518",
   "categories": [

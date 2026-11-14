@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lyne",
   "title": "Lyne",
-  "description": "Lyne empowers designers and developers to achieve pixel perfection. Create and organize on-screen Guides for precise design and coding.",
+  "description": "Create on-screen horizontal and vertical guide lines and rectangles in the Lyne app for pixel-perfect design and coding.",
   "icon": "app-icon.png",
   "author": "ruiaureliano",
   "categories": [

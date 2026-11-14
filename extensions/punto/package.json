@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "punto",
   "title": "Punto Switcher",
-  "description": "Changes the layout of selected text. Requires Accessibility access",
+  "description": "Fix text typed in the wrong keyboard layout by converting selected text between English and Russian or Ukrainian, like Punto Switcher.",
   "icon": "punto-icon.png",
   "author": "red.avtovo",
   "contributors": [

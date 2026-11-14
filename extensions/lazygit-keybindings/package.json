@@ -1,7 +1,7 @@
 {
   "name": "lazygit-keybindings",
   "title": "Lazygit Keybindings",
-  "description": "Search Lazygit keybindings by action or shortcut.",
+  "description": "Search Lazygit keybindings by action or shortcut, in any supported language, and copy them.",
   "icon": "icon.png",
   "author": "noamefergan",
   "keywords": [

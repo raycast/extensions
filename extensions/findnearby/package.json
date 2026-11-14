@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "findnearby",
   "title": "Google Maps Explorer",
-  "description": "Explore new places near you",
+  "description": "Find nearby places such as cafes and restaurants on Google Maps.",
   "icon": "command-icon.png",
   "author": "lichinlin",
   "contributors": [

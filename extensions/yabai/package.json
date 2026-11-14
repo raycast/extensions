@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yabai",
   "title": "Yabai",
-  "description": "Control Yabai using Raycast. Requires yabai to be installed.",
+  "description": "Control the yabai tiling window manager: focus, swap and warp windows, change layouts, manage spaces and search windows on your Mac.",
   "icon": "yabai-icon-512px.png",
   "author": "krzysztoff1",
   "contributors": [

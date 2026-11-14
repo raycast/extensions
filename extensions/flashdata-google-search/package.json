@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flashdata-google-search",
   "title": "FlashData Google Search",
-  "description": "Search Google and copy structured results for research and AI agent workflows using your own FlashData API key.",
+  "description": "Search Google with your FlashData API key and copy the results, URLs and snippets as JSON or Markdown for research and AI agents.",
   "icon": "icon.png",
   "author": "flashdatadev",
   "platforms": ["macOS"],

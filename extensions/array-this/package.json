@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "array-this",
   "title": "Array This",
-  "description": "Format list of items into an array.",
+  "description": "Turn a list of values separated by line breaks, commas, semicolons or spaces into an array with single or double quotes.",
   "icon": "command-icon.png",
   "author": "matheus_de_paula_domingos",
   "categories": [

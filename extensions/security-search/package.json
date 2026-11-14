@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "security-search",
   "title": "Security Search",
-  "description": "Searches for securities via name to get the ISIN or via ISIN to get the name",
+  "description": "Look up securities by name to get their ISIN, or by ISIN to get the name, using Tradegate search.",
   "categories": [
     "Finance",
     "Data"

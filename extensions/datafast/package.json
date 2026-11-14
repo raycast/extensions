@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "datafast",
   "title": "Datafast",
-  "description": "View your Datafast web analytics — visitors, revenue, pages, referrers, campaigns, and real-time data",
+  "description": "View your Datafast web analytics: visitors, revenue, top pages, referrers, campaigns, countries and real-time visitors in the menu bar.",
   "icon": "icon.png",
   "author": "joshmillgate",
   "categories": ["Data", "Web", "Productivity"],

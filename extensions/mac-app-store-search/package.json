@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mac-app-store-search",
   "title": "Mac App Store Search",
-  "description": "Search for apps in the Mac App Store from Raycast!",
+  "description": "Search apps in the Mac App Store and open them in the App Store app.",
   "icon": "icon.png",
   "author": "say4n",
   "contributors": [

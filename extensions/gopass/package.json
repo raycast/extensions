@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gopass",
   "title": "Gopass",
-  "description": "Search and copy passwords from gopass password manager",
+  "description": "Search and copy passwords from the gopass password manager, and create or edit entries.",
   "categories": [
     "Productivity",
     "Security"

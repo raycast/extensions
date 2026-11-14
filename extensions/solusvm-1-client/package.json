@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "solusvm-1-client",
   "title": "SolusVM 1 Client",
-  "description": "Fetch Information and Manage SolusVM 1 Virtual Server",
+  "description": "Check the status and details of your SolusVM 1 virtual server (VPS), and boot, reboot or shut it down.",
   "icon": "solusvm-1-client.png",
   "author": "xmok",
   "categories": [

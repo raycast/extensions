@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension",
   "name": "web-blocker",
   "title": "Web Blocker",
-  "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed.",
+  "description": "Block distracting websites on your Mac in every browser, including tabs already open, with schedules, categories and system-level blocking.",
   "icon": "icon.png",
   "author": "ahmad_bulbul",
   "access": "public",

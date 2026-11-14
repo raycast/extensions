@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-tree-generator",
   "title": "File Tree Generator",
-  "description": "Generates file tree from text",
+  "description": "Generate an ASCII file tree diagram from indented text, like tree.nathanfriend.io.",
   "icon": "command-icon.png",
   "author": "csharp",
   "categories": [

@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "shutdown-timer",
     "title": "Shutdown Timer",
-    "description": "Schedule shutdowns and restarts on a timer",
+    "description": "Schedule a Mac shutdown, restart or sleep on a timer, check the remaining time and cancel it.",
     "icon": "power-icon.png",
     "author": "whosmadeer",
     "license": "MIT",

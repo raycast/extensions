@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgo",
   "title": "ChatGo",
-  "description": "A chatGPT AI Tool",
+  "description": "Chat with ChatGPT through ChatGo: ask questions, keep conversations and history, generate AI images and use prompt templates. Requires a ChatGo account.",
   "icon": "command-icon.png",
   "author": "DDDDesign",
   "categories": [

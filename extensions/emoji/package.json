@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emoji",
   "title": "Emoji Search",
-  "description": "Finds emojis and inserts or copies them.",
+  "description": "Search emojis by name or keyword, then copy or paste them anywhere.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "contributors": [

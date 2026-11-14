@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "video-call-reactions",
   "title": "Video Call Reactions",
-  "description": "This extension triggers video call reactions such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers on macOS.",
+  "description": "Trigger macOS video call reactions like hearts, thumbs up, balloons, rain, confetti, fireworks and lasers on your Mac.",
   "icon": "video-call-reactions-icon.png",
   "author": "yazanzaid00",
   "categories": [

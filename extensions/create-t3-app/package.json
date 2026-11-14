@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "create-t3-app",
   "title": "Create T3 App",
-  "description": "Creates a Next.js app using create-t3-app",
+  "description": "Create a new Next.js app with create-t3-app, choosing NextAuth, Prisma, Tailwind and tRPC options.",
   "icon": "command-icon.png",
   "author": "mozzius",
   "categories": [

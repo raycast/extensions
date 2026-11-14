@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unogs",
   "title": "Unogs",
-  "description": "A Raycast extension for Unogs",
+  "description": "Search Netflix titles in the uNoGS database and see which countries they're available in, with audio and subtitle languages.",
   "icon": "command-icon.png",
   "author": "mohitkyadav",
   "version": "1.0.0",

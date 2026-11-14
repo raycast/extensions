@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "new-relic",
   "title": "New Relic",
-  "description": "Search Applications, Dashboard, Alerts, and more in New Relic",
+  "description": "Search New Relic entities like APM applications, dashboards and alerts, and open them in New Relic.",
   "icon": "newrelic-icon.png",
   "author": "cirne",
   "categories": [

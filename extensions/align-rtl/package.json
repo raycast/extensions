@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "align-rtl",
   "title": "Align RTL",
-  "description": "Paste selected text as right-aligned rich RTL content in editors that need paragraph-level RTL alignment.",
+  "description": "Paste Hebrew or Arabic text as right-aligned RTL rich text in Mail, Notion, Slack and other editors that keep paragraphs left-aligned.",
   "icon": "align-rtl-icon.png",
   "author": "jberrebi",
   "categories": [

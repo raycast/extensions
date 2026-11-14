@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emissions-calculator",
   "title": "Emissions Calculator",
-  "description": "Calculate the carbon emissions for the given distance and mode of transport.",
+  "description": "Calculate the CO2 emissions of a trip by car, bus, train or plane for a given distance.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [

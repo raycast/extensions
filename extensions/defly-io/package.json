@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defly-io",
   "title": "Defly.io",
-  "description": "Get defly.io teams and defuse info",
+  "description": "See who is playing defly.io right now in teams and defuse game modes, pick a server, and search for players by name.",
   "icon": "command-icon.png",
   "author": "isra",
   "categories": [

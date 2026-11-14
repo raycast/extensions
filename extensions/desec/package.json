@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "desec",
   "title": "deSEC",
-  "description": "Modern DNS Hosting for Everyone",
+  "description": "Manage your deSEC DNS hosting: create and delete domains and DNS records (RRsets), and copy zone files.",
   "icon": "desec.png",
   "author": "xmok",
   "platforms": [

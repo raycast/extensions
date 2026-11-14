@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hide-all-apps",
   "title": "Hide All Apps",
-  "description": "This extension hides all Applications—including Finder—leaving you with only the Desktop.",
+  "description": "Hide all open apps on your Mac, including Finder, to show a clean desktop.",
   "icon": "hide-icon.png",
   "author": "peduarte",
   "contributors": [

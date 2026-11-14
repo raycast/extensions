@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "olympic-games",
   "title": "Olympic Games",
-  "description": "Paris 2024 Olympic Medal Table",
+  "description": "View the Paris 2024 Olympic Games medal table by country.",
   "icon": "olympic.png",
   "author": "elonwoo",
   "contributors": [

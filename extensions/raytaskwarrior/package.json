@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raytaskwarrior",
   "title": "Taskwarrior",
-  "description": "Taskwarrior integration to Raycast",
+  "description": "List active Taskwarrior tasks, view and modify them, and add new tasks with command-line syntax or a full form.",
   "icon": "icon.png",
   "author": "yosy2010",
   "contributors": [

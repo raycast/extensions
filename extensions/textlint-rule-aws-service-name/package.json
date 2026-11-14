@@ -3,7 +3,7 @@
   "name": "raycast-textlint-rule-aws-service-name",
   "include": "src/.textlintrc.yaml",
   "title": "Textlint AWS Service Name",
-  "description": "Check AWS services name typo",
+  "description": "Find and fix typos in AWS service names in your text, such as AWS EC2 to Amazon EC2, using a textlint rule.",
   "icon": "command-icon.png",
   "author": "bun913",
   "categories": [

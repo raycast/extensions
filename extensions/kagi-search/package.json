@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kagi-search",
   "title": "Kagi Search",
-  "description": "Searches the Closed Beta of Kagi Search, with autosuggestions and quick access to FastGPT",
+  "description": "Search the web with Kagi, with search suggestions and quick answers from Kagi FastGPT.",
   "icon": "command-icon.png",
   "author": "fearoffish",
   "contributors": [

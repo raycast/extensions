@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "premier-league",
   "title": "Premier League",
-  "description": "Get instant access to Premier League data right from your Raycast menu. Easily search for teams, players, fixtures, results, standings and awards.",
+  "description": "Check Premier League tables, fixtures, live matches and results, and browse clubs, player stats and awards, including past seasons.",
   "icon": "icon.png",
   "author": "anhthang",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "discord",
   "title": "Discord",
-  "description": "Send message to a specific discord channel using webhook.",
+  "description": "Send messages to Discord channels through webhooks, and save the webhooks you use most.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [

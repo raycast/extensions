@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unix-timestamp",
   "title": "Unix Timestamp",
-  "description": "Convert between unix timestamp and human readable form date",
+  "description": "Convert Unix timestamps to human-readable dates and dates to Unix timestamps, or copy the current timestamp.",
   "icon": "command-icon.png",
   "author": "destiner",
   "contributors": [

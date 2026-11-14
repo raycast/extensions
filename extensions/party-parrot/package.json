@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "party-parrot",
   "title": "Party Parrot",
-  "description": "Celebrating the good times with some dancing party parrot in Raycast.",
+  "description": "Show a dancing ASCII art party parrot to celebrate the good times.",
   "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",

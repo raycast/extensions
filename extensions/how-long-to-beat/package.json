@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "howlongtobeat",
   "title": "HowLongToBeat",
-  "description": "Discover how many hours you need to beat a game.",
+  "description": "Search games on HowLongToBeat and see how many hours it takes to beat the main story, extras or 100% completion.",
   "icon": "icon.png",
   "author": "Cronos87",
   "contributors": [

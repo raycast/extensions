@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailwip",
   "title": "Mailwip",
-  "description": "Delete Domains, Manage Aliases, and View MailLog",
+  "description": "Manage your Mailwip email forwarding account: add or delete domains, create and delete aliases and view your mail log.",
   "icon": "mailwip.png",
   "author": "xmok",
   "categories": [

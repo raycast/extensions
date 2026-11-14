@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "done-bear",
   "private": true,
-  "description": "A local-first GTD task manager for Raycast: capture, search, and complete tasks, plan your Today list, and manage projects — synced with the Done Bear web, desktop, iOS, and CLI apps.",
+  "description": "Capture, search and complete tasks in Done Bear, a GTD to-do app: plan Today, browse Inbox and Upcoming, manage projects, and see Today in the menu bar.",
   "categories": [
     "Productivity"
   ],

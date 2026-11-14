@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visigrid",
   "title": "VisiGrid",
-  "description": "Spreadsheet powers from your launcher: evaluate Excel formulas against clipboard data, peek inside xlsx/csv/sheet files, and open workbooks — via the VisiGrid CLI.",
+  "description": "Run Excel formulas against CSV data on your clipboard, preview xlsx and csv spreadsheets as a grid, and open workbooks with the VisiGrid CLI.",
   "icon": "icon.png",
   "author": "visigrid",
   "platforms": [

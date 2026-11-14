@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wu-editor",
   "title": "Wu",
-  "description": "Open recent projects, files, and settings in Wu.",
+  "description": "Open recent projects, Finder selections, settings and keymap in the Wu code editor, and list installed Wu extensions.",
   "icon": "icon.png",
   "author": "farshed",
   "categories": [

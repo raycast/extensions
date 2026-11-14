@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "elixir",
   "title": "Elixir",
-  "description": "Navigate Elixir's documentation without leaving Raycast.",
+  "description": "Search Elixir standard library documentation by module or function and read the docs offline.",
   "icon": "icon.png",
   "author": "dinocosta",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "horoscope",
   "title": "Horoscope",
-  "description": "Get Daily, Weekly or Monthly Horoscope by Sign",
+  "description": "Read your daily, weekly or monthly horoscope for any zodiac sign.",
   "icon": "horoscope.png",
   "author": "xmok",
   "categories": [

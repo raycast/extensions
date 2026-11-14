@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "change-case",
   "title": "Change Case",
-  "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
+  "description": "Convert text between camelCase, snake_case, kebab-case, CONSTANT_CASE, PascalCase, Title Case and more, from selected text or clipboard.",
   "icon": "command-icon.png",
   "author": "erics118",
   "categories": [

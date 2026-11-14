@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "airsy",
   "title": "Airsy",
-  "description": "Check air pollution in Poland",
+  "description": "Check air quality and pollution indexes for monitoring stations across Poland, by city or for all stations, using GIOS data.",
   "icon": "logo.png",
   "author": "piotrzaborow",
   "version": "0.1.1",

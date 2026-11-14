@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sunsama",
-  "description": "Create, Edit, View, and Delete Tasks in Sunsama",
+  "description": "Create, view, edit and delete Sunsama tasks and subtasks, set a default channel, and manage tasks and timers with AI.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

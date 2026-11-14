@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
   "title": "YouTube",
-  "description": "Search Videos, Channels, and more",
+  "description": "Search YouTube videos, channels and live streams, browse popular videos, and open them in your browser or IINA.",
   "icon": "youtube.png",
   "author": "tonka3000",
   "contributors": [

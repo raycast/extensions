@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-radios",
   "title": "Quick Radios",
-  "description": "Manage Windows Wi-Fi from Raycast: scan, connect, share via QR, and inspect connection details.",
+  "description": "Manage Wi-Fi on Windows: scan and connect to networks, toggle Wi-Fi, share networks via QR code and see connection details.",
   "icon": "icon.png",
   "keywords": [
     "wifi",

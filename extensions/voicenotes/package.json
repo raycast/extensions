@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "voicenotes",
   "title": "Voicenotes",
-  "description": "Search and manage your Voicenotes directly from Raycast.",
+  "description": "Search your Voicenotes.com recordings by title, content or tag, read transcripts, and copy them or open notes in the browser.",
   "icon": "command-icon.png",
   "author": "parzival",
   "categories": [

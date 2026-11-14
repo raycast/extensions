@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cocktail-db",
   "title": "Cocktail DB",
-  "description": "Search Drinks by Name or Ingredient via TheCocktailDB",
+  "description": "Search cocktail recipes by name or ingredient on TheCocktailDB and view ingredients and instructions.",
   "icon": "cocktail-db.png",
   "author": "xmok",
   "categories": [

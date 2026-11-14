@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finary",
   "title": "Finary",
-  "description": "Fastest way to explore your Finary Portfolio & Investments.",
+  "description": "Open your Finary net worth dashboard, portfolio, insights, account settings or the add asset page in your browser.",
   "icon": "icon.png",
   "author": "jetaix",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-us-phone-number",
   "title": "Random US Phone Number",
-  "description": "Generate a random US phone number.",
+  "description": "Generate a random US phone number and copy or paste it into the frontmost app.",
   "icon": "command-icon.png",
   "author": "yug2005",
   "categories": [

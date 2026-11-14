@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "http-status-codes",
   "title": "HTTP Status Codes",
-  "description": "Quickly look up HTTP status codes",
+  "description": "Look up HTTP status codes by code or description, read the docs, and see cat or dog images for each code.",
   "icon": "command-icon.png",
   "author": "Alex_",
   "platforms": [

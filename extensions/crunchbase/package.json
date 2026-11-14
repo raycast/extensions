@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crunchbase",
   "title": "Crunchbase",
-  "description": "Search on Crunchbase companies",
+  "description": "Search Crunchbase companies by name using a Meilisearch-powered index.",
   "icon": "command-icon.png",
   "author": "qdequele",
   "categories": [

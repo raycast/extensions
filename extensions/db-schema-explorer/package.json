@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "db-schema-explorer",
   "title": "DB Schema Explorer",
-  "description": "Get database schema (tables, columns, relations) from PostgreSQL and MongoDB for AI reference and context",
+  "description": "Sync PostgreSQL and MongoDB database schemas (tables, columns, relations), search tables and copy their DDL to give AI assistants context.",
   "icon": "extension_icon.png",
   "author": "scisaif",
   "platforms": [

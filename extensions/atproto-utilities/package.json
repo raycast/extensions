@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "atproto-utilities",
   "title": "AT Protocol Utilities",
-  "description": "Utility commands for atproto development.",
+  "description": "Look up AT Protocol (atproto) lexicon definitions and resolve Bluesky handles to DIDs or DIDs to handles.",
   "icon": "magnisky.png",
   "author": "ftrstk",
   "categories": [

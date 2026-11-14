@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "signal",
   "title": "Signal",
-  "description": "Open Signal chats",
+  "description": "Save Signal chats and open them quickly in the Signal desktop app.",
   "icon": "signal.png",
   "author": "leeraymond78",
   "license": "MIT",

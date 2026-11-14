@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "phind-search",
   "title": "Phind Search",
-  "description": "Search anything with Phind",
+  "description": "Search Phind, the AI search engine for developers, with autosuggestions, added context and search history.",
   "icon": "command-icon.png",
   "author": "Chuck",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kaneo-for-raycast",
   "title": "Kaneo",
-  "description": "Quickly check and manage your Kaneo projects",
+  "description": "Browse your Kaneo projects and assigned tasks, create tasks and check notifications.",
   "icon": "kaneo.png",
   "author": "Baldy",
   "contributors": [

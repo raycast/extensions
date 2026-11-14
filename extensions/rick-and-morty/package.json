@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rick-and-morty",
   "title": "Rick and Morty",
-  "description": "Access characters, images, locations and episodes from the television show \"Rick and Morty\"",
+  "description": "Search Rick and Morty characters, locations and episodes with images and details from the Rick and Morty API.",
   "icon": "icon.png",
   "author": "xmok",
   "categories": [

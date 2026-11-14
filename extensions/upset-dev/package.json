@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "upset-dev",
   "title": "Upset.dev",
-  "description": "A collection of utilities from upset.dev that you can interact inside Raycast!",
+  "description": "Get website favicons with Favicone and generate random SVG blob shapes from BlobCDN, then copy them, from upset.dev.",
   "icon": "upsetdotdev.png",
   "author": "sereinne",
   "platforms": [

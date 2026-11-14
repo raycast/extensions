@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jisho",
   "title": "Jisho - Japanese Dictionary",
-  "description": "Search Jisho.org",
+  "description": "Translate Japanese words with the Jisho.org dictionary, copy readings, and view your search history.",
   "icon": "jisho-icon.png",
   "author": "dmacdermott",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonarr",
   "title": "Sonarr",
-  "description": "Manage your Sonarr library, search for series, monitor downloads, and view upcoming shows.",
+  "description": "Manage your Sonarr TV library: search and add series, view upcoming episodes, the download queue, history and missing episodes.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

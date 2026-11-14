@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meeting-room-check",
   "title": "Meeting Room Check",
-  "description": "See which meeting rooms are free right now and block one instantly.",
+  "description": "See which meeting rooms are free right now from Google Calendar, grouped by floor, and book one for 15, 30 or 60 minutes.",
   "icon": "icon.png",
   "author": "Ticsi",
   "categories": [

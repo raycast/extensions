@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "perchance-generator",
   "title": "Perchance Generator",
-  "description": "Input the generator name and receive the generated text.",
+  "description": "Generate random text from any text-based Perchance generator by entering its name from the perchance.org URL.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uptime",
   "title": "Uptime",
-  "description": "Show how long ago your mac was turned on",
+  "description": "Show how long your Mac has been running since it was last turned on or restarted.",
   "icon": "command-icon.png",
   "author": "iaroslav_naiden",
   "categories": [

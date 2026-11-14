@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vaib",
   "title": "vAIb - Your AI Companion",
-  "description": "Get quick answers to your quick questions with the power of AI with this free extension.",
+  "description": "Ask quick questions to GPT-3.5 for free, or ask about your clipboard content, with no API key.",
   "icon": "command-icon.png",
   "author": "Vaib215",
   "categories": [

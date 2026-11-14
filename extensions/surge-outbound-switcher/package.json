@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "surge-outbound-switcher",
   "title": "Surge Outbound Switcher",
-  "description": "Instantly switch Surge's outbound mode without using HTTP API",
+  "description": "Switch the Surge proxy outbound mode on Mac between Direct, Global and Rule-based instantly, via AppleScript instead of the HTTP API.",
   "icon": "extension-icon.png",
   "screenshots": [
     "assets/screenshot1.png",

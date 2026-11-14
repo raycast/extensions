@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zalgo-text",
   "title": "Zalgo Text Generator",
-  "description": "Translates given text to Zalgo text",
+  "description": "Turn text into glitchy Zalgo text with combining characters, and copy it.",
   "icon": "command-icon.png",
   "author": "petermiles",
   "categories": [

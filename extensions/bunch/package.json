@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bunch",
   "title": "Bunch",
-  "description": "Control Bunch via Raycast. Bunch is a Mac automation tool.",
+  "description": "Control the Bunch Mac automation app: search, open and close bunches, create new bunches, process Bunch text and browse syntax references.",
   "icon": "bunch.png",
   "author": "koinzhang",
   "categories": [

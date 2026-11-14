@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "airplane",
   "title": "Airplane",
-  "description": "Just like on iPhone, turn off the wireless features on your macOS anytime.",
+  "description": "Turn airplane mode on or off on your Mac, disabling or enabling Wi-Fi and Bluetooth in one command.",
   "icon": "airplane-icon.png",
   "author": "pradeepb28",
   "categories": [

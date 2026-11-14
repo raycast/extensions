@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "capacities",
   "title": "Capacities",
-  "description": "Interact with Capacities from your command bar. Search your notes, capture content & more.",
+  "description": "Search your Capacities notes, open spaces, save weblinks, create tasks and add text to today's daily note.",
   "icon": "capacities.png",
   "author": "steffenble",
   "contributors": [

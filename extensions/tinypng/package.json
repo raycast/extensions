@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinypng",
   "title": "TinyPNG",
-  "description": "Compress the selected images in Finder with TinyPNG.",
+  "description": "Compress PNG, JPEG and other images with TinyPNG, compress them multiple times, or resize them, right from your file selection.",
   "icon": "tinypng-icon.png",
   "author": "kawamataryo",
   "contributors": [

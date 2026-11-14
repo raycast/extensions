@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "duck-duck-go-search",
   "title": "DuckDuckGo Search",
-  "description": "DuckDuckGo search with suggestions.",
+  "description": "Search DuckDuckGo with live search suggestions and open results in your browser.",
   "icon": "command-icon.png",
   "author": "tegola",
   "contributors": [

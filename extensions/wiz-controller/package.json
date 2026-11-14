@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wiz-controller",
   "title": "Wiz Controller",
-  "description": "Control your Wiz lights from Raycast",
+  "description": "Control WiZ smart lights by IP address: turn them on or off, and set colors, scenes and color temperature.",
   "icon": "icon.png",
   "author": "shail_antani",
   "categories": [

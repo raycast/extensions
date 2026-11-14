@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-link-in-specific-browser",
   "title": "Open Link in Specific Browser",
-  "description": "Open link or search text in specific browser.",
+  "description": "Open a link or search selected text in the browser of your choice, including from the menu bar, for people who switch between browsers.",
   "icon": "open-link.png",
   "author": "koinzhang",
   "contributors": [

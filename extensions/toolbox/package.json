@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toolbox",
   "title": "ToolBox",
-  "description": "Collection of scripts that process data",
+  "description": "Developer data tools: format JSON, SQL, CSS and XML, change case, convert dates and numbers, encode Base64 and URLs, and decode JWTs.",
   "icon": "icon.png",
   "author": "Kang",
   "contributors": [

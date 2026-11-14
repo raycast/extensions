@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "douban",
   "title": "Douban",
-  "description": "Search Something on Douban",
+  "description": "Search Douban for movies, books, music, games, groups, users and sites.",
   "icon": "douban.png",
   "author": "crazyczy",
   "contributors": [

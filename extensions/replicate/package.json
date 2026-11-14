@@ -1,7 +1,7 @@
 {
   "name": "replicate",
   "title": "Replicate",
-  "description": "Run Replicate's AI models from Raycast, and use them in Raycast AI chats.",
+  "description": "Run Replicate AI image models, view your predictions, and add Replicate models to Raycast AI chats for image generation and editing.",
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "icon": "replicate.png",
   "author": "KevinBatdorf",

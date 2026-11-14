@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-code-config-switcher",
   "title": "Claude Code Switcher",
-  "description": "Quickly switch between different Claude Code configurations and manage provider profiles",
+  "description": "Switch between Claude Code configuration and provider profiles, synced with CC Switch, and manage MCP servers.",
   "icon": "icon.png",
   "author": "lavatorywang",
   "categories": [

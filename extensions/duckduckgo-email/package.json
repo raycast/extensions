@@ -3,7 +3,7 @@
   "name": "duckduckgo-email",
   "version": "1.0.1",
   "title": "DuckDuckGo Email",
-  "description": "A simple extension that generate DuckDuckGo email alias",
+  "description": "Generate a new DuckDuckGo Email Protection alias and copy it to your clipboard.",
   "icon": "duckduckgo-icon.png",
   "author": "Hugo-Persson",
   "categories": [

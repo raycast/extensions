@@ -1,7 +1,7 @@
 {
   "name": "string-formatter",
   "title": "String Formatter",
-  "description": "Format strings with custom separators and decorators",
+  "description": "Format lists of strings with auto-detected separators, character removal, custom separators and decorators like quotes.",
   "icon": "extension_icon.png",
   "author": "fireice009",
   "platforms": [

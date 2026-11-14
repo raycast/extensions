@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wrap-unwrap",
   "title": "Wrap Unwrap",
-  "description": "Wrap and unwrap text using Markdown-aware reflow.",
+  "description": "Wrap selected or clipboard text at a set column width, or unwrap it into paragraphs, while keeping Markdown structure.",
   "license": "MIT",
   "author": "chrismessina",
   "icon": "extension-icon.png",

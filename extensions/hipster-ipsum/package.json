@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hipster-ipsum",
   "title": "Hipster Ipsum",
-  "description": "Generate placeholder content using the official Hipster Ipsum API",
+  "description": "Generate Hipster Ipsum placeholder text paragraphs or sentences and copy them to your clipboard.",
   "version": "1.0.0",
   "icon": "hipster-ipsum-icon.png",
   "author": "plev",

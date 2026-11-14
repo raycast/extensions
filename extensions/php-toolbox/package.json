@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "php-toolbox",
   "title": "PHP Toolbox",
-  "description": "A suite of useful commands for PHP developers",
+  "description": "PHP developer tools: get common Unix timestamps, parse a timestamp from the clipboard, and search PHP date format characters.",
   "icon": "command-icon.png",
   "author": "inxilpro",
   "categories": [

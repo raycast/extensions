@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mousehunt-helper",
   "title": "MouseHunt Helper",
-  "description": "Find the best attraction rates for different mice",
+  "description": "Find the best cheese and location attraction rates for MouseHunt mice, using data from MouseHunt Community Tools (MHCT).",
   "icon": "mousehunt-icon.png",
   "author": "chesterhow",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "icons8",
   "title": "Icons8",
-  "description": "Search and download icons using Icons8 large library.",
+  "description": "Search Icons8 icons, recolor and pad them, and download SVG or export PNG, JPG or WEBP images.",
   "icon": "Icons8.png",
   "author": "yug2005",
   "categories": [

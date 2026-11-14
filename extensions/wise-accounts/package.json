@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wise-accounts",
   "title": "Wise Accounts",
-  "description": "View Wise Profiles, Balances, and Transactions",
+  "description": "View your Wise profiles, balances and transactions, and see balances and today's transactions in the menu bar.",
   "icon": "command-icon.png",
   "author": "robsel118",
   "contributors": [

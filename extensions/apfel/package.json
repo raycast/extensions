@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apfel",
   "title": "Apfel",
-  "description": "Interact with Apfel CLI from Raycast!",
+  "description": "Chat with Apple Intelligence on your Mac through the Apfel CLI: translate, explain text, files and folders, read text from images and scan QR codes.",
   "author": "eggsy",
   "contributors": [
     "florisdobber",

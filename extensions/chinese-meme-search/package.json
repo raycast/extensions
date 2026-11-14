@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-meme-search",
   "title": "Meme Search",
-  "description": "通过自定义 JSON 数据源搜索表情包，在 Raycast 中预览并回车复制图片。",
+  "description": "搜索中文表情包（Meme），在 Raycast 中预览静态图片和 GIF，回车复制原图。需在设置中配置自定义 JSON 数据源。",
   "icon": "meme-icon-transparent.png",
   "author": "uncaughtape",
   "license": "MIT",

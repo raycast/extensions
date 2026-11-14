@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convt",
   "title": "Convt",
-  "description": "Convert images, videos, audio, PDFs, and documents locally with Convt.",
+  "description": "Convert images, videos, audio, PDFs and documents locally with the Convt app, from Finder selections or picked files.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

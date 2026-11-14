@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-icon-generator",
   "title": "App Icon Generator",
-  "description": "Generate icons for multiple platforms: iOS, Android, macOS, and more.",
+  "description": "Generate app icons in every size for iOS, iPadOS, macOS, Android, watchOS and Windows ICO from a single image.",
   "icon": "command-icon.png",
   "author": "HunterJi",
   "contributors": [

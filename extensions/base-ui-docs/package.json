@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "base-ui-docs",
   "title": "Base UI Components",
-  "description": "Browse Base UI component documentation",
+  "description": "Search Base UI component documentation, preview code examples and API props, and copy the main example.",
   "icon": "baseui-icon.png",
   "author": "lucasmotta",
   "categories": [

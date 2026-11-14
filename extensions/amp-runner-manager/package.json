@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "amp-runner-manager",
   "title": "Local Amp Runners",
-  "description": "Manage folders served by local Amp runners",
+  "description": "Manage the folders served by local Amp runners: add or remove folders, open them in Finder and copy their paths.",
   "icon": "icon.png",
   "author": "nhkhang",
   "license": "MIT",

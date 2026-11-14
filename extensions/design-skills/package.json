@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "design-skills",
   "title": "Design Skills",
-  "description": "Browse, preview, and install brand design skills for your AI coding agent.",
+  "description": "Browse, preview and install DESIGN.md brand design system files from awesome-design-md so your AI coding agent can match a brand's UI.",
   "icon": "icon.png",
   "author": "shivraj-roy",
   "platforms": [

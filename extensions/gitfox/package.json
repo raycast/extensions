@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitfox",
   "title": "Gitfox Repositories",
-  "description": "Navigate and open your repositories in Gitfox.",
+  "description": "Browse and open your repositories in Gitfox, list them in the menu bar, or open the selected Finder folder in Gitfox.",
   "icon": "icon.png",
   "author": "azlekov",
   "license": "MIT",

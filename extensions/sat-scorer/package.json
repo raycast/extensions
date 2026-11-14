@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sat-scorer",
   "title": "SAT Scorer",
-  "description": "Calculate your SAT score based on problems correct.",
+  "description": "Calculate your SAT score from the number of reading, writing and math questions you answered correctly.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
   "categories": [

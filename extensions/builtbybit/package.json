@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "builtbybit",
   "title": "BuiltByBit",
-  "description": "Streamlined access to BuiltByBit, with a focus on productivity and quality of life enhancements.",
+  "description": "Search BuiltByBit members and resources by author, and get BuiltByBit notifications in the menu bar.",
   "icon": "bbb-icon.png",
   "author": "YourMCGeek",
   "categories": [

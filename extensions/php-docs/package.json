@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "php-docs",
   "title": "PHP Documentation Search",
-  "description": "Quickly search through official PHP documentation",
+  "description": "Search the official PHP documentation on php.net for functions, classes and language reference pages.",
   "icon": "php.png",
   "author": "comes",
   "version": "1.0.0",

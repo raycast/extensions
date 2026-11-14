@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scss-compile",
   "title": "SCSS Compile",
-  "description": "Utility that convert SCSS (Sassy Cascading Style Sheets) file into CSS file",
+  "description": "Compile SCSS (Sass) files to CSS, with a watch mode that recompiles on changes and saved settings for quick recompiles.",
   "icon": "scss-icon.png",
   "author": "SuoweiHu",
   "categories": [

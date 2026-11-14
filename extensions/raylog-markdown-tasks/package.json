@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raylog-markdown-tasks",
   "title": "Raylog - Markdown Tasks",
-  "description": "Manage focused local tasks from Raycast with a standalone markdown note.",
+  "description": "Manage local tasks stored in a single Markdown note, add tasks with dates and status, and show the next task in the menu bar.",
   "icon": "raylog-markdown-tasks.png",
   "author": "dillon-mccardell",
   "categories": [

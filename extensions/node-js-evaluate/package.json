@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "node-js-evaluate",
   "title": "Node.js Evaluate",
-  "description": "Evaluate Javascript (Node.js) code on-the-fly",
+  "description": "Evaluate JavaScript (Node.js) code on the fly and see the result as you type.",
   "icon": "command-icon.png",
   "author": "Selfish",
   "license": "MIT",

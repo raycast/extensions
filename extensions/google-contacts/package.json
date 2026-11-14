@@ -3,7 +3,7 @@
   "name": "google-contacts",
   "version": "1.0.2",
   "title": "Google Contacts",
-  "description": "Browse, search, and manage your Google Contacts directly from Raycast — create, edit, delete, and action contacts without leaving your keyboard.",
+  "description": "Search, create, edit and delete your Google Contacts, quickly add new contacts, and manage them with Raycast AI.",
   "icon": "extension-icon.png",
   "author": "aic",
   "platforms": [

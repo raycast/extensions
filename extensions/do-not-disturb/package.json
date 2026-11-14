@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "do-not-disturb",
   "title": "Do Not Disturb",
-  "description": "Disable notifications on your Apple devices",
+  "description": "Turn Do Not Disturb on or off on your Mac, toggle it and check its status, using a Shortcuts shortcut.",
   "icon": "dnd-icon.png",
   "author": "yakitrak",
   "contributors": [

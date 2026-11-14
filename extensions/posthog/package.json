@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "posthog",
   "title": "PostHog",
-  "description": "Open the web app, search PostHog resources, and run read-only analytics with AI tools.",
+  "description": "Search PostHog feature flags, cohorts, dashboards, persons and projects, and run read-only HogQL analytics queries with AI tools.",
   "icon": "posthog-logo.png",
   "author": "david_newell",
   "owner": "posthog",

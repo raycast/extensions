@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "close-apps",
   "title": "Close All Open Apps",
-  "description": "Script that closes all open apps",
+  "description": "Close all open apps on your Mac at once, except the apps you add to a whitelist.",
   "icon": "close-all.png",
   "author": "guide",
   "contributors": [

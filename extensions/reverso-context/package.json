@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reverso-context",
   "title": "Reverso Context",
-  "description": "Get Translations and Examples via Reverso Context",
+  "description": "Translate words and phrases with Reverso Context and see example sentences in context and pronunciation.",
   "icon": "reverso-context.png",
   "author": "adielBm",
   "contributors": [

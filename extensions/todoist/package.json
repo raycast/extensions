@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todoist",
   "title": "Todoist",
-  "description": "Check your Todoist tasks and quickly create new ones",
+  "description": "Add tasks to Todoist, see today's and upcoming tasks, complete or reschedule them, and keep a focus task in the menu bar, with AI tools.",
   "icon": "todoist.png",
   "author": "thomaslombart",
   "owner": "doist",

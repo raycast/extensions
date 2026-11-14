@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-tidy",
   "title": "File Tidy",
-  "description": "Organize folders into prefixed category archives with byte-level dedup, near-duplicate and similar-image detection, and one-step undo",
+  "description": "Organize messy folders like Downloads into category folders, quarantine duplicate files, flag similar images, and undo the last tidy.",
   "icon": "icon.png",
   "author": "fhf1121",
   "platforms": [

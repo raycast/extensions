@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "serie-a",
   "title": "Lega Serie A",
-  "description": "Stay up-to-date with the latest scores, and standings from the Italian Serie A football league.",
+  "description": "Follow Italian Serie A football: league table, fixtures, results, live commentary, clubs, Coppa Italia and European matches.",
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",

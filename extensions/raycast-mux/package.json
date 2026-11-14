@@ -3,7 +3,7 @@
   "name": "raycast-mux",
   "type": "module",
   "title": "Mux.com",
-  "description": "Interact with your Mux.com assets",
+  "description": "List, inspect and upload Mux video assets, list live streams, and convert between Mux asset IDs and playback IDs.",
   "icon": "extension-icon.png",
   "author": "adam_engebretson",
   "repository": "github:adamgoose/raycast-mux",

@@ -4,7 +4,7 @@
   "title": "Chinese Converter",
   "type": "module",
   "version": "1.0.1",
-  "description": "Convert number input into Chinese formatted text, including uppercase RMB amount text",
+  "description": "Convert numbers into Chinese uppercase RMB amount text (大写金额) for invoices, checks and accounting.",
   "icon": "icon.png",
   "author": "tofrankie",
   "license": "MIT",

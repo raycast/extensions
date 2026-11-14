@@ -3,7 +3,7 @@
   "name": "zendesk-admin",
   "version": "1.0.0",
   "title": "Zendesk — Admin",
-  "description": "Perform Zendesk Admin functions and access quickly any entity in Zendesk from Raycast.",
+  "description": "Search Zendesk tickets, users, organizations, groups, views and other entities, and open Zendesk products for your instances.",
   "icon": "icon.png",
   "categories": [
     "Productivity"

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toncoin-price",
   "title": "Toncoin (TON) Price",
-  "description": "Keep an eye on Toncoin (TON) cryptocurrency price directly from your system menu bar",
+  "description": "Show the live Toncoin (TON) price in your Mac menu bar from OKX or Bybit, with links to exchanges, DEXs and CoinMarketCap.",
   "icon": "command-icon.png",
   "author": "arthurn",
   "categories": [

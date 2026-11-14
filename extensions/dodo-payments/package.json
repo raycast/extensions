@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dodo-payments",
   "title": "Dodo Payments",
-  "description": "Manage all your Dodo Payments orders, payments, subscriptions, discounts, license keys, disputes, refunds and payouts, right from your keyboard.",
+  "description": "View and manage Dodo Payments payments, subscriptions, customers, products, discount codes, license keys, disputes, refunds and payouts.",
   "icon": "command-icon.png",
   "author": "dodopayments",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-ai",
   "title": "Browser AI Companion",
-  "description": "Use the best models with Raycast Browser Extension to extend your browsing experience.",
+  "description": "Summarize YouTube videos, ask questions about web pages and run custom prompts on selected text with Perplexity, OpenRouter or Groq models.",
   "icon": "icon.png",
   "author": "lin",
   "contributors": [],

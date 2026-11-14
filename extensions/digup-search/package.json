@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "digup-search",
   "title": "DigUp Search",
-  "description": "Search your files by what's in them with DigUp: pictures, PDFs, documents, recordings, videos and code.",
+  "description": "Search files on your Mac by their content with DigUp: find pictures, PDF pages, moments in recordings and videos, and code by describing them.",
   "icon": "icon.png",
   "author": "roy_jiang",
   "contributors": ["crazybird"],

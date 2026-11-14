@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chat",
   "title": "Google Chat",
-  "description": "Search spaces and direct messages, read and reply to messages, see your unread chats, and send messages in Google Chat.",
+  "description": "Search Google Chat spaces and DMs, read and reply to messages, see unread chats and send messages from your Google Workspace account.",
   "icon": "google-chat-icon.png",
   "author": "smrehan",
   "license": "MIT",

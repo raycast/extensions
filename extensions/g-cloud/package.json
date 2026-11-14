@@ -3,7 +3,7 @@
   "name": "g-cloud",
   "title": "Google Cloud CLI",
   "subtitle": "Manage your Google Cloud resources without opening a browser",
-  "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
+  "description": "Manage Google Cloud projects, Compute Engine, Cloud Storage, IAM, Cloud Run, Cloud SQL, secrets and gcloud configurations.",
   "icon": "icon.png",
   "version": "1.1.0",
   "author": "ojowwalker77",

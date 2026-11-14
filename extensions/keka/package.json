@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keka",
   "title": "Keka",
-  "description": "Compress and extract files using Keka, the macOS file archiver",
+  "description": "Compress and extract files selected in Finder with Keka, the macOS file archiver.",
   "icon": "keka-icon.png",
   "author": "aone",
   "categories": [

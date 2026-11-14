@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dotnet-docs-search",
   "title": ".NET Documentation Search",
-  "description": "Search .NET API documentation.",
+  "description": "Search .NET API documentation on Microsoft Learn by version and open results in your browser.",
   "icon": "dotnet-icon.png",
   "author": "huseyint",
   "categories": [

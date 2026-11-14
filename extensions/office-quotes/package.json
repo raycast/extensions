@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "office-quotes",
   "title": "Office Quotes",
-  "description": "An extension that displays quotes from NBC's beloved mockumentary series 'The Office'.",
+  "description": "Browse, copy and paste quotes from the TV series The Office, available offline.",
   "icon": "office-api-icon.png",
   "author": "braydoncoyer",
   "contributors": [

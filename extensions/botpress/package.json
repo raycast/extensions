@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "botpress",
   "title": "Botpress",
-  "description": "Manage your Botpress chatbots",
+  "description": "List your Botpress chatbots and open them in Botpress Studio or the dashboard.",
   "icon": "bp-logo.png",
   "author": "ermek_barmashev",
   "platforms": [

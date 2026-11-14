@@ -1,7 +1,7 @@
 {
   "name": "minimax-ai",
   "title": "MiniMax",
-  "description": "MiniMax AI Chat for Raycast",
+  "description": "Chat with MiniMax AI models (M2.7, M2.5, M2.1, M2) with streaming responses and chat history, using your own API key.",
   "version": "1.2.0",
   "icon": "icon.png",
   "author": "monfortegg",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quran-quick-insert",
   "title": "Quran Quick Insert",
-  "description": "Search, copy, and insert Quran ayahs or ranges.",
+  "description": "Search the Quran text offline and copy or paste ayahs or ayah ranges with a reference in your chosen style.",
   "icon": "icon.png",
   "author": "yshalsager",
   "license": "MIT",

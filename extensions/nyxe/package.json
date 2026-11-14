@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nyxe",
   "title": "Nyxe Mail",
-  "description": "Search, triage and send Nyxe mail, grab sign-in codes, and keep an eye on your inbox from the menu bar.",
+  "description": "Search, triage and send Nyxe mail, copy sign-in verification codes from your inbox and see unread mail in the menu bar.",
   "icon": "icon.png",
   "author": "raymondaxyz",
   "license": "MIT",

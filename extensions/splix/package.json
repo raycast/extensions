@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "splix",
   "title": "Splix",
-  "description": "Raycast interface for Splix (https://splix.app) to supercharge your productivity.",
+  "description": "Search your Splix notes and open new notes in Splix.",
   "icon": "splix.png",
   "author": "splix.app",
   "categories": [

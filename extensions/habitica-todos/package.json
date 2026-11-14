@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "habitica-todos",
   "title": "Habitica ToDos",
-  "description": "Unofficial extension to view and create ToDo's for Habitica",
+  "description": "Manage Habitica to-dos, dailies and habits, create tasks, view your profile and inventory, and buy shop items, on Mac and Windows.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "preferences": [

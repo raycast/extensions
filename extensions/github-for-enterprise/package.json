@@ -1,7 +1,7 @@
 {
   "name": "github-for-enterprise",
   "title": "GitHub Enterprise",
-  "description": "Visualize and manage your issues and pull requests",
+  "description": "Create, search and manage GitHub Enterprise issues and pull requests, search repositories, and see unread notifications in the menu bar.",
   "icon": "icon.png",
   "author": "Kinbaum",
   "license": "MIT",

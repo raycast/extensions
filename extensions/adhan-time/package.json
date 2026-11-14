@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adhan-time",
   "title": "Adhan Time",
-  "description": "This extension helps you to search prayer time for the user location",
+  "description": "View Islamic prayer (adhan) times for any city, with a choice of calculation methods and a menu bar display, using the Aladhan API.",
   "icon": "command-icon.png",
   "author": "mzaien",
   "contributors": [

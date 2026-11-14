@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tasknotes",
   "title": "TaskNotes",
-  "description": "Manage TaskNotes tasks in Obsidian from Raycast.",
+  "description": "Create TaskNotes tasks in Obsidian from natural language, search tasks and see an agenda of tasks by due and scheduled date.",
   "icon": "icon.png",
   "author": "robinradx",
   "platforms": [

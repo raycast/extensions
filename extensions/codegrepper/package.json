@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codegrepper",
   "title": "Code Grepper",
-  "description": "Get code examples instantly",
+  "description": "Search Code Grepper for code examples and answers to programming questions.",
   "icon": "codegrepper.png",
   "author": "emircanerkul",
   "contributors": [

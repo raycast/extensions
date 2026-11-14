@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "synonyms",
   "title": "Synonyms",
-  "description": "Find synonyms for words and translate if necessary",
+  "description": "Find synonyms for any word, and translate if needed, using an LLM like OpenAI, Grok or Anthropic with your own API key.",
   "icon": "./image.png",
   "author": "xmorse",
   "contributors": [

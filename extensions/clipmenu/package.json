@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipmenu",
   "title": "ClipMenu",
-  "description": "Show Current Clipboard Content on Menu Bar",
+  "description": "Show your latest clipboard content and clipboard history in the Mac menu bar.",
   "icon": "command-icon.png",
   "author": "Envl",
   "categories": [

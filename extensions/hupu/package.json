@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hupu",
   "title": "Hupu",
-  "description": "Read posts from Hupu China",
+  "description": "Read trending posts from the Hupu (虎扑) BBS forum in China.",
   "icon": "hupu.png",
   "author": "alpacachen",
   "categories": [

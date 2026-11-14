@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random",
   "title": "Random Data Generator",
-  "description": "Generate random data using Faker library",
+  "description": "Generate random fake data like names, emails, addresses, numbers and dates with Faker in any locale, and copy or paste it.",
   "icon": "random.png",
   "author": "loris",
   "contributors": [

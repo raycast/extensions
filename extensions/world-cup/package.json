@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "world-cup",
   "title": "FIFA World Cup 2026™",
-  "description": "See all FIFA World Cup 2026™ matches",
+  "description": "Follow FIFA World Cup 2026 matches, fixtures and results, with live scores in the menu bar and goal alerts.",
   "icon": "command-icon.png",
   "author": "isma",
   "contributors": [

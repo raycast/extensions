@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "groq",
   "title": "Groq",
-  "description": "Use the powerful models via Groq from the comfort of Raycast.",
+  "description": "Chat with Llama and other AI models via the Groq API, and summarize, translate, fix grammar, rewrite or change the tone of selected text.",
   "icon": "groq.png",
   "author": "ilian",
   "contributors": [

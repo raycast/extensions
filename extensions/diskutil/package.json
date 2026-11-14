@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "diskutil",
   "title": "Disk Utility",
-  "description": "Create, list and delete Apple File System (APFS) disk volumes",
+  "description": "Create, list and delete APFS volumes on your Mac, with encrypted volume passphrases stored in the keychain.",
   "icon": "command-icon.png",
   "author": "stelo",
   "contributors": [

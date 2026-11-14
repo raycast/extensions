@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aegis",
   "title": "Aegis Authenticator",
-  "description": "Search, sync and use your Aegis 2FA database with Raycast",
+  "description": "Search your Aegis Authenticator backup and copy 2FA codes (TOTP) from an encrypted Aegis export on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "bfayers",
   "contributors": [

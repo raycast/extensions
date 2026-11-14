@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "week-number",
   "title": "Week Number",
-  "description": "Show the current week of the year.",
+  "description": "Show the current week number of the year in your menu bar and find the week number for any date.",
   "icon": "week-number-icon.png",
   "author": "koinzhang",
   "license": "MIT",

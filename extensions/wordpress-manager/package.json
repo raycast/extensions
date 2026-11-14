@@ -2,7 +2,7 @@
   "name": "wordpress-manager",
   "version": "1.0.0",
   "title": "WordPress Manager",
-  "description": "Manage your WordPress site directly from Raycast. Create posts, moderate comments, manage plugins, and more.",
+  "description": "Manage a WordPress site: create and edit posts and pages, moderate comments, manage plugins, users and media, and view site stats.",
   "icon": "extension-icon.png",
   "author": "gaurav_tiwari",
   "categories": [

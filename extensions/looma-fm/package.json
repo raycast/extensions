@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "looma-fm",
   "title": "Looma.fm",
-  "description": "Shuffle and play amazing and relaxing music by Adi Goldstein",
+  "description": "Shuffle and play relaxing ambient music and meditation sessions by Adi Goldstein from Looma.fm.",
   "icon": "icon.png",
   "author": "adigold1",
   "categories": [

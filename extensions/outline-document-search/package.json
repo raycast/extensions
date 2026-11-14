@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "outline-document-search",
   "title": "Outline Document Search",
-  "description": "Search documents in multiple instances of Outline.",
+  "description": "Search documents across one or more Outline wiki instances, cloud or self-hosted, and manage your Outline instances.",
   "icon": "outline.png",
   "author": "dnlfrst",
   "categories": [

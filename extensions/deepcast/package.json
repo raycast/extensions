@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepcast",
   "title": "Deepcast",
-  "description": "Translate words, or entire sentences, into 27 different languages using DeepL.",
+  "description": "Translate words or sentences with DeepL into over 30 languages, including one-step commands to translate selected text into a specific language.",
   "type": "module",
   "icon": "icon.png",
   "keywords": [

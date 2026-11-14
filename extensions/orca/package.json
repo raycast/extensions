@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orca",
   "title": "Orca",
-  "description": "Unofficial extension for the Orca agent orchestrator: see which agents are waiting for input and start new ones",
+  "description": "See which Claude and Codex agents in the Orca orchestrator are waiting for input, list running agents, and start new agents from saved prompts.",
   "icon": "icon.png",
   "author": "dmitry_s",
   "categories": [

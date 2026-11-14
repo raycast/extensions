@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stagehand",
   "title": "Stagehand",
-  "description": "Control YouTube and other media playing in your browser without switching tabs. Works with Chrome, Arc, Brave, and Safari.",
+  "description": "Control YouTube and other browser media without switching tabs: play, pause, skip, change volume and copy the URL at the current time.",
   "icon": "icon.png",
   "author": "tamag0tcha",
   "license": "MIT",

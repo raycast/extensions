@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nmbs-planner",
   "title": "NMBS Planner",
-  "description": "Plan your trainrides with NMBS",
+  "description": "Plan train journeys in Belgium with NMBS/SNCB connections from the iRail API, with departure, arrival, platform and stops.",
   "icon": "train_icon.png",
   "author": "Samuel3865",
   "contributors": [

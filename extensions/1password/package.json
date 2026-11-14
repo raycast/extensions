@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1password",
   "title": "1Password",
-  "description": "Search, open or edit your 1Password passwords from Raycast",
+  "description": "Search your 1Password vaults, copy passwords, usernames and one-time codes, open logins in your browser, and generate secure passwords.",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
   "contributors": [

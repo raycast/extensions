@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "close-finder",
   "title": "Close Finder",
-  "description": "Utils to close Finder from Raycast.",
+  "description": "Close all Finder windows on your Mac without quitting Finder, or kill and relaunch Finder.",
   "icon": "command-icon.png",
   "author": "qeude",
   "categories": [

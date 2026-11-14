@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shadcn-vue",
   "title": "Shadcn/Vue",
-  "description": "Browses shadcn/vue documentation, components, and commands.",
+  "description": "Browse shadcn/vue documentation and components and copy their install commands.",
   "icon": "shadcn-vue-icon.png",
   "author": "selemondev",
   "contributors": [

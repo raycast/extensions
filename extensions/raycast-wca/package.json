@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-wca",
   "title": "WCA",
-  "description": "Shows you the WCA profile for a name or WCA ID",
+  "description": "Search World Cube Association (WCA) speedcubing profiles by name or WCA ID.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
   "categories": [

@@ -3,7 +3,7 @@
   "name": "quick-event",
   "title": "Quick Event",
   "version": "1.0.0",
-  "description": "Create a calendar event using natural language",
+  "description": "Create macOS Calendar events from natural language, like \"Lunch with Sam tomorrow at 1pm\", with alerts, in the calendar you choose.",
   "icon": "command-icon.png",
   "author": "mblode",
   "contributors": [

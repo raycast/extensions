@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keyboard-brightness",
   "title": "Keyboard Brightness",
-  "description": "Easily Control Keyboard Brightness on your Apple Silicon MacBook",
+  "description": "Control MacBook keyboard backlight brightness: toggle, increase, decrease or set a percentage, with a menu bar slider.",
   "icon": "command-icon.png",
   "author": "huzef44",
   "contributors": [

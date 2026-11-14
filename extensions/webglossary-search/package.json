@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webglossary-search",
   "title": "WebGlossary Search",
-  "description": "Search for a definition on WebGlossary.info",
+  "description": "Look up web development terms on WebGlossary.info and open their definitions, with full-text search as a fallback.",
   "icon": "webglossary-icon.png",
   "author": "aashwin_patki",
   "platforms": [

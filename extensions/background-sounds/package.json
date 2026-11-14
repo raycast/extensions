@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "background-sounds",
   "title": "Background Sounds",
-  "description": "Toggle macOS background sounds on and off.",
+  "description": "Toggle macOS background sounds such as rain or ocean on and off, and open settings to change the sound and volume.",
   "icon": "icon.png",
   "author": "sebdanielsson",
   "contributors": [

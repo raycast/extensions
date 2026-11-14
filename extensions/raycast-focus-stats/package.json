@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-focus-stats",
   "title": "Raycast Focus Stats",
-  "description": "View Raycast's Focus session statistics.",
+  "description": "View your Raycast Focus session history and daily summaries to track your productivity over time.",
   "icon": "icon.png",
   "author": "dinocosta",
   "contributor": [

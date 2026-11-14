@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "manga-calendar",
   "title": "Manga Mexico",
-  "description": "Show a calendar with the latest manga releases of Mexican editorials.",
+  "description": "Browse manga and comic releases published in Mexico, by month and collection, from Mis Comics.",
   "icon": "command-icon.png",
   "author": "jueet",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dbt-documentation",
   "title": "dbt Documentation",
-  "description": "Search the dbt documentation website https://docs.getdbt.com/",
+  "description": "Search the dbt documentation at docs.getdbt.com, open pages, copy their URLs, and view and copy code snippets.",
   "icon": "dbt-icon.png",
   "author": "b-per",
   "contributors": ["xmok"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "display-reinitializer",
   "title": "Display Reinitializer",
-  "description": "Force re-detection and reinitialization of connected displays with multiple methods (DDC, refresh rate, resolution cycle)",
+  "description": "Force macOS to re-detect and reinitialize connected monitors using DDC, refresh rate or resolution cycling, with hotkeys per display.",
   "icon": "monitor.png",
   "author": "JosNun",
   "license": "MIT",

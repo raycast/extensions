@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ccusage",
   "title": "Claude Usage (ccusage)",
-  "description": "Monitor Claude Code usage with real-time tracking",
+  "description": "Monitor Claude Code usage and costs with ccusage: daily, monthly and session token stats, usage limits, and a menu bar view.",
   "categories": [
     "Developer Tools"
   ],

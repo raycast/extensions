@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "seo-lighthouse",
   "title": "SEO Lighthouse",
-  "description": "Lighthouse SEO Analyzer is a powerful Raycast extension that leverages Google Lighthouse to provide comprehensive SEO and performance audits for any website. Simply input a URL and choose your desired analysis mode, device type, and categories. Get detailed insights into page load speed, core web vitals, accessibility, best practices, and more.",
+  "description": "Run Google Lighthouse SEO and performance audits on any URL, with Core Web Vitals, accessibility and best practices scores for mobile or desktop.",
   "icon": "extension-icon-dark.png",
   "author": "guelug",
   "version": "1.2.0",

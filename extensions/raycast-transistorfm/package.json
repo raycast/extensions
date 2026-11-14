@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-transistorfm",
   "title": "TransistorFM",
-  "description": "Get TransistorFM stats directly from your command bar",
+  "description": "Browse your Transistor.fm podcast shows and episodes and track download stats in the menu bar.",
   "icon": "icon.png",
   "author": "madebyankur",
   "categories": [

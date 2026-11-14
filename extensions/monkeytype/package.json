@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monkeytype",
   "title": "Monkeytype",
-  "description": "Quick access to Monkeytype sections - typing tests, stats, leaderboards, and settings",
+  "description": "Open Monkeytype typing tests, your account stats, leaderboards and settings in one step.",
   "icon": "icon.png",
   "author": "radouane-tamouss",
   "categories": [

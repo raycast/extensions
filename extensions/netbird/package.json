@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netbird",
   "title": "NetBird",
-  "description": "Control your NetBird mesh network right from Raycast.",
+  "description": "Connect and disconnect your NetBird mesh VPN network, view peers, status and network routes, update NetBird and open the admin panel.",
   "icon": "netbird-icon.png",
   "author": "mi7chal",
   "platforms": [

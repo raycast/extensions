@@ -3,7 +3,7 @@
   "name": "rubiks-cube-timer",
   "title": "Rubiks Cube Timer",
   "version": "1.0.0",
-  "description": "Time your Rubik's Cube solves with random scrambles and csTimer import/export. No account required.",
+  "description": "Time your Rubik's Cube solves with random 3x3 or 2x2 scrambles, save your solves, and import or export csTimer data.",
   "icon": "icon.png",
   "author": "nokoniko",
   "platforms": [

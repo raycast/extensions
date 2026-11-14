@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lavinprognoser",
   "title": "Lavinprognoser",
-  "description": "Swedish Avalanche forecast from Naturvårdsverket",
+  "description": "See Swedish avalanche forecasts from Lavinprognoser.se (Naturvårdsverket) for every area, with weather and snow details.",
   "icon": "i.png",
   "author": "samuelkraft",
   "categories": [

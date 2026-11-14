@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "better-uptime",
   "title": "Better Stack",
-  "description": "Check on your Better Stack monitors, incidents and heartbeats.",
+  "description": "View and add Better Stack (formerly Better Uptime) monitors, incidents and heartbeats, and check uptime status.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [

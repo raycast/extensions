@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "you-com-search",
   "title": "You.com Search",
-  "description": "Search You.com directly from Raycast",
+  "description": "Ask You.com AI a question in your browser, choosing a chat mode such as default, Genius or research.",
   "icon": "you2.png",
   "author": "salman_mian",
   "categories": [

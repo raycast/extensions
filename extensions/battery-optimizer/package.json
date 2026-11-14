@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "battery-optimizer",
   "title": "Battery Optimizer",
-  "description": "Keep the battery healthy by limiting the charging capacity.",
+  "description": "Set a battery charge limit on your Mac to protect battery health, using bclm or batt, with a menu bar toggle and battery status view.",
   "icon": "icon.png",
   "categories": [
     "System"

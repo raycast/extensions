@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cricketcast",
   "title": "CricketCast",
-  "description": "Check the cricket score and news through Raycast!",
+  "description": "Check live cricket scores and the latest cricket news from ESPNcricinfo, with scores in the menu bar.",
   "icon": "command-icon.png",
   "author": "sampoder",
   "categories": [

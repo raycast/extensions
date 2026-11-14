@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cheatsheets",
   "title": "Cheatsheets",
-  "description": "Search and view programming cheatsheets",
+  "description": "Search and view programming cheat sheets from Devhints (devhints.io) for languages, frameworks and command-line tools.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [

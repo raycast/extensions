@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "awesome-mac",
   "title": "Awesome Mac",
-  "description": "Search Awesome Mac Things",
+  "description": "Search the Awesome Mac list of curated macOS apps and tools, and open their details and download links.",
   "icon": "icon.png",
   "author": "ViGeng",
   "categories": [

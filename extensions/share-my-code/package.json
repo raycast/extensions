@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "share-my-code",
   "title": "Share My Code",
-  "description": "Quickly create shareable code snippet with ShareMyCode directly in your Raycast ecosystem.",
+  "description": "Create and share code snippets with ShareMyCode with automatic language detection, open shared snippets, and view your recent ones.",
   "icon": "smc-icon.png",
   "author": "jairaume",
   "categories": [

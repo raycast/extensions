@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "storytime",
   "title": "StoryTime",
-  "description": "Generate a story using OpenAI and Upstash.",
+  "description": "Deprecated: StoryTime no longer generates stories and is being removed from the Raycast Store.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [

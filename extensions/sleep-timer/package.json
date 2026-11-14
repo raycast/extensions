@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sleep-timer",
   "title": "Sleep Timer",
-  "description": "Sending your macbook into sleeping mode after the timer runs out, directly in Raycast, with no external dependencies.",
+  "description": "Put your Mac to sleep after a timer, with 15 to 90 minute presets, custom timers and a menu bar countdown.",
   "icon": "command-icon.png",
   "author": "dtmzr",
   "contributors": [

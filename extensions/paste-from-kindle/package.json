@@ -3,7 +3,7 @@
   "name": "kindle-paste",
   "title": "Kindle Paste",
   "subtitle": "Paste Kindle quotes without metadata.",
-  "description": "Removes the automatic Kindle citation from clipboard text and pastes the cleaned text",
+  "description": "Paste text copied from the Kindle app without the citation Kindle automatically adds to the clipboard.",
   "icon": "kindle-paste-icon.png",
   "author": "jasoncarey",
   "categories": [

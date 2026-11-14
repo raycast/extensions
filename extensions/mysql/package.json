@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mysql",
   "title": "MySQL Client",
-  "description": "Connect to MySQL databases — run queries, browse schema, and manage multiple connection profiles.",
+  "description": "Connect to MySQL, MariaDB and Aurora databases: run SQL queries, browse schemas and tables, re-run query history and manage connections.",
   "icon": "app-icon.png",
   "author": "itggood2420",
   "categories": [

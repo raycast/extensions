@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "helldivers2",
   "title": "Helldivers 2",
-  "description": "View Galactic War Status from Helldivers II",
+  "description": "Check the Helldivers 2 Galactic War status: the current Major Order, active planets and campaigns, and dispatches.",
   "icon": "command-icon.png",
   "author": "alexstrnik",
   "platforms": [

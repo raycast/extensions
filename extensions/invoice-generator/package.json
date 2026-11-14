@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "invoice-generator",
   "title": "Invoice Generator",
-  "description": "Create invoices using the Invoice Generator API.",
+  "description": "Create PDF invoices with line items and custom fields using the free Invoice Generator API, saved to your Downloads folder.",
   "icon": "command-icon.png",
   "author": "alexs",
   "license": "MIT",

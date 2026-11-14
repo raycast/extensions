@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-find-hub",
   "title": "Google Find Hub",
-  "description": "Open Google Find Hub from Raycast or the macOS menu bar for quick access to locating, ringing, securing, or erasing Android devices.",
+  "description": "Open Google Find Hub (formerly Find My Device) to locate, ring, secure or erase Android devices, from Raycast or the menu bar.",
   "icon": "find-hub.png",
   "author": "jonah_tweed",
   "platforms": [

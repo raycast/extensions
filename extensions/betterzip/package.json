@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "betterzip",
   "title": "BetterZip",
-  "description": "Compress and extract selected items in Finder with BetterZip via Raycast.",
+  "description": "Compress, extract or open the selected Finder files with BetterZip on Mac.",
   "icon": "betterzip-icon.png",
   "author": "koinzhang",
   "categories": [

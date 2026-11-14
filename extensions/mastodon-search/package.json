@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mastodon-search",
   "title": "Mastodon Search",
-  "description": "Search for People or Hashtags on Mastodon.",
+  "description": "Search Mastodon for people and hashtags and open their profile or hashtag pages.",
   "icon": "command-icon.png",
   "author": "daveverwer",
   "categories": [

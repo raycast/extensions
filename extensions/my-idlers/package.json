@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myidlers",
   "title": "MyIdlers",
-  "description": "View Summary and details of your idlers",
+  "description": "View your self-hosted MyIdlers dashboard: servers, VPS, shared and reseller hosting, domains, providers, costs and averages.",
   "icon": "my-idlers.png",
   "author": "xmok",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coda-bookmarks-search",
   "title": "Coda Bookmarks Search",
-  "description": "Quickly find and open your bookmarked URLs stored in a coda table.",
+  "description": "Search and open bookmarks stored in a Coda table, with favorites shown first.",
   "icon": "coda-logo-512.png",
   "author": "allienx",
   "categories": [

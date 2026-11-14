@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-jq",
   "title": "Jq",
-  "description": "Run queries on Json data using jq",
+  "description": "Run jq queries on JSON from your clipboard or a file and see the results instantly.",
   "icon": "icon-512.png",
   "author": "vladimir-kotikov",
   "license": "MIT",

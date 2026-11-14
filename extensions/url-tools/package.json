@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "url-tools",
   "title": "URL Tools",
-  "description": "Quickly encode or decode URL from the clipboard",
+  "description": "URL encode or decode the text on your clipboard in one step.",
   "icon": "command-icon.png",
   "author": "huzef44",
   "keywords": [

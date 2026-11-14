@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iwork",
   "title": "iWork",
-  "description": "Control Pages, Numbers, and Keynote",
+  "description": "Create, export and open Pages, Numbers and Keynote documents from templates or the clipboard, and start or stop Keynote slideshows.",
   "icon": "iwork-icon.png",
   "author": "HelloImSteven",
   "categories": [

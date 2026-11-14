@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mochi",
   "title": "Mochi",
-  "description": "Quickly create Mochi cards",
+  "description": "Create Mochi flashcards in any of your Mochi decks, filling in each deck's card fields.",
   "icon": "icon-mochi-square.png",
   "author": "kawamataryo",
   "categories": [

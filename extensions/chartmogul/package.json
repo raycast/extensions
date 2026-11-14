@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chartmogul",
   "title": "ChartMogul",
-  "description": "A Raycast extension that gives you quick access to key business metrics from ChartMogul right from your command bar. Instantly view MRR, ARR, churn, customer counts, and more without leaving your workflow.",
+  "description": "View ChartMogul subscription metrics like MRR, ARR, churn and customer counts, and browse recent MRR movements such as upgrades and cancellations.",
   "icon": "extension_icon.png",
   "author": "mattdelliott",
   "license": "MIT",

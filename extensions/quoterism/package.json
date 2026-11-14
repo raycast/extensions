@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quoterism-raycast",
   "title": "Quoterism",
-  "description": "Get access to the Web's largest collection of human inspiration",
+  "description": "Get a random inspirational quote from Quoterism's collection.",
   "icon": "icon.png",
   "author": "dmitry_fisenko",
   "categories": [

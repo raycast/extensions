@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "drupal-toolbox",
   "title": "Drupal Toolbox",
-  "description": "Valuable tools and shortcuts for your Drupal Websites",
+  "description": "Manage your Drupal websites: clear the cache, get a one-time login link, open in a browser, Finder, VS Code or PhpStorm.",
   "icon": "logo.png",
   "author": "emircanerkul",
   "contributors": [

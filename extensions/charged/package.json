@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "charged",
   "title": "Charged: Starknet Shortcuts",
-  "description": "Shorcuts for common web3 tasks",
+  "description": "Starknet developer tools: convert felts, strings and hex, search the Cairo book and ecosystem, view live Starknet stats and build transactions.",
   "icon": "icon.png",
   "author": "apoorv",
   "categories": [

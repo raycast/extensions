@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asoiaf",
   "title": "A Song of Ice and Fire",
-  "description": "Explore Books, Characters and Houses in the ASOIAF/GoT Universe",
+  "description": "Explore books, characters and houses from A Song of Ice and Fire and Game of Thrones, using An API of Ice and Fire.",
   "icon": "the-iron-throne.png",
   "author": "xmok",
   "categories": [

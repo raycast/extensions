@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shopify-theme-resources",
   "title": "Shopify Theme Resources",
-  "description": "Quickly reference and search Shopify theme resources, like input settings, fonts, and more for Shopify theme development.",
+  "description": "Search Shopify theme development references such as section and block input settings, fonts and more.",
   "icon": "shopify-icon.png",
   "author": "trpage_dev",
   "categories": [

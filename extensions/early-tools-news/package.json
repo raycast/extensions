@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "early-tools-news",
   "title": "early.tools news",
-  "description": "Long-form updates from 80+ of the greatest entrepreneurs on the web.",
+  "description": "Read long-form updates from 80+ indie makers and entrepreneurs, curated by early.tools.",
   "icon": "earlytoolsicon.png",
   "author": "julianpaul",
   "categories": [

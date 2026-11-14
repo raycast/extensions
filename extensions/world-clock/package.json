@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "world-clock",
   "title": "World Clock",
-  "description": "Query the current time of a region, ip or domain.",
+  "description": "Check the current time in any time zone, city, IP address or domain, and show starred time zones in the menu bar.",
   "icon": "command-icon.png",
   "author": "koinzhang",
   "platforms": [

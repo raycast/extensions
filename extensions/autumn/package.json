@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "autumn",
   "title": "Autumn",
-  "description": "Stripe made easy for AI Startups",
+  "description": "Manage Autumn billing for AI startups built on Stripe: list, create and delete customers and products, and view features.",
   "icon": "autumn-logo.png",
   "author": "xmok",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "solana-explorer",
   "title": "Solana Explorer",
-  "description": "Look up transactions and accounts on the various Solana clusters.",
+  "description": "Look up Solana transactions, accounts and tokens on mainnet, testnet and devnet.",
   "icon": "command-icon.png",
   "author": "darklong",
   "license": "MIT",

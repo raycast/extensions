@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode-cloud",
   "title": "Xcode Cloud",
-  "description": "Check your Xcode Cloud builds and start new ones.",
+  "description": "View Xcode Cloud builds and start new builds for your apps using the App Store Connect API.",
   "icon": "icon.png",
   "author": "yuta24",
   "categories": [

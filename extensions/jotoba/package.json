@@ -16,7 +16,7 @@
     "katakana",
     "clnhs"
   ],
-  "description": "Search Jotoba.de from the comfort of Raycast.",
+  "description": "Look up Japanese words and kanji on the Jotoba dictionary, with readings, meanings and kanji details.",
   "icon": "command-icon.png",
   "author": "clnhs",
   "contributors": [

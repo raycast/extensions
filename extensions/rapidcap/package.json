@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rapidcap",
   "title": "RapidCap",
-  "description": "Quickly save information without context switching",
+  "description": "Quickly save small bits of information as cards, then view, edit and delete them, without opening a notes app.",
   "icon": "rapidcap-icon.png",
   "author": "brittany_carusone",
   "contributors": [

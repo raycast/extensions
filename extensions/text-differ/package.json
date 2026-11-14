@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "text-differ",
   "title": "Text Differ",
-  "description": "Opens Text Differ from selected files",
+  "description": "Compare two files selected in Finder by opening them in the Text Differ app on Mac.",
   "icon": "command-icon.png",
   "author": "ErikFisher",
   "categories": [

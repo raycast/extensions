@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dot-new",
   "title": "dot-new",
-  "description": "Start something .new! .new links are shortcuts to your favorite actions on the websites you love",
+  "description": "Search and open .new shortcut links to start something new on your favorite websites, like a new doc, repo or design.",
   "icon": "command-icon.png",
   "author": "natterstefan",
   "contributors": [

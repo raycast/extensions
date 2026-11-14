@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scrycast",
   "title": "Scrycast",
-  "description": "Search for Magic: The Gathering cards on Scryfall or your collection",
+  "description": "Search Magic: The Gathering cards on Scryfall, bookmark cards, browse sets and precon decks, and import your ManaBox collection.",
   "icon": "scrycast.png",
   "author": "aayushpi",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mantine-documentation",
   "title": "Mantine UI Documentation",
-  "description": "Browse simplified documentation for Mantine or use quick links to particular pages directly through Raycast",
+  "description": "Search the Mantine UI React component documentation, including Styles API details, and open docs pages.",
   "icon": "logo.png",
   "author": "EmilMalanczak",
   "version": "1.0.0",

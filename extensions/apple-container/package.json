@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-container",
   "title": "Apple Container",
-  "description": "Manage containers, images, and volumes created by Apple's open-source container CLI.",
+  "description": "Manage containers, images and volumes from Apple's open-source container CLI on Mac, with a menu bar list of running containers.",
   "icon": "command-icon.png",
   "author": "davireisvieira",
   "categories": [

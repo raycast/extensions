@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ovhcloud",
   "title": "OVHcloud",
-  "description": "Manage Domains in OVHCloud",
+  "description": "Manage OVHcloud domains: DNS records, nameservers and renewal settings, and read your OVHcloud messages and contacts.",
   "icon": "white-cloud-blue-bg.png",
   "author": "xmok",
   "platforms": [

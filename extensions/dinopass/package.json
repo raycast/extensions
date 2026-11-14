@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dinopass",
   "title": "DinoPass",
-  "description": "Generate passwords from dinopass.com",
+  "description": "Generate simple, easy-to-remember or strong passwords from dinopass.com and copy them to your clipboard.",
   "icon": "command-icon.png",
   "author": "campo",
   "categories": [

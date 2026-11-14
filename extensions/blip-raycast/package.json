@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blip-raycast",
   "version": "0.1.0",
-  "description": "Send files and folders to Blip from Raycast.",
+  "description": "Send files and folders to Blip by picking them in a form or sending the current Finder or file manager selection.",
   "author": "astroboii47",
   "license": "MIT",
   "private": true,

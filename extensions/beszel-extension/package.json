@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "beszel",
   "title": "Beszel",
-  "description": "Monitor and configure your systems managed by Beszel.",
+  "description": "Search the servers monitored by Beszel and check their status, CPU, memory, disk and uptime.",
   "icon": "icon.png",
   "author": "wyattjoh",
   "categories": [

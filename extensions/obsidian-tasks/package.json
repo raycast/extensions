@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian-tasks",
   "title": "Obsidian Tasks",
-  "description": "Manage your Obsidian Tasks through Raycast",
+  "description": "List, add, edit and complete Obsidian tasks in the Obsidian Tasks plugin format, and show your next task in the menu bar.",
   "icon": "command-icon.png",
   "author": "ozencb",
   "contributors": [

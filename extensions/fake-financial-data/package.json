@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fake-financial-data",
   "title": "Fake Financial Data",
-  "description": "Generate fake financial data",
+  "description": "Generate and copy fake IBANs, SWIFT/BIC codes, account numbers and sort codes for testing, also from the menu bar.",
   "icon": "command-icon.png",
   "author": "andre-rd-rodrigues",
   "contributors": [

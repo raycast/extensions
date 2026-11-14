@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-matrix",
   "title": "The Matrix",
-  "description": "Summon and dismiss a Matrix rain overlay from Raycast.",
+  "description": "Show a click-through Matrix digital rain overlay on your Mac screens with optional sound, and dismiss it with a red pill.",
   "icon": "the-matrix-icon.png",
   "author": "clins1994",
   "platforms": [

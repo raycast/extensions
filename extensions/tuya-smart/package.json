@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tuya-smart",
   "title": "Tuya Smart",
-  "description": "Home automation with Tuya Smart",
+  "description": "Control Tuya Smart and Smart Life devices: switch lights and plugs on or off, set brightness, read sensors, and toggle pinned switches from the menu bar.",
   "icon": "command-icon.png",
   "author": "andresmorelos",
   "contributors": [

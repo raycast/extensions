@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bilibili-search",
   "title": "Bilibili Search",
-  "description": "Search Bilibili videos with autosuggestions",
+  "description": "Search Bilibili for videos, anime, live streams and users with real-time suggestions, and open results in your browser.",
   "icon": "command-icon.png",
   "author": "55b",
   "categories": [

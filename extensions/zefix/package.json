@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zefix",
   "title": "Zefix",
-  "description": "A Raycast extension that looks up companies in the Swiss national trade register",
+  "description": "Look up companies in Zefix, the Swiss commercial register, by current or former name or by UID.",
   "categories": [
     "Data",
     "Finance",

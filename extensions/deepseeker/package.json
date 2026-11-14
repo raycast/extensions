@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepseeker",
   "title": "Deepseek Quick Actions",
-  "description": "Performs one-shot actions with DeepSeek and more",
+  "description": "Summarize, rephrase, translate or fix selected text with DeepSeek, ask the LLM questions, run custom prompts and view your history.",
   "icon": "icon.png",
   "author": "ViGeng",
   "contributors": [

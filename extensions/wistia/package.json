@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wistia",
   "title": "Wistia",
-  "description": "Search Wistia Medias and Projects",
+  "description": "Search the videos (medias) and projects in your Wistia account.",
   "icon": "wistia-logo.png",
   "author": "darin",
   "contributors": [

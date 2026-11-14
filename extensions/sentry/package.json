@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sentry",
   "title": "Sentry",
-  "description": "Stay on top of your Sentry issues",
+  "description": "Search unresolved Sentry issues, view details and assign them, and see the latest releases with new issues and crash-free rate.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

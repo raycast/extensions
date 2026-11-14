@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bech32-converter",
   "title": "Bech32 Converter",
-  "description": "Converts Cosmos Bech32 addresses to a desired prefix",
+  "description": "Convert Cosmos Bech32 wallet addresses to a different chain prefix.",
   "icon": "command-icon.png",
   "author": "zygimantas_magelinskas",
   "categories": [

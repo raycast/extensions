@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defuddle",
   "title": "Defuddle",
-  "description": "Extract readable web pages to Markdown with Defuddle",
+  "description": "Extract clean, readable Markdown from any web page URL or the current browser tab with Defuddle, and keep a history to copy or export.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

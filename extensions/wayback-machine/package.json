@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wayback-machine",
   "title": "Wayback Machine",
-  "description": "Quickly open and save webpages in Wayback Machine",
+  "description": "Open any webpage or the current browser tab in the Internet Archive Wayback Machine, save pages to it, and search archived snapshots, on Mac and Windows.",
   "icon": "wayback-icon.png",
   "author": "pernielsentikaer",
   "contributors": [

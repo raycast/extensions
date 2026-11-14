@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bouncer-email-verifier",
   "title": "Bouncer Deliverability",
-  "description": "Check whether an email address is deliverable, or whether a domain can receive mail, with Bouncer",
+  "description": "Verify email addresses and check whether a domain can receive mail with Bouncer: deliverability status, score, MX record, catch-all and disposable checks.",
   "icon": "icon.png",
   "author": "eKamran",
   "platforms": [

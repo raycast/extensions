@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "port-from-project-name",
   "title": "Port from Project Name",
-  "description": "A tool that can generate a unique 4 digit port for a given project name",
+  "description": "Generate a unique, repeatable 4-digit development port from a project name, edit ports and keep a port history.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

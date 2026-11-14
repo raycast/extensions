@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shiori",
   "title": "Shiori",
-  "description": "Interact with Shiori the bookmark manager",
+  "description": "Add bookmarks to Shiori, the self-hosted bookmark manager.",
   "version": "0.1.0",
   "icon": "shiori-icon-512.png",
   "author": "namiwang",

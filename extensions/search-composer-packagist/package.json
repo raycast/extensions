@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-composer-packagist",
   "title": "Search Composer Packagist",
-  "description": "Search Composer Packagist For PHP Packages",
+  "description": "Search Packagist for Composer PHP packages and open their pages.",
   "icon": "composer-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",

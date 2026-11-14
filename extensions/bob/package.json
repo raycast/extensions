@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bobcontrol",
   "title": "Bob - Control Bob Translate",
-  "description": "Control the Bob Translate app for macOS with your keyboard.",
+  "description": "Control Bob Translate on your Mac: translate selected text, clipboard or typed input, and capture text from the screen with OCR.",
   "categories": [
     "Applications"
   ],

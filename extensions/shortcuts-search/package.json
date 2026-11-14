@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shortcuts-search",
   "title": "Shortcuts Search",
-  "description": "List, search and run shortcuts for different applications",
+  "description": "Search keyboard shortcuts for any app or the current app or website, and run a shortcut from the list.",
   "icon": "extension_icon.png",
   "author": "solomkinmv",
   "categories": [

@@ -3,7 +3,7 @@
   "name": "windows-environment-variables",
   "type": "module",
   "title": "Windows Environment Variables",
-  "description": "View, search, edit and manage Windows environment variables and PATH entries. A keyboard-first alternative to the Windows Environment Variables dialog.",
+  "description": "View, search, edit and delete Windows user and system environment variables, and add, remove and reorder PATH entries with validation.",
   "icon": "icon.png",
   "author": "ohmycodedev",
   "categories": [

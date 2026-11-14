@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "things",
   "title": "Things",
-  "description": "Search and manage your Things to-dos from Raycast",
+  "description": "Search, add and manage Things 3 to-dos and projects on your Mac, with Today, Inbox and Upcoming lists, a menu bar Today list and AI tools.",
   "icon": "things-icon.png",
   "author": "loris",
   "contributors": [

@@ -3,7 +3,7 @@
   "name": "desktop-manager",
   "type": "module",
   "title": "Desktop Manager",
-  "description": "Search and organize your desktop files",
+  "description": "Search and organize files on your Mac desktop, and open, copy, paste, reveal or delete the latest desktop file.",
   "icon": "icon.png",
   "author": "tykid",
   "categories": [

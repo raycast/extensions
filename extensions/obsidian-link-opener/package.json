@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian-link-opener",
   "title": "Obsidian Link Opener",
-  "description": "Open URLs from Obsidian markdown files' frontmatter",
+  "description": "Use your Obsidian vault as a bookmark manager: search and open URLs stored in your notes' frontmatter, grouped by note.",
   "icon": "command-icon.png",
   "author": "osteele",
   "license": "MIT",

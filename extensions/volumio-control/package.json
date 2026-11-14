@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "volumio-control",
   "title": "Volumio Control",
-  "description": "Control your Volumio music player remotely",
+  "description": "Control your Volumio music player: play, pause, skip, shuffle, see what's playing, and browse playlists, albums and songs.",
   "icon": "icon.png",
   "author": "riclib",
   "categories": [

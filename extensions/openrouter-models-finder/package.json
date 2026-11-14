@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openrouter-models-finder",
   "title": "OpenRouter Models Finder",
-  "description": "Search and copy AI model IDs from OpenRouter to clipboard",
+  "description": "Search OpenRouter AI models, see context window sizes, and copy model IDs to your clipboard.",
   "icon": "icon.png",
   "author": "jeejeeguan",
   "contributors": [

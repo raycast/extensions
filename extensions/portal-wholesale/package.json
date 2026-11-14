@@ -1,7 +1,7 @@
 {
   "name": "portal-wholesale",
   "title": "Portal Wholesale",
-  "description": "Search and manage Portal Wholesale brands",
+  "description": "Search Portal Wholesale brands by name or website URL in a logo grid and open their brand or admin pages.",
   "icon": "extension-icon.png",
   "author": "nickdichev",
   "categories": [

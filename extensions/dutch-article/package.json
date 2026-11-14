@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dutch-article",
   "title": "Dutch Article (Het of De)",
-  "description": "Look up whether a Dutch word uses 'het' or 'de' as its article",
+  "description": "Look up whether a Dutch noun takes the article het or de.",
   "icon": "command-icon.png",
   "author": "ahmeed83",
   "categories": [

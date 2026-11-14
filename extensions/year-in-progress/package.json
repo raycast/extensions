@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "year-in-progress",
   "title": "Year in Progress",
-  "description": "Stay motivated by see the progress of the year.",
+  "description": "Track how much of the year, quarter, month, week, day or a custom date range has passed, shown in the menu bar and command subtitle.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

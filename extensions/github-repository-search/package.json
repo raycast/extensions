@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-repository-search",
   "title": "GitHub Repository Search",
-  "description": "Search repositories on GitHub and open previously visited ones faster.",
+  "description": "Search GitHub repositories, reopen recently visited ones, open issues, pull requests and releases, and copy clone commands.",
   "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",

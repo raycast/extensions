@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "temporary-email",
   "title": "Temporary Email",
-  "description": "Quickly and easily create a temporary email.",
+  "description": "Create a disposable temporary email address with maildrop.cc or harakirimail.com and copy it.",
   "icon": "command-icon.png",
   "author": "natterstefan",
   "contributors": [

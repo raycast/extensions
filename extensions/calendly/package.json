@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calendly",
   "title": "Calendly",
-  "description": "Share scheduling links, manage meetings, and book invitees with Calendly.",
+  "description": "Share Calendly scheduling links, view upcoming meetings, reschedule or cancel them, and book invitees into open time slots.",
   "categories": [
     "Productivity"
   ],

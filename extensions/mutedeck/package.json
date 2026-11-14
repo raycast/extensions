@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mutedeck",
   "title": "MuteDeck",
-  "description": "Control your meetings from Raycast: toggle mute, camera, screen share and recording via MuteDeck, with a live Meeting Deck grid.",
+  "description": "Control meetings with MuteDeck: toggle mute, camera, screen share and recording, leave meetings, and see a live meeting control grid.",
   "icon": "icon.png",
   "author": "smitmartijn",
   "owner": "mutedeck",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "heed",
   "title": "Heed",
-  "description": "Move keyboard focus between windows and turn focus follows mouse on and off: Hyprland's movefocus and follow_mouse for macOS.",
+  "description": "Move keyboard focus between Mac windows by direction or name, and toggle focus follows mouse, Hyprland style, with the Heed app.",
   "icon": "icon.png",
   "author": "rbstp",
   "license": "MIT",

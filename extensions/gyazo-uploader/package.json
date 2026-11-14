@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gyazo-uploader",
   "title": "Gyazo Uploader",
-  "description": "Upload clipboard image to Gyazo",
+  "description": "Upload the image on your clipboard to Gyazo and copy the direct link.",
   "icon": "gyazo-icon.png",
   "author": "udus",
   "categories": [

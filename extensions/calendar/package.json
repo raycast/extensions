@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calendar",
   "title": "Quick Calendar",
-  "description": "View calendar month-by-month",
+  "description": "View a calendar for any month and year, and step between months and years.",
   "icon": "command-icon.png",
   "author": "fuksman",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "key-value",
   "title": "Key Value",
-  "description": "Copy a key from the clipboard and paste a value from a JSON file",
+  "description": "Look up values by key from a JSON file or URL, such as GUIDs, and copy them to the clipboard.",
   "icon": "key-value-icon.png",
   "author": "NirLevy",
   "contributors": [

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "delphi-tools-raycast-extension",
-  "description": "Run local design and text utilities from delphitools in Raycast",
+  "description": "Run local design and text tools: contrast checker, color palettes, QR codes, favicons, image converter, background remover, SVG optimizer and more.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

@@ -3,7 +3,7 @@
   "name": "cold-turkey-blocker",
   "title": "Cold Turkey Blocker",
   "version": "1.3.2",
-  "description": "Manage Cold Turkey blocks, create them with optional initial websites and exceptions, and control starts, locks, device schedules, and breaks.",
+  "description": "Manage Cold Turkey Blocker blocks: start, stop and lock blocks, create new ones with websites and exceptions, and control breaks on Mac and Windows.",
   "icon": "extension-icon.png",
   "author": "nabecite",
   "license": "MIT",

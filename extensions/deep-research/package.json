@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "research",
   "title": "Deep Research",
-  "description": "Iterative Deep Research powered by Raycast AI Extensions.",
+  "description": "Run iterative, step-by-step deep research with Raycast AI and other AI extensions, and browse saved research topics.",
   "icon": "deep-research-icon.png",
   "author": "EvanZhouDev",
   "categories": [

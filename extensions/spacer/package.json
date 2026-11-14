@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spacer",
   "title": "Spacer",
-  "description": "Name your spaces & more...",
+  "description": "Name your macOS desktop spaces with custom names and icons, and switch to a space by name.",
   "icon": "spacer-icon.png",
   "author": "jd-solanki",
   "platforms": [

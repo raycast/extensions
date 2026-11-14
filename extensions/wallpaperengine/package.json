@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wallpaperengine",
-  "description": "Raycast Extension for controlling WallpaperEngine",
+  "description": "Control Wallpaper Engine on Windows: play, pause, stop or mute wallpapers, switch wallpapers, playlists and profiles per monitor, and hide icons.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cache-control-builder",
   "title": "Cache-Control Builder",
-  "description": "Build a HTTP Cache-Control response header",
+  "description": "Build an HTTP Cache-Control response header by picking directives like max-age, no-cache and public.",
   "icon": "command-icon.png",
   "author": "rkusa",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-time-tracking",
   "title": "Jira Time Tracking",
-  "description": "Log, view, and manage time against Jira issues",
+  "description": "Log time against Jira issues and view your monthly worklogs, for Jira Cloud and Jira Server.",
   "icon": "command-icon.png",
   "author": "niallpaterson",
   "contributors": [

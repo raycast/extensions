@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "beeminder",
   "title": "Beeminder",
-  "description": "Manage your Beeminder goals from Raycast",
+  "description": "View your Beeminder goals, enter datapoints and open goals in Beeminder.",
   "icon": "beelogo.png",
   "categories": [
     "Productivity",

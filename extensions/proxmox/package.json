@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proxmox",
   "title": "Proxmox",
-  "description": "Manage your Proxmox server from Raycast",
+  "description": "Start, stop, shut down, reboot and suspend Proxmox VE virtual machines, view storage and manage multiple Proxmox servers.",
   "icon": "icon.png",
   "author": "CzBiX",
   "contributors": [

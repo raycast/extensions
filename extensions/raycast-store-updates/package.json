@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-store-updates",
   "title": "Raycast Store Updates",
-  "description": "Never miss new extensions or extension updates ever again!",
+  "description": "See new and updated Raycast Store extensions in one chronological list or the menu bar, with changelogs, and ask AI to find recent updates.",
   "icon": "store-updates-icon.png",
   "author": "chrismessina",
   "contributors": [

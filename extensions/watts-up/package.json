@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "watts-up",
   "title": "Watt's up",
-  "description": "Check your Mac's power adapter wattage, charging power, battery health and charge status. Shows the negotiated power (watts, voltage, current) your charger delivers, plus battery level, cycle count and temperature — in Raycast or your menu bar.",
+  "description": "Check your Mac charger wattage, charging power and battery health, see apps using the most energy, toggle Low Power Mode and show watts in the menu bar.",
   "icon": "command-icon.png",
   "keywords": [
     "battery",

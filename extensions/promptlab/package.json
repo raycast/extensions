@@ -3,7 +3,7 @@
   "name": "promptlab",
   "title": "PromptLab",
   "version": "1.3.0",
-  "description": "Create custom AI commands using powerful placeholders",
+  "description": "Create custom AI commands with contextual placeholders like selected text or today's events, chat with files, and share commands.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [

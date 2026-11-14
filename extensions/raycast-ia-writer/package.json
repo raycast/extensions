@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ia-writer",
   "title": "iA Writer",
-  "description": "Create or search notes with Raycast",
+  "description": "Create quick notes and daily notes in iA Writer, and open iA Writer Quick Search with your query.",
   "icon": "logo.png",
   "author": "xvvhang",
   "categories": [

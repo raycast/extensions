@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linak-desk-controller",
   "title": "Linak Desk Controller",
-  "description": "Control the height of standing desks manufactured by Linak, for example the Ikea Idasen desk, over Bluetooth.",
+  "description": "Control a Linak standing desk like the IKEA IDÅSEN over Bluetooth: stand up, sit down or move it to a custom height from your Mac.",
   "icon": "icon.png",
   "author": "samuelkraft",
   "categories": [

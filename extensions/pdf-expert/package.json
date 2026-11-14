@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdf-expert",
   "title": "PDF Expert",
-  "description": "Navigate open tabs and recent documents in PDF Expert, and copy the current page as an image",
+  "description": "Switch between open PDF Expert tabs, browse recent PDF Expert documents, and copy the current page to the clipboard as an image.",
   "icon": "pdf-expert.png",
   "author": "mattiacolombomc",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "json-editor",
   "title": "JSON Editor",
-  "description": "All JSON operations in one editor.",
+  "description": "Format, minify, escape and filter JSON, and convert it to TypeScript, Go types or YAML.",
   "icon": "command-icon.png",
   "author": "HerbertLu",
   "contributors": [

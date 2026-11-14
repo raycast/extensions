@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
   "title": "Azure DevOps Repositories Search",
-  "description": "Search through Azure DevOps git repositories and find open Pull Requests",
+  "description": "Search Azure DevOps repositories, pipelines, pull requests, PBIs and work items, and see open pull requests in the menu bar.",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
   "contributors": [

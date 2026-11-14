@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macupdater",
   "title": "MacUpdater",
-  "description": "Get app updates and popular apps from macupdater.net",
+  "description": "See macOS apps updated yesterday and the top 1,000 most popular Mac apps from macupdater.net.",
   "icon": "update-command-icon.png",
   "author": "kall",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "who-is-off-today",
   "title": "Who Is off Today?",
-  "description": "See who is off today from remote.com",
+  "description": "See which employees are off today, using time-off data from Remote.com.",
   "icon": "remote.png",
   "author": "pejman_yaghmaie",
   "categories": [

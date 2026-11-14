@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safari",
   "title": "Safari",
-  "description": "Manage your Safari Tabs, History and Reading List",
+  "description": "Search Safari tabs, bookmarks, history and Reading List, switch to open tabs, copy tab URLs and add pages to your Reading List.",
   "categories": [
     "Applications",
     "Web"

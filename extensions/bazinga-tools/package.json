@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bazinga-tools",
   "title": "Bazinga Tools",
-  "description": "A shortcut to open tools on Bazinga.tools",
+  "description": "Search and open the developer tools on Bazinga.tools by name.",
   "icon": "command-icon.png",
   "author": "luin",
   "license": "MIT",

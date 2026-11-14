@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "just",
-  "description": "Quickly access justfile recipes from Raycast",
+  "description": "Browse and run justfile recipes from the just command runner across your projects, and bind recipes to hotkeys.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

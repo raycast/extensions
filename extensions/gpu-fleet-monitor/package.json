@@ -1,7 +1,7 @@
 {
   "name": "gpu-fleet-monitor",
   "title": "GPU Fleet Monitor",
-  "description": "Monitor GPU/CPU usage across SSH hosts. Connect via Ghostty, Cursor, or tmux.",
+  "description": "Monitor GPU and CPU usage across your SSH hosts, find free GPU machines, and connect via Ghostty, Cursor or tmux.",
   "version": "0.2.0",
   "icon": "command-icon.png",
   "author": "kazzart",

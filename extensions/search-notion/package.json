@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-notion",
   "title": "Notion Page Search",
-  "description": "Search Notion pages and open visited ones faster. No admin access required.",
+  "description": "Search Notion pages and reopen recently visited ones, without needing admin access or a Notion API integration.",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
   "contributors": [

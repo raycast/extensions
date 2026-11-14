@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "explain-command",
   "title": "Explain Command",
-  "description": "Let ChatGPT explain a command for you",
+  "description": "Paste a shell or terminal command and get a plain-language explanation from ChatGPT using your OpenAI API key.",
   "icon": "command-icon.png",
   "author": "maantje",
   "categories": [

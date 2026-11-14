@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "telegram",
   "title": "Telegram",
-  "description": "Browse chats, view messages, and send messages to your Telegram contacts and groups",
+  "description": "Browse Telegram chats, read and send messages to contacts and groups, and view or send to Saved Messages, on Mac and Windows.",
   "icon": "telegram.png",
   "author": "ikupenov",
   "platforms": [

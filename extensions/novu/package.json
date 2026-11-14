@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "novu",
   "title": "Novu",
-  "description": "List all the useful sites, trigger notification, and more",
+  "description": "Send Novu notification triggers, reuse recent triggers, and open Novu docs, API reference, GitHub and Discord.",
   "icon": "novu-g-light.png",
   "author": "djabarovgeorge",
   "license": "MIT",

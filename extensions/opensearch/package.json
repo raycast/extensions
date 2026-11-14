@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "opensearch",
   "title": "OpenSearch DevTools",
-  "description": "Query and manage OpenSearch clusters — API explorer, command presets, and search, keyboard-first.",
+  "description": "Query and manage OpenSearch clusters: run Dev Tools console requests, explore the REST API, run cluster health and cat commands, and search indices.",
   "icon": "icon.png",
   "author": "itggood2420",
   "categories": [

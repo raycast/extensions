@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spoqify",
   "title": "Spoqify",
-  "description": "Spoqify is an MIT-licensed dead-simple service that allows you to access Spotify playlists like an anonymous user",
+  "description": "Anonymize a Spotify song radio with Spoqify and open the resulting playlist in Spotify.",
   "icon": "icon.png",
   "author": "truex",
   "categories": [

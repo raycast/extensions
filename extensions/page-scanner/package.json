@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "page-scanner",
   "title": "Page Scanner",
-  "description": "Capture the tab in front as a vector PDF, through the Page Scanner Chrome extension.",
+  "description": "Capture the current browser tab as a vector PDF, PNG or JPEG using the Page Scanner Chrome extension, then save and copy the file.",
   "icon": "icon.png",
   "author": "sbd530",
   "categories": [

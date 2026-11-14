@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "supernova",
     "title": "Supernova",
-    "description": "Access your design system and everything that comes with it - Tokens, Assets, Components, even your entire documentation site. Use what you find directly in your tools, without switching context.",
+    "description": "Search your Supernova design system tokens, components, assets and documentation, and switch between design systems.",
     "icon": "command-icon.png",
     "author": "JiriTrecak",
     "categories": [

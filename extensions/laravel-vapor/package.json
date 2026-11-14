@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-vapor",
   "title": "Laravel Vapor",
-  "description": "Interacts with Laravel Vapor API",
+  "description": "Search Laravel Vapor projects, databases, networks, domains and caches, switch teams, and open them in the Vapor dashboard.",
   "icon": "vapor.png",
   "author": "tcampbPPU",
   "license": "MIT",

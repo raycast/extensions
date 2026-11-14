@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatwoot",
   "title": "Chatwoot",
-  "description": "The modern, open source, self-hosted customer support platform",
+  "description": "View Chatwoot conversations, contacts, inboxes and notifications, and manage canned responses, teams, portals and integrations.",
   "icon": "chatwoot.png",
   "author": "xmok",
   "platforms": [

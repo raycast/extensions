@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sip",
   "title": "Sip",
-  "description": "Access these Sip color management app features from Raycast: show color picker, open contrast checker, open settings, check contrast between two hex values, and add hex color to history.",
+  "description": "Open the Sip color picker and contrast checker on your Mac, check the contrast of two HEX colors, and add HEX colors to Sip's history.",
   "icon": "sip-icon.png",
   "author": "jameslyons",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anybox",
   "title": "Anybox",
-  "description": "Control Anybox with Raycast",
+  "description": "Search and save bookmarks in Anybox: save the current browser tab, clipboard or notes with tags and folders, and toggle Anydock.",
   "icon": "anybox-icon.png",
   "author": "anybox",
   "contributors": [

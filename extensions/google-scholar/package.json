@@ -3,7 +3,7 @@
   "name": "google-scholar",
   "version": "2.0.0",
   "title": "Google Scholar",
-  "description": "Search Google Scholar for academic articles, papers, and research.",
+  "description": "Search Google Scholar for academic articles, papers and research.",
   "icon": "extension-icon.png",
   "author": "leandro.maia",
   "license": "MIT",

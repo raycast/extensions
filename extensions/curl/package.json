@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "curl",
   "title": "cURL",
-  "description": "Keyboard-first HTTP client",
+  "description": "Make HTTP requests with a keyboard-first cURL client: set method, headers and body, inspect responses, copy as cURL and keep a request history.",
   "icon": "app-icon.png",
   "author": "jonathangiardino",
   "contributors": [

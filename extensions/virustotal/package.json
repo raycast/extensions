@@ -3,7 +3,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "virustotal",
   "title": "VirusTotal",
-  "description": "Check files, IP addresses, URLs, and hashes for malware using VirusTotal",
+  "description": "Check files, IP addresses, URLs and file hashes (MD5, SHA1, SHA256) for malware on VirusTotal, including from your clipboard.",
   "icon": "virustotal-icon.png",
   "author": "sadv1r",
   "contributors": [

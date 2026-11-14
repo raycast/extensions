@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vatlayer",
   "title": "vatlayer",
-  "description": "Validate VAT numbers, retrieve all or single EU VAT rates based on IP address or country code, convert prices in compliance with EU VAT rates and types, and more.",
+  "description": "Validate EU VAT numbers, get VAT rates by country code or IP address, and calculate VAT-compliant prices with the vatlayer API.",
   "icon": "vatlayer.png",
   "author": "xmok",
   "categories": [

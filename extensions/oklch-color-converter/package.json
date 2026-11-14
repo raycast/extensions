@@ -1,7 +1,7 @@
 {
   "name": "oklch-color-converter",
   "title": "OKLCH Color Converter",
-  "description": "Convert colors between formats with wide gamut support",
+  "description": "Convert colors between HEX, RGB, HSL, OKLCH, OKLab, Display P3 and Figma P3, with wide gamut and out-of-gamut handling.",
   "version": "1.0.0",
   "author": "strongeron",
   "icon": "icon.png",

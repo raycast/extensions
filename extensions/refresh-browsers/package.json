@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "refresh-browsers",
   "title": "Refresh Browsers",
-  "description": "Refresh all browser tabs",
+  "description": "Reload all tabs in Safari, Chrome, Edge and other Chromium or WebKit browsers on your Mac with one command.",
   "icon": "refresh-browser-icon.png",
   "author": "koinzhang",
   "license": "MIT",

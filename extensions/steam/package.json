@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "steam",
   "title": "Steam",
-  "description": "Search Steam games and users, view game details, and browse the games you own.",
+  "description": "Search Steam games and users, view game details and player counts, browse your owned games, and get game recommendations with Raycast AI.",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
   "contributors": [

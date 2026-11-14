@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adguard-home",
   "title": "AdGuard Home",
-  "description": "Control your AdGuard Home instance",
+  "description": "Control AdGuard Home: toggle or snooze DNS protection, view stats, query log, top clients and blocked domains, and manage custom filtering rules.",
   "icon": "command-icon.png",
   "version": "1.1.2",
   "author": "theplgeek",

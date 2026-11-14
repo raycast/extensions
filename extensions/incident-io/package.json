@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "incident-io",
   "title": "Incident.io",
-  "description": "Gets the incidents from Incident.io",
+  "description": "View incident.io incidents, see who is on call, search incidents in natural language with AI, and show live incidents in the menu bar.",
   "icon": "logo.png",
   "author": "nkl",
   "categories": [

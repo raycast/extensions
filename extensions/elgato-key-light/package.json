@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "elgato-key-light",
   "title": "Elgato Key Light",
-  "description": "Control your Elgato Key Lights with ease",
+  "description": "Control Elgato Key Light lamps: turn them on or off, adjust brightness and color temperature, and apply saved presets.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "composerize",
   "title": "Composerize",
-  "description": "Convert docker commands to docker-compose and vice versa",
+  "description": "Convert docker run commands to Docker Compose YAML and Docker Compose files back to docker run commands.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "categories": [

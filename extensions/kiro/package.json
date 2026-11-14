@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kiro",
   "title": "Kiro",
-  "description": "Control Kiro directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "description": "Search and open recent Kiro IDE projects, open Finder items with Kiro, and install, view or uninstall Kiro extensions.",
   "icon": "kiro-icon.png",
   "author": "jyothish-ram",
   "categories": [

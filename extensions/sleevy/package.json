@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sleevy",
   "version": "1.0.0",
-  "description": "Add, view, and delete items from Sleevy",
+  "description": "Save the URL on your clipboard to Sleevy and browse your saved bookmark library.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

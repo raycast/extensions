@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "2do",
   "title": "2Do",
-  "description": "Add, view, and edit 2Do tasks.",
+  "description": "Add, view and edit 2Do tasks on Mac, save web pages as tasks, and browse lists and smart lists to complete or open tasks.",
   "icon": "icon.png",
   "author": "danielhaven",
   "categories": [

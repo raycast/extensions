@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readwise-reader",
   "title": "Readwise Reader",
-  "description": "Interact with Readwise Reader",
+  "description": "Save links, selected URLs, the clipboard or the current browser tab to Readwise Reader, list documents and open Reader views.",
   "icon": "reader-logo.png",
   "author": "zach",
   "contributors": [

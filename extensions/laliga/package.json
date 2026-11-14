@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laliga",
   "title": "LaLiga",
-  "description": "A comprehensive extension for tracking La Liga matches, standings, and club information.",
+  "description": "Follow LaLiga standings, fixtures and results, club squads and players, plus Champions League and Europa League results.",
   "icon": "icon.png",
   "author": "anhthang",
   "contributors": [

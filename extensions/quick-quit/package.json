@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-quit",
   "title": "Quick Quit",
-  "description": "A Raycast extension to instantly quit custom groups of applications. Create custom categories and quit them with a quicklink or a dedicated hotkey.",
+  "description": "Quit custom groups of Mac apps at once, with categories you create and trigger by quicklink or hotkey.",
   "icon": "quickquit_logo.png",
   "author": "sriramHQ",
   "categories": ["Productivity", "System"],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "confluence",
   "title": "Confluence",
-  "description": "Quickly navigate, create and search Confluence through Raycast.",
+  "description": "Search Confluence pages, blogs and people, see recent and popular pages, and create pages, blogs and whiteboards across your Atlassian sites.",
   "icon": "command-icon.png",
   "author": "tbrown",
   "contributors": [

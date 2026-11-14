@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "loan-calculator",
   "title": "Loan Calculator",
-  "description": "Calculate loan payments with customizable terms and payment schedules",
+  "description": "Calculate loan payments, total interest and amortization with custom loan term, interest rate, compounding and payment frequency.",
   "icon": "icon.png",
   "author": "kylinwowo",
   "categories": ["Finance"],

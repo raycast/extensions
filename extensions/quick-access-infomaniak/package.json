@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-access-infomaniak",
   "title": "Quick Access Infomaniak",
-  "description": "Quick access to Infomaniak's manager pages",
+  "description": "Open Infomaniak Manager pages for your domains, web hosting and email services, on Mac and Windows.",
   "icon": "infomaniak-logo.png",
   "author": "apiaget",
   "platforms": [

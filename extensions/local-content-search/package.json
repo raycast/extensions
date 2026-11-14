@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "local-content-search",
   "title": "Local Content Search",
-  "description": "Search documents, photos, audio, and video locally with EmbeddingGemma 2 and independent background indexing.",
+  "description": "Find files on your Mac by describing their contents: documents, photos, audio and video, searched locally with EmbeddingGemma and background indexing.",
   "version": "0.1.0",
   "platforms": [
     "macOS"

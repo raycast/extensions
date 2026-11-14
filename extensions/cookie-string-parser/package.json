@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cookie-string-parser",
   "title": "Cookie String",
-  "description": "Parses your cookie string",
+  "description": "Parse an HTTP cookie string into readable key-value pairs, edit it and convert it to a JSON object.",
   "icon": "command-icon.png",
   "author": "NicolasMontone",
   "categories": [

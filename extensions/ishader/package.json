@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ishader",
   "title": "iShader",
-  "description": "Apply artistic shader effects to images including dithering, ASCII art, and brick-style transformations with real-time preview",
+  "description": "Apply dithering, ASCII art and LEGO-style brick shader effects to images with a real-time preview.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
