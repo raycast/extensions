@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 import { Action, ActionPanel, Icon, List, showToast, Clipboard, getSelectedText } from "@raycast/api";
 
@@ -20,8 +20,13 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
 
   const [searchText, setSearchText] = useState("");
 
+  // Increments on every new query; replies from a superseded fetch are dropped, so clearing the
+  // field (or typing on) while `translate` is still waiting cannot re-fill stale results.
+  const fetchSequence = useRef(0);
+
   const fetchTranslations = useCallback(
     async (searchTerm: string) => {
+      const sequence = ++fetchSequence.current;
       setSearchText(searchTerm);
       setLoading(true);
 
@@ -29,14 +34,16 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
         const input = createInputFromSearchTerm(searchTerm);
         const { data, error, url } = await translate(input);
 
+        if (sequence !== fetchSequence.current) return;
+
         if (error) {
           throw error;
         }
-
         setTranslations(data);
         setUrl(url);
         setLanguages([input.sourceLanguage, input.targetLanguage]);
       } catch (error) {
+        if (sequence !== fetchSequence.current) return;
         if (error instanceof Error) {
           showToast({
             title: "Error",
@@ -45,17 +52,21 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
         }
       }
 
+      if (sequence !== fetchSequence.current) return;
       setLoading(false);
     },
     [setTranslations, setUrl, setLanguages, setLoading],
   );
 
+  // Prefill (clipboard/selection) runs once on mount: depending on `searchText` re-reads it on
+  // every edit, so clearing the field resurrected the clipboard term in a loop.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only prefill
   useEffect(() => {
     if (isSearchFromClipboard) {
       (async () => {
         const clipboardText = await Clipboard.readText();
 
-        if (clipboardText && clipboardText !== searchText) {
+        if (clipboardText) {
           fetchTranslations(clipboardText);
         }
       })();
@@ -64,18 +75,30 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
       (async () => {
         const selectedText = await getSelectedText();
 
-        if (selectedText && selectedText !== searchText) {
+        if (selectedText) {
           fetchTranslations(selectedText);
         }
       })();
     }
-  }, [isSearchFromClipboard, isSearchFromSelection, fetchTranslations, searchText]);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only prefill
+  }, []);
 
   return (
     <List
       isLoading={loading}
       searchText={searchText}
-      onSearchTextChange={(text) => fetchTranslations(text)}
+      onSearchTextChange={(text) => {
+        if (text === "") {
+          // Esc cleared the search bar: invalidate the in-flight fetch, then drop the query and
+          // results in the same tick, so no later reply can resurrect the old term or results.
+          fetchSequence.current++;
+          setSearchText("");
+          setTranslations([]);
+          setLoading(false);
+          return;
+        }
+        fetchTranslations(text);
+      }}
       navigationTitle="Search dict.cc"
       searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
       throttle
