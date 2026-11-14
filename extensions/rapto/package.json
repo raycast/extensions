@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rapto",
+  "title": "Rapto",
+  "description": "Switch windows across desktops, apply layouts, change modes and open workspaces with Rapto, the window manager for macOS.",
+  "icon": "icon.png",
+  "author": "Levka",
+  "platforms": ["macOS"],
+  "categories": ["Productivity", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-window",
+      "title": "Switch Window",
+      "subtitle": "Rapto",
+      "description": "Search all open windows on all desktops and jump to one instantly.",
+      "mode": "view"
+    },
+    {
+      "name": "apply-layout",
+      "title": "Apply Layout",
+      "subtitle": "Rapto",
+      "description": "Arrange the windows of the current desktop into a layout, or pick the layout for Drag to Snap.",
+      "mode": "view"
+    },
+    {
+      "name": "change-mode",
+      "title": "Change Mode",
+      "subtitle": "Rapto",
+      "description": "Switch the current desktop between Manual, Auto Tiling and Drag to Snap.",
+      "mode": "view"
+    },
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "subtitle": "Rapto",
+      "description": "Bring back the apps of a saved workspace into their places.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
