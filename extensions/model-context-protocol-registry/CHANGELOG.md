@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Scrapewise MCP Server] - {PR_MERGE_DATE}
+
+- Add Scrapewise to the official registry: clean, matched, AI-ready product data from any website. Hosted Streamable HTTP server at https://mcp.scrapewise.ai/mcp through `mcp-remote`, with a Scrapewise API key as an `Authorization: Bearer` header.
+
 ## [Add Tesseract MCP Server] - 2026-11-14
 
 - Add Tesseract to the official registry: make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures, charged to your own Tesseract plan (free media each month, then paid). 8 tools. Hosted Streamable HTTP server at https://app.tesseract.dev/api/core/tesseract/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Tesseract account is required.
