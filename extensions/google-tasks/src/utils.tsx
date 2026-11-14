@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { Task } from "./types";
+import { AssignmentInfo, Task } from "./types";
 
 export const defaultListKey = "task-default-list-v1";
 
@@ -28,4 +28,33 @@ export function getIcon(task: Task): { source: Icon; tintColor?: Color } {
     return { source: Icon.Checkmark, tintColor: Color.Green };
   }
   return { source: Icon.Circle };
+}
+
+const surfaces = {
+  DOCUMENT: { source: "Google Docs", icon: Icon.Document },
+  SPACE: { source: "Google Chat", icon: Icon.SpeechBubble },
+  SURFACE_TYPE_UNSPECIFIED: { source: "Other", icon: Icon.Document },
+};
+
+export function assignmentSurface(info?: AssignmentInfo) {
+  return info ? surfaces[info.surfaceType ?? "SURFACE_TYPE_UNSPECIFIED"] : undefined;
+}
+
+export function assignmentDetails(info?: AssignmentInfo) {
+  const surface = assignmentSurface(info);
+  if (!info || !surface) return undefined;
+  const fileId = info.driveResourceInfo?.driveFileId;
+  const resourceKey = info.driveResourceInfo?.resourceKey;
+  const spaceId = info.spaceInfo?.space?.replace(/^spaces\//, "");
+  return {
+    ...surface,
+    linkToTask: info.linkToTask,
+    fileUrl: fileId
+      ? `https://drive.google.com/open?${new URLSearchParams({ id: fileId, ...(resourceKey ? { resourcekey: resourceKey } : {}) })}`
+      : undefined,
+    driveFileId: fileId,
+    resourceKey,
+    spaceUrl: spaceId ? `https://mail.google.com/chat/#chat/space/${spaceId}` : undefined,
+    space: info.spaceInfo?.space,
+  };
 }
