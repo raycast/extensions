@@ -60,9 +60,9 @@ function permissionHarness(options = {}) {
         if (!state.writable) throw new Error("EACCES");
       },
     },
-    "run-applescript": {
-      runAppleScript: async (script) => {
-        state.calls.push(script);
+    "@raycast/utils": {
+      runAppleScript: async (script, args, options) => {
+        state.calls.push({ script, args, options });
         if (state.run) return state.run(script, state);
         Object.assign(state, { mode: 0o644, uid: 0, gid: 0, writable: true });
         return "granted";
@@ -76,13 +76,16 @@ test("native permission request targets the unelevated account and verifies the 
   const { state, permissions } = permissionHarness();
   await permissions.getSysHostAccess();
   assert.equal(state.calls.length, 1);
-  assert.match(state.calls[0], /user:fixture-user allow read,write/);
-  assert.match(state.calls[0], /with administrator privileges with prompt/);
-  assert.match(state.calls[0], /\/usr\/sbin\/chown root:wheel/);
-  assert.match(state.calls[0], /\/bin\/chmod 0644/);
-  assert.match(state.calls[0], /quoted form of accountAccess/);
-  assert.match(state.calls[0], /\/bin\/test ! -L/);
-  assert.doesNotMatch(state.calls[0], /777|password\s+"|user name\s+"|sudo/);
+  const { script, args, options } = state.calls[0];
+  assert.deepEqual(Array.from(args), ["/fixture-only/hosts", "user:fixture-user allow read,write"]);
+  assert.match(script, /on run argv/);
+  assert.match(script, /with administrator privileges with prompt/);
+  assert.match(script, /\/usr\/sbin\/chown root:wheel/);
+  assert.match(script, /\/bin\/chmod 0644/);
+  assert.match(script, /quoted form of accountAccess/);
+  assert.match(script, /\/bin\/test ! -L/);
+  assert.doesNotMatch(script, /fixture-user|fixture-only|777|password\s+"|user name\s+"|sudo/);
+  assert.equal(options.timeout, 0, "Do not kill the native authentication dialog after the default 10 seconds");
   assert.equal(permissions.checkSysHostAccess(), true);
 });
 
@@ -110,7 +113,7 @@ test("unsafe owner, group, type, or mode is never accepted as enabled", () => {
 test("cancellation stays disabled and can be retried", async () => {
   const { state, permissions } = permissionHarness({ run: async () => "cancelled" });
   await assert.rejects(permissions.getSysHostAccess(), (error) => {
-    assert.match(permissions.getSysHostPermissionErrorMessage(error), /cancelled/);
+    assert.match(permissions.getSysHostPermissionErrorMessage(error), /canceled/);
     return true;
   });
   assert.equal(permissions.checkSysHostAccess(), false);
@@ -170,7 +173,9 @@ test(
     const { state, permissions } = permissionHarness({ username: 'fixture"\\name\n$(touch should-not-run)' });
     await permissions.getSysHostAccess();
     const script = path.join(dir, "permission.applescript");
-    fs.writeFileSync(script, state.calls[0]);
+    fs.writeFileSync(script, state.calls[0].script);
+    assert.equal(state.calls[0].args[1], `user:${state.username} allow read,write`);
+    assert.ok(!state.calls[0].script.includes(state.username));
     execFileSync("/usr/bin/osacompile", ["-o", path.join(dir, "permission.scpt"), script], { stdio: "pipe" });
     assert.ok(fs.existsSync(path.join(dir, "permission.scpt")));
   }
@@ -307,6 +312,11 @@ function uiHarness(overrides) {
           ];
         },
         useEffect() {},
+        useRef(initial) {
+          const index = cursor++;
+          if (!(index in state)) state[index] = { current: initial };
+          return state[index];
+        },
       },
       "@raycast/api": raycast,
     },
@@ -384,6 +394,37 @@ test("menu-bar permission action refreshes to the hosts menu after authorization
   assert.equal(ui.state[0], false);
 });
 
+test("menu-bar authentication exposes loading and ignores repeated enable actions", async () => {
+  const ui = uiHarness();
+  let complete;
+  let requests = 0;
+  const command = loadSource("switch.tsx", {
+    ...ui.overrides,
+    "./component": {},
+    "./const": {},
+    "./utils/common": { getHostCommonsCache: () => [] },
+    "./utils/file": {
+      checkSysHostAccess: () => false,
+      getSysHostAccess: () => {
+        requests++;
+        return new Promise((resolve) => {
+          complete = resolve;
+        });
+      },
+    },
+  }).default;
+  const firstRender = ui.render(command);
+  const enable = findAction(firstRender, "Enable Hosts Access");
+  const pending = enable();
+  assert.equal(ui.render(command).props.isLoading, true);
+  await enable();
+  await findAction(ui.render(command), "Waiting for macOS authorization…")();
+  assert.equal(requests, 1);
+  complete();
+  await pending;
+  assert.equal(ui.render(command).props.isLoading, false);
+});
+
 test("main command transitions from permission screen without changing hook order", () => {
   const ui = uiHarness();
   const command = loadSource("ihosts.tsx", {
@@ -439,17 +480,120 @@ function loadUpdate(overrides) {
   }).default;
 }
 
-test("update uses persisted hosts and obtains permission before writing", async (t) => {
-  const { files, target, state } = writerHarness(t);
-  const command = loadUpdate({
-    "@raycast/api": { showHUD: async () => {}, LocalStorage: { setItem: async () => {} } },
+function menuToggleHarness(fetchRemote) {
+  const ui = uiHarness();
+  const state = {
+    saved: [
+      { id: "remote", name: "Remote", state: "Disabled", isRemote: true, url: "https://fixture.invalid", ctime: 1 },
+      { id: "local", name: "Local", state: "Disabled", content: "127.0.0.4 local.fixture", ctime: 2 },
+    ],
+    writes: [],
+    saves: [],
+    fetchCalls: 0,
+  };
+  const command = loadSource("switch.tsx", {
+    ...ui.overrides,
+    "./component": { getItemIcon: () => ({}) },
+    "./const": { State: { Enable: "Enabled", Disable: "Disabled" }, HostFolderMode: {} },
     "./utils/common": {
-      getHostCommons: async () => [{ name: "Persisted", state: "Enabled", content: "127.0.0.3 persisted.fixture" }],
+      getHostCommonsCache: () => JSON.parse(JSON.stringify(state.saved)),
+      saveHostCommons: async (hosts) => {
+        state.saved = JSON.parse(JSON.stringify(hosts));
+        state.saves.push(state.saved);
+      },
     },
+    "./utils/file": {
+      checkSysHostAccess: () => true,
+      getContentFromUrl: async () => {
+        state.fetchCalls++;
+        return fetchRemote();
+      },
+      writeSysHostFile: async (content) => {
+        state.writes.push(content);
+      },
+      getSysHostFileHash: () => "fixture-hash",
+    },
+    "@raycast/api": { ...ui.overrides["@raycast/api"], LocalStorage: { setItem: async () => {} } },
+  }).default;
+  return { ui, state, render: () => ui.render(command) };
+}
+
+test("overlapping menu-bar toggles cannot overwrite an in-flight choice across renders", async () => {
+  let complete;
+  const remote = new Promise((resolve) => {
+    complete = resolve;
+  });
+  const { state, render } = menuToggleHarness(() => remote);
+  const oldRender = render();
+  const first = findAction(oldRender, "Remote")();
+  assert.equal(render().props.isLoading, true);
+  await findAction(oldRender, "Local")();
+  await findAction(render(), "Local")();
+  assert.equal(state.fetchCalls, 1);
+  assert.equal(state.saves.length, 0);
+  assert.equal(state.writes.length, 0);
+  complete("127.0.0.2 remote.fixture");
+  await first;
+  assert.equal(state.saved.find((host) => host.id === "remote").state, "Enabled");
+  assert.equal(state.saved.find((host) => host.id === "local").state, "Disabled");
+  assert.equal(render().props.isLoading, false);
+  await findAction(render(), "Local")();
+  assert.ok(state.saved.every((host) => host.state === "Enabled"));
+  assert.equal(state.writes.length, 2);
+  assert.match(state.writes[1], /remote\.fixture/);
+  assert.match(state.writes[1], /local\.fixture/);
+});
+
+test("failed remote toggles release the operation lock for a subsequent retry", async () => {
+  let fail = true;
+  const { state, render } = menuToggleHarness(async () => {
+    if (fail) throw new Error("Fixture download failed");
+    return "127.0.0.2 remote.fixture";
+  });
+  await findAction(render(), "Remote")();
+  assert.equal(state.writes.length, 0);
+  assert.equal(render().props.isLoading, false);
+  fail = false;
+  await findAction(render(), "Remote")();
+  assert.equal(state.fetchCalls, 2);
+  assert.equal(state.writes.length, 1);
+  assert.equal(render().props.isLoading, false);
+});
+
+test("update reads real saved-data fallback when the cache is empty and authorizes before writing", async (t) => {
+  const { files, target, state } = writerHarness(t);
+  const reads = [];
+  const cacheReads = [];
+  const localStorage = {
+    getItem: async (key) => {
+      reads.push(key);
+      return JSON.stringify([{ name: "Persisted", state: "Enabled", content: "127.0.0.3 persisted.fixture" }]);
+    },
+    setItem: async () => {},
+  };
+  const common = loadSource("utils/common.ts", {
+    "@raycast/api": {
+      Cache: class {
+        get(key) {
+          cacheReads.push(key);
+          return undefined;
+        }
+      },
+      LocalStorage: localStorage,
+    },
+    "./file": {},
+    "../const": { DefaultCacheCapacity: 1024, HostsCommonKey: "fixture-hosts-key" },
+    uuid: {},
+  });
+  const command = loadUpdate({
+    "@raycast/api": { showHUD: async () => {}, LocalStorage: localStorage },
+    "./utils/common": common,
     "./utils/file": { ...files, getSysHostFileHash: () => "fixture-hash" },
   });
   await command();
   assert.equal(state.permissionCalls, 1);
+  assert.deepEqual(cacheReads, ["fixture-hosts-key"]);
+  assert.deepEqual(reads, ["fixture-hosts-key"]);
   assert.match(fs.readFileSync(target, "utf8"), /persisted\.fixture/);
 });
 

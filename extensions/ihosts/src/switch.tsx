@@ -10,11 +10,12 @@ import {
   getSysHostFileHash,
   writeSysHostFile,
 } from "./utils/file";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function Command() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
   const [hasHostAccess, setHasHostAccess] = useState(checkSysHostAccess);
+  const operationInProgress = useRef(false);
 
   if (!hasHostAccess) {
     return (
@@ -23,6 +24,7 @@ export default function Command() {
           source: "switch.png",
           tintColor: Color.PrimaryText,
         }}
+        isLoading={isLoadingState}
       >
         <MenuBarExtra.Item title="Enable hosts editing for your macOS account" />
         <MenuBarExtra.Item title="Other apps running as your account will also have access" />
@@ -30,7 +32,8 @@ export default function Command() {
           title={isLoadingState ? "Waiting for macOS authorization…" : "Enable Hosts Access"}
           icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
           onAction={async () => {
-            if (isLoadingState) return;
+            if (operationInProgress.current) return;
+            operationInProgress.current = true;
             updateLoadingState(true);
             try {
               await getSysHostAccess();
@@ -39,6 +42,7 @@ export default function Command() {
             } catch (error) {
               await showHUD(getSysHostPermissionErrorMessage(error));
             } finally {
+              operationInProgress.current = false;
               updateLoadingState(false);
             }
           }}
@@ -49,6 +53,8 @@ export default function Command() {
   const hostCommonsState = getHostCommonsCache();
 
   async function onToggleItemState(id: string) {
+    if (operationInProgress.current) return;
+    operationInProgress.current = true;
     updateLoadingState(true);
     try {
       let target = hostCommonsState.find((item) => item.id === id && !item.isFolder);
@@ -90,6 +96,7 @@ export default function Command() {
     } catch (error) {
       await showHUD("opps! Something was wrong");
     } finally {
+      operationInProgress.current = false;
       updateLoadingState(false);
     }
   }
