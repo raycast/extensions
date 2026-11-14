@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multica",
+  "title": "Multica",
+  "description": "Search, create, and triage Multica issues, and keep an eye on your agents and runtimes",
+  "icon": "extension-icon.png",
+  "author": "adam_engebretson",
+  "repository": "github:adamgoose/raycast-multica",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "subtitle": "Multica",
+      "description": "Browse open issues and search across all issues, then change status, priority, or assignee, or comment",
+      "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "subtitle": "Multica",
+      "description": "Create an issue and assign it to a teammate or an agent",
+      "mode": "view"
+    },
+    {
+      "name": "delegate-task",
+      "title": "Delegate Task",
+      "subtitle": "Multica",
+      "description": "Describe the work and an agent writes and files the issue for you (Multica's Agent mode)",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "My Inbox",
+      "subtitle": "Multica",
+      "description": "Your Multica notifications and the open issues assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "inbox-menu-bar",
+      "title": "Inbox Menu Bar",
+      "subtitle": "Multica",
+      "description": "Unread inbox count in the menu bar, broken down by workspace",
+      "mode": "menu-bar",
+      "interval": "2m"
+    },
+    {
+      "name": "inbox-counts",
+      "title": "Inbox Counts",
+      "subtitle": "Multica",
+      "description": "Keeps each workspace's unread count in this command's subtitle. Run it to open My Inbox.",
+      "mode": "no-view",
+      "interval": "5m"
+    },
+    {
+      "name": "agents",
+      "title": "Agents & Runtimes",
+      "subtitle": "Multica",
+      "description": "Check agent status, recent runs, and which runtimes are online",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Optional. A Multica personal access token (Settings → Tokens). Leave empty to reuse the login from the Multica desktop app or CLI (~/.multica).",
+      "type": "password",
+      "required": false,
+      "placeholder": "mul_…"
+    },
+    {
+      "name": "profile",
+      "title": "CLI Profile",
+      "description": "Optional. Which ~/.multica profile to read when no API token is set, e.g. desktop-api.multica.ai. Defaults to the main config, then the most recently used profile.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "desktop-api.multica.ai"
+    },
+    {
+      "name": "serverUrl",
+      "title": "API URL",
+      "description": "Optional. Override the API server for self-hosted Multica. Defaults to the profile's server or https://api.multica.ai.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.multica.ai"
+    },
+    {
+      "name": "appUrl",
+      "title": "Web App URL",
+      "description": "Optional. Override the web app URL used for Open in Browser links.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://multica.ai"
+    },
+    {
+      "name": "demoMode",
+      "title": "Demo Mode",
+      "label": "Show sample data",
+      "description": "Use built-in sample workspaces, issues, and agents instead of your Multica account. Nothing is sent to Multica.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
