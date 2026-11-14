@@ -18,6 +18,7 @@ export const supportedBrowsers = [
   "Yandex",
   "Zen",
   "Dia",
+  "Ardia",
   "Aside",
   // Yab installs as `yab.app`, so `getDefaultApplication` reports the lowercase
   // name.
@@ -112,7 +113,7 @@ export function getChromiumTabUrlScript(bundleId: string, tabId: string): string
 }
 
 /**
- * Arc and Dia use a nested `tell window i` form to read the active tab of
+ * Arc, Dia and Ardia use a nested `tell window i` form to read the active tab of
  * every window. Only the active tab is read, never `tabs of window`: a user
  * can easily have a stale `meet.google.com/xxx-xxxx-xxx` tab open from an
  * earlier call, and enumerating tabs would return that old link instead of

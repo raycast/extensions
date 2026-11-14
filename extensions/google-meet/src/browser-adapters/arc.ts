@@ -4,7 +4,8 @@ import { getArcFamilyTabsScript, getSystemEventsWindowCountScript, UNSCRIPTABLE_
 import type { MeetingUrlSource } from "./types";
 
 /**
- * Arc and Dia (both built by The Browser Company) share the same nested
+ * Arc and Dia (both built by The Browser Company), and Ardia, whose
+ * scripting dictionary mirrors Dia's, share the same nested
  * `tell window i` scripting quirk, and both routinely fail to report the
  * active tab of a window that is otherwise perfectly normal — `URL of active
  * tab` raises `-1728` while a tab is opening, and for windows whose active
@@ -22,7 +23,7 @@ import type { MeetingUrlSource } from "./types";
  * Little Arc either isn't enumerated by Arc's `windows` list at all, or is
  * enumerated and errors on `active tab` exactly like a normal window does.
  */
-export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource {
+export function createArcFamilyAdapter(appName: "Arc" | "Dia" | "Ardia"): MeetingUrlSource {
   // Evidence accumulated across every poll, used only to explain an expired
   // deadline. Judging by a single poll — even the last one — would resurrect
   // the false positive this adapter exists to avoid: an ordinary window
@@ -54,7 +55,7 @@ export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource
       // window and an ordinary window that never exposed a URL look
       // identical from here.
       if (sawWindow && !readAnyUrl) {
-        return new MeetError("ARC_URL_UNREADABLE");
+        return createUrlUnreadableError(appName);
       }
 
       // Otherwise cross-check against System Events, which enumerates real
@@ -62,12 +63,29 @@ export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource
       // exposes, to catch a window missing from `windows` entirely.
       const systemEventsWindowCount = await getSystemEventsWindowCount(appName);
       if (systemEventsWindowCount > lastWindowCount) {
-        return new MeetError("ARC_URL_UNREADABLE");
+        return createUrlUnreadableError(appName);
       }
 
       return undefined;
     },
   };
+}
+
+/**
+ * Only Arc has Little Arc and Air Traffic Control, so only Arc gets that
+ * recovery advice (the error code's defaults). Dia and Ardia share the
+ * unreadable-window symptom but not the cause, so they get a message that
+ * names the right browser and a recovery step that applies to them.
+ */
+function createUrlUnreadableError(appName: "Arc" | "Dia" | "Ardia"): MeetError {
+  if (appName === "Arc") {
+    return new MeetError("ARC_URL_UNREADABLE");
+  }
+
+  return new MeetError("ARC_URL_UNREADABLE", {
+    message: `Couldn't read the meeting link from any ${appName} window.`,
+    recovery: `${appName} didn't expose the meeting tab's URL to Raycast. Try again, or copy the link from ${appName} manually.`,
+  });
 }
 
 async function getSystemEventsWindowCount(processName: string): Promise<number> {
