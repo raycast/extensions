@@ -3,18 +3,20 @@ import { OAuthService, getAccessToken } from "@raycast/utils";
 
 let email: string | undefined;
 
-function decodeJWT(token: string): { email?: string } {
+export function decodeJWT(token: string): { email?: string; sub?: string } {
   const payload = token.split(".")[1];
   const decoded = Buffer.from(payload, "base64").toString("utf-8");
   return JSON.parse(decoded);
 }
 
+// Google Cloud Project: https://ray.so/ci5QOJb
+export const GOOGLE_CLIENT_ID =
+  getAppFlavor() === "internal"
+    ? "859594387706-m8618flpnahvmr5j8jjni2sfrbiunurv.apps.googleusercontent.com"
+    : "859594387706-uunbhp90efuesm18epbs0pakuft1m1kt.apps.googleusercontent.com";
+
 export const google = OAuthService.google({
-  // Google Cloud Project: https://ray.so/ci5QOJb
-  clientId:
-    getAppFlavor() === "internal"
-      ? "859594387706-m8618flpnahvmr5j8jjni2sfrbiunurv.apps.googleusercontent.com"
-      : "859594387706-uunbhp90efuesm18epbs0pakuft1m1kt.apps.googleusercontent.com",
+  clientId: GOOGLE_CLIENT_ID,
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   scope:
