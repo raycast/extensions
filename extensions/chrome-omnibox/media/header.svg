@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="352" height="56" viewBox="0 0 352 56">
+  <style>
+    text { fill: #24292f; }
+    @media (prefers-color-scheme: dark) { text { fill: #f0f6fc; } }
+  </style>
+  <svg y="4" width="48" height="48" viewBox="0 0 512 512">
+    <defs>
+      <linearGradient id="blue" x1="80" y1="24" x2="416" y2="488" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#64A5FF"/>
+        <stop offset="0.48" stop-color="#3478F6"/>
+        <stop offset="1" stop-color="#2454D9"/>
+      </linearGradient>
+      <linearGradient id="glass" x1="256" y1="164" x2="256" y2="348" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#FFFFFF"/>
+        <stop offset="1" stop-color="#EAF2FF"/>
+      </linearGradient>
+    </defs>
+    <rect x="24" y="24" width="464" height="464" rx="108" fill="url(#blue)"/>
+    <rect x="25" y="25" width="462" height="462" rx="107" fill="none" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="2"/>
+    <rect x="64" y="174" width="384" height="184" rx="64" fill="#123C9C" fill-opacity="0.16"/>
+    <rect x="64" y="164" width="384" height="184" rx="64" fill="url(#glass)"/>
+    <g fill="none" stroke="#3071EA" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="150" cy="256" r="40"/>
+      <ellipse cx="150" cy="256" rx="17" ry="40"/>
+      <path d="M 110 256 H 190"/>
+      <path d="M 356 228 V 280 H 272 M 294 258 L 272 280 L 294 302" stroke-width="16"/>
+    </g>
+    <path d="M 232 224 V 288" fill="none" stroke="#3071EA" stroke-opacity="0.18" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+  <text x="60" y="28" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="32" font-weight="600">Chrome Omnibox</text>
+</svg>
