@@ -1,18 +1,20 @@
 import {
-  getSelectedText,
-  closeMainWindow,
-  popToRoot,
-  open,
-  LocalStorage,
   Clipboard,
+  closeMainWindow,
   getPreferenceValues,
+  getSelectedText,
+  LocalStorage,
+  open,
+  popToRoot,
 } from "@raycast/api";
 import { getSearchHistory, getStaticResult } from "./utils/handleResults";
+import { getSearchUrl } from "./utils/resultUtils";
 import { showErrorToast } from "./utils/showErrorToast";
 import { HISTORY_KEY } from "./utils/types";
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences.SearchSelectText>();
+  const extensionPreferences = getPreferenceValues<Preferences>();
 
   try {
     // Try to get selected text first, fall back to clipboard if enabled. A blank
@@ -23,20 +25,23 @@ export default async function Command() {
     } catch {
       // Nothing selected
     }
+
     if (!searchText && preferences.useClipboardFallback) {
       searchText = (await Clipboard.readText())?.trim() ?? "";
       if (!searchText) {
         throw new Error("No text selected, and the clipboard has no text");
       }
     }
+
     if (!searchText) {
       throw new Error("No text selected");
     }
-    await open(`https://www.google.com/search?q=${encodeURIComponent(searchText)}`);
+
+    await open(getSearchUrl(searchText));
     await closeMainWindow();
     await popToRoot({ clearSearchBar: true });
 
-    if (preferences.rememberSearchHistory) {
+    if (extensionPreferences.rememberSearchHistory) {
       const newSearch = { ...getStaticResult(searchText)[0], isHistory: true };
       const history = (await getSearchHistory()).filter((item) => item.url !== newSearch.url);
       history.unshift(newSearch);
