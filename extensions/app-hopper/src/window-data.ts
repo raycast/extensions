@@ -60,12 +60,6 @@ interface SnapshotCache {
   set(key: string, value: string): void;
 }
 
-interface WindowSearchState {
-  data: WindowSearchData;
-  isLoading: boolean;
-  error?: unknown;
-}
-
 function readSnapshot(cache?: SnapshotCache | null): WindowSearchData | undefined {
   try {
     const raw = cache?.get(CACHE_KEY);
@@ -77,19 +71,17 @@ function readSnapshot(cache?: SnapshotCache | null): WindowSearchData | undefine
   }
 }
 
-/** Own visible observations, load lifetime and completed-cache commits together. */
+/** Keep progressive observations separate from the last completed cache entry. */
 export function createWindowSearch({
   queries = systemQueries,
   cache,
 }: { queries?: WindowDataQueries; cache?: SnapshotCache | null } = {}) {
   let committed = readSnapshot(cache);
-  const data = committed ?? emptyWindowData();
-  let state: WindowSearchState = { data, isLoading: data.windows.length === 0 };
+  let data = committed ?? emptyWindowData();
   const listeners = new Set<() => void>();
-  let active: object | undefined;
 
-  function publish(next: WindowSearchState) {
-    state = next;
+  function publish(next: WindowSearchData) {
+    data = next;
     for (const listener of listeners) listener();
   }
 
@@ -102,58 +94,45 @@ export function createWindowSearch({
     }
   }
 
-  function cancel() {
-    active = undefined;
-    if (state.isLoading) publish({ ...state, isLoading: false });
-  }
-
-  async function refresh(): Promise<void> {
-    const run = {};
-    active = run;
-    const previous = state.data;
-    publish({ data: previous, isLoading: true });
+  async function load(signal: AbortSignal): Promise<void> {
+    signal.throwIfAborted();
     try {
       await loadWindowData(
-        (data) => {
-          if (active === run) publish({ data, isLoading: true });
+        (next) => {
+          if (!signal.aborted) publish(next);
         },
         queries,
-        previous,
+        data,
       );
-      if (active === run) commit(state.data);
     } catch (error) {
-      if (active === run) publish({ ...state, error });
-    } finally {
-      if (active === run) {
-        active = undefined;
-        publish({ ...state, isLoading: false });
-      }
+      // Native queries may fail after cancellation. Ignore that obsolete failure.
+      signal.throwIfAborted();
+      throw error;
     }
+    signal.throwIfAborted();
+    commit(data);
   }
 
   function removeWindow(target: Window) {
-    // The caller confirmed closure. Late enrichment from that observation is obsolete.
-    active = undefined;
     const withoutTarget = (snapshot: WindowSearchData) =>
       retainWindowData(
         snapshot,
         snapshot.windows.filter((window) => !sameWindow(window, target)),
       );
-    publish({ ...state, data: withoutTarget(state.data), isLoading: false });
+    publish(withoutTarget(data));
     // Prune only the last completed snapshot; never persist an in-flight partial observation.
     if (committed) commit(withoutTarget(committed));
   }
 
   return {
-    getSnapshot: () => state,
+    getSnapshot: () => data,
     subscribe(listener: () => void) {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
       };
     },
-    refresh,
-    cancel,
+    load,
     removeWindow,
   };
 }
