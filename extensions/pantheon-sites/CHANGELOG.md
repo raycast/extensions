@@ -1,6 +1,6 @@
 # com.matbrady.pantheon Changelog
 
-## [Large Account Support] - {PR_MERGE_DATE}
+## [Large Account Support] - 2026-11-14
 
 ### Fixed
 
