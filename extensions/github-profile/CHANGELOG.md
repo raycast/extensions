@@ -1,6 +1,6 @@
 # GitHub Profile Changelog
 
-## [Improve Dashboard and Loading Reliability] - {PR_MERGE_DATE}
+## [Improve Dashboard and Loading Reliability] - 2026-11-14
 
 - The contribution heatmap now appears first with light and dark appearances, recent totals, and streak statistics.
 - Profile details now use a compact layout, and repository previews include descriptions and activity statistics.
