@@ -28,7 +28,7 @@ Assign hotkeys in Raycast Settings → Extensions → ScreenOCR. Cancel a select
 
 ## macOS requirements
 
-Requires macOS 15 or later and Screen Recording permission for screen capture. The existing macOS implementation and capture preferences are unchanged by this Windows contribution.
+Requires macOS 15 or later and Screen Recording permission for screen capture.
 
 ## Windows requirements and languages
 

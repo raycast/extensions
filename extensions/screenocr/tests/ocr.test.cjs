@@ -165,6 +165,16 @@ test("Windows full-screen capture includes Raycast, then closes it before handli
   assert.ok(processIndex < closeIndex && closeIndex < copyIndex);
 });
 
+test("Windows keeps full-screen OCR text when closing Raycast fails", async () => {
+  const host = createHost({
+    closeError: new Error("Unable to close"),
+    preferences: { includeRaycast: true },
+  });
+  await host.load("src/recognize-text-fullscreen.ts").default();
+  assert.deepEqual(outputs(host), [["copy", "Example text"]]);
+  assert.equal(host.calls.filter(([name]) => name === "failure").length, 1);
+});
+
 test("Windows full-screen capture closes Raycast before capture by default", async () => {
   const host = createHost();
   await host.load("src/recognize-text-fullscreen.ts").default();
@@ -208,6 +218,17 @@ test("macOS full-screen capture closes Raycast after capture when included", asy
   const closeIndex = host.calls.findIndex(([name]) => name === "close");
   const copyIndex = host.calls.findIndex(([name]) => name === "copy");
   assert.ok(swiftIndex < closeIndex && closeIndex < copyIndex);
+});
+
+test("macOS keeps full-screen OCR text when closing Raycast fails", async () => {
+  const host = createHost({
+    closeError: new Error("Unable to close"),
+    platform: "darwin",
+    preferences: { includeRaycast: true },
+  });
+  await host.load("src/ocr/macos-commands.ts").recognizeTextFullscreenCommand();
+  assert.deepEqual(outputs(host), [["copy", "Example text"]]);
+  assert.equal(host.calls.filter(([name]) => name === "failure").length, 1);
 });
 
 test("Windows process uses an absolute executable, safe argument array and bounded execution", async () => {

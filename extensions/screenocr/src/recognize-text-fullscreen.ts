@@ -1,7 +1,7 @@
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { handleRecognitionOutcome } from "./ocr/result";
 import { RecognitionOutcome } from "./ocr/types";
-import { recognize } from "./utils";
+import { recognize, showFailureToast } from "./utils";
 
 export default async function command() {
   if (process.platform === "darwin") {
@@ -23,16 +23,18 @@ export default async function command() {
         error instanceof Error ? error.message : "Failed to recognize text",
     };
   }
+  let closeFailed = false;
+  let closeError: unknown;
   if (includeRaycast) {
     try {
       await closeMainWindow();
     } catch (error) {
-      outcome = {
-        status: "error",
-        message:
-          error instanceof Error ? error.message : "Failed to close Raycast",
-      };
+      closeFailed = true;
+      closeError = error;
     }
   }
   await handleRecognitionOutcome(outcome);
+  if (closeFailed) {
+    await showFailureToast(closeError, { title: "Could not close Raycast" });
+  }
 }

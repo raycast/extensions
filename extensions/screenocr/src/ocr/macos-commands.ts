@@ -4,6 +4,7 @@ import {
   LaunchProps,
 } from "@raycast/api";
 import { LaunchContext } from "../types";
+import { showFailureToast } from "../utils";
 import { handleRecognitionOutcome } from "./result";
 import { detectBarcode, recognizeText } from "./macos";
 
@@ -22,8 +23,20 @@ export async function recognizeTextFullscreenCommand() {
     getPreferenceValues<Preferences.RecognizeTextFullscreen>();
   if (!includeRaycast) await closeMainWindow();
   const outcome = await recognizeText(true);
-  if (includeRaycast) await closeMainWindow();
+  let closeFailed = false;
+  let closeError: unknown;
+  if (includeRaycast) {
+    try {
+      await closeMainWindow();
+    } catch (error) {
+      closeFailed = true;
+      closeError = error;
+    }
+  }
   await handleRecognitionOutcome(outcome);
+  if (closeFailed) {
+    await showFailureToast(closeError, { title: "Could not close Raycast" });
+  }
 }
 
 export async function detectBarcodeCommand() {
