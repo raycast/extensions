@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vivaldi-links",
+  "title": "Vivaldi Links",
+  "description": "Open any link in Vivaldi — a brand new window by default, a tab in the window you are already using with Ctrl+Enter.",
+  "icon": "extension-icon.png",
+  "author": "luan_andrade",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "defaultAction",
+      "title": "Enter Opens",
+      "description": "Which action Enter runs. The other one is always available on the second row, so Ctrl+Enter runs it.",
+      "default": "new-window",
+      "required": false,
+      "data": [
+        {
+          "title": "New Window",
+          "value": "new-window"
+        },
+        {
+          "title": "Tab in the Current Window",
+          "value": "new-tab"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "open-link",
+      "title": "Open Link in Vivaldi",
+      "subtitle": "Vivaldi Links",
+      "description": "Type or paste a link and open it in Vivaldi. Enter opens a new window, Ctrl+Enter a tab in the window you are using.",
+      "mode": "view"
+    },
+    {
+      "name": "open-clipboard-link",
+      "title": "Open Clipboard Link in Vivaldi",
+      "subtitle": "Vivaldi Links",
+      "description": "Open whatever link is on the clipboard in a new Vivaldi window, with no intermediate screen.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
