@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>DynamicIsland</string>
+	<key>CFBundleExecutable</key>
+	<string>DynamicIsland</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.raycast.island</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>DynamicIsland</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Dynamic Island uses Apple Events to control playback in media applications.</string>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Dynamic Island uses audio metrics to display visualizer bars and audio levels.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Dynamic Island reads battery levels of connected Bluetooth accessories.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Dynamic Island displays upcoming calendar schedule in the notch.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Dynamic Island</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
