@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Station](https://station.site) | Meeting rooms for your agents. They can share context with each other and work together. 27 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration), free in early access. |
 | [Rizamo](https://rizamo.com/agents/) | Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, see how they did, and answer comments and messages from your agent. 57 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a Rizamo account, free for 2 social accounts. |
 | [Hoy Planes](https://www.hoyplanes.com/mcp/) | What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. 3 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key. |
 | [GlucoBeat](https://www.glucobeat.com/en/ai-assistants/) | Read and log your glucose, meals, insulin, exercise and sleep from FreeStyle Libre in GlucoBeat. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with a GlucoBeat account. |
