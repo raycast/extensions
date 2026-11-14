@@ -5,6 +5,7 @@ import { terminusCmd } from "./utils";
 import { Sites } from "./types";
 import { TerminusSetup } from "./components/TerminusSetup";
 import { SiteDetail } from "./components/SiteDetail";
+import { dashboardUrl } from "./dashboard";
 
 function getMemberships(site: Sites[string]): string[] {
   if (!site.memberships) return [];
@@ -75,8 +76,6 @@ export default function Command() {
       return true;
     })
     .sort((a, b) => sites[a].name.localeCompare(sites[b].name));
-
-  const dashboardUrl = "https://dashboard.pantheon.io";
 
   return (
     <List
@@ -168,7 +167,7 @@ export default function Command() {
                     <Action.OpenInBrowser
                       icon={Icon.AppWindowList}
                       title="Open Pantheon Dashboard"
-                      url={`${dashboardUrl}/sites/${sites[key].id}`}
+                      url={dashboardUrl(sites[key])}
                     />
                     <Action
                       icon={Icon.ArrowClockwise}
