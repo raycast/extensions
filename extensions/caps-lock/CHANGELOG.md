@@ -1,5 +1,9 @@
 # Caps Lock Changelog
 
+## [Document Shift Hotkey Workaround] - {PR_MERGE_DATE}
+
+- Document the reported both-sided Shift hotkey failure when Caps Lock is enabled, the affected configuration, and the verified Control + Option + C workaround.
+
 ## [Initial Version] - 2026-10-13
 
 - Toggle the macOS Caps Lock state independently of the physical key and its remapping.
