@@ -10,6 +10,10 @@ export default async function WordCommand(props?: LaunchProps<{ arguments: Argum
     await showError(error.message);
   } else {
     const output = generateWords(safeLoremIpsumNumber);
-    await produceOutput(output);
+    try {
+      await produceOutput(output);
+    } catch {
+      await showError("Failed to copy generated words");
+    }
   }
 }

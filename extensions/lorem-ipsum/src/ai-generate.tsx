@@ -31,8 +31,12 @@ export default async function AICommand(props?: LaunchProps<{ arguments: Argumen
 
   await showToast(Toast.Style.Animated, notification);
 
-  const response = await AI.ask(prompt, { model: AI.Model["OpenAI_GPT-4o_mini"], creativity: "none" });
-  const output = response.trim();
+  try {
+    const response = await AI.ask(prompt, { model: AI.Model["OpenAI_GPT-4o_mini"], creativity: "none" });
+    const output = response.trim();
 
-  await produceOutput(output);
+    await produceOutput(output);
+  } catch {
+    await showError("Failed to generate content with AI");
+  }
 }
