@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "persian-calendar",
+  "title": "Persian Calendar",
+  "description": "An offline Persian (Jalali) calendar with monthly navigation, Persian dates, and Gregorian date conversion.",
+  "icon": "extension-icon.png",
+  "author": "mimsalavati",
+  "platforms": ["Windows", "macOS"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "persian-calendar",
+      "title": "Persian Calendar",
+      "subtitle": "Jalali Monthly Calendar",
+      "description": "Browse Persian calendar months.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-date",
+      "title": "Convert Date",
+      "subtitle": "Jalali ↔ Gregorian",
+      "description": "Convert Persian and Gregorian dates.",
+      "mode": "view"
+    },
+    {
+      "name": "today-date",
+      "title": "Today's Date",
+      "subtitle": "Persian Calendar",
+      "description": "Show today's Persian date.",
+      "mode": "no-view",
+      "interval": "10m",
+      "keywords": ["چندمه", "امروز", "تاریخ امروز", "today", "date"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.2.7",
+    "jalaali-js": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
