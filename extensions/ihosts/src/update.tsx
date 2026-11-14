@@ -1,11 +1,27 @@
 import { LocalStorage, showHUD } from "@raycast/api";
-import { getHostCommonsCache } from "./utils/common";
-import { getContentFromUrl, getSysHostFileHash, writeSysHostFile } from "./utils/file";
+import { getHostCommons } from "./utils/common";
+import {
+  getContentFromUrl,
+  getSysHostAccess,
+  getSysHostPermissionErrorMessage,
+  getSysHostFileHash,
+  writeSysHostFile,
+} from "./utils/file";
 import { State, SystemHostHashKey } from "./const";
 
 // Runs async. code in a no-view command
 export default async function Command() {
-  const hostCommonsState = getHostCommonsCache();
+  const hostCommonsState = await getHostCommons();
+  if (!hostCommonsState.length) {
+    await showHUD("No saved hosts. Open iHosts to configure hosts before updating.");
+    return;
+  }
+  try {
+    await getSysHostAccess();
+  } catch (error) {
+    await showHUD(getSysHostPermissionErrorMessage(error));
+    return;
+  }
   let hostContents = "# iHost\n";
   for (const item of hostCommonsState) {
     if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {

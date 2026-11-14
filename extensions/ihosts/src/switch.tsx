@@ -6,6 +6,7 @@ import {
   checkSysHostAccess,
   getContentFromUrl,
   getSysHostAccess,
+  getSysHostPermissionErrorMessage,
   getSysHostFileHash,
   writeSysHostFile,
 } from "./utils/file";
@@ -13,8 +14,9 @@ import { useState } from "react";
 
 export default function Command() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
+  const [hasHostAccess, setHasHostAccess] = useState(checkSysHostAccess);
 
-  if (!checkSysHostAccess()) {
+  if (!hasHostAccess) {
     return (
       <MenuBarExtra
         icon={{
@@ -22,15 +24,22 @@ export default function Command() {
           tintColor: Color.PrimaryText,
         }}
       >
+        <MenuBarExtra.Item title="Enable hosts editing for your macOS account" />
+        <MenuBarExtra.Item title="Other apps running as your account will also have access" />
         <MenuBarExtra.Item
-          title="Get write system hosts permission"
+          title={isLoadingState ? "Waiting for macOS authorization…" : "Enable Hosts Access"}
           icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
           onAction={async () => {
+            if (isLoadingState) return;
+            updateLoadingState(true);
             try {
               await getSysHostAccess();
-              await showHUD("Write Permission got");
+              setHasHostAccess(true);
+              await showHUD("Hosts access enabled");
             } catch (error) {
-              await showHUD("Failed to get Write Permission");
+              await showHUD(getSysHostPermissionErrorMessage(error));
+            } finally {
+              updateLoadingState(false);
             }
           }}
         />

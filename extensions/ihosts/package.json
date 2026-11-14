@@ -100,6 +100,7 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "build": "rm -rf dist/* && ray build -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
