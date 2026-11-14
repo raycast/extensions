@@ -1,0 +1,24 @@
+{
+  "models": [
+    {
+      "name": "models/gemini-3.8-flash",
+      "baseModelId": "gemini-3.8-flash",
+      "version": "3.8",
+      "displayName": "Gemini 3.8 Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "temperature": 1,
+      "maxTemperature": 2,
+      "thinking": true
+    },
+    {
+      "name": "models/gemini-embedding-2",
+      "baseModelId": "gemini-embedding-2",
+      "version": "2",
+      "displayName": "Gemini Embedding 2",
+      "supportedGenerationMethods": ["embedContent"]
+    }
+  ],
+  "nextPageToken": "page-2"
+}

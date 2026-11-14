@@ -1,0 +1,4 @@
+data: {"choices":[{"delta":{"content":"Hallo","role":"assistant"},"index":0}],"created":1,"model":"gemini-3.8-flash","object":"chat.completion.chunk"}
+
+data: {"choices":[{"delta":{"content":" Welt","role":"assistant"},"finish_reason":"stop","index":0}],"created":1,"model":"gemini-3.8-flash","object":"chat.completion.chunk","usage":{"completion_tokens":4,"prompt_tokens":6,"total_tokens":10}}
+

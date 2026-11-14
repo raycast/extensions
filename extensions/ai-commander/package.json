@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-commander",
+  "title": "AI-Commander",
+  "description": "Run your own AI prompts on selected text in any app, with your own API keys.",
+  "icon": "extension-icon.png",
+  "author": "dhimmel",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ai",
+    "prompt",
+    "rewrite",
+    "translate",
+    "summarize",
+    "byok",
+    "openrouter"
+  ],
+  "commands": [
+    {
+      "name": "run-prompt",
+      "title": "Run Prompt Quicklink",
+      "subtitle": "AI-Commander",
+      "description": "Runs a saved prompt for a quicklink. For everyday use, open Run Prompt.",
+      "mode": "no-view"
+    },
+    {
+      "name": "prompt-session",
+      "title": "Run Prompt",
+      "subtitle": "AI-Commander",
+      "description": "Pick a prompt, review the result and its changes, and insert it.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-prompts",
+      "title": "Manage Prompts",
+      "subtitle": "AI-Commander",
+      "description": "Create, edit, duplicate, import, and export prompts and snippets.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-models",
+      "title": "Models & Providers",
+      "subtitle": "AI-Commander",
+      "description": "Browse models, set favorites and the default model, and test providers.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "description": "Claude models go directly to Anthropic. Without this key, they run through OpenRouter.",
+      "type": "password",
+      "required": false,
+      "placeholder": "sk-ant-..."
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "GPT models go directly to OpenAI. Without this key, they run through OpenRouter.",
+      "type": "password",
+      "required": false,
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Gemini models go directly to Google. Use a paid project for work text. Without this key, they run through OpenRouter.",
+      "type": "password",
+      "required": false,
+      "placeholder": "AIza..."
+    },
+    {
+      "name": "openrouterApiKey",
+      "title": "OpenRouter API Key",
+      "description": "Enables all other model families, and any of the above without its own key.",
+      "type": "password",
+      "required": false,
+      "placeholder": "sk-or-..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.10.1",
+    "@raycast/utils": "2.3.3",
+    "diff": "9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "9",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run build && npm run typecheck && npm run lint && npm test",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

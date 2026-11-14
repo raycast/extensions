@@ -1,0 +1,9 @@
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_fixture","type":"message","role":"assistant","content":[],"usage":{"input_tokens":9,"output_tokens":1}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Partial"}}
+
+event: error
+data: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}
+
