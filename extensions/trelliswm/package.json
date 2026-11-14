@@ -1,0 +1,193 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trelliswm",
+  "title": "TrellisWM",
+  "description": "Control the TrellisWM window manager: zoom, move between spaces, and open named saved views",
+  "icon": "extension-icon.png",
+  "author": "sean_lea",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "saved-views",
+      "title": "Saved Views",
+      "description": "Name, open and save your nine TrellisWM views",
+      "mode": "view"
+    },
+    {
+      "name": "save-view",
+      "title": "Save View",
+      "description": "Choose a view, then save where you are looking into it. Asks before it replaces a view",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-view",
+      "title": "Go to View",
+      "description": "Choose a saved view by name and go to it",
+      "mode": "view"
+    },
+    {
+      "name": "show-everything",
+      "title": "Show Everything",
+      "description": "Zoom out to show every window you have open",
+      "mode": "no-view"
+    },
+    {
+      "name": "zoom-out",
+      "title": "Zoom out",
+      "description": "Step out one level",
+      "mode": "no-view"
+    },
+    {
+      "name": "zoom-in",
+      "title": "Zoom in",
+      "description": "Step in one level, toward the window you are using",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-back",
+      "title": "Go Back",
+      "description": "Go back to the previous place",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-forward",
+      "title": "Go Forward",
+      "description": "Go forward to the next place",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-left",
+      "title": "Go to Space on Left",
+      "description": "Move to the neighbouring space on the left",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-right",
+      "title": "Go to Space on Right",
+      "description": "Move to the neighbouring space on the right",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-up",
+      "title": "Go to Space Above",
+      "description": "Move to the neighbouring space above",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-down",
+      "title": "Go to Space Below",
+      "description": "Move to the neighbouring space below",
+      "mode": "no-view"
+    },
+    {
+      "name": "frame-window",
+      "title": "Frame Window",
+      "description": "Show the focused window on its own. Run again to go back",
+      "mode": "no-view"
+    },
+    {
+      "name": "frame-desktop",
+      "title": "Frame Desktop",
+      "description": "Show the Desktop on its own",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-desktop",
+      "title": "Toggle Desktop",
+      "description": "Hide or show the Desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "split-with-finder",
+      "title": "Split with Finder",
+      "description": "Split the current window with a new Finder window",
+      "mode": "no-view"
+    },
+    {
+      "name": "arrange-windows",
+      "title": "Arrange Windows",
+      "description": "Arrange all your windows",
+      "mode": "no-view"
+    },
+    {
+      "name": "float-all-windows",
+      "title": "Float All Windows",
+      "description": "Float all your windows on the Desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "description": "Open TrellisWM settings at a pane",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "pane",
+          "type": "dropdown",
+          "placeholder": "Pane",
+          "required": false,
+          "data": [
+            {
+              "title": "General",
+              "value": "general"
+            },
+            {
+              "title": "Windows",
+              "value": "windows"
+            },
+            {
+              "title": "Tabs",
+              "value": "tabs"
+            },
+            {
+              "title": "Appearance",
+              "value": "appearance"
+            },
+            {
+              "title": "Gestures",
+              "value": "gestures"
+            },
+            {
+              "title": "Apps",
+              "value": "apps"
+            },
+            {
+              "title": "Shortcuts",
+              "value": "shortcuts"
+            },
+            {
+              "title": "License",
+              "value": "license"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
