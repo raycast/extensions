@@ -16,18 +16,21 @@
     {
       "name": "switch-workspace",
       "title": "Switch Workspace",
+      "subtitle": "Rotara",
       "description": "Switch to a Rotara workspace",
       "mode": "view"
     },
     {
       "name": "move-window",
       "title": "Move Window to Workspace",
+      "subtitle": "Rotara",
       "description": "Move the last focused window to another Rotara workspace",
       "mode": "view"
     },
     {
       "name": "new-workspace",
       "title": "New Workspace",
+      "subtitle": "Rotara",
       "description": "Create a Rotara workspace and switch to it",
       "mode": "no-view",
       "arguments": [
