@@ -31,6 +31,9 @@ This extension includes AI tools for Raycast AI Chat:
 
 ## Tips
 
+- Attach a copied image or screenshot with **Attach Image from Clipboard** in New Draft's Actions menu (**⌘⇧V** on macOS, **Ctrl+Shift+V** on Windows).
+- Review or remove attachments in the **Images** field, or choose image files there. Up to 4 PNG, JPEG, WebP, or GIF images are supported. Images attach to the first post on each selected platform, and text is optional when images are attached.
+- Images upload only when you submit the draft. Failed uploads keep the form content and attachments so you can retry.
 - Use `---` on its own line to split content into a thread
 - Set a default social set via **Search Social Sets** to skip the picker when creating drafts
 - Platform selections are remembered per social set

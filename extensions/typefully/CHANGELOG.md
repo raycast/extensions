@@ -1,5 +1,11 @@
 # Typefully Changelog
 
+## [Clipboard Images] - {PR_MERGE_DATE}
+
+- Add Attach Image from Clipboard to New Draft, supporting screenshots, copied images, and image files on macOS and Windows.
+- Add an Images field to review, remove, or select up to four images, attached to the first post on each selected platform.
+- Support image-only drafts and wait for images to finish processing before creating, scheduling, or publishing a draft.
+
 ## [Voice Drafting Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
