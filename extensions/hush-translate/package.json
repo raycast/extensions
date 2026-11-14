@@ -1,0 +1,218 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hush-translate",
+  "title": "Hush Translate",
+  "description": "Translate text, the clipboard, a selection or a screenshot with Apple Intelligence, on your Mac. No account, no API key, nothing leaves the device.",
+  "icon": "extension_icon.png",
+  "author": "whamwong",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Type text and translate it.",
+      "mode": "view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Translate Clipboard",
+      "description": "Translate the text on the clipboard. An image on the clipboard is read with OCR first.",
+      "mode": "view"
+    },
+    {
+      "name": "selection",
+      "title": "Translate Selection",
+      "description": "Translate the text selected in the frontmost app.",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot",
+      "title": "Translate Screenshot",
+      "description": "Select an area of the screen and translate the text in it.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "toLang",
+      "type": "dropdown",
+      "required": false,
+      "title": "Translate into",
+      "description": "The language you usually translate into.",
+      "default": "zh-Hans",
+      "data": [
+        {
+          "value": "zh-Hans",
+          "title": "简体中文"
+        },
+        {
+          "value": "zh-Hant",
+          "title": "繁體中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "ja",
+          "title": "日本語"
+        },
+        {
+          "value": "ko",
+          "title": "한국어"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "de",
+          "title": "Deutsch"
+        },
+        {
+          "value": "es",
+          "title": "Español"
+        },
+        {
+          "value": "it",
+          "title": "Italiano"
+        },
+        {
+          "value": "pt",
+          "title": "Português"
+        },
+        {
+          "value": "nl",
+          "title": "Nederlands"
+        },
+        {
+          "value": "sv",
+          "title": "Svenska"
+        },
+        {
+          "value": "da",
+          "title": "Dansk"
+        },
+        {
+          "value": "nb",
+          "title": "Norsk"
+        },
+        {
+          "value": "tr",
+          "title": "Türkçe"
+        },
+        {
+          "value": "vi",
+          "title": "Tiếng Việt"
+        }
+      ]
+    },
+    {
+      "name": "altLang",
+      "type": "dropdown",
+      "required": false,
+      "title": "Fallback Language",
+      "description": "Used when the text is already in the language above.",
+      "default": "en",
+      "data": [
+        {
+          "value": "zh-Hans",
+          "title": "简体中文"
+        },
+        {
+          "value": "zh-Hant",
+          "title": "繁體中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "ja",
+          "title": "日本語"
+        },
+        {
+          "value": "ko",
+          "title": "한국어"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "de",
+          "title": "Deutsch"
+        },
+        {
+          "value": "es",
+          "title": "Español"
+        },
+        {
+          "value": "it",
+          "title": "Italiano"
+        },
+        {
+          "value": "pt",
+          "title": "Português"
+        },
+        {
+          "value": "nl",
+          "title": "Nederlands"
+        },
+        {
+          "value": "sv",
+          "title": "Svenska"
+        },
+        {
+          "value": "da",
+          "title": "Dansk"
+        },
+        {
+          "value": "nb",
+          "title": "Norsk"
+        },
+        {
+          "value": "tr",
+          "title": "Türkçe"
+        },
+        {
+          "value": "vi",
+          "title": "Tiếng Việt"
+        }
+      ]
+    },
+    {
+      "name": "autoCopy",
+      "type": "checkbox",
+      "required": false,
+      "title": "Clipboard",
+      "label": "Copy every translation automatically",
+      "description": "Copies each finished translation to the clipboard without pressing Return.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
