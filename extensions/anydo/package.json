@@ -1,0 +1,445 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anydo",
+  "title": "Any.do",
+  "description": "Manage your Any.do tasks from Raycast: smart quick add (Persian/Jalali and English), reminders, due alerts and reports.",
+  "icon": "anydo.png",
+  "author": "arixworks",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "tasks",
+      "title": "Tasks",
+      "subtitle": "Any.do",
+      "description": "One page to search, add, manage and be reminded of your Any.do tasks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Today, Week or Completed — or type a task like “meeting tomorrow 10”",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "due-alerts",
+      "title": "Due Alerts",
+      "subtitle": "Background",
+      "description": "Runs in the background and raises a notification when a task is due",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-tasks",
+      "title": "Search Any.do Tasks",
+      "description": "Search and filter open Any.do tasks by text, list or due window (today, tomorrow, week, overdue)."
+    },
+    {
+      "name": "create-task",
+      "title": "Create Any.do Task",
+      "description": "Create a task from free-form text. Understands Jalali/Persian dates and times such as 1405/08/15 19:00, tomorrow at 10, or 25 Aban."
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Any.do Task",
+      "description": "Mark an Any.do task as done, matched by title or id."
+    },
+    {
+      "name": "set-reminder",
+      "title": "Set Any.do Reminder",
+      "description": "Set or change the due date and reminder of a task using free-form text, including Jalali dates and repeats."
+    },
+    {
+      "name": "tasks-today",
+      "title": "Today on Any.do",
+      "description": "List today's and overdue Any.do tasks with counts."
+    }
+  ],
+  "keywords": ["tasks", "todo", "reminders", "any.do", "کارها", "تسک", "یادآور"],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "زبان رابط · UI language",
+      "description": "زبان منوها و متن‌های اکستنشن · Language of the extension UI",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        { "title": "فارسی", "value": "fa" },
+        { "title": "English", "value": "en" }
+      ]
+    },
+    {
+      "name": "dateStyle",
+      "title": "نمایش تاریخ · Date format",
+      "description": "تاریخ‌ها شمسی، میلادی یا هر دو نشان داده شوند",
+      "type": "dropdown",
+      "required": false,
+      "default": "jalali",
+      "data": [
+        { "title": "شمسی", "value": "jalali" },
+        { "title": "میلادی", "value": "gregorian" },
+        { "title": "هر دو", "value": "both" }
+      ]
+    },
+    {
+      "name": "countdown",
+      "title": "شمارش معکوس · Countdown",
+      "description": "روی هر تسک زمان باقی‌مانده نشان داده شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "نمایش «۳ ساعت مانده» روی تسک‌ها · Show time left",
+      "default": true
+    },
+    {
+      "name": "defaultList",
+      "title": "لیست پیش‌فرض · Default list",
+      "description": "نام دقیق لیست Any.do برای تسک‌های تازه",
+      "type": "textfield",
+      "required": false,
+      "default": "کاری",
+      "placeholder": "کاری"
+    },
+    {
+      "name": "defaultTime",
+      "title": "ساعت پیش‌فرض · Default time",
+      "description": "اگر متن تسک ساعت نداشته باشد، این ساعت استفاده می‌شود",
+      "type": "textfield",
+      "required": false,
+      "default": "09:00",
+      "placeholder": "09:00"
+    },
+    {
+      "name": "reminderOffset",
+      "title": "یادآور پیش‌فرض · Default reminder",
+      "description": "هنگام ساخت تسک، یادآور پیش‌فرض تنظیم شود",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        { "title": "بدون یادآور", "value": "none" },
+        { "title": "سرِ موعد", "value": "at" },
+        { "title": "۱۰ دقیقه قبل", "value": "10" },
+        { "title": "۳۰ دقیقه قبل", "value": "30" },
+        { "title": "۱ ساعت قبل", "value": "60" }
+      ]
+    },
+    {
+      "name": "pomodoroMinutes",
+      "title": "طول جلسه‌ی تمرکز · Focus length",
+      "description": "مدت پیش‌فرض حالت تمرکز (پومودورو)",
+      "type": "dropdown",
+      "required": false,
+      "default": "25",
+      "data": [
+        { "title": "۲۵ دقیقه", "value": "25" },
+        { "title": "۵۰ دقیقه", "value": "50" },
+        { "title": "۱۵ دقیقه", "value": "15" },
+        { "title": "۴۵ دقیقه", "value": "45" }
+      ]
+    },
+    {
+      "name": "alertEnabled",
+      "title": "هشدار سررسید · Due alert",
+      "description": "آلارم ویندوزی وقتی زمان تسک می‌رسد",
+      "type": "checkbox",
+      "required": false,
+      "label": "آلارم ویندوزی بده · Windows alarm",
+      "default": true
+    },
+    {
+      "name": "alertLeadMinutes",
+      "title": "چند دقیقه قبل هشدار · Lead minutes",
+      "description": "علاوه بر سرِ موعد، این‌قدر دقیقه قبل هم هشدار بده (۰ = فقط سرِ موعد)",
+      "type": "textfield",
+      "required": false,
+      "default": "15",
+      "placeholder": "15"
+    },
+    {
+      "name": "alertSound",
+      "title": "صدای هشدار · Alert sound",
+      "description": "نوتیف ویندوزی با صدا نمایش داده شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "با صدا · With sound",
+      "default": true
+    },
+    {
+      "name": "telegramEnabled",
+      "title": "خلاصه‌ی روزانه تلگرام · Daily Telegram summary",
+      "description": "هر روز صبح فهرست کارهای امروز و عقب‌افتاده به تلگرام فرستاده شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "ارسال خلاصه به تلگرام · Send the digest",
+      "default": false
+    },
+    {
+      "name": "telegramToken",
+      "title": "توکن ربات تلگرام · Telegram bot token",
+      "description": "توکن رباتی که خودت ساختی (از @BotFather)",
+      "type": "password",
+      "required": false,
+      "placeholder": "123456:ABC..."
+    },
+    {
+      "name": "telegramChatId",
+      "title": "Chat ID تلگرام · Telegram chat id",
+      "description": "شناسه‌ی چت/کانالی که خلاصه به آن فرستاده می‌شود",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "123456789"
+    },
+    {
+      "name": "telegramTime",
+      "title": "ساعت ارسال خلاصه · Summary time",
+      "description": "ساعت محلی ارسال پیام روزانه (۲۴ ساعته)",
+      "type": "textfield",
+      "required": false,
+      "default": "08:00",
+      "placeholder": "08:00"
+    },
+    {
+      "name": "weeklyTelegram",
+      "title": "گزارش هفتگی تلگرام · Weekly Telegram report",
+      "description": "یک‌بار در هفته خلاصه‌ی نمودار و روند کارها فرستاده شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "ارسال گزارش هفتگی · Send the weekly report",
+      "default": false
+    },
+    {
+      "name": "weeklyDay",
+      "title": "روز گزارش هفتگی · Weekly report day",
+      "description": "کدام روز هفته گزارش فرستاده شود",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "data": [
+        { "title": "شنبه", "value": "0" },
+        { "title": "یک‌شنبه", "value": "1" },
+        { "title": "دوشنبه", "value": "2" },
+        { "title": "سه‌شنبه", "value": "3" },
+        { "title": "چهارشنبه", "value": "4" },
+        { "title": "پنجشنبه", "value": "5" },
+        { "title": "جمعه", "value": "6" }
+      ]
+    },
+    {
+      "name": "weeklyTime",
+      "title": "ساعت گزارش هفتگی · Weekly report time",
+      "description": "ساعت محلی ارسال گزارش هفتگی",
+      "type": "textfield",
+      "required": false,
+      "default": "20:00",
+      "placeholder": "20:00"
+    },
+    {
+      "name": "defaultView",
+      "title": "نمای پیش‌فرض · Default view",
+      "description": "با چه فیلتری باز شود",
+      "type": "dropdown",
+      "required": false,
+      "default": "open",
+      "data": [
+        { "title": "همه‌ی باز", "value": "open" },
+        { "title": "امروز و عقب‌افتاده", "value": "today" },
+        { "title": "این هفته", "value": "week" },
+        { "title": "بدون تاریخ", "value": "nodate" },
+        { "title": "انجام‌شده‌ها", "value": "completed" }
+      ]
+    },
+    {
+      "name": "alarmSoundKind",
+      "title": "صدای هشدار · Alert sound",
+      "description": "کدام صدای ویندوز با نوتیف پخش شود",
+      "type": "dropdown",
+      "required": false,
+      "default": "reminder",
+      "data": [
+        { "title": "یادآور (پیش‌فرض)", "value": "reminder" },
+        { "title": "نوتیف معمولی", "value": "default" },
+        { "title": "پیام فوری", "value": "im" },
+        { "title": "ایمیل", "value": "mail" },
+        { "title": "زنگ ساعت", "value": "alarm" },
+        { "title": "بی‌صدا", "value": "silent" }
+      ]
+    },
+    {
+      "name": "alertSoundFile",
+      "title": "فایل صدای دلخواه · Custom sound file",
+      "description": "اختیاری: یک فایل WAV که هم‌زمان با هشدار پخش شود",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "twoPane",
+      "title": "نمای دوستونه · Two-pane view",
+      "description": "جزئیات تسک در پنل کناری نمایش داده شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "نمایش پنل جزئیات کنار لیست · Show the side panel",
+      "default": true
+    },
+    {
+      "name": "dailyLogEnabled",
+      "title": "خلاصه‌ی پایان روز در فایل · End-of-day file summary",
+      "description": "در پایان روز خلاصه‌ی کارهای امروز در فایل anydo-daily.md نوشته شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "نوشتن خلاصه‌ی روزانه · Write the daily summary",
+      "default": false
+    },
+    {
+      "name": "dailyLogTime",
+      "title": "ساعت خلاصه‌ی روزانه · Daily summary time",
+      "description": "چه ساعتی خلاصه‌ی روز نوشته شود",
+      "type": "textfield",
+      "required": false,
+      "default": "22:00",
+      "placeholder": "22:00"
+    },
+    {
+      "name": "logEnabled",
+      "title": "ثبت کارهای تمام‌شده در فایل · Log completed to file",
+      "description": "هر تسکی که انجام می‌شود در یک فایل مارک‌داون نوشته شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "ذخیره در anydo-completed.md · Save to the file",
+      "default": false
+    },
+    {
+      "name": "logDirectory",
+      "title": "پوشه‌ی فایل لاگ · Log folder",
+      "description": "فایل anydo-completed.md در این پوشه ساخته می‌شود",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "notionEnabled",
+      "title": "ثبت در Notion · Log to Notion",
+      "description": "هر تسک انجام‌شده به‌عنوان یک صفحه در دیتابیس نوشن ساخته شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "ارسال به Notion · Send to Notion",
+      "default": false
+    },
+    {
+      "name": "notionToken",
+      "title": "توکن Notion · Notion token",
+      "description": "Internal Integration Token (با دسترسی نوشتن به دیتابیس)",
+      "type": "password",
+      "required": false,
+      "placeholder": "secret_..."
+    },
+    {
+      "name": "notionDatabaseId",
+      "title": "شناسه دیتابیس Notion · Notion database id",
+      "description": "دیتابیسی که صفحه‌ها در آن ساخته می‌شوند",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "32-character id"
+    },
+    {
+      "name": "laterLabel",
+      "title": "نام بخش «بعداً» · “Later” section name",
+      "description": "عنوان بخش تسک‌های دورتر را خودت انتخاب کن",
+      "type": "textfield",
+      "required": false,
+      "default": "آینده",
+      "placeholder": "آینده / بلندمدت"
+    },
+    {
+      "name": "subtasksInPane",
+      "title": "زیرتسک‌ها در پنل · Subtasks in pane",
+      "description": "زیرتسک‌ها در همان پنل جزئیات نشان داده شوند و از همان‌جا تیک بخورند",
+      "type": "checkbox",
+      "required": false,
+      "label": "نمایش زیرتسک‌ها در پنل · Show subtasks",
+      "default": true
+    },
+    {
+      "name": "telegramDueAlerts",
+      "title": "هشدار تلگرام سرِ موعد · Instant Telegram alert",
+      "description": "وقتی زمان یک تسک می‌رسد، همان لحظه به تلگرام هم پیام برود",
+      "type": "checkbox",
+      "required": false,
+      "label": "هشدار لحظه‌ای در تلگرام · Instant alert",
+      "default": true
+    },
+    {
+      "name": "monthlyArchive",
+      "title": "آرشیو ماهانه · Monthly archive",
+      "description": "هر ماه یک گزارش فایل (MD و HTML زیبا) از کارهای تمام‌شده به تفکیک لیست ساخته شود",
+      "type": "checkbox",
+      "required": false,
+      "label": "ساخت خودکار آرشیو ماهانه · Build it automatically",
+      "default": false
+    },
+    {
+      "name": "monthlyArchiveDay",
+      "title": "روز ساخت آرشیو · Archive day",
+      "description": "چه روزی از ماه گزارش ماه قبل ساخته شود (۱ تا ۲۸)",
+      "type": "textfield",
+      "required": false,
+      "default": "1",
+      "placeholder": "1"
+    },
+    {
+      "name": "reportFontFile",
+      "title": "فایل فونت دلخواه · Custom font file",
+      "description": "اختیاری: فایل ttf/otf/woff2 فونت فارسی‌ات (مثلاً IRANSansX) تا داخل گزارش جاسازی شود · optional .ttf/.otf/.woff2 to embed in the report",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "reportFont",
+      "title": "فونت گزارش‌ها · Report font",
+      "description": "فونت فارسیِ گزارش‌های HTML (وزیرمتن، ایران‌سنس و …)",
+      "type": "dropdown",
+      "required": false,
+      "default": "Vazirmatn",
+      "data": [
+        { "title": "وزیرمتن (Vazirmatn)", "value": "Vazirmatn" },
+        { "title": "ایران‌سنس‌ایکس (نصب‌شده در ویندوز)", "value": "IRANSansX" },
+        { "title": "ساحل (Sahel) — وب", "value": "Sahel" },
+        { "title": "استعداد (Estedad) — وب", "value": "Estedad" },
+        { "title": "سیستم (Segoe UI / Tahoma)", "value": "Segoe UI" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "jalaali-js": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test:parser": "esbuild tools/test-parser.mts --bundle --platform=node --format=esm --outfile=.smoke/test-parser.mjs --external:@raycast/api && node .smoke/test-parser.mjs",
+    "test:archive": "esbuild tools/test-archive.mts --bundle --platform=node --format=esm --outfile=.smoke/test-archive.mjs --external:@raycast/api && node .smoke/test-archive.mjs",
+    "test:analyze": "esbuild tools/test-analyze.mts --bundle --platform=node --format=esm --outfile=.smoke/test-analyze.mjs --external:@raycast/api && node .smoke/test-analyze.mjs",
+    "smoke": "esbuild tools/smoke.mts --bundle --platform=node --format=esm --outfile=.smoke/smoke.mjs --external:@raycast/api && node .smoke/smoke.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
