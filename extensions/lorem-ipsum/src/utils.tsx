@@ -122,6 +122,10 @@ const renderMarkdownSegments = (segments: EmphasisSegment[]) =>
     })
     .join("");
 
+export const randomDocumentBlockCount = (): number => {
+  return 3 + Math.floor(Math.random() * 6);
+};
+
 export const generateMarkdownDocument = (blockCount: number): string => {
   return generateDocument(blockCount)
     .map((block) => {

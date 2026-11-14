@@ -78,6 +78,20 @@
       ]
     },
     {
+      "name": "markdown",
+      "title": "Generate Markdown",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random placeholder content as a Markdown document",
+      "mode": "no-view"
+    },
+    {
+      "name": "html",
+      "title": "Generate HTML",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random placeholder content as an HTML document",
+      "mode": "no-view"
+    },
+    {
       "name": "ai-generate",
       "title": "Generate with AI",
       "subtitle": "Lorem Ipsum",
