@@ -66,9 +66,8 @@ export default function Command() {
       }
       if (!target) return;
       target.state = target.state === State.Enable ? State.Disable : State.Enable;
-      await saveHostCommons(hostCommonsState);
       let hostContents = "# iHost\n";
-      hostCommonsState.forEach(async (item) => {
+      for (const item of hostCommonsState) {
         if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {
           item.content = await getContentFromUrl(item.url);
         }
@@ -83,7 +82,8 @@ export default function Command() {
             }
           });
         }
-      });
+      }
+      await saveHostCommons(hostCommonsState);
       await writeSysHostFile(hostContents);
       await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
       await showHUD("Host state toggled");

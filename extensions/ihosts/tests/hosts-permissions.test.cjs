@@ -402,6 +402,36 @@ test("main command transitions from permission screen without changing hook orde
   assert.equal(ui.state.length, count);
 });
 
+test("menu-bar switch waits for remote hosts before writing the target", async () => {
+  const ui = uiHarness();
+  let finishFetch;
+  let written;
+  const host = { id: "remote", name: "Remote", state: "Disabled", isRemote: true, url: "https://fixture.invalid" };
+  const command = loadSource("switch.tsx", {
+    ...ui.overrides,
+    "./component": { getItemIcon: () => ({}) },
+    "./const": { State: { Enable: "Enabled", Disable: "Disabled" }, HostFolderMode: {} },
+    "./utils/common": { getHostCommonsCache: () => [host], saveHostCommons: async () => {} },
+    "./utils/file": {
+      checkSysHostAccess: () => true,
+      getContentFromUrl: () =>
+        new Promise((resolve) => {
+          finishFetch = resolve;
+        }),
+      writeSysHostFile: async (content) => {
+        written = content;
+      },
+      getSysHostFileHash: () => "fixture-hash",
+    },
+    "@raycast/api": { ...ui.overrides["@raycast/api"], LocalStorage: { setItem: async () => {} } },
+  }).default;
+  const switching = findAction(ui.render(command), "Remote")();
+  assert.equal(written, undefined);
+  finishFetch("127.0.0.2 remote.fixture");
+  await switching;
+  assert.match(written, /127\.0\.0\.2 remote\.fixture/);
+});
+
 function loadUpdate(overrides) {
   return loadSource("update.tsx", {
     "./const": { State: { Enable: "Enabled" }, SystemHostHashKey: "fixture-hash-key" },
