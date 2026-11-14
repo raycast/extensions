@@ -87,9 +87,16 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
 
-Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key, and its message names the app in front.
 
-Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared.
+
+Filling needs two permissions for Raycast, in System Settings › Privacy & Security:
+
+- **Accessibility**, named **Device Control and Data Access** in recent macOS versions: Raycast must be turned on there
+- **Automation**: Raycast must be allowed to control System Events. The first time, macOS asks
+
+When one is missing, filling stops and opens its place in System Settings.
 
 To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
 
