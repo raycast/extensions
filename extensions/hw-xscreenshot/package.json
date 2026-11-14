@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hw-xscreenshot",
+  "title": "X Post Screenshot",
+  "description": "Turn the X (Twitter) post in your active browser tab into a clean screenshot image on your clipboard.",
+  "icon": "icon.png",
+  "author": "martin_mikusat",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "keywords": [
+    "x",
+    "twitter",
+    "tweet",
+    "post",
+    "screenshot",
+    "image",
+    "capture"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "typecheck": "tsc --noEmit",
+    "check-render": "node scripts/check-render.mjs",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "screenshot-x-post",
+      "title": "Screenshot X Post",
+      "description": "Render the X post in the active browser tab as an image and copy it to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-screenshot-folder",
+      "title": "Open X Screenshot Folder",
+      "description": "Open the folder holding your saved X post screenshots",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "theme",
+      "title": "Theme",
+      "description": "Colors of the rendered post card",
+      "type": "dropdown",
+      "required": false,
+      "default": "dark",
+      "data": [
+        {
+          "title": "Dark",
+          "value": "dark"
+        },
+        {
+          "title": "Dim",
+          "value": "dim"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        }
+      ]
+    },
+    {
+      "name": "closeOnSuccess",
+      "label": "Close the launcher when the screenshot is done",
+      "title": "After Capture",
+      "description": "Off keeps Raycast open and shows a result toast with a Show in Finder action",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "saveFolder",
+      "title": "Save Folder",
+      "description": "Where screenshots are saved as PNG; empty uses Pictures/hw_raycast_xscreenshot",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "node-html-parser": "^9.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  }
+}
