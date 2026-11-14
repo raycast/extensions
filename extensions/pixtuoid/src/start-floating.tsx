@@ -1,4 +1,5 @@
-import { openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
+import { openExtensionPreferences, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BinaryNotFoundError, predatesFloatingLaunch, startFloating } from "./pixtuoid";
 
 export default async function StartFloating() {
@@ -7,24 +8,18 @@ export default async function StartFloating() {
     await showHUD("🪟 Opening the Pixtuoid floating window…");
   } catch (e) {
     if (e instanceof BinaryNotFoundError) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(e, {
         title: "Pixtuoid not found",
         message: "Set the binary path in extension preferences.",
       });
       await openExtensionPreferences();
     } else if (predatesFloatingLaunch(e)) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(e, {
         title: "Pixtuoid is out of date",
         message: "Update pixtuoid to start the floating window from Raycast.",
       });
     } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't start the floating window",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Couldn't start the floating window" });
     }
   }
 }
