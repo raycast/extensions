@@ -1,6 +1,6 @@
 # com.matbrady.pantheon Changelog
 
-## [New Dashboard URLs] - {PR_MERGE_DATE}
+## [New Dashboard URLs] - 2026-11-14
 
 ### Changed
 
