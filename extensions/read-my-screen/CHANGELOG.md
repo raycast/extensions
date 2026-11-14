@@ -1,5 +1,9 @@
 # Read My Screen Changelog
 
+## [Fix crash on launch] - {PR_MERGE_DATE}
+
+- Upgrade the OpenAI SDK from v4 to v7. The v4 SDK fails to load in the store build with `Package subpath './_shims/auto/runtime' is not defined by "exports"`.
+
 ## [Update] - 2026-07-13
 
 - Add latest OpenAI, Anthropic, and Gemini models from a single preferences source and sync them into the Raycast manifest.

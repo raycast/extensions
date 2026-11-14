@@ -247,7 +247,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.0",
     "html-to-text": "^9.0.5",
-    "openai": "^4.77.0"
+    "openai": "^7.53.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
