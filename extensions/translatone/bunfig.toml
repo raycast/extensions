@@ -1,0 +1,7 @@
+[test]
+preload = ["./src/raycast/__test__/test-helpers.ts"]
+coverage = true
+coverageReporter = ["text", "lcov"]
+coverageDir = "coverage"
+coverageThreshold = { lines = 1.0, functions = 1.0 }
+coveragePathIgnorePatterns = ["**/*.tsx", "**/__test__/**"]
