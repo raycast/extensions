@@ -1,0 +1,262 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snaprender",
+  "title": "SnapRender",
+  "description": "Capture website screenshots and read pages as Markdown. Requires a SnapRender account and API key (a free plan is available).",
+  "icon": "icon.png",
+  "author": "snaprender",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "screenshot",
+    "website",
+    "capture",
+    "markdown",
+    "full page",
+    "pdf"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "screenshot-website",
+      "title": "Screenshot Website",
+      "subtitle": "SnapRender",
+      "description": "Capture a screenshot of any public URL with device, full page, dark mode and format options.",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot-current-tab",
+      "title": "Screenshot Current Tab",
+      "subtitle": "SnapRender",
+      "description": "Capture the page open in your frontmost browser tab and copy the image to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-page",
+      "title": "Read Page as Markdown",
+      "subtitle": "SnapRender",
+      "description": "Extract the readable content of a web page as Markdown.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "check-usage",
+      "title": "Check Usage",
+      "subtitle": "SnapRender",
+      "description": "Show the captures left this month, your plan and the reset date.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "take-screenshot",
+      "title": "Take Screenshot",
+      "description": "Capture a screenshot of a public web page. Saves the image to the Downloads folder and returns the file path. Each call uses one monthly capture."
+    },
+    {
+      "name": "read-page",
+      "title": "Read Page",
+      "description": "Read the content of a public web page as Markdown. Use it to answer questions about a page or summarize it. Each call uses one monthly capture."
+    },
+    {
+      "name": "get-usage",
+      "title": "Get Usage",
+      "description": "Get the SnapRender plan, captures used and left this month, and the date the monthly allowance resets."
+    }
+  ],
+  "ai": {
+    "instructions": "SnapRender renders public web pages. It cannot reach localhost, private networks or pages behind a login. Use read-page to read text and take-screenshot only when the user wants an image. When a result says the monthly captures are used up, do not retry: tell the user the reset date.",
+    "evals": [
+      {
+        "input": "@snaprender read https://example.com and summarize it in one sentence",
+        "mocks": {
+          "read-page": {
+            "url": "https://example.com/",
+            "wordCount": 28,
+            "truncated": false,
+            "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "read-page",
+              "arguments": {
+                "url": {
+                  "includes": "example.com"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "take-screenshot"
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes the page as a domain meant for illustrative examples"
+          }
+        ]
+      },
+      {
+        "input": "@snaprender take a full page screenshot of https://example.com on an iPhone",
+        "mocks": {
+          "take-screenshot": {
+            "filePath": "/Users/me/Downloads/snaprender-example.com-2026-01-15-10-00-00-a1b2c3.png",
+            "url": "https://example.com",
+            "format": "png",
+            "sizeBytes": 48213,
+            "capturesLeft": 187,
+            "image": "![Screenshot of https://example.com](file:///Users/me/Downloads/snaprender-example.com-2026-01-15-10-00-00-a1b2c3.png)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "take-screenshot",
+              "arguments": {
+                "url": {
+                  "includes": "example.com"
+                },
+                "fullPage": true,
+                "device": {
+                  "or": [
+                    "iphone_15_pro",
+                    "iphone_14"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "includes": "Downloads"
+          }
+        ]
+      },
+      {
+        "input": "@snaprender how many captures do I have left this month",
+        "mocks": {
+          "get-usage": {
+            "plan": "free",
+            "capturesUsed": 13,
+            "capturesLimit": 200,
+            "capturesLeft": 187,
+            "extraCredits": 0,
+            "periodStart": "2026-01-01",
+            "resetsAt": "2026-02-01"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-usage"
+          },
+          {
+            "includes": "187"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your SnapRender API key. Create a free key at https://app.snap-render.com/auth/signup",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk_live_..."
+    },
+    {
+      "name": "defaultFormat",
+      "title": "Default Format",
+      "description": "Image format used when a command does not ask for one.",
+      "type": "dropdown",
+      "required": false,
+      "default": "png",
+      "data": [
+        {
+          "title": "PNG",
+          "value": "png"
+        },
+        {
+          "title": "JPEG",
+          "value": "jpeg"
+        },
+        {
+          "title": "WebP",
+          "value": "webp"
+        },
+        {
+          "title": "PDF",
+          "value": "pdf"
+        }
+      ]
+    },
+    {
+      "name": "defaultDevice",
+      "title": "Default Device",
+      "description": "Device emulated when a command does not ask for one.",
+      "type": "dropdown",
+      "required": false,
+      "default": "desktop",
+      "data": [
+        {
+          "title": "Desktop (1280 x 800)",
+          "value": "desktop"
+        },
+        {
+          "title": "MacBook Pro",
+          "value": "macbook_pro"
+        },
+        {
+          "title": "iPhone 15 Pro",
+          "value": "iphone_15_pro"
+        },
+        {
+          "title": "iPhone 14",
+          "value": "iphone_14"
+        },
+        {
+          "title": "Pixel 7",
+          "value": "pixel_7"
+        },
+        {
+          "title": "iPad Pro",
+          "value": "ipad_pro"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
