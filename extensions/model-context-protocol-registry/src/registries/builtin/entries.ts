@@ -10,7 +10,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "openany",
     title: "OpenAny",
     description:
-      "One MCP for 3,200+ APIs and 168+ AI models: search APIs, inspect schemas and pricing, and run calls with one OpenAny key. Browsing, search and price checks are free and need no key. Only run_api requires Authorization: Bearer <OPENANY_API_KEY>; create a key at https://openany.si/dashboard?page=api-keys and store it in client secrets, never in chat. Hosted Streamable HTTP at https://mcp.openany.si. The advanced full catalog is https://mcp.openany.si/mcp. Official registry: si.openany/openany v0.1.2. MIT. Operator: Alephant AI LLC.",
+      "OpenAny is the B2A (business to agent) marketplace: one MCP endpoint for 3,200+ APIs and 168+ AI models, one key, pay per call. Get started: 1) Add https://mcp.openany.si to your MCP client. 2) Ask \"What can OpenAny do for me?\" 3) Try a real task, like recent tweets, a domain's backlinks, the bitcoin price, the latest CPI, or an image. Browsing, search and pricing are free; only run_api needs an OpenAny API key.",
     icon: "https://openany.si/apple-touch-icon.png",
     homepage: "https://openany.si/mcp/",
     configuration: {
