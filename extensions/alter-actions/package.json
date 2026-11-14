@@ -18,7 +18,8 @@
       "name": "run-action",
       "title": "Run Alter Action",
       "description": "Choose a saved Alter callback, prepare input, and review it before opening the action in Alter.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Alter"
     }
   ],
   "dependencies": {
@@ -31,14 +32,12 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "tsx": "^4.21.0",
     "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts"
+    "typecheck": "tsc --noEmit"
   }
 }
