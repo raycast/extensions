@@ -9,4 +9,4 @@ The extension provides two commands:
 
 Set **Folders** in the extension preferences to a comma-separated list of paths. A leading `~` is supported, and the default is `~/Downloads, ~/Desktop`. Empty entries and duplicate paths are ignored.
 
-Items only ever go to the macOS Trash, so they remain recoverable. Clean Folders uses `/usr/bin/trash` and has no `rm` path anywhere in its implementation.
+Items only ever go to the macOS Trash, so they remain recoverable.
