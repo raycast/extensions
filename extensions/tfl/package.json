@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tfl",
   "title": "TFL",
-  "description": "See live TfL (Transport for London) arrivals at stops and stations, and track disruptions on your favourite lines and stops in the menu bar.",
+  "description": "See live TfL (Transport for London) arrivals at stops and stations, and track disruptions on your favorite lines and stops in the menu bar.",
   "icon": "icon.png",
   "author": "haneenmahdin",
   "categories": [
