@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Raw API responses from a real Outseta account: may contain customer PII. Never commit.
+/fixtures/raw/
+
+# Development-only files. They are tracked in this repository (committed before these rules),
+# but `npm run publish` stages the extension with `git add`, so these rules keep them out of the
+# Raycast Store submission. Add new files here with `git add -f`.
+/scripts/
+/.githooks/
+/.env.example
