@@ -1,6 +1,10 @@
 # Brew Changelog
 
-## [CLI search keywords] - {PR_MERGE_DATE}
+## [Handle missing package descriptions] - {PR_MERGE_DATE}
+
+- Omit missing formula and cask descriptions from list subtitles instead of passing `null` to the UI.
+
+## [CLI search keywords] - 2026-11-09
 
 - Fixed: Show Upgrades answers to "outdated" again. The keyword was removed by accident and is restored
 - New: root search finds Show Installed with "list", Manage Taps with "untap" or "trust", and Clean up with "cleanup"
