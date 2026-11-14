@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "calendar-availability-image",
+  "title": "Calendar Availability Image",
+  "description": "Renders an anonymized week view of your free time slots from a published ICS calendar and copies it to the clipboard.",
+  "icon": "icon.png",
+  "author": "alexander-krause-glau",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy-availability",
+      "title": "Copy Calendar Availability Image",
+      "description": "Renders the upcoming weeks as an image without event titles and copies it to the clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "icsUrl",
+      "title": "ICS Link",
+      "description": "Published ICS link of your calendar, e.g. from Outlook on the web (Settings → Calendar → Shared calendars) or Google Calendar (secret address in iCal format).",
+      "type": "password",
+      "required": true,
+      "placeholder": "https://example.com/calendar.ics"
+    },
+    {
+      "name": "weeks",
+      "title": "Time Range",
+      "description": "Number of weeks, starting with the current week.",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1 Week",
+          "value": "1"
+        },
+        {
+          "title": "2 Weeks",
+          "value": "2"
+        },
+        {
+          "title": "3 Weeks",
+          "value": "3"
+        },
+        {
+          "title": "4 Weeks",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "startHour",
+      "title": "Workday Start (Hour)",
+      "description": "First hour shown, e.g. 8.",
+      "type": "textfield",
+      "required": false,
+      "default": "8",
+      "placeholder": "8"
+    },
+    {
+      "name": "endHour",
+      "title": "Workday End (Hour)",
+      "description": "End of the range shown, e.g. 18.",
+      "type": "textfield",
+      "required": false,
+      "default": "18",
+      "placeholder": "18"
+    },
+    {
+      "name": "minSlotMinutes",
+      "title": "Shortest Free Slot",
+      "description": "Free gaps shorter than this are not marked as free.",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "15 Minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 Minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 Minutes",
+          "value": "45"
+        },
+        {
+          "title": "60 Minutes",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "name": "tentativeIsBusy",
+      "title": "Tentative Events",
+      "label": "Treat as busy",
+      "description": "When off, tentatively accepted events remain visible as free time.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "includeWeekend",
+      "title": "Weekend",
+      "label": "Show Saturday and Sunday",
+      "description": "Shows seven instead of five days per week.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.0",
+    "@raycast/utils": "^2.3.3",
+    "@resvg/resvg-wasm": "^2.6.2",
+    "ical.js": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "esbuild test/*.test.ts --bundle --platform=node --outdir=.tmp/test --log-level=warning && TZ=Europe/Berlin node --test \".tmp/test/*.test.js\"",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
