@@ -9,7 +9,8 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "noEmit": true
