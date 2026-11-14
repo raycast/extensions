@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "tesseract",
+    title: "Tesseract",
+    description:
+      "Make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures from your conversation, charged to your own Tesseract plan. 8 tools; each job takes a price ceiling. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Tesseract account is required. The plan includes free media each month, then it is paid.",
+    icon: "https://raw.githubusercontent.com/opentech-dev/tesseract-claude-plugin/v1.0.0/assets/logo-square.png",
+    homepage: "https://tesseract.dev/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.tesseract.dev/api/core/tesseract/mcp"],
+    },
+    remoteUrl: "https://app.tesseract.dev/api/core/tesseract/mcp",
+  },
+  {
     name: "rizamo",
     title: "Rizamo",
     description:

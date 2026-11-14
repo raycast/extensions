@@ -57,6 +57,8 @@ absolute executable path in the extension preferences.
 
 - **Search ClaudeScope** — debounced full-text search with exact message links.
 - **ClaudeScope Recent Sessions** — browse and locally filter the 75 most recent sessions.
+- **ClaudeScope Live Agents** — watch sessions active in the last 15 minutes, grouped by
+  whether they wait for you, refreshed every 5 seconds. Requires ClaudeScope 0.27.0 or later.
 - **Open ClaudeScope** — start the daemon if needed and open the local web app.
 
 ## Privacy
