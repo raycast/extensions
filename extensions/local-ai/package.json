@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-ai",
+  "title": "Local AI",
+  "description": "Run your own AI commands on selected text with Apple's on-device model. No API keys, no subscription.",
+  "icon": "extension-icon.png",
+  "author": "MatloobAltaf",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "run-ai-command",
+      "title": "AI Commands",
+      "description": "Run, create and manage your AI commands",
+      "mode": "view"
+    },
+    {
+      "name": "run-command",
+      "title": "Run AI Command from Hotkey",
+      "description": "Runs an AI command from its Quicklink hotkey without opening Raycast. Create a Quicklink in AI Commands, then assign it a hotkey",
+      "mode": "no-view"
+    },
+    {
+      "name": "ask-local-ai",
+      "title": "Ask Local AI",
+      "description": "Ask the on-device model a quick question",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Question",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "chat-with-local-ai",
+      "title": "Chat with Local AI",
+      "description": "Have a saved conversation with the on-device model",
+      "mode": "view"
+    },
+    {
+      "name": "check-setup",
+      "title": "Check Setup",
+      "description": "Check that the on-device model is ready to use",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultModel",
+      "type": "textfield",
+      "title": "Default Model",
+      "description": "Model for new commands. Check Setup lists the models this Mac offers.",
+      "default": "system",
+      "required": false
+    },
+    {
+      "name": "defaultCreativity",
+      "type": "dropdown",
+      "title": "Default Creativity",
+      "description": "Creativity for new commands.",
+      "default": "normal",
+      "required": false,
+      "data": [
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+          "title": "Precise",
+          "value": "precise"
+        }
+      ]
+    },
+    {
+      "name": "quickAiIncludeSelection",
+      "type": "checkbox",
+      "title": "Ask Local AI",
+      "label": "Include selected text as context",
+      "description": "Include the selected text as context in Ask Local AI.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "copySelectionFallback",
+      "type": "checkbox",
+      "title": "Selection",
+      "label": "Copy selection in apps that don't share it",
+      "description": "When running a command from its hotkey and the app does not let Raycast read the selected text, copy it and restore your clipboard right after. The copy may appear in clipboard history.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "timeoutSeconds",
+      "type": "textfield",
+      "title": "Timeout (Seconds)",
+      "description": "How long to wait for the on-device model before giving up.",
+      "default": "60",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9",
+    "prettier": "^3",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:fm": "FM_INTEGRATION=1 vitest run src/lib/starters.integration.test.ts",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}
