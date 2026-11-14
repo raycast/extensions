@@ -23,7 +23,7 @@ export function parseEntry(line: string): { path: string; used: Date } | undefin
 
 // Spotlight query for Word documents, newest use first. No shell is involved.
 async function recentDocuments(days: number): Promise<RecentDoc[]> {
-  const query = `(kMDItemContentTypeTree == "org.openxmlformats.wordprocessingml.document" || kMDItemContentTypeTree == "com.microsoft.word.doc") && kMDItemLastUsedDate >= $time.today(-${days})`;
+  const query = `(kMDItemContentTypeTree == "org.openxmlformats.wordprocessingml.document" || kMDItemContentTypeTree == "com.microsoft.word.doc" || kMDItemContentTypeTree == "org.openxmlformats.wordprocessingml.document.macroenabled" || kMDItemFSName == "*.docm"c) && kMDItemLastUsedDate >= $time.today(-${days})`;
   const { stdout } = await run("/usr/bin/mdfind", ["-0", "-attr", "kMDItemLastUsedDate", query], {
     maxBuffer: 4_000_000,
     timeout: 15_000,
@@ -78,7 +78,7 @@ export default function RecentDocuments() {
       {data.map((doc) => (
         <List.Item
           key={doc.path}
-          title={doc.name.replace(/\.docx?$/i, "")}
+          title={doc.name.replace(/\.doc[xm]?$/i, "")}
           subtitle={doc.folder.replace(home, "~")}
           icon={{ fileIcon: doc.path }}
           accessories={[{ date: doc.used, tooltip: `Last used ${doc.used.toLocaleString()}` }]}

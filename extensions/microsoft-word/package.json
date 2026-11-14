@@ -19,17 +19,14 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.4",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "tsx": "^4.20.6"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/word-client.test.ts",
-    "test:live": "tsx scripts/live-test.ts"
+    "typecheck": "tsc --noEmit"
   },
   "name": "microsoft-word",
   "title": "Microsoft Word",
@@ -38,6 +35,7 @@
     {
       "name": "recent-documents",
       "title": "Recent Word Documents",
+      "subtitle": "Microsoft Word",
       "description": "Search Word documents you've used in the last 90 days and open, preview or reveal them.",
       "mode": "view"
     },

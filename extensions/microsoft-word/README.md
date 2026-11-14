@@ -2,14 +2,10 @@
 
 Control the document currently open in Microsoft Word for Mac.
 
-## What's new
-
-- New **Recent Word Documents** command (Spotlight-powered) with Quick Look, open in Word and reveal in Finder.
-- Active Document now shows word, character and paragraph counts, reading time and a text preview.
-
 ## Commands
 
-- **Active Document** shows the document’s location, save status, read-only state, and Track Changes state. Copy the main document text, copy the current selection, or explicitly turn Track Changes on or off.
+- **Recent Word Documents** lists Word documents (`.doc`, `.docx`, `.docm`) you opened recently, found with Spotlight. Preview them with Quick Look, open them in Word, or reveal them in Finder.
+- **Active Document** shows the document’s location, save status, read-only state, Track Changes state, word, character and paragraph counts, reading time, and a text preview. Copy the main document text, copy the current selection, or explicitly turn Track Changes on or off.
 - **New Document from Text** creates an unsaved document from typed or clipboard text. Save it in Word when ready.
 - **Toggle Track Changes** changes the active document’s tracking state and reads it back.
 
