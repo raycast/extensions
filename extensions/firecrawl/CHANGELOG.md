@@ -1,5 +1,14 @@
 # Firecrawl Changelog
 
+## [Move Deep Research to the Agent API] - {PR_MERGE_DATE}
+
+### Changed
+- `deep-research` tool now runs on Firecrawl's Agent API (`/v2/agent`), because the Deep Research API (`/v1/deep-research`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-deep-research))
+- Updated `@mendable/firecrawl-js` from `^4.3.4` to `^4.9.0`
+
+### Removed
+- `Max Depth` and `Time Limit` preferences, which the Agent API has no equivalent for
+
 ## [Major Update: Firecrawl SDK v4.3.4] - 2025-09-10
 
 ### Changed

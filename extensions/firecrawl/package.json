@@ -60,26 +60,10 @@
       "type": "password",
       "required": false,
       "description": "Your custom Firecrawl API key."
-    },
-    {
-      "name": "maxDepth",
-      "title": "Max Depth - Deep Research",
-      "type": "textfield",
-      "description": "The maximum depth of the research.",
-      "default": "3",
-      "required": false
-    },
-    {
-      "name": "timeLimit",
-      "title": "Time Limit - Deep Research",
-      "type": "textfield",
-      "description": "The time limit of the research in seconds.",
-      "default": "500",
-      "required": false
     }
   ],
   "dependencies": {
-    "@mendable/firecrawl-js": "^4.3.4",
+    "@mendable/firecrawl-js": "^4.9.0",
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0"
   },
