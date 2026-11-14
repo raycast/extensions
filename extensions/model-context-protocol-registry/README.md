@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [SightRadar Face Recognition API MCP](https://sightradar.com/mcp) | Official MCP server for the SightRadar face recognition API. Index event and library photos into your own collections, find every photo a person appears in from one selfie, compare and detect faces, and run batches of up to 1,000 photo URLs. 39 tools in five permission groups. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a SightRadar account. |
 | [Tesseract](https://tesseract.dev/mcp/) | Make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures from your conversation, charged to your own Tesseract plan. 8 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Tesseract account is required (free media each month, then paid). |
 | [Rizamo](https://rizamo.com/agents/) | Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, see how they did, and answer comments and messages from your agent. 57 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a Rizamo account, free for 2 social accounts. |
 | [Hoy Planes](https://www.hoyplanes.com/mcp/) | What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. 3 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key. |
