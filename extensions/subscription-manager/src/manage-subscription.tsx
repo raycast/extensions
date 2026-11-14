@@ -9,6 +9,8 @@ import {
   buildCalendarMarkdown,
   formatCurrency,
   formatCycle,
+  getBillingDayForMonth,
+  getMissingRateCurrencies,
   getMonthSubscriptions,
   getMonthlyTotal,
   getSubscriptionIcon,
@@ -34,6 +36,7 @@ export default function ManageSubscription() {
 
   const monthSubs = getMonthSubscriptions(month, year, subscriptions);
   const monthTotal = getMonthlyTotal(subscriptions, month, year, primaryCurrency, ratesData?.rates);
+  const missingRateCurrencies = getMissingRateCurrencies(subscriptions, month, year, primaryCurrency, ratesData?.rates);
 
   const markdown = buildCalendarMarkdown(year, month, subscriptions);
 
@@ -57,10 +60,21 @@ export default function ManageSubscription() {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
-            title={`Monthly Total (${primaryCurrency})`}
+            title={
+              missingRateCurrencies.length > 0
+                ? `Monthly Total (${primaryCurrency}, partial)`
+                : `Monthly Total (${primaryCurrency})`
+            }
             text={ratesLoading ? "Loading…" : formatCurrency(monthTotal, primaryCurrency)}
             icon={Icon.BankNote}
           />
+          {missingRateCurrencies.length > 0 && (
+            <Detail.Metadata.Label
+              title="Missing Rates"
+              text={missingRateCurrencies.join(", ")}
+              icon={Icon.ExclamationMark}
+            />
+          )}
           <Detail.Metadata.Label title="Subscriptions" text={`${monthSubs.length} this month`} icon={Icon.Calendar} />
           <Detail.Metadata.Separator />
           {monthSubs.length > 0 ? (
@@ -68,7 +82,10 @@ export default function ManageSubscription() {
               <Detail.Metadata.Label
                 key={sub.id}
                 title={
-                  i === 0 || monthSubs[i - 1].billingDay !== sub.billingDay ? `${sub.billingDay} ${monthName}` : ""
+                  i === 0 ||
+                  getBillingDayForMonth(monthSubs[i - 1], month, year) !== getBillingDayForMonth(sub, month, year)
+                    ? `${getBillingDayForMonth(sub, month, year)} ${monthName}`
+                    : ""
                 }
                 text={`${sub.name} · ${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
                 icon={getSubscriptionIcon(sub)}
@@ -122,7 +139,7 @@ export default function ManageSubscription() {
               {monthSubs.map((sub) => (
                 <Action.Push
                   key={sub.id}
-                  title={`${sub.billingDay} ${monthName} · ${sub.name}`}
+                  title={`${getBillingDayForMonth(sub, month, year)} ${monthName} · ${sub.name}`}
                   icon={getSubscriptionIcon(sub)}
                   target={<SubscriptionDetail id={sub.id} />}
                 />
