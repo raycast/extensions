@@ -184,8 +184,10 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       controller.current?.abort();
       const abort = new AbortController();
       controller.current = abort;
-      // Only the newest translation may touch the view.
-      const current = () => controller.current === abort && !abort.signal.aborted;
+      // Only the newest translation may touch the view. Being stopped is separate: a stopped
+      // translation still owns the view and clears its own progress row.
+      const owns = () => controller.current === abort;
+      const live = () => owns() && !abort.signal.aborted;
       // Deleting the entry this text came from must not delete the image it still needs.
       const release = history.hold(origin.image);
 
@@ -201,13 +203,15 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
             to,
             alt,
             signal: abort.signal,
-            onStart: (from, to) => current() && setJob((job) => job && { ...job, from, to }),
-            onText: (translation) => current() && setJob((job) => job && { ...job, translation }),
+            onStart: (from, to) => live() && setJob((job) => job && { ...job, from, to }),
+            onText: (translation) => live() && setJob((job) => job && { ...job, translation }),
           });
         } catch (error) {
-          if (!current()) return;
+          if (!owns()) return;
           setJob(undefined);
           setSearchText(singleLine(original));
+          // Stopped on purpose: nothing went wrong.
+          if (abort.signal.aborted) return;
           if (error instanceof EngineError && UNAVAILABLE_REASONS.includes(error.code)) {
             setStatus({ available: false, reason: error.code as UnavailableReason });
           } else {
@@ -215,7 +219,12 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
           }
           return;
         }
-        if (!current()) return;
+        if (!owns()) return;
+        if (abort.signal.aborted) {
+          setJob(undefined);
+          setSearchText(singleLine(original));
+          return;
+        }
 
         const entry: Entry = {
           id: randomUUID(),
@@ -229,12 +238,12 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
         try {
           await history.add(entry);
         } catch (error) {
-          if (!current()) return;
+          if (!owns()) return;
           setJob({ ...entry, unsaved: true });
           await showFailureToast(error, { title: "Couldn’t Save the Translation" });
           return;
         }
-        if (!current()) return;
+        if (!owns()) return;
         setJob(undefined);
         setSelectedId(entry.id);
 
@@ -321,10 +330,21 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
   const entries = history.entries ?? [];
   const hasItems = Boolean(job) || entries.length > 0;
 
+  const historyFailed: Notice | undefined =
+    history.error && !history.entries
+      ? {
+          icon: { source: Icon.Warning, tintColor: Color.Orange },
+          title: "Couldn’t Load the History",
+          description: history.error.message,
+          retry: true,
+        }
+      : undefined;
+
   const empty: Notice =
     isPreparing && source !== "input"
       ? { icon: sourceIcon(source, launchImage), title: PREPARING[source], description: "" }
-      : (notice ?? {
+      : (notice ??
+        historyFailed ?? {
           icon: Icon.Globe,
           title: "Type Text and Press Return",
           description: "Apple Intelligence translates it on this Mac. Nothing is sent anywhere.",
@@ -357,7 +377,11 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
         actions={
           empty.retry ? (
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={notice ? load : () => history.revalidate()}
+              />
             </ActionPanel>
           ) : undefined
         }
@@ -379,7 +403,16 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
               </ActionPanel>
             ) : (
               <ActionPanel>
-                <Action title="Stop Translating" icon={Icon.Stop} onAction={() => controller.current?.abort()} />
+                <Action
+                  title="Stop Translating"
+                  icon={Icon.Stop}
+                  onAction={() => {
+                    // The piece being translated finishes in the background; the view stops now.
+                    controller.current?.abort();
+                    setJob(undefined);
+                    setSearchText(singleLine(job.original));
+                  }}
+                />
               </ActionPanel>
             )
           }

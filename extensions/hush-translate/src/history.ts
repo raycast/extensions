@@ -50,7 +50,7 @@ async function removeUnusedImages(entries: Entry[], held: Set<string>) {
  * write succeeded; a failed write throws and leaves both storage and the list as they were.
  */
 export function useHistory() {
-  const { data, isLoading, error, mutate } = usePromise(readEntries, [], {
+  const { data, isLoading, error, mutate, revalidate } = usePromise(readEntries, [], {
     failureToastOptions: { title: "Couldn’t Load the History" },
   });
 
@@ -103,5 +103,5 @@ export function useHistory() {
     };
   }, []);
 
-  return { entries: data, isLoading, error, add, remove, clear, hold };
+  return { entries: data, isLoading, error, revalidate, add, remove, clear, hold };
 }
