@@ -1,5 +1,9 @@
 # Linkding Changelog
 
+## [Dia support in Save Browser Tab] - {PR_MERGE_DATE}
+
+- Add Dia support to Save Browser Tab ([#33011](https://github.com/raycast/extensions/issues/33011)).
+
 ## [Fix Save Browser Tab] - 2026-05-20
 
 - Add Microsoft Edge support to Save Browser Tab.
