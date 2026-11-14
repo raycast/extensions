@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zero-wire",
+  "title": "Zero Wire",
+  "description": "Search Cloudflare Zero Wire security briefings, follow relevant technologies, and revisit guidance updates. Independent integration.",
+  "icon": "extension_icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "zero-wire",
+      "title": "Search Security Briefings",
+      "subtitle": "Zero Wire",
+      "description": "Search Cloudflare Zero Wire briefings by title, CVE, or technology and review source guidance",
+      "mode": "view"
+    },
+    {
+      "name": "saved-briefings",
+      "title": "Saved Briefings",
+      "subtitle": "Zero Wire",
+      "description": "Read bookmarked Zero Wire briefings and acknowledge reviewed revisions",
+      "mode": "view"
+    },
+    {
+      "name": "follow-technologies",
+      "title": "Follow Technologies",
+      "subtitle": "Zero Wire",
+      "description": "Choose source technology tags to follow in Zero Wire",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.0",
+    "@raycast/utils": "^2.3.3",
+    "cheerio": "1.2.0",
+    "fast-xml-parser": "5.12.0",
+    "proper-lockfile": "4.1.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/proper-lockfile": "4.1.4",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "4.20.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "tools": [
+    {
+      "name": "search-briefings",
+      "title": "Search Security Briefings",
+      "description": "Search curated Cloudflare Zero Wire briefings by CVE, title, or technology, with saved, followed, and unread filters and source freshness."
+    },
+    {
+      "name": "get-briefing",
+      "title": "Get Security Briefing",
+      "description": "Read a full Zero Wire briefing with source guidance, CVE-specific qualifiers, evidence, chronology, coverage, and its available assessment prompt."
+    }
+  ]
+}

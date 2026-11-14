@@ -70,6 +70,7 @@ describe("generateAiDiagramArtifact", () => {
         outputFormat: "svg",
         renderEngine: "auto",
         usePersistentOutputDir: true,
+        useOndineInAuto: false,
       }),
     );
     expect(copyGeneratedImage).toHaveBeenCalledWith({
@@ -113,6 +114,7 @@ describe("generateAiDiagramArtifact", () => {
         outputFormat: "png",
         renderEngine: "compatible",
         usePersistentOutputDir: true,
+        useOndineInAuto: false,
       }),
     );
     expect(copyGeneratedImage).toHaveBeenCalledWith({

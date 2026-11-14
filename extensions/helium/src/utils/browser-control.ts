@@ -58,8 +58,8 @@ export async function listHeliumTabs(): Promise<HeliumTabRef[]> {
  * Focus an already open tab.
  *
  * macOS addresses it by Helium's stable AppleScript tab id. Windows has no such
- * handle, so it matches on the tab title through the accessibility tree; when
- * that finds nothing the caller is expected to fall back to opening the URL.
+ * handle, so it matches on the tab title through the native accessibility helper.
+ * Windows failures throw an actionable error instead of opening a duplicate URL.
  */
 export async function switchToTab(tab: Tab): Promise<boolean> {
   return isWindows ? windows.switchToTabByTitle(tab.title) : applescript.switchToHeliumTabById(tab.id);

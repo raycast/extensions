@@ -50,14 +50,18 @@ export function EditRepositoryForm({ repo, onUpdated }: { repo: UserRepository; 
         return;
       }
 
-      await Service.updateUserRepository(repo.id, {
-        name: values.name.trim(),
-        owner: values.owner.trim(),
-        description: values.description?.trim() || undefined,
-        url: values.url?.trim() || undefined,
-        defaultBranch: values.defaultBranch.trim(),
-        subdirectory: values.subdirectory?.trim() || undefined,
-      });
+      await Service.updateUserRepository(
+        repo.id,
+        {
+          name: values.name.trim(),
+          owner: values.owner.trim(),
+          description: values.description?.trim() || undefined,
+          url: values.url?.trim() || undefined,
+          defaultBranch: values.defaultBranch.trim(),
+          subdirectory: values.subdirectory?.trim() || undefined,
+        },
+        repo,
+      );
 
       if (onUpdated) {
         onUpdated();

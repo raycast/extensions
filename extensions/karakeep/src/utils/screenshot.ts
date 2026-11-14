@@ -52,8 +52,7 @@ async function sweepExpiredCacheEntries(imageCacheDirectory: string) {
 
 export async function getScreenshot(id: string) {
   const { apiUrl, apiKey } = await getApiConfig();
-  const encodedUrl = encodeURIComponent(`/api/assets/${id}`);
-  const imageUrl = `${apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
+  const imageUrl = `${apiUrl}/api/assets/${id}`;
   const imageCacheDirectory = path.join(environment.supportPath, "preview-images");
   const cacheKey = cacheKeyFromAssetId(id);
 

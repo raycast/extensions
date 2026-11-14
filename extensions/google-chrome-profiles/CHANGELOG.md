@@ -1,5 +1,14 @@
 # Google Chrome Profiles Changelog
 
+## [Brave and Brave Origin] - 2026-11-11
+
+- Add Brave Browser and Brave Origin (standalone, `com.brave.Browser.origin`) to the Browser preference.
+
+## [Hide Profiles] - 2026-10-24
+
+- Add a "Hide Profile" action (⌘H) to Switch Profiles. Hidden profiles are left out of Switch Profiles and of Move Current Tab's destinations, and their Quicklinks keep working.
+- Add a "Show Hidden Profiles" action (⇧⌘H) to list hidden profiles and unhide them. It only appears while a profile is hidden.
+
 ## [Faster Profile Switching] - 2026-09-29
 
 - Find Chrome's Profiles menu at its usual position first, so switching profiles no longer slows down with every open tab. The full menu scan remains the fallback, so other menu orders and languages keep working.

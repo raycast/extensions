@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [Copy System Info] - 2026-10-24
+
+- Add a Copy Info submenu (⌘⇧C) on System Info to copy the macOS version, hostname, model, chip, serial number and other values
+
 ## [Compact Layout] - 2026-10-13
 
 - Restructure the main view as a sectioned entity list (Overview / CPU / Memory / Disk / Power / Network) with colored percentage tags on the CPU, Memory, Disk and Power rows

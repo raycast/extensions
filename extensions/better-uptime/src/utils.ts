@@ -1,3 +1,4 @@
+import type { Response } from "node-fetch";
 import { IncidentItem, MonitorItem } from "./interface";
 
 export function ucfirst(text: string) {
@@ -28,4 +29,34 @@ export function getMonitorFrequency(item: MonitorItem) {
     : item.attributes.check_frequency === 60
       ? `${item.attributes.check_frequency / 60} minute`
       : `${item.attributes.check_frequency} seconds`;
+}
+
+export function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+export async function getResponseErrorMessage(response: Response) {
+  const fallback = `${response.status} ${response.statusText}`.trim();
+
+  try {
+    const { errors } = (await response.json()) as { errors?: unknown };
+    return formatApiErrors(errors) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// The API returns errors as a string, a list, or messages keyed by field (e.g. { "base": ["URL is invalid."] })
+function formatApiErrors(errors: unknown) {
+  if (typeof errors === "string") return errors;
+  if (Array.isArray(errors)) return errors.join(", ");
+  if (errors && typeof errors === "object") {
+    return Object.entries(errors)
+      .map(([field, messages]) => {
+        const message = [messages].flat().join(", ");
+        return field === "base" ? message : `${field}: ${message}`;
+      })
+      .join("; ");
+  }
+  return "";
 }

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Alert,
   Color,
@@ -10,12 +9,15 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { MENU_BAR_HEARTBEAT_MS } from "./menu-bar-presence";
 import {
   clearState,
   formatClock,
   formatDuration,
   getRemainingMs,
   getState,
+  markMenuBarSeen,
   resumeTimer,
   stopTimer,
   TimerState,
@@ -29,6 +31,8 @@ export default function Command() {
   // Load the persisted timer state once on mount (and whenever Raycast
   // re-invokes this menu-bar command on its refresh interval).
   useEffect(() => {
+    void markMenuBarSeen();
+    const heartbeat = setInterval(() => void markMenuBarSeen(), MENU_BAR_HEARTBEAT_MS);
     getState()
       .then(setState)
       .catch(() => {
@@ -38,6 +42,7 @@ export default function Command() {
         });
       })
       .finally(() => setIsLoading(false));
+    return () => clearInterval(heartbeat);
   }, []);
 
   // Tick every second so the countdown updates live while the instance stays mounted.

@@ -30,6 +30,14 @@ export function fileWriteErrorToast(path: string, filename: string) {
   });
 }
 
+export function invalidNoteNameToast(message: string) {
+  showToast({
+    title: "Couldn't create note",
+    message,
+    style: Toast.Style.Failure,
+  });
+}
+
 export function vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin: ObsidianVault[]) {
   showToast({
     title: "Vaults without Advanced URI plugin:",

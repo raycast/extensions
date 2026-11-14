@@ -3,6 +3,8 @@ import { SlackClient, type User } from "./SlackClient";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useMemo, useRef, useState } from "react";
 import { createDirectoryUserSearch, directoryUsersToShow, mergeDirectorySearchResults } from "./directory";
+import { getSlackToken } from "./WebClient";
+import { identityCacheKey, identityForAccount, loadAccountIdentity } from "./identity";
 
 export const useChannels = () =>
   usePromise(
@@ -91,7 +93,21 @@ export const useDirectorySearch = (query: string) => {
   };
 };
 
-export const useMe = () => useCachedPromise(SlackClient.getMe);
+const loadMe = (accountKey: string | undefined) => {
+  if (accountKey !== identityCacheKey(getSlackToken())) throw new Error("Slack account changed. Please retry.");
+  return loadAccountIdentity(accountKey, SlackClient.getMe);
+};
+
+export const useMe = () => {
+  const accountKey = identityCacheKey(getSlackToken());
+  // Retain the last successful auth.test result across refresh failures, but never across accounts.
+  const result = useCachedPromise(loadMe, [accountKey], { execute: !!accountKey, keepPreviousData: false });
+  return { ...result, data: identityForAccount(result.data, accountKey) };
+};
 
 export const useUnreadConversations = (conversationIds: string[] | undefined) =>
-  useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []]);
+  useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []], {
+    onError(error) {
+      handleError(error, "Failed to load unread messages");
+    },
+  });

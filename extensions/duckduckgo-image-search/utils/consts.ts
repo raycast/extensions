@@ -1,15 +1,18 @@
 export const DDG_URL = "https://duckduckgo.com/";
 const USER_AGENT =
   process.platform === "darwin"
-    ? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+    ? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0"
+    : "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0";
 
-/** A small, coherent browser-like profile shared by all DuckDuckGo requests. */
+/**
+ * Keep the request profile consistent with the working Firefox image-search
+ * request. The previous Chrome/131 profile receives botnet_challenge on its
+ * first image request, even with a fresh VQD.
+ */
 export const HEADERS = {
   accept: "*/*",
-  "accept-language": "en-US,en;q=0.5",
+  "accept-language": "en-US,en;q=0.9",
   connection: "keep-alive",
-  priority: "u=4",
   referer: "https://duckduckgo.com/",
   "sec-fetch-dest": "empty",
   "sec-fetch-mode": "cors",

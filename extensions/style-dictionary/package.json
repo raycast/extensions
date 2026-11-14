@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "style-dictionary",
+  "title": "Style Dictionary",
+  "description": "Browse, search, and copy design tokens from your Style Dictionary projects",
+  "icon": "extension-icon.png",
+  "author": "ars2062",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-tokens",
+      "title": "Browse Tokens",
+      "subtitle": "Style Dictionary",
+      "description": "Browse, search, and copy design tokens of the active project",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "Style Dictionary",
+      "description": "Add, edit, and switch style-dictionary token projects",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.2.7",
+    "culori": "^4.0.2",
+    "json5": "^2.2.3",
+    "style-dictionary": "^5.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/culori": "^4.0.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { CreateStoryParams, Story, StorySlim, UpdateStory } from "@useshortcut/client";
+import { CreateStoryParams, Story, StorySearchResult, StorySlim, UpdateStory } from "@useshortcut/client";
 
 import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes, useFormField } from "../helpers/storyHelpers";
 import { capitalize } from "../utils/string";
@@ -62,7 +62,7 @@ export default function StoryForm({
   draftValues,
   enableDrafts,
 }: {
-  story?: Story | StorySlim;
+  story?: Story | StorySlim | StorySearchResult;
   submitTitle?: string;
   onSubmit: (story: CreateStoryParams | UpdateStory) => void;
   draftValues?: StoryFormRawValues;

@@ -33,10 +33,10 @@ export const SHORTCUTS = {
   openInNewTab: crossPlatform(["cmd", "shift"], ["ctrl", "shift"], "o"),
   /** Open the selected item in the system default browser. */
   openInDefaultBrowser: crossPlatform(["cmd", "opt"], ["ctrl", "alt"], "o"),
-  copyUrl: crossPlatform(["cmd"], ["ctrl"], "c"),
-  copyTitle: crossPlatform(["cmd", "shift"], ["ctrl", "shift"], "c"),
+  copyUrl: crossPlatform(["cmd", "shift"], ["ctrl", "shift"], "c"),
+  copyTitle: crossPlatform(["cmd", "opt"], ["ctrl", "alt"], "c"),
   /** Same slot as {@link SHORTCUTS.copyTitle}, in lists that have no title to copy. */
-  copyQuery: crossPlatform(["cmd", "shift"], ["ctrl", "shift"], "c"),
-  copyAsMarkdown: crossPlatform(["cmd", "opt"], ["ctrl", "alt"], "c"),
+  copyQuery: crossPlatform(["cmd", "opt"], ["ctrl", "alt"], "c"),
+  copyAsMarkdown: crossPlatform(["cmd", "ctrl"], ["alt", "shift"], "c"),
   createQuicklink: crossPlatform(["cmd", "shift"], ["ctrl", "shift"], "q"),
 } satisfies Record<string, Keyboard.Shortcut>;

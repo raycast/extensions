@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "frihet",
+  "title": "Frihet ERP",
+  "description": "Search invoices, clients, products, and review your daily operational business brief in Frihet ERP directly from the keyboard.",
+  "icon": "icon.png",
+  "author": "viktor_berthelius",
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Frihet API Key",
+      "description": "Your Frihet API key (starts with fri_). Generate a scoped key in Frihet -> Settings -> API Keys.",
+      "placeholder": "fri_..."
+    },
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.frihet.io/v1",
+      "title": "API Base URL",
+      "description": "Canonical Frihet v1 REST endpoint (leave default unless testing against a staging environment)."
+    }
+  ],
+  "commands": [
+    {
+      "name": "business-brief",
+      "title": "Business Brief",
+      "subtitle": "Frihet ERP",
+      "description": "Daily operational brief: what to review today in your business and why, with explicit coverage and draft vs issued separation.",
+      "mode": "view"
+    },
+    {
+      "name": "search-invoices",
+      "title": "Search Invoices",
+      "subtitle": "Frihet ERP",
+      "description": "Search and filter invoices by status, inspect line items and tax breakdown, copy invoice numbers, or open in Frihet.",
+      "mode": "view"
+    },
+    {
+      "name": "search-clients",
+      "title": "Search Clients",
+      "subtitle": "Frihet ERP",
+      "description": "Search clients, inspect contact details and recent CRM activities, copy email or tax ID, and open in Frihet.",
+      "mode": "view"
+    },
+    {
+      "name": "search-products",
+      "title": "Search Products",
+      "subtitle": "Frihet ERP",
+      "description": "Search catalogue products and services, filter by active status with legacy fallback, and inspect pricing and tax rates.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-workspace",
+      "title": "Switch Workspace & Clear Cache",
+      "subtitle": "Frihet ERP",
+      "description": "Inspect the connected Frihet workspace, verify tenant cache isolation, purge cached records, or switch API credentials.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.7.2"
+  }
+}

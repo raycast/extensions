@@ -1,22 +1,21 @@
-import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
+import { MutableRefObject, useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
+import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
 import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
-import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
+import { countItemsByVault, refreshItemCounts } from "./item-counts";
 import { ItemList } from "./item-list";
-import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves } from "./refresh";
+import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
+import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
+import { isSharedWithMe, listedUnder } from "./shared-items";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
-  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
-}
 
 function originOf(raw?: string): string | undefined {
   if (!raw) return undefined;
@@ -33,51 +32,30 @@ function matchesActiveOrigin(item: Item, activeOrigin?: string): boolean {
   return item.urls.some((url) => originOf(url) === activeOrigin);
 }
 
-const ALL_VAULTS_VALUE = "all";
-
-interface VaultDropdownProps {
-  vaults: Vault[];
-  /** Number of items in each vault, once known. */
-  itemCounts: Map<string, number>;
-  /** Vault to show, for a vault opened from List Vaults. Otherwise the last selection is restored. */
-  value?: string;
-  onVaultChange: (vaultId: string) => void;
+interface SearchItemsViewProps {
+  /** Vault opened from the vault list. */
+  initialVault?: Vault;
+  /** Opened from All Vaults in the vault list: shows every vault rather than the last selection. */
+  allVaults?: boolean;
+  /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
+  sessionConfirmed?: boolean;
+  /** The order chosen with Sort by in this window. */
+  sortChoice?: MutableRefObject<SortOrder>;
+  /** The vaults' order in the vault list this was opened from. */
+  vaultOrder?: VaultSortOrder;
 }
 
-function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdownProps) {
-  // The selected item's title stays in the search bar, so the count of the vault shown is always visible.
-  return (
-    <List.Dropdown
-      tooltip="Select Vault"
-      storeValue={value === undefined}
-      value={value}
-      defaultValue={value === undefined ? ALL_VAULTS_VALUE : undefined}
-      onChange={onVaultChange}
-    >
-      <List.Dropdown.Item
-        title={titleWithCount("All Vaults", totalItemCount(vaults, itemCounts))}
-        value={ALL_VAULTS_VALUE}
-        icon={Icon.Globe}
-      />
-      <List.Dropdown.Section title="Vaults">
-        {vaults.map((vault) => (
-          <List.Dropdown.Item
-            key={vault.shareId}
-            title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
-            value={vault.shareId}
-            icon={Icon.Folder}
-          />
-        ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
-}
-
-/** Search Items, also opened from List Vaults with that vault preselected. */
-export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
+/** The item list of Browse Items, with every vault, or the one opened from the vault list. */
+export function SearchItemsView({
+  initialVault,
+  allVaults = false,
+  sessionConfirmed = false,
+  sortChoice,
+  vaultOrder,
+}: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
-  // A vault opened from List Vaults brings its count, kept if its own listing fails.
+  // A vault opened from the vault list brings its count, kept if its own listing fails.
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(
     new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
   );
@@ -129,27 +107,34 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
-    const [sharedItems, cachedVaults, legacyItems] = await Promise.all([
+    // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
+    // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
+    // screen replaces them once it answers that the session has ended.
+    const sessionCheck =
+      hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
+    const [sharedItems, cachedVaults, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
+      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
-    const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
+    const sharedHasVault = sharedItems?.data.some((item) => listedUnder(item) === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
     // Replace that vault's items rather than unioning snapshots, so deleted items do not return.
     const cachedItems =
       legacyItems && (!sharedHasVault || legacyItems.timestamp > (sharedItems?.timestamp ?? 0))
         ? {
             data: [
-              ...(sharedItems?.data.filter((item) => item.shareId !== initialVault?.shareId) ?? []),
+              ...(sharedItems?.data.filter((item) => listedUnder(item) !== initialVault?.shareId) ?? []),
               ...legacyItems.data,
             ],
             isStale: true,
           }
         : sharedItems;
     if (!isLatest()) return;
-    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
-      // Show cached metadata right away, even when stale: the first pass-cli call can take
+    let isFresh = false;
+    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
+      // Show cached metadata once the session is confirmed, even when stale: listing everything can take
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
@@ -158,14 +143,17 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       hasLoadedFromCache.current = true;
 
       const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
-      if (!isStale && !backgroundRefreshEnabled) {
-        setIsLoading(false);
-        return;
-      }
+      isFresh = !isStale && !backgroundRefreshEnabled;
     }
 
     try {
-      if (initialVault && itemsRef.current.length === 0) {
+      const ended = await sessionCheck;
+      if (!isLatest()) return;
+      if (ended) throw ended;
+      if (isFresh) return;
+      // Not for Shared with Me: an item shared with the user that is also in one of their vaults only shows with that
+      // vault, which takes listing the vaults too.
+      if (initialVault && !isSharedWithMe(initialVault) && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
           if (err instanceof PassCliError && err.type === "not_authenticated") throw err;
@@ -195,7 +183,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (failureMessage) throw new Error(failureMessage);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
-      // Saves follow the order listings started, also across List Vaults, so an older one can't replace a newer one.
+      // Saves follow the order listings started, also across the vault list, so an older one can't replace a newer one.
       if (isComplete && isLatest()) {
         await listingSaves.save(listing, () =>
           Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]),
@@ -239,7 +227,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   }
 
   const filteredItems = useMemo(
-    () => (selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => item.shareId === selectedVaultId)),
+    () =>
+      selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => listedUnder(item) === selectedVaultId),
     [items, selectedVaultId],
   );
   const emptyFailureMessage =
@@ -257,18 +246,19 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   return (
     <ItemList
+      sortChoice={sortChoice}
       // Items wait for the active tab, so that the suggested login is selected from the start.
       items={isLoadingActiveTab ? [] : filteredItems}
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
       isLoading={isLoading || isLoadingActiveTab}
-      navigationTitle={initialVault ? "Search Items" : undefined}
       searchBarAccessory={
         <VaultDropdown
+          order={vaultOrder ?? preferredVaultSortOrder()}
           // Until vaults are loaded, the preselected vault must still be one of the options.
           vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
           itemCounts={itemCounts}
-          value={initialVault ? selectedVaultId : undefined}
+          value={initialVault || allVaults ? selectedVaultId : undefined}
           onVaultChange={setSelectedVaultId}
         />
       }
@@ -277,7 +267,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         title: emptyFailureMessage ? "Couldn't Load Items" : "No Items Found",
         description:
           emptyFailureMessage?.split("\n")[0] ??
-          (selectedVaultId === ALL_VAULTS_VALUE ? "Your vaults are empty" : "No items in this vault"),
+          (selectedVaultId === ALL_VAULTS_VALUE
+            ? "Your vaults are empty"
+            : isSharedWithMe({ shareId: selectedVaultId })
+              ? "No items are shared with you"
+              : "No items in this vault"),
         onRetry: emptyFailureMessage ? loadItems : undefined,
       }}
       onRefresh={loadItems}

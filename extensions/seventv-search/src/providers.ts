@@ -13,6 +13,13 @@ export interface EmoteFile {
   url?: string;
   static_name?: string;
 }
+export interface EmoteUsage {
+  approvedPersonal?: boolean;
+  deniedPersonal?: boolean;
+  private?: boolean;
+  publicListed?: boolean;
+  nsfw?: boolean;
+}
 export interface Emote {
   id: string;
   name: string;
@@ -20,6 +27,7 @@ export interface Emote {
   owner?: { display_name: string };
   host: { url: string; files: EmoteFile[] };
   animated?: boolean;
+  usage?: EmoteUsage;
 }
 export const PAGE_SIZE = 60;
 export const BTTV_PAGE_SIZE = 50;
@@ -55,16 +63,21 @@ const https = (url: string) => (url.startsWith("//") ? `https:${url}` : url);
 const fileUrl = (e: Emote, f: EmoteFile) =>
   https(f.url ?? `${e.host.url}/${f.name}`);
 export const getEmoteKey = (e: Emote) => `${e.provider ?? "7tv"}:${e.id}`;
-export function getEmoteFile(e: Emote) {
+// Every provider names its files after their scale ("2x.gif").
+const scaleOf = (f: EmoteFile) => parseInt(f.name, 10);
+// Picks the largest file at or below `size`, or the smallest one above it when
+// none is that small, so the paste is never heavier than requested if avoidable.
+export function getEmoteFile(e: Emote, size: number) {
   const formats = e.animated
     ? ["gif", "png", "webp", "avif"]
     : ["png", "webp", "avif"];
   for (const ext of formats) {
-    const file = e.host.files
+    const files = e.host.files
       .filter(
         (f) => f.format.toLowerCase() === ext && !f.name.includes("_static"),
       )
-      .sort((a, b) => b.width * b.height - a.width * a.height)[0];
+      .sort((a, b) => scaleOf(a) - scaleOf(b));
+    const file = files.filter((f) => scaleOf(f) <= size).at(-1) ?? files[0];
     if (file) return { url: fileUrl(e, file), ext };
   }
   throw new Error(`No usable image for ${e.name}`);
@@ -76,7 +89,7 @@ export function getPreviewUrl(e: Emote) {
     )
     .sort((a, b) => a.height - b.height);
   const file = files.find((f) => f.height >= 64) ?? files.at(-1);
-  return file ? fileUrl(e, file) : getEmoteFile(e).url;
+  return file ? fileUrl(e, file) : getEmoteFile(e, 4).url;
 }
 export function getEmotePage(e: Emote) {
   switch (e.provider) {

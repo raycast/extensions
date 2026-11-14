@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
 import { LocalStorage } from "@raycast/api";
-import { ProtonExport, TOTPAccount, ImportMode } from "../types";
+import { ProtonExport, TOTPAccount, ImportMode, LoadResult } from "../types";
 import { parseOtpAuthUri } from "./parser";
 import { STORAGE_KEYS } from "./constants";
 import { loadAccountsFromDatabase } from "./database";
@@ -18,39 +18,52 @@ export async function setImportMode(mode: ImportMode): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEYS.IMPORT_MODE, mode);
 }
 
-export async function getEncryptionKey(): Promise<string | null> {
-  const key = await LocalStorage.getItem<string>(STORAGE_KEYS.ENCRYPTION_KEY);
-  return key || null;
+export async function getEncryptionKeys(): Promise<string[]> {
+  const keys = await LocalStorage.getItem<string>(STORAGE_KEYS.ENCRYPTION_KEYS);
+  if (keys) {
+    try {
+      const parsed: unknown = JSON.parse(keys);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((key): key is string => typeof key === "string");
+      }
+    } catch (error) {
+      console.error("Failed to parse stored encryption keys:", error);
+    }
+    return [];
+  }
+  const legacyKey = await LocalStorage.getItem<string>(STORAGE_KEYS.ENCRYPTION_KEY);
+  return legacyKey ? [legacyKey] : [];
 }
 
-export async function setEncryptionKey(key: string): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
+export async function setEncryptionKeys(keys: string[]): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEYS, JSON.stringify(keys));
+  await LocalStorage.removeItem(STORAGE_KEYS.ENCRYPTION_KEY);
 }
 
-export async function loadAccountsFromStorage(): Promise<TOTPAccount[]> {
+export async function getParsedEncryptionKeys(): Promise<Buffer[]> {
+  const keys = await getEncryptionKeys();
+  return keys.map(validateAndParseKey).filter((key): key is Buffer => key !== null);
+}
+
+export async function loadAccountsFromStorage(): Promise<LoadResult> {
   try {
     const mode = await getImportMode();
 
     if (mode === "sqlite") {
-      const keyString = await getEncryptionKey();
-      if (!keyString) {
-        return [];
-      }
-      const key = validateAndParseKey(keyString);
-      if (!key) {
-        return [];
-      }
-      return await loadAccountsFromDatabase(key);
+      const { accounts, missingKeys, undecodableCount } = await loadAccountsFromDatabase(
+        await getParsedEncryptionKeys(),
+      );
+      return { accounts, missingKeys, undecodableCount };
     }
 
     // Default to JSON mode
     const storedData = await LocalStorage.getItem<string>(STORAGE_KEYS.PROTON_EXPORT);
     if (!storedData) {
-      return [];
+      return { accounts: [], missingKeys: [], undecodableCount: 0 };
     }
 
     const exportData: ProtonExport = JSON.parse(storedData);
-    return parseProtonExport(exportData);
+    return { accounts: parseProtonExport(exportData), missingKeys: [], undecodableCount: 0 };
   } catch (error) {
     console.error("Failed to read from storage:", error);
     throw error;
@@ -109,4 +122,5 @@ export async function clearStoredData(): Promise<void> {
   await LocalStorage.removeItem(STORAGE_KEYS.PROTON_EXPORT);
   await LocalStorage.removeItem(STORAGE_KEYS.IMPORT_MODE);
   await LocalStorage.removeItem(STORAGE_KEYS.ENCRYPTION_KEY);
+  await LocalStorage.removeItem(STORAGE_KEYS.ENCRYPTION_KEYS);
 }

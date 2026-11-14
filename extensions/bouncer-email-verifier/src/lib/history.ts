@@ -58,6 +58,11 @@ function keyOf(entry: HistoryEntry): string {
   return `${entry.kind}:${entry.subject}`;
 }
 
+/** Newest first, one row per check, capped. */
+function withEntry(current: HistoryEntry[], entry: HistoryEntry): HistoryEntry[] {
+  return [entry, ...current.filter((e) => keyOf(e) !== keyOf(entry))].slice(0, MAX_ENTRIES);
+}
+
 /**
  * Every mutation is read-modify-write against a single storage key, so two overlapping
  * ones would both read the same snapshot and the second would discard the first's result.
@@ -88,8 +93,7 @@ export function useHistory() {
       if (!saveHistory) return;
       await serialize(async () => {
         const current = await readStored();
-        const next = [entry, ...current.filter((e) => keyOf(e) !== keyOf(entry))].slice(0, MAX_ENTRIES);
-        await setValue(next);
+        await setValue(withEntry(current, entry));
       });
     },
     [saveHistory, setValue],
@@ -138,6 +142,19 @@ export function useHistory() {
     clear,
     entryKey: keyOf,
   };
+}
+
+/**
+ * For callers outside a view, such as the AI tools. They write the same storage the command
+ * reads, so a check made through Raycast AI can be reopened there without another credit.
+ */
+export async function saveToHistory(entry: HistoryEntry): Promise<void> {
+  const { saveHistory } = getPreferenceValues<Preferences>();
+  if (!saveHistory) return;
+  await serialize(async () => {
+    const current = await readStored();
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(withEntry(current, entry)));
+  });
 }
 
 export function formatVerifiedAt(timestamp: number): string {

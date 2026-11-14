@@ -2,26 +2,27 @@
 
 [![Raycast Cross-Extension](https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square)](https://github.com/LitoMore/raycast-cross-extension-conventions)
 
-ScreenOCR extracts text from screen captures on macOS and Windows, with clipboard-image recognition on Windows. Recognition runs locally using Apple Vision on macOS and Windows.Media.Ocr on Windows.
+ScreenOCR extracts text from screen captures on macOS and Windows, with clipboard-image recognition on both. Recognition runs locally using Apple Vision on macOS and Windows.Media.Ocr on Windows.
 
 ## Commands
 
-| Command                           | macOS                                          | Windows                                                    |
-| --------------------------------- | ---------------------------------------------- | ---------------------------------------------------------- |
-| Recognize Text                    | Select a screen region                         | Drag-select a region in a frozen-screen overlay            |
-| Recognize Text on Entire Screen   | Recognize the current display                  | Recognize the virtual desktop across all monitors          |
-| Recognize Text in Clipboard Image | Not supported                                  | Recognize a clipboard image or supported copied image file |
-| Select Recognition Languages      | Choose primary and additional Vision languages | Choose Auto or one installed Windows OCR language          |
-| Detect Barcode/QR Code            | Detect codes in a selected screen region       | Not supported; the command explains this limitation        |
+| Command                           | macOS                                            | Windows                                                    |
+| --------------------------------- | ------------------------------------------------ | ---------------------------------------------------------- |
+| Recognize Text                    | Select a screen region                           | Drag-select a region in a frozen-screen overlay            |
+| Recognize Text on Entire Screen   | Recognize the current display                    | Recognize the virtual desktop across all monitors          |
+| Recognize Text in Clipboard Image | Recognize a clipboard image or copied image file | Recognize a clipboard image or supported copied image file |
+| Select Recognition Languages      | Choose primary and additional Vision languages   | Choose Auto or one installed Windows OCR language          |
+| Detect Barcode/QR Code            | Detect codes in a selected screen region         | Not supported; the command explains this limitation        |
 
-Assign hotkeys in Raycast Settings → Extensions → ScreenOCR. Cancel a Windows selection with Escape or right-click; cancellation leaves the clipboard unchanged.
+Assign hotkeys in Raycast Settings → Extensions → ScreenOCR. Cancel a selection with Escape (macOS) or Escape/right-click (Windows); cancellation is silent and leaves the clipboard unchanged.
 
 ## Preferences
 
 - **After Recognition (Windows)**: copy text, paste into the active app, or copy and paste. The default is copy. macOS retains its existing copy behavior. Cross-extension callbacks receive text directly and skip ordinary output actions.
+- **After Recognition (macOS)** (Recognize Text in Clipboard Image only): _Copy Text (Replaces Image)_ is the default. _Paste Text and Keep Image_ pastes the text into the active app, then restores the original clipboard contents (all items and formats), so the image stays available. The pasted text may still appear in clipboard-history tools, since Raycast's paste API has no concealed option. Windows uses the extension-wide preference above.
 - **Ignore line breaks**: join recognized lines with spaces.
 - **Show toast messages**: control command-result notifications.
-- **macOS options**: recognition level, language correction, primary/additional languages, custom words, shutter sound, and copying the captured image before recognition. Copying recognized text may replace the clipboard image. These options do not configure the Windows OCR engine.
+- **macOS options**: recognition level, language correction, primary/additional languages, custom words, shutter sound, and copying the captured image before recognition. Shutter sound and keep-image apply to screen-capture commands only, not clipboard recognition. Copying recognized text may replace the clipboard image. These options do not configure the Windows OCR engine.
 
 ## macOS requirements
 
@@ -38,8 +39,9 @@ Windows and macOS language selections are stored separately. Windows clipboard-f
 ## Troubleshooting
 
 - **No OCR language available**: install an OCR language pack, then select it or use Auto. A display language alone does not establish that its OCR feature is available.
-- **No image in clipboard**: copy an image or a supported image file. Corrupt or unsupported files produce a separate error.
+- **No image in clipboard**: copy an image or a supported image file. On macOS, a clipboard containing only text reports that it holds no image; an image that cannot be decoded reports a separate error. Corrupt or unsupported files produce a separate error.
 - **Text recognition failed**: verify screen-capture permission on macOS or that Windows policy permits the helper. The extension does not change system execution policies.
+- **Clipboard not restored after paste (macOS)**: the original contents are restored about 0.4 seconds after pasting. If the target app reads the clipboard later than that, switch to _Copy Text_.
 - **Wrong language**: select the appropriate installed Windows OCR language or adjust the macOS recognition languages.
 
 The extension sends no captures or recognized text to a cloud OCR service. Copy and paste use the system clipboard, whose history or sync behavior follows your system settings.

@@ -11,7 +11,9 @@ import * as format from "./format";
 import * as shortcuts from "./shortcuts";
 import * as fillSequence from "./fill-sequence";
 import * as keyPress from "./key-press";
-import { Item, ItemDetail, PassCliError } from "./types";
+import * as sharedItems from "./shared-items";
+import * as totp from "./totp";
+import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
 type Component = (props: Record<string, unknown>) => Element;
@@ -34,6 +36,13 @@ function loadView(
     require: (name: string) => {
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
       if (name in services) return services[name];
+      if (name === "./shared-items") return sharedItems;
+      if (name === "./format") return format;
+      if (name === "./totp") return totp;
+      if (name === "./sort" || name === "./lib/sort") return sort;
+      if (name === "./vault-dropdown" || name === "./lib/vault-dropdown") return vaultDropdown;
+      if (name === "./lib/item-counts") return itemCounts;
+      if (name === "./lib/shared-items") return sharedItems;
       throw new Error(`Unexpected dependency: ${name}`);
     },
     URL,
@@ -49,25 +58,39 @@ function loadView(
   return module.exports;
 }
 
+// The real sorting, with the Sort By preference at its default.
+const sort = loadView("sort.tsx", {
+  "@raycast/api": { Icon: {}, getPreferenceValues: () => ({}) },
+  "@raycast/utils": { useFrecencySorting: (data: unknown[]) => ({ data, visitItem: () => undefined }) },
+  "./shortcuts": shortcuts,
+});
+
+// The vault menu's element isn't rendered here: only its constant and props matter.
+const vaultDropdown = loadView("vault-dropdown.tsx", {
+  react: { useRef: (current: unknown) => ({ current }) },
+  "@raycast/api": { List: {}, Icon: {} },
+  "./item-counts": itemCounts,
+});
+
 function actions(element: unknown): Element["props"][] {
   if (!element || typeof element !== "object" || !("props" in element)) return [];
   const props = (element as Element).props;
-  return [props, ...[props.children].flat().flatMap(actions)];
+  return [props, ...[props.children].flat(Infinity).flatMap(actions)];
 }
 
-test("autofill keeps the original external target when closing changes focus and rejects Raycast", async () => {
+test("autofill targets the app Raycast was opened from, rejects Raycast, and keeps Raycast open meanwhile", async () => {
   const externalApp = { name: "Example", bundleId: "com.example.app" };
-  const otherApp = { name: "Other", bundleId: "com.example.other" };
   const raycast = { name: "Raycast", bundleId: "com.raycast.macos" };
   for (const initialApp of [externalApp, raycast, undefined]) {
-    let frontmostApp: typeof externalApp | undefined = initialApp;
+    let closed = false;
     const { getTargetApp } = loadView("autofill.ts", {
       "@raycast/api": {
         PopToRootType: { Suspended: "suspended" },
+        // Raycast closes only to fill, once the item is loaded: its toast shows the loading meanwhile.
         closeMainWindow: async () => {
-          frontmostApp = otherApp;
+          closed = true;
         },
-        getFrontmostApplication: async () => frontmostApp,
+        getFrontmostApplication: async () => initialApp,
       },
       "@raycast/utils": {},
       "./fill-sequence": fillSequence,
@@ -80,6 +103,7 @@ test("autofill keeps the original external target when closing changes focus and
     } else {
       await assert.rejects(getTargetApp(), /Couldn't find the app to fill/);
     }
+    assert.equal(closed, false);
   }
 });
 
@@ -124,6 +148,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
       },
       showToast: async () => undefined,
     },
+    "./utils": { TOTP_ICON: "totp" },
     "./autofill": {
       canFillFrontmostApp: true,
       getTargetApp: async () => {
@@ -253,7 +278,8 @@ function hookHarness() {
     },
     react: {
       useState: (initial: unknown) => {
-        const index = cell(initial);
+        // Like React, a function is called once for the initial value.
+        const index = cursor in slots ? cell(undefined) : cell(typeof initial === "function" ? initial() : initial);
         return [
           slots[index],
           // Like React, an updater function receives the current value.
@@ -297,6 +323,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => [item],
       listVaultsAndItems: async () => {
         calls++;
@@ -378,7 +405,11 @@ test("pass-cli not found shows its screen instead of the cached items, which can
       showToast: async () => undefined,
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
-    "./pass-cli": { listItems: notFound, listVaultsAndItems: notFound },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: notFound,
+      listVaultsAndItems: notFound,
+    },
     "./types": { PassCliError },
     "./cache": {
       getCachedItems: async () => ({ data: [item], isStale: true }),
@@ -410,10 +441,17 @@ test("pass-cli not found shows its screen instead of the cached items, which can
       showToast: async () => undefined,
       getPreferenceValues: () => ({}),
     },
-    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound },
+    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound, localTotpCode: () => undefined },
     "./lib/types": { PassCliError },
+    // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
+    "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+    "./lib/item-icon": { getListIcon: () => "" },
+    "./lib/shortcuts": shortcuts,
+    "@raycast/utils": { useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }) },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
+      totpProgressIcon: () => "",
+      totpTimerColor: () => "",
       getItemIcon: () => "",
       formatTotpCode: (code: string) => code,
     },
@@ -447,6 +485,7 @@ test("item-list authentication failures clear saved session metadata on both lis
     "./core/adapter": {
       createPassCliAdapter: () => ({
         listVaults: async () => [vault],
+        listItemShares: async () => [],
         listItems: async () => {
           throw new PassCliError("Session ended", "not_authenticated");
         },
@@ -462,6 +501,252 @@ test("item-list authentication failures clear saved session metadata on both lis
   await assert.rejects(api.listItems("vault", [vault]), /Session ended/);
   await assert.rejects(api.listVaultsAndItems(), /Session ended/);
   assert.equal(clears, 2);
+});
+
+function passCliWithAdapter(adapter: Record<string, unknown>) {
+  return loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": { clearCache: async () => undefined },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": { createPassCliAdapter: () => adapter },
+    "./core/login": { isDetachedLoginRunning: async () => false },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as {
+    listVaultsAndItems: () => Promise<{
+      vaults: Vault[];
+      items: Item[];
+      failedVaults: { vault: Vault; message: string; shareIds?: string[] }[];
+    }>;
+  };
+}
+
+test("items shared one by one are listed under Shared with Me, through their own share", async () => {
+  const listed: string[] = [];
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => ["item-share", "also-in-vault"],
+    listItems: async (shareId: string, vaultName: string) => {
+      listed.push(shareId);
+      if (shareId === "vault") return [{ ...item, shareId, itemId: "in-vault", vaultName }];
+      // The share printed can be the one of the vault the item comes from, which the user can't open.
+      return [{ ...item, shareId: "owner-vault", itemId: shareId === "item-share" ? "shared" : "in-vault", vaultName }];
+    },
+  });
+  const { vaults, items, failedVaults } = await api.listVaultsAndItems();
+  assert.equal(listed.sort().join(), "also-in-vault,item-share,vault");
+  assert.equal(vaults.map((vault) => vault.name).join(), "Personal,Shared with Me");
+  assert.equal(
+    items.map((entry) => `${entry.itemId} ${entry.shareId} ${entry.vaultName} ${entry.sharedWithMe === true}`).join(),
+    "in-vault vault Personal false,shared item-share Shared with Me true",
+  );
+  assert.equal(failedVaults.length, 0);
+});
+
+test("the vaults' items don't wait for the shares of the items shared with the user, which can take seconds", async () => {
+  let releaseShares: (shareIds: string[]) => void = () => undefined;
+  const listed: string[] = [];
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: () =>
+      new Promise((resolve) => {
+        releaseShares = resolve;
+      }),
+    listItems: async (shareId: string, vaultName: string) => {
+      listed.push(shareId);
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const listing = api.listVaultsAndItems();
+  await new Promise(setImmediate);
+  assert.equal(listed.join(), "vault");
+
+  releaseShares(["item-share"]);
+  const { items } = await listing;
+  assert.equal(listed.join(), "vault,item-share");
+  assert.equal(items.length, 2);
+});
+
+test("vault and shared item listings run at most 8 pass-cli commands at once, together", async () => {
+  let running = 0;
+  let most = 0;
+  const api = passCliWithAdapter({
+    listVaults: async () => Array.from({ length: 12 }, (_, index) => ({ shareId: `vault-${index}`, name: "Vault" })),
+    listItemShares: async () => Array.from({ length: 6 }, (_, index) => `item-share-${index}`),
+    listItems: async (shareId: string, vaultName: string) => {
+      running++;
+      most = Math.max(most, running);
+      await new Promise(setImmediate);
+      running--;
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const { items } = await api.listVaultsAndItems();
+  assert.equal(items.length, 18);
+  assert.equal(most, 8);
+});
+
+test("overlapping listings, e.g. the vault list and the item list it opens, still run at most 8 commands at once", async () => {
+  let running = 0;
+  let most = 0;
+  const api = passCliWithAdapter({
+    listVaults: async () => Array.from({ length: 12 }, (_, index) => ({ shareId: `vault-${index}`, name: "Vault" })),
+    listItemShares: async () => [],
+    listItems: async (shareId: string, vaultName: string) => {
+      running++;
+      most = Math.max(most, running);
+      await new Promise(setImmediate);
+      running--;
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const [first, second] = await Promise.all([api.listVaultsAndItems(), api.listVaultsAndItems()]);
+  assert.equal(first.items.length + second.items.length, 24);
+  assert.equal(most, 8);
+});
+
+test("every listing command counts toward the 8 at once: vaults, shares, items of one vault and members", async () => {
+  let running = 0;
+  let most = 0;
+  const command =
+    <T>(result: T, ticks = 1) =>
+    async () => {
+      running++;
+      most = Math.max(most, running);
+      for (let tick = 0; tick < ticks; tick++) await new Promise(setImmediate);
+      running--;
+      return result;
+    };
+  const vaults = Array.from({ length: 12 }, (_, index) => ({ shareId: `vault-${index}`, name: "Vault" }));
+  const api = passCliWithAdapter({
+    listVaults: command(vaults),
+    // Slow, as it can be: it used to run beside 8 item listings.
+    listItemShares: command([], 5),
+    listItems: (shareId: string, vaultName: string) => command([{ ...item, shareId, itemId: shareId, vaultName }])(),
+    listVaultRoles: command(new Map(vaults.map(({ shareId }) => [shareId, "owner"]))),
+    countVaultMembers: command(1),
+  }) as unknown as {
+    listVaultsAndItems: () => Promise<{ items: Item[] }>;
+    listItems: (shareId: string, vaults: Vault[]) => Promise<Item[]>;
+    listVaultSharing: () => Promise<Map<string, unknown>>;
+  };
+  const [first, second, oneVault, sharing] = await Promise.all([
+    api.listVaultsAndItems(),
+    api.listVaultsAndItems(),
+    api.listItems("vault-0", [vaults[0]]),
+    api.listVaultSharing(),
+  ]);
+  assert.equal(first.items.length + second.items.length + oneVault.length, 25);
+  assert.equal(sharing.size, 12);
+  assert.equal(most, 8);
+});
+
+test("a shared item failing to load is named, so that the shared items that loaded aren't kept twice", async () => {
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => ["loaded-share", "failed-share"],
+    listItems: async (shareId: string, vaultName: string) => {
+      if (shareId === "failed-share") throw new PassCliError("Network unavailable", "network_error");
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const { items, failedVaults } = await api.listVaultsAndItems();
+  assert.equal(items.map(({ shareId }) => shareId).join(), "vault,loaded-share");
+  assert.equal(
+    JSON.stringify(failedVaults.map(({ vault, shareIds }) => ({ name: vault.name, shareIds }))),
+    JSON.stringify([{ name: "Shared with Me", shareIds: ["failed-share"] }]),
+  );
+});
+
+test("listed TOTP secrets stay in memory to generate codes, and are forgotten once the session ends", async () => {
+  const uri = "otpauth://totp/Example?secret=JBSWY3DPEHPK3PXP";
+  let ended = false;
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => [],
+    listItems: async (shareId: string, vaultName: string, onTotpUri: (itemId: string, uri: string) => void) => {
+      if (ended) throw new PassCliError("Session ended", "not_authenticated");
+      onTotpUri("login", uri);
+      return [{ ...item, shareId, vaultName, hasTotp: true }];
+    },
+  }) as unknown as {
+    listVaultsAndItems: () => Promise<{ items: Item[] }>;
+    localTotpCode: (shareId: string, itemId: string) => string | undefined;
+  };
+  assert.equal(api.localTotpCode("vault", "login"), undefined);
+  const { items } = await api.listVaultsAndItems();
+  assert.equal(JSON.stringify(items).includes("otpauth"), false);
+  assert.equal(api.localTotpCode("vault", "login"), totp.generateTotp(totp.parseOtpauthUri(uri)!).code);
+
+  ended = true;
+  await assert.rejects(api.listVaultsAndItems(), /Session ended/);
+  assert.equal(api.localTotpCode("vault", "login"), undefined);
+});
+
+test("Shared with Me failing to load doesn't hold the vaults back, unlike an ended session", async () => {
+  let shareError = new PassCliError("Network unavailable", "network_error");
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => {
+      throw shareError;
+    },
+    listItems: async (shareId: string, vaultName: string) => [{ ...item, shareId, vaultName }],
+  });
+  const { vaults, items, failedVaults } = await api.listVaultsAndItems();
+  // Shared with Me stays listed, so that the shared items known already keep showing.
+  assert.equal(vaults.map((vault) => vault.name).join(), "Personal,Shared with Me");
+  assert.equal(items.length, 1);
+  assert.equal(
+    failedVaults.map(({ vault, message }) => `${vault.name}: ${message}`).join(),
+    "Shared with Me: Network unavailable",
+  );
+
+  shareError = new PassCliError("Session ended", "not_authenticated");
+  await assert.rejects(api.listVaultsAndItems(), /Session ended/);
+});
+
+test("pass-cli commands wait for the session check, during which pass-cli can catch up with the account", async () => {
+  const started: string[] = [];
+  let finishCheck: () => void = () => undefined;
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {},
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => ({
+        checkAuth: () => {
+          started.push("info");
+          return new Promise((resolve) => {
+            finishCheck = () => resolve(true);
+          });
+        },
+        getItem: async () => {
+          started.push("item view");
+          return item;
+        },
+      }),
+    },
+    "./core/login": { isDetachedLoginRunning: async () => false },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as {
+    endedSessionError: () => Promise<PassCliError | undefined>;
+    getItem: (shareId: string, itemId: string) => Promise<unknown>;
+  };
+  const check = api.endedSessionError();
+  // Started meanwhile, it would catch up with the account again, as long as the check.
+  const detail = api.getItem("vault", "login");
+  await new Promise(setImmediate);
+  assert.equal(started.join(), "info");
+
+  finishCheck();
+  assert.equal(await check, undefined);
+  await detail;
+  assert.equal(started.join(), "info,item view");
 });
 
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
@@ -597,6 +882,7 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
       },
       "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
       "./pass-cli": {
+        endedSessionError: async () => undefined,
         listItems: async () => {
           throw new PassCliError("Offline", "network_error");
         },
@@ -639,6 +925,7 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultsAndItems: async () => {
         calls++;
         return {
@@ -700,8 +987,9 @@ test("hiding item details stops automatic secret loads while showing them select
         useState: () => [undefined, () => undefined],
         useRef: (value: unknown) => ({ current: value }),
         useCallback: (callback: unknown) => callback,
+        useEffect: () => undefined,
       },
-      "./avatar": { getInitialIconDataUri: () => "" },
+      "./item-icon": { getListIcon: () => "" },
       "./format": format,
       "./item-actions": {},
       "./item-detail-panel": {},
@@ -716,7 +1004,13 @@ test("hiding item details stops automatic secret loads while showing them select
           return { isLoading: false };
         },
       },
-      "./utils": { getItemIcon: () => "" },
+      "./utils": {
+        getItemIcon: () => "",
+        getTotpRemainingSeconds: () => 30,
+        totpCircle: () => "circle",
+        totpProgressIcon: () => "circle",
+        totpTimerColor: () => "",
+      },
     });
     const list = ItemList({ items: [item], isLoading: false, emptyView: {} });
     const row = (list.props.children as Element[])[0];
@@ -740,7 +1034,7 @@ function loadItemList() {
       useCachedState: () => [true, () => undefined],
       useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }),
     },
-    "./avatar": { getInitialIconDataUri: () => "" },
+    "./item-icon": { getListIcon: () => "" },
     "./format": format,
     "./item-actions": {},
     "./item-detail-panel": {},
@@ -755,10 +1049,16 @@ function loadItemList() {
         return {};
       },
     },
-    "./utils": { getItemIcon: () => "" },
+    "./utils": {
+      getItemIcon: () => "",
+      getTotpRemainingSeconds: () => 30,
+      totpCircle: () => "circle",
+      totpProgressIcon: () => "circle",
+      totpTimerColor: () => "",
+    },
   });
-  const render = (items: Item[], suggestedItems: Item[] = []) =>
-    harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {} });
+  const render = (items: Item[], suggestedItems: Item[] = [], props: Record<string, unknown> = {}) =>
+    harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {}, ...props });
   const select = (list: Element, id: string | null) =>
     (list.props.onSelectionChange as (id: string | null) => void)(id);
   return { render, select, state };
@@ -860,6 +1160,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       react: harness.react,
       "@raycast/api": api,
       "./lib/pass-cli": {
+        localTotpCode: () => undefined,
         getTotp: async () => "123456",
         listVaultsAndItems: async () => {
           calls++;
@@ -873,10 +1174,18 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
         },
       },
       "./lib/types": { PassCliError },
+      // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
+      "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+      "./lib/item-icon": { getListIcon: () => "" },
+      "./lib/shortcuts": shortcuts,
+      "@raycast/utils": { useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }) },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
+        totpProgressIcon: () => "",
+        totpTimerColor: () => "",
         getItemIcon: () => "",
         formatTotpCode: (code: string) => code,
+        hiddenTotpCode: (code: string) => "•".repeat(code.length),
       },
       "./lib/cache": cache,
       "./lib/refresh": refresh,
@@ -921,11 +1230,15 @@ function totpCommandFixture(
   getTotp: (shareId: string, itemId: string) => Promise<string> = async () => "123456",
   writeCache: (items: Item[]) => Promise<void> = async () => undefined,
   globals: Record<string, unknown> = {},
+  localTotpCode: (shareId: string, itemId: string) => string | undefined = () => undefined,
+  cachedItems: Item[] | null = null,
+  preferences: Record<string, unknown> = {},
 ) {
   const harness = hookHarness();
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
   const writes: Item[][] = [];
   const copied: string[] = [];
+  const visited: Item[] = [];
   let clears = 0;
   let savedItems: Item[] = [];
   const { default: Command } = loadView(
@@ -940,7 +1253,7 @@ function totpCommandFixture(
         Color: {},
         Keyboard: { Shortcut: { Common: { Refresh: {} } } },
         Toast: { Style: {} },
-        getPreferenceValues: () => ({}),
+        getPreferenceValues: () => preferences,
         Clipboard: {
           copy: async (value: string) => {
             copied.push(value);
@@ -950,15 +1263,25 @@ function totpCommandFixture(
           toasts.push(toast);
         },
       },
-      "./lib/pass-cli": { listVaultsAndItems, getTotp },
+      "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
       "./lib/types": { PassCliError },
+      // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
+      "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+      "./lib/item-icon": { getListIcon: () => "" },
+      "./lib/shortcuts": shortcuts,
+      "@raycast/utils": {
+        useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: (entry: Item) => visited.push(entry) }),
+      },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
+        totpProgressIcon: () => "",
+        totpTimerColor: () => "",
         getItemIcon: () => "",
         formatTotpCode: (code: string) => code,
+        hiddenTotpCode: (code: string) => "•".repeat(code.length),
       },
       "./lib/cache": {
-        getCachedItems: async () => null,
+        getCachedItems: async () => (cachedItems ? { data: cachedItems } : null),
         setCachedItems: async (items: Item[]) => {
           await writeCache(items);
           savedItems = items;
@@ -991,6 +1314,7 @@ function totpCommandFixture(
     toasts,
     writes,
     copied,
+    visited,
     get clears() {
       return clears;
     },
@@ -999,6 +1323,299 @@ function totpCommandFixture(
     },
   };
 }
+
+test("the TOTP countdown uses Raycast's own circles, in quarters, and turns from green to yellow to red with them", () => {
+  const icons = {
+    CircleProgress100: "100",
+    CircleProgress75: "75",
+    CircleProgress50: "50",
+    CircleProgress25: "25",
+    Circle: "empty",
+  };
+  const { totpProgressIcon, totpTimerColor } = loadView("utils.ts", {
+    "@raycast/api": { Color: { Green: "green", Yellow: "yellow", Red: "red" }, Icon: icons },
+  }) as unknown as {
+    totpProgressIcon: (remaining: number, period: number, tint?: string) => unknown;
+    totpTimerColor: (remaining: number, period?: number) => string;
+  };
+  assert.equal(
+    [30, 23, 22, 16, 15, 8, 7, 1].map((seconds) => totpProgressIcon(seconds, 30)).join(),
+    "100,100,75,75,50,50,25,25",
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(totpProgressIcon(30, 30, "green"))), {
+    source: "100",
+    tintColor: "green",
+  });
+  assert.equal(
+    [30, 16, 15, 8, 7, 1].map((seconds) => totpTimerColor(seconds)).join(),
+    "green,green,yellow,yellow,red,red",
+  );
+  assert.equal([31, 30, 16, 15].map((seconds) => totpTimerColor(seconds, 60)).join(), "green,yellow,yellow,red");
+});
+
+test("logins show their initials, or their website's icon with Show Website Icons, in Browse Items and Get TOTP", () => {
+  const favicons: string[] = [];
+  const { getListIcon } = loadView("item-icon.ts", {
+    "@raycast/api": { Image: { Mask: { RoundedRectangle: "rounded" } } },
+    "@raycast/utils": {
+      getFavicon: (url: string, options: { fallback: string }) => {
+        favicons.push(url);
+        return { favicon: url, fallback: options.fallback };
+      },
+    },
+    "./avatar": { getInitialIconDataUri: (title: string) => `initials:${title}` },
+    "./utils": { getItemIcon: (type: string) => `type:${type}` },
+  }) as unknown as { getListIcon: (item: Item, showWebsiteIcons: boolean) => unknown };
+  // Plain copies: objects made in the module's context don't share this one's prototypes.
+  const iconOf = (entry: Item, showWebsiteIcons: boolean) =>
+    JSON.parse(JSON.stringify(getListIcon(entry, showWebsiteIcons)));
+  const login = { ...item, type: "login" as const, urls: ["example.com/login"] };
+  assert.deepEqual(iconOf(login, false), { source: `initials:${login.title}`, fallback: "type:login" });
+  assert.deepEqual(iconOf(login, true), {
+    favicon: "https://example.com/login",
+    fallback: `initials:${login.title}`,
+  });
+  assert.deepEqual(iconOf({ ...login, urls: [] }, true), {
+    source: `initials:${login.title}`,
+    fallback: "type:login",
+  });
+  assert.equal(iconOf({ ...item, type: "note" }, true), "type:note");
+  assert.deepEqual(favicons, ["https://example.com/login"]);
+});
+
+test("TOTP codes have their halves set apart like Proton Authenticator's, and longer codes stay whole", () => {
+  const { formatTotpCode } = loadView("utils.ts", { "@raycast/api": { Color: {}, Icon: {} } }) as unknown as {
+    formatTotpCode: (code: string) => string;
+  };
+  assert.equal(formatTotpCode("123456"), "123\u2002456");
+  assert.equal(formatTotpCode("12345678"), "12345678");
+});
+
+test("hidden TOTP codes have one dot per digit, since Raycast spaces out each character of a tag", () => {
+  const { hiddenTotpCode } = loadView("utils.ts", { "@raycast/api": { Color: {}, Icon: {} } }) as unknown as {
+    hiddenTotpCode: (code: string) => string;
+  };
+  assert.equal(hiddenTotpCode("123456"), "⦁⦁⦁\u2005⦁⦁⦁");
+  assert.equal(hiddenTotpCode("123456").length, "123\u2002456".length);
+  assert.equal(hiddenTotpCode("12345678"), "⦁⦁⦁⦁⦁⦁⦁⦁");
+});
+
+test("Get TOTP Code generates codes from the listing instead of asking pass-cli for each item", async () => {
+  let asked = 0;
+  const fixture = totpCommandFixture(
+    async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+    async () => {
+      asked++;
+      return "123456";
+    },
+    undefined,
+    {},
+    () => "654321",
+  );
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title);
+  assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0].tag.value, "654321");
+  assert.equal(asked, 0);
+});
+
+test("Sort by puts names in alphabetical order, and dates newest first with undated items last", () => {
+  const sortItems = sort.sortItems as unknown as (items: Item[], order: string, mostUsed: Item[]) => Item[];
+  const titles = (items: Item[]) => items.map((entry) => entry.title).join();
+  const items = [
+    { ...item, title: "item 10", modifiedAt: "2026-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+    { ...item, title: "Été", modifiedAt: "2025-06-01T00:00:00.000Z", createdAt: "2026-02-01T00:00:00.000Z" },
+    { ...item, title: "item 9" },
+  ];
+  assert.equal(titles(sortItems(items, "name", [])), "Été,item 9,item 10");
+  assert.equal(titles(sortItems(items, "modified", [])), "item 10,Été,item 9");
+  assert.equal(titles(sortItems(items, "created", [])), "Été,item 10,item 9");
+  assert.equal(sortItems(items, "mostUsed", items.slice(1)).length, 2);
+});
+
+test("Sort by changes Browse Items' order, and holds for the item lists opened next from the same window", () => {
+  const sortChoice = { current: "mostUsed" };
+  const items = [
+    { ...item, itemId: "b", title: "Beta", modifiedAt: "2026-01-01T00:00:00.000Z" },
+    { ...item, itemId: "a", title: "Alpha", modifiedAt: "2025-01-01T00:00:00.000Z" },
+  ];
+  const titles = (list: Element) => (list.props.children as Element[]).map((row) => row.props.title).join();
+  const first = loadItemList();
+  const list = first.render(items, [], { sortChoice });
+  assert.equal(titles(list), "Beta,Alpha");
+  const menu = (list.props.children as Element[])[0].props.actions as Element;
+  assert.equal(menu.props.sortOrder, "mostUsed");
+  (menu.props.onSortOrderChange as (order: string) => void)("name");
+  assert.equal(titles(first.render(items, [], { sortChoice })), "Alpha,Beta");
+  assert.equal(sortChoice.current, "name");
+  // A vault opened next from the vault list starts in the order chosen.
+  assert.equal(titles(loadItemList().render(items, [], { sortChoice })), "Alpha,Beta");
+});
+
+test("Get TOTP Code sorts like Browse Items, and a copied code counts as a use", async () => {
+  const fixture = totpCommandFixture(
+    async () => ({
+      items: [
+        { ...item, itemId: "b", title: "Beta", hasTotp: true },
+        { ...item, itemId: "a", title: "Alpha", hasTotp: true },
+      ],
+      failedVaults: [],
+    }),
+    undefined,
+    undefined,
+    {},
+    () => "654321",
+  );
+  await new Promise(setImmediate);
+  const rows = () => actions(fixture.render()).filter((entry) => entry.accessories);
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Beta,Alpha",
+  );
+  const sortMenu = actions(rows()[0].actions).find((entry) => "onChange" in entry && "value" in entry)!;
+  assert.equal(sortMenu.value, "mostUsed");
+  (sortMenu.onChange as (order: string) => void)("name");
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Alpha,Beta",
+  );
+  await (
+    actions(rows()[0].actions).find((entry) => entry.title === "Copy TOTP Code")!.onAction as () => Promise<void>
+  )();
+  assert.deepEqual(
+    fixture.visited.map((entry) => entry.itemId),
+    ["a"],
+  );
+});
+
+test("Get TOTP Code has Browse Items' vault menu, with the vaults that have codes and their counts", async () => {
+  const fixture = totpCommandFixture(
+    async () => ({
+      items: [
+        { ...item, itemId: "a", title: "Alpha", hasTotp: true },
+        { ...item, shareId: "work", vaultName: "Work", itemId: "b", title: "Beta", hasTotp: true },
+        { ...item, shareId: "work", vaultName: "Work", itemId: "c", title: "Gamma", hasTotp: true },
+        {
+          ...item,
+          shareId: "share-1",
+          vaultName: "Unknown Vault",
+          itemId: "d",
+          title: "Delta",
+          hasTotp: true,
+          sharedWithMe: true,
+        },
+        { ...item, shareId: "empty", vaultName: "No Codes", itemId: "e", title: "Epsilon" },
+      ],
+      failedVaults: [],
+    }),
+    undefined,
+    undefined,
+    {},
+    () => "654321",
+  );
+  await new Promise(setImmediate);
+  const menu = () =>
+    (fixture.render().props.searchBarAccessory as Element).props as {
+      vaults: Vault[];
+      itemCounts: Map<string, number>;
+      onVaultChange: (shareId: string) => void;
+    };
+  const titles = () =>
+    actions(fixture.render())
+      .filter((entry) => entry.accessories)
+      .map((row) => row.title)
+      .join();
+  assert.equal(
+    menu()
+      .vaults.map((vault) => vault.name)
+      .join(),
+    "Personal,Work,Shared with Me",
+  );
+  // Arrays made in the module's context: compared as text.
+  assert.equal(Array.from(menu().itemCounts.values()).join(), "1,2,1");
+  assert.equal(titles(), "Alpha,Beta,Gamma,Delta");
+  menu().onVaultChange("work");
+  assert.equal(titles(), "Beta,Gamma");
+  menu().onVaultChange(menu().vaults[2].shareId);
+  assert.equal(titles(), "Delta");
+});
+
+test("Hide Codes shows dots instead of the codes until Show Codes, and copying still gives the code", async () => {
+  for (const hideCodes of [false, true]) {
+    const fixture = totpCommandFixture(
+      async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+      undefined,
+      undefined,
+      {},
+      () => "654321",
+      null,
+      { hideCodes },
+    );
+    await new Promise(setImmediate);
+    const row = () => actions(fixture.render()).find((entry) => entry.title === item.title)!;
+    const tag = () => (row().accessories as { tag: { value: string } }[])[0].tag.value;
+    const action = (title: string) => actions(row().actions).find((entry) => entry.title === title);
+    assert.equal(tag(), hideCodes ? "••••••" : "654321");
+    assert.equal(Boolean(action("Show Codes")), hideCodes);
+    await (action("Copy TOTP Code")!.onAction as () => Promise<void>)();
+    assert.deepEqual(fixture.copied, ["654321"]);
+    if (!hideCodes) continue;
+    (action("Show Codes")!.onAction as () => void)();
+    assert.equal(tag(), "654321");
+    (action("Hide Codes")!.onAction as () => void)();
+    assert.equal(tag(), "••••••");
+  }
+});
+
+test("a new TOTP period during the listing waits for it instead of asking pass-cli for each cached item", async () => {
+  let now = 0;
+  let tick!: () => void;
+  let asked = 0;
+  let listed = false;
+  let finishListing!: () => void;
+  const listing = new Promise<void>((resolve) => {
+    finishListing = resolve;
+  });
+  const fixture = totpCommandFixture(
+    async () => {
+      await listing;
+      listed = true;
+      return { items: [{ ...item, hasTotp: true }], failedVaults: [] };
+    },
+    async () => {
+      asked++;
+      return "123456";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+      setInterval: (callback: () => void) => {
+        tick = callback;
+        return 0;
+      },
+    },
+    // Codes are only generated here for listed items.
+    () => (listed ? "654321" : undefined),
+    [{ ...item, hasTotp: true }],
+  );
+  await new Promise(setImmediate);
+  const loading = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((loading.accessories as { tag: { value: string } }[])[0].tag.value, "Loading…");
+  now = 30_000;
+  tick();
+  finishListing();
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((row.accessories as { tag: { value: string } }[])[0].tag.value, "654321");
+  assert.equal(asked, 0);
+});
 
 test("TOTP Retry keeps unsaved visible codes when their vault fails, then removes them after a successful deletion", async () => {
   let calls = 0;
@@ -1152,7 +1769,7 @@ test("expired TOTP codes are hidden and cannot be copied after a failed Retry", 
   now = 30_000;
   await fixture.toasts[0].primaryAction.onAction();
   const expiredRow = actions(fixture.render()).find((entry) => entry.title === item.title)!;
-  assert.equal((expiredRow.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  assert.equal((expiredRow.accessories as { tag: { value: string } }[])[0].tag.value, "Unavailable");
   assert.equal(
     actions(expiredRow.actions).some((entry) => entry.title === "Copy TOTP Code"),
     false,
@@ -1287,7 +1904,7 @@ test("repeated slow TOTP responses stop with Retry instead of keeping refresh ru
   assert.equal(codes, 3);
   assert.equal(fixture.render().props.isLoading, false);
   const updated = actions(fixture.render()).find((entry) => entry.title === item.title)!;
-  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "Unavailable");
   const retry = fixture.toasts.at(-1)?.primaryAction;
   assert.equal(typeof retry?.onAction, "function");
   await retry!.onAction();
@@ -1390,6 +2007,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => [],
       listVaultsAndItems: async () => {
         calls++;
@@ -1435,7 +2053,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   assert.equal(typeof retriedEmpty.onRetry, "function");
 });
 
-function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown }) {
+function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown; "./item-counts"?: unknown }) {
   const harness = hookHarness();
   const { SearchItemsView } = loadView("search-items-view.tsx", {
     react: harness.react,
@@ -1459,14 +2077,142 @@ function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknow
   return { harness, SearchItemsView };
 }
 
-test("List Vaults shows and saves items before optional sharing, from complete listings only", async () => {
-  const personal = { shareId: "vault", name: "Personal" };
-  const added = { shareId: "added", name: "Added" };
-  const saved: string[] = [];
-  const pendingSharing: ((sharing: Map<string, unknown>) => void)[] = [];
-  let failing = true;
+test("an ended session shows the login screen at once, without showing the saved items first", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => new PassCliError("Not authenticated.", "not_authenticated"),
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      // Counted when the saved items show.
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(shownSaved, false);
+  assert.equal(listings, 0);
+  // NotLoggedInView, which reloads once logged in.
+  assert.equal(typeof render().props.reload, "function");
+});
+
+test("a slow session check doesn't hold the saved items back, and an ended session still shows the login screen", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  let endSession: (error: PassCliError) => void = () => undefined;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          endSession = resolve;
+        }),
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      // Counted when the saved items show.
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(shownSaved, true);
+  // The listing waits for the answer.
+  assert.equal(listings, 0);
+
+  endSession(new PassCliError("Not authenticated.", "not_authenticated"));
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(typeof render().props.reload, "function");
+  assert.equal(listings, 0);
+});
+
+test("an item list opened from the vault list once the session is confirmed doesn't ask pass-cli again", async () => {
+  let checks = 0;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => {
+        checks++;
+        return undefined;
+      },
+      listItems: async () => [],
+      // Still listing: the saved items are on screen.
+      listVaultsAndItems: () => new Promise(() => undefined),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+  });
+  const props = { initialVault: { shareId: "vault", name: "Personal" }, sessionConfirmed: true };
+  harness.render(SearchItemsView, props);
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(checks, 0);
+  // The saved items show at once, rather than after pass-cli answers.
+  assert.equal((harness.render(SearchItemsView, props).props.items as Item[]).length, 1);
+});
+
+test("Shared with Me opened with nothing saved waits for the vaults, rather than showing items that then move", async () => {
+  const previewed = async (initialVault: Vault) => {
+    const shareIds: string[] = [];
+    const { harness, SearchItemsView } = searchItemsFixture({
+      "./pass-cli": {
+        endedSessionError: async () => undefined,
+        listItems: async (shareId: string) => {
+          shareIds.push(shareId);
+          return [{ ...item, shareId }];
+        },
+        listVaultsAndItems: () => new Promise(() => undefined),
+      },
+      "./cache": {
+        getCachedItems: async () => null,
+        getCachedVaults: async () => null,
+      },
+    });
+    harness.render(SearchItemsView, { initialVault, sessionConfirmed: true });
+    harness.effects.forEach((effect) => effect());
+    await new Promise(setImmediate);
+    return shareIds.join();
+  };
+  assert.equal(await previewed({ shareId: "vault", name: "Personal" }), "vault");
+  // An item shared with the user that is also in one of their vaults shows with that vault only.
+  assert.equal(await previewed(sharedItems.SHARED_WITH_ME), "");
+});
+
+test("the vault list passes on a session it confirmed to the item lists it opens", async () => {
   const harness = hookHarness();
-  const { default: Command } = loadView("../list-vaults.tsx", {
+  const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
     "@raycast/api": {
       List: { Item: {}, EmptyView: {} },
@@ -1475,8 +2221,67 @@ test("List Vaults shows and saves items before optional sharing, from complete l
       Icon: {},
       Keyboard: { Shortcut: { Common: { Copy: {} } } },
       getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
     },
-    "./lib/pass-cli": {
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [{ shareId: "vault", name: "Personal" }, sharedItems.SHARED_WITH_ME],
+        items: [{ ...item, shareId: "item-share", sharedWithMe: true }],
+        failedVaults: [],
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const confirmed = () =>
+    actions(harness.render(VaultsView, { startOnItems: false }))
+      .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
+      .filter((entry) => entry.title === "View Items")
+      .map((entry) => (entry.target as Element).props.sessionConfirmed);
+  harness.render(VaultsView, { startOnItems: false });
+  const [load] = harness.effects;
+  load();
+  await new Promise(setImmediate);
+  // All Vaults, the vault and Shared with Me.
+  assert.equal(confirmed().join(), "true,true,true");
+});
+
+test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  const added = { shareId: "added", name: "Added" };
+  const saved: string[] = [];
+  const pendingSharing: ((sharing: Map<string, unknown>) => void)[] = [];
+  let failing = true;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultSharing: () => new Promise((resolve) => pendingSharing.push(resolve)),
       listVaultsAndItems: async () => ({
         vaults: [personal, added],
@@ -1484,11 +2289,11 @@ test("List Vaults shows and saves items before optional sharing, from complete l
         failedVaults: failing ? [{ vault: added, message: "Offline" }] : [],
       }),
     },
-    "./lib/types": { PassCliError },
-    "./lib/search-items-view": {},
-    "./lib/error-views": {},
-    "./lib/login-view": {},
-    "./lib/cache": {
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
@@ -1502,16 +2307,16 @@ test("List Vaults shows and saves items before optional sharing, from complete l
         saved.push("vaults");
       },
     },
-    "./lib/item-counts": itemCounts,
-    "./lib/refresh": refresh,
-    "./lib/shortcuts": shortcuts,
-    "./lib/vault-sharing": vaultSharing,
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
   });
-  harness.render(Command, {});
+  harness.render(VaultsView, { startOnItems: false });
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
-  const view = harness.render(Command, {});
+  const view = harness.render(VaultsView, { startOnItems: false });
   assert.equal(view.props.isLoading, false);
   const row = actions(view).find((entry) => entry.title === personal.name)!;
   assert.ok(row);
@@ -1519,7 +2324,9 @@ test("List Vaults shows and saves items before optional sharing, from complete l
   assert.deepEqual(saved, []);
   pendingSharing[0](new Map([["vault", { role: "owner", isShared: true }]]));
   await new Promise(setImmediate);
-  const sharedRow = actions(harness.render(Command, {})).find((entry) => entry.title === personal.name)!;
+  const sharedRow = actions(harness.render(VaultsView, { startOnItems: false })).find(
+    (entry) => entry.title === personal.name,
+  )!;
   assert.deepEqual(JSON.parse(JSON.stringify(sharedRow.accessories)), [
     { tooltip: "Shared by you" },
     { text: "1 item" },
@@ -1536,13 +2343,69 @@ test("List Vaults shows and saves items before optional sharing, from complete l
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
-test("an older List Vaults load can't replace newer sharing or displayed counts", async () => {
-  const vault = { shareId: "vault", name: "Personal" };
-  const savedSharing: unknown[] = [];
-  const pending: ((sharing: Map<string, unknown>) => void)[] = [];
-  let listings = 0;
+test("Sort vaults by puts vaults by name or by item count, the uncounted last", () => {
+  const sortVaults = sort.sortVaults as unknown as (
+    vaults: Vault[],
+    order: string,
+    countOf: (vault: Vault) => number | undefined,
+    mostUsed: Vault[],
+  ) => Vault[];
+  const vaults = [
+    { shareId: "w", name: "work" },
+    { shareId: "p", name: "Personal" },
+    { shareId: "a", name: "Archive" },
+  ];
+  const counts = new Map([
+    ["w", 12],
+    ["p", 40],
+  ]);
+  const names = (order: string) =>
+    sortVaults(vaults, order, (vault) => counts.get(vault.shareId), vaults.slice(1))
+      .map((vault) => vault.name)
+      .join();
+  assert.equal(names("name"), "Archive,Personal,work");
+  assert.equal(names("itemCount"), "Personal,work,Archive");
+  assert.equal(names("mostUsed"), "Personal,Archive");
+});
+
+test("the vault menu follows the vaults' order, and only a vault chosen in it counts as a use", () => {
+  const visits: string[] = [];
+  const changes: string[] = [];
+  const { VaultDropdown } = loadView("vault-dropdown.tsx", {
+    react: { useRef: (current: unknown) => ({ current }) },
+    "@raycast/api": { List: { Dropdown: { Item: {}, Section: {} } }, Icon: {} },
+    "./item-counts": itemCounts,
+    "./sort": {
+      ...sort,
+      useVaultFrecency: (data: Vault[]) => ({ data, visitItem: (vault: Vault) => visits.push(vault.shareId) }),
+    },
+  });
+  const menu = VaultDropdown({
+    vaults: [{ shareId: "w", name: "Work" }, { shareId: "p", name: "Personal" }, sharedItems.SHARED_WITH_ME],
+    itemCounts: new Map([
+      ["w", 3],
+      ["p", 1],
+    ]),
+    order: "itemCount",
+    onVaultChange: (shareId: string) => changes.push(shareId),
+  } as unknown as Record<string, unknown>);
+  assert.equal(
+    actions(menu)
+      .filter((entry) => typeof entry.value === "string")
+      .map((entry) => entry.value)
+      .join(),
+    "all,w,p,shared-with-me",
+  );
+  const onChange = menu.props.onChange as (shareId: string) => void;
+  // The vault Raycast opens on, then one the user picks.
+  onChange("w");
+  onChange("p");
+  assert.equal(changes.join(), "w,p");
+  assert.equal(visits.join(), "p");
+});
+test("the vault list is sorted by name by default, and Sort by or its search bar menu reorders it and the vault menus opened from it", async () => {
   const harness = hookHarness();
-  const { default: Command } = loadView("../list-vaults.tsx", {
+  const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
     "@raycast/api": {
       List: { Item: {}, EmptyView: {} },
@@ -1551,8 +2414,97 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
       Icon: {},
       Keyboard: { Shortcut: { Common: { Copy: {} } } },
       getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
     },
-    "./lib/pass-cli": {
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [
+          { shareId: "b", name: "Beta" },
+          { shareId: "a", name: "Alpha" },
+        ],
+        items: [
+          { ...item, shareId: "b", itemId: "1" },
+          { ...item, shareId: "b", itemId: "2" },
+          { ...item, shareId: "a", itemId: "3" },
+        ],
+        failedVaults: [],
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  harness.render(VaultsView, { startOnItems: false });
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const rows = () =>
+    actions(harness.render(VaultsView, { startOnItems: false })).filter(
+      (entry) => entry.actions && entry.title !== "All Vaults",
+    );
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Alpha,Beta",
+  );
+  const sortMenu = actions(rows()[0].actions).find((entry) => "onChange" in entry && "value" in entry)!;
+  assert.equal(sortMenu.value, "name");
+  (sortMenu.onChange as (order: string) => void)("itemCount");
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Beta,Alpha",
+  );
+  // The item lists opened from here show their vault menu in the same order.
+  const open = actions(rows()[0].actions).find((entry) => entry.title === "View Items")!;
+  assert.equal((open.target as Element).props.vaultOrder, "itemCount");
+  // The search bar menu shows the same order and changes it too.
+  const dropdown = harness.render(VaultsView, { startOnItems: false }).props.searchBarAccessory as Element;
+  assert.equal(dropdown.props.value, "itemCount");
+  (dropdown.props.onChange as (order: string) => void)("name");
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Alpha,Beta",
+  );
+});
+
+test("an older vault list load can't replace newer sharing or displayed counts", async () => {
+  const vault = { shareId: "vault", name: "Personal" };
+  const savedSharing: unknown[] = [];
+  const pending: ((sharing: Map<string, unknown>) => void)[] = [];
+  let listings = 0;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
       listVaultsAndItems: async () => ({
         vaults: [vault],
@@ -1560,11 +2512,11 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
         failedVaults: [],
       }),
     },
-    "./lib/types": { PassCliError },
-    "./lib/search-items-view": {},
-    "./lib/error-views": {},
-    "./lib/login-view": {},
-    "./lib/cache": {
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
@@ -1574,12 +2526,12 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
       setCachedItems: async () => undefined,
       setCachedVaults: async () => undefined,
     },
-    "./lib/item-counts": itemCounts,
-    "./lib/refresh": refresh,
-    "./lib/shortcuts": shortcuts,
-    "./lib/vault-sharing": vaultSharing,
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
   });
-  harness.render(Command, {});
+  harness.render(VaultsView, { startOnItems: false });
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
@@ -1592,17 +2544,111 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
   pending[0](new Map([["vault", { role: "owner", isShared: false }]]));
   await new Promise(setImmediate);
   assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
-  const row = actions(harness.render(Command, {})).find((entry) => entry.title === vault.name)!;
+  const row = actions(harness.render(VaultsView, { startOnItems: false })).find((entry) => entry.title === vault.name)!;
   assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [
     { tooltip: "Shared with you · Viewer" },
     { text: "2 items" },
   ]);
 });
 
-test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {
+test("List Vaults opens Browse Items on the vault list, and says so when Browse Items is disabled", async () => {
+  const { default: BrowseItems } = loadView("../search-items.tsx", { "./lib/vaults-view": { VaultsView: {} } });
+  assert.equal(BrowseItems({}).props.startOnItems, true);
+  assert.equal(BrowseItems({ launchContext: { openOn: "vaults" } }).props.startOnItems, false);
+  const launched: unknown[] = [];
+  const toasts: { title: string }[] = [];
+  let isEnabled = true;
+  const { default: ListVaults } = loadView("../list-vaults.tsx", {
+    "@raycast/api": {
+      LaunchType: { UserInitiated: "userInitiated" },
+      Toast: { Style: { Failure: "failure" } },
+      launchCommand: async (options: unknown) => {
+        if (!isEnabled) throw new Error("Command is disabled");
+        launched.push(options);
+      },
+      showToast: async (toast: { title: string }) => {
+        toasts.push(toast);
+      },
+    },
+    "./search-items": {},
+  });
+  await ListVaults({});
+  assert.deepEqual(JSON.parse(JSON.stringify(launched)), [
+    { name: "search-items", type: "userInitiated", context: { openOn: "vaults" } },
+  ]);
+  isEnabled = false;
+  await ListVaults({});
+  assert.equal(toasts[0].title, "Couldn't Open Browse Items");
+});
+
+test("Browse Items opens all items over the vaults, which load only once they're shown", async () => {
+  const pushed: { view: Element; onPop?: () => void }[] = [];
+  let listings = 0;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({
+        push: (view: Element, onPop?: () => void) => {
+          pushed.push({ view, onPop });
+        },
+      }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [{ shareId: "vault", name: "Personal" }], items: [item], failedVaults: [] };
+      },
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const render = () => harness.render(VaultsView, { startOnItems: true });
+  render();
+  // Twice, as React does in development: a second copy of the items would take a second Esc to leave.
+  harness.effects.forEach((effect) => effect());
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  // All items, rather than a vault, and nothing listed for the vaults underneath meanwhile.
+  assert.equal(pushed.length, 1);
+  assert.equal(pushed[0].view.props.initialVault, undefined);
+  assert.equal(listings, 0);
+
+  pushed[0].onPop?.();
+  await new Promise(setImmediate);
+  assert.equal(listings, 1);
+  const rows = (render().props.children as { props: { children: unknown[] } }).props.children.flat();
+  const titles = rows.flatMap((row) => (row && typeof row === "object" ? [(row as Element).props.title] : []));
+  assert.equal(titles.join(", "), "All Vaults, Personal");
+});
+
+test("a vault opened from the vault list keeps its count when its items can't be listed", async () => {
   const failed = { shareId: "vault", name: "Personal" };
   const { harness, SearchItemsView } = searchItemsFixture({
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => {
         throw new PassCliError("Offline", "network_error");
       },
@@ -1637,6 +2683,7 @@ test("Check Again in Search Items keeps the login screen until the items have lo
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultsAndItems: async () => {
         if (!isLoggedIn) throw new PassCliError("Session ended", "not_authenticated");
         return { vaults: [vault], items: [item], failedVaults: [] };
@@ -1783,7 +2830,7 @@ test("a login started while a check is in flight lets it finish, and keeps its o
   const [checkLogin] = harness.effects;
   checkLogin();
   await new Promise(setImmediate);
-  // As Re-Run Browser Login does, in the Login command, while the check of an earlier login is still running.
+  // Login with Browser pressed right away, while the check of an earlier login is still running.
   const starting = login().start();
   await new Promise(setImmediate);
   // That check would remove the new login's files, and report its own result over the new login's.

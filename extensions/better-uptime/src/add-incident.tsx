@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { baseUrl } from "./constants";
 import { Preferences } from "./interface";
+import { getErrorMessage, getResponseErrorMessage } from "./utils";
 import { FormValidation, useForm } from "@raycast/utils";
 import fetch from "node-fetch";
 
@@ -12,7 +13,7 @@ interface AddIncidentFormValues {
 
 export default function AddIncidentCommand() {
   const preferences = getPreferenceValues<Preferences>();
-  const { handleSubmit } = useForm<AddIncidentFormValues>({
+  const { handleSubmit, itemProps } = useForm<AddIncidentFormValues>({
     async onSubmit(values) {
       await showToast({
         title: "Creating incident...",
@@ -29,8 +30,7 @@ export default function AddIncidentCommand() {
       })
         .then(async (response) => {
           if (!response.ok) {
-            const errorData = await response.json();
-            throw { response: { data: errorData } };
+            throw new Error(await getResponseErrorMessage(response));
           }
 
           await showToast({
@@ -44,7 +44,7 @@ export default function AddIncidentCommand() {
           await showToast({
             title: "Incident not created",
             style: Toast.Style.Failure,
-            message: error.response.data.errors,
+            message: getErrorMessage(error),
           });
         });
     },
@@ -63,9 +63,9 @@ export default function AddIncidentCommand() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="summary" title="Summary" placeholder="New users can't sign up" />
-      <Form.TextField id="description" title="Description" placeholder="Enter a description" />
-      <Form.TextField id="requester_email" title="Requester Email" placeholder="john@example.com" />
+      <Form.TextField title="Summary" placeholder="New users can't sign up" {...itemProps.summary} />
+      <Form.TextField title="Description" placeholder="Enter a description" {...itemProps.description} />
+      <Form.TextField title="Requester Email" placeholder="john@example.com" {...itemProps.requester_email} />
     </Form>
   );
 }

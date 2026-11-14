@@ -83,7 +83,7 @@ export async function switchToSession(session: string, setLoading: (value: boole
   const toast = await showToast({ style: Toast.Style.Animated, title: "" });
   setLoading(true);
 
-  exec(`tmux switch -t ${shq("=" + session)}`, { env }, async (error, stdout, stderr) => {
+  exec(`tmux switch-client -t ${shq("=" + session)}`, { env }, async (error, stdout, stderr) => {
     if (error || stderr) {
       console.error(`exec error: ${error || stderr}`);
 

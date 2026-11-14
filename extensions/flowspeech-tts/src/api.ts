@@ -1,6 +1,8 @@
-const FLOWSPEECH_TTS_ENDPOINT = "https://flowspeech.io/api/ai/text-to-speech";
+import { FlowSpeechClient } from "./client";
 
 export interface GeneratedAudio {
+  requestId: string;
+  jobId: string;
   audio: Buffer;
   mimeType: string;
   sampleRate: number;
@@ -8,54 +10,22 @@ export interface GeneratedAudio {
   bitsPerSample: number;
 }
 
-interface FlowSpeechResponse {
-  code?: number;
-  message?: string;
-  data?: {
-    audioBase64?: string;
-    mimeType?: string;
-    sampleRate?: number;
-    numChannels?: number;
-    bitsPerSample?: number;
-  };
-}
-
-export async function generateSpeech(text: string, voiceName: string, apiKey: string): Promise<GeneratedAudio> {
-  const response = await fetch(FLOWSPEECH_TTS_ENDPOINT, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      text,
-      originalText: text,
-      speakers: [{ voiceName }],
-      clientSource: "raycast-extension",
-      clientVersion: "1.0.0",
-    }),
-  });
-
-  let result: FlowSpeechResponse;
-  try {
-    result = (await response.json()) as FlowSpeechResponse;
-  } catch {
-    throw new Error(`FlowSpeech returned an invalid response (${response.status})`);
-  }
-
-  if (!response.ok || result.code !== 0) {
-    throw new Error(result.message || `FlowSpeech request failed (${response.status})`);
-  }
-
-  if (!result.data?.audioBase64) {
-    throw new Error("FlowSpeech returned no audio data");
-  }
-
+export async function generateSpeech(
+  text: string,
+  voiceName: string,
+  apiKey: string,
+  requestId: string,
+  signal?: AbortSignal,
+): Promise<GeneratedAudio> {
+  const client = new FlowSpeechClient({ apiKey });
+  const result = await client.generate({ mode: "single", text, voiceName }, requestId, signal);
   return {
-    audio: Buffer.from(result.data.audioBase64, "base64"),
-    mimeType: result.data.mimeType || "audio/L16;rate=24000",
-    sampleRate: result.data.sampleRate || 24000,
-    numChannels: result.data.numChannels || 1,
-    bitsPerSample: result.data.bitsPerSample || 16,
+    audio: Buffer.from(result.audio),
+    mimeType: "audio/wav",
+    sampleRate: 24000,
+    numChannels: 1,
+    bitsPerSample: 16,
+    requestId: result.requestId,
+    jobId: result.job.id,
   };
 }

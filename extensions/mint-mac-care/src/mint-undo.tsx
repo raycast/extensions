@@ -4,6 +4,7 @@ import { openMint, plural, runMintSurface } from "./mint-cli";
 
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { RetryActions } from "./confirm-in-mint";
 import { UndoBatch, UndoKind, undoKind, undoPicture, undoTitle } from "./mint-panes";
 
 type UndoListResponse = { items: UndoBatch[] };
@@ -58,7 +59,12 @@ function UndoList({ cli }: { cli: string }) {
       searchBarPlaceholder="Search what Mint did"
     >
       {error ? (
-        <List.EmptyView title="Mint could not read its history" description={error.message} icon={Icon.Warning} />
+        <List.EmptyView
+          title="Mint could not read its history"
+          description={error.message}
+          icon={Icon.Warning}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {!error && !isLoading && data?.items.length === 0 ? (
         <List.EmptyView

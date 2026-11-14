@@ -63,7 +63,7 @@ async function harness({ preferences = {}, native, history = [] } = {}) {
     }
     if (operation === "updateReviewImage") {
       await writeFile(args[4], png);
-      return new Set(JSON.parse(args[2]).map((box) => JSON.stringify(box))).size;
+      return new Set(JSON.parse(args[2]).map((mask) => JSON.stringify(mask.box))).size;
     }
     if (operation === "copyRedactedImage") return;
     await writeFile(args[0], png);
@@ -581,7 +581,7 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
         if (renderGate) await renderGate;
         await writeFile(args[4], png);
         if (failRender) throw new Error("synthetic render failure");
-        return new Set(JSON.parse(args[2]).map((box) => JSON.stringify(box))).size;
+        return new Set(JSON.parse(args[2]).map((mask) => JSON.stringify(mask.box))).size;
       }
       await writeFile(args[0], png);
       return { hits: privateHits, regionCount: 1, output: args[0], clipboardChangeCount: 17 };
@@ -849,7 +849,7 @@ test("exclusions use scan-scoped identities and copy only the latest successful 
   assert.equal(wrapper.calls.at(-1).args[0], excluded.output);
   const restored = await wrapper.updateRedactions(excluded, []);
   assert.equal(restored.regionCount, 1);
-  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [hit.box]);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [{ kind: hit.kind, box: hit.box }]);
   const second = await wrapper.redactClipboard({ forReview: true });
   assert.notEqual(second.hits[0].id, id, "a new scan never inherits an exclusion");
   await assert.rejects(wrapper.updateRedactions(second, [id]), /different scan/);
@@ -863,7 +863,7 @@ test("excluding one of overlapping detections keeps other categories masked", as
     native: async (args, operation) => {
       if (operation === "updateReviewImage") {
         await writeFile(args[4], png);
-        return new Set(JSON.parse(args[2]).map((box) => JSON.stringify(box))).size;
+        return new Set(JSON.parse(args[2]).map((mask) => JSON.stringify(mask.box))).size;
       }
       await writeFile(args[0], png);
       return {
@@ -880,7 +880,10 @@ test("excluding one of overlapping detections keeps other categories masked", as
   scan.hits.reverse(); // Sorting the review must not change which detection an ID refers to.
   const excluded = await wrapper.updateRedactions(scan, [excludedId]);
   assert.equal(excluded.regionCount, 2);
-  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [{ ...hit.box, y: 50 }, hit.box]);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [
+    { kind: hit.kind, box: { ...hit.box, y: 50 } },
+    { kind: "custom", box: hit.box },
+  ]);
   await wrapper.disposeScan(excluded);
 });
 
@@ -985,3 +988,18 @@ test("edits and closing preserve output until every already-started copy finishe
     assert.deepEqual(await wrapper.outputs(), []);
   }
 });
+
+for (const blurFaces of [undefined, false, true]) {
+  test(`macOS scan and review preserve face blur preference ${blurFaces}`, async () => {
+    const preferences = { style: "pixelate", blurFaces };
+    const wrapper = await harness({ preferences });
+    const scan = await wrapper.redactClipboard({ forReview: true });
+    assert.equal(wrapper.calls.at(-1).args[9], blurFaces ?? false);
+    preferences.blurFaces = !blurFaces;
+    const updated = await wrapper.updateRedactions(scan, []);
+    assert.equal(wrapper.calls.at(-1).args[3], "pixelate");
+    assert.equal(wrapper.calls.at(-1).args[5], blurFaces ?? false, "review keeps the scan's preference");
+    assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [{ kind: hit.kind, box: hit.box }]);
+    await wrapper.disposeScan(updated);
+  });
+}

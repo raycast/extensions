@@ -49,7 +49,7 @@ export type SkillLockEntry = {
   sourceType: string;
   sourceUrl?: string;
   ref?: string;
-  skillPath: string;
+  skillPath?: string;
   skillFolderHash: string;
   installedAt: string;
   updatedAt: string;
@@ -67,6 +67,8 @@ export type InstalledSkill = {
   ref?: string;
   installedAt?: string;
   updatedAt?: string;
+  managedBySkillsCli?: boolean;
+  mutableAgents?: string[];
 };
 
 export type SkillFrontmatter = {
@@ -93,7 +95,7 @@ const REPO_URL = "https://github.com/raycast/extensions";
 const ISSUE_TEMPLATE = "extension_bug_report.yml";
 
 export function parseFrontmatter(content: string): { frontmatter: SkillFrontmatter; body: string } {
-  const match = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+  const match = content.match(/^\uFEFF?---\s*\n([\s\S]*?)\n---\s*(?:\n|$)([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: content };
 
   const body = match[2];

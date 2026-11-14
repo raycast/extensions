@@ -69,6 +69,7 @@ async function run(request: Record<string, unknown>, respond?: (response: unknow
 export async function redactImage(options: {
   outputPath: string;
   style: string;
+  blurFaces?: boolean;
   padding: number;
   categories: Set<string>;
   extraWords: string;
@@ -102,7 +103,14 @@ export async function redactImage(options: {
         height: analysis.height,
       });
       report = { hits, regionCount: regions.length, clipboardChangeCount: analysis.changeCount };
-      return { output: options.outputPath, regions };
+      // Render faces first so overlapping text masks retain their selected style.
+      const renderRegions = options.blurFaces
+        ? [
+            ...hits.filter((hit) => hit.kind === "face").map((hit) => ({ ...hit.box, style: "blur" })),
+            ...hits.filter((hit) => hit.kind !== "face").map((hit) => ({ ...hit.box, style: options.style })),
+          ]
+        : regions;
+      return { output: options.outputPath, regions: renderRegions };
     },
   );
   if (!report) throw new Error("The Windows redaction helper returned no result. Try scanning again.");

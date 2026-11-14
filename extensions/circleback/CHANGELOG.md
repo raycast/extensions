@@ -1,5 +1,9 @@
 # Circleback Changelog
 
+## [Error reporting] - 2026-10-22
+
+- Errors shown in a toast are now reported to Raycast so we can fix them.
+
 ## [Ask Circleback and Chats] - 2026-10-15
 
 - **Ask Circleback**: Ask Circleback about your meetings and more.

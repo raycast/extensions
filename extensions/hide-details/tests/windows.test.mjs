@@ -170,6 +170,16 @@ test("invalid OCR geometry stops the Windows helper before rendering", async () 
   assert.equal(backend.killed, true);
 });
 
+test("face blur renders before overlapping text blackout without changing region counts", async () => {
+  const backend = helper({ ...analysis, faces: [{ x: 55, y: 15, width: 5, height: 20 }] });
+  const report = await backend.windows.redactImage({ ...options, blurFaces: true });
+  assert.deepEqual(backend.requests[1].regions, [
+    { x: 55, y: 15, width: 5, height: 20, style: "blur" },
+    { x: 55, y: 15, width: 5, height: 20, style: "blackout" },
+  ]);
+  assert.equal(report.regionCount, 1);
+});
+
 test(
   "bundled Windows helper scans and renders empty and single-item results",
   { skip: process.platform !== "win32" },
@@ -180,6 +190,10 @@ test(
     const windows = loadSource("../src/windows.ts", {
       "@raycast/api": { environment: { assetsPath: path.join(root, "assets") } },
       "./detection": { ...detection, ocrBox, regionBox },
+    });
+    await t.test("clipboard sequence can be read without changing the clipboard", async () => {
+      const count = await windows.clipboardChangeCount();
+      assert.ok(Number.isSafeInteger(count) && count >= 0 && count <= 0xffffffff);
     });
     // Only Raycast and TS module loading are replaced. spawn and the shipped script run unchanged.
     function powershell(script, report = {}) {
@@ -218,6 +232,13 @@ test(
         categories: ["face"],
         kind: "face",
       },
+      {
+        name: "face blur overrides blackout",
+        input: path.join(root, "tests", "fixtures", "face.jpg"),
+        categories: ["face"],
+        kind: "face",
+        blurFaces: true,
+      },
     ];
     for (const [index, scenario] of cases.entries()) {
       await t.test(scenario.name, async () => {
@@ -227,6 +248,7 @@ test(
           outputPath: path.join(directory, `output-${index}.png`),
           categories: new Set(scenario.categories),
           recognition: "fast",
+          blurFaces: scenario.blurFaces ?? false,
         });
         assert.equal(report.output, path.join(directory, `output-${index}.png`));
         assert.equal(report.clipboardChangeCount, null);
@@ -256,17 +278,114 @@ test(
           }
           foreach ($hit in $report.hits) {
             $box = $hit.box
+            $changed = 0
+            $nonBlack = 0
             for ($y = $box.y; $y -lt $box.y + $box.height; $y++) {
               for ($x = $box.x; $x -lt $box.x + $box.width; $x++) {
-                if ($bitmap.GetPixel($x, $y).ToArgb() -ne [System.Drawing.Color]::Black.ToArgb()) { throw 'Mask has an unredacted pixel' }
+                $pixel = $bitmap.GetPixel($x, $y).ToArgb()
+                if ($pixel -ne $source.GetPixel($x, $y).ToArgb()) { $changed++ }
+                if ($pixel -ne [System.Drawing.Color]::Black.ToArgb()) { $nonBlack++ }
               }
             }
+            if ($report.blurFaces) {
+              if ($changed -eq 0 -or $nonBlack -eq 0) { throw 'Face was not blurred' }
+            } elseif ($nonBlack -ne 0) { throw 'Mask has an unredacted pixel' }
           }
         } finally { $source.Dispose(); $bitmap.Dispose() }
       `,
-          { ...report, inputPath: path.resolve(directory, scenario.input) },
+          { ...report, inputPath: path.resolve(directory, scenario.input), blurFaces: scenario.blurFaces ?? false },
         );
       });
     }
+
+    // Request order never executes the renderer. Draw the address across the detected face and require those pixels to stay black.
+    await t.test("overlapping face blur keeps every text-mask pixel black", async () => {
+      const faceInput = path.join(root, "tests", "fixtures", "face.jpg");
+      const detected = await windows.redactImage({
+        ...options,
+        inputPath: faceInput,
+        outputPath: path.join(directory, "overlap-face.png"),
+        categories: new Set(["face"]),
+        recognition: "fast",
+      });
+      assert.equal(detected.hits.length, 1);
+      assert.equal(detected.hits[0].kind, "face");
+      powershell(
+        `
+        $ErrorActionPreference = 'Stop'
+        Add-Type -AssemblyName System.Drawing
+        $report = ConvertFrom-Json $env:HIDE_DETAILS_TEST_REPORT
+        $source = New-Object System.Drawing.Bitmap $report.inputPath
+        $bitmap = New-Object System.Drawing.Bitmap($source.Width, $source.Height)
+        $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+        $font = New-Object System.Drawing.Font 'Arial', 28, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
+        try {
+          $graphics.DrawImage($source, 0, 0, $source.Width, $source.Height)
+          $face = $report.face
+          $text = 'jane@example.com'
+          $measured = $graphics.MeasureString($text, $font)
+          $bandWidth = [Math]::Min($bitmap.Width, [int][Math]::Ceiling($measured.Width) + 12)
+          $bandHeight = [Math]::Max(40, [int][Math]::Ceiling($measured.Height) + 10)
+          if ($bandHeight -gt [int][Math]::Floor([double]$face.height * 0.4)) { throw 'Face box is too small for an overlapping text mask' }
+          $bandX = [int][Math]::Floor([double]$face.x + ([double]$face.width - $bandWidth) / 2)
+          $bandY = [int][Math]::Floor([double]$face.y + [double]$face.height - $bandHeight - [double]$face.height * 0.08)
+          if ($bandX -lt 0) { $bandX = 0 }
+          if ($bandY -lt 0) { $bandY = 0 }
+          if ($bandX + $bandWidth -gt $bitmap.Width) { $bandX = $bitmap.Width - $bandWidth }
+          if ($bandY + $bandHeight -gt $bitmap.Height) { $bandY = $bitmap.Height - $bandHeight }
+          $graphics.FillRectangle([System.Drawing.Brushes]::White, $bandX, $bandY, $bandWidth, $bandHeight)
+          $graphics.DrawString($text, $font, [System.Drawing.Brushes]::Black, ($bandX + 6), ($bandY + 4))
+          $bitmap.Save((Join-Path $env:HIDE_DETAILS_TEST_DIRECTORY 'overlap.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+        } finally { $font.Dispose(); $graphics.Dispose(); $bitmap.Dispose(); $source.Dispose() }
+      `,
+        { inputPath: faceInput, face: detected.hits[0].box },
+      );
+
+      const report = await windows.redactImage({
+        ...options,
+        inputPath: path.join(directory, "overlap.png"),
+        outputPath: path.join(directory, "overlap-output.png"),
+        categories: new Set(["email", "face"]),
+        recognition: "fast",
+        blurFaces: true,
+      });
+      const email = report.hits.find((hit) => hit.kind === "email");
+      const face = report.hits.find((hit) => hit.kind === "face");
+      assert.ok(email, "missing email mask");
+      assert.ok(face, "missing face mask");
+      assert.equal(report.hits.length, 2);
+      assert.equal(email.text.replace(/\s/g, ""), "jane@example.com");
+      assert.equal(report.clipboardChangeCount, null);
+      assert.ok(email.box.width > 0 && email.box.height > 0);
+      assert.ok(
+        email.box.x < face.box.x + face.box.width &&
+          face.box.x < email.box.x + email.box.width &&
+          email.box.y < face.box.y + face.box.height &&
+          face.box.y < email.box.y + email.box.height,
+        "face blur does not overlap the text mask",
+      );
+      assert.deepEqual([...readFileSync(report.output).subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+      powershell(
+        `
+        $ErrorActionPreference = 'Stop'
+        Add-Type -AssemblyName System.Drawing
+        $report = ConvertFrom-Json $env:HIDE_DETAILS_TEST_REPORT
+        $bitmap = New-Object System.Drawing.Bitmap $report.output
+        try {
+          $box = $report.text
+          $left = [int]$box.x
+          $top = [int]$box.y
+          $right = $left + [int]$box.width
+          $bottom = $top + [int]$box.height
+          for ($y = $top; $y -lt $bottom; $y++) {
+            for ($x = $left; $x -lt $right; $x++) {
+              if ($bitmap.GetPixel($x, $y).ToArgb() -ne [System.Drawing.Color]::Black.ToArgb()) { throw "Text mask pixel $x,$y is not black" }
+            }
+          }
+        } finally { $bitmap.Dispose() }
+      `,
+        { output: report.output, text: email.box },
+      );
+    });
   },
 );

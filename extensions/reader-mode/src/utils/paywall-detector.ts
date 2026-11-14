@@ -91,6 +91,12 @@ export const BARRIER_SELECTORS = [
 ];
 
 /** Phrases that a page shows only when it is withholding the story. */
+/**
+ * "Unlimited access" gates a teaser, but a product page says it too ("unlimited access to every
+ * feature"), so callers weighing a full-length article may set it aside.
+ */
+export const UNLIMITED_ACCESS = /unlimited (?:digital )?access/i;
+
 const BARRIER_PHRASES: RegExp[] = [
   /subscribe to (?:unlock|read|continue)/i,
   /(?:this|the) (?:article|story|content) is (?:reserved )?(?:for|available (?:only )?to) (?:paying )?(?:subscribers|members)/i,
@@ -102,7 +108,7 @@ const BARRIER_PHRASES: RegExp[] = [
   /sign up to (?:read|continue reading) (?:the |this )?(?:full |rest of (?:the |this )?)?(?:article|story)/i,
   /you have a preview view of this article/i,
   /already a (?:subscriber|member)\?/i,
-  /unlimited (?:digital )?access/i,
+  UNLIMITED_ACCESS,
   /for subscribers only/i,
 ];
 

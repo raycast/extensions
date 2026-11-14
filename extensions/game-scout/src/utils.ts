@@ -1,5 +1,5 @@
 import { Icon, Color } from "@raycast/api";
-import type { BundleValue, Deal, HistoryPoint } from "./types";
+import type { BundleValue, Deal, HistoryPoint, SavedGame } from "./types";
 
 export const STORE_MAP: Record<string, string[]> = {
   steam: ["Steam"],
@@ -42,14 +42,55 @@ for (const [id, names] of Object.entries(STORE_MAP)) {
 export const safeParse = <T>(
   str: string | undefined | null,
   fallback: T,
+  validate?: (value: unknown) => value is T,
 ): T => {
   if (!str) return fallback;
+
   try {
-    return JSON.parse(str) as T;
+    const value: unknown = JSON.parse(str);
+
+    if (validate) {
+      return validate(value) ? value : fallback;
+    }
+
+    if (Array.isArray(fallback)) {
+      return Array.isArray(value) ? (value as T) : fallback;
+    }
+
+    if (typeof fallback === "object") {
+      return value !== null &&
+        typeof value === "object" &&
+        !Array.isArray(value)
+        ? (value as T)
+        : fallback;
+    }
+
+    return typeof value === typeof fallback ? (value as T) : fallback;
   } catch {
     return fallback;
   }
 };
+
+export const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
+
+export const parseSavedGames = (str: string | undefined | null): SavedGame[] =>
+  safeParse<unknown[]>(str, [])
+    .filter(
+      (item): item is Record<string, unknown> =>
+        item !== null &&
+        typeof item === "object" &&
+        "id" in item &&
+        typeof item.id === "string" &&
+        "title" in item &&
+        typeof item.title === "string",
+    )
+    .map((item) => ({
+      id: item.id as string,
+      title: item.title as string,
+      slug: typeof item.slug === "string" ? item.slug : "",
+      type: typeof item.type === "string" ? item.type : undefined,
+    }));
 
 export function formatPrice(
   amount: number | undefined,

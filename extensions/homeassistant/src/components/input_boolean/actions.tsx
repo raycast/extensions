@@ -6,12 +6,12 @@ import {
   callInputBooleanToggleService,
   callInputBooleanTurnOffService,
   callInputBooleanTurnOnService,
-  isEditableInputBoolean,
+  isInputBoolean,
 } from "./utils";
 
 export function InputBooleanToggleAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isEditableInputBoolean(s)) {
+  if (!isInputBoolean(s)) {
     return null;
   }
   return (
@@ -25,7 +25,7 @@ export function InputBooleanToggleAction(props: { state: State }): React.ReactEl
 
 export function InputBooleanOnAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isEditableInputBoolean(s)) {
+  if (!isInputBoolean(s)) {
     return null;
   }
   return (
@@ -40,7 +40,7 @@ export function InputBooleanOnAction(props: { state: State }): React.ReactElemen
 
 export function InputBooleanOffAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isEditableInputBoolean(s)) {
+  if (!isInputBoolean(s)) {
     return null;
   }
   return (

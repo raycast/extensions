@@ -21,8 +21,16 @@ const required = (value: unknown) => {
   return isValid ? undefined : "This field is required";
 };
 
+// Extracts raw email address from potential RFC 5322 format: "Name <email@domain.com>" or "email@domain.com"
+export const extractEmailAddress = (value: string): string => {
+  const match = value.match(/<([^>]+)>/);
+  return (match ? match[1] : value).trim();
+};
+
 const email = (value?: string) => {
-  return value != null && emailRegex.test(value) ? undefined : "Invalid email address";
+  if (value == null) return "Invalid email address";
+  const address = extractEmailAddress(value);
+  return emailRegex.test(address) ? undefined : "Invalid email address";
 };
 
 const emails = (value?: string) => {
@@ -30,7 +38,8 @@ const emails = (value?: string) => {
     ?.split(",")
     .map((recipient: string) => {
       const trimmedRecipient = recipient.trim();
-      if (trimmedRecipient && !emailRegex.test(trimmedRecipient)) {
+      const address = extractEmailAddress(trimmedRecipient);
+      if (trimmedRecipient && !emailRegex.test(address)) {
         return "Invalid email address";
       }
 

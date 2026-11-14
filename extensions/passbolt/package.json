@@ -20,7 +20,18 @@
       "title": "Search Passwords",
       "subtitle": "Passbolt",
       "description": "Search for passwords in Passbolt",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "matchCurrentWebsite",
+          "type": "checkbox",
+          "title": "Website Matching",
+          "label": "Show passwords for the current website first",
+          "description": "Uses the Raycast Browser Extension when available, or a URL supplied in launch context.",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "create",

@@ -8,17 +8,19 @@ import { getTurns } from "../utils/assistant/chat";
 import { loadRenderer } from "../utils/assistant/image";
 import { getTurnMarkdown, getTurnView, removeSources } from "../utils/assistant/markdown";
 import { resolveUrl } from "../utils/deepLink";
+import { reportErrors } from "../utils/error";
 
 const TURN_SEPARATOR = "\n\n---\n\n";
 
 // Module-level so usePromise doesn't restart on every render.
-const getAssistantUrl = () => resolveUrl("/assistant/");
+const getAssistantUrl = reportErrors(() => resolveUrl("/assistant/"));
+const loadImageRenderer = reportErrors(loadRenderer);
 
 const ChatsView = ({ initialQuestion }: { initialQuestion?: string }) => {
   const [draft, setDraft] = useState("");
   const { chats, chatId, selectChat, messages, sources, isAnswering, isLoading, hasLoadError, ask } =
     useAssistantChat(initialQuestion);
-  const { data: renderer } = usePromise(loadRenderer);
+  const { data: renderer } = usePromise(loadImageRenderer);
   const { data: assistantUrl } = usePromise(getAssistantUrl);
   const turns = getTurns(messages);
   const lastTurn = turns.at(-1);

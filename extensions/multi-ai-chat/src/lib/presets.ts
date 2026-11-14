@@ -2,6 +2,7 @@ import type { AIServiceId } from "./prompt-urls.js";
 
 export const PRESETS_STORAGE_KEY = "prompt-presets";
 export const PRESET_STORAGE_PREFIX = "prompt-preset:";
+export const UPDATED_PRESET_STORAGE_PREFIX = "updated-prompt-preset:";
 export const DELETED_PRESET_STORAGE_PREFIX = "deleted-prompt-preset:";
 
 export type PresetServiceCounts = Record<AIServiceId, number>;
@@ -133,8 +134,37 @@ export function presetStorageKey(id: string): string {
   return `${PRESET_STORAGE_PREFIX}${id}`;
 }
 
+export function serializeStoredPreset(
+  preset: PromptPreset,
+  updatedAt: number,
+): string {
+  return JSON.stringify({ ...preset, updatedAt });
+}
+
+export function storedPresetUpdatedAt(value: unknown): number | undefined {
+  if (typeof value !== "string") return undefined;
+  try {
+    const record: unknown = JSON.parse(value);
+    return isRecord(record)
+      ? validPresetTimestamp(record.updatedAt)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function validPresetTimestamp(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : undefined;
+}
+
 export function deletedPresetStorageKey(id: string): string {
   return `${DELETED_PRESET_STORAGE_PREFIX}${id}`;
+}
+
+export function updatedPresetStorageKey(id: string): string {
+  return `${UPDATED_PRESET_STORAGE_PREFIX}${id}`;
 }
 
 export function buildPresetDeeplink(

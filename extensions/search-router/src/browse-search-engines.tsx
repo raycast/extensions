@@ -23,6 +23,7 @@ import type { SearchEngine } from "./types";
 import { resolveDefaultSearchEngine, useDefaultSearchEngine } from "./data/cache";
 import Fuse from "fuse.js";
 import AddCustomSearchEngine from "./add-custom-search-engine";
+import SearchWithEngine from "./search-with-engine";
 import { getEngineTriggerPreference } from "./preferences";
 
 type FilterType = "all" | "custom" | "builtin";
@@ -211,6 +212,7 @@ export default function BrowseSearchEngines() {
           {filteredSearchEngines.map((searchEngine) => {
             const isOverridden = !searchEngine.isCustom && customTriggers.has(searchEngine.t);
             const isDefault = searchEngine === effectiveDefaultSearchEngine;
+            const trigger = `${triggerPrefix}${searchEngine.t}`;
             const aliases = getAliases(searchEngine);
             const aliasShortcuts = aliases.map((alias) => `${triggerPrefix}${alias}`);
 
@@ -218,17 +220,12 @@ export default function BrowseSearchEngines() {
               <List.Item
                 key={searchEngine.t}
                 title={searchEngine.s}
-                subtitle={`${triggerPrefix}${searchEngine.t}`}
+                subtitle={{
+                  value: `${[trigger, ...aliasShortcuts.slice(0, 2)].join(" ")}${aliases.length > 2 ? "…" : ""}`,
+                  tooltip: [trigger, ...aliasShortcuts].join(" "),
+                }}
                 accessories={[
                   { tag: searchEngine.ad || searchEngine.d },
-                  ...(aliases.length
-                    ? [
-                        {
-                          text: `Aliases: ${aliasShortcuts.slice(0, 3).join(", ")}${aliases.length > 3 ? "…" : ""}`,
-                          tooltip: aliasShortcuts.join(", "),
-                        },
-                      ]
-                    : []),
                   { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
                   { tag: searchEngine.isCustom ? getCustomEngineTag(searchEngine, triggerPrefix) : undefined },
                   { text: isDefault ? "Default" : "" },
@@ -237,22 +234,23 @@ export default function BrowseSearchEngines() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
+                      <Action.Push
+                        title={`Search with ${searchEngine.s}`}
+                        icon={Icon.MagnifyingGlass}
+                        target={<SearchWithEngine searchEngine={searchEngine} />}
+                      />
                       {!isOverridden && (
-                        <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
-                      )}
-                      {searchEngine.urls && searchEngine.urls.length > 1 ? (
-                        searchEngine.urls.map((url, index) => (
-                          <Action.OpenInBrowser
-                            key={index}
-                            title={`Test Search - URL ${index + 1}`}
-                            url={url.replace("{{{s}}}", "test")}
-                          />
-                        ))
-                      ) : (
-                        <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                        <Action
+                          title="Set as Default"
+                          icon={Icon.Star}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "return" },
+                            Windows: { modifiers: ["ctrl"], key: "return" },
+                          }}
+                          onAction={() => setAsDefault(searchEngine)}
+                        />
                       )}
                     </ActionPanel.Section>
-
                     <ActionPanel.Section>
                       <Action
                         title="Add Custom Search Engine"

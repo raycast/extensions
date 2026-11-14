@@ -3,6 +3,7 @@ import os from "node:os";
 import crypto from "node:crypto";
 import { getPreferenceValues } from "@raycast/api";
 import { DeviceInfo, LocalSendDevice, PrepareUploadRequest, PrepareUploadResponse, FileMetadata } from "../types";
+import { deviceFetch } from "./device-fetch";
 
 export const MULTICAST_ADDRESS = "224.0.0.167";
 export const MULTICAST_PORT = 53317;
@@ -212,6 +213,33 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
 
   const portsToCheck = [53317, 53318, 53319];
 
+  const probeDevice = async (ip: string, port: number): Promise<DeviceInfo | null> => {
+    // Peers with encryption enabled only respond over HTTPS, so try both protocols.
+    for (const protocol of ["http", "https"] as const) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+      try {
+        const response = await deviceFetch(`${protocol}://${ip}:${port}/api/localsend/v2/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(deviceInfo),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          return (await response.json()) as DeviceInfo;
+        }
+      } catch {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    return null;
+  };
+
   for (let i = 1; i <= 254; i++) {
     const ip = `${subnet}.${i}`;
 
@@ -221,32 +249,17 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
 
     for (const port of portsToCheck) {
       const promise = (async () => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1000);
+        const data = await probeDevice(ip, port);
 
-        try {
-          const response = await fetch(`http://${ip}:${port}/api/localsend/v2/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(deviceInfo),
-            signal: controller.signal,
-          });
-
-          clearTimeout(timeoutId);
-
-          if (response.ok) {
-            const data = (await response.json()) as DeviceInfo;
-            const existingDevice = devices.find((d) => d.ip === ip);
-            if (!existingDevice) {
-              devices.push({
-                ...data,
-                ip,
-                lastSeen: Date.now(),
-              });
-            }
+        if (data) {
+          const existingDevice = devices.find((d) => d.ip === ip);
+          if (!existingDevice) {
+            devices.push({
+              ...data,
+              ip,
+              lastSeen: Date.now(),
+            });
           }
-        } catch {
-          clearTimeout(timeoutId);
         }
       })();
 
@@ -258,12 +271,16 @@ export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
   return devices;
 };
 
-export const getDeviceInfoHTTP = async (ip: string, port: number): Promise<DeviceInfo | null> => {
+export const getDeviceInfoHTTP = async (
+  ip: string,
+  port: number,
+  protocol: "http" | "https" = "http",
+): Promise<DeviceInfo | null> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 3000);
 
   try {
-    const response = await fetch(`http://${ip}:${port}/api/localsend/v2/info`, {
+    const response = await deviceFetch(`${protocol}://${ip}:${port}/api/localsend/v2/info`, {
       signal: controller.signal,
     });
 
@@ -323,7 +340,7 @@ export const sendFiles = async (
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-      prepareResponse = await fetch(url, {
+      prepareResponse = await deviceFetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(prepareRequest),
@@ -384,7 +401,7 @@ export const sendFiles = async (
       const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       try {
-        const uploadResponse = await fetch(uploadUrl, {
+        const uploadResponse = await deviceFetch(uploadUrl, {
           method: "POST",
           body: fileData,
           signal: controller.signal,
@@ -414,10 +431,13 @@ export const cancelSession = async (device: LocalSendDevice, sessionId: string):
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     try {
-      await fetch(`${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`, {
-        method: "POST",
-        signal: controller.signal,
-      });
+      await deviceFetch(
+        `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`,
+        {
+          method: "POST",
+          signal: controller.signal,
+        },
+      );
       clearTimeout(timeoutId);
     } catch (fetchError) {
       clearTimeout(timeoutId);

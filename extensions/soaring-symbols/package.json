@@ -26,21 +26,21 @@
       "name": "airline-info",
       "title": "Airline Information",
       "subtitle": "Soaring Symbols",
-      "description": "View detailed airline information including name, IATA, ICAO, country, website, and related assets.",
+      "description": "View detailed airline information including name, IATA, ICAO, callsign, founding year, country, alliance, hubs, and website.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
-    "soaring-symbols": "^0.1.0-alpha.10"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "soaring-symbols": "^0.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.9.1",
-    "@types/react": "19.2.16",
-    "eslint": "^10.4.1",
-    "prettier": "^3.8.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.1",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -49,6 +49,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test \"test/**/*.test.ts\""
   }
 }

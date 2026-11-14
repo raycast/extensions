@@ -217,6 +217,16 @@
       "name": "send-dm",
       "title": "Send X Direct Message",
       "description": "Sends a confirmed 1:1 or group direct message and never performs unsolicited outreach"
+    },
+    {
+      "name": "get-dm-conversations",
+      "title": "Get X Direct Message Conversations",
+      "description": "Gets one page of the authenticated user's recent direct message conversations with participant profiles"
+    },
+    {
+      "name": "get-dm-messages",
+      "title": "Get X Direct Messages",
+      "description": "Gets one page of messages from a single direct message conversation by conversation ID or username"
     }
   ],
   "preferences": [

@@ -1,5 +1,9 @@
 # Shortcut Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+Fix type errors in Search Stories and handle comments without text.
+
 ## [Improvement] - 2024-03-20
 
 Adds copy actions to a story.
