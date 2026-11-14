@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "comet",
   "title": "Comet",
-  "description": "Search open tabs, bookmarks and history in Comet.",
+  "description": "Search open tabs, bookmarks and history in Comet, and switch between Comet profiles.",
   "icon": "comet-icon.png",
   "author": "xjo_nd",
   "contributors": [
     "xmok",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "alexa"
   ],
   "license": "MIT",
   "categories": [
@@ -64,6 +65,172 @@
       "subtitle": "Comet",
       "description": "Create New Incognito Window.",
       "mode": "no-view"
+    },
+    {
+      "name": "switch-profile",
+      "title": "Switch Comet Profile",
+      "subtitle": "Comet",
+      "description": "Browse your Comet profiles and open one. Focuses the profile's window if it is already open.",
+      "mode": "view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser",
+        "perplexity"
+      ]
+    },
+    {
+      "name": "profile-1",
+      "title": "Open Profile 1",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "profile-2",
+      "title": "Open Profile 2",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "profile-3",
+      "title": "Open Profile 3",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "profile-4",
+      "title": "Open Profile 4",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "profile-5",
+      "title": "Open Profile 5",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
     }
   ],
   "tools": [
@@ -263,6 +430,15 @@
       "required": false,
       "title": "Favicon",
       "type": "checkbox"
+    },
+    {
+      "name": "alwaysNewWindow",
+      "title": "Windows",
+      "label": "Always open a new window",
+      "description": "Applies to Switch Comet Profile and Open Profile 1–5. By default Comet focuses an existing window for the profile if one is open. Enable this to open a fresh window every time.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
