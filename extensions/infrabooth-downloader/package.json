@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "infrabooth-downloader",
+  "title": "InfraBooth Downloader",
+  "description": "Search SoundCloud, download links and control the InfraBooth Downloader desktop player from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "kandid",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search SoundCloud",
+      "description": "Search SoundCloud tracks and playlists and send them to InfraBooth Downloader.",
+      "mode": "view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "See the track playing in InfraBooth Downloader and control playback, shuffle, volume and the queue.",
+      "mode": "view"
+    },
+    {
+      "name": "download-link",
+      "title": "Download SoundCloud Link",
+      "description": "Paste a SoundCloud track, playlist or album link and download it with InfraBooth Downloader.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
