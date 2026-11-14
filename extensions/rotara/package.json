@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rotara",
+  "title": "Rotara",
+  "description": "Switch, create and move windows between workspaces. Requires the Rotara macOS app",
+  "icon": "icon.png",
+  "author": "ry504",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-workspace",
+      "title": "Switch Workspace",
+      "subtitle": "Rotara",
+      "description": "Switch to a Rotara workspace",
+      "mode": "view"
+    },
+    {
+      "name": "move-window",
+      "title": "Move Window to Workspace",
+      "subtitle": "Rotara",
+      "description": "Move the last focused window to another Rotara workspace",
+      "mode": "view"
+    },
+    {
+      "name": "new-workspace",
+      "title": "New Workspace",
+      "subtitle": "Rotara",
+      "description": "Create a Rotara workspace and switch to it",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "text",
+          "placeholder": "Name",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
