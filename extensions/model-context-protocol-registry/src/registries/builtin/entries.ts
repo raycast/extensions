@@ -2075,6 +2075,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.10ml.com/mcp"],
     },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
