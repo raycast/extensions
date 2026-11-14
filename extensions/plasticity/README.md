@@ -20,7 +20,7 @@ Triangle and vertex counts describe the bridge’s tessellation of solids and sh
 
 ## Compatibility
 
-The bridge is a vendor-published integration protocol originally built for Blender. The parser and real local WebSocket client have automated fixture coverage. Live all-object and visible-object inventories passed against Plasticity 25.3.8. The extension sends direct list requests supported by both the original and current official bridge clients. Models larger than 64 MB of bridge data or 100,000 objects are rejected with a clear error.
+The bridge is a vendor-published integration protocol originally built for Blender. Live all-object and visible-object inventories passed against Plasticity 25.3.8. The extension sends direct list requests supported by both the original and current official bridge clients. Models larger than 64 MB of bridge data or 100,000 objects are rejected with a clear error.
 
 ## Sources
 
