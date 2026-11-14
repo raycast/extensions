@@ -11,10 +11,12 @@ export type Screen = {
   width: number;
   height: number;
   underMouse: boolean;
+  builtIn: boolean;
 };
 
 export const SCREEN_ENUMERATION_JXA = `
 ObjC.import('AppKit');
+ObjC.import('CoreGraphics');
 const mouse = $.NSEvent.mouseLocation;
 const screens = $.NSScreen.screens.js;
 const primary = screens.find((screen) => {
@@ -38,6 +40,11 @@ const result = screens.map((screen, index) => {
     const localizedName = screen.localizedName.js;
     name = localizedName == null ? '' : String(localizedName);
   } catch {}
+  let builtIn = false;
+  try {
+    const displayId = screen.deviceDescription.objectForKey('NSScreenNumber').unsignedIntValue;
+    builtIn = Boolean($.CGDisplayIsBuiltin(displayId));
+  } catch {}
   return {
     displayNumber: index + 1,
     name,
@@ -46,6 +53,7 @@ const result = screens.map((screen, index) => {
     width: Number(frame.size.width),
     height: Number(frame.size.height),
     underMouse: index === selectedScreen,
+    builtIn,
   };
 });
 JSON.stringify(result);
@@ -64,7 +72,8 @@ function isScreen(value: unknown): value is Screen {
     typeof screen.y === "number" &&
     typeof screen.width === "number" &&
     typeof screen.height === "number" &&
-    typeof screen.underMouse === "boolean"
+    typeof screen.underMouse === "boolean" &&
+    typeof screen.builtIn === "boolean"
   );
 }
 
@@ -79,12 +88,28 @@ export async function enumerateScreens(): Promise<Screen[]> {
   return screens;
 }
 
-export function sortScreens(screens: readonly Screen[], order: "arrangement" | "system"): Screen[] {
-  const ordered = [...screens];
-  if (order === "arrangement") {
-    ordered.sort((a, b) => a.x - b.x || a.y - b.y || a.displayNumber - b.displayNumber);
+function readingOrder(screens: readonly Screen[]): Screen[] {
+  const rows: Screen[][] = [];
+  for (const screen of [...screens].sort((a, b) => a.y - b.y || a.x - b.x)) {
+    const row = rows.at(-1);
+    if (row && screen.y + screen.height / 2 < row[0].y + row[0].height) {
+      row.push(screen);
+    } else {
+      rows.push([screen]);
+    }
   }
-  return ordered;
+  return rows.flatMap((row) => row.sort((a, b) => a.x - b.x || a.displayNumber - b.displayNumber));
+}
+
+export function sortScreens(
+  screens: readonly Screen[],
+  order: "arrangement" | "system",
+  builtInLast: boolean,
+): Screen[] {
+  const ordered = order === "arrangement" ? readingOrder(screens) : [...screens];
+  return builtInLast
+    ? [...ordered.filter((screen) => !screen.builtIn), ...ordered.filter((screen) => screen.builtIn)]
+    : ordered;
 }
 
 export function screenUnderMouse(screens: Screen[]): Screen {

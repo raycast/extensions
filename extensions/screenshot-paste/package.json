@@ -82,13 +82,13 @@
     {
       "name": "displayOrder",
       "title": "Display Order",
-      "description": "Order of displays in Choose Screen. Left to right follows the arrangement in System Settings → Displays, so it stays the same no matter in which order the displays were connected.",
+      "description": "Order of displays in Choose Screen. Reading order goes row by row, top to bottom, and left to right within a row, following the arrangement in System Settings → Displays, so it stays the same no matter in which order the displays were connected.",
       "type": "dropdown",
       "required": true,
       "default": "arrangement",
       "data": [
         {
-          "title": "Left to right (as arranged in Displays settings)",
+          "title": "Reading order (rows, left to right)",
           "value": "arrangement"
         },
         {
@@ -96,6 +96,15 @@
           "value": "system"
         }
       ]
+    },
+    {
+      "name": "builtInLast",
+      "title": "Built-in Display",
+      "label": "List the built-in display last",
+      "description": "Move the built-in laptop display to the end of the Choose Screen list.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "scripts": {

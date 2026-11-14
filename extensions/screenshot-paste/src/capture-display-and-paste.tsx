@@ -25,7 +25,7 @@ function ignoreFileSystemError(action: () => void): void {
 }
 
 export default function Command() {
-  const { displayOrder } = getPreferenceValues<Preferences>();
+  const { displayOrder, builtInLast } = getPreferenceValues<Preferences>();
   const [screens, setScreens] = useState<Screen[]>();
   const [loadError, setLoadError] = useState<string>();
   const lastHighlightedDisplay = useRef<number | undefined>(undefined);
@@ -84,7 +84,7 @@ export default function Command() {
         if (items.length === 1) {
           void runCapture(items[0], 1);
         } else {
-          setScreens(sortScreens(items, displayOrder));
+          setScreens(sortScreens(items, displayOrder, builtInLast));
         }
       })
       .catch((error) => {
@@ -98,7 +98,7 @@ export default function Command() {
     return () => {
       active = false;
     };
-  }, [displayOrder, runCapture]);
+  }, [builtInLast, displayOrder, runCapture]);
 
   useEffect(() => {
     const displayNumber = screens?.[0]?.displayNumber;
