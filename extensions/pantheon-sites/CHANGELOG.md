@@ -1,5 +1,16 @@
 # com.matbrady.pantheon Changelog
 
+## [Large Account Support] - 2026-11-14
+
+### Fixed
+
+- `terminus site:list` no longer times out after 10s on accounts with many sites
+
+### Added
+
+- "Site List Timeout" preference (default 120s)
+- "Refresh Site List" action (⌘R) and loading/error toasts
+
 ## [New Dashboard URLs] - 2026-11-14
 
 ### Changed
