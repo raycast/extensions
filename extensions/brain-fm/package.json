@@ -19,7 +19,7 @@
       "title": "Brain.fm Browser",
       "description": "Browser containing your signed-in Brain.fm player tab. Other tabs and media apps are never controlled.",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "dia",
       "data": [
         {
