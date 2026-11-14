@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iban-generator",
+  "title": "IBAN Generator",
+  "description": "Generate test IBANs, BICs, and bank details for development.",
+  "icon": "extension-icon.png",
+  "author": "Jetski",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": ["iban", "bic", "sepa", "swift", "bank", "test data"],
+  "commands": [
+    {
+      "name": "iban",
+      "title": "IBAN",
+      "description": "Paste the last generated IBAN",
+      "mode": "no-view"
+    },
+    {
+      "name": "gen-iban",
+      "title": "Generate IBAN",
+      "description": "Generate an IBAN and bank details",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "country",
+          "placeholder": "DE or Germany",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "bic",
+      "title": "Paste BIC",
+      "description": "Paste the BIC for the saved IBAN",
+      "mode": "no-view"
+    },
+    {
+      "name": "test-iban",
+      "title": "Search Test IBANs",
+      "description": "Search payment-provider test IBANs",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "ibantools": "^4.5.4",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
