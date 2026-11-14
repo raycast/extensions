@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ReasoningEffort } from "../../type";
@@ -7,12 +7,15 @@ import { useCallback, useState } from "react";
 import { useModel } from "../../hooks/useModel";
 import { ModelField } from "./model-field";
 import { validateTemperature } from "../../utils/model-validation";
+import { parseReasoningEffort, REASONING_EFFORTS } from "../../utils/reasoning-effort";
 
 export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (model: Model) => void }) => {
   const { model } = props;
   const models = useModel();
   const { pop } = useNavigation();
-  const reasoningEffortOptions: ReasoningEffort[] = ["none", "low", "medium", "high"];
+  const reasoningEffortOptions = REASONING_EFFORTS;
+  const globalReasoningEffort = getPreferenceValues<{ reasoningEffort?: string }>().reasoningEffort;
+  const globalEffort = parseReasoningEffort(globalReasoningEffort) ?? "none";
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (values) => {
@@ -124,12 +127,17 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
       <Form.Checkbox
         id="enableReasoningEffortChange"
         title="Reasoning"
-        label="Enable reasoning effort change"
+        label="Override global reasoning effort"
         value={itemProps.enableReasoningEffortChange.value}
+        info={
+          itemProps.enableReasoningEffortChange.value
+            ? "Customizes reasoning effort for this model."
+            : `Uses the global Reasoning Effort setting (${globalEffort}).`
+        }
         onChange={(value) => {
           itemProps.enableReasoningEffortChange.onChange?.(value);
           if (value) {
-            setValue("reasoningEffort", "medium");
+            setValue("reasoningEffort", globalEffort === "none" ? "medium" : globalEffort);
           }
         }}
       />

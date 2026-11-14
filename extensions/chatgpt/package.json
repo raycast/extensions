@@ -163,6 +163,41 @@
       "required": true
     },
     {
+      "name": "reasoningEffort",
+      "label": "Reasoning Effort",
+      "description": "Default reasoning effort for chat models that do not override it. Set to None to omit reasoning_effort.",
+      "type": "dropdown",
+      "title": "Reasoning Effort",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Minimal",
+          "value": "minimal"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        },
+        {
+          "title": "XHigh",
+          "value": "xhigh"
+        }
+      ],
+      "required": false,
+      "default": "none"
+    },
+    {
       "name": "isAutoSaveConversation",
       "label": "Enable auto-save conversation",
       "description": "Auto-save every conversation that you had with the model",

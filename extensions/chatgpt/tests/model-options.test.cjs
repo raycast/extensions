@@ -35,3 +35,29 @@ test("does not offer an empty or whitespace-only model ID", () => {
   assert.deepEqual(getModelOptions([], "", ""), []);
   assert.deepEqual(getModelOptions([], "", "   "), []);
 });
+
+test("filters models by a case-insensitive search query", () => {
+  const models = ["openai/gpt-4o", "openai/gpt-4o-mini", "anthropic/claude"];
+  assert.deepEqual(getModelOptions(models, "", "GPT"), [
+    { value: "openai/gpt-4o", title: "openai/gpt-4o" },
+    { value: "openai/gpt-4o-mini", title: "openai/gpt-4o-mini" },
+    { value: "GPT", title: 'Use "GPT"' },
+  ]);
+  assert.deepEqual(getModelOptions(models, "", "claude"), [
+    { value: "anthropic/claude", title: "anthropic/claude" },
+    { value: "claude", title: 'Use "claude"' },
+  ]);
+});
+
+test("keeps the selected model visible while filtering and keeps the manual ID reachable", () => {
+  const models = ["openai/gpt-4o", "anthropic/claude"];
+  assert.deepEqual(getModelOptions(models, "openai/gpt-4o", "claude"), [
+    { value: "openai/gpt-4o", title: "openai/gpt-4o" },
+    { value: "anthropic/claude", title: "anthropic/claude" },
+    { value: "claude", title: 'Use "claude"' },
+  ]);
+  assert.deepEqual(getModelOptions(models, "openai/gpt-4o", "my-custom-id"), [
+    { value: "openai/gpt-4o", title: "openai/gpt-4o" },
+    { value: "my-custom-id", title: 'Use "my-custom-id"' },
+  ]);
+});
