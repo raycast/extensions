@@ -386,7 +386,7 @@ export default function Command() {
         ) : null}
         <MenuBarExtra.Item
           icon={Icon.Gear}
-          title="Menu Bar Settings…"
+          title="MOCO Settings…"
           onAction={() => openMenuBarTool({ view: "settings" })}
         />
       </MenuBarExtra.Section>

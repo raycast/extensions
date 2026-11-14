@@ -14,10 +14,12 @@ npm run dev          # builds, loads into Raycast and rebuilds on save
 
 ## Before you open a PR
 
-There are no automated tests. Run these checks and test your change in Raycast under `npm run dev`.
+Use Node.js 24 or newer for the fixture tests (they use Node's TypeScript support). Run these checks and test your change in Raycast under `npm run dev`.
 
 ```bash
-npx tsc --noEmit
+npm run build       # generates the manifest preference types before checking TypeScript
+npm test
+npm run typecheck
 npm run lint
 ```
 

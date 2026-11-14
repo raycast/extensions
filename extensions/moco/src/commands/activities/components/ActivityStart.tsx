@@ -1,15 +1,28 @@
-import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { ActionPanel, Action, Form, useNavigation, Icon, showToast, Toast } from "@raycast/api";
+import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { Task } from "../../tasks/types";
 import { startActivity } from "../api";
 import { fetchProjects } from "../../projects/api";
 import { Project } from "../../projects/types";
 import { localDate, parseHours, validateTime } from "../utils";
+import { jiraActivityLink, JiraIssue } from "../../../utils/jira";
+import { makeTimerDefault, scopeForIssue } from "../../../utils/jira-defaults";
+import { JiraTicketTime } from "./JiraTicketTime";
+import { fetchJiraTicketTime } from "../jira-time-api";
 
 interface ActivityStartProps {
   task?: Task;
   projectID?: number | null;
+  initialDescription?: string;
+  jiraIssue?: JiraIssue;
+  assignedProjects?: Project[];
+  initialSelection?: { projectId: string; taskId: string; notice: string };
+  defaultScopeLabel?: string;
+  contextNotice?: string;
+  onClearJira?: () => void;
+  onSaveDefaults?: (projectId: string, taskId: string) => Promise<void>;
+  isRoot?: boolean;
   // Called after a successful submit. Defaults to popping the form.
   onSubmitted?: () => Promise<void>;
 }
@@ -22,16 +35,67 @@ interface ActivityStartValues {
   hours: string;
 }
 
-export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, onSubmitted }) => {
+export const ActivityStart: React.FC<ActivityStartProps> = ({
+  task,
+  projectID,
+  initialDescription = "",
+  jiraIssue,
+  assignedProjects,
+  initialSelection,
+  onSaveDefaults,
+  defaultScopeLabel = "for plain timers",
+  contextNotice,
+  onClearJira,
+  isRoot = false,
+  onSubmitted,
+}) => {
   const navi = useNavigation();
+  const [rememberDefault, setRememberDefault] = useState(true);
+  const abortable = useRef<AbortController | null>(null);
+  const {
+    data: ticketTime,
+    isLoading: isLoadingTicketTime,
+    error: ticketTimeError,
+    revalidate: refreshTicketTime,
+  } = usePromise(
+    (issue?: JiraIssue) => (issue ? fetchJiraTicketTime(issue, abortable.current?.signal) : Promise.resolve(undefined)),
+    [jiraIssue],
+    {
+      execute: Boolean(jiraIssue),
+      abortable,
+      onError: () => {
+        /* Show a sanitized inline unavailable state instead of a request-error toast. */
+      },
+    },
+  );
   // With a given task the dropdowns are hidden, so the projects are not needed.
-  const { data: projects = [], isLoading } = useCachedPromise(fetchProjects, [], {
-    execute: task === undefined,
+  const { data: fetchedProjects = [], isLoading } = useCachedPromise(fetchProjects, [], {
+    execute: task === undefined && assignedProjects === undefined,
     keepPreviousData: true,
   });
+  const projects = assignedProjects ?? fetchedProjects;
+
+  const saveDefaults = async (projectId: string, taskId: string): Promise<boolean> => {
+    if (!onSaveDefaults) return true;
+    try {
+      makeTimerDefault(Number(projectId), Number(taskId), projects);
+      await onSaveDefaults(projectId, taskId);
+      return true;
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not save timer defaults" });
+      return false;
+    }
+  };
 
   const { handleSubmit, itemProps, values, setValue } = useForm<ActivityStartValues>({
-    initialValues: { description: "", date: new Date(), hours: "" },
+    initialValues: {
+      ...(initialSelection
+        ? { projectDropdown: initialSelection.projectId, taskDropdown: initialSelection.taskId }
+        : {}),
+      description: initialDescription,
+      date: new Date(),
+      hours: "",
+    },
     validation: {
       projectDropdown: task ? undefined : FormValidation.Required,
       taskDropdown: task ? undefined : FormValidation.Required,
@@ -39,12 +103,22 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
       hours: validateTime,
     },
     onSubmit: async (values) => {
+      if (initialSelection) {
+        try {
+          makeTimerDefault(Number(values.projectDropdown), Number(values.taskDropdown), projects);
+        } catch (error) {
+          await showFailureToast(error, { title: "Choose an available project and role / service" });
+          return;
+        }
+        if (rememberDefault && !(await saveDefaults(values.projectDropdown, values.taskDropdown))) return;
+      }
       const success = await startActivity({
         description: values.description,
         hours: values.hours.trim() === "" ? "" : parseHours(values.hours),
         date: localDate(values.date ?? new Date()),
         projectID: task ? task.projectID : values.projectDropdown ? Number(values.projectDropdown) : projectID,
         taskID: task ? task.id : Number(values.taskDropdown),
+        ...(jiraIssue ? jiraActivityLink(jiraIssue) : {}),
       });
       if (success !== true) {
         return;
@@ -71,18 +145,30 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
     if (task) {
       return;
     }
-    const tasks = selectedProject?.tasks ?? [];
+    const tasks = (selectedProject?.tasks ?? []).filter((t) => !initialSelection || t.active !== false);
     const current = values.taskDropdown;
-    const next = tasks.some((t) => String(t.id) === current) ? current : tasks.length > 0 ? String(tasks[0].id) : "";
+    const next = tasks.some((t) => String(t.id) === current)
+      ? current
+      : !initialSelection && tasks.length > 0
+        ? String(tasks[0].id)
+        : "";
     if (next !== current) {
       setValue("taskDropdown", next);
     }
-  }, [task, selectedProject, values.taskDropdown]);
+  }, [task, selectedProject, values.taskDropdown, initialSelection]);
 
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={task ? `${task.projectName}/${task.name}` : "New Activity"}
+      navigationTitle={
+        isRoot
+          ? undefined
+          : jiraIssue
+            ? `MOCO · ${jiraIssue.key}`
+            : task
+              ? `${task.projectName}/${task.name}`
+              : "New Activity"
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -90,11 +176,54 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
             title={startTimer ? "Start Timer" : "Log Work"}
             onSubmit={handleSubmit}
           />
+          {jiraIssue ? (
+            <Action.OpenInBrowser
+              title="Open Jira Ticket"
+              url={jiraIssue.url}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+          ) : null}
+          {jiraIssue ? (
+            <Action
+              title="Refresh Jira Ticket Time"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={refreshTicketTime}
+            />
+          ) : null}
+          {onClearJira ? (
+            <Action title="Use without Jira Ticket" icon={Icon.XMarkCircle} onAction={onClearJira} />
+          ) : null}
+          {onSaveDefaults ? (
+            <Action
+              title="Save Project and Role Defaults"
+              icon={Icon.Pin}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              onAction={async () => {
+                if (await saveDefaults(values.projectDropdown, values.taskDropdown)) {
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Project and role defaults saved",
+                  });
+                }
+              }}
+            />
+          ) : null}
         </ActionPanel>
       }
     >
+      {jiraIssue ? (
+        <Form.Description title="Ticket" text={`${jiraIssue.key} · ${new URL(jiraIssue.url).hostname}`} />
+      ) : null}
+      {jiraIssue ? (
+        <JiraTicketTime summary={ticketTime} isLoading={isLoadingTicketTime} failed={Boolean(ticketTimeError)} />
+      ) : null}
+      {contextNotice ? <Form.Description title="Browser" text={contextNotice} /> : null}
+      {initialSelection?.notice ? <Form.Description title="Saved Defaults" text={initialSelection.notice} /> : null}
+      {jiraIssue ? <Form.Separator /> : null}
       {!task ? (
         <Form.Dropdown title="Project" {...itemProps.projectDropdown}>
+          {initialSelection ? <Form.Dropdown.Item title="Choose a MOCO project…" value="" /> : null}
           {Object.entries(projectsByCustomer).map(([customerName, customerProjects]) => (
             <Form.Dropdown.Section key={customerName} title={customerName}>
               {customerProjects.map((project) => (
@@ -105,17 +234,44 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
         </Form.Dropdown>
       ) : null}
       {!task ? (
-        <Form.Dropdown title="Task" {...itemProps.taskDropdown}>
-          {(selectedProject?.tasks ?? []).map((task) => (
-            <Form.Dropdown.Item key={task.id} title={task.name} value={task.id.toString()} />
-          ))}
+        <Form.Dropdown title={initialSelection ? "Role / Service" : "Task"} {...itemProps.taskDropdown}>
+          {initialSelection ? <Form.Dropdown.Item title="Choose a role / service…" value="" /> : null}
+          {(selectedProject?.tasks ?? [])
+            .filter((t) => !initialSelection || t.active !== false)
+            .map((task) => (
+              <Form.Dropdown.Item key={task.id} title={task.name} value={task.id.toString()} />
+            ))}
         </Form.Dropdown>
       ) : null}
-      <Form.TextArea title="Add Description" placeholder="Describe what you are doing" {...itemProps.description} />
-      <Form.DatePicker type={Form.DatePicker.Type.Date} title="Booking Date" {...itemProps.date} />
+      <Form.TextArea
+        title="Description"
+        placeholder={
+          jiraIssue && !jiraIssue.summary ? "Add the ticket summary or describe your work" : "What are you working on?"
+        }
+        info={
+          jiraIssue
+            ? "The Jira ticket link is attached automatically. Your time shows your recorded MOCO entries for this ticket, across all dates. Press ⌘R to refresh it."
+            : undefined
+        }
+        autoFocus={Boolean(task || (initialSelection?.projectId && initialSelection.taskId))}
+        {...itemProps.description}
+      />
+      <Form.Separator />
+      {onSaveDefaults ? (
+        <Form.Checkbox
+          id="rememberTimerDefault"
+          title="Defaults"
+          label={jiraIssue ? `Remember for ${scopeForIssue(jiraIssue).prefix}-* tickets` : "Remember for plain timers"}
+          info={`Save this project and role ${defaultScopeLabel}. Uncheck for a one-off booking.`}
+          value={rememberDefault}
+          onChange={setRememberDefault}
+        />
+      ) : null}
+      <Form.DatePicker type={Form.DatePicker.Type.Date} title="Date" {...itemProps.date} />
       <Form.TextField
-        title="Hours Worked"
-        placeholder="Leaving this field empty will start a timer"
+        title="Duration"
+        placeholder="Leave empty to start a timer"
+        info="Optional: enter h:mm or decimal hours to log completed work instead."
         {...itemProps.hours}
       />
     </Form>
