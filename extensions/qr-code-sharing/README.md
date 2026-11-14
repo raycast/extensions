@@ -1,49 +1,20 @@
 # QR Code Sharing
 
-Keep the things you share often — an email address, a phone number, a Wi-Fi password, a link — and turn any of them into a QR code or a barcode in two keystrokes.
+Copy something — an email address, a phone number, a Wi-Fi password, a link — then run **Show Data** to see it as a code.
 
-![Search Data](media/search-data.png)
+## Show Data
 
-## Commands
+Pastes the clipboard into the search bar right away and lists three views on the left, with the selected one drawn on the right. Type to replace the content and all three update:
 
-### Search Data
-
-One screen for everything. Type to search what you have saved; the code of the highlighted entry is drawn next to the list, so moving the selection is all it takes to show someone a code.
-
-Typing content that isn't saved yet offers a **Create** row: the code is already on screen, and `↵` saves it. The **Type** dropdown in the search bar picks the symbology for new entries and remembers your choice.
-
-Entries are grouped by the day they were created, with pinned ones kept at the top.
+1. **Text** — one cell per character, for typing it on another device: letters dark, capitals brown, digits orange, symbols blue. Spaces show as `␣`, line breaks as `↵`.
+2. **QR Code**
+3. **Barcode** (Code 128, ASCII text only)
 
 | Shortcut | Action |
 | --- | --- |
-| `↵` | Show the code full size (or save, on the Create row) |
-| `⌃E` | Edit the content and type — the code redraws as you type |
-| `⌃P` | Pin or unpin an entry |
-| `⌃X` | Delete an entry, `↵` confirms |
-| `⌘⇧C` | Copy the code as an image |
-| `⌘O` | Reveal the CSV file in Finder |
+| `⌘⇧C` | Copy the code as an image (QR Code and Barcode) |
 
-### Export Data
-
-Pick a folder and save a dated copy of the CSV — a backup you can keep, or put back later to restore everything.
-
-## Code types
-
-**Most common:** QR Code, Data Matrix, Aztec, PDF417.
-**Barcodes:** Code 128, EAN-13, UPC-A, Code 39, ITF.
-
-Content that a symbology cannot hold is refused with the encoder's own explanation, so an entry is never saved as something unscannable.
-
-## Where the data lives
-
-A single CSV file in the extension's support folder, with one row per entry:
-
-```csv
-creation date,content,type,pinned
-2026-09-15T14:20:00.000Z,hello@mail.com,qr,true
-```
-
-It is plain text on purpose: edit it by hand, keep it in version control, or restore it from a backup. Missing columns are tolerated — an unknown type reads as a QR code, a missing pin as unpinned.
+Nothing is saved.
 
 ## Preferences
 

@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/deps.nosync
+*.nosync
 
 # Raycast specific files
 raycast-env.d.ts
