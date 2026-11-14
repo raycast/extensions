@@ -347,3 +347,32 @@ export async function fetchBinanceQuote(pair: string): Promise<Quote> {
 export function fetchQuote(symbol: string): Promise<Quote> {
   return isCryptoPair(symbol) ? fetchBinanceQuote(symbol) : fetchYahooQuote(symbol);
 }
+
+/**
+ * List rows for stocks and pairs together. A source that fails is named in `failed`;
+ * when nothing could be priced at all, the whole call fails.
+ */
+export async function fetchRows(symbols: string[]): Promise<{ quotes: Record<string, RowQuote>; failed: string[] }> {
+  const crypto = symbols.filter(isCryptoPair);
+  const stocks = symbols.filter((symbol) => !isCryptoPair(symbol));
+  const [stockRows, cryptoRows] = await Promise.allSettled([
+    fetchSparkQuotes(stocks),
+    // One bad pair fails a Binance batch, so price pairs one by one when the batch fails.
+    fetchBinanceRows(crypto).catch(async () => {
+      const each = await Promise.allSettled(crypto.map((pair) => fetchBinanceRows([pair])));
+      return Object.assign({}, ...each.map((result) => (result.status === "fulfilled" ? result.value : {})));
+    }),
+  ]);
+  const failed = [
+    ...(stockRows.status === "rejected" ? ["Yahoo Finance"] : []),
+    ...(cryptoRows.status === "rejected" ? ["Binance"] : []),
+  ];
+  const quotes = {
+    ...(stockRows.status === "fulfilled" ? stockRows.value : {}),
+    ...(cryptoRows.status === "fulfilled" ? cryptoRows.value : {}),
+  } as Record<string, RowQuote>;
+  if (failed.length && Object.keys(quotes).length === 0) {
+    throw new QuoteError(`${failed.join(" and ")} did not answer.`);
+  }
+  return { quotes, failed };
+}

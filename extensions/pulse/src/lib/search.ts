@@ -2,7 +2,16 @@
 // SymbolSearchIndex: every spelling of every listing is folded once, and a
 // query ranks exact over prefix over substring matches, then by popularity.
 import * as OpenCC from "opencc-js/t2cn";
-import { INDICES, Instrument, Kind, Language, Market, yahooSymbol } from "./symbols";
+import {
+  INDICES,
+  Instrument,
+  Kind,
+  Language,
+  Market,
+  isCryptoPair,
+  normalizeTypedSymbol,
+  yahooSymbol,
+} from "./symbols";
 
 /** The catalog file as pulse-server publishes it (schema 1). */
 export interface CatalogDocument {
@@ -320,4 +329,45 @@ export class SymbolIndex {
       exchange: candidate.exchange,
     };
   }
+}
+
+// The Yahoo suffixes of the markets the filter offers, so a typed `7203.T` stays under Japan.
+const SUFFIX_MARKETS: Record<string, Market> = {
+  HK: "hk",
+  SS: "sh",
+  SZ: "sz",
+  T: "jp",
+  KS: "kr",
+  KQ: "kq",
+  TW: "tw",
+  TWO: "two",
+};
+
+/**
+ * A ticker or pair typed by hand that the catalog may not list, priced by its source as typed.
+ * Null when the text cannot be a ticker, or names a pair Binance does not trade.
+ */
+export function typedInstrument(query: string, index: SymbolIndex | undefined): Instrument | null {
+  const symbol = normalizeTypedSymbol(query.replace(/\s+/g, ""));
+  if (!symbol || symbol.length < 2) return null;
+  if (isCryptoPair(symbol)) {
+    if (index && index.pairs.size > 0 && !index.pairs.has(symbol)) return null;
+    return { symbol, market: "crypto", kind: "crypto", name: symbol.split("/")[0], exchange: "Binance Spot" };
+  }
+  // A typed "^FTSE" is an index whatever its exchange, so the Indices filter keeps it.
+  if (symbol.startsWith("^")) return { symbol, market: "index", kind: "index", name: symbol, exchange: null };
+  const suffix = /\.([A-Z]+)$/.exec(symbol)?.[1];
+  const market = (suffix ? SUFFIX_MARKETS[suffix] : undefined) ?? "us";
+  return { symbol, market, kind: "equity", name: symbol, exchange: null };
+}
+
+/** The listing behind a symbol in the catalog, or the symbol as typed when the catalog does not list it. */
+export function resolveSymbol(symbol: string, index: SymbolIndex | undefined, language: Language): Instrument | null {
+  const typed = normalizeTypedSymbol(symbol.replace(/\s+/g, ""));
+  return (
+    index?.lookup(symbol, language) ??
+    (typed ? index?.lookup(typed, language) : null) ??
+    typedInstrument(symbol, index) ??
+    null
+  );
 }
