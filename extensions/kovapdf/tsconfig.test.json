@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/lib/**/*", "test/**/*", "raycast-env.d.ts"],
+  "include": ["src/lib/logic.ts", "src/lib/client.ts", "test/**/*"],
   "compilerOptions": { "outDir": ".test-dist", "rootDir": ".", "noEmit": false, "types": ["node"] }
 }
