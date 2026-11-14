@@ -62,3 +62,52 @@ test("paths are shown relative to home", () => {
 	// /Users/meredith must not be rewritten as ~redith.
 	assert.equal(shortPath("/Users/meredith/x", "/Users/me"), "/Users/meredith/x");
 });
+
+test("a detached HEAD in a tool's hidden checkout is how the tool works", () => {
+	const nvm = {
+		name: ".nvm",
+		path: "/Users/x/.nvm",
+		uncommitted: 0,
+		unpushed: 0,
+		stashed: 0,
+		detached_head: true,
+		no_upstream: 1,
+	};
+	assert.equal(repoLevel(nvm), "loose");
+	assert.equal(summarise(nvm), "1 branch with no upstream");
+	assert.equal(repoLevel({ ...nvm, name: "app" }), "detached");
+	assert.equal(repoLevel({ ...nvm, unpushed: 2 }), "unpushed");
+});
+
+test("a tool's hidden checkout with nothing else outstanding is not reported", () => {
+	const repo = (name: string, extra = {}) => ({
+		name,
+		path: `/Users/x/${name}`,
+		uncommitted: 0,
+		unpushed: 0,
+		stashed: 0,
+		detached_head: true,
+		// What rcc really sends: git lists the detached HEAD as a branch with no upstream.
+		no_upstream: 1,
+		...extra,
+	});
+	const parsed = parseGit(
+		JSON.stringify({
+			repos_total: 6,
+			repos_with_issues: 5,
+			repos: [
+				repo(".nvm"),
+				repo(".oh-my-zsh", { no_upstream: 0 }),
+				repo(".dirty", { uncommitted: 3 }),
+				repo(".branches", { no_upstream: 2 }),
+				repo("app"),
+			],
+		}),
+	);
+	assert.deepEqual(
+		parsed.repos.map((r) => r.name),
+		[".dirty", ".branches", "app"],
+	);
+	assert.equal(parsed.repos_with_issues, 3);
+	assert.equal(parsed.repos_total, 6);
+});
