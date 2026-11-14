@@ -5,6 +5,9 @@
   "description": "Search stocks, indices and crypto across US, Hong Kong, China, Japan, Korea and Taiwan in five languages, with live prices and today's chart.",
   "icon": "extension-icon.png",
   "author": "fatwang266",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Finance"
   ],
@@ -64,6 +67,28 @@
         {
           "title": "한국어",
           "value": "ko"
+        }
+      ]
+    },
+    {
+      "name": "priceColors",
+      "title": "Price Colors",
+      "description": "Which color marks a gain. Taiwan, China, Japan and Korea show gains in red; crypto exchanges show them in green.",
+      "type": "dropdown",
+      "required": false,
+      "default": "green-up",
+      "data": [
+        {
+          "title": "Green Up, Red Down",
+          "value": "green-up"
+        },
+        {
+          "title": "Red Up, Green Down",
+          "value": "red-up"
+        },
+        {
+          "title": "Red Up for Stocks, Green Up for Crypto",
+          "value": "red-up-stocks"
         }
       ]
     }

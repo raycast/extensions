@@ -16,6 +16,9 @@ and today's chart.
 - **Filter by market** from the dropdown, and find recent symbols when the
   search bar is empty.
 
+- **Red or green for gains**: pick the colors your market uses in the
+  preferences, for stocks only or for crypto as well.
+
 Typing a ticker the list does not know, like `^FTSE` or `EURUSD=X`, looks it up
 on Yahoo Finance directly; a pair like `ETH/BTC` is priced on Binance.
 
