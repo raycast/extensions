@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
+import { DEFAULT_SUMMARY_MODEL, SummaryModelKey } from "../config/ai";
 import { SummaryStyle, SupportedLanguage } from "../types/summary";
 import { aiLog } from "./logger";
-import { DEFAULT_SUMMARY_MODEL, SummaryModelKey } from "../config/ai";
 
 /**
  * Cached summary entry

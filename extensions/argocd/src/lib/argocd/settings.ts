@@ -35,13 +35,42 @@ function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+/** The public client ArgoCD registers in its bundled Dex, the one `argocd login --sso` uses. */
+export const DEX_CLI_CLIENT_ID = "argo-cd-cli";
+const DEX_SCOPES = ["openid", "profile", "email", "groups", "offline_access"];
+
+/**
+ * The bundled Dex: argocd-cm carries `dex.config` instead of `oidc.config`, and the settings
+ * endpoint lists its connectors. Dex's issuer is the instance URL plus /api/dex, as the CLI derives it.
+ */
+function projectDexSettings(raw: Record<string, unknown>): OidcSettings | undefined {
+  const dex = raw.dexConfig;
+  if (typeof dex !== "object" || dex === null) {
+    return undefined;
+  }
+  const connectors = (dex as { connectors?: unknown }).connectors;
+  const url = asString(raw.url);
+  if (!Array.isArray(connectors) || connectors.length === 0 || !url) {
+    return undefined;
+  }
+  const first = connectors[0] as { name?: unknown } | null;
+  return {
+    issuer: `${url.replace(/\/+$/, "")}/api/dex`,
+    clientId: DEX_CLI_CLIENT_ID,
+    usesCliClient: true,
+    scopes: DEX_SCOPES,
+    pkceEnabled: true,
+    providerName: connectors.length === 1 ? asString(first?.name) : undefined,
+  };
+}
+
 export function projectOidcSettings(raw: unknown): OidcSettings | undefined {
   if (typeof raw !== "object" || raw === null) {
     return undefined;
   }
   const oidc = (raw as { oidcConfig?: unknown }).oidcConfig;
   if (typeof oidc !== "object" || oidc === null) {
-    return undefined;
+    return projectDexSettings(raw as Record<string, unknown>);
   }
 
   const config = oidc as Record<string, unknown>;
@@ -94,7 +123,7 @@ export async function fetchOidcSettings(baseUrl: string, deps: SettingsDeps): Pr
   const settings = projectOidcSettings(body);
   if (!settings) {
     throw new ApiError(
-      "This instance reports no OIDC configuration, so there is no single sign-on to use. Configure an API token instead.",
+      "This instance reports neither an OIDC nor a Dex configuration, so there is no single sign-on to use. Configure an API token instead.",
       response.status,
     );
   }

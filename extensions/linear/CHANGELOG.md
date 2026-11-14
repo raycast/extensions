@@ -1,5 +1,32 @@
 # Linear Changelog
 
+## [Project Mentions and Mention Icons in AI Chat] - 2026-11-13
+
+- Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name. Each project shows its own icon and color.
+- Mentioning a project gives AI its status, lead, teams, members, and milestones.
+- **Issues** mentions show the issue title with its identifier beside it and its status icon in the state color.
+- **Users** mentions show just the name, with initials for people without an avatar.
+
+## [Primary Action Preference] - 2026-10-29
+
+- Add a **Primary Action** preference to choose whether pressing Enter on an issue, project, document, or view shows its details or opens it in Linear.
+- Add an **Open View in Linear** action to **Search Custom Views**.
+
+## [Fix Search Documents Crash] - 2026-10-29
+
+- Fix **Search Documents** crashing for documents that have no creator.
+
+## [User and Issue Mentions in AI Chat] - 2026-10-28
+
+- Add **Users** and **Issues** mention searches in AI Chat, with active user search and full-text issue search.
+- Show recently updated issues for an empty search and load current profiles or issue details when sending mentions.
+
+## [Fix Issue Template Description Prefill] - 2026-10-24
+
+- Fix issue description not being pre-filled when selecting an issue template whose description is stored on the template object rather than nested under `templateData`.
+
+## [Added new screenshots] - 2026-10-13
+
 ## [Simplify AI Tools] - 2026-10-07
 
 - Remove 17 older AI tools that overlapped with the newer `list-*`, `get-*`, and `save-*` tools, so Raycast AI picks the right tool more reliably.

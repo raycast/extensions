@@ -1,10 +1,12 @@
-import { open } from "@raycast/api";
+import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
 import { formatRetryAfter, getRetryAfter, isRateLimitError, slackRateLimitDocumentationUrl } from "./client/rateLimit";
 import * as emoji from "node-emoji";
+import { canReauthorizeSlack, getMissingScopeDetails } from "./client/permissions";
+import { parseSlackTimestamp } from "./client/presentation";
 
 function convertSlackEmojiToUnicode(text: string): string {
   return emoji.emojify(text);
@@ -22,9 +24,7 @@ const timeDifference = (date: Date): string => {
 };
 
 const convertTimestampToDate = (ts: string) => {
-  const [seconds, microseconds] = ts.split(".").map(Number);
-  const milliseconds = seconds * 1000 + Math.floor(microseconds / 1000);
-  return new Date(milliseconds);
+  return parseSlackTimestamp(ts);
 };
 
 const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: string): string => {
@@ -74,29 +74,43 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
     });
   }
 
-  if (isCodedError(error)) {
-    if (error.message.includes("missing_scope")) {
-      const isUsingOAuth = !!(await slack.client.getTokens());
+  const missingScope = getMissingScopeDetails(error);
+  if (missingScope) {
+    const { accessToken } = getPreferenceValues<Preferences>();
+    const isUsingOAuth = canReauthorizeSlack(accessToken, !!(await slack.client.getTokens()));
 
-      return showFailureToast(error, {
-        title: "Missing Scopes",
-        message: "Please make sure your Slack app has all of the required scopes.",
-        primaryAction: isUsingOAuth
-          ? {
-              title: "Re-authorize Slack",
-              onAction: async () => {
+    return showFailureToast(error, {
+      title: "Slack permission required",
+      message: [
+        missingScope.needed ? `Required: ${missingScope.needed}.` : "Your Slack token is missing required permissions.",
+        isUsingOAuth
+          ? "Re-authorize Slack, then reopen this command."
+          : "Add the scopes to your Slack app, reinstall it to the workspace, and update the access token in preferences.",
+      ].join(" "),
+      primaryAction: isUsingOAuth
+        ? {
+            title: "Re-authorize Slack",
+            onAction: async () => {
+              try {
                 await slack.client.removeTokens();
                 await slack.authorize();
-              },
-            }
-          : {
-              title: "Open Slack Apps",
-              onAction: () => {
-                open("https://api.slack.com/apps");
-              },
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Slack re-authorized",
+                  message: "Reopen the command to try again.",
+                });
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not re-authorize Slack" });
+              }
             },
-      });
-    }
+          }
+        : {
+            title: "Open Slack Apps",
+            onAction: () => {
+              open("https://api.slack.com/apps");
+            },
+          },
+    });
   }
 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
@@ -153,3 +167,35 @@ export {
   isValidChannelId,
   formatSlackFiles,
 };
+
+type MessageWithContent = {
+  text?: string;
+  attachments?: { pretext?: string; title?: string; text?: string; fallback?: string }[];
+  blocks?: { text?: { text?: string } }[];
+};
+
+/**
+ * Extracts the text content of a message. Bot/webhook messages (e.g. IFTTT tweet streams)
+ * often have an empty top-level `text` with the actual content living in `attachments` or `blocks`.
+ */
+export function getMessageText(message: MessageWithContent) {
+  if (message.text) {
+    return message.text;
+  }
+
+  const attachmentText = message.attachments
+    ?.map(
+      (attachment) =>
+        [attachment.pretext, attachment.title, attachment.text].filter(Boolean).join("\n") || attachment.fallback,
+    )
+    .filter(Boolean)
+    .join("\n\n");
+  if (attachmentText) {
+    return attachmentText;
+  }
+
+  return message.blocks
+    ?.map((block) => block.text?.text)
+    .filter(Boolean)
+    .join("\n");
+}

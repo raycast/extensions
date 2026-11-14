@@ -2,8 +2,9 @@ export function isSlackUserId(id: string): boolean {
   return id.startsWith("U") || id.startsWith("W");
 }
 
-export function getDirectorySearchPageSize(query: string): number {
-  return query.trim() ? 999 : 200;
+/** Slack recommends at most 200 items per page; larger limits on big workspaces can time out or return HTTP 500. */
+export function getDirectorySearchPageSize(): number {
+  return 200;
 }
 
 export function mergeDirectorySearchResults<User, Channel, Group>(
@@ -40,6 +41,20 @@ export function mergeVisitedDirectoryItems<T extends { id: string }>(
   const rows = results ?? [];
   const seen = new Set(rows.map((row) => row.id));
   return [...rows, ...visited.filter((item) => !seen.has(item.id))];
+}
+
+/**
+ * While a query is loading, only a preview recorded for that same query is safe to show.
+ * Settled results belong to the previous query until this one finishes.
+ */
+export function directoryUsersToShow<User>(
+  query: string,
+  isLoading: boolean,
+  preview: { query: string; users: User[] } | undefined,
+  settled: User[] | undefined,
+): User[] | undefined {
+  const previewUsers = preview?.query === query ? preview.users : undefined;
+  return isLoading ? previewUsers : (settled ?? previewUsers);
 }
 
 /** Shares one bounded member scan between user rows and MPIM name resolution for a query. */

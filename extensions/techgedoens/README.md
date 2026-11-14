@@ -5,24 +5,31 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 ## Commands
 
 - **All Articles** - Opens the searchable local article archive with independent topic and read-status filters.
-- **Ask Techgedöns** - Answers questions from matching archived articles with Raycast AI and links the sources used.
 - **Favorites** - Collects saved articles in a dedicated read-later list.
 - **Latest Articles** - Shows the latest nine articles in a compact numbered list.
+- **Next Unread Article** - Opens the oldest or newest unread article in Raycast or the default browser.
 - **Open Techgedöns.de** - Opens the website directly in the default browser.
 - **Refresh Articles** - Updates the latest articles and the local archive manually or through Raycast Background Refresh.
-- **Search Techgedöns** - Searches all published articles in the public Techgedöns.de blog archive.
+- **Search Selected Text** - Searches the public blog archive for text selected in the frontmost application.
+- **Search Techgedöns** - Searches all published articles in the public Techgedöns.de blog archive, optionally starting with a query entered directly in Raycast root search.
+- **Techgedöns Menu Bar** - Optionally shows the unread count, configurable latest articles, and favorites in the macOS menu bar.
 
 ## Additional Features
 
+- `@Techgedöns` AI extension for searching the archive, retrieving the latest posts, loading complete articles, and accessing personal unread or favorite lists in Raycast AI
 - Full-text search across the local archive and the complete public blog archive
+- Search the public blog archive directly using text selected in another application
 - Article previews with images, publication dates, topics, and rendered article content
+- Related older articles found live across the public blog archive and ranked by topic and meaningful terms
 - Read, unread, and favorite status with an unread count in Raycast root search
+- Configurable oldest-first or newest-first reading queue for unread articles
 - Configurable Return key action for reading in Raycast or opening the default browser
-- Open articles with another app or copy their links
+- Open articles with another app or copy links with optional titles, summaries, and Markdown formatting
 - Configurable initial filter, archive retention, and number of articles loaded per page
 - Infinite scrolling and independent topic and read-status filters
 - Favorites remain stored regardless of the selected archive retention period
 - Automatic hourly background refresh with the latest update status shown in Raycast
+- Optional menu bar mode with 3, 5, or 10 articles per section, five title-length levels, an unread-only filter, a configurable unread counter, a dedicated favorites section, configurable date and category details, and shortcuts to the main lists and settings
 - US English command interface with the original German blog topics
 
 ## Local Development
@@ -40,4 +47,4 @@ Run **Refresh Articles** once or enable Background Refresh in that command's Ray
 
 ## Data Source
 
-The article lists use only the public RSS feed at `https://tchgdns.de/feed/`; no credentials are required. Ask Techgedöns sends the question and excerpts from matching public articles to Raycast AI, which must be available for the user's Raycast account.
+Article content comes only from the public RSS feeds at `https://tchgdns.de/`; no credentials are required. The unread and favorite tools additionally read their status from Raycast's local extension storage. `@Techgedöns` sends the content of up to five matching public articles per tool call to Raycast AI, which requires Raycast Pro.

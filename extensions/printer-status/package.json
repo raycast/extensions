@@ -4,7 +4,7 @@
   "title": "Printer Status",
   "description": "Check printer status (page counts, ink levels, device info) via SNMP",
   "icon": "printer-icon.png",
-  "author": "davidyannick",
+  "author": "pernielsentikaer",
   "platforms": [
     "macOS",
     "Windows"

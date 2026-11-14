@@ -1,5 +1,11 @@
 # Kill Process Changelog
 
+## [Fix] - 2026-11-10
+
+- App and process names with non-ASCII characters (e.g. `企业微信.app`) no longer show as escaped text such as `M-dM-<M^A...` on macOS (fixes #25334)
+
+## [Added new screenshots] - 2026-10-13
+
 ## [Fix] - 2026-09-16
 
 - App grouping now works on Windows, where it groups a process with the helpers it spawned (fixes #26386)

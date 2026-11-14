@@ -73,6 +73,8 @@ export type CompactCalendarEpisode = {
   localTime: string;
   showTitle: string;
   showTraktId: number;
+  showSlug?: string;
+  showImdbId?: string;
   season: number;
   number: number;
   episodeTitle?: string;
@@ -85,6 +87,7 @@ export type CompactCalendarMovie = {
   title: string;
   year?: number;
   traktId: number;
+  slug?: string;
 };
 
 export type CompactEpisode = {
@@ -269,6 +272,8 @@ export function toCompactCalendarEpisode(
     ...airing,
     showTitle: show.title,
     showTraktId: show.ids.trakt,
+    showSlug: show.ids.slug,
+    showImdbId: show.ids.imdb ?? undefined,
     season: episode.season,
     number: episode.number,
     episodeTitle: episode.title ?? undefined,
@@ -279,7 +284,13 @@ export function toCompactCalendarEpisode(
 export function toCompactCalendarMovie({ released, movie }: TraktCalendarMovieItem): CompactCalendarMovie | undefined {
   if (!released) return undefined;
 
-  return { releaseDate: released, title: movie.title, year: movie.year ?? undefined, traktId: movie.ids.trakt };
+  return {
+    releaseDate: released,
+    title: movie.title,
+    year: movie.year ?? undefined,
+    traktId: movie.ids.trakt,
+    ...(movie.ids.slug && { slug: movie.ids.slug }),
+  };
 }
 
 export function toCompactEpisode(episode: TraktEpisodeListItem): CompactEpisode {

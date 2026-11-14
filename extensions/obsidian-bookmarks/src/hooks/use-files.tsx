@@ -8,6 +8,7 @@ export type FilesHook = {
   loading: boolean;
   backgroundLoading: boolean;
   updateFile: (file: File) => void;
+  deleteFile: (file: File) => void;
 };
 
 export default function useFiles(): FilesHook {
@@ -19,6 +20,11 @@ export default function useFiles(): FilesHook {
   const updateFile = useCallback((updated: File) => {
     updatedPaths.current.add(updated.fullPath);
     setFiles((current) => current.map((file) => (file.fullPath === updated.fullPath ? updated : file)));
+  }, []);
+
+  const deleteFile = useCallback((deleted: File) => {
+    updatedPaths.current.add(deleted.fullPath);
+    setFiles((current) => current.filter((file) => file.fullPath !== deleted.fullPath));
   }, []);
 
   useEffect(() => {
@@ -56,5 +62,6 @@ export default function useFiles(): FilesHook {
     loading,
     backgroundLoading,
     updateFile,
+    deleteFile,
   };
 }

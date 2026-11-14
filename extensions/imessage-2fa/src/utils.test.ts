@@ -1,4 +1,12 @@
-import { extractCode, extractVerificationLink, extractTextFromBinaryData, escapeSqlLikePattern } from "./utils";
+import {
+  combineMessageText,
+  decodeAttributedBody,
+  extractCode,
+  extractVerificationLink,
+  extractTextFromBinaryData,
+  escapeSqlLikePattern,
+  stripHtmlTags,
+} from "./utils";
 
 describe("Testing matching logic", () => {
   test("Alphanumeric codes", () => {
@@ -334,6 +342,71 @@ describe("Testing binary data extraction from iMessage", () => {
   });
 });
 
+describe("Testing attributedBody decoding from iMessage", () => {
+  // Builds a typedstream blob shaped like the ones in chat.db, hex encoded as SQLite's hex() returns it
+  function attributedBodyHex(body: string): string {
+    const text = Buffer.from(body, "utf-8");
+    const length = Buffer.alloc(text.length < 0x80 ? 1 : 3);
+    if (text.length < 0x80) {
+      length.writeUInt8(text.length);
+    } else {
+      length.writeUInt8(0x81);
+      length.writeUInt16LE(text.length, 1);
+    }
+    return Buffer.concat([
+      Buffer.from(
+        "\x04\x0Bstreamtyped\x81\xE8\x03\x84\x01@\x84\x84\x84\x19NSMutableAttributedString\x00\x84\x84\x12NSAttributedString\x00\x84\x84\bNSObject\x00\x85\x92\x84\x84\x84\bNSString\x01\x94\x84\x01+",
+        "latin1"
+      ),
+      length,
+      text,
+      Buffer.from("\x86\x84\x02iI\x01\x7F\x92\x84\x84\x84\fNSDictionary\x00", "latin1"),
+    ]).toString("hex");
+  }
+
+  test("Decodes a short body", () => {
+    const body = "AOL: If anyone asks you for this code, it's a scam. Your 6-digit code is: 123456";
+    expect(decodeAttributedBody(attributedBodyHex(body))).toBe(body);
+  });
+
+  test("Decodes a body with a two-byte length", () => {
+    const body = `Amazon: Your profile security code is 654321. ${"Don't share it with others. ".repeat(6)}`;
+    expect(decodeAttributedBody(attributedBodyHex(body))).toBe(body);
+  });
+
+  test("Decodes non-Latin text", () => {
+    const body = "【抖音】验证码9316，用于手机验证 🎉";
+    expect(decodeAttributedBody(attributedBodyHex(body))).toBe(body);
+  });
+
+  test("Decodes a real iMessage payload", () => {
+    const binaryData =
+      "\x04\x0Bstreamtyped\x81è\x03\x84\x01@\x84\x84\x84\x19NSMutableAttributedString\x00\x84\x84\x12NSAttributedString\x00\x84\x84\bNSObject\x00\x85\x92\x84\x84\x84\x0FNSMutableString\x01\x84\x84\bNSString\x01\x95\x84\x01+\x81\x85\x00DO NOT share. We will NEVER call you to ask for this code. Didn't request? Contact support. Your HealthSafe ID access code is: 643066\x86\x84\x02iI\x01\x7F\x92";
+    const result = decodeAttributedBody(Buffer.from(binaryData, "latin1").toString("hex"));
+    expect(result).toMatch(/^DO NOT share\..*access code is: 643066$/);
+    expect(extractCode(result)).toBe("643066");
+  });
+
+  test("Returns an empty string when there is no body", () => {
+    expect(decodeAttributedBody(null)).toBe("");
+    expect(decodeAttributedBody("")).toBe("");
+    expect(decodeAttributedBody(Buffer.from("\x04\x0Bstreamtyped\x00NSObject", "latin1").toString("hex"))).toBe("");
+  });
+
+  test("Combines a notification label with the decoded body", () => {
+    expect(combineMessageText("Time Sensitive", "Your Example verification code is: 246810")).toBe(
+      "Time Sensitive Your Example verification code is: 246810"
+    );
+  });
+
+  test("Does not duplicate text already in the decoded body", () => {
+    const body = "Your verification code is: 246810";
+    expect(combineMessageText(body, body)).toBe(body);
+    expect(combineMessageText(null, body)).toBe(body);
+    expect(combineMessageText(body, "")).toBe(body);
+  });
+});
+
 describe("Testing SQL LIKE pattern escaping", () => {
   test("Escapes single quotes", () => {
     expect(escapeSqlLikePattern("test'string")).toBe("test''string");
@@ -363,5 +436,32 @@ describe("Testing SQL LIKE pattern escaping", () => {
     expect(escapeSqlLikePattern("normal text")).toBe("normal text");
     expect(escapeSqlLikePattern("123456")).toBe("123456");
     expect(escapeSqlLikePattern("test@example.com")).toBe("test@example.com");
+  });
+});
+
+describe("Testing HTML stripping", () => {
+  test("drops CSS so hex colours are not read as codes (#30102)", () => {
+    const html =
+      "<html><head><style>.muted { color: #999999; }</style></head>" +
+      "<body><!--[if mso]><style>td { color: #888888; }</style><![endif]-->" +
+      '<p class="muted">Your one-time code is 482913</p></body></html>';
+    const text = stripHtmlTags(html);
+    expect(text).not.toContain("999999");
+    expect(text).not.toContain("888888");
+    expect(extractCode(text)).toBe("482913");
+  });
+
+  test.each([
+    ["comment", "<!--[if mso]><table><tr><td>777777</td></tr></table><![endif]--><p>Your code is 482913</p>", "777777"],
+    ["head", "<head><title>Ref 555555</title></head><p>Your code is 482913</p>", "555555"],
+    ["script", "<script>var id = 666666;</script><p>Your code is 482913</p>", "666666"],
+  ])("drops %s content before extracting the code", (_, html, decoy) => {
+    const text = stripHtmlTags(html);
+    expect(text).not.toContain(decoy);
+    expect(extractCode(text)).toBe("482913");
+  });
+
+  test("keeps body text and line breaks", () => {
+    expect(stripHtmlTags("<p>Hello&nbsp;there<br/>Code: 1234</p>")).toBe("Hello there\nCode: 1234");
   });
 });

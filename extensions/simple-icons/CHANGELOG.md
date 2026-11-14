@@ -1,5 +1,9 @@
 # Brand Icons Changelog
 
+## [Maintenance] - 2026-10-19
+
+- Unlock "Make Badge" action for Windows
+
 ## [Bugfix] - 2026-10-08
 
 - Check the selected icon package on every command launch and apply confirmed updates without restarting Raycast

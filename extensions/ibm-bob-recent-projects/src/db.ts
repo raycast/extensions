@@ -2,6 +2,8 @@ import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
+import path from "path";
+import { getBobAppName, readProductJSON } from "./lib/bob";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
@@ -12,9 +14,9 @@ export type RemoveMethods = {
 };
 
 export function useRecentEntries() {
-  const path = getPath();
+  const dbPath = getPath();
 
-  if (!fs.existsSync(path)) {
+  if (!fs.existsSync(dbPath)) {
     return {
       data: [],
       isLoading: false,
@@ -26,7 +28,7 @@ export function useRecentEntries() {
   }
 
   const { data, isLoading, revalidate } = useSQL<RecentEntries>(
-    path,
+    dbPath,
     "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
   );
 
@@ -40,7 +42,10 @@ export function useRecentEntries() {
     }
 
     try {
-      await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
+      await saveEntries(
+        dbPath,
+        parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)),
+      );
       await revalidate();
       showToast(Toast.Style.Success, "Entry removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
     } catch {
@@ -65,7 +70,7 @@ export function useRecentEntries() {
           },
         })
       ) {
-        await saveEntries([]);
+        await saveEntries(dbPath, []);
         await revalidate();
         showToast(Toast.Style.Success, "All entries removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
       }
@@ -78,12 +83,24 @@ export function useRecentEntries() {
 }
 
 function getPath() {
-  return `${homedir()}/Library/Application Support/IBM Bob/User/globalStorage/state.vscdb`;
+  const sharedPath = getSharedStateDatabasePath();
+  if (sharedPath && fs.existsSync(sharedPath)) {
+    return sharedPath;
+  }
+  const appName = getBobAppName();
+  return path.join(homedir(), "Library", "Application Support", appName, "User", "globalStorage", "state.vscdb");
 }
 
-async function saveEntries(entries: EntryLike[]) {
+function getSharedStateDatabasePath(): string | undefined {
+  const sharedDataFolderName = readProductJSON().sharedDataFolderName;
+  if (!sharedDataFolderName) return undefined;
+  // sharedDataFolderName (e.g. ".bobide-shared") lives directly in the home directory.
+  return path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb");
+}
+
+async function saveEntries(dbPath: string, entries: EntryLike[]) {
   const data = JSON.stringify({ entries });
   const escapedData = data.replace(/'/g, "''");
   const query = `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${escapedData}');`;
-  await execFilePromise("sqlite3", [getPath(), query]);
+  await execFilePromise("sqlite3", [dbPath, query]);
 }

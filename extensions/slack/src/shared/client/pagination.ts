@@ -1,6 +1,8 @@
 export type CursorPage<T> = {
   items: T[];
   nextCursor?: string;
+  /** Set when this page was fetched, but the scan stopped before the directory was complete. */
+  error?: unknown;
 };
 
 type CollectPaginatedResultsOptions<T, Result> = {

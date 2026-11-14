@@ -1,5 +1,11 @@
-import { normalizeItem, normalizeItemDetail, normalizeVault } from "../pass-cli-normalize";
-import { Item, ItemDetail, PassCliError, PasswordOptions, Vault } from "../types";
+import {
+  normalizeItem,
+  normalizeItemDetail,
+  normalizeShareRoles,
+  normalizeVault,
+  totpUriOf,
+} from "../pass-cli-normalize";
+import { Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
 
 export function passwordArgs(options: PasswordOptions): string[] {
@@ -20,12 +26,29 @@ export function passwordArgs(options: PasswordOptions): string[] {
   return args;
 }
 
+/** A forced logout only removes the local session, for when ending it on Proton's servers fails. */
+export function logoutArgs(force: boolean): string[] {
+  return force ? ["logout", "--force"] : ["logout"];
+}
+
 export function authCheckArgs(): string[] {
   return ["info"];
 }
 
 export function vaultListArgs(): string[] {
   return ["vault", "list", "--output", "json"];
+}
+
+export function vaultShareListArgs(): string[] {
+  return ["share", "list", "--only-vaults", "true", "--output", "json"];
+}
+
+export function itemShareListArgs(): string[] {
+  return ["share", "list", "--only-items", "true", "--output", "json"];
+}
+
+export function vaultMemberListArgs(shareId: string): string[] {
+  return ["vault", "member", "list", `--share-id=${shareId}`, "--output", "json"];
 }
 
 // IDs are passed as `--flag=value`: they are base64url and can start with "-", which pass-cli would
@@ -75,11 +98,28 @@ function trimOrUndefined(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function parseShares(text: string): unknown[] {
+  const data = parseJson(text, "share list");
+  const rawShares = Array.isArray(data) ? data : isRecord(data) ? data.shares : undefined;
+  if (!Array.isArray(rawShares)) {
+    throw new PassCliError("Unexpected share list output from pass-cli.", "invalid_output");
+  }
+  return rawShares;
+}
+
 export interface PassCliAdapter {
   generatePassword(options: PasswordOptions): Promise<string>;
   checkAuth(): Promise<boolean>;
+  logout(force: boolean): Promise<void>;
   listVaults(): Promise<Vault[]>;
-  listItems(shareId: string, vaultName: string): Promise<Item[]>;
+  /** The user's role on each vault, by share ID. */
+  listVaultRoles(): Promise<Map<string, VaultRole>>;
+  /** Share IDs of the items shared with the user on their own, outside their vaults. */
+  listItemShares(): Promise<string[]>;
+  /** Number of people with access to a vault, the user included. */
+  countVaultMembers(shareId: string): Promise<number>;
+  /** `onTotpUri` gets the otpauth URI of each login that has one, which `Item` never holds. */
+  listItems(shareId: string, vaultName: string, onTotpUri?: (itemId: string, uri: string) => void): Promise<Item[]>;
   getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
 }
@@ -96,6 +136,9 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
 
   return {
     generatePassword: async (options) => run(passwordArgs(options)),
+    logout: async (force) => {
+      await run(logoutArgs(force));
+    },
     checkAuth: async () => {
       try {
         await run(authCheckArgs());
@@ -113,7 +156,21 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
       }
       return rawVaults.map(normalizeVault);
     },
-    listItems: async (shareId, vaultName) => {
+    listVaultRoles: async () => normalizeShareRoles(parseShares(await run(vaultShareListArgs()))),
+    listItemShares: async () =>
+      parseShares(await run(itemShareListArgs())).flatMap((raw) => {
+        const shareId = isRecord(raw) ? trimOrUndefined(raw.id ?? raw.share_id) : undefined;
+        return shareId ? [shareId] : [];
+      }),
+    countVaultMembers: async (shareId) => {
+      const data = parseJson(await run(vaultMemberListArgs(shareId)), "vault member list");
+      const members = Array.isArray(data) ? data : isRecord(data) ? data.members : undefined;
+      if (!Array.isArray(members)) {
+        throw new PassCliError("Unexpected vault member list output from pass-cli.", "invalid_output");
+      }
+      return members.length;
+    },
+    listItems: async (shareId, vaultName, onTotpUri) => {
       const data = parseJson(await run(itemListArgs(shareId)), "item list");
       const rawItems = Array.isArray(data) ? data : isRecord(data) ? data.items : undefined;
       if (!Array.isArray(rawItems)) {
@@ -124,7 +181,12 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
           (item): item is Record<string, unknown> =>
             isRecord(item) && trimOrUndefined(item.state)?.toLowerCase() !== "trashed",
         )
-        .map((item) => normalizeItem(item, vaultName, shareId));
+        .map((raw) => {
+          const item = normalizeItem(raw, vaultName, shareId);
+          const totpUri = totpUriOf(raw);
+          if (totpUri) onTotpUri?.(item.itemId, totpUri);
+          return item;
+        });
     },
     getItem: async (shareId, itemId, vaultName) => {
       const data = parseJson(await run(itemViewArgs(shareId, itemId)), "item view");

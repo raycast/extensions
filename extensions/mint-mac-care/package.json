@@ -1,30 +1,31 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mint-mac-care",
-  "title": "Mint",
-  "description": "Clean up your Mac with Mint: see what fills the disk, get space back without deleting anything, clear caches, organize folders, free memory and uninstall apps",
+  "title": "Mint - Smart Disk and Memory for You and Your Agents",
+  "description": "Smart disk and memory for you and your agents: space back without deleting, RAM back from idle apps, and what Codex, Claude Code and Cursor leave behind",
   "icon": "extension-icon.png",
   "author": "dzg-studio",
   "categories": [
-    "Productivity",
-    "System"
+    "System",
+    "Developer Tools",
+    "Productivity"
   ],
   "platforms": [
     "macOS"
   ],
   "keywords": [
-    "mac cleaner",
-    "cleaner",
-    "disk space",
-    "free space",
-    "storage",
-    "junk",
-    "cache",
-    "duplicates",
-    "memory",
-    "uninstaller",
+    "ai agents",
+    "agents",
+    "claude code",
     "codex",
-    "claude"
+    "cursor",
+    "memory",
+    "ram",
+    "disk space",
+    "free up space",
+    "storage optimizer",
+    "worktrees",
+    "disk cleanup"
   ],
   "license": "MIT",
   "commands": [
@@ -32,55 +33,61 @@
       "name": "mint-status",
       "title": "View Mac Status",
       "subtitle": "Mint",
-      "description": "Disk, memory and your organized folders on one screen, like Mint's menu bar",
+      "description": "What Mint can get back, then disk space, memory and organized folders at a glance, with their Auto Care, like Mint's menu bar",
       "mode": "view",
       "keywords": [
-        "disk",
-        "storage",
-        "space",
+        "disk usage",
+        "storage usage",
+        "disk space",
         "free space",
         "memory",
         "ram",
         "system status",
-        "overview"
+        "overview",
+        "monitor",
+        "auto care",
+        "dashboard"
       ]
     },
     {
       "name": "mint-optimize",
       "title": "Optimize Storage",
       "subtitle": "Mint",
-      "description": "Identical copies share their storage. Nothing is deleted and every file stays where it is",
+      "description": "Get space back without deleting anything, as Mint's Optimize does: identical copies share their storage and idle files are stored compressed, by source like Codex, Claude Code, Cursor and your files",
       "mode": "view",
       "keywords": [
+        "optimizer",
+        "optimization",
         "duplicates",
-        "copies",
-        "clone",
-        "space",
+        "duplicate files",
         "dedupe",
-        "apfs",
+        "apfs clone",
+        "lossless",
         "codex",
-        "claude",
-        "ai agents"
+        "claude code",
+        "cursor",
+        "ai agents",
+        "agent storage"
       ]
     },
     {
       "name": "mint-scan",
       "title": "Free Disk",
       "subtitle": "Mint",
-      "description": "Mint's groups with what is in each: optimize copies, clean what apps make again, choose from your own files",
+      "description": "Free disk space: share identical copies, clean the caches, logs and build output apps make again, and choose from your own files",
       "mode": "view",
       "keywords": [
-        "clean",
         "cleaner",
-        "mac cleaner",
-        "cache",
+        "cleanup",
+        "clean up",
         "junk",
-        "space",
-        "disk space",
-        "free up space",
+        "cache",
+        "disk cleanup",
+        "xcode",
+        "derived data",
         "node_modules",
-        "logs",
-        "purge",
+        "build cache",
+        "temporary files",
         "system data"
       ]
     },
@@ -88,7 +95,7 @@
       "name": "mint-organize",
       "title": "Organize a Folder",
       "subtitle": "Mint",
-      "description": "How many files each folder has to sort and where they go, then organize it in one step",
+      "description": "How many loose files each folder has to sort and where they go, then tidy it in one step",
       "mode": "view",
       "keywords": [
         "desktop",
@@ -97,14 +104,17 @@
         "sort",
         "organize files",
         "declutter",
-        "clean desktop"
+        "clean desktop",
+        "file organizer",
+        "folder organizer",
+        "sort files"
       ]
     },
     {
       "name": "mint-memory",
       "title": "Free Memory",
       "subtitle": "Mint",
-      "description": "Quit every idle app in one step, or choose the apps to quit",
+      "description": "Quit idle apps to free RAM in one step, or choose which apps to quit",
       "mode": "view",
       "keywords": [
         "ram",
@@ -112,7 +122,28 @@
         "free ram",
         "quit apps",
         "idle apps",
-        "memory cleaner"
+        "memory cleaner",
+        "ram cleaner",
+        "memory usage",
+        "memory pressure"
+      ]
+    },
+    {
+      "name": "mint-autocare",
+      "title": "Auto Care",
+      "subtitle": "Mint",
+      "description": "Turn Mint's Auto Care on or off for Optimizable, Safe to clean and Yours, memory and each organized folder, as in the app",
+      "mode": "view",
+      "keywords": [
+        "auto care",
+        "autocare",
+        "schedule",
+        "automatic cleanup",
+        "automatic",
+        "hourly",
+        "memory guard",
+        "organize automatically",
+        "background"
       ]
     },
     {
@@ -126,19 +157,23 @@
         "delete app",
         "leftovers",
         "uninstaller",
-        "remove app"
+        "remove app",
+        "app cleaner",
+        "app remover",
+        "leftover files"
       ]
     },
     {
       "name": "mint-undo",
       "title": "Undo Mint Action",
       "subtitle": "Mint",
-      "description": "Put back files from a recent cleanup, uninstall or organize run",
+      "description": "Restore eligible files from recent Mint operations while files and recovery records remain available",
       "mode": "view",
       "keywords": [
         "restore",
         "revert",
-        "put back"
+        "put back",
+        "history"
       ]
     },
     {
@@ -152,7 +187,88 @@
         "what grew",
         "storage history",
         "space used",
-        "system data"
+        "system data",
+        "disk usage",
+        "storage usage",
+        "what is using space"
+      ]
+    },
+    {
+      "name": "mint-trash",
+      "title": "Empty Trash",
+      "subtitle": "Mint",
+      "description": "What is in the Trash, largest first; delete chosen items or all of it after confirming in Mint",
+      "mode": "view",
+      "keywords": [
+        "trash",
+        "empty trash",
+        "bin",
+        "deleted files",
+        "free up space",
+        "icloud"
+      ]
+    },
+    {
+      "name": "mint-conversations",
+      "title": "AI Conversations",
+      "subtitle": "Mint",
+      "description": "Optimize Codex conversations, remove their pictures or delete them, clear pictures from Claude Code conversations, and review pictures one by one, each confirmed in Mint",
+      "mode": "view",
+      "keywords": [
+        "codex",
+        "claude code",
+        "conversations",
+        "chat history",
+        "pictures",
+        "screenshots",
+        "ai agents",
+        "agent storage",
+        "archives"
+      ]
+    },
+    {
+      "name": "mint-history",
+      "title": "Mint History",
+      "subtitle": "Mint",
+      "description": "What Mint cleaned, freed, organized and uninstalled, newest first, by hand or by Auto Care",
+      "mode": "view",
+      "keywords": [
+        "history",
+        "log",
+        "activity",
+        "receipts",
+        "what mint did"
+      ]
+    },
+    {
+      "name": "mint-handling",
+      "title": "File Handling",
+      "subtitle": "Mint",
+      "description": "Where Mint never acts (Protect) and where it asks first (Needs Review); loosening a rule is confirmed in Mint",
+      "mode": "view",
+      "keywords": [
+        "protect",
+        "never touch",
+        "needs review",
+        "exclude",
+        "ignore list",
+        "boundaries",
+        "safe folders"
+      ]
+    },
+    {
+      "name": "mint-rules",
+      "title": "Cleanup Rules",
+      "subtitle": "Mint",
+      "description": "Mint's cleanup rules: what each matches and does, a preview of what it finds now, and rules made by hand, each change confirmed in Mint",
+      "mode": "view",
+      "keywords": [
+        "rules",
+        "custom rules",
+        "cleanup rules",
+        "filters",
+        "old installers",
+        "automation"
       ]
     }
   ],
@@ -160,7 +276,7 @@
     {
       "name": "get-disk-overview",
       "title": "Get Disk Overview",
-      "description": "How full the Mac's disk is and what Mint found at its last Scan, in four groups: Optimizable (identical copies that can share their storage, nothing deleted), Safe to clean (caches, build output and leftovers that apps make again), Yours (the person's own files, chosen one by one) and Keep. Read-only."
+      "description": "How full the Mac's disk is and what Mint found at its last Scan, in four groups: Optimizable (identical copies that can share their storage and idle files that can be stored compressed in place, nothing deleted), Safe to clean (caches, build output, leftovers that apps make again and finished agent worktrees; Free Disk deletes them permanently), Yours (the person's own files and agent worktrees that still hold their work, chosen one by one) and Keep. Read-only."
     },
     {
       "name": "get-memory-overview",
@@ -175,11 +291,11 @@
     {
       "name": "open-mint-command",
       "title": "Open Mint Command",
-      "description": "Open one of Mint's commands in Raycast (Free Disk, Optimize Storage, Free Memory, Organize a Folder, Uninstall App, Show Disk Growth or View Mac Status) so the person reviews what it would do and confirms it there. The tool itself changes nothing."
+      "description": "Open one of Mint's commands in Raycast (Free Disk, Optimize Storage, Free Memory, Organize a Folder, Uninstall App, Show Disk Growth, View Mac Status or Auto Care) so the person reviews what it would do and confirms it there. The tool itself changes nothing."
     }
   ],
   "ai": {
-    "instructions": "Mint must be installed for these tools to answer; if a tool says it is not, pass on its words and link. The read tools never change anything. Mint never removes, quits or moves anything from an AI answer: when the person wants space or memory back, say what Mint found with its sizes, then open the matching command with open-mint-command so they review and confirm it there. Never say something was cleaned, freed or deleted. Optimizable gives space back without deleting any file; Safe to clean is what apps make again; Yours is the person's own files. Write sizes exactly as the tools give them.",
+    "instructions": "Mint must be installed for these tools to answer; if a tool says it is not, pass on its words and link. The read tools never change anything. Mint never removes, quits or moves anything from an AI answer: when the person wants space or memory back, say what Mint found with its sizes, then open the matching command with open-mint-command so they review and confirm it there. Never say something was cleaned, freed or deleted. Optimizable gives space back without deleting any file; Safe to clean is what apps make again plus finished agent worktrees (merged, nothing only there, untouched for a day), and Free Disk deletes it permanently; Yours is the person's own files and agent worktrees that still hold their work. Write sizes exactly as the tools give them.",
     "evals": [
       {
         "input": "@mint what's taking up space on my Mac?",
@@ -342,12 +458,12 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build --output dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "node --experimental-strip-types --import ./test/register.mjs --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
-    "validate": "npm run lint && npm test && npm run build",
+    "validate": "npm run lint && tsc --noEmit && npm test && npm run build",
     "prepublishOnly": "echo 'Publish this extension through the Raycast Store, not npm.' && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

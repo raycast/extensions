@@ -6,6 +6,7 @@ export interface Context {
   projects?: Project[];
   currency: string;
   demo?: boolean;
+  chartsV3?: boolean;
 }
 export const DASHBOARD = "https://app.revenuecat.com";
 export function SettingsAction() {

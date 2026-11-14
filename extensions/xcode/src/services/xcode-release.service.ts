@@ -3,6 +3,22 @@ import fetch from "node-fetch";
 import { XcodeReleaseSDK } from "../models/xcode-release/xcode-release-sdk.model";
 
 /**
+ * A raw Xcode Release entry from https://xcodereleases.com/data.json
+ */
+interface RawXcodeRelease {
+  name: string;
+  date: { year: number; month: number; day: number };
+  version: {
+    number: string;
+    build: string;
+    release: { beta?: number; rc?: number };
+  };
+  sdks: Record<string, { number: string }[]>;
+  compilers?: { swift?: { number: string }[] };
+  links?: { notes?: { url: string }; download?: { url: string } };
+}
+
+/**
  * XcodeReleaseService
  */
 export class XcodeReleaseService {
@@ -13,7 +29,7 @@ export class XcodeReleaseService {
     // Fetch Response from https://xcodereleases.com
     const response = await fetch("https://xcodereleases.com/data.json");
     // Retrieve JSON array from response
-    const jsonArray = (await response.json()) as any[];
+    const jsonArray = (await response.json()) as RawXcodeRelease[];
     // Decode each entry to a XcodeRelease
     return jsonArray.map((rawXcodeRelease) => {
       return {

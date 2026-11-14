@@ -34,8 +34,9 @@ export type ZedWorkspace = ZedLocalWorkspace | ZedRemoteWorkspace;
 // Unified types for extension
 //
 
+// The user is optional: Zed stores null when the project uses the distribution's default user.
 function isWslWorkspace(workspace: ZedRemoteWorkspace): boolean {
-  return workspace.kind === "wsl" && !!workspace.user && !!workspace.distro;
+  return workspace.kind === "wsl" && !!workspace.distro;
 }
 
 export interface Workspace {

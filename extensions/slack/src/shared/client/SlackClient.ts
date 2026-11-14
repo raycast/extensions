@@ -1,5 +1,6 @@
 import { Icon, Image } from "@raycast/api";
-import { getSlackWebClient } from "./WebClient";
+import { handleError } from "../utils";
+import { getSlackToken, getSlackWebClient } from "./WebClient";
 import type { SlackMember } from "./slackTypes";
 import { formatRelative } from "date-fns";
 import { Profile } from "@slack/web-api/dist/types/response/UsersProfileGetResponse";
@@ -8,8 +9,11 @@ import { getDirectorySearchPageSize } from "./directory";
 import { searchConversationDirectory, searchUserNames } from "./conversationSearch";
 import { toChannel, toGroup } from "./conversation";
 import type { Channel, Group } from "./conversation";
-import { searchMemberDirectory } from "./memberSearch";
+import { isMemberDirectoryScanError, searchMemberDirectory } from "./memberSearch";
 import { toUserName } from "./member";
+import { getMemberPage } from "./memberDirectoryCache";
+import { getConversationPage, getMemberChannelPage } from "./channelDirectoryCache";
+import type { ConversationPage, ConversationPageOptions } from "./channelDirectoryCache";
 
 export type { Channel, Group } from "./conversation";
 
@@ -88,6 +92,81 @@ function toUser(member: SlackMember): User | undefined {
     conversationId: undefined,
     timezone: tz ?? "",
   };
+}
+
+/**
+ * Member pages come from a shared, cached users.list scan. The cursor is the index of the next cached page, so a
+ * search can start reading matches while later pages are still loading.
+ */
+const createMemberPageLoader = () => async (cursor?: string) => {
+  const slackWebClient = getSlackWebClient();
+  const index = Number(cursor ?? 0);
+  const page = await getMemberPage(
+    getSlackToken(),
+    async (nextCursor) => {
+      const response = await slackWebClient.users.list({ limit: getDirectorySearchPageSize(), cursor: nextCursor });
+      return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+    },
+    index,
+  );
+  return {
+    items: page.items,
+    nextCursor: page.hasMore ? String(index + 1) : undefined,
+    error: page.error,
+  };
+};
+
+function toConversationCursorPage(page: ConversationPage, index: number) {
+  return {
+    items: page.items,
+    nextCursor: page.hasMore ? String(index + 1) : undefined,
+    error: page.error,
+    savedAt: page.savedAt,
+  };
+}
+
+/**
+ * Channel pages come from a shared, cached conversations.list scan. The cursor is the page index, so a search can
+ * filter locally as pages arrive instead of restarting a full directory walk on each keystroke.
+ */
+export async function loadConversationDirectoryPage(cursor?: string, options?: ConversationPageOptions) {
+  const slackWebClient = getSlackWebClient();
+  const index = Number(cursor ?? 0);
+  const page = await getConversationPage(
+    getSlackToken(),
+    async (nextCursor) => {
+      const response = await slackWebClient.conversations.list({
+        exclude_archived: true,
+        types: "public_channel,private_channel,mpim",
+        limit: getDirectorySearchPageSize(),
+        cursor: nextCursor,
+      });
+      return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
+    },
+    index,
+    options,
+  );
+  return toConversationCursorPage(page, index);
+}
+
+/** Pages of the channels the signed-in user belongs to, from a shared, cached users.conversations scan. */
+export async function loadMemberChannelDirectoryPage(cursor?: string) {
+  const slackWebClient = getSlackWebClient();
+  const index = Number(cursor ?? 0);
+  const page = await getMemberChannelPage(
+    getSlackToken(),
+    async (nextCursor) => {
+      const response = await slackWebClient.users.conversations({
+        exclude_archived: true,
+        types: "public_channel,private_channel",
+        limit: getDirectorySearchPageSize(),
+        cursor: nextCursor,
+      });
+      return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
+    },
+    index,
+  );
+  return toConversationCursorPage(page, index);
 }
 
 export class SlackClient {
@@ -170,20 +249,29 @@ export class SlackClient {
     return (await SlackClient.searchDirectoryMembers(query, signal)).users;
   }
 
-  public static async searchDirectoryMembers(query: string, signal?: AbortSignal) {
-    const slackWebClient = getSlackWebClient();
-    const result = await searchMemberDirectory({
-      query,
-      maxResults: maxSearchResultsPerType,
-      toUser,
-      loadPage: async (cursor) => {
-        const response = await slackWebClient.users.list({ limit: getDirectorySearchPageSize(query), cursor });
-        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
-      },
-      signal,
-    });
-    result.users.sort((a, b) => sortNames(a.name, b.name));
-    return result;
+  public static async searchDirectoryMembers(query: string, signal?: AbortSignal, onUsers?: (users: User[]) => void) {
+    const finish = (result: { users: User[]; userNames: ReadonlyMap<string, string> }) => {
+      result.users.sort((a, b) => sortNames(a.name, b.name));
+      return result;
+    };
+    try {
+      return finish(
+        await searchMemberDirectory({
+          query,
+          maxResults: maxSearchResultsPerType,
+          toUser,
+          loadPage: createMemberPageLoader(),
+          signal,
+          onProgress: (partial) => {
+            onUsers?.([...partial.users].sort((a, b) => sortNames(a.name, b.name)));
+          },
+        }),
+      );
+    } catch (error) {
+      if (!isMemberDirectoryScanError<User>(error)) throw error;
+      await handleError(error.failure, "Could not load the full member directory");
+      return finish(error.partial);
+    }
   }
 
   public static async searchConversations(
@@ -192,40 +280,27 @@ export class SlackClient {
     loadUserNames?: () => Promise<ReadonlyMap<string, string>>,
     types: "channels" | "groups" | "all" = "all",
   ): Promise<[Channel[], Group[]]> {
-    const slackWebClient = getSlackWebClient();
     const [channels, groups] = await searchConversationDirectory({
       query,
       maxResultsPerType: maxSearchResultsPerType,
       types,
       loadUserNames:
         loadUserNames ??
-        (() =>
-          searchUserNames({
-            query,
-            maxResults: maxSearchResultsPerType,
-            loadPage: async (cursor) => {
-              const response = await slackWebClient.users.list({
-                limit: getDirectorySearchPageSize(query),
-                cursor,
-              });
-              return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
-            },
-            signal,
-          })),
-      loadConversationsPage: async (cursor) => {
-        const response = await slackWebClient.conversations.list({
-          exclude_archived: true,
-          types:
-            types === "channels"
-              ? "public_channel,private_channel"
-              : types === "groups"
-                ? "mpim"
-                : "public_channel,private_channel,mpim",
-          limit: getDirectorySearchPageSize(query),
-          cursor,
-        });
-        return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
-      },
+        (async () => {
+          try {
+            return await searchUserNames({
+              query,
+              maxResults: maxSearchResultsPerType,
+              loadPage: createMemberPageLoader(),
+              signal,
+            });
+          } catch (error) {
+            if (!isMemberDirectoryScanError(error)) throw error;
+            await handleError(error.failure, "Could not load the full member directory");
+            return error.partial.userNames;
+          }
+        }),
+      loadConversationsPage: (cursor) => loadConversationDirectoryPage(cursor),
       signal,
     });
 

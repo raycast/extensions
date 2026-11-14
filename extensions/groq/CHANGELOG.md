@@ -1,5 +1,19 @@
 # Groq Changelog
 
+## [Fix Streaming Responses] - 2026-11-04
+
+- Buffer streaming updates to prevent long responses from freezing text commands and AI Chat.
+- Cancel requests when leaving a view and preserve partial answers when a request fails.
+
+## [Fix Empty and Failed Responses] - 2026-11-03
+
+- Fix every command failing with "Unexpected error" when Response Streaming is enabled
+- Fix empty responses from reasoning models when Response Streaming is disabled
+
+## [Fix Crash on Launch] - 2026-10-14
+
+- Fix every command failing with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7, which no longer self-references `_shims`
+
 ## [Raycast Model Provider] - 2026-09-24
 
 - Use available models directly in Raycast AI with streaming, conversation history, and supported model capabilities.

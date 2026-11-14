@@ -119,7 +119,14 @@ export class XcodeSimulatorApplicationService {
       return undefined;
     }
     // Declare Info.plist JSON
-    let infoPlistJSON: any;
+    let infoPlistJSON: {
+      CFBundleIdentifier?: string;
+      CFBundleShortVersionString?: string;
+      CFBundleVersion?: string;
+      CFBundleDisplayName?: string;
+      CFBundleName?: string;
+      CFBundleIcons?: { CFBundlePrimaryIcon?: { CFBundleIconFiles?: string[] } };
+    };
     try {
       // Try to parse Info.plist JSON
       // using 'plutil' to convert the Info.plist XML to JSON format

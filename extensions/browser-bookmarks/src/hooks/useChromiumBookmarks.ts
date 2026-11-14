@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { getSearchFolder } from "../utils/bookmarkSearch";
 import { loadChromiumFavicons } from "../utils/chromiumFavicons";
 import { getChromiumFaviconSignature, getChromiumSourceSignature } from "../utils/chromiumSourceSignature";
 
@@ -54,6 +55,12 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   }
 
   return bookmarks;
+}
+
+function getBookmarksWithSearchFolder(root: BookmarkFolder | undefined) {
+  return root
+    ? getBookmarks(root).map((bookmark) => ({ ...bookmark, searchFolder: getSearchFolder(root.name, bookmark.folder) }))
+    : [];
 }
 
 function getBookmarkCount(bookmarksRoot: BookmarksRoot) {
@@ -244,8 +251,8 @@ export default function useChromiumBookmarks(
   const otherRoot = data?.roots.other;
 
   const rawBookmarks = useMemo(() => {
-    const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
-    const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
+    const toolbarBookmarks = getBookmarksWithSearchFolder(toolbarRoot);
+    const otherBookmarks = getBookmarksWithSearchFolder(otherRoot);
 
     return [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
       return {

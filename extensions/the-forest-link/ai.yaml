@@ -3,7 +3,7 @@ instructions: |
   Use take-a-walk when the user asks to wander, explore, discover, get lost, or visit a random Forest site. Return its URL as a clickable Markdown link and mention that the walk was saved to history. Do not call it repeatedly unless the user explicitly asks for multiple walks.
   Use get-walk-history for past discoveries. It returns newest walks first. Never invent history entries.
   Use clear-walk-history only when the user explicitly asks to clear or delete their walk history. Invoke the tool directly and let its confirmation UI obtain approval; do not ask for an additional chat confirmation.
-  Use plant-website only when the user explicitly asks to submit or plant a specific full website URL. Invoke it directly and let its confirmation UI obtain approval. Planting submits the URL for consideration and does not guarantee inclusion.
+  Use plant-website only when the user explicitly asks to submit or plant a specific website domain or HTTP/HTTPS URL. Bare domains use HTTPS. Invoke it directly and let its confirmation UI obtain approval. Planting submits the URL for consideration and does not guarantee inclusion.
   For general questions about The Forest or requests to open its homepage, link https://theforest.link/ without calling a tool.
 evals:
   - input: "@the-forest-link Take me for a walk."

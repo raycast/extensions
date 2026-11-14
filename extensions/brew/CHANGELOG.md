@@ -4,6 +4,45 @@
 
 - Omit missing formula and cask descriptions from list subtitles instead of passing `null` to the UI.
 
+## [CLI search keywords] - 2026-11-09
+
+- Fixed: Show Upgrades answers to "outdated" again. The keyword was removed by accident and is restored
+- New: root search finds Show Installed with "list", Manage Taps with "untap" or "trust", and Clean up with "cleanup"
+- New: "homebrew" is on every command, so search finds the whole extension
+- Improved: the Adopt Apps subtitle changed from Homebrew to Brew
+
+## [Show unscanned formulae in Show Vulnerabilities] - 2026-11-06
+
+- Fixed: Show Vulnerabilities lists the formulae `brew vulns` didn't scan, such as ones from untrusted taps, and why
+- Fixed: Show Vulnerabilities lists the formulae brew checked against a newer version than the one installed, instead of saying "No known vulnerabilities"
+
+## [Adopt Apps reads brew.env] - 2026-11-06
+
+- Fixed: Adopt Apps now looks in the install folder set in `brew.env`, `/Applications` and `~/Applications`
+- Improved: the README says Raycast doesn't get `XDG_CONFIG_HOME`, and which `brew.env` file to use
+
+## [Homebrew options] - 2026-11-05
+
+- Improved: the README explains how to set Homebrew options, such as where casks install, so installs from the extension use them too
+
+## [Run in Terminal after a finished command] - 2026-11-03
+
+- Fixed: with Terminal as the terminal application, a Run in Terminal action did nothing once an earlier command had finished and its window still showed "[Process completed]". Run in Terminal now opens a new window, so it also no longer ends the shell in your front tab
+
+## [Install in your terminal by default] - 2026-11-03
+
+- New: an "Install and uninstall in the terminal application" preference, off by default. ↩ on a package that is not installed runs `brew install` in your terminal application, and ⌘I still installs inside Raycast. ⌃X runs `brew uninstall` there too, except on a pinned package, where Uninstall stays in Raycast and asks to unpin
+
+## [Finished toasts lose Cancel] - 2026-11-03
+
+- Fixed: a finished install, upgrade or uninstall could stay on its progress toast, such as "Installing Tinycast / Operation completed successfully", with a Cancel button that did nothing. It now ends on the result, such as "Installed Tinycast", with no Cancel
+
+## [Better search ranking] - 2026-10-31
+
+- Improved: Search now lists exact name matches first, then names that start with what you typed, then names containing it, and description-only matches last. Searching `dia` finds Dia before AirMedia
+
+## [Added new screenshots] - 2026-10-13
+
 ## [Remove Tap fix] - 2026-10-04
 
 - Fixed: on Homebrew 6.0.12 and earlier, Remove Tap left the tap's installed packages behind although its confirmation said they would be uninstalled. It now uninstalls them, then removes the tap, on every Homebrew version, and keeps the tap if a package can't be uninstalled

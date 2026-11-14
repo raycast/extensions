@@ -1,13 +1,16 @@
-import { OAuth } from "@raycast/api";
+import { environment, OAuth } from "@raycast/api";
 import { CLIENT_ID, createTokenReader, exchangeToken, hasRequiredScopes, REDIRECT_URI, SCOPES } from "./oauth-core";
 
+import { createTokenLock } from "./oauth-lock";
+
+const withTokenLock = createTokenLock(environment.supportPath);
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "RevenueCat",
   providerIcon: "revenuecat-icon.png",
   providerId: "revenuecat",
 });
-const readAccessToken = createTokenReader(client);
+const readAccessToken = createTokenReader(client, exchangeToken, withTokenLock);
 let signInPromise: Promise<void> | undefined;
 function signIn(): Promise<void> {
   if (signInPromise) return signInPromise;
@@ -25,7 +28,10 @@ function signIn(): Promise<void> {
       code_verifier: request.codeVerifier,
       redirect_uri: REDIRECT_URI,
     });
-    await client.setTokens({ ...tokens, scope: tokens.scope ?? SCOPES.join(" ") });
+    await withTokenLock(async (assertHeld) => {
+      assertHeld();
+      await client.setTokens({ ...tokens, scope: tokens.scope ?? SCOPES.join(" ") });
+    });
   })().finally(() => {
     signInPromise = undefined;
   });

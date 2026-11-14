@@ -331,8 +331,10 @@
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "26.1.0",
     "@types/react": "19.2.17",
+    "@types/react-test-renderer": "19.0.0",
     "eslint": "^10.6.0",
     "prettier": "^3.9.4",
+    "react-test-renderer": "19.0.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   },

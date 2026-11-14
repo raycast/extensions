@@ -1,5 +1,24 @@
 # Cheatsheets Remastered Changelog
 
+## [Metadata and Markdown Import] - 2026-11-05
+
+- Read titles, descriptions and tags from repository Markdown frontmatter, including saved sheets offline.
+- Search repository metadata, see tags in lists and read full descriptions in sheet details.
+- Import a local Markdown file as an editable personal copy from Manage Custom Cheatsheets; skip identical saved content.
+- Handle invalid metadata safely and preserve original Markdown, existing sheets and saved state.
+- Update the Raycast API for compatibility with the current release.
+
+## [Markdown and Sync Reliability] - 2026-11-04
+
+- Preserve original Markdown for copying and improve display of frontmatter, Unicode, tables and code examples.
+- Keep the previous repository snapshot when a download fails or is canceled; validate and bound downloads before saving a complete revision.
+- Validate local storage, retain legacy collections, back up the previous snapshot and protect concurrent writes.
+- Keep favorites, hidden state and history independent across repositories, branches and paths; preserve ambiguous legacy state.
+- Fix title search, view counts, recent navigation, drafts, stale edits and refresh after changes.
+- Add search within a sheet with heading context, source lines and exact section copying.
+- Restore six MIT-licensed historical reference editions with targeted accuracy fixes; exclude `basic`, `keywords_test`, `packs` and `polyfill.io`, update the bundled index and remove the obsolete polyfill CDN loader from the styling example.
+- Update Raycast dependencies, documentation and bundled software notices. GitHub OAuth behavior and macOS support are retained.
+
 ## [1.1.0 - Custom User Repos] - 2025-09-09
 
 ### Added

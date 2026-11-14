@@ -1,5 +1,53 @@
 # Slack Changelog
 
+## [Navigation and Search Reliability] - 2026-11-12
+
+- Add an **Open Links In** preference to choose the Slack app or browser when automatic app detection is incorrect.
+- Recognize renamed and alternate Slack installations and open native links through the system's registered Slack handler.
+- Use the signed-in workspace when opening conversations, including Slack Connect users and shared channels.
+- Keep cached workspace navigation available when the connection fails, with a retry action; allow marking conversations as read independently of workspace lookup.
+- Handle missing or invalid profile metadata and message timestamps without passing invalid values to search results.
+- Load the Search Messages author menu only when opened, with searchable results limited to 100 at a time to reduce memory use in large workspaces.
+- Show the permissions Slack requires and the correct recovery steps for OAuth or personal access tokens, including errors while loading unread messages.
+
+## [Faster Channel Mentions] - 2026-11-02
+
+- The **Channels** mention search in AI Chat now reads the cached channel directory that Open Channel uses, instead of scanning every channel in the workspace on each keystroke. Your own channels are cached too, so the default list opens instantly.
+- A search that finds nothing in a cache older than a minute looks again, so newly created channels still show up.
+- Cache only the channel fields search needs, so the directory loads faster on large workspaces.
+
+## [Cache channel directory for instant local search] - 2026-11-01
+
+- Open Channel now filters locally as pages arrive instead of restarting a full `conversations.list` scan on each keystroke. The workspace channel and group directory is shared across all searches and refreshed in the background at most once per hour.
+
+## [Channel Mentions in AI Chat] - 2026-10-31
+
+- Add a **Channels** mention search to find public and private channels by name. Without a query it lists the channels you're a member of, and search results rank your own channels first.
+- Read the selected channel's current topic, purpose, member count, and Slack channel ID when sending a mention, so AI can read its history or search it without guessing the channel.
+
+## [User Mentions in AI Chat] - 2026-10-28
+
+- Add a **Users** mention search to find workspace members by name, username, email, or job title.
+- Read the selected person's current profile when sending a mention, including their Slack user ID and workspace.
+
+## [Profile photos in Find Users] - 2026-10-22
+
+- Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
+- Add a `hasCustomPhoto` flag so AI can tell an uploaded photo apart from Slack's default avatar.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Rename Channel AI Tool] - 2026-10-12
+
+- Add a **Rename Channel** AI tool that renames a channel by ID after confirmation. Names are converted to Slack's format (lowercase, hyphens instead of spaces), and common errors such as a taken name or missing permission are explained.
+
+## [Fix user search stalling] - 2026-10-10
+
+- Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
+- Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
+- Show the first page of people right away when opening the picker while the full list loads in the background.
+- Request smaller pages from Slack. Timeouts and server errors stop retrying after a few attempts so they show up instead of loading forever; rate limits still wait for Slack's retry delay.
+
 ## [Add Canvas AI tools] - 2026-10-09
 
 - Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.

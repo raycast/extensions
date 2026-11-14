@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snow-report",
+  "title": "Snow Report",
+  "description": "Snow forecasts for ski resorts worldwide, comparing base and summit.",
+  "icon": "chairlift-icon-c.png",
+  "author": "jonathan_hunt",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "snow-report",
+      "title": "Search Resorts",
+      "subtitle": "Snow Report",
+      "description": "Search ski resorts worldwide and compare snow forecasts at the base and summit.",
+      "mode": "view"
+    },
+    {
+      "name": "snow-menu-bar",
+      "title": "Favorites in Menu Bar",
+      "subtitle": "Snow Report",
+      "description": "Show the next 24 hours of snow at your favorite resorts in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "30m"
+    },
+    {
+      "name": "add-custom-resort",
+      "title": "Add Resort",
+      "subtitle": "Snow Report",
+      "description": "Add a resort that isn't listed, by its coordinates and base and summit elevations.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "units",
+      "title": "Units",
+      "description": "Units for snowfall, depth, temperature, elevation and wind.",
+      "type": "dropdown",
+      "required": false,
+      "default": "metric",
+      "data": [
+        {
+          "title": "Metric (cm, °C, m, km/h)",
+          "value": "metric"
+        },
+        {
+          "title": "Imperial (in, °F, ft, mph)",
+          "value": "imperial"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

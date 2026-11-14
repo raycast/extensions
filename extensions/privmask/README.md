@@ -40,8 +40,16 @@ unexamined rather than letting it pass as clean. Each finding shows how
 confident the detection is, in red, orange or yellow, and which detector found
 it. Everything is selected by default; press `⌘T` to leave one alone.
 
-`↵` copies the masked text. `⌘⇧↵` pastes it straight into the app you came
-from.
+The masked text is on the clipboard as soon as it is ready, and follows every
+change you make, so switching back to the app you came from and pressing `⌘V`
+is all that is left. Nothing is copied while the Raycast window is hidden; the
+copy waits until the window is back on screen, so a copy you make elsewhere in
+the meantime is left alone. `↵` copies it and closes the window; `⌘⇧↵` pastes it
+straight into that app.
+
+To mask the next thing, copy it and press `⌘V` here: the window starts over on
+what is on the clipboard now. There is no need to close and reopen the command
+between texts.
 
 Values are replaced with numbered placeholders — `[NAME_1]`, `[EMAIL_2]` — and
 the same value always gets the same number, so a reader can still follow who is

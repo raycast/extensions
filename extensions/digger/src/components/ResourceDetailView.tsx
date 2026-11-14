@@ -58,8 +58,8 @@ export function ResourceDetailView({ url, title, resourceName, renderAsMarkdown 
     if (renderAsMarkdown) {
       markdown = `# ${title}\n\n${data}`;
     } else {
-      // A tagged fence gets syntax colouring in Raycast's Markdown renderer, so
-      // a 17KB app-site-association reads as JSON instead of grey monospace.
+      // A tagged fence gets syntax coloring in Raycast's Markdown renderer, so
+      // a 17KB app-site-association reads as JSON instead of gray monospace.
       // Pretty-printing is display-only; `resource` below keeps the raw bytes.
       const body = prettyPrintCode ? prettyPrint(data, language) : data;
       markdown = `# ${title}\n\n\`\`\`${language}\n${body}\n\`\`\``;

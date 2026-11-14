@@ -4,6 +4,7 @@ import { openMint, plural, runMintSurface } from "./mint-cli";
 
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { RetryActions } from "./confirm-in-mint";
 import { UndoBatch, UndoKind, undoKind, undoPicture, undoTitle } from "./mint-panes";
 
 type UndoListResponse = { items: UndoBatch[] };
@@ -40,7 +41,8 @@ function UndoList({ cli }: { cli: string }) {
       }
       toast.style = result.restoredCount ? Toast.Style.Success : Toast.Style.Failure;
       toast.title = `Put back ${result.restoredCount} of ${batch.operationCount}`;
-      toast.message = "The rest were moved, changed or replaced since. Mint never overwrites a file.";
+      toast.message =
+        "The remaining items could not be restored. They may be unavailable or conflict with existing files.";
       revalidate();
     } catch (undoError) {
       toast.style = Toast.Style.Failure;
@@ -57,16 +59,21 @@ function UndoList({ cli }: { cli: string }) {
       searchBarPlaceholder="Search what Mint did"
     >
       {error ? (
-        <List.EmptyView title="Mint could not read its history" description={error.message} icon={Icon.Warning} />
+        <List.EmptyView
+          title="Mint could not read its history"
+          description={error.message}
+          icon={Icon.Warning}
+          actions={<RetryActions onRetry={revalidate} />}
+        />
       ) : null}
       {!error && !isLoading && data?.items.length === 0 ? (
         <List.EmptyView
           icon={Icon.CheckCircle}
           title="Nothing to undo"
-          description="What Mint moves or cleans to the Trash shows here for 90 days."
+          description="Recovery needs the files and records. History keeps up to 90 days or 5,000 batches; permanent deletions cannot be undone."
         />
       ) : null}
-      <List.Section title="Can be put back">
+      <List.Section title="Available recovery records">
         {data?.items.map((batch) => {
           const kind = undoKind(batch.trigger);
           return (

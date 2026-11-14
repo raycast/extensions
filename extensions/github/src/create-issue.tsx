@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  Image,
+  Keyboard,
+  Toast,
+  getPreferenceValues,
+  open,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -29,6 +42,8 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const { push } = useNavigation();
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
+  // Preferences of the Create Issue command; undefined when the form is pushed from another command
+  const { openInBrowserAfterCreate } = getPreferenceValues<Preferences.CreateIssue>();
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
     async onSubmit(values) {
@@ -61,15 +76,23 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
           toast.primaryAction = {
             title: "Open Issue",
-            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             onAction: () => push(<IssueDetail initialIssue={issue} />),
           };
 
           toast.secondaryAction = {
             title: `Copy URL`,
-            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: () => Clipboard.copy(issue.url),
           };
+
+          if (openInBrowserAfterCreate) {
+            try {
+              await open(issue.url);
+            } catch {
+              // The issue was created, so failing to open the browser shouldn't mark it as failed
+            }
+          }
         }
 
         reset({

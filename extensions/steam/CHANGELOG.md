@@ -1,5 +1,20 @@
 # Steam Changelog
 
+## [Player Counts] - 2026-11-13
+
+- Add a View Player Count action to every game (⌘⇧P), with the live count, 24-hour and all-time peaks, a chart for the last 48 hours, week, month, or all time, and a monthly table
+- Add a Most Played Games command: Steam's top 100 by players right now, or this week's top with rank changes
+- Show how many people are playing in game details
+- Add an AI tool for a game's player count, peaks, and trend
+- Add a My Games command
+- Pin games in My Games with the Pin Game action. Pinned games show in a Pinned section at the top
+- Reorder pinned games with Move Up in Pinned and Move Down in Pinned
+- Launch games from My Games with ⌘Return, or switch Return and ⌘Return in preferences
+
+## [Web API Key Required] - 2026-11-13
+
+- The Web API Key is now required. Search runs only from the local game list, and the extension no longer uses its own search server
+
 ## [Local Search, Recommendations, and New AI Tools] - 2026-10-01
 
 - Fix game details showing "Game not found" for every game

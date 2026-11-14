@@ -1,4 +1,12 @@
-# Is Agentic
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/icon.png" alt="Is Agentic" width="100"/>
+    <h3>Is Agentic</h3>
+    <p>Check how ready a website is for AI agents</p>
+    <br/>
+    <br/>
+</div>
 
 View a website's completed [Is Agentic](https://is-agentic.com) report directly in Raycast. Inspect its score, failed or partial checks, evidence, and recommendations for making the site easier for AI agents to use.
 

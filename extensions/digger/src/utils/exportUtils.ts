@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { LIMITS } from "./config";
+import { parseSitemap, SitemapParse } from "./sitemapParse";
 
 /**
  * Conversions shared by every "Copy as …" / "Download as …" action.
@@ -33,18 +34,18 @@ export interface Exportable {
 }
 
 /**
- * RFC 4180 quoting, plus formula neutralisation.
+ * RFC 4180 quoting, plus formula neutralization.
  *
  * Quoting alone does NOT stop a spreadsheet executing a cell: Excel, Sheets and
  * Numbers all evaluate a value beginning `=`, `+`, `-`, `@`, or a leading tab or
  * carriage return, quoted or not. Every value here came off a remote server, so
  * a well-known file containing `[{"value":"=1+1"}]` would arrive as a live
  * formula in the user's spreadsheet. Prefixing an apostrophe is the standard
- * neutralisation and is stripped by the spreadsheet on display.
+ * neutralization and is stripped by the spreadsheet on display.
  */
 function csvCell(value: string): string {
-  const neutralised = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-  return /[",\n\r]/.test(neutralised) ? `"${neutralised.replace(/"/g, '""')}"` : neutralised;
+  const neutralized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\n\r]/.test(neutralized) ? `"${neutralized.replace(/"/g, '""')}"` : neutralized;
 }
 
 export function toCsv(rows: NonNullable<Exportable["rows"]>): string {
@@ -185,109 +186,29 @@ export function rowsFromJson(text: string): Exportable["rows"] {
 }
 
 /**
- * A numeric character reference, or the original text when it names nothing.
+ * URLs out of a sitemap, in document order.
  *
- * `String.fromCodePoint` THROWS a RangeError above U+10FFFF, and this runs inside
- * `inferRows` during render — so one `&#1114112;` in a remote sitemap took out the
- * whole detail view and its export actions rather than displaying an odd string.
- * A reference that cannot be resolved is left exactly as written: that is what the
- * bytes said, and substituting a replacement character would be a quieter lie.
+ * Parsed by the same code the sitemap list uses, so an export cannot list
+ * entries the view did not show, or miss ones it did.
  */
-function codePoint(value: number, original: string): string {
-  if (!Number.isInteger(value) || value < 0 || value > 0x10ffff) return original;
-  // Lone surrogates are accepted by fromCodePoint but are not valid XML and
-  // corrupt any string they land in.
-  if (value >= 0xd800 && value <= 0xdfff) return original;
-  try {
-    return String.fromCodePoint(value);
-  } catch {
-    return original;
-  }
-}
-
-/** Resolves the XML entities a <loc> legitimately contains. */
-function decodeXmlText(raw: string): string {
-  const cdata = /^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/.exec(raw);
-  const text = cdata ? cdata[1] : raw;
-  return (
-    text
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'")
-      .replace(/&#(\d+);/g, (whole, code) => codePoint(Number(code), whole))
-      .replace(/&#x([0-9a-f]+);/gi, (whole, code) => codePoint(parseInt(code, 16), whole))
-      // Ampersand last, or `&amp;lt;` would decode twice.
-      .replace(/&amp;/g, "&")
-      .trim()
-  );
-}
-
-/**
- * Splits on an element by scanning, not by regex.
- *
- * `/<url>([\s\S]*?)<\/url>/g` looks equivalent and is quadratic on malformed
- * input: a body of repeated `<url>` with no closing tag makes every opener
- * rescan the whole remaining suffix. Measured at 138ms / 560ms / 2,220ms for
- * 10k / 20k / 40k openers — and this runs during render, on a response whose
- * size the server chooses. indexOf is linear and cannot backtrack.
- */
-function scanElements(xml: string, tag: string): string[] {
-  const open = `<${tag}`;
-  const close = `</${tag}>`;
-  const blocks: string[] = [];
-  let cursor = 0;
-
-  while (blocks.length < LIMITS.MAX_EXPORT_ROWS) {
-    const start = xml.indexOf(open, cursor);
-    if (start === -1) break;
-    // `<url` must be the whole tag name, not the prefix of `<urlset>`.
-    const afterName = xml[start + open.length];
-    const contentStart = xml.indexOf(">", start);
-    if (contentStart === -1) break;
-    if (afterName !== ">" && afterName !== " " && afterName !== "\t" && afterName !== "\n" && afterName !== "\r") {
-      cursor = start + open.length;
-      continue;
-    }
-    const end = xml.indexOf(close, contentStart);
-    if (end === -1) break;
-    blocks.push(xml.slice(contentStart + 1, end));
-    cursor = end + close.length;
-  }
-  return blocks;
-}
-
-/** First child element's decoded text, or "". Bounded scan, no backtracking. */
-function childText(block: string, tag: string): string {
-  const start = block.indexOf(`<${tag}`);
-  if (start === -1) return "";
-  const contentStart = block.indexOf(">", start);
-  const end = block.indexOf(`</${tag}>`, contentStart);
-  if (contentStart === -1 || end === -1) return "";
-  return decodeXmlText(block.slice(contentStart + 1, end));
-}
-
-/** URLs out of a sitemap, in document order. */
 export function rowsFromSitemap(text: string): Exportable["rows"] {
-  const entries = scanElements(text, "url");
-  if (entries.length > 0) {
+  return rowsFromParsedSitemap(parseSitemap(text, LIMITS.MAX_EXPORT_ROWS));
+}
+
+/** `rowsFromSitemap` for a caller that has already parsed the file. */
+export function rowsFromParsedSitemap(parsed: SitemapParse): Exportable["rows"] {
+  if (parsed.kind === "urlset" && parsed.pages.length > 0) {
     return {
       headers: ["loc", "lastmod", "changefreq", "priority"],
-      values: entries.map((block) => [
-        childText(block, "loc"),
-        childText(block, "lastmod"),
-        childText(block, "changefreq"),
-        childText(block, "priority"),
-      ]),
+      values: parsed.pages.map((p) => [p.loc, p.lastmod ?? "", p.changefreq ?? "", p.priority ?? ""]),
     };
   }
 
   // A sitemap index lists other sitemaps rather than pages.
-  const indexed = scanElements(text, "sitemap");
-  if (indexed.length > 0) {
+  if (parsed.kind === "index" && parsed.sitemaps.length > 0) {
     return {
       headers: ["loc", "lastmod"],
-      values: indexed.map((block) => [childText(block, "loc"), childText(block, "lastmod")]),
+      values: parsed.sitemaps.map((s) => [s.loc, s.lastmod ?? ""]),
     };
   }
   return undefined;

@@ -15,7 +15,10 @@ export function FavoriteAction({ identifier, favorites, onToggle }: FavoriteActi
     <Action
       title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
       icon={Icon.Star}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "f" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+      }}
       onAction={() => onToggle(identifier)}
     />
   );

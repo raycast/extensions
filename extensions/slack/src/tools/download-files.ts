@@ -1,6 +1,6 @@
-import { getSlackWebClient, slack } from "../shared/client/WebClient";
+import { getSlackWebClient } from "../shared/client/WebClient";
 import { downloadSlackFile } from "../shared/client/downloadFile";
-import { withSlackClient } from "../shared/withSlackClient";
+import { shouldRetryAfterMissingScope, withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
   /**
@@ -67,12 +67,8 @@ async function performDownloadFiles(input: Input, retried = false) {
       results.push({ id: fileId, name: filename, path: savedPath, bytes });
     }
   } catch (error) {
-    if (error instanceof Error && error.message.includes("missing_scope") && !retried) {
-      const isUsingOAuth = !!(await slack.client.getTokens());
-      if (isUsingOAuth) {
-        await slack.client.removeTokens();
-        return withSlackClient((input: Input) => performDownloadFiles(input, true))(input);
-      }
+    if (await shouldRetryAfterMissingScope(error, retried)) {
+      return withSlackClient((input: Input) => performDownloadFiles(input, true))(input);
     }
     throw error;
   }

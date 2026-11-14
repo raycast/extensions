@@ -1,8 +1,10 @@
 import { handleError } from "../utils";
-import { SlackClient } from "./SlackClient";
+import { SlackClient, type User } from "./SlackClient";
 import { useCachedPromise, usePromise } from "@raycast/utils";
-import { useMemo, useRef } from "react";
-import { createDirectoryUserSearch, mergeDirectorySearchResults } from "./directory";
+import { useMemo, useRef, useState } from "react";
+import { createDirectoryUserSearch, directoryUsersToShow, mergeDirectorySearchResults } from "./directory";
+import { getSlackToken } from "./WebClient";
+import { identityCacheKey, identityForAccount, loadAccountIdentity } from "./identity";
 
 export const useChannels = () =>
   usePromise(
@@ -24,10 +26,17 @@ export const useDirectorySearch = (query: string) => {
   const userSearchAbortable = useRef<AbortController>(null);
   const channelSearchAbortable = useRef<AbortController>(null);
   const conversationSearchAbortable = useRef<AbortController>(null);
+  const [preview, setPreview] = useState<{ query: string; users: User[] }>();
 
   const userSearch = useMemo(
     () =>
-      createDirectoryUserSearch(() => SlackClient.searchDirectoryMembers(query, userSearchAbortable.current?.signal)),
+      createDirectoryUserSearch(() => {
+        const signal = userSearchAbortable.current?.signal;
+        return SlackClient.searchDirectoryMembers(query, signal, (matched) => {
+          if (signal?.aborted) return;
+          setPreview({ query, users: matched });
+        });
+      }),
     [query],
   );
 
@@ -73,16 +82,32 @@ export const useDirectorySearch = (query: string) => {
     },
   );
 
+  const shownUsers = directoryUsersToShow(query, users.isLoading, preview, users.data);
+
   return {
     data: mergeDirectorySearchResults(
-      users.data,
+      shownUsers,
       channels.data || conversations.data ? [channels.data?.[0] ?? [], conversations.data?.[1] ?? []] : undefined,
     ),
     isLoading: users.isLoading || channels.isLoading || conversations.isLoading,
   };
 };
 
-export const useMe = () => useCachedPromise(SlackClient.getMe);
+const loadMe = (accountKey: string | undefined) => {
+  if (accountKey !== identityCacheKey(getSlackToken())) throw new Error("Slack account changed. Please retry.");
+  return loadAccountIdentity(accountKey, SlackClient.getMe);
+};
+
+export const useMe = () => {
+  const accountKey = identityCacheKey(getSlackToken());
+  // Retain the last successful auth.test result across refresh failures, but never across accounts.
+  const result = useCachedPromise(loadMe, [accountKey], { execute: !!accountKey, keepPreviousData: false });
+  return { ...result, data: identityForAccount(result.data, accountKey) };
+};
 
 export const useUnreadConversations = (conversationIds: string[] | undefined) =>
-  useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []]);
+  useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []], {
+    onError(error) {
+      handleError(error, "Failed to load unread messages");
+    },
+  });

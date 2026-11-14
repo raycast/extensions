@@ -165,7 +165,7 @@ async function getDiaAutomationStatus(
   }
 }
 
-async function resolveAgentBrowserExecutable(configured: string): Promise<string> {
+export async function resolveAgentBrowserExecutable(configured: string, signal?: AbortSignal): Promise<string> {
   if (configured.includes(path.sep) || (process.platform === "win32" && configured.includes("/"))) {
     await validateAgentBrowserExecutable(configured);
     return configured;
@@ -179,7 +179,7 @@ async function resolveAgentBrowserExecutable(configured: string): Promise<string
         : process.platform === "darwin"
           ? ["-lic", 'command -v -- "$1"', "resolve-agent-browser", configured]
           : [configured];
-    const { stdout } = await execFileAsync(command, args, { encoding: "utf8", timeout: 10_000 });
+    const { stdout } = await execFileAsync(command, args, { encoding: "utf8", timeout: 10_000, signal });
     const resolved = stdout
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -188,6 +188,7 @@ async function resolveAgentBrowserExecutable(configured: string): Promise<string
     await validateAgentBrowserExecutable(resolved);
     return resolved;
   } catch {
+    signal?.throwIfAborted();
     throw new Error(
       `Could not resolve ${configured} to an executable. Set Agent Browser Executable to the full path from \`command -v agent-browser\`.`,
     );

@@ -1,8 +1,12 @@
-import { captureException, closeMainWindow, getApplications, open, showToast, Toast } from "@raycast/api";
+import { captureException, closeMainWindow, getApplications, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 const ZOOMER_BUNDLE_ID = "studio.zoomer.desktop";
 const ZOOMER_WEBSITE_URL = "https://zoomer.studio";
 const ZOOMER_DOWNLOAD_URL = "https://zoomer.studio/downloads/latest";
+const execFileAsync = promisify(execFile);
 
 const SCREENSHOT_OUTPUTS = ["default", "copy", "save", "upload"] as const;
 const SETTINGS_SECTIONS = ["app", "recording", "screenshot"] as const;
@@ -42,10 +46,8 @@ export function zoomerUrl(path: ZoomerPath, params: Partial<Record<"output" | "s
 
 export async function openZoomerUrl(url: string): Promise<void> {
   if (!(await zoomerIsInstalled())) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast("Install the Zoomer desktop app to use this command.", {
       title: "Zoomer isn’t installed",
-      message: "Install the Zoomer desktop app to use this command.",
       primaryAction: {
         title: "Download Zoomer",
         onAction: () => void open(ZOOMER_DOWNLOAD_URL),
@@ -57,13 +59,12 @@ export async function openZoomerUrl(url: string): Promise<void> {
   await closeMainWindow({ clearRootSearch: true }).catch(() => undefined);
 
   try {
-    await open(url, ZOOMER_BUNDLE_ID);
+    // Zoomer decides which commands show its main window; URL delivery must not activate it.
+    await execFileAsync("/usr/bin/open", ["-g", "-b", ZOOMER_BUNDLE_ID, url]);
   } catch (error: unknown) {
     captureException(error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Could not open Zoomer",
-      message: error instanceof Error ? error.message : undefined,
       primaryAction: {
         title: "Open Zoomer Website",
         onAction: () => void open(ZOOMER_WEBSITE_URL),

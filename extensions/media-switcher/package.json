@@ -18,60 +18,67 @@
     {
       "name": "switch-media",
       "title": "Switch Media",
-      "subtitle": "Media Switcher",
       "description": "Switch between media sessions",
-      "mode": "view",
-      "preferences": [
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "prevNextTrackShortcuts",
+      "title": "Previous / Next Track Shortcuts",
+      "description": "Keyboard shortcuts for skipping to the previous or next track.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
         {
-          "name": "prevNextTrackShortcuts",
-          "title": "Previous / Next Track Shortcuts",
-          "description": "Choose shortcuts for the \"Previous Track\" and \"Next Track\" actions",
-          "type": "dropdown",
-          "required": false,
-          "data": [
-            {
-              "title": "⌘ / Ctrl and Square Brackets [ ]",
-              "value": "squareBrackets"
-            },
-            {
-              "title": "⌘ / Ctrl and Arrow Keys ← →",
-              "value": "arrowKeys"
-            }
-          ],
-          "default": "squareBrackets"
+          "title": "⌘ / Ctrl + [ and ]",
+          "value": "squareBrackets"
         },
         {
-          "name": "refreshInterval",
-          "title": "Refresh Interval (seconds)",
-          "description": "How often to auto-refresh the media session list. Set to 0 to disable",
-          "type": "textfield",
-          "required": false,
-          "default": "5",
-          "placeholder": "5"
-        },
-        {
-          "name": "volumeStep",
-          "title": "Volume Step",
-          "description": "How much to increase or decrease the volume by",
-          "type": "textfield",
-          "required": false,
-          "default": "5",
-          "placeholder": "5"
+          "title": "⌘ / Ctrl + ← and →",
+          "value": "arrowKeys"
         }
-      ]
+      ],
+      "default": "squareBrackets"
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often the session list updates, in seconds. Enter 0 to turn off auto-refresh.",
+      "type": "textfield",
+      "required": false,
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "name": "volumeStep",
+      "title": "Volume Step",
+      "description": "How much the Volume Up and Volume Down actions change the volume, in percentage points.",
+      "type": "textfield",
+      "required": false,
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "name": "groupPlayingSessions",
+      "label": "Group playing sessions at the top",
+      "description": "Moves playing sessions into their own \"Playing\" section, so they're quicker to reach.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^2.1.3",
-    "@raycast/utils": "^2.3.0"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.4.1",
-    "@types/react": "19.2.18",
-    "eslint": "^10.9.1",
-    "prettier": "^3.9.6",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -83,6 +90,6 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "allowScripts": {
-    "esbuild@0.28.2": true
+    "esbuild": true
   }
 }

@@ -2,11 +2,11 @@ import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import React from "react";
-import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
+import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimer } from "./utils";
 
 export function TimerStartAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isTimerEditable(s)) {
+  if (!isTimer(s)) {
     return null;
   }
   const title = s.state === "active" ? "Restart" : "Start";
@@ -23,7 +23,7 @@ export function TimerStartAction(props: { state: State }): React.ReactElement | 
 
 export function TimerPauseAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("timer") || s.attributes.editable !== true) {
+  if (!isTimer(s)) {
     return null;
   }
   return (
@@ -38,7 +38,7 @@ export function TimerPauseAction(props: { state: State }): React.ReactElement | 
 
 export function TimerCancelAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isTimerEditable(s) && s.state === "active") {
+  if (!isTimer(s)) {
     return null;
   }
   return (

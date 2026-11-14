@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation, Keyboard } 
 import { useState } from "react";
 import { updatePost } from "../lib/notra";
 import type { Post } from "../types";
-import { getErrorMessage, notraUrl } from "../utils";
+import { getErrorMessage, notraOrganizationUrl } from "../utils";
 
 interface EditPostFormValues {
   markdown: string;
@@ -68,7 +68,7 @@ export function EditPostForm({ post, onPostUpdated }: EditPostFormProps) {
           <Action.OpenInBrowser
             shortcut={Keyboard.Shortcut.Common.OpenWith}
             title="View on Notra"
-            url={notraUrl(`/content/${post.id}`)}
+            url={notraOrganizationUrl(`/content/${post.id}`)}
           />
         </ActionPanel>
       }

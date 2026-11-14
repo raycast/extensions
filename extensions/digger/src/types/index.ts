@@ -264,7 +264,7 @@ export interface HostMetadataData {
 /**
  * One file actually published under `/.well-known/`.
  *
- * Only files that passed the content-type judgement in `wellKnownUtils` become
+ * Only files that passed the content-type judgment in `wellKnownUtils` become
  * hits, so the absence of a path here means the host answered for it — not that
  * the probe was skipped. Paths whose probe never got an answer are listed
  * separately in `WellKnownData.unchecked`.

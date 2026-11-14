@@ -14,6 +14,10 @@ This is a [Raycast](https://raycast.com/) extension that allows you to monitor y
 
 The 10-second background refresh updates CPU and storage without starting external programs. Memory uses the same macOS accounting as the Memory tab and updates when you open the menu. Between openings, the menu-bar title keeps the last Memory value. Network, temperature, and battery work the same way. These values remain unavailable until the first user-opened collection.
 
+## Disk I/O
+
+❕ The I/O rate on the boot volume's pane comes from `iostat`, which reports **combined** read and write throughput — macOS does not split the two.
+
 ## Data and Privacy
 
 - The monitoring commands read system data locally via macOS tools (`system_profiler`, `sysctl`, `ps`, `pmset`, `iostat`, `diskutil`). When you use Ask System Monitor, Raycast AI receives the current CPU, memory, disk, and battery readings. The AI tool does not include your serial number, hostname, or process list.

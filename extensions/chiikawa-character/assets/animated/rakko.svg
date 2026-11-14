@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 260 270" role="img" aria-labelledby="title">
+  <title id="title">Rakko blinks and waves beside a sheathed sword</title>
+  <ellipse cx="130" cy="249" rx="73" ry="9" fill="#d7e2df" opacity="0.65"/>
+  <g stroke="#292321" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(-24 89 190)"><path d="M77 154h12v76q-6 13 -12 0Z" fill="#686c74"/><path d="M73 151h20v8H73Z" fill="#b6bbc0"/><path d="M78 127h10v24H78Z" fill="#fffdf7"/><path d="M79 133h8m-8 6h8m-8 6h8" stroke="#292321" stroke-width="2"/></g><g fill="#fff4d9"><path d="M102 225q-17 11 -12 18q5 8 23 0l3 -16"/><path d="M144 227l3 16q18 8 23 0q5 -7 -12 -18"/></g><path d="M95 171Q79 191 88 219Q93 237 130 239Q167 237 172 219Q181 191 165 171Z" fill="#fff4d9"/><g data-part="left-arm">
+    
+    <path d="M96 178Q86 175 78 186L65 198Q61 204 67 208Q73 211 79 204L99 192" fill="#fff4d9"/>
+  </g><g data-part="right-arm">
+    <animateTransform attributeName="transform" type="rotate" values="0 168 185;0 168 185;-28 168 185;8 168 185;-28 168 185;0 168 185;0 168 185" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="4.8s" repeatCount="indefinite"/>
+    <path d="M164 178Q174 175 182 186L195 198Q199 204 193 208Q187 211 181 204L161 192" fill="#fff4d9"/>
+  </g><ellipse cx="57" cy="114" rx="11" ry="9" fill="#292321" stroke="none"/><ellipse cx="203" cy="114" rx="11" ry="9" fill="#292321" stroke="none"/><path d="M55 137C53 94 83 63 129 63C174 62 206 94 205 137Q206 182 130 187Q55 182 55 137Z" fill="#fff4d9"/><path d="M88 89l8 7 13 -10 -8 14 5 8 -10 -4 -12 9 6 -14Z" fill="#cbb48f" stroke-width="2.5"/><path d="M70 90l4 4m12 -20 3 5m14 -12 2 5m21 -9v5m21 -4 -1 5m19 0 -3 5m19 8 -4 4" fill="none" stroke-width="2.5"/><g transform="translate(0 132)"><g data-part="eyes">
+    <animateTransform attributeName="transform" type="scale" values="1 1;1 1;1 0.08;1 1;1 1;1 0.08;1 1;1 1" keyTimes="0;0.54;0.56;0.58;0.64;0.66;0.68;1" dur="6s" repeatCount="indefinite"/>
+    <ellipse cx="102" cy="0" rx="11" ry="7.5" fill="#292321" stroke="none"/><path d="M95 0.5q7 5 14 0q-7 -2.5 -14 0Z" fill="white" stroke="none"/><ellipse cx="158" cy="0" rx="11" ry="7.5" fill="#292321" stroke="none"/><path d="M151 0.5q7 5 14 0q-7 -2.5 -14 0Z" fill="white" stroke="none"/>
+  </g></g><g stroke="none" fill="#f5b5bd"><ellipse cx="83" cy="150" rx="14" ry="9"/><ellipse cx="177" cy="150" rx="14" ry="9"/></g>
+    <path d="M75.5 147l-3 6M81.5 147l-3 6M87.5 147l-3 6M93.5 147l-3 6M169.5 147l-3 6M175.5 147l-3 6M181.5 147l-3 6M187.5 147l-3 6" fill="none" stroke-width="2"/><g data-part="mouth" transform="translate(130 151)">
+    <g><animateTransform attributeName="transform" type="scale" values="1 1;1 1;1 1.2;1 1;1 1" keyTimes="0;0.3;0.45;0.6;1" dur="4.8s" repeatCount="indefinite"/>
+      
+      <path d="M-11 0q2 9 11 3q9 6 11 -3" fill="none" stroke-width="3.4"/>
+      <path d="M-4 13q4 2 8 0" fill="none" stroke-width="3"/>
+    </g>
+  </g><path d="M74 173Q129 194 185 173L180 191Q130 210 80 192Z" fill="#fffdf7"/><path d="M83 191l-9 31 19 -7 6 -21M169 196l8 28 12 -9 -9 -24" fill="#fffdf7"/>
+  </g>
+</svg>

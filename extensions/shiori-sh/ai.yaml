@@ -1,0 +1,57 @@
+instructions: |
+  These tools work with the user's hosted shiori.sh library and its configured API key.
+  Search and find-unread return one page of results. If hasMore is true, more matching
+  bookmarks exist. Use nextOffset with exactly the same query/topic and filters to
+  continue when needed; never describe a partial page as the whole library.
+  Topic matching uses Shiori full-text search across title, summary, and content.
+  Finding or opening unread bookmarks does not mark them read.
+  Save only URLs the user asks to save. Saving an existing URL bumps it to the top
+  of the inbox. Metadata extraction and summaries may still be pending after saving.
+  Never ask for or reveal API keys in chat; authentication uses extension preferences.
+  On a failed or timed-out save, ask the user to check their library before retrying:
+  the server may have accepted the write. Do not retry saves automatically.
+evals:
+  - input: "@shiori-sh Find my unread bookmarks about typography"
+    mocks:
+      find-unread-bookmarks:
+        links: []
+        total: 0
+        offset: 0
+        hasMore: false
+        nextOffset: null
+    expected:
+      - callsTool:
+          name: find-unread-bookmarks
+          arguments:
+            topic: typography
+      - not:
+          callsTool: save-bookmark
+  - input: "@shiori-sh Search my starred design bookmarks tagged inspiration saved in the last 7 days"
+    mocks:
+      search-bookmarks:
+        links: []
+        total: 0
+        offset: 0
+        hasMore: false
+        nextOffset: null
+    expected:
+      - callsTool:
+          name: search-bookmarks
+          arguments:
+            query: design
+            favorite: true
+            tag: inspiration
+            since: 7d
+  - input: "@shiori-sh Save https://example.com/article as Example Article"
+    mocks:
+      save-bookmark:
+        id: example-id
+        url: https://example.com/article
+        duplicate: false
+        message: "Bookmark saved; processing may still be pending."
+    expected:
+      - callsTool:
+          name: save-bookmark
+          arguments:
+            url: https://example.com/article
+            title: Example Article

@@ -12,7 +12,9 @@
     "josh_carty",
     "smpeotn",
     "radek_cabaj",
-    "0xdhrv"
+    "0xdhrv",
+    "masamallow",
+    "danlane"
   ],
   "license": "MIT",
   "commands": [
@@ -57,6 +59,14 @@
         {
           "title": "Google Chrome Canary",
           "value": "chrome-canary"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
+        },
+        {
+          "title": "Brave Origin",
+          "value": "brave-origin"
         }
       ]
     },

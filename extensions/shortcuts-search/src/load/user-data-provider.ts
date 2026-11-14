@@ -27,9 +27,9 @@ export function useUserData(allowAuthorization = false) {
       store.reset();
     },
     toggleFavorite: async (identifier: FavoriteIdentifier) => {
-      const token = await getAccessToken(true);
-      if (!token) throw new Error("Sign in was cancelled");
       try {
+        const token = await getAccessToken(true);
+        if (!token) throw new Error("Sign in was cancelled");
         const added = await userDataService.toggleFavorite(token, identifier);
         if (!(await isAccessTokenCurrent(token))) {
           store.reset();

@@ -58,7 +58,9 @@ export default function TodoListItem({
   const accessories: List.Item.Accessory[] = [];
 
   if (todo.tags) {
-    accessories.push({ icon: Icon.Tag, text: todo.tags });
+    for (const tag of todo.tags.split(', ').filter(Boolean)) {
+      accessories.push({ tag, tooltip: `Tags: ${todo.tags}` });
+    }
   }
 
   if (todo.activationDate && displayActivationDates) {

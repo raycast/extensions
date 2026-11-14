@@ -14,7 +14,9 @@
     "loris",
     "xmok",
     "heytommy",
-    "christianmagill"
+    "christianmagill",
+    "Berenger",
+    "clins1994"
   ],
   "platforms": [
     "macOS"
@@ -86,7 +88,27 @@
       "title": "Search Tabs",
       "subtitle": "Dia",
       "description": "Search tabs in Dia",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "spaceLabel",
+          "type": "dropdown",
+          "title": "Space Label",
+          "description": "How each tab shows the Dia space it belongs to when you have more than one space.",
+          "required": false,
+          "default": "name",
+          "data": [
+            {
+              "title": "Colored Name",
+              "value": "name"
+            },
+            {
+              "title": "Colored Dot",
+              "value": "dot"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-history",
@@ -101,6 +123,24 @@
       "subtitle": "Dia",
       "description": "Search bookmarks in Dia",
       "mode": "view"
+    },
+    {
+      "name": "search-extensions",
+      "title": "Search Extensions",
+      "subtitle": "Dia",
+      "description": "Search the browser extensions installed in Dia and open them",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showBuiltInExtensions",
+          "type": "checkbox",
+          "title": "Built-in Extensions",
+          "label": "Show built-in extensions",
+          "description": "Include extensions bundled with Dia, such as the PDF viewer.",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "new-window",
@@ -140,6 +180,68 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "open-url",
+      "title": "Open URL",
+      "description": "Open a URL or a web search in a new Dia tab"
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Switch to an open Dia tab"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close an open Dia tab by its ID"
+    },
+    {
+      "name": "get-tab-contents",
+      "title": "Get Tab Contents",
+      "description": "Return the visible text of a Dia tab or the focused tab"
+    },
+    {
+      "name": "get-tabs",
+      "title": "Get Tabs",
+      "description": "Return the open tabs across all Dia windows and spaces"
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "Return the tab currently focused in Dia"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search the Dia browsing history"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search the Dia bookmarks"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Return the Dia spaces and which ones are active"
+    },
+    {
+      "name": "switch-space",
+      "title": "Switch Space",
+      "description": "Switch a Dia window to another space"
+    },
+    {
+      "name": "get-extensions",
+      "title": "Get Extensions",
+      "description": "Return the browser extensions installed in each Dia space"
+    },
+    {
+      "name": "open-extension",
+      "title": "Open Extension",
+      "description": "Open a Dia browser extension like its toolbar button"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.3",
@@ -164,7 +266,9 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12",
     "js-yaml@4": "4.3.2"
   }
 }

@@ -25,12 +25,13 @@ import ErrorComponent from "./components/ErrorComponent";
 import { onError, useEmails, useGetEmail } from "./lib/hooks";
 import { Attachment, CreateEmailOptions, Tag as EmailTag } from "resend";
 import { getResend, withResend } from "./lib/oauth";
+import { formatDefaultSender } from "./lib/sender";
 
 // Get preferences for sender information
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
 // Create default sender string from preferences
-const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
+const defaultSender = formatDefaultSender(preferences);
 
 export default withResend(Emails);
 function Emails() {

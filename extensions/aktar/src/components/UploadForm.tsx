@@ -18,7 +18,17 @@ type Values = {
   folder: string;
   /** Days as a string, "0" meaning never. */
   deleteAfter: string;
+  /** A ShortLinkChoice. */
+  shortLink: string;
 };
+
+type ShortLinkChoice = "destination" | "always" | "never";
+
+const SHORT_LINK_CHOICES: { value: ShortLinkChoice; title: string }[] = [
+  { value: "destination", title: "Destination's Setting" },
+  { value: "always", title: "Make a Short Link" },
+  { value: "never", title: "Original Link" },
+];
 
 type Props = {
   /** Preselects this destination and folder, e.g. when opened from the bucket browser. */
@@ -47,6 +57,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       folder: prefix === undefined ? "" : prefix || "/",
       // Aktar can't auto-delete into a chosen folder, so a preset folder starts at Never.
       deleteAfter: String(prefix === undefined ? preferredExpiry() : 0),
+      shortLink: "destination",
     },
     validation: {
       files: (value) => (value && value.length > 0 ? undefined : "Pick at least one file"),
@@ -77,6 +88,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         prefix: folder ? folder : undefined,
         expires,
         filename: files.length === 1 ? uploadName(values.name, files[0]) : undefined,
+        short: values.shortLink === "destination" ? undefined : values.shortLink === "always",
       });
       if (uploads.length === 0) return false;
       if (onUploaded) {
@@ -140,6 +152,15 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       >
         {DELETE_AFTER_OPTIONS.map((option) => (
           <Form.Dropdown.Item key={option.days} value={String(option.days)} title={option.title} />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        title="Short Link"
+        info="Destination's Setting makes a short link when the destination has a link shortener set up in Aktar and its rules apply to the file. Make a Short Link always makes one with that shortener (the upload fails if the destination has none), and Original Link makes none. The short link is what gets copied."
+        {...itemProps.shortLink}
+      >
+        {SHORT_LINK_CHOICES.map((choice) => (
+          <Form.Dropdown.Item key={choice.value} value={choice.value} title={choice.title} />
         ))}
       </Form.Dropdown>
     </Form>

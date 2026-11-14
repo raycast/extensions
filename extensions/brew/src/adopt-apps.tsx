@@ -485,6 +485,12 @@ function AdoptRow(props: {
     accessories.push({ icon: WARNING_ICON, tooltip: "Nothing but the name and version connects this app to the cask" });
   }
   accessories.push({ text: candidate.caskVersion ?? "—", tooltip: "Cask version" });
+  // The same app can sit in several scanned folders, so the row names its folder.
+  const folder = path.dirname(app.path);
+  const home = os.homedir();
+  const folderText = folder === home || folder.startsWith(`${home}/`) ? `~${folder.slice(home.length)}` : folder;
+  const folderAccessory: List.Item.Accessory[] =
+    folder === "/Applications" ? [] : [{ text: folderText, tooltip: "Folder" }];
 
   return (
     <List.Item
@@ -492,7 +498,7 @@ function AdoptRow(props: {
       icon={{ fileIcon: app.path }}
       title={app.name}
       subtitle={app.version ?? "No version"}
-      accessories={[{ text: candidate.token, tooltip: "Cask" }, ...accessories]}
+      accessories={[...folderAccessory, { text: candidate.token, tooltip: "Cask" }, ...accessories]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

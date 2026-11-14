@@ -288,6 +288,12 @@ reservation behind, and the next attempt steps to `name (1)`.
 - **Bounds the whole transfer** with `AbortSignal.timeout`, so a stalled CDN socket cannot
   leave the command spinning. That timeout arrives as an abort, which is why `failToast` gets
   `ignoreAbort: false` — it is the one abort the user must be told about.
+- **Throttles progress and drains the toast before returning.** Each `Toast` property
+  assignment is an unawaited IPC call, queued per toast. A fast download outruns ~100
+  percentage updates, the command exits while they are still replaying, and Raycast kills the
+  worker mid-queue — so the toast froze on "Media 1 of 2 66%" for a post that had finished in
+  under a second. `settle()` awaits `toast.show()`, which is enqueued behind the backlog. Keep
+  both the throttle and the `settle` calls.
 - **Uses `handle.createWriteStream()`**, never `createWriteStream("", { fd: handle.fd })`. The
   latter leaves the `FileHandle` and the stream both owning the descriptor and emits
   `File descriptor N closed but not opened in unmanaged mode` on close.

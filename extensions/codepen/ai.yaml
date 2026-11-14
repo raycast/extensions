@@ -1,0 +1,110 @@
+instructions: |
+  These tools access only work owned by the API key's user or team. They cannot search the public CodePen community, other users' work, or a collaborator's Pens.
+  Resolve named items with search-my-pens, list-collections, or list-assets before changing them. If the user provides a Pen ID, call get-pen directly. Never invent IDs or URLs; use links actually returned by the API.
+  Lists return data and next. Follow the exact next URL while looking for an item. Collections and assets have no server-side text search; examine subsequent pages as needed. Do not claim an item is absent after checking only the first page.
+  Classic Pens are read-only. You may read their source files and add or remove them from collections, but do not call update-pen, write-files, fork-pen, delete-pen, or set-deployment for them.
+  Get a Pen before editing files. Use the returned version.id as expectedVersionId and base edits on that version's source files. Write complete replacement content only for the requested paths. Other files are preserved.
+  Writes save files and start builds. A Failed or terminal Canceled build does not mean the save failed. Report saved files separately from build status. Never repeat a create or file write to retry a failed build.
+  For Queued or Running builds, check get-build. For Canceled builds with next_id, check get-build using next_id. Do not write while a build is pending. If it remains pending, report that and allow the user to check later rather than poll indefinitely.
+  After a build settles, call get-pen again before the next edit: the compiler may have changed source files and the saved version. Never reuse sent content as if it were current source. On CONFLICT, re-read and reconcile changes before a new confirmed write.
+  If a write was interrupted or its response could not be read, it may already have succeeded. Inspect CodePen before attempting it again, especially create-pen, fork-pen, save-collection, and create-text-asset.
+  Preserve existing privacy unless the user requests a change. For new items, omit access to use the account default unless specified. Private means unlisted, not authenticated access. Protected and Collaborators require PRO and cannot use unauthenticated preview URLs.
+  Creating or forking a Protected Pen requires a new password of at least 8 characters. Ask the user for a password before calling the tool; never invent one or downgrade privacy. For a fork, read the source's access and preserve it unless directed otherwise.
+  Use all built-in mutation confirmations. Do not claim success until the tool succeeds. Deploying exposes the selected saved version at its hosted URL. Asset deletion is permanent; Pens and collections are restorable from CodePen's trash for 3 days.
+  For binary asset uploads, direct the user to the Upload Asset command. create-text-asset is for text content only and requires PRO.
+evals:
+  - input: "@codepen find my CSS grid demos"
+    mocks:
+      search-my-pens:
+        data:
+          [
+            {
+              id: pen-1,
+              title: CSS Grid Demo,
+              editor: V2,
+              access: Public,
+              urls: { editor: "https://codepen.io/editor/example/pen/pen-1" },
+            },
+          ]
+        next: null
+    expected:
+      - callsTool: search-my-pens
+
+  - input: "@codepen show the source for pen-1"
+    mocks:
+      get-pen:
+        pen: { id: pen-1, title: Demo, editor: V2 }
+        version: { id: version-1, build: { status: Success } }
+        files: [{ path: /index.html, content: "<h1>Hello</h1>" }]
+    expected:
+      - callsTool: get-pen
+      - not: { callsTool: write-files }
+
+  - input: "@codepen change the heading to Goodbye in pen-1"
+    usedAsExample: false
+    mocks:
+      search-my-pens:
+        data: [{ id: pen-1, title: Demo, editor: Classic }]
+        next: null
+      get-pen:
+        pen: { id: pen-1, title: Demo, editor: Classic }
+        version: null
+        files: [{ path: /index.html, content: "<h1>Hello</h1>" }]
+    expected:
+      - callsTool: get-pen
+      - not: { callsTool: write-files }
+      - matches: "[Cc]lassic|[Rr]ead.only"
+
+  - input: "@codepen fork pen-1 and keep its privacy"
+    usedAsExample: false
+    mocks:
+      fork-pen:
+        error: "Protected Pens require a user-provided password of at least 8 characters. Ask before forking."
+      search-my-pens:
+        data: [{ id: pen-1, title: Secret Demo, editor: V2, access: Protected }]
+        next: null
+      get-pen:
+        pen: { id: pen-1, title: Secret Demo, editor: V2, access: Protected }
+        version: { id: version-1, build: { status: Success } }
+        files: []
+    expected:
+      - callsTool: get-pen
+      - not: { callsTool: fork-pen }
+      - matches: "[Pp]assword"
+
+  - input: "@codepen create a public Pen called Broken Demo with index.html containing <script>bad syntax here</script>"
+    mocks:
+      create-pen:
+        id: new-pen
+        title: Broken Demo
+        build: { id: build-1, status: Failed, errors: [{ type: Error, message: Invalid JavaScript }] }
+    expected:
+      - callsTool: create-pen
+      - matches: "[Ss]aved|[Cc]reated"
+      - matches: "[Ff]ailed|[Ee]rror"
+
+  - input: "@codepen create a private collection called Animation Studies"
+    mocks:
+      save-collection: { id: collection-1, title: Animation Studies, access: Private }
+    expected:
+      - callsTool: save-collection
+
+  - input: "@codepen find popular public Pens by other people"
+    usedAsExample: false
+    mocks:
+      search-my-pens:
+        data: []
+        next: null
+    expected:
+      - not: { callsTool: search-my-pens }
+      - matches: "[Oo]wn|[Yy]our|[Aa]ccount|can't|cannot|[Cc]annot|[Uu]nable"
+
+  - input: "@codepen permanently delete asset-1"
+    mocks:
+      list-assets:
+        data: [{ id: asset-1, filename: old.png, url: "https://assets.codepen.io/1/old.png" }]
+        next: null
+      get-asset: { id: asset-1, filename: old.png, url: "https://assets.codepen.io/1/old.png" }
+      delete-asset: { assetId: asset-1, deleted: true }
+    expected:
+      - callsTool: delete-asset

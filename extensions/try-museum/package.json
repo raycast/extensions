@@ -4,7 +4,7 @@
   "title": "Museum",
   "description": "Find public domain artworks by color. Browse palettes, copy images, and discover art from museum collections.",
   "icon": "museum-icon.png",
-  "author": "ray.dhruv",
+  "author": "0xdhrv",
   "platforms": [
     "Windows",
     "macOS"

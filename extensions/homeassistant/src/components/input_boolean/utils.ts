@@ -13,6 +13,6 @@ export async function callInputBooleanTurnOffService(state: State) {
   await ha.callService("input_boolean", "turn_off", { entity_id: state.entity_id });
 }
 
-export function isEditableInputBoolean(state: State) {
-  return state.entity_id.startsWith("input_boolean") && state.attributes.editable === true;
+export function isInputBoolean(state: State) {
+  return state.entity_id.startsWith("input_boolean.");
 }

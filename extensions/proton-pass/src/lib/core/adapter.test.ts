@@ -3,11 +3,15 @@ import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import {
   authCheckArgs,
+  logoutArgs,
   createPassCliAdapter,
   itemListArgs,
+  itemShareListArgs,
   itemTotpArgs,
   itemViewArgs,
   vaultListArgs,
+  vaultMemberListArgs,
+  vaultShareListArgs,
 } from "./adapter";
 import { CommandDescriptor } from "./exec";
 import { PassCliError } from "../types";
@@ -83,6 +87,8 @@ test("checks authentication with info", async () => {
 
   assert.equal(await adapter.checkAuth(), true);
   assert.deepEqual(authCheckArgs(), ["info"]);
+  assert.deepEqual(logoutArgs(false), ["logout"]);
+  assert.deepEqual(logoutArgs(true), ["logout", "--force"]);
 });
 
 test("returns false for the real unauthenticated CLI failure", async () => {
@@ -93,6 +99,9 @@ test("returns false for the real unauthenticated CLI failure", async () => {
 
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
+  assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);
+  assert.deepEqual(itemShareListArgs(), ["share", "list", "--only-items", "true", "--output", "json"]);
+  assert.deepEqual(vaultMemberListArgs("X"), ["vault", "member", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id=X", "--output", "json", "--show-secrets"]);
   assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id=X", "--item-id=Y", "--output", "json"]);
   assert.deepEqual(itemTotpArgs("X", "Y"), ["item", "totp", "--share-id=X", "--item-id=Y", "--output", "json"]);
@@ -108,6 +117,30 @@ test("accepts bare-array and wrapped vault lists", async () => {
 
   assert.deepEqual(bare, [{ shareId: "vault-1", name: "Personal", itemCount: 3, role: "owner" }]);
   assert.deepEqual(wrapped, [{ shareId: "vault-2", name: "Work", itemCount: undefined, role: undefined }]);
+});
+
+test("reads the user's role on each vault from the share list", async () => {
+  const roles = await createPassCliAdapter(fakeCommand("json:vault-shares")).listVaultRoles();
+
+  // Custom roles are printed as objects and left out.
+  assert.deepEqual(
+    roles,
+    new Map([
+      ["vault-1", "owner"],
+      ["vault-2", "viewer"],
+    ]),
+  );
+});
+
+test("lists the shares of the items shared with the user on their own", async () => {
+  const shareIds = await createPassCliAdapter(fakeCommand("json:item-shares")).listItemShares();
+  assert.deepEqual(shareIds, ["item-share-1", "item-share-2"]);
+});
+
+test("counts the members of a vault, the user included", async () => {
+  const adapter = createPassCliAdapter(fakeCommand("json:vault-members"));
+
+  assert.equal(await adapter.countVaultMembers("vault-1"), 2);
 });
 
 test("lists active items and strips full-list secrets", async () => {
@@ -126,8 +159,20 @@ test("lists active items and strips full-list secrets", async () => {
     hasTotp: true,
     hasPassword: true,
     modifiedAt: "2025-06-01T12:34:56.000Z",
+    createdAt: "2025-01-15T08:00:00.000Z",
     hasNote: false,
   });
+});
+
+test("hands each login's otpauth URI over apart from the item, which never holds it", async () => {
+  const uris: string[] = [];
+  const items = await createPassCliAdapter(fakeCommand("json:items-full")).listItems(
+    "vault-1",
+    "Personal",
+    (itemId, uri) => uris.push(`${itemId} ${uri}`),
+  );
+  assert.deepEqual(uris, ["item-login otpauth://totp/Example?secret=MUST_NEVER_BE_CACHED"]);
+  assert.equal(JSON.stringify(items).includes("otpauth"), false);
 });
 
 test("gets item details without adding list-only show-secrets flag", async () => {

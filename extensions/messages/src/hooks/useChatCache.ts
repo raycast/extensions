@@ -318,7 +318,6 @@ export function useChatCache(scope: MessagesCacheScope, searchText: string) {
     hydratedCatalog,
     contactCatalog,
     contactMap,
-    hasResolvedFreshChats: freshChats !== undefined,
     hasContactCatalogSnapshot,
     isRefreshingContactCatalog,
     loadContactPhotos,

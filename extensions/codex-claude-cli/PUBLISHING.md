@@ -7,16 +7,17 @@ Run these commands from the extension root before every submission:
 ```bash
 npm ci
 npx tsc --noEmit
+npm test
 npm run lint
 npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-All five commands must finish without errors from the extension source or manifest.
+All six commands must finish without errors from the extension source or manifest.
 
 ## Manifest
 
-- Confirm that `author` exactly matches the Raycast Store username that will submit the extension.
+- Preserve the existing `author`; add your Raycast Store username to `contributors` when updating this extension.
 - Keep the Raycast API on its latest stable version.
 - Keep `platforms` restricted to macOS because PromptCast uses PTYs, AppleScript, and macOS applications.
 - Keep the MIT license, `package-lock.json`, Developer Tools category, and clear command titles.
@@ -27,7 +28,7 @@ All five commands must finish without errors from the extension source or manife
 
 - PromptCast provides live control of a real shared CLI process, startup and permission controls, usage, MCPs, skills, and editor integration. State this clearly in the pull-request description to distinguish it from extensions that only search saved Claude Code or Codex conversations.
 - PromptCast requires `node-pty` native files from the declared npm dependency for Apple Silicon and Intel. Include the provenance below in the pull-request description. A Raycast team member must independently copy, verify, and add the binary files during Store review.
-- `npm audit --omit=dev --audit-level=high` currently passes. npm may still report the Raycast SDK's low-severity `esbuild` advisory for the Windows development server; PromptCast is macOS-only. Do not use `npm audit fix --force`, because npm currently resolves it by downgrading `@raycast/api` incompatibly.
+- Run `npm audit --omit=dev --audit-level=high` against the committed lockfile. Review dependency updates rather than applying forced downgrades.
 
 ### Store Differentiation
 

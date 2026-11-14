@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { readFile, readdir, writeFile, mkdtemp, rm, mkdir, utimes, access } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { after, test } from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
@@ -49,24 +49,54 @@ async function loadSource(relative, replacements) {
   return module.exports;
 }
 
-async function harness({ preferences = {}, native } = {}) {
+async function harness({ preferences = {}, native, history = [] } = {}) {
   const directory = path.join(temporary, String(sequence++));
   await mkdir(directory);
   const calls = [];
   const invoke = async (operation, args) => {
     calls.push({ operation, args });
-    if (native) return native(args, operation);
+    if (native) {
+      const result = await native(args, operation);
+      return operation === "redactImage" && result && typeof result === "object"
+        ? { reviewKey: Buffer.alloc(32, 1).toString("base64"), ...result }
+        : result;
+    }
+    if (operation === "updateReviewImage") {
+      await writeFile(args[4], png);
+      return new Set(JSON.parse(args[2]).map((mask) => JSON.stringify(mask.box))).size;
+    }
     if (operation === "copyRedactedImage") return;
     await writeFile(args[0], png);
-    return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+    return {
+      hits: [hit],
+      regionCount: 1,
+      output: args[0],
+      clipboardChangeCount: 17,
+      reviewKey: Buffer.alloc(32, 1).toString("base64"),
+    };
   };
+  const api = { getPreferenceValues: () => preferences, LocalStorage: { getItem: async () => undefined } };
+  const categoryModule = await loadSource("src/categories.ts", { "@raycast/api": api });
   const source = await loadSource("src/redaction.ts", {
-    "@raycast/api": { getPreferenceValues: () => preferences },
+    "./categories": categoryModule,
+    "@raycast/api": {
+      ...api,
+      getPreferenceValues: () => preferences,
+      Clipboard: {
+        read: async ({ offset }) => {
+          if (history[offset] instanceof Error) throw history[offset];
+          return history[offset] ?? { text: "" };
+        },
+      },
+    },
     os: { tmpdir: () => directory },
     "swift:../swift/hide-details": {
+      updateReviewImage: (...args) => invoke("updateReviewImage", args),
       redactImage: (...args) => invoke("redactImage", args),
       copyRedactedImage: (...args) => invoke("copyRedactedImage", args),
+      clipboardChangeCount: async () => 17,
     },
+    "./windows": {},
   });
   return {
     ...source,
@@ -277,7 +307,8 @@ test("unmount disposes a scan that finishes after the review closes", async () =
   });
   let mount;
   const stateValues = [];
-  const command = await loadSource("src/redact-clipboard.tsx", {
+  const review = await loadSource("src/review.tsx", {
+    "./category-settings": { CategorySettings: () => null },
     "./redaction": wrapper,
     react: {
       useState: (initial) => [initial, (value) => stateValues.push(value)],
@@ -290,7 +321,10 @@ test("unmount disposes a scan that finishes after the review closes", async () =
     "react/jsx-runtime": { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) },
     "@raycast/api": { getPreferenceValues: () => ({}), Icon: {}, List: { Section: {}, Item: { Detail: {} } } },
   });
-  command.default();
+  review.Review({
+    load: (recognition) => wrapper.redactClipboard({ recognition, forReview: true }),
+    target: "clipboard",
+  });
   const unmount = mount();
   await nativeStarted;
   unmount();
@@ -298,7 +332,7 @@ test("unmount disposes a scan that finishes after the review closes", async () =
   for (let attempts = 0; attempts < 50 && (await wrapper.outputs()).length; attempts++) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
-  assert.deepEqual(stateValues, [null, null]);
+  assert.deepEqual(stateValues, [false, null, null]);
   assert.deepEqual(await wrapper.outputs(), []);
 });
 
@@ -537,8 +571,18 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
     kind,
     text: `${kind}: sensitive OCR text 4111.1111.1111.1111`,
   }));
+  let finishRender;
+  let renderGate;
+  let failRender = false;
   const wrapper = await harness({
-    native: async (args) => {
+    native: async (args, operation) => {
+      if (operation === "copyRedactedImage") return;
+      if (operation === "updateReviewImage") {
+        if (renderGate) await renderGate;
+        await writeFile(args[4], png);
+        if (failRender) throw new Error("synthetic render failure");
+        return new Set(JSON.parse(args[2]).map((mask) => JSON.stringify(mask.box))).size;
+      }
       await writeFile(args[0], png);
       return { hits: privateHits, regionCount: 1, output: args[0], clipboardChangeCount: 17 };
     },
@@ -548,7 +592,8 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   let hookIndex = 0;
   const hooks = [];
   const jsx = (type, props) => ({ type, props });
-  const command = await loadSource("src/redact-clipboard.tsx", {
+  const review = await loadSource("src/review.tsx", {
+    "./category-settings": { CategorySettings: () => null },
     "./redaction": wrapper,
     react: {
       useState(initial) {
@@ -575,6 +620,7 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
     "@raycast/api": {
       getPreferenceValues: () => preferences,
       Icon: {},
+      Color: { Orange: "orange" },
       Keyboard: { Shortcut: { Common: { Refresh: { modifiers: ["cmd"], key: "r" } } } },
       Action: {},
       ActionPanel: {},
@@ -585,7 +631,10 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   });
   const render = () => {
     hookIndex = 0;
-    return command.default();
+    return review.Review({
+      load: (recognition) => wrapper.redactClipboard({ recognition, forReview: true }),
+      target: "clipboard",
+    });
   };
   render();
   const unmount = mount();
@@ -615,7 +664,37 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   assert.equal(render().props.children[1].props.children[0].props.accessories.length, 0);
   preferences.showOCRConfidence = true;
   assert.equal(render().props.children[1].props.children[0].props.accessories[0].text, "OCR 90%");
-  const scanAgain = preview.props.actions.props.children[1];
+  const action = (row, title) => row.props.actions.props.children.find((action) => action?.props?.title === title);
+  const detectionRow = () => render().props.children[1].props.children[0];
+  renderGate = new Promise((resolve) => {
+    finishRender = resolve;
+  });
+  const toggle = action(detectionRow(), "Don't Redact").props.onAction();
+  assert.equal(render().props.isLoading, true);
+  assert.equal(action(detectionRow(), "Copy Redacted Image"), undefined);
+  // Even a stale keyboard action from the previous render cannot copy during an update.
+  const copies = wrapper.calls.filter((call) => call.operation === "copyRedactedImage").length;
+  await action(hitRow, "Copy Redacted Image").props.onAction();
+  assert.equal(wrapper.calls.filter((call) => call.operation === "copyRedactedImage").length, copies);
+  finishRender();
+  await toggle;
+  renderGate = undefined;
+  assert.equal(detectionRow().props.id, first.hits[0].id);
+  assert.equal(detectionRow().props.accessories[0].tag.value, "Don't Redact");
+  assert.equal(hooks[0].regionCount, 1, "overlapping enabled detections still cover the same region");
+  assert.ok(detectionRow().props.detail.props.markdown.includes(hooks[0].output));
+  await action(detectionRow(), "Copy Redacted Image").props.onAction();
+  assert.equal(wrapper.calls.at(-1).args[0], hooks[0].output);
+  failRender = true;
+  await action(detectionRow(), "Redact").props.onAction();
+  assert.ok(action(detectionRow(), "Redact"), "failed edit retains the prior state for retry");
+  failRender = false;
+  await action(detectionRow(), "Redact").props.onAction();
+  assert.ok(action(detectionRow(), "Don't Redact"));
+  await action(detectionRow(), "Don't Redact").props.onAction();
+  await action(detectionRow(), "Redact All Detections").props.onAction();
+  assert.deepEqual(Array.from(hooks[0].excludedIds), []);
+  const scanAgain = action(render().props.children[0], "Scan Current Clipboard Again");
   await scanAgain.props.onAction();
   const second = await waitForScan();
   assert.notEqual(first.output, second.output);
@@ -627,3 +706,300 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   }
   assert.deepEqual(await wrapper.outputs(), []);
 });
+
+const noImage = () =>
+  Object.assign(new Error("process failed"), { stderr: "Clipboard has no image. Copy a screenshot first." });
+
+async function historyFiles() {
+  const directory = path.join(temporary, `history-${sequence++}`);
+  await mkdir(directory);
+  const files = {};
+  for (const name of ["notes.txt", "shot.png", "photo.JPG", "pruned.png"]) files[name] = path.join(directory, name);
+  for (const name of ["notes.txt", "shot.png", "photo.JPG"]) await writeFile(files[name], png);
+  return files;
+}
+
+test("clipboard history lists only existing image files, newest first, without duplicates", async () => {
+  const files = await historyFiles();
+  const wrapper = await harness({
+    history: [
+      { text: "plain text" },
+      { text: "notes.txt", file: files["notes.txt"] },
+      { text: "shot.png", file: files["shot.png"] },
+      new Error("history unavailable"),
+      { text: "photo", file: pathToFileURL(files["photo.JPG"]).href },
+      { text: "pruned", file: files["pruned.png"] },
+    ],
+  });
+  const images = await wrapper.clipboardHistoryImageFiles();
+  assert.deepEqual(
+    Array.from(images, ({ offset, path }) => [offset, path]),
+    [
+      [2, files["shot.png"]],
+      [4, files["photo.JPG"]],
+    ],
+  );
+  assert.ok(images[0].modified instanceof Date);
+  assert.equal((await wrapper.clipboardHistoryImageFiles(1)).length, 1);
+});
+
+test("a history scan reads the file and never claims a clipboard generation", async () => {
+  const files = await historyFiles();
+  const wrapper = await harness({
+    native: async (args) => {
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: null };
+    },
+  });
+  const image = { offset: 3, path: files["shot.png"], modified: new Date() };
+  const scan = await wrapper.redactHistoryImage(image, { recognition: "accurate" });
+  assert.equal(wrapper.calls[0].args[7], files["shot.png"]);
+  assert.equal(wrapper.calls[0].args[5], "accurate");
+  assert.equal(scan.source.kind, "history");
+  assert.equal(scan.source.offset, 3);
+  assert.equal(scan.clipboardChangeCount, null);
+  await wrapper.copyRedacted(scan, { requireOriginalClipboard: true });
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [scan.output, null]);
+  await wrapper.disposeScan(scan);
+  assert.deepEqual(await wrapper.outputs(), []);
+
+  const lying = await harness({
+    native: async (args) => {
+      await writeFile(args[0], png);
+      return { hits: [], regionCount: 0, output: args[0], clipboardChangeCount: 4 };
+    },
+  });
+  await assert.rejects(lying.redactHistoryImage(image), /invalid result/);
+  assert.deepEqual(await lying.outputs(), []);
+});
+
+test("history fallback skips screenshot API responses, scans a copied image file, and guards automatic copy", async () => {
+  const files = await historyFiles();
+  const wrapper = await harness({
+    // Clipboard.read returns no file for screenshot image representations, even though Raycast retains the image.
+    history: [{ text: "copied text" }, { text: "" }, { text: "shot.png", file: files["shot.png"] }],
+    native: async (args, operation) => {
+      if (operation === "copyRedactedImage") return;
+      if (args[7] === null) throw noImage();
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: null };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ fallbackToHistory: true, guardClipboard: true });
+  assert.equal(scan.source.kind, "history");
+  assert.equal(scan.source.offset, 2);
+  assert.equal(wrapper.calls[1].args[7], files["shot.png"]);
+  assert.equal(scan.clipboardChangeCount, 17);
+  await wrapper.copyRedacted(scan, { requireOriginalClipboard: true });
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [scan.output, 17]);
+  await wrapper.disposeScan(scan);
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("history fallback only handles a missing clipboard image", async () => {
+  const files = await historyFiles();
+  const history = [{ text: "shot.png", file: files["shot.png"] }];
+  const empty = await harness({
+    native: async () => {
+      throw noImage();
+    },
+  });
+  await assert.rejects(empty.redactClipboard({ fallbackToHistory: true }), /recent history has no copied image files/);
+  await assert.rejects(empty.redactClipboard(), /^Error: Clipboard has no image\. Copy a screenshot first\.$/);
+  const failing = await harness({
+    history,
+    native: async () => {
+      throw Object.assign(new Error("process failed"), { stderr: "Invalid Custom Regex." });
+    },
+  });
+  await assert.rejects(failing.redactClipboard({ fallbackToHistory: true }), /Invalid Custom Regex/);
+  assert.equal(failing.calls.length, 1);
+  assert.deepEqual(await failing.outputs(), []);
+});
+
+test("screenshot-only history explains the API limitation and how to scan the screenshot", async () => {
+  const wrapper = await harness({
+    history: [{ text: "" }, { text: "" }],
+    native: async () => {
+      throw noImage();
+    },
+  });
+  assert.deepEqual(Array.from(await wrapper.clipboardHistoryImageFiles()), []);
+  await assert.rejects(wrapper.redactClipboard({ fallbackToHistory: true }), (error) => {
+    assert.match(error.message, /Screenshot history is unavailable/);
+    assert.match(error.message, /Copy a screenshot again or copy an image file/);
+    return true;
+  });
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("exclusions use scan-scoped identities and copy only the latest successful render", async () => {
+  const wrapper = await harness();
+  const first = await wrapper.redactClipboard({ forReview: true });
+  const id = first.hits[0].id;
+  assert.deepEqual(Array.from(first.excludedIds), []);
+  const excluded = await wrapper.updateRedactions(first, [id]);
+  assert.equal(excluded.regionCount, 0);
+  assert.equal(excluded.hits[0].id, id);
+  assert.notEqual(excluded.output, first.output);
+  assert.equal(wrapper.calls.filter((call) => call.operation === "redactImage").length, 1);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), []);
+  await assert.rejects(wrapper.copyRedacted(first), /expired/);
+  await wrapper.copyRedacted(excluded);
+  assert.equal(wrapper.calls.at(-1).args[0], excluded.output);
+  const restored = await wrapper.updateRedactions(excluded, []);
+  assert.equal(restored.regionCount, 1);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [{ kind: hit.kind, box: hit.box }]);
+  const second = await wrapper.redactClipboard({ forReview: true });
+  assert.notEqual(second.hits[0].id, id, "a new scan never inherits an exclusion");
+  await assert.rejects(wrapper.updateRedactions(second, [id]), /different scan/);
+  await wrapper.disposeScan(restored);
+  await wrapper.disposeScan(second);
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("excluding one of overlapping detections keeps other categories masked", async () => {
+  const wrapper = await harness({
+    native: async (args, operation) => {
+      if (operation === "updateReviewImage") {
+        await writeFile(args[4], png);
+        return new Set(JSON.parse(args[2]).map((mask) => JSON.stringify(mask.box))).size;
+      }
+      await writeFile(args[0], png);
+      return {
+        hits: [hit, { ...hit, kind: "custom" }, { ...hit, box: { ...hit.box, y: 50 } }],
+        regionCount: 2,
+        output: args[0],
+        clipboardChangeCount: 17,
+      };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ forReview: true });
+  assert.equal(new Set(scan.hits.map((hit) => hit.id)).size, 3);
+  const excludedId = scan.hits[0].id;
+  scan.hits.reverse(); // Sorting the review must not change which detection an ID refers to.
+  const excluded = await wrapper.updateRedactions(scan, [excludedId]);
+  assert.equal(excluded.regionCount, 2);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [
+    { kind: hit.kind, box: { ...hit.box, y: 50 } },
+    { kind: "custom", box: hit.box },
+  ]);
+  await wrapper.disposeScan(excluded);
+});
+
+test("pending renders block copying and edits; closing waits for cleanup without publishing", async () => {
+  let finish;
+  const gate = new Promise((resolve) => {
+    finish = resolve;
+  });
+  const wrapper = await harness({
+    native: async (args, operation) => {
+      if (operation === "updateReviewImage") {
+        await gate;
+        await writeFile(args[4], png);
+        return 0;
+      }
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ forReview: true });
+  const updating = wrapper.updateRedactions(scan, [scan.hits[0].id]);
+  await assert.rejects(wrapper.copyRedacted(scan), /updating/);
+  await assert.rejects(wrapper.updateRedactions(scan, []), /updating/);
+  const closing = wrapper.disposeScan(scan);
+  finish();
+  await assert.rejects(updating, /expired/);
+  await closing;
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("failed or invalid render retains the previous selection and allows retry", async () => {
+  let behavior = "failure";
+  const wrapper = await harness({
+    native: async (args, operation) => {
+      if (operation === "updateReviewImage") {
+        await writeFile(args[4], png);
+        if (behavior === "failure") throw new Error("synthetic render failure");
+        return behavior === "count" ? 1 : 0;
+      }
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ forReview: true });
+  for (const value of ["failure", "count"]) {
+    behavior = value;
+    await assert.rejects(wrapper.updateRedactions(scan, [scan.hits[0].id]));
+    assert.deepEqual(Array.from(scan.excludedIds), []);
+    await access(scan.output);
+    assert.deepEqual(await readdir(path.dirname(scan.output)), ["out.png"]);
+  }
+  behavior = "success";
+  const next = await wrapper.updateRedactions(scan, [scan.hits[0].id]);
+  assert.equal(next.regionCount, 0);
+  await wrapper.disposeScan(next);
+});
+
+test("edits and closing preserve output until every already-started copy finishes", async () => {
+  for (const close of [false, true]) {
+    const readers = [];
+    const wrapper = await harness({
+      native: async (args, operation) => {
+        if (operation === "copyRedactedImage") {
+          await new Promise((resolve) => {
+            readers.push(resolve);
+          });
+          await access(args[0]); // Model a native process that only opens the file after spawning.
+          return;
+        }
+        if (operation === "updateReviewImage") {
+          await writeFile(args[4], png);
+          return 0;
+        }
+        await writeFile(args[0], png);
+        return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+      },
+    });
+    const scan = await wrapper.redactClipboard({ forReview: true });
+    const firstCopy = wrapper.copyRedacted(scan);
+    const secondCopy = wrapper.copyRedacted(scan);
+    let finished = false;
+    const pending = (close ? wrapper.disposeScan(scan) : wrapper.updateRedactions(scan, [scan.hits[0].id])).then(
+      (result) => {
+        finished = true;
+        return result;
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.equal(finished, false);
+    await access(scan.output);
+    readers[0]();
+    await firstCopy;
+    assert.equal(finished, false, "the second copy also owns the old output");
+    readers[1]();
+    await secondCopy;
+    const result = await pending;
+    await absent(scan.output);
+    if (!close) {
+      assert.equal(result.regionCount, 0);
+      await wrapper.disposeScan(result);
+    }
+    assert.deepEqual(await wrapper.outputs(), []);
+  }
+});
+
+for (const blurFaces of [undefined, false, true]) {
+  test(`macOS scan and review preserve face blur preference ${blurFaces}`, async () => {
+    const preferences = { style: "pixelate", blurFaces };
+    const wrapper = await harness({ preferences });
+    const scan = await wrapper.redactClipboard({ forReview: true });
+    assert.equal(wrapper.calls.at(-1).args[9], blurFaces ?? false);
+    preferences.blurFaces = !blurFaces;
+    const updated = await wrapper.updateRedactions(scan, []);
+    assert.equal(wrapper.calls.at(-1).args[3], "pixelate");
+    assert.equal(wrapper.calls.at(-1).args[5], blurFaces ?? false, "review keeps the scan's preference");
+    assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [{ kind: hit.kind, box: hit.box }]);
+    await wrapper.disposeScan(updated);
+  });
+}

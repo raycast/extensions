@@ -6,13 +6,18 @@ import { getFrontmostBrowserTarget, getFrontmostHostname } from "./frontmost-hos
 import { runAppleScript } from "@raycast/utils";
 import { getPlatform } from "../load/platform";
 import { getWindowsFrontmostBrowserTarget } from "./windows-hostname-fetcher";
+import { getFrontmostApplication } from "@raycast/api";
 import { matchesHostname } from "./hostname-matcher";
 import { validateTarget } from "./execution-target";
+
+beforeEach(() => {
+  jest.mocked(getFrontmostApplication).mockResolvedValue({ name: "Safari", path: "", bundleId: "com.apple.Safari" });
+});
 
 it("matches www catalog aliases without changing the captured macOS URL or host", async () => {
   jest.mocked(getPlatform).mockReturnValue("macos");
   const url = "https://www.github.com/user/repo?q=1";
-  jest.mocked(runAppleScript).mockResolvedValue(JSON.stringify({ bundleId: "com.apple.Safari", url }));
+  jest.mocked(runAppleScript).mockResolvedValue(url);
   const target = await getFrontmostBrowserTarget();
   expect(target).toEqual({ kind: "browser", bundleId: "com.apple.Safari", hostname: "www.github.com", url });
   if (!target || target.kind !== "browser") throw new Error("Expected browser target");
@@ -22,9 +27,7 @@ it("matches www catalog aliases without changing the captured macOS URL or host"
 });
 it("preserves the complete macOS browser target", async () => {
   jest.mocked(getPlatform).mockReturnValue("macos");
-  jest
-    .mocked(runAppleScript)
-    .mockResolvedValue(JSON.stringify({ bundleId: "com.apple.Safari", url: "https://github.com/user/repo" }));
+  jest.mocked(runAppleScript).mockResolvedValue("https://github.com/user/repo");
   expect(await getFrontmostBrowserTarget()).toEqual({
     kind: "browser",
     bundleId: "com.apple.Safari",
@@ -32,6 +35,15 @@ it("preserves the complete macOS browser target", async () => {
     url: "https://github.com/user/repo",
   });
   expect(await getFrontmostHostname()).toBe("github.com");
+});
+it("distinguishes a supported browser without a page from other apps", async () => {
+  jest.mocked(getPlatform).mockReturnValue("macos");
+  jest.mocked(runAppleScript).mockResolvedValue("");
+  await expect(getFrontmostBrowserTarget()).rejects.toThrow("The active browser tab has no web page");
+  jest.mocked(runAppleScript).mockClear();
+  jest.mocked(getFrontmostApplication).mockResolvedValue({ name: "Finder", path: "", bundleId: "com.apple.finder" });
+  expect(await getFrontmostBrowserTarget()).toBeNull();
+  expect(runAppleScript).not.toHaveBeenCalled();
 });
 it("dispatches Windows capture without calling AppleScript", async () => {
   jest.mocked(getPlatform).mockReturnValue("windows");

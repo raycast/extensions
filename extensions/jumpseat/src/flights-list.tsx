@@ -9,7 +9,7 @@ import {
   open,
   openExtensionPreferences,
 } from "@raycast/api";
-import { trustedJumpseatAssetUrl, trustedProfilePictureUrl } from "./assets";
+import { trustedAirlineLogoSource, trustedProfilePictureUrl } from "./assets";
 import {
   JumpseatApiError,
   type FriendSummary,
@@ -108,10 +108,7 @@ function FlightDetail({
   const departureCode = airportCode(flight.departureAirport);
   const arrivalCode = airportCode(flight.arrivalAirport);
   const status = formatFlightStatus(flight.flight);
-  const airlineLogoUrl = trustedJumpseatAssetUrl(
-    flight.airline.logoUrl,
-    "airline-logo",
-  );
+  const airlineLogo = trustedAirlineLogoSource(flight.airline);
   const friendProfilePictureUrl = trustedProfilePictureUrl(
     flight.friend?.profilePictureUrl,
   );
@@ -149,8 +146,8 @@ function FlightDetail({
             title="Flight Number"
             text={displayFlightNumber(flight)}
             icon={
-              airlineLogoUrl
-                ? { source: airlineLogoUrl, fallback: Icon.Airplane }
+              airlineLogo
+                ? { source: airlineLogo, fallback: Icon.Airplane }
                 : Icon.Airplane
             }
           />
@@ -344,10 +341,7 @@ export function FlightsList({
           const departureCode = airportCode(flight.departureAirport);
           const arrivalCode = airportCode(flight.arrivalAirport);
           const aircraft = aircraftName(flight);
-          const airlineLogoUrl = trustedJumpseatAssetUrl(
-            flight.airline.logoUrl,
-            "airline-logo",
-          );
+          const airlineLogo = trustedAirlineLogoSource(flight.airline);
           const friend = flight.friend;
           const subtitle = friend
             ? friendFirstName(friend)
@@ -366,8 +360,8 @@ export function FlightsList({
                   : flight.flight.id
               }
               icon={
-                airlineLogoUrl
-                  ? { source: airlineLogoUrl, fallback: Icon.Airplane }
+                airlineLogo
+                  ? { source: airlineLogo, fallback: Icon.Airplane }
                   : Icon.Airplane
               }
               title={`${departureCode} → ${arrivalCode}`}

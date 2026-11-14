@@ -2,12 +2,9 @@ import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getModelIds } from "../utils/model-response";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
-import { useProxy } from "./useProxy";
 
 export function useModelOptions() {
   const gpt = useChatGPT();
-  const proxy = useProxy();
-  const [httpAgent] = useState(proxy);
   const { useAzure } = getConfiguration();
   const [options, setOptions] = useState<string[]>([]);
   const [isLoading, setLoading] = useState(!useAzure);
@@ -21,7 +18,7 @@ export function useModelOptions() {
     const controller = new AbortController();
     setLoading(true);
     gpt.models
-      .list({ httpAgent, signal: controller.signal })
+      .list({ signal: controller.signal })
       .then((res) => {
         if (controller.signal.aborted) return;
         setOptions(getModelIds(res.data, (res as unknown as { body: unknown }).body));
@@ -40,7 +37,7 @@ export function useModelOptions() {
       });
 
     return () => controller.abort();
-  }, [gpt, httpAgent, useAzure]);
+  }, [gpt, useAzure]);
 
   return { options, isLoading };
 }

@@ -1,0 +1,81 @@
+import { ItemDef, ItemId } from "../../types";
+
+export const XENOCHEMISTRY_ITEMS: Partial<Record<ItemId, ItemDef>> = {
+  swift_tonic: {
+    id: "swift_tonic",
+    name: "Swift Tonic",
+    description: "Tasks take 15% less time for 15 minutes. Fizzes in the pocket.",
+    value: 20,
+    potion: { kind: "speed", power: 0.85, durationMs: 15 * 60_000 },
+  },
+  fortune_draught: {
+    id: "fortune_draught",
+    name: "Fortune Draught",
+    description: "25% more of everything tasks produce for 15 minutes.",
+    value: 25,
+    potion: { kind: "yield", power: 1.25, durationMs: 15 * 60_000 },
+  },
+  fury_serum: {
+    id: "fury_serum",
+    name: "Fury Serum",
+    description: "+4 damage per combat round for 15 minutes. Mind the shaking.",
+    value: 25,
+    potion: { kind: "damage", power: 4, durationMs: 15 * 60_000 },
+  },
+  quicksilver_tonic: {
+    id: "quicksilver_tonic",
+    name: "Quicksilver Tonic",
+    description: "Tasks take 30% less time for 30 minutes. Everyone else looks slow.",
+    value: 90,
+    potion: { kind: "speed", power: 0.7, durationMs: 30 * 60_000 },
+  },
+  windfall_elixir: {
+    id: "windfall_elixir",
+    name: "Windfall Elixir",
+    description: "50% more of everything tasks produce for 30 minutes.",
+    value: 150,
+    potion: { kind: "yield", power: 1.5, durationMs: 30 * 60_000 },
+  },
+  berserker_extract: {
+    id: "berserker_extract",
+    name: "Berserker Extract",
+    description: "+10 damage per combat round for 30 minutes. You will not remember it fondly.",
+    value: 200,
+    potion: { kind: "damage", power: 10, durationMs: 30 * 60_000 },
+  },
+  ironblood_serum: {
+    id: "ironblood_serum",
+    name: "Ironblood Serum",
+    description: "Hot, red and thick. You stop feeling the first blow.",
+    value: 126,
+    potion: { kind: "damage", power: 6, durationMs: 20 * 60_000 },
+  },
+  chronos_elixir: {
+    id: "chronos_elixir",
+    name: "Chronos Elixir",
+    description: "Time goes by a little slower for you.",
+    value: 1741,
+    potion: { kind: "speed", power: 0.6, durationMs: 40 * 60_000 },
+  },
+  cornucopia_draught: {
+    id: "cornucopia_draught",
+    name: "Cornucopia Draught",
+    description: "Everything you touch comes back with more.",
+    value: 2178,
+    potion: { kind: "yield", power: 1.75, durationMs: 40 * 60_000 },
+  },
+  warlord_serum: {
+    id: "warlord_serum",
+    name: "Warlord's Serum",
+    description: "The kind of brew soldiers are not supposed to know about.",
+    value: 1627,
+    potion: { kind: "damage", power: 14, durationMs: 40 * 60_000 },
+  },
+  stillwater_tonic: {
+    id: "stillwater_tonic",
+    name: "Stillwater Tonic",
+    description: "Everything is calm, and everything is quick.",
+    value: 6079,
+    potion: { kind: "speed", power: 0.5, durationMs: 60 * 60_000 },
+  },
+};

@@ -11,6 +11,7 @@ import {
   brewUpgradeCommand,
   caskHasSymlinkArtifacts,
   HOMEBREW_7,
+  preferences,
   type Cask,
   type Formula,
   type OutdatedCask,
@@ -18,6 +19,7 @@ import {
   type UpgradePackageStatus,
 } from "../utils";
 import { uninstallableReason } from "../utils/brew/installability";
+import { slotRunsInTerminal, type ActionSlot } from "../utils/default-action";
 import { hasNextPage } from "../utils/paging";
 import { useTerminalApp } from "../utils/terminal";
 import { useBrewMajorVersion } from "../hooks/useBrewMajorVersion";
@@ -64,6 +66,70 @@ const PreviewInstallAction = (props: { item: Cask | Formula; onAction: (result: 
       onAction={async () => {
         if (await ensureTrusted(props.item)) push(<InstallPreview item={props.item} onAction={props.onAction} />);
       }}
+    />
+  );
+};
+
+/**
+ * Install or Run Install in Terminal, whichever `slot` holds; see
+ * `slotRunsInTerminal`. Install keeps ⌘I in either slot. Run Install in
+ * Terminal has ⌘↩ only beside the copy actions. In the first slot ↩ runs it,
+ * and Raycast gives ⌘↩ to the second action.
+ */
+const InstallSlotAction = (props: { item: Cask | Formula; slot: ActionSlot; onAction: (result: boolean) => void }) => {
+  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  if (!slotRunsInTerminal(props.slot, preferences.runInTerminalByDefault)) {
+    return <Actions.FormulaInstallAction formula={props.item} onAction={props.onAction} />;
+  }
+  return (
+    <Action
+      title={`Run Install in ${terminalName}`}
+      icon={terminalIcon}
+      shortcut={props.slot === "terminal" ? { modifiers: ["cmd"], key: "return" } : undefined}
+      onAction={async () => {
+        // brew trusts a package named on its command line by itself.
+        if (await ensureTrusted(props.item)) await runCommandInTerminal(brewInstallCommand(props.item));
+      }}
+    />
+  );
+};
+
+/** Uninstall or Run Uninstall in Terminal, whichever `slot` holds; see `slotRunsInTerminal`. */
+const UninstallSlotAction = (props: {
+  item: Cask | Formula | OutdatedCask | OutdatedFormula;
+  /** Effective pin state, forwarded to Uninstall; see `FormulaUninstallAction`. */
+  pinned?: boolean;
+  slot: ActionSlot;
+  onAction: (result: boolean) => void;
+}) => {
+  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  const pinned = props.pinned ?? props.item.pinned === true;
+  const first = props.slot === "first";
+  const shortcut: Keyboard.Shortcut = first
+    ? Keyboard.Shortcut.Common.Remove
+    : { modifiers: ["cmd", "shift"], key: "return" };
+  if (!slotRunsInTerminal(props.slot, preferences.runInTerminalByDefault, pinned)) {
+    return (
+      <Actions.FormulaUninstallAction
+        formula={props.item}
+        pinned={props.pinned}
+        shortcut={shortcut}
+        onAction={props.onAction}
+      />
+    );
+  }
+  return (
+    <Action
+      title={`Run Uninstall in ${terminalName}`}
+      icon={terminalIcon}
+      style={Action.Style.Destructive}
+      shortcut={shortcut}
+      onAction={() =>
+        // On ⌃X, check brew's pins first. ⌘⇧↩ runs the command directly, as before.
+        first
+          ? Actions.uninstallInTerminal(props.item, props.pinned, runCommandInTerminal, props.onAction)
+          : runCommandInTerminal(brewUninstallCommand(props.item))
+      }
     />
   );
 };
@@ -348,7 +414,7 @@ export function CaskActionPanel(props: {
           </ActionPanel.Section>
         )}
         <ActionPanel.Section>
-          <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
+          <UninstallSlotAction item={cask} slot="first" onAction={props.onAction} />
           {/* A pinned package cannot be uninstalled without --force, which the
               command builder does not add — so no command is offered to paste. */}
           {!cask.pinned && (
@@ -361,13 +427,7 @@ export function CaskActionPanel(props: {
                 // in this same panel.
                 shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
               />
-              <Action
-                title={`Run Uninstall in ${terminalName}`}
-                icon={terminalIcon}
-                style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-                onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
-              />
+              <UninstallSlotAction item={cask} slot="terminal" onAction={props.onAction} />
             </>
           )}
         </ActionPanel.Section>
@@ -401,7 +461,7 @@ export function CaskActionPanel(props: {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          {!blocked && <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />}
+          {!blocked && <InstallSlotAction item={cask} slot="first" onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -422,17 +482,7 @@ export function CaskActionPanel(props: {
             // Command; Preview Upgrade's ⌘⌥I is installed-only, so this panel is free.
             shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
           />
-          {!blocked && (
-            <Action
-              title={`Run Install in ${terminalName}`}
-              icon={terminalIcon}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
-              onAction={async () => {
-                // brew trusts a package named on its command line by itself.
-                if (await ensureTrusted(cask)) await runCommandInTerminal(brewInstallCommand(cask));
-              }}
-            />
-          )}
+          {!blocked && <InstallSlotAction item={cask} slot="terminal" onAction={props.onAction} />}
           {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
               package this Mac cannot install. Copy Install stays: it is for
               another machine, where the package may install fine. */}
@@ -586,7 +636,7 @@ export function FormulaActionPanel(props: {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
+          <UninstallSlotAction item={formula} slot="first" onAction={props.onAction} />
           {/* A pinned package cannot be uninstalled without --force, which the
               command builder does not add — so no command is offered to paste. */}
           {!formula.pinned && (
@@ -599,13 +649,7 @@ export function FormulaActionPanel(props: {
                 // in this same panel.
                 shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
               />
-              <Action
-                title={`Run Uninstall in ${terminalName}`}
-                style={Action.Style.Destructive}
-                icon={terminalIcon}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-                onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
-              />
+              <UninstallSlotAction item={formula} slot="terminal" onAction={props.onAction} />
             </>
           )}
         </ActionPanel.Section>
@@ -636,7 +680,7 @@ export function FormulaActionPanel(props: {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          {!blocked && <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />}
+          {!blocked && <InstallSlotAction item={formula} slot="first" onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -661,17 +705,7 @@ export function FormulaActionPanel(props: {
             // Command; Preview Upgrade's ⌘⌥I is installed-only, so this panel is free.
             shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
           />
-          {!blocked && (
-            <Action
-              title={`Run Install in ${terminalName}`}
-              icon={terminalIcon}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
-              onAction={async () => {
-                // brew trusts a package named on its command line by itself.
-                if (await ensureTrusted(formula)) await runCommandInTerminal(brewInstallCommand(formula));
-              }}
-            />
-          )}
+          {!blocked && <InstallSlotAction item={formula} slot="terminal" onAction={props.onAction} />}
           {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
               package this Mac cannot install. Copy Install stays: it is for
               another machine, where the package may install fine. */}
@@ -858,7 +892,7 @@ export function OutdatedActionSections(
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Actions.FormulaUninstallAction formula={outdated} pinned={pinned} onAction={props.onAction} />
+        <UninstallSlotAction item={outdated} pinned={pinned} slot="first" onAction={props.onAction} />
         {/* brew refuses to uninstall a pinned package without --force, and the
             command builder does not add it — so a pinned row is offered no
             uninstall command it could paste. The action above handles it, with
@@ -870,13 +904,7 @@ export function OutdatedActionSections(
               content={brewUninstallCommand(outdated)}
               shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
             />
-            <Action
-              title={`Run Uninstall in ${terminalName}`}
-              icon={terminalIcon}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-              onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
-            />
+            <UninstallSlotAction item={outdated} pinned={pinned} slot="terminal" onAction={props.onAction} />
           </>
         )}
       </ActionPanel.Section>

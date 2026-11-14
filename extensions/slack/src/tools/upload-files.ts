@@ -1,5 +1,5 @@
-import { getSlackWebClient, slack } from "../shared/client/WebClient";
-import { withSlackClient } from "../shared/withSlackClient";
+import { getSlackWebClient } from "../shared/client/WebClient";
+import { shouldRetryAfterMissingScope, withSlackClient } from "../shared/withSlackClient";
 import { getAiMessageBlocks } from "./message-signature";
 import { access } from "node:fs/promises";
 import path from "node:path";
@@ -116,12 +116,8 @@ async function performUploadFiles(input: Input, retried = false) {
       })),
     });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("missing_scope") && !retried) {
-      const isUsingOAuth = !!(await slack.client.getTokens());
-      if (isUsingOAuth) {
-        await slack.client.removeTokens();
-        return withSlackClient((input: Input) => performUploadFiles(input, true))(input);
-      }
+    if (await shouldRetryAfterMissingScope(error, retried)) {
+      return withSlackClient((input: Input) => performUploadFiles(input, true))(input);
     }
     throw mapUploadError(error);
   }

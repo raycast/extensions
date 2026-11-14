@@ -78,9 +78,15 @@ export function vaultPluginCheck(vaults: Vault[], plugin: string) {
     if (!fs.existsSync(communityPluginsPath)) {
       vaultsWithoutPlugin.push(vault);
     } else {
-      const plugins: string[] = JSON.parse(fs.readFileSync(communityPluginsPath, "utf-8"));
+      let plugins: string[] = [];
+      try {
+        plugins = JSON.parse(fs.readFileSync(communityPluginsPath, "utf-8"));
+      } catch (error) {
+        // An unreachable vault (offline network or cloud drive) or an unreadable file must not crash the command
+        console.error(`Could not read ${communityPluginsPath}`, error);
+      }
 
-      if (plugins.includes(plugin)) {
+      if (Array.isArray(plugins) && plugins.includes(plugin)) {
         return vault;
       } else {
         vaultsWithoutPlugin.push(vault);

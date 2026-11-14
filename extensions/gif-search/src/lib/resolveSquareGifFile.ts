@@ -124,13 +124,14 @@ export default async function resolveSquareGifFile(gif: IGif) {
     throw new Error("Copy GIF as Square is only supported on macOS");
   }
 
-  const response = await fetch(gif.download_url);
+  // A Clip's download_url is an MP4 that ImageIO can't decode, so square copies read the GIF rendition.
+  const response = await fetch(gif.gif_url || gif.download_url);
 
   if (!response.ok) {
     throw new Error(`GIF file download failed. Server responded with ${response.status}`);
   }
 
-  // The script always re-encodes to a GIF, so the name must say .gif even for a Clip's MP4.
+  // The script always re-encodes to a GIF, so the name must say .gif even when download_name says .mp4.
   const squareGifName = getDisplayName(gif, ".gif");
   const inputFile = await tempy.write(Buffer.from(await response.arrayBuffer()), { extension: "gif" });
   const file = tempy.file({ name: squareGifName });

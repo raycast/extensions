@@ -204,12 +204,12 @@ restated as a per-package verdict.
   excluded via `.git/info/exclude` shipped to the public monorepo this way.
 - **Toast handles act on whichever toast is visible.** `hide()` and the update
   helpers carry no toast id, so hiding "ours" can dismiss someone else's.
-  `settle` in `src/utils/toast.ts` currently finishes an animated toast by
-  _replacing_ it with `showToast`, and that has a known problem: a progress
-  update sent in the same tick can land on top of the replacement, so a
-  finished install read "Installing … / Operation completed successfully" with
-  a live Cancel button. The plan is to finish in place again, Raycast's usual
-  pattern; see "Finish action toasts in place again" in `TODO.md`.
+  `settle` in `src/utils/toast.ts` finishes an action toast in place: it sets
+  the style and title and clears the message and both actions, so Cancel goes
+  with the progress. Do not finish by replacing it with `showToast`: a progress
+  update sent in the same tick landed on top of the replacement, and a finished
+  install read "Installing … / Operation completed successfully" with a live
+  Cancel button.
 - **`execBrewWithProgress` checks `cancel.aborted` before it spawns.** Its
   abort listener is attached after an `await`, and an abort that fired during
   that await is already spent — so brew started although the user had pressed

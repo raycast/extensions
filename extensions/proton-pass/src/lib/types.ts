@@ -11,7 +11,18 @@ export interface Vault {
   name: string;
   itemCount?: number;
   role?: VaultRole;
+  /** Whether other people have access to the vault. */
+  isShared?: boolean;
 }
+
+/** How a vault is shared: the user's role on it, and whether other people have access, when known. */
+export interface VaultSharing {
+  role: VaultRole;
+  isShared?: boolean;
+}
+
+/** How each vault is shared, by share ID, as saved by the vault list. */
+export type SavedSharing = Record<string, VaultSharing>;
 
 export interface Item {
   shareId: string;
@@ -27,8 +38,12 @@ export interface Item {
   hasPassword?: boolean;
   /** ISO 8601 date of the last modification. */
   modifiedAt?: string;
+  /** ISO 8601 date of the creation. */
+  createdAt?: string;
   /** Whether the item has a note. The note itself is never part of `Item`. */
   hasNote?: boolean;
+  /** Shared with the user on its own: `shareId` is then that item's share, not a vault's. */
+  sharedWithMe?: boolean;
 }
 
 export interface CustomField {

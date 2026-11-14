@@ -1,9 +1,21 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { createGitHubIntegration } from "../lib/notra";
 import { getErrorMessage } from "../utils";
 
-export function CreateGitHubIntegrationForm({ onCreated }: { onCreated?: () => Promise<void> | void }) {
+interface CreateGitHubIntegrationFormProps {
+  /** Shown while the standalone command resolves the workspace. */
+  isLoading?: boolean;
+  onCreated?: () => Promise<void> | void;
+  /** Workspace picker for the standalone command; pushed forms use the parent's workspace. */
+  workspacePicker?: ReactNode;
+}
+
+export function CreateGitHubIntegrationForm({
+  isLoading,
+  onCreated,
+  workspacePicker,
+}: CreateGitHubIntegrationFormProps) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,9 +62,10 @@ export function CreateGitHubIntegrationForm({ onCreated }: { onCreated?: () => P
           <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} title="Create Integration" />
         </ActionPanel>
       }
-      isLoading={isSubmitting}
+      isLoading={isLoading || isSubmitting}
       navigationTitle="Create GitHub Integration"
     >
+      {workspacePicker}
       <Form.TextField id="owner" placeholder="Organization or username" title="Owner" />
       <Form.TextField id="repo" placeholder="Repository name" title="Repository" />
       <Form.TextField defaultValue="" id="branch" placeholder="Default branch (optional)" title="Branch" />

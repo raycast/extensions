@@ -6,6 +6,7 @@ import type { Upload } from "../api/types";
 import { showAktarFailure } from "./errors";
 import { expiryNote, expiryWarning, isExpiryNotSetUp } from "./expiry";
 import { fetchFormat, formatUploads } from "./output";
+import { shortLinkWarning } from "./short-links";
 
 export type UploadTarget = {
   destinationId?: string;
@@ -15,6 +16,8 @@ export type UploadTarget = {
   expires?: number;
   /** A new name for the upload, extension included. Only used when uploading a single file. */
   filename?: string;
+  /** True makes a short link, false makes none; undefined leaves it to the destination. */
+  short?: boolean;
 };
 
 /** Keeps regular files and reports how many folders (or missing paths) were skipped. */
@@ -87,14 +90,14 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     await Clipboard.copy(formatUploads(uploads, await fetchFormat()));
   }
 
-  const warning = expiryWarning(uploads, target.expires);
+  const warning = joinWarnings(expiryWarning(uploads, target.expires), shortLinkWarning(uploads));
   if (failures.length === 0) {
     toast.style = Toast.Style.Success;
     if (uploads.length === 1) {
       toast.title = uploads[0].reused ? "Already uploaded" : `Uploaded ${uploads[0].filename}`;
       toast.message = uploads[0].reused
         ? `Copied the existing link${warning ? "" : expiryNote(uploads[0])}`
-        : "Link copied to clipboard";
+        : `${uploads[0].shortUrl ? "Short link" : "Link"} copied to clipboard`;
     } else {
       const summary = batchSummary(uploads);
       toast.title = summary.title;
@@ -114,6 +117,12 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     toast.message = `${reused > 0 ? `${reused} already uploaded. ` : ""}${warning ? `${failures[0]}. ${warning}` : failures[0]}`;
   }
   return uploads;
+}
+
+/** Every warning that applies, as one toast message; undefined when there are none. */
+export function joinWarnings(...warnings: (string | undefined)[]) {
+  const present = warnings.filter((warning): warning is string => Boolean(warning));
+  return present.length > 0 ? present.join(". ") : undefined;
 }
 
 /**

@@ -10,12 +10,12 @@ export function waitForFileAvailable(path: string): Promise<void> {
       if (!existsSync(path)) return;
       const stats = statSync(path);
       if (stats.isFile()) {
+        clearTimeout(timeout);
         clearInterval(interval);
         resolve();
       }
     }, 300);
-
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       clearInterval(interval);
       reject(new Error(`File ${path} not found.`));
     }, 5000);
@@ -23,10 +23,14 @@ export function waitForFileAvailable(path: string): Promise<void> {
 }
 
 export async function decompressFile(filePath: string, targetPath: string) {
-  const zip = new streamZip.async({ file: filePath });
   if (!existsSync(targetPath)) mkdirSync(targetPath, { recursive: true });
-  await zip.extract(null, targetPath);
-  await zip.close();
+
+  const zip = new streamZip.async({ file: filePath });
+  try {
+    await zip.extract(null, targetPath);
+  } finally {
+    await zip.close();
+  }
 }
 
 export async function removeFilesThatStartWith(startingWith: string, path: string) {

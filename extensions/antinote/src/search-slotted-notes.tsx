@@ -2,7 +2,8 @@ import { ActionPanel, Action, List, Detail, closeMainWindow } from "@raycast/api
 import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 import { useEffect, useState } from "react";
-import { BETA_DB_PATH } from "./constants";
+import { existsSync } from "fs";
+import { BETA_DB_PATH, DATABASE_NOT_FOUND } from "./constants";
 
 type Note = {
   id: string;
@@ -68,37 +69,8 @@ async function openInAntinote(noteId: string) {
   }
 }
 
-function resolveDb() {
-  return useSQL<Note>(BETA_DB_PATH, beta_query);
-}
-
-export default function Command() {
-  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
-  const [version, setVersion] = useState<string | null>(null);
-
-  const { isLoading, data: notes, permissionView } = resolveDb();
-
-  useEffect(() => {
-    async function checkInstallation() {
-      const { installed, version } = await checkAntinoteInstalled();
-      setIsInstalled(installed);
-      setVersion(version);
-    }
-
-    checkInstallation();
-  }, []);
-
-  if (isInstalled === null) {
-    return <List isLoading={true} />;
-  }
-
-  if (isInstalled === false) {
-    return <Detail markdown="Antinote is not installed." />;
-  }
-
-  if (version !== "beta") {
-    return <Detail markdown="Slotted notes are only available in Antinote v2.* (beta)" />;
-  }
+function SlottedNotesList() {
+  const { isLoading, data: notes, permissionView } = useSQL<Note>(BETA_DB_PATH, beta_query);
 
   if (permissionView) {
     return permissionView;
@@ -143,4 +115,38 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+export default function Command() {
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkInstallation() {
+      const { installed, version } = await checkAntinoteInstalled();
+      setIsInstalled(installed);
+      setVersion(version);
+    }
+
+    checkInstallation();
+  }, []);
+
+  if (isInstalled === null) {
+    return <List isLoading={true} />;
+  }
+
+  if (isInstalled === false) {
+    return <Detail markdown="Antinote is not installed." />;
+  }
+
+  if (version !== "beta") {
+    return <Detail markdown="Slotted notes are only available in Antinote v2.* (beta)" />;
+  }
+
+  // useSQL throws when the file is missing, so only open the database once it exists
+  if (!existsSync(BETA_DB_PATH)) {
+    return <Detail markdown={DATABASE_NOT_FOUND} />;
+  }
+
+  return <SlottedNotesList />;
 }

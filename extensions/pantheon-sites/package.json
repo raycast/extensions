@@ -5,6 +5,9 @@
   "description": "List and manage Pantheon sites",
   "icon": "command-icon.png",
   "author": "matbrady",
+  "contributors": [
+    "bdimaggio"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -48,6 +51,15 @@
       "type": "textfield",
       "required": false,
       "placeholder": "/usr/local/bin/terminus"
+    },
+    {
+      "title": "Site List Timeout (Seconds)",
+      "name": "siteListTimeout",
+      "description": "Max seconds to wait for 'terminus site:list'. Accounts with many sites can take well over the 10s default.",
+      "type": "textfield",
+      "required": false,
+      "default": "120",
+      "placeholder": "120"
     }
   ],
   "dependencies": {

@@ -5,6 +5,8 @@ Manage Apple Reminders from within Raycast:
 - View, complete and update your reminders
 - Effortlessly create new reminders
 - Manage your reminders from the menu bar
+- See your next timed reminder and its countdown with the Next Reminder command
+- Show the upcoming reminder in the menu bar, the way Raycast shows calendar events
 
 ## Search reminders
 

@@ -1,11 +1,15 @@
+import { shortcut } from "./shortcuts";
+import { Keyboard } from "@raycast/api";
 import React from "react";
 import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
 import Service, { CustomCheatsheet } from "./service";
+import { ImportMarkdownFile } from "./import-markdown-file";
 
 export default function ManageCustomCheatsheets() {
   const [customSheets, setCustomSheets] = useState<CustomCheatsheet[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
@@ -17,9 +21,11 @@ export default function ManageCustomCheatsheets() {
   async function loadCustomSheets() {
     try {
       setIsLoading(true);
+      setLoadError(null);
       const sheets = await Service.getCustomCheatsheets();
       setCustomSheets(sheets);
     } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Storage unavailable. Retry before making changes.");
       showFailureToast(error, { title: "Failed to load custom cheatsheets" });
     } finally {
       setIsLoading(false);
@@ -62,6 +68,7 @@ export default function ManageCustomCheatsheets() {
 
   return (
     <List
+      filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder="Search custom cheatsheets..."
       searchText={searchText}
@@ -72,8 +79,13 @@ export default function ManageCustomCheatsheets() {
           <Action
             title="Create New"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={() => push(<CreateCustomCheatsheet onCreated={loadCustomSheets} />)}
+          />
+          <Action.Push
+            title="Import Markdown File"
+            icon={Icon.Document}
+            target={<ImportMarkdownFile onImported={loadCustomSheets} />}
           />
         </ActionPanel>
       }
@@ -82,9 +94,12 @@ export default function ManageCustomCheatsheets() {
       {filteredSheets.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Document}
-          title="No custom cheatsheets found"
+          title={loadError ? "Storage Unavailable" : "No custom cheatsheets found"}
           description={
-            searchText ? `No cheatsheets match "${searchText}"` : "Create your first custom cheatsheet to get started"
+            loadError ||
+            (searchText
+              ? `No cheatsheets match "${searchText}"`
+              : "Create a custom cheatsheet or import a Markdown file")
           }
           actions={
             <ActionPanel>
@@ -93,6 +108,11 @@ export default function ManageCustomCheatsheets() {
                 title="Create New"
                 icon={Icon.Plus}
                 onAction={() => push(<CreateCustomCheatsheet onCreated={loadCustomSheets} />)}
+              />
+              <Action.Push
+                title="Import Markdown File"
+                icon={Icon.Document}
+                target={<ImportMarkdownFile onImported={loadCustomSheets} />}
               />
             </ActionPanel>
           }
@@ -117,22 +137,27 @@ export default function ManageCustomCheatsheets() {
                   <Action.Push
                     title="Edit Cheatsheet"
                     icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<EditCustomSheetForm sheet={sheet} onUpdated={loadCustomSheets} />}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Actions">
+                  <Action.Push
+                    title="Import Markdown File"
+                    icon={Icon.Document}
+                    target={<ImportMarkdownFile onImported={loadCustomSheets} />}
+                  />
                   <Action
                     title="Add to Favorites"
                     icon={Icon.Star}
-                    shortcut={{ modifiers: ["cmd"], key: "f" }}
+                    shortcut={shortcut("f")}
                     onAction={async () => {
-                      await Service.addToFavorites("custom", sheet.id, sheet.title);
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Favorited",
-                        message: sheet.title,
-                      });
+                      try {
+                        await Service.addToFavorites("custom", sheet.id, sheet.title);
+                        await showToast({ style: Toast.Style.Success, title: "Favorited", message: sheet.title });
+                      } catch (error) {
+                        await showFailureToast(error, { title: "Could Not Save Favorite" });
+                      }
                     }}
                   />
                   <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
@@ -140,7 +165,7 @@ export default function ManageCustomCheatsheets() {
                     title="Copy Content"
                     content={sheet.content}
                     icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Danger Zone">

@@ -8,7 +8,8 @@
   "contributors": [
     "JoyG",
     "leeonfield",
-    "ridemountainpig"
+    "ridemountainpig",
+    "benwk"
   ],
   "categories": [
     "Applications",
@@ -735,7 +736,7 @@
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.19.0",
+    "@anthropic-ai/sdk": "^0.133.0",
     "@raycast/api": "^1.103.0",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^1.1.1",

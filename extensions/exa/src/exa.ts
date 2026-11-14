@@ -16,6 +16,7 @@ export type CodeContextTokens = "dynamic" | number;
 
 export type SearchToolInput = {
   query: string;
+  type?: "lite" | "auto" | "deep" | "deep-reasoning";
   numResults?: number;
   category?: SearchCategory;
   includeDomains?: string[];
@@ -124,12 +125,12 @@ export function compactStatuses(statuses?: Status[]): CompactStatus[] | undefine
 }
 
 export async function searchHighlights(input: SearchToolInput) {
-  const { query, numResults, category, includeDomains, excludeDomains } = input;
+  const { query, type = "auto", numResults, category, includeDomains, excludeDomains } = input;
 
   return exa.search(query, {
-    type: "auto",
+    type,
     numResults,
-    category,
+    category: category === "research paper" ? "publication" : category,
     includeDomains: cleanArray(includeDomains),
     excludeDomains: cleanArray(excludeDomains),
     contents: {
@@ -138,19 +139,8 @@ export async function searchHighlights(input: SearchToolInput) {
   });
 }
 
-export async function searchDeepReasoning(input: SearchToolInput) {
-  const { query, numResults, category, includeDomains, excludeDomains } = input;
-
-  return exa.search(query, {
-    type: "deep-reasoning",
-    numResults,
-    category,
-    includeDomains: cleanArray(includeDomains),
-    excludeDomains: cleanArray(excludeDomains),
-    contents: {
-      highlights: true,
-    },
-  });
+export async function searchDeep(input: SearchToolInput) {
+  return searchHighlights({ ...input, type: input.type ?? "deep" });
 }
 
 export function compactSearchResults(response: SearchHighlightsResponse): CompactSearchResult[] {

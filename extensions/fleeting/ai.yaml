@@ -1,0 +1,163 @@
+instructions: |
+  Fleeting meetings are fictional, synthetic workplace scenarios, not meetings with real attendees.
+  Use list-meetings to resolve scenario names to meeting IDs and obtain links, favorites, preferences, currentTime, and the device timeZone.
+  If the user only wants to browse scenarios or get a link, use list-meetings without opening a browser or changing the clipboard.
+  Use copy-meeting-link only when the user asks to copy a link.
+  For open-meeting, use the returned meeting ID for a specific scenario, 'random' for a random meeting, 'preferred' for the preferred meeting, and 'quick' when the user asks for Quick Meeting or does not specify a scenario.
+  Use set-favorite with favorite true to add or false to remove. Never toggle by guessing the current state.
+  block-calendar prepares a draft or invite, and cannot read calendars, check availability, invite attendees, or save an event directly to a calendar.
+  Ask for a start date and time if the user has not provided one. Resolve relative dates using currentTime and timeZone from list-meetings.
+  Pass start as an ISO 8601 date-time with an explicit UTC offset or Z. Use the device time zone unless the user explicitly specifies another zone.
+  Recurrence uses the device's local time zone. If the user requests recurrence in a different time zone, explain the limitation before preparing the block.
+  Omit optional calendar fields to use preferences. Preserve explicit duration, title, provider, recurrence, privacy, and join-link choices.
+  A draft-opened result means the user must save the draft. An invite-saved result means the user must import the file. Never say the calendar is already blocked.
+  Explain returned warnings, especially private visibility limitations and Outlook recurrence falling back to .ics. If opened is false, the invite still exists; provide its path and do not retry the export.
+  Only report actions as successful after the tool succeeds. Format meeting links as Markdown links using the returned title and URL.
+
+evals:
+  - input: "@fleeting what security meetings are available?"
+    mocks:
+      list-meetings:
+        meetings:
+          - {
+              id: appsec,
+              title: AppSec Review,
+              category: security,
+              url: "https://iminafleeting.com/?m=appsec&v=en-US",
+              isFavorite: false,
+            }
+          - {
+              id: vendor,
+              title: Vendor Security Review,
+              category: security,
+              url: "https://iminafleeting.com/?m=vendor&v=en-US",
+              isFavorite: false,
+            }
+    expected:
+      - callsTool: list-meetings
+      - includes: AppSec Review
+      - not: { callsTool: open-meeting }
+      - not: { callsTool: copy-meeting-link }
+
+  - input: "@fleeting open a random meeting"
+    mocks:
+      open-meeting:
+        {
+          status: opened,
+          meetingId: sales,
+          title: Client Sales Call,
+          url: "https://iminafleeting.com/?m=sales&v=en-US",
+        }
+    expected:
+      - callsTool: { name: open-meeting, arguments: { meeting: random } }
+
+  - input: "@fleeting open my preferred meeting"
+    mocks:
+      open-meeting:
+        { status: opened, meetingId: api, title: API Design Review, url: "https://iminafleeting.com/?m=api&v=en-US" }
+    expected:
+      - callsTool: { name: open-meeting, arguments: { meeting: preferred } }
+
+  - input: "@fleeting copy the API Design Review link"
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: api, title: API Design Review, url: "https://iminafleeting.com/?m=api&v=en-US", isFavorite: false }
+      copy-meeting-link:
+        { status: copied, meetingId: api, title: API Design Review, url: "https://iminafleeting.com/?m=api&v=en-US" }
+    expected:
+      - callsTool: list-meetings
+      - callsTool: { name: copy-meeting-link, arguments: { meetingId: api } }
+
+  - input: "@fleeting add Engineering Standup to my favorites"
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: standup, title: Engineering Standup, isFavorite: false }
+      set-favorite: { meetingId: standup, title: Engineering Standup, isFavorite: true, favorites: [standup] }
+    expected:
+      - callsTool: { name: set-favorite, arguments: { meetingId: standup, favorite: true } }
+
+  - input: "@fleeting remove Engineering Standup from my favorites"
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: standup, title: Engineering Standup, isFavorite: true }
+      set-favorite: { meetingId: standup, title: Engineering Standup, isFavorite: false, favorites: [] }
+    expected:
+      - callsTool: { name: set-favorite, arguments: { meetingId: standup, favorite: false } }
+
+  - input: "@fleeting show my favorite meetings"
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: standup, title: Engineering Standup, isFavorite: true }
+    expected:
+      - callsTool: { name: list-meetings, arguments: { favoritesOnly: true } }
+      - not: { callsTool: set-favorite }
+
+  - input: "@fleeting block 45 minutes for Engineering Standup in Google Calendar on January 15, 2030 at 10:00 UTC, without a join link"
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: standup, title: Engineering Standup }
+        timeZone: UTC
+      block-calendar:
+        status: draft-opened
+        provider: google
+        requestedProvider: google
+        title: Engineering Standup
+        start: "2030-01-15T10:00:00.000Z"
+        end: "2030-01-15T10:45:00.000Z"
+        requiresSaveOrImport: true
+        warnings: ["This calendar link cannot set Private. Adjust visibility before saving the event."]
+    expected:
+      - callsTool:
+          name: block-calendar
+          arguments:
+            {
+              meetingId: standup,
+              provider: google,
+              durationMinutes: 45,
+              includeJoinLink: false,
+              start: { matches: "^2030-01-15T10:00(?::00(?:\\.000)?)?(?:Z|\\+00:00)$" },
+            }
+      - matches: "[Ss]av(e|ing)"
+      - matches: "[Pp]rivat(e|cy)|[Vv]isibility"
+      - not: { matches: "(has been|is now|already) (blocked|scheduled|added)" }
+
+  - input: "@fleeting prepare a private weekly Engineering Standup in Outlook for 30 minutes starting January 15, 2030 at 10:00 UTC"
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: standup, title: Engineering Standup }
+        timeZone: UTC
+      block-calendar:
+        status: invite-saved
+        provider: ics
+        requestedProvider: outlook
+        path: /Users/example/Downloads/fleeting-standup.ics
+        opened: true
+        requiresSaveOrImport: true
+        warnings: ["Outlook compose links cannot repeat events. Import the saved .ics file in Outlook."]
+    expected:
+      - callsTool:
+          {
+            name: block-calendar,
+            arguments:
+              { meetingId: standup, provider: outlook, recurrence: weekly, isPrivate: true, durationMinutes: 30 },
+          }
+      - includes: .ics
+      - includes: import
+
+  - input: "@fleeting block some calendar time for Engineering Standup"
+    usedAsExample: false
+    mocks:
+      list-meetings:
+        meetings:
+          - { id: standup, title: Engineering Standup }
+        currentTime: "2030-01-15T09:00:00.000Z"
+        timeZone: UTC
+    expected:
+      - not: { callsTool: block-calendar }
+      - matches: "[Ww]hen|[Ss]tart|[Dd]ate|[Tt]ime"

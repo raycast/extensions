@@ -14,9 +14,7 @@ pub struct MediaSessionInfo {
     pub title: String,
     pub artist: String,
     pub is_playing: bool,
-    // Exactly one of these is populated per session:
-    // exe_path  — process executable of a classic app (shell fileIcon).
-    // icon_path — rendered logo image of a packaged (MSIX/Store) app.
+    // Exactly one of these is populated per session.
     pub exe_path: String,
     pub icon_path: String,
 }
@@ -32,9 +30,6 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
-    // Single process-table scan: name stems and parent PIDs let each session
-    // resolve to its owning executable, or to the host app when the matched
-    // process is a headless engine embedded inside another application.
     let mut procs: std::collections::HashMap<u32, (String, String, u32)> = std::collections::HashMap::new();
     let mut by_name: std::collections::HashMap<String, Vec<u32>> = std::collections::HashMap::new();
     unsafe {
@@ -59,7 +54,11 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 
     let mut result = Vec::new();
     let mut app_index: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
+    let visible = unsafe { visible_window_pids() };
 
+    // Fire every properties request up front so the wait is the slowest
+    // session, not the sum.
+    let mut pending = Vec::new();
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
         if !has_current {
@@ -76,11 +75,16 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
         let session_index = *idx;
         *idx += 1;
 
-        let props = session
+        let props_op = session
             .TryGetMediaPropertiesAsync()
-            .map_err(|e| format!("TryGetMediaPropertiesAsync failed: {}", e))?
-            .get()
-            .map_err(|e| format!("Get media properties failed: {}", e))?;
+            .map_err(|e| format!("TryGetMediaPropertiesAsync failed: {}", e))?;
+        pending.push((session, app_id, session_index, props_op));
+
+        iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
+    }
+
+    for (session, app_id, session_index, props_op) in pending {
+        let props = props_op.get().map_err(|e| format!("Get media properties failed: {}", e))?;
 
         let title = props.Title().map_err(|e| format!("Title failed: {}", e))?.to_string();
         let artist = props.Artist().map_err(|e| format!("Artist failed: {}", e))?.to_string();
@@ -89,19 +93,16 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
         let status = info.PlaybackStatus().map_err(|e| format!("PlaybackStatus failed: {}", e))?;
         let is_playing = status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing;
 
-        // Packaged (MSIX/Store) apps have no process-name match and no
-        // embedded exe icon; pull the logo out of their package manifest.
-        let (exe_path, icon_path, resolved_app_name) = if app_id.contains('!') {
-            (String::new(), packaged_app_icon(&app_id).unwrap_or_default(), format_app_name(&app_id))
+        // One-shot process: in-memory caches would die with it, so anything
+        // beyond the process table and registry stays caller-side.
+        let (exe_path, resolved_app_name) = if app_id.contains('!') {
+            (String::new(), format_app_name(&app_id))
         } else {
-            // Display identity comes from a real window owner: the matched
-            // process itself when it has a visible window, otherwise the host
-            // app it was spawned by (an embedded engine has no window of its own).
             let exe_name = app_id.to_lowercase().trim_end_matches(".exe").to_string();
             let mut chosen: Option<(u32, String)> = None;
             if let Some(pids) = by_name.get(&exe_name) {
                 for &pid in pids {
-                    if unsafe { has_visible_window(pid) } {
+                    if visible.contains(&pid) {
                         chosen = procs.get(&pid).map(|(_, raw, _)| (pid, raw.clone()));
                         break;
                     }
@@ -114,7 +115,7 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
                                 Some((_, _, p)) if *p != 0 && *p != cur => *p,
                                 _ => break,
                             };
-                            if unsafe { has_visible_window(parent) } {
+                            if visible.contains(&parent) {
                                 chosen = procs.get(&parent).map(|(_, raw, _)| (parent, raw.clone()));
                                 break 'host;
                             }
@@ -130,15 +131,8 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
             }
 
             match &chosen {
-                Some((pid, raw)) => (unsafe { exe_path_from_pid(*pid) }.unwrap_or_default(), String::new(), format_app_name(raw)),
-                // No process matched the AUMID (e.g. Chromium-family browsers
-                // whose exe is chrome.exe but AUMID is "Helium.{hash}"). Fall
-                // back to the app's Start Menu shortcut target for the icon.
-                None => {
-                    let app_name = format_app_name(&app_id);
-                    let exe = exe_path_from_shortcut_name(&app_name);
-                    (exe.unwrap_or_default(), String::new(), app_name)
-                }
+                Some((pid, raw)) => (unsafe { exe_path_from_pid(*pid) }.unwrap_or_default(), format_app_name(raw)),
+                None => (unsafe { exe_path_from_aumid(&app_id) }.unwrap_or_default(), format_app_name(&app_id)),
             }
         };
 
@@ -150,41 +144,19 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
             artist,
             is_playing,
             exe_path,
-            icon_path,
+            icon_path: String::new(),
         });
-
-        iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
-    }
-
-    // Prefer the Start Menu shortcut name when the resolved executable has
-    // one — it is the display name users recognize (and what launchers show).
-    if result.iter().any(|s| !s.exe_path.is_empty()) {
-        let names = start_menu_shortcut_names();
-        if !names.is_empty() {
-            for session in result.iter_mut() {
-                if let Some(name) = names.get(&session.exe_path.to_lowercase()) {
-                    session.app_name = name.clone();
-                }
-            }
-        }
     }
 
     Ok(result)
 }
 
-// The Windows Media Transport Controls API does not expose stable per-session IDs.
-// Session identity uses (app_id + ordinal within app) captured at render time,
-// resolved against a fresh snapshot via resolve_target_index — the exact same
-// identity logic find_session_by_index uses, so switching never falls back to a
-// weaker matcher.
+// SMTC exposes no stable per-session IDs; identity is (app_id + ordinal +
+// exact metadata) via resolve_target_index, shared by every control action.
 //
-// Order of operations avoids ever playing two sessions at once:
-//   1. Pause every competing session and confirm each reached Paused.
-//   2. Only then start the target and confirm it reached Playing.
-// If any competitor can't be confirmed paused, the target is never started and
-// the sessions we did pause are resumed (pause is reversible — re-playing puts
-// them back in the state we found them in). If the target fails to start, the
-// already-paused competitors are resumed the same way.
+// Never play two sessions at once: pause + confirm every competitor first,
+// and resume whatever was paused if anything downstream fails (pause is
+// reversible, so resume restores the prior state).
 #[raycast]
 fn switch_session(
     target_app_id: String,
@@ -192,17 +164,15 @@ fn switch_session(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    // One snapshot, used for both resolving the target and pausing competitors —
-    // a second GetSessions() between the two would reintroduce a race window.
+    // One snapshot for resolve + pause: a second GetSessions() between the
+    // two would reintroduce a race window.
     let entries = snapshot_sessions()?;
-    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title, &target_artist)
+    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title, &target_artist, false)
         .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
 
-    // Phase 1: pause every competitor. Track every session whose pause request was
-    // ACCEPTED — confirmed or not — because an accepted pause can still complete
-    // after the confirmation poll times out, and rollback must restore it too.
-    // Resuming a still-playing session later is a harmless no-op, so including
-    // unconfirmed pauses in the rollback set is safe.
+    // Track every ACCEPTED pause, confirmed or not: an accepted request can
+    // still complete after the poll times out. Resuming a still-playing
+    // session is a harmless no-op.
     let mut pause_attempted_positions: Vec<usize> = Vec::new();
     let mut pause_errors: Vec<String> = Vec::new();
 
@@ -212,9 +182,8 @@ fn switch_session(
         }
         let label = format!("{}[{}]", entry.app_id, entry.ordinal);
 
-        // Decide whether this competitor must be paused. An unreadable state is
-        // treated as possibly-playing and still gets a pause attempt rather than
-        // being silently skipped; only an actual pause failure surfaces as an error.
+        // Unreadable state reads as possibly-playing: attempt the pause, only
+        // surface actual failures.
         let status = entry.session.GetPlaybackInfo().and_then(|info| info.PlaybackStatus());
         let should_pause = match &status {
             Ok(s) => *s == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing,
@@ -232,7 +201,7 @@ fn switch_session(
             Ok(_) => {
                 pause_attempted_positions.push(i);
                 let mut paused = false;
-                for _ in 0..50 {
+                for _ in 0..60 {
                     if let Ok(info) = entry.session.GetPlaybackInfo() {
                         if let Ok(status) = info.PlaybackStatus() {
                             if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
@@ -241,7 +210,7 @@ fn switch_session(
                             }
                         }
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(50));
+                    std::thread::sleep(std::time::Duration::from_millis(15));
                 }
                 if !paused {
                     pause_errors.push(format!("{} accepted pause but never reached paused state", label));
@@ -251,8 +220,6 @@ fn switch_session(
         }
     }
 
-    // Starting the target while a competitor might still be playing would create
-    // simultaneous playback. Undo what we paused and report instead.
     if !pause_errors.is_empty() {
         let resume_errors = resume_sessions(&entries, &pause_attempted_positions);
         let mut msg = format!("Could not pause all playing sessions: {}", pause_errors.join("; "));
@@ -262,10 +229,6 @@ fn switch_session(
         return Err(msg);
     }
 
-    // Phase 2: nothing else can be playing now — start the target. Any failure
-    // (request rejected, immediate TryPlayAsync error, or state never reached)
-    // resumes the paused competitors so the user's previous playback isn't left
-    // interrupted; resume failures are reported alongside the switch error.
     let target_session = entries[target_pos].session.clone();
     let play_result = match target_session.TryPlayAsync() {
         Ok(op) => op.get().map(|_| ()).map_err(|e| format!("Play request rejected: {}", e)),
@@ -274,7 +237,7 @@ fn switch_session(
     let target_failure = match play_result {
         Ok(_) => {
             let mut started = false;
-            for _ in 0..50 {
+            for _ in 0..60 {
                 if let Ok(info) = target_session.GetPlaybackInfo() {
                     if let Ok(status) = info.PlaybackStatus() {
                         if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
@@ -283,7 +246,7 @@ fn switch_session(
                         }
                     }
                 }
-                std::thread::sleep(std::time::Duration::from_millis(50));
+                std::thread::sleep(std::time::Duration::from_millis(15));
             }
             if !started {
                 Some("Target session did not start playing after switch".to_string())
@@ -306,12 +269,6 @@ fn switch_session(
     Ok(())
 }
 
-// Re-playing a session we just paused restores it — pause is reversible, so a
-// paused SMTC session resumes from where it stopped. Used to undo the pause
-// phase when the target can't be started, so competitors aren't left paused.
-// Each resume is confirmed to actually reach Playing, matching the play path;
-// an accepted request with no state transition is reported as a resume failure
-// so interrupted playback isn't silently treated as restored.
 fn resume_sessions(entries: &[SessionEntry], positions: &[usize]) -> Vec<String> {
     let mut errors = Vec::new();
     for &i in positions {
@@ -324,7 +281,7 @@ fn resume_sessions(entries: &[SessionEntry], positions: &[usize]) -> Vec<String>
         match resume {
             Ok(_) => {
                 let mut resumed = false;
-                for _ in 0..50 {
+                for _ in 0..60 {
                     if let Ok(info) = entry.session.GetPlaybackInfo() {
                         if let Ok(status) = info.PlaybackStatus() {
                             if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
@@ -333,7 +290,7 @@ fn resume_sessions(entries: &[SessionEntry], positions: &[usize]) -> Vec<String>
                             }
                         }
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(50));
+                    std::thread::sleep(std::time::Duration::from_millis(15));
                 }
                 if !resumed {
                     errors.push(format!("{} accepted resume but never reached playing state", label));
@@ -397,41 +354,20 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
     Ok(entries)
 }
 
-// Resolve which snapshot entry the user clicked. GetSessions() has no documented
-// ordering guarantee and sessions expose no stable ID, so identity is a per-app
-// ordinal plus the exact media metadata the user clicked: a session is accepted
-// only when its title AND artist are byte-identical to what was captured at
-// render time. Any drift — a track skip, a metadata refresh, or a replacement
-// that merely shares a prefix or substring — is refused rather than risking
-// control of a different session. The list auto-refreshes, so the user re-clicks
-// the current metadata and the action proceeds. Priority:
-//   1. Exact (ordinal + title + artist) match — the confident happy path.
-//   2. Exactly one session matches both — it moved ordinals (a sibling closed,
-//      order changed). Trust the metadata, not the number.
-//   Otherwise unmatched or ambiguous (two+ sessions reproduce the metadata) →
-//   None. Callers surface a "try refreshing" error.
-//
-// When the captured title is empty, the artist is the fingerprint and the
-// session must STILL be titleless with an identical artist — a now-populated
-// title or changed artist is not the entry the user clicked. Symmetrically, a
-// captured-empty artist must still be artist-less: a session whose artist
-// populated between render and action is not the entry the user clicked.
-//
-// There is deliberately NO ordinal-only fallback and NO prefix tolerance: an
-// ordinal or prefix match cannot distinguish "the selected session track-
-// skipped" from "it closed and a sibling or replacement occupies its slot", so
-// guessing would risk controlling the wrong session.
-//
-// Only limit: two genuinely different sessions presenting byte-identical title
-// and artist (e.g. two same-app tabs playing the same stream) are
-// indistinguishable by any metadata-based API; SMTC exposes no session ID, so
-// exact metadata equality is the strongest identity available.
+// Identity is (app_id + ordinal + byte-identical title/artist). No
+// ordinal-only or prefix fallback: those can't distinguish "track skipped"
+// from "session closed and replaced", so guessing risks driving the wrong
+// session. Empty fields must stay empty; two sessions with identical
+// metadata are indistinguishable — SMTC exposes no session ID.
+//   1. Exact match. 2. Unique metadata match at a shifted ordinal.
+//   3. Single-session app, only when the caller opts in (see below).
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
     target_index: u32,
     target_title: &str,
     target_artist: &str,
+    allow_single: bool,
 ) -> Option<usize> {
     if target_title.is_empty() {
         if target_artist.is_empty() {
@@ -452,6 +388,9 @@ fn resolve_target_index(
         }
         if artist_matches.len() == 1 {
             return artist_matches[0].into();
+        }
+        if allow_single {
+            return single_app_session(entries, target_app_id);
         }
         return None;
     }
@@ -479,7 +418,30 @@ fn resolve_target_index(
         return title_matches[0].into();
     }
 
+    if allow_single {
+        return single_app_session(entries, target_app_id);
+    }
     None
+}
+
+// 3. Opt-in last resort: the app has exactly one session, so app (+ ordinal)
+// already identifies it — the metadata only drifted because the app moved
+// faster than the UI refreshed (rapid prev/next). Zero sessions means it
+// closed; two or more without a metadata match stays ambiguous. Scoped to
+// momentary single-target actions: switch_session stays strict because it
+// pauses other apps on the strength of a possibly stale click.
+fn single_app_session(entries: &[SessionEntry], target_app_id: &str) -> Option<usize> {
+    let mut found: Option<usize> = None;
+    for (i, entry) in entries.iter().enumerate() {
+        if entry.app_id != target_app_id {
+            continue;
+        }
+        if found.is_some() {
+            return None;
+        }
+        found = Some(i);
+    }
+    found
 }
 
 #[raycast]
@@ -489,13 +451,13 @@ fn pause_session(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     session.TryPauseAsync()
         .map_err(|e| format!("TryPauseAsync failed: {}", e))?
         .get()
         .map_err(|e| format!("Pause request rejected: {}", e))?;
     let mut paused = false;
-    for _ in 0..50 {
+    for _ in 0..60 {
         if let Ok(info) = session.GetPlaybackInfo() {
             if let Ok(status) = info.PlaybackStatus() {
                 if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
@@ -504,7 +466,7 @@ fn pause_session(
                 }
             }
         }
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(15));
     }
     if paused {
         Ok(())
@@ -520,13 +482,13 @@ fn play_session(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     session.TryPlayAsync()
         .map_err(|e| format!("TryPlayAsync failed: {}", e))?
         .get()
         .map_err(|e| format!("Play request rejected: {}", e))?;
     let mut started = false;
-    for _ in 0..50 {
+    for _ in 0..60 {
         if let Ok(info) = session.GetPlaybackInfo() {
             if let Ok(status) = info.PlaybackStatus() {
                 if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
@@ -535,7 +497,7 @@ fn play_session(
                 }
             }
         }
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(15));
     }
     if started {
         Ok(())
@@ -551,7 +513,7 @@ fn previous_track(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipPreviousAsync()
         .map_err(|e| format!("TrySkipPreviousAsync failed: {}", e))?
@@ -568,7 +530,7 @@ fn next_track(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipNextAsync()
         .map_err(|e| format!("TrySkipNextAsync failed: {}", e))?
@@ -594,7 +556,7 @@ fn get_session_title(session: &GlobalSystemMediaTransportControlsSession) -> Res
 }
 
 fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_title: &str) {
-    for _ in 0..50 {
+    for _ in 0..60 {
         if let Ok(props) = session.TryGetMediaPropertiesAsync().and_then(|op| op.get()) {
             if let Ok(title) = props.Title() {
                 if title.to_string() != old_title {
@@ -602,33 +564,232 @@ fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_ti
                 }
             }
         }
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(15));
     }
 }
 
-// Session lookup for play/pause/skip actions. Thin wrapper over the shared
-// snapshot + resolve logic so every control action uses the same identity
-// rules switch_session does — no separate, weaker matcher to drift apart.
 fn find_session_by_index(
     target_app_id: &str,
     target_index: u32,
     target_title: &str,
     target_artist: &str,
+    allow_single: bool,
 ) -> Result<GlobalSystemMediaTransportControlsSession, String> {
     let entries = snapshot_sessions()?;
-    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title, target_artist)
+    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title, target_artist, allow_single)
         .ok_or_else(|| {
         format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing")
     })?;
     Ok(entries[pos].session.clone())
 }
 
-// Some desktop apps register their App User Model ID — the exact string SMTC
-// reports — under HKCU\Software\Classes\AppUserModelId\<aumid> (or the HKCR
-// equivalent) with the executable path as the default value. This lets us
-// reveal apps whose AUMID doesn't match their process name. Only a path that
-// resolves to an existing .exe is trusted: some apps point the key at a data
-// folder, and launching that would open Explorer at the wrong location.
+// Session artwork in a temp file. Empty path when the session offers none;
+// the caller sizes the image from the dimensions.
+#[derive(Serialize)]
+pub struct SessionThumbnail {
+    pub path: String,
+    pub width: u32,
+    pub height: u32,
+    // Content hash, embedded in the filename: the renderer's image cache
+    // ignores query strings, so only a unique path per byte-content defeats
+    // stale art. Doubles as the settling flip signal caller-side.
+    pub hash: String,
+}
+
+fn empty_thumbnail() -> SessionThumbnail {
+    SessionThumbnail { path: String::new(), width: 0, height: 0, hash: String::new() }
+}
+
+fn fnv1a_hex(bytes: &[u8]) -> String {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for b in bytes {
+        h ^= *b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    format!("{h:016x}")
+}
+
+// Header parsing avoids a decoding dependency for five formats.
+fn image_dimensions(bytes: &[u8]) -> Option<(u32, u32)> {
+    let nonzero = |w: u32, h: u32| (w > 0 && h > 0).then_some((w, h));
+
+    // PNG: 8-byte signature, IHDR width/height as u32BE at 16..24.
+    if bytes.len() >= 24 && bytes.starts_with(&[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A]) {
+        let w = u32::from_be_bytes(bytes[16..20].try_into().ok()?);
+        let h = u32::from_be_bytes(bytes[20..24].try_into().ok()?);
+        return nonzero(w, h);
+    }
+    // JPEG: scan segment markers for a Start-Of-Frame.
+    if bytes.len() > 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 {
+        let mut i = 2;
+        while i < bytes.len() {
+            if bytes[i] != 0xFF {
+                i += 1;
+                continue;
+            }
+            let mut j = i + 1;
+            while j < bytes.len() && bytes[j] == 0xFF {
+                j += 1;
+            }
+            if j >= bytes.len() {
+                break;
+            }
+            let marker = bytes[j];
+            if marker == 0x00 || marker == 0x01 || (0xD0..=0xD9).contains(&marker) {
+                i = j + 1;
+                continue;
+            }
+            if j + 2 >= bytes.len() {
+                break;
+            }
+            let seg_len = u16::from_be_bytes([bytes[j + 1], bytes[j + 2]]) as usize;
+            if seg_len < 2 || j + 1 + seg_len > bytes.len() {
+                break;
+            }
+            if (0xC0..=0xCF).contains(&marker) && ![0xC4, 0xC8, 0xCC].contains(&marker) && seg_len >= 8 {
+                let h = u16::from_be_bytes([bytes[j + 4], bytes[j + 5]]) as u32;
+                let w = u16::from_be_bytes([bytes[j + 6], bytes[j + 7]]) as u32;
+                return nonzero(w, h);
+            }
+            i = j + 1 + seg_len;
+        }
+    }
+    // GIF87a/89a: dimensions as u16LE at 6..10.
+    if bytes.len() >= 10 && (bytes.starts_with(b"GIF87a") || bytes.starts_with(b"GIF89a")) {
+        let w = u16::from_le_bytes([bytes[6], bytes[7]]) as u32;
+        let h = u16::from_le_bytes([bytes[8], bytes[9]]) as u32;
+        return nonzero(w, h);
+    }
+    // BMP: DIB header size at 14; v3+ has i32LE dimensions at 18..26.
+    if bytes.len() >= 26 && bytes.starts_with(b"BM") {
+        let dib = u32::from_le_bytes(bytes[14..18].try_into().ok()?);
+        if dib == 12 && bytes.len() >= 22 {
+            let w = u16::from_le_bytes([bytes[18], bytes[19]]) as u32;
+            let h = u16::from_le_bytes([bytes[20], bytes[21]]) as u32;
+            return nonzero(w, h);
+        } else if dib >= 40 {
+            let w = i32::from_le_bytes(bytes[18..22].try_into().ok()?).unsigned_abs();
+            let h = i32::from_le_bytes(bytes[22..26].try_into().ok()?).unsigned_abs();
+            return nonzero(w, h);
+        }
+    }
+    // WebP: "RIFF"...."WEBP", then a VP8/VP8L/VP8X chunk at 12.
+    if bytes.len() >= 30 && bytes.starts_with(b"RIFF") && bytes[8..12] == *b"WEBP" {
+        match &bytes[12..16] {
+            b"VP8 " if bytes[23..26] == [0x9D, 0x01, 0x2A] => {
+                let w = (u16::from_le_bytes([bytes[26], bytes[27]]) & 0x3FFF) as u32;
+                let h = (u16::from_le_bytes([bytes[28], bytes[29]]) & 0x3FFF) as u32;
+                return nonzero(w, h);
+            }
+            b"VP8L" if bytes[20] == 0x2F && bytes.len() >= 25 => {
+                let b1 = bytes[21] as u32;
+                let b2 = bytes[22] as u32;
+                let b3 = bytes[23] as u32;
+                let b4 = bytes[24] as u32;
+                let w = 1 + (((b2 & 0x3F) << 8) | b1);
+                let h = 1 + (((b4 & 0x0F) << 10) | (b3 << 2) | (b2 >> 6));
+                return nonzero(w, h);
+            }
+            b"VP8X" => {
+                let w = 1 + u32::from_le_bytes([bytes[24], bytes[25], bytes[26], 0]);
+                let h = 1 + u32::from_le_bytes([bytes[27], bytes[28], bytes[29], 0]);
+                return nonzero(w, h);
+            }
+            _ => {}
+        }
+    }
+    None
+}
+#[raycast]
+fn session_thumbnail(
+    target_app_id: String,
+    target_index: u32,
+    target_title: String,
+    target_artist: String,
+) -> Result<SessionThumbnail, String> {
+    use windows::core::Interface;
+    use windows::Storage::Streams::{DataReader, IInputStream};
+
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
+    let props = session
+        .TryGetMediaPropertiesAsync()
+        .map_err(|e| format!("TryGetMediaPropertiesAsync failed: {}", e))?
+        .get()
+        .map_err(|e| format!("Get media properties failed: {}", e))?;
+    let thumb_ref = match props.Thumbnail() {
+        Ok(r) => r,
+        Err(_) => return Ok(empty_thumbnail()),
+    };
+
+    let stream = thumb_ref
+        .OpenReadAsync()
+        .map_err(|e| format!("Thumbnail OpenReadAsync failed: {}", e))?
+        .get()
+        .map_err(|e| format!("Thumbnail open failed: {}", e))?;
+    let size = stream.Size().map_err(|e| format!("Thumbnail Size failed: {}", e))?;
+    if size == 0 || size > 25_000_000 {
+        return Ok(empty_thumbnail());
+    }
+    let input: IInputStream = stream.cast().map_err(|e| format!("Thumbnail cast failed: {}", e))?;
+    let reader = DataReader::CreateDataReader(&input).map_err(|e| format!("CreateDataReader failed: {}", e))?;
+    reader
+        .LoadAsync(size as u32)
+        .map_err(|e| format!("Thumbnail LoadAsync failed: {}", e))?
+        .get()
+        .map_err(|e| format!("Thumbnail load failed: {}", e))?;
+    let mut bytes = vec![0u8; size as usize];
+    reader.ReadBytes(&mut bytes).map_err(|e| format!("Thumbnail ReadBytes failed: {}", e))?;
+
+    let content_type = stream.ContentType().map(|c| c.to_string().to_lowercase()).unwrap_or_default();
+    let ext = if content_type.contains("png") {
+        "png"
+    } else if content_type.contains("bmp") {
+        "bmp"
+    } else if content_type.contains("gif") {
+        "gif"
+    } else if content_type.contains("webp") {
+        "webp"
+    } else if content_type.contains("avif") {
+        "avif"
+    } else if bytes.starts_with(&[0x89, b'P', b'N', b'G']) {
+        "png"
+    } else {
+        "jpg"
+    };
+
+    // Unique path per byte-content (renderer ignores query strings);
+    // superseded slot files are cleared — the caller holds no references
+    // to gone sessions, so nothing rendered is deleted under it.
+    let safe_id: String = target_app_id
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' { c } else { '_' })
+        .take(60)
+        .collect();
+    let hash = fnv1a_hex(&bytes);
+    let slot = format!("media-switcher-thumb-{safe_id}-{target_index}-");
+    let file_name = format!("{slot}{hash}.{ext}");
+    let dir = std::env::temp_dir();
+    let path = dir.join(&file_name);
+    if let Ok(entries) = std::fs::read_dir(&dir) {
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with(&slot) && name != file_name {
+                let _ = std::fs::remove_file(entry.path());
+            }
+        }
+    }
+    std::fs::write(&path, &bytes).map_err(|e| format!("Thumbnail write failed: {}", e))?;
+    let (width, height) = image_dimensions(&bytes).unwrap_or((0, 0));
+    Ok(SessionThumbnail {
+        path: path.to_string_lossy().to_string(),
+        width,
+        height,
+        hash,
+    })
+}
+
+// AUMID registry key points at the exe — except some apps point it at a data
+// folder, so only existing .exe paths are trusted.
 unsafe fn exe_path_from_aumid(aumid: &str) -> Option<String> {
     use windows::core::HSTRING;
     use windows::Win32::System::Registry::{
@@ -675,8 +836,6 @@ unsafe fn exe_path_from_aumid(aumid: &str) -> Option<String> {
     None
 }
 
-// Full executable path for a running process, used to relaunch apps whose
-// process matched but had no visible window to bring to the front.
 unsafe fn exe_path_from_pid(pid: u32) -> Option<String> {
     use windows::Win32::Foundation::CloseHandle;
     use windows::Win32::System::Threading::{
@@ -695,30 +854,27 @@ unsafe fn exe_path_from_pid(pid: u32) -> Option<String> {
     }
 }
 
-// Whether any visible top-level window belongs to this process.
-unsafe fn has_visible_window(pid: u32) -> bool {
-    use std::sync::atomic::{AtomicUsize, Ordering};
+// One EnumWindows pass; browsers spawn dozens of same-name processes.
+unsafe fn visible_window_pids() -> std::collections::HashSet<u32> {
     use windows::Win32::Foundation::{BOOL, HWND, LPARAM, TRUE};
     use windows::Win32::UI::WindowsAndMessaging::{EnumWindows, GetWindowThreadProcessId, IsWindowVisible};
 
-    static TARGET_PID: AtomicUsize = AtomicUsize::new(0);
-    static FOUND: AtomicUsize = AtomicUsize::new(0);
+    static mut FOUND: *mut std::collections::HashSet<u32> = std::ptr::null_mut();
     unsafe extern "system" fn cb(hwnd: HWND, _lparam: LPARAM) -> BOOL {
-        if !IsWindowVisible(hwnd).as_bool() {
-            return TRUE;
-        }
-        let mut wpid: u32 = 0;
-        let _ = GetWindowThreadProcessId(hwnd, Some(&mut wpid));
-        if wpid as usize == TARGET_PID.load(Ordering::SeqCst) {
-            FOUND.store(1, Ordering::SeqCst);
-            return BOOL(0);
+        if IsWindowVisible(hwnd).as_bool() {
+            let mut wpid: u32 = 0;
+            let _ = GetWindowThreadProcessId(hwnd, Some(&mut wpid));
+            if !FOUND.is_null() {
+                (*FOUND).insert(wpid);
+            }
         }
         TRUE
     }
-    TARGET_PID.store(pid as usize, Ordering::SeqCst);
-    FOUND.store(0, Ordering::SeqCst);
+    let mut set = std::collections::HashSet::new();
+    FOUND = &mut set;
     let _ = EnumWindows(Some(cb), LPARAM(0));
-    FOUND.load(Ordering::SeqCst) != 0
+    FOUND = std::ptr::null_mut();
+    set
 }
 
 fn collect_shortcuts(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
@@ -733,32 +889,19 @@ fn collect_shortcuts(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
     }
 }
 
-// Friendly display names from Start Menu shortcuts: maps each shortcut's
-// target executable path to the shortcut's own file name (e.g. an exe with
-// no embedded metadata still shows the name users see in the Start menu).
-fn start_menu_shortcut_names() -> std::collections::HashMap<String, String> {
-    let (by_exe, _) = start_menu_shortcuts();
-    by_exe
-}
-
-// Start Menu <-> executable mapping, memoized. First map: target exe path ->
-// shortcut stem (for display names). Second map: shortcut stem -> target exe
-// path (for recovering an exe from an app name, e.g. Chromium-family browsers
-// whose AUMID doesn't match their chrome.exe process).
-fn start_menu_shortcuts() -> (
-    std::collections::HashMap<String, String>,
-    std::collections::HashMap<String, String>,
-) {
-    static CACHE: std::sync::Mutex<Option<(std::collections::HashMap<String, String>, std::collections::HashMap<String, String>)>> =
-        std::sync::Mutex::new(None);
+// Built on demand by scan_shortcuts; the caller caches it (one-shot
+// process, so the memo only dedupes within a single invocation). One entry
+// per shortcut — several shortcuts may share an executable under different
+// names, and the caller indexes every name.
+fn start_menu_shortcuts() -> Vec<ShortcutEntry> {
+    static CACHE: std::sync::Mutex<Option<Vec<ShortcutEntry>>> = std::sync::Mutex::new(None);
     if let Ok(guard) = CACHE.lock() {
-        if let Some(pair) = guard.as_ref() {
-            return pair.clone();
+        if let Some(entries) = guard.as_ref() {
+            return entries.clone();
         }
     }
 
-    let mut by_exe: std::collections::HashMap<String, String> = std::collections::HashMap::new();
-    let mut by_name: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    let mut entries: Vec<ShortcutEntry> = Vec::new();
     use std::os::windows::ffi::OsStrExt;
     unsafe {
         use windows::core::{Interface, PCWSTR};
@@ -783,11 +926,15 @@ fn start_menu_shortcuts() -> (
             }
         }
 
+        let link: IShellLinkW = match CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER) {
+            Ok(l) => l,
+            Err(_) => return entries,
+        };
+        let persist: IPersistFile = match link.cast() {
+            Ok(p) => p,
+            Err(_) => return entries,
+        };
         for lnk in files {
-            let Ok(link): Result<IShellLinkW, _> = CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER) else {
-                continue;
-            };
-            let Ok(persist) = link.cast::<IPersistFile>() else { continue };
             let wide: Vec<u16> = lnk.as_os_str().encode_wide().chain(Some(0)).collect();
             if persist.Load(PCWSTR(wide.as_ptr()), windows::Win32::System::Com::STGM(0)).is_err() {
                 continue;
@@ -798,31 +945,38 @@ fn start_menu_shortcuts() -> (
                 continue;
             }
             let len = target.iter().position(|c| *c == 0).unwrap_or(target.len());
-            let orig_path = String::from_utf16_lossy(&target[..len]);
-            let exe_path = orig_path.to_lowercase();
-            if exe_path.is_empty() || !exe_path.ends_with(".exe") {
+            let exe_path = String::from_utf16_lossy(&target[..len]);
+            if exe_path.is_empty() || !exe_path.to_lowercase().ends_with(".exe") {
                 continue;
             }
             if let Some(stem) = lnk.file_stem().and_then(|s| s.to_str()) {
-                by_exe.entry(exe_path).or_insert_with(|| stem.to_string());
-                by_name.entry(stem.to_lowercase()).or_insert_with(|| orig_path);
+                entries.push(ShortcutEntry { exe_path, name: stem.to_string() });
             }
         }
     }
 
     if let Ok(mut guard) = CACHE.lock() {
-        *guard = Some((by_exe.clone(), by_name.clone()));
+        *guard = Some(entries.clone());
     }
-    (by_exe, by_name)
+    entries
 }
 
-// Recover an executable path from an app's display/shortcut name (e.g.
-// "Helium" -> "...\Helium\Application\chrome.exe") via its Start Menu
-// shortcut. Used when the AUMID matches neither a running process nor a
-// registered AppUserModelId (Chromium-family browsers).
-fn exe_path_from_shortcut_name(name: &str) -> Option<String> {
-    let (_, by_name) = start_menu_shortcuts();
-    by_name.get(&name.to_lowercase()).cloned()
+#[derive(Serialize, Clone)]
+pub struct ShortcutEntry {
+    pub exe_path: String,
+    pub name: String,
+}
+
+// Flat entry list: the d.ts generator mangles HashMap<String, String>, so
+// maps cross the bridge as entries and the caller rebuilds both directions.
+#[raycast]
+fn scan_shortcuts() -> Result<Vec<ShortcutEntry>, String> {
+    Ok(start_menu_shortcuts())
+}
+
+#[raycast]
+fn packaged_app_icon_for(app_id: String) -> Result<String, String> {
+    Ok(packaged_app_icon(&app_id).unwrap_or_default())
 }
 
 fn xml_attr(manifest: &str, attr: &str) -> Option<String> {
@@ -832,8 +986,8 @@ fn xml_attr(manifest: &str, attr: &str) -> Option<String> {
     Some(manifest[start..end].replace('/', "\\"))
 }
 
-// Rank MRT asset variants: closest targetsize to 32px, then scales (200 best),
-// then the bare logo; contrast/theme/light variants are deprioritized.
+// Highest wins: nearest targetsize to 32px, then scale-200, then bare logo;
+// theme/contrast/light variants lose.
 fn asset_score(name: &str) -> u32 {
     let lower = name.to_lowercase();
     let parse_suffix = |marker: &str| -> Option<i32> {
@@ -863,7 +1017,6 @@ fn asset_score(name: &str) -> u32 {
     score
 }
 
-// Pick the best-sized PNG among the scale/targetsize variants of a manifest logo.
 fn pick_best_logo_asset(base: &std::path::Path) -> Option<String> {
     let stem = base.file_stem()?.to_str()?.to_string();
     let dir = base.parent()?;
@@ -883,9 +1036,6 @@ fn pick_best_logo_asset(base: &std::path::Path) -> Option<String> {
 }
 
 
-// Packaged (MSIX/Store) apps carry their icon as manifest-referenced assets,
-// not an embedded exe icon. Resolve the package's install folder and pick the
-// best logo variant from it.
 fn packaged_app_icon(app_id: &str) -> Option<String> {
     use windows::core::{HSTRING, PWSTR};
     use windows::Win32::Foundation::{ERROR_INSUFFICIENT_BUFFER, ERROR_SUCCESS};
@@ -1067,9 +1217,6 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
                 return Ok(());
             }
 
-            // The matched processes are headless (e.g. an embedded playback
-            // engine). Walk up the parent chain to the host app and look for
-            // its visible window instead of giving up.
             let mut ancestors: Vec<u32> = Vec::new();
             for &pid in &pids {
                 let mut cur = pid;
@@ -1093,8 +1240,6 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
                 }
             }
 
-            // Nothing visible anywhere in the tree: relaunch the matched or
-            // host executable to surface it instead of giving up.
             for pid in pids.iter().chain(ancestors.iter()) {
                 if let Some(path) = exe_path_from_pid(*pid) {
                     let r = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&path), None, None, SW_SHOWNORMAL);
@@ -1105,8 +1250,6 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
             }
         }
 
-        // AUMID may not match the process name; resolve it through the
-        // registered AppUserModelId and launch the executable directly.
         if let Some(exe_path) = exe_path_from_aumid(&target_app_id) {
             let r = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&exe_path), None, None, SW_SHOWNORMAL);
             if (r.0 as isize) > 32 {
@@ -1114,8 +1257,7 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
             }
         }
 
-        // Packaged apps launch via shell:AppsFolder\<aumid>. Desktop apps whose
-        // AUMID is (or contains) the executable name launch directly.
+        // Packaged apps launch via shell:AppsFolder.
         let mut last_error: isize;
         let path = format!("shell:AppsFolder\\{}", target_app_id);
         let result = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&path), None, None, SW_SHOWNORMAL);
@@ -1156,6 +1298,7 @@ unsafe fn bring_to_front(hwnd: HWND) {
         let _ = ShowWindow(hwnd, SW_RESTORE);
     }
     keybd_event(VK_MENU.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
+    // Alt-tap settle so SetForegroundWindow isn't treated as a background steal. Keep at 50ms.
     std::thread::sleep(std::time::Duration::from_millis(50));
     keybd_event(VK_MENU.0 as u8, 0, KEYEVENTF_KEYUP, 0);
     let _ = SetForegroundWindow(hwnd);
@@ -1256,7 +1399,6 @@ fn format_app_name(app_id: &str) -> String {
         return "Unknown".to_string();
     }
 
-    // Map internally-named AUMIDs to the names users actually see.
     let overrides: &[(&str, &str)] = &[
         ("Microsoft.ZuneMusic_", "Media Player"),
         ("Microsoft.ZuneVideo_", "Movies & TV"),

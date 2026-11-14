@@ -1,41 +1,59 @@
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import {
   ExternalAccessDeniedError,
+  InvalidPortError,
   MCPNotRunningError,
-  RemoteAccessUnsupportedError,
+  RateLimitedError,
+  ServerDisabledError,
+  ServerUnreachableError,
   TableProNotInstalledError,
+  TokenExpiredError,
   TokenMissingError,
   TokenRevokedError,
+  UpdateRequiredError,
 } from "./types";
+import { translateError } from "./protocol";
 
 export type ErrorScenario =
   | { kind: "not-installed" }
+  | { kind: "update-required"; minimum: string; installed?: string }
   | { kind: "mcp-not-running" }
+  | { kind: "unreachable"; port: number }
+  | { kind: "invalid-port"; value: string }
   | { kind: "no-token" }
   | { kind: "token-revoked" }
-  | { kind: "remote-unsupported" }
+  | { kind: "token-expired" }
+  | { kind: "server-disabled" }
+  | { kind: "rate-limited" }
   | { kind: "access-denied"; message: string }
   | { kind: "other"; message: string };
 
-const FORBIDDEN_CODE = -32_007;
-
 export function classifyError(error: unknown): ErrorScenario {
-  if (error instanceof TableProNotInstalledError)
+  const err = translateError(error);
+  if (err instanceof TableProNotInstalledError)
     return { kind: "not-installed" };
-  if (error instanceof MCPNotRunningError) return { kind: "mcp-not-running" };
-  if (error instanceof TokenMissingError) return { kind: "no-token" };
-  if (error instanceof TokenRevokedError) return { kind: "token-revoked" };
-  if (error instanceof RemoteAccessUnsupportedError) {
-    return { kind: "remote-unsupported" };
+  if (err instanceof UpdateRequiredError) {
+    return {
+      kind: "update-required",
+      minimum: err.minimumVersion,
+      installed: err.installedVersion,
+    };
   }
-  if (error instanceof ExternalAccessDeniedError) {
-    return { kind: "access-denied", message: error.message };
+  if (err instanceof MCPNotRunningError) return { kind: "mcp-not-running" };
+  if (err instanceof ServerUnreachableError) {
+    return { kind: "unreachable", port: err.port };
   }
-  if (error instanceof McpError && error.code === FORBIDDEN_CODE) {
-    return { kind: "access-denied", message: error.message };
+  if (err instanceof InvalidPortError) {
+    return { kind: "invalid-port", value: err.value };
   }
-  if (error instanceof Error) return { kind: "other", message: error.message };
-  return { kind: "other", message: String(error) };
+  if (err instanceof TokenMissingError) return { kind: "no-token" };
+  if (err instanceof TokenRevokedError) return { kind: "token-revoked" };
+  if (err instanceof TokenExpiredError) return { kind: "token-expired" };
+  if (err instanceof ServerDisabledError) return { kind: "server-disabled" };
+  if (err instanceof RateLimitedError) return { kind: "rate-limited" };
+  if (err instanceof ExternalAccessDeniedError) {
+    return { kind: "access-denied", message: err.message };
+  }
+  return { kind: "other", message: err.message };
 }
 
 export function describeScenario(scenario: ErrorScenario): {
@@ -49,11 +67,29 @@ export function describeScenario(scenario: ErrorScenario): {
         description:
           "Install TablePro from tablepro.app to use this extension.",
       };
+    case "update-required":
+      return {
+        title: "Update TablePro",
+        description: scenario.installed
+          ? `This extension needs TablePro ${scenario.minimum} or later. You have ${scenario.installed}.`
+          : `This extension needs TablePro ${scenario.minimum} or later.`,
+      };
     case "mcp-not-running":
       return {
         title: "TablePro is not running",
         description:
           "Open TablePro and try again. The local MCP server starts on demand.",
+      };
+    case "unreachable":
+      return {
+        title: `No answer on port ${scenario.port}`,
+        description:
+          "TablePro's MCP server is not on this port. Set MCP Port in the extension preferences to the port TablePro shows in its settings.",
+      };
+    case "invalid-port":
+      return {
+        title: "MCP Port is not valid",
+        description: `"${scenario.value}" is not a port. Set MCP Port in the extension preferences to a number from 1 to 65535.`,
       };
     case "no-token":
       return {
@@ -66,11 +102,21 @@ export function describeScenario(scenario: ErrorScenario): {
         title: "API token was revoked",
         description: "Run Pair with TablePro again to issue a new token.",
       };
-    case "remote-unsupported":
+    case "token-expired":
       return {
-        title: "Remote access not supported",
+        title: "API token expired",
+        description: "Run Pair with TablePro again to issue a new token.",
+      };
+    case "server-disabled":
+      return {
+        title: "MCP server is off",
+        description: "Turn on the MCP server in TablePro's settings.",
+      };
+    case "rate-limited":
+      return {
+        title: "Too many requests",
         description:
-          "Disable remote access in TablePro Settings to use this extension.",
+          "TablePro is limiting requests from this Mac. Wait a few minutes and try again.",
       };
     case "access-denied":
       return { title: "Access denied", description: scenario.message };

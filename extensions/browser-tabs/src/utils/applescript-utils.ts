@@ -157,28 +157,47 @@ tell application "${browser}"
 	if running then
 		set output to ""
 		repeat with aWindow in every window
-      set chromiumTabIndex to 0 
-			repeat with aTab in every tab of aWindow
-        set chromiumTabIndex to chromiumTabIndex + 1
-				try
-					-- WebKit
-					set tabName to name of aTab
-				on error
-					-- Chromium
-					set tabName to title of aTab
-				end try
-				set tabUrl to URL of aTab
-        set windowId to id of aWindow
-				try
-          -- WebKit
-          set tabIndex to index of aTab
-        on error
-          -- Chromium
-          set tabIndex to chromiumTabIndex
-        end try
-				set tabInfo to tabName & "\n" & tabUrl & "\n" & windowId & "\n" & tabIndex & "\n\n"
-				set output to output & tabInfo
-			end repeat
+			try
+				set windowId to id of aWindow
+				if windowId is missing value then
+					set windowId to ""
+				end if
+				set chromiumTabIndex to 0
+				repeat with aTab in every tab of aWindow
+					set chromiumTabIndex to chromiumTabIndex + 1
+					set tabName to ""
+					try
+						-- WebKit
+						set tabName to name of aTab
+					on error
+						-- Chromium
+						set tabName to title of aTab
+					end try
+					if tabName is missing value then
+						set tabName to ""
+					end if
+
+					set tabUrl to ""
+					try
+						set tabUrl to URL of aTab
+					end try
+					if tabUrl is missing value then
+						set tabUrl to ""
+					end if
+
+					set tabIndex to chromiumTabIndex
+					try
+						-- WebKit
+						set tabIndex to index of aTab
+					end try
+					if tabIndex is missing value then
+						set tabIndex to chromiumTabIndex
+					end if
+
+					set tabInfo to tabName & "\n" & tabUrl & "\n" & windowId & "\n" & tabIndex & "\n---tab---\n"
+					set output to output & tabInfo
+				end repeat
+			end try
 		end repeat
 		return output
 	else
@@ -199,11 +218,20 @@ export const getTabsString = async (browser: string) => {
 
 const parseTabs = (browser: Application, tabs: string): Tab[] => {
   try {
-    const tabStrList = tabs.split("\n\n").filter((tab) => tab.length > 0);
+    const tabStrList = tabs.split("\n---tab---\n").filter((tab) => tab.trim().length > 0);
     const tabList = tabStrList.map((tabStr) => {
-      const [title, url, windowId, tabId] = tabStr.split("\n");
-      const domain = new URL(url).hostname;
-      return { browser: browser.name, title, url, domain, windowId, tabId };
+      const parts = tabStr.split("\n");
+      const tabId = parts.pop() ?? "";
+      const windowId = parts.pop() ?? "";
+      const url = parts.pop() ?? "";
+      const title = parts.join("\n");
+      let domain = "";
+      try {
+        domain = new URL(url).hostname;
+      } catch {
+        // tabs without a valid URL have no domain
+      }
+      return { browser: browser.name, title: title || "Untitled", url, domain, windowId, tabId };
     });
     return recentOnTop ? tabList.reverse() : tabList;
   } catch (e) {

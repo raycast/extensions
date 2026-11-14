@@ -120,6 +120,32 @@ interface CreateProjectFormValues {
   slug: string;
 }
 
+type CustomFieldType = "text" | "number" | "date" | "checkbox" | "dropdown" | "multiselect" | (string & {});
+
+interface CustomFieldDefinition {
+  id: string;
+  projectId: string;
+  name: string;
+  type: CustomFieldType;
+  required: boolean;
+  defaultValue?: unknown;
+  options?: string[] | null;
+  position?: number;
+}
+
+interface CustomFieldValue {
+  id?: string;
+  taskId: string;
+  fieldId: string;
+  value: unknown;
+  field?: CustomFieldDefinition;
+}
+
+interface CustomFieldFilterValues {
+  fieldId: string;
+  values: unknown[];
+}
+
 export type {
   Session,
   Project,
@@ -133,4 +159,8 @@ export type {
   Notification,
   CreateTaskFormValues,
   CreateProjectFormValues,
+  CustomFieldDefinition,
+  CustomFieldValue,
+  CustomFieldFilterValues,
+  CustomFieldType,
 };

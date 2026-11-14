@@ -43,7 +43,7 @@ type ViewMode = "list" | "grid";
 /**
  * Tile for a token whose color could not be resolved.
  *
- * `Icon.Circle` draws a small glyph centred in an otherwise empty cell, which is
+ * `Icon.Circle` draws a small glyph centered in an otherwise empty cell, which is
  * exactly what made a grid of unresolved tokens look broken. An SVG data URI is
  * rendered as an image and fills the tile the way a color swatch does — the
  * same technique the color-hunt extension uses for its multi-band palette tiles.

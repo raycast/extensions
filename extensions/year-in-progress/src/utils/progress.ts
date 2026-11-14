@@ -1,13 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
 import {
+  addDays,
+  addMonths,
+  addQuarters,
+  addWeeks,
+  addYears,
   type Day,
-  endOfDay,
-  endOfMonth,
-  endOfQuarter,
-  endOfWeek,
-  endOfYear,
   getDayOfYear,
-  getQuarter,
   isLeapYear,
   startOfDay,
   startOfMonth,
@@ -15,150 +13,69 @@ import {
   startOfWeek,
   startOfYear,
 } from "date-fns";
-import { PerferenceValue, Progress } from "../types";
+import { DefaultProgressId, Progress, ProgressSnapshot } from "../types";
 
-const now = new Date();
-const { weekStartsOn } = getPreferenceValues<PerferenceValue>();
-
-export function getYearProgressNum() {
+export function getYearProgressNum(now = new Date()) {
+  if (!Number.isFinite(now.getTime())) return 0;
   const dayOfYear = getDayOfYear(now);
   const daysInYear = isLeapYear(now) ? 366 : 365;
   return Math.floor((dayOfYear / daysInYear) * 100);
 }
 
-export function getQuarterProgressNum() {
-  const quarter = getQuarter(now);
-  const nextQuarterDate = new Date();
-  if (quarter === 4) {
-    nextQuarterDate.setFullYear(now.getFullYear() + 1, 0, 1);
-  } else {
-    nextQuarterDate.setFullYear(now.getFullYear(), quarter * 3, 1);
-  }
-
-  const startQuarterTime = startOfQuarter(now).getTime();
-  const nextQuarterTime = nextQuarterDate.getTime();
-
-  const currentTime = now.getTime();
-  return Math.floor(((currentTime - startQuarterTime) / (nextQuarterTime - startQuarterTime)) * 100);
+export function getQuarterProgressNum(now = new Date()) {
+  const startDate = startOfQuarter(now);
+  return getProgressNumByDate(startDate, addQuarters(startDate, 1), now);
 }
 
-export function getProgressNumByDate(startDate: Date, endDate: Date) {
+export function getProgressNumByDate(startDate: Date, endDate: Date, now = new Date()) {
   const startTime = startDate.getTime();
   const endTime = endDate.getTime();
-  const currentTime = new Date().getTime();
-
-  const progress = (currentTime - startTime) / (endTime - startTime);
-
-  if (progress >= 1) return 100;
-  if (progress <= 0) return 0;
-  return Math.floor(progress * 100);
+  const currentTime = now.getTime();
+  if (![startTime, endTime, currentTime].every(Number.isFinite) || endTime <= startTime) return 0;
+  return Math.floor(Math.max(0, Math.min(1, (currentTime - startTime) / (endTime - startTime))) * 100);
 }
 
-function getYearProgress(): Progress {
-  const startDate = startOfYear(now);
-  const endDate = endOfYear(now);
+export function getDefaultProgress(now = new Date(), weekStartsOn: Day = 1): Progress[] {
+  const yearStart = startOfYear(now);
+  const quarterStart = startOfQuarter(now);
+  const monthStart = startOfMonth(now);
+  const weekStart = startOfWeek(now, { weekStartsOn });
+  const dayStart = startOfDay(now);
 
-  return {
-    title: "Year In Progress",
+  const create = (id: DefaultProgressId, label: string, startDate: Date, endDate: Date, pinned = false): Progress => ({
+    id,
+    title: `${label} In Progress`,
     type: "default",
-    pinned: true,
-    progressNum: getYearProgressNum(),
+    pinned,
     startDate: startDate.getTime(),
     endDate: endDate.getTime(),
-    menubar: {
-      shown: true,
-      title: "Year",
-    },
-  };
+    progressNum: id === "default:year" ? getYearProgressNum(now) : getProgressNumByDate(startDate, endDate, now),
+    menubar: { shown: true, title: label },
+    showAsCommand: false,
+  });
+
+  return [
+    create("default:year", "Year", yearStart, addYears(yearStart, 1), true),
+    create("default:quarter", "Quarter", quarterStart, addQuarters(quarterStart, 1), true),
+    create("default:month", "Month", monthStart, addMonths(monthStart, 1)),
+    create("default:week", "Week", weekStart, addWeeks(weekStart, 1)),
+    create("default:day", "Day", dayStart, addDays(dayStart, 1)),
+  ];
 }
 
-function getQuarterProgress(): Progress {
-  const startDate = startOfQuarter(now);
-  const endDate = endOfQuarter(now);
-
-  return {
-    title: "Quarter In Progress",
-    type: "default",
-    pinned: true,
-    progressNum: getQuarterProgressNum(),
-    startDate: startDate.getTime(),
-    endDate: endDate.getTime(),
-    menubar: {
-      shown: true,
-      title: "Quarter",
-    },
-  };
-}
-
-function getMonthProgress(): Progress {
-  const startDate = startOfMonth(now);
-  const endDate = endOfMonth(now);
-
-  return {
-    title: "Month In Progress",
-    type: "default",
-    progressNum: getProgressNumByDate(startDate, endDate),
-    startDate: startDate.getTime(),
-    endDate: endDate.getTime(),
-    menubar: {
-      shown: true,
-      title: "Month",
-    },
-  };
-}
-
-function getWeekProgress(): Progress {
-  const startDate = startOfWeek(now, { weekStartsOn: +weekStartsOn as Day });
-  const endDate = endOfWeek(now, { weekStartsOn: +weekStartsOn as Day });
-
-  return {
-    title: "Week In Progress",
-    type: "default",
-    progressNum: getProgressNumByDate(startDate, endDate),
-    startDate: startDate.getTime(),
-    endDate: endDate.getTime(),
-    menubar: {
-      shown: true,
-      title: "Week",
-    },
-  };
-}
-
-function getDayProgress(): Progress {
-  const startDate = startOfDay(now);
-  const endDate = endOfDay(now);
-
-  return {
-    title: "Day In Progress",
-    type: "default",
-    progressNum: getProgressNumByDate(startDate, endDate),
-    startDate: startDate.getTime(),
-    endDate: endDate.getTime(),
-    menubar: {
-      shown: true,
-      title: "Day",
-    },
-  };
-}
-
-function getProgressBar(progressNum: number, options: { limit?: number } = {}) {
-  const { limit = 10 } = options;
-  let progressBar = "";
-  for (let i = 0; i < limit; i++) {
-    progressBar += progressNum > i * limit ? "■" : "□";
-  }
-  return progressBar;
-}
-
-// To display subtitle for menubar item & x-in-progress item
 export function getSubtitle(progressNum: number) {
-  return `${getProgressBar(progressNum)} ${progressNum}%`;
+  const percent = Number.isFinite(progressNum) ? Math.floor(Math.max(0, Math.min(100, progressNum))) : 0;
+  let progressBar = "";
+  for (let i = 0; i < 10; i++) progressBar += percent > i * 10 ? "■" : "□";
+  return `${progressBar} ${percent}%`;
 }
 
-export const defaultProgress = [
-  getYearProgress(),
-  getQuarterProgress(),
-  getMonthProgress(),
-  getWeekProgress(),
-  getDayProgress(),
-];
+export function getCommandSubtitle(
+  snapshot: Pick<ProgressSnapshot, "allProgress" | "commandProgressId">
+): string | undefined {
+  const progress =
+    snapshot.allProgress.find((item) => item.id === snapshot.commandProgressId) ??
+    snapshot.allProgress.find((item) => item.id === "default:year");
+  if (!progress) return undefined;
+  return `${progress.menubar.title || progress.title} ${getSubtitle(progress.progressNum)}`;
+}

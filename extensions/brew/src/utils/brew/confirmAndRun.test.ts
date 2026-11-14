@@ -159,11 +159,15 @@ describe("labels", () => {
   // `/opt/homebrew/bin/brew install --adopt --cask updatest`. The raw command
   // stays the default because Doctor's commands ARE the point.
   it("replaces the raw command with the progress label on a single-command run", async () => {
+    let runningTitle: string | undefined;
+    shell.behavior = () => {
+      runningTitle = __raycast.toasts[0].title;
+    };
     await confirmAndRun(["brew install --adopt --cask updatest"], {
       title: "Adopt Updatest",
       labels: { progress: "Adopting Updatest…" },
     });
-    expect(__raycast.toasts[0].title).toBe("Adopting Updatest…");
+    expect(runningTitle).toBe("Adopting Updatest…");
     expect(__raycast.toasts[0].messages).toEqual([]);
   });
 

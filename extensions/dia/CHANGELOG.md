@@ -1,5 +1,56 @@
 # Dia Changelog
 
+## [AI Tools for Spaces and Extensions] - 2026-11-13
+
+- Ask Dia can now see and switch spaces: the new Get Spaces tool lists the spaces in Dia's order and which ones are active, and Switch Space switches a window to another space.
+- Get Tabs now returns the tabs of every space, each with its space name, and can return the tabs of a single space. Select Tab, Close Tab and Get Tab Contents also find tabs in spaces a window isn't showing, and Select Tab switches the window to the tab's space.
+- Added Get Extensions and Open Extension tools, so you can ask which browser extensions are installed in each space and open one like its toolbar button. Opening an extension requires Accessibility access for Raycast.
+- Switch Space and Open Extension ask for confirmation before they change the Dia window.
+- Ask Dia now says right away that it can't create, rename, delete or reorder spaces, because Dia doesn't allow it from other apps. You can do it in Dia.
+- Search Extensions and the extension tools no longer treat Dia's Chromium profile as a space. Extensions that all spaces share are listed as available in all spaces and open in the current space, instead of under an old profile name such as a deleted space, which Dia couldn't open.
+
+## [History and Bookmarks Across Profiles] - 2026-11-11
+
+- Search History, Search Dia and the history and bookmark AI tools now include every Dia profile (space), not only the last used one.
+- With more than one profile, history results show the profile name and bookmarks are grouped under a folder per profile.
+- A profile whose History or Bookmarks file can't be read no longer hides the others.
+
+## [Search Extensions Command] - 2026-11-07
+
+- Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.
+- Open Extension switches the front window to the extension's profile and picks the extension from Dia's Extensions menu, which opens it like its toolbar button. Requires Accessibility access for Raycast.
+- When the Extensions menu has no item for the extension, its popup (or, without one, its settings page) opens in a new tab instead.
+- Added actions to open an extension's popup or settings page in a new tab and to copy its ID, and a profile filter (⌘P) that marks the active profile. Built-in extensions are hidden unless enabled in the command preferences.
+
+## [Search Tabs Across Spaces] - 2026-11-07
+
+- Search Tabs now lists tabs from every Dia space, not only the space active in each window.
+- With more than one space, tabs are grouped by space in Dia's order. Each section shows the space's tab count and which space is active, and every tab shows its space in the space's Dia color, as a name or a dot (new "Space Label" preference, default name).
+- A dropdown (⌘P) filters by space, showing each space's color and marking the active space. The last choice is remembered.
+- Added "Switch to Space" actions (⌘K) that switch the tab's Dia window to another space.
+- Focus and Close find tabs in any space; focusing a tab from another space switches its window to that space.
+- Tabs load faster: tab fetching now uses the bulk AppleScript path first.
+- Focusing a tab that was already closed now shows an error instead of failing silently.
+
+## [Update Icon] - 2026-11-07
+
+- Updated the extension icon to match the current Dia app icon, with a dark mode variant.
+
+## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
+
+- Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
+- History and bookmark searches return 50 results by default, up to 100.
+
+## [AI Tool: Read Tab Contents] - 2026-10-10
+
+- Added an AI tool that reads the visible text of a tab or the focused tab, truncated to 20,000 characters by default.
+- Requires Dia to be launched with `--enable-applescript-javascript`; the tool explains how when it isn't.
+
+## [AI Tools: Open URLs and Manage Tabs] - 2026-10-10
+
+- Added AI tools to open a URL or web search, switch to a tab, and close a tab.
+- Closing a tab asks for confirmation first.
+
 ## [Security: Address dependabot alert] - 2026-08-19
 
 - Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383

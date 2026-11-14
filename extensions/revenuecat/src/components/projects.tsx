@@ -1,14 +1,14 @@
-import { environment, launchCommand, LaunchType, List, LocalStorage } from "@raycast/api";
+import { environment, launchCommand, LaunchType, List } from "@raycast/api";
 import { createContext, useContext } from "react";
 import type { Context } from "./common";
 import type { Project } from "../lib/revenuecat";
 
-export const SELECTED_PROJECT_KEY = "selectedProjectId";
+import { saveSelectedProject } from "../lib/project-selection";
 export const ProjectContext = createContext<{ projects: Project[]; selected: string } | undefined>(undefined);
 
 async function selectProject(id: string, selected: string, command?: string) {
   if (id === selected) return;
-  await LocalStorage.setItem(SELECTED_PROJECT_KEY, id);
+  await saveSelectedProject(id);
   await launchCommand({ name: command || environment.commandName, type: LaunchType.UserInitiated });
 }
 

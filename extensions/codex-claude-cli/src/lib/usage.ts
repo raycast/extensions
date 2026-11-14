@@ -1,9 +1,14 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ChatProvider } from "./types";
+import { readClaudeStatusLineUsage } from "./claude-statusline";
+import { fetchCustomUsage } from "./custom-usage";
+
+export type UsageProvider = ChatProvider | `custom-${string}`;
 
 export const usageCacheTtlMilliseconds = 5 * 60 * 1_000;
 
@@ -49,7 +54,8 @@ export interface UsageTokenStats {
 }
 
 export interface ProviderUsageData {
-  provider: ChatProvider;
+  provider: UsageProvider;
+  dashboardUrl?: string;
   fetchedAt: number;
   plan?: string;
   windows: UsageWindow[];
@@ -60,7 +66,10 @@ export interface ProviderUsageData {
 type UsageDataSource = "live" | "cache" | "stale" | "unavailable";
 
 export interface ProviderUsageState {
-  provider: ChatProvider;
+  provider: UsageProvider;
+  name?: string;
+  bridgeConnected?: boolean;
+  needsConnection?: boolean;
   data?: ProviderUsageData;
   error?: string;
   lastAttemptAt?: number;
@@ -70,6 +79,7 @@ export interface ProviderUsageState {
 export interface UsageSnapshot {
   generatedAt: number;
   providers: Record<ChatProvider, ProviderUsageState>;
+  customProviders: ProviderUsageState[];
 }
 
 interface StoredProviderUsageState {
@@ -88,19 +98,108 @@ interface RpcPendingRequest {
   reject: (error: Error) => void;
 }
 
-const cacheKey = "cli-usage-cache-v1";
+const cacheKey = "cli-usage-cache-v3";
+const revisionKey = "cli-usage-revision-v2";
 const providers: ChatProvider[] = ["claude", "codex"];
 const codexTimeoutMilliseconds = 15_000;
 const claudeTimeoutMilliseconds = 20_000;
 const maximumJsonBufferLength = 4 * 1_024 * 1_024;
 let inFlightUsageRequest: Promise<UsageSnapshot> | undefined;
+let queuedForcedRequest: Promise<UsageSnapshot> | undefined;
+let legacyCacheCleaned = false;
 
+// A forced refresh arriving during a read must run after it (for example after Connect).
 export async function loadUsageSnapshot(options?: { force?: boolean }): Promise<UsageSnapshot> {
-  if (inFlightUsageRequest) return inFlightUsageRequest;
-  inFlightUsageRequest = loadUsageSnapshotInternal(Boolean(options?.force)).finally(() => {
+  if (inFlightUsageRequest) {
+    if (!options?.force) return inFlightUsageRequest;
+    if (!queuedForcedRequest) {
+      const queued = inFlightUsageRequest
+        .catch(() => undefined)
+        .then(() => {
+          // Release the queue slot before joining any request that won the scheduling race.
+          if (queuedForcedRequest === queued) queuedForcedRequest = undefined;
+          return loadUsageSnapshot({ force: true });
+        });
+      queuedForcedRequest = queued;
+    }
+    return queuedForcedRequest;
+  }
+  inFlightUsageRequest = loadCurrentUsageSnapshot(Boolean(options?.force)).finally(() => {
     inFlightUsageRequest = undefined;
   });
   return inFlightUsageRequest;
+}
+
+export async function invalidateUsageCache(): Promise<void> {
+  // The revision is part of the saved profile tag, so older writes cannot restore invalidated data.
+  await LocalStorage.setItem(revisionKey, randomUUID());
+}
+
+async function loadCurrentUsageSnapshot(force: boolean): Promise<UsageSnapshot> {
+  await cleanLegacyUsageCaches();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const revision = await LocalStorage.getItem<string>(revisionKey);
+    const preferences = getPreferenceValues<Preferences>();
+    const profile = createHash("sha256")
+      .update(
+        JSON.stringify([
+          preferences.claudeHome,
+          preferences.codexHome,
+          preferences.usageOnly,
+          process.env.CLAUDE_CONFIG_DIR,
+          process.env.CODEX_HOME,
+          revision,
+        ]),
+      )
+      .digest("hex")
+      .slice(0, 24);
+    const snapshot = await loadUsageSnapshotInternal(force, profile, preferences);
+    if (revision === (await LocalStorage.getItem<string>(revisionKey))) return snapshot;
+    force = true;
+  }
+  throw new Error("The usage connection changed while refreshing. Refresh again.");
+}
+
+export function usageProviderName(state: ProviderUsageState): string {
+  return (
+    state.name || (state.provider === "claude" ? "Claude" : state.provider === "codex" ? "Codex" : "Custom Provider")
+  );
+}
+
+export function isUsageStateFresh(state: ProviderUsageState, now = Date.now()): boolean {
+  return Boolean(
+    state.data &&
+    !state.error &&
+    (state.source === "live" || state.source === "cache") &&
+    Number.isFinite(state.data.fetchedAt) &&
+    state.data.fetchedAt <= now + 60_000 &&
+    now - state.data.fetchedAt < usageCacheTtlMilliseconds,
+  );
+}
+
+export function currentUsageWindows(state: ProviderUsageState, now = Date.now()): UsageWindow[] {
+  if (!isUsageStateFresh(state, now)) return [];
+  return (state.data?.windows || []).filter(
+    (window) =>
+      Number.isFinite(window.usedPercent) &&
+      window.usedPercent >= 0 &&
+      window.usedPercent <= 100 &&
+      Number.isFinite(window.remainingPercent) &&
+      window.remainingPercent >= 0 &&
+      window.remainingPercent <= 100 &&
+      (window.resetsAt === undefined || (Number.isFinite(window.resetsAt) && window.resetsAt > now)),
+  );
+}
+
+export function refreshUsageState(state: ProviderUsageState, now = Date.now()): ProviderUsageState {
+  if (!state.data || state.source === "unavailable" || state.source === "stale") return state;
+  if (
+    !isUsageStateFresh(state, now) ||
+    (state.data.windows.length > 0 && currentUsageWindows(state, now).length === 0)
+  ) {
+    return { ...state, source: "stale" };
+  }
+  return state;
 }
 
 export function providerRemainingPercent(data: ProviderUsageData | undefined): number | undefined {
@@ -108,73 +207,82 @@ export function providerRemainingPercent(data: ProviderUsageData | undefined): n
   return values.length > 0 ? Math.min(...values) : undefined;
 }
 
-async function loadUsageSnapshotInternal(force: boolean): Promise<UsageSnapshot> {
+async function loadUsageSnapshotInternal(
+  force: boolean,
+  profile: string,
+  preferences: Preferences,
+): Promise<UsageSnapshot> {
   const now = Date.now();
-  const cache = await readUsageCache();
+  const cache = await readUsageCache(profile);
   const nextCache: StoredUsageCache = {
     version: 1,
-    providers: {
-      claude: { ...cache.providers.claude },
-      codex: { ...cache.providers.codex },
-    },
+    providers: { claude: { ...cache.providers.claude }, codex: { ...cache.providers.codex } },
   };
-  const attempted = new Set<ChatProvider>();
-  const succeeded = new Set<ChatProvider>();
-
+  const states = {} as Record<ChatProvider, ProviderUsageState>;
   await Promise.all(
     providers.map(async (provider) => {
+      if (provider === "claude") {
+        // Always read the observation on refresh. Re-reading never renews its timestamp.
+        const connected = await readClaudeStatusLineUsage();
+        if (connected || preferences.usageOnly) {
+          states.claude = refreshUsageState(
+            connected || {
+              provider: "claude",
+              source: "unavailable",
+              needsConnection: true,
+              error: "Connect Claude Code to read its saved usage.",
+            },
+          );
+          return;
+        }
+      }
       const previous = nextCache.providers[provider];
       const freshnessAnchor = previous.lastAttemptAt || previous.data?.fetchedAt || 0;
-      if (!force && now - freshnessAnchor < usageCacheTtlMilliseconds) return;
-
-      attempted.add(provider);
-      try {
-        const data = provider === "codex" ? await fetchCodexUsage() : await fetchClaudeUsage();
-        nextCache.providers[provider] = { data, lastAttemptAt: Date.now() };
-        succeeded.add(provider);
-      } catch (error) {
-        nextCache.providers[provider] = {
-          ...previous,
-          error: safeErrorMessage(error, provider),
-          lastAttemptAt: Date.now(),
-        };
+      let fetched = false;
+      if (force || now - freshnessAnchor >= usageCacheTtlMilliseconds) {
+        try {
+          const data = provider === "codex" ? await fetchCodexUsage() : await fetchClaudeUsage();
+          nextCache.providers[provider] = { data, lastAttemptAt: Date.now() };
+          fetched = true;
+        } catch (error) {
+          nextCache.providers[provider] = {
+            ...previous,
+            error: safeErrorMessage(error, provider),
+            lastAttemptAt: Date.now(),
+          };
+        }
       }
+      const stored = nextCache.providers[provider];
+      states[provider] = refreshUsageState({
+        provider,
+        data: stored.data,
+        error: stored.error,
+        lastAttemptAt: stored.lastAttemptAt,
+        source: stored.data ? (stored.error ? "stale" : fetched ? "live" : "cache") : "unavailable",
+        ...(provider === "claude" ? { needsConnection: true } : {}),
+      });
     }),
   );
-
-  if (attempted.size > 0) await writeUsageCache(nextCache);
-
-  return {
-    generatedAt: Date.now(),
-    providers: {
-      claude: runtimeProviderState("claude", nextCache.providers.claude, attempted, succeeded),
-      codex: runtimeProviderState("codex", nextCache.providers.codex, attempted, succeeded),
-    },
-  };
+  await writeUsageCache(nextCache, profile);
+  let customProviders: ProviderUsageState[] = [];
+  if (preferences.customUsageFile) {
+    try {
+      customProviders = (await fetchCustomUsage(preferences.customUsageFile)).map((state) => refreshUsageState(state));
+    } catch (error) {
+      customProviders = [
+        {
+          provider: "custom-file",
+          name: "Custom Providers",
+          source: "unavailable",
+          error: error instanceof Error ? error.message : "Could not read the custom usage file.",
+        },
+      ];
+    }
+  }
+  return { generatedAt: Date.now(), providers: states, customProviders };
 }
 
-function runtimeProviderState(
-  provider: ChatProvider,
-  stored: StoredProviderUsageState,
-  attempted: Set<ChatProvider>,
-  succeeded: Set<ChatProvider>,
-): ProviderUsageState {
-  let source: UsageDataSource;
-  if (succeeded.has(provider)) source = "live";
-  else if (stored.data && stored.error) source = "stale";
-  else if (stored.data) source = "cache";
-  else source = "unavailable";
-
-  return {
-    provider,
-    data: stored.data,
-    error: attempted.has(provider) || stored.error ? stored.error : undefined,
-    lastAttemptAt: stored.lastAttemptAt,
-    source,
-  };
-}
-
-async function readUsageCache(): Promise<StoredUsageCache> {
+async function readUsageCache(profile: string): Promise<StoredUsageCache> {
   const emptyCache = (): StoredUsageCache => ({
     version: 1,
     providers: { claude: {}, codex: {} },
@@ -184,7 +292,9 @@ async function readUsageCache(): Promise<StoredUsageCache> {
     const stored = await LocalStorage.getItem<string>(cacheKey);
     if (!stored) return emptyCache();
     const parsed: unknown = JSON.parse(stored);
-    if (!isRecord(parsed) || parsed.version !== 1 || !isRecord(parsed.providers)) return emptyCache();
+    if (!isRecord(parsed) || parsed.version !== 1 || parsed.profile !== profile || !isRecord(parsed.providers)) {
+      return emptyCache();
+    }
     return {
       version: 1,
       providers: {
@@ -197,11 +307,25 @@ async function readUsageCache(): Promise<StoredUsageCache> {
   }
 }
 
-async function writeUsageCache(cache: StoredUsageCache): Promise<void> {
+async function writeUsageCache(cache: StoredUsageCache, profile: string): Promise<void> {
   try {
-    await LocalStorage.setItem(cacheKey, JSON.stringify(cache));
+    // One bounded entry, tagged with both profile and revision. A racing older
+    // writer may cause a cache miss, but its data can never match a new connection.
+    await LocalStorage.setItem(cacheKey, JSON.stringify({ ...cache, profile }));
   } catch {
     return;
+  }
+}
+
+async function cleanLegacyUsageCaches(): Promise<void> {
+  if (legacyCacheCleaned) return;
+  try {
+    const items = await LocalStorage.allItems();
+    const obsolete = Object.keys(items).filter((key) => /^cli-usage-cache-v(?:1|2(?:-[a-f0-9]{24})?)$/.test(key));
+    await Promise.all(obsolete.map((key) => LocalStorage.removeItem(key)));
+    legacyCacheCleaned = true;
+  } catch {
+    // Cache cleanup must not prevent reading current provider usage.
   }
 }
 
@@ -313,9 +437,9 @@ async function fetchCodexUsage(): Promise<ProviderUsageData> {
         });
         rpc.notify("initialized");
         const [account, rateLimits, tokenUsage] = await Promise.all([
-          rpc.request("account/read", { refreshToken: false }),
+          rpc.request("account/read", { refreshToken: false }).catch(() => undefined),
           rpc.request("account/rateLimits/read"),
-          rpc.request("account/usage/read"),
+          rpc.request("account/usage/read").catch(() => undefined),
         ]);
         return normalizeCodexUsage(account, rateLimits, tokenUsage, Date.now());
       })(),
@@ -403,7 +527,7 @@ function createCodexRpcClient(child: ChildProcessWithoutNullStreams) {
   };
 }
 
-function normalizeCodexUsage(
+export function normalizeCodexUsage(
   accountValue: unknown,
   rateLimitsValue: unknown,
   tokenUsageValue: unknown,
@@ -467,10 +591,11 @@ function normalizeCodexUsage(
 
 function codexRateLimitSnapshots(rateLimits: Record<string, unknown>): Record<string, unknown>[] {
   if (isRecord(rateLimits.rateLimitsByLimitId)) {
-    const snapshots = Object.values(rateLimits.rateLimitsByLimitId).filter(isRecord);
-    if (snapshots.length > 0) return snapshots;
+    const main = rateLimits.rateLimitsByLimitId.codex;
+    if (isRecord(main)) return [main];
   }
-  return isRecord(rateLimits.rateLimits) ? [rateLimits.rateLimits] : [];
+  const legacy = rateLimits.rateLimits;
+  return isRecord(legacy) && (!legacy.limitId || legacy.limitId === "codex") ? [legacy] : [];
 }
 
 function normalizeCodexTokenUsage(value: unknown): UsageTokenStats | undefined {
@@ -689,6 +814,8 @@ function resolveCliExecutable(executable: "codex" | "claude"): string {
 
 function childEnvironment(): NodeJS.ProcessEnv {
   const home = homedir();
+  const preferences = getPreferenceValues<Preferences>();
+  const expandHome = (path: string) => (path === "~" ? home : path.startsWith("~/") ? join(home, path.slice(2)) : path);
   const pathEntries = [
     join(home, ".local", "bin"),
     join(home, ".npm-global", "bin"),
@@ -702,6 +829,8 @@ function childEnvironment(): NodeJS.ProcessEnv {
   ];
   return {
     ...process.env,
+    ...(preferences.claudeHome?.trim() ? { CLAUDE_CONFIG_DIR: expandHome(preferences.claudeHome.trim()) } : {}),
+    ...(preferences.codexHome?.trim() ? { CODEX_HOME: expandHome(preferences.codexHome.trim()) } : {}),
     PATH: [...pathEntries, process.env.PATH || ""].filter(Boolean).join(":"),
     NO_COLOR: "1",
   };

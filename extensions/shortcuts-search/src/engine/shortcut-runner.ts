@@ -6,6 +6,7 @@ import type { KeyCodes } from "../load/key-codes-provider";
 import { getPlatform } from "../load/platform";
 import {
   chromiumBundles,
+  executionError,
   safariBundles,
   parseDelay,
   validateTarget,
@@ -86,8 +87,9 @@ export async function runShortcuts(
   const script = buildJxaScript(target, delaySeconds, sequence, keyCodes);
   try {
     await execute("/usr/bin/osascript", ["-l", "JavaScript", "-e", script], { timeout: 15000, maxBuffer: 65536 });
-  } catch {
-    throw new Error(
+  } catch (error) {
+    throw executionError(
+      error,
       "Shortcut execution stopped. Check the target and Accessibility/Automation permissions. Earlier chords may have run; retry manually."
     );
   }

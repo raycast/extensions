@@ -40,7 +40,3 @@ A keyboard-driven [Raycast](https://raycast.com) extension for managing all of y
 ## Notes
 
 macOS support is intended but not yet implemented because I don't have a Mac to test on. Contributions adding macOS support via PRs are very welcome :)
-
-## Issues
-
-If any issues persist, feel free to [contact me](https://x.com/muhammadrizo_y)

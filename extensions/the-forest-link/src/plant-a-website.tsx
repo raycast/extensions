@@ -15,7 +15,7 @@ function validateWebsite(value: string | undefined) {
   try {
     normalizeWebsiteUrl(value);
   } catch {
-    return "Enter a valid website address, including https://";
+    return "Enter a domain or a valid HTTP or HTTPS address";
   }
 
   return undefined;
@@ -51,8 +51,8 @@ export default function Command() {
       <Form.Description text="Plant a tree and help grow The Forest. Submissions may be reviewed before they appear." />
       <Form.TextField
         title="Website"
-        placeholder="https://youareaweso.me"
-        info="Include the full address, starting with http:// or https://"
+        placeholder="youareaweso.me"
+        info="Enter a domain or an HTTP or HTTPS address. Bare domains use HTTPS."
         {...itemProps.website}
       />
     </Form>

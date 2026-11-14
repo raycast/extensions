@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-null",
+  "title": "/dev/null",
+  "description": "Participate in the social network for devs.",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-commit",
+      "title": "Create Commit",
+      "subtitle": "/dev/null",
+      "description": "Sign a commit with your SSH key and post it to /dev/null.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectedText",
+          "title": "Selected Text",
+          "label": "Use selected text for new commits",
+          "description": "Selected text is appended to a draft you already started.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "view-profile",
+      "title": "View Profile",
+      "subtitle": "/dev/null",
+      "description": "Look up someone's /dev/null profile, commits and followers, or search for people.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "username",
+          "placeholder": "Username",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "my-profile",
+      "title": "Go to My Profile",
+      "subtitle": "/dev/null",
+      "description": "Open your own /dev/null profile, commits and followers.",
+      "mode": "view"
+    },
+    {
+      "name": "my-commits",
+      "title": "My Commits",
+      "subtitle": "/dev/null",
+      "description": "Browse the commits and replies you've posted to /dev/null.",
+      "mode": "view"
+    },
+    {
+      "name": "search-commits",
+      "title": "Search Commits",
+      "subtitle": "/dev/null",
+      "description": "Search everyone's commits on /dev/null.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "post-commit",
+      "title": "Post Commit",
+      "description": "Post a commit (a public post) to /dev/null, signed with your SSH key, with optional image attachments."
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Leave empty to use the account of your last commit.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "chrismessina"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
+    }
+  ]
+}

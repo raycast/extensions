@@ -1,6 +1,6 @@
-import type { FigaWorkspaceContext } from "./api/types";
+import type { FigaExpense, FigaTag, FigaWorkspaceContext } from "./api/types";
 
-export type ReadCapabilityResource = "expenses" | "categories" | "recipients";
+export type ReadCapabilityResource = "expenses" | "categories" | "recipients" | "tags";
 
 export interface MonthReference {
   year: number;
@@ -33,12 +33,13 @@ export function formatMonthLabel(input: MonthReference, style: "long" | "short" 
   );
 }
 
-export function formatMoney(cents: number, currency: string): string {
+export function formatMoney(cents: number | null, currency: string): string {
+  if (cents === null) return "Amount unknown";
   try {
     return new Intl.NumberFormat(RAYCAST_LOCALE, {
       style: "currency",
       currency,
-      currencyDisplay: "narrowSymbol",
+      currencyDisplay: "code",
     }).format(cents / 100);
   } catch {
     return `${(cents / 100).toFixed(2)} ${currency}`;
@@ -56,11 +57,12 @@ export function formatUnixDate(value: number | null | undefined): string {
 }
 
 export function getWorkspaceBaseCurrency(context: FigaWorkspaceContext): string {
-  return context.schemaVersion === 2 ? context.defaults.baseCurrency : context.workspace.baseCurrency;
+  return context.schemaVersion !== 1 ? context.defaults.baseCurrency : context.workspace.baseCurrency;
 }
 
 export function canReadResource(context: FigaWorkspaceContext, resource: ReadCapabilityResource): boolean {
-  return context.schemaVersion !== 2 || context.capabilities[resource].read;
+  if (resource === "tags") return context.schemaVersion === 3 && context.capabilities.tags.read;
+  return context.schemaVersion === 1 || context.capabilities[resource].read;
 }
 
 export function formatReadCapability(resource: ReadCapabilityResource): string {
@@ -68,13 +70,33 @@ export function formatReadCapability(resource: ReadCapabilityResource): string {
 }
 
 export function canWriteExpenses(context: FigaWorkspaceContext): boolean {
-  return context.schemaVersion !== 2 || context.capabilities.expenses.write;
+  return context.schemaVersion === 1 || context.capabilities.expenses.write;
 }
 
 export function canRecordExpensePayments(context: FigaWorkspaceContext): boolean {
-  return context.schemaVersion !== 2 || context.capabilities.expenses.payments || context.capabilities.expenses.write;
+  return context.schemaVersion === 1 || context.capabilities.expenses.payments || context.capabilities.expenses.write;
 }
 
 export function escapeMarkdown(value: string): string {
   return value.replace(/([\\`*_{}[\]()#+.!|-])/g, "\\$1");
+}
+
+export function formatExpenseAmount(expense: FigaExpense, currency: string): string {
+  if (expense.bill?.state === "unknown") return "Amount unknown";
+  const amount = formatMoney(expense.amount, currency);
+  if (expense.amount === null) return amount;
+  const estimated = expense.bill?.state === "estimated" || expense.money?.amountState === "estimated";
+  return `${amount}${estimated ? " (estimated)" : ""}${expense.money?.fxIsEstimated ? " (estimated FX)" : ""}${expense.money?.amountState === "unknown" ? " (base valuation unavailable)" : ""}`;
+}
+
+export function formatExpenseDate(expense: FigaExpense): string {
+  if (!expense.isPaid && expense.dueBy != null) {
+    return `${formatUnixDate(expense.scheduledDate ?? expense.expenseDate)} – ${formatUnixDate(expense.dueBy)}`;
+  }
+  return formatUnixDate(expense.expenseDate);
+}
+
+export function getExpenseTagNames(expense: Pick<FigaExpense, "tagIds">, tags: FigaTag[]): string[] {
+  const ids = new Set(expense.tagIds ?? []);
+  return tags.filter((tag) => ids.has(tag.id)).map((tag) => tag.name);
 }

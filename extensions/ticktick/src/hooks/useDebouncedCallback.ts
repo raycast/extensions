@@ -6,7 +6,7 @@ export default function useDebouncedCallback<T extends (...args: IntentionalAny[
   delay: number,
   deps: unknown[]
 ) {
-  const callbackRef = useRef<T | undefined>();
+  const callbackRef = useRef<T | undefined>(undefined);
 
   useEffect(() => {
     callbackRef.current = callback;

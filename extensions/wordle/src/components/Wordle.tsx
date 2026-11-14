@@ -17,6 +17,7 @@ export const Wordle = ({ language }: WordleProps) => {
 
   return (
     <List
+      isShowingDetail
       filtering={false}
       searchBarPlaceholder="Enter your guess"
       searchText={guessInput}

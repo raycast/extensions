@@ -16,6 +16,8 @@ export type CollectorPaths = {
   out: string;
   err: string;
   pid: string;
+  heartbeat: string;
+  ping: string;
 };
 
 export function collectorPaths(dir: string): CollectorPaths {
@@ -24,6 +26,8 @@ export function collectorPaths(dir: string): CollectorPaths {
     out: path.join(dir, "stream.ndjson"),
     err: path.join(dir, "stream.err"),
     pid: path.join(dir, "collector.pid"),
+    heartbeat: path.join(dir, "menu-bar.ran"),
+    ping: path.join(dir, "collector.ping"),
   };
 }
 
@@ -38,10 +42,11 @@ type CollectorDeps = {
   isAlive: (pid: number) => Promise<boolean>;
 };
 
-export const COLLECTOR_MARKER = "foqus-collector-7";
+export const COLLECTOR_MARKER = "foqus-collector-8";
 
-export const MENU_BAR_DEEPLINK =
-  "raycast://extensions/filipimiparebine/foqus-league/focus-menu-bar?launchType=background";
+export const MENU_BAR_URL = "raycast://extensions/filipimiparebine/foqus-league/focus-menu-bar";
+
+export const POKE_MINUTES = 12;
 
 export const WRAPPER = `# ${COLLECTOR_MARKER}
 echo "$$" > "$PIDFILE"
@@ -60,7 +65,10 @@ if mkfifo "$fifo" 2>/dev/null; then
       kill "$tailpid" 2>/dev/null
       exit 0
     fi
-    open -g "$POKE" 2>/dev/null
+    if [ -n "$(find "$HEARTBEAT" -mmin -${POKE_MINUTES} 2>/dev/null)" ]; then
+      : > "$PING"
+      open -g "$POKE" 2>/dev/null
+    fi
   done < "$fifo" &
   watcher=$!
 fi
@@ -90,7 +98,9 @@ function defaultSpawn(paths: CollectorPaths): number | null {
       OUT: paths.out,
       ERR: paths.err,
       PIDFILE: paths.pid,
-      POKE: MENU_BAR_DEEPLINK,
+      HEARTBEAT: paths.heartbeat,
+      PING: paths.ping,
+      POKE: MENU_BAR_URL,
     },
   });
   child.unref();
@@ -132,6 +142,14 @@ async function fileSize(file: string): Promise<number> {
     return (await fs.stat(file)).size;
   } catch {
     return 0;
+  }
+}
+
+export async function mtimeOf(file: string): Promise<number | undefined> {
+  try {
+    return (await fs.stat(file)).mtimeMs;
+  } catch {
+    return undefined;
   }
 }
 
