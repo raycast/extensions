@@ -14,3 +14,7 @@ Search Portal Wholesale brands by name or website URL.
 - **Open Organization Admin** - Opens the organization admin page for the brand
 - **Copy Brand Name** - Copies the brand name to clipboard
 - **Copy Brand Page URL** - Copies the brand page URL to clipboard
+
+## API
+
+Searches the Portal V2 public brand search: `GET https://portalwholesale.com/api/v2/public/brand-search?q=<query>`.
