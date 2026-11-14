@@ -44,7 +44,12 @@ export default function SearchBrands() {
 
   const query = searchText.trim();
 
-  const { isLoading, data: brands } = useFetch<Brand[]>(buildSearchUrl(query), {
+  const {
+    isLoading,
+    data: brands,
+    error,
+    revalidate,
+  } = useFetch<Brand[]>(buildSearchUrl(query), {
     execute: query.length > 0,
     parseResponse: async (response) => {
       if (!response.ok) {
@@ -68,6 +73,21 @@ export default function SearchBrands() {
         <Grid.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Start typing to search for brands"
+        />
+      ) : error && (brands ?? []).length === 0 && !isLoading ? (
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Brand search failed"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
         />
       ) : (brands ?? []).length === 0 && !isLoading ? (
         <Grid.EmptyView
