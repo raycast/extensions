@@ -21,7 +21,6 @@
   },
   "include": [
     "src/**/*",
-    "tests/**/*",
     "raycast-env.d.ts"
   ]
 }

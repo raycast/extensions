@@ -1,4 +1,4 @@
-# Recast
+# Recast - Text Rewriter
 
 Rewrite, polish, and translate text with Claude on Amazon Bedrock, using your own AWS account. Select text in any app, choose a tone or instruction in Raycast, and review the rewrite before pasting it back.
 
