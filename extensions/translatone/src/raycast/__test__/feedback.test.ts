@@ -93,10 +93,9 @@ describe("showTranslationError", () => {
     trigger(raycast.toasts[0]?.primaryAction);
     await Bun.sleep(0);
 
-    expect(raycast.toasts[1]).toMatchObject({
-      style: "FAILURE",
+    expect(raycast.showFailureToast).toHaveBeenCalledWith(raycast.launchError, {
       title: "Could not open Manage Providers",
-      message: expect.stringContaining("disabled"),
+      message: "Command is disabled. Check that the command is enabled in Raycast Settings.",
     });
   });
 

@@ -1,4 +1,5 @@
-import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const COMMAND_TITLES = {
   translate: "Translate",
@@ -9,8 +10,7 @@ export async function openCommand(command: keyof typeof COMMAND_TITLES): Promise
   try {
     await launchCommand({ name: command, type: LaunchType.UserInitiated });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: `Could not open ${COMMAND_TITLES[command]}`,
       message: `${error instanceof Error ? error.message : String(error)}. Check that the command is enabled in Raycast Settings.`,
     });

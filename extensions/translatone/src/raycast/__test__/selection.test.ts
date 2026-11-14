@@ -143,10 +143,9 @@ describe("translateSelectionInPlace", () => {
       await translateSelectionInPlace(fetch);
 
       expect(calls).toHaveLength(0);
-      expect(raycast.toasts[0]).toMatchObject({
-        style: "FAILURE",
+      expect(raycast.showFailureToast).toHaveBeenCalledWith(failure, {
         title: "Could not open Translate",
-        message: expect.stringContaining("disabled"),
+        message: "Command is disabled. Check that the command is enabled in Raycast Settings.",
       });
     },
   );

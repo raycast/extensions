@@ -12,6 +12,9 @@ class RaycastFake {
   readonly clipboard: string[] = [];
   readonly events: string[] = [];
   readonly huds: { readonly title: string; readonly popToRootType: unknown }[] = [];
+  readonly showFailureToast = mock<(error: unknown, options: Partial<Toast.Options>) => Promise<void>>(() =>
+    Promise.resolve(),
+  );
   readonly openExtensionPreferences = mock(() => Promise.resolve());
 
   reset(): void {
@@ -24,6 +27,7 @@ class RaycastFake {
     this.events.length = 0;
     this.huds.length = 0;
     this.openExtensionPreferences.mockClear();
+    this.showFailureToast.mockClear();
   }
 }
 
@@ -78,4 +82,8 @@ void mock.module("@raycast/api", () => ({
     raycast.toasts.push(options);
     return Promise.resolve();
   },
+}));
+
+void mock.module("@raycast/utils", () => ({
+  showFailureToast: (error: unknown, options: Partial<Toast.Options>) => raycast.showFailureToast(error, options),
 }));
