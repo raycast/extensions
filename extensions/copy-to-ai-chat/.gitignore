@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.rayext
+*.tsbuildinfo
+.DS_Store
+.env*
+verification-*.png
+design/
