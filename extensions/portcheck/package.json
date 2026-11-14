@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portcheck",
+  "title": "Portcheck",
+  "description": "See what's using a port and stop it safely: every listening port with its process, who started it, and one-key stop, open and copy.",
+  "icon": "icon.png",
+  "author": "roystondwork-dev",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ports",
+      "title": "Search Ports",
+      "subtitle": "Portcheck",
+      "description": "Every port listening on this Mac, with its process, PID and user; stop it, open it or copy its PID.",
+      "mode": "view"
+    },
+    {
+      "name": "check-port",
+      "title": "Check Port",
+      "subtitle": "Portcheck",
+      "description": "Is a port free? If not, which process holds it and who started it.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "port",
+          "placeholder": "3000",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "kill-port",
+      "title": "Kill Port",
+      "subtitle": "Portcheck",
+      "description": "Stop whatever is listening on a port, after confirming. Never stops system processes.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "port",
+          "placeholder": "3000",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "free-port",
+      "title": "Find Free Port",
+      "subtitle": "Portcheck",
+      "description": "Copy a free port, optionally in a range such as 3000-3999.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "range",
+          "placeholder": "3000-3999",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "portcheckPath",
+      "title": "Portcheck Path",
+      "description": "Path to the portcheck binary. Leave empty to find it in Homebrew, ~/.local/bin, ~/go/bin or PATH.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^3.2.7",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
