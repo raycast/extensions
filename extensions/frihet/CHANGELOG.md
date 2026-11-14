@@ -1,6 +1,6 @@
 # Frihet ERP Changelog
 
-## [Store Listing Documentation] - {PR_MERGE_DATE}
+## [Store Listing Documentation] - 2026-11-14
 
 - Updated the README status to link to the published Raycast Store listing.
 
