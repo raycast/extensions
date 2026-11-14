@@ -66,7 +66,12 @@ func roleAndSubrole(_ element: AXUIElement) -> (role: String, subrole: String) {
 
 func inspectWebKitWindow(_ window: AXUIElement, collectUrl: Bool = true) -> WindowAXInspection {
   var result = WindowAXInspection()
-  var foundTabsFromAxis = false
+
+  func appendTabs(_ tabs: [AXUIElement]) {
+    for tab in tabs where !result.tabButtons.contains(where: { CFEqual($0, tab) }) {
+      result.tabButtons.append(tab)
+    }
+  }
 
   func walk(
     _ element: AXUIElement,
@@ -109,7 +114,7 @@ func inspectWebKitWindow(_ window: AXUIElement, collectUrl: Bool = true) -> Wind
     }
 
     if !skipTabCollection && (subrole == "AXTabButton" || (insideTabGroup && role == "AXRadioButton")) {
-      result.tabButtons.append(element)
+      appendTabs([element])
       return
     }
 
@@ -117,14 +122,14 @@ func inspectWebKitWindow(_ window: AXUIElement, collectUrl: Bool = true) -> Wind
     let nowInToolbar = insideToolbar || role == "AXToolbar"
     var skipChildrenTabs = skipTabCollection
 
-    if !skipTabCollection && role == "AXTabGroup" && !foundTabsFromAxis {
+    // Orion exposes ordinary and pinned tabs in separate groups. Read every group.
+    if !skipTabCollection && role == "AXTabGroup" {
       if let axTabs = copyAttr(element, "AXTabs") as? [AXUIElement], !axTabs.isEmpty {
         let filtered = axTabs.filter { tab in
           let (r, sr) = roleAndSubrole(tab)
           return sr == "AXTabButton" || r == "AXRadioButton" || r == "AXTab"
         }
-        result.tabButtons.append(contentsOf: filtered.isEmpty ? axTabs : filtered)
-        foundTabsFromAxis = true
+        appendTabs(filtered.isEmpty ? axTabs : filtered)
         skipChildrenTabs = true
       }
     }
@@ -470,9 +475,15 @@ func appleEventTabs(
   fallbackTitle: String = "",
   activeURL: String = ""
 ) -> [BrowserTabOutput] {
-  candidate.titles.enumerated().map { (index, title) in
+  let activeIndex: Int?
+  if candidate.titles.count == 1 {
+    activeIndex = 0
+  } else {
+    activeIndex = uniqueTabTitleIndex(titles: candidate.titles, expectedTitle: fallbackTitle)
+  }
+  return candidate.titles.enumerated().map { (index, title) in
     let url = index < candidate.urls.count ? candidate.urls[index] : ""
-    let fallbackURL = index == 0 ? activeURL : ""
+    let fallbackURL = index == activeIndex ? activeURL : ""
     return BrowserTabOutput(
       id: "\(windowId):\(index)",
       title: title.isEmpty ? fallbackTitle : title,
@@ -792,18 +803,7 @@ func handleFocus(args: [String]) throws {
     try focusTabViaAppleEvent(pid: ownerPid, windowId: targetWid, appName: appName, expectedTitle: expectedTitle)
   }
 
-  if boolAttr(targetWindow, kAXMinimizedAttribute) {
-    _ = AXUIElementSetAttributeValue(targetWindow, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
-  }
-
-  _ = AXUIElementPerformAction(targetWindow, kAXRaiseAction as CFString)
-  _ = AXUIElementSetAttributeValue(targetWindow, kAXMainAttribute as CFString, kCFBooleanTrue)
-  NSRunningApplication(processIdentifier: ownerPid)?.unhide()
-  if #available(macOS 14.0, *) {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate()
-  } else {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate(options: [.activateIgnoringOtherApps])
-  }
+  try focusWindow(targetWindow, pid: ownerPid, windowId: targetWid)
   print("ok")
 }
 

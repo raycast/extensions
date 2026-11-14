@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { AppGroup, AXWindow, Window, queryAXWindows, queryWindows } from "./windows";
-import { getErrorMessage } from "./helpers/applescript";
 import { rankSearch, remainingSearch, SEARCH_WEIGHT as W } from "./helpers/search";
 import { useListSearch } from "./helpers/use-list-search";
 import { getWindowAccessories } from "./helpers/window-presentation";
@@ -49,11 +49,7 @@ export function AppWindowsView({
       setWindows(latest.filter((window) => pids.has(window.pid)));
       onRefresh();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to refresh windows",
-        message: getErrorMessage(error),
-      });
+      await showFailureToast(error, { title: "Failed to refresh windows" });
     } finally {
       setIsLoading(false);
     }
@@ -143,11 +139,7 @@ export function AXWindowsView({
       setWindows(latest.flat());
       onRefresh();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to refresh windows",
-        message: getErrorMessage(error),
-      });
+      await showFailureToast(error, { title: "Failed to refresh windows" });
     } finally {
       setIsLoading(false);
     }

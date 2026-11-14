@@ -17,7 +17,6 @@ export function RuntimeSetupView({ status, onCheck }: { status: RuntimeStatus; o
   }[status.kind];
   return (
     <Detail
-      navigationTitle="App Hopper Setup"
       markdown={markdown}
       isLoading={status.kind === "checking"}
       actions={

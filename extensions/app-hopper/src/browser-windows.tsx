@@ -1,15 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  Keyboard,
-  List,
-  PopToRootType,
-  Toast,
-  closeMainWindow,
-  showToast,
-} from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, Keyboard, List, PopToRootType, closeMainWindow } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { browserEmptyState, tabsEmptyState } from "./browser-empty-state";
 
 import type { BrowserConfig, BrowserTab, BrowserWindow } from "./browsers/types";
@@ -40,11 +30,7 @@ export async function switchBrowserTab(browser: BrowserConfig, window: BrowserWi
 
     await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to switch tab",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed to switch tab" });
   }
 }
 

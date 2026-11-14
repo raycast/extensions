@@ -344,17 +344,7 @@ func handleFocus(args: [String]) throws {
       userInfo: [NSLocalizedDescriptionKey: "Cannot access tab controls. Refresh the list."])
   }
 
-  if boolAttr(targetWindow, kAXMinimizedAttribute) {
-    _ = AXUIElementSetAttributeValue(targetWindow, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
-  }
-
-  _ = AXUIElementPerformAction(targetWindow, kAXRaiseAction as CFString)
-  _ = AXUIElementSetAttributeValue(targetWindow, kAXMainAttribute as CFString, kCFBooleanTrue)
-  if #available(macOS 14.0, *) {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate()
-  } else {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate(options: [.activateIgnoringOtherApps])
-  }
+  try focusWindow(targetWindow, pid: ownerPid, windowId: targetWid, unhide: false)
   print("ok")
 }
 

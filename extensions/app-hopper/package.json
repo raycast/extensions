@@ -17,57 +17,36 @@
     {
       "name": "app-hopper",
       "title": "App Hopper",
-      "subtitle": "Quickly switch between running apps",
       "description": "Search running apps, windows, and browser tabs on macOS and switch to the result you need.",
       "mode": "view",
       "icon": "app-hopper-icon-512.png"
     }
   ],
-  "tools": [],
   "dependencies": {
     "@raycast/api": "^2.10.1",
     "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/firefox-webext-browser": "^143.0.1",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "eslint": "^10.13.0",
     "jiti": "^2.7.0",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3",
-    "web-ext": "10.8.0"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build:native": "node --import tsx scripts/build-native.ts",
-    "package:native": "node --import tsx scripts/build-native.ts --release",
     "verify:native": "node --import tsx scripts/verify-native.ts",
     "prebuild": "npm run build:native",
     "build": "ray build",
-    "test": "node --import tsx --test tests/*.test.ts",
-    "package:firefox": "node --import tsx scripts/package-companion.ts",
-    "configure:firefox-release": "node --import tsx scripts/configure-companion-release.ts",
     "predev": "npm run build:native",
     "dev": "ray develop",
-    "preview:loading": "npm run build && node --import tsx scripts/preview-loading.ts",
-    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npm run verify:store && npx @raycast/api@latest publish",
-    "verify:store": "node --import tsx scripts/verify-store.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.tooling.json && tsc --noEmit -p tsconfig.companion.json && tsc --noEmit -p tsconfig.privileged.json",
-    "build:firefox": "node --import tsx scripts/build-companion.ts",
-    "build:zen": "node --import tsx scripts/build-companion.ts --zen",
-    "package:zen": "node --import tsx scripts/package-companion.ts --zen",
-    "configure:zen-release": "node --import tsx scripts/configure-companion-release.ts --browser zen",
-    "verify:zen-workspaces": "python3 scripts/verify-zen-workspaces.py",
-    "build:companion": "node --import tsx scripts/build-companion.ts",
-    "package:companion": "node --import tsx scripts/package-companion.ts",
-    "configure:companion-release": "node --import tsx scripts/configure-companion-release.ts",
-    "build:privileged": "tsc -p tsconfig.privileged.json",
-    "package:companion-source": "node --import tsx scripts/package-companion-source.ts",
-    "lint:companion": "web-ext lint --source-dir dist/companion/extension --self-hosted --warnings-as-errors"
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

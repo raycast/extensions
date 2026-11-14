@@ -493,40 +493,32 @@ func handleFocus(args: [String]) throws {
     )
   }
 
-  if boolAttr(targetWindow, kAXMinimizedAttribute) {
-    _ = AXUIElementSetAttributeValue(targetWindow, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
-  }
-
-  _ = AXUIElementPerformAction(targetWindow, kAXRaiseAction as CFString)
-  _ = AXUIElementSetAttributeValue(targetWindow, kAXMainAttribute as CFString, kCFBooleanTrue)
-  _ = AXUIElementSetAttributeValue(targetWindow, kAXFocusedAttribute as CFString, kCFBooleanTrue)
-
-  NSRunningApplication(processIdentifier: ownerPid)?.unhide()
-  if #available(macOS 14.0, *) {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate()
-  } else {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate(options: [.activateIgnoringOtherApps])
-  }
+  try focusWindow(targetWindow, pid: ownerPid, windowId: targetWid, setFocused: true)
   print("ok")
 }
 
-do {
-  let args = Array(CommandLine.arguments.dropFirst())
-  guard let command = args.first else {
-    throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing command"])
+@main
+enum MacOSWindowsHelper {
+  static func main() {
+    do {
+      let args = Array(CommandLine.arguments.dropFirst())
+      guard let command = args.first else {
+        throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing command"])
+      }
+      let rest = Array(args.dropFirst())
+      switch command {
+      case "list":
+        try handleList()
+      case "applications":
+        try handleApplications()
+      case "focus":
+        try handleFocus(args: rest)
+      default:
+        throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unknown command: \(command)"])
+      }
+    } catch {
+      fputs((error as NSError).localizedDescription + "\n", stderr)
+      exit(1)
+    }
   }
-  let rest = Array(args.dropFirst())
-  switch command {
-  case "list":
-    try handleList()
-  case "applications":
-    try handleApplications()
-  case "focus":
-    try handleFocus(args: rest)
-  default:
-    throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unknown command: \(command)"])
-  }
-} catch {
-  fputs((error as NSError).localizedDescription + "\n", stderr)
-  exit(1)
 }

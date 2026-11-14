@@ -54,6 +54,8 @@ export async function focusBrowserTab(
   window: BrowserWindow,
   tab: BrowserWindow["tabs"][number],
 ) {
-  if (browser.engine === "firefox") return focusFirefoxTab(window.id, tab.id, browser, tab.title);
+  if (browser.engine === "firefox") {
+    return focusFirefoxTab(window.id, tab.id, browser, tab.title, window.nativeWindowId);
+  }
   return focusNativeBrowserTab(browser, window.id, tab.id, tab.title);
 }

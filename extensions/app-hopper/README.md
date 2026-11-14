@@ -2,26 +2,9 @@
 
 Find and switch between running apps, windows, and browser tabs from Raycast on macOS.
 
-[![CI](https://github.com/chenghsj/app-hopper/actions/workflows/ci.yml/badge.svg)](https://github.com/chenghsj/app-hopper/actions/workflows/ci.yml)
-[![Release notes](https://img.shields.io/badge/GitHub-Release_notes-181717?logo=github&logoColor=white)](https://github.com/chenghsj/app-hopper/releases/tag/companion-v1.0.1)
-[![MIT License](https://img.shields.io/badge/License-MIT-green)](https://github.com/chenghsj/app-hopper/blob/main/LICENSE)
-
 - Search running apps, window titles, and browser tabs in one place.
 - Browse an app's windows or a browser's tabs and switch to the one you need.
 - Find tabs by title or available URL, including background URLs with the Firefox/Zen companion.
-
-## Install from Source
-
-Requires macOS, [Raycast](https://www.raycast.com/), Node.js 24 or newer, and Apple's Command Line Tools (`xcode-select --install`) or Xcode.
-
-```sh
-git clone https://github.com/chenghsj/app-hopper.git
-cd app-hopper
-npm ci
-npm run dev
-```
-
-This builds the native helpers and loads App Hopper into Raycast. See the [development guide](docs/development.md) for more details.
 
 ## Usage
 
@@ -60,7 +43,7 @@ Press **⌘R — Refresh List** to reload and reorder results. Changing your sea
 
 Available tabs and URLs depend on the browser and its permissions. Without the Firefox/Zen companion, background tab URLs may be unavailable. Zen's hidden sidebar can also make its tab list unavailable.
 
-See the [compatibility guide](docs/compatibility.md) for tested environments and known limitations.
+See the [compatibility guide](https://github.com/chenghsj/app-hopper/blob/main/docs/compatibility.md) for tested environments and known limitations.
 
 ### Firefox and Zen
 
@@ -72,16 +55,10 @@ Requires Firefox 142 or later, or a compatible Zen version.
 
 Install the same companion in each Firefox or Zen profile you use. Private-window access is optional and stays off by default.
 
-Searching across all **Zen Spaces** requires a [separate local bridge](docs/zen-integration.md#local-cross-workspace-bridge). It changes Zen's startup files, requires a restart, and may need reinstalling after a Zen update. Zen Spaces are separate from the macOS Spaces used by **By Space** sorting.
+Searching across all **Zen Spaces** requires a [separate local bridge](https://github.com/chenghsj/app-hopper/blob/main/docs/zen-integration.md#local-cross-workspace-bridge). It changes Zen's startup files, requires a restart, and may need reinstalling after a Zen update. Zen Spaces are separate from the macOS Spaces used by **By Space** sorting.
 
-For troubleshooting, updates, and removal, see the [Firefox guide](docs/firefox-integration.md) or [Zen guide](docs/zen-integration.md).
-
-## Development
-
-See the [development guide](docs/development.md) for project structure and checks, and [release automation](docs/release-automation.md) for companion signing and publishing.
-
-Run `npm run preview:loading` to build and open a persistent loading-screen preview in Raycast. Confirm **Run** if Raycast asks. Press **Esc** to leave the preview; opening App Hopper normally returns to the live app list.
+For troubleshooting, updates, and removal, see the [Firefox guide](https://github.com/chenghsj/app-hopper/blob/main/docs/firefox-integration.md) or [Zen guide](https://github.com/chenghsj/app-hopper/blob/main/docs/zen-integration.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/chenghsj/app-hopper/blob/main/LICENSE)

@@ -6,7 +6,7 @@ import type { BrowserConfig, BrowserWindow } from "./types";
 import { runBrowserHelper } from "../helpers/browser-helper";
 import { assertNativeTabTarget } from "../helpers/browser-tab-id";
 import { sortWindows } from "../helpers/window-utils";
-import { queryWindows, Window } from "../windows";
+import { focusNativeWindowById, queryWindows, Window } from "../windows";
 import type { GeckoBrowserId } from "./gecko-config";
 import { FIREFOX_DIRECTORY, ZEN_DIRECTORY } from "./firefox-integration";
 import { reconcileFirefoxWindows } from "./firefox-reconciliation";
@@ -224,6 +224,7 @@ export async function focusFirefoxTab(
   tabId: string,
   browser?: BrowserConfig,
   expectedTitle = "",
+  nativeWindowId?: string,
 ): Promise<void> {
   const appName = browser?.appName ?? "Firefox";
   const sessionWindow = /^([a-f0-9]{16}):(\d+)$/.exec(windowId);
@@ -241,6 +242,16 @@ export async function focusFirefoxTab(
       },
       appName === "Zen" ? "zen" : "firefox",
     );
+    // WebExtension focus can select a window without activating its macOS app.
+    // Use only a uniquely reconciled native identity, scoped to this browser.
+    const nativeWindows = await getFirefoxNativeWindows(appName);
+    if (!nativeWindowId) {
+      const windows = await getFirefoxWindows(browser, nativeWindows);
+      nativeWindowId = windows.find((window) => window.id === windowId)?.nativeWindowId;
+    }
+    const matched = nativeWindows.find((window) => String(window.id) === nativeWindowId);
+    if (!matched) throw new Error(`Could not identify the ${appName} window. Refresh the list.`);
+    await focusNativeWindowById(matched.id, matched.pid);
     return;
   }
 

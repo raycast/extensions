@@ -25,10 +25,11 @@ struct BrowserWindowOutput: Encodable {
   let space: Int?
 }
 
-func chromiumBrowserPolicy(appName: String) -> (tabClass: String, tabSearchDepth: Int) {
+func chromiumBrowserPolicy(appName: String) -> (tabClass: String, tabSearchDepth: Int, isVivaldi: Bool) {
   // Opera's tab strip sits below extra application groups and uses its own scripting class.
-  if appName == "Opera" { return ("OpTb", 24) }
-  return ("CrTb", 12)
+  if appName == "Opera" { return ("OpTb", 24, false) }
+  if appName == "Vivaldi" { return ("CrTb", 24, true) }
+  return ("CrTb", 12, false)
 }
 
 func roleAndSubrole(_ element: AXUIElement) -> (role: String, subrole: String) {
@@ -52,13 +53,22 @@ func collectChromiumTabs(
   depth: Int = 0,
   insideTabGroup: Bool = false,
   maxDepth: Int = 12,
+  includeVivaldiUI: Bool = false,
   out: inout [AXUIElement]
 ) {
   if depth > maxDepth {
     return
   }
   let (role, subrole) = roleAndSubrole(element)
-  if role == "AXWebArea" || role == "AXMenu" || role == "AXMenuBar" || role == "AXButton"
+  if role == "AXWebArea" {
+    // Vivaldi renders its browser chrome in this internal extension page.
+    // Only cross this outer UI boundary; content pages remain excluded.
+    let url = copyAttr(element, "AXURL") as? URL
+    guard includeVivaldiUI,
+      url?.absoluteString == "chrome-extension://mpognobbkildjkofajifpdfhcoklimli/window.html"
+    else { return }
+  }
+  if role == "AXMenu" || role == "AXMenuBar" || role == "AXButton"
     || role == "AXStaticText" || role == "AXImage" || role == "AXTextField"
   {
     return
@@ -77,7 +87,10 @@ func collectChromiumTabs(
   }
   if let children = copyAttr(element, kAXChildrenAttribute) as? [AXUIElement] {
     for child in children {
-      collectChromiumTabs(child, depth: depth + 1, insideTabGroup: nowInTabGroup, maxDepth: maxDepth, out: &out)
+      collectChromiumTabs(
+        child, depth: depth + 1, insideTabGroup: nowInTabGroup, maxDepth: maxDepth,
+        includeVivaldiUI: includeVivaldiUI && role != "AXWebArea", out: &out
+      )
     }
   }
 }
@@ -309,6 +322,7 @@ func buildWindowOutput(
   fallbackDocUrl: String?,
   space: Int?,
   tabSearchDepth: Int = 12,
+  includeVivaldiUI: Bool = false,
   aeCandidates: inout [(titles: [String], urls: [String])]
 ) -> BrowserWindowOutput? {
   let winIdStr = String(wid)
@@ -325,7 +339,7 @@ func buildWindowOutput(
   }
 
   var tabButtons: [AXUIElement] = []
-  collectChromiumTabs(axWindow, maxDepth: tabSearchDepth, out: &tabButtons)
+  collectChromiumTabs(axWindow, maxDepth: tabSearchDepth, includeVivaldiUI: includeVivaldiUI, out: &tabButtons)
 
   let axWinTitle = stringAttr(axWindow, kAXTitleAttribute)
   let effectiveWinTitle = !axWinTitle.isEmpty ? axWinTitle : (fallbackTitle ?? "")
@@ -432,6 +446,7 @@ func handleList(args: [String]) throws {
       fallbackDocUrl: nWin.documentUrl,
       space: validSpace,
       tabSearchDepth: policy.tabSearchDepth,
+      includeVivaldiUI: policy.isVivaldi,
       aeCandidates: &aeCandidates
     ) {
       results.append(output)
@@ -450,6 +465,7 @@ func handleList(args: [String]) throws {
         fallbackDocUrl: nil,
         space: nil,
         tabSearchDepth: policy.tabSearchDepth,
+        includeVivaldiUI: policy.isVivaldi,
         aeCandidates: &emptyCandidates
       ) {
         results.append(output)
@@ -459,6 +475,100 @@ func handleList(args: [String]) throws {
 
   let encoded = try JSONEncoder().encode(results)
   print(String(data: encoded, encoding: .utf8) ?? "[]")
+}
+
+func vivaldiTabID(domIdentifier: String) -> String? {
+  guard domIdentifier.hasPrefix("tab-") else { return nil }
+  let id = String(domIdentifier.dropFirst(4))
+  guard !id.isEmpty, id.utf8.allSatisfy({ $0 >= 48 && $0 <= 57 }), let number = UInt64(id), number > 0 else {
+    return nil
+  }
+  return id
+}
+
+func vivaldiScriptTarget(
+  tabID: String, windows: [(id: String, tabs: [String])]
+) -> (windowID: String, index: Int)? {
+  let matches = windows.flatMap { window in
+    window.tabs.enumerated().compactMap { index, id in
+      id == tabID ? (windowID: window.id, index: index) : nil
+    }
+  }
+  guard matches.count == 1, !matches[0].windowID.isEmpty else { return nil }
+  return matches[0]
+}
+
+func vivaldiWindowSpec(id: String) -> NSAppleEventDescriptor {
+  let object = NSAppleEventDescriptor.record()
+  object.setDescriptor(NSAppleEventDescriptor(typeCode: fourCC("cwin")), forKeyword: fourCC("want"))
+  object.setDescriptor(NSAppleEventDescriptor.null(), forKeyword: fourCC("from"))
+  object.setDescriptor(NSAppleEventDescriptor(enumCode: fourCC("ID  ")), forKeyword: fourCC("form"))
+  object.setDescriptor(NSAppleEventDescriptor(string: id), forKeyword: fourCC("seld"))
+  return object.coerce(toDescriptorType: fourCC("obj ")) ?? object
+}
+
+func sendVivaldiAppleEvent(
+  pid: Int32, command: String, target: NSAppleEventDescriptor, value: NSAppleEventDescriptor? = nil
+) throws -> NSAppleEventDescriptor {
+  let event = NSAppleEventDescriptor(
+    eventClass: fourCC("core"), eventID: fourCC(command),
+    targetDescriptor: NSAppleEventDescriptor(processIdentifier: pid),
+    returnID: AEReturnID(kAutoGenerateReturnID), transactionID: AETransactionID(kAnyTransactionID)
+  )
+  event.setParam(target, forKeyword: fourCC("----"))
+  if let value = value { event.setParam(value, forKeyword: fourCC("data")) }
+  let reply = try event.sendEvent(options: [.waitForReply], timeout: 2)
+  let error = reply.paramDescriptor(forKeyword: fourCC("errn"))?.int32Value ?? 0
+  guard error == 0 else {
+    throw NSError(domain: "ChromiumAX", code: Int(error),
+      userInfo: [NSLocalizedDescriptionKey: "Vivaldi scripting failed (error \(error))."])
+  }
+  return reply.paramDescriptor(forKeyword: fourCC("----")) ?? NSAppleEventDescriptor.null()
+}
+
+func vivaldiStringValues(_ value: NSAppleEventDescriptor) -> [String] {
+  if value.numberOfItems == 0 { return value.stringValue.map { [$0] } ?? [] }
+  // Preserve positions if another tab's ID is unavailable.
+  return (1...value.numberOfItems).map { value.atIndex($0)?.stringValue ?? "" }
+}
+
+func activateVivaldiTab(pid: Int32, tab: AXUIElement) throws {
+  guard let tabID = vivaldiTabID(domIdentifier: stringAttr(tab, "AXDOMIdentifier")) else {
+    throw NSError(domain: "ChromiumAX", code: 7,
+      userInfo: [NSLocalizedDescriptionKey: "Vivaldi tab identity is unavailable. Refresh the list."])
+  }
+  let windows = try sendVivaldiAppleEvent(
+    pid: pid, command: "getd",
+    target: propertySpec(prop: fourCC("ID  "), from: everyElement(want: fourCC("cwin"), from: .null()))
+  )
+  var candidates: [(id: String, tabs: [String])] = []
+  for id in vivaldiStringValues(windows) {
+    // Query each stable window ID separately: window ordering may change between events.
+    let tabs = try sendVivaldiAppleEvent(
+      pid: pid, command: "getd",
+      target: propertySpec(
+        prop: fourCC("ID  "), from: everyElement(want: fourCC("CrTb"), from: vivaldiWindowSpec(id: id))
+      )
+    )
+    candidates.append((id: id, tabs: vivaldiStringValues(tabs)))
+  }
+  guard let target = vivaldiScriptTarget(tabID: tabID, windows: candidates), target.index < Int(Int32.max) else {
+    throw NSError(domain: "ChromiumAX", code: 7,
+      userInfo: [NSLocalizedDescriptionKey: "Vivaldi tab moved or closed. Refresh the list."])
+  }
+  let window = vivaldiWindowSpec(id: target.windowID)
+  _ = try sendVivaldiAppleEvent(
+    pid: pid, command: "setd", target: propertySpec(prop: fourCC("acTI"), from: window),
+    value: NSAppleEventDescriptor(int32: Int32(target.index + 1))
+  )
+  let active = try sendVivaldiAppleEvent(
+    pid: pid, command: "getd",
+    target: propertySpec(prop: fourCC("ID  "), from: propertySpec(prop: fourCC("acTa"), from: window))
+  )
+  guard active.stringValue == tabID else {
+    throw NSError(domain: "ChromiumAX", code: 7,
+      userInfo: [NSLocalizedDescriptionKey: "Vivaldi tab changed during activation. Refresh the list."])
+  }
 }
 
 func handleFocus(args: [String]) throws {
@@ -521,7 +631,7 @@ func handleFocus(args: [String]) throws {
   }
 
   var tabButtons: [AXUIElement] = []
-  collectChromiumTabs(targetWindow, maxDepth: policy.tabSearchDepth, out: &tabButtons)
+  collectChromiumTabs(targetWindow, maxDepth: policy.tabSearchDepth, includeVivaldiUI: policy.isVivaldi, out: &tabButtons)
 
   if !tabButtons.isEmpty {
     guard let resolvedIndex = tabReferences.resolve(
@@ -536,30 +646,32 @@ func handleFocus(args: [String]) throws {
 
     let targetTab = tabButtons[resolvedIndex]
     let pressError = AXUIElementPerformAction(targetTab, kAXPressAction as CFString)
-    if pressError != .success {
+    if pressError != .success && !policy.isVivaldi {
       throw NSError(
         domain: "ChromiumAX",
         code: 7,
         userInfo: [NSLocalizedDescriptionKey: "Failed to activate Chromium tab (AX error \(pressError.rawValue))."]
       )
     }
+    if policy.isVivaldi {
+      if !readTabInfo(targetTab).selected { try activateVivaldiTab(pid: ownerPid, tab: targetTab) }
+      let deadline = Date(timeIntervalSinceNow: 0.5)
+      while !readTabInfo(targetTab).selected {
+        guard Date() < deadline else {
+          throw NSError(
+            domain: "ChromiumAX", code: 7,
+            userInfo: [NSLocalizedDescriptionKey: "Vivaldi did not activate the requested tab. Refresh the list."]
+          )
+        }
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.025))
+      }
+    }
   } else {
     throw NSError(domain: "ChromiumAX", code: 6,
       userInfo: [NSLocalizedDescriptionKey: "Cannot access tab controls. Refresh the list."])
   }
 
-  if boolAttr(targetWindow, kAXMinimizedAttribute) {
-    _ = AXUIElementSetAttributeValue(targetWindow, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
-  }
-
-  _ = AXUIElementPerformAction(targetWindow, kAXRaiseAction as CFString)
-  _ = AXUIElementSetAttributeValue(targetWindow, kAXMainAttribute as CFString, kCFBooleanTrue)
-  NSRunningApplication(processIdentifier: ownerPid)?.unhide()
-  if #available(macOS 14.0, *) {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate()
-  } else {
-    NSRunningApplication(processIdentifier: ownerPid)?.activate(options: [.activateIgnoringOtherApps])
-  }
+  try focusWindow(targetWindow, pid: ownerPid, windowId: targetWid)
   print("ok")
 }
 

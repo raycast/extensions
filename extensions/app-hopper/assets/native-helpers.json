@@ -2,14 +2,19 @@
   "minimumMacOS": "13.0",
   "helpers": [
     { "name": "runtime-status", "source": "runtime-status.swift", "additionalSources": [] },
-    { "name": "macos-windows", "source": "macos-windows.swift", "additionalSources": [] },
+    {
+      "name": "macos-windows",
+      "source": "macos-windows.swift",
+      "additionalSources": ["window-focus.swift"]
+    },
     {
       "name": "chromium-ax",
       "source": "chromium-ax.swift",
       "additionalSources": [
         "browser-tab-references.swift",
         "browser-helper-runtime.swift",
-        "browser-accessibility.swift"
+        "browser-accessibility.swift",
+        "window-focus.swift"
       ]
     },
     {
@@ -18,7 +23,8 @@
       "additionalSources": [
         "browser-tab-references.swift",
         "browser-helper-runtime.swift",
-        "browser-accessibility.swift"
+        "browser-accessibility.swift",
+        "window-focus.swift"
       ]
     },
     {
@@ -27,7 +33,8 @@
       "additionalSources": [
         "browser-tab-references.swift",
         "browser-helper-runtime.swift",
-        "browser-accessibility.swift"
+        "browser-accessibility.swift",
+        "window-focus.swift"
       ]
     },
     { "name": "firefox-bridge", "source": "firefox-bridge.swift", "additionalSources": [] }

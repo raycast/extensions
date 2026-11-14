@@ -11,6 +11,7 @@ import {
   getRunningApplications,
   queryAXWindows,
   queryWindows,
+  sameWindow,
 } from "./windows";
 
 export interface WindowSearchData extends AppWindowData {
@@ -51,6 +52,111 @@ const systemQueries: WindowDataQueries = {
   getApplicationOrder,
   getRunningApplications,
 };
+
+const CACHE_KEY = "window-search-snapshot-v3";
+
+interface SnapshotCache {
+  get(key: string): string | undefined;
+  set(key: string, value: string): void;
+}
+
+interface WindowSearchState {
+  data: WindowSearchData;
+  isLoading: boolean;
+  error?: unknown;
+}
+
+function readSnapshot(cache?: SnapshotCache | null): WindowSearchData | undefined {
+  try {
+    const raw = cache?.get(CACHE_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as WindowSearchData;
+    if (parsed && Array.isArray(parsed.windows)) return { ...emptyWindowData(), ...parsed };
+  } catch {
+    // A cache failure must not prevent live discovery.
+  }
+}
+
+/** Own visible observations, load lifetime and completed-cache commits together. */
+export function createWindowSearch({
+  queries = systemQueries,
+  cache,
+}: { queries?: WindowDataQueries; cache?: SnapshotCache | null } = {}) {
+  let committed = readSnapshot(cache);
+  const data = committed ?? emptyWindowData();
+  let state: WindowSearchState = { data, isLoading: data.windows.length === 0 };
+  const listeners = new Set<() => void>();
+  let active: object | undefined;
+
+  function publish(next: WindowSearchState) {
+    state = next;
+    for (const listener of listeners) listener();
+  }
+
+  function commit(snapshot: WindowSearchData) {
+    committed = snapshot;
+    try {
+      cache?.set(CACHE_KEY, JSON.stringify(snapshot));
+    } catch {
+      // Keep the live snapshot when persistence is unavailable.
+    }
+  }
+
+  function cancel() {
+    active = undefined;
+    if (state.isLoading) publish({ ...state, isLoading: false });
+  }
+
+  async function refresh(): Promise<void> {
+    const run = {};
+    active = run;
+    const previous = state.data;
+    publish({ data: previous, isLoading: true });
+    try {
+      await loadWindowData(
+        (data) => {
+          if (active === run) publish({ data, isLoading: true });
+        },
+        queries,
+        previous,
+      );
+      if (active === run) commit(state.data);
+    } catch (error) {
+      if (active === run) publish({ ...state, error });
+    } finally {
+      if (active === run) {
+        active = undefined;
+        publish({ ...state, isLoading: false });
+      }
+    }
+  }
+
+  function removeWindow(target: Window) {
+    // The caller confirmed closure. Late enrichment from that observation is obsolete.
+    active = undefined;
+    const withoutTarget = (snapshot: WindowSearchData) =>
+      retainWindowData(
+        snapshot,
+        snapshot.windows.filter((window) => !sameWindow(window, target)),
+      );
+    publish({ ...state, data: withoutTarget(state.data), isLoading: false });
+    // Prune only the last completed snapshot; never persist an in-flight partial observation.
+    if (committed) commit(withoutTarget(committed));
+  }
+
+  return {
+    getSnapshot: () => state,
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    refresh,
+    cancel,
+    removeWindow,
+  };
+}
 
 function sameNativeWindows(before: Window[], after: Window[]): boolean {
   return (

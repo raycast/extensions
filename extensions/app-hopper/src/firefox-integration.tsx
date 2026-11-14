@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Alert, Detail, Icon, Keyboard, Toast, confirmAlert, open, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { geckoConfig, type GeckoBrowserId } from "./browsers/gecko-config";
-import { getErrorMessage } from "./helpers/applescript";
 import { disconnectFirefoxBridges, getFirefoxCompanionVersions, isFirefoxBridgeConnected } from "./browsers/firefox";
 import {
   hasFirefoxHostRegistration,
@@ -73,9 +72,8 @@ export function FirefoxIntegrationView({ browserId = "firefox" }: { browserId?: 
       toast.title = result.title;
       toast.message = result.message;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `${appName} integration could not be changed`;
-      toast.message = getErrorMessage(error);
+      await toast.hide();
+      await showFailureToast(error, { title: `${appName} integration could not be changed` });
     } finally {
       // Loading errors are displayed by useCachedPromise in the detail view.
       revalidate();

@@ -1,9 +1,8 @@
 import { Action, Icon, Keyboard, PopToRootType, Toast, closeMainWindow, showToast } from "@raycast/api";
-import type { Dispatch, SetStateAction } from "react";
+import { showFailureToast } from "@raycast/utils";
 import type { RemoveWindow } from "./app-windows";
-import { getErrorMessage } from "./helpers/applescript";
 import { activateApplication, focusNativeWindow } from "./window-focus";
-import { raiseAXWindow, sameWindow, type AppGroup, type AXWindow, type Window } from "./windows";
+import { raiseAXWindow, type AppGroup, type AXWindow, type Window } from "./windows";
 
 export interface WindowActions {
   refresh: () => void;
@@ -18,12 +17,9 @@ export function RefreshWindowsAction({ onRefresh }: { onRefresh: () => void }) {
   );
 }
 
-export function createWindowActions(
-  setWindows: Dispatch<SetStateAction<Window[]>>,
-  refresh: () => void,
-): WindowActions {
+export function createWindowActions(removeWindow: (window: Window) => void, refresh: () => void): WindowActions {
   async function handleMissingWindow(target: Window, onRemoved?: RemoveWindow): Promise<void> {
-    setWindows((current) => current.filter((window) => !sameWindow(window, target)));
+    removeWindow(target);
     onRemoved?.(target.id);
     refresh();
     await showToast({
@@ -41,7 +37,7 @@ export function createWindowActions(
       }
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to focus window", message: getErrorMessage(error) });
+      await showFailureToast(error, { title: "Failed to focus window" });
     }
   }
 
@@ -50,7 +46,7 @@ export function createWindowActions(
       await raiseAXWindow(target);
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Unable to focus window", message: getErrorMessage(error) });
+      await showFailureToast(error, { title: "Unable to focus window" });
       refresh();
     }
   }
@@ -78,11 +74,7 @@ export function createWindowActions(
       refresh();
       await showToast({ style: Toast.Style.Failure, title: "Application is no longer running" });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unable to open application window",
-        message: getErrorMessage(error),
-      });
+      await showFailureToast(error, { title: "Unable to open application window" });
     }
   }
 

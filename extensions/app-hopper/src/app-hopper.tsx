@@ -11,9 +11,10 @@ import { createWindowActions, RefreshWindowsAction } from "./window-actions";
 
 type CommandProps = Pick<LaunchProps<{ launchContext: { preview?: "loading" } }>, "launchContext">;
 
-function emptySearchState(preparing: boolean, hasQuery: boolean) {
+function emptySearchState(preparing: boolean, hasQuery: boolean, error?: string) {
   if (preparing)
     return { title: "Getting things ready…", description: "Your apps, windows and browser tabs will appear here." };
+  if (error) return { title: "Failed to Load Applications", description: error };
   if (hasQuery) return { title: "No Results", description: "Try another app name, window title or URL." };
   return { title: "No Running Applications", description: "Open an app, then refresh the list." };
 }
@@ -25,12 +26,13 @@ export default function Command({ launchContext }: CommandProps = {}) {
     windows,
     applications = [],
     applicationOrder = [],
-    setWindows,
+    removeWindow,
     metadataByPid,
     browserCounts,
     browserTabs,
     axWindowsByPid,
     isLoading,
+    error,
     refreshWindows: reloadWindows,
   } = useWindowSearch(runtimeStatus.kind === "ready" && !previewLoading);
   const isCheckingSetup = previewLoading || runtimeStatus.kind === "checking";
@@ -50,9 +52,9 @@ export default function Command({ launchContext }: CommandProps = {}) {
     return <RuntimeSetupView status={runtimeStatus} onCheck={checkSetup} />;
   }
 
-  const actions = createWindowActions(setWindows, search.refresh);
+  const actions = createWindowActions(removeWindow, search.refresh);
   const refreshAction = <RefreshWindowsAction onRefresh={search.refresh} />;
-  const emptyState = emptySearchState(isPreparing, search.hasQuery);
+  const emptyState = emptySearchState(isPreparing, search.hasQuery, error);
   function renderSection(section: (typeof search.groups)[number]) {
     const items = section.items.map((row) => (
       <SearchResultItem
