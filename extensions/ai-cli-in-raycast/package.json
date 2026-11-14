@@ -1,0 +1,434 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-cli-in-raycast",
+  "title": "AI CLI in Raycast",
+  "description": "在 Raycast 中使用本机 AI CLI，各家拥有独立命令、设置与会话。Native chats for your installed AI CLIs, with independent commands, settings, and sessions.",
+  "icon": "chat-icon.png",
+  "author": "bbfss",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "cli-hub",
+      "title": "AI CLI in Raycast",
+      "subtitle": "Local AI CLIs",
+      "description": "选择本机 AI CLI，或管理其设置。Open a local AI CLI or manage its settings.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "cli",
+        "chat",
+        "codex",
+        "antigravity",
+        "qoder",
+        "workbuddy",
+        "gemini"
+      ],
+      "disabledByDefault": false,
+      "icon": "chat-icon.png"
+    },
+    {
+      "name": "index",
+      "title": "Codex in Raycast",
+      "subtitle": "Chat with your local Codex CLI",
+      "description": "与本机 Codex CLI 对话，独立保存会话和模型选择。Chat with your local Codex CLI, with its own conversations and model choice.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "terminal",
+        "codex",
+        "chatgpt"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "输入问题（可选） / Optional question",
+          "required": false
+        }
+      ],
+      "icon": "provider-codex.png",
+      "disabledByDefault": false
+    },
+    {
+      "name": "antigravity",
+      "title": "Antigravity in Raycast",
+      "subtitle": "Chat with your local Antigravity CLI",
+      "description": "与本机 Antigravity CLI 对话，独立保存会话和模型选择。Chat with your local Antigravity CLI, with its own conversations and model choice.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "terminal",
+        "antigravity",
+        "agy"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "输入问题（可选） / Optional question",
+          "required": false
+        }
+      ],
+      "icon": "provider-antigravity.png",
+      "disabledByDefault": false
+    },
+    {
+      "name": "qoder",
+      "title": "Qoder in Raycast",
+      "subtitle": "Chat with your local Qoder CLI",
+      "description": "与本机 Qoder CLI 对话，独立保存会话和模型选择。Chat with your local Qoder CLI, with its own conversations and model choice.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "terminal",
+        "qoder"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "输入问题（可选） / Optional question",
+          "required": false
+        }
+      ],
+      "icon": "provider-qoder.png",
+      "disabledByDefault": false
+    },
+    {
+      "name": "qoder-cn",
+      "title": "Qoder CN in Raycast",
+      "subtitle": "Chat with your local Qoder CN CLI",
+      "description": "与本机 Qoder CN CLI 对话，独立保存会话和模型选择。Chat with your local Qoder CN CLI, with its own conversations and model choice.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "terminal",
+        "qoder",
+        "qodercn"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "输入问题（可选） / Optional question",
+          "required": false
+        }
+      ],
+      "icon": "provider-qoder.png",
+      "disabledByDefault": false
+    },
+    {
+      "name": "workbuddy",
+      "title": "WorkBuddy in Raycast",
+      "subtitle": "Chat with your local WorkBuddy CLI",
+      "description": "与本机 WorkBuddy CLI 对话，独立保存会话和模型选择。Chat with your local WorkBuddy CLI, with its own conversations and model choice.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "terminal",
+        "workbuddy",
+        "codebuddy"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "输入问题（可选） / Optional question",
+          "required": false
+        }
+      ],
+      "icon": "provider-workbuddy.png",
+      "disabledByDefault": false
+    },
+    {
+      "name": "gemini",
+      "title": "Gemini in Raycast",
+      "subtitle": "Chat with your local Gemini CLI",
+      "description": "与本机 Gemini CLI 对话，独立保存会话和模型选择。Chat with your local Gemini CLI, with its own conversations and model choice.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "terminal",
+        "gemini"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "输入问题（可选） / Optional question",
+          "required": false
+        }
+      ],
+      "icon": "provider-gemini.png",
+      "disabledByDefault": false
+    }
+  ],
+  "preferences": [
+    {
+      "name": "uiLanguage",
+      "type": "dropdown",
+      "title": "界面语言 / Interface Language",
+      "description": "聊天、启动器与插件内设置默认跟随系统语言，也可手动指定。更改后重新打开命令生效。Language for chats, launcher, and CLI Settings. Follow the system or choose a language, then reopen the command.",
+      "required": false,
+      "default": "system",
+      "data": [
+        {
+          "title": "跟随系统 / Follow System",
+          "value": "system"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "简体中文",
+          "value": "zh-CN"
+        },
+        {
+          "title": "繁體中文",
+          "value": "zh-TW"
+        }
+      ]
+    },
+    {
+      "name": "autoDetectCli",
+      "type": "checkbox",
+      "title": "CLI 自动检测 / CLI Detection",
+      "label": "自动查找已安装的 CLI / Automatically find installed CLIs",
+      "description": "检查 PATH 与常见安装位置，手动路径优先。关闭后需为每家 CLI 填写路径。Search PATH and known locations; manual paths take priority. Turn off to require explicit paths.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "codexModelStrategy",
+      "type": "dropdown",
+      "title": "Codex 默认策略 / Defaults",
+      "description": "沿用上次的模型与思考强度，或固定使用“CLI 设置 → Codex”中选择的配置。切回沿用上次时仍保留固定配置。Use the last model and effort, or a fixed pair from CLI Settings → Codex. Switching back preserves the fixed pair.",
+      "required": false,
+      "default": "last",
+      "data": [
+        {
+          "title": "沿用上次 / Last Used",
+          "value": "last"
+        },
+        {
+          "title": "固定模型与思考强度 / Fixed",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "agyModelStrategy",
+      "type": "dropdown",
+      "title": "Antigravity 默认策略 / Defaults",
+      "description": "沿用上次的模型与思考强度，或固定使用“CLI 设置 → Antigravity”中选择的配置。切回沿用上次时仍保留固定配置。Use the last model and effort, or a fixed pair from CLI Settings → Antigravity. Switching back preserves the fixed pair.",
+      "required": false,
+      "default": "last",
+      "data": [
+        {
+          "title": "沿用上次 / Last Used",
+          "value": "last"
+        },
+        {
+          "title": "固定模型与思考强度 / Fixed",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "qoderModelStrategy",
+      "type": "dropdown",
+      "title": "Qoder 默认策略 / Defaults",
+      "description": "沿用上次的模型与思考强度，或固定使用“CLI 设置 → Qoder”中选择的配置。切回沿用上次时仍保留固定配置。Use the last model and effort, or a fixed pair from CLI Settings → Qoder. Switching back preserves the fixed pair.",
+      "required": false,
+      "default": "last",
+      "data": [
+        {
+          "title": "沿用上次 / Last Used",
+          "value": "last"
+        },
+        {
+          "title": "固定模型与思考强度 / Fixed",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "qoderCnModelStrategy",
+      "type": "dropdown",
+      "title": "Qoder CN 默认策略 / Defaults",
+      "description": "沿用上次的模型与思考强度，或固定使用“CLI 设置 → Qoder CN”中选择的配置。切回沿用上次时仍保留固定配置。Use the last model and effort, or a fixed pair from CLI Settings → Qoder CN. Switching back preserves the fixed pair.",
+      "required": false,
+      "default": "last",
+      "data": [
+        {
+          "title": "沿用上次 / Last Used",
+          "value": "last"
+        },
+        {
+          "title": "固定模型与思考强度 / Fixed",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "workbuddyModelStrategy",
+      "type": "dropdown",
+      "title": "WorkBuddy 默认策略 / Defaults",
+      "description": "沿用上次的模型与思考强度，或固定使用“CLI 设置 → WorkBuddy”中选择的配置。切回沿用上次时仍保留固定配置。Use the last model and effort, or a fixed pair from CLI Settings → WorkBuddy. Switching back preserves the fixed pair.",
+      "required": false,
+      "default": "last",
+      "data": [
+        {
+          "title": "沿用上次 / Last Used",
+          "value": "last"
+        },
+        {
+          "title": "固定模型与思考强度 / Fixed",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "geminiModelStrategy",
+      "type": "dropdown",
+      "title": "Gemini 默认策略 / Defaults",
+      "description": "沿用上次的模型与思考强度，或固定使用“CLI 设置 → Gemini”中选择的配置。切回沿用上次时仍保留固定配置。Use the last model and effort, or a fixed pair from CLI Settings → Gemini. Switching back preserves the fixed pair.",
+      "required": false,
+      "default": "last",
+      "data": [
+        {
+          "title": "沿用上次 / Last Used",
+          "value": "last"
+        },
+        {
+          "title": "固定模型与思考强度 / Fixed",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "liveSearch",
+      "type": "checkbox",
+      "title": "Codex 网页搜索 / Web Search",
+      "description": "允许 Codex CLI 实时搜索网页；其他 CLI 使用各自的设置。Allow Codex live web search. Other CLIs use their own settings.",
+      "label": "启用实时网页搜索 / Enable live web search",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sandboxMode",
+      "type": "dropdown",
+      "title": "Codex 权限范围 / Sandbox Mode",
+      "description": "设置 Codex 的文件访问权限。Antigravity 使用自己的规划与沙箱参数。Codex file permissions. Antigravity uses its own plan and sandbox flags.",
+      "required": false,
+      "data": [
+        {
+          "title": "只读（推荐） / Read-only",
+          "value": "read-only"
+        },
+        {
+          "title": "可修改工作目录 / Workspace write",
+          "value": "workspace-write"
+        },
+        {
+          "title": "完全访问 / Full access",
+          "value": "danger-full-access"
+        }
+      ],
+      "default": "read-only"
+    },
+    {
+      "name": "workingDirectory",
+      "type": "textfield",
+      "title": "工作目录 / Working Directory",
+      "description": "可选，填写项目文件夹的绝对路径；留空使用 CLI 的默认目录。Optional absolute project directory. Leave empty for the CLI default.",
+      "required": false,
+      "placeholder": "C:\\Users\\you\\project or /Users/you/project",
+      "default": ""
+    },
+    {
+      "name": "codexPath",
+      "type": "textfield",
+      "title": "Codex CLI 路径 / Path",
+      "description": "可选，填写 codex、codex.exe 或 codex.cmd 的绝对路径；留空自动检测（需开启自动检测）。Optional absolute executable path. Leave empty for automatic detection when enabled.",
+      "required": false,
+      "placeholder": "可选：可执行文件绝对路径 / Optional executable path",
+      "default": ""
+    },
+    {
+      "name": "agyPath",
+      "type": "textfield",
+      "title": "Antigravity CLI 路径 / Path",
+      "description": "可选，填写 agy 可执行文件的绝对路径；留空自动检测（需开启自动检测）。沿用本机 CLI 登录。Optional absolute agy path; leave empty for detection when enabled. Uses your CLI sign-in.",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "qoderPath",
+      "type": "textfield",
+      "title": "Qoder CLI 路径 / Path",
+      "description": "可选，填写可执行文件或 Node 入口的绝对路径；留空自动检测（需开启自动检测）。使用该 CLI 自身的登录。Optional absolute executable or Node entrypoint path; leave empty for detection when enabled. Uses this CLI’s own sign-in.",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "qoderCnPath",
+      "type": "textfield",
+      "title": "Qoder CN CLI 路径 / Path",
+      "description": "可选，填写可执行文件或 Node 入口的绝对路径；留空自动检测（需开启自动检测）。使用该 CLI 自身的登录。Optional absolute executable or Node entrypoint path; leave empty for detection when enabled. Uses this CLI’s own sign-in.",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "workbuddyPath",
+      "type": "textfield",
+      "title": "WorkBuddy CLI 路径 / Path",
+      "description": "可选，填写可执行文件或 Node 入口的绝对路径；留空自动检测（需开启自动检测）。使用该 CLI 自身的登录。Optional absolute executable or Node entrypoint path; leave empty for detection when enabled. Uses this CLI’s own sign-in.",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "geminiPath",
+      "type": "textfield",
+      "title": "Gemini CLI 路径 / Path",
+      "description": "可选，填写可执行文件或 Node 入口的绝对路径；留空自动检测（需开启自动检测）。使用该 CLI 自身的登录。Optional absolute executable or Node entrypoint path; leave empty for detection when enabled. Uses this CLI’s own sign-in.",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test tests/*.test.cjs",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "0.1.0-beta.1"
+}
