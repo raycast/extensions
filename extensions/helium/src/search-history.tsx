@@ -1,11 +1,7 @@
-import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { Icon, LaunchProps, List } from "@raycast/api";
 import { useState } from "react";
-import type { HistoryEntry } from "./types";
-import { CreateQuicklinkAction, OpenInHeliumAction, ReloadAction } from "./utils/actions";
 import { useHistorySearch } from "./utils/history";
-import { SHORTCUTS } from "./utils/shortcuts";
-import { extractDomain, normalizeURL } from "./utils/url";
+import { HistoryListItem } from "./utils/list-items";
 
 export default function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
@@ -52,32 +48,5 @@ export default function SearchHistory(props: LaunchProps) {
         </List.Section>
       )}
     </List>
-  );
-}
-
-function HistoryListItem({ entry, revalidate }: { entry: HistoryEntry; revalidate: () => Promise<unknown> | void }) {
-  const domain = extractDomain(entry.url);
-
-  return (
-    <List.Item
-      title={entry.title}
-      subtitle={domain}
-      keywords={[entry.url, entry.title]}
-      icon={getFavicon(entry.url, { fallback: Icon.Globe })}
-      accessories={[{ text: new Date(entry.lastVisitedAt).toLocaleDateString() }]}
-      actions={
-        <ActionPanel>
-          <OpenInHeliumAction title="Open in Helium" url={normalizeURL(entry.url)} />
-          <Action.CopyToClipboard title="Copy URL" content={entry.url} shortcut={SHORTCUTS.copyUrl} />
-          <Action.CopyToClipboard
-            title="Copy as Markdown"
-            content={`[${entry.title}](${entry.url})`}
-            shortcut={SHORTCUTS.copyAsMarkdown}
-          />
-          <CreateQuicklinkAction url={entry.url} name={entry.title} />
-          <ReloadAction subject="History" revalidate={revalidate} />
-        </ActionPanel>
-      }
-    />
   );
 }

@@ -9,7 +9,8 @@
     "mallsjr",
     "IslamTayeb",
     "ohivan",
-    "muhammadrizo"
+    "muhammadrizo",
+    "Reivaj"
   ],
   "platforms": [
     "macOS",
@@ -25,11 +26,15 @@
     {
       "name": "searchEngine",
       "title": "Search Engine",
-      "description": "Choose your preferred search engine for suggestions and searches",
+      "description": "Search engine for web searches and suggestions. \"Same as Helium\" follows the default search engine set in Helium's settings.",
       "type": "dropdown",
       "required": false,
-      "default": "google",
+      "default": "helium",
       "data": [
+        {
+          "title": "Same as Helium",
+          "value": "helium"
+        },
         {
           "title": "Google",
           "value": "google"
@@ -69,6 +74,12 @@
     }
   ],
   "commands": [
+    {
+      "name": "search-helium",
+      "title": "Search Helium",
+      "description": "Search open tabs, bookmarks, browsing history and the web in Helium browser",
+      "mode": "view"
+    },
     {
       "name": "search-tabs",
       "title": "Search Tabs",

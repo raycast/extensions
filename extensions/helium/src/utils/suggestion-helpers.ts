@@ -28,7 +28,56 @@ const SUGGESTION_PARSERS: Record<string, Pick<SearchEngineConfig, "suggestionsPa
   "ecosia.org": {
     suggestionsParser: parseGoogleSuggestions,
   },
+  // Bing's osjson endpoint uses the same OpenSearch `[query, [suggestions]]` shape.
+  bing: {
+    suggestionsParser: parseGoogleSuggestions,
+  },
+  "bing.com": {
+    suggestionsParser: parseGoogleSuggestions,
+  },
 };
+
+/**
+ * Engines offered by the extension's "Search Engine" preference. The default
+ * value, "helium", follows the engine selected in Helium's own settings.
+ */
+export const SEARCH_ENGINE_OVERRIDES: Record<string, HeliumSearchEngine> = {
+  google: {
+    name: "Google",
+    keyword: "google.com",
+    searchUrl: "https://www.google.com/search?q={searchTerms}",
+    suggestionsUrl: "https://www.google.com/complete/search?client=chrome&q={searchTerms}",
+  },
+  duckduckgo: FALLBACK_SEARCH_ENGINE,
+  bing: {
+    name: "Bing",
+    keyword: "bing.com",
+    searchUrl: "https://www.bing.com/search?q={searchTerms}",
+    suggestionsUrl: "https://www.bing.com/osjson.aspx?query={searchTerms}",
+  },
+  yahoo: {
+    name: "Yahoo",
+    keyword: "yahoo.com",
+    searchUrl: "https://search.yahoo.com/search?p={searchTerms}",
+  },
+  ecosia: {
+    name: "Ecosia",
+    keyword: "ecosia.org",
+    searchUrl: "https://www.ecosia.org/search?q={searchTerms}",
+    suggestionsUrl: "https://ac.ecosia.org/?type=list&q={searchTerms}",
+  },
+};
+
+/**
+ * The engine picked in the extension's preferences, or `undefined` to follow
+ * Helium (the "helium" default, an empty value, or an unknown value).
+ */
+export function getSearchEngineOverride(preference: string | undefined): HeliumSearchEngine | undefined {
+  if (!preference || preference === "helium") return undefined;
+  return Object.prototype.hasOwnProperty.call(SEARCH_ENGINE_OVERRIDES, preference)
+    ? SEARCH_ENGINE_OVERRIDES[preference]
+    : undefined;
+}
 
 export const FALLBACK_SUGGESTION_CONFIG: SearchEngineConfig = {
   name: FALLBACK_SEARCH_ENGINE.name,

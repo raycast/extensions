@@ -1,5 +1,12 @@
 # Helium Changelog
 
+## [Search Helium] - {PR_MERGE_DATE}
+
+- **Search Helium**: New command that searches open tabs, bookmarks, browsing history and the web in one list, so a single hotkey covers everything in Helium. A dropdown narrows results to Open Tabs, Bookmarks, History or Search Web and remembers your choice. Typed URLs and bangs appear first, and history entries for pages that are already open are hidden.
+- History stays optional: if Helium's History database is missing or unreadable, Search Helium still shows tabs, bookmarks and web results.
+- **Search engine**: Fix Search Web and Search Helium always searching with DuckDuckGo. The extension now reads the search engine selected in Helium's settings (Chromium's stored default search provider, or its `Web Data` entry by GUID).
+- **Search Engine preference**: The extension's Search Engine preference was ignored. It works again as an optional override, with a new default of "Same as Helium". Bing suggestions are now supported.
+
 ## [Tab Switching and Action Improvements] - 2026-11-07
 
 - **Action panels**: Group Search Tabs actions into sections, update the Open in New Tab and Create Quicklink icons, and use Raycast's standard Open shortcut for Open in New Tab in Search Tabs
