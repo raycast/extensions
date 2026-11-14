@@ -1,3 +1,4 @@
+import { projectShortcut } from '../platform'
 import { Action, ActionPanel, Icon, useNavigation } from '@raycast/api'
 import { Project } from '../project'
 import GitCommitsDetail from './GitCommitsDetail'
@@ -16,7 +17,7 @@ export default function Git({ project }: GitProps) {
         <ActionPanel.Submenu
             title="Git"
             icon={Icon.WrenchScrewdriver}
-            shortcut={{ modifiers: ['cmd'], key: 'g' }}
+            shortcut={projectShortcut('g')}
         >
             <Action
                 title="Git Commits"

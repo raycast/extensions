@@ -1,14 +1,15 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { getPreferenceValues, open, Cache, Color, Application, closeMainWindow, PopToRootType, LocalStorage, showToast, Toast } from '@raycast/api'
-import { exec, execFile, spawn } from 'child_process'
+import { execFile, spawn } from 'child_process'
 import { promisify } from 'util'
-import { homedir } from 'os'
+import { commandEnvironment, resolveUserPath, shouldResizeEditorWindow } from './platform'
+
+export { resolveUserPath } from './platform'
 
 import { GitHealth, Project, ProjectList } from './project'
 import { Directory } from './components/DirectoriesDropdown'
 
-const execAsync = promisify(exec)
 const execFileAsync = promisify(execFile)
 
 export type PrimaryAction = 'start-development' | 'open-in-editor' | 'open-in-terminal' | 'open-url' | 'open-git-remotes'
@@ -40,11 +41,7 @@ function isAbortError(error: unknown): boolean {
 }
 
 function runGit(projectPath: string, args: string[], signal?: AbortSignal) {
-    return execFileAsync('git', args, { cwd: projectPath, signal })
-}
-
-export function resolveUserPath(filePath: string): string {
-    return filePath.replace(/^~(?=$|\/)/, homedir())
+    return execFileAsync('git', args, { cwd: projectPath, signal, env: commandEnvironment })
 }
 
 function getNormalizedMaxScanningLevels(): number {
@@ -70,15 +67,15 @@ function createProjectsCachePayload(projects: ProjectList): ProjectsCachePayload
 }
 
 export const resizeEditorWindow = async (editorApp: Application): Promise<void> => {
-    if (!preferences.resizeEditorWindowAfterLaunch || !editorApp?.name) {
+    if (!shouldResizeEditorWindow(preferences.resizeEditorWindowAfterLaunch, editorApp)) {
         return
     }
 
     try {
-        await execAsync(`osascript -e 'tell application "${editorApp.name}" to activate'`)
+        await execFileAsync('osascript', ['-e', 'on run argv\n tell application (item 1 of argv) to activate\nend run', editorApp.name])
 
         setTimeout(() => {
-            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/window-management/${preferences.windowResizeMode}`).catch(() => {
+            open(`${process.env.RAYCAST_SCHEME ?? 'raycast'}://extensions/raycast/window-management/${preferences.windowResizeMode}`).catch(() => {
                 // Silently fail if window management extension is not available
             })
         }, WINDOW_RESIZE_DELAY)
@@ -339,6 +336,7 @@ async function hasUntrackedChanges(projectPath: string, signal?: AbortSignal): P
     return new Promise((resolve, reject) => {
         const git = spawn('git', ['ls-files', '--others', '--exclude-standard', '--directory'], {
             cwd: projectPath,
+            env: commandEnvironment,
             signal,
             stdio: ['ignore', 'pipe', 'ignore'],
         })
@@ -427,24 +425,7 @@ export function isObjectEmpty(object: object): boolean {
 }
 
 export async function openUrl(url: string): Promise<void> {
-    try {
-        if (url.startsWith('http')) {
-            if (preferences.browserApp?.path) {
-                await open(url, preferences.browserApp.path)
-            } else {
-                await open(url)
-            }
-        } else {
-            await open(url)
-        }
-    } catch (error) {
-        console.error('Failed to open URL:', error)
-        await showToast({
-            style: Toast.Style.Failure,
-            title: 'Failed to Open URL',
-            message: `Could not open: ${url}`,
-        })
-    }
+    await open(url, url.startsWith('http') ? preferences.browserApp : undefined)
 }
 
 export async function getFavoriteProjects(): Promise<string[]> {
