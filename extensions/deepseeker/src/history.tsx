@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { getHistory, HistoryItem } from "./common";
-import { sendToSideNote } from "./util";
+import { formatCost, sendToSideNote } from "./util";
 
 function HistoryDetail({ item }: { item: HistoryItem }) {
   const formatDate = (timestamp: number) => {
@@ -37,7 +37,7 @@ function HistoryDetail({ item }: { item: HistoryItem }) {
       <Detail.Metadata.Label title="Prompt Tokens" text={item.promptTokens.toString()} />
       <Detail.Metadata.Label title="Response Tokens" text={item.responseTokens.toString()} />
       <Detail.Metadata.Label title="Total Tokens" text={(item.promptTokens + item.responseTokens).toString()} />
-      <Detail.Metadata.Label title="Cost" text={`${item.cost.toFixed(4)} cents`} />
+      <Detail.Metadata.Label title="Cost" text={formatCost(item.cost, 4)} />
     </Detail.Metadata>
   );
 
@@ -157,7 +157,7 @@ function HistoryListItem({
                 title="Total Tokens"
                 text={(item.promptTokens + item.responseTokens).toString()}
               />
-              <List.Item.Detail.Metadata.Label title="Cost" text={`${item.cost.toFixed(4)} cents`} />
+              <List.Item.Detail.Metadata.Label title="Cost" text={formatCost(item.cost, 4)} />
             </List.Item.Detail.Metadata>
           }
         />

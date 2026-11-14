@@ -10,8 +10,8 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { globalModel, openai } from "./api";
-import { countToken, estimatePrice, sendToSideNote } from "./util";
+import { globalModel, normalizeModel, openai } from "./api";
+import { countToken, estimatePrice, formatCost, sendToSideNote } from "./util";
 
 // Define history item type
 export interface HistoryItem {
@@ -24,7 +24,7 @@ export interface HistoryItem {
   model: string;
   promptTokens: number;
   responseTokens: number;
-  cost: number;
+  cost?: number;
 }
 
 // Cache instance for history
@@ -67,7 +67,7 @@ export default function ResultView(
   const [loading, setLoading] = useState(true);
   const [cumulativeTokens, setCumulativeTokens] = useState(0);
   const [cumulativeCost, setCumulativeCost] = useState(0);
-  const [model, setModel] = useState(modelOverride === "global" ? globalModel : modelOverride);
+  const [model, setModel] = useState(modelOverride === "global" ? globalModel : normalizeModel(modelOverride));
 
   async function getResult() {
     const now = new Date();
@@ -154,15 +154,15 @@ export default function ResultView(
     getResult();
   }
 
-  async function retryWithDeepSeekChat() {
-    setModel("deepseek-chat");
+  async function retryWithDeepSeekFlash() {
+    setModel("deepseek-flash");
     setLoading(true);
     setResponse("");
     getResult();
   }
 
-  async function retryWithDeepSeekReasoner() {
-    setModel("deepseek-reasoner");
+  async function retryWithDeepSeekPro() {
+    setModel("deepseek-v4-pro");
     setLoading(true);
     setResponse("");
     getResult();
@@ -175,7 +175,10 @@ export default function ResultView(
   useEffect(() => {
     if (loading === false && response && !response.startsWith("⚠️")) {
       setCumulativeTokens(cumulativeTokens + promptTokenCount + responseTokenCount);
-      setCumulativeCost(cumulativeCost + estimatePrice(promptTokenCount, responseTokenCount, model));
+      const cost = estimatePrice(promptTokenCount, responseTokenCount, model);
+      if (cost !== undefined) {
+        setCumulativeCost(cumulativeCost + cost);
+      }
 
       // Save to history
       const historyItem: HistoryItem = {
@@ -188,7 +191,7 @@ export default function ResultView(
         model: model,
         promptTokens: promptTokenCount,
         responseTokens: responseTokenCount,
-        cost: estimatePrice(promptTokenCount, responseTokenCount, model),
+        cost,
       };
       saveToHistory(historyItem);
     }
@@ -226,18 +229,18 @@ export default function ResultView(
                 icon={Icon.ArrowNe}
               />
             )}
-            {model != "deepseek-chat" && (
+            {model != "deepseek-flash" && (
               <Action
-                title="Retry with DeepSeek Chat"
-                onAction={retryWithDeepSeekChat}
+                title="Retry with DeepSeek Flash"
+                onAction={retryWithDeepSeekFlash}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 icon={Icon.ArrowNe}
               />
             )}
-            {model != "deepseek-reasoner" && (
+            {model != "deepseek-v4-pro" && (
               <Action
-                title="Retry with DeepSeek Reasoner"
-                onAction={retryWithDeepSeekReasoner}
+                title="Retry with DeepSeek V4 Pro"
+                onAction={retryWithDeepSeekPro}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 icon={Icon.ArrowNe}
               />
@@ -255,7 +258,7 @@ export default function ResultView(
           <Detail.Metadata.Label title="Total Tokens" text={(promptTokenCount + responseTokenCount).toString()} />
           <Detail.Metadata.Label
             title="Total Cost"
-            text={`${estimatePrice(promptTokenCount, responseTokenCount, model).toString()} cents`}
+            text={formatCost(estimatePrice(promptTokenCount, responseTokenCount, model))}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Cumulative Tokens" text={cumulativeTokens.toString()} />
