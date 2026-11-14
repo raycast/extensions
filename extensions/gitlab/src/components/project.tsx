@@ -42,6 +42,7 @@ export function ProjectListItem(props: {
   showCreateQuickLink?: boolean;
   pinActions?: React.ReactNode;
 }) {
+  const parentGroup = props.nameOnly ? undefined : props.project.name_with_namespace.split(" / ").at(-2);
   const avatarSources = useAvatars([projectIconUrl(props.project)]);
   const accessories = [];
   if (props.project.archived) {
@@ -57,7 +58,9 @@ export function ProjectListItem(props: {
   });
   return (
     <List.Item
-      title={props.nameOnly === true ? props.project.name : props.project.name_with_namespace}
+      title={props.project.name}
+      subtitle={parentGroup ? { value: parentGroup, tooltip: props.project.name_with_namespace } : undefined}
+      keywords={props.nameOnly ? undefined : [props.project.name_with_namespace]}
       accessories={accessories}
       icon={
         avatarSources[projectIconUrl(props.project) ?? ""]

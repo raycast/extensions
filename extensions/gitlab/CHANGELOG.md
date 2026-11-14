@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Keep repository names visible in project lists] - {PR_MERGE_DATE}
+
+- Show the repository name first and its parent namespace as a subtitle, with the full project path in a tooltip.
+
 ## [Fix punycode deprecation warning] - 2026-11-10
 
 - Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` module `exports` error
