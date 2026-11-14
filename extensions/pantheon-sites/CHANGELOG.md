@@ -11,6 +11,12 @@
 - "Site List Timeout" preference (default 120s)
 - "Refresh Site List" action (⌘R) and loading/error toasts
 
+## [New Dashboard URLs] - 2026-11-14
+
+### Changed
+
+- "Open Pantheon Dashboard" uses Pantheon's new `/workspace/<workspace>/<cms-site|node-site>/<site>` URLs, using the workspace you access the site through (from `site:list` memberships; personal sites use your personal workspace)
+
 ## [Uninitialized Site Fix] - 2026-11-13
 
 ### Fixed
