@@ -5,6 +5,17 @@ const formatTime = (seconds: number) => {
   return `${hours === 0 ? "" : hours + ":"}${mins}:${secs}`;
 };
 
+const formatTimeWithoutSeconds = (seconds: number) => {
+  const totalMinutes = Math.ceil(seconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (hours > 0) {
+    return `${hours}:${String(mins).padStart(2, "0")}`;
+  } else {
+    return `${mins} min`;
+  }
+};
+
 const formatDateTime = (d: Date) => {
   const parsedDate = new Date(d);
   const datevalues = [
@@ -30,4 +41,4 @@ const secondsBetweenDates = (args: { d1?: Date | string; d2?: Date | string }) =
   );
 };
 
-export { formatTime, formatDateTime, secondsBetweenDates };
+export { formatTime, formatTimeWithoutSeconds, formatDateTime, secondsBetweenDates };
