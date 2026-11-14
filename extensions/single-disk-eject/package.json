@@ -44,6 +44,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "test": "node --test \"test/*.test.ts\"",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
