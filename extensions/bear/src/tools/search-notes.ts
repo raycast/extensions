@@ -13,5 +13,6 @@ export default async function (input: {
 }) {
   const db = await loadDatabase();
   const notes = db.getNotes(input.text || "", input.tag);
-  return notes;
+  // imagePaths are local file paths for rendering previews; the model has no use for them
+  return notes.map((note) => ({ ...note, imagePaths: undefined }));
 }
