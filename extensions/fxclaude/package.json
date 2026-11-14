@@ -19,6 +19,21 @@
 			"title": "fxClaude",
 			"description": "Open and manage isolated Claude desktop workspaces",
 			"mode": "view"
+		},
+		{
+			"name": "open-link",
+			"title": "Open Link in Workspace",
+			"disabledByDefault": true,
+			"description": "Deliver a claude:// link to one workspace's Claude instance",
+			"mode": "view",
+			"arguments": [
+				{
+					"name": "url",
+					"placeholder": "Link",
+					"type": "text",
+					"required": false
+				}
+			]
 		}
 	],
 	"tools": [],
@@ -42,7 +57,6 @@
 		"lint": "ray lint",
 		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
 		"publish": "npx @raycast/api@latest publish",
-		"update-cli": "./scripts/update-cli.sh",
 		"test": "node --test tests/*.test.mjs"
 	}
 }

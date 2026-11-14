@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { build } from "esbuild";
-import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile, access } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { mkdtemp, mkdir, rm, symlink, writeFile, access } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -10,19 +12,18 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const originalHome = process.env.FXCLAUDE_HOME;
 let fixture;
 let bridge;
+let selectedExecutable;
 
 before(async () => {
 	fixture = await mkdtemp(join(root, ".test-build-"));
 	process.env.FXCLAUDE_HOME = join(fixture, "profiles with spaces");
+	await claimRunningClaudeInstances(process.env.FXCLAUDE_HOME);
 	const assetsPath = join(fixture, "assets");
 	const supportPath = join(fixture, "extension-support");
-	await mkdir(join(assetsPath, "bin"), { recursive: true });
-	const executable = resolve(process.env.FXCLAUDE_TEST_EXECUTABLE || join(root, "assets/bin/fxclaude"));
-	await symlink(executable, join(assetsPath, "bin/fxclaude"));
-	const checksum = createHash("sha256")
-		.update(await readFile(executable))
-		.digest("hex");
-	await writeFile(join(assetsPath, "bin/fxclaude.sha256"), `${checksum}  fxclaude\n`);
+	// The extension no longer bundles the CLI, so register a real executable the way a user would.
+	selectedExecutable = join(fixture, "selected/fxclaude");
+	await mkdir(dirname(selectedExecutable), { recursive: true });
+	await symlink(testExecutable(), selectedExecutable);
 	const output = join(fixture, "bridge.mjs");
 	await build({
 		stdin: {
@@ -30,7 +31,8 @@ before(async () => {
 				export * from "./src/lib/dashboard";
 				export * from "./src/lib/workspace-icons";
 				export * from "./src/lib/executable";
-				export * from "./src/lib/diagnostics";`,
+				export * from "./src/lib/diagnostics";
+				export * from "./src/lib/links";`,
 			resolveDir: root,
 		},
 		bundle: true,
@@ -45,6 +47,8 @@ before(async () => {
 					build.onLoad({ filter: /.*/, namespace: "test-host" }, () => ({
 						contents: `export const environment = ${JSON.stringify({ assetsPath, supportPath })};
 						export const Icon = { Folder: "folder-16", House: "house-16", Star: "star-16" };
+						export const Toast = { Style: { Animated: "animated", Success: "success", Failure: "failure" } };
+						export const showToast = async () => ({});
 						export const Image = { Mask: { RoundedRectangle: "rounded" } };
 						const storage = new Map();
 						export const LocalStorage = {
@@ -58,6 +62,7 @@ before(async () => {
 		],
 	});
 	bridge = await import(pathToFileURL(output).href);
+	await bridge.setExternalExecutablePath(selectedExecutable);
 });
 
 after(async () => {
@@ -66,11 +71,11 @@ after(async () => {
 	if (fixture) await rm(fixture, { recursive: true, force: true });
 });
 
-test("bundled CLI loads a healthy dashboard without Codex-only status fields", async () => {
-	assert.equal(await bridge.verifyBundledChecksum(), true);
+test("the selected CLI loads a healthy dashboard without Codex-only status fields", async () => {
+	assert.equal((await bridge.resolveExecutable()).isInstalled, true);
 	const dashboard = await bridge.loadDashboard();
 	assert.deepEqual(dashboard.issues, []);
-	assert.equal(dashboard.source, "bundled");
+	assert.equal(dashboard.executablePath, selectedExecutable);
 	assert.equal(dashboard.status.currentWorkspace, "primary");
 	assert.deepEqual(dashboard.workspaceIcons, {});
 	assert.match(dashboard.version, /^\d+\.\d+\.\d+$/);
@@ -81,6 +86,7 @@ test("workspace creation, selection, icons, erase, and deletion use the real CLI
 	assert.equal(workspace.kind, "managed");
 	assert.ok(workspace.userDataURL);
 	assert.equal(workspace.claudeHomeURL, undefined);
+	assert.ok(workspace.claudeConfigURL);
 	await bridge.setRaycastWorkspaceIcon(workspace.id, "star-16");
 	let dashboard = await bridge.loadDashboard();
 	assert.deepEqual(dashboard.issues, []);
@@ -127,18 +133,19 @@ test("opaque attribute keys and client errors survive the JSON bridge", async ()
 	);
 });
 
-test("an external executable uses the same workspace store and diagnostics respect its support root", async () => {
+test("another registered executable uses the same workspace store and diagnostics respect its support root", async () => {
 	const external = join(fixture, "external/fxclaude");
 	await mkdir(dirname(external), { recursive: true });
-	await symlink((await bridge.resolveExecutable("bundled")).path, external);
+	await symlink(testExecutable(), external);
 	await bridge.setExternalExecutablePath(external);
-	await bridge.selectExecutableSource("external");
 	const dashboard = await bridge.loadDashboard();
 	assert.deepEqual(dashboard.issues, []);
-	assert.equal(dashboard.source, "external");
 	assert.equal(dashboard.executablePath, external);
 	assert.equal((await bridge.collectDirectDiagnostics(dashboard)).storage.supportDirectory, process.env.FXCLAUDE_HOME);
-	await bridge.selectExecutableSource("bundled");
+	// Discovery also reports installations already on this Mac, so only require the registered ones.
+	const listed = (await bridge.listExecutables()).map((installation) => installation.path);
+	assert.ok(listed.includes(external) && listed.includes(selectedExecutable), listed.join(", "));
+	await bridge.selectExecutableSource(selectedExecutable);
 });
 
 test("an absent optional application URL is reported as not installed", () => {
@@ -155,3 +162,104 @@ test("an absent optional application URL is reported as not installed", () => {
 	assert.equal(status.applicationURL, null);
 	assert.deepEqual(issues, []);
 });
+
+test("only Claude app links are pre-filled from text", () => {
+	assert.equal(bridge.appLinkCandidate("  claude://login/callback?code=1 \n"), "claude://login/callback?code=1");
+	assert.equal(bridge.appLinkCandidate("CLAUDE://open"), "CLAUDE://open");
+	assert.equal(
+		bridge.appLinkCandidate("msauth.com.anthropic.claudefordesktop://auth"),
+		"msauth.com.anthropic.claudefordesktop://auth",
+	);
+	assert.equal(bridge.appLinkCandidate("https://claude.ai"), undefined);
+	assert.equal(bridge.appLinkCandidate("codex://open"), undefined);
+	assert.equal(bridge.appLinkCandidate("not a link"), undefined);
+	assert.equal(bridge.appLinkCandidate(""), undefined);
+	assert.equal(bridge.appLinkCandidate(undefined), undefined);
+});
+
+test("opening a link reports CLI errors without delivering anything", async () => {
+	await assert.rejects(bridge.openLink("missing-workspace", "claude://open"), (error) => {
+		assert.notEqual(error.code, "unsupported_command");
+		assert.match(error.message, /missing-workspace/);
+		return true;
+	});
+	await assert.rejects(bridge.openLink("primary", "https://claude.ai"), (error) => {
+		assert.notEqual(error.code, "unsupported_command");
+		return true;
+	});
+});
+
+test("an executable without open-url gets an explanatory error", async () => {
+	const external = join(fixture, "legacy/fxclaude");
+	await mkdir(dirname(external), { recursive: true });
+	await writeFile(
+		external,
+		"#!/bin/sh\nprintf \"Error: 3 unexpected arguments: 'open-url', 'work', 'claude://open'\\n\" >&2\nexit 64\n",
+		{ mode: 0o755 },
+	);
+	await assert.rejects(
+		bridge.openLink("work", "claude://open", external),
+		(error) => error.code === "unsupported_command" && /cannot open links/.test(error.message),
+	);
+});
+
+// The scratch store has no records for Claude instances already open on this Mac. With more
+// than one running, `status` cannot tell which is primary and reports an error, so the tests
+// would depend on the host. Record each running instance under a placeholder workspace ID,
+// in the format fxclaude writes, so the CLI treats them as belonging to other workspaces.
+async function claimRunningClaudeInstances(home) {
+	const instances = Object.fromEntries(
+		runningClaudeInstances().map((instance) => [
+			randomUUID(),
+			{
+				bundle_url: `${pathToFileURL(instance.bundlePath).href}/`,
+				launch_date: instance.launchDate.toISOString().replace(/\.\d{3}Z$/, "Z"),
+				process_id: instance.processID,
+			},
+		]),
+	);
+	await mkdir(home, { recursive: true, mode: 0o700 });
+	await writeFile(join(home, "runtime.json"), JSON.stringify({ schema_version: "2.0", instances }));
+}
+
+function runningClaudeInstances() {
+	const output = execFileSync("ps", ["-axo", "pid=,lstart=,command="], {
+		encoding: "utf8",
+		env: { ...process.env, LC_ALL: "C" },
+	});
+	return output.split("\n").flatMap((line) => {
+		// `lstart` is five fields in the C locale, such as "Sat Nov 14 03:55:56 2026".
+		const match = line.match(/^\s*(\d+)\s+(\w+ \w+\s+\d+ [\d:]+ \d+)\s+(.+?\.app)\/Contents\/MacOS\/Claude(?: |$)/);
+		// Helpers live in bundles nested inside Claude.app and are not app instances.
+		if (!match || match[3].includes(".app/")) return [];
+		return [
+			{
+				processID: Number(match[1]),
+				launchDate: new Date(match[2]),
+				bundlePath: match[3],
+			},
+		];
+	});
+}
+
+// FXCLAUDE_TEST_EXECUTABLE wins; otherwise use the sibling Swift package's build (`make test` keeps the
+// debug build current) or an fxclaude on PATH.
+function testExecutable() {
+	const candidates = [
+		process.env.FXCLAUDE_TEST_EXECUTABLE,
+		resolve(root, "../../../Projects/fxClaude/fxclaude/.build/debug/fxclaude"),
+		resolve(root, "../../../Projects/fxClaude/fxclaude/.build/release/fxclaude"),
+		whichFxclaude(),
+	].filter(Boolean);
+	const executable = candidates.find((candidate) => existsSync(candidate));
+	if (!executable) throw new Error("No fxclaude executable found. Set FXCLAUDE_TEST_EXECUTABLE to one.");
+	return resolve(executable);
+}
+
+function whichFxclaude() {
+	try {
+		return execFileSync("which", ["fxclaude"], { encoding: "utf8" }).trim() || undefined;
+	} catch {
+		return undefined;
+	}
+}

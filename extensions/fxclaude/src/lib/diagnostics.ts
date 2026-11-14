@@ -4,12 +4,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { invokeRaw } from "./client";
 import { Dashboard } from "./dashboard";
-import {
-	executablePreferences,
-	resolveExecutable,
-	selectedExecutableSource,
-	verifyBundledChecksum,
-} from "./executable";
+import { executablePreferences, listExecutables, resolveExecutable, selectedExecutableSource } from "./executable";
 
 interface InspectedFile {
 	path: string;
@@ -27,9 +22,8 @@ export interface DiagnosticReport {
 	};
 	executables: {
 		preferences?: Awaited<ReturnType<typeof executablePreferences>>;
-		bundled?: Awaited<ReturnType<typeof resolveExecutable>>;
-		external?: Awaited<ReturnType<typeof resolveExecutable>>;
-		bundledChecksum?: "valid" | "invalid";
+		selected?: Awaited<ReturnType<typeof resolveExecutable>>;
+		installations?: Awaited<ReturnType<typeof listExecutables>>;
 		errors: string[];
 	};
 	storage: {
@@ -101,26 +95,22 @@ export async function collectCLIDiagnostics(): Promise<CLIDiagnostics> {
 
 async function inspectExecutables(): Promise<DiagnosticReport["executables"]> {
 	const errors: string[] = [];
-	const [preferences, bundled, external, checksum] = await Promise.allSettled([
+	const [preferences, selected, installations] = await Promise.allSettled([
 		executablePreferences(),
-		resolveExecutable("bundled"),
-		resolveExecutable("external"),
-		verifyBundledChecksum(),
+		resolveExecutable(),
+		listExecutables(),
 	]);
 
 	return {
 		...(preferences.status === "fulfilled"
 			? { preferences: preferences.value }
 			: recordError(errors, "Executable preferences", preferences.reason)),
-		...(bundled.status === "fulfilled"
-			? { bundled: bundled.value }
-			: recordError(errors, "Bundled executable", bundled.reason)),
-		...(external.status === "fulfilled"
-			? { external: external.value }
-			: recordError(errors, "External executable", external.reason)),
-		...(checksum.status === "fulfilled"
-			? { bundledChecksum: checksum.value ? ("valid" as const) : ("invalid" as const) }
-			: recordError(errors, "Bundled checksum", checksum.reason)),
+		...(selected.status === "fulfilled"
+			? { selected: selected.value }
+			: recordError(errors, "Selected executable", selected.reason)),
+		...(installations.status === "fulfilled"
+			? { installations: installations.value }
+			: recordError(errors, "Executable discovery", installations.reason)),
 		errors,
 	};
 }

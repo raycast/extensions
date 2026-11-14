@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClaudeView } from "./components/claude";
 import { ExecutableView } from "./components/executable-view";
 import { ManagementItem } from "./components/management-item";
@@ -8,7 +8,7 @@ import { StatusView } from "./components/status";
 import { WorkspaceActions } from "./components/workspace-actions";
 import { Dashboard, loadDashboard } from "./lib/dashboard";
 import { WorkspaceStatus } from "./lib/models";
-import { applicationIcon, capitalize } from "./lib/ui";
+import { applicationIcon } from "./lib/ui";
 import { WorkspaceIcon, workspaceIconImage } from "./lib/workspace-icons";
 
 interface CachedWorkspaceResults {
@@ -30,7 +30,7 @@ export default function FXClaudeCommand() {
 	const { data, error, isLoading, revalidate } = usePromise(loadDashboard, []);
 	const dashboard: Dashboard = data ?? {
 		status: {},
-		source: "bundled",
+		source: "",
 		executablePath: "",
 		workspaceIcons: {},
 		issues: error ? [`Extension dashboard: ${error.message}`] : [],
@@ -55,11 +55,16 @@ export default function FXClaudeCommand() {
 		});
 	}, [data, hasFreshWorkspaceResults, setCachedWorkspaceResults]);
 
+	// Select the current workspace on first load and when it changes, but not on every refresh,
+	// so an action on another workspace keeps that workspace selected.
+	const selectedCurrentWorkspaceID = useRef<string>(undefined);
 	useEffect(() => {
 		const currentWorkspace =
 			dashboard.status.currentWorkspaceID ??
 			workspaceResults.workspaces.find((workspace) => workspace.isCurrent)?.workspace.id;
-		if (currentWorkspace) setSelectedItemId(`workspace-${currentWorkspace}`);
+		if (!currentWorkspace || currentWorkspace === selectedCurrentWorkspaceID.current) return;
+		selectedCurrentWorkspaceID.current = currentWorkspace;
+		setSelectedItemId(`workspace-${currentWorkspace}`);
 	}, [dashboard.status.currentWorkspaceID, workspaceResults.workspaces]);
 
 	const workspaces = [...workspaceResults.workspaces].sort((lhs, rhs) => {
@@ -117,6 +122,8 @@ export default function FXClaudeCommand() {
 							hasFreshWorkspaceResults ? (
 								<WorkspaceActions
 									workspace={workspace}
+									workspaces={workspaces}
+									workspaceIcons={workspaceResults.workspaceIcons}
 									selectedIcon={workspaceResults.workspaceIcons[workspace.workspace.id]}
 									executableSource={dashboard.source}
 									onChange={revalidate}
@@ -145,7 +152,6 @@ export default function FXClaudeCommand() {
 				<ManagementItem
 					id="preferences"
 					title="Preferences"
-					subtitle={`${capitalize(dashboard.source)} executable · ${dashboard.version ?? "Unknown version"}`}
 					icon={Icon.Gear}
 					target={<ExecutableView onChange={revalidate} />}
 					onRefresh={revalidate}

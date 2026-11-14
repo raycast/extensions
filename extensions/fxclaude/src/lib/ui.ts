@@ -3,7 +3,6 @@ import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { invoke } from "./client";
 import { ExecutableSource } from "./models";
-import { verifyBundledChecksum } from "./executable";
 
 export async function mutate(
 	args: string[],
@@ -24,14 +23,6 @@ export async function mutate(
 		toast.message = error instanceof Error ? error.message : String(error);
 		throw error;
 	}
-}
-
-export async function verifyChecksum(): Promise<void> {
-	const valid = await verifyBundledChecksum();
-	await showToast({
-		style: valid ? Toast.Style.Success : Toast.Style.Failure,
-		title: valid ? "Bundled Checksum Is Valid" : "Bundled Checksum Is Invalid",
-	});
 }
 
 export function applicationDisplayName(applicationURL: string | null): string {

@@ -33,12 +33,7 @@ export interface RawInvocationResult {
 export async function invoke<T>(args: string[], source?: ExecutableSource): Promise<InvocationResult<T>> {
 	const executable = await resolveExecutable(source);
 	if (!executable.isInstalled) {
-		throw new FXClaudeInvocationError(
-			executable.source === "external"
-				? "External fxClaude is not installed."
-				: "The bundled fxClaude executable is missing.",
-			"executable_not_found",
-		);
+		throw new FXClaudeInvocationError(`fxClaude is not installed at ${executable.path}.`, "executable_not_found");
 	}
 
 	const result = await execute(executable.path, args);
@@ -82,10 +77,7 @@ export async function invokeRaw(args: string[], source?: ExecutableSource): Prom
 			stdout: "",
 			stderr: "",
 			exitCode: 1,
-			error:
-				executable.source === "external"
-					? "External fxClaude is not installed."
-					: "The bundled fxClaude executable is missing.",
+			error: `fxClaude is not installed at ${executable.path}.`,
 		};
 	}
 

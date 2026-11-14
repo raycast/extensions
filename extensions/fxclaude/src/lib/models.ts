@@ -1,4 +1,6 @@
-export type ExecutableSource = "bundled" | "external";
+// Executables are identified by absolute path so several independently versioned
+// installations can coexist and callers keep using the exact selected binary.
+export type ExecutableSource = string;
 
 export interface Workspace {
 	id: string;
@@ -6,6 +8,7 @@ export interface Workspace {
 	kind: "primary" | "managed";
 	rootURL: string | null;
 	userDataURL: string | null;
+	claudeConfigURL?: string | null;
 	integrations: Record<string, unknown>;
 }
 
@@ -27,6 +30,13 @@ export type PartialFXClaudeStatus = Partial<FXClaudeStatus>;
 
 export interface VersionOutput {
 	version: string;
+}
+
+export interface OpenURLOutput {
+	workspaceName: string;
+	workspaceID: string;
+	processID: number;
+	delivery: "apple-event" | "launch";
 }
 
 export interface MachineWarning {
