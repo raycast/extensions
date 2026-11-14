@@ -1,6 +1,6 @@
 # Tuple Changelog
 
-## [Send Reactions] - {PR_MERGE_DATE}
+## [Send Reactions] - 2026-11-14
 
 - Add Send Reaction to search and send the sound and webcam reactions supported by your installed Tuple CLI.
 
