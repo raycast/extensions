@@ -68,9 +68,9 @@ function calculateCost(tokenInput: number, tokenOutput: number, priceInput: numb
 }
 
 /**
- * Estimates price for a model based on token usage
+ * Estimates price for a model based on token usage. Returns undefined when the model has no known price.
  */
-export function estimatePrice(promptTokens: number, outputTokens: number, model: string): number {
+export function estimatePrice(promptTokens: number, outputTokens: number, model: string): number | undefined {
   if (isValidNumber(+priceinput) && isValidNumber(+priceoutput)) {
     return calculateCost(promptTokens, outputTokens, priceinput, priceoutput);
   }
@@ -79,7 +79,18 @@ export function estimatePrice(promptTokens: number, outputTokens: number, model:
     return calculateCost(promptTokens, outputTokens, prices[model].in, prices[model].out);
   }
 
-  return -1;
+  return undefined;
+}
+
+/**
+ * Formats a cost in cents, or "Unavailable" when there is no price for the model.
+ * Older history entries stored -1 for an unknown price, so negative values count as unavailable too.
+ */
+export function formatCost(cost: number | undefined, fractionDigits?: number): string {
+  if (cost === undefined || cost < 0) {
+    return "Unavailable";
+  }
+  return `${fractionDigits === undefined ? cost.toString() : cost.toFixed(fractionDigits)} cents`;
 }
 
 /**

@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { globalModel, normalizeModel, openai } from "./api";
-import { countToken, estimatePrice, sendToSideNote } from "./util";
+import { countToken, estimatePrice, formatCost, sendToSideNote } from "./util";
 
 // Define history item type
 export interface HistoryItem {
@@ -24,7 +24,7 @@ export interface HistoryItem {
   model: string;
   promptTokens: number;
   responseTokens: number;
-  cost: number;
+  cost?: number;
 }
 
 // Cache instance for history
@@ -175,7 +175,10 @@ export default function ResultView(
   useEffect(() => {
     if (loading === false && response && !response.startsWith("⚠️")) {
       setCumulativeTokens(cumulativeTokens + promptTokenCount + responseTokenCount);
-      setCumulativeCost(cumulativeCost + estimatePrice(promptTokenCount, responseTokenCount, model));
+      const cost = estimatePrice(promptTokenCount, responseTokenCount, model);
+      if (cost !== undefined) {
+        setCumulativeCost(cumulativeCost + cost);
+      }
 
       // Save to history
       const historyItem: HistoryItem = {
@@ -188,7 +191,7 @@ export default function ResultView(
         model: model,
         promptTokens: promptTokenCount,
         responseTokens: responseTokenCount,
-        cost: estimatePrice(promptTokenCount, responseTokenCount, model),
+        cost,
       };
       saveToHistory(historyItem);
     }
@@ -255,7 +258,7 @@ export default function ResultView(
           <Detail.Metadata.Label title="Total Tokens" text={(promptTokenCount + responseTokenCount).toString()} />
           <Detail.Metadata.Label
             title="Total Cost"
-            text={`${estimatePrice(promptTokenCount, responseTokenCount, model).toString()} cents`}
+            text={formatCost(estimatePrice(promptTokenCount, responseTokenCount, model))}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Cumulative Tokens" text={cumulativeTokens.toString()} />
