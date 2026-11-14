@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windscribe-vpn",
+  "private": true,
+  "type": "module",
+  "title": "Windscribe VPN",
+  "description": "Control the Windscribe desktop VPN from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "hugomarfani",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "commands": [
+    {
+      "name": "connect",
+      "title": "Connect Windscribe",
+      "description": "Connect to your last used location or Best Location.",
+      "mode": "no-view",
+      "keywords": [
+        "VPN",
+        "Windscribe"
+      ]
+    },
+    {
+      "name": "connect-best",
+      "title": "Connect to Best Location",
+      "subtitle": "Windscribe VPN",
+      "description": "Let Windscribe pick a server when the VPN is disconnected.",
+      "mode": "no-view",
+      "keywords": [
+        "VPN",
+        "Windscribe",
+        "Server"
+      ]
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect Windscribe",
+      "description": "Disconnect the Windscribe VPN.",
+      "mode": "no-view",
+      "keywords": [
+        "VPN",
+        "Windscribe"
+      ]
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Windscribe",
+      "description": "Connect or disconnect based on Windscribe's current status.",
+      "mode": "no-view",
+      "keywords": [
+        "VPN",
+        "Windscribe"
+      ]
+    },
+    {
+      "name": "status",
+      "title": "Windscribe Status",
+      "description": "See the current VPN state, location, and protocol.",
+      "mode": "view",
+      "keywords": [
+        "VPN",
+        "Windscribe"
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "proper-lockfile": "^4.1.2",
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
