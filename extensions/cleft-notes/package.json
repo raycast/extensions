@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cleft-notes",
+  "title": "Cleft Notes",
+  "description": "Search Cleft's synced notes and transcripts, and control voice capture using native Cleft Shortcuts actions.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Cleft",
+      "description": "Search titles, tags, summaries, and transcripts in Cleft Local Sync files.",
+      "mode": "view"
+    },
+    {
+      "name": "latest-transcript",
+      "title": "Read Latest Transcript",
+      "subtitle": "Cleft",
+      "description": "Read and copy the transcript from your most recently created synced Cleft note.",
+      "mode": "view"
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Voice Note",
+      "subtitle": "Cleft",
+      "description": "Run Cleft's native Start Recording action through Apple Shortcuts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop and Save Recording",
+      "subtitle": "Cleft",
+      "description": "Run Cleft's native Stop Recording action through Apple Shortcuts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "continue-recording",
+      "title": "Continue Last Note",
+      "subtitle": "Cleft",
+      "description": "Run Cleft's native Continue Last Note action through Apple Shortcuts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "setup",
+      "title": "Configure Cleft Integration",
+      "subtitle": "Cleft",
+      "description": "Install native capture shortcuts and configure the Local Sync folder.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "syncFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Local Sync Folder",
+      "description": "Choose the exact folder shown in Cleft Settings → Local Sync → Show path. Leave empty to try Cleft's default folders."
+    },
+    {
+      "name": "startShortcut",
+      "type": "textfield",
+      "required": false,
+      "title": "Start Recording Shortcut",
+      "default": "Raycast Cleft Start Recording",
+      "placeholder": "Raycast Cleft Start Recording",
+      "description": "Name of the Apple Shortcut containing Cleft's Start Recording action."
+    },
+    {
+      "name": "stopShortcut",
+      "type": "textfield",
+      "required": false,
+      "title": "Stop Recording Shortcut",
+      "default": "Raycast Cleft Stop Recording",
+      "placeholder": "Raycast Cleft Stop Recording",
+      "description": "Name of the Apple Shortcut containing Cleft's Stop Recording action."
+    },
+    {
+      "name": "continueShortcut",
+      "type": "textfield",
+      "required": false,
+      "title": "Continue Note Shortcut",
+      "default": "Raycast Cleft Continue Last Note",
+      "placeholder": "Raycast Cleft Continue Last Note",
+      "description": "Name of the Apple Shortcut containing Cleft's Continue Last Note action."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3",
+    "js-yaml": "^4.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit"
+  }
+}
