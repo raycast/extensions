@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "gitranks-contribute",
+    title: "GitRanks Contribute",
+    description:
+      "Find open-source GitHub issues to contribute to, matched to your skills and checked ready for a pull request: still open, nobody working on it, wanted by the maintainers. Your agent claims one, gets a brief with the repository's rules and how to test, fixes it on a fresh clone and hands the commits back; you review the change and approve the pull request on gitranks.com, where it opens from your fork in your name. The agent never posts on GitHub itself. 10 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in through gitranks.com with your GitHub account (dynamic client registration and PKCE), no API key to paste. Free, in beta. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://gitranks.com/apple-icon.png",
+    homepage: "https://gitranks.com/contribute/mcp?utm_source=raycast&utm_campaign=mcp-listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gitranks.com/mcp"],
+    },
+    remoteUrl: "https://mcp.gitranks.com/mcp",
+  },
+  {
     name: "tesseract",
     title: "Tesseract",
     description:

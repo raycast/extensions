@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [GitRanks Contribute](https://gitranks.com/contribute/mcp?utm_source=raycast&utm_campaign=mcp-listing) | Find open-source GitHub issues to contribute to, matched to your skills; your agent fixes one on a fresh clone and you approve the pull request on gitranks.com. The agent never posts on GitHub itself. 10 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with GitHub (dynamic client registration and PKCE), no API key. Free, in beta. |
 | [Tesseract](https://tesseract.dev/mcp/) | Make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures from your conversation, charged to your own Tesseract plan. 8 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Tesseract account is required (free media each month, then paid). |
 | [Rizamo](https://rizamo.com/agents/) | Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, see how they did, and answer comments and messages from your agent. 57 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a Rizamo account, free for 2 social accounts. |
 | [Hoy Planes](https://www.hoyplanes.com/mcp/) | What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. 3 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key. |
