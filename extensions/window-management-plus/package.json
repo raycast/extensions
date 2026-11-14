@@ -1,0 +1,728 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "window-management-plus",
+  "title": "Window Management+",
+  "description": "Tile every open window at once, with layouts inspired by Hyprland. Requires Raycast Pro.",
+  "icon": "extension-icon.png",
+  "author": "connorforsyth",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "gap",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "title": "Window Gap",
+      "description": "Gap between windows",
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "Tiny (8px)",
+          "value": "8"
+        },
+        {
+          "title": "Small (16px)",
+          "value": "16"
+        },
+        {
+          "title": "Medium (32px)",
+          "value": "32"
+        },
+        {
+          "title": "Large (64px)",
+          "value": "64"
+        },
+        {
+          "title": "Extra Large (128px)",
+          "value": "128"
+        }
+      ]
+    },
+    {
+      "name": "screenGap",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "title": "Screen Gap",
+      "description": "Gap from windows to the screen edge",
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "Tiny (8px)",
+          "value": "8"
+        },
+        {
+          "title": "Small (16px)",
+          "value": "16"
+        },
+        {
+          "title": "Medium (32px)",
+          "value": "32"
+        },
+        {
+          "title": "Large (64px)",
+          "value": "64"
+        },
+        {
+          "title": "Extra Large (128px)",
+          "value": "128"
+        }
+      ]
+    },
+    {
+      "name": "sidebar",
+      "type": "dropdown",
+      "required": false,
+      "default": "notes",
+      "title": "Default Sidebar App",
+      "description": "Opened and pinned to the screen by Toggle Sidebar",
+      "data": [
+        {
+          "title": "Raycast Notes",
+          "value": "notes"
+        },
+        {
+          "title": "Raycast AI Chat",
+          "value": "ai"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "auto-tile",
+      "title": "Auto Tile",
+      "description": "Arrange every window on every display in an even grid. Use Pivot Layout to change the grid's shape.",
+      "mode": "no-view",
+      "icon": "tile.png",
+      "keywords": [
+        "tile",
+        "grid"
+      ]
+    },
+    {
+      "name": "toggle-sidebar",
+      "title": "Toggle Sidebar",
+      "description": "Open the window chosen as the Default Sidebar App and pin it full height down the right of the screen. Run it again to unpin. While a sidebar is pinned, every other command arranges the remaining windows beside it.",
+      "mode": "no-view",
+      "icon": "toggle-sidebar.png",
+      "keywords": [
+        "sidebar",
+        "pin",
+        "notes",
+        "ai chat",
+        "auto tile with sidebar"
+      ]
+    },
+    {
+      "name": "make-sidebar",
+      "title": "Make Sidebar",
+      "description": "Pin the focused window full height down the right of the screen, whatever app it is. It stays the sidebar until you unpin it with Toggle Sidebar, drag it away or close it.",
+      "mode": "no-view",
+      "icon": "make-sidebar.png",
+      "keywords": [
+        "sidebar",
+        "pin",
+        "promote",
+        "focused window"
+      ]
+    },
+    {
+      "name": "pivot",
+      "title": "Pivot Layout",
+      "description": "Change the shape of Auto Tile. Each run steps to the next shape: all windows side by side, two small above one large, then two small beside one large.",
+      "mode": "no-view",
+      "icon": "pivot.png",
+      "keywords": [
+        "cycle tile layout",
+        "cycle layout",
+        "toggle split",
+        "togglesplit",
+        "grid",
+        "columns",
+        "rows",
+        "orientation",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "smart-arrange",
+      "title": "Smart Arrange",
+      "description": "Arrange windows by what each app is for. The focused window leads your largest display with related work beside it. Chat, mail and music go to your other display.",
+      "mode": "no-view",
+      "keywords": [
+        "smart",
+        "auto",
+        "organize",
+        "organise",
+        "categories",
+        "roles"
+      ],
+      "icon": "smart-arrange.png"
+    },
+    {
+      "name": "master-left",
+      "title": "Master Left",
+      "description": "Make the focused window the master on the left, as wide as the others allow. Every other window is stacked on the right, as narrow as its app goes.",
+      "mode": "no-view",
+      "icon": "master-left.png",
+      "keywords": [
+        "master layout left",
+        "master",
+        "largest",
+        "main",
+        "orientationleft",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "master-right",
+      "title": "Master Right",
+      "description": "Make the focused window the master on the right, as wide as the others allow. Every other window is stacked on the left, as narrow as its app goes.",
+      "mode": "no-view",
+      "icon": "master-right.png",
+      "keywords": [
+        "master layout right",
+        "master",
+        "largest",
+        "main",
+        "orientationright",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "master-center",
+      "title": "Master Center",
+      "description": "Make the focused window the master in the middle, as wide as the others allow. The other windows are stacked on both sides. Best on wide displays.",
+      "mode": "no-view",
+      "keywords": [
+        "master layout center",
+        "master",
+        "largest",
+        "main",
+        "orientationcenter",
+        "ultrawide",
+        "hyprland"
+      ],
+      "icon": "master-center.png"
+    },
+    {
+      "name": "cycle-master",
+      "title": "Cycle Master Layout",
+      "description": "Move the master to its next position. Each run steps round: left, then right, then center.",
+      "mode": "no-view",
+      "icon": "cycle-master.png",
+      "keywords": [
+        "next master layout",
+        "next layout",
+        "cycle",
+        "switch layout",
+        "orientationnext",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "grow-master",
+      "title": "Make Master Larger",
+      "description": "Give the master window 5% more of the screen. The stacked windows shrink to make room.",
+      "mode": "no-view",
+      "keywords": [
+        "grow master",
+        "grow",
+        "mfact",
+        "bigger",
+        "resize",
+        "main",
+        "hyprland"
+      ],
+      "icon": "grow-master.png"
+    },
+    {
+      "name": "shrink-master",
+      "title": "Make Master Smaller",
+      "description": "Give the master window 5% less of the screen. The stacked windows grow to fill the space.",
+      "mode": "no-view",
+      "keywords": [
+        "shrink master",
+        "shrink",
+        "mfact",
+        "smaller",
+        "resize",
+        "main",
+        "hyprland"
+      ],
+      "icon": "shrink-master.png"
+    },
+    {
+      "name": "swap-with-master",
+      "title": "Swap with Master",
+      "description": "Make the focused window the master. It trades places with the current master.",
+      "mode": "no-view",
+      "icon": "swap-with-master.png",
+      "keywords": [
+        "swapwithmaster",
+        "largest",
+        "main",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "swap-next",
+      "title": "Swap with Next Window",
+      "description": "Trade places between the focused window and the next one in the layout. With two windows, they simply swap.",
+      "mode": "no-view",
+      "icon": "swap-next.png",
+      "keywords": [
+        "swapnext",
+        "swap windows",
+        "swap left",
+        "swap right",
+        "swap up",
+        "swap down",
+        "switch",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate Windows Clockwise",
+      "description": "Move every window one position clockwise in the current layout. A pinned sidebar stays where it is.",
+      "mode": "no-view",
+      "icon": "rotate.png",
+      "keywords": [
+        "rollnext",
+        "roll next",
+        "cycle",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "rotate-backwards",
+      "title": "Rotate Windows Counterclockwise",
+      "description": "Move every window one position counterclockwise in the current layout. A pinned sidebar stays where it is.",
+      "mode": "no-view",
+      "icon": "rotate-backwards.png",
+      "keywords": [
+        "rollprev",
+        "roll prev",
+        "cycle",
+        "hyprland"
+      ]
+    },
+    {
+      "name": "swap-displays",
+      "title": "Swap Displays",
+      "description": "Send every window to your other display. They land in the layout you last tiled with, or keep their places on the screen if you haven't tiled yet. With more than two displays, each display's windows move to the next one.",
+      "mode": "no-view",
+      "keywords": [
+        "swap screens",
+        "swap monitors",
+        "swapactiveworkspaces",
+        "hyprland"
+      ],
+      "icon": "swap-displays.png"
+    },
+    {
+      "name": "distribute-displays",
+      "title": "Distribute Across Displays",
+      "description": "Spread windows over all your displays in proportion to their size, so no display is crowded while another sits empty.",
+      "mode": "no-view",
+      "keywords": [
+        "spread",
+        "balance",
+        "monitors",
+        "screens",
+        "displays"
+      ],
+      "icon": "distribute-displays.png"
+    },
+    {
+      "name": "move-others",
+      "title": "Move Others to Next Display",
+      "description": "Keep only the focused window on this display. Every other window here moves to your next display.",
+      "mode": "no-view",
+      "keywords": [
+        "push others",
+        "solo",
+        "isolate",
+        "clear",
+        "hide others",
+        "monitors",
+        "screens",
+        "displays"
+      ],
+      "icon": "move-others.png"
+    },
+    {
+      "name": "move-all",
+      "title": "Move All to This Display",
+      "description": "Bring every window from your other displays to the one you are working on.",
+      "mode": "no-view",
+      "keywords": [
+        "pull all",
+        "pull others",
+        "bring all",
+        "gather",
+        "collect",
+        "monitors",
+        "screens",
+        "displays"
+      ],
+      "icon": "move-all.png"
+    },
+    {
+      "name": "toggle-menu-bar-visibility",
+      "title": "Toggle Menu Bar Visibility",
+      "description": "Hide or show the macOS menu bar, to give windows the full height of the screen.",
+      "mode": "no-view",
+      "icon": "toggle-menu-bar.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-windows",
+      "title": "Get Windows",
+      "description": "List every display and every open window on the current desktop, with its app, title, display and frame."
+    },
+    {
+      "name": "arrange-windows",
+      "title": "Arrange Windows",
+      "description": "Move windows onto chosen displays in a chosen order and tile each display with a chosen layout."
+    }
+  ],
+  "ai": {
+    "instructions": "You arrange the user's open windows so they suit what the user is doing.\nAlways call get-windows first, then call arrange-windows once with a plan for every display.\nWork out the task from the apps, window titles and each window's role (work, reference, comms or background). Put the window the user is working in (usually the focused one, or the editor, document or design tool) first on the largest display, and use a master layout when one window clearly matters most.\nKeep related windows together on one display, such as an editor with its terminal and browser preview.\nPut supporting windows such as chat, music, mail, notes and settings on the smaller display, or last in the order.\nA display fits about three windows side by side when it is under 1600 points wide, and about six when it is wider. Do not give a display more than that unless there is nowhere else to put them.\nUse auto-tile when the windows matter equally. Use master-center only on displays wider than 2000 points.\nAfter arranging, say in one or two sentences what you put where and why. Do not list frames or ids.",
+    "evals": [
+      {
+        "input": "@window-management-plus arrange my windows for coding",
+        "mocks": {
+          "get-windows": {
+            "displays": [
+              {
+                "index": 0,
+                "x": 0,
+                "y": 0,
+                "width": 2560,
+                "height": 1440
+              },
+              {
+                "index": 1,
+                "x": 0,
+                "y": 32,
+                "width": 1512,
+                "height": 950
+              }
+            ],
+            "windows": [
+              {
+                "id": "101_1",
+                "app": "Cursor",
+                "title": "main.ts",
+                "role": "work",
+                "display": 1,
+                "focused": true,
+                "frame": {
+                  "x": 0,
+                  "y": 32,
+                  "width": 756,
+                  "height": 950
+                }
+              },
+              {
+                "id": "102_2",
+                "app": "Safari",
+                "title": "TypeScript Handbook",
+                "role": "reference",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 1440
+                }
+              },
+              {
+                "id": "103_3",
+                "app": "Slack",
+                "title": "general",
+                "role": "comms",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                }
+              },
+              {
+                "id": "104_4",
+                "app": "Spotify",
+                "title": "Spotify",
+                "role": "background",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 720,
+                  "width": 1280,
+                  "height": 720
+                }
+              }
+            ]
+          },
+          "arrange-windows": "Arranged 4 windows"
+        },
+        "expected": [
+          {
+            "callsTool": "get-windows"
+          },
+          {
+            "callsTool": {
+              "name": "arrange-windows",
+              "arguments": {
+                "displays": [
+                  {
+                    "display": 0,
+                    "windows": {
+                      "includes": "101_1"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@window-management-plus what windows do I have open, and which display is each on?",
+        "mocks": {
+          "get-windows": {
+            "displays": [
+              {
+                "index": 0,
+                "x": 0,
+                "y": 0,
+                "width": 2560,
+                "height": 1440
+              },
+              {
+                "index": 1,
+                "x": 0,
+                "y": 32,
+                "width": 1512,
+                "height": 950
+              }
+            ],
+            "windows": [
+              {
+                "id": "101_1",
+                "app": "Cursor",
+                "title": "main.ts",
+                "role": "work",
+                "display": 1,
+                "focused": true,
+                "frame": {
+                  "x": 0,
+                  "y": 32,
+                  "width": 756,
+                  "height": 950
+                }
+              },
+              {
+                "id": "102_2",
+                "app": "Safari",
+                "title": "TypeScript Handbook",
+                "role": "reference",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 1440
+                }
+              },
+              {
+                "id": "103_3",
+                "app": "Slack",
+                "title": "general",
+                "role": "comms",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                }
+              },
+              {
+                "id": "104_4",
+                "app": "Spotify",
+                "title": "Spotify",
+                "role": "background",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 720,
+                  "width": 1280,
+                  "height": 720
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-windows"
+          },
+          {
+            "includes": "Cursor"
+          },
+          {
+            "includes": "Slack"
+          }
+        ]
+      },
+      {
+        "input": "@window-management-plus put Slack and Spotify on my laptop screen and everything else on the big display",
+        "mocks": {
+          "get-windows": {
+            "displays": [
+              {
+                "index": 0,
+                "x": 0,
+                "y": 0,
+                "width": 2560,
+                "height": 1440
+              },
+              {
+                "index": 1,
+                "x": 0,
+                "y": 32,
+                "width": 1512,
+                "height": 950
+              }
+            ],
+            "windows": [
+              {
+                "id": "101_1",
+                "app": "Cursor",
+                "title": "main.ts",
+                "role": "work",
+                "display": 1,
+                "focused": true,
+                "frame": {
+                  "x": 0,
+                  "y": 32,
+                  "width": 756,
+                  "height": 950
+                }
+              },
+              {
+                "id": "102_2",
+                "app": "Safari",
+                "title": "TypeScript Handbook",
+                "role": "reference",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 1440
+                }
+              },
+              {
+                "id": "103_3",
+                "app": "Slack",
+                "title": "general",
+                "role": "comms",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                }
+              },
+              {
+                "id": "104_4",
+                "app": "Spotify",
+                "title": "Spotify",
+                "role": "background",
+                "display": 0,
+                "focused": false,
+                "frame": {
+                  "x": 1280,
+                  "y": 720,
+                  "width": 1280,
+                  "height": 720
+                }
+              }
+            ]
+          },
+          "arrange-windows": "Arranged 4 windows"
+        },
+        "expected": [
+          {
+            "callsTool": "get-windows"
+          },
+          {
+            "callsTool": {
+              "name": "arrange-windows",
+              "arguments": {
+                "displays": [
+                  {
+                    "display": 1,
+                    "windows": {
+                      "includes": "103_3"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.x",
+    "@types/react": "19.x",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
