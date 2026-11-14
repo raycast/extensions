@@ -71,10 +71,10 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 - **Password Type**: Random password or passphrase (default: random)
 - **Random: Length**: Characters in random passwords, from 8 to 128 (default: 20)
-- **Random: Characters**: Uppercase letters, symbols and numbers, all on by default
+- **Random: Uppercase letters**, **Random: Symbols** and **Random: Numbers**: Characters in random passwords, all on by default
 - **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
 - **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
-- **Passphrase: Options**: Capitalize words and include numbers, both on by default
+- **Passphrase: Capitalize words** and **Passphrase: Numbers**: Start each word with a capital letter, and include numbers, both on by default
 
 ### Get TOTP Code
 

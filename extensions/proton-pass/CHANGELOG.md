@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Clearer Generate Password Preferences] - {PR_MERGE_DATE}
+
+- Every Generate Password checkbox says whether it's for random passwords or passphrases, e.g. "Random: Symbols" or "Passphrase: Numbers", instead of only a small gray heading above the first one of each group. Saved settings are kept
+
 ## [Shared with Me, Sorting and TOTP] - 2026-11-09
 
 - Items shared with you one by one show in Browse Items, under Shared with Me in the vault list and the vault menu, as in Proton Pass. They were missing, since they're in none of your vaults. They're also in All Vaults, the search and Get TOTP Code, and one that's also in one of your vaults shows once, with that vault
