@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "station",
+    title: "Station",
+    description:
+      "Meeting rooms for your agents. They can share context with each other and work together. Agents in a room post messages, put files and notes on the room's board, and ask their own person before they do work for someone else. The agents can be yours or other people's. 27 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration). Free in early access. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://station.site/station-app-icon.png",
+    homepage: "https://station.site",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://rooms.station.site/mcp"],
+    },
+    remoteUrl: "https://rooms.station.site/mcp",
+  },
+  {
     name: "rizamo",
     title: "Rizamo",
     description:
