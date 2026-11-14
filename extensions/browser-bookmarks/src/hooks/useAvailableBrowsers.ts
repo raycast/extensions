@@ -45,6 +45,7 @@ const WINDOWS_ROAMING_APPDATA = process.platform === "win32" ? getWindowsRoaming
 
 export const BROWSERS_BUNDLE_ID = {
   arc: "company.thebrowser.browser",
+  ardia: "com.ardia.browser",
   brave: "com.brave.browser",
   braveBeta: "com.brave.browser.beta",
   braveNightly: "com.brave.browser.nightly",
@@ -91,6 +92,7 @@ export type BrowserApplication = Application & {
 
 const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.arc, name: "Arc", macBundleId: "company.thebrowser.browser" },
+  { id: BROWSERS_BUNDLE_ID.ardia, name: "Ardia", macBundleId: "com.ardia.browser" },
   {
     id: BROWSERS_BUNDLE_ID.brave,
     name: "Brave",

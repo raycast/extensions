@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Ardia] - {PR_MERGE_DATE}
+
+- Added support for the `Ardia` browser on macOS
+
 ## [Search Profiles] - 2026-10-26
 
 - Search 1.0.7 added profiles: each one has its own bookmarks, pins and spaces, and can be picked from the Select Profile submenu

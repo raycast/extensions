@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useArcBookmarks from "./hooks/useArcBookmarks";
+import useArdiaBookmarks from "./hooks/useArdiaBookmarks";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID, BrowserApplication } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
@@ -228,6 +229,7 @@ export default function Command() {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
+  const hasArdia = browsers.includes(BROWSERS_BUNDLE_ID.ardia) ?? false;
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
@@ -257,6 +259,7 @@ export default function Command() {
   const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
 
   const arc = useArcBookmarks(hasArc);
+  const ardia = useArdiaBookmarks(hasArdia);
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
@@ -290,6 +293,7 @@ export default function Command() {
   useEffect(() => {
     const bookmarks = [
       ...arc.bookmarks,
+      ...ardia.bookmarks,
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
       ...braveNightly.bookmarks,
@@ -351,6 +355,7 @@ export default function Command() {
     setBookmarks(bookmarks);
   }, [
     arc.bookmarks,
+    ardia.bookmarks,
     brave.bookmarks,
     braveBeta.bookmarks,
     braveNightly.bookmarks,
@@ -384,6 +389,7 @@ export default function Command() {
   useEffect(() => {
     const folders = [
       ...arc.folders,
+      ...ardia.folders,
       ...brave.folders,
       ...braveBeta.folders,
       ...braveNightly.folders,
@@ -415,6 +421,7 @@ export default function Command() {
     setFolders(folders);
   }, [
     arc.folders,
+    ardia.folders,
     brave.folders,
     braveBeta.folders,
     braveNightly.folders,
@@ -510,6 +517,9 @@ export default function Command() {
   function mutateBookmarks() {
     if (hasArc) {
       arc.mutate();
+    }
+    if (hasArdia) {
+      ardia.mutate();
     }
     if (hasBrave) {
       brave.mutate();
@@ -636,6 +646,7 @@ export default function Command() {
         isLoadingAvailableBrowsers ||
         isLoadingFrecencies ||
         arc.isLoading ||
+        ardia.isLoading ||
         brave.isLoading ||
         braveBeta.isLoading ||
         braveNightly.isLoading ||
@@ -777,6 +788,19 @@ export default function Command() {
                     profiles={arc.profiles}
                     currentProfile={arc.currentProfile}
                     setCurrentProfile={arc.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.ardia}
+                    name="Ardia"
+                    icon="ardia.png"
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                    }}
+                    profiles={ardia.profiles}
+                    currentProfile={ardia.currentProfile}
+                    setCurrentProfile={ardia.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}
