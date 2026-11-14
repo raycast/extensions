@@ -12,7 +12,7 @@ Search, add, and finish jots from Raycast.
 
 - A preview pane shows the jot's Markdown, rendered, with its tags and date (⌘⇧P to hide or show).
 - Filter by Open, Open and Done, or any tag from the dropdown. Tags keep the same color everywhere.
-- ⏎ copies the text. ⌘O opens the file, ⌘D marks it done (with Undo in the toast), ⌘T adds tags, ⌘⇧A archives, ⌘N writes a new jot.
+- ⏎ copies the text. ⌘⏎ opens the file, ⌘D marks it done (with Undo in the toast), ⌘T adds tags, ⌘⇧A archives, ⌘N writes a new jot.
 - Nothing matches your search? Press ⏎ to save the search text as a new jot.
 
 **Add Jot**: a Markdown form with a section (Inbox, any existing section, or a new one) and tags. With Jot 2.0.1 or later you can also attach images (pick files, or the image on your clipboard) and pin the jot. ⌘⏎ saves, ⌘⇧⏎ saves and clears the form for the next one. Unsent text is kept as a draft.
