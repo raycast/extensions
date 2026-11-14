@@ -57,7 +57,8 @@ function useRecent() {
 function ArticleActions({ article }: { article: WikiHowArticle }) {
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open on WikiHow" url={article.url} />
+      {/* eslint-disable-next-line @raycast/prefer-title-case -- official wikiHow brand spelling */}
+      <Action.OpenInBrowser title="Open on wikiHow" url={article.url} />
       <Action.CopyToClipboard title="Copy Article Link" content={article.url} />
     </ActionPanel>
   );
@@ -111,7 +112,8 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
 
   const pagingActions = (
     <ActionPanel.Section title="Search">
-      {trimmed ? <Action.OpenInBrowser title="Search on WikiHow.com" url={siteSearchUrl(trimmed)} /> : null}
+      {/* eslint-disable-next-line @raycast/prefer-title-case -- official wikiHow brand spelling */}
+      {trimmed ? <Action.OpenInBrowser title="Search on wikiHow.com" url={siteSearchUrl(trimmed)} /> : null}
       {canGoNext ? (
         <Action
           title="Next Results Page"
@@ -149,7 +151,8 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
         detail={<List.Item.Detail markdown={articleMarkdown(article)} />}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open on WikiHow" url={article.url} onOpen={() => history.remember(article)} />
+            {/* eslint-disable-next-line @raycast/prefer-title-case -- official wikiHow brand spelling */}
+            <Action.OpenInBrowser title="Open on wikiHow" url={article.url} onOpen={() => history.remember(article)} />
             <Action.Push
               title="Read Excerpts"
               icon={Icon.Paragraph}
@@ -250,7 +253,8 @@ export default function SearchArticles(props: LaunchProps<{ arguments: Arguments
             detail={<List.Item.Detail markdown={`Opens wikiHow's own search for **${trimmed}** in your browser.`} />}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Search on WikiHow.com" url={siteSearchUrl(trimmed)} />
+                {/* eslint-disable-next-line @raycast/prefer-title-case -- official wikiHow brand spelling */}
+                <Action.OpenInBrowser title="Search on wikiHow.com" url={siteSearchUrl(trimmed)} />
                 <Action title="Add API Key" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }

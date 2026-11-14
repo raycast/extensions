@@ -2,13 +2,12 @@
 
 Find English wikiHow articles, read indexed excerpts in a split view or a larger preview, then explicitly open the complete article on wikiHow.
 
-## What's new
-
-- Works **without an API key**: searches open on wikiHow.com, and a key unlocks in-Raycast previews.
-- **Recently Viewed** articles appear when the search bar is empty.
-- Copy any article as a Markdown link.
-
 This is an unofficial extension by **itsdanielsultan**. Search uses the supported **Brave Web Search API** with your personal key. Previews are search excerpts, not complete article steps. This package does not use a wikiHow API or scrape article pages.
+
+## Commands
+
+- **Search Articles** finds English wikiHow articles. With a Brave Search API key, results, excerpts and previews appear in Raycast; without one, the search opens on wikiHow.com. Recently viewed articles appear when the search bar is empty, and any article can be copied as a Markdown link.
+- **Random Article** opens a random article with wikiHow's own randomizer.
 
 ## Setup
 
