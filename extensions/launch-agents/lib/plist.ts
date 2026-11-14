@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync, execSync } from "child_process";
 
 export const getLaunchAgentRecurrence = (filePath: string) => {
   const plistContent = execSync(`cat ${filePath}`).toString();
@@ -68,4 +68,25 @@ export const createLaunchAgent = () => {
   execSync(`touch ${userLaunchAgentsPath}/${fileName}.plist`);
 
   return fileName;
+};
+
+export const getLaunchAgentLabel = (filePath: string) => {
+  try {
+    const label = execFileSync("plutil", ["-extract", "Label", "raw", "-o", "-", filePath], { stdio: "pipe" })
+      .toString()
+      .trim();
+    if (label) return label;
+  } catch {
+    // Fall back to the file name below
+  }
+  return (filePath.split("/").pop() || "").replace(/\.plist$/, "");
+};
+
+/**
+ * Starts a loaded launch agent immediately, regardless of its schedule.
+ * Throws if the agent is not loaded or launchctl fails.
+ */
+export const runLaunchAgent = (label: string) => {
+  const uid = process.getuid?.() ?? 501;
+  execFileSync("launchctl", ["kickstart", `gui/${uid}/${label}`], { stdio: "pipe" });
 };

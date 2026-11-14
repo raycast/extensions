@@ -1,5 +1,7 @@
 # Launch Agents Extension Changelog
 
+## [Add Run Now action to start a specific launch agent] - {PR_MERGE_DATE}
+
 ## [Add non existing file exception handler] - 2025-04-20
 
 ## [Add open file exception handler] - 2024-10-22
