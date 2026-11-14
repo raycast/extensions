@@ -1,6 +1,6 @@
 # ClaudeScope Changelog
 
-## [Live Agents] - {PR_MERGE_DATE}
+## [Live Agents] - 2026-11-14
 
 - Watch live coding-agent sessions and see which ones are waiting for you. Requires ClaudeScope 0.27.0 or later.
 
