@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { ReactNode } from "react";
 import { formatDuration, type Entry } from "daily-karte";
 import { activityIcon } from "./components";
@@ -23,15 +23,8 @@ export function EntryItem({
       id={entry.id}
       title={entry.name}
       icon={activityIcon(entry)}
+      subtitle={new Date(entry.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       keywords={entry.note ? [entry.note] : []}
-      accessories={[
-        {
-          text: new Date(entry.end).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      ]}
       detail={
         <List.Item.Detail
           markdown={`# ${markdownText(entry.name)}\n\n${entry.note ? markdownText(entry.note) : "This activity has no note."}`}
@@ -52,7 +45,6 @@ export function EntryItem({
           <Action.Push
             title="Edit Record"
             icon={Icon.Pencil}
-            shortcut={Keyboard.Shortcut.Common.Edit}
             target={<EditEntry id={entry.id} uid={uid} projectId={projectId} onSaved={onSaved} />}
           />
           {sharedActions}

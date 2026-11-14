@@ -2,7 +2,7 @@ import { showFailureToast } from "@raycast/utils";
 import { Action, ActionPanel, Icon, Keyboard, LaunchType, List, launchCommand } from "@raycast/api";
 import { useState } from "react";
 import { dateKey, formatDuration } from "daily-karte";
-import { getSession } from "./auth";
+import { getSession, withGoogleAccess } from "./auth";
 import { FirestoreClient } from "./lib/firestore";
 import { activityIcon, ErrorView, useLoad } from "./components";
 import { markdownText, todayPresentation } from "./lib/presentation";
@@ -17,7 +17,7 @@ async function loadToday() {
   };
 }
 
-export default function Today() {
+function Today() {
   const [view, setView] = useState("timeline");
   const [search, setSearch] = useState("");
   const state = useLoad(loadToday);
@@ -36,8 +36,13 @@ export default function Today() {
           }
         }}
       />
-      <Action title="Refresh" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={state.refresh} />
       {value && <Action.OpenInBrowser title="Open Daily Karte" url={value.session.config.website} />}
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={value ? Keyboard.Shortcut.Common.Refresh : undefined}
+        onAction={state.refresh}
+      />
     </>
   );
   return (
@@ -81,7 +86,7 @@ export default function Today() {
                   id={`activity-${index}`}
                   title={activity.name}
                   icon={activityIcon(activity)}
-                  accessories={[{ text: formatDuration(activity.minutes) }]}
+                  subtitle={formatDuration(activity.minutes)}
                   detail={
                     <List.Item.Detail
                       markdown={`# ${markdownText(activity.name)}\n\nThis activity appears in ${activity.count} ${activity.count === 1 ? "record" : "records"} ending today.`}
@@ -131,3 +136,5 @@ export default function Today() {
     </List>
   );
 }
+
+export default withGoogleAccess(Today);

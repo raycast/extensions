@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard, environment } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, environment } from "@raycast/api";
 import { dateKey, summarizeWeek } from "daily-karte";
-import { getSession } from "./auth";
+import { getSession, withGoogleAccess } from "./auth";
 import { ErrorView, useLoad } from "./components";
 import { FirestoreClient } from "./lib/firestore";
 import { calendarImage } from "./lib/calendar";
@@ -15,7 +15,7 @@ async function loadWeek() {
   };
 }
 
-export default function ThisWeek() {
+function ThisWeek() {
   const state = useLoad(loadWeek);
   if (state.error) return <ErrorView error={state.error} refresh={state.refresh} />;
   return (
@@ -24,15 +24,12 @@ export default function ThisWeek() {
       markdown={state.value ? `![This week's calendar](${state.value.image})` : ""}
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh Calendar"
-            icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={state.refresh}
-          />
+          <Action title="Refresh Calendar" icon={Icon.ArrowClockwise} onAction={state.refresh} />
           {state.value && <Action.OpenInBrowser title="Open Daily Karte" url={state.value.website} />}
         </ActionPanel>
       }
     />
   );
 }
+
+export default withGoogleAccess(ThisWeek);

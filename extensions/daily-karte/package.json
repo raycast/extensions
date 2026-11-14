@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "daily-karte",
   "title": "Daily Karte",
-  "description": "Record activities and review daily timelines and weekly calendars in Daily Karte.",
+  "description": "Record activities and review daily timelines and weekly calendars in Daily Karte. Requires a Google account.",
   "icon": "icon.png",
   "author": "ViGeng",
   "license": "MIT",

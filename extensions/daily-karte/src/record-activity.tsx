@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard, Grid } from "@raycast/api";
 import { useState } from "react";
 import { formatDuration, type Card } from "daily-karte";
-import { getSession } from "./auth";
+import { getSession, withGoogleAccess } from "./auth";
 import { FirestoreClient } from "./lib/firestore";
 import { activityIcon, ErrorView, useLoad } from "./components";
 import { RecordForm } from "./entry-form";
@@ -12,7 +12,7 @@ async function loadCards() {
   return { session, cards: await new FirestoreClient(session).cards() };
 }
 
-export default function RecordActivity() {
+function RecordActivity() {
   const state = useLoad(loadCards);
   const [selected, setSelected] = useState<string>();
   const [search, setSearch] = useState("");
@@ -30,14 +30,15 @@ export default function RecordActivity() {
         onSaved,
       }
     : undefined;
-  const create = props && (
-    <Action.Push
-      title="New Activity Card"
-      icon={Icon.Plus}
-      shortcut={Keyboard.Shortcut.Common.New}
-      target={<NewCard {...props} />}
-    />
-  );
+  const create = (withShortcut = false) =>
+    props && (
+      <Action.Push
+        title="New Activity Card"
+        icon={Icon.Plus}
+        shortcut={withShortcut ? Keyboard.Shortcut.Common.New : undefined}
+        target={<NewCard {...props} />}
+      />
+    );
   return (
     <Grid
       isLoading={state.loading}
@@ -56,8 +57,14 @@ export default function RecordActivity() {
         description="You can add an activity with its own icon and default duration."
         actions={
           <ActionPanel>
-            {create}
-            <Action title="Refresh" onAction={state.refresh} />
+            {create()}
+            {value && <Action.OpenInBrowser title="Open Daily Karte" url={value.session.config.website} />}
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              shortcut={value ? Keyboard.Shortcut.Common.Refresh : undefined}
+              onAction={state.refresh}
+            />
           </ActionPanel>
         }
       />
@@ -87,15 +94,22 @@ export default function RecordActivity() {
                       <RecordForm card={card} uid={value.session.uid} projectId={value.session.config.projectId} />
                     }
                   />
-                  <Action.Push
-                    title="Edit Activity Card"
-                    icon={Icon.Pencil}
-                    shortcut={Keyboard.Shortcut.Common.Edit}
-                    target={<EditCard id={card.id} {...props!} />}
-                  />
-                  {create}
-                  <Action title="Refresh" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={state.refresh} />
                   <Action.OpenInBrowser title="Open Daily Karte" url={value.session.config.website} />
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Edit Activity Card"
+                      icon={Icon.Pencil}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
+                      target={<EditCard id={card.id} {...props!} />}
+                    />
+                    {create(true)}
+                  </ActionPanel.Section>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={state.refresh}
+                  />
                 </ActionPanel>
               }
             />
@@ -105,3 +119,5 @@ export default function RecordActivity() {
     </Grid>
   );
 }
+
+export default withGoogleAccess(RecordActivity);

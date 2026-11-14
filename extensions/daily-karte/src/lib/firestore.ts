@@ -27,6 +27,15 @@ export interface Versioned<T> {
   updateTime: string;
 }
 
+export interface RecordResult {
+  entry: Entry;
+  merged: boolean;
+}
+
+export interface RecordAttempt {
+  result?: RecordResult;
+}
+
 function sameRecord(first: Card | Entry, second: Card | Entry) {
   return Object.keys(first).every((key) => first[key as keyof typeof first] === second[key as keyof typeof second]);
 }
@@ -235,13 +244,23 @@ export class FirestoreClient {
     });
   }
 
-  async record(incoming: Entry, previous?: Versioned<Entry>): Promise<{ entry: Entry; merged: boolean }> {
+  private async confirmEdit(previous: Versioned<Entry>, attempt: RecordAttempt): Promise<RecordResult | undefined> {
+    const latest = await this.entrySnapshot(previous.record.id);
+    if (attempt.result && sameRecord(latest.record, attempt.result.entry))
+      return { entry: latest.record, merged: attempt.result.merged };
+    if (latest.updateTime !== previous.updateTime)
+      throw new Error("This activity changed on another device. Reopen its editor before saving.");
+  }
+
+  async record(incoming: Entry, previous?: Versioned<Entry>, attempt: RecordAttempt = {}): Promise<RecordResult> {
     if (!isValidEntry(incoming)) throw new Error("The activity is invalid and was not saved.");
     if (previous && (previous.record.id !== incoming.id || !isValidEntry(previous.record) || !previous.updateTime))
       throw new Error("The original activity is invalid. Reopen its editor.");
-    for (let attempt = 0; attempt < 3; attempt++) {
-      let intended: Entry | undefined;
-      let merged = false;
+    if (previous && attempt.result) {
+      const confirmed = await this.confirmEdit(previous, attempt);
+      if (confirmed) return confirmed;
+    }
+    for (let retry = 0; retry < 3; retry++) {
       try {
         const snapshots = await this.daySnapshots(dateKey(incoming.end));
         const entries = snapshots
@@ -253,11 +272,12 @@ export class FirestoreClient {
           if (existing.createdAt !== incoming.createdAt || existing.cardId !== incoming.cardId) {
             throw new Error("This activity identifier is already in use.");
           }
-          return { entry: existing, merged: false };
+          return {
+            entry: existing,
+            merged: attempt.result && sameRecord(existing, attempt.result.entry) ? attempt.result.merged : false,
+          };
         }
         const change = saveActivity(entries, incoming);
-        intended = change.entry;
-        merged = change.merged;
         if (change.before.length >= 400)
           throw new Error("This save would merge too many records. Please review them in the Web app.");
         const versions = new Map(snapshots.map((snapshot) => [snapshot.record.id, snapshot.updateTime]));
@@ -281,28 +301,24 @@ export class FirestoreClient {
               };
             }),
         ];
+        attempt.result = { entry: change.entry, merged: change.merged };
         // Firebase user tokens support conditional commits, but not REST read-write transactions.
         await this.call(`${this.documents}:commit`, { writes });
-        return { entry: change.entry, merged: change.merged };
+        return attempt.result;
       } catch (error) {
         if (
           previous &&
           error instanceof ServiceError &&
           ["ABORTED", "FAILED_PRECONDITION", "ALREADY_EXISTS"].includes(error.code)
         ) {
-          const latest = await this.entrySnapshot(incoming.id);
-          if (intended && sameRecord(latest.record, intended))
-            return {
-              entry: latest.record,
-              merged,
-            };
-          if (latest.updateTime !== previous.updateTime)
-            throw new Error("This activity changed on another device. Reopen its editor before saving.");
+          const confirmed = await this.confirmEdit(previous, attempt);
+          if (confirmed) return confirmed;
+          attempt.result = undefined;
         }
         if (
           !(error instanceof ServiceError) ||
           !["ABORTED", "FAILED_PRECONDITION", "ALREADY_EXISTS"].includes(error.code) ||
-          attempt === 2
+          retry === 2
         )
           throw error;
       }

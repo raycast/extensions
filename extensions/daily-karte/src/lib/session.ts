@@ -1,5 +1,5 @@
-import type { OAuth } from "@raycast/api";
-import { requestJSON, ServiceError } from "./http";
+import type { ProviderOptions } from "@raycast/utils";
+import { requestJSON } from "./http";
 import type { Config, Session } from "../types";
 
 export function readConfig(application: { projectId: string; clientId: string }): Config {
@@ -14,58 +14,15 @@ export function readConfig(application: { projectId: string; clientId: string })
   return { projectId, clientId, website: `https://${projectId}.web.app` };
 }
 
-type OAuthClient = Pick<
-  OAuth.PKCEClient,
-  "getTokens" | "setTokens" | "removeTokens" | "authorizationRequest" | "authorize"
->;
-
-export async function authorizeGoogle(client: OAuthClient, clientId: string, request = requestJSON): Promise<string> {
-  const saved = await client.getTokens();
-  if (saved?.accessToken && !saved.isExpired()) return saved.accessToken;
-  if (saved?.refreshToken) {
-    try {
-      const refreshed = await request<OAuth.TokenResponse>("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        body: new URLSearchParams({
-          client_id: clientId,
-          refresh_token: saved.refreshToken,
-          grant_type: "refresh_token",
-        }),
-      });
-      if (!refreshed.access_token) throw new Error("Google did not return a sign-in session.");
-      await client.setTokens({
-        ...refreshed,
-        refresh_token: refreshed.refresh_token ?? saved.refreshToken,
-      });
-      return refreshed.access_token;
-    } catch (error) {
-      if (!(error instanceof ServiceError) || error.code !== "invalid_grant") throw error;
-      await client.removeTokens();
-    }
-  }
-  const auth = await client.authorizationRequest({
-    endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-    clientId,
+export function googleOptions(config: Config): ProviderOptions {
+  return {
+    clientId: config.clientId,
     scope: "openid email profile",
-    extraParameters: {
-      access_type: "offline",
-      prompt: "consent select_account",
-    },
-  });
-  const { authorizationCode } = await client.authorize(auth);
-  const response = await request<OAuth.TokenResponse>("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    body: new URLSearchParams({
-      client_id: clientId,
-      code: authorizationCode,
-      code_verifier: auth.codeVerifier,
-      redirect_uri: auth.redirectURI,
-      grant_type: "authorization_code",
-    }),
-  });
-  if (!response.access_token) throw new Error("Google did not return a sign-in session.");
-  await client.setTokens(response);
-  return response.access_token;
+    providerId: `${config.projectId}:${config.clientId}`,
+    providerName: "Daily Karte",
+    description: "Sign in with the Google account you use for Daily Karte.",
+    extraParameters: { access_type: "offline", prompt: "consent select_account" },
+  };
 }
 
 export async function firebaseSession(

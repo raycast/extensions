@@ -68,14 +68,14 @@ export function useLoad<T>(loader: () => Promise<T>) {
 
 export function ErrorView({ error, refresh }: { error: Error; refresh: () => void }) {
   return (
-    <List>
+    <List searchBarPlaceholder="Search Daily Karte…">
       <List.EmptyView
         title="Daily Karte Could Not Connect"
         description={error.message}
         icon={Icon.ExclamationMark}
         actions={
           <ActionPanel>
-            <Action title="Try Again" onAction={refresh} />
+            <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={refresh} />
             <Action.OpenInBrowser title="Open Daily Karte" url={`https://${APP_CONFIG.projectId}.web.app`} />
           </ActionPanel>
         }

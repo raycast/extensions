@@ -20,6 +20,8 @@ You can create cards with a name, built-in icon or custom emoji, color, and opti
 
 Compatible neighboring records merge using the same five-minute rule as the Web app. A stale editor refuses to overwrite a record changed on another device.
 
+If a save response is lost, retrying an unchanged form confirms the previously submitted result, including merged neighbors. Changing the form values starts a new save attempt. In an empty gallery, Return creates your first card.
+
 ## Review your day and week
 
 Today switches between Timeline and By Activity and remembers your last selection. It shows the current local day's record count and estimated duration total. Select a timeline record to edit its ending time, duration, or note.
@@ -32,11 +34,11 @@ Both clients use your machine's local timezone. Daily totals count records by th
 
 | Shortcut | Action |
 | --- | --- |
-| Return | You record the selected activity or edit the selected timeline record. |
+| Return | You record the selected activity, edit the selected timeline record, or refresh This Week. |
 | Command-N | You create an activity card in Record Activity. |
-| Command-E | You edit the selected activity card or timeline record. |
+| Command-E | You edit the selected activity card in Record Activity. |
 | Command-P | You switch Today's view. |
-| Command-R | You refresh the current command. |
+| Command-R | You refresh Record Activity or Today. |
 
 ## Data and connectivity
 

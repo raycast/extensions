@@ -6,7 +6,7 @@ import { getSession } from "./auth";
 import { FirestoreClient } from "./lib/firestore";
 import { ErrorView, useLoad } from "./components";
 import { durationInput } from "./lib/forms";
-import type { Versioned } from "./lib/firestore";
+import type { Versioned, RecordAttempt } from "./lib/firestore";
 
 export function RecordForm({
   card,
@@ -24,7 +24,7 @@ export function RecordForm({
   const { pop } = useNavigation();
   const [loading, setLoading] = useState(false);
   const busy = useRef(false);
-  const candidate = useRef<{ signature: string; entry: Entry } | undefined>(undefined);
+  const candidate = useRef<{ signature: string; entry: Entry; attempt: RecordAttempt } | undefined>(undefined);
   const initialEnd = useRef(new Date(previous?.record.end ?? Date.now()));
   async function submit(values: { duration: string; end: Date | null; note: string }) {
     if (busy.current) return;
@@ -39,6 +39,7 @@ export function RecordForm({
       if (candidate.current?.signature !== signature)
         candidate.current = {
           signature,
+          attempt: {},
           entry: {
             ...createEntry(card, {
               end: values.end.getTime(),
@@ -53,7 +54,7 @@ export function RecordForm({
       const session = await getSession();
       if (session.uid !== uid || session.config.projectId !== projectId)
         throw new Error("The account changed. Reopen Record Activity before saving.");
-      const result = await new FirestoreClient(session).record(entry, previous);
+      const result = await new FirestoreClient(session).record(entry, previous, candidate.current.attempt);
       await showToast({
         style: Toast.Style.Success,
         title: previous ? "Activity Updated" : "Activity Recorded",

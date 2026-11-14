@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createEntry, DEFAULT_CARDS, summarizeWeek } from "daily-karte";
-import { FirestoreClient, encodeFields, decodeDocument } from "../src/lib/firestore";
+import { createEntry, DEFAULT_CARDS, summarizeWeek, type Entry } from "daily-karte";
+import { FirestoreClient, encodeFields, decodeDocument, type RecordAttempt } from "../src/lib/firestore";
 import { ServiceError, requestJSON } from "../src/lib/http";
 import type { Session } from "../src/types";
 
@@ -478,4 +478,79 @@ test("A weekly query includes cross-boundary records and uses a local Monday thr
     if (previous === undefined) delete process.env.TZ;
     else process.env.TZ = previous;
   }
+});
+
+test("A merged edit with a lost response is confirmed across client instances without rebuilding the merge.", async () => {
+  const changed = { ...first, note: "My edit." };
+  const previous = { record: first, updateTime: doc().updateTime };
+  const attempt: RecordAttempt = {};
+  let saved: Entry | undefined;
+  let commits = 0;
+  const handler = (url: string, body: RequestBody) => {
+    if (url.endsWith(":runQuery"))
+      return (saved ? [saved] : [first, incoming]).map((entry) => ({ document: doc(entry) }));
+    if (url.endsWith(":batchGet")) return [{ found: { ...doc(saved!), updateTime: "2026-11-14T00:02:00.000001Z" } }];
+    commits++;
+    if (saved) throw new ServiceError("FAILED_PRECONDITION");
+    saved = decodeDocument(body.writes[0].update, prefix, "entries") as Entry;
+    throw new Error("The response was lost.");
+  };
+  await assert.rejects(harness(handler).client.record(changed, previous, attempt), /response was lost/);
+  assert.equal(saved!.duration, 60);
+  const retry = harness(handler);
+  assert.deepEqual(await retry.client.record(changed, previous, attempt), { entry: saved, merged: true });
+  assert.deepEqual(
+    retry.calls.map((call) => call.url.split(":").at(-1)),
+    ["batchGet"],
+  );
+  assert.equal(commits, 1);
+});
+
+test("A failed ambiguous edit can retry against fresh neighbors when the original version is unchanged.", async () => {
+  const previous = { record: first, updateTime: doc().updateTime };
+  const attempt: RecordAttempt = {};
+  let commits = 0;
+  const h = harness((url) => {
+    if (url.endsWith(":batchGet")) return [{ found: doc() }];
+    if (url.endsWith(":runQuery"))
+      return [
+        { document: doc() },
+        {
+          document: {
+            ...doc({ ...incoming, note: commits ? "New neighbor note." : "" }),
+            updateTime: commits ? "2026-11-14T00:03:00.000001Z" : doc().updateTime,
+          },
+        },
+      ];
+    if (++commits === 1) throw new Error("The response was lost.");
+    return {};
+  });
+  const changed = { ...first, note: "My edit." };
+  await assert.rejects(h.client.record(changed, previous, attempt), /response was lost/);
+  const result = await h.client.record(changed, previous, attempt);
+  assert.equal(result.entry.note, "My edit.\nNew neighbor note.");
+  assert.equal(result.entry.duration, 60);
+  const commit = h.calls.filter((call) => call.url.endsWith(":commit"))[1];
+  assert.equal(commit.body.writes[1].currentDocument.updateTime, "2026-11-14T00:03:00.000001Z");
+});
+
+test("A merged edit retry cannot overwrite a later change made by another client.", async () => {
+  const previous = { record: first, updateTime: doc().updateTime };
+  const attempt: RecordAttempt = {};
+  let saved: Entry | undefined;
+  let commits = 0;
+  const handler = (url: string, body: RequestBody) => {
+    if (url.endsWith(":runQuery")) return [first, incoming].map((entry) => ({ document: doc(entry) }));
+    if (url.endsWith(":batchGet")) return [{ found: { ...doc(saved!), updateTime: "2026-11-14T00:04:00.000001Z" } }];
+    commits++;
+    saved = decodeDocument(body.writes[0].update, prefix, "entries") as Entry;
+    throw new Error("The response was lost.");
+  };
+  const changed = { ...first, note: "My edit." };
+  await assert.rejects(harness(handler).client.record(changed, previous, attempt), /response was lost/);
+  saved = { ...saved!, note: "Changed later on another device." };
+  const retry = harness(handler);
+  await assert.rejects(retry.client.record(changed, previous, attempt), /changed on another device/);
+  assert.equal(commits, 1);
+  assert.equal(retry.calls.length, 1);
 });
