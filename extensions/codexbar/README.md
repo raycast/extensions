@@ -33,6 +33,6 @@ Limits come first on purpose: on a subscription plan the question is "how much d
 
 - **Usage Limits** reads `widget-snapshot.json` from CodexBar's App Group container (`~/Library/Group Containers/<team>.com.steipete.codexbar/`). The menu bar app rewrites it on every refresh to feed its widgets, so the command opens instantly.
 - **Refresh** runs the CLI bundled with the app (`CodexBar.app/Contents/Helpers/CodexBarCLI usage --format json`). It contacts every enabled provider and can take around 30 seconds. The result is cached, and for each provider the newest reading (app snapshot or CLI) wins.
-- **Pace** is computed locally with the same linear model CodexBar uses: after 12 hours of a 7-day window, about 7% used is "on pace".
+- **Pace** is computed locally with the same linear model CodexBar uses: after 12 hours of a 7-day window, about 7% used is "on pace". Each gauge shows it as a thin blue inner ring for the time left in the window: when the outer quota arc is longer than the time ring you are in reserve, when it is shorter you are burning faster than an even spread.
 - **Cost History** runs `codexbar cost --format json`, which reads local logs through CodexBar's scan cache. Costs are estimates at API list prices.
 - Only providers enabled in CodexBar are queried. Account emails are never displayed.

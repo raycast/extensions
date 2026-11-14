@@ -5,7 +5,7 @@ import { LimitWindow, ProviderUsage } from "./types";
 
 export function windowGauge(window: LimitWindow, mode: PercentMode, now: Date = new Date()): GaugeSpec {
   const pace = computePace(window, now);
-  const expectedShown =
+  const time =
     pace === undefined ? undefined : mode === "used" ? pace.expectedUsedPercent : 100 - pace.expectedUsedPercent;
   let subtitle = formatResetIn(window.resetsAt, now);
   if (pace && !pace.willLastToReset && pace.runsOutAt) {
@@ -17,7 +17,8 @@ export function windowGauge(window: LimitWindow, mode: PercentMode, now: Date = 
     caption: mode === "used" ? "used" : "left",
     title: window.title,
     subtitle,
-    marker: expectedShown,
+    time,
+    timeLabel: time === undefined ? undefined : `${time}% of time ${mode === "used" ? "elapsed" : "left"}`,
   };
 }
 

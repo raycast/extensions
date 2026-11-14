@@ -86,7 +86,9 @@ function ManageProviders(props: { providers: ProviderRef[] }) {
                   />
                   <CreateQuicklinkAction {...provider} />
                   <Action
-                    title="Move up"
+                    // "Up" is a verb particle here, so Title Case keeps it capitalized like "Move Down".
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Move Up"
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                     onAction={() => save(moveProvider(prefs, available, id, -1))}

@@ -73,15 +73,13 @@
     "@types/react": "19.3.0",
     "eslint": "^9.39.5",
     "prettier": "^3.9.10",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.12"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   }
 }

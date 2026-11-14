@@ -10,8 +10,13 @@ export interface GaugeSpec {
   caption: string;
   title: string;
   subtitle?: string;
-  /** 0–100 on the same scale as `percent`: where an even spread would be right now. */
-  marker?: number;
+  /**
+   * 0–100 on the same scale as `percent`: the share of the window's time (left or elapsed),
+   * drawn as a thin inner ring so it can be compared with the quota arc at a glance.
+   */
+  time?: number;
+  /** Text explaining the time ring, e.g. `83% of time left`. */
+  timeLabel?: string;
 }
 
 const SEVERITY_HEX: Record<Severity, string> = {
@@ -21,9 +26,9 @@ const SEVERITY_HEX: Record<Severity, string> = {
   exhausted: "#FF453A",
 };
 
-const PALETTE: Record<Theme, { track: string; text: string; secondary: string; marker: string }> = {
-  dark: { track: "#3A3A3C", text: "#FFFFFF", secondary: "#98989F", marker: "#FFFFFF" },
-  light: { track: "#E5E5EA", text: "#1C1C1E", secondary: "#6E6E73", marker: "#1C1C1E" },
+const PALETTE: Record<Theme, { track: string; text: string; secondary: string; time: string }> = {
+  dark: { track: "#3A3A3C", text: "#FFFFFF", secondary: "#98989F", time: "#64D2FF" },
+  light: { track: "#E5E5EA", text: "#1C1C1E", secondary: "#6E6E73", time: "#0A84FF" },
 };
 
 const FONT = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif";
@@ -33,7 +38,7 @@ const START_ANGLE = 150;
 const SWEEP = 240;
 
 export const CELL_WIDTH = 240;
-const CELL_HEIGHT = 250;
+const CELL_HEIGHT = 272;
 
 export function escapeXml(text: string): string {
   return text
@@ -80,13 +85,16 @@ function gaugeCell(spec: GaugeSpec, x: number, theme: Theme): string {
       `<path d="${arcPath(cx, cy, r, percent / 100)}" fill="none" stroke="${SEVERITY_HEX[spec.severity]}" stroke-width="${stroke}" stroke-linecap="round"/>`,
     );
   }
-  if (spec.marker !== undefined) {
-    const angle = START_ANGLE + (SWEEP * clamp(spec.marker)) / 100;
-    const [ix, iy] = polar(cx, cy, r - stroke / 2 - 5, angle);
-    const [ox, oy] = polar(cx, cy, r + stroke / 2 + 5, angle);
+  if (spec.time !== undefined) {
+    const inner = r - stroke / 2 - 9;
     parts.push(
-      `<line x1="${fmt(ix)}" y1="${fmt(iy)}" x2="${fmt(ox)}" y2="${fmt(oy)}" stroke="${colors.marker}" stroke-width="3" stroke-linecap="round" opacity="0.85"/>`,
+      `<path d="${arcPath(cx, cy, inner, 1)}" fill="none" stroke="${colors.track}" stroke-width="4" stroke-linecap="round"/>`,
     );
+    if (clamp(spec.time) > 0) {
+      parts.push(
+        `<path d="${arcPath(cx, cy, inner, clamp(spec.time) / 100)}" fill="none" stroke="${colors.time}" stroke-width="4" stroke-linecap="round"/>`,
+      );
+    }
   }
   parts.push(
     `<text x="${cx}" y="${cy + 12}" text-anchor="middle" font-family="${FONT}" font-size="46" font-weight="700" fill="${colors.text}">${Math.round(percent)}%</text>`,
@@ -96,6 +104,11 @@ function gaugeCell(spec: GaugeSpec, x: number, theme: Theme): string {
   if (spec.subtitle) {
     parts.push(
       `<text x="${cx}" y="${cy + 124}" text-anchor="middle" font-family="${FONT}" font-size="14" fill="${colors.secondary}">${escapeXml(spec.subtitle)}</text>`,
+    );
+  }
+  if (spec.timeLabel) {
+    parts.push(
+      `<text x="${cx}" y="${cy + 146}" text-anchor="middle" font-family="${FONT}" font-size="13" fill="${colors.secondary}"><tspan fill="${colors.time}">●</tspan> ${escapeXml(spec.timeLabel)}</text>`,
     );
   }
   parts.push("</g>");
