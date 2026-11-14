@@ -135,7 +135,11 @@ function ExecutableItem({ installation, onChange }: { installation: ProbedInstal
 						/>
 					)}
 					{installation.destination === "homebrew" && (
-						<Action title="Update with Homebrew" icon={Icon.ArrowClockwise} onAction={() => updateBrew(onChange)} />
+						<Action
+							title="Update with Homebrew"
+							icon={Icon.ArrowClockwise}
+							onAction={() => updateBrew(installation.path, onChange)}
+						/>
 					)}
 					<Action.Push
 						title="Choose Existing Executable…"
@@ -184,10 +188,10 @@ async function select(installation: ProbedInstallation, onChange: () => void) {
 	onChange();
 }
 
-async function updateBrew(onChange: () => void) {
+async function updateBrew(executablePath: string, onChange: () => void) {
 	const toast = await showToast({ style: Toast.Style.Animated, title: "Updating fxClaude with Homebrew…" });
 	try {
-		const path = await updateHomebrewExecutable();
+		const path = await updateHomebrewExecutable(executablePath);
 		toast.style = Toast.Style.Success;
 		toast.title = "Homebrew fxClaude Updated";
 		toast.message = path;

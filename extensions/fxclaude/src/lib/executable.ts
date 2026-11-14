@@ -236,8 +236,8 @@ export async function installRelease(
 	return destinationPath;
 }
 
-export async function updateHomebrewExecutable(): Promise<string> {
-	const brew = await requireBrewExecutable();
+export async function updateHomebrewExecutable(executablePath: string): Promise<string> {
+	const brew = await brewExecutableFor(executablePath);
 	try {
 		await runBrew(brew, ["upgrade", executableName]);
 	} catch (error) {
@@ -266,7 +266,7 @@ export async function uninstallExecutable(path: string): Promise<void> {
 	}
 
 	if (registration?.method === "homebrew" || isUnregisteredHomebrewInstall) {
-		const brew = await requireBrewExecutable();
+		const brew = await brewExecutableFor(executablePath);
 		await runBrew(brew, ["uninstall", executableName]);
 	} else {
 		await rm(executablePath, { force: true });
@@ -500,6 +500,23 @@ async function requireBrewExecutable(): Promise<string> {
 	return brew;
 }
 
+// Use the Homebrew that owns this executable: with both Apple silicon and Intel Homebrew installed,
+// the first `brew` on PATH may manage a different copy.
+async function brewExecutableFor(path: string): Promise<string> {
+	const candidates = [join(dirname(path), "brew")];
+	try {
+		const resolved = await realpath(path);
+		const cellar = resolved.indexOf(`${sep}Cellar${sep}`);
+		if (cellar > 0) candidates.unshift(join(resolved.slice(0, cellar), "bin", "brew"));
+	} catch {
+		// Fall back to the brew next to the executable's link.
+	}
+	for (const candidate of candidates) {
+		if (await isExecutable(candidate)) return normalizedExecutablePath(candidate);
+	}
+	throw new Error(`Could not find the Homebrew installation that owns ${path}.`);
+}
+
 async function homebrewInstalledExecutable(brew: string): Promise<string> {
 	const linked = join(dirname(brew), executableName);
 	if (await isExecutable(linked)) return normalizedExecutablePath(linked);
@@ -564,8 +581,7 @@ function normalizedExecutablePath(path: string): string {
 }
 
 function isWithin(path: string, directory: string): boolean {
-	const relative = normalizedExecutablePath(path).slice(normalizedExecutablePath(directory).length);
-	return relative.startsWith(sep);
+	return normalizedExecutablePath(path).startsWith(`${normalizedExecutablePath(directory)}${sep}`);
 }
 
 async function isExecutable(path: string): Promise<boolean> {

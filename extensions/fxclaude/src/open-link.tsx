@@ -4,7 +4,7 @@ import { OpenLinkForm } from "./components/open-link-form";
 import { loadDashboard } from "./lib/dashboard";
 
 export default function OpenLinkCommand(props: LaunchProps<{ arguments: Arguments.OpenLink }>) {
-	const { data, isLoading } = usePromise(loadDashboard, []);
+	const { data, error, isLoading, revalidate } = usePromise(loadDashboard, []);
 
 	return (
 		<OpenLinkForm
@@ -13,6 +13,8 @@ export default function OpenLinkCommand(props: LaunchProps<{ arguments: Argument
 			initialURL={props.arguments.url}
 			executableSource={data?.source}
 			isLoading={isLoading}
+			issues={[...(data?.issues ?? []), ...(error ? [error.message] : [])]}
+			onRetry={revalidate}
 		/>
 	);
 }

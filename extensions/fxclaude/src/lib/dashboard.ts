@@ -128,6 +128,7 @@ function parseWorkspaceStatus(value: unknown): WorkspaceStatus | undefined {
 		name: workspace.name,
 		kind: workspace.kind,
 		rootURL: nullableString(workspace.rootURL),
+		claudeConfigURL: nullableString(workspace.claudeConfigURL),
 		userDataURL: nullableString(workspace.userDataURL),
 		integrations: isRecord(workspace.integrations) ? workspace.integrations : {},
 	};

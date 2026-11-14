@@ -4,7 +4,7 @@ import { build } from "esbuild";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdtemp, mkdir, rm, symlink, writeFile, access } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile, access } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -13,13 +13,14 @@ const originalHome = process.env.FXCLAUDE_HOME;
 let fixture;
 let bridge;
 let selectedExecutable;
+let supportPath;
 
 before(async () => {
 	fixture = await mkdtemp(join(root, ".test-build-"));
 	process.env.FXCLAUDE_HOME = join(fixture, "profiles with spaces");
 	await claimRunningClaudeInstances(process.env.FXCLAUDE_HOME);
 	const assetsPath = join(fixture, "assets");
-	const supportPath = join(fixture, "extension-support");
+	supportPath = join(fixture, "extension-support");
 	// The extension no longer bundles the CLI, so register a real executable the way a user would.
 	selectedExecutable = join(fixture, "selected/fxclaude");
 	await mkdir(dirname(selectedExecutable), { recursive: true });
@@ -241,6 +242,39 @@ function runningClaudeInstances() {
 		];
 	});
 }
+
+test("an executable outside extension support is never treated as extension-installed", async () => {
+	// Same length as the "executables" directory, so the old prefix check saw a "/" in the right place.
+	const lookalike = join(supportPath, "x".repeat("executables".length), "fxclaude");
+	await mkdir(dirname(lookalike), { recursive: true });
+	await writeFile(lookalike, "#!/bin/sh\necho 0.0.0\n", { mode: 0o755 });
+	await assert.rejects(bridge.uninstallExecutable(lookalike), /Only an executable installed through this extension/);
+	await access(lookalike);
+});
+
+test("Homebrew upgrades use the Homebrew that owns the executable", async () => {
+	const owner = join(fixture, "brew-owner");
+	const other = join(fixture, "brew-other");
+	const log = join(fixture, "brew.log");
+	for (const prefix of [owner, other]) {
+		await mkdir(join(prefix, "bin"), { recursive: true });
+		await writeFile(join(prefix, "bin/brew"), `#!/bin/sh\necho "${prefix} $*" >> "${log}"\n`, { mode: 0o755 });
+	}
+	const cellarExecutable = join(owner, "Cellar/fxclaude/0.1.0/bin/fxclaude");
+	await mkdir(dirname(cellarExecutable), { recursive: true });
+	await writeFile(cellarExecutable, "#!/bin/sh\necho 0.1.0\n", { mode: 0o755 });
+	await symlink(cellarExecutable, join(owner, "bin/fxclaude"));
+
+	const originalPath = process.env.PATH;
+	process.env.PATH = `${join(other, "bin")}:${originalPath}`;
+	try {
+		await bridge.updateHomebrewExecutable(join(owner, "bin/fxclaude"));
+	} finally {
+		process.env.PATH = originalPath;
+		await bridge.selectExecutableSource(selectedExecutable);
+	}
+	assert.deepEqual((await readFile(log, "utf8")).trim().split("\n"), [`${owner} upgrade fxclaude`]);
+});
 
 // FXCLAUDE_TEST_EXECUTABLE wins; otherwise use the sibling Swift package's build (`make test` keeps the
 // debug build current) or an fxclaude on PATH.
