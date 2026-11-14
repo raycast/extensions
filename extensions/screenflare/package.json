@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenflare",
+  "title": "Screenflare",
+  "description": "Capture, recognize text, control recordings, and reopen your Screenflare history.",
+  "icon": "screenflare-icon-9bd8e9e3.png",
+  "author": "QIanGua",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "screenshots",
+      "title": "All in One",
+      "subtitle": "Screenflare",
+      "description": "Search all capture, recording, library, and settings actions",
+      "mode": "view",
+      "keywords": [
+        "screenshot",
+        "record",
+        "截图",
+        "录屏"
+      ]
+    },
+    {
+      "name": "all-in-one",
+      "title": "Record or Capture",
+      "subtitle": "Screenflare",
+      "description": "Open the Screenflare capture bar",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Screenflare",
+      "description": "Capture a selected area; press Space to switch to windows",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Screenflare",
+      "description": "Capture a selected window",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Screenflare",
+      "description": "Capture the display under the pointer",
+      "mode": "no-view"
+    },
+    {
+      "name": "scrolling-capture",
+      "title": "Scrolling Capture",
+      "subtitle": "Screenflare",
+      "description": "Capture a scrolling page or thread",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Screenflare",
+      "description": "Recognize and copy text from an area or window on your Mac",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Display",
+      "subtitle": "Screenflare",
+      "description": "Open the display recording selector",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-window",
+      "title": "Record Window",
+      "subtitle": "Screenflare",
+      "description": "Open the window recording selector",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "record-area",
+      "title": "Record Area",
+      "subtitle": "Screenflare",
+      "description": "Open the area recording selector",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "pause-resume-recording",
+      "title": "Pause or Resume Recording",
+      "subtitle": "Screenflare",
+      "description": "Pause the current recording or resume a paused recording",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "Screenflare",
+      "description": "Stop the active recording and open its editor",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-history",
+      "title": "Open Screenshot History",
+      "subtitle": "Screenflare",
+      "description": "Browse and re-edit screenshots in Screenflare",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-recording-history",
+      "title": "Open Recording History",
+      "subtitle": "Screenflare",
+      "description": "Browse editable recording projects in Screenflare",
+      "mode": "no-view"
+    },
+    {
+      "name": "annotate",
+      "title": "Open Image Editor",
+      "subtitle": "Screenflare",
+      "description": "Open the editor, then paste or drop an image to annotate",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Screenflare",
+      "description": "Open Screenflare settings and permissions",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  }
+}
