@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meeting-capture",
+  "title": "Meeting Capture",
+  "description": "Record meeting system audio and microphone to local MP3 files with private on-device transcripts",
+  "icon": "icon.png",
+  "type": "module",
+  "author": "bui_tr_ng_khanh_duy",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "keywords": [
+    "meeting",
+    "recording",
+    "audio",
+    "transcript",
+    "vietnamese"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "outputDirectory",
+      "title": "Recording Folder",
+      "description": "Local folder for timestamped MP3 recordings and plain-text transcripts",
+      "type": "directory",
+      "required": true,
+      "default": "~/Documents/Meeting Capture",
+      "placeholder": "~/Documents/Meeting Capture"
+    },
+    {
+      "name": "transcriptLanguage",
+      "title": "Transcript Language",
+      "description": "Choose the Apple on-device recognition language. Required models are installed automatically after the MP3 is saved.",
+      "type": "dropdown",
+      "required": true,
+      "default": "system-default",
+      "data": [
+        {
+          "title": "Vietnamese",
+          "value": "vietnamese"
+        },
+        {
+          "title": "English",
+          "value": "english"
+        },
+        {
+          "title": "Vietnamese + English",
+          "value": "vietnamese-english"
+        },
+        {
+          "title": "System Default",
+          "value": "system-default"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "start-meeting-capture",
+      "title": "Start Meeting Capture",
+      "description": "Start recording system audio and microphone for a new meeting",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause-meeting-capture",
+      "title": "Pause Meeting Capture",
+      "description": "Pause the active meeting recording and exclude paused time",
+      "mode": "no-view"
+    },
+    {
+      "name": "continue-meeting-capture",
+      "title": "Continue Meeting Capture",
+      "description": "Continue a paused meeting recording using the same output files",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-meeting-capture",
+      "title": "Stop Meeting Capture",
+      "description": "Stop recording, finalize the MP3, and create an on-device transcript",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-meeting-capture",
+      "title": "Toggle Meeting Capture",
+      "description": "Start when idle or stop an active meeting capture",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "eslint src && prettier --check \"src/**/*.ts\" \"*.{js,json,md}\"",
+    "lint:store": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "./script/test.sh"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.10.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}
