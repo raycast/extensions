@@ -184,8 +184,8 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       controller.current?.abort();
       const abort = new AbortController();
       controller.current = abort;
-      // Only the newest translation may touch the view. Being stopped is separate: a stopped
-      // translation still owns the view and clears its own progress row.
+      // Only the newest translation that has not been stopped may touch the view. Once saved,
+      // only being replaced matters: the entry is already in the history.
       const owns = () => controller.current === abort;
       const live = () => owns() && !abort.signal.aborted;
       // Deleting the entry this text came from must not delete the image it still needs.
@@ -207,11 +207,11 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
             onText: (translation) => live() && setJob((job) => job && { ...job, translation }),
           });
         } catch (error) {
-          if (!owns()) return;
+          // Replaced by a newer translation, or stopped: the Stop action already reset the view,
+          // and the search text may have been edited since.
+          if (!live()) return;
           setJob(undefined);
           setSearchText(singleLine(original));
-          // Stopped on purpose: nothing went wrong.
-          if (abort.signal.aborted) return;
           if (error instanceof EngineError && UNAVAILABLE_REASONS.includes(error.code)) {
             setStatus({ available: false, reason: error.code as UnavailableReason });
           } else {
@@ -219,12 +219,7 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
           }
           return;
         }
-        if (!owns()) return;
-        if (abort.signal.aborted) {
-          setJob(undefined);
-          setSearchText(singleLine(original));
-          return;
-        }
+        if (!live()) return;
 
         const entry: Entry = {
           id: randomUUID(),
