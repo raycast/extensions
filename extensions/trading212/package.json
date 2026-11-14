@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trading212",
+  "title": "Trading 212",
+  "description": "View your Trading 212 portfolio, positions with charts, and account history. Read-only.",
+  "icon": "extension-icon.png",
+  "author": "gorolmartin",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "trading212",
+    "trading 212",
+    "portfolio",
+    "stocks",
+    "investing",
+    "dividends",
+    "isa",
+    "broker"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "portfolio",
+      "title": "Portfolio",
+      "subtitle": "Trading 212",
+      "description": "Browse your positions, balance, and allocation.",
+      "mode": "view"
+    },
+    {
+      "name": "portfolio-menu-bar",
+      "title": "Portfolio Menu Bar",
+      "subtitle": "Trading 212",
+      "description": "Show your portfolio value and return in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Trading 212",
+      "description": "Browse orders, dividends, deposits, and transactions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Trading 212 API key with view-only permissions (Account data, Portfolio, History). Create it in Trading 212 → Settings → API; leave order and pie permissions off.",
+      "placeholder": "API key ⋅ View Only"
+    },
+    {
+      "name": "apiSecret",
+      "type": "password",
+      "required": true,
+      "title": "API Secret",
+      "description": "Trading 212 API secret, shown once when you create the key.",
+      "placeholder": "API secret"
+    },
+    {
+      "name": "environment",
+      "type": "dropdown",
+      "required": false,
+      "title": "Environment",
+      "description": "Which Trading 212 environment to connect to.",
+      "default": "live",
+      "data": [
+        {
+          "title": "Live",
+          "value": "live"
+        },
+        {
+          "title": "Demo",
+          "value": "demo"
+        }
+      ]
+    },
+    {
+      "name": "menuBarShowAmount",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar",
+      "label": "Show amount in menu bar",
+      "description": "Show the total balance next to the return in the menu bar.",
+      "default": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
+  }
+}
