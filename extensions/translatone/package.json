@@ -1,0 +1,286 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translatone",
+  "description": "Translate text with the right tone for LinkedIn, email, and chat using free AI providers.",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "ayungavis",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test && bun scripts/check-coverage.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/bun": "^1.4.4",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "TranslaTone",
+      "description": "Translate text with a selected tone and target language.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-selection",
+      "title": "Translate Selection",
+      "subtitle": "TranslaTone",
+      "description": "Replace the selected text with its translation in your default tone. Opens Translate when nothing is selected.",
+      "mode": "no-view"
+    },
+    {
+      "name": "choose-model",
+      "title": "Choose Model",
+      "subtitle": "TranslaTone",
+      "description": "Pick a model from your provider's model list. Overrides the model set in preferences.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-providers",
+      "title": "Manage Providers",
+      "subtitle": "TranslaTone",
+      "description": "Add, edit, test, enable or remove translation providers and choose your primary provider.",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "mainLanguage",
+      "title": "Main Language",
+      "description": "Text in any other language is translated into this one.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        }
+      ]
+    },
+    {
+      "name": "secondLanguage",
+      "title": "Second Language",
+      "description": "Text in your main language is translated into this one.",
+      "type": "dropdown",
+      "required": false,
+      "default": "id",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        }
+      ]
+    },
+    {
+      "name": "defaultTone",
+      "title": "Default Tone",
+      "description": "Tone used by Translate Selection. Translate remembers the last tone you picked.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "LinkedIn",
+          "value": "linkedin"
+        },
+        {
+          "title": "Email",
+          "value": "email"
+        },
+        {
+          "title": "Chat",
+          "value": "chat"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Enter Key",
+      "description": "What ↵ does with a translation. The other action is on ⌘↵.",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste into the previous app",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to clipboard",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
+  "title": "TranslaTone"
+}
