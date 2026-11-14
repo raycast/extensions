@@ -1,15 +1,13 @@
-import { Action, ActionPanel, LocalStorage, showToast, Toast, Form } from "@raycast/api";
-import { STORAGE_WORKSPACE_SLUG_KEY } from "../helpers/keys";
+import { Action, ActionPanel, showToast, Toast, Form } from "@raycast/api";
+import { normalizeWorkspaceSlug } from "../helpers/urls";
 
 function WorkspaceSlugForm({
   onWorkspaceSlugSubmit,
-  token,
 }: {
-  onWorkspaceSlugSubmit: (workspaceSlug: string) => void;
-  token: string;
+  onWorkspaceSlugSubmit: (workspaceSlug: string) => Promise<void>;
 }) {
   async function handleSubmit(values: { workspaceSlug: string }) {
-    const workspaceSlug = values.workspaceSlug?.trim();
+    const workspaceSlug = normalizeWorkspaceSlug(values.workspaceSlug);
 
     if (!workspaceSlug) {
       showToast({
@@ -20,14 +18,12 @@ function WorkspaceSlugForm({
     }
 
     try {
-      const tokenKey = STORAGE_WORKSPACE_SLUG_KEY(token);
-      await LocalStorage.setItem(tokenKey, workspaceSlug);
+      await onWorkspaceSlugSubmit(workspaceSlug);
       showToast({
         style: Toast.Style.Success,
         title: "Workspace saved",
         message: `Workspace: ${workspaceSlug}`,
       });
-      onWorkspaceSlugSubmit(workspaceSlug);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -50,7 +46,7 @@ function WorkspaceSlugForm({
         id="workspaceSlug"
         title="Workspace Slug"
         placeholder="my-workspace"
-        info="You can find your workspace slug in your Plane URL: app.plane.so/my-workspace"
+        info="You can find your workspace slug in your Plane URL: app.plane.so/my-workspace (you can paste the URL)"
       />
     </Form>
   );

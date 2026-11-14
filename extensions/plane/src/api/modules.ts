@@ -1,5 +1,8 @@
 import { Module, ModuleIssue } from "@makeplane/plane-node-sdk";
-import { planeClient } from "./auth";
+import { planeClient, requirePlaneClient } from "./auth";
+import { planeRequest, toPage, workspacePath } from "./request";
+import type { RawPaginated, RawWorkItem } from "./types";
+import { toWorkItemSummary } from "../helpers/work-item-summary";
 
 export type ModuleResponse = {
   data: Module[];
@@ -45,4 +48,28 @@ export async function addWorkItemsToModule({
     },
   });
   return response;
+}
+
+/** Work items in a module. v1.3.1 returns full work items here (the SDK types them as ModuleIssue). */
+export async function getModuleWorkItems({
+  project,
+  moduleId,
+  cursor,
+}: {
+  project: { id: string; identifier: string; name?: string };
+  moduleId: string;
+  cursor?: string;
+}) {
+  const client = requirePlaneClient();
+  const response = await planeRequest<RawPaginated<RawWorkItem>>(
+    workspacePath("projects", project.id, "modules", moduleId, "module-issues"),
+    { query: { per_page: 100, cursor, expand: "state" } },
+  );
+  return toPage(response, (raw) =>
+    toWorkItemSummary(raw, {
+      projectIdentifier: project.identifier,
+      projectName: project.name,
+      workspaceSlug: client.workspaceSlug,
+    }),
+  );
 }
