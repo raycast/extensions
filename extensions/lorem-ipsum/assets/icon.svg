@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="Background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c57bff"/>
+      <stop offset="1" stop-color="#7a29ff"/>
+    </linearGradient>
+    <linearGradient id="Border" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path id="Background" fill="url(#Background)" d="M127.7.3h256c70.7 0 128 57.3 128 128v256c0 70.7-57.3 128-128 128h-256c-70.7 0-128-57.3-128-128v-256C-.3 57.6 57 .3 127.7.3z"/>
+  <g id="Border" opacity=".5">
+    <path fill="url(#Border)" fill-rule="evenodd" d="M127.7.3C57 .3-.3 57.6-.3 128.3v256c0 70.7 57.3 128 128 128h256c70.7 0 128-57.3 128-128v-256c0-70.7-57.3-128-128-128h-256zm0 16c-61.9 0-112 50.1-112 112v256c0 61.9 50.1 112 112 112h256c61.9 0 112-50.1 112-112v-256c0-61.9-50.1-112-112-112h-256z" clip-rule="evenodd"/>
+  </g>
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="30.5">
+    <path d="M112 156h288"/>
+    <path d="M112 232h288"/>
+    <path d="M112 308h288"/>
+    <path d="M112 384h160"/>
+  </g>
+</svg>

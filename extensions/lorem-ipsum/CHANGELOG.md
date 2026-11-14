@@ -1,5 +1,12 @@
 # Lorem Ipsum Changelog
 
+## [New Commands] - {PR_MERGE_DATE}
+
+- New `Generate Markdown` command that generates placeholder content as a Markdown document (headings, paragraphs, lists, blockquotes).
+- New `Generate HTML` command that generates placeholder content as an HTML document.
+- Clear the root search bar after running a command, so the previous input is not kept. Fixes [#26117](https://github.com/raycast/extensions/issues/26117).
+- Modernized the extension icon.
+
 ## [Updates] - 2025-12-17
 
 - Update (dev) dependencies
