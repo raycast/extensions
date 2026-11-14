@@ -36,6 +36,13 @@ export function TaskResult({ initial, prompt }: { initial: TaskRecord; prompt: s
   }, [isLoading]);
 
   const pollError = failures >= MAX_POLL_FAILURES ? error?.message : undefined;
+
+  // The task keeps running on PopNow, so checking again restarts polling instead of submitting a new job.
+  function checkAgain() {
+    setFailures(0);
+    delay.current = FIRST_POLL_MS;
+    revalidate();
+  }
   const done = isFinished(task);
   const assets = (task.output?.assets ?? []).filter((asset) => asset.url && !asset.unavailable);
   const failed = done && task.state !== "succeeded";
@@ -66,6 +73,7 @@ export function TaskResult({ initial, prompt }: { initial: TaskRecord; prompt: s
       }
       actions={
         <ActionPanel>
+          {pollError && <Action title="Check Again" icon={Icon.ArrowClockwise} onAction={checkAgain} />}
           {assets.map((asset, index) => (
             <ActionPanel.Section key={asset.url} title={assets.length > 1 ? `File ${index + 1}` : undefined}>
               <Action title="Save to Downloads" icon={Icon.Download} onAction={() => save(asset, task.taskId, index)} />
