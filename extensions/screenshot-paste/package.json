@@ -78,6 +78,24 @@
       "type": "textfield",
       "required": true,
       "default": "200"
+    },
+    {
+      "name": "displayOrder",
+      "title": "Display Order",
+      "description": "Order of displays in Choose Screen. Left to right follows the arrangement in System Settings → Displays, so it stays the same no matter in which order the displays were connected.",
+      "type": "dropdown",
+      "required": true,
+      "default": "arrangement",
+      "data": [
+        {
+          "title": "Left to right (as arranged in Displays settings)",
+          "value": "arrangement"
+        },
+        {
+          "title": "System order",
+          "value": "system"
+        }
+      ]
     }
   ],
   "scripts": {

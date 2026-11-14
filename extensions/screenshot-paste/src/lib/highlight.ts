@@ -10,6 +10,7 @@ function run(argv) {
   const index = parseInt(argv[0], 10);
   const durationMs = parseInt(argv[1], 10);
   const heartbeatPath = argv[2];
+  const displayLabel = argv[3];
   const app = $.NSApplication.sharedApplication;
   const screens = $.NSScreen.screens;
   const screen = screens.objectAtIndex(Math.min(index, screens.count - 1));
@@ -21,7 +22,7 @@ function run(argv) {
   win.setIgnoresMouseEvents(true);
   win.setBackgroundColor($.NSColor.colorWithSRGBRedGreenBlueAlpha(0.35, 0.45, 1.0, 0.28));
   win.setCollectionBehavior($.NSWindowCollectionBehaviorCanJoinAllSpaces | $.NSWindowCollectionBehaviorTransient);
-  const label = $.NSTextField.labelWithString('' + (index + 1));
+  const label = $.NSTextField.labelWithString(displayLabel);
   label.setFont($.NSFont.boldSystemFontOfSize(220));
   label.setTextColor($.NSColor.whiteColor);
   label.sizeToFit;
@@ -106,12 +107,12 @@ export function stopHighlight(): void {
   void killStrayOverlays();
 }
 
-export function highlightDisplay(displayNumber: number): void {
+export function highlightDisplay(displayNumber: number, displayLabel: number): void {
   killTrackedOverlay();
 
   const child = spawn(
     "/usr/bin/osascript",
-    ["-l", "JavaScript", "-e", HIGHLIGHT_JXA, String(displayNumber - 1), "60000", HEARTBEAT_FILE],
+    ["-l", "JavaScript", "-e", HIGHLIGHT_JXA, String(displayNumber - 1), "60000", HEARTBEAT_FILE, String(displayLabel)],
     { detached: true, stdio: "ignore" },
   );
 

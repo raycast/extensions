@@ -79,6 +79,14 @@ export async function enumerateScreens(): Promise<Screen[]> {
   return screens;
 }
 
+export function sortScreens(screens: readonly Screen[], order: "arrangement" | "system"): Screen[] {
+  const ordered = [...screens];
+  if (order === "arrangement") {
+    ordered.sort((a, b) => a.x - b.x || a.y - b.y || a.displayNumber - b.displayNumber);
+  }
+  return ordered;
+}
+
 export function screenUnderMouse(screens: Screen[]): Screen {
   return screens.find((screen) => screen.underMouse) ?? screens[0];
 }

@@ -1,9 +1,19 @@
-import { Action, ActionPanel, Detail, environment, Icon, launchCommand, LaunchType, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  environment,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HEARTBEAT_FILE, highlightDisplay, killStrayOverlays, stopHighlight } from "./lib/highlight";
-import { enumerateScreens, Screen } from "./lib/screens";
+import { enumerateScreens, Screen, sortScreens } from "./lib/screens";
 import { screenshotFlowErrorMessage } from "./lib/screenshot-flow";
 
 function ignoreFileSystemError(action: () => void): void {
@@ -15,6 +25,7 @@ function ignoreFileSystemError(action: () => void): void {
 }
 
 export default function Command() {
+  const { displayOrder } = getPreferenceValues<Preferences>();
   const [screens, setScreens] = useState<Screen[]>();
   const [loadError, setLoadError] = useState<string>();
   const lastHighlightedDisplay = useRef<number | undefined>(undefined);
@@ -30,7 +41,7 @@ export default function Command() {
   }, []);
 
   const runCapture = useCallback(
-    async (screen: Screen) => {
+    async (screen: Screen, displayLabel: number) => {
       try {
         stopHighlight();
         stopHeartbeat();
@@ -40,7 +51,7 @@ export default function Command() {
           context: { displayNumber: screen.displayNumber },
         });
       } catch (error) {
-        highlightDisplay(screen.displayNumber);
+        highlightDisplay(screen.displayNumber, displayLabel);
         await showFailureToast(error, { title: "Failed to Start Capture" });
       }
     },
@@ -71,9 +82,9 @@ export default function Command() {
         }
 
         if (items.length === 1) {
-          void runCapture(items[0]);
+          void runCapture(items[0], 1);
         } else {
-          setScreens(items);
+          setScreens(sortScreens(items, displayOrder));
         }
       })
       .catch((error) => {
@@ -87,14 +98,14 @@ export default function Command() {
     return () => {
       active = false;
     };
-  }, [runCapture]);
+  }, [displayOrder, runCapture]);
 
   useEffect(() => {
     const displayNumber = screens?.[0]?.displayNumber;
 
     if (displayNumber !== undefined && lastHighlightedDisplay.current === undefined) {
       lastHighlightedDisplay.current = displayNumber;
-      highlightDisplay(displayNumber);
+      highlightDisplay(displayNumber, 1);
     }
   }, [screens]);
 
@@ -118,22 +129,23 @@ export default function Command() {
         }
 
         const displayNumber = Number(id);
-        if (lastHighlightedDisplay.current !== displayNumber) {
+        const index = screens.findIndex((screen) => screen.displayNumber === displayNumber);
+        if (index >= 0 && lastHighlightedDisplay.current !== displayNumber) {
           lastHighlightedDisplay.current = displayNumber;
-          highlightDisplay(displayNumber);
+          highlightDisplay(displayNumber, index + 1);
         }
       }}
     >
-      {screens.map((screen) => (
+      {screens.map((screen, index) => (
         <List.Item
           id={String(screen.displayNumber)}
           key={screen.displayNumber}
-          title={screen.displayNumber + " · " + (screen.name || "Display " + screen.displayNumber)}
+          title={index + 1 + " · " + (screen.name || "Display " + (index + 1))}
           subtitle={`${screen.width}x${screen.height}`}
           icon={Icon.Desktop}
           actions={
             <ActionPanel>
-              <Action title="Capture & Paste" icon={Icon.Camera} onAction={() => runCapture(screen)} />
+              <Action title="Capture & Paste" icon={Icon.Camera} onAction={() => runCapture(screen, index + 1)} />
             </ActionPanel>
           }
         />
