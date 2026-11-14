@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-usage",
+  "title": "Claude Code Usage",
+  "description": "Consumo do Claude Code: limites do plano (janela de 5h e semanal), tokens e custo equivalente por dia, projeto e modelo.",
+  "icon": "command-icon.png",
+  "author": "luan_andrade",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "usage",
+      "title": "Uso do Claude Code",
+      "subtitle": "Claude Code",
+      "description": "Limites do plano, tokens e custo equivalente por dia, projeto e modelo.",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Uso na Barra",
+      "subtitle": "Claude Code",
+      "description": "Mostra a janela de 5 horas e o limite semanal na barra.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "claudeDir",
+      "type": "textfield",
+      "required": false,
+      "title": "Pasta do Claude Code",
+      "description": "Onde ficam .claude.json e a pasta projects. Deixe vazio para usar a pasta do usuario.",
+      "default": ""
+    },
+    {
+      "name": "currency",
+      "type": "dropdown",
+      "required": false,
+      "title": "Moeda do custo equivalente",
+      "description": "O custo e sempre calculado em USD nos precos de lista da API; BRL apenas converte para leitura.",
+      "default": "USD",
+      "data": [
+        {
+          "title": "USD (precos de lista da API)",
+          "value": "USD"
+        },
+        {
+          "title": "BRL (converte com a taxa abaixo)",
+          "value": "BRL"
+        }
+      ]
+    },
+    {
+      "name": "usdToBrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Taxa USD para BRL",
+      "description": "Usada apenas quando a moeda escolhida e BRL.",
+      "default": "5.40"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "verify:sync": "esbuild .verify/sync.ts --bundle --platform=node --target=node20 --format=cjs --alias:@raycast/api=./.verify/stub-api.js --outfile=.verify/out/sync.cjs --log-level=warning && node .verify/out/sync.cjs"
+  }
+}
