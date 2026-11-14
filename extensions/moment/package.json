@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moment",
+  "title": "Moment",
+  "description": "Start a focus session in Moment, pause or resume it, add time, stop it, and see how long is left.",
+  "icon": "icon.png",
+  "author": "milosz_falinski",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "focus",
+    "focus timer",
+    "timer",
+    "deep work",
+    "break"
+  ],
+  "commands": [
+    {
+      "name": "start-focus",
+      "title": "Start Focus",
+      "subtitle": "Moment",
+      "description": "Start a focus session in Moment, for the minutes you enter or the timer's own length.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "minutes",
+          "type": "text",
+          "placeholder": "Minutes",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "begin",
+        "session"
+      ]
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "subtitle": "Moment",
+      "description": "Pause the focus session or break in progress.",
+      "mode": "no-view",
+      "keywords": [
+        "hold"
+      ]
+    },
+    {
+      "name": "resume-timer",
+      "title": "Resume Timer",
+      "subtitle": "Moment",
+      "description": "Resume the paused focus session or break.",
+      "mode": "no-view",
+      "keywords": [
+        "continue",
+        "unpause"
+      ]
+    },
+    {
+      "name": "add-time",
+      "title": "Add Time",
+      "subtitle": "Moment",
+      "description": "Add minutes to the focus session or break in progress: the minutes you enter, or 5.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "minutes",
+          "type": "text",
+          "placeholder": "Minutes",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "extend",
+        "more time"
+      ]
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Moment",
+      "description": "End the focus session or break in progress.",
+      "mode": "no-view",
+      "keywords": [
+        "end",
+        "cancel"
+      ]
+    },
+    {
+      "name": "time-left",
+      "title": "Time Left",
+      "subtitle": "Moment",
+      "description": "Show how long is left in the focus session or break in progress.",
+      "mode": "no-view",
+      "keywords": [
+        "remaining",
+        "how long",
+        "check",
+        "status"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "start-focus",
+      "title": "Start Focus",
+      "description": "Start a focus session in Moment. Moment never replaces a focus session or break in progress."
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "description": "Pause the focus session or break in progress."
+    },
+    {
+      "name": "resume-timer",
+      "title": "Resume Timer",
+      "description": "Resume the paused focus session or break."
+    },
+    {
+      "name": "add-time",
+      "title": "Add Time",
+      "description": "Add minutes to the focus session or break in progress."
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "End the focus session or break in progress."
+    },
+    {
+      "name": "time-left",
+      "title": "Time Left",
+      "description": "Read the timer: whether a focus session or break is running or paused, the time left and its length."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \"src/**/*.test.ts\"",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
