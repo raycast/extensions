@@ -1,0 +1,51 @@
+[
+  {
+    "player_id": "living-room",
+    "provider": "sendspin--fixture",
+    "type": "player",
+    "name": "Living Room",
+    "available": true,
+    "supported_features": ["volume_set", "volume_mute", "set_members", "next_previous"],
+    "playback_state": "playing",
+    "volume_level": 42,
+    "volume_muted": false,
+    "group_members": [],
+    "can_group_with": ["kitchen"],
+    "active_source": "whole-home",
+    "active_group": "whole-home",
+    "synced_to": null,
+    "hide_in_ui": false,
+    "private": false
+  },
+  {
+    "player_id": "kitchen",
+    "provider": "cast--fixture",
+    "type": "player",
+    "name": "Kitchen",
+    "available": true,
+    "supported_features": ["volume_set"],
+    "playback_state": "paused",
+    "volume_level": 31,
+    "volume_muted": null,
+    "group_members": [],
+    "can_group_with": [],
+    "active_source": "spotify-connect",
+    "active_group": null,
+    "synced_to": null,
+    "hide_in_ui": false,
+    "private": false
+  },
+  {
+    "player_id": "private-browser",
+    "provider": "webplayer--fixture",
+    "type": "player",
+    "name": "Private Browser",
+    "available": true,
+    "supported_features": [],
+    "playback_state": "idle",
+    "group_members": [],
+    "can_group_with": [],
+    "hide_in_ui": false,
+    "private": true
+  }
+]
