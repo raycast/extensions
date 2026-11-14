@@ -1,0 +1,171 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gosavetool",
+  "title": "GoSaveTool Text and Image Tools",
+  "description": "Count words and characters, check social media limits, change text case, make URL slugs, and convert or compress images to WebP, JPG and PNG. Works offline, nothing is uploaded.",
+  "icon": "icon.png",
+  "author": "codivalabtech",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Media"
+  ],
+  "keywords": [
+    "word count",
+    "character counter",
+    "reading time",
+    "case converter",
+    "slug",
+    "camelcase",
+    "webp",
+    "image compressor",
+    "convert image"
+  ],
+  "commands": [
+    {
+      "name": "count-words",
+      "title": "Count Words and Characters",
+      "description": "Words, characters, sentences, reading time and social media limits of the selected text or the clipboard.",
+      "mode": "view",
+      "keywords": [
+        "word count",
+        "character count",
+        "reading time"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or selection / clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "check-social-limits",
+      "title": "Check Social Media Limits",
+      "description": "See if the text fits an X post, Instagram caption, TikTok caption, YouTube title, SEO title or meta description.",
+      "mode": "view",
+      "keywords": [
+        "twitter",
+        "instagram",
+        "tiktok",
+        "youtube",
+        "seo"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or selection / clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "change-case",
+      "title": "Change Case",
+      "description": "Turn the selected text or the clipboard into UPPER, lower, Title, Sentence, camelCase, PascalCase, snake_case, kebab-case or a URL slug.",
+      "mode": "view",
+      "keywords": [
+        "uppercase",
+        "lowercase",
+        "title case",
+        "camelcase",
+        "snake case",
+        "kebab case"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or selection / clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "make-slug",
+      "title": "Make URL Slug",
+      "description": "Copy a clean URL slug of the selected text or the clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "slug",
+        "url",
+        "permalink"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or selection / clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "compress-image",
+      "title": "Compress Image",
+      "description": "Make PNG, JPG and WebP files smaller and optionally resize them, on your computer.",
+      "mode": "view",
+      "keywords": [
+        "image compressor",
+        "optimize",
+        "resize"
+      ]
+    },
+    {
+      "name": "convert-image",
+      "title": "Convert Image Format",
+      "description": "Convert images between PNG, JPG and WebP, on your computer.",
+      "mode": "view",
+      "keywords": [
+        "webp",
+        "png",
+        "jpg",
+        "jpeg",
+        "converter"
+      ]
+    },
+    {
+      "name": "search-online-tools",
+      "title": "Search Online Tools",
+      "description": "Open the free GoSaveTool online tools for subtitles, images and text.",
+      "mode": "view",
+      "keywords": [
+        "gosavetool",
+        "online tools"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@jsquash/jpeg": "^1.6.0",
+    "@jsquash/oxipng": "^2.3.0",
+    "@jsquash/png": "^3.1.1",
+    "@jsquash/webp": "^1.5.0",
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\n\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node test/run.mjs"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  }
+}
