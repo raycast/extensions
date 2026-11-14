@@ -1,0 +1,353 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "layoutfixer",
+  "title": "LayoutFixer",
+  "description": "Fix English and Persian text typed with the wrong keyboard layout, check spelling, and tidy up Persian text.",
+  "icon": "extension-icon.png",
+  "author": "macan",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "persian",
+    "farsi",
+    "keyboard",
+    "layout",
+    "spelling",
+    "\u0641\u0627\u0631\u0633\u06cc"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "setup",
+      "title": "Setup and Shortcuts",
+      "description": "Check that everything is ready, set up hotkeys and try it out.",
+      "mode": "view"
+    },
+    {
+      "name": "fix-selection",
+      "title": "Fix Selected Text",
+      "description": "Retype the selected text in the right layout (English \u21c4 Persian). With nothing selected, fixes the current line.",
+      "mode": "no-view"
+    },
+    {
+      "name": "undo-last-fix",
+      "title": "Undo Last Fix",
+      "description": "Undo the last fix and switch the keyboard layout back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fix-clipboard",
+      "title": "Fix Clipboard",
+      "description": "Fix the layout of the text on the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fix-spelling",
+      "title": "Check Spelling",
+      "description": "Find spelling mistakes in the selected English or Persian text and pick corrections.",
+      "mode": "view"
+    },
+    {
+      "name": "finglish-to-persian",
+      "title": "Finglish to Persian",
+      "description": "Convert Persian written in Latin letters (salam khobi) to Persian script.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-up-persian",
+      "title": "Clean up Persian Text",
+      "description": "Fix half-spaces, punctuation, \u06cc/\u06a9 and digits in the selected Persian text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "persian-tools",
+      "title": "Persian Tools",
+      "description": "Numbers to Persian words, Jalali \u21c4 Gregorian dates, Persian \u21c4 Latin digits.",
+      "mode": "view"
+    },
+    {
+      "name": "ai-tools",
+      "title": "AI Writing Tools",
+      "description": "Fix, rewrite (formal or casual Persian), shorten or translate text with Raycast AI.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-text",
+      "title": "Convert Text",
+      "description": "Type or paste text and preview every fix as you go.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-layout",
+      "title": "Switch Keyboard Layout",
+      "description": "Toggle between your English and Persian keyboard layouts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Keyboard Layout in Menu Bar",
+      "description": "Shows your current keyboard layout in the menu bar, with quick actions.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "menuBarStyle",
+          "title": "Show",
+          "description": "What to show in the menu bar.",
+          "type": "dropdown",
+          "required": false,
+          "default": "text",
+          "data": [
+            {
+              "title": "Layout Name (EN / \u0641\u0627)",
+              "value": "text"
+            },
+            {
+              "title": "Icon and Layout Name",
+              "value": "both"
+            },
+            {
+              "title": "Icon Only",
+              "value": "icon"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fix-history",
+      "title": "Fix History",
+      "description": "Recent fixes, to copy or paste again. Turn it on in the extension settings.",
+      "mode": "view"
+    },
+    {
+      "name": "personal-dictionary",
+      "title": "Personal Dictionary",
+      "description": "Words that are never converted and never marked as misspelled.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "persianLayout",
+      "title": "Persian Layout",
+      "description": "The Persian keyboard layout you type with. Automatic reads it from your Mac's input sources.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "Persian \u2013 Standard (ISIRI 2901)",
+          "value": "isiri2901"
+        },
+        {
+          "title": "Persian \u2013 Legacy",
+          "value": "persian"
+        }
+      ]
+    },
+    {
+      "name": "mode",
+      "title": "Fix Mode",
+      "description": "Smart only converts words that look mistyped, so names like github are left alone.",
+      "type": "dropdown",
+      "required": false,
+      "default": "smart",
+      "data": [
+        {
+          "title": "Smart",
+          "value": "smart"
+        },
+        {
+          "title": "Convert Everything",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "name": "autoSelect",
+      "title": "When Nothing Is Selected",
+      "description": "Fix Selected Text can select the text before the cursor itself, so you don't have to.",
+      "type": "dropdown",
+      "required": false,
+      "default": "line",
+      "data": [
+        {
+          "title": "Fix the Current Line",
+          "value": "line"
+        },
+        {
+          "title": "Fix the Last Word",
+          "value": "word"
+        },
+        {
+          "title": "Do Nothing",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "fallbackToAll",
+      "title": "Fixing",
+      "label": "Convert the whole selection when no word looks wrong",
+      "description": "Only for text you selected yourself.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "switchLayout",
+      "label": "Switch the keyboard layout after fixing",
+      "description": "So the next words come out right.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "capsLock",
+      "label": "Fix text typed with Caps Lock on (hELLO \u2192 Hello)",
+      "description": "Also reads SGHL as sghl when looking for Persian.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "autoSpell",
+      "label": "Correct obvious spelling mistakes in converted words",
+      "description": "Only applies a correction when one is clearly the most likely.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "persianDigits",
+      "label": "Type digits as Persian (\u06f1\u06f2\u06f3) when converting to Persian",
+      "description": "Turn off to keep 123.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "cleanupAfterFix",
+      "label": "Clean up Persian text after converting to Persian",
+      "description": "Uses the Persian clean-up options below.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "restoreClipboard",
+      "title": "Behavior",
+      "label": "Restore the clipboard after pasting",
+      "description": "Pasting the fixed text goes through the clipboard; this puts back what was there.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showPreview",
+      "label": "Show the fixed text in the HUD",
+      "description": "Otherwise only says which language it was converted to.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "history",
+      "label": "Keep a history of fixes",
+      "description": "The last 100 fixes, stored only on this Mac. Off by default.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "englishSpeller",
+      "title": "English Spell Checker",
+      "description": "Persian spelling always uses LayoutFixer's built-in Persian word list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "macos",
+      "data": [
+        {
+          "title": "macOS Spell Checker",
+          "value": "macos"
+        },
+        {
+          "title": "Built-in Word List",
+          "value": "builtin"
+        }
+      ]
+    },
+    {
+      "name": "cleanupHalfSpace",
+      "title": "Persian Clean-up",
+      "label": "Half-spaces: \u0645\u06cc\u200c\u062e\u0648\u0627\u0647\u0645, \u06a9\u062a\u0627\u0628\u200c\u0647\u0627, \u0628\u0632\u0631\u06af\u200c\u062a\u0631",
+      "description": "Joins \u0645\u06cc / \u0646\u0645\u06cc, \u0647\u0627 / \u0647\u0627\u06cc and \u062a\u0631 / \u062a\u0631\u06cc\u0646 with a half-space.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "cleanupPunctuation",
+      "label": "Persian punctuation: \u060c \u061b \u061f \u00ab\u00bb",
+      "description": "Next to Persian words only. Also removes the space before punctuation.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "cleanupDigits",
+      "label": "Persian digits in Persian sentences",
+      "description": "URLs and English words keep their digits.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "cleanupSpaces",
+      "label": "Extra spaces and kashida (\u0640)",
+      "description": "Collapses repeated spaces and removes stretched letters.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ignoredWords",
+      "title": "Ignored Words",
+      "description": "Comma-separated words that are never converted or marked as misspelled, on top of the Personal Dictionary.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "layouts": "swift scripts/gen-layouts.swift > src/lib/layout-data.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
