@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alter-actions",
+  "title": "Alter Actions",
+  "description": "Run your saved Alter actions with selected text, clipboard text, or a custom prompt after reviewing the input. Requires the Alter app and a configured account.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "run-action",
+      "title": "Run Alter Action",
+      "description": "Choose a saved Alter callback, prepare input, and review it before opening the action in Alter.",
+      "mode": "view",
+      "subtitle": "Alter"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  }
+}
