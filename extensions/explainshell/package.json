@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "explainshell",
+  "title": "Shell Command Explainer",
+  "description": "Match each argument of a shell command to its man page help text, using explainshell.com",
+  "icon": "icon.png",
+  "author": "benjaminkifle",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "explain",
+      "title": "Explain Command",
+      "subtitle": "explainshell.com",
+      "description": "Type a shell command and see the help text for each of its arguments",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.0",
+    "@raycast/utils": "^2.3.3",
+    "node-html-markdown": "^2.0.0",
+    "node-html-parser": "^6.1.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/parse.test.ts"
+  }
+}
