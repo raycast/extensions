@@ -1,0 +1,13 @@
+id,method,description,quantity,combination,limit_ratio,limit_abs_mm,applies,default_floor,default_roof,reference,status
+EN-1,EN,Instantaneous deflection (characteristic),w_inst,Characteristic,300,0,Span,Yes,Yes,EN 1995-1-1 7.2 Table 7.2 (range l/300-l/500) - value per NA,VERIFY NA value
+EN-2,EN,Net final deflection,w_net_fin,Quasi-permanent+creep,250,0,Span,Yes,Yes,EN 1995-1-1 7.2 Table 7.2 (range l/250-l/350),VERIFY NA value
+EN-3,EN,Final deflection,w_fin,Characteristic+creep,150,0,Span,Yes,Yes,EN 1995-1-1 7.2 Table 7.2 (range l/150-l/300),VERIFY NA value
+EN-4,EN,Cantilever instantaneous,w_inst,Characteristic,150,0,Cantilever,Yes,Yes,EN 1995-1-1 Table 7.2 cantilever (l/150-l/250),VERIFY NA value
+EN-5,EN,Cantilever net final,w_net_fin,Quasi-permanent+creep,125,0,Cantilever,Yes,Yes,EN 1995-1-1 Table 7.2 cantilever (l/125-l/175),VERIFY NA value
+EN-6,EN,Cantilever final,w_fin,Characteristic+creep,75,0,Cantilever,Yes,Yes,EN 1995-1-1 Table 7.2 cantilever (l/75-l/150),VERIFY NA value
+NL-1,NL,Floors carrying crack-sensitive partitions,w_bij,Frequent,500,0,Span,No,No,NEN-EN 1990/NB A1.4.3 (values from user reference),VERIFY
+NL-2,NL,Other floors and roofs intensively used by people,w_bij,Frequent,333.333,0,Span,Yes,No,NEN-EN 1990/NB A1.4.3 - 3/1000 (user reference),VERIFY
+NL-3,NL,Other roofs,w_bij,Characteristic,250,0,Span,No,Yes,NEN-EN 1990/NB A1.4.3 (user reference),VERIFY
+NL-4,NL,Cantilevers - absolute,w_bij,Characteristic,0,10,Cantilever,Yes,Yes,NEN-EN 1990/NB (user reference),VERIFY
+NL-5,NL,Appearance - net final deflection,w_net_fin,Quasi-permanent+creep,250,0,Span,Yes,Yes,NEN-EN 1990/NB A1.4.3 (user reference),VERIFY
+NL-6,NL,Floors carrying partition walls - absolute,w_bij,Frequent,0,15,Span,No,No,NEN-EN 1990/NB (user reference),VERIFY

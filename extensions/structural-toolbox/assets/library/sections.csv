@@ -1,0 +1,38 @@
+id,family,shape,b,h,d,t,tw,tf,r,A,Iy,Iz,Iyz,Wy,Wz,Wply,Wplz,J,Iw,Ay,Az,mass,cy,cz,source,notes
+Sawn 38x89,Sawn,rectangle,38,89,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 38x140,Sawn,rectangle,38,140,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 45x95,Sawn,rectangle,45,95,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 45x145,Sawn,rectangle,45,145,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 45x170,Sawn,rectangle,45,170,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 45x195,Sawn,rectangle,45,195,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 45x220,Sawn,rectangle,45,220,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 45x245,Sawn,rectangle,45,245,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 71x171,Sawn,rectangle,71,171,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 71x196,Sawn,rectangle,71,196,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 71x221,Sawn,rectangle,71,221,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 71x246,Sawn,rectangle,71,246,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 71x271,Sawn,rectangle,71,271,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Sawn 71x300,Sawn,rectangle,71,300,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 90x270,Glulam,rectangle,90,270,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 90x315,Glulam,rectangle,90,315,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 115x315,Glulam,rectangle,115,315,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 115x405,Glulam,rectangle,115,405,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 140x450,Glulam,rectangle,140,450,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 160x540,Glulam,rectangle,160,540,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+Glulam 200x630,Glulam,rectangle,200,630,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+LVL 45x200,LVL,rectangle,45,200,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,Kerto-S on edge
+LVL 45x260,LVL,rectangle,45,260,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+LVL 45x300,LVL,rectangle,45,300,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+LVL 63x300,LVL,rectangle,63,300,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+LVL 75x360,LVL,rectangle,75,360,,,,,,,,,,,,,,,,,,,,,User EN1995 reference: trade size preset,
+IPE 160,IPE,i,82,160,,,5,7.4,9,2010.0000000000002,8690000,680000,,109000,17000,124000,26000,35400.0,4000000000.0,,,15.8,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 180,IPE,i,91,180,,,5.3,8,9,2390.0,13170000,1010000,,146000,22000,166000,35000,47300.00000000001,7500000000.0,,,18.8,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 200,IPE,i,100,200,,,5.6,8.5,12,2850.0,19430000,1420000,,194000,28000,221000,45000,69200.0,13100000000.0,,,22.4,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 220,IPE,i,110,220,,,5.9,9.2,12,3340.0,27720000,2050000,,252000,37000,285000,58000,90300.0,22800000000.0,,,26.2,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 240,IPE,i,120,240,,,6.2,9.8,15,3910.0,38920000,2840000,,324000,47000,367000,74000,130000,37600000000.0,,,30.7,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 270,IPE,i,135,270,,,6.6,10.2,15,4590.0,57900000,4200000,,429000,62000,484000,97000,159000.0,70800000000.0,,,36.1,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 300,IPE,i,150,300,,,7.1,10.7,15,5380.0,83560000,6040000,,557000,81000,628000,125000,199000.0,126000000000.0,,,42.2,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 400,IPE,i,180,400,,,8.6,13.5,20,8410.0,230150000,13170000,,1151000,146000,1301000,228000,497000.0,492000000000.0,,,66.3,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 450,IPE,i,190,450,,,9.4,14.6,20,9850.0,335970000,16750000,,1493000,176000,1695000,276000,650000,794000000000.0,,,77.6,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 500,IPE,i,200,500,,,10.2,16,20,11500,480170000,21410000,,1921000,214000,2186000,335000,871000.0,1250000000000.0,,,90.7,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.
+IPE 600,IPE,i,220,600,,,12,19,20,15400,909520000,33840000,,3032000,308000,3471000,483000,1540000,2860000000000.0,,,122,,,https://www.britishsteel.co.uk/wp-content/uploads/2025/08/british-steel-european-sections-product-range.pdf,British Steel published rounded values. Schematic drawing omits root fillets; catalogue properties include section geometry.

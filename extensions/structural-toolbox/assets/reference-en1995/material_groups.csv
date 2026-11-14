@@ -1,0 +1,11 @@
+group,kmod_class,kdef_class,gM_key,kcr_key,beta_c,k_m,k_n,kc90_cont,kc90_disc,kc90_disc_lmax,kh_bend_ref,kh_bend_exp,kh_bend_max,kh_tens_mode,kh_tens_ref,kh_tens_exp,kh_tens_max,embed_rule,k90_a,reference,notes
+Softwood,Solid,Solid,gM_solid,kcr_solid,0.2,0.7,5.0,1.25,1.5,0,150,0.2,1.3,dim,150,0.2,1.3,Timber,1.35,EN 1995-1-1 3.2(3); 6.1.5(4); 6.1.6(2); 6.1.7(2); (6.29); (6.63); (8.33),kh only if rho_k <= 700 kg/m3
+Hardwood,Solid,Solid,gM_solid,kcr_solid,0.2,0.7,5.0,1.0,1.0,0,150,0.2,1.3,dim,150,0.2,1.3,Timber,0.90,EN 1995-1-1 (kc90 enhancement only given for softwood),
+Glulam,Solid,Solid,gM_glulam,kcr_glulam,0.1,0.7,6.5,1.5,1.75,400,600,0.1,1.1,dim,600,0.1,1.1,Timber,1.35,EN 1995-1-1 3.3(3); 6.1.5(4),kc90 discrete 1.75 only if bearing length l <= 400 mm
+LVL-P,Solid,Solid,gM_lvl,kcr_lvl,0.1,0.7,4.5,1.0,1.0,0,300,-1,1.2,length,3000,-1,1.1,Timber,1.30,EN 1995-1-1 3.4(3)(4) - exponent s from material column lvl_s; tension uses length factor kl=(3000/l)^(s/2),no kc90 enhancement for LVL in EN 1995-1-1
+LVL-C,Solid,Solid,gM_lvl,kcr_lvl,0.1,0.7,4.5,1.0,1.0,0,300,-1,1.2,length,3000,-1,1.1,Timber,1.30,EN 1995-1-1 3.4,
+CLT,CLT,CLT,gM_clt,kcr_one,0.1,0.7,5.0,1.0,1.0,0,600,0,1.0,dim,600,0,1.0,Timber,1.35,CLT not covered by EN 1995-1-1:2004 - product ETA / EN 16351; kmod and kdef per ETA,kh not applied
+OSB3,OSB3,OSB3,gM_osb,kcr_one,0,1.0,0,1.0,1.0,0,0,0,1.0,dim,0,0,1.0,OSB,0,EN 1995-1-1 Tables 2.3 / 3.1 / 3.2; 8.3.1.3 (8.22),
+Plywood,Plywood3,Plywood3,gM_plywood,kcr_one,0,1.0,0,1.0,1.0,0,0,0,1.0,dim,0,0,1.0,Plywood,0,EN 1995-1-1 Tables 2.3 / 3.1 / 3.2 (EN 636-3); 8.3.1.3 (8.20),
+Particleboard,Particle5,Particle5,gM_particle,kcr_one,0,1.0,0,1.0,1.0,0,0,0,1.0,dim,0,0,1.0,OSB,0,EN 1995-1-1 Tables 3.1 / 3.2 (P5),embedment of particleboard per (8.22) as OSB
+CementBoard,Particle5,Particle5,gM_particle,kcr_one,0,1.0,0,1.0,1.0,0,0,0,1.0,dim,0,0,1.0,OSB,0,VERIFY - cement-bonded board not in EN 1995-1-1; P5 factors assumed,assumption flagged
