@@ -19,6 +19,21 @@
 			"title": "fxCodex",
 			"description": "Manage fxCodex workspaces, application, and executable",
 			"mode": "view"
+		},
+		{
+			"name": "open-link",
+			"title": "Open Link in Workspace",
+			"disabledByDefault": true,
+			"description": "Deliver a codex:// link to one workspace's Codex instance",
+			"mode": "view",
+			"arguments": [
+				{
+					"name": "url",
+					"placeholder": "Link",
+					"type": "text",
+					"required": false
+				}
+			]
 		}
 	],
 	"tools": [],
