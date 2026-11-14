@@ -63,6 +63,13 @@ export interface VersionOutput {
 	version: string;
 }
 
+export interface OpenURLOutput {
+	workspaceName: string;
+	workspaceID: string;
+	processID: number;
+	delivery: "apple-event" | "launch";
+}
+
 export interface UpdateResult {
 	outcome: "updated" | "already-current";
 	previousVersion: string;

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-export const fallbackVersion = "0.2.1";
+export const fallbackVersion = "0.3.1";
 export const releaseRepository = "CaptureContext/fxcodex";
 export const releaseArtifactName = "fxcodex-universal-apple-darwin";
 
