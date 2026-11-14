@@ -13,9 +13,10 @@ import {
   savedDetachedLogin,
   startDetachedLogin,
 } from "./core/login";
-import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
+import { MOCK_FOLDERS, MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
 import { isSharedWithMe, listedUnder, SHARED_WITH_ME, withoutDuplicates } from "./shared-items";
 import { itemKey } from "./format";
+import { ListedFolders, VaultFolder, vaultFolders, withFolderPaths } from "./folders";
 import { generateTotp, parseOtpauthUri } from "./totp";
 import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultSharing } from "./types";
 
@@ -257,6 +258,26 @@ async function listItemShares(): Promise<string[]> {
   }
 }
 
+/** A vault's folders, empty ones included, or nothing when they couldn't be listed: its items still show then. */
+async function listFoldersOf(shareId: string, vaultName: string): Promise<VaultFolder[] | undefined> {
+  try {
+    return vaultFolders(shareId, await listingCommands(async () => (await getAdapter()).listFolders(shareId)));
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+    console.error(`Failed to list folders of vault ${vaultName}: ${errorMessage(error)}`);
+    return undefined;
+  }
+}
+
+/** A vault's items, with the path of their folder, and its folders, which pass-cli lists apart, at the same time. */
+async function listVaultContents(shareId: string, vaultName: string) {
+  const [items, folders] = await Promise.all([
+    listingCommands(() => listItemsFromVault(shareId, vaultName)),
+    listFoldersOf(shareId, vaultName),
+  ]);
+  return { items: folders ? withFolderPaths(items, folders) : items, folders };
+}
+
 /** A vault whose items couldn't be listed. */
 export interface VaultFailure {
   vault: Vault;
@@ -281,13 +302,25 @@ const vaultSources = (vaults: Vault[]): ItemSource[] =>
 const sharedSources = (shareIds: string[]): ItemSource[] =>
   shareIds.map((shareId) => ({ shareId, vault: SHARED_WITH_ME }));
 
-async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
+async function listItemsOfSources(
+  sources: ItemSource[],
+): Promise<{ items: Item[]; failedVaults: VaultFailure[]; folders: ListedFolders }> {
   const failures = new Map<string, VaultFailure>();
+  const folders: ListedFolders = { shareIds: [], folders: [] };
   const listSource = async ({ shareId, vault }: ItemSource): Promise<Item[]> => {
     try {
-      const items = await listItemsFromVault(shareId, vault.name);
-      // A shared item is only reachable through its own share, whichever share pass-cli prints.
-      return isSharedWithMe(vault) ? items.map((item) => ({ ...item, shareId, sharedWithMe: true })) : items;
+      if (isSharedWithMe(vault)) {
+        // A shared item is only reachable through its own share, whichever share pass-cli prints. Its folder, if any,
+        // is in someone else's vault.
+        const items = await listingCommands(() => listItemsFromVault(shareId, vault.name));
+        return items.map((item) => ({ ...item, shareId, sharedWithMe: true }));
+      }
+      const contents = await listVaultContents(shareId, vault.name);
+      if (contents.folders) {
+        folders.shareIds.push(shareId);
+        folders.folders.push(...contents.folders);
+      }
+      return contents.items;
     } catch (error) {
       // An ended session concerns every vault, so it fails the whole listing.
       if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
@@ -300,8 +333,10 @@ async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[
       return [];
     }
   };
-  const itemsPerSource = await Promise.all(sources.map((source) => listingCommands(() => listSource(source))));
-  return { items: itemsPerSource.flat(), failedVaults: Array.from(failures.values()) };
+  // Each command waits for its turn among the listing commands, rather than each vault: a vault lists its items and
+  // its folders at once.
+  const itemsPerSource = await Promise.all(sources.map(listSource));
+  return { items: itemsPerSource.flat(), failedVaults: Array.from(failures.values()), folders };
 }
 
 export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Item[]> {
@@ -313,7 +348,7 @@ export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Ite
   const knownVaults = vaults ?? (await listVaults());
   if (shareId) {
     const vault = knownVaults.find((candidate) => candidate.shareId === shareId);
-    return listingCommands(() => listItemsFromVault(shareId, vault?.name ?? "Unknown Vault"));
+    return (await listVaultContents(shareId, vault?.name ?? "Unknown Vault")).items;
   }
 
   return (await listItemsOfSources(vaultSources(knownVaults))).items;
@@ -322,13 +357,20 @@ export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Ite
 /**
  * Lists vaults once and reuses them for the item listing, instead of listing vaults twice. Items shared with the user
  * on their own come with them, under Shared with Me, which is added to the vaults when there are any. Vaults whose
- * items couldn't be listed are reported rather than thrown, so the other vaults still load.
+ * items couldn't be listed are reported rather than thrown, so the other vaults still load. The vaults' folders come
+ * with them, empty ones included, for the vaults whose folders could be listed.
  */
-export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: Item[]; failedVaults: VaultFailure[] }> {
+export async function listVaultsAndItems(): Promise<{
+  vaults: Vault[];
+  items: Item[];
+  failedVaults: VaultFailure[];
+  folders: ListedFolders;
+}> {
   if (USE_MOCK_DATA) {
     const items = await listItems();
     const vaults = items.some((item) => item.sharedWithMe) ? [...MOCK_VAULTS, SHARED_WITH_ME] : MOCK_VAULTS;
-    return { vaults, items, failedVaults: [] };
+    const folders = { shareIds: MOCK_VAULTS.map((vault) => vault.shareId), folders: MOCK_FOLDERS };
+    return { vaults, items, failedVaults: [], folders };
   }
 
   // The vaults' items and the shared ones each start as soon as their shares are known, which can take seconds for the
@@ -342,7 +384,7 @@ export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: It
     (error: unknown) => {
       // A failure only concerns Shared with Me.
       if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
-      return { items: [], failedVaults: [{ vault: SHARED_WITH_ME, message: errorMessage(error) }] };
+      return { items: [] as Item[], failedVaults: [{ vault: SHARED_WITH_ME, message: errorMessage(error) }] };
     },
   );
   const [own, shared] = await Promise.all([ownListing, sharedListing]);
@@ -350,7 +392,12 @@ export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: It
   const failures = [...own.failedVaults, ...shared.failedVaults];
   // Shared with Me also shows when its items failed to load, so that the ones known already stay.
   const hasShared = items.some((item) => item.sharedWithMe) || failures.some(({ vault }) => isSharedWithMe(vault));
-  return { vaults: hasShared ? [...own.vaults, SHARED_WITH_ME] : own.vaults, items, failedVaults: failures };
+  return {
+    vaults: hasShared ? [...own.vaults, SHARED_WITH_ME] : own.vaults,
+    items,
+    failedVaults: failures,
+    folders: own.folders,
+  };
 }
 
 /**

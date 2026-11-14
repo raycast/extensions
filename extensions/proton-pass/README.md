@@ -26,15 +26,9 @@ Run the login command in your terminal:
 pass-cli login
 ```
 
-This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
+This uses web login: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
 
 You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. The login keeps going if Raycast closes while you're in the browser, and the extension picks it up when you come back. After a login done elsewhere, such as in the terminal, Check Again (⌘R) picks up the new session. To log out, use Logout in the Login command.
-
-Optional: use terminal prompts with interactive login:
-
-```bash
-pass-cli login --interactive user@proton.me
-```
 
 ### 3. Verify
 
@@ -47,6 +41,8 @@ pass-cli vault list
 ## Browse Items
 
 Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
+
+A vault, opened from the vault list or the vault menu, shows its Proton Pass folders first, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. An opened folder has Sort by in its search bar, where a vault has its vault menu. The search finds what's on screen: an item in a folder shows once its folder is open, or in All Vaults. The item details say which folder an item is in, under Vault.
 
 ## Preferences
 

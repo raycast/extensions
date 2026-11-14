@@ -1,4 +1,5 @@
 import { formatRelativeTime, formatTypeLabel, toOpenableUrl, websiteLabels } from "./format";
+import { folderPathLabel } from "./folders";
 import { Item, ItemDetail } from "./types";
 
 export type PanelValue =
@@ -85,6 +86,7 @@ export function getPanelRows({ item, detail, totp, totpFailed, isLoading, error,
       { id: "website", title: "Website", value: websites },
       { id: "note", title: "Note", value: note },
       { id: "vault", title: "Vault", value: text(item.vaultName) },
+      { id: "folder", title: "Folder", value: text(item.folderPath && folderPathLabel(item.folderPath)) },
       { id: "type", title: "Type", value: text(formatTypeLabel(item.type)) },
       {
         id: "modified",

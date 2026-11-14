@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, chmod, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, mkdtemp, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { Artifact } from "./artifact";
@@ -67,4 +67,21 @@ export async function installArtifact(options: InstallArtifactOptions): Promise<
   } finally {
     if (attemptDir) await rm(attemptDir, { recursive: true, force: true });
   }
+}
+
+/** Removes the other versions installed next to `versionDir`, e.g. the one an upgrade replaced. */
+export async function removeOtherVersions(versionDir: string): Promise<void> {
+  const versionsDir = path.dirname(versionDir);
+  const kept = path.basename(versionDir);
+  let names: string[];
+  try {
+    names = await readdir(versionsDir);
+  } catch {
+    return;
+  }
+  await Promise.all(
+    names
+      .filter((name) => name !== kept)
+      .map((name) => rm(path.join(versionsDir, name), { recursive: true, force: true }).catch(() => undefined)),
+  );
 }

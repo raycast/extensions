@@ -58,12 +58,28 @@ test("shows the same rows in the same order for every item", () => {
     "website:Website",
     "note:Note",
     "vault:Vault",
+    "folder:Folder",
     "type:Type",
     "modified:Last Modified",
   ];
   assert.deepEqual(layout(getPanelRows({ item: login, isLoading: false, now: NOW })), expected);
   assert.deepEqual(layout(getPanelRows({ item: note, isLoading: true })), expected);
   assert.deepEqual(layout(getPanelRows({ item: bareLogin, isLoading: false, error: "boom" })), expected);
+});
+
+test("the Folder row shows the item's folder with the ones it's in", () => {
+  const item = {
+    ...login,
+    folderId: "cards",
+    folderPath: [
+      { id: "banking", name: "Banking" },
+      { id: "cards", name: "Cards" },
+    ],
+  };
+  assert.deepEqual(valueOf(getPanelRows({ item, isLoading: false }), "folder"), {
+    kind: "text",
+    text: "Banking › Cards",
+  });
 });
 
 test("groups the credentials apart from the details about the item", () => {
@@ -74,13 +90,13 @@ test("groups the credentials apart from the details about the item", () => {
   );
   assert.deepEqual(
     rows.details.map((row) => row.id),
-    ["website", "note", "vault", "type", "modified"],
+    ["website", "note", "vault", "folder", "type", "modified"],
   );
 });
 
 test("marks missing values as empty and keeps secrets masked", () => {
   const rows = getPanelRows({ item: bareLogin, isLoading: false });
-  for (const id of ["username", "email", "password", "totp", "website", "note", "modified"]) {
+  for (const id of ["username", "email", "password", "totp", "website", "note", "folder", "modified"]) {
     assert.deepEqual(valueOf(rows, id), { kind: "empty" }, id);
   }
 
