@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jot",
+  "title": "Jot",
+  "description": "Search, add, and capture jots in Jot, the quick capture app for Mac: voice notes, quick draw, screen annotation, images and sections. Needs the Jot app.",
+  "icon": "extension-icon.png",
+  "author": "mohak_bajaj",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "notes",
+    "inbox",
+    "capture",
+    "markdown"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-jots",
+      "title": "Search Jots",
+      "subtitle": "Jot",
+      "description": "Search open jots, then open, copy, finish, archive, or tag them.",
+      "mode": "view"
+    },
+    {
+      "name": "add-jot",
+      "title": "Add Jot",
+      "subtitle": "Jot",
+      "description": "Write a new jot in Markdown, with optional tags.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-jot",
+      "title": "Quick Jot",
+      "subtitle": "Jot",
+      "description": "Add a jot straight from the Raycast bar. End with #tags to tag it.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "What's on your mind? End with #tags",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "voice-note",
+      "title": "Voice Note",
+      "subtitle": "Jot",
+      "description": "Speak a jot. Opens Jot's voice note, transcribed on your Mac.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-draw",
+      "title": "Quick Draw",
+      "subtitle": "Jot",
+      "description": "Sketch something and save it as a jot.",
+      "mode": "no-view"
+    },
+    {
+      "name": "annotate-screen",
+      "title": "Annotate Screen",
+      "subtitle": "Jot",
+      "description": "Grab a region of the screen and mark it up.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-note",
+      "title": "Quick Note",
+      "subtitle": "Jot",
+      "description": "Open Jot's quick note window over any app.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Jot CLI",
+      "description": "Path to the jot CLI. Leave empty to use /usr/local/bin/jot or /Applications/Jot.app/Contents/Helpers/jot.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "vault",
+      "title": "Vault Folder",
+      "description": "Vault folder to use. Leave empty to use the vault from Jot settings.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
