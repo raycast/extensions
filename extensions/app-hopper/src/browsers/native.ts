@@ -1,12 +1,8 @@
-import { homedir } from "node:os";
-import path from "node:path";
 import type { BrowserConfig, BrowserWindow, BrowserSummary } from "./types";
 import { runBrowserHelper } from "../helpers/browser-helper";
 import { assertNativeTabTarget } from "../helpers/browser-tab-id";
 import { sortWindows } from "../helpers/window-utils";
 import { queryWindows, Window } from "../windows";
-
-const DIRECTORY = path.join(homedir(), "Library/Application Support/raycast-app-hopper");
 
 const engines = {
   chromium: { helper: "chromium-ax", label: "Chromium", subroles: ["AXStandardWindow"] },
@@ -85,7 +81,7 @@ export async function getNativeBrowserWindows(
       documentUrl: win.documentUrl,
     })),
   );
-  const stdout = await runBrowserHelper(engine.helper, DIRECTORY, ["list", appName, payload]);
+  const stdout = await runBrowserHelper(engine.helper, ["list", appName, payload]);
   return parseAXWindows(stdout, engine.label);
 }
 
@@ -109,7 +105,7 @@ export async function focusNativeBrowserTab(
     args.push(String(matched.pid));
   }
 
-  await runBrowserHelper(engine.helper, DIRECTORY, args);
+  await runBrowserHelper(engine.helper, args);
 }
 
 /** Count windows and (for a single window) tabs via the native Swift helper. */

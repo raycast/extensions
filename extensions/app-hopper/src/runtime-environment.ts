@@ -1,13 +1,11 @@
-import fs from "node:fs";
 import { platform } from "node:os";
-import path from "node:path";
 import { usePromise } from "@raycast/utils";
-import { nativeHelpers } from "./native-helper-catalog";
-import { execBinary, getRaycastPaths } from "./helpers/applescript";
-import { resolveNativeHelper, runNativeHelper } from "./helpers/native-helper";
+import { minimumMacOS } from "./native-config";
+import { execBinary } from "./helpers/applescript";
+import { runNativeHelper } from "./helpers/native-helper";
 
 export type RuntimeStatus = {
-  kind: "checking" | "ready" | "accessibility" | "developer-tools" | "unsupported" | "error";
+  kind: "checking" | "ready" | "accessibility" | "unsupported" | "error";
 };
 
 /** Inspect prerequisites without requesting permissions or installing software. */
@@ -16,28 +14,13 @@ export async function checkRuntimeEnvironment(): Promise<RuntimeStatus> {
   try {
     const { stdout } = await execBinary("/usr/bin/sw_vers", ["-productVersion"]);
     const version = stdout.trim().split(".").map(Number);
-    const minimum = nativeHelpers.minimumMacOS.split(".").map(Number);
+    const minimum = minimumMacOS.split(".").map(Number);
     if (!Number.isSafeInteger(version[0])) return { kind: "error" };
     if (version[0] < minimum[0] || (version[0] === minimum[0] && (version[1] ?? 0) < minimum[1])) {
       return { kind: "unsupported" };
     }
 
-    const support = getRaycastPaths().supportPath ?? path.resolve(".raycast-swift-build");
-    const needsCompiler = nativeHelpers.helpers.some((helper) => {
-      if (helper.name === "firefox-bridge") return false; // The Firefox companion is optional.
-      const paths = resolveNativeHelper(helper.name, support);
-      return !paths.bundledBinaryPath && !fs.existsSync(paths.binaryPath);
-    });
-    if (needsCompiler) {
-      try {
-        await execBinary("/usr/bin/xcode-select", ["--print-path"]);
-        await execBinary("/usr/bin/xcrun", ["--find", "swiftc"]);
-      } catch {
-        return { kind: "developer-tools" };
-      }
-    }
-
-    const raw = await runNativeHelper("runtime-status", support, []);
+    const raw = await runNativeHelper("runtime-status", []);
     const status: unknown = JSON.parse(raw);
     if (!status || typeof status !== "object" || !("accessibility" in status)) return { kind: "error" };
     if (status.accessibility === true) return { kind: "ready" };

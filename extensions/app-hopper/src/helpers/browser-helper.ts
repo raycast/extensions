@@ -1,6 +1,6 @@
 import { spawn, ChildProcessWithoutNullStreams } from "node:child_process";
 import { OSA_TIMEOUT_MS } from "./applescript";
-import { ensureNativeHelper } from "./native-helper";
+import { getNativeExecutable, nativeHelperArguments } from "./swift-package";
 import { isRetainedTabId } from "./browser-tab-id";
 
 const MAX_RESPONSE_LENGTH = 10 * 1024 * 1024;
@@ -25,8 +25,9 @@ class BrowserHelperSession {
   constructor(
     binary: string,
     private readonly key: string,
+    name: string,
   ) {
-    this.child = spawn(binary, ["serve"], { stdio: "pipe" });
+    this.child = spawn(binary, nativeHelperArguments(name, ["serve"]), { stdio: "pipe" });
     this.child.stdout.setEncoding("utf8");
     this.child.stdout.on("data", (chunk: string) => this.receiveOutput(chunk));
     // Drain diagnostic output without retaining browsing data.
@@ -98,15 +99,15 @@ class BrowserHelperSession {
   }
 }
 
-export async function runBrowserHelper(name: string, fallbackSupportDir: string, args: string[]): Promise<string> {
-  const binary = await ensureNativeHelper(name, fallbackSupportDir);
-  const key = JSON.stringify([binary, args[1] ?? ""]);
+export async function runBrowserHelper(name: string, args: string[]): Promise<string> {
+  const binary = await getNativeExecutable();
+  const key = JSON.stringify([binary, name, args[1] ?? ""]);
   let session = sessions.get(key);
   if (!session) {
     if (args[0] === "focus" && isRetainedTabId(args[3] ?? "")) {
       throw new Error("Tab list expired. Refresh the list.");
     }
-    session = new BrowserHelperSession(binary, key);
+    session = new BrowserHelperSession(binary, key, name);
     sessions.set(key, session);
   }
   return session.request(args);

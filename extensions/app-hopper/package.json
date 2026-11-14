@@ -33,15 +33,10 @@
     "eslint": "^10.13.0",
     "jiti": "^2.7.0",
     "prettier": "^3.9.10",
-    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build:native": "node --import tsx scripts/build-native.ts",
-    "verify:native": "node --import tsx scripts/verify-native.ts",
-    "prebuild": "npm run build:native",
     "build": "ray build",
-    "predev": "npm run build:native",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",

@@ -4,8 +4,7 @@ import Foundation
 enum BrowserHelperRuntime {
   typealias Handler = ([String]) throws -> Void
 
-  static func run(list: Handler, focus: Handler) {
-    let args = Array(CommandLine.arguments.dropFirst())
+  static func run(args: [String], list: Handler, focus: Handler) {
     if args.first == "serve" {
       runSession(list: list, focus: focus)
     } else {

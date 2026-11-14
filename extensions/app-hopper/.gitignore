@@ -3,8 +3,6 @@
 # dependencies
 /node_modules
 /dist
-# Native helpers and their manifest are included for Store review. Only staging files are ignored.
-/assets/native/*.tmp
 
 # Raycast specific files
 raycast-env.d.ts
@@ -15,3 +13,6 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# Swift package build output
+.build

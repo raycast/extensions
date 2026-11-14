@@ -1,5 +1,3 @@
-import { homedir } from "node:os";
-import path from "node:path";
 import { execBinary, OSA_TIMEOUT_MS, runAppleScript } from "./helpers/applescript";
 import { runNativeHelper } from "./helpers/native-helper";
 import { BaseWindow, WindowState, sortWindows } from "./helpers/window-utils";
@@ -38,7 +36,6 @@ export interface AppGroup {
   windows: Window[];
 }
 
-const SUPPORT_DIR = path.join(homedir(), "Library/Application Support/raycast-app-hopper");
 const FIELD_SEPARATOR = "\u001f";
 const RECORD_SEPARATOR = "\u001e";
 
@@ -54,7 +51,7 @@ export async function focusNativeWindowById(id: number, pid?: number): Promise<v
   if (pid !== undefined && Number.isSafeInteger(pid) && pid > 0) {
     args.push(String(pid));
   }
-  await runNativeHelper("macos-windows", SUPPORT_DIR, args);
+  await runNativeHelper("macos-windows", args);
 }
 
 /** Activates an existing process without reopening it or choosing one of its windows. */
@@ -82,7 +79,7 @@ export async function activateRunningApplication(pid: number): Promise<void> {
  * Windows without an Accessibility reference are marked with `has-ax-reference: false`.
  */
 export async function queryWindows(): Promise<Window[]> {
-  const stdout = await runNativeHelper("macos-windows", SUPPORT_DIR, ["list"]);
+  const stdout = await runNativeHelper("macos-windows", ["list"]);
   const data: unknown = JSON.parse(stdout || "[]");
   if (!Array.isArray(data)) {
     throw new Error("Invalid native window response");
@@ -92,7 +89,7 @@ export async function queryWindows(): Promise<Window[]> {
 
 /** Regular running apps remain selectable even after their last window is closed. */
 export async function getRunningApplications(): Promise<RunningAppMetadata[]> {
-  const stdout = await runNativeHelper("macos-windows", SUPPORT_DIR, ["applications"]);
+  const stdout = await runNativeHelper("macos-windows", ["applications"]);
   const data: unknown = JSON.parse(stdout || "[]");
   if (!Array.isArray(data)) throw new Error("Invalid running application response");
   return data.filter(

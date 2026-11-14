@@ -188,7 +188,7 @@ export async function getFirefoxWindows(
   );
   let axWindows: BrowserWindow[];
   try {
-    const stdout = await runBrowserHelper("firefox-ax", DIRECTORY, ["list", appName, payload]);
+    const stdout = await runBrowserHelper("firefox-ax", ["list", appName, payload]);
     axWindows = parseAXWindows(stdout);
   } catch (error) {
     if (!bridgeWindows) throw error;
@@ -279,5 +279,5 @@ export async function focusFirefoxTab(
     args.push(String(matched.pid));
   }
 
-  await runBrowserHelper("firefox-ax", DIRECTORY, args);
+  await runBrowserHelper("firefox-ax", args);
 }
