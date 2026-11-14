@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>trash_active</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-650.000000, -16.000000)" fill="#000000">
+            <path d="M663,19 L663,20 L657,20 L657,19 L663,19 Z M663,19 C663,18.4 662.6,18 662,18 L658,18 C657.4,18 657,18.4 657,19 L657,20 L654,20 C653.4,20 653,20.4 653,21 L654,21 L654,32 C654,33 655,34 656,34 L664,34 C665,34 666,33 666,32 L666,21 L667,21 C667,20.4 666.6,20 666,20 L663,20 L663,19 Z M658,24 L659,24 L659,30 L658,30 L658,24 Z M661,24 L662,24 L662,30 L661,30 L661,24 Z" id="Combined-Shape" opacity="0.9"></path>
+            <rect id="Rectangle-1695" x="653" y="20" width="14" height="1"></rect>
+        </g>
+    </g>
+</svg>

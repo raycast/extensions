@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>calendar</title>
+    <g id="calendar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" fill="#000000" opacity="0.100000001" x="3" y="8" width="14" height="9"></rect>
+        <path d="M7,1 L7,3 L13,3 L13,1 L14,1 L14,3 L16,3 C17.1045695,3 18,3.8954305 18,5 L18,16 C18,17.1045695 17.1045695,18 16,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,5 C2,3.8954305 2.8954305,3 4,3 L6,3 L6,1 L7,1 Z M3,8 L3,16 C3,16.5128358 3.38604019,16.9355072 3.88337887,16.9932723 L4,17 L16,17 C16.5128358,17 16.9355072,16.6139598 16.9932723,16.1166211 L17,16 L17,8 L3,8 Z M3,7 L17,7 L17,5 C17,4.48716416 16.6139598,4.06449284 16.1166211,4.00672773 L16,4 L14,4 L14,6 L13,6 L13,4 L7,4 L7,6 L6,6 L6,4 L4,4 C3.48716416,4 3.06449284,4.38604019 3.00672773,4.88337887 L3,5 L3,7 Z" id="Combined-Shape" fill="#000000" fill-rule="nonzero"></path>
+    </g>
+</svg>
