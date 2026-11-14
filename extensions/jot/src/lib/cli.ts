@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { accessSync, constants } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { execFile, spawn } from "node:child_process";
@@ -95,7 +96,7 @@ async function mcpRequest(method: string, params: Record<string, unknown>): Prom
       params: {
         protocolVersion: "2025-06-18",
         capabilities: {},
-        clientInfo: { name: "raycast-jot", version: "1.0.0" },
+        clientInfo: { name: "Raycast", version: "1.0.0" },
       },
     },
     { jsonrpc: "2.0", method: "notifications/initialized" },
@@ -166,7 +167,8 @@ const IMAGE_FILE = /\.(png|jpe?g|gif|webp|heic|heif|tiff?|bmp)$/i;
 
 /** Creates a jot in one write and returns its id. */
 export async function addJot(jot: NewJot): Promise<string> {
-  const args: Record<string, unknown> = { text: jot.text };
+  // Jot 2.0.2+ records this as where the jot came from; older versions ignore it.
+  const args: Record<string, unknown> = { text: jot.text, source: "Raycast" };
   if (jot.tags?.length) args.tags = jot.tags;
   if (jot.section?.trim()) args.section = jot.section.trim();
   if (jot.pin || jot.images?.length) {
@@ -234,5 +236,5 @@ export async function pressJotShortcut(which: CaptureShortcut): Promise<void> {
     await exec("/usr/bin/open", ["-g", "-a", "Jot"]);
     await new Promise((r) => setTimeout(r, 1500));
   }
-  await exec("/usr/bin/osascript", ["-e", script]);
+  await runAppleScript(script, [], { timeout: 8000 });
 }

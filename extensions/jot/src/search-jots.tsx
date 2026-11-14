@@ -122,7 +122,6 @@ function JotList() {
       isShowingDetail={showDetail && jots.length > 0}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your jots"
-      navigationTitle={tag ? `#${tag}` : section !== undefined ? section || "Inbox" : "Jots"}
       throttle
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter} storeValue>
@@ -200,12 +199,7 @@ function JotList() {
                   <ActionPanel.Section>
                     <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => copyText(jot)} />
                     {jot.path ? (
-                      <Action.Open
-                        title="Open in Default App"
-                        icon={Icon.Document}
-                        target={jot.path}
-                        shortcut={Keyboard.Shortcut.Common.Open}
-                      />
+                      <Action.Open title="Open in Default App" icon={Icon.Document} target={jot.path} />
                     ) : null}
                     <Action
                       title={showDetail ? "Hide Preview" : "Show Preview"}

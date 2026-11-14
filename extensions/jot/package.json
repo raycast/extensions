@@ -42,7 +42,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "What's on your mind? End with #tags",
+          "placeholder": "What's on Your Mind? End with #tags",
           "type": "text",
           "required": true
         }

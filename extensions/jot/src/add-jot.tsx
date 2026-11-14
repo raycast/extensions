@@ -12,6 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
+import { fileURLToPath } from "node:url";
 import { useRef } from "react";
 import { addJot, canAttachImages, findCli, listJots } from "./lib/cli";
 import { GetJotView } from "./lib/get-jot";
@@ -33,7 +34,7 @@ const IMAGE_FILE = /\.(png|jpe?g|gif|webp|heic|heif|tiff?|bmp)$/i;
 /** The copied image, if the clipboard holds one (Raycast saves pasted image data to a file). */
 async function clipboardImage(): Promise<string | undefined> {
   const { file } = await Clipboard.read();
-  const path = file ? decodeURI(file.replace(/^file:\/\//, "")) : undefined;
+  const path = file?.startsWith("file:") ? fileURLToPath(file) : file;
   return path && IMAGE_FILE.test(path) ? path : undefined;
 }
 
@@ -52,18 +53,21 @@ export function AddJotForm({
 }) {
   const { pop } = useNavigation();
   const another = useRef(false);
-  const { data: sections = [] } = useCachedPromise(async () => sectionsOf(await listJots("", true)), []);
-  const { data: richAdd } = usePromise(canAttachImages, []);
-  const { data: copied } = usePromise(clipboardImage, []);
+  const { data: sections = [], isLoading: loadingSections } = useCachedPromise(
+    async () => sectionsOf(await listJots("", true)),
+    [],
+  );
+  const { data: richAdd, isLoading: loadingRich } = usePromise(canAttachImages, []);
+  const { data: copied, isLoading: loadingClipboard } = usePromise(clipboardImage, []);
 
   const { handleSubmit, itemProps, reset, focus, values, setValidationError } = useForm<Values>({
     initialValues: {
       text: initialText ?? draft?.text ?? "",
       tags: draft?.tags ?? "",
       section: draft?.section ?? "",
-      newSection: "",
-      pin: false,
-      images: [],
+      newSection: draft?.newSection ?? "",
+      pin: draft?.pin ?? false,
+      images: draft?.images ?? [],
       clipboardImage: false,
     },
     async onSubmit(v) {
@@ -112,15 +116,22 @@ export function AddJotForm({
 
   return (
     <Form
-      navigationTitle="New Jot"
+      isLoading={loadingSections || loadingRich || loadingClipboard}
+      navigationTitle={onAdded ? "New Jot" : undefined}
       enableDrafts={!onAdded}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Jot" icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Save Jot"
+            icon={Icon.Check}
+            onSubmit={(v: Values) => {
+              another.current = false;
+              return handleSubmit(v);
+            }}
+          />
           <Action.SubmitForm
             title="Save and Write Another"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onSubmit={(v: Values) => {
               another.current = true;
               return handleSubmit(v);
