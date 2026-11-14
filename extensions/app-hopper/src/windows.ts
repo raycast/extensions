@@ -57,6 +57,26 @@ export async function focusNativeWindowById(id: number, pid?: number): Promise<v
   await runNativeHelper("macos-windows", SUPPORT_DIR, args);
 }
 
+/** Activates an existing process without reopening it or choosing one of its windows. */
+export async function activateRunningApplication(pid: number): Promise<void> {
+  if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error("Invalid application PID");
+  await runAppleScript(
+    `
+      ObjC.import("AppKit");
+      var app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(${pid});
+      if (!app || app.terminated) throw new Error("Application is no longer running. Refresh the list.");
+      if (app.hidden) app.unhide;
+      app.activateWithOptions($.NSApplicationActivateIgnoringOtherApps);
+      var deadline = $.NSProcessInfo.processInfo.systemUptime + 1.5;
+      while (!app.active && $.NSProcessInfo.processInfo.systemUptime < deadline) {
+        $.NSRunLoop.currentRunLoop.runUntilDate($.NSDate.dateWithTimeIntervalSinceNow(0.03));
+      }
+      if (!app.active) throw new Error("Application did not become focused. Try again.");
+    `,
+    "JavaScript",
+  );
+}
+
 /**
  * Fetches the native macOS window snapshot via CoreGraphics + Accessibility.
  * Windows without an Accessibility reference are marked with `has-ax-reference: false`.

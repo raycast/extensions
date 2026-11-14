@@ -41,10 +41,17 @@ export function execBinary(
   });
 }
 
-export async function runAppleScript(script: string, language = "AppleScript"): Promise<string> {
+export async function runAppleScript(
+  script: string,
+  language: "AppleScript" | "JavaScript" = "AppleScript",
+): Promise<string> {
   try {
-    const { stdout } = await execBinary("/usr/bin/osascript", ["-l", language, "-e", script], {
+    // Native packaging tools also import this module outside Raycast's runtime.
+    const { runAppleScript: runRaycastAppleScript } = await import("@raycast/utils");
+    const stdout = await runRaycastAppleScript(script, {
+      language,
       timeout: OSA_TIMEOUT_MS,
+      humanReadableOutput: true,
     });
     return stdout.trimEnd();
   } catch (error) {

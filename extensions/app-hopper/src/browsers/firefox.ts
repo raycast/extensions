@@ -6,7 +6,13 @@ import type { BrowserConfig, BrowserWindow } from "./types";
 import { runBrowserHelper } from "../helpers/browser-helper";
 import { assertNativeTabTarget } from "../helpers/browser-tab-id";
 import { sortWindows } from "../helpers/window-utils";
-import { focusNativeWindowById, queryWindows, Window } from "../windows";
+import {
+  activateRunningApplication,
+  focusNativeWindowById,
+  getRunningApplications,
+  queryWindows,
+  Window,
+} from "../windows";
 import type { GeckoBrowserId } from "./gecko-config";
 import { FIREFOX_DIRECTORY, ZEN_DIRECTORY } from "./firefox-integration";
 import { reconcileFirefoxWindows } from "./firefox-reconciliation";
@@ -243,15 +249,25 @@ export async function focusFirefoxTab(
       appName === "Zen" ? "zen" : "firefox",
     );
     // WebExtension focus can select a window without activating its macOS app.
-    // Use only a uniquely reconciled native identity, scoped to this browser.
     const nativeWindows = await getFirefoxNativeWindows(appName);
     if (!nativeWindowId) {
       const windows = await getFirefoxWindows(browser, nativeWindows);
       nativeWindowId = windows.find((window) => window.id === windowId)?.nativeWindowId;
     }
     const matched = nativeWindows.find((window) => String(window.id) === nativeWindowId);
-    if (!matched) throw new Error(`Could not identify the ${appName} window. Refresh the list.`);
-    await focusNativeWindowById(matched.id, matched.pid);
+    if (matched) {
+      await focusNativeWindowById(matched.id, matched.pid);
+    } else if (nativeWindowId) {
+      throw new Error(`Could not identify the ${appName} window. Refresh the list.`);
+    } else {
+      // The companion already chose the exact window. Ambiguous AX titles must
+      // not make that selection fail or cause us to raise a different window.
+      const apps = (await getRunningApplications()).filter((app) =>
+        browser?.appPath ? app.bundlePath === browser.appPath : app.localizedName === appName,
+      );
+      if (apps.length !== 1) throw new Error(`Could not identify the ${appName} process. Refresh the list.`);
+      await activateRunningApplication(apps[0].pid);
+    }
     return;
   }
 
