@@ -2,4 +2,4 @@
 [default.extend-words]
 tha = "tha"
 [files]
-extend-exclude = ["good.json"]
+extend-exclude = ["good.json", "src/providers/dictionary/wiktionary/fixtures/*.wikitext"]

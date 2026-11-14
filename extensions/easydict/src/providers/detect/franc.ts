@@ -13,10 +13,6 @@ export class FrancDetectProvider extends BaseDetectProvider {
   type = LanguageDetectType.Franc;
   isLocal = true;
 
-  isEnabled() {
-    return true;
-  }
-
   protected async doDetect(text: string): Promise<DetectionObservation> {
     const only = languageItemList.flatMap((item) => getLangCode(item.youdaoLangCode, "francLangCode") ?? []);
     const candidates = francAll(text, { minLength: 2, only }).map(([code, confidence]) => {

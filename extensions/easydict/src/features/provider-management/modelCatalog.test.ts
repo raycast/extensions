@@ -8,25 +8,20 @@ const timedFetch = vi.hoisted(() => vi.fn());
 const cache = vi.hoisted(() => new Map<string, string>());
 
 vi.mock("@/shared/http", () => ({ timedFetch }));
-vi.mock("@raycast/api", () => ({
-  AI: {
-    Model: {
-      "OpenAI_GPT-5_mini": "openai-gpt-5-mini",
-      Duplicate: "openai-gpt-5-mini",
-      Anthropic_Claude: "anthropic-claude",
+vi.mock("@raycast/api", async () => {
+  const { createCacheMock } = await import("@/test-support/raycastStorage");
+  return {
+    AI: {
+      Model: {
+        "OpenAI_GPT-5_mini": "openai-gpt-5-mini",
+        Duplicate: "openai-gpt-5-mini",
+        Anthropic_Claude: "anthropic-claude",
+      },
     },
-  },
-  environment: { isDevelopment: false },
-  Cache: class {
-    get(key: string) {
-      return cache.get(key);
-    }
-
-    set(key: string, value: string) {
-      cache.set(key, value);
-    }
-  },
-}));
+    environment: { isDevelopment: false },
+    Cache: createCacheMock(new Map([["ai-provider-models", cache]])),
+  };
+});
 
 beforeEach(() => {
   timedFetch.mockReset();

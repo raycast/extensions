@@ -4,12 +4,7 @@ import { AI } from "@raycast/api";
 
 import type { AIProviderProfile, OpenAICompatibleProfile } from "@/providers/profiles/types";
 
-import {
-  fetchOpenAICompatibleModelIds,
-  getCachedOpenAICompatibleModelIds,
-  getModelsCacheKey,
-  isPublicOpenAICompatibleModelsEndpoint,
-} from "./modelDiscovery";
+import { resolveOpenAICompatibleModelDiscovery } from "./modelDiscovery";
 
 export interface AIModelOption {
   title: string;
@@ -50,15 +45,7 @@ function resolveRaycastAIModelCatalog(): ResolvedAIModelCatalog {
 
 function resolveOpenAICompatibleModelCatalog(profile: OpenAICompatibleProfile): ResolvedAIModelCatalog {
   const endpoint = profile.endpoint.trim();
-  const apiKey = profile.apiKey.trim();
-  const isPublicModelsEndpoint = isPublicOpenAICompatibleModelsEndpoint(endpoint);
-  let key: string;
-  try {
-    key = getModelsCacheKey(endpoint, apiKey);
-  } catch {
-    // Invalid edits have no cache identity, but still need request error feedback.
-    key = `invalid:${endpoint}`;
-  }
+  const discovery = resolveOpenAICompatibleModelDiscovery(endpoint, profile.apiKey.trim());
   const normalize = getOpenAICompatibleModelIdNormalizer(endpoint);
   const toOptions = (modelIds: string[]) =>
     [...new Set(modelIds.map(normalize).filter(Boolean))]
@@ -67,10 +54,10 @@ function resolveOpenAICompatibleModelCatalog(profile: OpenAICompatibleProfile): 
 
   return {
     allowsCustomModel: true,
-    key,
-    canLoad: !!endpoint && (!!apiKey || isPublicModelsEndpoint),
-    getCachedOptions: () => (endpoint ? toOptions(getCachedOpenAICompatibleModelIds(endpoint, apiKey)) : []),
-    loadOptions: async (signal) => toOptions(await fetchOpenAICompatibleModelIds(endpoint, apiKey, signal)),
+    key: discovery.key,
+    canLoad: discovery.canLoad,
+    getCachedOptions: () => toOptions(discovery.getCachedIds()),
+    loadOptions: async (signal) => toOptions(await discovery.loadIds(signal)),
   };
 }
 

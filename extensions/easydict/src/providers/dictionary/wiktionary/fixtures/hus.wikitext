@@ -1,0 +1,984 @@
+{{also|Appendix:Variations of "hus"}}
+{{minitoc}}
+==Translingual==
+
+===Etymology===
+{{abbrev|mul|en:'''Hu'''a'''s'''tec,es:'''hu'''a'''s'''teco}}.
+
+===Symbol===
+{{mul-symbol}}
+
+# {{ISO 639|3}}
+
+===See also===
+* {{langcat}}
+
+==Alemannic German==
+
+===Alternative forms===
+* {{alt|gsw|Hus|Huus}}
+* {{alt|gsw|Hüs||Alsatian}}
+* {{alt|gsw|hüs|husch|hüüsch||Walser}}
+
+===Etymology===
+From {{inh|gsw|gmh|hūs}}, {{m|gmh|hous}}, from {{inh|gsw|goh|hūs}}, from {{inh|gsw|gem-pro|*hūsą}}. Cognate with {{cog|de|Haus}}, {{cog|nds-de|Huus}}, {{cog|nl|huis}}, {{cog|en|house}}, {{cog|is|hús}}.
+
+===Noun===
+{{head|gsw|noun|g=n}}
+
+# {{lb|gsw|Gressoney}} [[house]]
+
+====See also====
+* {{l|gsw|housunh||house}}, {{l|gsw|hous||home}} {{q|Issime}}
+
+===References===
+* {{R:Patuzzi}}
+
+{{topics|gsw|Buildings|Housing}}
+
+==Champenois==
+
+===Etymology===
+{{inh+|roa-cha|fro|huis}}, from {{inh|roa-cha|la|ostium}}.
+
+===Pronunciation===
+* {{IPA|roa-cha|/y/}}
+
+===Noun===
+{{head|roa-cha|noun|g=m|plural|hus}}
+
+# {{lb|roa-cha|Troyen|Rémois|Langrois}} [[door]]
+
+===References===
+* {{R:roa-cha:Daunay}}
+* {{R:roa-cha:Baudouin}}
+
+==Cornish==
+
+===Etymology===
+From {{inh|kw|cel-bry-pro|*hʉd}}, from {{inh|kw|cel-pro|*soitos}}, from {{der|kw|ine-pro|*seyt-}}. Cognate with {{cog|br,cy|hud}}.
+
+===Noun===
+{{kw-noun|r}} 
+
+# [[magic]]
+#: {{syn|kw|pystri}}
+# [[enchantment]], [[spell]], [[charm]]
+#: {{syn|kw|soon}}
+
+====Derived terms====
+{{col|kw
+|gwelen hus<t:magic wand>
+|husa<t:charm, enchant><pos:v>
+|husek<t:charming, bewitching>
+}}
+
+===References===
+* {{R:CDGK}}
+
+{{C|kw|Magic}}
+
+==Crimean Gothic==
+
+===Etymology===
+From {{inh|gme-cgo|gem-pro|*hūsą}}. Akin to {{cog|en|house}}, {{cog|de|Haus}}, {{cog|nds-de|Huus}}, {{cog|nl|huis}}, {{cog|sv|hus}}, {{cog|is|hús}}.
+
+===Pronunciation===
+Krause & Slocum argue that the ''h'' was silent.<ref>https://lrc.la.utexas.edu/eieol/gotol/100#grammar_718</ref>
+
+===Noun===
+{{head|gme-cgo|noun}}
+
+# {{topics|gme-cgo|Buildings|Home}} [[house]], [[home]]
+#* {{RQ:Ogier Ghiselin de Busbecq|passage='''Hus'''. Domus.}}
+
+===References===
+{{reflist}}
+
+==Czech==
+
+===Pronunciation===
+* {{cs-IPA}}
+
+===Noun===
+{{head|cs|noun form}}
+
+# {{infl of|cs|husa||gen|p}}
+
+==Danish==
+{{wp|da:}}
+
+===Etymology===
+From {{inh|da|gmq-oda|hūs}}, from {{inh|da|non|hús}}, from {{inh|da|gem-pro|*hūsą||house}}. {{doublet|da|house}}.
+
+===Pronunciation===
+* {{IPA|da|[ˈhuˀs]}}
+
+===Noun===
+{{da-noun|et|e}}
+
+# [[house]]
+# [[building]]
+# [[block of flats]], [[cottage]]
+# [[shell]]
+
+====Declension====
+{{da-noun-infl|et|e||hus'}}
+
+====Derived terms====
+{{col4|da
+|gudshus
+|husstand
+|ishus
+|kernehus|huse|huslig|husbyggeri|husfacade|husgavl|huskøber|huslån|huspris|hussalg|hustag|hustype|bondehus|fuglehus|højhus|medborgerhus|operahus|posthus|rådhus|sneglehus|sommerhus|træhus|udhus|ungdomshus|varehus|værtshus|åbent hus-arrangement|horehus|domhus|sygehus|drømmehus|drivhus|dukkehus|bulhus|beboerhus|bøfhus|arresthus|fritidshus|galehus|glashus|glædeshus|gæstehus|herskabshus|hundehus|hønsehus|kolonihavehus|klubhus|kræmmerhus|kulturhus|langhus|legehus|lerhus|lighus|lysthus|pakhus|pandekagehus|penalhus|rækkehus|slagtehus|spisehus|sporehus|spøgelseshus|tinghus|stenhus|tugthus|typehus|tøjhus|vajsenhus|vaskehus|vinhus|vogterhus|væksthus|våbenhus|husejer|husdyr|husbond|husholdning|kongehus|hustru|huskat|husarbejde|husbesøg|husarrest|husbåd|husfar|husmor|husflid|husforsikring|husfred|husgeråd|husgud|hushjælp|huskøb|husleje|husly|husmår|husnummer|husorden|husråd|husskade|hustomt|hustugt|husvild|husvært|husundersøgelse|auktionshus|husflue|husmus|modehus|hussvamp|tehus|husrum|husholderske|husholder|husmandskost|husmand|fattighus|grubehus|kedelhus|parkeringshus|husfårekylling|husapotek|husbrand|husstøv|styrehus|hustelefon|korthus|pesthus|vagthus|skilderhus|skidehus|blokhus|badehus|sorthus|bryghus|forrådshus|hushjørne|bladhus|husven|hustyran|huspoet|husorkester|husrødstjert|husspektakler|husmøde|husløg|huslæge|huslærer|huslærerinde|forhus|baghus|husinstallation|ledvogterhus|ridehus|husmur|husslave|husspildevand|husaftale|husalter|husbesættelse|husbuk|husdramatiker|husfælle|husførelse|husfrue|husgerning|husherre|husfrit|forsamlingshus|fælleshus|husstøvmide|underhus|overhus|husregel|husvant|hustyv|hustyveri|hustoft|hustrang|husrotte|huspostil|huskarl|småhus|hushandel|hushøj|huslighed|abehus|aktivitetshus|bedehus|bindingsværkshus|akutsygehus|atriumhus|betonhus|blækhus|byhus|dobbelthus|bz-hus|enfamilieshus|etagehus|finanshus|etplanshus|familiehus|feriehus|fiskerhus|flerfamilieshus|forbedringshus|foderhus|frysehus|fyrstehus|færdighus|førerhus|gavlhus|genbohus|gulstenshus|gårdhavehus|gårdhus|halmhus|handelshus|havehus|helårshus|hjørnehus|hovedhus|stuehus|huggehus|husmandshus|ildebrandshus|indenhus|udenhus|jazzhus|jernalderhus|klyngehus|koncerthus|kontorhus|kædehus|købmandshus|købstadshus|kølehus|landhus|lavenergihus|missionshus|maskinhus|mediehus|murstenshus|møbelhus|
+møllehus|
+nabohus|
+nathus|
+nulenergihus|parcelhus|prøvehus|røgterhus|råhus|skovløberhus|supersygehus|terrassehus|toetagershus|tofamilieshus|trappehus|tropehus|vinkelhus|våningshus|husandagt|husværling|hallehus|rundhus|passivhus|A-hus|kaffehus}}
+
+====See also====
+* {{l|da|bolig}}
+
+===Verb===
+{{head|da|verb form}}
+
+# {{infl of|da|huse||imp}}
+
+====References====
+* {{R:Den Danske Ordbog}}
+* {{R:ODS}}
+
+{{C|da|Buildings}}
+
+==Finnish==
+
+===Etymology===
+Related to {{cog|krl|huš}}. Probably also somehow akin to Germanic words (all dialectal): {{cog|sv|huss}}, {{cog|de|huss}}, {{cog|en|huss}}. 
+
+===Pronunciation===
+{{fi-pronunciation}}
+
+===Interjection===
+{{head|fi|intj}}
+
+# [[shoo]]!
+
+===Further reading===
+* {{R:fi:KTSK|accessdate=2023-07-02}}
+
+==Middle English==
+
+===Etymology 1===
+
+====Noun====
+{{head|enm|noun|var=1}} 
+
+# {{alt form|enm|hous}}
+
+===Etymology 2===
+
+====Determiner====
+{{head|enm|determiner|var=1}} 
+
+# {{alt form|enm|his|t=his|id=his}}
+
+====Pronoun====
+{{head|enm|pronoun|var=1}} 
+
+# {{alt form|enm|his|t=his|id=his2}}
+
+===Etymology 3===
+
+====Pronoun====
+{{head|enm|pronoun|var=1}} 
+
+# {{alt form|enm|us}}
+
+==Middle High German==
+
+===Alternative forms===
+* {{alt|gmh|hous}}
+
+===Etymology===
+{{etymon|gmh|:inh|goh:hūs<id:house>|id=house|text=+}}
+
+===Pronunciation===
+* {{gmh-IPA|hūs}}
+
+===Noun===
+{{gmh-noun|n|head=hūs}}
+
+# [[house]]
+
+====Declension====
+{{gmh-ndecl|hūs<n.loc>}}
+
+====Derived terms====
+{{col|gmh|wīchūs}}
+
+====Descendants====
+* {{desc|gsw|Hus|Huus}}
+** Alsatian: {{l|gsw|Hüs}}
+** Walser: {{l|gsw|hus}}, {{l|gsw|hüs}}, {{l|gsw|husch}}, {{l|gsw|hüüsch}}, {{l|gsw|hous}}
+* {{desc|bar|Haus}}
+** {{desc|cim|haus}}
+** {{desc|mhn|haus}}
+** Udinese: {{l|bar|haus}}
+* {{desctree|gmw-cfr|Haus<qq:Moselle Franconian>|noalts=1}}
+** Britten: {{IPAchar|[haʊ̯s]}}<ref>Besse, Maria. 2004. ''Britter Wörterbuch''. Losheim am See: Verein für Heimatkunde.</ref>
+* {{desc|gmw-cfr|Huus<qq:Ripuarian>}}
+** {{desc|ksh|Huus}} {{IPAchar|[huːs]}}<ref>{{cite-web |url=https://www.koelsch-akademie.de/de/nc/online-woerterbuch/Haus/von/2/action//list/ |title=„Huus“, ''Online-Wörterbuch der Akademie för uns kölsche Sproch''. |accessdate=12 July 2019 |archiveurl=https://web.archive.org/web/20190712182419/https://www.koelsch-akademie.de/de/nc/online-woerterbuch/Haus/von/2/action//list/ |archivedate=12 July 2019 }}</ref>
+* {{desc|de|Haus}}
+* {{desc|gmw-rfr|-}}
+** {{desc|pdc|Haus}}
+* {{desc|wym|haojs|haus|hoüz}}
+* {{desc|yi|הויז}}
+
+===References===
+{{reflist}}
+* {{R:gmh:BMZ|HÛS|id=H01786}}
+* {{R:gmh:Kobler|hūs}}
+
+{{C|gmh|Buildings}}
+
+==Norman==
+
+===Alternative forms===
+* {{l|nrf|us}}
+
+===Etymology===
+Possibly a {{der|nrf|gem|-}} borrowing, as no obvious cognates exist in Romance (the expected inheritance would be {{cog|fro|porte}}, such as Jersey dialect {{m|nrf|porte}}). Compare {{cog|non|hús|t=house}}.
+
+===Noun===
+{{nrf-noun|m|plural=hus}}
+
+# {{lb|nrf|Guernsey}} [[door]]
+#* {{quote-book|nrf|year=2006|author=Marie de Garis|chapter=Enne p'tite ôlure|title=P'tites Lures Guernésiaises|publisher=Cromwell Press|year_published=2006|page=24
+|passage=Ils aeurent aën chocque à quànd al'ouvrissi l’'''hus''', dja, la breune avait épaissi tànt qué nous n'pouvait pas quâsi veis sa môin au d'vànt d'sé.|t=They had a shock when they opened the '''door''' though; the fog had thickened so much that they could hardly see their hands in front of them.}}
+
+==Norwegian Bokmål==
+{{wp|no:}}
+
+===Pronunciation===
+* {{IPA|nb|/hʉːs/|[hʉʷːs]}}
+* {{rhymes|nb|ʉːs}}
+
+===Etymology 1===
+From {{inh|nb|non|hús||house}}, from {{inh|nb|gem-pro|*hūsą||house}}, possibly from {{inh|nb|ine-pro|*(s)kewHs-}}, from {{m|ine-pro|*(s)kewH-||cover, hide}}. {{doublet|nb|house}}.
+
+====Noun====
+{{nb-noun-n1}}
+
+# a [[house]]
+
+=====Derived terms=====
+{{col4|nb
+|auksjonshus
+|drivhus
+|drømmehus
+|galehus
+|gudshus
+|horehus
+|husarbeid
+|husarrest
+|husdyr
+|huseier
+|hushjørne
+|hushold
+|husholdning
+|huskatt
+|husløs
+|husmor
+|husordensregel
+|hussopp
+|husstand
+|hustak
+|hønsehus
+|høyhus
+|kongehus
+|klubbhus
+|motehus
+|operahus
+|rekkehus
+|Representantenes hus
+|sjukehus
+|styrehus
+|sykehus
+|trehus
+|underhus
+|uthus
+|varehus
+|veksthus
+|våningshus
+}}
+
+=====Related terms=====
+* {{l|nb|huse}}
+
+===Etymology 2===
+
+====Verb====
+{{head|nb|verbf}}
+
+# {{infl of|nb|huse||imp}}
+
+====Further reading====
+* {{R:nb:OB}}
+
+{{C|nb|Buildings}}
+
+==Norwegian Nynorsk==
+{{wp|nn:}}
+
+===Etymology===
+From {{der|nn|non|hús}}, from {{der|nn|gem-pro|*hūsą||house}} of unknown origin. Akin to {{cog|en|house}}. {{doublet|nn|house}}.
+
+===Pronunciation===
+* {{IPA|nn|/hʉːs/}}
+
+===Noun===
+{{nn-noun-n1}}
+
+# a [[house]]
+# {{lb|nn|in compound}} a small container for an item, a liquid or a powder (e.g. sunglasses, seeds or ink)
+
+====Derived terms====
+{{col4|nn
+|auksjonshus
+|blekkhus
+|borakshus
+|brillehus
+|frøhus
+|drivhus
+|galehus
+|galnehus
+|gudshus
+|horehus
+|husarbeid
+|husarrest
+|husdyr
+|hushjørne
+|huskatt
+|husmor
+|husordensregel
+|hussopp
+|husstand
+|hustak
+|hønsehus
+|jordhus
+|kongehus
+|klubbhus
+|motehus
+|operahus
+|rekkehus
+|rekkjehus
+|sjukehus
+|sniglehus
+|strøhus
+|styrehus
+|styrhus
+|trehus
+|tukthus
+|underhus
+|uthus
+|varehus
+|veksthus
+|våningshus
+}}
+
+====Further reading====
+* {{R:nn:OB}}
+
+{{C|nn|Buildings}}
+
+==Old Czech==
+
+===Etymology===
+{{ety|zlw-ocs|:inh|sla-pro:*gǫsь<id:noun>|text=+|tree=1}}
+
+===Pronunciation===
+* {{zlw-ocs-IPA}}
+
+===Noun===
+{{zlw-ocs-noun|f|dim=húscě}}
+
+# [[goose]]
+
+====Declension====
+{{zlw-ocs-ndecl|f}}
+
+====Derived terms====
+{{col|zlw-ocs|húska|husák|húsě|húsěr}}
+
+====Descendants====
+* {{desc|cs|husa}}
+
+===Further reading===
+* {{R:zlw-ocs:Gebauer}}
+
+{{C|zlw-ocs|Animals}}
+
+==Old Danish==
+
+===Etymology===
+From {{inh|gmq-oda|non|hús}}, from {{inh|gmq-oda|gem-pro|*hūsą}}.
+
+===Noun===
+{{head|gmq-oda|noun|g=n}}
+
+# [[house]]
+#* {{quote-book|gmq-oda|year=1241|chapterurl=http://middelaldertekster.dk/jyske-lov/2/99|chapter=Of ransaknæs i hws oc bondæn ær æi hemmæ|title=Code of Jutland|section=book 2, chapter 99
+|passage=Of man ransaknæs i bondæns '''hws''' oc ær han æi sialf hemmæ.
+|translation=''If the farmer's '''house''' is searched and he is not at home himself.''}}
+
+====Declension====
+{| class=
+! Declension
+! Singular Indefinite
+! Singular Definite
+! Plural Indefinite
+! Plural Definite
+|-
+! Nominative
+| [[hūs]]
+| [[hūsit]] or [[hūset]]
+| [[hūs]]
+| [[hūsin]] or [[hūsen]]
+|-
+! Genitive
+| [[hūss]] or [[hūses]] 
+| [[hūsins]] or [[hūsets]]
+| [[hūsa]]
+| [[hūsinæ]] or [[hūsenæ]]
+|-
+! Dative
+| [[hūse]] or [[hūs]]
+| [[hūsinu]]
+| [[hūsum]] 
+| [[hūsunum]]
+|-
+! Accusative
+| [[hūs]]
+| [[hūsit]] or [[hūset]]
+| [[hūs]]
+| [[hūsin]] or [[hūsen]]
+|}
+
+====Descendants====
+* {{desc|da|hus}}
+** {{desc|nb|hus}}
+
+===References===
+* {{R:GDO}}
+
+==Old Dutch==
+
+===Etymology===
+{{dercat|odt|gem-pro|inh=1}}
+From {{inh|odt|gmw-pro|*hūs}}.
+
+===Noun===
+{{odt-noun|head=hūs|n}}
+
+# [[house]]
+
+====Inflection====
+{{odt-decl-noun-a|hūs|g=n}}
+
+====Descendants====
+* {{desctree|dum|huus}}
+
+===Further reading===
+* {{R:ONW|2591|hūs}}
+
+==Old English==
+
+===Etymology===
+{{etymon|ang|id=house|:inh|gmw-pro:*hūs<id:house>|tree=1}}
+{{dercat|ang|gem-pro|ine-pro|inh=1}}
+From {{inh|ang|gmw-pro|*hūs}}.
+
+Cognate with {{cog|ofs|hūs}}, {{cog|osx|hūs}}, {{cog|odt|hūs}}, {{cog|goh|hūs}} and {{cog|non|hús}}.
+
+===Pronunciation===
+* {{ang-IPA|hūs}}
+* {{rhymes|ang|uːs|s=1}}
+
+===Noun===
+{{ang-noun|hūs|n}}
+
+# [[house]]
+#* '''c. 990''', ''{{w|Wessex Gospels}}'', [https://archive.org/stream/dahalgangodspelo00thor#page/n83/mode/2up Mark 2:10-11]
+#*: {{quote|ang|''[[hē|Hē]] [[cwæð]] [[tō]] [[þām]] [[laman]], "[[þē|Þē]] [[iċ]] [[seċġe]], [[ārīs]], [[nim]] [[ðīn]] [[bed]], [[and]] [[gā]] [[tō]] [[þīnum]] '''hūse'''."''|He said to the lame man, "I say to you, arise, take your bed, and go to your '''house'''."}}
+
+====Declension====
+{{ang-decl-noun-a-n|hūs}}
+
+====Derived terms====
+{{col3|ang
+|ambihthūs
+|æppelhūs
+|bānhūs
+|bēdhūs
+|bæchūs
+|bæþhūs
+|ġebēdhūs
+|bōchūs
+|cachūs
+|capitolhūs
+|ċealfra hūs
+|cornhūs
+|crucethūs
+|dēofolġieldhūs
+|dimhūs
+|dōmhūs
+|drenchūs
+|dūnhūs
+|ealuhūs
+|eardunghūs
+|eorþhūs
+|feohhūs
+|feorhhūs
+|fisċhūs
+|flǣsċhūs
+|forehūs
+|forliġerhūs
+|friþhūs
+|fȳrhūs
+|ġiestthūs
+|ġeofonhūs
+|ġifthūs
+|goldhordhūs
+|græfhūs
+|grētinghūs
+|hāliġdōmhūs
+|hellehūs
+|heofonhūs
+|hīeġhūs
+|hlāfhūs
+|horshūs
+|hræġlhūs
+|hunda hūs
+|hūsa
+|hūsærn
+|hūsbonda
+|hūsbonde
+|hūsbōt
+|hūsbryċe
+|hūsbryne
+|hūsfæst
+|hūsheofon
+|hūshlāford
+|hūshlēow
+|hūsian
+|hūsinċel
+|*hūslēac
+|hūsrǣden
+|hūssċipe
+|hūsstede
+|hūswist
+|lǣċehūs
+|lārhūs
+|leornunghūs
+|māþmhūs
+|mangunghūs
+|mānhūs
+|mealthūs
+|meluhūs
+|merehūs
+|myltestrehūs
+|morþorhūs
+|mōthūs
+|nicorhūs
+|nīedhūs
+|offrunghūs
+|pleġhūs
+|reordhūs
+|ġereordinghūs
+|resthūs
+|sealthūs
+|sāwolhūs
+|sċandhūs
+|snǣdinghūs
+|snytruhūs
+|spichūs
+|sprǣchūs
+|sumorhūs
+|symbelhūs
+|tōċierhūs
+|tōwhūs
+|þeġnunghūs
+|þȳrelhūs
+|wæferhūs
+|wǣpnhūs
+|wæsċhūs
+|weorchūs
+|wīnhūs
+|winterhūs
+|wītehūs
+|wundorhūs
+}}
+
+====Descendants====
+* {{desctree|enm|hous}}
+
+==Old Frisian==
+
+===Etymology===
+From {{inh|ofs|gmw-pro|*hūs}}, from {{inh|ofs|gem-pro|*hūsą}}.
+
+===Noun===
+{{ofs-noun|head=hūs|n}}
+
+# [[house]]
+
+====Declension====
+{{ofs-decl-noun-a-n|hūs}}
+
+====Descendants====
+* {{desc|frr|-}}
+*: Föhr-Amrum, Mooring: {{l|frr|hüs}}
+* {{desc|stq|Húus|alts=1}}
+* {{desc|fy|hûs}}
+
+==Old High German==
+
+===Etymology===
+{{etymon|goh|:inh|gmw-pro:*hūs<id:house>|id=house}}
+From {{inh|goh|gmw-pro|*hūs}}, from {{inh|goh|gem-pro|*hūsą}}, whence also {{cog|osx|hūs}}, {{cog|odt|hūs}}, {{cog|ofs|hūs}}, {{cog|ang|hūs}}, and {{cog|non|hús}}.
+
+===Pronunciation===
+* {{IPA|goh|/huːs̠/}}
+
+===Noun===
+{{goh-noun|head=hūs|n}}
+
+# [[house]]
+
+====Declension====
+{{goh-decl-noun-a-n|hūs}}
+
+====Derived terms====
+* {{l|goh|bluozhūs}}
+
+====Descendants====
+* {{desctree|gmh|hūs}}
+
+===References===
+{{reflist}}
+* {{R:goh:Köbler|hūs}}
+
+==Old Saxon==
+
+===Etymology===
+From {{inh|osx|gmw-pro|*hūs}}, from {{inh|osx|gem-pro|*hūsą}}, whence also {{cog|ofs|hūs}}, {{cog|ang|hūs}}, {{cog|odt|hūs}}, and {{cog|goh|hūs}}, {{cog|non|hús}}.
+
+===Noun===
+{{osx-noun|head=hūs|g=n}}
+
+# [[house]]
+
+====Declension====
+{{osx-decl-noun-a-n|hūs}}
+
+====Descendants====
+* {{desc|gml|hûs}}
+** {{desc|nds-de|Huus|alts=1}}
+** {{desc|nds-nl|huus|alts=1}}
+** {{desc|pdt|Hus}}
+
+==Old Swedish==
+
+===Etymology===
+From {{inh|gmq-osw|non|hús}}, from {{inh|gmq-osw|gem-pro|*hūsą||house}}.
+
+===Noun===
+{{head|gmq-osw|noun form|g=n|head=hūs}}
+
+# [[house]]
+
+====Declension====
+{{gmq-osw-decl-noun-a-n|hūs}}
+
+====Derived terms====
+* {{l|gmq-osw|siuka hus||hospital (of monastery)}}
+
+====Descendants====
+* {{desc|sv|hus}}
+
+===References===
+* {{R:svenska.se|saob}}
+* {{R:runeberg.org|svmtsprk|1|0533.html hus}}
+
+==Slovak==
+
+===Etymology===
+{{ety|sk|:inh|sla-pro:*gǫ̑sь<id:noun>|text=+|tree=1}}
+
+===Pronunciation===
+* {{sk-IPA}}
+* {{audio|sk|LL-Q9058 (slk)-TomášPolonec-hus.wav|a=Bratislava}}
+
+===Noun===
+{{sk-noun|f|adj=husí}}
+
+# [[goose]]
+
+====Declension====
+{{sk-ndecl|f}}
+
+====Derived terms====
+{{col|sk|title=adjectives|husací}}
+{{col|sk|title=nouns|húsa|húsatko|húska|husička|husisko}}
+{{col|sk|title=proverbs|trafená hus zagágala}}
+
+====Further reading====
+* {{R:sk:SDK}}
+
+{{C|sk|Geese}}
+
+==Swedish==
+{{wp|sv:}}
+[[File:House Silhouette (black).png|thumb|250px|{{lang|sv|ett hus}}]]
+
+===Alternative forms===
+* {{alt|sv|hws||obsolete}}
+
+===Pronunciation===
+* {{IPA|sv|/hʉːs/|[hʉᵝːs̪]}}
+* {{audio|sv|Sv-hus.ogg|text=ett hus}}
+* {{rhymes|sv|ʉːs|s=1}}
+
+===Etymology 1===
+From {{inh|sv|gmq-osw|[[hus|hūs]]}}, from {{inh|sv|non|hús}}, from {{inh|sv|gem-pro|*hūsą||house}}.
+
+====Noun====
+{{sv-noun|n}}
+
+# a [[house]]
+#: {{ux|sv|ett rött '''hus'''|a red '''house'''}}
+#: {{ux|sv|Conny bor i ett '''hus'''|Conny lives in a '''house'''}}
+#: {{ux|sv|Jag gick in i '''huset'''|I went into '''the house'''}}
+# a [[house]] (restaurant, casino, theater, etc. – place of public accommodation or entertainment)
+#: {{ux|sv|'''Huset''' bjuder|It's on '''the house'''}}
+#: {{ux|sv|Det var fullt '''hus''' på premiären|There was a full '''house''' at the premiere}}
+# {{lb|sv|politics}} a [[house]]
+#: {{ux|sv|'''husets''' talman|the speaker of '''the house''' (of representatives)}}
+# a [[house]] ((royal) family)
+#: {{ux|sv|'''Huset''' Bernadotte har regerat Sverige sedan 1818|'''The house of''' Bernadotte has ruled Sweden since 1818}}
+# {{lb|sv|archaic}} a [[castle]] (several Swedish castles have "hus" in their name)
+# {{lb|sv|astrology}} a [[house]] (section of the [[zodiac]])
+# {{lb|sv|uncommon}} a [[housing]]
+#: {{ux|sv|Skruva loss '''huset''' och kolla åt vilket håll termostaten sitter|Unscrew '''the housing''' and check which way the thermostat is facing}}
+
+=====Declension=====
+{{sv-infl-noun-n-zero}}
+
+=====Synonyms=====
+* {{l|sv|kåk}}
+* {{l|sv|stuga}}
+
+=====Hyponyms=====
+{{col4|sv
+|bostadshus
+|brygghus
+|bårhus
+|dårhus
+|flerfamiljshus
+|folkets hus
+|furstehus
+|förlagshus
+|hemlighus
+|horhus
+|höghus
+|hönshus
+|kamerahus
+|kungahus
+|kårhus
+|kärnhus
+|lamellhus
+|låghus
+|operahus
+|skivhus
+|småhus
+|spökhus
+|stadshus
+|sjukhus
+|tehus
+|underhus
+|uthus
+|öppet hus
+|överhus
+}}
+
+=====Derived terms=====
+{{col|sv
+|gå man ur huse
+|husa
+|husaga
+|husandakt
+|husapotek
+|husarrest
+|husband
+|husbehov
+|husbil
+|husbock
+|husbonde
+|husbyggare
+|husbygge
+|husbyggnad
+|husbåt
+|husdjur
+|huse
+|husera
+|husering
+|husesyn
+|husfader
+|husfaderlig
+|husfar
+|husfasad
+|husflit
+|husfluga
+|husfolk
+|husfrid
+|husfru
+|husföreståndarinna
+|husförhör
+|husgavel
+|husgeråd
+|husgrund
+|husgrupp
+|husgud
+|hushyra
+|hushåll
+|hushålla
+|hushållare
+|hushållerska
+|hushållning
+|hushållsam
+|husjungfru
+|huskarl
+|huskatt
+|husklunga
+|husknut
+|huskomplex
+|huskors
+|huskropp
+|huskur
+|husköp
+|husköpare
+|huslig
+|huslighet
+|husly
+|huslån
+|husläkare
+|huslänga
+|husman
+|husmanskost
+|husmoder
+|husmoderlig
+|husmor
+|husmus
+|husnummer
+|husockupant
+|husockupation
+|husorgan
+|huspianist
+|huspiga
+|huspostilla
+|huspris
+|husrad
+|husrannsakan
+|husrannsakning
+|husrum
+|husråtta
+|husse
+|hussvala
+|hussvamp
+|hustak
+|hustavlan
+|hustomte
+|hustru
+|hustyp
+|hustyrann
+|husundersökning
+|husvagn
+|husvill
+|husvillhet
+|husvägg
+|husvärd
+|husägare
+|hålla hus
+|krigsmanshus
+|utomhus
+}}
+
+=====Related terms=====
+{{col|sv
+|hos
+}}
+
+====See also====
+* {{l|sv|byggnad||building}}
+* {{l|sv|stuga||cottage, cabin}}
+
+===Etymology 2===
+From the genus name, {{der|sv|la-new|huso|t=sturgeon}}.
+
+====Noun====
+{{sv-noun|c}}
+
+# [[beluga]] ({{taxfmt|Huso huso|species}})
+
+=====Declension=====
+{{sv-infl-noun-c-ar}}
+
+===References===
+* {{R:svenska.se|so}}
+* {{R:svenska.se|saol}}
+* {{R:svenska.se|saob}}
+
+===Anagrams===
+* {{anagrams|sv|a=hsu|SUH}}
+
+{{C|sv|Buildings}}
+
+==Unami==
+
+===Etymology===
+From Dutch.
+
+===Noun===
+{{unm-noun|g=an|pl=husàk|loc=husink}}
+
+# [[bucket]], [[pot]]
+
+====Derived terms====
+{{col3|unm
+|màsktahus
+|lënhus
+|mpihus
+|siskëwahus
+|taxànahus
+|wekathus
+}}
+
+{{c|unm|Containers}}
+
+==Upper Sorbian==
+
+===Etymology===
+{{ety|hsb|:inh|sla-pro:*gǫ̑sь|text=+|tree=1}}
+
+===Pronunciation===
+* {{hsb-IPA}}
+
+===Noun===
+{{hsb-noun|f}}
+
+# [[goose]]
+
+===Further reading===
+* {{R:hsb:Soblex}}
+
+{{C|hsb|Geese}}

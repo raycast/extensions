@@ -2,7 +2,6 @@
 
 import querystring from "node:querystring";
 
-import { myPreferences } from "@/consts";
 import type { DetectionObservation } from "@/core/detect/types";
 import { getLanguageFromProviderCode, isLanguageCode } from "@/core/language/utils";
 import { LanguageDetectType } from "@/core/results/kinds";
@@ -14,10 +13,6 @@ import { detectionNumber, detectionObject, detectionString } from "./response";
 
 export class BaiduDetectProvider extends BaseDetectProvider {
   type = LanguageDetectType.Baidu;
-
-  isEnabled() {
-    return myPreferences.enableBaiduLanguageDetect;
-  }
 
   protected async doDetect(text: string, options?: DetectOptions): Promise<DetectionObservation> {
     const response = detectionObject(

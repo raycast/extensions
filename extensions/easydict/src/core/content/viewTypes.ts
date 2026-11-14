@@ -4,11 +4,12 @@ import type { QueryType, QueryWordInfo, RuntimeServiceMetadata } from "@/core/re
 
 import type { ContentEquivalent, DictionarySection } from "./types";
 
-/** View layers keep service identity only; ordering is already owned upstream. */
+/** Rows share their service's metadata and query. */
 export interface ViewService extends Omit<RuntimeServiceMetadata, "serviceOrder"> {
   readonly type: QueryType;
   readonly query: QueryWordInfo;
   readonly kind: "translation" | "dictionary";
+  readonly sourceUrl?: string;
   readonly fromCache?: boolean;
 }
 
@@ -30,6 +31,7 @@ export interface ViewRow {
   readonly title: string;
   readonly subtitle?: string;
   readonly copyText: string;
+  readonly textLanguage?: string;
   readonly tooltip?: string;
   readonly accessory?: { readonly phonetic?: string; readonly examTypes?: readonly string[] };
   readonly frequency?: ContentEquivalent["frequency"];

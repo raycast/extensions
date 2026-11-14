@@ -3,6 +3,7 @@
 export enum TranslationType {
   Youdao = "Youdao Translate",
   Baidu = "Baidu Translate",
+  /** Stored in favorites created with Tencent Cloud TMT. */
   Tencent = "Tencent Translate",
   Caiyun = "Caiyun Translate",
   Apple = "Apple Translate",
@@ -19,12 +20,14 @@ export enum DictionaryType {
   Youdao = "Youdao Dictionary",
   Eudic = "Eudic Dictionary",
   Linguee = "Linguee Dictionary",
+  Wiktionary = "Wiktionary Dictionary",
   AI = "AI Dictionary",
 }
 
 export enum LanguageDetectType {
   Simple = "Simple Detect",
   Franc = "Franc Detect",
+  /** Stored in detection cache entries created with Tencent Cloud TMT. */
   Tencent = "Tencent Detect",
   Baidu = "Baidu Detect",
   Bing = "Bing Detect",

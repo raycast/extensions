@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { LocalStorage } from "@raycast/api";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,19 +10,16 @@ import type { FavoriteWord } from "./model";
 import { useFavoriteWords } from "./useFavoriteWords";
 
 const storage = vi.hoisted(() => new Map<string, string>());
-const failures = vi.hoisted(() => ({ write: false }));
 
-vi.mock("@raycast/api", () => ({
-  LocalStorage: {
-    getItem: async (key: string) => storage.get(key),
-    setItem: async (key: string, value: string) => {
-      if (failures.write) throw new Error("storage write failed");
-      storage.set(key, value);
-    },
-  },
-  LaunchType: { Background: "background" },
-  environment: { launchType: "userInitiated", commandMode: "view" },
-}));
+vi.mock("@raycast/api", async () => {
+  const { createLocalStorageMock } = await import("@/test-support/raycastStorage");
+  const localStorage = createLocalStorageMock(storage);
+  return {
+    LocalStorage: { ...localStorage, setItem: vi.fn(localStorage.setItem) },
+    LaunchType: { Background: "background" },
+    environment: { launchType: "userInitiated", commandMode: "view" },
+  };
+});
 
 const KEY = "favorite-content-v1";
 const query = { word: "serendipity", fromLanguage: "en", toLanguage: "zh-CHS" };
@@ -34,7 +32,7 @@ const envelope = (favorites: FavoriteWord[]) => JSON.stringify({ version: 1, fav
 
 beforeEach(() => {
   storage.clear();
-  failures.write = false;
+  vi.mocked(LocalStorage.setItem).mockReset();
 });
 afterEach(cleanup);
 
@@ -107,7 +105,7 @@ describe("useFavoriteWords", () => {
     const saved = makeFavorite();
     storage.set(KEY, envelope([saved]));
     const { result } = await renderLoadedFavorites();
-    failures.write = true;
+    vi.mocked(LocalStorage.setItem).mockRejectedValueOnce(new Error("storage write failed"));
     await act(async () => {
       await expect(result.current.clear()).rejects.toThrow("storage write failed");
     });

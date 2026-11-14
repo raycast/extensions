@@ -1,12 +1,10 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { getPreferenceValues } from "@raycast/api";
-
 import { config } from "@/core/config";
 import type { LanguageCode, SourceLanguage } from "@/core/language/types";
 import { LanguageDetectType } from "@/core/results/kinds";
 import type { BaseDetectProvider } from "@/providers/detect/base";
-import { detectServices } from "@/providers/detect/registry";
+import { createEnabledDetectors } from "@/providers/detect/registry";
 import { CancelledError } from "@/shared/errors";
 import { logError, logSummary, logTrace } from "@/shared/logger";
 
@@ -23,11 +21,7 @@ interface DetectSnapshot {
 type SingleObservation = Extract<DetectionObservation, { kind: "single" }>;
 
 function createSnapshot(): DetectSnapshot {
-  const preferences = getPreferenceValues<Preferences>();
-  const enabled = detectServices
-    .filter((service) => !service.preference || preferences[service.preference] !== false)
-    .map((service) => new service.provider())
-    .filter((provider) => provider.isEnabled());
+  const enabled = createEnabledDetectors();
   return {
     remote: enabled.filter((provider) => !provider.isLocal),
     local: enabled.filter((provider) => provider.isLocal),
@@ -40,7 +34,6 @@ export async function detectLanguage(text: string, signal?: AbortSignal): Promis
   if (signal?.aborted) throw new CancelledError();
   const snapshot = createSnapshot();
   const started = performance.now();
-  // Tencent's detector is case-sensitive; retain the current remote normalization.
   const decision =
     (await detectRemote(text.toLowerCase(), snapshot, signal)) ?? (await detectLocal(text, snapshot, signal));
   const source =

@@ -25,6 +25,23 @@ function migrate(displaySections: unknown[], extra: Record<string, unknown> = {}
 }
 
 describe("legacy favorite content", () => {
+  it("restores saved Tencent translations after the provider is removed", () => {
+    const favorite = migrate([
+      {
+        type: "Tencent Translate",
+        items: [{ ...oldRow, queryType: "Tencent Translate", displayType: undefined }],
+      },
+    ]);
+
+    const restored = decodeFavoriteSnapshot(JSON.parse(JSON.stringify(favorite)));
+    expect(restored.services[0]).toMatchObject({
+      type: "Tencent Translate",
+      serviceLabel: "Tencent Translate",
+    });
+    expect(favoriteMarkdown(restored)).toContain("你好");
+    expect(resolveFavoriteTranslations(restored)).toEqual(["你好"]);
+  });
+
   it("keeps old AI bodies and skips Linguee placeholders when deriving the saved preview", () => {
     const favorite = migrate([
       {

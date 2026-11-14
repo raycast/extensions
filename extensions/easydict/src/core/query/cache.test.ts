@@ -14,61 +14,35 @@ import {
   hasEnabledQueryCache,
 } from "./cache";
 
-const testState = vi.hoisted(() => ({
-  caches: new Map<string, Map<string, string>>(),
-  preferences: {
+const testState = vi.hoisted(() => {
+  const defaults = {
     queryCacheMode: "words",
     aiQueryCacheMode: "off",
     language1: "zh-CHS",
     language2: "en",
     enableDetectLanguageSpeedFirst: true,
     enableBaiduLanguageDetect: true,
-    enableTencentLanguageDetect: false,
     enableVolcanoLanguageDetect: false,
-  },
-}));
+    baiduAppId: "baidu-id",
+    baiduAppSecret: "baidu-secret",
+    volcanoAccessKeyId: "volcano-id",
+    volcanoAccessKeySecret: "volcano-secret",
+  };
+  return { caches: new Map<string, Map<string, string>>(), preferences: { ...defaults }, defaults };
+});
 
-vi.mock("@raycast/api", () => ({
-  Cache: class {
-    private storage: Map<string, string>;
-
-    constructor(options?: { namespace?: string }) {
-      const namespace = options?.namespace ?? "default";
-      let storage = testState.caches.get(namespace);
-      if (!storage) {
-        storage = new Map();
-        testState.caches.set(namespace, storage);
-      }
-      this.storage = storage;
-    }
-
-    get(key: string) {
-      return this.storage.get(key);
-    }
-
-    set(key: string, value: string) {
-      this.storage.set(key, value);
-    }
-
-    remove(key: string) {
-      return this.storage.delete(key);
-    }
-
-    clear() {
-      this.storage.clear();
-    }
-  },
-}));
+vi.mock("@raycast/api", async () => {
+  const { createCacheMock } = await import("@/test-support/raycastStorage");
+  return { Cache: createCacheMock(testState.caches), environment: { isDevelopment: false } };
+});
 
 vi.mock("@/consts", () => ({ myPreferences: testState.preferences }));
-vi.mock("@/shared/logger", () => ({ logWarn: vi.fn() }));
 
 const query = { word: "cache", fromLanguage: "en", toLanguage: "zh-CHS", isWord: true } as const;
 
 beforeEach(() => {
   vi.useRealTimers();
-  testState.preferences.queryCacheMode = "words";
-  testState.preferences.aiQueryCacheMode = "off";
+  Object.assign(testState.preferences, testState.defaults);
   clearQueryCache();
 });
 
@@ -113,23 +87,13 @@ describe("query cache", () => {
     },
   );
 
-  it("does not let work started before a clear operation repopulate the cache", () => {
-    const service = createService("builtin:translation:Bing", "regular");
-    const requestCacheGeneration = getQueryCacheGeneration();
+  it("rejects detection cache writes started before the cache was cleared", () => {
+    const generation = getQueryCacheGeneration();
+    const detection: DetectionDecision = { type: LanguageDetectType.Bing, language: "en", confirmed: true };
 
     clearQueryCache();
-    cacheQueryResult(service, query, createTranslationResult(), requestCacheGeneration);
-    cacheLanguageDetection(
-      query.word,
-      {
-        type: LanguageDetectType.Bing,
-        language: "en",
-        confirmed: true,
-      },
-      requestCacheGeneration,
-    );
+    cacheLanguageDetection(query.word, detection, generation);
 
-    expect(getCachedQueryResult(service, query)).toBeUndefined();
     expect(getCachedLanguageDetection(query.word)).toBeUndefined();
   });
 
@@ -199,6 +163,23 @@ describe("query cache", () => {
     };
     cacheQueryResult(service, query, result);
     expect(getCachedQueryResult(service, query)).toEqual(result);
+  });
+
+  it("allows a fresh lookup after a temporarily incomplete dictionary result", () => {
+    const service = createService("builtin:dictionary:Wiktionary", "regular");
+    const result: DictionaryResult = {
+      type: DictionaryType.Wiktionary,
+      cacheable: false,
+      content: {
+        kind: "dictionary",
+        query,
+        sections: [{ kind: "definitions", entries: [{ kind: "plain", text: "A place to live." }] }],
+      },
+    };
+
+    cacheQueryResult(service, query, result);
+
+    expect(getCachedQueryResult(service, query)).toBeUndefined();
   });
 
   it("stores content version 2 while retaining version 1 word evidence and seven-day dictionary expiry", () => {
@@ -299,6 +280,27 @@ describe("query cache", () => {
     expect(getCachedLanguageDetection("uncertain")).toBeUndefined();
     cacheLanguageDetection("unmapped", { type: LanguageDetectType.Bing, language: "auto", confirmed: false });
     expect(getCachedLanguageDetection("unmapped")).toBeUndefined();
+  });
+
+  it("keeps cached detection after Baidu translation credentials rotate", () => {
+    const detection: DetectionDecision = { type: LanguageDetectType.Baidu, language: "en", confirmed: true };
+    cacheLanguageDetection(query.word, detection);
+    testState.preferences.baiduAppId = "new-baidu-id";
+    testState.preferences.baiduAppSecret = "new-baidu-secret";
+
+    expect(getCachedLanguageDetection(query.word)).toEqual(detection);
+  });
+
+  it("invalidates cached detection when the detector toggle or Volcano credentials change", () => {
+    const detection: DetectionDecision = { type: LanguageDetectType.Volcano, language: "en", confirmed: true };
+    testState.preferences.enableVolcanoLanguageDetect = true;
+    cacheLanguageDetection(query.word, detection);
+    testState.preferences.enableVolcanoLanguageDetect = false;
+    expect(getCachedLanguageDetection(query.word)).toBeUndefined();
+
+    testState.preferences.enableVolcanoLanguageDetect = true;
+    testState.preferences.volcanoAccessKeySecret = "new-volcano-secret";
+    expect(getCachedLanguageDetection(query.word)).toBeUndefined();
   });
 
   it("reports an enabled cache only while at least one mode is not off", () => {

@@ -96,19 +96,8 @@ function detectionCacheKey(text: string): string {
     text,
     preferredLanguages: [myPreferences.language1, myPreferences.language2],
     speedFirst: myPreferences.enableDetectLanguageSpeedFirst,
-    detectors: [
-      myPreferences.enableBaiduLanguageDetect,
-      myPreferences.enableTencentLanguageDetect,
-      myPreferences.enableVolcanoLanguageDetect,
-    ],
-    credentials: [
-      myPreferences.baiduAppId,
-      myPreferences.baiduAppSecret,
-      myPreferences.tencentSecretId,
-      myPreferences.tencentSecretKey,
-      myPreferences.volcanoAccessKeyId,
-      myPreferences.volcanoAccessKeySecret,
-    ],
+    detectors: [myPreferences.enableBaiduLanguageDetect, myPreferences.enableVolcanoLanguageDetect],
+    credentials: [myPreferences.volcanoAccessKeyId, myPreferences.volcanoAccessKeySecret],
   });
 }
 
@@ -179,6 +168,7 @@ export function cacheQueryResult(
 ): void {
   synchronizeDisabledCaches();
   if (expectedGeneration !== cacheGeneration) return;
+  if ("cacheable" in result && result.cacheable === false) return;
   const mode = getResultCacheMode(service);
   if (!permitsInput(mode, query, result.content.query.isWord)) return;
   const ttl = !isAIService(service) && result.content.kind === "dictionary" ? 7 * DAY : DAY;

@@ -14,6 +14,7 @@ export const PROVIDER_ICON_NAMES = [
   "kimi",
   "minimax",
   "mimo",
+  "tokenhub",
   "raycast",
 ] as const;
 
@@ -77,6 +78,8 @@ export interface TranslationResult {
 export interface DictionaryResult {
   readonly type: DictionaryType;
   readonly content: DictionaryContent;
+  /** A temporary lookup failure left this result incomplete. */
+  readonly cacheable?: false;
 }
 
 export type ProviderResult = TranslationResult | DictionaryResult;

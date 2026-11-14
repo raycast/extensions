@@ -3,7 +3,12 @@ import { defineGenerator } from "automd";
 
 import { languageCatalog } from "./src/core/language/catalog";
 import { languageItemList } from "./src/core/language/consts";
-import type { LanguageDefinition, LanguageItem, SourceLanguage } from "./src/core/language/types";
+import type {
+  LanguageDefinition,
+  LanguageItem,
+  ProviderLanguageCodes,
+  SourceLanguage,
+} from "./src/core/language/types";
 
 const getYesNo = (condition: unknown) => {
   if (condition) return "✅";
@@ -88,73 +93,39 @@ const generateEasydictLanguages = ({ args }: GenerateContext) => {
   }
 };
 
-const generateEasydictDetectionTable = ({ args }: GenerateContext) => {
-  const locale = args.locale as string;
-  const isZh = locale === "zh";
+interface ProviderColumn {
+  en: string;
+  zh: string;
+  code: keyof ProviderLanguageCodes | "youdaoLangCode";
+}
 
-  const headers = isZh
-    ? ["语言", "Bing", "百度", "火山", "腾讯"]
-    : ["Languages", "Bing", "Baidu", "Volcano", "Tencent"];
+const detectionColumns: ProviderColumn[] = [
+  { en: "Bing", zh: "Bing", code: "bingLangCode" },
+  { en: "Baidu", zh: "百度", code: "baiduLangCode" },
+  { en: "Volcano", zh: "火山", code: "volcanoLangCode" },
+];
 
-  const rows: string[][] = [];
+const translationColumns: ProviderColumn[] = [
+  { en: "Youdao", zh: "有道翻译", code: "youdaoLangCode" },
+  { en: "DeepL", zh: "DeepL", code: "deepLSourceId" },
+  { en: "Google", zh: "Google 翻译", code: "googleLangCode" },
+  { en: "Bing", zh: "Bing 翻译", code: "bingLangCode" },
+  { en: "🍎 Apple", zh: "🍎 系统翻译", code: "appleLangCode" },
+  { en: "Baidu", zh: "百度翻译", code: "baiduLangCode" },
+  { en: "Volcano", zh: "火山翻译", code: "volcanoLangCode" },
+  { en: "Caiyun", zh: "彩云小译", code: "caiyunLangCode" },
+];
 
-  for (const lang of getFilteredLangs()) {
-    const name = getLangName(lang, locale);
-    const codes = codesOf(lang);
-    rows.push([
-      name,
-      getYesNo(codes.bingLangCode),
-      getYesNo(codes.baiduLangCode),
-      getYesNo(codes.volcanoLangCode),
-      getYesNo(codes.tencentDetectCode),
-    ]);
-  }
-
-  return { contents: buildMarkdownTable(headers, rows) };
-};
-
-const generateEasydictTranslationTable = ({ args }: GenerateContext) => {
-  const locale = args.locale as string;
-  const isZh = locale === "zh";
-
-  const headers = isZh
-    ? [
-        "语言",
-        "有道翻译",
-        "DeepL",
-        "Google 翻译",
-        "Bing 翻译",
-        "🍎 系统翻译",
-        "百度翻译",
-        "火山翻译",
-        "腾讯翻译",
-        "彩云小译",
-      ]
-    : ["Languages", "Youdao", "DeepL", "Google", "Bing", "🍎 Apple", "Baidu", "Volcano", "Tencent", "Caiyun"];
-
-  const rows: string[][] = [];
-
-  for (const lang of getFilteredLangs()) {
-    const name = getLangName(lang, locale);
-    const codes = codesOf(lang);
-    const cols = [
-      name,
-      getYesNo(lang.youdaoLangCode),
-      getYesNo(codes.deepLSourceId),
-      getYesNo(codes.googleLangCode),
-      getYesNo(codes.bingLangCode),
-      getYesNo(codes.appleLangCode),
-      getYesNo(codes.baiduLangCode),
-      getYesNo(codes.volcanoLangCode),
-      getYesNo(codes.tencentLangCode),
-      getYesNo(codes.caiyunLangCode),
-    ];
-
-    rows.push(cols);
-  }
+function generateProviderTable({ args }: GenerateContext, columns: ProviderColumn[]) {
+  const locale = args.locale === "zh" ? "zh" : "en";
+  const headers = [locale === "zh" ? "语言" : "Languages", ...columns.map((column) => column[locale])];
+  const rows = getFilteredLangs().map((lang) => {
+    const codes = { ...codesOf(lang), youdaoLangCode: lang.youdaoLangCode };
+    return [getLangName(lang, locale), ...columns.map(({ code }) => getYesNo(codes[code]))];
+  });
 
   return { contents: buildMarkdownTable(headers, rows) };
-};
+}
 
 /** @type {import("automd").Config} */
 export default {
@@ -166,11 +137,11 @@ export default {
     }),
     easydictDetectionTable: defineGenerator({
       name: "easydictDetectionTable",
-      generate: generateEasydictDetectionTable,
+      generate: (context) => generateProviderTable(context, detectionColumns),
     }),
     easydictTranslationTable: defineGenerator({
       name: "easydictTranslationTable",
-      generate: generateEasydictTranslationTable,
+      generate: (context) => generateProviderTable(context, translationColumns),
     }),
   },
 };

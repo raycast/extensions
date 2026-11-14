@@ -46,7 +46,7 @@ Beyond quick lookups, Raycast Easydict also works as a lightweight language-lear
 
 - 📦 **Out of the box**: look up words and translate text, with automatic language detection and a preferred target language; auto-queries selected text (on by default) and supports OCR screenshot translation.
 - 🎨 **Rich results**: translations, pronunciations, exam coverage, parts of speech, tenses and word forms, web phrases.
-- 🌐 **Multiple services**: dictionary lookup with Youdao and Linguee; translation with 🍎 Apple System Translation, DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun; 🤖 AI translation and lookup with Raycast AI or any OpenAI-compatible endpoint, including a dictionary mode that builds structured entries for words and terms.
+- 🌐 **Multiple services**: dictionary lookup with Youdao, Linguee, and Wiktionary; translation with 🍎 Apple System Translation, DeepL, Google, Bing, Baidu, Volcano, Youdao, and Caiyun; 🤖 AI translation and lookup with Raycast AI or any OpenAI-compatible endpoint, including a dictionary mode that builds structured entries for words and terms.
 - 🔊 **Auto pronunciation**: plays the word audio automatically after a query, with Youdao TTS for other languages.
 
 **Learn and review**
@@ -144,6 +144,11 @@ Use the **Manage Providers** command to manage AI providers and to set the order
 - AI providers connect to **Raycast AI** or any **OpenAI-compatible endpoint**.
 - Built-in presets cover common providers: pick yours, add the API key, and adjust the model if needed. If yours is missing, [contributions are welcome](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/development/adding-ai-provider.md).
 - **Word & Term Results** chooses **Plain Translation** or **AI-Generated Dictionary Entry**. Dictionary mode builds a structured entry for words and terms — pronunciation, senses, examples, and word forms — while other input is translated normally; it can be slower and may need a retry.
+
+**Tencent TokenHub**
+
+- In **Manage Providers**, choose **Add OpenAI-Compatible Provider**, select the **Tencent TokenHub** preset, and enter a [TokenHub API key](https://cloud.tencent.com/document/product/1823/130078). The preset uses the Guangzhou endpoint and defaults to `hy-mt2-lite`. If your key is from another region, set the API Base URL for that region.
+- The retired Tencent Cloud TMT translation and language detection options have been removed. TokenHub uses its own API key. Saved Tencent translations remain available in Favorite Words.
 
 **Legacy migration**
 
@@ -301,65 +306,65 @@ Currently we support 49 languages: **Simplified Chinese, Traditional Chinese, En
 
 ### Language Detection
 
-Easydict uses four remote language detection services: Bing, Baidu, Tencent, and Volcano. Franc provides the local fallback.
+Easydict uses three remote language detection services: Bing, Baidu, and Volcano. Franc provides the local fallback.
 
-Bing and Baidu language detection are enabled by default. Tencent and Volcano can be enabled independently in preferences and require their corresponding credentials. In general, enabling more detection services can improve accuracy and response time.
+Bing and Baidu language detection are enabled by default. Volcano can be enabled in preferences and requires its own credentials. In general, enabling more detection services can improve accuracy and response time.
 
 Details of the languages supported by each language detection service are as follows:
 
 <!-- automd:easydictDetectionTable locale="en" -->
 
-| Languages | Bing | Baidu | Volcano | Tencent |
-| - | - | - | - | - |
-| Simplified Chinese | ✅ | ✅ | ✅ | ✅ |
-| Traditional Chinese | ✅ | ✅ | ✅ | ❌ |
-| English | ✅ | ✅ | ✅ | ✅ |
-| Japanese | ✅ | ✅ | ✅ | ✅ |
-| Korean | ✅ | ✅ | ✅ | ✅ |
-| French | ✅ | ✅ | ✅ | ✅ |
-| Spanish | ✅ | ✅ | ✅ | ✅ |
-| Portuguese | ✅ | ✅ | ✅ | ✅ |
-| Italian | ✅ | ✅ | ✅ | ✅ |
-| German | ✅ | ✅ | ✅ | ✅ |
-| Russian | ✅ | ✅ | ✅ | ✅ |
-| Arabic | ✅ | ✅ | ✅ | ❌ |
-| Swedish | ✅ | ✅ | ✅ | ❌ |
-| Romanian | ✅ | ✅ | ✅ | ❌ |
-| Thai | ✅ | ✅ | ✅ | ✅ |
-| Slovak | ✅ | ✅ | ✅ | ❌ |
-| Dutch | ✅ | ✅ | ✅ | ❌ |
-| Hungarian | ✅ | ✅ | ✅ | ❌ |
-| Greek | ✅ | ✅ | ✅ | ❌ |
-| Danish | ✅ | ✅ | ✅ | ❌ |
-| Finnish | ✅ | ✅ | ✅ | ❌ |
-| Polish | ✅ | ✅ | ✅ | ❌ |
-| Czech | ✅ | ✅ | ✅ | ❌ |
-| Turkish | ✅ | ✅ | ✅ | ✅ |
-| Lithuanian | ✅ | ✅ | ✅ | ❌ |
-| Latvian | ✅ | ✅ | ✅ | ❌ |
-| Ukrainian | ✅ | ✅ | ✅ | ❌ |
-| Bulgarian | ✅ | ✅ | ✅ | ❌ |
-| Indonesian | ✅ | ✅ | ✅ | ✅ |
-| Malay | ✅ | ✅ | ✅ | ✅ |
-| Slovenian | ✅ | ✅ | ✅ | ❌ |
-| Estonian | ✅ | ✅ | ✅ | ❌ |
-| Vietnamese | ✅ | ✅ | ✅ | ✅ |
-| Persian | ✅ | ✅ | ✅ | ❌ |
-| Hindi | ✅ | ✅ | ✅ | ❌ |
-| Telugu | ✅ | ✅ | ✅ | ❌ |
-| Tamil | ✅ | ✅ | ✅ | ❌ |
-| Urdu | ✅ | ✅ | ✅ | ❌ |
-| Filipino | ✅ | ✅ | ✅ | ❌ |
-| Khmer | ✅ | ✅ | ✅ | ❌ |
-| Lao | ✅ | ✅ | ✅ | ❌ |
-| Bangla | ✅ | ✅ | ✅ | ❌ |
-| Burmese | ✅ | ✅ | ✅ | ❌ |
-| Norwegian | ✅ | ✅ | ✅ | ❌ |
-| Georgian | ✅ | ✅ | ✅ | ❌ |
-| Serbian | ✅ | ✅ | ✅ | ❌ |
-| Croatian | ✅ | ✅ | ✅ | ❌ |
-| Mongolian | ✅ | ✅ | ✅ | ❌ |
-| Hebrew | ✅ | ✅ | ✅ | ❌ |
+| Languages | Bing | Baidu | Volcano |
+| - | - | - | - |
+| Simplified Chinese | ✅ | ✅ | ✅ |
+| Traditional Chinese | ✅ | ✅ | ✅ |
+| English | ✅ | ✅ | ✅ |
+| Japanese | ✅ | ✅ | ✅ |
+| Korean | ✅ | ✅ | ✅ |
+| French | ✅ | ✅ | ✅ |
+| Spanish | ✅ | ✅ | ✅ |
+| Portuguese | ✅ | ✅ | ✅ |
+| Italian | ✅ | ✅ | ✅ |
+| German | ✅ | ✅ | ✅ |
+| Russian | ✅ | ✅ | ✅ |
+| Arabic | ✅ | ✅ | ✅ |
+| Swedish | ✅ | ✅ | ✅ |
+| Romanian | ✅ | ✅ | ✅ |
+| Thai | ✅ | ✅ | ✅ |
+| Slovak | ✅ | ✅ | ✅ |
+| Dutch | ✅ | ✅ | ✅ |
+| Hungarian | ✅ | ✅ | ✅ |
+| Greek | ✅ | ✅ | ✅ |
+| Danish | ✅ | ✅ | ✅ |
+| Finnish | ✅ | ✅ | ✅ |
+| Polish | ✅ | ✅ | ✅ |
+| Czech | ✅ | ✅ | ✅ |
+| Turkish | ✅ | ✅ | ✅ |
+| Lithuanian | ✅ | ✅ | ✅ |
+| Latvian | ✅ | ✅ | ✅ |
+| Ukrainian | ✅ | ✅ | ✅ |
+| Bulgarian | ✅ | ✅ | ✅ |
+| Indonesian | ✅ | ✅ | ✅ |
+| Malay | ✅ | ✅ | ✅ |
+| Slovenian | ✅ | ✅ | ✅ |
+| Estonian | ✅ | ✅ | ✅ |
+| Vietnamese | ✅ | ✅ | ✅ |
+| Persian | ✅ | ✅ | ✅ |
+| Hindi | ✅ | ✅ | ✅ |
+| Telugu | ✅ | ✅ | ✅ |
+| Tamil | ✅ | ✅ | ✅ |
+| Urdu | ✅ | ✅ | ✅ |
+| Filipino | ✅ | ✅ | ✅ |
+| Khmer | ✅ | ✅ | ✅ |
+| Lao | ✅ | ✅ | ✅ |
+| Bangla | ✅ | ✅ | ✅ |
+| Burmese | ✅ | ✅ | ✅ |
+| Norwegian | ✅ | ✅ | ✅ |
+| Georgian | ✅ | ✅ | ✅ |
+| Serbian | ✅ | ✅ | ✅ |
+| Croatian | ✅ | ✅ | ✅ |
+| Mongolian | ✅ | ✅ | ✅ |
+| Hebrew | ✅ | ✅ | ✅ |
 
 <!-- /automd -->
 
@@ -373,9 +378,13 @@ Support 5 languages, (Chinese), English, French, Japanese, Korean.
 
 Support 19 languages, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
+#### Wiktionary Dictionary
+
+This free dictionary uses [English Wiktionary](https://en.wiktionary.org/) and requires no API key. It shows English definitions for words in other languages and available translations into your target language for English words. Results can include parts of speech, IPA pronunciation, recorded audio, word forms, and usage examples. It covers language pairs without a reviewed Linguee dictionary, such as English ↔ Danish.
+
 ### Translation
 
-Currently, we support OpenAI, Gemini, DeepL, Google, Bing, 🍎 Apple, Baidu, Tencent, Volcano, Youdao, and Caiyun translation, total 11 translation services.
+Easydict supports DeepL, DeepLX, Google, Bing, 🍎 Apple System Translation, Baidu, Volcano, Youdao, and Caiyun. Add AI translation providers such as OpenAI, Gemini, and Tencent TokenHub in **Manage Providers**.
 
 Google and DeepL translations support system proxy. To enable proxy, turn on `Use System Proxy Settings` in the Raycast extension settings. (DeepL works without a proxy, but sometimes requests time out)
 
@@ -387,57 +396,57 @@ Supported translation languages:
 
 <!-- automd:easydictTranslationTable locale="en" -->
 
-| Languages | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Tencent | Caiyun |
-| - | - | - | - | - | - | - | - | - | - |
-| Simplified Chinese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Traditional Chinese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| English | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Japanese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Korean | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| French | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Spanish | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Portuguese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Italian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| German | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Russian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Arabic | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Swedish | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Romanian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Thai | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Slovak | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Dutch | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Hungarian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Greek | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Danish | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Finnish | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Polish | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Czech | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Turkish | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Lithuanian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Latvian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Ukrainian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Bulgarian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Indonesian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Malay | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Slovenian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Estonian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Vietnamese | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Persian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Hindi | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Telugu | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Tamil | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Urdu | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Filipino | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Khmer | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Lao | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Bangla | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Burmese | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Norwegian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Georgian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Serbian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Croatian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Mongolian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Hebrew | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Languages | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Caiyun |
+| - | - | - | - | - | - | - | - | - |
+| Simplified Chinese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Traditional Chinese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| English | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Japanese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Korean | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| French | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Spanish | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Portuguese | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Italian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| German | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Russian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Arabic | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Swedish | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Romanian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Thai | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Slovak | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Dutch | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Hungarian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Greek | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Danish | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Finnish | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Polish | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Czech | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Turkish | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Lithuanian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Latvian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Ukrainian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Bulgarian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Indonesian | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Malay | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Slovenian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Estonian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Vietnamese | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Persian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Hindi | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Telugu | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Tamil | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Urdu | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Filipino | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Khmer | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Lao | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Bangla | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Burmese | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Norwegian | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Georgian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Serbian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Croatian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Mongolian | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Hebrew | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 <!-- /automd -->
 
@@ -451,7 +460,6 @@ The following tutorial (from [`Bob`](https://bobtranslate.com/guide/advance/serv
 
 - [Youdao Translate](https://bobtranslate.com/service/translate/youdao.html)： Select `text translation` and `speech synthesis`. (You will receive ¥50 experience fund)
 - [Baidu Translate](https://bobtranslate.com/service/translate/baidu.html)
-- [Tencent Translate](https://bobtranslate.com/service/translate/tencent.html)
 - [Volcano Translate](https://bobtranslate.com/service/translate/volcengine.html)
 - [Caiyun Translate](https://bobtranslate.com/service/translate/caiyun.html)
 - [DeepL](https://www.deepl.com/translator)

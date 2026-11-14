@@ -14,10 +14,15 @@ export interface ProviderLanguageCodes {
   deepLSourceId?: string;
   deepLTargetId?: string;
   francLangCode?: string;
-  tencentDetectCode?: string;
-  tencentLangCode?: string;
   baiduLangCode?: string;
   caiyunLangCode?: string;
+}
+
+/** English Wiktionary language headings and translation-table codes, eg. `Norwegian Bokmål` and `nb`. */
+export interface WiktionaryLanguage {
+  names: readonly string[];
+  codes: readonly string[];
+  latinOnly?: boolean;
 }
 
 export interface LanguageDefinition {
@@ -26,8 +31,10 @@ export interface LanguageDefinition {
   emoji: string;
   voiceList?: { macOS?: readonly string[]; Windows?: readonly string[] };
   codes: ProviderLanguageCodes;
+  /** Only where Wiktionary differs from `langEnglishName` and the internal code. */
+  wiktionary?: WiktionaryLanguage;
 }
 
-export interface LanguageItem extends Omit<LanguageDefinition, "codes"> {
+export interface LanguageItem extends Omit<LanguageDefinition, "codes" | "wiktionary"> {
   youdaoLangCode: SourceLanguage;
 }
