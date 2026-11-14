@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <filter id="k-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComponentTransfer in="blur" result="glow1">
+        <feFuncA type="linear" slope="0.5" />
+      </feComponentTransfer>
+      <feColorMatrix type="matrix" values="
+        0 0 0 0 0.49
+        0 0 0 0 0.82
+        0 0 0 0 0.98
+        0 0 0 1 0" in="glow1" result="colorGlow" />
+      <feComposite in="SourceGraphic" in2="colorGlow" operator="over" />
+    </filter>
+  </defs>
+  <path d="M 377 440 L 437 440 L 437 760 L 377 760 Z M 437 620 L 557 440 L 637 440 L 487 650 L 647 760 L 557 760 L 437 640 Z" 
+        fill="#FFFFFF" filter="url(#k-glow)" />
+</svg>
