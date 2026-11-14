@@ -1,5 +1,10 @@
 # Google Cloud CLI Changelog
 
+## [Delete Compute Engine Instances] - {PR_MERGE_DATE}
+
+- Added a destructive action to permanently delete Compute Engine VM instances from the instance list or detail view
+- Added confirmation and operation-status feedback, including a warning that auto-delete disks are also removed
+
 ## [Compute Engine Lifecycle Fixes] - 2026-09-23
 
 - Fixed Compute Engine lifecycle actions to use state-aware verbs, including resuming suspended instances instead of trying to start them
