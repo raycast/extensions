@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "buildinpublic",
+  "title": "Build in Public",
+  "description": "Manage your Build in Public projects, find member deals and search the maker directory from Raycast. Requires a Build in Public account.",
+  "icon": "extension-icon.png",
+  "author": "marckohlbrugge",
+  "platforms": ["macOS"],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-projects",
+      "title": "My Projects",
+      "subtitle": "Build in Public",
+      "description": "See, edit and remove the projects on your Build in Public profile",
+      "mode": "view"
+    },
+    {
+      "name": "add-project",
+      "title": "Add Project",
+      "subtitle": "Build in Public",
+      "description": "Add a project to your Build in Public profile",
+      "mode": "view"
+    },
+    {
+      "name": "search-deals",
+      "title": "Search Deals",
+      "subtitle": "Build in Public",
+      "description": "Search the discounts and credits on software that members get",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Build in Public",
+      "description": "Search projects in the Build in Public directory",
+      "mode": "view"
+    },
+    {
+      "name": "search-members",
+      "title": "Search Members",
+      "subtitle": "Build in Public",
+      "description": "Search makers in the Build in Public directory",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "environment",
+      "type": "dropdown",
+      "title": "Environment",
+      "description": "Which Build in Public server to talk to. Leave on Production unless you're developing the extension.",
+      "default": "production",
+      "required": false,
+      "data": [
+        {
+          "title": "Production",
+          "value": "production"
+        },
+        {
+          "title": "Development",
+          "value": "development"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
