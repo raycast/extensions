@@ -1,0 +1,7 @@
+{
+  "companion": {
+    "version": "1.0.1",
+    "xpiUrl": "https://github.com/chenghsj/app-hopper/releases/download/companion-v1.0.1/app-hopper-companion-1.0.1.xpi",
+    "sha256": "1a498b3d6bd9ef1a3216b7ae7f3b1f6f146012084fcf801c932927ef815c76cb"
+  }
+}

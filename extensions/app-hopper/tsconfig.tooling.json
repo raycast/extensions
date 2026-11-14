@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["scripts/**/*.ts", "tests/**/*.ts", "eslint.config.ts"],
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "lib": ["ES2023", "DOM"]
+  },
+  "exclude": ["scripts/prototypes/**", "tests/fixtures/zen-workspace-smoke.ts"]
+}

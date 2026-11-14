@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "minimumMacOS": "13.0",
+  "signing": "ad-hoc",
+  "helpers": {
+    "runtime-status": {
+      "file": "runtime-status-5e63c5df71af",
+      "sourceHash": "5e63c5df71af",
+      "sha256": "8ef85cade94057c6d2d4e5822c6fc16d823258c1349f701eca36ea148c2a50cd"
+    },
+    "macos-windows": {
+      "file": "macos-windows-5fd4900929b2",
+      "sourceHash": "5fd4900929b2",
+      "sha256": "bb66b5c2fd37a8c3430a9fa276999a84958f87d0b80805388b76e29b27b4cc02"
+    },
+    "chromium-ax": {
+      "file": "chromium-ax-caa86deafc21",
+      "sourceHash": "caa86deafc21",
+      "sha256": "64450b1b676cffe77f149c411a57507c35836b4ca6bdb1af262cffc85c793640"
+    },
+    "webkit-ax": {
+      "file": "webkit-ax-9d3b7892c574",
+      "sourceHash": "9d3b7892c574",
+      "sha256": "38d16b5f423cf39fa2f6cd0eb510801771faa8acf0a1246d754e41ccddc48109"
+    },
+    "firefox-ax": {
+      "file": "firefox-ax-be66c84b3ba9",
+      "sourceHash": "be66c84b3ba9",
+      "sha256": "3fb5a895811c6d59f5c8585cdf5721a1d00439fab2eed4ddb65bb084132a95cb"
+    },
+    "firefox-bridge": {
+      "file": "firefox-bridge-7505e0e44b8c",
+      "sourceHash": "7505e0e44b8c",
+      "sha256": "d410cd59a82829954068a05b9c8f080df0de967d408e38a3e68b856ddc98264f"
+    }
+  }
+}
