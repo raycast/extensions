@@ -6,6 +6,7 @@ Manage Beeper Desktop with Raycast. Uses the [Beeper Desktop API TypeScript SDK]
 
 - **Recent Chats**: Browse recent chats, open in Beeper Desktop, reply/edit, set reminders, archive, and upload/download attachments.
 - **Unread Chats**: Focus on chats with unread messages.
+- **Awaiting Reply**: See direct conversations where the other person sent the last message, mark them handled, or hand off a draft to Beeper. Also available as a menu bar count (**Awaiting Reply Count**) on macOS; Raycast doesn't support menu bar commands on Windows, so there the list command is the way to check.
 - **Contacts**: Search contacts across connected accounts and start chats.
 - **Search Recent Messages**: Search messages across chats with sender/attachment/date filters.
 - **Connected Accounts**: View all connected messaging services.
