@@ -57,7 +57,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --test --experimental-strip-types src/ccswap.test.ts",
     "prepublishOnly": "echo \"\\n\\nUse \\`npm run publish\\` to publish to the Raycast Store.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

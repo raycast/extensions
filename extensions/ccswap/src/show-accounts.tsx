@@ -23,6 +23,8 @@ const AFTER_SWITCH: Record<Provider, string> = {
 
 function windowTag(name: string, window: UsageWindow | undefined): List.Item.Accessory[] {
   if (!window) return [];
+  // null: the API reported the window without a utilization figure.
+  if (window.pct === null) return [{ tag: `${name} ?`, tooltip: window.countdown && `Resets in ${window.countdown}` }];
   const pct = Math.round(window.pct);
   const color = pct >= 90 ? Color.Red : pct >= 70 ? Color.Orange : undefined;
   return [{ tag: { value: `${name} ${pct}%`, color }, tooltip: window.countdown && `Resets in ${window.countdown}` }];
@@ -98,6 +100,19 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search accounts…">
+      {data && !data.claude.length && !data.codex.length && (
+        <List.EmptyView
+          icon={Icon.PersonCircle}
+          title="No Accounts Yet"
+          description="Log in to Claude Code, then run `ccswap add` in a terminal to save the account."
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy Command" content="ccswap add" />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      )}
       {(["claude", "codex"] as const).map((provider) => (
         <List.Section key={provider} title={TITLES[provider]}>
           {(data?.[provider] ?? []).map((account) => (

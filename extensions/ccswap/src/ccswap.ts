@@ -3,13 +3,13 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-// Kept free of @raycast/api imports so `npm test` runs it under plain Node.
+// Kept free of @raycast/api imports so raycast-tests/ccswap.test.ts runs it under plain Node.
 
 export const SCHEMA_VERSION = 1;
 
 export type Provider = "claude" | "codex";
 
-export type UsageWindow = { pct: number; countdown?: string };
+export type UsageWindow = { pct: number | null; countdown?: string };
 
 export type Account = {
   number: number;
