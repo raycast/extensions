@@ -1,0 +1,230 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "graphite",
+  "title": "Graphite",
+  "description": "Review, approve, comment on, and merge the pull requests in your Graphite inbox. Requires the Graphite and GitHub CLIs.",
+  "icon": "extension-icon.png",
+  "author": "michalzuch",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "inbox",
+      "title": "Pull Request Inbox",
+      "subtitle": "Graphite",
+      "description": "See the pull requests in your Graphite inbox, then read, approve, comment on, and merge them.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "title": "Primary Action",
+          "description": "Choose whether ↵ shows the pull request in Raycast or opens your preferred website. The other action moves to ⌘↵.",
+          "type": "dropdown",
+          "required": false,
+          "default": "details",
+          "data": [
+            {
+              "title": "Show Pull Request in Raycast",
+              "value": "details"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "browser"
+            }
+          ]
+        },
+        {
+          "name": "showReviewStatus",
+          "title": "Show in List",
+          "label": "Review status",
+          "description": "Approved or changes requested, plus your own review.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showComments",
+          "label": "Comments",
+          "description": "Unresolved comments and approvals that came with comments.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showChecks",
+          "label": "Checks",
+          "description": "Whether CI checks pass, fail, or are still running.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showMergeStatus",
+          "label": "Merge status",
+          "description": "Ready to merge, merging, or merge conflicts, as reported by Graphite.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showUpdated",
+          "label": "Last updated",
+          "description": "When the pull request last changed.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ],
+      "keywords": [
+        "review",
+        "pr",
+        "prs",
+        "approve",
+        "merge"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Inbox Menu Bar",
+      "subtitle": "Graphite",
+      "description": "Show your Graphite inbox in the menu bar, with a count of pull requests waiting on you.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "showEmptySections",
+          "title": "Menu Bar",
+          "label": "Show empty sections",
+          "description": "List sections that have no pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "showCount",
+          "label": "Show count next to the icon",
+          "description": "Counts the pull requests in sections Graphite includes in your inbox total (marked ⚐).",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ],
+      "disabledByDefault": true
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-inbox",
+      "title": "Get Inbox",
+      "description": "List the pull requests in your Graphite PR inbox by section, with review status, unresolved comments, CI checks, and merge status."
+    },
+    {
+      "name": "get-pull-request",
+      "title": "Get Pull Request",
+      "description": "Read a pull request in full: description, reviews, unresolved comments, checks, and Graphite's merge status."
+    },
+    {
+      "name": "review-pull-request",
+      "title": "Review Pull Request",
+      "description": "Approve, request changes on, or comment on a pull request with the GitHub CLI, after you confirm."
+    },
+    {
+      "name": "merge-pull-request",
+      "title": "Merge Pull Request",
+      "description": "Merge a pull request and the pull requests below it in its stack with Graphite, after you confirm. Only merges when Graphite says it's ready."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openPullRequestsIn",
+      "title": "Open Pull Requests In",
+      "description": "The website pull requests open in. The other one is always in the Actions panel.",
+      "type": "dropdown",
+      "required": false,
+      "default": "graphite",
+      "data": [
+        {
+          "title": "Graphite",
+          "value": "graphite"
+        },
+        {
+          "title": "GitHub",
+          "value": "github"
+        }
+      ]
+    },
+    {
+      "name": "celebrateMerges",
+      "title": "Extras",
+      "label": "Celebrate merges",
+      "description": "Show confetti after you merge a pull request from Raycast.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "repositoryFolders",
+      "title": "Repository Folders",
+      "description": "Comma-separated folders that hold your Git repositories, searched up to three levels deep. Used by Check out Locally (`gt get`).",
+      "type": "textfield",
+      "required": false,
+      "default": "~/code, ~/Developer, ~/Projects, ~/src, ~/dev, ~/repos, ~/git, ~/GitHub, ~/workspace",
+      "placeholder": "~/code, ~/Developer"
+    },
+    {
+      "name": "gtPath",
+      "title": "Graphite CLI Path",
+      "description": "Path to the `gt` executable. Leave empty to find it on your login shell's PATH.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/gt"
+    },
+    {
+      "name": "ghPath",
+      "title": "GitHub CLI Path",
+      "description": "Path to the `gh` executable, used for reviews, comments, and checks. Leave empty to find it on your login shell's PATH.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/gh"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "4.1.12"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "graphite",
+    "gt",
+    "stacked prs",
+    "pull requests",
+    "code review",
+    "review",
+    "merge"
+  ]
+}
