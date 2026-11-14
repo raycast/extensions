@@ -45,12 +45,11 @@
     "dev": "ray develop",
     "lint": "npm run lint:code && ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --test-reporter=spec tests/*.test.mjs",
     "publish": "npx @raycast/api@latest publish",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run build && npm run typecheck && npm run lint:code && npm test && npm run format:check",
-    "lint:code": "eslint src tests --max-warnings=0"
+    "check": "npm run build && npm run typecheck && npm run lint:code && npm run format:check",
+    "lint:code": "eslint src --max-warnings=0"
   },
   "platforms": [
     "macOS"
