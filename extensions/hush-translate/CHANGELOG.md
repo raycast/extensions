@@ -1,6 +1,6 @@
 # Hush Translate Changelog
 
-## [Initial Version] - 2026-11-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Translate typed text, the clipboard, the selection in the frontmost app, or an area of the screen.
 - Translation runs on the Mac with Apple Intelligence: no account, no API key, nothing leaves the device.

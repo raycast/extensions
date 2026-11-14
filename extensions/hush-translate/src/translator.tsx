@@ -13,6 +13,7 @@ import {
   getSelectedText,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { pathToFileURL } from "url";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -47,13 +48,17 @@ interface Job {
   to: string;
   source: Source;
   image?: string;
+  /** Translated, but the history could not save it; the result stays on screen to copy. */
+  unsaved?: boolean;
 }
 
 /** Why there is nothing to translate, shown in place of the empty list. */
 interface Notice {
-  icon: Icon;
+  icon: Icon | { source: Icon; tintColor: Color };
   title: string;
   description: string;
+  /** Offer to read the source again. */
+  retry?: boolean;
 }
 
 const JOB_ID = "job";
@@ -103,6 +108,11 @@ const NOTHING_FOUND: Record<Exclude<Source, "input">, Notice> = {
   },
 };
 
+const READ_FAILED: Record<"clipboard" | "screenshot", string> = {
+  clipboard: "Couldn’t Read the Clipboard",
+  screenshot: "Couldn’t Read the Screenshot",
+};
+
 const NO_TEXT_IN_IMAGE: Notice = {
   icon: Icon.Image,
   title: "No Text Found in the Image",
@@ -118,18 +128,26 @@ function sourceIcon(source: Source, image?: string) {
 
 const singleLine = (text: string) => text.replace(/\s+/g, " ").trim();
 
+/**
+ * Copied or translated text is shown as Markdown, which can embed remote images. Image syntax and
+ * HTML are escaped, and an invisible word joiner splits every "//" so that no URL in the text can
+ * be fetched even if the renderer still reads some of it as markup. Copy actions use the raw text.
+ */
+const inert = (text: string) =>
+  text.replace(/\\/g, "\\\\").replace(/!\[/g, "!\\[").replace(/</g, "\\<").replace(/\/\//g, "/\u2060/");
+
 /** Markdown folds single line breaks into spaces; keep the lines the text came with. */
 const keepLineBreaks = (text: string) => text.replace(/\n/g, "  \n");
 
 /** The translation, then the language pair, the original as a quote and the image it was read from. */
 function detailMarkdown(item: { original: string; translation: string; from?: string; to: string; image?: string }) {
   const languages = item.from ? `\`${languageName(item.from)} → ${languageName(item.to)}\`\n\n` : "";
-  const quote = item.original
+  const quote = inert(item.original)
     .split("\n")
     .map((line) => `> ${line}`)
     .join("  \n");
   const image = item.image ? `\n\n![The image this text was read from](${pathToFileURL(item.image).href})` : "";
-  return `${keepLineBreaks(item.translation)}\n\n---\n\n${languages}${quote}${image}`;
+  return `${keepLineBreaks(inert(item.translation))}\n\n---\n\n${languages}${quote}${image}`;
 }
 
 export function Translator({ source, text: launchText, image: launchImage }: TranslatorProps) {
@@ -166,6 +184,10 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       controller.current?.abort();
       const abort = new AbortController();
       controller.current = abort;
+      // Only the newest translation may touch the view.
+      const current = () => controller.current === abort && !abort.signal.aborted;
+      // Deleting the entry this text came from must not delete the image it still needs.
+      const release = history.hold(origin.image);
 
       setNotice(undefined);
       setSearchText("");
@@ -173,14 +195,27 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       setSelectedId(JOB_ID);
 
       try {
-        const result = await translate(original, {
-          to,
-          alt,
-          signal: abort.signal,
-          onStart: (from, to) => setJob((job) => job && { ...job, from, to }),
-          onText: (translation) => setJob((job) => job && { ...job, translation }),
-        });
-        if (abort.signal.aborted) return;
+        let result;
+        try {
+          result = await translate(original, {
+            to,
+            alt,
+            signal: abort.signal,
+            onStart: (from, to) => current() && setJob((job) => job && { ...job, from, to }),
+            onText: (translation) => current() && setJob((job) => job && { ...job, translation }),
+          });
+        } catch (error) {
+          if (!current()) return;
+          setJob(undefined);
+          setSearchText(singleLine(original));
+          if (error instanceof EngineError && UNAVAILABLE_REASONS.includes(error.code)) {
+            setStatus({ available: false, reason: error.code as UnavailableReason });
+          } else {
+            await showFailureToast(error, { title: "Couldn’t Translate" });
+          }
+          return;
+        }
+        if (!current()) return;
 
         const entry: Entry = {
           id: randomUUID(),
@@ -191,7 +226,15 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
           to: result.to,
           ...origin,
         };
-        await history.add(entry);
+        try {
+          await history.add(entry);
+        } catch (error) {
+          if (!current()) return;
+          setJob({ ...entry, unsaved: true });
+          await showFailureToast(error, { title: "Couldn’t Save the Translation" });
+          return;
+        }
+        if (!current()) return;
         setJob(undefined);
         setSelectedId(entry.id);
 
@@ -199,52 +242,53 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
           await Clipboard.copy(result.text);
           await showToast({ style: Toast.Style.Success, title: "Copied Translation" });
         }
-      } catch (error) {
-        // Another translation took over; it owns the state now.
-        if (controller.current !== abort) return;
-        setJob(undefined);
-        setSearchText(singleLine(original));
-        if (abort.signal.aborted) return;
-
-        if (error instanceof EngineError && UNAVAILABLE_REASONS.includes(error.code)) {
-          setStatus({ available: false, reason: error.code as UnavailableReason });
-          return;
-        }
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn’t Translate",
-          message: error instanceof Error ? error.message : String(error),
-        });
+      } finally {
+        release();
       }
     },
-    [history.add, preferences.altLang, preferences.toLang, preferences.autoCopy],
+    [history.add, history.hold, preferences.altLang, preferences.toLang, preferences.autoCopy],
   );
+
+  /** Reads what the command was opened for and translates it. */
+  const load = useCallback(async () => {
+    setIsPreparing(true);
+    setNotice(undefined);
+    let capture: Capture = { kind: "empty" };
+    try {
+      if (launchImage) capture = await recognizeText(launchImage);
+      else if (launchText) capture = { kind: "text", text: launchText };
+      else if (source === "clipboard") capture = await readClipboard();
+      else if (source === "selection") {
+        // Raycast throws when nothing is selected; that is the "nothing selected" case.
+        capture = { kind: "text", text: await getSelectedText().catch(() => "") };
+      } else return;
+    } catch (error) {
+      if (source === "clipboard" || source === "screenshot") {
+        setNotice({
+          icon: { source: Icon.Warning, tintColor: Color.Orange },
+          title: READ_FAILED[source],
+          description: error instanceof Error ? error.message : String(error),
+          retry: true,
+        });
+      }
+      return;
+    } finally {
+      setIsPreparing(false);
+    }
+
+    const text = capture.text?.trim();
+    if (text) {
+      await run(text, { source, image: capture.image });
+    } else if (source !== "input") {
+      await discardImage(capture.image ?? launchImage);
+      setNotice(source === "clipboard" && capture.kind === "image" ? NO_TEXT_IN_IMAGE : NOTHING_FOUND[source]);
+    }
+  }, [launchImage, launchText, source, run]);
 
   // Pick up what the command was opened for.
   useEffect(() => {
     checkStatus();
-
-    (async () => {
-      let capture: Capture = { kind: "empty" };
-      try {
-        if (launchImage) capture = await recognizeText(launchImage);
-        else if (launchText) capture = { kind: "text", text: launchText };
-        else if (source === "clipboard") capture = await readClipboard();
-        else if (source === "selection") capture = { kind: "text", text: await getSelectedText() };
-        else return;
-      } catch {
-        // Nothing selected, or the image could not be read: handled as "nothing found" below.
-      }
-
-      const text = capture.text?.trim();
-      if (text) {
-        await run(text, { source, image: capture.image });
-      } else if (source !== "input") {
-        await discardImage(capture.image ?? launchImage);
-        setNotice(source === "clipboard" && capture.kind === "image" ? NO_TEXT_IN_IMAGE : NOTHING_FOUND[source]);
-      }
-    })().finally(() => setIsPreparing(false));
-
+    void load();
     return () => controller.current?.abort();
   }, []);
 
@@ -288,7 +332,7 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
 
   return (
     <List
-      isLoading={isPreparing || Boolean(job) || history.entries === undefined}
+      isLoading={isPreparing || Boolean(job && !job.unsaved) || history.isLoading}
       isShowingDetail={hasItems}
       filtering={false}
       searchText={searchText}
@@ -306,7 +350,18 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       }
       actions={<ActionPanel>{translateTyped}</ActionPanel>}
     >
-      <List.EmptyView icon={empty.icon} title={empty.title} description={empty.description} />
+      <List.EmptyView
+        icon={empty.icon}
+        title={empty.title}
+        description={empty.description}
+        actions={
+          empty.retry ? (
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={load} />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
 
       {job && (
         <List.Item
@@ -317,9 +372,16 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
             <List.Item.Detail markdown={detailMarkdown({ ...job, translation: job.translation || "_Translating…_" })} />
           }
           actions={
-            <ActionPanel>
-              <Action title="Stop Translating" icon={Icon.Stop} onAction={() => controller.current?.abort()} />
-            </ActionPanel>
+            job.unsaved ? (
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Translation" content={job.translation} />
+                <Action.Paste title="Paste Translation" content={job.translation} />
+              </ActionPanel>
+            ) : (
+              <ActionPanel>
+                <Action title="Stop Translating" icon={Icon.Stop} onAction={() => controller.current?.abort()} />
+              </ActionPanel>
+            )
           }
         />
       )}
@@ -368,7 +430,19 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={() => history.remove(entry.id)}
+                  onAction={async () => {
+                    const confirmed = await confirmAlert({
+                      title: "Delete this translation?",
+                      message: "It will be removed from the history. This can’t be undone.",
+                      primaryAction: { title: "Delete Entry", style: Alert.ActionStyle.Destructive },
+                    });
+                    if (!confirmed) return;
+                    try {
+                      await history.remove(entry.id);
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Couldn’t Delete the Entry" });
+                    }
+                  }}
                 />
                 <Action
                   title="Clear History"
@@ -381,7 +455,12 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
                       message: `All ${entries.length} entries will be deleted. This can’t be undone.`,
                       primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
                     });
-                    if (confirmed) await history.clear();
+                    if (!confirmed) return;
+                    try {
+                      await history.clear();
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Couldn’t Clear the History" });
+                    }
                   }}
                 />
               </ActionPanel.Section>

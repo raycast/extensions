@@ -114,7 +114,7 @@ struct Plan: Encodable {
   return Plan(from: from ?? "", to: to, chunks: chunks(of: text, budget: budget))
 }
 
-/// Translates one piece from `plan`, keeping the line breaks that end it.
+/// Translates one piece from `plan`, keeping the whitespace around it so pieces join up again.
 @raycast func translateChunk(chunk: String, to: String) async throws -> String {
   guard chunk.contains(where: { !$0.isWhitespace }) else { return chunk }
   try requireModel()
@@ -130,8 +130,8 @@ struct Plan: Encodable {
   let session = LanguageModelSession(model: model, instructions: instructions)
   let prompt = "Translate into \(target):\n\n\(chunk.trimmingCharacters(in: .newlines))"
   do {
-    let response = try await session.respond(to: prompt, options: GenerationOptions(samplingMode: .greedy))
-    return unquoted(response.content, source: chunk) + trailingNewlines(of: chunk)
+    let response = try await session.respond(to: prompt, options: GenerationOptions(sampling: .greedy))
+    return leadingWhitespace(of: chunk) + unquoted(response.content, source: chunk) + trailingWhitespace(of: chunk)
   } catch {
     let (code, message) = describe(error)
     throw Failure(code: code, message: message)
@@ -163,22 +163,20 @@ private func weight(_ text: some StringProtocol) -> Int {
   return Int(total.rounded(.up))
 }
 
-/// Splits on line boundaries (and inside an oversized line, on sentence boundaries) so that
-/// concatenating the pieces gives back the original text.
+/// Splits on line boundaries, then inside an oversized line on sentence boundaries, then inside
+/// an oversized sentence on word or character boundaries. Concatenating the pieces gives back the
+/// original text, whitespace included.
 private func chunks(of text: String, budget: Int) -> [String] {
   var pieces: [String] = []
   for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+    let line = String(line) + "\n"
     if weight(line) <= budget {
-      pieces.append(line + "\n")
+      pieces.append(line)
       continue
     }
-    let tokenizer = NLTokenizer(unit: .sentence)
-    let string = String(line)
-    tokenizer.string = string
-    var sentences = tokenizer.tokens(for: string.startIndex..<string.endIndex).map { String(string[$0]) }
-    if sentences.isEmpty { sentences = [string] }
-    sentences[sentences.count - 1] += "\n"
-    pieces.append(contentsOf: sentences)
+    for sentence in sentences(of: line) {
+      pieces.append(contentsOf: weight(sentence) <= budget ? [sentence] : hardSplit(sentence, budget: budget))
+    }
   }
 
   var result: [String] = []
@@ -194,8 +192,47 @@ private func chunks(of text: String, budget: Int) -> [String] {
   return result
 }
 
-private func trailingNewlines(of chunk: String) -> String {
-  String(chunk.reversed().prefix(while: { $0 == "\n" }))
+/// Sentences of `line`, each running up to where the next one starts so the spaces between them stay.
+private func sentences(of line: String) -> [String] {
+  let tokenizer = NLTokenizer(unit: .sentence)
+  tokenizer.string = line
+  var starts = tokenizer.tokens(for: line.startIndex..<line.endIndex).map(\.lowerBound)
+  if starts.first != line.startIndex { starts.insert(line.startIndex, at: 0) }
+  return zip(starts, starts.dropFirst().map(Optional.some) + [nil]).map { start, end in
+    String(line[start..<(end ?? line.endIndex)])
+  }
+}
+
+/// Cuts a sentence that alone exceeds the budget: after a space where there is one (Latin
+/// scripts), otherwise between characters (Chinese, Japanese).
+private func hardSplit(_ sentence: String, budget: Int) -> [String] {
+  var pieces: [String] = []
+  var current = ""
+  var lastBreak: String.Index? = nil
+  for character in sentence {
+    current.append(character)
+    if character.isWhitespace { lastBreak = current.endIndex }
+    guard weight(current) > budget else { continue }
+    if let cut = lastBreak, cut < current.endIndex {
+      pieces.append(String(current[..<cut]))
+      current = String(current[cut...])
+    } else {
+      pieces.append(current)
+      current = ""
+    }
+    lastBreak = nil
+  }
+  if !current.isEmpty { pieces.append(current) }
+  return pieces
+}
+
+private func leadingWhitespace(of chunk: String) -> String {
+  String(chunk.prefix(while: \.isWhitespace))
+}
+
+private func trailingWhitespace(of chunk: String) -> String {
+  guard chunk.contains(where: { !$0.isWhitespace }) else { return "" }
+  return String(chunk.reversed().prefix(while: \.isWhitespace).reversed())
 }
 
 // MARK: - Output clean-up

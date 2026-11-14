@@ -1,7 +1,8 @@
 import { LocalStorage } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { readdir, stat, unlink } from "fs/promises";
 import path from "path";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { imageDirectory } from "./engine";
 
 export type Source = "input" | "clipboard" | "selection" | "screenshot";
@@ -26,47 +27,61 @@ export async function discardImage(file: string | undefined) {
   if (file && path.dirname(path.resolve(file)) === imageDirectory) await unlink(file).catch(() => undefined);
 }
 
+async function readEntries(): Promise<Entry[]> {
+  const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : [];
+}
+
 /** Deletes images no entry points at any more, including ones left behind by a failed capture. */
-async function removeUnusedImages(entries: Entry[]) {
+async function removeUnusedImages(entries: Entry[], held: Set<string>) {
   const used = new Set(entries.map((entry) => entry.image));
   const names = await readdir(imageDirectory).catch(() => [] as string[]);
   for (const name of names) {
     const file = path.join(imageDirectory, name);
-    if (used.has(file)) continue;
+    if (used.has(file) || held.has(file)) continue;
     // A capture that is being translated right now has no entry yet.
     const info = await stat(file).catch(() => undefined);
     if (info && Date.now() - info.mtimeMs > 10 * 60 * 1000) await discardImage(file);
   }
 }
 
-async function load(): Promise<Entry[]> {
-  const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
-}
-
+/**
+ * The translation history. Every change is written to storage first and shown only once the
+ * write succeeded; a failed write throws and leaves both storage and the list as they were.
+ */
 export function useHistory() {
-  const [entries, setEntries] = useState<Entry[]>();
-  const current = useRef<Entry[]>([]);
-  const loading = useRef<Promise<void>>(undefined);
+  const { data, isLoading, error, mutate } = usePromise(readEntries, [], {
+    failureToastOptions: { title: "Couldn’t Load the History" },
+  });
+
+  // Images that a translation in progress still needs, so deleting their entry keeps the file.
+  const held = useRef(new Set<string>());
+  // Changes run one after another, each on top of what the previous one stored.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
 
   useEffect(() => {
-    loading.current = load().then((loaded) => {
-      current.current = loaded;
-      setEntries(loaded);
-      void removeUnusedImages(loaded);
-    });
-  }, []);
+    if (data) void removeUnusedImages(data, held.current);
+  }, [data === undefined]);
 
-  /** Applies a change on top of the stored entries, waiting for them to load first. */
-  const update = useCallback(async (change: (entries: Entry[]) => Entry[]) => {
-    await loading.current;
-    const next = change(current.current);
-    const dropped = current.current.filter((entry) => entry.image && !next.some((kept) => kept.image === entry.image));
-    current.current = next;
-    setEntries(next);
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    await Promise.all(dropped.map((entry) => discardImage(entry.image)));
-  }, []);
+  const update = useCallback(
+    (change: (entries: Entry[]) => Entry[]) => {
+      const run = queue.current.then(async () => {
+        const before = await readEntries();
+        const next = change(before);
+        await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        await mutate(Promise.resolve(), { optimisticUpdate: () => next, shouldRevalidateAfter: false });
+
+        const kept = new Set(next.map((entry) => entry.image));
+        const dropped = before.filter(
+          (entry) => entry.image && !kept.has(entry.image) && !held.current.has(entry.image),
+        );
+        await Promise.all(dropped.map((entry) => discardImage(entry.image)));
+      });
+      queue.current = run.catch(() => undefined);
+      return run;
+    },
+    [mutate],
+  );
 
   /** Adds an entry on top; translating the same text into the same language again replaces the old one. */
   const add = useCallback(
@@ -79,5 +94,14 @@ export function useHistory() {
   const remove = useCallback((id: string) => update((all) => all.filter((entry) => entry.id !== id)), [update]);
   const clear = useCallback(() => update(() => []), [update]);
 
-  return { entries, add, remove, clear };
+  /** Keeps `image` on disk until the returned function is called, whatever happens to its entry. */
+  const hold = useCallback((image: string | undefined) => {
+    if (!image) return () => undefined;
+    held.current.add(image);
+    return () => {
+      held.current.delete(image);
+    };
+  }, []);
+
+  return { entries: data, isLoading, error, add, remove, clear, hold };
 }
