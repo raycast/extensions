@@ -1,6 +1,6 @@
 # Productboard Changelog
 
-## [Migrate to v2 API] - {PR_MERGE_DATE}
+## [Migrate to v2 API] - 2026-11-15
 
 - Fixed extension not working due to deprecation of v1 API (ref: [Issue #31244](https://github.com/raycast/extensions/issues/31244))
 
