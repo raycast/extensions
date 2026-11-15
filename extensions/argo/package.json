@@ -27,6 +27,13 @@
       "mode": "view"
     },
     {
+      "name": "screenshot",
+      "title": "Screenshot and Comment",
+      "subtitle": "Argo",
+      "description": "Capture a screen region, add a comment, and send it to your recent Agent session.",
+      "mode": "no-view"
+    },
+    {
       "name": "connect",
       "title": "Connect a Server",
       "subtitle": "Argo",

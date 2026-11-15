@@ -314,19 +314,29 @@ export function useBridges() {
 export function useDraft(bindingId: string, identity?: string) {
   const [text, setText] = useState("");
   const [ready, setReady] = useState(false);
+  const [imageId, setImageId] = useState<string>();
   const writes = useRef<Promise<unknown>>(Promise.resolve());
   const current = useRef("");
-  const pending = useRef<{ id: string; text: string; generation: string } | undefined>(undefined);
+  const currentImage = useRef<string | undefined>(undefined);
+  const pending = useRef<
+    { id: string; text: string; generation: string; imageId?: string; imageFingerprint?: string } | undefined
+  >(undefined);
   useEffect(() => {
     let active = true;
     setReady(false);
     setText("");
+    setImageId(undefined);
     current.current = "";
+    currentImage.current = undefined;
     pending.current = undefined;
     if (!identity) return;
     const key = draftKey(bindingId, identity);
-    void Promise.all([LocalStorage.getItem<string>(key), LocalStorage.getItem<string>(`${key}:pending`)])
-      .then(([value, raw]) => {
+    void Promise.all([
+      LocalStorage.getItem<string>(key),
+      LocalStorage.getItem<string>(`${key}:pending`),
+      LocalStorage.getItem<string>(`${key}:image`),
+    ])
+      .then(([value, raw, savedImage]) => {
         const saved = raw === undefined ? undefined : JSON.parse(raw);
         if (
           raw !== undefined &&
@@ -339,23 +349,32 @@ export function useDraft(bindingId: string, identity?: string) {
             !/^[\w:.-]{1,200}$/.test(saved.generation) ||
             typeof saved.text !== "string" ||
             !saved.text.trim() ||
-            saved.text.length > 100_000)
+            saved.text.length > 100_000 ||
+            (saved.imageId !== undefined &&
+              (typeof saved.imageId !== "string" ||
+                !/^[a-f0-9-]{36}$/.test(saved.imageId) ||
+                typeof saved.imageFingerprint !== "string" ||
+                saved.imageFingerprint.length > 1000)))
         )
           throw new Error("Invalid pending message");
+        const restoredImage = savedImage ?? saved?.imageId;
+        if (restoredImage !== undefined && !/^[a-f0-9-]{36}$/.test(restoredImage))
+          throw new Error("Invalid saved image");
         if (active) {
           pending.current = saved;
           current.current = value ?? saved?.text ?? "";
+          currentImage.current = restoredImage;
           setText(current.current);
+          setImageId(restoredImage);
           setReady(true);
         }
       })
       .catch(() => {
-        if (active) {
+        if (active)
           void showToast({
             style: Toast.Style.Failure,
             title: "Could not restore the local draft and pending message",
           });
-        }
       });
     return () => {
       active = false;
@@ -373,36 +392,76 @@ export function useDraft(bindingId: string, identity?: string) {
       )
       .catch(() => showToast({ style: Toast.Style.Failure, title: "Could not save the local draft" }));
   };
-  const prepare = async (value: string, generation: string) => {
+  const changeImage = async (value?: string) => {
+    if (!identity || !ready) throw new Error("Wait for your local draft to restore.");
+    if (value !== undefined && !/^[a-f0-9-]{36}$/.test(value)) throw new Error("Invalid image reference.");
+    if (pending.current && pending.current.imageId !== value)
+      throw new Error("The previous message's delivery is unknown. Keep its original image until delivery is checked.");
+    const key = `${draftKey(bindingId, identity)}:image`;
+    const write = writes.current.then(async () => {
+      if (value) await LocalStorage.setItem(key, value);
+      else await LocalStorage.removeItem(key);
+      currentImage.current = value;
+      setImageId(value);
+    });
+    writes.current = write.catch(() => undefined);
+    await write;
+  };
+  const prepare = async (value: string, generation: string, selectedImage?: string, imageFingerprint?: string) => {
     if (!identity || !ready) throw new Error("Wait for your local draft to restore before sending.");
-    if (pending.current && pending.current.text !== value)
+    if (selectedImage !== currentImage.current)
+      throw new Error("The draft image changed. Reopen Compose before sending.");
+    if (selectedImage && !imageFingerprint) throw new Error("The image has not been validated. Your draft is kept.");
+    if (
+      pending.current &&
+      (pending.current.text !== value ||
+        pending.current.imageId !== selectedImage ||
+        pending.current.imageFingerprint !== imageFingerprint)
+    )
       throw new Error(
-        "The previous message's delivery is unknown. Retry its original text before sending a different message.",
+        "The previous message's delivery is unknown. Retry its original text and image before sending a different message.",
       );
     if (pending.current && pending.current.generation !== generation)
       throw new Error(
         "The Agent session changed while message delivery was unknown. Check the original Agent before retrying.",
       );
-    const attempt = pending.current ?? { id: randomUUID(), text: value, generation };
+    const attempt = pending.current ?? {
+      id: randomUUID(),
+      text: value,
+      generation,
+      ...(selectedImage ? { imageId: selectedImage, imageFingerprint } : {}),
+    };
     await writes.current;
-    // Save before network I/O, so closing Raycast cannot turn an ambiguous retry into a new execution.
     await LocalStorage.setItem(`${draftKey(bindingId, identity)}:pending`, JSON.stringify(attempt));
     pending.current = attempt;
     return attempt;
   };
-  const clearIf = async (sent: string) => {
+  const clearIf = async (sent: string, sentImage?: string) => {
     if (!identity) return;
     const key = draftKey(bindingId, identity);
-    const clearText = current.current === sent;
-    if (clearText) {
-      current.current = "";
-      setText("");
-    }
     writes.current = writes.current
       .then(async () => {
-        // Clear the text first: a crash must never leave an old draft without its retry ID.
-        if (clearText) await LocalStorage.removeItem(key);
-        if (pending.current?.text === sent) {
+        const [savedText, savedImage] = await Promise.all([
+          LocalStorage.getItem<string>(key),
+          LocalStorage.getItem<string>(`${key}:image`),
+        ]);
+        const clearDraft =
+          current.current === sent &&
+          currentImage.current === sentImage &&
+          savedText === sent &&
+          savedImage === sentImage;
+        // Clear the draft before its retry ID, so a crash cannot replay an old submission as a new message.
+        if (clearDraft) {
+          await LocalStorage.removeItem(key);
+          await LocalStorage.removeItem(`${key}:image`);
+          if (current.current === sent && currentImage.current === sentImage) {
+            current.current = "";
+            currentImage.current = undefined;
+            setText("");
+            setImageId(undefined);
+          }
+        }
+        if (pending.current?.text === sent && pending.current.imageId === sentImage) {
           await LocalStorage.removeItem(`${key}:pending`);
           pending.current = undefined;
         }
@@ -411,6 +470,7 @@ export function useDraft(bindingId: string, identity?: string) {
         showToast({ style: Toast.Style.Failure, title: "Could not clear the sent draft; its retry ID is kept" }),
       );
     await writes.current;
+    return currentImage.current !== sentImage && pending.current?.imageId !== sentImage;
   };
   const reject = async (messageId: string) => {
     if (!identity) return;
@@ -420,9 +480,8 @@ export function useDraft(bindingId: string, identity?: string) {
       await LocalStorage.removeItem(key);
       pending.current = undefined;
     });
-    // Keep subsequent writes usable, but report this failure without dropping the retry ID.
     writes.current = removal.catch(() => undefined);
     await removal;
   };
-  return { text, change, clearIf, prepare, reject, ready };
+  return { text, imageId, change, changeImage, clearIf, prepare, reject, ready };
 }

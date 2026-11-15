@@ -17,15 +17,18 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { createHash, randomUUID } from "node:crypto";
 import { stripVTControlCharacters } from "node:util";
-import { HcClient, HcError, hcProgramFingerprint, hcTargetKey } from "./herdr.js";
+import { HcClient, HcError, hcImageAgent, hcProgramFingerprint, hcTargetKey } from "./herdr.js";
 import type { HcTarget, HcTerminal } from "./herdr.js";
 import { Compose } from "./compose.js";
+import { ImageAccessory, ImageActions } from "./image-actions.js";
 import { literal } from "./interaction-format.js";
 import { openHerdr } from "./herdr-connection.js";
 import { HcConversation } from "./herdr-conversation.js";
 import type { HcTurn } from "./herdr-conversation.js";
 import { safeMarkdown } from "./core.js";
 import { messageMarkdown } from "./message-format.js";
+import { getImage, readImage, releaseImage } from "./images.js";
+import { imageAttachmentSchema, type ImageAttachment, type ImageUpload } from "./protocol.js";
 
 export type HcCapture = { text: string; complete: boolean; how: string; why?: string };
 export type HcScreen = {
@@ -36,10 +39,22 @@ export type HcScreen = {
   stable?: boolean;
 };
 type InputKind = "task" | "answer" | "terminal";
-type Attempt = { id: string; kind: InputKind | "key" | "interrupt"; text?: string; at: number };
-type Drafts = { task: string; answer: string; terminal: string };
+type Attempt = {
+  id: string;
+  kind: InputKind | "key" | "interrupt";
+  text?: string;
+  at: number;
+  imageId?: string;
+  image?: ImageAttachment;
+  fingerprint?: string;
+  program?: string;
+  phase?: "uploading" | "uploaded" | "sending";
+  remotePath?: string;
+};
+type Drafts = { task: string; answer: string; terminal: string; imageId?: string };
 type Storage = Pick<typeof LocalStorage, "getItem" | "setItem" | "removeItem">;
 const hcOperationLocks = new Set<string>();
+const hcDraftWrites = new Map<string, Promise<void>>();
 const MAX_INPUT = 100_000;
 
 export function sanitizeTerminalText(text: string): string {
@@ -134,7 +149,7 @@ export function hcScreenMarkdown(screen?: HcScreen, heading?: string): string {
 }
 
 function hcMessageMarkdown(turn: HcTurn, user: boolean): string {
-  if (user) return messageMarkdown(sanitizeTerminalText(turn.text));
+  if (user) return `${messageMarkdown(sanitizeTerminalText(turn.text))}${turn.image ? "\n\n📎 Image attached" : ""}`;
   if (turn.state === "rejected") return "This message was not submitted. Your draft is kept.";
   if (turn.state === "unknown")
     return "Input delivery is uncertain. Inspect the raw terminal before acknowledging; nothing retries automatically.";
@@ -155,6 +170,7 @@ function hcMessageMarkdown(turn: HcTurn, user: boolean): string {
 export class HcLocalState {
   readonly draftKey: string;
   readonly attemptKey: string;
+  readonly imageBudgetKey: string;
   drafts: Drafts = { task: "", answer: "", terminal: "" };
   attempt?: Attempt;
   ready = false;
@@ -166,24 +182,28 @@ export class HcLocalState {
   ) {
     this.draftKey = `hc-drafts-v1:${key}`;
     this.attemptKey = `hc-attempt-v1:${key}`;
+    this.imageBudgetKey = `hc-image-bytes-v1:${key}`;
   }
   async load() {
     const [draft, pending] = await Promise.all([
       this.storage.getItem<string>(this.draftKey),
       this.storage.getItem<string>(this.attemptKey),
     ]);
-    if (draft) {
-      const value = JSON.parse(draft);
-      if (
-        !value ||
-        ["task", "answer", "terminal"].some((key) => typeof value[key] !== "string" || value[key].length > MAX_INPUT)
-      )
-        throw new Error("Invalid HC draft storage. Input is disabled to preserve your saved text.");
-      this.drafts = value;
-    }
+    this.drafts = this.parseDraft(draft);
     this.restoreAttempt(pending);
     this.ready = true;
     this.changed();
+  }
+  private parseDraft(raw: string | undefined): Drafts {
+    if (raw === undefined) return { task: "", answer: "", terminal: "" };
+    const value = JSON.parse(raw);
+    if (
+      !value ||
+      ["task", "answer", "terminal"].some((key) => typeof value[key] !== "string" || value[key].length > MAX_INPUT) ||
+      (value.imageId !== undefined && (typeof value.imageId !== "string" || !/^[a-f0-9-]{36}$/.test(value.imageId)))
+    )
+      throw new Error("Invalid HC draft storage. Input is disabled to preserve your saved text.");
+    return value;
   }
   private restoreAttempt(pending: string | undefined) {
     this.attempt = undefined;
@@ -195,16 +215,32 @@ export class HcLocalState {
           typeof value.id !== "string" ||
           !["task", "answer", "terminal", "key", "interrupt"].includes(value.kind) ||
           typeof value.at !== "number" ||
-          (value.text !== undefined && typeof value.text !== "string")
+          (value.text !== undefined && typeof value.text !== "string") ||
+          (value.imageId !== undefined &&
+            (value.kind !== "task" ||
+              typeof value.imageId !== "string" ||
+              !/^[a-f0-9-]{36}$/.test(value.imageId) ||
+              !imageAttachmentSchema.safeParse(value.image).success ||
+              typeof value.fingerprint !== "string" ||
+              !/^[a-f0-9]{64}$/.test(value.fingerprint) ||
+              typeof value.program !== "string" ||
+              !["uploading", "uploaded", "sending"].includes(value.phase) ||
+              (value.remotePath !== undefined &&
+                (typeof value.remotePath !== "string" || value.remotePath.length > 4096))))
         )
           throw new Error();
         this.attempt = value;
         if (
           ["task", "answer", "terminal"].includes(value.kind) &&
           typeof value.text === "string" &&
-          !this.drafts[value.kind as InputKind]
+          !this.drafts[value.kind as InputKind] &&
+          (value.kind !== "task" || !this.drafts.imageId || this.drafts.imageId === value.imageId)
         )
-          this.drafts = { ...this.drafts, [value.kind]: value.text };
+          this.drafts = {
+            ...this.drafts,
+            [value.kind]: value.text,
+            ...(value.kind === "task" && value.imageId && !this.drafts.imageId ? { imageId: value.imageId } : {}),
+          };
       } catch {
         this.attempt = {
           id: `unreadable:${createHash("sha256").update(pending).digest("hex")}`,
@@ -218,15 +254,117 @@ export class HcLocalState {
   change(kind: InputKind, text: string) {
     if (!this.ready || text.length > MAX_INPUT) return;
     this.drafts = { ...this.drafts, [kind]: text };
-    const saved = JSON.stringify(this.drafts);
-    this.writes = this.writes.catch(() => {}).then(() => this.storage.setItem(this.draftKey, saved));
-    // Observe rejected writes immediately; flush() still prevents a later mutation.
-    void this.writes.catch(() => {});
+    this.saveDrafts({ [kind]: text });
     this.changed();
   }
-  async clearIf(kind: InputKind, text: string) {
-    if (this.drafts[kind] === text) this.change(kind, "");
-    await this.writes;
+  private saveDrafts(patch: Partial<Drafts>, expected?: { kind: InputKind; text: string; imageId?: string }) {
+    const imageAtSchedule = this.drafts.imageId;
+    const write = (hcDraftWrites.get(this.key) ?? this.writes)
+      .catch(() => {})
+      .then(async () => {
+        const saved = this.parseDraft(await this.storage.getItem<string>(this.draftKey));
+        if (
+          expected &&
+          (saved[expected.kind] !== expected.text || (expected.kind === "task" && saved.imageId !== expected.imageId))
+        ) {
+          if (this.drafts[expected.kind] === patch[expected.kind])
+            this.drafts = { ...this.drafts, [expected.kind]: saved[expected.kind] };
+          if (expected.kind === "task" && this.drafts.imageId === patch.imageId)
+            this.drafts = { ...this.drafts, imageId: saved.imageId };
+          this.changed();
+          return false;
+        }
+        const next = { ...saved, ...patch };
+        await this.storage.setItem(this.draftKey, JSON.stringify(next));
+        if (!Object.hasOwn(patch, "imageId") && this.drafts.imageId === imageAtSchedule)
+          this.drafts = { ...this.drafts, imageId: next.imageId };
+        this.changed();
+        return true;
+      });
+    this.writes = write.then(() => {});
+    hcDraftWrites.set(this.key, this.writes);
+    const queued = this.writes;
+    void queued
+      .finally(() => {
+        if (hcDraftWrites.get(this.key) === queued) hcDraftWrites.delete(this.key);
+      })
+      .catch(() => {});
+    // Observe rejected writes immediately; run() still blocks network input after a failed save.
+    void this.writes.catch(() => {});
+    return write;
+  }
+  async changeImage(imageId?: string, capture = false) {
+    if (!this.ready) throw new Error("Local input storage is not ready. The image is kept.");
+    if (imageId !== undefined && !/^[a-f0-9-]{36}$/.test(imageId)) throw new Error("Invalid image reference.");
+    if (hcOperationLocks.has(this.key))
+      throw new Error("Wait for the current terminal operation before changing its image.");
+    hcOperationLocks.add(this.key);
+    const previous = this.drafts.imageId;
+    try {
+      await this.writes;
+      await hcDraftWrites.get(this.key);
+      const pending = await this.storage.getItem<string>(this.attemptKey);
+      if (pending || this.attempt) {
+        if (pending) this.restoreAttempt(pending);
+        throw new Error(
+          "Previous input is uncertain. Your screenshot is kept separately; inspect and acknowledge that attempt before changing the draft image.",
+        );
+      }
+      const saved = await this.storage.getItem<string>(this.draftKey);
+      const latest = this.parseDraft(saved);
+      const existing = latest.imageId;
+      if (
+        (capture && previous && previous !== imageId) ||
+        (existing && existing !== previous) ||
+        (capture && existing && existing !== imageId)
+      ) {
+        this.drafts = latest;
+        throw new Error(
+          "An image is already attached or changed in another view. Your screenshot is kept separately; reopen the composer or use Attach Captured Image to review replacement.",
+        );
+      }
+      this.drafts = { ...this.drafts, imageId };
+      this.saveDrafts({ imageId });
+      await this.writes;
+    } catch (cause) {
+      if (this.drafts.imageId === imageId) this.drafts = { ...this.drafts, imageId: previous };
+      throw cause;
+    } finally {
+      hcOperationLocks.delete(this.key);
+      this.changed();
+    }
+  }
+  async clearIf(kind: InputKind, text: string, imageId?: string) {
+    if (this.drafts[kind] !== text || (kind === "task" && this.drafts.imageId !== imageId)) {
+      await this.writes;
+      return false;
+    }
+    const patch = { [kind]: "", ...(kind === "task" ? { imageId: undefined } : {}) };
+    this.drafts = { ...this.drafts, ...patch };
+    this.changed();
+    return this.saveDrafts(patch, { kind, text, imageId });
+  }
+  async reserveImage(bytes: number) {
+    const raw = await this.storage.getItem<string>(this.imageBudgetKey);
+    const used: unknown = raw === undefined ? 0 : JSON.parse(raw);
+    if (!Number.isSafeInteger(used) || (used as number) < 0 || !Number.isSafeInteger(bytes) || bytes < 1)
+      throw new HcError("changed", "Cannot read the terminal image budget. Nothing was uploaded or sent.");
+    if ((used as number) + bytes > 100 * 1024 * 1024)
+      throw new HcError(
+        "changed",
+        "This terminal has reached its 100 MiB image budget. Nothing was uploaded or sent. Use a new terminal for further images.",
+      );
+    // ponytail: charge reservations even after failed uploads; HC owns cleanup and has no image-delete RPC.
+    await this.storage.setItem(this.imageBudgetKey, String((used as number) + bytes));
+  }
+  async imagePhase(phase: "uploaded" | "sending", remotePath?: string) {
+    if (!this.attempt?.imageId) throw new Error("Image upload journal is missing. Nothing was sent.");
+    const next = { ...this.attempt, phase, ...(remotePath ? { remotePath } : {}) };
+    // An uploaded file exists even if saving its path fails; never proceed to terminal input in that case.
+    if (phase === "uploaded") this.attempt = next;
+    await this.storage.setItem(this.attemptKey, JSON.stringify(next));
+    this.attempt = next;
+    this.changed();
   }
   async run<T>(
     kind: Attempt["kind"],
@@ -234,7 +372,8 @@ export class HcLocalState {
     preflight: () => Promise<boolean>,
     request: () => Promise<T>,
     active: () => boolean,
-  ): Promise<{ sent: boolean; value?: T }> {
+    attachment?: { imageId: string; image: ImageAttachment; program: string },
+  ): Promise<{ sent: boolean; value?: T; cleared?: boolean }> {
     if (hcOperationLocks.has(this.key)) throw new Error("Another terminal operation is running. Nothing was sent.");
     hcOperationLocks.add(this.key);
     let marked = false,
@@ -244,10 +383,27 @@ export class HcLocalState {
       await this.writes;
       if (this.attempt || (await this.storage.getItem<string>(this.attemptKey)))
         throw new Error(
-          "Previous input may have reached the terminal. Inspect output and acknowledge uncertainty before another operation.",
+          this.attempt?.imageId && this.attempt.phase !== "sending"
+            ? "Previous input is locked by an image upload that needs review. No message input was sent; inspect the terminal before acknowledging."
+            : "Previous input may have reached the terminal. Inspect output and acknowledge uncertainty before another operation.",
         );
       if (!active() || !(await preflight()) || !active()) return { sent: false };
-      const attempt: Attempt = { id: randomUUID(), kind, text, at: Date.now() };
+      const attempt: Attempt = {
+        id: randomUUID(),
+        kind,
+        text,
+        at: Date.now(),
+        ...(attachment
+          ? {
+              ...attachment,
+              image: imageAttachmentSchema.parse(attachment.image),
+              phase: "uploading" as const,
+              fingerprint: createHash("sha256")
+                .update(JSON.stringify([text, attachment.image]))
+                .digest("hex"),
+            }
+          : {}),
+      };
       await this.storage.setItem(this.attemptKey, JSON.stringify(attempt));
       this.attempt = attempt;
       marked = true;
@@ -270,17 +426,39 @@ export class HcLocalState {
         throw cause;
       }
       if (kind === "task" || kind === "answer" || kind === "terminal") {
-        cleared = this.drafts[kind] === text;
-        await this.clearIf(kind, text!);
+        cleared = this.drafts[kind] === text && (kind !== "task" || this.drafts.imageId === attachment?.imageId);
+        cleared = await this.clearIf(kind, text!, attachment?.imageId);
       }
       await this.storage.removeItem(this.attemptKey);
       this.attempt = undefined;
-      return { sent: true, value };
+      return { sent: true, value, cleared };
     } catch (cause) {
-      if (cleared && (kind === "task" || kind === "answer" || kind === "terminal") && this.drafts[kind] === "") {
-        this.change(kind, text!);
+      if (
+        cleared &&
+        (kind === "task" || kind === "answer" || kind === "terminal") &&
+        this.drafts[kind] === "" &&
+        (kind !== "task" || !this.drafts.imageId)
+      ) {
+        this.drafts = {
+          ...this.drafts,
+          [kind]: text!,
+          ...(kind === "task" && attachment ? { imageId: attachment.imageId } : {}),
+        };
+        this.saveDrafts(
+          { [kind]: text!, ...(kind === "task" && attachment ? { imageId: attachment.imageId } : {}) },
+          { kind, text: "" },
+        );
+        this.changed();
         await this.writes.catch(() => {});
       }
+      if (marked && attachment)
+        throw new Error(
+          this.attempt?.phase === "sending"
+            ? "Image uploaded, but message delivery is uncertain. Your text and image are kept. Inspect the terminal before acknowledging; nothing retries automatically."
+            : this.attempt?.phase === "uploaded"
+              ? "Image uploaded, but no message input was sent. Could not complete the saved upload or input checks. Your text and image are kept; inspect before acknowledging."
+              : "Image upload was not confirmed. No message input was sent. Your text and image are kept; inspect before acknowledging. Nothing retries automatically.",
+        );
       if (marked)
         throw new Error(
           "Delivery is uncertain. Input may already be queued or submitted. Nothing will retry automatically; inspect the screen before acknowledging.",
@@ -528,7 +706,7 @@ function HcCompose({
   send,
   ...props
 }: Omit<React.ComponentProps<typeof Compose>, "send"> & {
-  send: (text: string, active: () => boolean) => Promise<boolean>;
+  send: (text: string, active: () => boolean, imageId?: string) => Promise<boolean>;
 }) {
   const active = useRef(true);
   useEffect(() => {
@@ -537,7 +715,7 @@ function HcCompose({
       active.current = false;
     };
   }, []);
-  return <Compose {...props} send={(text) => send(text, () => active.current)} />;
+  return <Compose {...props} send={(text, imageId) => send(text, () => active.current, imageId)} />;
 }
 
 type Mode = "output" | "controls" | "text";
@@ -556,16 +734,21 @@ const keyRows = [
 export function HerdrSession({
   target,
   onAllSessions,
+  captureId,
 }: {
   target: HcTarget;
   onAllSessions?: (onPop?: () => void) => void;
+  captureId?: string;
 }) {
   const [review, setReview] = useState(0);
+  const captureSeen = useRef<string | undefined>(undefined);
   return (
     <HcSessionView
       key={`${hcTargetKey(target)}:${review}`}
       target={target}
       onAllSessions={onAllSessions}
+      captureId={captureId}
+      captureSeen={captureSeen}
       reopen={() => setReview((value) => value + 1)}
     />
   );
@@ -576,10 +759,14 @@ function HcSessionView({
   target,
   onAllSessions,
   reopen,
+  captureId,
+  captureSeen,
 }: {
   target: HcTarget;
   onAllSessions?: (onPop?: () => void) => void;
   reopen: () => void;
+  captureId?: string;
+  captureSeen?: { current: string | undefined };
 }) {
   const { push } = useNavigation();
   const [paused, setPaused] = useState(false);
@@ -601,6 +788,7 @@ function HcSessionView({
       if (feed.mounted.current) update((value) => value + 1);
     });
   const local = localRef.current;
+  const captureRef = useRef<string | undefined>(undefined);
   const [conversation, setConversation] = useState<HcConversation>();
   useEffect(() => {
     const program = feed.pin.current;
@@ -691,8 +879,9 @@ function HcSessionView({
     kind: Attempt["kind"],
     text: string | undefined,
     check: () => Promise<boolean>,
-    request: (client: HcClient) => Promise<T>,
+    request: (client: HcClient, wireText?: string) => Promise<T>,
     active: () => boolean = live,
+    attachment?: { imageId: string; image: ImageUpload; agent: "claude" | "codex"; program: string },
   ) {
     if (busy || !feed.mounted.current) return undefined;
     setBusy(true);
@@ -705,33 +894,126 @@ function HcSessionView({
         async () => {
           const client = feed.client.current;
           if (!client) throw new Error("HC disconnected before input submission.");
+          let wireText = text;
+          if (attachment) {
+            try {
+              await local.reserveImage(attachment.image.size);
+            } catch (cause) {
+              throw cause instanceof HcError
+                ? cause
+                : new HcError("changed", "The terminal image budget could not be saved. Nothing was uploaded or sent.");
+            }
+            if (!live() || !active())
+              throw new HcError("changed", "The composer closed before upload. Nothing was uploaded or sent.");
+            const uploaded = await client.put(target, attachment.image);
+            await local.imagePhase("uploaded", uploaded.path);
+            if (!live() || !active())
+              throw new HcError(
+                "changed",
+                "Image uploaded, but the composer closed or disconnected. No message input was sent; your draft is kept.",
+              );
+            if (!(await preflight()) || !live() || !active())
+              throw new HcError(
+                "changed",
+                "Image uploaded, but the current terminal could not be verified. No message input was sent; your draft is kept.",
+              );
+            const fresh = feed.latest.current!.terminal;
+            if (
+              hcProgramFingerprint(fresh) !== attachment.program ||
+              hcImageAgent(fresh) !== attachment.agent ||
+              !hcReportedReady(fresh)
+            )
+              throw new HcError(
+                "changed",
+                "Image uploaded, but the Agent changed or is now busy or blocked. No message input was sent; your draft is kept.",
+              );
+            wireText = `${text}\n\n${attachment.agent === "claude" ? "Use the Read tool to read the attached image at" : "Use view_image to view the attached image at"} ${JSON.stringify(uploaded.path)}.`;
+          }
           if (kind === "task") {
             const baseline = feed.latest.current;
             if (!conversation?.ready || !baseline)
-              throw new HcError("changed", "Message history is not ready. Nothing was sent.");
+              throw new HcError(
+                "changed",
+                attachment
+                  ? "Image uploaded, but message history is not ready. No message input was sent."
+                  : "Message history is not ready. Nothing was sent.",
+              );
             conversationId = local.attempt!.id;
             try {
-              await conversation.begin(conversationId, text!, {
-                text: sanitizeTerminalText(baseline.capture.text),
-                state: baseline.terminal.status?.state,
-                turn: baseline.terminal.turn,
-                complete: baseline.capture.complete,
-                stable: baseline.stable,
-              });
+              const image = attachment
+                ? imageAttachmentSchema.parse({
+                    name: attachment.image.name,
+                    mimeType: attachment.image.mimeType,
+                    size: attachment.image.size,
+                    sha256: attachment.image.sha256,
+                  })
+                : undefined;
+              await conversation.begin(
+                conversationId,
+                text!,
+                {
+                  text: sanitizeTerminalText(baseline.capture.text),
+                  state: baseline.terminal.status?.state,
+                  turn: baseline.terminal.turn,
+                  complete: baseline.capture.complete,
+                  stable: baseline.stable,
+                },
+                image,
+                wireText,
+              );
             } catch (cause) {
               throw new HcError(
                 "changed",
-                cause instanceof Error ? cause.message : "Cannot save message. Nothing was sent.",
+                attachment
+                  ? "Image uploaded, but message history could not be saved. No message input was sent; your text and image are kept."
+                  : cause instanceof Error
+                    ? cause.message
+                    : "Cannot save message. Nothing was sent.",
               );
             }
-            if (!live() || !active()) throw new HcError("changed", "The terminal review closed. Nothing was sent.");
+            if (!live() || !active())
+              throw new HcError(
+                "changed",
+                attachment
+                  ? "Image uploaded, but the terminal review closed. No message input was sent."
+                  : "The terminal review closed. Nothing was sent.",
+              );
           }
-          const value = await request(client);
+          if (attachment) await local.imagePhase("sending");
+          if (attachment && (!live() || !active()))
+            throw new HcError(
+              "changed",
+              "Image uploaded, but the composer closed before input. No message input was sent; your draft is kept.",
+            );
+          let value: T;
+          try {
+            value = await request(client, wireText);
+          } catch (cause) {
+            if (attachment && cause instanceof HcError && ["blocked", "changed"].includes(cause.kind))
+              throw new HcError(
+                cause.kind,
+                "Image uploaded, but terminal input was rejected before writing. No message input was sent; your text and image are kept.",
+              );
+            throw cause;
+          }
           if (conversationId) conversation!.submitted(conversationId);
           return value;
         },
         () => live() && active(),
+        attachment
+          ? {
+              imageId: attachment.imageId,
+              program: attachment.program,
+              image: {
+                name: attachment.image.name,
+                mimeType: attachment.image.mimeType,
+                size: attachment.image.size,
+                sha256: attachment.image.sha256,
+              },
+            }
+          : undefined,
       );
+      if (result.sent && result.cleared && attachment) void releaseImage(attachment.imageId).catch(() => {});
       if (result.sent && feed.mounted.current) {
         if (kind === "task") {
           setNotice(undefined);
@@ -760,7 +1042,13 @@ function HcSessionView({
       if (feed.mounted.current) setBusy(false);
     }
   }
-  async function sendTask(text: string, program?: string, active: () => boolean = live, fromComposer = false) {
+  async function sendTask(
+    text: string,
+    program?: string,
+    active: () => boolean = live,
+    fromComposer = false,
+    imageId = local.drafts.imageId,
+  ) {
     if (!text.trim() || text.length > MAX_INPUT) {
       await toastError(new Error("Enter 1–100,000 characters."));
       return false;
@@ -769,8 +1057,24 @@ function HcSessionView({
       await toastError(new Error("This terminal changed while composing. Your draft is kept; start a new review."));
       return false;
     }
+    let attachment: { imageId: string; image: ImageUpload; agent: "claude" | "codex"; program: string } | undefined;
+    if (imageId) {
+      try {
+        if (!feed.client.current?.methods.has("terminal.put"))
+          throw new Error(
+            "This Herdr core does not support image uploads. Update Herdr; your text and image are kept.",
+          );
+        const agent = feed.latest.current && hcImageAgent(feed.latest.current.terminal);
+        if (!agent)
+          throw new Error("Images require an identified Claude or Codex Agent. Your text and image are kept.");
+        attachment = { imageId, image: await readImage(imageId), agent, program };
+        if (!active() || !live()) return false;
+      } catch (cause) {
+        await toastError(cause);
+        return false;
+      }
+    }
     let routed = false;
-    let expectedState: string | undefined;
     const result = await operate(
       "task",
       text,
@@ -795,18 +1099,23 @@ function HcSessionView({
           return false;
         }
         // HC only accepts idle/working conditions. Done needs a fresh check and force:false, without an unsupported condition.
-        expectedState = current.status!.state === "idle" ? "idle" : undefined;
+        if (
+          attachment &&
+          (hcImageAgent(current) !== attachment.agent || hcProgramFingerprint(current) !== attachment.program)
+        )
+          throw new HcError("changed", "The Agent changed before upload. Nothing was uploaded or sent.");
         return true;
       },
-      (client) =>
+      (client, wireText) =>
         client.request("terminal.send", {
           terminal: address,
-          text,
+          text: wireText ?? text,
           force: false,
-          ...(expectedState ? { if: expectedState } : {}),
+          ...(feed.latest.current!.terminal.status!.state === "idle" ? { if: "idle" } : {}),
           wait: false,
         }),
       active,
+      attachment,
     );
     return result?.sent || (fromComposer && routed && active());
   }
@@ -817,6 +1126,9 @@ function HcSessionView({
       <HcCompose
         text={local.drafts[kind]}
         change={(text) => local.change(kind, text)}
+        imageId={kind === "task" ? local.drafts.imageId : undefined}
+        changeImage={kind === "task" ? changeTaskImage : undefined}
+        imageUnavailable={kind === "task" ? imageUnavailable() : undefined}
         title={
           kind === "answer"
             ? "Respond to Current Prompt"
@@ -832,7 +1144,7 @@ function HcSessionView({
               ? "Reply to the currently displayed terminal dialog. Next you will review the full screen and answer before explicitly submitting with HC force:true. This is not a queued task."
               : "This program has no status reporter. Next review the full screen and text before submitting terminal input with force:false and no idle condition. It may be a shell command."
         }
-        send={async (text, active) => {
+        send={async (text, active, imageId) => {
           if (!text.trim() || text.length > MAX_INPUT) {
             await toastError(new Error("Enter 1–100,000 characters."));
             return false;
@@ -841,7 +1153,15 @@ function HcSessionView({
             await toastError(new Error("The terminal changed while composing. Your draft is kept."));
             return false;
           }
-          if (kind === "task") return sendTask(text, program, active, true);
+          if (kind === "task") return sendTask(text, program, active, true, imageId);
+          if (imageId) {
+            await toastError(
+              new Error(
+                "Images are supported only for ordinary Agent messages, not prompt responses or terminal input.",
+              ),
+            );
+            return false;
+          }
           try {
             const fresh = await feed.refresh(true);
             if (!active() || !live() || program !== feed.pin.current)
@@ -864,6 +1184,74 @@ function HcSessionView({
       />,
     );
   }
+  async function changeTaskImage(imageId?: string) {
+    if (imageId) await getImage(imageId);
+    if (!feed.mounted.current) throw new Error("This terminal view closed. Your image is kept.");
+    await local.changeImage(imageId);
+  }
+  function imageUnavailable() {
+    if (!feed.client.current?.methods.has("terminal.put"))
+      return "Image uploads require Herdr with terminal.put. Update Herdr; text remains available.";
+    if (!feed.latest.current || !hcImageAgent(feed.latest.current.terminal))
+      return "Images require an identified Claude or Codex Agent; arbitrary terminal input is unsupported.";
+  }
+  async function attachCapture(active: () => boolean = () => feed.mounted.current) {
+    if (!captureId || !local.ready || storageError || busy) return;
+    try {
+      await readImage(captureId);
+      if (!active()) return;
+      if (local.attempt)
+        throw new Error(
+          "Previous input is uncertain. Your screenshot is kept; inspect and acknowledge the attempt, then use Attach Captured Image.",
+        );
+      const previous = local.drafts.imageId;
+      let replace = false;
+      if (previous && previous !== captureId) {
+        replace = await confirmAlert({
+          title: "Replace Draft Image?",
+          message:
+            "The current draft already has an image. Replace it with this screenshot? Your text stays saved. Cancel keeps both images available.",
+          primaryAction: { title: "Replace with Screenshot" },
+          dismissAction: { title: "Keep Current Image" },
+        });
+        if (!replace || !active()) return;
+      }
+      await local.changeImage(captureId, !replace);
+      if (previous && previous !== captureId) void releaseImage(previous).catch(() => {});
+      if (active()) {
+        setMode("output");
+        setFullWidth(false);
+      }
+    } catch (cause) {
+      if (active()) {
+        setNotice(
+          cause instanceof Error
+            ? cause.message
+            : "The screenshot could not be attached. Use Attach Captured Image to try explicitly.",
+        );
+        await toastError(cause);
+      }
+    }
+  }
+  useEffect(() => {
+    const seen = captureSeen || captureRef;
+    if (
+      !captureId ||
+      seen.current === captureId ||
+      !local.ready ||
+      storageError ||
+      busy ||
+      paused ||
+      (feed.loading && !feed.pin.current)
+    )
+      return;
+    seen.current = captureId;
+    let canceled = false;
+    void attachCapture(() => !canceled && feed.mounted.current);
+    return () => {
+      canceled = true;
+    };
+  }, [captureId, local.ready, storageError, busy, paused, feed.loading, feed.pin.current]);
   async function sendKey(raw: string) {
     const key = hcKeyToken(raw);
     if (key === "ctrl+c") {
@@ -936,7 +1324,9 @@ function HcSessionView({
       setReviewed(fresh);
       inspected.current = { id: local.attempt.id, screen: hcScreenFingerprint(fresh) };
       setNotice(
-        "Inspect this current screen before acknowledging the uncertain input. Unlocking sends and cancels nothing.",
+        local.attempt.imageId && local.attempt.phase !== "sending"
+          ? "Inspect this current screen and the saved image upload phase. No message input was sent. Unlocking sends and cancels nothing."
+          : "Inspect this current screen before acknowledging the uncertain input. Unlocking sends and cancels nothing.",
       );
     } catch (cause) {
       await toastError(cause);
@@ -965,7 +1355,9 @@ function HcSessionView({
         !(await confirmAlert({
           title: "Acknowledge Uncertain Input?",
           message:
-            "The earlier input may still be queued. Acknowledging only unlocks future operations; it sends nothing, cancels nothing, and never replays the earlier input.",
+            local.attempt.imageId && local.attempt.phase !== "sending"
+              ? "No message input was sent. The remote image upload may exist. Acknowledging only unlocks future operations; it uploads or sends nothing and never replays the earlier attempt."
+              : "The earlier input may still be queued. Acknowledging only unlocks future operations; it sends nothing, cancels nothing, and never replays the earlier input.",
           primaryAction: { title: "I Inspected Output — Unlock" },
           dismissAction: { title: "Keep Locked" },
         }))
@@ -1021,6 +1413,16 @@ function HcSessionView({
     }
   }
   const terminal = feed.screen?.terminal;
+  const uploadOnly = Boolean(local.attempt?.imageId && local.attempt.phase !== "sending");
+  const attemptTitle = uploadOnly
+    ? busy
+      ? "Uploading Image"
+      : local.attempt?.phase === "uploaded"
+        ? "Image Uploaded · Message Not Sent"
+        : "Image Upload Needs Review"
+    : busy
+      ? "Submitting Terminal Input"
+      : "Input Result Uncertain";
   const blocked = terminal?.reported === true && terminal.status?.state === "blocked";
   const unavailable = storageError || feed.invalid || feed.error;
   const canSend = Boolean(
@@ -1121,6 +1523,12 @@ function HcSessionView({
               }
             />
             <Action.CopyToClipboard title="Copy Terminal Target" content={address} />
+            {mode === "output" && local.ready && !storageError && !local.attempt ? (
+              <ImageActions imageId={local.drafts.imageId} changeImage={changeTaskImage} />
+            ) : null}
+            {captureId && captureId !== local.drafts.imageId ? (
+              <Action title="Attach Captured Image" icon={Icon.Pencil} onAction={() => attachCapture()} />
+            ) : null}
             <Action
               title="Compose Message"
               icon={Icon.Pencil}
@@ -1255,6 +1663,11 @@ function HcSessionView({
         if (id) setSelected(id);
       }}
       searchText={mode === "output" ? local.drafts.task : ""}
+      searchBarAccessory={
+        mode === "output" && local.drafts.imageId ? (
+          <ImageAccessory imageId={local.drafts.imageId} changeImage={changeTaskImage} />
+        ) : undefined
+      }
       onSearchTextChange={(text) => {
         if (mode === "output") local.change("task", text);
       }}
@@ -1286,12 +1699,18 @@ function HcSessionView({
       {local.attempt ? (
         <List.Item
           id="uncertain"
-          title={busy ? "Submitting Terminal Input" : "Input Result Uncertain"}
-          subtitle={busy ? "Waiting for HC response · No automatic retry" : "Inspect output before unlocking"}
+          title={attemptTitle}
+          subtitle={
+            uploadOnly
+              ? "No message input sent · Draft kept"
+              : busy
+                ? "Waiting for HC response · No automatic retry"
+                : "Inspect output before unlocking"
+          }
           icon={{ source: busy ? Icon.Clock : Icon.Warning, tintColor: busy ? Color.SecondaryText : Color.Orange }}
           detail={
             <List.Item.Detail
-              markdown={`# ${busy ? "Submitting Terminal Input" : "Input May Have Reached the Terminal"}\n\n${literal(`${local.attempt.kind}\n${local.attempt.at ? new Date(local.attempt.at).toLocaleString() : "Unknown time"}\n${sanitizeTerminalText(local.attempt.text || "Interrupt attempt")}`)}\n\n${busy ? "Waiting for HC response. No automatic retry. Other terminal operations stay locked while this request is running." : "Never retried automatically. All mutations stay locked, including after reopening Raycast. Inspect the current screen, then acknowledge. Acknowledging sends and cancels nothing."}`}
+              markdown={`# ${uploadOnly ? attemptTitle : busy ? "Submitting Terminal Input" : "Input May Have Reached the Terminal"}\n\n${literal(`${local.attempt.kind}${local.attempt.image ? ` · ${local.attempt.phase === "uploading" ? "Upload not confirmed · no message input sent" : local.attempt.phase === "uploaded" ? "Uploaded · no message input sent" : "Uploaded · message input may have been sent"}\n${local.attempt.image.name} · ${local.attempt.image.size} bytes${local.attempt.remotePath ? `\nRemote file: ${local.attempt.remotePath}` : ""}` : ""}\n${local.attempt.at ? new Date(local.attempt.at).toLocaleString() : "Unknown time"}\n${sanitizeTerminalText(local.attempt.text || "Interrupt attempt")}`)}\n\n${busy ? "Waiting for HC response. No automatic retry. Other terminal operations stay locked while this request is running." : "Never retried automatically. All mutations stay locked, including after reopening Raycast. Inspect the current screen, then acknowledge. Acknowledging sends and cancels nothing."}`}
             />
           }
           actions={
