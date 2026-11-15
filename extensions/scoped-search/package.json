@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scoped-search",
+  "title": "Scoped Search",
+  "description": "Search only inside the folders you choose, with a configurable depth limit. No whole-disk scanning.",
+  "icon": "command-icon.png",
+  "author": "kervanaslan",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Scoped Search",
+      "subtitle": "Scoped Search",
+      "description": "Search inside your configured folders only.",
+      "mode": "view"
+    },
+    {
+      "name": "manage",
+      "title": "Manage Search Folders",
+      "subtitle": "Scoped Search",
+      "description": "Add, remove, enable or disable the folders that are searched.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "maxDepth",
+      "title": "Search Depth",
+      "description": "How many levels below each configured folder to include. 1 = only the direct children.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "1 level (direct children only)",
+          "value": "1"
+        },
+        {
+          "title": "2 levels",
+          "value": "2"
+        },
+        {
+          "title": "3 levels",
+          "value": "3"
+        },
+        {
+          "title": "4 levels",
+          "value": "4"
+        },
+        {
+          "title": "5 levels",
+          "value": "5"
+        },
+        {
+          "title": "Unlimited",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "name": "itemType",
+      "title": "Include",
+      "description": "What to list in the search results.",
+      "type": "dropdown",
+      "required": false,
+      "default": "folders",
+      "data": [
+        {
+          "title": "Folders only",
+          "value": "folders"
+        },
+        {
+          "title": "Files only",
+          "value": "files"
+        },
+        {
+          "title": "Folders and files",
+          "value": "both"
+        }
+      ]
+    },
+    {
+      "name": "showHidden",
+      "label": "Include hidden items",
+      "description": "Include entries whose name starts with a dot.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "excludeNames",
+      "title": "Exclude Names",
+      "description": "Comma-separated folder/file names to skip entirely (also stops descending into them).",
+      "type": "textfield",
+      "required": false,
+      "default": "node_modules, .git, .next, dist, build, .venv, venv, __pycache__, .DS_Store, Pods, target, .cache"
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "Application used by the \"Open in Terminal\" action.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor App",
+      "description": "Application used by the \"Open in Editor\" action.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "maxResults",
+      "title": "Result Limit",
+      "description": "Safety cap on how many entries are loaded into the list.",
+      "type": "textfield",
+      "required": false,
+      "default": "5000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
