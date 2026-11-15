@@ -2,6 +2,10 @@
 
 ## [Add Run Now action to start a specific launch agent] - {PR_MERGE_DATE}
 
+- Add a Run Now action (⌘R) that starts a specific launch agent immediately, from the user, loaded and system lists and the details view
+- Show the launch agent's label in the details view
+- Add categories and platforms, and update to the latest Raycast API
+
 ## [Add non existing file exception handler] - 2025-04-20
 
 ## [Add open file exception handler] - 2024-10-22
