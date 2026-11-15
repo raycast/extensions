@@ -9,6 +9,7 @@ import { localStorage } from "@ui/localstorage";
 
 interface Props {
   revalidate: () => Promise<GlpiServer[] | undefined>;
+  glpiServerConfig?: GlpiServer[];
   glpiServer?: GlpiServer;
 }
 
@@ -128,7 +129,7 @@ export default function ServerForm(props: Props): React.ReactElement {
     },
     validation: {
       name: ValidateName,
-      endpoint: ValidateEndpoint,
+      endpoint: (value) => ValidateEndpoint(value, props.glpiServerConfig),
       clientid: FormValidation.Required,
       clientsecret: FormValidation.Required,
       username: props.glpiServer ? undefined : FormValidation.Required,

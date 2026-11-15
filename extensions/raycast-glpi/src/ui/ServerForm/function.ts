@@ -1,6 +1,9 @@
+import { GlpiServer } from "@ui/types";
+
 const ERROR_MSG_VALUE_EMPTY = "Please enter a value.";
 const ERROR_MSG_VALUE_URL = "Must be a valid http:// or https:// URL.";
 const ERROR_MSG_VALUE_NAME = "This name can't be use. Chose a different one.";
+const ERROR_MSG_VALUE_ALREADY_USED = "Already configured.";
 
 /**
  * Validation for `endpoint` value.
@@ -9,12 +12,14 @@ const ERROR_MSG_VALUE_NAME = "This name can't be use. Chose a different one.";
  *
  * @returns Error message if value is invalid.
  */
-export const ValidateEndpoint = (value?: string): string | undefined => {
+export const ValidateEndpoint = (value?: string, config?: GlpiServer[]): string | undefined => {
   if (!value) return ERROR_MSG_VALUE_EMPTY;
+
+  let url;
 
   /* Check if is a valid URL */
   try {
-    const url = new URL(value);
+    url = new URL(value);
 
     /* Check Proto */
     if (url.protocol !== "http:" && url.protocol !== "https:") return ERROR_MSG_VALUE_URL;
@@ -24,6 +29,20 @@ export const ValidateEndpoint = (value?: string): string | undefined => {
     if ("code" in error && error.code === "ERR_INVALID_URL") return ERROR_MSG_VALUE_URL;
 
     return error.message;
+  }
+
+  /* Check if endpoint is already used */
+  if (config && config.length > 0) {
+    const index = config.findIndex((v) => {
+      try {
+        const u = new URL(v.endpoint);
+        return url.toString() === u.toString();
+      } catch {
+        return false;
+      }
+    });
+
+    if (index > -1) return ERROR_MSG_VALUE_ALREADY_USED;
   }
 };
 

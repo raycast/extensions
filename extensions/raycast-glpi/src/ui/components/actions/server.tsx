@@ -138,7 +138,12 @@ export default function ActionPanelSectionServer(): React.JSX.Element {
         <Action.Push
           title="Add Server"
           icon={Icon.Plus}
-          target={<ServerForm revalidate={ctxGlpiServer.revalidateGlpiServerConfig} />}
+          target={
+            <ServerForm
+              glpiServerConfig={ctxGlpiServer.glpiServerConfig}
+              revalidate={ctxGlpiServer.revalidateGlpiServerConfig}
+            />
+          }
         />
       )}
       <ActionPanelSubmenuEditServer />
