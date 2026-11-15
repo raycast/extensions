@@ -1,29 +1,14 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  closeMainWindow,
-  Color,
-  Detail,
-  Icon,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { ListErrorView } from "./components/error-view";
-import { sentence, showHexFailure } from "./lib/feedback";
+import { copyOrPaste, sentence, showHexFailure } from "./lib/feedback";
 import { formatDuration, formatTime, groupByDay } from "./lib/format";
 import { hex, hexText, MEETING_START_TIMEOUT_MS } from "./lib/hex";
 import { transcriptBody } from "./lib/meetings";
 import { DoneReply, Meeting, MeetingListReply } from "./lib/types";
 
-const STATUS_TAGS: Partial<
-  Record<Meeting["status"], { text: string; color: Color }>
-> = {
+const STATUS_TAGS: Partial<Record<Meeting["status"], { text: string; color: Color }>> = {
   starting: { text: "Starting", color: Color.Orange },
   recording: { text: "Recording", color: Color.Red },
   transcribing: { text: "Transcribing", color: Color.Blue },
@@ -31,28 +16,22 @@ const STATUS_TAGS: Partial<
   failed: { text: "Failed", color: Color.Red },
 };
 
+const MEETING_LIMIT = "200";
+
 const transcriptOf = (id: string) => hexText(["meetings", "show", id, "--md"]);
 
-async function copyTranscript(id: string, paste: boolean) {
+async function copyOrPasteTranscript(id: string, mode: "copy" | "paste") {
+  let markdown: string;
   try {
-    const markdown = await transcriptOf(id);
-    if (paste) {
-      await closeMainWindow();
-      await Clipboard.paste(markdown);
-    } else {
-      await Clipboard.copy(markdown);
-      await showHUD("Copied transcript");
-    }
+    markdown = await transcriptOf(id);
   } catch (error) {
     await showHexFailure(error, "Couldn't read the transcript");
+    return;
   }
+  await copyOrPaste(markdown, mode, "Copied transcript");
 }
 
-async function control(
-  args: string[],
-  titles: { changed: string; failed: string },
-  onDone: () => void,
-) {
+async function control(args: string[], titles: { changed: string; failed: string }, onDone: () => void) {
   try {
     const reply = await hex<DoneReply>(args, {
       timeoutMs: MEETING_START_TIMEOUT_MS,
@@ -70,24 +49,15 @@ async function control(
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading, error, revalidate } = usePromise(
-    () => hex<MeetingListReply>(["meetings", "list", "--limit", "200"]),
+    () => hex<MeetingListReply>(["meetings", "list", "--limit", MEETING_LIMIT]),
     [],
     { onError: () => undefined },
   );
 
-  const sections = useMemo(
-    () =>
-      groupByDay(
-        data?.meetings ?? [],
-        (meeting) => new Date(meeting.timestamp_ms),
-      ),
-    [data],
-  );
-  const canStop =
-    data?.meetings.some(
-      (meeting) =>
-        meeting.status === "recording" || meeting.status === "starting",
-    ) ?? false;
+  const sections = useMemo(() => groupByDay(data?.meetings ?? [], (meeting) => new Date(meeting.timestamp_ms)), [data]);
+  const meetings = data?.meetings ?? [];
+  const canStop = meetings.some((meeting) => meeting.status === "recording" || meeting.status === "starting");
+  const transcribing = meetings.some((meeting) => meeting.status === "transcribing");
 
   const recordAction = canStop ? (
     <Action
@@ -105,7 +75,7 @@ export default function Command() {
         )
       }
     />
-  ) : (
+  ) : transcribing ? undefined : (
     <Action
       title="Record Meeting"
       icon={Icon.Microphone}
@@ -134,31 +104,27 @@ export default function Command() {
           icon={Icon.TwoPeople}
           title={searchText ? "No matching meetings" : "No meetings yet"}
           description={searchText ? undefined : "Record a meeting in Hex."}
-          actions={<ActionPanel>{recordAction}</ActionPanel>}
+          actions={recordAction && <ActionPanel>{recordAction}</ActionPanel>}
         />
       )}
-      {sections.map((section) => (
-        <List.Section key={section.title} title={section.title}>
+      {sections.map((section, index) => (
+        <List.Section
+          key={section.title}
+          title={section.title}
+          subtitle={index === 0 && data?.truncated ? `Latest ${MEETING_LIMIT} meetings` : undefined}
+        >
           {section.items.map((meeting) => {
             const date = new Date(meeting.timestamp_ms);
             const tag = STATUS_TAGS[meeting.status];
             return (
               <List.Item
                 key={meeting.id}
-                icon={
-                  meeting.in_progress
-                    ? { source: Icon.CircleFilled, tintColor: Color.Red }
-                    : Icon.TwoPeople
-                }
+                icon={meeting.in_progress ? { source: Icon.CircleFilled, tintColor: Color.Red } : Icon.TwoPeople}
                 title={meeting.title || "Untitled meeting"}
                 subtitle={meeting.application ?? undefined}
-                keywords={
-                  meeting.application ? [meeting.application] : undefined
-                }
+                keywords={meeting.application ? [meeting.application] : undefined}
                 accessories={[
-                  ...(tag
-                    ? [{ tag: { value: tag.text, color: tag.color } }]
-                    : []),
+                  ...(tag ? [{ tag: { value: tag.text, color: tag.color } }] : []),
                   {
                     text: formatDuration(meeting.duration_ms),
                     tooltip: "Length",
@@ -176,14 +142,13 @@ export default function Command() {
                       <Action
                         title="Copy Transcript"
                         icon={Icon.CopyClipboard}
-                        shortcut={Keyboard.Shortcut.Common.Copy}
-                        onAction={() => copyTranscript(meeting.id, false)}
+                        onAction={() => copyOrPasteTranscript(meeting.id, "copy")}
                       />
                       <Action
                         title="Paste Transcript"
                         icon={Icon.Clipboard}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                        onAction={() => copyTranscript(meeting.id, true)}
+                        onAction={() => copyOrPasteTranscript(meeting.id, "paste")}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
@@ -217,7 +182,7 @@ export default function Command() {
 }
 
 function MeetingDetail({ meeting }: { meeting: Meeting }) {
-  const { data, isLoading } = usePromise(transcriptOf, [meeting.id], {
+  const { data, isLoading, revalidate } = usePromise(transcriptOf, [meeting.id], {
     onError: (error) => showHexFailure(error, "Couldn't read the transcript"),
   });
   const tag = STATUS_TAGS[meeting.status];
@@ -228,17 +193,9 @@ function MeetingDetail({ meeting }: { meeting: Meeting }) {
       markdown={data ? transcriptBody(data) : ""}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="When"
-            text={new Date(meeting.timestamp_ms).toLocaleString()}
-          />
-          {meeting.application && (
-            <Detail.Metadata.Label title="App" text={meeting.application} />
-          )}
-          <Detail.Metadata.Label
-            title="Length"
-            text={formatDuration(meeting.duration_ms)}
-          />
+          <Detail.Metadata.Label title="When" text={new Date(meeting.timestamp_ms).toLocaleString()} />
+          {meeting.application && <Detail.Metadata.Label title="App" text={meeting.application} />}
+          <Detail.Metadata.Label title="Length" text={formatDuration(meeting.duration_ms)} />
           {tag && (
             <Detail.Metadata.TagList title="Status">
               <Detail.Metadata.TagList.Item text={tag.text} color={tag.color} />
@@ -247,12 +204,24 @@ function MeetingDetail({ meeting }: { meeting: Meeting }) {
         </Detail.Metadata>
       }
       actions={
-        data ? (
-          <ActionPanel>
-            <Action.CopyToClipboard title="Copy Transcript" content={data} />
-            <Action.Paste title="Paste Transcript" content={data} />
-          </ActionPanel>
-        ) : undefined
+        <ActionPanel>
+          <Action
+            title="Copy Transcript"
+            icon={Icon.CopyClipboard}
+            onAction={() => copyOrPasteTranscript(meeting.id, "copy")}
+          />
+          <Action
+            title="Paste Transcript"
+            icon={Icon.Clipboard}
+            onAction={() => copyOrPasteTranscript(meeting.id, "paste")}
+          />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={revalidate}
+          />
+        </ActionPanel>
       }
     />
   );

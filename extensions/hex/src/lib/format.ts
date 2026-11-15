@@ -3,20 +3,14 @@ export function formatDuration(ms: number): string {
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const seconds = String(total % 60).padStart(2, "0");
-  return hours > 0
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${seconds}`
-    : `${minutes}:${seconds}`;
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${seconds}` : `${minutes}:${seconds}`;
 }
 
 function startOfDay(date: Date): number {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-  ).getTime();
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-export function dayLabel(date: Date, now = new Date()): string {
+function dayLabel(date: Date, now = new Date()): string {
   const days = Math.round((startOfDay(now) - startOfDay(date)) / 86_400_000);
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";

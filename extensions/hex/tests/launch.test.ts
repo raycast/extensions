@@ -46,6 +46,17 @@ describe("openingHex", () => {
     expect(attempt).toHaveBeenCalledTimes(3);
   });
 
+  it("retries while Hex is launched but not answering yet", async () => {
+    const attempt = vi
+      .fn()
+      .mockRejectedValueOnce(notRunning)
+      .mockRejectedValueOnce(notRunning)
+      .mockResolvedValue("recording");
+    await expect(openingHex(attempt)).resolves.toBe("recording");
+    expect(hexMock).toHaveBeenCalledTimes(1);
+    expect(attempt).toHaveBeenCalledTimes(3);
+  });
+
   it("rethrows other failures without starting Hex", async () => {
     const refused = new HexError("failed", "Microphone is busy");
     const attempt = vi.fn().mockRejectedValue(refused);
@@ -55,10 +66,7 @@ describe("openingHex", () => {
 
   it("gives up when setup doesn't finish in time", async () => {
     vi.useFakeTimers();
-    const attempt = vi
-      .fn()
-      .mockRejectedValueOnce(notRunning)
-      .mockRejectedValue(settingUp);
+    const attempt = vi.fn().mockRejectedValueOnce(notRunning).mockRejectedValue(settingUp);
     const result = openingHex(attempt);
     const settled = expect(result).rejects.toBe(settingUp);
     await vi.advanceTimersByTimeAsync(5_000);

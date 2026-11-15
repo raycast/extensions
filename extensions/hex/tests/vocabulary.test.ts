@@ -1,16 +1,9 @@
 import { describe, expect, it } from "vitest";
-import {
-  planVocabularyEdit,
-  splitSpellings,
-  vocabularyAddArgs,
-} from "../src/lib/vocabulary";
+import { planVocabularyEdit, splitSpellings, vocabularyAddArgs } from "../src/lib/vocabulary";
 
 describe("splitSpellings", () => {
   it("trims, drops blanks, and dedupes ignoring case", () => {
-    expect(splitSpellings(" flycast, flight cast,, Flycast ,")).toEqual([
-      "flycast",
-      "flight cast",
-    ]);
+    expect(splitSpellings(" flycast, flight cast,, Flycast ,")).toEqual(["flycast", "flight cast"]);
   });
 
   it("returns nothing for an empty field", () => {
@@ -41,19 +34,11 @@ describe("planVocabularyEdit", () => {
   };
 
   it("does nothing when nothing changed", () => {
-    expect(
-      planVocabularyEdit(before, "Flightcast", ["Flycast", "flight cast"]),
-    ).toEqual([]);
+    expect(planVocabularyEdit(before, "Flightcast", ["Flycast", "flight cast"])).toEqual([]);
   });
 
   it("only adds the new spellings when every old one stays", () => {
-    expect(
-      planVocabularyEdit(before, "Flightcast", [
-        "flycast",
-        "flight cast",
-        "fly cast",
-      ]),
-    ).toEqual([
+    expect(planVocabularyEdit(before, "Flightcast", ["flycast", "flight cast", "fly cast"])).toEqual([
       ["vocabulary", "add", "Flightcast", "--sounds-like", "fly cast"],
     ]);
   });

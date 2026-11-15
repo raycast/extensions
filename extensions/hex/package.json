@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hex",
   "title": "Hex",
-  "description": "Control Hex dictation and browse saved dictations, captures, and meetings",
+  "description": "Control Hex dictation and browse saved dictations, captures, and meetings. Requires Hex 3.4.0 or later",
   "icon": "icon.png",
   "author": "tim_gailey",
   "categories": [
@@ -155,7 +155,7 @@
         },
         {
           "name": "soundsLike",
-          "placeholder": "Sounds like (comma-separated)",
+          "placeholder": "Sounds Like (Comma-Separated)",
           "type": "text",
           "required": false
         }

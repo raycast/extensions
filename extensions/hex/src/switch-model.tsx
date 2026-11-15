@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { ListErrorView } from "./components/error-view";
@@ -34,11 +23,9 @@ function languagesText(model: Model): string {
 }
 
 export default function Command() {
-  const { data, isLoading, error, revalidate } = usePromise(
-    () => hex<ModelsReply>(["model", "list"]),
-    [],
-    { onError: () => undefined },
-  );
+  const { data, isLoading, error, revalidate } = usePromise(() => hex<ModelsReply>(["model", "list"]), [], {
+    onError: () => undefined,
+  });
   const [searchText, setSearchText] = useState("");
   const models = data?.models ?? [];
   const installed = models.filter((model) => model.installed);
@@ -54,9 +41,7 @@ export default function Command() {
       if (language) args.push("--language", language);
       const reply = await hex<DoneReply>(args, { timeoutMs: 30_000 });
       toast.style = Toast.Style.Success;
-      toast.title = reply.changed
-        ? `Switched to ${model.name}`
-        : sentence(reply.message);
+      toast.title = reply.changed ? `Switched to ${model.name}` : sentence(reply.message);
       revalidate();
     } catch (error) {
       toast.hide();
@@ -99,41 +84,24 @@ export default function Command() {
         subtitle={languagesText(model)}
         keywords={[model.id, ...model.languages.map(describeLanguage)]}
         accessories={[
-          ...(model.selected
-            ? [{ tag: { value: "In Use", color: Color.Green } }]
-            : []),
+          ...(model.selected ? [{ tag: { value: "In Use", color: Color.Green } }] : []),
           { text: model.size },
         ]}
         actions={
           <ActionPanel>
             {model.installed ? (
               <>
-                <Action
-                  title="Use Model"
-                  icon={Icon.CheckCircle}
-                  onAction={() => use(model)}
-                />
+                <Action title="Use Model" icon={Icon.CheckCircle} onAction={() => use(model)} />
                 {model.languages.length > 1 && (
-                  <ActionPanel.Submenu
-                    title="Use with Language"
-                    icon={Icon.Globe}
-                  >
+                  <ActionPanel.Submenu title="Use with Language" icon={Icon.Globe}>
                     {model.languages.map((code) => (
-                      <Action
-                        key={code}
-                        title={describeLanguage(code)}
-                        onAction={() => use(model, code)}
-                      />
+                      <Action key={code} title={describeLanguage(code)} onAction={() => use(model, code)} />
                     ))}
                   </ActionPanel.Submenu>
                 )}
               </>
             ) : (
-              <Action
-                title="Download Model"
-                icon={Icon.Download}
-                onAction={() => install(model)}
-              />
+              <Action title="Download Model" icon={Icon.Download} onAction={() => install(model)} />
             )}
             <Action
               title="Refresh"
@@ -148,24 +116,14 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      filtering
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search models"
-    >
+    <List isLoading={isLoading} filtering onSearchTextChange={setSearchText} searchBarPlaceholder="Search models">
       {error ? (
         <ListErrorView error={error} onRetry={revalidate} />
       ) : (
-        <List.EmptyView
-          icon={Icon.Waveform}
-          title={searchText ? "No matching models" : "No models"}
-        />
+        <List.EmptyView icon={Icon.Waveform} title={searchText ? "No matching models" : "No models"} />
       )}
       <List.Section title="Downloaded">{installed.map(item)}</List.Section>
-      <List.Section title="Available to Download">
-        {available.map(item)}
-      </List.Section>
+      <List.Section title="Available to Download">{available.map(item)}</List.Section>
     </List>
   );
 }

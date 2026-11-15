@@ -6,25 +6,11 @@ export type DoneReply = {
 
 export type StatusReply = {
   status: "status";
-  app_version: string;
-  listener: { running: boolean; status: string };
-  capture: {
-    state: "idle" | "recording" | "transcribing" | "unknown";
-    recording: "dictation" | "service" | null;
-    pending_jobs: number;
-  };
-  meeting: {
-    state: "idle" | "starting" | "recording" | "transcribing";
-    title: string | null;
-    elapsed_seconds: number | null;
-  };
-  model: { id: string; name: string; language: string | null };
-  features: { meetings: boolean; history_retention: string };
-  labs?: string[];
+  capture: { recording: "dictation" | "service" | null };
+  meeting: { state: "idle" | "starting" | "recording" | "transcribing" };
 };
 
-export type HistoryKind =
-  "dictation" | "send" | "voice_action" | "printed" | "raw";
+export type HistoryKind = "dictation" | "send" | "voice_action" | "printed" | "raw";
 
 export type HistoryEntry = {
   id: number;
@@ -34,13 +20,10 @@ export type HistoryEntry = {
   kind: HistoryKind;
   final_text: string;
   raw_text?: string;
-  score?: number;
-  snippet?: string;
   recording?: string;
 };
 
 export type HistoryReply = {
-  version: 1;
   retention: "off" | "day" | "week" | "month" | "forever";
   truncated: boolean;
   entries: HistoryEntry[];
@@ -52,32 +35,19 @@ export type Meeting = {
   timestamp_ms: number;
   duration_ms: number;
   application: string | null;
-  status:
-    | "starting"
-    | "recording"
-    | "transcribing"
-    | "complete"
-    | "interrupted"
-    | "failed";
+  status: "starting" | "recording" | "transcribing" | "complete" | "interrupted" | "failed";
   in_progress: boolean;
-  transcript_source: "final" | "rolling" | "missing" | "draft";
-  warnings: string[];
 };
 
 export type MeetingListReply = {
-  version: 1;
   meetings: Meeting[];
-  skipped: { id: string; reason: string }[];
   truncated: boolean;
 };
 
-export type Setting = {
-  key: string;
-  value: unknown;
-  kind: string;
+export type SettingsReply = {
+  status: "settings";
+  settings: { key: string; value: unknown }[];
 };
-
-export type SettingsReply = { status: "settings"; settings: Setting[] };
 
 export type VocabularyEntry = { term: string; sounds_like?: string[] };
 
@@ -93,7 +63,6 @@ export type Model = {
   size: string;
   installed: boolean;
   selected: boolean;
-  source?: string;
 };
 
 export type ModelsReply = { status: "models"; models: Model[] };
@@ -103,11 +72,9 @@ export type Annotation = {
   bundle: string;
   created_at_ms: number;
   duration_ms: number | null;
-  mode: string | null;
   app: string | null;
   words: number;
-  sent_to: { session: string; title: string } | null;
-  queued: boolean;
+  sent_to: { title: string } | null;
 };
 
 export type AnnotationListReply = {
@@ -124,7 +91,6 @@ export type AnnotationDetail = Annotation & {
   marks: number;
   keyframes: number;
   video: string | null;
-  audio: string | null;
   contact_sheet: string | null;
 };
 
@@ -132,5 +98,4 @@ export type AnnotationStatusReply = {
   status: "scrawl-capture";
   changed: boolean;
   state: string;
-  bundle: string | null;
 };

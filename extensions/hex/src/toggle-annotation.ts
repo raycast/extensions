@@ -8,17 +8,12 @@ export default async function Command() {
   try {
     const status = await hex<AnnotationStatusReply>(["annotate", "status"]);
     const recording = status.state === "recording";
-    const reply = await hex<AnnotationStatusReply>([
-      "annotate",
-      recording ? "stop" : "start",
-    ]);
+    const reply = await hex<AnnotationStatusReply>(["annotate", recording ? "stop" : "start"]);
     if (!reply.changed) {
-      await showHUD(
-        recording ? "Annotation already stopped" : "Already annotating",
-      );
+      await showHUD(recording ? "Annotation already stopped" : "Already annotating");
       return;
     }
-    await showHUD(recording ? "Annotation saved to captures" : "Annotating");
+    await showHUD(recording ? "Saving annotation to captures" : "Annotating");
   } catch (error) {
     if (errorCode(error) === "unsupported") {
       await showHUD("Annotation is disabled in Hex");

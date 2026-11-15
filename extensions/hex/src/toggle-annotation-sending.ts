@@ -8,21 +8,16 @@ export default async function Command() {
   await closeMainWindow();
   try {
     const reply = await hex<SettingsReply>(["settings", "get", ROUTING_KEY]);
-    const next = flipSending(
-      reply.settings.find((setting) => setting.key === ROUTING_KEY)?.value,
-    );
+    const next = flipSending(reply.settings.find((setting) => setting.key === ROUTING_KEY)?.value);
     if (!next) {
       await showHUD("Update Hex to change annotation sending");
       return;
     }
-    // On stdin, not argv: capture.routing can hold an API key, and argv shows in ps.
     await hex<DoneReply>(["settings", "apply", "-"], {
       input: JSON.stringify({ [ROUTING_KEY]: next }),
     });
     await showHUD(
-      next.sendCaptures
-        ? "Hex now sends annotations to OpenCode"
-        : "Hex now only saves and copies annotations",
+      next.sendCaptures ? "Hex now sends annotations to OpenCode" : "Hex now only saves and copies annotations",
     );
   } catch (error) {
     await showFailureHUD(error);

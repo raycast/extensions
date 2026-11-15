@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { ListErrorView } from "./components/error-view";
@@ -37,21 +29,14 @@ const RETENTION_LABELS: Record<HistoryReply["retention"], string> = {
 
 function historyArgs(search: string, app: string): string[] {
   const query = search.trim();
-  const args = [
-    "history",
-    "--raw",
-    "--limit",
-    query ? SEARCH_LIMIT : BROWSE_LIMIT,
-  ];
+  const args = ["history", "--raw", "--limit", query ? SEARCH_LIMIT : BROWSE_LIMIT];
   if (query) args.push("--search", query);
   if (app !== ALL_APPS) args.push("--app", app);
   return args;
 }
 
 function changedRaw(entry: HistoryEntry): string | undefined {
-  return entry.raw_text?.trim() !== entry.final_text.trim()
-    ? entry.raw_text
-    : undefined;
+  return entry.raw_text?.trim() !== entry.final_text.trim() ? entry.raw_text : undefined;
 }
 
 export default function Command() {
@@ -61,19 +46,14 @@ export default function Command() {
   const [showingDetail, setShowingDetail] = useState(true);
 
   const { data, isLoading, error, revalidate } = usePromise(
-    (search: string, app: string) =>
-      hex<HistoryReply>(historyArgs(search, app)),
+    (search: string, app: string) => hex<HistoryReply>(historyArgs(search, app)),
     [searchText, app],
     { onError: () => undefined },
   );
 
-  const { data: apps } = usePromise(
+  const { data: apps, revalidate: revalidateApps } = usePromise(
     async () => {
-      const reply = await hex<HistoryReply>([
-        "history",
-        "--limit",
-        BROWSE_LIMIT,
-      ]);
+      const reply = await hex<HistoryReply>(["history", "--limit", BROWSE_LIMIT]);
       const names = new Set<string>();
       for (const entry of reply.entries) {
         if (entry.application) names.add(entry.application);
@@ -83,6 +63,11 @@ export default function Command() {
     [],
     { onError: () => undefined },
   );
+
+  const refresh = () => {
+    revalidate();
+    revalidateApps();
+  };
 
   const searching = searchText.trim().length > 0;
   const filtered = searching || app !== ALL_APPS;
@@ -94,6 +79,12 @@ export default function Command() {
         : groupByDay(entries, (entry) => new Date(entry.timestamp_ms)),
     [entries, searching],
   );
+  const retention = data && RETENTION_LABELS[data.retention];
+  const limitNote = data?.truncated
+    ? searching
+      ? `Top ${SEARCH_LIMIT} matches`
+      : `Latest ${BROWSE_LIMIT} dictations`
+    : undefined;
 
   return (
     <List
@@ -116,7 +107,7 @@ export default function Command() {
       }
     >
       {error ? (
-        <ListErrorView error={error} onRetry={revalidate} />
+        <ListErrorView error={error} onRetry={refresh} />
       ) : data?.retention === "off" && entries.length === 0 ? (
         <List.EmptyView
           icon={Icon.Clock}
@@ -124,11 +115,7 @@ export default function Command() {
           description="Turn on History in Hex's settings to keep dictations."
           actions={
             <ActionPanel>
-              <Action
-                title="Open Hex History"
-                icon={Icon.AppWindow}
-                onAction={() => openHistoryPane()}
-              />
+              <Action title="Open Hex History" icon={Icon.AppWindow} onAction={() => openHistoryPane()} />
             </ActionPanel>
           }
         />
@@ -136,15 +123,11 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Microphone}
           title={filtered ? "No matching dictations" : "No dictations yet"}
-          description={
-            data && !filtered
-              ? `Hex keeps dictations ${RETENTION_LABELS[data.retention]}.`
-              : undefined
-          }
+          description={data && !filtered && retention ? `Hex keeps dictations ${retention}.` : undefined}
         />
       )}
-      {sections.map((section) => (
-        <List.Section key={section.title} title={section.title}>
+      {sections.map((section, index) => (
+        <List.Section key={section.title} title={section.title} subtitle={index === 0 ? limitNote : undefined}>
           {section.items.map((entry) => (
             <HistoryItem
               key={entry.id}
@@ -152,7 +135,7 @@ export default function Command() {
               primaryAction={primaryAction}
               showingDetail={showingDetail}
               onToggleDetail={() => setShowingDetail((value) => !value)}
-              onRefresh={revalidate}
+              onRefresh={refresh}
             />
           ))}
         </List.Section>
@@ -194,49 +177,21 @@ function HistoryItem({
       }
       detail={
         <List.Item.Detail
-          markdown={
-            raw !== undefined
-              ? `${text}\n\n---\n\n**Before Output steps**\n\n${raw}`
-              : text
-          }
+          markdown={raw !== undefined ? `${text}\n\n---\n\n**Before Output steps**\n\n${raw}` : text}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="When"
-                text={date.toLocaleString()}
-              />
-              {entry.application && (
-                <List.Item.Detail.Metadata.Label
-                  title="App"
-                  text={entry.application}
-                />
-              )}
-              {entry.mode && (
-                <List.Item.Detail.Metadata.Label
-                  title="Mode"
-                  text={entry.mode}
-                />
-              )}
+              <List.Item.Detail.Metadata.Label title="When" text={date.toLocaleString()} />
+              {entry.application && <List.Item.Detail.Metadata.Label title="App" text={entry.application} />}
+              {entry.mode && <List.Item.Detail.Metadata.Label title="Mode" text={entry.mode} />}
               <List.Item.Detail.Metadata.TagList title="Kind">
                 <List.Item.Detail.Metadata.TagList.Item
                   text={KIND_LABELS[entry.kind] ?? entry.kind}
-                  color={
-                    entry.kind === "dictation"
-                      ? Color.SecondaryText
-                      : Color.Blue
-                  }
+                  color={entry.kind === "dictation" ? Color.SecondaryText : Color.Blue}
                 />
               </List.Item.Detail.Metadata.TagList>
-              <List.Item.Detail.Metadata.Label
-                title="Words"
-                text={String(wordCount(text))}
-              />
+              <List.Item.Detail.Metadata.Label title="Words" text={String(wordCount(text))} />
               {entry.recording && (
-                <List.Item.Detail.Metadata.Label
-                  title="Recording"
-                  text="Kept"
-                  icon={Icon.Waveform}
-                />
+                <List.Item.Detail.Metadata.Label title="Recording" text="Kept" icon={Icon.Waveform} />
               )}
             </List.Item.Detail.Metadata>
           }
@@ -253,11 +208,7 @@ function HistoryItem({
                   content={raw}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                 />
-                <Action.CopyToClipboard
-                  title="Copy Original"
-                  content={raw}
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                />
+                <Action.CopyToClipboard title="Copy Original" content={raw} shortcut={Keyboard.Shortcut.Common.Copy} />
               </>
             )}
           </ActionPanel.Section>

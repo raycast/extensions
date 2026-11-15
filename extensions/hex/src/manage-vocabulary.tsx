@@ -12,53 +12,38 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ListErrorView } from "./components/error-view";
 import { showHexFailure } from "./lib/feedback";
 import { errorMessage, hex } from "./lib/hex";
 import { DoneReply, VocabularyEntry, VocabularyReply } from "./lib/types";
-import {
-  planVocabularyEdit,
-  splitSpellings,
-  vocabularyAddArgs,
-} from "./lib/vocabulary";
+import { planVocabularyEdit, splitSpellings, vocabularyAddArgs } from "./lib/vocabulary";
 
 export default function Command() {
-  const { data, isLoading, error, revalidate } = usePromise(
-    () => hex<VocabularyReply>(["vocabulary", "list"]),
-    [],
-    { onError: () => undefined },
-  );
+  const { data, isLoading, error, revalidate } = usePromise(() => hex<VocabularyReply>(["vocabulary", "list"]), [], {
+    onError: () => undefined,
+  });
   const entries = data?.entries ?? [];
   const [searchText, setSearchText] = useState("");
 
-  const addAction = (initialTerm?: string) => (
+  const addAction = (initialTerm?: string, shortcut?: Keyboard.Shortcut) => (
     <Action.Push
       title="Add Term"
       icon={Icon.Plus}
-      shortcut={Keyboard.Shortcut.Common.New}
+      shortcut={shortcut}
       target={<VocabularyForm initialTerm={initialTerm} onSaved={revalidate} />}
     />
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      filtering
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search vocabulary"
-    >
+    <List isLoading={isLoading} filtering onSearchTextChange={setSearchText} searchBarPlaceholder="Search vocabulary">
       {error ? (
         <ListErrorView error={error} onRetry={revalidate} />
       ) : (
         <List.EmptyView
           icon={Icon.Book}
           title={searchText ? "No matching terms" : "No vocabulary yet"}
-          description={
-            searchText
-              ? undefined
-              : "Add names or words with your preferred spelling."
-          }
+          description={searchText ? undefined : "Add names or words with your preferred spelling."}
           actions={<ActionPanel>{addAction(searchText.trim())}</ActionPanel>}
         />
       )}
@@ -71,11 +56,7 @@ export default function Command() {
                 key={entry.term}
                 icon={Icon.Book}
                 title={entry.term}
-                subtitle={
-                  spellings.length > 0
-                    ? `sounds like ${spellings.join(", ")}`
-                    : undefined
-                }
+                subtitle={spellings.length > 0 ? `sounds like ${spellings.join(", ")}` : undefined}
                 keywords={spellings}
                 actions={
                   <ActionPanel>
@@ -83,22 +64,17 @@ export default function Command() {
                       <Action.Push
                         title="Edit Term"
                         icon={Icon.Pencil}
-                        target={
-                          <VocabularyForm entry={entry} onSaved={revalidate} />
-                        }
+                        target={<VocabularyForm entry={entry} onSaved={revalidate} />}
                       />
-                      {addAction()}
-                      <Action.CopyToClipboard
-                        title="Copy Term"
-                        content={entry.term}
-                      />
+                      <Action.CopyToClipboard title="Copy Term" content={entry.term} />
+                      {addAction(undefined, Keyboard.Shortcut.Common.New)}
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                       <Action
                         title="Remove Term"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={() => removeTerm(entry.term, revalidate)}
                       />
                     </ActionPanel.Section>
@@ -142,17 +118,29 @@ function VocabularyForm({
   onSaved: () => void;
 }) {
   const { pop } = useNavigation();
+  const saving = useRef(false);
+  const [isSaving, setSaving] = useState(false);
 
   async function save(values: FormValues) {
+    if (saving.current) return;
+    saving.current = true;
+    setSaving(true);
+    try {
+      await saveTerm(values);
+    } finally {
+      saving.current = false;
+      setSaving(false);
+    }
+  }
+
+  async function saveTerm(values: FormValues) {
     const term = values.term.trim();
     if (!term) {
       await showToast({ style: Toast.Style.Failure, title: "Enter a term" });
       return;
     }
     const spellings = splitSpellings(values.soundsLike);
-    const steps = entry
-      ? planVocabularyEdit(entry, term, spellings)
-      : [vocabularyAddArgs(term, spellings)];
+    const steps = entry ? planVocabularyEdit(entry, term, spellings) : [vocabularyAddArgs(term, spellings)];
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving",
@@ -186,22 +174,15 @@ function VocabularyForm({
 
   return (
     <Form
+      isLoading={isSaving}
       navigationTitle={entry ? "Edit Term" : "Add Term"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={entry ? "Save Term" : "Add Term"}
-            onSubmit={save}
-          />
+          <Action.SubmitForm title={entry ? "Save Term" : "Add Term"} onSubmit={save} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="term"
-        title="Term"
-        placeholder="Raycast"
-        defaultValue={entry?.term ?? initialTerm}
-      />
+      <Form.TextField id="term" title="Term" placeholder="Raycast" defaultValue={entry?.term ?? initialTerm} />
       <Form.TextField
         id="soundsLike"
         title="Sounds Like"

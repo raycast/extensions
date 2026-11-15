@@ -1,6 +1,6 @@
 export const ROUTING_KEY = "capture.routing";
 
-export type Routing = Record<string, unknown> & { sendCaptures: boolean };
+type Routing = Record<string, unknown> & { sendCaptures: boolean };
 
 export function flipSending(value: unknown): Routing | undefined {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {

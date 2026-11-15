@@ -44,19 +44,21 @@ describe("parseReply", () => {
   });
 
   it("uses stderr when a read command fails without JSON", () => {
-    expect(() =>
-      parseReply("", 'hex: Could not read the time "bogus"; use today.', 1),
-    ).toThrow('Could not read the time "bogus"; use today.');
+    expect(() => parseReply("", 'hex: Could not read the time "bogus"; use today.', 1)).toThrow(
+      'Could not read the time "bogus"; use today.',
+    );
   });
 
   it("refuses output that isn't JSON", () => {
-    expect(() => parseReply("not json", "", 0)).toThrow(
-      "Couldn't read Hex's reply",
-    );
+    expect(() => parseReply("not json", "", 0)).toThrow("Couldn't read Hex's reply");
   });
 
   it("reports exit 3 without output as not-running", () => {
     expect(codeOf(() => parseReply("", "", 3))).toBe("not-running");
+  });
+
+  it("reports exit 3 with text output as not-running", () => {
+    expect(codeOf(() => parseReply("Hex is not running", "", 3))).toBe("not-running");
   });
 });
 
@@ -74,16 +76,11 @@ describe("errorMessage", () => {
       "feature-off",
       "Annotate is off; turn it on in Settings › Annotate or run `hex settings set capture.enabled true`",
     );
-    expect(errorMessage(error)).toBe(
-      "Annotate is off; turn it on in Settings › Annotate",
-    );
+    expect(errorMessage(error)).toBe("Annotate is off; turn it on in Settings › Annotate");
   });
 
   it("strips backticks when every clause names a command", () => {
-    const error = new HexError(
-      "unsupported",
-      "build with `--features capture`",
-    );
+    const error = new HexError("unsupported", "build with `--features capture`");
     expect(errorMessage(error)).toBe("build with --features capture");
   });
 

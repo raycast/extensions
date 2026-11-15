@@ -1,9 +1,10 @@
 import { errorCode, hex } from "./hex";
 
-const LAUNCH_TIMEOUT_MS = 10_000;
+const LAUNCH_TIMEOUT_MS = 25_000;
 const SETUP_WAIT_MS = 3_000;
 const SETUP_POLL_MS = 200;
 export const SETTING_UP = "not-ready";
+const STILL_STARTING = new Set(["not-running", SETTING_UP]);
 
 export async function openingHex<T>(attempt: () => Promise<T>): Promise<T> {
   try {
@@ -17,7 +18,7 @@ export async function openingHex<T>(attempt: () => Promise<T>): Promise<T> {
     try {
       return await attempt();
     } catch (error) {
-      if (errorCode(error) !== SETTING_UP || Date.now() >= deadline) {
+      if (!STILL_STARTING.has(errorCode(error) ?? "") || Date.now() >= deadline) {
         throw error;
       }
       await new Promise((resolve) => setTimeout(resolve, SETUP_POLL_MS));

@@ -14,39 +14,19 @@ const HEADER = [
 
 describe("transcriptBody", () => {
   it("drops Hex's header fields and keeps the title and transcript", () => {
-    const markdown = [
-      ...HEADER,
-      "## Transcript",
-      "",
-      "[00:02] You: Let's start.",
-    ].join("\n");
+    const markdown = [...HEADER, "## Transcript", "", "[00:02] You: Let's start."].join("\n");
     expect(transcriptBody(markdown)).toBe(
-      [
-        "# Roadmap sync",
-        "",
-        "",
-        "## Transcript",
-        "",
-        "[00:02] You: Let's start.",
-      ].join("\n"),
+      ["# Roadmap sync", "", "", "## Transcript", "", "[00:02] You: Let's start."].join("\n"),
     );
   });
 
   it("keeps header-like lines inside the transcript", () => {
-    const markdown = [
-      ...HEADER,
-      "## Transcript",
-      "- Status: blocked on review",
-    ].join("\n");
+    const markdown = [...HEADER, "## Transcript", "- Status: blocked on review"].join("\n");
     expect(transcriptBody(markdown)).toContain("- Status: blocked on review");
   });
 
   it("keeps lines it doesn't recognize in the header", () => {
-    const markdown = [
-      ...HEADER,
-      "warning: microphone only",
-      "## Transcript",
-    ].join("\n");
+    const markdown = [...HEADER, "warning: microphone only", "## Transcript"].join("\n");
     expect(transcriptBody(markdown)).toContain("warning: microphone only");
   });
 
