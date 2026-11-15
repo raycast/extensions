@@ -84,7 +84,7 @@ export default function ServerForm(props: Props): React.ReactElement {
           if ((value.username && value.password) || value.endpoint !== props.glpiServer.endpoint) {
             if (!value.username || !value.password)
               throw new Error("Username and Password are required for this edit.");
-            client.getTokenWithPassword(value.username, value.password);
+            await client.getTokenWithPassword(value.username, value.password);
           } else {
             await client.getTokenWithRefreshToken();
           }
