@@ -204,6 +204,20 @@ async function revokeLegacyRefreshToken(
   }
 }
 
+function revokeRefreshToken(
+  configuration: JumpseatConfiguration,
+  protocol: JumpseatAuthProtocol,
+  issuer: string | undefined,
+  refreshToken: string,
+): Promise<void> {
+  if (protocol === "legacy") {
+    return revokeLegacyRefreshToken(configuration, refreshToken);
+  }
+  return issuer
+    ? revokeCentralRefreshToken(issuer, refreshToken)
+    : Promise.resolve();
+}
+
 async function clearStoredAuthorization(
   configuration: JumpseatConfiguration,
   { revoke = false }: { revoke?: boolean } = {},
@@ -244,11 +258,7 @@ async function clearStoredAuthorization(
       : undefined;
   const revocation =
     tokens?.refreshToken && protocol
-      ? protocol === "legacy"
-        ? revokeLegacyRefreshToken(configuration, tokens.refreshToken)
-        : issuer
-          ? revokeCentralRefreshToken(issuer, tokens.refreshToken)
-          : Promise.resolve()
+      ? revokeRefreshToken(configuration, protocol, issuer, tokens.refreshToken)
       : Promise.resolve();
 
   // Revocation is best-effort, but local deletion is the disconnect contract.
@@ -444,9 +454,21 @@ export async function clearJumpseatAuthorization(): Promise<void> {
 }
 
 // Replaces the current grant with a fresh one, e.g. to pick up a scope the
-// existing grant predates.
+// existing grant predates. authorize() stores the new grant only once sign-in
+// succeeds, so a cancelled or failed reconnect keeps the current connection;
+// the old refresh token is revoked only after the replacement is stored.
 export async function reconnectJumpseat(): Promise<void> {
   const configuration = getJumpseatConfiguration();
-  await clearStoredAuthorization(configuration, { revoke: true });
+  const previous = await getStoredAuthorization(configuration);
   await authorize(configuration);
+  clearFlightCache();
+  const previousRefreshToken = previous?.tokens.refreshToken;
+  if (previous && previousRefreshToken) {
+    await revokeRefreshToken(
+      configuration,
+      previous.protocol,
+      previous.issuer,
+      previousRefreshToken,
+    );
+  }
 }

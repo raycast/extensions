@@ -8,9 +8,8 @@ import {
   List,
   open,
   openExtensionPreferences,
-  showToast,
-  Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   flightAirline,
   flightAirlineKeywords,
@@ -75,11 +74,7 @@ async function reconnect(revalidate: () => void) {
     await reconnectJumpseat();
     revalidate();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could Not Reconnect Jumpseat",
-      message: error instanceof Error ? error.message : undefined,
-    });
+    await showFailureToast(error, { title: "Could Not Reconnect Jumpseat" });
   }
 }
 
@@ -417,9 +412,16 @@ export function FlightsList({
             ? { source: airlineLogo, fallback: Icon.Airplane }
             : Icon.Airplane;
           const friend = flight.friend;
+          // The detail pane hides accessories, so a past flight's date goes in
+          // the subtitle where it stays visible.
           const subtitle = friend
             ? friendFirstName(friend)
-            : displayFlightNumber(flight);
+            : isPast
+              ? `${displayFlightNumber(flight)} · ${formatListDate(
+                  departure,
+                  flight.departureAirport.timeZoneRegionName,
+                )}`
+              : displayFlightNumber(flight);
 
           return (
             <List.Item
@@ -457,14 +459,7 @@ export function FlightsList({
               }
               accessories={
                 isPast
-                  ? [
-                      {
-                        text: formatListDate(
-                          departure,
-                          flight.departureAirport.timeZoneRegionName,
-                        ),
-                      },
-                    ]
+                  ? undefined
                   : [
                       {
                         tag: {

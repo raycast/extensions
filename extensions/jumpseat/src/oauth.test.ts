@@ -44,6 +44,7 @@ vi.mock("./config", () => ({
 import {
   clearJumpseatAuthorization,
   getJumpseatAccessToken,
+  reconnectJumpseat,
   refreshJumpseatAccessToken,
 } from "./oauth";
 
@@ -426,5 +427,91 @@ describe.each(["central", "legacy"])("%s refresh failures", (protocol) => {
       expiresIn: 3600,
       scope: "flights:upcoming:read",
     });
+  });
+});
+
+describe("reconnectJumpseat", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mocks.getConfiguration.mockReturnValue({
+      apiBaseUrl: "https://api.withjumpseat.com",
+      webBaseUrl: "https://app.withjumpseat.com",
+      authBaseUrl: "https://auth.withjumpseat.com",
+    });
+    mocks.getTokens.mockResolvedValue({ refreshToken: "old-refresh" });
+    mocks.getItem.mockImplementation(
+      async (key: string) =>
+        ({
+          "jumpseat-auth-configuration": "https://api.withjumpseat.com",
+          "jumpseat-auth-protocol": "central",
+          "jumpseat-auth-issuer": "https://auth.withjumpseat.com",
+        })[key],
+    );
+    mocks.setTokens.mockResolvedValue(undefined);
+    mocks.setItem.mockResolvedValue(undefined);
+    mocks.authorizationRequest.mockResolvedValue({
+      redirectURI: "https://raycast.com/callback",
+      codeVerifier: "verifier",
+    });
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  function stubAuthorityFetch() {
+    const fetchMock = vi.fn<typeof fetch>(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/.well-known/oauth-authorization-server")) {
+        return Response.json({
+          issuer: "https://auth.withjumpseat.com",
+          authorization_endpoint:
+            "https://auth.withjumpseat.com/oauth/authorize",
+          token_endpoint: "https://auth.withjumpseat.com/oauth/token",
+        });
+      }
+      if (url.endsWith("/oauth/token")) {
+        return Response.json({
+          access_token: "new-access",
+          refresh_token: "new-refresh",
+          token_type: "Bearer",
+          expires_in: 3600,
+        });
+      }
+      return new Response(null, { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("keeps the current connection when sign-in is cancelled", async () => {
+    const fetchMock = stubAuthorityFetch();
+    mocks.authorize.mockRejectedValue(new Error("cancelled"));
+
+    await expect(reconnectJumpseat()).rejects.toThrow("cancelled");
+    expect(mocks.removeTokens).not.toHaveBeenCalled();
+    expect(mocks.setTokens).not.toHaveBeenCalled();
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).endsWith("/revoke")),
+    ).toBe(false);
+  });
+
+  it("revokes the old grant only after storing the new one", async () => {
+    const fetchMock = stubAuthorityFetch();
+    mocks.authorize.mockResolvedValue({ authorizationCode: "code" });
+
+    await reconnectJumpseat();
+
+    expect(mocks.setTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ refresh_token: "new-refresh" }),
+    );
+    const revoke = fetchMock.mock.calls.find(([url]) =>
+      String(url).endsWith("/oauth/revoke"),
+    );
+    expect(String(revoke?.[1]?.body)).toContain("token=old-refresh");
+    expect(mocks.setTokens.mock.invocationCallOrder[0]).toBeLessThan(
+      fetchMock.mock.invocationCallOrder[
+        fetchMock.mock.calls.indexOf(revoke!)
+      ]!,
+    );
+    expect(mocks.removeTokens).not.toHaveBeenCalled();
   });
 });
