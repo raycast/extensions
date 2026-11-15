@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "cheaterbusting",
+    title: "CheaterBusting",
+    description:
+      "Checks Tinder, Bumble, Hinge and 9 more dating apps for a public profile matching a photo, name, age and city: plans, apps covered, how it works, and the start link. 4 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/MindCraftersGroup/cheaterbusting-plugin/main/assets/logo.png",
+    homepage: "https://cheaterbusting.com/agents.md",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://cheaterbusting.com/mcp"],
+    },
+    remoteUrl: "https://cheaterbusting.com/mcp",
+  },
+  {
     name: "within",
     title: "within",
     description:

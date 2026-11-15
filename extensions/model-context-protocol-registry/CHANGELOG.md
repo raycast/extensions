@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CheaterBusting MCP Server] - {PR_MERGE_DATE}
+
+- Add CheaterBusting to the official registry: checks Tinder, Bumble, Hinge and 9 more dating apps for a public profile matching a photo, name, age and city, with plans, apps covered, how it works, and the start link. 4 read-only tools. Hosted Streamable HTTP server at https://cheaterbusting.com/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add within MCP Server] - 2026-11-15
 
 - Add within to the official registry: find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted Streamable HTTP server at https://shopwithin.co/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

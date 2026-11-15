@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [CheaterBusting](https://cheaterbusting.com/agents.md) | Checks Tinder, Bumble, Hinge and 9 more dating apps for a public profile matching a photo, name, age and city: plans, apps covered, how it works, and the start link. 4 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key. |
 | [within](https://shopwithin.co/agents) | Find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted remote Streamable HTTP server; no account or API key. |
 | [Tesseract](https://tesseract.dev/mcp/) | Make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures from your conversation, charged to your own Tesseract plan. 8 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Tesseract account is required (free media each month, then paid). |
 | [Rizamo](https://rizamo.com/agents/) | Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, see how they did, and answer comments and messages from your agent. 57 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a Rizamo account, free for 2 social accounts. |
