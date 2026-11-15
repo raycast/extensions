@@ -27,7 +27,7 @@ import { HcConversation } from "./herdr-conversation.js";
 import type { HcTurn } from "./herdr-conversation.js";
 import { safeMarkdown } from "./core.js";
 import { messageMarkdown } from "./message-format.js";
-import { getImage, readImage, releaseImage } from "./images.js";
+import { getImage, readImage, releaseImage, retainImage } from "./images.js";
 import { imageAttachmentSchema, type ImageAttachment, type ImageUpload } from "./protocol.js";
 
 export type HcCapture = { text: string; complete: boolean; how: string; why?: string };
@@ -323,6 +323,7 @@ export class HcLocalState {
           "An image is already attached or changed in another view. Your screenshot is kept separately; reopen the composer or use Attach Captured Image to review replacement.",
         );
       }
+      if (imageId) await retainImage(imageId);
       this.drafts = { ...this.drafts, imageId };
       this.saveDrafts({ imageId });
       await this.writes;

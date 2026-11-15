@@ -7,6 +7,7 @@ import type { Connection } from "./core.js";
 
 import { loadConnection, onConnectionChange, profiles, type BridgeProfile } from "./connections.js";
 import { portRange } from "./discovery.js";
+import { retainImage } from "./images.js";
 export { recentKey } from "./connections.js";
 
 export const draftKey = (bindingId: string, identity?: string) => `draft:${identity ?? "unconfigured"}:${bindingId}`;
@@ -399,8 +400,10 @@ export function useDraft(bindingId: string, identity?: string) {
       throw new Error("The previous message's delivery is unknown. Keep its original image until delivery is checked.");
     const key = `${draftKey(bindingId, identity)}:image`;
     const write = writes.current.then(async () => {
-      if (value) await LocalStorage.setItem(key, value);
-      else await LocalStorage.removeItem(key);
+      if (value) {
+        await retainImage(value);
+        await LocalStorage.setItem(key, value);
+      } else await LocalStorage.removeItem(key);
       currentImage.current = value;
       setImageId(value);
     });

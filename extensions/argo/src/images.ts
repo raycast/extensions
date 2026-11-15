@@ -1,6 +1,7 @@
-import { environment } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
 import { constants } from "node:fs";
-import { mkdir, open, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { DatabaseSync } from "node:sqlite";
+import { mkdir, open, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { basename, join } from "node:path";
 import {
@@ -13,7 +14,49 @@ import {
 import { parseSessionTarget, type SessionTarget } from "./session-target.js";
 
 export type LocalImage = ImageAttachment & { id: string; path: string };
-type ImageRecord = { image: ImageAttachment; target?: SessionTarget; releasedAt?: number };
+type ImageRecord = {
+  image: ImageAttachment;
+  target?: SessionTarget;
+  createdAt: number;
+  retainedAt?: number;
+  releasedAt?: number;
+};
+let cacheWrites: Promise<unknown> = Promise.resolve();
+function mutateCache<T>(action: () => Promise<T>): Promise<T> {
+  const write = cacheWrites.then(async () => {
+    await mkdir(cacheDirectory(), { recursive: true, mode: 0o700 });
+    const path = join(cacheDirectory(), ".cache-lock.sqlite");
+    const file = await open(
+      path,
+      constants.O_CREAT | constants.O_RDWR | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+      0o600,
+    );
+    try {
+      const stat = await file.stat();
+      if (!stat.isFile() || (stat.mode & 0o077) !== 0 || stat.uid !== process.getuid?.())
+        throw new Error("The image cache lock must be private and owned by you.");
+    } finally {
+      await file.close();
+    }
+    // A SQLite transaction coordinates command isolates/processes and releases its lock on process death.
+    // No image data or references are stored in this database, and lock contention never blocks the event loop.
+    const lock = new DatabaseSync(path);
+    try {
+      try {
+        lock.exec("PRAGMA busy_timeout=0; BEGIN IMMEDIATE");
+      } catch (cause) {
+        if ([5, 6].includes((cause as { errcode?: number }).errcode ?? 0))
+          throw new Error("The image cache is busy in another command. Try again; your saved draft is kept.");
+        throw cause;
+      }
+      return await action();
+    } finally {
+      lock.close();
+    }
+  });
+  cacheWrites = write.catch(() => undefined);
+  return write;
+}
 const cacheDirectory = () => join(environment.supportPath, "images-v1");
 const imageId = (id: string) => {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error("Invalid image reference.");
@@ -46,13 +89,21 @@ async function bytesAt(path: string, privateFile = false): Promise<Buffer> {
 }
 
 async function recordAt(id: string): Promise<ImageRecord> {
-  const raw = await bytesAt(join(cacheDirectory(), `${imageId(id)}.json`), true);
+  const path = join(cacheDirectory(), `${imageId(id)}.json`);
+  const raw = await bytesAt(path, true);
   const saved = JSON.parse(raw.toString("utf8")) as ImageRecord;
   const image = imageAttachmentSchema.parse(saved.image);
   const target = saved.target ? parseSessionTarget(JSON.stringify(saved.target)) : undefined;
-  if (saved.releasedAt !== undefined && !Number.isFinite(saved.releasedAt))
-    throw new Error("Invalid image cache record.");
-  return { image, ...(target ? { target } : {}), ...(saved.releasedAt ? { releasedAt: saved.releasedAt } : {}) };
+  for (const timestamp of [saved.createdAt, saved.retainedAt, saved.releasedAt])
+    if (timestamp !== undefined && (!Number.isFinite(timestamp) || timestamp < 0))
+      throw new Error("Invalid image cache record.");
+  return {
+    image,
+    ...(target ? { target } : {}),
+    createdAt: saved.createdAt ?? (await stat(path)).mtimeMs,
+    ...(saved.retainedAt !== undefined ? { retainedAt: saved.retainedAt } : {}),
+    ...(saved.releasedAt !== undefined ? { releasedAt: saved.releasedAt } : {}),
+  };
 }
 
 export async function getCapture(id: string): Promise<{ image: LocalImage; target?: SessionTarget }> {
@@ -81,8 +132,19 @@ async function cacheSpace(size: number) {
   for (const file of await readdir(directory)) {
     if (!/^[a-f0-9-]{36}\.json$/.test(file)) continue;
     const id = file.slice(0, -5);
-    const saved = await recordAt(id);
-    if (saved.releasedAt && Date.now() - saved.releasedAt > 7 * 86400_000) {
+    let saved = await recordAt(id);
+    const expired = (record: ImageRecord) =>
+      Date.now() - (record.releasedAt ?? record.retainedAt ?? record.createdAt) > 7 * 86400_000;
+    let remove = false;
+    if (expired(saved)) {
+      // Include drafts, unknown attempts and capture recovery, even partially unreadable JSON journals.
+      const referenced = Object.values(await LocalStorage.allItems()).some(
+        (value) => typeof value === "string" && value.includes(id),
+      );
+      saved = await recordAt(id);
+      remove = !referenced && expired(saved);
+    }
+    if (remove) {
       await unlink(join(directory, `${id}.${suffix[saved.image.mimeType]}`)).catch((cause: NodeJS.ErrnoException) => {
         if (cause.code !== "ENOENT") throw cause;
       });
@@ -95,42 +157,63 @@ async function cacheSpace(size: number) {
 }
 
 export async function importImage(path: string, target?: SessionTarget): Promise<LocalImage> {
-  const bytes = await bytesAt(path);
-  const mimeType = imageMime(bytes);
-  const id = randomUUID();
-  const name =
-    basename(path)
-      // eslint-disable-next-line no-control-regex -- attachment names intentionally remove control bytes
-      .replace(/[\x00-\x1f\x7f-\x9f\\/]/g, "_")
-      .slice(0, 180) || `Screenshot.${suffix[mimeType]}`;
-  const image = imageAttachmentSchema.parse({ name, mimeType, size: bytes.length, sha256: digest(bytes) });
-  await cacheSpace(bytes.length);
-  const destination = join(cacheDirectory(), `${id}.${suffix[mimeType]}`);
-  await writeFile(destination, bytes, { flag: "wx", mode: 0o600 });
-  try {
-    await writeFile(join(cacheDirectory(), `${id}.json`), JSON.stringify({ image, ...(target ? { target } : {}) }), {
-      flag: "wx",
-      mode: 0o600,
-    });
-  } catch (cause) {
-    await unlink(destination);
-    throw cause;
-  }
-  return { ...image, id, path: destination };
+  return mutateCache(async () => {
+    const bytes = await bytesAt(path);
+    const mimeType = imageMime(bytes);
+    const id = randomUUID();
+    const name =
+      basename(path)
+        // eslint-disable-next-line no-control-regex -- attachment names intentionally remove control bytes
+        .replace(/[\x00-\x1f\x7f-\x9f\\/]/g, "_")
+        .slice(0, 180) || `Screenshot.${suffix[mimeType]}`;
+    const image = imageAttachmentSchema.parse({ name, mimeType, size: bytes.length, sha256: digest(bytes) });
+    await cacheSpace(bytes.length);
+    const destination = join(cacheDirectory(), `${id}.${suffix[mimeType]}`);
+    await writeFile(destination, bytes, { flag: "wx", mode: 0o600 });
+    try {
+      await writeFile(
+        join(cacheDirectory(), `${id}.json`),
+        JSON.stringify({ image, createdAt: Date.now(), ...(target ? { target } : {}) }),
+        {
+          flag: "wx",
+          mode: 0o600,
+        },
+      );
+    } catch (cause) {
+      await unlink(destination);
+      throw cause;
+    }
+    return { ...image, id, path: destination };
+  });
 }
 
-export async function releaseImage(id: string): Promise<void> {
-  const saved = await recordAt(id);
-  // Keep a short recovery window for another open view; referenced/uncertain images are never released by send failures.
-  const temporary = join(cacheDirectory(), `${randomUUID()}.release.json`);
+async function writeRecord(id: string, saved: ImageRecord): Promise<void> {
+  const temporary = join(cacheDirectory(), `${randomUUID()}.record.json`);
   try {
-    await writeFile(temporary, JSON.stringify({ ...saved, releasedAt: Date.now() }), { flag: "wx", mode: 0o600 });
+    await writeFile(temporary, JSON.stringify(saved), { flag: "wx", mode: 0o600 });
     await rename(temporary, join(cacheDirectory(), `${imageId(id)}.json`));
   } finally {
     await unlink(temporary).catch((cause: NodeJS.ErrnoException) => {
       if (cause.code !== "ENOENT") throw cause;
     });
   }
+}
+
+// Retain before publishing a draft reference; a failed save still has a bounded recovery window.
+export async function retainImage(id: string): Promise<void> {
+  return mutateCache(async () => {
+    const saved = await recordAt(id);
+    await readImage(id);
+    delete saved.releasedAt;
+    await writeRecord(id, { ...saved, retainedAt: Date.now() });
+  });
+}
+
+export async function releaseImage(id: string): Promise<void> {
+  return mutateCache(async () => {
+    const saved = await recordAt(id);
+    await writeRecord(id, { ...saved, releasedAt: Date.now() });
+  });
 }
 
 export async function captureImage(

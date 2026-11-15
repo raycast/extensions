@@ -2,6 +2,7 @@
 
 ## [Screenshot Comments and Attachment Controls] - {PR_MERGE_DATE}
 
+- Protect reattached images and saved draft/uncertain/recovery references during cache cleanup; reclaim abandoned captures after seven days and preserve images when reference storage is unavailable.
 - Add Screenshot and Comment: select a region, open the frozen recent session with an attachment, add text and explicitly send. Supports a user-configured Control-Command-Shift-H hotkey and safe capture recovery.
 - Add remove, preview and change controls directly to the input's image dropdown; removing a restored attachment keeps its comment and respects uncertain-delivery locks.
 - Keep screenshot comments in the existing conversation input with a compact image indicator, explicit preview/change/remove actions, and optional Command-N multiline editing. Hide filenames and private cache paths from normal attachment display.
