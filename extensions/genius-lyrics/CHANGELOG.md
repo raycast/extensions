@@ -1,6 +1,6 @@
 # Genius Lyrics Changelog
 
-## [Spoof User Agent] - {PR_MERGE_DATE}
+## [Spoof User Agent] - 2026-11-15
 
 - Add Firefox MacOS user agent to all `useFetch` requests
 
