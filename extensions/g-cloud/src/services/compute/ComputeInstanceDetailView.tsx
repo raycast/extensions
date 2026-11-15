@@ -12,6 +12,7 @@ import {
   Keyboard,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { ReactElement, useMemo, useCallback, useEffect, useState } from "react";
 import { useStreamerMode } from "../../utils/useStreamerMode";
@@ -432,8 +433,7 @@ export default function ComputeInstanceDetailView({
     } catch (error) {
       deletingToast.hide();
       const friendly = friendlyErrorMessage(error, "Failed to delete instance");
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: friendly.title,
         message: friendly.message,
       });

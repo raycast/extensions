@@ -12,6 +12,7 @@ import {
   useNavigation,
   Clipboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
@@ -378,8 +379,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     } catch (error) {
       deletingToast.hide();
       const friendly = friendlyErrorMessage(error, "Failed to delete instance");
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: friendly.title,
         message: friendly.message,
       });
