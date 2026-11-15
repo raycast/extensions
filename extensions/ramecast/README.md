@@ -65,7 +65,8 @@ Your screen is streamed only on your local network, and only to the device you p
 - Every stream URL contains a new random 192-bit token, and only the generated stream files can be requested.
 - Screen mirroring to Google Cast devices goes straight to the device over UDP, encrypted with a new AES-128 key
   for each session.
-- Nothing is sent to the internet, apart from the one-time encoder download from GitHub.
+- Nothing is sent to the internet, apart from the one-time encoder download (from ffmpeg.martin-riedl.de on macOS and
+  GitHub on Windows; see [Screen encoder](#screen-encoder-ffmpeg)).
 - **Stop Casting** stops the encoder and the server, deletes the temporary stream files, and closes the player on the
   device. It only stops what RameCast started: if you've since opened another app on the TV, it's left alone.
 
