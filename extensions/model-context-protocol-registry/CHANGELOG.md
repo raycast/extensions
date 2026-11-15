@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add within MCP Server] - 2026-11-15
+
+- Add within to the official registry: find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted Streamable HTTP server at https://shopwithin.co/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add 10ML Fragrance Index MCP Server] - 2026-11-15
 
 - Add the 10ML Fragrance Index to the official registry: perfume notes, accords, families, similar scents and alternatives, houses and expert guides, curated by 10ML's fragrance editors. Hosted Streamable HTTP server at https://mcp.10ml.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
