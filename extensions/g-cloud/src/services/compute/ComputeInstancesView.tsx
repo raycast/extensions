@@ -337,52 +337,50 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       return;
     }
 
-    const shouldDelete = await confirmAlert({
-      title: "Delete Instance",
-      message: `Permanently delete ${instance.name}? Disks configured to auto-delete will also be deleted. This action cannot be undone.`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (!shouldDelete) {
-      return;
-    }
-
-    const zone = service.formatZone(instance.zone);
-    const deletingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Deleting instance ${instance.name}...`,
-      message: `Zone: ${zone}`,
-    });
-
-    try {
-      const result = await service.deleteInstance(instance.name, zone);
-      deletingToast.hide();
-
-      if (!result.isTimedOut) {
-        setInstances((current) => current.filter((item) => item.id !== instance.id));
-      }
-
-      showToast({
-        style: Toast.Style.Success,
-        title: result.isTimedOut ? "Delete requested" : "Instance deleted",
-        message: result.isTimedOut
-          ? `${instance.name} is still being deleted. Refresh again in a moment to confirm.`
-          : `${instance.name} has been permanently deleted.`,
+    if (
+      await confirmAlert({
+        title: "Delete Instance",
+        message: `Permanently delete ${instance.name}? Disks configured to auto-delete will also be deleted. This action cannot be undone.`,
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      const zone = service.formatZone(instance.zone);
+      const deletingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Deleting instance ${instance.name}...`,
+        message: `Zone: ${zone}`,
       });
 
-      if (result.isTimedOut) {
-        await fetchInstances(service, { silent: true });
+      try {
+        const result = await service.deleteInstance(instance.name, zone);
+        deletingToast.hide();
+
+        if (!result.isTimedOut) {
+          setInstances((current) => current.filter((item) => item.id !== instance.id));
+        }
+
+        showToast({
+          style: Toast.Style.Success,
+          title: result.isTimedOut ? "Delete requested" : "Instance deleted",
+          message: result.isTimedOut
+            ? `${instance.name} is still being deleted. Refresh again in a moment to confirm.`
+            : `${instance.name} has been permanently deleted.`,
+        });
+
+        if (result.isTimedOut) {
+          await fetchInstances(service, { silent: true });
+        }
+      } catch (error) {
+        deletingToast.hide();
+        const friendly = friendlyErrorMessage(error, "Failed to delete instance");
+        await showFailureToast(error, {
+          title: friendly.title,
+          message: friendly.message,
+        });
       }
-    } catch (error) {
-      deletingToast.hide();
-      const friendly = friendlyErrorMessage(error, "Failed to delete instance");
-      await showFailureToast(error, {
-        title: friendly.title,
-        message: friendly.message,
-      });
     }
   };
 
