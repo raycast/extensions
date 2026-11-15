@@ -24,13 +24,15 @@ import { getDisplayNames } from "./services/format";
 import { loadRates } from "./services/rates";
 import { getHistoryCutoff } from "./services/statement";
 import { detectStoredSubscriptions, getHistoryStart } from "./services/subscriptions";
-import { Currency, Subscription } from "./types";
+import { Currency, CurrencyRate, Subscription } from "./types";
 import {
+  costOf,
   formatAmount,
   formatCadence,
   formatDate,
   formatHryvnias,
   formatNextDate,
+  formatPerPerson,
   formatPlainAmount,
   getMonthlyTotal,
   getSubscriptionMenuBarTitle,
@@ -46,6 +48,10 @@ interface MenuSubscription {
   status: Subscription["status"];
   amount: number;
   currency: Currency;
+  /** `amount` in UAH at monobank's rates, when it's charged in another currency and the rates are known. */
+  amountUah?: number;
+  /** How many people share it, when it's a family subscription. */
+  seats?: number;
   nextDate: number;
   accountId: string;
   accountName?: string;
@@ -67,15 +73,16 @@ async function loadMenuSubscriptions(scope: string) {
   const visible = subscriptions.filter((subscription) => !subscription.hidden);
   const names = getDisplayNames(loaded.items);
 
+  let rates: CurrencyRate[] = [];
   let monthlyTotal: number | undefined;
   try {
-    const { rates } = await loadRates(RATES_TTL);
+    ({ rates } = await loadRates(RATES_TTL));
     monthlyTotal = getMonthlyTotal(
       visible.filter((subscription) => subscription.status === "active"),
       rates,
     );
   } catch (error) {
-    // Rates only add the total.
+    // Rates only add the totals.
     console.error(error);
   }
 
@@ -95,6 +102,11 @@ async function loadMenuSubscriptions(scope: string) {
       status: subscription.status,
       amount: subscription.amount,
       currency: subscription.currency,
+      amountUah:
+        subscription.currency.code === "UAH"
+          ? undefined
+          : costOf(rates, subscription.amount, subscription.currency.code, "UAH")?.result,
+      seats: subscription.seats,
       nextDate: subscription.nextDate,
       accountId: subscription.account.id,
       accountName: names.get(subscription.account.id),
@@ -210,6 +222,7 @@ export default function Command() {
 
   const renderSubscription = (subscription: MenuSubscription) => {
     const amount = formatAmount(subscription.amount, subscription.currency);
+    const perPerson = formatPerPerson(subscription);
     const when =
       subscription.status === "late" ? formatCadence(subscription.cadence) : formatNextDate(subscription, now);
     return (
@@ -217,7 +230,7 @@ export default function Command() {
         key={subscription.key}
         icon={subscription.icon}
         title={subscription.title}
-        subtitle={`${amount} · ${when}`}
+        subtitle={`${perPerson ? `${amount} (${perPerson})` : amount} · ${when}`}
         tooltip={[formatCadence(subscription.cadence), showsCard && subscription.accountName]
           .filter(Boolean)
           .join(" · ")}

@@ -1,10 +1,17 @@
 import { LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { PERSONAL_STORAGE_KEYS } from "../data/constants";
+import { purgeListeners } from "../services/owner";
 
-/** React state mirrored to LocalStorage as JSON under `key`. */
+/**
+ * React state mirrored to LocalStorage as JSON under `key`. A personal key (see `PERSONAL_STORAGE_KEYS`) goes back
+ * to `initialValue` when the previous person's data is removed.
+ */
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<T>(initialValue);
+  const initial = useRef(initialValue);
+  initial.current = initialValue;
 
   useEffect(() => {
     let isCancelled = false;
@@ -19,6 +26,15 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
     return () => {
       isCancelled = true;
+    };
+  }, [key]);
+
+  useEffect(() => {
+    if (!(PERSONAL_STORAGE_KEYS as readonly string[]).includes(key)) return;
+    const listener = () => setData(initial.current);
+    purgeListeners.add(listener);
+    return () => {
+      purgeListeners.delete(listener);
     };
   }, [key]);
 

@@ -8,7 +8,8 @@
   "contributors": [
     "litomore",
     "taken",
-    "clins1994"
+    "clins1994",
+    "danulqua"
   ],
   "crossExtensions": [
     "litomore/protondb",
@@ -25,6 +26,20 @@
       "title": "Search Games",
       "subtitle": "Steam",
       "description": "Search the Steam api for game information.",
+      "mode": "view"
+    },
+    {
+      "name": "my-games",
+      "title": "My Games",
+      "subtitle": "Steam",
+      "description": "Browse the games you own on Steam, with your pinned games on top.",
+      "mode": "view"
+    },
+    {
+      "name": "most-played",
+      "title": "Most Played Games",
+      "subtitle": "Steam",
+      "description": "See which Steam games have the most players right now.",
       "mode": "view"
     },
     {
@@ -54,12 +69,12 @@
     {
       "name": "get-owned-games",
       "title": "Get Owned Games",
-      "description": "List the games you own on Steam with playtime and when each was last played. Needs your Web API Key and Steam ID."
+      "description": "List the games you own on Steam with playtime and when each was last played. Needs your Steam ID."
     },
     {
       "name": "get-recently-played-games",
       "title": "Get Recently Played Games",
-      "description": "List the games you played on Steam in the last two weeks. Needs your Web API Key and Steam ID."
+      "description": "List the games you played on Steam in the last two weeks. Needs your Steam ID."
     },
     {
       "name": "find-similar-games",
@@ -74,7 +89,7 @@
     {
       "name": "recommend-owned-games",
       "title": "Recommend Owned Games",
-      "description": "Find games in your library like games you name. Needs your Web API Key and Steam ID."
+      "description": "Find games in your library like games you name. Needs your Steam ID."
     },
     {
       "name": "get-game-news",
@@ -82,14 +97,19 @@
       "description": "Get recent announcements, patch notes, and press coverage for a Steam game."
     },
     {
+      "name": "get-player-count",
+      "title": "Get Player Count",
+      "description": "Get how many people are playing a Steam game now, its peaks, and its recent player trend."
+    },
+    {
       "name": "query-game-list",
       "title": "Query Game List",
-      "description": "List the newest or most recently updated apps on Steam. Needs your Web API Key."
+      "description": "List the newest or most recently updated apps on Steam."
     },
     {
       "name": "refresh-game-list",
       "title": "Refresh Game List",
-      "description": "Download the Steam game list again. Needs your Web API Key."
+      "description": "Download the Steam game list again."
     },
     {
       "name": "launch-game",
@@ -103,7 +123,7 @@
     }
   ],
   "ai": {
-    "instructions": "Use Search Steam Games only to look up games by title; it cannot search by genre or description, so for games like one the user names, call Find Similar Games with that title. Use Get Steam Game Details when the user asks about one game or provides a Steam app ID/store URL. Use Search Steam Users when the user asks about a Steam user or profile. Prefer direct Steam IDs, profile URLs, and vanity URLs when present. Display-name user search can return multiple people, so do not claim an exact identity unless the result came from a Steam ID, profile URL, or vanity URL. Use Get Owned Games for questions about the user's own library and playtime, and Get Recently Played Games for what they played lately. Use Get Game News for updates, patches, or news about a game. Use Find Similar Games when the user asks for games like one game. When they name two or more games, call Recommend Games once with all of them instead of Find Similar Games for each. Use Recommend Games for recommendations based on games the user likes, and Recommend Owned Games when they want something from their own library or backlog. Use Query Game List when the user asks what is new, just added, or recently updated on Steam. Only use Refresh Game List when the user asks to update or refresh the game list. Write each game as a Markdown link, [Name](storeUrl). Don't show app IDs unless the user asks for them. Only use Launch Game or Install Game when the user explicitly asks to play, launch, or install a game. Both need an app ID: get it from Search Steam Games or Get Owned Games first.",
+    "instructions": "Use Search Steam Games only to look up games by title; it cannot search by genre or description, so for games like one the user names, call Find Similar Games with that title. Use Get Steam Game Details when the user asks about one game or provides a Steam app ID/store URL. Use Search Steam Users when the user asks about a Steam user or profile. Prefer direct Steam IDs, profile URLs, and vanity URLs when present. Display-name user search can return multiple people, so do not claim an exact identity unless the result came from a Steam ID, profile URL, or vanity URL. Use Get Owned Games for questions about the user's own library and playtime, and Get Recently Played Games for what they played lately. Use Get Game News for updates, patches, or news about a game. Use Get Player Count when the user asks how many people play a game, its player peaks, or whether its player count is rising or falling. Use Find Similar Games when the user asks for games like one game. When they name two or more games, call Recommend Games once with all of them instead of Find Similar Games for each. Use Recommend Games for recommendations based on games the user likes, and Recommend Owned Games when they want something from their own library or backlog. Use Query Game List when the user asks what is new, just added, or recently updated on Steam. Only use Refresh Game List when the user asks to update or refresh the game list. Write each game as a Markdown link, [Name](storeUrl). Don't show app IDs unless the user asks for them. Only use Launch Game or Install Game when the user explicitly asks to play, launch, or install a game. Both need an app ID: get it from Search Steam Games or Get Owned Games first.",
     "evals": [
       {
         "input": "@steam find Stardew Valley",
@@ -728,6 +748,141 @@
         ]
       },
       {
+        "input": "@steam how many people are playing Counter-Strike 2 right now?",
+        "mocks": {
+          "get-player-count": {
+            "game": {
+              "appid": 730,
+              "name": "Counter-Strike 2",
+              "storeUrl": "https://store.steampowered.com/app/730",
+              "steamChartsUrl": "https://steamcharts.com/app/730"
+            },
+            "playingNow": 746118,
+            "peak24h": 1182810,
+            "allTimePeak": 1818368,
+            "last7Days": {
+              "peak": 1402441,
+              "avg": 812004,
+              "low": 402113
+            },
+            "last30Days": {
+              "peak": 1402441,
+              "avg": 782907,
+              "low": 352870
+            },
+            "changeVs7DaysAgoPct": -3.2,
+            "months": [
+              {
+                "label": "Last 30 Days",
+                "avg": 782907.74,
+                "gain": -14416.4,
+                "gainPct": -1.81,
+                "peak": 1402441
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-player-count",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "Counter-Strike"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "746"
+          }
+        ]
+      },
+      {
+        "input": "@steam is Balatro's player count going up?",
+        "mocks": {
+          "get-player-count": {
+            "game": {
+              "appid": 2379780,
+              "name": "Balatro",
+              "storeUrl": "https://store.steampowered.com/app/2379780",
+              "steamChartsUrl": "https://steamcharts.com/app/2379780"
+            },
+            "playingNow": 21450,
+            "peak24h": 30112,
+            "allTimePeak": 49212,
+            "last7Days": {
+              "peak": 30112,
+              "avg": 19870,
+              "low": 11204
+            },
+            "last30Days": {
+              "peak": 30112,
+              "avg": 15530,
+              "low": 8012
+            },
+            "changeVs7DaysAgoPct": 24.6,
+            "months": [
+              {
+                "label": "Last 30 Days",
+                "avg": 15530.2,
+                "gain": 3120.5,
+                "gainPct": 25.15,
+                "peak": 30112
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-player-count"
+          },
+          {
+            "includes": "24"
+          }
+        ]
+      },
+      {
         "input": "@steam launch Hades",
         "mocks": {
           "launch-game": {
@@ -1340,9 +1495,9 @@
       "name": "token",
       "type": "password",
       "title": "Web API Key",
-      "description": "Enables local mode for fast searches: https://steamcommunity.com/dev/apikey",
+      "description": "Get one at https://steamcommunity.com/dev/apikey",
       "placeholder": "Web API Key",
-      "required": false
+      "required": true
     },
     {
       "name": "steamid",
@@ -1350,6 +1505,15 @@
       "title": "Steam ID",
       "description": "Steam ID, profile URL, or custom URL name",
       "placeholder": "Steam ID or profile URL",
+      "required": false
+    },
+    {
+      "name": "launchOnEnter",
+      "type": "checkbox",
+      "title": "Return Key",
+      "label": "Launch games with Return",
+      "description": "Return launches the game and ⌘Return opens its details. Turn off for the opposite. Applies to My Games and the Recently Added and Recently Played lists.",
+      "default": false,
       "required": false
     },
     {

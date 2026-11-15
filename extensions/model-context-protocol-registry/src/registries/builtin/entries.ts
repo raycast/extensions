@@ -20,6 +20,84 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://shopwithin.co/mcp",
   },
   {
+    name: "tesseract",
+    title: "Tesseract",
+    description:
+      "Make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures from your conversation, charged to your own Tesseract plan. 8 tools; each job takes a price ceiling. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Tesseract account is required. The plan includes free media each month, then it is paid.",
+    icon: "https://raw.githubusercontent.com/opentech-dev/tesseract-claude-plugin/v1.0.0/assets/logo-square.png",
+    homepage: "https://tesseract.dev/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.tesseract.dev/api/core/tesseract/mcp"],
+    },
+    remoteUrl: "https://app.tesseract.dev/api/core/tesseract/mcp",
+  },
+  {
+    name: "rizamo",
+    title: "Rizamo",
+    description:
+      "Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads from your AI agent, see how they did, and answer comments and messages. Create posts now, at a time or in a profile's queue of posting times, read views, reach, engagement and every post ranked, see who your audience is, and reply to, hide or delete comments in one inbox. The server asks agents to show a post or reply and wait for your yes before it goes out. 57 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which profiles your agent can reach. A Rizamo account is required (free for 2 social accounts). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://rizamo.com/icon-512.png",
+    homepage: "https://rizamo.com/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rizamo.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rizamo.com/mcp",
+  },
+  {
+    name: "hoy-planes",
+    title: "Hoy Planes",
+    description:
+      "What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. Search the daily-updated listings of the Hoy Planes network (Hoy Madrid, Hoy Barcelona, Hoy Valencia, Hoy Sevilla and eight more), open a plan's dates, address and full description, and list the provinces, topics and occasions. Every plan links to its page on the website, where tickets are bought. Listings are in Spanish. 3 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.hoyplanes.com/conector/icono-512.png",
+    homepage: "https://www.hoyplanes.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.hoyplanes.com"],
+    },
+    remoteUrl: "https://mcp.hoyplanes.com",
+  },
+  {
+    name: "glucobeat",
+    title: "GlucoBeat",
+    description:
+      "Read and log your glucose, meals, insulin, exercise and sleep from FreeStyle Libre in GlucoBeat. Tell your assistant what you measured, ate or did and it is saved in your GlucoBeat diary at the time it happened; ask about your readings, time in range and statistics, or how a meal or a workout went, and the answer describes what happened in your data with counts and ranges. No predictions, doses or diagnoses: GlucoBeat is not a medical device. 17 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a GlucoBeat account is required. Logging and the last 3 days are free; full-history queries need Premium after 10 free days. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.glucobeat.com/icons/icon-512.png",
+    homepage: "https://www.glucobeat.com/en/ai-assistants/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.glucobeat.com"],
+    },
+    remoteUrl: "https://mcp.glucobeat.com",
+  },
+  {
+    name: "freelance-link",
+    title: "freelance.link",
+    description:
+      "Keep your freelance.link availability current from your AI agent. Add, change and remove projects and absences, check when you are free again, confirm that your availability is still correct, and tell your waitlist when you have time. 11 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose what your agent may do. A freelance.link account is required (14-day free trial, no credit card).",
+    icon: "https://raw.githubusercontent.com/freelancelink/freelancelink-plugin/main/assets/icon.png",
+    homepage: "https://freelance.link/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://freelance.link/mcp"],
+    },
+    remoteUrl: "https://freelance.link/mcp",
+  },
+  {
+    name: "excession-labs-cve",
+    title: "Excession Labs CVE intelligence",
+    description:
+      "Search CVEs by text, vendor, product, package, ecosystem or a literal source version. Read CVE details, source references, affected-software evidence and available CISA KEV and dated FIRST EPSS data. Check source coverage and collection health, page through hosted revisions, or read changes after a saved cursor. Six read-only tools. Version filters match source assertions; they do not evaluate installed-version applicability. Free hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy and require Node.js.",
+    icon: "https://excessionlabs.ai/icon-512.png",
+    homepage: "https://excessionlabs.ai/cve-intelligence/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://excessionlabs.ai/mcp/cve"],
+    },
+    remoteUrl: "https://excessionlabs.ai/mcp/cve",
+  },
+  {
     name: "mobile-joe",
     title: "Mobile Joe",
     description:
@@ -680,6 +758,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         BRAVE_API_KEY: "YOUR_API_KEY_HERE",
       },
     },
+  },
+  {
+    name: "buildbase-console",
+    title: "BuildBase Console",
+    description:
+      "Manage BuildBase organizations, members, content, email, workflows and settings as yourself. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/buildbase-app/mcp/main/assets/logo-400.png",
+    homepage: "https://docs.buildbase.app/console/ai-agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.console.buildbase.app/mcp"],
+    },
+    remoteUrl: "https://api.console.buildbase.app/mcp",
   },
   {
     name: "bulkpublish",
@@ -1797,7 +1888,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-calendar",
     title: "Multi Calendar",
     description:
-      "Your Outlook.com, Hotmail, Microsoft 365, Google, iCloud, Fastmail and other CalDAV calendars in Raycast - many accounts at once, one search for free time across all of them. Read events, find free time, create, move and cancel events and answer invitations, make booking links, booking pages and group polls, each account within the permissions its owner sets. No copy of the calendars is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Calendar connects your own Outlook.com, Hotmail, Microsoft 365, Google, iCloud (Apple Calendar), Yahoo, AOL, Fastmail and other CalDAV calendars to Raycast - many accounts at once, with free time found across all of them. Booking links, booking pages and group polls. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-512.png",
     homepage: "https://lumman.co/mcp/multi-calendar",
     configuration: {
@@ -1810,7 +1901,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-mail",
     title: "Multi Mail",
     description:
-      "Your Gmail, Outlook.com, Hotmail, Microsoft 365, iCloud, Fastmail and other IMAP mailboxes in Raycast - several at once, one search across all of them. Read threads, messages and attachments, draft, send and organise mail, each mailbox within the permissions its owner sets. No copy of the mail is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Mail connects your own Gmail, Outlook.com, Hotmail, Microsoft 365, Yahoo, AOL, iCloud, Fastmail and other IMAP email accounts to Raycast - several inboxes at once, with one search across all of them. Read, draft, send and clean out an inbox by sender. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-512.png",
     homepage: "https://lumman.co/mcp/multi-mail",
     configuration: {
@@ -1992,6 +2083,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.pixelesq.app/mcp"],
+    },
+  },
+  {
+    name: "plushsource",
+    title: "PlushSource",
+    description:
+      "Search and compare the custom plush manufacturers listed in the PlushSource directory: filter by country, minimum order quantity, certifications, products, design inputs and OEM/ODM, read every published fact for one manufacturer, or compare two to five side by side. Facts come from each manufacturer's own website and fields it does not publish are left empty; PlushSource does not audit manufacturers. 5 tools and an RFQ draft prompt. Local stdio server `plushsource-mcp` (MIT) through `npx`; the dataset is bundled, with no network calls, no account and no API key. Needs Node.js 20 or newer.",
+    icon: "https://raw.githubusercontent.com/quickman924/plushsource-mcp/main/assets/icon.png",
+    homepage: "https://plushsource.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "plushsource-mcp"],
     },
   },
   {
@@ -2500,6 +2603,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "statuz",
+    title: "Statuz",
+    description:
+      "Schedule and publish posts and threads to X, Bluesky, Mastodon, LinkedIn and Reddit (beta) from your agent: draft, schedule in plain words like \"tomorrow 9am\", list what goes out next, edit, and publish. Every post is checked against each network's limits before it's saved, and the same post never goes out twice. Hosted remote Streamable HTTP server at https://api.statuz.cloud/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Statuz Cloud account: drafts and scheduling are free, a published post costs $0.01 per account ($0.03 on X).",
+    icon: "https://statuz.app/assets/appIcon.png",
+    homepage: "https://statuz.app/docs/agents?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.statuz.cloud/mcp"],
+    },
+    remoteUrl: "https://api.statuz.cloud/mcp",
+  },
+  {
     name: "stripe",
     title: "Stripe",
     description:
@@ -2712,6 +2828,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://trvlrr.app/mcp"],
+    },
+  },
+  {
+    name: "uberllm",
+    title: "UberLLM",
+    description:
+      "Make images and videos and price AI model requests from your agent with one UberLLM API key. List the chat, image, video and music models you can call with their prices, read a model's options, get a quote without spending, generate and edit images, start a video and wait for the job, and check your balance. Spending tools take a max_cost limit, and failed requests are not billed. 9 tools. Prepaid credit from $5, no monthly fee. Hosted remote Streamable HTTP server through `mcp-remote`; UberLLM API key (uberllm.dev/signup) as an `Authorization: Bearer` header. Connecting and listing tools needs no key; every tool call does. Replace YOUR_UBERLLM_API_KEY in UBERLLM_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://uberllm.dev/favicon.svg",
+    homepage: "https://uberllm.dev/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.uberllm.dev/mcp", "--header", "Authorization:${UBERLLM_AUTH_HEADER}"],
+      env: {
+        UBERLLM_AUTH_HEADER: "Bearer YOUR_UBERLLM_API_KEY",
+      },
     },
   },
   {
@@ -3661,6 +3792,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "bunx",
       args: ["cursor-talk-to-figma-mcp@latest"],
+    },
+  },
+  {
+    name: "a11y-toolkit",
+    title: "a11y-toolkit",
+    description:
+      "WCAG 2.2 accessibility for coding agents. 37 tools that audit a URL, an HTML string or a rendered page, sample real text-over-image contrast pixel by pixel, walk Tab to find keyboard traps, submit invalid data to judge form errors, linearize what a screen reader would announce, and run blindfold task journeys. It also fixes (nearest passing color, deterministic autofixes, SHA-256-sealed patch sets), documents (EAA / RD 1112 statements, VPAT 2.5, OpenACR, evidence packs a human can sign) and watches for regressions (snapshot diffs, an error budget where only new findings block, SARIF for code scanning). 51 of 55 A/AA criteria carry automated signals and every report prints what still needs a human; it never claims conformance. Local stdio server from PyPI through uvx, so it needs uv; the core has zero dependencies, no account and no API keys, and the rendered tools optionally use Playwright. MIT, English and Spanish output, no telemetry.",
+    icon: "https://raw.githubusercontent.com/kinti/a11y-toolkit/main/docs/logo-400.png",
+    homepage: "https://github.com/kinti/a11y-toolkit",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "a11y-toolkit", "a11y-toolkit-mcp"],
     },
   },
   {

@@ -64,6 +64,12 @@
       "mode": "no-view"
     },
     {
+      "name": "send-reaction",
+      "title": "Send Reaction",
+      "description": "Choose a sound or webcam reaction from your installed Tuple CLI and send it to the active call.",
+      "mode": "view"
+    },
+    {
       "name": "toggle-mute",
       "title": "Toggle Mute",
       "description": "Mute or unmute your microphone in the active call.",

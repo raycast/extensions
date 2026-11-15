@@ -2,46 +2,153 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "day-one",
   "title": "Day One",
-  "description": "Add entries to Day One",
+  "description": "Search, write, and sync your Day One journals and Daily Chat with the Day One CLI",
   "icon": "day-one.png",
   "author": "AntonNiklasson",
   "contributors": [
     "bestemic",
-    "Fizzbow"
+    "Fizzbow",
+    "chrismessina"
   ],
   "license": "MIT",
   "categories": [
     "Productivity"
   ],
+  "keywords": [
+    "journal",
+    "diary",
+    "dayone"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "subtitle": "Day One",
+      "description": "Search your Day One entries by meaning, or browse the newest ones",
+      "mode": "view"
+    },
     {
       "name": "add-entry",
       "title": "Add Entry",
       "subtitle": "Day One",
-      "description": "Add a new entry to one of your journals in Day One",
+      "description": "Write a new entry in one of your Day One journals",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "syncAfterSaving",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Sync",
+          "label": "Sync after saving",
+          "description": "Upload the new entry to Day One right away"
+        }
+      ]
+    },
+    {
+      "name": "add-to-daily-chat",
+      "title": "Add to Daily Chat",
+      "subtitle": "Day One",
+      "description": "Add a message to today's Daily Chat in Day One",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "type": "text",
+          "placeholder": "What's happening?",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "sync",
+      "title": "Sync Day One",
+      "subtitle": "Day One",
+      "description": "Download new entries and upload the ones you wrote here",
+      "mode": "no-view"
+    },
+    {
+      "name": "doctor",
+      "title": "Run Doctor",
+      "subtitle": "Day One",
+      "description": "Install the Day One CLI, sign in, and fix setup problems",
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-journals",
+      "title": "List Journals",
+      "description": "List the user's Day One journals with their IDs and names."
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "description": "Search the user's Day One entries by meaning, with optional journal, tag, and date filters. Returns each entry's ID, journal, date, tags, and text."
+    },
+    {
+      "name": "get-entry",
+      "title": "Get Entry",
+      "description": "Read one Day One entry in full by its entry ID."
+    },
+    {
+      "name": "create-entry",
+      "title": "Create Entry",
+      "description": "Write a new entry in one of the user's Day One journals. Asks the user to confirm first."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "file",
+      "required": false,
+      "title": "Day One CLI",
+      "description": "Leave empty to find the Day One CLI automatically"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.10.1"
+    "@chrismessina/raycast-kit": "^0.3.0",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hora-calendar",
   "title": "Hora Calendar",
-  "description": "The official hora Calendar extension. Create events and tasks in plain language and join your next meeting, without leaving Raycast.",
+  "description": "The official hora Calendar extension. Create events and tasks in plain language, join your next meeting, run Focus and share your availability, without leaving Raycast.",
   "icon": "icon.png",
   "author": "szamski",
   "platforms": [
@@ -90,6 +90,118 @@
         "video call",
         "conference",
         "standup"
+      ]
+    },
+    {
+      "name": "start-focus",
+      "title": "Start Focus",
+      "subtitle": "hora Calendar",
+      "description": "Start a Focus session in hora, optionally with a length in minutes.",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "pomodoro",
+        "timer",
+        "deep work",
+        "concentrate",
+        "start timer"
+      ],
+      "arguments": [
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stop-focus",
+      "title": "Stop Focus",
+      "subtitle": "hora Calendar",
+      "description": "Stop the running Focus session in hora.",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "pomodoro",
+        "timer",
+        "stop timer",
+        "end focus",
+        "break"
+      ]
+    },
+    {
+      "name": "copy-availability",
+      "title": "Copy My Availability",
+      "subtitle": "hora Calendar",
+      "description": "Copy your free time slots as text, ready to paste into a message.",
+      "mode": "no-view",
+      "keywords": [
+        "availability",
+        "free time",
+        "free slots",
+        "schedule meeting",
+        "open slots",
+        "when am i free"
+      ],
+      "arguments": [
+        {
+          "name": "duration",
+          "placeholder": "Duration",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "15 min",
+              "value": "15"
+            },
+            {
+              "title": "30 min",
+              "value": "30"
+            },
+            {
+              "title": "60 min",
+              "value": "60"
+            }
+          ]
+        },
+        {
+          "name": "days",
+          "placeholder": "Days Ahead",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "3 days",
+              "value": "3"
+            },
+            {
+              "title": "5 days",
+              "value": "5"
+            },
+            {
+              "title": "7 days",
+              "value": "7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "todays-agenda",
+      "title": "Today's Agenda",
+      "subtitle": "hora Calendar",
+      "description": "See what is left today and tomorrow, then join, RSVP, copy a link or delete an event.",
+      "mode": "view",
+      "keywords": [
+        "agenda",
+        "today",
+        "schedule",
+        "events",
+        "what's next",
+        "rsvp",
+        "tomorrow",
+        "calendar"
       ]
     }
   ],

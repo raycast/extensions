@@ -38,7 +38,9 @@ export interface ClientInfoResponse {
   managedClients?: ManagedClientResponse[];
 }
 
-export type AccountTypeResponse = "black" | "white" | "platinum" | "iron" | "fop" | "yellow" | "eAid";
+/** The documentation lists the types up to "eAid"; "diia" and "madeInUkraine" come in real responses. */
+export type AccountTypeResponse =
+  "black" | "white" | "platinum" | "iron" | "fop" | "yellow" | "eAid" | "diia" | "madeInUkraine";
 
 export type CashbackTypeResponse = "None" | "UAH" | "Miles";
 
