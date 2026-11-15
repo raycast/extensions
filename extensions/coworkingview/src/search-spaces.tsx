@@ -37,18 +37,19 @@ export default function SearchSpaces() {
   const [type, setType] = useState<string>("");
   const { data: cities, isLoading: citiesLoading, error: citiesError, revalidate: revalidateCities } = useCities();
 
-  const { data, isLoading, error, revalidate, pagination } = useCachedPromise(
-    (city: string, type: string) => async (options: { page: number }) => {
-      const q = new URLSearchParams({
-        locale: locale(),
-        city,
-        pageSize: String(PAGE_SIZE),
-        page: String(options.page + 1),
-      });
-      if (type) q.set("pricingOptionType", type);
-      const body = await getJson<Envelope<SpaceSummary[]>>(`${API}/v1/properties?${q}`);
-      const p = body.meta.pagination;
-      return { data: body.data, hasMore: p ? p.page < p.pageCount : false };
+  // Load every page of the city up front: Raycast filters the list locally, so a search
+  // would otherwise only match the spaces on pages that happen to be loaded already.
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    async (city: string, type: string) => {
+      const spaces: SpaceSummary[] = [];
+      for (let page = 1; ; page++) {
+        const q = new URLSearchParams({ locale: locale(), city, pageSize: String(PAGE_SIZE), page: String(page) });
+        if (type) q.set("pricingOptionType", type);
+        const body = await getJson<Envelope<SpaceSummary[]>>(`${API}/v1/properties?${q}`);
+        spaces.push(...body.data);
+        const p = body.meta.pagination;
+        if (!p || page >= p.pageCount) return spaces;
+      }
     },
     [city, type],
     { keepPreviousData: true, initialData: [] },
@@ -60,7 +61,6 @@ export default function SearchSpaces() {
   return (
     <List
       isLoading={isLoading || citiesLoading}
-      pagination={pagination}
       searchBarPlaceholder={`Filter spaces in ${cityName}${type ? ` · ${typeTitle(type)}` : ""}`}
       searchBarAccessory={
         <List.Dropdown tooltip="City" value={city} onChange={setCity} storeValue>
