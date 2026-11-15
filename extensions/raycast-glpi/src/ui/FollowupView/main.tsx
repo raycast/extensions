@@ -26,7 +26,7 @@ export default function FollowupView({ glpiServerConfig, ticket }: Props): React
   } = useCachedPromise(getAssistanceTicketFollowups, [ticket.id], {
     onError(error) {
       if (error instanceof GlpiApiError && error.code === "GLPI_API_SERVER_AUTH_EXPIRED") {
-        push(<AuthForm glpiServer={glpiServerConfig} />);
+        push(<AuthForm glpiServer={glpiServerConfig} revalidate={revalidateFollowups} />);
         return;
       }
       showFailureToast(error);

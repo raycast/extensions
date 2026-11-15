@@ -46,20 +46,20 @@ export default function FollowupForm({ ticket }: Props): React.ReactElement {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   /* Followup Templates */
-  const { data: followupTemplates, isLoading: isLoadingFollowupTemplates } = useCachedPromise(
-    getDropdownFollowupTemplates,
-    [],
-    {
-      onError(error) {
-        if (error instanceof GlpiApiError && error.code === "GLPI_API_SERVER_AUTH_EXPIRED") {
-          const server = glpiServerConfig?.find((v) => v.uuid === selectedGlpiServer);
-          if (server) push(<AuthForm glpiServer={server} />);
-          return;
-        }
-        showFailureToast(error);
-      },
+  const {
+    data: followupTemplates,
+    isLoading: isLoadingFollowupTemplates,
+    revalidate: revalidateTemplates,
+  } = useCachedPromise(getDropdownFollowupTemplates, [], {
+    onError(error) {
+      if (error instanceof GlpiApiError && error.code === "GLPI_API_SERVER_AUTH_EXPIRED") {
+        const server = glpiServerConfig?.find((v) => v.uuid === selectedGlpiServer);
+        if (server) push(<AuthForm glpiServer={server} revalidate={revalidateTemplates} />);
+        return;
+      }
+      showFailureToast(error);
     },
-  );
+  });
 
   /* Merged isLoading */
   const isLoadingTotal = React.useMemo(() => {
@@ -125,6 +125,8 @@ export default function FollowupForm({ ticket }: Props): React.ReactElement {
       } catch (e) {
         const error = e instanceof Error ? e : new Error("Unknown error creating followup", { cause: e });
         await showFailureToast(error);
+        setIsLoading(false);
+        return;
       }
 
       /* Set Loading */
@@ -165,7 +167,10 @@ export default function FollowupForm({ ticket }: Props): React.ReactElement {
 
       /* Template selected: write its content on Message TextArea */
       const template = followupTemplates?.find((v) => String(v.id) === value);
-      if (template) setValue("content", template.content);
+      if (template) {
+        setValue("content", template.content);
+        setValue("isPrivate", template.is_private);
+      }
     },
     [followupTemplates, setValue],
   );

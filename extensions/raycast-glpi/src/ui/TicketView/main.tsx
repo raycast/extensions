@@ -54,7 +54,7 @@ export function TicketView(): React.ReactElement {
     onError(error) {
       if (error instanceof GlpiApiError && error.code === "GLPI_API_SERVER_AUTH_EXPIRED") {
         const server = glpiServerConfig?.find((v) => v.uuid === selectedGlpiServer);
-        if (server) push(<AuthForm glpiServer={server} />);
+        if (server) push(<AuthForm glpiServer={server} revalidate={revalidateTickets} />);
         return;
       }
       showFailureToast(error);

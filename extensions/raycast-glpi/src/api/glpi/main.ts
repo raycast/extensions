@@ -314,7 +314,7 @@ export class GlpiApiClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
 
-      console.debug("Class: GlpiApiClient, Fn: #post. Request.", { url: url.href, headers, body });
+      console.debug("Class: GlpiApiClient, Fn: #post. Request.", { url: url.href, headers });
 
       /* POST request */
       const response = await fetch(url, {
@@ -373,7 +373,7 @@ export class GlpiApiClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
 
-      console.debug("Class: GlpiApiClient, Fn: #patch. Request.", { url: url.href, headers, body });
+      console.debug("Class: GlpiApiClient, Fn: #patch. Request.", { url: url.href, headers });
 
       /* PATCH request */
       const response = await fetch(url, {

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type * as Types from "@ui/types";
 import * as Context from "@ui/context";
@@ -74,12 +74,24 @@ function ActionEditServer({
 
   const onActionDelete = React.useCallback(async () => {
     if (!revalidateGlpiServerConfig) return;
-    try {
-      await localStorage.removeGlpiServerConfig(glpiServer);
-      await revalidateGlpiServerConfig();
-    } catch (e) {
-      await showFailureToast(e);
-    }
+
+    /* Wait User Confirm */
+    await confirmAlert({
+      title: "Are you sure?",
+      message: `This action will delete '${glpiServer.name}' server configuration.`,
+      primaryAction: {
+        title: `Yes, Delete "${glpiServer.name}"`,
+        onAction: async () => {
+          try {
+            await localStorage.removeGlpiServerConfig(glpiServer);
+            await revalidateGlpiServerConfig();
+          } catch (e) {
+            await showFailureToast(e);
+          }
+        },
+      },
+    });
+    return;
   }, [glpiServer, revalidateGlpiServerConfig]);
 
   if (!revalidateGlpiServerConfig) return <React.Fragment />;
@@ -91,10 +103,7 @@ function ActionEditServer({
         icon={Icon.Pencil}
         target={<ServerForm revalidate={revalidateGlpiServerConfig} glpiServer={glpiServer} />}
       />
-      <ActionPanel.Submenu title="Delete Server" icon={Icon.Trash}>
-        <Action title={`Yes, Delete "${glpiServer.name}"`} icon={Icon.Trash} onAction={onActionDelete} />
-        <Action title="No" icon={Icon.Undo} />
-      </ActionPanel.Submenu>
+      <Action style={Action.Style.Destructive} title="Delete Server" icon={Icon.Trash} onAction={onActionDelete} />
     </ActionPanel.Submenu>
   );
 }

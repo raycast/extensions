@@ -70,12 +70,28 @@ export default function ServerForm(props: Props): React.ReactElement {
           props.glpiServer &&
           (value.endpoint !== props.glpiServer.endpoint ||
             value.clientid !== props.glpiServer.clientid ||
-            value.clientsecret !== props.glpiServer.clientsecret)
+            value.clientsecret !== props.glpiServer.clientsecret ||
+            (value.username && value.password))
         ) {
+          /* On Edit Server */
           const client = new GlpiApiClient(value.endpoint, value.clientid, value.clientsecret);
-          await client.getTokenWithRefreshToken();
+
+          /**
+           * Check OAuth2 with password in this condition:
+           * - new username and password
+           * - endpoint changed
+           */
+          if ((value.username && value.password) || value.endpoint !== props.glpiServer.endpoint) {
+            if (!value.username || !value.password)
+              throw new Error("Username and Password are required for this edit.");
+            client.getTokenWithPassword(value.username, value.password);
+          } else {
+            await client.getTokenWithRefreshToken();
+          }
         } else if (!props.glpiServer) {
+          /* On New Server */
           const client = new GlpiApiClient(value.endpoint, value.clientid, value.clientsecret);
+
           await client.getTokenWithPassword(value.username!, value.password!);
         }
       } catch (e) {
@@ -163,8 +179,8 @@ export default function ServerForm(props: Props): React.ReactElement {
       <Form.TextField title="Endpoint" placeholder="https://glpi.example.com/" {...itemProps.endpoint} />
       <Form.TextField title="Client ID" {...itemProps.clientid} />
       <Form.PasswordField title="Client Secret" {...itemProps.clientsecret} />
-      {!props.glpiServer && <Form.TextField title="Username" {...itemProps.username} />}
-      {!props.glpiServer && <Form.PasswordField title="Password" {...itemProps.password} />}
+      <Form.TextField title="Username" {...itemProps.username} />
+      <Form.PasswordField title="Password" {...itemProps.password} />
     </Form>
   );
 }

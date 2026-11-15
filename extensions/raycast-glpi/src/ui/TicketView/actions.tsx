@@ -35,7 +35,7 @@ function ActionPanelSectionTicket({ ticket }: Props): React.JSX.Element {
 
   const url = React.useMemo(() => {
     if (!config) return;
-    return new URL(`/front/ticket.form.php?id=${ticket?.id}`, config.endpoint);
+    return new URL(`front/ticket.form.php?id=${ticket?.id}`, config.endpoint);
   }, [config, ticket]);
 
   if (!ticket)

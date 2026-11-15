@@ -7,6 +7,7 @@ import { clientGlpi } from "@services/glpi";
 
 interface Props {
   glpiServer: GlpiServer;
+  revalidate: () => void;
 }
 
 interface FormData {
@@ -66,6 +67,7 @@ export default function AuthForm(props: Props): React.ReactElement {
       /* Set Loading */
       setIsLoading(false);
 
+      props.revalidate();
       pop();
     },
     [isLoading, props],
