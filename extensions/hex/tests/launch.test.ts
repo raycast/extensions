@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { hexMock } = vi.hoisted(() => ({ hexMock: vi.fn() }));
+const { hexMock, openMock } = vi.hoisted(() => ({ hexMock: vi.fn(), openMock: vi.fn() }));
 
 vi.mock("../src/lib/hex", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/lib/hex")>();
@@ -15,6 +15,8 @@ vi.mock("@raycast/api", () => ({
     set() {}
   },
   getApplications: async () => [],
+  getFrontmostApplication: async () => ({ name: "TextEdit", path: "/System/Applications/TextEdit.app" }),
+  open: openMock,
 }));
 
 import { HexError } from "../src/lib/hex";
@@ -26,6 +28,7 @@ const settingUp = new HexError(SETTING_UP, "Hex is waiting for setup");
 beforeEach(() => {
   hexMock.mockReset();
   hexMock.mockResolvedValue({ status: "done" });
+  openMock.mockReset();
 });
 
 describe("openingHex", () => {
@@ -53,8 +56,24 @@ describe("openingHex", () => {
       .mockRejectedValueOnce(notRunning)
       .mockResolvedValue("recording");
     await expect(openingHex(attempt)).resolves.toBe("recording");
-    expect(hexMock).toHaveBeenCalledTimes(1);
+    expect(hexMock.mock.calls.filter(([args]) => args[0] === "start")).toHaveLength(1);
     expect(attempt).toHaveBeenCalledTimes(3);
+  });
+
+  it("hides Hex's window and returns focus to the app in front before it started", async () => {
+    const attempt = vi.fn().mockRejectedValueOnce(notRunning).mockResolvedValue("recording");
+    await expect(openingHex(attempt)).resolves.toBe("recording");
+    expect(hexMock).toHaveBeenCalledWith(["window", "hide"]);
+    expect(openMock).toHaveBeenCalledWith("/System/Applications/TextEdit.app");
+  });
+
+  it("still dictates when Hex's window can't be hidden", async () => {
+    hexMock.mockImplementation(async (args: string[]) => {
+      if (args[0] === "window") throw new HexError("failed", "No window");
+      return { status: "done" };
+    });
+    const attempt = vi.fn().mockRejectedValueOnce(notRunning).mockResolvedValue("recording");
+    await expect(openingHex(attempt)).resolves.toBe("recording");
   });
 
   it("rethrows other failures without starting Hex", async () => {

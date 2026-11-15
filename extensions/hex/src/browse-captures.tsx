@@ -227,14 +227,21 @@ function AnnotationDetailView({ capture }: { capture: Capture }) {
       }
       actions={
         <ActionPanel>
-          {data?.transcript && <Action.CopyToClipboard title="Copy Transcript" content={data.transcript} />}
           {summary && (
-            <Action
-              title="Copy Summary for Agent"
-              icon={Icon.CopyClipboard}
-              onAction={() => copyOrPasteSummary(summary, "copy")}
-            />
+            <>
+              <Action
+                title="Paste Summary for Agent"
+                icon={Icon.Clipboard}
+                onAction={() => copyOrPasteSummary(summary, "paste")}
+              />
+              <Action
+                title="Copy Summary for Agent"
+                icon={Icon.CopyClipboard}
+                onAction={() => copyOrPasteSummary(summary, "copy")}
+              />
+            </>
           )}
+          {data?.transcript && <Action.CopyToClipboard title="Copy Transcript" content={data.transcript} />}
           {data?.video && <Action.Open title="Open Recording" icon={Icon.Play} target={data.video} />}
           <Action.ShowInFinder path={capture.path} />
         </ActionPanel>
