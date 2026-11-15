@@ -1,5 +1,9 @@
 # Zed Recent Projects Changelog
 
+## [Fix Open with Zed for Paths with Spaces] - {PR_MERGE_DATE}
+
+- Fix Open with Zed doing nothing on macOS when the selected Finder item's path contains a space. The path is no longer URL-encoded before it is handed to Zed.
+
 ## [Open WSL Projects That Use the Default User] - 2026-10-13
 
 - Fix WSL projects opened with the distribution's default user showing as "SSH: null" and failing to open. They are now recognised as WSL projects and opened with `--wsl <distro>` ([#25742](https://github.com/raycast/extensions/issues/25742))
