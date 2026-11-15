@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Sóley](https://soley.travel/en/docs/mcp) | Book licensed Icelandic tours, activities and stays, with live Iceland roads, weather, aurora and buses. Search, check availability, get quotes in ISK and your own currency, and reserve each leg of a trip; you confirm by email code and pay the operator directly. 30 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); no account or password needed. |
 | [Tesseract](https://tesseract.dev/mcp/) | Make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures from your conversation, charged to your own Tesseract plan. 8 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Tesseract account is required (free media each month, then paid). |
 | [Rizamo](https://rizamo.com/agents/) | Publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, see how they did, and answer comments and messages from your agent. 57 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a Rizamo account, free for 2 social accounts. |
 | [Hoy Planes](https://www.hoyplanes.com/mcp/) | What's on in 12 Spanish provinces: concerts, theater and free plans by date, topic, price and distance. 3 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key. |
