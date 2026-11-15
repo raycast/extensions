@@ -1,6 +1,6 @@
 # Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-15
 
 - Add Windows support
 - Use Ctrl instead of Cmd for keyboard shortcuts on Windows
