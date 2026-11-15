@@ -2,10 +2,10 @@
 <img src="./assets/command-icon.png" width="300" />
 
 <h1>
-    remove.bg
+    Remove Background
 </h1>
 
-Raycast extension to remove the background from an image using the remove.bg API
+Raycast extension to remove the background from an image using the Leonardo.Ai API (formerly the remove.bg API)
 
 <p>
     <a href="https://github.com/raycast/extensions/blob/master/LICENSE">
@@ -29,15 +29,16 @@ Raycast extension to remove the background from an image using the remove.bg API
 
 ## Features
 
-- Removed the background from an image using the remove.bg API
+- Removed the background from an image using the Leonardo.Ai API
 
-## How to get the API key for remove.bg
+## How to get the API key for Leonardo.Ai
 
-- Navigate to https://www.remove.bg
+Starting December 1, 2026, the remove.bg API moves to Leonardo.Ai ([migration guide](https://docs.leonardo.ai/docs/migrate-from-the-removebg-api-to-leonardoai)). remove.bg keys don't carry over, so you need a Leonardo.Ai API key:
+
+- Navigate to https://app.leonardo.ai
 - Sign in
-- Navigate to https://www.remove.bg/dashboard#api-key
-- Click the "Show" button
-- Copy displayed API key
+- Open the API Access page and create an API key
+- Paste it into the extension preferences
 
 ## How to use
 
