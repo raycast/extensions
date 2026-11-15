@@ -1,6 +1,6 @@
 # JW Library Linker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-15
 
 - Open German Bible references and the Meetings tab in JW Library.
 - Discover installed publications and open books, issues, and individual chapters.
