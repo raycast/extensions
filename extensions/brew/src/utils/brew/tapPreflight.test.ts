@@ -67,11 +67,34 @@ describe("readmeLeads", () => {
     ]);
   });
 
-  it("reads each command on a line joined with shell separators", () => {
+  it("reads a tap line and an install line for the same tap as one lead, so the install isn't lost", () => {
     expect(readmeLeads("brew tap acme/tools && brew install acme/tools/frob")).toEqual([
-      { tap: "acme/tools" },
       { tap: "acme/tools", package: "acme/tools/frob" },
     ]);
+  });
+
+  it("takes a later tap line's URL onto the install before it", () => {
+    expect(readmeLeads("brew install acme/tools/frob\nbrew tap acme/tools https://git.example.com/acme/tools")).toEqual(
+      [{ tap: "acme/tools", url: "https://git.example.com/acme/tools", package: "acme/tools/frob" }],
+    );
+  });
+
+  it("gives the tap line's URL to every install line for that tap", () => {
+    const readme = [
+      "brew tap acme/tools https://git.example.com/acme/tools",
+      "brew install acme/tools/old",
+      "brew install --cask acme/tools/new",
+    ].join("\n");
+    expect(readmeLeads(readme)).toEqual([
+      { tap: "acme/tools", url: "https://git.example.com/acme/tools", package: "acme/tools/old" },
+      { tap: "acme/tools", url: "https://git.example.com/acme/tools", package: "acme/tools/new", cask: true },
+    ]);
+  });
+
+  it("keeps the tap line's URL on the install it merges with", () => {
+    expect(readmeLeads("brew tap acme/tools https://git.example.com/acme/tools\nbrew install acme/tools/frob")).toEqual(
+      [{ tap: "acme/tools", url: "https://git.example.com/acme/tools", package: "acme/tools/frob" }],
+    );
   });
 });
 

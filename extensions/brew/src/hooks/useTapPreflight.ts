@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { getErrorMessage, preflightTap, type Preflight, type TapTarget } from "../utils";
 import { fetchLogger } from "../utils/logger";
 
@@ -13,57 +14,76 @@ const DEBOUNCE_MS = 400;
  */
 const answers = new Map<string, Preflight>();
 
+async function check(key: string, signal: AbortSignal | undefined): Promise<{ key: string; value: Preflight }> {
+  const known = answers.get(key);
+  if (known) return { key, value: known };
+  const started = performance.now();
+  const target = JSON.parse(key) as TapTarget;
+  const value: Preflight = await preflightTap(target, undefined, signal).catch((err: unknown) => ({
+    kind: "unchecked" as const,
+    reason: getErrorMessage(err),
+  }));
+  fetchLogger.log("Tap preflight", { target: key, result: value.kind, ms: Math.round(performance.now() - started) });
+  // "Couldn't look" and an answer missing a lead it couldn't read may both
+  // change a moment later; only a final answer is kept.
+  if (!signal?.aborted && value.kind !== "unchecked" && !("incomplete" in value)) answers.set(key, value);
+  return { key, value };
+}
+
 /**
  * What the repository behind a typed or pasted tap holds, read with git
  * without cloning it (see `preflightTap`). `checking` while it runs; undefined
- * when there is no target.
+ * when there is no target. `recheck` runs it again, for Refresh after a check
+ * that couldn't look.
  *
  * `text` is the search bar's text. When it grew by more than one character at
  * once, it was pasted (or passed as a launch argument), so there is no typing
  * to wait out and the check runs at once.
  */
-export function useTapPreflight(target: TapTarget | undefined, text: string): Preflight | "checking" | undefined {
+export function useTapPreflight(
+  target: TapTarget | undefined,
+  text: string,
+): { preflight: Preflight | "checking" | undefined; recheck: () => void } {
   const key = target ? JSON.stringify(target) : undefined;
-  const [answer, setAnswer] = useState<{ key: string; value: Preflight }>();
+  // The target once typing has paused. Only the timer lives in this effect;
+  // the read itself goes through `usePromise` below.
+  const [settled, setSettled] = useState<string>();
   const previousText = useRef("");
+  // Whether the last change to the text was a paste. Kept until the text
+  // changes again, so a target that becomes checkable a moment after the
+  // paste (Search first asks whether the tap is added) still skips the wait.
+  const pasted = useRef(false);
+
+  // Declared first, so it runs before the effect below in the same commit.
+  useEffect(() => {
+    pasted.current = text.length - previousText.current.length > 1;
+    previousText.current = text;
+  }, [text]);
 
   useEffect(() => {
-    const pasted = text.length - previousText.current.length > 1;
-    if (!target || !key || answers.has(key)) return;
-    const controller = new AbortController();
-    const timer = setTimeout(
-      async () => {
-        const started = performance.now();
-        const value: Preflight = await preflightTap(target, undefined, controller.signal).catch((err: unknown) => ({
-          kind: "unchecked" as const,
-          reason: getErrorMessage(err),
-        }));
-        if (controller.signal.aborted) return;
-        fetchLogger.log("Tap preflight", {
-          target: key,
-          result: value.kind,
-          ms: Math.round(performance.now() - started),
-        });
-        // "Couldn't look" and an answer missing a lead it couldn't read may
-        // both change a moment later; only a final answer is kept.
-        if (value.kind !== "unchecked" && !("incomplete" in value)) answers.set(key, value);
-        setAnswer({ key, value });
-      },
-      pasted ? 0 : DEBOUNCE_MS,
-    );
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
+    // A new target waits its own pause, even one checked before (A → B → A).
+    setSettled(undefined);
+    if (!key || answers.has(key)) return;
+    const timer = setTimeout(() => setSettled(key), pasted.current ? 0 : DEBOUNCE_MS);
+    return () => clearTimeout(timer);
     // Runs per target, not per keystroke: `key` describes `target` fully, and
-    // `text` only decides the delay.
+    // the text only decides the delay.
   }, [key]);
 
-  // After the check above, so it compares against the previous render's text.
-  useEffect(() => {
-    previousText.current = text;
-  });
+  const abortable = useRef<AbortController>(null);
+  const ready = key !== undefined && settled === key && !answers.has(key);
+  const { data, isLoading, revalidate } = usePromise(
+    (k: string) => check(k, abortable.current?.signal),
+    [settled ?? ""],
+    {
+      execute: ready,
+      abortable,
+    },
+  );
 
-  if (!key) return undefined;
-  return answers.get(key) ?? (answer?.key === key ? answer.value : "checking");
+  // A recheck shows as checking again, not as the answer it is replacing.
+  const preflight = !key
+    ? undefined
+    : (answers.get(key) ?? (data?.key === key && !isLoading ? data.value : "checking"));
+  return { preflight, recheck: () => key && settled === key && revalidate() };
 }

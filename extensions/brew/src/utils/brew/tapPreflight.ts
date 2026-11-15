@@ -109,15 +109,24 @@ export function contentsText(contents: TapContents): string {
  * official packages such as `brew install wget` drop out.
  */
 export function readmeLeads(readme: string): TapTarget[] {
+  const commands = readme.split(/&&|\|\||[;|`\n]/).flatMap((part) => part.match(/\bbrew\s+(?:install|tap)\b.*/) ?? []);
+  const targets = commands.flatMap((line) => parseTapName(line) ?? []);
+  // A `brew tap x/y <url>` line says where every `x/y/...` install comes from.
+  const urls = new Map<string, string>();
+  for (const target of targets) if (target.url && !urls.has(target.tap)) urls.set(target.tap, target.url);
+  // `brew tap x/y` followed by `brew install x/y/pkg` is one instruction, so a
+  // tap line stands for its tap's first install line rather than for the bare tap.
+  const firstInstall = (tap: string) => targets.find((target) => target.tap === tap && target.package);
+
   const leads: TapTarget[] = [];
   const seen = new Set<string>();
-  const commands = readme.split(/&&|\|\||[;|`\n]/).flatMap((part) => part.match(/\bbrew\s+(?:install|tap)\b.*/) ?? []);
-  for (const line of commands) {
-    const target = parseTapName(line);
-    const key = target && JSON.stringify(target);
-    if (!target || !key || seen.has(key)) continue;
+  for (const target of targets) {
+    const lead = (!target.package && firstInstall(target.tap)) || target;
+    const url = lead.url ?? urls.get(lead.tap);
+    const key = [lead.tap, lead.package, lead.cask, url].join("|");
+    if (seen.has(key)) continue;
     seen.add(key);
-    leads.push(target);
+    leads.push(url ? { ...lead, url } : lead);
   }
   return leads;
 }

@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
 import { usePopularityRanks } from "./hooks/usePopularityRanks";
@@ -13,7 +13,7 @@ import { FormulaList } from "./components/list";
 import { InstallFromTapAction } from "./components/actions";
 import { ToggleSidebarAction } from "./components/actionPanels";
 import { STATUS_COLOR, UP_TO_DATE_ICON } from "./components/palette";
-import { brewIdentifier, closestPackages, installTargetFor, packageNameOf, parseTapName } from "./utils";
+import { brewIdentifier, brewIsTapped, closestPackages, installTargetFor, packageNameOf, parseTapName } from "./utils";
 import { useTapPreflight } from "./hooks/useTapPreflight";
 import { PAGE_SIZE, clampPage, pageCount, visibleTotal } from "./utils/paging";
 
@@ -153,18 +153,33 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
     const target = parseTapName(searchText);
     return target?.package ? { ...target, package: target.package } : undefined;
   }, [searchText]);
-  const installedFromTap = (tap: string, fullName: string) =>
+  /** `cask` undefined: either kind, as an unflagged pasted name may be either. */
+  const installedFromTap = (tap: string, fullName: string, cask?: boolean) =>
     installed !== undefined &&
-    [...installed.formulae.values(), ...installed.casks.values()].some(
+    [...(cask === true ? [] : installed.formulae.values()), ...(cask === false ? [] : installed.casks.values())].some(
       (item) => item.tap === tap && brewIdentifier(item) === fullName,
     );
-  const tapPackageInstalled = tapTarget !== undefined && installedFromTap(tapTarget.tap, tapTarget.package);
+  const tapPackageInstalled =
+    tapTarget !== undefined && installedFromTap(tapTarget.tap, tapTarget.package, tapTarget.cask || undefined);
+  // An added tap is read where it is, by brew: its remote may not be the
+  // GitHub repository the check would read, so the check is for taps not yet added.
+  // The answer names its tap: `usePromise` keeps the last data while the next
+  // tap is asked about, and one tap's answer must never stand for another's.
+  const { data: tapStatus } = usePromise(
+    async (tap: string) => ({ tap, added: await brewIsTapped(tap) }),
+    [tapTarget?.tap ?? ""],
+    { execute: tapTarget !== undefined && !tapPackageInstalled },
+  );
+  const tapNotAdded = tapStatus !== undefined && tapStatus.tap === tapTarget?.tap && !tapStatus.added;
   const tapName = tapTarget && packageNameOf(tapTarget);
   // Is that package really in that tap? Checked with a git read before the tap
   // is added, so a typo offers the tap's real packages instead of failing after
   // the tap is added. Any other answer keeps the single row. An installed
   // package needs no check: its tap is already added.
-  const tapPreflight = useTapPreflight(tapPackageInstalled ? undefined : tapTarget, searchText);
+  const { preflight: tapPreflight } = useTapPreflight(
+    tapPackageInstalled || !tapNotAdded ? undefined : tapTarget,
+    searchText,
+  );
   const toggleSidebar = () => setSidebar({ preference: showMetadataPanel, show: !showDetails });
   const viewSection = (
     <ActionPanel.Section title="View">
@@ -256,7 +271,7 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
         tapTarget && missing ? (
           <List.Section title={`${tapTarget.tap} Has No ${missing.package}`}>
             {suggestions.map((item) => {
-              const isInstalled = installedFromTap(tapTarget.tap, `${tapTarget.tap}/${item.name}`);
+              const isInstalled = installedFromTap(tapTarget.tap, `${tapTarget.tap}/${item.name}`, item.cask);
               return (
                 <List.Item
                   key={`${item.cask ? "cask" : "formula"}:${item.name}`}
@@ -269,6 +284,8 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
                     `**${tapTarget.tap}** has no package named **${missing.package}**.`,
                   )}
                   icon={isInstalled ? UP_TO_DATE_ICON : Icon.Plus}
+                  // Kept beside the sidebar on purpose: the row is a package
+                  // name and one short tag, so nothing truncates (Chris, 2026-11-14).
                   accessories={isInstalled ? [{ tag: { value: "Installed", color: STATUS_COLOR.ok } }] : undefined}
                   actions={
                     <ActionPanel>

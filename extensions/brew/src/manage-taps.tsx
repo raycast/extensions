@@ -331,7 +331,7 @@ function ManageTapsContent(props: { initialTap?: string }) {
   const known = target && taps.find((tap) => tap.name === target.tap);
   const offerAdd = target !== undefined && !known && data !== undefined;
   const query = target ? "" : searchText.trim().toLowerCase();
-  const preflight = useTapPreflight(offerAdd ? target : undefined, searchText);
+  const { preflight, recheck } = useTapPreflight(offerAdd ? target : undefined, searchText);
 
   // A typed tap narrows to that tap (or offers to add it); anything else
   // searches package names and descriptions, and a tap-name hit keeps the
@@ -421,7 +421,12 @@ function ManageTapsContent(props: { initialTap?: string }) {
                 showing={showAddPanel}
                 onToggleSidebar={() => setShowAddPanel((current) => !current)}
               />
-              <RefreshAction onRefresh={onChange} />
+              <RefreshAction
+                onRefresh={() => {
+                  onChange();
+                  recheck();
+                }}
+              />
             </ActionPanel.Section>
           }
         />
