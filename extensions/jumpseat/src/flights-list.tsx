@@ -63,12 +63,6 @@ interface FlightsListProps {
   pagination?: List.Props["pagination"];
 }
 
-const NAVIGATION_TITLES: Record<FlightsListKind, string> = {
-  personal: "Upcoming Flights",
-  past: "Past Flights",
-  friends: "Friends' Upcoming Flights",
-};
-
 async function reconnect(revalidate: () => void) {
   try {
     await reconnectJumpseat();
@@ -325,7 +319,6 @@ export function FlightsList({
     <List
       isLoading={isLoading}
       isShowingDetail
-      navigationTitle={NAVIGATION_TITLES[kind]}
       searchBarAccessory={searchBarAccessory}
       pagination={pagination}
       searchBarPlaceholder={
