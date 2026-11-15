@@ -1,4 +1,5 @@
 import { closeMainWindow, getApplications, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
@@ -58,11 +59,7 @@ export async function openInSpaceManager(url: string): Promise<void> {
     await open(url, appPath);
     await closeMainWindow();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Couldn't open ${APP_NAME}`,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: `Couldn't open ${APP_NAME}` });
   }
 }
 
