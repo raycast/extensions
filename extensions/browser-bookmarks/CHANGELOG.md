@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Chromium Permission Guidance] - {PR_MERGE_DATE}
+
+- Show a clear Full Disk Access message when Raycast cannot read selected Chromium browser profiles
+
 ## [Search Profiles] - 2026-10-26
 
 - Search 1.0.7 added profiles: each one has its own bookmarks, pins and spaces, and can be picked from the Select Profile submenu

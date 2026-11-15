@@ -58,6 +58,7 @@ import { getInitialBrowserSelection } from "./utils/browsers";
 import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
+import { isFileAccessPermissionError } from "./utils/chromiumProfiles";
 
 type Bookmark = {
   id: string;
@@ -616,9 +617,33 @@ export default function Command() {
     }
   }
 
+  const chromiumPermissionError = [
+    brave.error,
+    braveBeta.error,
+    braveNightly.error,
+    chatGPTAtlas.error,
+    chrome.error,
+    chromeBeta.error,
+    chromeDev.error,
+    comet.error,
+    dia.error,
+    edge.error,
+    edgeCanary.error,
+    edgeDev.error,
+    ghostBrowser.error,
+    helium.error,
+    island.error,
+    prismaAccess.error,
+    sidekick.error,
+    vivaldi.error,
+    vivaldiSnapshot.error,
+    whale.error,
+  ].some(isFileAccessPermissionError);
+
   if (
-    safari.error?.message.includes("operation not permitted") ||
-    duckDuckGo.error?.message.includes("operation not permitted")
+    isFileAccessPermissionError(safari.error) ||
+    isFileAccessPermissionError(duckDuckGo.error) ||
+    chromiumPermissionError
   ) {
     return <PermissionErrorScreen />;
   }
