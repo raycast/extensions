@@ -1,4 +1,5 @@
 import { Toast, getSelectedFinderItems, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { extname } from "node:path";
 import { pathToFileURL } from "node:url";
 import { runFlicopy } from "./flicopy";
@@ -9,8 +10,8 @@ export default async function Command() {
   let paths: string[];
   try {
     paths = (await getSelectedFinderItems()).map((item) => item.path);
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: "Select images in Finder first" });
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't read the Finder selection" });
     return;
   }
 
