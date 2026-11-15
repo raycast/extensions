@@ -1,5 +1,9 @@
 # WIP Changelog
 
+## [Paste images from clipboard] - {PR_MERGE_DATE}
+
+- Attach screenshots and other copied images when pasting into Add Completed Todo
+
 ## [Fix todo search debounce] - 2026-10-12
 
 - Cancel pending debounced todo searches when the search query changes
