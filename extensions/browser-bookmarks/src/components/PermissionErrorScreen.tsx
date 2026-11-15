@@ -36,13 +36,12 @@ export default function PermissionErrorScreen({ browsers, onSelectBrowsers }: Pe
         }
         actions={
           <ActionPanel>
+            {isMacOS ? <Action.Open title={actionTitle} icon={Icon.Gear} target={actionTarget} /> : null}
             <Action.Push
               title="Select Browsers"
               icon={Icon.CheckCircle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               target={<SelectBrowsers browsers={browsers} onSelect={onSelectBrowsers} />}
             />
-            {isMacOS ? <Action.Open title={actionTitle} target={actionTarget} /> : null}
           </ActionPanel>
         }
       />
