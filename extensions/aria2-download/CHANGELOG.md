@@ -1,6 +1,6 @@
 # Aria2 Download Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-15
 
 - Manage direct URLs, torrents, magnet/BT downloads, and LinkSwift netdisk pushes in one aria2 queue
 - Start aria2 on demand and optionally stop it after all downloads finish
