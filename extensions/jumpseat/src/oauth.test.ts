@@ -15,6 +15,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@raycast/api", () => ({
+  environment: {
+    supportPath: `${process.env.TMPDIR ?? "/tmp"}/jumpseat-oauth-test-${process.pid}`,
+  },
   LocalStorage: {
     getItem: mocks.getItem,
     removeItem: mocks.removeItem,

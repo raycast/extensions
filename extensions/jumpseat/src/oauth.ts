@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { LocalStorage, OAuth } from "@raycast/api";
+import { environment, LocalStorage, OAuth } from "@raycast/api";
+import { withAuthStorageLock } from "./auth-lock";
 import { getJumpseatConfiguration } from "./config";
 import { clearFlightCache, migrateFlightCache } from "./flight-cache";
 import {
@@ -34,6 +35,10 @@ const AUTH_ISSUER_KEY = "jumpseat-auth-issuer";
 const AUTH_DISCOVERY_TIMEOUT_MS = 5_000;
 const AUTH_DISCOVERY_ERROR_MESSAGE =
   "Jumpseat could not start sign-in. Please try again shortly.";
+
+function lockAuthStorage<T>(critical: () => Promise<T>): Promise<T> {
+  return withAuthStorageLock(environment.supportPath, critical);
+}
 
 export const jumpseatOAuthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -145,19 +150,23 @@ async function authorize(
     request,
     authorizationCode,
   );
-  await jumpseatOAuthClient.setTokens(tokens);
-  await LocalStorage.setItem(
-    AUTH_CONFIGURATION_KEY,
-    protocol === "legacy"
-      ? legacyJumpseatConfigurationId()
-      : jumpseatConfigurationId(configuration),
-  );
-  await LocalStorage.setItem(AUTH_PROTOCOL_KEY, protocol);
-  if (authorizationProtocol.issuer) {
-    await LocalStorage.setItem(AUTH_ISSUER_KEY, authorizationProtocol.issuer);
-  } else {
-    await LocalStorage.removeItem(AUTH_ISSUER_KEY);
-  }
+  // Stored under the lock so a refresh of an older grant that is still in
+  // flight sees this grant and does not overwrite it (see the refresh below).
+  await lockAuthStorage(async () => {
+    await jumpseatOAuthClient.setTokens(tokens);
+    await LocalStorage.setItem(
+      AUTH_CONFIGURATION_KEY,
+      protocol === "legacy"
+        ? legacyJumpseatConfigurationId()
+        : jumpseatConfigurationId(configuration),
+    );
+    await LocalStorage.setItem(AUTH_PROTOCOL_KEY, protocol);
+    if (authorizationProtocol.issuer) {
+      await LocalStorage.setItem(AUTH_ISSUER_KEY, authorizationProtocol.issuer);
+    } else {
+      await LocalStorage.removeItem(AUTH_ISSUER_KEY);
+    }
+  });
   return tokens.access_token;
 }
 
@@ -266,7 +275,7 @@ async function clearStoredAuthorization(
   await Promise.all([
     revocation,
     Promise.resolve().then(clearFlightCache),
-    jumpseatOAuthClient.removeTokens(),
+    lockAuthStorage(() => jumpseatOAuthClient.removeTokens()),
     LocalStorage.removeItem(AUTH_CONFIGURATION_KEY),
     LocalStorage.removeItem(AUTH_PROTOCOL_KEY),
     LocalStorage.removeItem(AUTH_ISSUER_KEY),
@@ -411,35 +420,50 @@ async function refreshStoredAccessToken(
     );
   }
 
-  // Stored tokens can change while this refresh is in flight. A concurrent
-  // refresh replaying the same request already stored these rotated tokens;
-  // keep them. A reconnect stored a new grant; never overwrite it with the
-  // superseded grant's rotated tokens, and revoke the token nothing will use.
-  const current = await jumpseatOAuthClient.getTokens();
-  if (current?.refreshToken === refreshed.refreshToken && current.accessToken) {
-    return current.accessToken;
-  }
-  if (current?.refreshToken !== tokens.refreshToken) {
-    await revokeRefreshToken(
-      configuration,
-      protocol,
-      issuer,
-      refreshed.refreshToken,
-    );
-    if (current?.accessToken) return current.accessToken;
-    throw new JumpseatAuthenticationError(
-      "Your Jumpseat session has expired. Try again to sign in.",
-    );
-  }
+  // Stored tokens can change while this refresh is in flight, so the check and
+  // the write happen under the lock that sign-in and disconnect also take. A
+  // concurrent refresh replaying the same request already stored these rotated
+  // tokens; keep them. A reconnect stored a new grant, or a disconnect removed
+  // it; never overwrite that with this grant's rotated tokens.
+  const outcome = await lockAuthStorage(
+    async (): Promise<
+      | { kind: "stored" | "current"; accessToken: string }
+      | { kind: "superseded"; accessToken?: string }
+    > => {
+      const current = await jumpseatOAuthClient.getTokens();
+      if (
+        current?.refreshToken === refreshed.refreshToken &&
+        current.accessToken
+      ) {
+        return { kind: "current", accessToken: current.accessToken };
+      }
+      if (current?.refreshToken !== tokens.refreshToken) {
+        return { kind: "superseded", accessToken: current?.accessToken };
+      }
+      await jumpseatOAuthClient.setTokens({
+        accessToken: refreshed.accessToken,
+        refreshToken: refreshed.refreshToken,
+        expiresIn: refreshed.expiresIn,
+        // A refresh keeps the grant's scopes, so an older grant stays
+        // upcoming-only.
+        scope: tokens.scope || oauthScope(protocol),
+      });
+      return { kind: "stored", accessToken: refreshed.accessToken };
+    },
+  );
+  if (outcome.kind !== "superseded") return outcome.accessToken;
 
-  await jumpseatOAuthClient.setTokens({
-    accessToken: refreshed.accessToken,
-    refreshToken: refreshed.refreshToken,
-    expiresIn: refreshed.expiresIn,
-    // A refresh keeps the grant's scopes, so an older grant stays upcoming-only.
-    scope: tokens.scope || oauthScope(protocol),
-  });
-  return refreshed.accessToken;
+  // Nothing will use this grant's rotated token any more.
+  await revokeRefreshToken(
+    configuration,
+    protocol,
+    issuer,
+    refreshed.refreshToken,
+  );
+  if (outcome.accessToken) return outcome.accessToken;
+  throw new JumpseatAuthenticationError(
+    "Your Jumpseat session has expired. Try again to sign in.",
+  );
 }
 
 export async function refreshJumpseatAccessToken(
