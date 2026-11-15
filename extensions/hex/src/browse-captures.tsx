@@ -136,7 +136,13 @@ async function copyOrPasteSummary(path: string, mode: "copy" | "paste") {
   try {
     text = await readFile(path, "utf8");
   } catch (error) {
-    await showFailureToast(error, { title: "Couldn't read the summary" });
+    const missing = error instanceof Error && "code" in error && error.code === "ENOENT";
+    await showFailureToast(
+      error,
+      missing
+        ? { title: "Couldn't find the summary", message: "It was moved or deleted" }
+        : { title: "Couldn't read the summary" },
+    );
     return;
   }
   await copyOrPaste(text, mode, "Copied summary");

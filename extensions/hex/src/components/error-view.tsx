@@ -7,9 +7,9 @@ type Props = { error: Error; onRetry: () => void };
 function describe(error: Error) {
   switch (errorCode(error)) {
     case "not-running":
-      return { icon: Icon.Power, title: "Hex isn't running" };
+      return { icon: Icon.Power, title: "Hex isn't running", description: "Open Hex to continue." };
     case "hex-missing":
-      return { icon: Icon.Download, title: "Hex isn't installed" };
+      return { icon: Icon.Download, title: "Hex isn't installed", description: "Download Hex from GitHub." };
     case "cli-missing":
       return { icon: Icon.Download, title: "Hex needs an update" };
     case "disabled":
@@ -48,24 +48,24 @@ function ErrorActions({ error, onRetry }: Props) {
 }
 
 export function ListErrorView(props: Props) {
-  const { icon, title } = describe(props.error);
+  const { icon, title, description } = describe(props.error);
   return (
     <List.EmptyView
       icon={icon}
       title={title}
-      description={errorMessage(props.error)}
+      description={description ?? errorMessage(props.error)}
       actions={<ErrorActions {...props} />}
     />
   );
 }
 
 export function GridErrorView(props: Props) {
-  const { icon, title } = describe(props.error);
+  const { icon, title, description } = describe(props.error);
   return (
     <Grid.EmptyView
       icon={icon}
       title={title}
-      description={errorMessage(props.error)}
+      description={description ?? errorMessage(props.error)}
       actions={<ErrorActions {...props} />}
     />
   );
