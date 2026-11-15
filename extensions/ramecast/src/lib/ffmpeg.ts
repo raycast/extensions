@@ -2,15 +2,34 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
-import { gunzipSync } from "zlib";
+import { fetchZipEntry } from "./zip";
 
-// Pinned static builds from https://github.com/eugeneware/ffmpeg-static (includes libx264, HLS,
-// avfoundation on macOS and gdigrab on Windows). Downloaded once on first use and verified by SHA-256.
-const VERSION = "b6.1.1";
-const BUILDS: Record<string, string> = {
-  "darwin-arm64": "8923876afa8db5585022d7860ec7e589af192f441c56793971276d450ed3bbfa",
-  "darwin-x64": "929b375c1182d956c51f7ac25e0b2b0411fb01f6f407aa15c9758efeb4242106",
-  "win32-x64": "8883a3dffbd0a16cf4ef95206ea05283f78908dbfb118f73c83f4951dcc06d77",
+// Pinned static ffmpeg builds (include libx264, libvpx, HLS, avfoundation on macOS and gdigrab on Windows).
+// Only the ffmpeg binary is pulled out of each zip, and it is verified by SHA-256 before it is installed.
+//   macOS:   https://ffmpeg.martin-riedl.de (release builds)
+//   Windows: https://github.com/FFmpeg-Builds/FFmpeg-Builds (BtbN; a month-end autobuild of the 9.0 branch,
+//            since only those are kept long-term). The winarm64 build has no libvpx (needed for VP8
+//            mirroring), so Windows on ARM uses the x64 build through emulation.
+const VERSION = "9.0.2";
+const RIEDL = "https://ffmpeg.martin-riedl.de/download/macos";
+const BTBN_RELEASE = "autobuild-2026-10-31-12-59";
+const BTBN_BUILD = "ffmpeg-n9.0.2-39-g7adfbe40dc-win64-gpl-9.0";
+const BUILDS: Record<string, { url: string; entry: string; sha256: string }> = {
+  "darwin-arm64": {
+    url: `${RIEDL}/arm64/1789931890_${VERSION}/ffmpeg.zip`,
+    entry: "ffmpeg",
+    sha256: "2e11c6f90993cdb79fff84d3f90044d28316b310e75b3e030cfc9a54f2c9d384",
+  },
+  "darwin-x64": {
+    url: `${RIEDL}/amd64/1789931006_${VERSION}/ffmpeg.zip`,
+    entry: "ffmpeg",
+    sha256: "b25689cf2211c0582d317e849912769a1f1c93904fe102c485b5364a425633d1",
+  },
+  "win32-x64": {
+    url: `https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/${BTBN_RELEASE}/${BTBN_BUILD}.zip`,
+    entry: `${BTBN_BUILD}/bin/ffmpeg.exe`,
+    sha256: "c930b63cb1ee8b7e2eaf9c15161160edd5c9acad34f0303b5855c8eb142a7e8d",
+  },
 };
 
 function platformKey(): string {
@@ -28,22 +47,33 @@ export async function ensureFfmpeg(onProgress?: (message: string) => void): Prom
     return ffmpegPath;
   }
 
-  const key = platformKey();
-  const target = path.join(environment.supportPath, `ffmpeg-${VERSION}${process.platform === "win32" ? ".exe" : ""}`);
+  const build = BUILDS[platformKey()];
+  const name = `ffmpeg-${VERSION}${process.platform === "win32" ? ".exe" : ""}`;
+  const target = path.join(environment.supportPath, name);
   if (fs.existsSync(target)) return target;
 
-  onProgress?.("Downloading screen encoder (one-time, ~25 MB)…");
-  const url = `https://github.com/eugeneware/ffmpeg-static/releases/download/${VERSION}/ffmpeg-${key}.gz`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to download encoder: HTTP ${res.status}`);
-  const gz = Buffer.from(await res.arrayBuffer());
-  const hash = createHash("sha256").update(gz).digest("hex");
-  if (hash !== BUILDS[key]) throw new Error("Downloaded encoder failed integrity check");
+  onProgress?.(`Downloading screen encoder (one-time, ~${process.platform === "win32" ? 65 : 35} MB)…`);
+  const binary = await fetchZipEntry(build.url, build.entry);
+  const hash = createHash("sha256").update(binary).digest("hex");
+  if (hash !== build.sha256) throw new Error("Downloaded encoder failed integrity check");
 
   onProgress?.("Installing screen encoder…");
   fs.mkdirSync(environment.supportPath, { recursive: true });
   const tmp = `${target}.tmp`;
-  fs.writeFileSync(tmp, gunzipSync(gz), { mode: 0o755 });
+  fs.writeFileSync(tmp, binary, { mode: 0o755 });
   fs.renameSync(tmp, target);
+  removeOldBuilds(name);
   return target;
+}
+
+/** Deletes encoders installed by earlier versions of the extension (e.g. ffmpeg-b6.1.1). */
+function removeOldBuilds(current: string) {
+  for (const file of fs.readdirSync(environment.supportPath)) {
+    if (!file.startsWith("ffmpeg-") || file.startsWith(current)) continue;
+    try {
+      fs.rmSync(path.join(environment.supportPath, file), { force: true });
+    } catch {
+      // Still running (Windows locks executables); it will be removed next time.
+    }
+  }
 }

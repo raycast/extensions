@@ -35,15 +35,23 @@ There is nothing to install. RameCast runs on macOS (Apple silicon and Intel) an
 
 ## Screen encoder (ffmpeg)
 
-The first time you cast, RameCast downloads a pinned ffmpeg build (~20–30 MB) for your platform and stores it in the
-extension's support folder. It is not downloaded again.
+The first time you cast, RameCast downloads a pinned ffmpeg 9.0.2 build (~30–35 MB on macOS, ~65 MB on Windows) for
+your platform and stores it in the extension's support folder. It is not downloaded again.
 
-- **Source:** [eugeneware/ffmpeg-static](https://github.com/eugeneware/ffmpeg-static) release `b6.1.1`,
-  `ffmpeg-<platform>-<arch>.gz` (darwin-arm64, darwin-x64, win32-x64).
-- **Integrity:** each download is checked against a SHA-256 hash hard-coded in `src/lib/ffmpeg.ts`. If the hash does
-  not match, the file is discarded and casting stops.
-- **License:** this ffmpeg build includes libx264, so it is licensed under the
-  [GNU GPL v2 or later](https://www.ffmpeg.org/legal.html). RameCast downloads and runs it as a separate program; it
+- **Source:**
+  - macOS (Apple silicon and Intel): [Martin Riedl's ffmpeg builds](https://ffmpeg.martin-riedl.de), release 9.0.2.
+  - Windows (x64; Windows on ARM runs it through emulation):
+    [FFmpeg-Builds](https://github.com/FFmpeg-Builds/FFmpeg-Builds) (BtbN) release
+    [`autobuild-2026-10-31-12-59`](https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/tag/autobuild-2026-10-31-12-59),
+    `ffmpeg-n9.0.2-39-g7adfbe40dc-win64-gpl-9.0.zip` (the 9.0.2 release plus later fixes from the 9.0 branch).
+
+  Both are zip files. RameCast reads only the `ffmpeg` binary out of the zip (using HTTP range requests), so ffprobe,
+  ffplay and the docs are not downloaded.
+
+- **Integrity:** the extracted binary is checked against a SHA-256 hash hard-coded in `src/lib/ffmpeg.ts`. If the
+  hash does not match, the file is discarded and casting stops.
+- **License:** these ffmpeg builds include libx264 and are built with `--enable-version3`, so they are licensed under
+  the [GNU GPL v3](https://www.ffmpeg.org/legal.html). RameCast downloads and runs it as a separate program; it
   is not bundled with or linked into the extension.
 - **Using your own ffmpeg:** set **Custom ffmpeg Path** in the extension preferences, and RameCast will skip the
   download.
