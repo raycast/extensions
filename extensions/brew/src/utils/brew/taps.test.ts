@@ -14,6 +14,8 @@ import {
   parseTapName,
   tapCommandName,
   untapCommands,
+  untapSteps,
+  installTargetFor,
 } from "./taps";
 
 describe("parseTapInfo", () => {
@@ -225,6 +227,14 @@ describe("untapCommands", () => {
     ]);
   });
 
+  it("clears the tap's trust before untapping it, when asked", () => {
+    expect(untapCommands("a/b", { formulae: ["a/b/one"], casks: [] }, { untrust: true })).toEqual([
+      "HOMEBREW_NO_AUTOREMOVE=1 brew uninstall --formula a/b/one",
+      "brew untrust --tap a/b",
+      "brew untap a/b",
+    ]);
+  });
+
   it("is a plain untap when nothing is installed", () => {
     expect(untapCommands("a/b", { formulae: [], casks: [] })).toEqual(["brew untap a/b"]);
   });
@@ -243,5 +253,34 @@ describe("untapCommands", () => {
   it("never passes --force", () => {
     const commands = untapCommands("a/b", { formulae: ["a/b/one"], casks: ["a/b/two"] });
     expect(commands.join(" ")).not.toContain("--force");
+  });
+});
+
+describe("untapSteps", () => {
+  it("names each step it will run, in the same order", () => {
+    expect(
+      untapSteps("a/b", { formulae: ["a/b/one"], casks: ["a/b/two"] }, { untrust: true }).map((s) => s.label),
+    ).toEqual(["Uninstalling casks", "Uninstalling formulae", "Clearing trust", "Removing the tap"]);
+  });
+});
+
+describe("installTargetFor", () => {
+  it("never carries a pasted --cask onto a formula, and keeps the clone URL", () => {
+    const pasted = {
+      tap: "acme/tools",
+      url: "https://example.com/acme/tools",
+      package: "acme/tools/typo",
+      cask: true as const,
+    };
+    expect(installTargetFor(pasted, "tool", false)).toEqual({
+      tap: "acme/tools",
+      url: "https://example.com/acme/tools",
+      package: "acme/tools/tool",
+    });
+    expect(installTargetFor({ tap: "acme/tools" }, "widget", true)).toEqual({
+      tap: "acme/tools",
+      package: "acme/tools/widget",
+      cask: true,
+    });
   });
 });

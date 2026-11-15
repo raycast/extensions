@@ -11,8 +11,10 @@ import { usePopularityRanks } from "./hooks/usePopularityRanks";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
 import { InstallFromTapAction } from "./components/actions";
+import { ToggleSidebarAction } from "./components/actionPanels";
 import { STATUS_COLOR, UP_TO_DATE_ICON } from "./components/palette";
-import { brewIdentifier, parseTapName } from "./utils";
+import { brewIdentifier, closestPackages, installTargetFor, packageNameOf, parseTapName } from "./utils";
+import { useTapPreflight } from "./hooks/useTapPreflight";
 import { PAGE_SIZE, clampPage, pageCount, visibleTotal } from "./utils/paging";
 
 /**
@@ -22,6 +24,22 @@ function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
+/**
+ * The sidebar for a third-party tap row in Search. The package is not in the
+ * search index, so there is no record to show yet: say where it comes from
+ * and who stands behind it, which is what the install confirmation asks about.
+ */
+function tapRowDetail(tap: string, name: string, note?: string) {
+  const owner = tap.split("/")[0];
+  return (
+    <List.Item.Detail
+      markdown={[note, `**${name}** comes from **${tap}**, maintained by ${owner}, not Homebrew.`]
+        .filter(Boolean)
+        .join("\n\n")}
+    />
+  );
+}
+
 export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const [searchText, setSearchText] = useState(props.arguments.search ?? "");
   const [page, setPage] = useState(0);
@@ -29,8 +47,19 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
   const [sortByPopularity, setSortByPopularity] = useCachedState("sort-by-popularity", false);
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { showMetadataPanel } = getPreferenceValues<Preferences.Search>();
-  // The preference is the default; the action toggles it for this session.
-  const [showDetails, setShowDetails] = useState(showMetadataPanel);
+  // The preference is the default. The action's choice is remembered with the
+  // preference it overrode, and a changed preference discards it.
+  const [sidebar, setSidebar] = useCachedState("show-sidebar-search", {
+    preference: showMetadataPanel,
+    show: showMetadataPanel,
+  });
+  const showDetails = sidebar.preference === showMetadataPanel ? sidebar.show : showMetadataPanel;
+  useEffect(() => {
+    // Drop a choice made under a different preference, or returning to that
+    // preference would bring it back.
+    if (sidebar.preference !== showMetadataPanel)
+      setSidebar({ preference: showMetadataPanel, show: showMetadataPanel });
+  }, [sidebar.preference, showMetadataPanel]);
 
   // Install rankings for the whole index, loaded only when the sort is on.
   const {
@@ -124,13 +153,27 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
     const target = parseTapName(searchText);
     return target?.package ? { ...target, package: target.package } : undefined;
   }, [searchText]);
-  const tapPackageInstalled =
-    tapTarget !== undefined &&
+  const installedFromTap = (tap: string, fullName: string) =>
     installed !== undefined &&
     [...installed.formulae.values(), ...installed.casks.values()].some(
-      (item) => item.tap === tapTarget.tap && brewIdentifier(item) === tapTarget.package,
+      (item) => item.tap === tap && brewIdentifier(item) === fullName,
     );
-  const tapName = tapTarget?.package.split("/").pop();
+  const tapPackageInstalled = tapTarget !== undefined && installedFromTap(tapTarget.tap, tapTarget.package);
+  const tapName = tapTarget && packageNameOf(tapTarget);
+  // Is that package really in that tap? Checked with a git read before the tap
+  // is added, so a typo offers the tap's real packages instead of failing after
+  // the tap is added. Any other answer keeps the single row. An installed
+  // package needs no check: its tap is already added.
+  const tapPreflight = useTapPreflight(tapPackageInstalled ? undefined : tapTarget, searchText);
+  const toggleSidebar = () => setSidebar({ preference: showMetadataPanel, show: !showDetails });
+  const viewSection = (
+    <ActionPanel.Section title="View">
+      <ToggleSidebarAction showing={showDetails} onToggleSidebar={toggleSidebar} />
+    </ActionPanel.Section>
+  );
+  const missing =
+    typeof tapPreflight === "object" && tapPreflight.kind === "missing-package" ? tapPreflight : undefined;
+  const suggestions = useMemo(() => (missing ? closestPackages(missing.contents, missing.package) : []), [missing]);
 
   // Track toast reference for updating progress
   const initToastRef = useRef<Toast | null>(null);
@@ -210,24 +253,77 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
   return (
     <FormulaList
       leadingSection={
-        tapTarget && (
-          <List.Section title="Third-Party Tap">
-            <List.Item
-              id="install-from-tap"
-              title={tapName ?? tapTarget.package}
-              subtitle={`from ${tapTarget.tap}`}
-              icon={tapPackageInstalled ? UP_TO_DATE_ICON : Icon.Plus}
-              accessories={tapPackageInstalled ? [{ tag: { value: "Installed", color: STATUS_COLOR.ok } }] : undefined}
-              actions={
-                <ActionPanel>
-                  {!tapPackageInstalled && (
-                    <InstallFromTapAction target={tapTarget} onAction={() => revalidateInstalled()} />
+        tapTarget && missing ? (
+          <List.Section title={`${tapTarget.tap} Has No ${missing.package}`}>
+            {suggestions.map((item) => {
+              const isInstalled = installedFromTap(tapTarget.tap, `${tapTarget.tap}/${item.name}`);
+              return (
+                <List.Item
+                  key={`${item.cask ? "cask" : "formula"}:${item.name}`}
+                  id={`install-from-tap:${item.cask ? "cask" : "formula"}:${item.name}`}
+                  title={item.name}
+                  subtitle={showDetails ? undefined : `${item.cask ? "cask " : ""}from ${tapTarget.tap}`}
+                  detail={tapRowDetail(
+                    tapTarget.tap,
+                    item.name,
+                    `**${tapTarget.tap}** has no package named **${missing.package}**.`,
                   )}
-                  <Action.CopyToClipboard title="Copy Package Name" content={tapTarget.package} />
-                </ActionPanel>
-              }
-            />
+                  icon={isInstalled ? UP_TO_DATE_ICON : Icon.Plus}
+                  accessories={isInstalled ? [{ tag: { value: "Installed", color: STATUS_COLOR.ok } }] : undefined}
+                  actions={
+                    <ActionPanel>
+                      {!isInstalled && (
+                        <InstallFromTapAction
+                          target={installTargetFor(tapTarget, item.name, item.cask)}
+                          onAction={() => revalidateInstalled()}
+                        />
+                      )}
+                      {viewSection}
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+            {suggestions.length === 0 && (
+              // A tap that only adds brew commands has nothing to suggest.
+              <List.Item
+                id="install-from-tap:none"
+                title="No formulae or casks"
+                subtitle={showDetails ? undefined : `${tapTarget.tap} only adds brew commands`}
+                detail={tapRowDetail(
+                  tapTarget.tap,
+                  missing.package,
+                  `**${tapTarget.tap}** has no package named **${missing.package}**, and no formulae or casks at all.`,
+                )}
+                icon={Icon.Terminal}
+                actions={<ActionPanel>{viewSection}</ActionPanel>}
+              />
+            )}
           </List.Section>
+        ) : (
+          tapTarget && (
+            <List.Section title="Third-Party Tap">
+              <List.Item
+                id="install-from-tap"
+                title={tapName ?? tapTarget.package}
+                subtitle={showDetails ? undefined : `from ${tapTarget.tap}`}
+                detail={tapRowDetail(tapTarget.tap, tapName ?? tapTarget.package)}
+                icon={tapPackageInstalled ? UP_TO_DATE_ICON : Icon.Plus}
+                accessories={
+                  tapPackageInstalled ? [{ tag: { value: "Installed", color: STATUS_COLOR.ok } }] : undefined
+                }
+                actions={
+                  <ActionPanel>
+                    {!tapPackageInstalled && (
+                      <InstallFromTapAction target={tapTarget} onAction={() => revalidateInstalled()} />
+                    )}
+                    <Action.CopyToClipboard title="Copy Package Name" content={tapTarget.package} />
+                    {viewSection}
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          )
         )
       }
       formulae={formulae}
@@ -262,7 +358,7 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
       onAction={() => revalidateInstalled()}
       dataFetched={loadingState.phase === "complete"}
       showMetadataPanel={showDetails}
-      onToggleSidebar={() => setShowDetails((current) => !current)}
+      onToggleSidebar={toggleSidebar}
       showDescription={showDescription}
       onToggleDescription={() => setShowDescription((current) => !current)}
       sortByPopularity={sortByPopularity}

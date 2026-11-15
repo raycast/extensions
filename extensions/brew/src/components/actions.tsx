@@ -403,15 +403,11 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
     return false;
   }
 
+  // The title names the tap; the message says who stands behind it and what
+  // gets trusted. That adding the tap comes first is implied by "from".
   const confirmed = await confirmAlert({
-    title: `Install ${name}?`,
-    message: [
-      `From ${target.tap}, maintained by ${user}, not Homebrew.`,
-      tapped ? undefined : "Homebrew adds the tap first.",
-      `Only ${name} is trusted, not the rest of the tap.`,
-    ]
-      .filter(Boolean)
-      .join(" "),
+    title: `Install ${name} from ${target.tap}?`,
+    message: `Maintained by ${user}, not Homebrew. Only ${name} will be trusted.`,
     primaryAction: { title: "Install", style: Alert.ActionStyle.Default },
     dismissAction: { title: "Cancel" },
   });

@@ -61,6 +61,29 @@ export interface TapTarget {
   cask?: true;
 }
 
+/** The bare package name a target names: `rcc` for `thousandflowers/tap/rcc`. */
+export function packageNameOf(target: TapTarget): string | undefined {
+  return target.package?.split("/").pop();
+}
+
+/** The owner of a `user/repo` tap name. */
+export function tapOwner(tapName: string): string {
+  return tapName.split("/")[0];
+}
+
+/**
+ * The target that installs `name` from a tap. Built field by field rather than
+ * by spreading `tap`, which would carry a pasted `--cask` onto a formula.
+ */
+export function installTargetFor(tap: TapTarget, name: string, cask: boolean): TapTarget & { package: string } {
+  return {
+    tap: tap.tap,
+    ...(tap.url ? { url: tap.url } : {}),
+    package: `${tap.tap}/${name}`,
+    ...(cask ? { cask: true as const } : {}),
+  };
+}
+
 /**
  * Parse `brew tap-info --json=v1 --installed`, keeping only taps that are
  * actually tapped. Under the JSON API brew still reports homebrew/core and
@@ -312,13 +335,18 @@ export async function brewFetchTapPackages(
   };
 }
 
-/** Whether the tap is added on this Mac. `tap-info` answers for one that is not. */
-export async function brewIsTapped(tapName: string): Promise<boolean> {
+/** One tap's `tap-info` record. brew answers for a tap that is not added, with `installed: false`. */
+export async function brewFetchTap(tapName: string, cancel?: AbortSignal): Promise<Tap | undefined> {
   const { stdout } = await execBrew(`tap-info --json=v1 ${shellQuote(tapName)}`, {
+    signal: cancel,
     env: { HOMEBREW_NO_AUTO_UPDATE: "1" },
   });
   const [tap] = JSON.parse(stdout) as Tap[];
-  return tap?.installed === true;
+  return tap;
+}
+
+export async function brewIsTapped(tapName: string): Promise<boolean> {
+  return (await brewFetchTap(tapName))?.installed === true;
 }
 
 /**
@@ -366,11 +394,27 @@ export interface TapInstalls {
  * only as their dependencies, and the formula step then fails on a package
  * that is already gone, so the tap is never removed.
  */
-export function untapCommands(tapName: string, installed: TapInstalls): string[] {
-  const commands: string[] = [];
+export function untapSteps(
+  tapName: string,
+  installed: TapInstalls,
+  opts: { untrust?: boolean } = {},
+): { command: string; label: string }[] {
+  const steps: { command: string; label: string }[] = [];
   const uninstall = (...args: string[]) => `HOMEBREW_NO_AUTOREMOVE=1 ${brewTapCommand("uninstall", ...args)}`;
-  if (installed.casks.length > 0) commands.push(uninstall("--cask", ...installed.casks));
-  if (installed.formulae.length > 0) commands.push(uninstall("--formula", ...installed.formulae));
-  commands.push(brewTapCommand("untap", tapName));
-  return commands;
+  if (installed.casks.length > 0) {
+    steps.push({ command: uninstall("--cask", ...installed.casks), label: "Uninstalling casks" });
+  }
+  if (installed.formulae.length > 0) {
+    steps.push({ command: uninstall("--formula", ...installed.formulae), label: "Uninstalling formulae" });
+  }
+  // brew keeps trust after an untap. Cleared first, while the tap is still
+  // added: a custom-remote tap is recorded by URL, resolved through the tap.
+  if (opts.untrust) steps.push({ command: brewTapCommand("untrust", "--tap", tapName), label: "Clearing trust" });
+  steps.push({ command: brewTapCommand("untap", tapName), label: "Removing the tap" });
+  return steps;
+}
+
+/** `untapSteps` without the labels. */
+export function untapCommands(tapName: string, installed: TapInstalls, opts: { untrust?: boolean } = {}): string[] {
+  return untapSteps(tapName, installed, opts).map((step) => step.command);
 }

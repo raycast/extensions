@@ -1,6 +1,23 @@
 # Brew Changelog
 
-## [Handle missing package descriptions] - {PR_MERGE_DATE}
+## [Tap checks before adding, and readable warnings] - {PR_MERGE_DATE}
+
+- New: pasting a tap or repository into Manage Taps shows what it holds before you add it. A repository that isn't a Homebrew tap says so, and offers the install its README names or a tap from the same owner
+- New: when a paste names a package, or the tap has only one, the first row installs it after one confirmation
+- Improved: once the check finishes, a misspelled `user/repo/name` lists the tap's real packages, in Search and Manage Taps
+- Improved: typing `user/name` for a package rather than a tap, such as `thousandflowers/rcc`, offers to install it from the owner's own tap when it is there
+- Improved: Add Tap trusts a tap only once brew lists packages in it. Adding an empty tap doesn't trust it, and Manage Taps shows "No packages found" with Remove Tap
+- Improved: a shorter confirmation when installing from a tap, and progress that names each step
+- Improved: after an install from Manage Taps, the list moves to that tap's section
+- Changed: Remove Tap also clears the tap's trust, so adding it again asks first
+- Improved: a suggested package that is already installed opens its details instead of offering Install again
+- Improved: trusting a tap with no packages asks first, since trust covers whatever it adds later
+- Improved: the sidebar action says Show Sidebar or Hide Sidebar, and each list remembers the choice
+- Improved: shorter preference descriptions, code on error screens is marked as text, and Debug is now Show Debug Info
+- Fixed: a Disabled or Deprecated row shows a label, such as "Fails Gatekeeper Check", instead of Homebrew's internal code, such as `fails_gatekeeper_check`
+- Improved: the Disabled or Deprecated row shows a short reason, such as "Requires a signed download URL". Show Details gives the full reason, the date and any replacement
+
+## [Handle missing package descriptions] - 2026-11-14
 
 - Omit missing formula and cask descriptions from list subtitles instead of passing `null` to the UI.
 
@@ -110,7 +127,7 @@
 ## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01
 
 - **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
-- A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
+- A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterward
 - A pin is a lock, matching brew's own behavior: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
 - Refreshing mid-review (⌘R) keeps the selections you have already made; a formula pinned outside the extension is deselected on refresh — the lock always wins
 - Casks are selectable exactly like formulae. Cask _pinning_ (the lock semantics) ships in a follow-up

@@ -420,7 +420,7 @@ function AdoptRow(props: {
             signal,
             {
               packageName: candidate.token,
-              // ponytail: generous fixed ceiling. The default kills brew after
+              // A generous fixed ceiling. The default kills brew after
               // 5 minutes of silence, and comparing a large bundle with
               // `diff --recursive` can be that quiet. Raise it if a real
               // adoption ever hits it.

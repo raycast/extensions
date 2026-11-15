@@ -121,10 +121,10 @@ export async function hasSearchCache(): Promise<boolean> {
  * Fetch all installed packages with full metadata.
  */
 export async function brewFetchInstalled(useCache: boolean, cancel?: AbortSignal): Promise<InstalledMap | undefined> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   const results = await brewFetchInstallableResults(useCache, cancel);
   const mapped = brewMapInstalled(results);
-  const duration = Date.now() - startTime;
+  const duration = Math.round(performance.now() - startTime);
 
   if (mapped) {
     brewLogger.log("Installed packages fetched", {
@@ -160,10 +160,10 @@ export async function brewFetchInstallableResults(
   }
 
   async function updateCache(): Promise<InstallableResults> {
-    const startTime = Date.now();
+    const startTime = performance.now();
     const info = await installed();
     const parsed = JSON.parse(info) as InstallableResults;
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
 
     try {
       await fs.writeFile(installedCachePath, info);
@@ -396,7 +396,7 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
  * waiting shows no update badge until something runs `brew update`.
  *
  * The refresh is unavoidably global: Homebrew has no per-tap, let alone
- * per-formula, update. What is scoped is the re-read afterwards — one
+ * per-formula, update. What is scoped is the re-read afterward — one
  * `brew info` for the package the user asked about, rather than the full
  * `brew outdated` sweep the Check for Updates command runs.
  *
@@ -923,13 +923,13 @@ export async function fetchCaskItems(entries: IndexEntry[]): Promise<Cask[]> {
  * Much faster than fetching all installed packages.
  */
 export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): Promise<Formula | undefined> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   brewLogger.log("Fetching formula info", { name });
 
   try {
     const output = await execBrew(`info --json=v2 ${name}`, { signal: cancel });
     const results = JSON.parse(output.stdout) as InstallableResults;
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
 
     if (results.formulae.length > 0) {
       brewLogger.log("Formula info fetched", { name, durationMs: duration });
@@ -949,7 +949,7 @@ export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): 
  * Much faster than fetching all installed packages.
  */
 export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Promise<Cask | undefined> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   brewLogger.log("Fetching cask info", { token });
 
   try {
@@ -957,7 +957,7 @@ export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Pr
     // same-named FORMULA (cli/named_args.rb), returning an empty `casks` array.
     const output = await execBrew(`info --json=v2 --cask ${token}`, { signal: cancel });
     const results = JSON.parse(output.stdout) as InstallableResults;
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
 
     if (results.casks.length > 0) {
       brewLogger.log("Cask info fetched", { token, durationMs: duration });

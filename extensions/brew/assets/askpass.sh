@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Tell the extension a password was actually asked for. The dialog takes focus
-# from Raycast, so a success toast shown afterwards can land in a window the
+# from Raycast, so a success toast shown afterward can land in a window the
 # user has left; the caller checks this file to decide how to report success.
 if [ -n "$BREW_ASKPASS_MARKER" ]; then touch "$BREW_ASKPASS_MARKER"; fi
 

@@ -24,22 +24,24 @@ import {
   InstalledMap,
   parseTapName,
   tapCommandName,
-  untapCommands,
+  untapSteps,
+  shortUrl,
   type Cask,
   type Formula,
   type Tap,
   type TapInstalls,
   type TapStatus,
-  type TapTarget,
 } from "./utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { CaskListItem, FormulaListItem } from "./components/list";
 import { RefreshAction, ToggleSidebarAction } from "./components/actionPanels";
 import { STATUS_COLOR, WARNING_ICON } from "./components/palette";
+import { TapAddSection } from "./components/tapAdd";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewMajorVersion } from "./hooks/useBrewMajorVersion";
 import { isInstalled } from "./hooks/useBrewSearch";
 import { useBrewTaps } from "./hooks/useBrewTaps";
+import { useTapPreflight } from "./hooks/useTapPreflight";
 
 const ALL_TAPS = "all";
 
@@ -49,7 +51,8 @@ function provides(tap: Tap): string {
     tap.formula_names.length > 0 ? formatCount(tap.formula_names.length, "formula", "formulae") : undefined,
     tap.cask_tokens.length > 0 ? formatCount(tap.cask_tokens.length, "cask") : undefined,
   ].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : "Commands only";
+  if (parts.length > 0) return parts.join(", ");
+  return (tap.command_files ?? []).length > 0 ? "Commands only" : "No packages";
 }
 
 function commandNames(tap: Tap): string[] {
@@ -58,13 +61,7 @@ function commandNames(tap: Tap): string[] {
 
 /** The web page for a tap's remote, when it is one. `updatest/tap` is a `.git` URL. */
 function repositoryUrl(tap: Tap): string | undefined {
-  return tap.remote?.startsWith("https://") ? tap.remote.replace(/\.git$/, "") : undefined;
-}
-
-/** Where a tap is cloned from, as a person would read it. */
-function tapSource(target: TapTarget): string {
-  const [user, repo] = target.tap.split("/");
-  return (target.url ?? `github.com/${user}/homebrew-${repo}`).replace(/^https:\/\//, "");
+  return tap.remote?.startsWith("https://") ? `https://${shortUrl(tap.remote)}` : undefined;
 }
 
 /**
@@ -113,36 +110,17 @@ function installedFrom(tap: Tap, installed: InstalledMap | undefined): TapInstal
   return { formulae: from(installed.formulae.values()), casks: from(installed.casks.values()) };
 }
 
-async function addTap(target: TapTarget, trustSupported: boolean, onDone: () => void) {
-  const user = target.tap.split("/")[0];
-  const commands = [brewTapCommand("tap", target.tap, ...(target.url ? [target.url] : []))];
-  if (trustSupported) commands.push(brewTapCommand("trust", "--tap", target.tap));
-  // Refresh after any attempt: the tap can be added although trusting it then fails.
-  let started = false;
-  await confirmAndRun(commands, {
-    beforeRun: async () => (started = true),
-    title: `Add ${target.tap}?`,
-    showCommands: false,
-    confirmTitle: "Add Tap",
-    message: trustSupported
-      ? `Maintained by ${user}, not Homebrew. Adding also trusts it, which lets Homebrew run anything it provides, now or later.`
-      : `Maintained by ${user}, not Homebrew. Adding it lets Homebrew install anything it provides.`,
-    stepNoun: "step",
-    labels: {
-      progress: `Adding ${target.tap}`,
-      success: `Added ${target.tap}`,
-      failure: `Failed to add ${target.tap}`,
-    },
-  });
-  if (started) onDone();
-}
-
 async function trustTap(tap: Tap, onDone: () => void) {
+  // Trust covers whatever the tap adds later, so trusting an empty one is
+  // trusting only what its owner pushes next. Say so before it happens.
+  const empty = provides(tap) === "No packages";
   const ok = await confirmAndRun([brewTapCommand("trust", "--tap", tap.name)], {
-    title: `Trust ${tap.name}?`,
+    title: empty ? "Trust a Tap with No Packages?" : `Trust ${tap.name}?`,
     showCommands: false,
-    confirmTitle: "Trust",
-    message: `Maintained by ${tap.user}, not Homebrew. Trusting it lets Homebrew run anything it provides (${provides(tap).toLowerCase()}), now or later.`,
+    confirmTitle: empty ? "Proceed" : "Trust",
+    message: empty
+      ? `You're about to trust ${tap.name}, which has no packages. Homebrew will run anything ${tap.user} adds to it later.`
+      : `Maintained by ${tap.user}, not Homebrew. Trusting it lets Homebrew run anything it provides (${provides(tap).toLowerCase()}), now or later.`,
     labels: {
       progress: `Trusting ${tap.name}`,
       success: `Trusted ${tap.name}`,
@@ -177,23 +155,33 @@ async function untap(tap: Tap, installed: TapInstalls | undefined, onDone: () =>
   // uninstalled and a formula then fails, a stale list would make a retry try
   // to uninstall the casks again, fail there, and never reach the formula.
   let started = false;
-  await confirmAndRun(untapCommands(tap.name, known), {
-    beforeRun: async () => (started = true),
-    title: uninstallFirst
-      ? `Uninstall ${formatCount(uninstalls.length, "Package")} and Remove ${tap.name}?`
-      : `Remove ${tap.name}?`,
-    message: uninstallFirst
-      ? `Homebrew will not remove a tap while packages from it are installed, so these are uninstalled first:\n${uninstalls.join("\n")}`
-      : "Removes the local copy of this tap. Its packages will no longer appear in Homebrew.",
-    showCommands: false,
-    stepNoun: "step",
-    confirmTitle: uninstallFirst ? "Uninstall and Remove" : "Remove",
-    labels: {
-      progress: `Removing ${tap.name}`,
-      success: `Removed ${tap.name}`,
-      failure: `Failed to remove ${tap.name}`,
+  // Homebrew 7 reports `trusted`; trust there is reset along with the tap, so
+  // adding it again later asks again instead of trusting it silently.
+  const untrust = tap.trusted !== undefined;
+  const steps = untapSteps(tap.name, known, { untrust });
+  await confirmAndRun(
+    steps.map((step) => step.command),
+    {
+      beforeRun: async () => (started = true),
+      title: uninstallFirst
+        ? `Uninstall ${formatCount(uninstalls.length, "Package")} and Remove ${tap.name}?`
+        : `Remove ${tap.name}?`,
+      message: uninstallFirst
+        ? `Homebrew will not remove a tap while packages from it are installed, so these are uninstalled first:\n${uninstalls.join("\n")}${untrust ? "\n\nIts trust setting is reset too." : ""}`
+        : untrust
+          ? "Remove the local copy of this tap with its packages and reset its trust setting."
+          : "Remove the local copy of this tap with its packages.",
+      showCommands: false,
+      stepNoun: "step",
+      stepLabels: steps.map((step) => step.label),
+      confirmTitle: uninstallFirst ? "Uninstall and Remove" : "Remove",
+      labels: {
+        progress: `Removing ${tap.name}`,
+        success: `Removed ${tap.name}`,
+        failure: `Failed to remove ${tap.name}`,
+      },
     },
-  });
+  );
   if (started) onDone();
 }
 
@@ -255,14 +243,21 @@ function CommandsItem(props: {
   return (
     <List.Item
       id={`commands:${tap.name}`}
-      title="No formulae or casks"
+      title={commands.length > 0 ? "No formulae or casks" : "No packages found"}
       subtitle={props.showMetadataPanel ? undefined : commands.length > 0 ? `Adds ${commands.join(", ")}` : undefined}
-      icon={Icon.Terminal}
+      icon={commands.length > 0 ? Icon.Terminal : Icon.Box}
       detail={
         <List.Item.Detail
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title={tap.name} text="Adds brew commands and no formulae or casks" />
+              <List.Item.Detail.Metadata.Label
+                title={tap.name}
+                text={
+                  commands.length > 0
+                    ? "Adds brew commands and no formulae or casks"
+                    : "Holds no formulae, casks or commands. Remove it if you don't need it."
+                }
+              />
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Commands">
                 {commands.map((command) => (
@@ -270,9 +265,7 @@ function CommandsItem(props: {
                 ))}
               </List.Item.Detail.Metadata.TagList>
               {trusted && <List.Item.Detail.Metadata.Label title="Trust" text={trusted} />}
-              {tap.remote && (
-                <List.Item.Detail.Metadata.Label title="Source" text={tap.remote.replace(/^https:\/\//, "")} />
-              )}
+              {tap.remote && <List.Item.Detail.Metadata.Label title="Source" text={shortUrl(tap.remote)} />}
               {tap.last_commit && <List.Item.Detail.Metadata.Label title="Last Commit" text={tap.last_commit} />}
             </List.Item.Detail.Metadata>
           }
@@ -300,7 +293,7 @@ function CommandsItem(props: {
             onChange={props.onChange}
           />
           <ActionPanel.Section title="View">
-            <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />
+            <ToggleSidebarAction showing={props.showMetadataPanel} onToggleSidebar={props.onToggleSidebar} />
             <RefreshAction onRefresh={props.onChange} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -317,7 +310,10 @@ function ManageTapsContent(props: { initialTap?: string }) {
   const [searchText, setSearchText] = useState(props.initialTap ?? "");
   const [tapFilter, setTapFilter] = useState(ALL_TAPS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showMetadataPanel, setShowMetadataPanel] = useState(false);
+  const [showMetadataPanel, setShowMetadataPanel] = useCachedState("show-sidebar-taps", false);
+  // The add rows open with the sidebar, since what the check found is their
+  // point; their own toggle hides it. Separate from the package rows' toggle.
+  const [showAddPanel, setShowAddPanel] = useCachedState("show-add-panel", true);
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data, revalidate } = useBrewTaps();
   const { data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
@@ -335,6 +331,7 @@ function ManageTapsContent(props: { initialTap?: string }) {
   const known = target && taps.find((tap) => tap.name === target.tap);
   const offerAdd = target !== undefined && !known && data !== undefined;
   const query = target ? "" : searchText.trim().toLowerCase();
+  const preflight = useTapPreflight(offerAdd ? target : undefined, searchText);
 
   // A typed tap narrows to that tap (or offers to add it); anything else
   // searches package names and descriptions, and a tap-name hit keeps the
@@ -375,7 +372,7 @@ function ManageTapsContent(props: { initialTap?: string }) {
       onSearchTextChange={setSearchText}
       onSelectionChange={setSelectedId}
       filtering={false}
-      isShowingDetail={showMetadataPanel}
+      isShowingDetail={offerAdd && preflight !== undefined ? showAddPanel : showMetadataPanel}
       searchBarPlaceholder="Search packages and taps, or type user/repo to add…"
       searchBarAccessory={
         <List.Dropdown tooltip="Tap" value={tapFilter} onChange={setTapFilter}>
@@ -404,29 +401,30 @@ function ManageTapsContent(props: { initialTap?: string }) {
         />
       )}
 
-      {offerAdd && target && (
-        <List.Section title="Add">
-          <List.Item
-            id="add"
-            title={`Add ${target.tap}`}
-            subtitle={tapSource(target)}
-            icon={Icon.Plus}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Add Tap"
-                  icon={Icon.Plus}
-                  onAction={() =>
-                    addTap(target, trustSupported, () => {
-                      setSearchText(target.tap);
-                      onChange();
-                    })
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
+      {offerAdd && target && preflight && (
+        <TapAddSection
+          target={target}
+          preflight={preflight}
+          knownTaps={taps.map((tap) => tap.name)}
+          trustSupported={trustSupported}
+          onAdded={(tap) => {
+            setSearchText(tap);
+            onChange();
+          }}
+          onInstalled={onChange}
+          installed={installed}
+          isInstalled={rowProps.isInstalled}
+          showDetail={showAddPanel}
+          viewActions={
+            <ActionPanel.Section title="View">
+              <ToggleSidebarAction
+                showing={showAddPanel}
+                onToggleSidebar={() => setShowAddPanel((current) => !current)}
+              />
+              <RefreshAction onRefresh={onChange} />
+            </ActionPanel.Section>
+          }
+        />
       )}
 
       {sections.map(({ tap, formulae, casks, commandsOnly }) => (
