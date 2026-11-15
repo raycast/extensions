@@ -1,6 +1,6 @@
 # Premier League Changelog
 
-## [English-Only Commentary] - {PR_MERGE_DATE}
+## [English-Only Commentary] - 2026-11-15
 
 - Fix Match Commentary listing every event three times, in English, Spanish and Arabic. The feed now carries all three for recent matches, so commentary is requested in English only.
 - Fix Lineup showing nothing for matches whose formation isn't announced yet.
