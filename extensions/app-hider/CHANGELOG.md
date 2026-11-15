@@ -8,5 +8,5 @@
 - Remove hidden apps from LaunchServices and refresh Launchpad, using the right method for each macOS version
 - Offer to quit running apps before moving them
 - Move system-owned apps (e.g. from the App Store) with administrator rights, after confirmation
-- Roll back moves if the restore record can't be saved
+- Save the restore record before hiding an app, and repair records left by an interrupted hide or restore
 - Detect hidden apps that were deleted or moved manually

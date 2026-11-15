@@ -42,7 +42,7 @@ App Hider moves selected `.app` bundles out of `/Applications` into a hidden, Sp
 - ▶️ **Launch hidden apps** straight from Raycast
 - 🛑 **Safe with running apps**: offers to quit an app before moving it
 - 🔐 **App Store apps**: system-owned bundles are moved with your administrator password, after confirmation
-- ↩️ **Never loses an app**: every move is rolled back if the restore record can't be saved
+- ↩️ **Never loses an app**: the restore record is saved before an app is hidden, and records left by an interrupted hide or restore are repaired automatically the next time you open the list
 - 🧹 Detects hidden apps that were deleted or moved manually and lets you clean up their records
 
 ## Installation
