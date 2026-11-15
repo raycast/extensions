@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Clipboard, Grid, Icon, Color, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import type { Airline } from "soaring-symbols";
-import { earlierMarks, getAssetTiles, markTitle } from "../utils/airlines";
+import type { Airline, Alliance } from "soaring-symbols";
+import { allianceTiles, type AssetTile, earlierMarks, getAssetTiles, markTitle } from "../utils/airlines";
 import { getSVGContent } from "../utils/fetch";
 
 const slugToName = (slug: string): string => {
@@ -22,10 +22,16 @@ const getDownloadsDir = (): string => {
   return path.join(home, "Downloads");
 };
 
-type Tile = ReturnType<typeof getAssetTiles>[number];
-
-export default function AirlineAssets(airline: Airline) {
-  const renderTile = ({ variant, url: source, fileName, mono }: Tile) => {
+// A grid of SVG tiles, each with copy and download actions: the current
+// marks, then any older ones in a section each
+function MarkGrid({
+  navigationTitle,
+  sections,
+}: {
+  navigationTitle: string;
+  sections: { key: string; title: string; tiles: AssetTile[] }[];
+}) {
+  const renderTile = ({ variant, url: source, fileName, mono }: AssetTile) => {
     const tintColor = mono ? Color.PrimaryText : undefined;
 
     return (
@@ -90,30 +96,39 @@ export default function AirlineAssets(airline: Airline) {
     );
   };
 
-  // With older marks, the current ones get a section of their own above them,
-  // newest first; without, the grid stays a plain list of tiles
-  const history = earlierMarks(airline);
-  const current = getAssetTiles(airline).map(renderTile);
-  const children = history.length
-    ? [
-        <Grid.Section key="current" title="Current">
-          {current}
-        </Grid.Section>,
-        ...history.map((mark) => (
-          <Grid.Section key={mark.since} title={markTitle(airline, mark)}>
-            {getAssetTiles(airline, mark).map(renderTile)}
+  // With older marks, the current ones get a section of their own above them;
+  // without, the grid stays a plain list of tiles
+  const children =
+    sections.length > 1
+      ? sections.map((section) => (
+          <Grid.Section key={section.key} title={section.title}>
+            {section.tiles.map(renderTile)}
           </Grid.Section>
-        )),
-      ]
-    : current;
+        ))
+      : (sections[0]?.tiles ?? []).map(renderTile);
 
+  return <Grid columns={4} inset={Grid.Inset.Small} throttle navigationTitle={navigationTitle} children={children} />;
+}
+
+export default function AirlineAssets(airline: Airline) {
+  // Older marks newest first, below the current ones
+  const sections = [
+    { key: "current", title: "Current", tiles: getAssetTiles(airline) },
+    ...earlierMarks(airline).map((mark) => ({
+      key: String(mark.since),
+      title: markTitle(airline, mark),
+      tiles: getAssetTiles(airline, mark),
+    })),
+  ];
+
+  return <MarkGrid navigationTitle={`${airline.name} | Assets`} sections={sections} />;
+}
+
+export function AllianceAssets(alliance: Alliance) {
   return (
-    <Grid
-      columns={4}
-      inset={Grid.Inset.Small}
-      throttle
-      navigationTitle={`${airline.name} | Assets`}
-      children={children}
+    <MarkGrid
+      navigationTitle={`${alliance.name} | Assets`}
+      sections={[{ key: "current", title: "Current", tiles: allianceTiles(alliance) }]}
     />
   );
 }
