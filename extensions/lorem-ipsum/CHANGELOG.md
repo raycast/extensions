@@ -1,6 +1,6 @@
 # Lorem Ipsum Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2026-11-15
 
 - New `Generate Markdown` command that generates placeholder content as a Markdown document (headings, paragraphs, lists, blockquotes).
 - New `Generate HTML` command that generates placeholder content as an HTML document.
