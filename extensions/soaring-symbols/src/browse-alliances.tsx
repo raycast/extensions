@@ -11,7 +11,12 @@ import { allianceIcon } from "./components/alliances";
 
 export default function BrowseAlliances() {
   const { isLoading, data: alliances = [] } = useCachedPromise(fetchAlliances);
-  const { data: airlines = [] } = useCachedPromise(fetchAirlines);
+  const { isLoading: airlinesLoading, data: airlines = [] } = useCachedPromise(fetchAirlines);
+
+  // A pushed view keeps the props it was pushed with, so hand the member
+  // grid these lists only once the airlines have loaded; before that it
+  // loads its own instead of staying empty
+  const lists = airlinesLoading ? undefined : { airlines, alliances };
 
   // How many of each one's airlines the collection has, as on the website
   const counts = useMemo(
@@ -33,7 +38,7 @@ export default function BrowseAlliances() {
               <Action.Push
                 title="Show Member Airlines"
                 icon={Icon.AirplaneFilled}
-                target={<AirlineGrid alliance={alliance.name} lists={{ airlines, alliances }} />}
+                target={<AirlineGrid alliance={alliance.name} lists={lists} />}
               />
               {allianceMark(alliance) && (
                 <Action.Push
@@ -51,7 +56,12 @@ export default function BrowseAlliances() {
   };
 
   return (
-    <Grid isLoading={isLoading} columns={4} inset={Grid.Inset.Large} searchBarPlaceholder="Search alliances...">
+    <Grid
+      isLoading={isLoading || airlinesLoading}
+      columns={4}
+      inset={Grid.Inset.Large}
+      searchBarPlaceholder="Search alliances..."
+    >
       <Grid.Section title="Alliances">{alliances.filter((a) => !a.defunct).map(renderItem)}</Grid.Section>
       <Grid.Section title="Disbanded">{alliances.filter((a) => a.defunct).map(renderItem)}</Grid.Section>
     </Grid>
