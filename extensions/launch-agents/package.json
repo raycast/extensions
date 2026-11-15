@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launch-agents",
   "title": "Launch Agents",
-  "description": "Manage Launch Agents",
+  "description": "Manage, load, unload and run your macOS launch agents",
   "icon": "launch-icon.png",
   "author": "stevensd2m",
   "license": "MIT",
@@ -17,19 +17,19 @@
     {
       "name": "index",
       "title": "Manage User Launch Agents",
-      "description": "Manage User Launch Agents",
+      "description": "View, load, unload, run and remove your user launch agents",
       "mode": "view"
     },
     {
       "name": "list-system-launch-agents",
       "title": "List System Launch Agents",
-      "description": "List System Launch Agents. This list will not have details available because it needs binary conversion to work.",
+      "description": "List system launch agents and run them now. Details are not available because these files need binary conversion.",
       "mode": "view"
     },
     {
       "name": "list-loaded-launch-agents",
       "title": "List Loaded Launch Agents",
-      "description": "List Loaded Launch Agents",
+      "description": "List loaded launch agents and run them now",
       "mode": "view"
     },
     {
