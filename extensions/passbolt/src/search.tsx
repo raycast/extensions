@@ -140,18 +140,14 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
     const toast = await showToast({ style: Toast.Style.Animated, title: "Decrypting password..." });
     try {
       const secretRes = await client.getSecret(resourceId);
-      // secretRes is usually { id, data, ... } or just the secret object
-      // The secret data is in `data` field usually, encrypted.
-      // Wait, `getSecret` returns `json.body`.
-      // Check API docs for `viewSecret`.
-      // Response body: { id, user_id, resource_id, data, ... }
-      // `data` is the encrypted secret.
-
       if (!secretRes || !secretRes.data) {
         throw new Error("No secret data found");
       }
 
-      const decrypted = await client.decryptSecret(secretRes.data);
+      const decrypted = await client.decryptSecret(
+        secretRes.data,
+        allItems.find((item) => item.id === resourceId)?.resource_type_id,
+      );
       await Clipboard.copy(decrypted);
       toast.style = Toast.Style.Success;
       toast.title = "Password copied!";

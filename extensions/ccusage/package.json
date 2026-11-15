@@ -439,7 +439,7 @@
     {
       "name": "get-usage-limits",
       "title": "Get Usage Limits",
-      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times"
+      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times. A window the plan does not have is null."
     }
   ],
   "ai": {

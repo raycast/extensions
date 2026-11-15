@@ -1,0 +1,157 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-inbox",
+  "title": "Agent Inbox",
+  "description": "Subscribe to Claude Code and Codex sessions, get notified when they need your input, and jump back to the conversation.",
+  "icon": "agent-inbox-icon.png",
+  "author": "silencerichard",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions.git",
+    "directory": "extensions/agent-inbox"
+  },
+  "homepage": "https://github.com/raycast/extensions/tree/main/extensions/agent-inbox#readme",
+  "bugs": {
+    "url": "https://github.com/raycast/extensions/issues"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "claude",
+    "codex",
+    "agent",
+    "session",
+    "inbox"
+  ],
+  "commands": [
+    {
+      "name": "subscribe-current",
+      "title": "Subscribe to Current Conversation",
+      "subtitle": "Agent Inbox",
+      "description": "Subscribe to the Claude Code or Codex conversation in the focused desktop window or terminal tab.",
+      "mode": "no-view",
+      "keywords": [
+        "subscribe",
+        "current",
+        "focused",
+        "window",
+        "conversation"
+      ]
+    },
+    {
+      "name": "all-sessions",
+      "title": "All Sessions",
+      "subtitle": "Agent Inbox",
+      "description": "Find and subscribe to Claude Code and Codex sessions, including past conversations.",
+      "mode": "view",
+      "keywords": [
+        "all sessions",
+        "search",
+        "history"
+      ]
+    },
+    {
+      "name": "inbox",
+      "title": "Subscriptions",
+      "subtitle": "Agent Inbox",
+      "description": "Follow subscribed sessions and jump back to conversations that need your input.",
+      "mode": "view",
+      "keywords": [
+        "subscriptions",
+        "subscribed",
+        "inbox"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Session Menu Bar",
+      "subtitle": "Agent Inbox",
+      "description": "Show subscribed sessions and the waiting count in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "subscriptions",
+        "refresh",
+        "menu bar"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "resumeTerminal",
+      "title": "Default Terminal",
+      "description": "Focus the original session when possible; otherwise resume in the selected terminal.",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iterm"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "title": "System Notifications",
+      "label": "Notify when a subscribed session needs attention",
+      "description": "Only unhandled requests in subscribed sessions trigger a notification. Open a command after changing this preference to sync the background collector.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "contentSearchEnabled",
+      "title": "Full-Text Search",
+      "label": "Index local conversation content",
+      "description": "Read user and agent messages and build a search index on this Mac. Nothing is uploaded. Turning this off stops indexing and queries without deleting the existing index.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build:cli": "esbuild cli/agent-inbox.ts --bundle --platform=node --format=esm --target=node18 --outfile=assets/agent-inbox.mjs --banner:js='#!/usr/bin/env node'",
+    "build": "npm run build:cli && ray build -e dist",
+    "bundle": "npm run build:cli && ray bundle --output dist/agent-inbox.rayext && zip -q -d dist/agent-inbox.rayext '*.map'",
+    "dev": "npm run build:cli && ray develop",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build:cli",
+    "test": "esbuild test/*.test.ts --bundle --platform=node --format=esm --outdir=.test-build --out-extension:.js=.mjs --log-level=warning && node --test .test-build/*.test.mjs",
+    "lint:code": "eslint src cli test && prettier --check src cli test",
+    "check": "npm test && npm run typecheck && npm run lint:code && npm run build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npm run build:cli && ray publish"
+  }
+}

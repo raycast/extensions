@@ -1,5 +1,12 @@
 # Linear Changelog
 
+## [Project Mentions and Mention Icons in AI Chat] - 2026-11-13
+
+- Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name. Each project shows its own icon and color.
+- Mentioning a project gives AI its status, lead, teams, members, and milestones.
+- **Issues** mentions show the issue title with its identifier beside it and its status icon in the state color.
+- **Users** mentions show just the name, with initials for people without an avatar.
+
 ## [Primary Action Preference] - 2026-10-29
 
 - Add a **Primary Action** preference to choose whether pressing Enter on an issue, project, document, or view shows its details or opens it in Linear.

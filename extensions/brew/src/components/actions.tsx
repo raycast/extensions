@@ -11,6 +11,7 @@ import {
   isCask,
   brewPin,
   brewUninstall,
+  brewUninstallCommand,
   brewUnpin,
   brewUpgradeAll,
   brewCheckForUpdate,
@@ -94,13 +95,15 @@ export function FormulaUninstallAction(props: {
    * knows better says so rather than letting a guard read the stale value.
    */
   pinned?: boolean;
+  /** Overrides Common.Remove, for a panel that swaps this with Run Uninstall in Terminal. */
+  shortcut?: Keyboard.Shortcut;
   onAction: (result: boolean) => void;
 }) {
   return (
     <Action
       title="Uninstall"
       icon={Icon.Trash}
-      shortcut={Keyboard.Shortcut.Common.Remove}
+      shortcut={props.shortcut ?? Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}
       onAction={async () => {
         const result = await uninstall(props.formula, false, props.pinned, props.onAction);
@@ -508,6 +511,46 @@ async function offerForcedUninstall(
   });
 }
 
+/**
+ * Whether `formula` is pinned, read from brew's pin directory rather than the
+ * cached payload, as FormulaUpgradeAction does. A caller's effective value wins
+ * and skips brew, because the review tracks live pin changes. Undefined means
+ * the pins could not be read, and a failure toast already said so.
+ */
+async function pinnedForUninstall(formula: Cask | Nameable, effectivePinned?: boolean): Promise<boolean | undefined> {
+  if (effectivePinned !== undefined) {
+    return effectivePinned;
+  }
+  const pins = await readPins("Uninstall");
+  return pins && isPinnedPackage(pins, brewIdentifier(formula), isCask(formula));
+}
+
+/**
+ * Run Uninstall in Terminal on ⌃X, where the terminal preference puts it.
+ * The panel shows it only when its pin state says unpinned, but a pin set from
+ * the CLI since the list loaded still makes brew refuse. So this reads brew's
+ * pins first, even when the caller passes `false`, and sends a pinned package
+ * to the in-Raycast Uninstall, which asks to unpin. A caller's `true` is a live
+ * pin and needs no read.
+ */
+export async function uninstallInTerminal(
+  formula: Cask | Nameable,
+  effectivePinned: boolean | undefined,
+  runCommandInTerminal: (command: string) => Promise<void>,
+  onAction: (result: boolean) => void,
+): Promise<void> {
+  const pinned = effectivePinned === true || (await pinnedForUninstall(formula));
+  if (pinned === undefined) {
+    return;
+  }
+  if (pinned) {
+    // Pass the pin just read, so uninstall does not ask brew again.
+    onAction(await uninstall(formula, false, true, onAction));
+    return;
+  }
+  await runCommandInTerminal(brewUninstallCommand(formula));
+}
+
 async function uninstall(
   formula: Cask | Nameable,
   force = false,
@@ -516,16 +559,10 @@ async function uninstall(
 ): Promise<boolean> {
   const name = brewName(formula);
   const cask = isCask(formula);
-  // Ask Homebrew, not the cached payload — see FormulaUpgradeAction. The caller's
-  // effective value still wins when it has one (a live pin change in the review).
   // Only ask about pins when the caller has not already decided.
-  let pinned = effectivePinned;
+  const pinned = await pinnedForUninstall(formula, effectivePinned);
   if (pinned === undefined) {
-    const pins = await readPins("Uninstall");
-    if (!pins) {
-      return false;
-    }
-    pinned = isPinnedPackage(pins, brewIdentifier(formula), cask);
+    return false;
   }
 
   // Homebrew refuses to uninstall a pinned package — casks in

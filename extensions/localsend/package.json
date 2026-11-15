@@ -219,6 +219,7 @@
     "@raycast/utils": "^2.2.2",
     "@types/archiver": "7.0.0",
     "archiver": "7.0.1",
+    "selfsigned": "^5.5.0",
     "undici": "^6.29.1"
   },
   "devDependencies": {

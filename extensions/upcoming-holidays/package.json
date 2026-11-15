@@ -39,6 +39,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "test": "node tests/run-tests.mjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

@@ -1,5 +1,23 @@
 # LeetCode Changelog
 
+## [Search Pagination and Fixes] - 2026-11-11
+
+- Load more search results as you scroll instead of stopping at the first 30, and reload from the first page if loading a page fails
+- Search by keyword with the query behind LeetCode's own problemset search, so results stay in relevance order across pages without repeats or gaps, and each page loads several times faster
+- Fix problem search showing no results while the search bar is empty (LeetCode now returns nothing for an empty keyword)
+- Fix problem search showing stale results: clearing the search text or switching the category now refreshes the list, and reopening the command revalidates instead of showing the last search
+- Add `Open in Browser` and `Copy Link to Clipboard` actions to search results
+- Fetch problem lists without code templates, making search and random-pick responses about 90% smaller
+- Fix `Pick a Random Problem` showing `No matches` with the `All` category, and ignoring a saved `Exclude premium` checkbox until it was toggled. Filters saved before this update are reset once, so pick your difficulty, category, topic tags, and premium choice again
+- Show the picked problem's description in `Pick a Random Problem`; `Pick Another` is now the primary action
+- Make random picks uniform over every matching problem, including with premium excluded; the last problems matching the filters were picked less often or never, and when every problem matching the filters is premium, say so instead of re-rolling
+- Fix the default language preference: add `Python3` as the new default (`Python` is LeetCode's Python 2), fix `Go` never matching LeetCode's `golang` templates, and add Rust, PHP, Dart, Scala, Elixir, Erlang, and Racket
+- Show plain language names in the `Copy Code Template` submenu (`Go` instead of `Go Code`)
+- Add `Show Topic Tags` preference to show a problem's topic tags in previews and random picks (off by default, since tags can hint at the solution)
+- Stop repeating the paid-only failure toast whenever a premium problem preview re-renders; the notice stays in the preview
+- Hide the browser, link, and copy actions on the daily challenge until the problem has loaded
+- Stop marking every problem `Unrated` when the zerotrac ratings fail to load
+
 ## [Fix Menu Bar Icon Color] - 2026-09-19
 
 - Fix the daily challenge menu bar icon showing the wrong color after recent Raycast updates by tinting a single icon instead of using light and dark variants

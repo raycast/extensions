@@ -187,6 +187,7 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx -y @raycast/api@latest publish",
     "test": "vitest run",
+    "test:dist": "node --test test/distribution.test.cjs",
     "test:watch": "vitest"
   }
 }

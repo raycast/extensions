@@ -15,6 +15,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
+import { readClipboardImage, saveClipboardImageAsJpeg } from "./clipboard-image";
 
 type ClipboardType = "file" | "image" | "text" | "html" | "empty";
 
@@ -50,6 +51,7 @@ function detectImageFormat(filePath: string): string | null {
 interface ClipboardState {
   type: ClipboardType;
   sourcePath?: string;
+  imageData?: Buffer;
   text?: string;
   html?: string;
   suggestedFilename: string;
@@ -96,6 +98,16 @@ async function detectClipboard(): Promise<ClipboardState> {
       sourcePath: fsPath,
       suggestedFilename: base,
       extension: ext,
+    };
+  }
+
+  const imageData = await readClipboardImage();
+  if (imageData) {
+    return {
+      type: "image",
+      imageData,
+      suggestedFilename: `screenshot-${generateTimestamp()}`,
+      extension: ".jpg",
     };
   }
 
@@ -158,7 +170,7 @@ export default function Command() {
           showToast({
             style: Toast.Style.Failure,
             title: "Clipboard is empty",
-            message: "Copy a file or text first",
+            message: "Copy an image, file or text first",
           });
           popToRoot();
           return;
@@ -189,7 +201,9 @@ export default function Command() {
     );
 
     try {
-      if (clipState.type === "image" && clipState.sourcePath) {
+      if (clipState.type === "image" && clipState.imageData) {
+        saveClipboardImageAsJpeg(clipState.imageData, destPath);
+      } else if (clipState.type === "image" && clipState.sourcePath) {
         convertToJpeg(clipState.sourcePath, destPath);
       } else if (clipState.type === "file" && clipState.sourcePath) {
         fs.copyFileSync(clipState.sourcePath, destPath);

@@ -36,6 +36,11 @@ This is a Raycast extension for [Resend](https://resend.com/) - _Email for devel
 
 This extension provides the following commands:
 
+- Careers
+  - Browse open positions at Resend
+  - Filter positions by Americas or Europe, or show all positions
+  - Choose Apply to Job from a position's action menu
+  - Complete the form, select a local resume, review, and submit
 - API Keys
   - View API Keys
   - Create API Key
@@ -63,6 +68,7 @@ Mention `@resend` to work with Resend using natural language. In addition to sen
 - Read sent and received email, create temporary share links, inspect attachments, reschedule delivery, and report delivery or engagement metrics
 - Discover domains and DNS records, then verify a domain with confirmation
 - Inspect templates, broadcasts, segments, topics, and webhooks
+- Browse jobs with `list-positions`, inspect application questions with `retrieve-position`, and apply with `apply-to-position` using your own answers and a local resume, with confirmation
 - Debug failed API calls with request logs
 - Create and manage contacts and API keys, with confirmation before sensitive or destructive actions
 

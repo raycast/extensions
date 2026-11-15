@@ -36,6 +36,54 @@ test("selected project scopes totals, share, activity and running status", () =>
   assert.equal(model.sessions, 1);
   assert.equal(model.running, false);
   assert.equal(model.days.at(-1)?.seconds, 3600);
+  assert.equal(model.weekDays[0].seconds, 3600);
+});
+
+test("weekly bars stay Monday to Sunday, with future days empty and today's live time included", () => {
+  const instant = new Date(2026, 9, 14, 12);
+  const entries: WorkLog[] = [
+    { ...logs[0], startedAt: at(11, 23), endedAt: at(12, 1) },
+    { ...logs[1], startedAt: at(13, 9), endedAt: at(13, 11) },
+    { ...logs[1], id: "future", startedAt: at(15, 9), endedAt: at(15, 10) },
+  ];
+  const timer = { id: "t", projectId: "a", description: "", startedAt: at(14, 11) };
+  const model = createDashboard("Overview", "today", entries, projects, timer, instant);
+  assert.deepEqual(
+    model.weekDays.map((day) => day.date.getDate()),
+    [12, 13, 14, 15, 16, 17, 18],
+  );
+  assert.deepEqual(
+    model.weekDays.map((day) => day.seconds),
+    [3600, 7200, 3600, 0, 0, 0, 0],
+  );
+  for (const period of ["week", "month"] as const) {
+    assert.deepEqual(createDashboard("Overview", period, entries, projects, timer, instant).weekDays, model.weekDays);
+  }
+  const svg = dashboardSvg(model);
+  assert.match(svg, /THIS WEEK/);
+  assert.doesNotMatch(svg, /LAST 7 DAYS/);
+  const weekdays = [...svg.matchAll(/>(Mon|Tue|Wed|Thu|Fri|Sat|Sun)<\/text>/g)].map((match) => match[1]);
+  assert.deepEqual(weekdays, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+  assert.match(svg, /<rect x="141"[^>]*fill="#67e8b1"/);
+});
+
+test("weekly bars roll over on Monday and preserve calendar dates across year boundaries", () => {
+  for (const [instant, dates] of [
+    [new Date(2026, 9, 18, 23, 59), [12, 13, 14, 15, 16, 17, 18]],
+    [new Date(2026, 9, 19), [19, 20, 21, 22, 23, 24, 25]],
+    [new Date(2027, 0, 1), [28, 29, 30, 31, 1, 2, 3]],
+  ] as const) {
+    const model = createDashboard("Overview", "today", [], projects, null, instant);
+    assert.deepEqual(
+      model.weekDays.map((day) => day.date.getDate()),
+      dates,
+    );
+    assert.deepEqual(
+      model.weekDays.map((day) => day.date.getDay()),
+      [1, 2, 3, 4, 5, 6, 0],
+    );
+    assert.ok(model.weekDays.every((day) => day.seconds === 0));
+  }
 });
 
 test("empty data and a future active timer produce finite, empty charts", () => {
@@ -128,7 +176,7 @@ test("expanding project mix displays every project and moves charts below the ad
   const expanded = dashboardSvg(model, true);
   assert.match(expanded, /MixProject6/);
   assert.match(expanded, /height="427" viewBox="0 0 440 427"/);
-  assert.match(expanded, /y="323"[^>]*>LAST 7 DAYS/);
+  assert.match(expanded, /y="323"[^>]*>THIS WEEK/);
   assert.match(expanded, /TRACKED TIME/);
   assert.equal(dashboardSvg(model, false), collapsed);
 });

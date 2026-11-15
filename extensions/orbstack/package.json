@@ -5,6 +5,9 @@
   "description": "Manage OrbStack with Raycast",
   "icon": "orbstack.png",
   "author": "nicholasq",
+  "contributors": [
+    "davidlabs"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -23,6 +26,12 @@
       "name": "machine_create",
       "title": "Machine Create",
       "description": "Create a new machine",
+      "mode": "view"
+    },
+    {
+      "name": "container_list",
+      "title": "Container List",
+      "description": "List and manage Docker containers",
       "mode": "view"
     }
   ],
@@ -61,6 +70,11 @@
       "name": "machine_rename",
       "title": "Machine Rename",
       "description": "Rename a machine"
+    },
+    {
+      "name": "container_list",
+      "title": "Container List",
+      "description": "List all Docker containers"
     }
   ],
   "ai": {

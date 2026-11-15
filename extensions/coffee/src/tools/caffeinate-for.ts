@@ -1,4 +1,5 @@
 import { startCaffeinate, deviceName } from "../utils";
+import { calculateDuration } from "../duration";
 
 type Input = {
   /**
@@ -25,7 +26,7 @@ export default async function (input: Input) {
     throw new Error("Please specify a duration");
   }
 
-  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const totalSeconds = calculateDuration({ hours, minutes, seconds });
   const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
 
   await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${totalSeconds}`, {

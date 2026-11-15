@@ -1,5 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { AvailableBundle, CreateTaskInput, FlatTaskResult, Priority, Task, UpdateTaskInput, User } from "./types";
+import type {
+  AvailableBundle,
+  CreateTaskInput,
+  FlatTaskResult,
+  GtdSettings,
+  Priority,
+  Task,
+  UpdateTaskInput,
+  User,
+} from "./types";
 
 const DEFAULT_API_URL = "https://api.hule-do.com/api";
 
@@ -91,6 +100,20 @@ async function errorMessage(res: Response): Promise<string> {
 type Method = "GET" | "POST" | "PATCH" | "DELETE";
 
 /**
+ * Raycast extensions carry no version field — the store publishes by merge
+ * date — so the extension names its own. Bump it with each CHANGELOG entry.
+ */
+export const CLIENT_VERSION = "1.0.0";
+
+/**
+ * Tells this extension's requests apart in the API's request log (pino keeps
+ * the `user-agent` header), where a weekly Loki count answers whether anyone
+ * uses Raycast at all (PI3, H-1117). Without it the requests look like any
+ * other API-token client.
+ */
+const USER_AGENT = `HuleRaycast/${CLIENT_VERSION}`;
+
+/**
  * One funnel for every call, so the Bearer credential, the error mapping and
  * the empty-body handling are defined once. All authorization stays server-side
  * — a request here is an ordinary authenticated REST call, and the API's own
@@ -109,6 +132,7 @@ async function request<T>(
   const headers: Record<string, string> = {
     Authorization: authHeader(),
     Accept: "application/json",
+    "User-Agent": USER_AGENT,
   };
   if (opts.body !== undefined) headers["Content-Type"] = "application/json";
 
@@ -136,6 +160,11 @@ async function request<T>(
 /** Lists, statuses, members and tags of every workspace — one call, one cache. */
 export function getBundle(): Promise<AvailableBundle> {
   return request<AvailableBundle>("GET", "/available/all");
+}
+
+/** Your GTD preferences in one workspace — the Inbox list among them. */
+export function getGtdSettings(workspaceId: string): Promise<GtdSettings> {
+  return request<GtdSettings>("GET", `/workspaces/${encodeURIComponent(workspaceId)}/gtd-settings`);
 }
 
 export function getMe(): Promise<User> {
@@ -272,7 +301,7 @@ export async function getImageBytes(
 
   let res: Response;
   try {
-    res = await fetch(url, { headers: { Authorization: authHeader() } });
+    res = await fetch(url, { headers: { Authorization: authHeader(), "User-Agent": USER_AGENT } });
   } catch (cause) {
     throw new HuleError(0, `Cannot reach ${url.origin}: ${(cause as Error).message}`);
   }

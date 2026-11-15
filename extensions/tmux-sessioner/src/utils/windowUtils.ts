@@ -20,7 +20,7 @@ export async function switchToWindow(window: TmuxWindow, setLoading: (value: boo
   setLoading(true);
   const { sessionName: session, windowIndex, windowName } = window;
 
-  exec(`tmux switch -t ${shq("=" + session)}`, { env }, async (error, stdout, stderr) => {
+  exec(`tmux switch-client -t ${shq("=" + session)}`, { env }, async (error, stdout, stderr) => {
     if (error || stderr) {
       console.error(`exec error: ${error || stderr}`);
 
@@ -31,7 +31,7 @@ export async function switchToWindow(window: TmuxWindow, setLoading: (value: boo
 
       return;
     }
-    execSync(`tmux select-window -t ${shq(String(windowIndex))}`, { env });
+    execSync(`tmux select-window -t ${shq(`=${session}:${windowIndex}`)}`, { env });
 
     try {
       await openTerminal();

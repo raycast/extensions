@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoo",
-  "title": "Zoo - Ask AIs with Your Prompt Library",
-  "description": "Interact with AIs with your own Github Gist prompt library with ease",
+  "title": "Zoo - AI Prompt Library with Your Own Key",
+  "description": "Run GitHub Gist prompts on selected text with your own OpenAI, Gemini, Claude, or DeepSeek API key. No Raycast Pro is required.",
   "icon": "zoo.png",
   "author": "ViGeng",
   "categories": [
@@ -83,7 +83,7 @@
     {
       "name": "ask-gist",
       "title": "Ask by Prompt on Selected Text",
-      "description": "Search and use GitHub gists as prompt for AI.",
+      "description": "Apply a reusable Gist prompt to selected text using your own AI API key.",
       "mode": "view",
       "preferences": [
         {
@@ -147,6 +147,14 @@
             }
           ]
         }
+      ],
+      "keywords": [
+        "AI",
+        "prompt",
+        "BYOK",
+        "translate",
+        "summarize",
+        "rewrite"
       ]
     },
     {
@@ -154,95 +162,137 @@
       "title": "Create Gist Prompt",
       "description": "Create GitHub gist from selection or clipboard.",
       "mode": "view"
+    },
+    {
+      "name": "check-ai-connection",
+      "title": "Check AI Connection",
+      "description": "Check API access and model availability without sending a prompt or input text.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@anthropic-ai/sdk": "^1.7.0",
     "@octokit/core": "^6.1.0",
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
     "js-base64": "^3.7.2",
-    "openai": "^4.77.0",
-    "run-applescript": "^7.0.0"
+    "openai": "^7.55.0"
   },
   "preferences": [
     {
+      "name": "provider",
+      "type": "dropdown",
+      "title": "AI Provider",
+      "description": "Choose a service. Automatic detects it from the model or existing endpoint. Named providers use their official endpoints.",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic (from Model or Endpoint)",
+          "value": "auto"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Google Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Anthropic Claude",
+          "value": "anthropic"
+        },
+        {
+          "title": "DeepSeek",
+          "value": "deepseek"
+        },
+        {
+          "title": "Custom OpenAI-Compatible API",
+          "value": "custom"
+        }
+      ]
+    },
+    {
       "name": "apikey",
-      "description": "Your API Key",
+      "description": "Enter the API key issued by the selected AI service.",
       "type": "password",
       "required": true,
       "title": "LLM API Key"
     },
     {
       "name": "baseurl",
-      "description": "Custom API endpoint for DeepSeek or ChatGPT, or more",
+      "description": "Set the API base URL for Automatic or Custom mode. Leave it empty to use the official endpoint.",
       "type": "textfield",
       "required": false,
-      "title": "LLM API Endpoint",
-      "default": "https://api.openai.com/v1"
+      "title": "LLM API Endpoint"
     },
     {
       "name": "priceinput",
-      "description": "Input price($) per million characters for your API endpoint",
+      "description": "Optional USD price per million input tokens. Set both prices to show an estimate.",
       "type": "textfield",
       "required": false,
       "title": "Custom Model Input Price"
     },
     {
       "name": "priceoutput",
-      "description": "Output price($) per million characters for your API endpoint",
+      "description": "Optional USD price per million output tokens. Set both prices to show an estimate.",
       "type": "textfield",
       "required": false,
-      "title": "Custom Model Input Price"
+      "title": "Custom Model Output Price"
     },
     {
       "name": "model",
-      "description": "LLM to use for your commands",
+      "description": "Choose a model from the selected provider, or use its default. A custom model ID overrides this choice.",
       "type": "dropdown",
       "data": [
         {
-          "title": "deepseek-chat",
-          "value": "deepseek-chat"
+          "title": "Provider Default",
+          "value": "default"
         },
         {
-          "title": "GPT-4o",
-          "value": "gpt-4o"
+          "title": "OpenAI GPT-6 Luna",
+          "value": "gpt-6-luna"
         },
         {
-          "title": "GPT-4o mini",
-          "value": "gpt-4o-mini"
+          "title": "OpenAI GPT-6.1 Sol",
+          "value": "gpt-6.1-sol"
         },
         {
-          "title": "GPT-4",
-          "value": "gpt-4"
+          "title": "OpenAI GPT-6 Astra",
+          "value": "gpt-6-astra"
         },
         {
-          "title": "GPT-4 Turbo",
-          "value": "gpt-4-turbo"
+          "title": "Gemini 3.8 Flash",
+          "value": "gemini-3.8-flash"
         },
         {
-          "title": "GPT-3.5 Turbo",
-          "value": "gpt-3.5-turbo"
+          "title": "Gemini 3.5 Flash-Lite",
+          "value": "gemini-3.5-flash-lite"
         },
         {
-          "title": "gemini-2.0-flash-exp",
-          "value": "gemini-2.0-flash-exp"
+          "title": "Claude Sonnet 5.5",
+          "value": "claude-sonnet-5-5"
         },
         {
-          "title": "gemini-exp-1206",
-          "value": "gemini-exp-1206"
+          "title": "Claude Haiku 5.5",
+          "value": "claude-haiku-5-5"
         },
         {
-          "title": "learnlm-1.5-pro-experimental",
-          "value": "learnlm-1.5-pro-experimental"
+          "title": "Claude Opus 5.5",
+          "value": "claude-opus-5-5"
         },
         {
-          "title": "gemini-2.0-flash-thinking-exp-1219",
-          "value": "gemini-2.0-flash-thinking-exp-1219"
+          "title": "DeepSeek Flash",
+          "value": "deepseek-flash"
+        },
+        {
+          "title": "DeepSeek V4 Pro",
+          "value": "deepseek-v4-pro"
         }
       ],
       "required": true,
-      "default": "gpt-4o",
+      "default": "default",
       "title": "LLM Model Name"
     },
     {
@@ -255,21 +305,38 @@
   ],
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.9",
-    "@types/node-fetch": "^2.6.11",
-    "@types/react": "18.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
+    "tsx": "^4.23.15",
     "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build:local": "ray build -e dev",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "tsx --test tests/*.test.ts"
   },
   "overrides": {
     "brace-expansion": "5.0.9"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "AI",
+    "BYOK",
+    "prompt library",
+    "GitHub Gist",
+    "OpenAI",
+    "Gemini",
+    "Claude",
+    "DeepSeek",
+    "translation",
+    "summarize"
+  ]
 }

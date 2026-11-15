@@ -5,6 +5,9 @@
   "description": "Start T3 Code sessions, search threads, and jump to the ones waiting on you.",
   "icon": "icon.png",
   "author": "skilux",
+  "contributors": [
+    "yoshiki_ozaki"
+  ],
   "categories": [
     "Developer Tools"
   ],

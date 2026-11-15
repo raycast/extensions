@@ -3,18 +3,16 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { useEffect, useState } from "react";
-import { estimatedFraction } from "./progress-estimate";
+import { progressStep, type ProgressReport, type ProgressStep } from "./progress-estimate";
 import { expectedDuration } from "./use-wait";
 
 export type Progress = {
-  /** 0…1, never backwards. */
+  /** 0…1, never backwards: a forecast from recent durations, never Mint's weight. */
   fraction: number;
   /** Files (or folder entries) Mint has read so far, when it says. */
   files?: number;
   /** Where Mint is, in its own words ("Checking Chrome Cache… 12,416 files"). */
   phase?: string;
-  /** True on a Mint that reports nothing until it is done: estimated from the last run. */
-  estimated: boolean;
 };
 
 export function newProgressToken(): string {
@@ -26,51 +24,38 @@ export function progressFile(token: string): string {
 }
 
 /**
- * Mint 1.0.81 writes a request's progress to a small file named by the token
- * the request carries; this reads it four times a second. A Mint that writes
- * nothing gets an estimate from how long the same request took on its recent
- * runs, which keeps moving, more slowly, until the answer comes.
+ * Mint 1.0.81 writes a scan's progress to a small file named by the token the
+ * request carries; this reads it four times a second for Mint's phase and
+ * count. The bar is forecast from how long the same scan took on its recent
+ * runs, because Mint's weighted stages do not measure the share done.
  */
 export function useMintProgress(token: string | undefined, active: boolean, durationKey: string): Progress | undefined {
-  const [progress, setProgress] = useState<Progress | undefined>();
+  const [report, setReport] = useState<{ token: string; progress: Progress } | undefined>();
   useEffect(() => {
     if (!active || !token) {
-      setProgress(undefined);
+      setReport(undefined);
       return;
     }
+    const setProgress = (progress: Progress) => setReport({ token, progress });
     const started = Date.now();
     const expected = expectedDuration(durationKey);
-    let reported = false;
-    let best = 0;
+    let step: ProgressStep = { fraction: 0 };
     const tick = () => {
+      const seconds = (Date.now() - started) / 1000;
+      let report: ProgressReport | undefined;
       try {
-        const value = JSON.parse(readFileSync(progressFile(token), "utf8")) as {
-          fraction?: number;
-          files?: number;
-          phase?: string;
-        };
-        if (typeof value.fraction === "number") {
-          reported = true;
-          best = Math.max(best, Math.min(1, Math.max(0, value.fraction)));
-          setProgress({ fraction: best, files: value.files, phase: value.phase, estimated: false });
-          return;
-        }
+        report = JSON.parse(readFileSync(progressFile(token), "utf8")) as ProgressReport;
       } catch {
         // Not written yet, or a Mint that does not report.
       }
-      if (reported) return;
-      best = Math.max(best, estimatedFraction((Date.now() - started) / 1000, expected));
-      setProgress({ fraction: best, estimated: true });
+      step = progressStep(step, report, seconds, expected);
+      setProgress(step);
     };
     tick();
     const timer = setInterval(tick, 250);
     return () => clearInterval(timer);
   }, [token, active, durationKey]);
-  return progress;
-}
-
-export function progressText(progress: Progress | undefined): string {
-  if (!progress) return "";
-  const percent = `${progress.estimated ? "about " : ""}${Math.round(progress.fraction * 100)}%`;
-  return progress.files ? `${percent} · ${progress.files.toLocaleString("en-US")} files` : percent;
+  // A new request must not flash the preceding request's progress before its
+  // first effect/tick, or keep it when the authoritative response arrives.
+  return active && report && report.token === token ? report.progress : undefined;
 }

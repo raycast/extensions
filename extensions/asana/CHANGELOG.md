@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Keep default assignee] - 2026-11-10
+
+- Fix the "Create Task" assignee resetting to "Unassigned" (e.g. after an extension update); it now remembers your last choice and defaults to you
+
 ## [Add Copy Short Task URL action] - 2026-10-21
 
 - Added a "Copy Task Short URL" action that copies the short `https://app.asana.com/0/0/<task-id>` link of a task

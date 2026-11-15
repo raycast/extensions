@@ -12,13 +12,13 @@ const cachedGifsDir = path.join(environment.supportPath, "cached-gifs");
 
 /**
  * A GIF provider. Excludes the aggregate views, which are not providers: a GIF shown under
- * Favorites or Recents still belongs to the service it came from, and keying on the view would
+ * Favorites, Recents or All Sources still belongs to the service it came from, and keying on the view would
  * give the same GIF two different cache entries.
  */
-export type CacheableService = Exclude<ServiceName, "favorites" | "recents">;
+export type CacheableService = Exclude<ServiceName, "favorites" | "recents" | "all">;
 
 export function isCacheableService(service: ServiceName | null): service is CacheableService {
-  return service !== null && service !== "favorites" && service !== "recents";
+  return service !== null && service !== "favorites" && service !== "recents" && service !== "all";
 }
 
 /**

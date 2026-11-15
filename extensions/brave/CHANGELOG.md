@@ -1,5 +1,33 @@
 # Brave Changelog
 
+## [Improvements] - 2026-11-08
+
+- **Search Bookmarks**: Create Quicklinks from saved bookmarks
+- **Search Bookmarks**: Clarify the selected bookmark's Open in New Tab action with a dedicated icon
+- **Search Tabs**: Open blank tabs, reopen the selected URL in another tab, copy titles, create Quicklinks, and reload the tab list
+- **Search Tabs**: Match tabs playing audio, muted tabs, and picture-in-picture videos, including labels combined with memory or inactive-tab metadata
+- **Search Tabs**: Restore the macOS-only Move to New Window and Move to Private Window actions
+
+## [Windows support] - 2026-10-31
+
+### ✨ New
+
+- Added Windows support.
+- Added `Open New Window` command.
+- Added `Open New Incognito Window` command.
+- Added custom executable and User Data directory preferences for Windows.
+
+### 💎 Improvements
+
+- Support Brave, Beta, and Nightly on Windows.
+- Added copyable error reports and count-aware bookmark labels with `raycast-kit`.
+- Tab-switching now uses a Rust helper for more reliable and faster behaviour.
+- Improved and added new keyboard shortcuts.
+
+### 🐞 Fixes
+
+- Fixed `Search Tabs` items sometimes opening a new tab.
+
 ## [Fix Missing History Database] - 2026-08-16
 
 - Fixed New Brave Tab crashing when the selected Brave profile has not created a History database yet.

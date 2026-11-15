@@ -8,6 +8,7 @@ import { IssueFormValues } from "../components/CreateIssueForm";
 import { CustomFieldSchema, getCustomFieldValue } from "../helpers/customFields";
 
 import { Project } from "./projects";
+import { getJiraCredentials } from "./jiraCredentials";
 import { autocomplete, getAuthenticatedUri, request } from "./request";
 import { User } from "./users";
 
@@ -256,13 +257,67 @@ export type Issue = {
   };
 };
 
+export type IssueForAI = {
+  id: Issue["id"];
+  key: Issue["key"];
+  fields: {
+    summary: Issue["fields"]["summary"];
+    updated: Issue["fields"]["updated"];
+    issuetype: Issue["fields"]["issuetype"];
+    status: Issue["fields"]["status"];
+    priority: Issue["fields"]["priority"];
+    assignee: Issue["fields"]["assignee"];
+    project: Issue["fields"]["project"];
+    parent?: {
+      id: Issue["id"];
+      key: Issue["key"];
+      fields: {
+        summary: Issue["fields"]["summary"];
+        issuetype: Issue["fields"]["issuetype"];
+        status: Issue["fields"]["status"];
+        priority: Issue["fields"]["priority"];
+      };
+    };
+  };
+};
+
 export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
   await resolveIssueTypeIconUri(issuetype);
 
   return issuetype;
 };
 
-const issueTypeIconUris = new Map<string, Promise<string>>();
+const issueTypeIconUris = new Map<string, string>();
+const pendingIssueTypeIcons = new Map<string, Promise<string>>();
+const waitingIconDownloads: (() => void)[] = [];
+let activeIconDownloads = 0;
+
+function getIssueTypeIconCacheKey(iconUrl: string) {
+  const { siteUrl, myself } = getJiraCredentials();
+  return JSON.stringify([siteUrl, myself.accountId, iconUrl]);
+}
+
+async function downloadIssueTypeIcon(iconUrl: string, cacheKey: string) {
+  if (activeIconDownloads >= 4) {
+    await new Promise<void>((resolve) => waitingIconDownloads.push(resolve));
+  } else {
+    activeIconDownloads += 1;
+  }
+
+  try {
+    if (getIssueTypeIconCacheKey(iconUrl) !== cacheKey) {
+      throw new Error("The Jira account changed while waiting to load an icon.");
+    }
+    return await getAuthenticatedUri(iconUrl, "image/jpeg");
+  } finally {
+    const next = waitingIconDownloads.shift();
+    if (next) {
+      next();
+    } else {
+      activeIconDownloads -= 1;
+    }
+  }
+}
 
 async function resolveIssueTypeIconUri(issuetype?: IssueType) {
   const iconUrl = issuetype?.iconUrl;
@@ -270,24 +325,45 @@ async function resolveIssueTypeIconUri(issuetype?: IssueType) {
     return;
   }
 
-  let dataUri = issueTypeIconUris.get(iconUrl);
-  if (!dataUri) {
-    dataUri = getAuthenticatedUri(iconUrl, "image/jpeg");
-    dataUri.catch(() => issueTypeIconUris.delete(iconUrl));
-    issueTypeIconUris.set(iconUrl, dataUri);
-  }
-
   try {
-    issuetype.iconUrl = await dataUri;
+    const cacheKey = getIssueTypeIconCacheKey(iconUrl);
+    const cachedDataUri = issueTypeIconUris.get(cacheKey);
+    if (cachedDataUri) {
+      issuetype.iconUrl = cachedDataUri;
+      return;
+    }
+
+    let dataUri = pendingIssueTypeIcons.get(cacheKey);
+    if (!dataUri) {
+      dataUri = downloadIssueTypeIcon(iconUrl, cacheKey)
+        .then((uri) => {
+          if (getIssueTypeIconCacheKey(iconUrl) !== cacheKey) {
+            throw new Error("The Jira account changed while loading an icon.");
+          }
+          issueTypeIconUris.set(cacheKey, uri);
+          if (issueTypeIconUris.size > 128) {
+            const oldestKey = issueTypeIconUris.keys().next().value;
+            if (oldestKey !== undefined) issueTypeIconUris.delete(oldestKey);
+          }
+          return uri;
+        })
+        .finally(() => pendingIssueTypeIcons.delete(cacheKey));
+      pendingIssueTypeIcons.set(cacheKey, dataUri);
+    }
+
+    const resolvedUri = await dataUri;
+    if (getIssueTypeIconCacheKey(iconUrl) === cacheKey) {
+      issuetype.iconUrl = resolvedUri;
+    }
   } catch {
-    // Keep the original Jira icon URL when Jira returns an HTML error page instead of image content.
+    // An optional icon must not prevent loading issues or form metadata.
   }
 }
 
-type GetIssuesResponse = {
-  issues?: Issue[];
-  searchResults?: Issue[];
-  values?: Issue[];
+type GetIssuesResponse<TIssue = Issue> = {
+  issues?: TIssue[];
+  searchResults?: TIssue[];
+  values?: TIssue[];
 };
 
 export async function getIssues({ jql } = { jql: "" }) {
@@ -347,25 +423,19 @@ export async function getIssues({ jql } = { jql: "" }) {
   return resolvedIssues;
 }
 
-export async function getIssuesForAI({ jql } = { jql: "" }) {
+export async function getIssuesForAI({ jql } = { jql: "" }): Promise<IssueForAI[]> {
   const body = {
     jql,
     maxResults: 50,
     fields: ["summary", "updated", "issuetype", "status", "priority", "assignee", "project", "parent"],
   };
 
-  const result = await request<GetIssuesResponse>("/search/jql", {
+  const result = await request<GetIssuesResponse<IssueForAI>>("/search/jql", {
     method: "POST",
     body: JSON.stringify(body),
   });
 
-  const issues =
-    result?.issues ??
-    (result as unknown as { searchResults?: Issue[] }).searchResults ??
-    (result as unknown as { values?: Issue[] }).values ??
-    [];
-
-  return issues;
+  return result?.issues ?? result?.searchResults ?? result?.values ?? [];
 }
 
 export type Schema = {

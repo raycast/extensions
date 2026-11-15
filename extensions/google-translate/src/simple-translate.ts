@@ -21,8 +21,15 @@ export type SimpleTranslateResult = {
 
 export class TranslateError extends Error {}
 
-const extractPronounceTextFromRaw = (raw: string) => {
-  return raw?.[0]?.[1]?.[2];
+const extractPronounceTextFromRaw = (raw: unknown) => {
+  if (!Array.isArray(raw) || !Array.isArray(raw[0]) || !Array.isArray(raw[0][1])) {
+    return undefined;
+  }
+
+  // Target romanization is at [2]. Source pronunciation is at [3] when the
+  // target script does not need a separate romanization.
+  const pronunciation = raw[0][1][2] || raw[0][1][3];
+  return typeof pronunciation === "string" ? pronunciation : undefined;
 };
 
 function isSameLanguage(lang1: string, lang2: string): boolean {

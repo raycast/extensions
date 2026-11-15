@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hackban",
+  "title": "Hackban",
+  "description": "See what's due, search your boards, and capture cards in Hackban, Hack Club's Trello, across every server you use.",
+  "icon": "icon.png",
+  "author": "leowilkin",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-cards",
+      "title": "My Cards",
+      "subtitle": "Hackban",
+      "description": "Cards you're a member of, grouped by when they're due.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Hackban",
+      "subtitle": "Hackban",
+      "description": "Search board names and card titles and descriptions.",
+      "mode": "view"
+    },
+    {
+      "name": "boards",
+      "title": "Browse Boards",
+      "subtitle": "Hackban",
+      "description": "Your workspaces and boards, with each board's lists and cards.",
+      "mode": "view"
+    },
+    {
+      "name": "create-card",
+      "title": "Create Card",
+      "subtitle": "Hackban",
+      "description": "Add a card to any list on your boards.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "Hackban",
+      "description": "Cards you were added to and comments on cards you watch.",
+      "mode": "view"
+    },
+    {
+      "name": "accounts",
+      "title": "Manage Accounts",
+      "subtitle": "Hackban",
+      "description": "Sign in to more Hackban servers, and rename, recolor, reorder, hide or sign out of them.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "mdast-util-from-markdown": "^2.1.0",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-to-markdown": "^2.2.1",
+    "micromark-extension-gfm": "^3.0.0",
+    "unist-util-visit": "^5.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

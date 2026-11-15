@@ -2,7 +2,7 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { ComponentType, createElement } from "react";
 
-import { jira, jiraWithApiToken } from "../api/jiraCredentials";
+import { getJiraCacheKey, jira, jiraWithApiToken } from "../api/jiraCredentials";
 
 export function withJiraCredentials<T, R>(fn: (input: T) => Promise<R> | R) {
   const { token, email, siteUrl } = getPreferenceValues<Preferences>();
@@ -20,7 +20,7 @@ export function withJiraCredentials<T, R>(fn: (input: T) => Promise<R> | R) {
 
   const Component = fn as unknown as ComponentType<T & object>;
   return withAccessToken<T>(service)((props: T) => {
-    return createElement(Component, props as T & object);
+    return createElement(Component, { ...props, key: getJiraCacheKey() });
   });
 }
 

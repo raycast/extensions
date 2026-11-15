@@ -133,6 +133,14 @@
           "placeholder": "~/Backup,~/Archive/Xcode"
         },
         {
+          "name": "showDirectoryTag",
+          "type": "checkbox",
+          "required": false,
+          "description": "Show a tag with the git root directory, or the parent directory, instead of the project path. Hover over the tag to see the full path.",
+          "default": false,
+          "label": "Show directory tag instead of path"
+        },
+        {
           "name": "terminalApp",
           "type": "appPicker",
           "required": false,

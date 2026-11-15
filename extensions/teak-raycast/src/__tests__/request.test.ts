@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { createRaycastApiMock } from "./raycastApiMock";
+import {
+  createRaycastApiMock,
+  raycastLocalStorageMock,
+} from "./raycastApiMock";
 
 const getPreferenceValuesMock = mock(() => ({ apiKey: "valid-test-key" }));
 const authorizeMock = mock(() => Promise.resolve("oauth-access-token"));
@@ -135,6 +138,10 @@ const withDiscovery = (transport: typeof fetch): typeof fetch =>
             workosClient,
           ]),
         ),
+        resource: "https://teakvault.com/mcp",
+        authorization_endpoint: `${issuer}/authorize`,
+        token_endpoint: `${issuer}/oauth2/token`,
+        code_challenge_methods_supported: ["S256"],
       };
     } else if (url.includes("oauth-authorization-server")) {
       metadata = {
@@ -522,6 +529,30 @@ describe("raycast request handling", () => {
     expect(result.notes).toBe("Updated note");
   });
 
+  // The pinned teak-sdk's types predate palette edits, so this pins that the
+  // fields still reach the API in the body.
+  test("updateCard sends palette color edits in the body", async () => {
+    let capturedBody: unknown = null;
+
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, sampleCard);
+      }) as unknown as typeof fetch,
+    );
+
+    await updateCard(
+      "card_123",
+      { addColors: ["#00FF00"], removeColors: ["#FF0000"] },
+      "interactive",
+    );
+
+    expect(capturedBody).toEqual({
+      addColors: ["#00FF00"],
+      removeColors: ["#FF0000"],
+    });
+  });
+
   test("falls back to browser OAuth when no API key is set", async () => {
     getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "   " }));
 
@@ -543,6 +574,10 @@ describe("raycast request handling", () => {
 
   test("discovery outage remains a connection failure without opening sign-in", async () => {
     getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "" }));
+    // Without a saved connection, even a fresh token waits for discovery.
+    for (const key of Object.keys(await raycastLocalStorageMock.allItems())) {
+      await raycastLocalStorageMock.removeItem(key);
+    }
     getTokensMock.mockResolvedValue({ accessToken: "saved" });
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response(null, { status: 503 })),

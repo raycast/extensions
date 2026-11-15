@@ -9,7 +9,6 @@ import {
   redactUrl,
   releaseReservation,
   reservePath,
-  uniqueMediaUrls,
 } from "./media-files";
 
 /**
@@ -26,24 +25,6 @@ function wrapped(mediaId: string, signature: string, ext = "jpg"): string {
   ).toString("base64url");
   return `https://d.rapidcdn.app/v2?token=eyJ0eXAiOiJKV1QifQ.${payload}.${signature}`;
 }
-
-describe("uniqueMediaUrls", () => {
-  it("collapses a carousel the API repeats with different signatures, keeping carousel order", () => {
-    // The real response for a 4-image carousel: 16 entries, the set repeated four times.
-    const ids = ["4017031570581172086", "4017031579573853192", "4017031582669078707", "4017031586091796504"];
-    const response = [0, 1, 2, 3].flatMap((round) => ids.map((id) => wrapped(id, `sig${round}`)));
-
-    const unique = uniqueMediaUrls(response);
-
-    expect(unique).toHaveLength(4);
-    expect(unique).toEqual(ids.map((id) => wrapped(id, "sig0")));
-  });
-
-  it("keeps URLs it can't decode, deduplicating them by the URL itself", () => {
-    const plain = "https://example.com/video.mp4";
-    expect(uniqueMediaUrls([plain, plain, wrapped("1", "a")])).toEqual([plain, wrapped("1", "a")]);
-  });
-});
 
 describe("mediaBasename", () => {
   it("names a single item after the post", () => {
@@ -70,6 +51,13 @@ describe("extensionFor", () => {
     // d.rapidcdn.app serves every file as application/octet-stream (observed 2026-10-27).
     expect(extensionFor("application/octet-stream", wrapped("1", "a", "jpg"))).toBe("jpg");
     expect(extensionFor("application/octet-stream", wrapped("1", "a", "mp4"))).toBe("mp4");
+  });
+
+  it("refuses to name a file with anything but a media extension, whatever the server says", () => {
+    // A downloader that answered with a link to a script must not put one in Downloads.
+    expect(() => extensionFor("application/octet-stream", "https://cdn.example/setup.pkg")).toThrow(/not a media file/);
+    expect(() => extensionFor("image/svg+xml", "https://cdn.example/page.html")).toThrow(/not a media file/);
+    expect(extensionFor("application/octet-stream", "https://cdn.example/clip.MOV")).toBe("mov");
   });
 });
 

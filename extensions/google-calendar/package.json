@@ -88,7 +88,24 @@
       "subtitle": "Google Calendar"
     }
   ],
+  "resourceProvider": "read-resource",
   "tools": [
+    {
+      "title": "Contacts",
+      "name": "search-contact-mentions",
+      "description": "Search Google Contacts by name or email to mention people in AI Chat, or type a full email address to mention anyone.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "title": "Events",
+      "name": "search-event-mentions",
+      "description": "Search events across your visible Google calendars by title, description, location, or attendee to mention in AI Chat, listing this week's events by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "name": "create-event",
       "title": "Create Event",
@@ -283,7 +300,7 @@
   "dependencies": {
     "@googleapis/calendar": "^15.0.0",
     "@googleapis/people": "^7.0.1",
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.10.0",
     "@raycast/utils": "^2.2.4",
     "chrono-node": "^2.9.1",
     "date-fns": "^4.1.0",

@@ -97,6 +97,21 @@
       ]
     },
     {
+      "name": "find-profile",
+      "title": "Find Profile",
+      "subtitle": "@ Profile",
+      "description": "Find the sites where a username has a profile",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "profile",
+          "placeholder": "Username",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "manage-apps",
       "title": "Manage Apps",
       "subtitle": "@ Profile",
@@ -135,25 +150,33 @@
       "name": "history",
       "title": "Get Profile History",
       "description": "Get recently opened profiles, optionally filtered by app"
+    },
+    {
+      "name": "find-profiles",
+      "title": "Find Profiles",
+      "description": "Find the sites where a username has a profile"
     }
   ],
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.2.0",
+    "@chrismessina/raycast-logger": "^1.5.0",
     "@raycast/api": "^2.9.0",
     "@raycast/utils": "^2.2.2",
-    "js-yaml": "^4.3.2"
+    "js-yaml": "^4.3.2",
+    "undici": "^7.30.1"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@oclif/core": "^2.12.0",
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.10.2",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.1.8",
     "eslint": "^9.39.1",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.7"
+    "vite-node": "^6.0.0",
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -163,14 +186,17 @@
     "test": "vitest run",
     "evals": "npx ray evals",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "sync-catalog": "vite-node --config vitest.config.mts scripts/sync-catalog.ts",
+    "sync-favicons": "vite-node --config vitest.config.mts scripts/sync-favicons.ts"
   },
   "platforms": [
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9",
-    "js-yaml@3": "3.15.2"
+    "brace-expansion": "5.0.12",
+    "js-yaml@3": "3.15.2",
+    "minimatch@10": "11.0.7"
   },
   "preferences": [
     {
@@ -180,6 +206,33 @@
       "title": "Export Directory",
       "description": "Where Export Apps saves its YAML file",
       "default": "~/Downloads"
+    },
+    {
+      "name": "includeNsfw",
+      "type": "checkbox",
+      "required": false,
+      "title": "NSFW",
+      "label": "Include NSFW apps",
+      "description": "Show adult sites in Find Profile and Import from Catalog",
+      "default": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
     }
   ]
 }

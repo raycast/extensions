@@ -1,5 +1,25 @@
 # GitHub Changelog
 
+## [Fix AI Chat Mention Icons] - 2026-11-12
+
+- Make pull request and issue icons readable in dark mode in the AI Chat `@` menu and mention pills.
+
+## [Windows Action Shortcuts] - 2026-11-06
+
+- Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
+
+## [Update] - 2026-11-06
+
+- Add **Create Repository** command (disabled by default) to create a repository on your account or in one of your organizations.
+- AI: Add a **Create Repository** tool, which always asks for confirmation before creating the repository.
+
+## [Create Release and Dispatch Workflow Commands] - 2026-10-31
+
+- New **Create Release** command to publish a release with auto-suggested next tag, generated release notes, draft and pre-release options.
+- New **Dispatch Workflow** command to trigger `workflow_dispatch` workflows with their inputs, defaulting the ref to the branch of the latest run.
+- Dispatch Workflow: Pin workflows with ⌘P to list them first in the workflow picker; pins are stored per repository.
+- Dispatch Workflow: Remember the last selected repository.
+
 ## [Mentions in AI Chat] - 2026-10-29
 
 - Add **Issues**, **Pull Requests**, and **Repositories** mention searches to the AI Chat composer's `@` menu. Without a query they list open issues and pull requests you're involved in, and your most recently pushed repositories.

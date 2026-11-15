@@ -11,6 +11,7 @@ Control Cursor directly from Raycast
 - Search Cursor Recent Projects
 - Use `Open With Cursor` command
 - Use `Open New Window` command
+- Show Active Workspaces across all macOS Spaces and focus their windows
 - Show Installed Extensions list
 - Search & Install Extension from VSCode Marketplace
 - Reach and search the Cursor Documentation in an instant right from Raycast without any hassle.

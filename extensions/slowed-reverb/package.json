@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slowed-reverb",
   "title": "Slowed + Reverb",
-  "description": "Turn any song into a Slowed + Reverb version",
+  "description": "Slow down, speed up, add reverb, and convert local audio files.",
   "icon": "extension_icon.png",
-  "author": "tomo_myrman",
+  "author": "0xdhrv",
   "scripts": {
     "ray": "ray",
     "build": "ray build -e dist -o ./dist",
@@ -37,17 +37,22 @@
       "title": "Generate Nightcore Version",
       "description": "Turn any song into a Nightcore version",
       "mode": "no-view"
+    },
+    {
+      "name": "process-audio",
+      "title": "Process Audio",
+      "description": "Batch process audio with custom speed, reverb, and output format",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "customSoxPath",
-      "title": "Custom Sox Path (install with Homebrew first)",
-      "description": "Custom path to Sox",
+      "title": "SoX Executable Path",
+      "description": "Absolute path to the SoX executable. Leave blank to find SoX automatically.",
       "type": "textfield",
-      "default": "/opt/homebrew/bin/sox",
-      "placeholder": "/opt/homebrew/bin/sox",
-      "required": true
+      "placeholder": "Path to sox or sox.exe",
+      "required": false
     },
     {
       "name": "defaultSlowedSpeed",
@@ -55,7 +60,7 @@
       "description": "Default speed for the Slowed version",
       "type": "dropdown",
       "default": "0.8",
-      "required": true,
+      "required": false,
       "data": [
         {
           "title": "0.5",
@@ -105,7 +110,7 @@
       "description": "Default speed for the Nightcore version",
       "type": "dropdown",
       "default": "1.2",
-      "required": true,
+      "required": false,
       "data": [
         {
           "title": "1.1",
@@ -144,6 +149,31 @@
           "value": "1.5"
         }
       ]
+    },
+    {
+      "name": "defaultOutputFormat",
+      "title": "Default Output Format",
+      "description": "The format used when you do not choose one",
+      "type": "dropdown",
+      "default": {
+        "macOS": "mp3",
+        "Windows": "wav"
+      },
+      "required": false,
+      "data": [
+        {
+          "title": "MP3",
+          "value": "mp3"
+        },
+        {
+          "title": "WAV",
+          "value": "wav"
+        },
+        {
+          "title": "FLAC",
+          "value": "flac"
+        }
+      ]
     }
   ],
   "categories": [
@@ -152,15 +182,37 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "contributors": [
+    "ray.dhruv"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "tools": [
+    {
+      "name": "inspect-audio",
+      "title": "Inspect Audio",
+      "description": "Read the duration, format, sample rate, and channels of a local audio file"
+    },
+    {
+      "name": "render-audio",
+      "title": "Render Audio",
+      "description": "Apply audio effects or convert local files to MP3, WAV, or FLAC"
+    }
+  ],
+  "ai": {
+    "evals": []
   }
 }

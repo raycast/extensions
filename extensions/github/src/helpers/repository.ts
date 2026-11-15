@@ -21,13 +21,16 @@ export const WEB_IDES: {
     title: "github.dev",
     baseUrl: "https://github.dev/",
     icon: { source: "github-dev.svg", tintColor: Color.PrimaryText },
-    shortcut: { modifiers: ["cmd"], key: "o" },
+    shortcut: Keyboard.Shortcut.Common.Open,
   },
   {
     title: "VS Code for the Web",
     baseUrl: "https://vscode.dev/github/",
     icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
-    shortcut: { modifiers: ["cmd"], key: "v" },
+    shortcut: {
+      macOS: { modifiers: ["cmd"], key: "v" },
+      Windows: { modifiers: ["ctrl"], key: "v" },
+    },
   },
   {
     title: "CodeSandbox",
@@ -53,13 +56,19 @@ export const WEB_IDES: {
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
     icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
-    shortcut: { modifiers: ["cmd"], key: "s" },
+    shortcut: {
+      macOS: { modifiers: ["cmd"], key: "s" },
+      Windows: { modifiers: ["ctrl"], key: "s" },
+    },
   },
   {
     title: "DeepWiki",
     baseUrl: "https://deepwiki.com/",
     icon: { source: "deepwiki.png" },
-    shortcut: { modifiers: ["cmd"], key: "d" },
+    shortcut: {
+      macOS: { modifiers: ["cmd"], key: "d" },
+      Windows: { modifiers: ["ctrl"], key: "d" },
+    },
   },
   {
     title: "VS Code Remote Repositories",
@@ -290,7 +299,8 @@ export const buildGhCloneCommandArgs = (
  * Result of checking the availability of the GitHub CLI on the user's machine.
  */
 export type GhAvailability =
-  { available: true; executable: string } | { available: false; reason: "not-installed" | "not-authenticated" };
+  | { available: true; executable: string }
+  | { available: false; reason: "not-installed" | "not-authenticated" };
 
 const execFileAsync = promisify(execFile);
 

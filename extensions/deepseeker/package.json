@@ -48,12 +48,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -106,12 +106,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -164,12 +164,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -247,12 +247,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -305,12 +305,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -363,12 +363,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -429,12 +429,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -495,12 +495,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -553,12 +553,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -611,12 +611,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -661,12 +661,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek Flash",
+              "value": "deepseek-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -702,7 +702,7 @@
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
     "@raycast/api": "^1.50.0",
-    "openai": "^4.53.2",
+    "openai": "^7.55.0",
     "run-applescript": "^6.1.0"
   },
   "preferences": [
@@ -740,16 +740,12 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "deepseek-chat",
-          "value": "deepseek-chat"
+          "title": "DeepSeek Flash",
+          "value": "deepseek-flash"
         },
         {
-          "title": "deepseek-reasoner",
-          "value": "deepseek-reasoner"
-        },
-        {
-          "title": "deepseek-r1",
-          "value": "deepseek-r1"
+          "title": "DeepSeek V4 Pro",
+          "value": "deepseek-v4-pro"
         },
         {
           "title": "GPT-4o",

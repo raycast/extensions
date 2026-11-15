@@ -5,6 +5,10 @@
   "description": "Quickly connect and manage multiple SSH connections",
   "icon": "command-icon.png",
   "author": "dimagrossman",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
   "contributors": [
     "LenoxFro",
     "otatoPotato",
@@ -13,7 +17,8 @@
     "ViGeng",
     "alschetinin",
     "xmok",
-    "benhepburn"
+    "benhepburn",
+    "olafvanmidden"
   ],
   "license": "MIT",
   "preferences": [
