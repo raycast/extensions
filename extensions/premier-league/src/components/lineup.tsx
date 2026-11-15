@@ -3,10 +3,8 @@ import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getMatchEvents, getMatchLineups } from "../api";
 import { Fixture, MatchEvent, Player } from "../types";
-import { getClubLogo, getProfileImg } from "../utils";
+import { getClubLogo, getProfileImg, positions } from "../utils";
 import groupBy from "lodash.groupby";
-
-const positions = ["Goalkeeper", "Defenders", "Midfielders", "Forwards"];
 
 const cardMap: Record<string, string> = {
   Yellow: "match/card-yellow.svg",
