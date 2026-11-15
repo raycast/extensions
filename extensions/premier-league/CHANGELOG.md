@@ -3,6 +3,7 @@
 ## [English-Only Commentary] - {PR_MERGE_DATE}
 
 - Fix Match Commentary listing every event three times, in English, Spanish and Arabic. The feed now carries all three for recent matches, so commentary is requested in English only.
+- Fix Lineup showing nothing for matches whose formation isn't announced yet.
 
 ## [Move Jump to Matchweek off Enter] - 2026-08-31
 
