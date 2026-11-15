@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
 import { hcReplyText } from "./herdr-output.js";
+import { imageAttachmentSchema, type ImageAttachment } from "./protocol.js";
 
 export type HcTurn = {
   id: string;
   text: string;
+  image?: ImageAttachment;
   output: string;
   at: number;
   state: "submitting" | "submitted" | "working" | "blocked" | "done" | "unknown" | "rejected" | "paused";
@@ -30,6 +32,7 @@ function decodeTurns(raw: unknown): HcTurn[] {
         t.id.length > 200 ||
         typeof t.text !== "string" ||
         t.text.length > 100_000 ||
+        (t.image !== undefined && !imageAttachmentSchema.safeParse(t.image).success) ||
         typeof t.output !== "string" ||
         t.output.length > 100_000 ||
         !Number.isSafeInteger(t.at) ||
@@ -57,7 +60,7 @@ export class HcConversation {
   turns: HcTurn[] = [];
   ready = false;
   error?: string;
-  private active?: { id: string; before: Observation; working: boolean };
+  private active?: { id: string; before: Observation; working: boolean; wireText: string };
   private writes: Promise<void> = Promise.resolve();
   private owned = new Set<string>();
   constructor(
@@ -131,7 +134,7 @@ export class HcConversation {
     this.owned.clear();
     await this.load();
   }
-  async begin(id: string, text: string, before: Observation) {
+  async begin(id: string, text: string, before: Observation, image?: ImageAttachment, wireText = text) {
     if (!this.ready || this.error) throw new Error("Local message history is unavailable. Nothing was sent.");
     const changed: HcTurn[] = [];
     if (this.active) {
@@ -141,11 +144,19 @@ export class HcConversation {
         changed.push(prior);
       }
     }
-    const turn: HcTurn = { id, text, output: "", at: Date.now(), state: "submitting", isolated: true };
+    const turn: HcTurn = {
+      id,
+      text,
+      ...(image ? { image: imageAttachmentSchema.parse(image) } : {}),
+      output: "",
+      at: Date.now(),
+      state: "submitting",
+      isolated: true,
+    };
     this.owned.add(id);
     this.turns.push(turn);
     changed.push(turn);
-    this.active = { id, before, working: false };
+    this.active = { id, before, working: false, wireText };
     try {
       await this.save(changed);
     } catch {
@@ -183,7 +194,7 @@ export class HcConversation {
     if (!current.complete || current.stable === false) return;
     const result =
       active.before.complete && active.before.stable !== false
-        ? hcReplyText(active.before.text, current.text, turn.text)
+        ? hcReplyText(active.before.text, current.text, active.wireText)
         : { text: "", isolated: false };
     const nextState = current.state === "working" ? "working" : current.state === "blocked" ? "blocked" : turn.state;
     active.working ||= current.state === "working";

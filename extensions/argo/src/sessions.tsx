@@ -26,6 +26,8 @@ import { DiscoverBridges, Setup } from "./onboarding.js";
 import { portRange } from "./discovery.js";
 import { interactionMarkdown, literal, originalParametersMarkdown } from "./interaction-format.js";
 import { Compose } from "./compose.js";
+import { ImageAccessory, ImageActions } from "./image-actions.js";
+import { getCapture, readImage, releaseImage } from "./images.js";
 import { messageMarkdown } from "./message-format.js";
 import { HcClient, hcTargetKey, type HcTarget } from "./herdr.js";
 import { HerdrSession } from "./herdr-session.js";
@@ -39,7 +41,13 @@ import {
 } from "./session-target.js";
 export { LAST_CONVERSATION_KEY } from "./session-target.js";
 
-export type Context = { bindingId?: string; profileId?: string; connectionKey?: string; recent?: boolean };
+export type Context = {
+  bindingId?: string;
+  profileId?: string;
+  connectionKey?: string;
+  recent?: boolean;
+  captureId?: string;
+};
 export function parseLastConversation(raw: string): ConversationTarget {
   const value = parseSessionTarget(raw);
   if ("kind" in value) throw new Error("Not a bridge conversation");
@@ -134,7 +142,7 @@ function PreferencesAction() {
   return <Action title="Open Argo Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />;
 }
 
-function SessionList({ notice }: { notice?: string }) {
+function SessionList({ notice, captureId }: { notice?: string; captureId?: string }) {
   const feed = useBridges();
   const { push } = useNavigation();
   const hc = useHerdr();
@@ -147,7 +155,13 @@ function SessionList({ notice }: { notice?: string }) {
   const openHc = async (target: HcTarget) => {
     try {
       await LocalStorage.setItem(LAST_CONVERSATION_KEY, JSON.stringify(target));
-      push(<HerdrSession target={target} onAllSessions={(onPop) => push(<SessionList />, onPop)} />);
+      push(
+        <HerdrSession
+          target={target}
+          captureId={captureId}
+          onAllSessions={(onPop) => push(<SessionList captureId={captureId} />, onPop)}
+        />,
+      );
     } catch {
       await showToast({
         style: Toast.Style.Failure,
@@ -314,6 +328,7 @@ function SessionList({ notice }: { notice?: string }) {
                             bindingId={session.id}
                             profileId={session.bridge.profile.id}
                             connectionKey={session.bridge.connectionKey}
+                            captureId={captureId}
                           />,
                         )
                       }
@@ -826,10 +841,12 @@ function Conversation({
   bindingId,
   profileId,
   connectionKey,
+  captureId,
 }: {
   bindingId: string;
   profileId: string;
   connectionKey?: string;
+  captureId?: string;
 }) {
   const feed = useHub(bindingId, profileId, connectionKey);
   const { push } = useNavigation();
@@ -837,7 +854,10 @@ function Conversation({
   if (!identity && feed.connectionKey) setIdentity(feed.connectionKey);
   const connectionChanged = Boolean(identity && feed.connectionKey && identity !== feed.connectionKey);
   const draft = useDraft(bindingId, identity);
-  const latestSend = useRef<(text: string, generation?: string) => Promise<boolean>>(async () => false);
+  const latestSend = useRef<(text: string, generation?: string, imageId?: string) => Promise<boolean>>(
+    async () => false,
+  );
+  const openedCapture = useRef<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [detached, setDetached] = useState(false);
   const lock = useRef(false);
@@ -919,7 +939,7 @@ function Conversation({
       setBusy(false);
     }
   }
-  async function send(text: string, expectedGeneration?: string): Promise<boolean> {
+  async function send(text: string, expectedGeneration?: string, imageId?: string): Promise<boolean> {
     const unavailable = connectionChanged
       ? "Bridge connection changed. Open this session again from All Sessions; your original draft is kept."
       : expectedGeneration && expectedGeneration !== generation
@@ -937,12 +957,25 @@ function Conversation({
       await showToast({ style: Toast.Style.Failure, title: "Enter a message of 1–100,000 characters" });
       return false;
     }
+    if (imageId && !session.capabilities.images) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Image Not Sent",
+        message: "This connection needs an image-capable bridge and connector update. Your text and image are kept.",
+      });
+      return false;
+    }
     const client = feed.hub.current!;
     const sent = await run(
       async () => {
         let attempt;
+        let image;
         try {
-          attempt = await draft.prepare(text, session.generation);
+          image = imageId ? await readImage(imageId) : undefined;
+          const fingerprint = image
+            ? JSON.stringify([image.name, image.mimeType, image.size, image.sha256])
+            : undefined;
+          attempt = await draft.prepare(text, session.generation, imageId, fingerprint);
         } catch (cause) {
           const error = new HubError(0);
           error.message = cause instanceof Error ? cause.message : "Could not save the pending message locally.";
@@ -955,6 +988,7 @@ function Conversation({
             messageId: attempt.id,
             generation: attempt.generation,
             text,
+            ...(image ? { image } : {}),
           });
         } catch (cause) {
           if (cause instanceof HubError && [400, 401, 403, 404, 409, 422].includes(cause.status)) {
@@ -986,7 +1020,11 @@ function Conversation({
       session.status === "ready" ? "Message queued for Agent" : "Queued — waiting for Agent",
     );
     if (sent) {
-      await draft.clearIf(text);
+      const cleared = await draft.clearIf(text, imageId);
+      if (cleared && imageId)
+        await releaseImage(imageId).catch(() =>
+          showToast({ style: Toast.Style.Failure, title: "Message sent, but image cache cleanup failed" }),
+        );
     }
     return sent;
   }
@@ -1071,6 +1109,61 @@ function Conversation({
       }
     }
   }
+  function openCompose(selectedImage = draft.imageId) {
+    push(
+      <Compose
+        text={draft.text}
+        change={draft.change}
+        imageId={selectedImage}
+        changeImage={draft.changeImage}
+        imageUnavailable={
+          session?.capabilities.images
+            ? undefined
+            : "Images require an updated image-capable bridge and connector. Text messages still work."
+        }
+        send={(text, imageId) => latestSend.current(text, generation, imageId)}
+      />,
+    );
+  }
+  async function attachCapture(active: () => boolean = () => true) {
+    if (!captureId || !draft.ready) return;
+    try {
+      if (
+        draft.imageId &&
+        draft.imageId !== captureId &&
+        !(await confirmAlert({
+          title: "Replace Draft Image?",
+          message: "Your current comment is kept. The new screenshot will replace its image.",
+          primaryAction: { title: "Use Screenshot" },
+          dismissAction: { title: "Keep Draft Image" },
+        }))
+      )
+        return;
+      if (!active()) return;
+      await draft.changeImage(captureId);
+      if (draft.imageId && draft.imageId !== captureId) await releaseImage(draft.imageId).catch(() => {});
+    } catch (cause) {
+      if (active())
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Screenshot Kept",
+          message:
+            cause instanceof Error
+              ? cause.message
+              : "Could not attach the screenshot. Resolve the saved draft and try Attach Captured Image.",
+        });
+    }
+  }
+  useEffect(() => {
+    if (!captureId || !draft.ready || !generation || openedCapture.current === captureId) return;
+    openedCapture.current = captureId;
+    let active = true;
+    void attachCapture(() => active);
+    return () => {
+      active = false;
+    };
+  }, [captureId, draft.ready, generation]);
+
   function commonActions() {
     return (
       <>
@@ -1078,7 +1171,7 @@ function Conversation({
           <Action
             title={canSend ? sendTitle : "Send Message (Unavailable)"}
             icon={Icon.ArrowUp}
-            onAction={() => latestSend.current(draft.text)}
+            onAction={() => latestSend.current(draft.text, undefined, draft.imageId)}
           />
         ) : null}
         <Action
@@ -1094,11 +1187,15 @@ function Conversation({
               });
               return;
             }
-            push(
-              <Compose text={draft.text} change={draft.change} send={(text) => latestSend.current(text, generation)} />,
-            );
+            openCompose();
           }}
         />
+        {draft.ready && !busy && !connectionChanged ? (
+          <ImageActions imageId={draft.imageId} changeImage={draft.changeImage} />
+        ) : null}
+        {captureId && captureId !== draft.imageId ? (
+          <Action title="Attach Captured Image" icon={Icon.Image} onAction={() => attachCapture()} />
+        ) : null}
         <Action
           title="Jump to Latest Reply"
           icon={Icon.ArrowDown}
@@ -1240,6 +1337,9 @@ function Conversation({
       filtering={false}
       isShowingDetail
       searchText={draft.text}
+      searchBarAccessory={
+        draft.imageId ? <ImageAccessory imageId={draft.imageId} changeImage={draft.changeImage} /> : undefined
+      }
       onSearchTextChange={(text) => {
         if (draft.ready) draft.change(text);
       }}
@@ -1276,7 +1376,11 @@ function Conversation({
           subtitle="Compose a message to your existing Agent"
           icon={Icon.Message}
           detail={
-            <List.Item.Detail markdown="## Your Agent replies appear here\n\nPress **⌘N** to compose a message, or type a short draft in the search bar. Sending is always explicit; reconnecting never sends a draft." />
+            <List.Item.Detail
+              markdown={
+                "## Your Agent replies appear here\n\nPress **⌘N** to compose a message, or type a short draft in the search bar. Sending is always explicit; reconnecting never sends a draft."
+              }
+            />
           }
           actions={<ActionPanel>{commonActions()}</ActionPanel>}
         />
@@ -1356,7 +1460,11 @@ function Conversation({
                 },
               ]}
               icon={message.role === "user" ? Icon.Person : Icon.Message}
-              detail={<List.Item.Detail markdown={messageMarkdown(message.text)} />}
+              detail={
+                <List.Item.Detail
+                  markdown={`${messageMarkdown(message.text)}${message.image ? "\n\n📎 Image attached" : ""}`}
+                />
+              }
               actions={
                 <ActionPanel>
                   {commonActions()}
@@ -1422,7 +1530,13 @@ function Conversation({
   );
 }
 
-export function SessionCommand({ bindingId, profileId, connectionKey: expectedKey, recent = true }: Context) {
+export function SessionCommand({
+  bindingId,
+  profileId,
+  connectionKey: expectedKey,
+  recent = true,
+  captureId,
+}: Context) {
   const [target, setTarget] = useState<SessionTarget>();
   const [loading, setLoading] = useState(Boolean(recent || bindingId));
   const [notice, setNotice] = useState<string>();
@@ -1440,9 +1554,14 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
           setNotice("Session Link Has No Bridge — Choose the Intended Session Below");
           return;
         }
-        const raw = !bindingId ? await LocalStorage.getItem<string>(LAST_CONVERSATION_KEY) : undefined;
+        const capture = captureId ? await getCapture(captureId) : undefined;
+        const raw = !captureId && !bindingId ? await LocalStorage.getItem<string>(LAST_CONVERSATION_KEY) : undefined;
         if (!active) return;
-        const reference = raw ? parseSessionTarget(raw) : undefined;
+        const reference = capture ? capture.target : raw ? parseSessionTarget(raw) : undefined;
+        if (captureId && !reference) {
+          setNotice("Screenshot Kept — Choose a Session to Add Your Comment");
+          return;
+        }
         if (reference && "kind" in reference) {
           const client = await HcClient.connect(reference.socketPath);
           hcClient = client;
@@ -1497,16 +1616,25 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
       hub?.close();
       hcClient?.close();
     };
-  }, [bindingId, profileId, expectedKey, recent, configPath, portStart, portEnd]);
+  }, [bindingId, profileId, expectedKey, recent, captureId, configPath, portStart, portEnd]);
   if (loading) return <List isLoading navigationTitle="Argo · Recent Session" />;
   return target ? (
     "kind" in target ? (
-      <HerdrSession key={hcTargetKey(target)} target={target} onAllSessions={() => setTarget(undefined)} />
+      <HerdrSession
+        key={hcTargetKey(target)}
+        target={target}
+        captureId={captureId}
+        onAllSessions={() => setTarget(undefined)}
+      />
     ) : (
-      <Conversation key={`${target.profileId}:${target.connectionKey}:${target.bindingId}`} {...target} />
+      <Conversation
+        key={`${target.profileId}:${target.connectionKey}:${target.bindingId}`}
+        {...target}
+        captureId={captureId}
+      />
     )
   ) : (
-    <SessionList notice={notice} />
+    <SessionList notice={notice} captureId={captureId} />
   );
 }
 
