@@ -398,6 +398,57 @@ describe.each(["central", "legacy"])("%s refresh failures", (protocol) => {
     },
   );
 
+  it("keeps a grant stored by reconnect while the refresh was in flight", async () => {
+    mocks.getTokens
+      .mockResolvedValueOnce({ refreshToken: "stored-refresh" })
+      .mockResolvedValue({
+        accessToken: "reconnected-access",
+        refreshToken: "reconnected-refresh",
+      });
+    const fetchMock = vi.fn<typeof fetch>(async (input) =>
+      String(input).endsWith("/refresh") || String(input).endsWith("/token")
+        ? Response.json({
+            access_token: "rotated-access",
+            refresh_token: "rotated-refresh",
+            token_type: "Bearer",
+            expires_in: 3600,
+          })
+        : new Response(null, { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(refreshJumpseatAccessToken()).resolves.toBe(
+      "reconnected-access",
+    );
+    expect(mocks.setTokens).not.toHaveBeenCalled();
+    const revoke = fetchMock.mock.calls.find(([url]) =>
+      /\/(oauth\/revoke|auth\/logout)$/.test(String(url)),
+    );
+    expect(String(revoke?.[1]?.body)).toContain("rotated-refresh");
+  });
+
+  it("keeps rotated tokens a concurrent refresh already stored", async () => {
+    mocks.getTokens
+      .mockResolvedValueOnce({ refreshToken: "stored-refresh" })
+      .mockResolvedValue({
+        accessToken: "rotated-access",
+        refreshToken: "rotated-refresh",
+      });
+    const fetchMock = vi.fn<typeof fetch>(async () =>
+      Response.json({
+        access_token: "rotated-access",
+        refresh_token: "rotated-refresh",
+        token_type: "Bearer",
+        expires_in: 3600,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(refreshJumpseatAccessToken()).resolves.toBe("rotated-access");
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(mocks.setTokens).not.toHaveBeenCalled();
+  });
+
   it("can retry a transient failure and persist rotated tokens", async () => {
     // A grant made before past flights keeps its upcoming-only scope.
     mocks.getTokens.mockResolvedValue({
