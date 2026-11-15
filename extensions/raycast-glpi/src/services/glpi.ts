@@ -32,6 +32,7 @@ export function initClientGlpi(endpoint: string, clientid: string, clientsecret:
  * @returns Tickets
  */
 export async function getAssistanceTickets(
+  server?: string,
   filter?: string,
   start?: number,
   limit?: number,

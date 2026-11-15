@@ -49,7 +49,7 @@ export function TicketView(): React.ReactElement {
     data: tickets,
     isLoading: isLoadingTickets,
     revalidate: revalidateTickets,
-  } = useCachedPromise(getAssistanceTickets, [filter, undefined, undefined, "date_mod:desc"], {
+  } = useCachedPromise(getAssistanceTickets, [selectedGlpiServer, filter, undefined, undefined, "date_mod:desc"], {
     execute: false,
     onError(error) {
       if (error instanceof GlpiApiError && error.code === "GLPI_API_SERVER_AUTH_EXPIRED") {
