@@ -1,6 +1,6 @@
 # Changelog
 
-## [Past Flights and In-Flight Progress] - {PR_MERGE_DATE}
+## [Past Flights and In-Flight Progress] - 2026-11-15
 
 - Switch Upcoming Flights to Past to browse the flights you have taken, newest first. Existing connections are asked to reconnect once to allow it.
 - While you are airborne, the menu bar counts down to arrival and shows the flight's progress, takeoff time and arrival in your own time zone.
