@@ -1,0 +1,317 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "charon-clipboard",
+  "title": "Charon Clipboard",
+  "description": "Clipy-style clipboard manager: a popup menu at your cursor with numbered history folders, snippet folders, and Clipy XML import/export.",
+  "icon": "icon.png",
+  "author": "unz47",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "clipboard",
+    "clipy",
+    "history",
+    "snippets",
+    "popup",
+    "paste",
+    "menu"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "popup-main",
+      "title": "Show Clipboard Menu",
+      "subtitle": "Charon",
+      "description": "Show the main menu (history and snippets) at the mouse cursor. Suggested hotkey: ⌘⇧V.",
+      "mode": "no-view"
+    },
+    {
+      "name": "popup-history",
+      "title": "Show History Menu",
+      "subtitle": "Charon",
+      "description": "Show the clipboard history menu at the mouse cursor. Suggested hotkey: ⌃⌘V.",
+      "mode": "no-view"
+    },
+    {
+      "name": "popup-snippets",
+      "title": "Show Snippet Menu",
+      "subtitle": "Charon",
+      "description": "Show the snippet menu at the mouse cursor. Suggested hotkey: ⌘⇧B.",
+      "mode": "no-view"
+    },
+    {
+      "name": "popup-folder",
+      "title": "Show Snippet Folder Menu",
+      "subtitle": "Charon",
+      "description": "Show a single snippet folder at the mouse cursor. Combine with a Quicklink to give each folder its own hotkey.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "folder",
+          "placeholder": "Folder Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Clipboard Menu Bar",
+      "subtitle": "Charon",
+      "description": "Clipboard history and snippets in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "search",
+      "title": "Search Clipboard and Snippets",
+      "subtitle": "Charon",
+      "description": "Search history and snippets in Raycast and paste the selection.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-snippets",
+      "title": "Manage Snippets",
+      "subtitle": "Charon",
+      "description": "Create, edit, reorder, and delete snippet folders and snippets.",
+      "mode": "view"
+    },
+    {
+      "name": "import-export-snippets",
+      "title": "Import and Export Snippets",
+      "subtitle": "Charon",
+      "description": "Import or export snippets in the Clipy XML format.",
+      "mode": "view"
+    },
+    {
+      "name": "clear-history",
+      "title": "Clear Clipboard History",
+      "subtitle": "Charon",
+      "description": "Delete all clipboard history items.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-preferences",
+      "title": "Open Charon Preferences",
+      "subtitle": "Charon",
+      "description": "Open the extension preferences.",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable-helper",
+      "title": "Enable Clipboard Helper",
+      "subtitle": "Charon",
+      "description": "Review and enable the background helper that records the clipboard and shows popup menus.",
+      "mode": "view"
+    },
+    {
+      "name": "disable-helper",
+      "title": "Disable Clipboard Helper",
+      "subtitle": "Charon",
+      "description": "Stop the background helper and remove its login item.",
+      "mode": "no-view"
+    },
+    {
+      "name": "keep-alive",
+      "title": "Check Clipboard Helper",
+      "subtitle": "Charon",
+      "description": "Periodically restarts the helper if it was enabled and stopped.",
+      "mode": "no-view",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "maxHistory",
+      "title": "Maximum History Size",
+      "description": "How many clipboard items to keep.",
+      "type": "textfield",
+      "default": "30",
+      "required": false
+    },
+    {
+      "name": "reorder",
+      "title": "Reorder",
+      "label": "Move pasted items to the top",
+      "description": "Move an item to the top of the history after you paste it.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "dedupe",
+      "title": "Duplicates",
+      "label": "Remove duplicates",
+      "description": "Copying the same content again moves it to the top instead of adding a duplicate.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "itemsInline",
+      "title": "Inline Items",
+      "description": "Number of items shown directly in the menu before the numbered folders.",
+      "type": "textfield",
+      "default": "0",
+      "required": false
+    },
+    {
+      "name": "itemsPerFolder",
+      "title": "Items per Folder",
+      "description": "Number of items in each history folder (1 - 10, 11 - 20, ...).",
+      "type": "textfield",
+      "default": "10",
+      "required": false
+    },
+    {
+      "name": "maxTitleLength",
+      "title": "Maximum Title Length",
+      "description": "Longer menu titles are truncated with an ellipsis.",
+      "type": "textfield",
+      "default": "20",
+      "required": false
+    },
+    {
+      "name": "numbered",
+      "title": "Numbering",
+      "label": "Show item numbers",
+      "description": "Prefix menu items with 1. 2. 3. ...",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "numericShortcuts",
+      "title": "Number Keys",
+      "label": "Select items with the 1-9 and 0 keys",
+      "description": "Add numeric key equivalents to history items in the popup menu.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "tooltip",
+      "title": "Tooltips",
+      "label": "Show the full text as a tooltip",
+      "description": "Show up to 200 characters when hovering over an item.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "imagePreview",
+      "title": "Image Preview",
+      "label": "Show image thumbnails",
+      "description": "Show thumbnails for image items.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "colorPreview",
+      "title": "Color Preview",
+      "label": "Show a swatch for color codes",
+      "description": "Show a color swatch for items like #FF8800.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "confirmClear",
+      "title": "Clear Confirmation",
+      "label": "Ask before clearing the history",
+      "description": "Show a confirmation dialog before clearing the history.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "storeRich",
+      "title": "Rich Text",
+      "label": "Keep formatting (HTML and RTF)",
+      "description": "When disabled, only plain text is stored.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "storeImage",
+      "title": "Images",
+      "label": "Store images",
+      "description": "Store copied images as PNG files.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "storeFile",
+      "title": "Files",
+      "label": "Store files copied in Finder",
+      "description": "When disabled, copied files are stored as their file names.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "excludedApps",
+      "title": "Excluded Apps",
+      "description": "Comma-separated app names or bundle IDs whose copies are never recorded (for example: 1Password, com.apple.keychainaccess).",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What Enter does in Search Clipboard and Snippets.",
+      "type": "dropdown",
+      "default": "paste",
+      "required": false,
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "showHistoryInMenu",
+      "title": "Search History",
+      "label": "Include history in Search Clipboard and Snippets",
+      "description": "Disable to search snippets only.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
