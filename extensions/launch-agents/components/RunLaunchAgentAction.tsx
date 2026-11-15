@@ -1,6 +1,6 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { runLaunchAgent } from "../lib/plist";
+import { getLaunchAgentLabel, runLaunchAgent } from "../lib/plist";
 
 export const runLaunchAgentWithToast = async (label: string) => {
   try {
@@ -15,13 +15,19 @@ export const runLaunchAgentWithToast = async (label: string) => {
   }
 };
 
-export default function RunLaunchAgentAction({ label }: { label: string }) {
+type RunLaunchAgentActionProps = ({ label: string; filePath?: never } | { filePath: string; label?: never }) & {
+  /** Set to false when Run Now is the primary action, where a custom shortcut isn't shown. */
+  withShortcut?: boolean;
+};
+
+export default function RunLaunchAgentAction({ label, filePath, withShortcut = true }: RunLaunchAgentActionProps) {
   return (
     <Action
       icon={Icon.Play}
       title="Run Now"
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={() => runLaunchAgentWithToast(label)}
+      shortcut={withShortcut ? { modifiers: ["cmd"], key: "r" } : undefined}
+      // Read the label only when the action runs, so lists don't call plutil for every item.
+      onAction={() => runLaunchAgentWithToast(label ?? getLaunchAgentLabel(filePath as string))}
     />
   );
 }

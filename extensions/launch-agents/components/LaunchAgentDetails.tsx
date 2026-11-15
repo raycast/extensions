@@ -162,8 +162,8 @@ export default function LaunchAgentDetails({
             title={isFileLoaded ? "Unload" : "Load"}
             onAction={loadOrUnloadFile}
           />
-          {isFileLoaded && <RunLaunchAgentAction label={label} />}
           <Action icon={Icon.Folder} title="Open with Visual Studio Code" onAction={handleOpenFile} />
+          {isFileLoaded && <RunLaunchAgentAction label={label} />}
           <Action
             title="Remove"
             icon={Icon.Trash}

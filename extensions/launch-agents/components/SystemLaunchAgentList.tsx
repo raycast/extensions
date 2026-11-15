@@ -1,7 +1,6 @@
 import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
-import { getLaunchAgentLabel } from "../lib/plist";
 import { getFileName } from "../lib/utils";
 import RunLaunchAgentAction from "./RunLaunchAgentAction";
 
@@ -40,7 +39,7 @@ export default function SystemLaunchAgentList() {
           icon={{ source: Icon.Rocket, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <RunLaunchAgentAction label={getLaunchAgentLabel(file)} />
+              <RunLaunchAgentAction filePath={file} withShortcut={false} />
             </ActionPanel>
           }
         />

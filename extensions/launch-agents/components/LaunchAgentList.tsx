@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
-import { createLaunchAgent as createLaunchAgentCommand, getLaunchAgentLabel } from "../lib/plist";
+import { createLaunchAgent as createLaunchAgentCommand } from "../lib/plist";
 import { getFileName } from "../lib/utils";
 import LaunchAgentDetails from "./LaunchAgentDetails";
 import RunLaunchAgentAction from "./RunLaunchAgentAction";
@@ -68,12 +68,12 @@ export default function LaunchAgentList() {
                 title="View Details"
                 target={<LaunchAgentDetails selectedFile={file} refreshList={loadLaunchAgentsFiles} />}
               />
-              <RunLaunchAgentAction label={getLaunchAgentLabel(file)} />
               <Action
                 icon={{ source: Icon.NewDocument, tintColor: Color.Green }}
                 title="Create Launch Agent"
                 onAction={createLaunchAgent}
               />
+              <RunLaunchAgentAction filePath={file} />
             </ActionPanel>
           }
         />

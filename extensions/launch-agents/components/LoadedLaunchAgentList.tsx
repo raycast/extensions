@@ -50,7 +50,7 @@ export default function LoadedLaunchAgentList() {
           icon={{ source: Icon.Rocket, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <RunLaunchAgentAction label={file.label} />
+              <RunLaunchAgentAction label={file.label} withShortcut={false} />
             </ActionPanel>
           }
         />
