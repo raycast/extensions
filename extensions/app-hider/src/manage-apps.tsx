@@ -169,12 +169,31 @@ async function readRegistry(): Promise<Registry> {
     throw error;
   }
   // A corrupt registry must NOT be treated as empty: the next write would erase
-  // every restore record.
+  // every restore record. Anything that isn't a plain object of well-formed entries
+  // (e.g. an array, where added records would be silently dropped on save) is rejected.
+  const damaged = new Error(`registry.json is damaged. Fix or remove it manually: ${REGISTRY}`);
+  let parsed: unknown;
   try {
-    return JSON.parse(raw) as Registry;
+    parsed = JSON.parse(raw);
   } catch {
-    throw new Error(`registry.json is damaged. Fix or remove it manually: ${REGISTRY}`);
+    throw damaged;
   }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw damaged;
+  for (const [key, value] of Object.entries(parsed)) {
+    if (!isRegistryEntry(value) || value.originalPath !== key) throw damaged;
+  }
+  return parsed as Registry;
+}
+
+function isRegistryEntry(value: unknown): value is RegistryEntry {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const entry = value as Record<string, unknown>;
+  return (
+    typeof entry.name === "string" &&
+    typeof entry.originalPath === "string" &&
+    typeof entry.hiddenPath === "string" &&
+    typeof entry.hiddenAt === "string"
+  );
 }
 
 async function writeRegistry(registry: Registry): Promise<void> {
@@ -287,6 +306,15 @@ async function refreshAppLauncher(): Promise<void> {
   }
 }
 
+/**
+ * Text added to the hide/restore confirmations when that action will also reset the
+ * Launchpad layout (macOS 15 and older, with the preference on). Empty otherwise.
+ */
+async function launchpadResetWarning(): Promise<string> {
+  if (!getPreferenceValues<Preferences>().resetLaunchpad || !(await hasClassicLaunchpad())) return "";
+  return "\n\nLaunchpad will also be reset: its folders and icon order will be lost. You can turn this off in the extension preferences.";
+}
+
 /** Refreshes the app launcher after hide/restore if enabled in the extension preferences. Best effort. */
 async function refreshLaunchpadIfEnabled(): Promise<void> {
   if (!getPreferenceValues<Preferences>().resetLaunchpad) return;
@@ -383,35 +411,56 @@ end run`,
     );
   } catch (error) {
     if (isUserCancel(error)) throw new CancelledError();
-    throw Object.assign(new Error(errorMessage(error)), { code: "EPERM" });
+    // Keep the real reason (e.g. disk full). Only a real permission denial gets the
+    // App Management advice from errorMessage().
+    const details = shellErrorText(error);
+    if (/operation not permitted|permission denied/i.test(details)) {
+      throw Object.assign(new Error(details), { code: "EPERM" });
+    }
+    throw new Error(`Could not move ${path.basename(src)}: ${details}`);
   }
 
   if (!(await exists(dst)) || (await exists(src))) {
-    throw Object.assign(new Error("Move failed"), { code: "EPERM" });
+    throw new Error(`Could not move ${path.basename(src)}: the move did not complete.`);
   }
 }
 
-/**
- * Moves a bundle back after a failed registry save. If that fails too, tells the user
- * where the app is now and how to recover it by hand.
- */
-async function rollbackMove(from: string, to: string, cause: unknown): Promise<never> {
-  try {
-    await moveBundle(from, to);
-  } catch {
-    throw new Error(
-      `${errorMessage(cause)} The app could not be moved back and is now at "${from}". Move it to "${to}" in Finder to recover it.`,
-    );
-  }
-  throw cause;
+/** The useful part of a failed `do shell script`: stderr if present, otherwise the message. */
+function shellErrorText(error: unknown): string {
+  const stderr = String((error as { stderr?: string })?.stderr ?? "").trim();
+  const message = error instanceof Error ? error.message : String(error);
+  return stderr || message;
 }
 
 // ---------------------------------------------------------------------------
 // Operations
 // ---------------------------------------------------------------------------
 
+/**
+ * Records are written BEFORE a hide moves the bundle and deleted AFTER a restore moves it
+ * back, so a crash can only ever leave an extra record, never a hidden app without one.
+ * An extra record is recognisable: its hidden bundle is gone and the app sits at its
+ * original path again. Drop those records so the app simply shows as visible.
+ */
+async function repairUnfinishedMoves(): Promise<void> {
+  const registry = await readRegistry();
+  let changed = false;
+  for (const [key, entry] of Object.entries(registry)) {
+    if (await exists(entry.hiddenPath)) continue;
+    try {
+      if (!(await fs.lstat(entry.originalPath)).isDirectory()) continue;
+    } catch {
+      continue; // Neither copy exists: keep the record so the app shows as Missing.
+    }
+    delete registry[key];
+    changed = true;
+  }
+  if (changed) await writeRegistry(registry);
+}
+
 async function scanApps(): Promise<AppItem[]> {
   await migrateLegacyFolder();
+  await repairUnfinishedMoves();
   const registry = await readRegistry();
   const items: AppItem[] = [];
 
@@ -464,19 +513,26 @@ async function hideApp(app: AppItem): Promise<void> {
     throw new Error(`An item named ${path.basename(hiddenPath)} already exists in the hidden folder.`);
   }
 
-  await moveBundle(app.path, hiddenPath);
+  // Save the restore record BEFORE moving. If Raycast stops between the two steps, the
+  // app is either still in place (the record is dropped on the next scan) or hidden with
+  // a record, never hidden without one.
+  const previous = registry[app.path];
+  registry[app.path] = {
+    name: app.name,
+    originalPath: app.path,
+    hiddenPath,
+    hiddenAt: new Date().toISOString(),
+  };
+  await writeRegistry(registry);
 
   try {
-    registry[app.path] = {
-      name: app.name,
-      originalPath: app.path,
-      hiddenPath,
-      hiddenAt: new Date().toISOString(),
-    };
-    await writeRegistry(registry);
+    await moveBundle(app.path, hiddenPath);
   } catch (error) {
-    // Without a registry record the app would be lost to the UI: put it back.
-    await rollbackMove(hiddenPath, app.path, error);
+    // Nothing was moved: undo the record (if this fails too, the next scan drops it).
+    if (previous) registry[app.path] = previous;
+    else delete registry[app.path];
+    await writeRegistry(registry).catch(() => undefined);
+    throw error;
   }
 
   await unregisterFromLaunchServices(app.path);
@@ -500,12 +556,10 @@ async function restoreApp(app: AppItem): Promise<void> {
   await ensureNotRunning(entry.hiddenPath, entry.name);
   await moveBundle(entry.hiddenPath, entry.originalPath);
 
-  try {
-    delete registry[key];
-    await writeRegistry(registry);
-  } catch (error) {
-    await rollbackMove(entry.originalPath, entry.hiddenPath, error);
-  }
+  // The app is back in place. If removing its record fails, the next scan drops it,
+  // so there is nothing to roll back.
+  delete registry[key];
+  await writeRegistry(registry).catch(() => undefined);
 
   await registerWithLaunchServices(entry.originalPath);
   await refreshLaunchpadIfEnabled();
@@ -625,10 +679,14 @@ export default function Command() {
                   title="Restore App"
                   icon={Icon.Eye}
                   onAction={async () => {
+                    const warning = await launchpadResetWarning();
                     const ok = await confirmAlert({
                       title: `Restore ${app.name}?`,
-                      message: "The app will be moved back to its original Applications folder.",
-                      primaryAction: { title: "Restore" },
+                      message: `The app will be moved back to its original Applications folder.${warning}`,
+                      primaryAction: {
+                        title: "Restore",
+                        style: warning ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
+                      },
                     });
                     if (!ok) return;
                     await run(`Restoring ${app.name}…`, `${app.name} restored`, "Restore failed", () =>
@@ -646,10 +704,10 @@ export default function Command() {
                   icon={Icon.EyeDisabled}
                   style={Action.Style.Destructive}
                   onAction={async () => {
+                    const warning = await launchpadResetWarning();
                     const ok = await confirmAlert({
                       title: `Hide ${app.name}?`,
-                      message:
-                        "This moves the app bundle out of Applications. Some apps may not update or work normally while moved.",
+                      message: `This moves the app bundle out of Applications. Some apps may not update or work normally while moved.${warning}`,
                       primaryAction: { title: "Hide App", style: Alert.ActionStyle.Destructive },
                     });
                     if (!ok) return;
