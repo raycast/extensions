@@ -2,6 +2,7 @@ import { Color, Detail, List } from "@raycast/api";
 
 import { useAssignments } from "./hooks/useAssignments";
 import { getProgressIcon } from "@raycast/utils";
+import { ownerColors } from "./data/factions";
 import { taskTypes } from "./data/taskTypes";
 
 const expireFormat = (seconds: number) =>
@@ -32,9 +33,9 @@ export default function Command() {
               <Detail.Metadata.Label title="Task" text={assignments[0].setting.taskDescription} />
             ) : null}
             {assignments[0].setting.tasks.map((task, index) => {
-              if (!task.planet || !task.status || !task.info) {
-                const count = assignments[0].progress[index] ?? 0;
+              const count = assignments[0].progress[index] ?? 0;
 
+              if (!task.planet || !task.status || !task.info) {
                 return (
                   <Detail.Metadata.Label
                     key={`task-${index}`}
@@ -47,16 +48,17 @@ export default function Command() {
                 );
               }
 
-              const progress = Math.max(
-                (task.info.maxHealth - task.status.health) / task.info.maxHealth,
-                assignments[0].progress[index] ?? 0,
-              );
+              // Control and Liberation tasks have a goal of 1 and progress of 0 or 1; other tasks count toward their goal.
+              const progress =
+                task.goal && task.goal > 1
+                  ? count / task.goal
+                  : Math.max((task.info.maxHealth - task.status.health) / task.info.maxHealth, count);
 
               return (
                 <Detail.Metadata.Label
                   key={`task-${index}`}
                   icon={getProgressIcon(progress, Color.Blue, {
-                    background: [Color.Blue, Color.Yellow, Color.Red, Color.Purple][task.status.owner - 1],
+                    background: ownerColors[task.status.owner - 1],
                   })}
                   title={task.planet.sector}
                   text={task.planet.name}

@@ -3,7 +3,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePlanetCampaigns } from "./hooks/usePlanetCampaigns";
 import { useState } from "react";
 import { getProgressIcon } from "@raycast/utils";
-import { factions } from "./data/factions";
+import { factions, ownerColors } from "./data/factions";
 
 export default function Command() {
   const { isLoading, campaigns } = usePlanetCampaigns();
@@ -20,7 +20,7 @@ export default function Command() {
           return (
             <List.Item
               icon={getProgressIcon(progress, Color.Blue, {
-                background: [Color.Blue, Color.Yellow, Color.Red, Color.Purple][planet.status.owner - 1],
+                background: ownerColors[planet.status.owner - 1],
               })}
               key={planet.planetIndex}
               id={planet.planetIndex.toString()}

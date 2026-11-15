@@ -7,6 +7,7 @@
 - Show Major Order tasks without a single planet, such as "defend 10 planets" or "eradicate 200,000,000 Automatons", with their progress
 - Add the 12 planets added to the game since the planet list was made, so their campaigns show in View Active Planets
 - Rename planet 99 to Sangis, which the game swapped with Alderidge Cove
+- Show planets the extension doesn't know yet as "Planet 274" and so on, instead of hiding their campaigns
 - Fix View Dispatches stopping months back: it now lists the past year of dispatches, up to the latest
 - Show a failure toast when the Helldivers 2 API can't be reached
 - Give Illuminate-held planets their own color in the progress icons

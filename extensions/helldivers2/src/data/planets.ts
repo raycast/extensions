@@ -6,6 +6,14 @@ interface Planet {
   environmentals: string[];
 }
 
+export const unknownPlanet = (index: number): Planet => ({
+  name: `Planet ${index}`,
+  sector: "",
+  biome: "",
+  environmentals: [],
+  names: {},
+});
+
 export const planets: Partial<Record<string, Planet>> = {
   "0": {
     name: "Super Earth",

@@ -1,5 +1,5 @@
 import { campaignTypes } from "../data/campaignTypes";
-import { planets } from "../data/planets";
+import { planets, unknownPlanet } from "../data/planets";
 import { useSummaryStats } from "./useSummaryStats";
 import { useWarInfo } from "./useWarInfo";
 import { useWarStatus } from "./useWarStatus";
@@ -13,12 +13,12 @@ export const usePlanetCampaigns = () => {
 
   const campaigns = status?.campaigns
     .flatMap((planet) => {
-      const planetData = planets[planet.planetIndex.toString()];
+      const planetData = planets[planet.planetIndex.toString()] ?? unknownPlanet(planet.planetIndex);
       const planetStatus = status.planetStatus.find((status) => status.index === planet.planetIndex);
       const planetInfo = info.planetInfos.find((info) => info.index === planet.planetIndex);
       const planetStats = stats.planets_stats.find((stats) => stats.planetIndex === planet.planetIndex);
 
-      if (!planetData || !planetStatus || !planetInfo || !planetStats) return [];
+      if (!planetStatus || !planetInfo || !planetStats) return [];
 
       return {
         ...planet,

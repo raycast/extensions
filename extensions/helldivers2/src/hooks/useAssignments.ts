@@ -1,4 +1,4 @@
-import { planets } from "../data/planets";
+import { planets, unknownPlanet } from "../data/planets";
 import { useFetch } from "./useFetch";
 import { useWarInfo } from "./useWarInfo";
 import { useWarStatus } from "./useWarStatus";
@@ -58,7 +58,7 @@ export const useAssignments = () => {
       return {
         ...task,
         goal: valueOf(GOAL_VALUE_TYPE),
-        planet: planetIndex === undefined ? undefined : planets[planetIndex],
+        planet: planetIndex === undefined ? undefined : (planets[planetIndex] ?? unknownPlanet(planetIndex)),
         status: status?.planetStatus.find((status) => status.index === planetIndex),
         info: info?.planetInfos.find((info) => info.index === planetIndex),
       };
