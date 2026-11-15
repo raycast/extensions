@@ -1,6 +1,6 @@
 # WIP Changelog
 
-## [Paste images from clipboard] - {PR_MERGE_DATE}
+## [Paste images from clipboard] - 2026-11-15
 
 - Attach screenshots and other copied images when pasting into Add Completed Todo
 
