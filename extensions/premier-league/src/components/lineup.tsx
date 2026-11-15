@@ -119,6 +119,8 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
     });
   };
 
+  const pitchAvailable = Array.isArray(teamLineup?.formation?.lineup);
+
   return (
     <List
       throttle
@@ -142,7 +144,7 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
         </List.Dropdown>
       }
     >
-      {teamLineup ? (
+      {pitchAvailable ? (
         <List.Section title="Manager">
           <List.Item
             title={
@@ -166,7 +168,7 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
         />
       )}
 
-      {teamLineup && teamLineup.formation
+      {Array.isArray(teamLineup?.formation?.lineup)
         ? teamLineup.formation.lineup.map((group, idx) => {
             const players = teamLineup?.players.filter((p) =>
               group.includes(p.id),
