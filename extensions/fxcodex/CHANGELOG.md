@@ -1,6 +1,6 @@
 # fxCodex Changelog
 
-## [Open Links in Workspaces] - {PR_MERGE_DATE}
+## [Open Links in Workspaces] - 2026-11-15
 
 - Add **Open Link in Workspace** to deliver a `codex://` link, such as a sign-in callback, to one workspace's Codex. The link comes from the command argument or the clipboard. The command is disabled by default; enable it in Raycast Settings when needed.
 - Add **Open Link…** to each workspace's action panel.
