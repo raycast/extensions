@@ -1,6 +1,6 @@
 # Argo Changelog
 
-## [Screenshot Comments and Attachment Controls] - {PR_MERGE_DATE}
+## [Screenshot Comments and Attachment Controls] - 2026-11-15
 
 - Protect reattached images and saved draft/uncertain/recovery references during cache cleanup; reclaim abandoned captures after seven days and preserve images when reference storage is unavailable.
 - Add Screenshot and Comment: select a region, open the frozen recent session with an attachment, add text and explicitly send. Supports a user-configured Control-Command-Shift-H hotkey and safe capture recovery.
