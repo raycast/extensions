@@ -1,4 +1,4 @@
-import { activate_layout, foreground_process_id, list_layouts, toggle_layout } from "rust:../../rust";
+import { activate_layout, list_layouts, raycast_foreground_pid, toggle_layout } from "rust:../../rust";
 
 export interface RawLayout {
   id: string;
@@ -10,8 +10,8 @@ export async function getWindowsLayouts(): Promise<RawLayout[]> {
   return (await list_layouts()) as RawLayout[];
 }
 
-export async function getWindowsForegroundProcessId(): Promise<number> {
-  return (await foreground_process_id()) as number;
+export async function getWindowsRaycastPid(): Promise<number> {
+  return (await raycast_foreground_pid()) as number;
 }
 
 export async function activateWindowsLayout(id: string, waitForForegroundPid = 0): Promise<void> {

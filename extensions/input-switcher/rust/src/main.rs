@@ -1,12 +1,15 @@
 use raycast_rust_macros::raycast;
 use serde::Serialize;
 use windows::core::{PCWSTR, PWSTR};
-use windows::Win32::Foundation::{ERROR_SUCCESS, HWND, LPARAM, WPARAM};
+use windows::Win32::Foundation::{CloseHandle, ERROR_SUCCESS, HWND, LPARAM, WPARAM};
 use windows::Win32::Globalization::GetLocaleInfoW;
 use windows::Win32::System::Registry::{
   RegCloseKey, RegEnumKeyExW, RegOpenKeyExW, RegQueryValueExW, HKEY, HKEY_LOCAL_MACHINE, KEY_READ,
 };
-use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
+use windows::Win32::System::Threading::{
+  AttachThreadInput, GetCurrentThreadId, OpenProcess, QueryFullProcessImageNameW,
+  PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+};
 use windows::Win32::UI::Input::KeyboardAndMouse::{
   ActivateKeyboardLayout, GetKeyboardLayout, GetKeyboardLayoutList, ACTIVATE_KEYBOARD_LAYOUT_FLAGS,
   HKL,
@@ -415,18 +418,58 @@ fn list_layouts() -> Result<Vec<KeyboardLayout>, String> {
   unsafe { list_layouts_impl() }
 }
 
+/// True when the process's executable image is Raycast itself.
+///
+/// Checking the full image path keeps this unambiguous: Raycast's Windows
+/// binary is always `...\raycast.exe`, and helper or child processes with a
+/// different basename are correctly rejected.
+unsafe fn is_raycast_process(pid: u32) -> bool {
+  let Ok(handle) = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) else {
+    return false;
+  };
+  let mut buf = [0u16; 512];
+  let mut len = buf.len() as u32;
+  let read = QueryFullProcessImageNameW(
+    handle,
+    PROCESS_NAME_WIN32,
+    PWSTR(buf.as_mut_ptr()),
+    &mut len,
+  )
+  .is_ok();
+  let _ = CloseHandle(handle);
+  if !read {
+    return false;
+  }
+  let path = String::from_utf16_lossy(&buf[..len as usize]);
+  let path = path.replace('/', "\\");
+  path
+    .rsplit('\\')
+    .next()
+    .is_some_and(|name| name.eq_ignore_ascii_case("raycast.exe"))
+}
+
+/// The foreground PID only when Raycast itself is the foreground window, else 0.
+///
+/// The close-then-wait flow must only wait on Raycast: when the command runs
+/// while the Raycast window is visible, closing it hands focus back to the
+/// app the user was typing in. When another app is already in front there is
+/// nothing to wait for, and waiting on it would only time out.
 #[raycast]
-fn foreground_process_id() -> Result<u32, String> {
+fn raycast_foreground_pid() -> Result<u32, String> {
   unsafe {
     let fg = GetForegroundWindow();
     if fg.is_invalid() {
-      return Err("No foreground window".to_string());
+      return Ok(0);
     }
     let mut pid = 0u32;
     if GetWindowThreadProcessId(fg, Some(&mut pid)) == 0 || pid == 0 {
-      return Err("Could not identify the foreground process".to_string());
+      return Ok(0);
     }
-    Ok(pid)
+    if is_raycast_process(pid) {
+      Ok(pid)
+    } else {
+      Ok(0)
+    }
   }
 }
 
