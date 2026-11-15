@@ -99,7 +99,7 @@ export class FluidVoiceAPI {
         message.includes("fetch failed")
       ) {
         throw new Error(
-          `Could not connect to FluidVoice at ${this.baseUrl}. Ensure FluidVoice is running and its Local API is enabled.`,
+          `Could not connect to FluidVoice at ${this.baseUrl}. Start FluidVoice with Local API enabled. If it is already running, fully quit and reopen it.`,
         );
       }
       throw new Error(`FluidVoice request failed: ${message}`);

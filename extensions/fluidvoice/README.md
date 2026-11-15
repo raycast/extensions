@@ -4,7 +4,7 @@ Transcribe local audio/video files and web media with [FluidVoice](https://githu
 
 ## Setup
 
-1. Install FluidVoice and choose/download a speech model. This extension was verified against FluidVoice **1.6.11**.
+1. Install FluidVoice and choose/download a speech model. This extension was verified against FluidVoice **1.6.11 and 1.6.13**.
 2. Enable FluidVoice's Local API. Its default address is `http://127.0.0.1:47733`. If you change the port, set **Local API Port** in this extension's Raycast preferences to match. Restart FluidVoice if the API does not respond after enabling it.
 3. Install the media helpers:
 
@@ -14,7 +14,7 @@ Transcribe local audio/video files and web media with [FluidVoice](https://githu
 
    `ffprobe` (included with ffmpeg) checks audio compatibility. ffmpeg converts unsupported media formats. yt-dlp is used for supported player pages and media manifests; direct audio/video URLs download without it.
 
-API contract: [FluidVoice 1.6.11 Local API source](https://github.com/altic-dev/FluidVoice/tree/v1.6.11/Sources/Fluid/Services/LocalAPI).
+API contract: [FluidVoice 1.6.13 Local API source](https://github.com/altic-dev/FluidVoice/tree/v1.6.13/Sources/Fluid/Services/LocalAPI).
 
 No API key is required. Keep FluidVoice running while transcribing.
 
@@ -40,7 +40,7 @@ Web media is downloaded to the extension's private support folder. HTML/player p
 
 ## Troubleshooting
 
-- **Could not connect**: run Check Connection, ensure FluidVoice is running, check that Local API is enabled and the ports match, then restart FluidVoice if needed.
+- **Could not connect**: run Check Connection, ensure FluidVoice is running, check that Local API is enabled and the ports match, then fully quit and reopen FluidVoice if needed. The app can be running without its API listener responding after an update; reopening its window alone does not restart the listener.
 - **Missing media tools**: install `ffmpeg` and `yt-dlp` with the command above. Homebrew paths on both Apple Silicon and Intel Macs are supported.
 - **No audio track or no speech**: check the media in a player and verify the selected speech model and language in FluidVoice.
 - **Busy/model errors**: finish other FluidVoice recording/transcription work and retry. Actual limits and performance depend on the selected provider, model, and machine.
