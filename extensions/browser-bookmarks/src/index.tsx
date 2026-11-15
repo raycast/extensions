@@ -645,7 +645,7 @@ export default function Command() {
     isFileAccessPermissionError(duckDuckGo.error) ||
     chromiumPermissionError
   ) {
-    return <PermissionErrorScreen />;
+    return <PermissionErrorScreen browsers={browsers} onSelectBrowsers={setBrowsers} />;
   }
 
   // Get the browser Application from the browser ID to open the bookmark in its associated browser

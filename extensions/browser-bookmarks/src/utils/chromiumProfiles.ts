@@ -124,3 +124,84 @@ export async function getChromiumProfiles(
   profiles.sort((a, b) => a.name.localeCompare(b.name));
   return { profiles, defaultProfile };
 }
+
+export type ChromiumBookmarkURL = {
+  guid: string;
+  name: string;
+  url: string;
+  type: "url";
+};
+
+export type ChromiumBookmarkFolder = {
+  guid: string;
+  name: string;
+  type: "folder";
+  children: ChromiumBookmarkItem[];
+};
+
+export type ChromiumBookmarkItem = ChromiumBookmarkURL | ChromiumBookmarkFolder;
+
+export type ChromiumBookmarksRoot = {
+  roots: {
+    bookmark_bar: ChromiumBookmarkFolder;
+    other: ChromiumBookmarkFolder;
+  } & Record<string, ChromiumBookmarkFolder | undefined>;
+};
+
+export type ChromiumBookmarksFileSystem = {
+  readFile: (path: string) => Promise<Buffer | string>;
+};
+
+const defaultBookmarksFileSystem: ChromiumBookmarksFileSystem = {
+  readFile: (path) => readFile(path),
+};
+
+function countBookmarks(bookmark: ChromiumBookmarkItem): number {
+  if (bookmark.type === "url") {
+    return 1;
+  }
+
+  return bookmark.children?.reduce((count, child) => count + countBookmarks(child), 0) ?? 0;
+}
+
+function getBookmarkCount(bookmarksRoot: ChromiumBookmarksRoot) {
+  return Object.values(bookmarksRoot.roots).reduce((count, root) => count + (root ? countBookmarks(root) : 0), 0);
+}
+
+async function readOptionalChromiumFile(filePath: string, fileSystem: ChromiumBookmarksFileSystem) {
+  try {
+    return await fileSystem.readFile(filePath);
+  } catch (error) {
+    if (isFileNotFoundError(error)) {
+      return;
+    }
+    throw error;
+  }
+}
+
+export async function readChromiumBookmarks(
+  path: string,
+  profile: string,
+  fileSystem: ChromiumBookmarksFileSystem = defaultBookmarksFileSystem,
+): Promise<ChromiumBookmarksRoot | undefined> {
+  const accountBookmarksPath = join(path, profile, "AccountBookmarks");
+
+  try {
+    const accountBookmarksFile = await readOptionalChromiumFile(accountBookmarksPath, fileSystem);
+    if (accountBookmarksFile) {
+      const accountBookmarks = JSON.parse(accountBookmarksFile.toString()) as ChromiumBookmarksRoot;
+      if (getBookmarkCount(accountBookmarks) > 0) {
+        return accountBookmarks;
+      }
+    }
+  } catch (error) {
+    if (isFileAccessPermissionError(error)) {
+      throw error;
+    }
+    // Fall back to the legacy Bookmarks file if the account file is missing or invalid.
+  }
+
+  const bookmarksPath = join(path, profile, "Bookmarks");
+  const bookmarksFile = await readOptionalChromiumFile(bookmarksPath, fileSystem);
+  return bookmarksFile ? (JSON.parse(bookmarksFile.toString()) as ChromiumBookmarksRoot) : undefined;
+}

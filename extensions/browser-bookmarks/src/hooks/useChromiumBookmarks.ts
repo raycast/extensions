@@ -1,39 +1,15 @@
-import { readFile } from "fs";
-import { join } from "path";
-import { promisify } from "util";
-
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { getSearchFolder } from "../utils/bookmarkSearch";
 import { loadChromiumFavicons } from "../utils/chromiumFavicons";
 import { getChromiumFaviconSignature, getChromiumSourceSignature } from "../utils/chromiumSourceSignature";
-import { getChromiumProfiles, isFileAccessPermissionError, isFileNotFoundError } from "../utils/chromiumProfiles";
-
-const read = promisify(readFile);
-
-type BookmarkURL = {
-  guid: string;
-  name: string;
-  url: string;
-  type: "url";
-};
-
-type BookmarkFolder = {
-  guid: string;
-  name: string;
-  type: "folder";
-  children: BookmarkItem[];
-};
-
-type BookmarkItem = BookmarkURL | BookmarkFolder;
-
-type BookmarksRoot = {
-  roots: {
-    bookmark_bar: BookmarkFolder;
-    other: BookmarkFolder;
-  } & Record<string, BookmarkFolder | undefined>;
-};
+import {
+  getChromiumProfiles,
+  readChromiumBookmarks,
+  type ChromiumBookmarkFolder as BookmarkFolder,
+  type ChromiumBookmarkItem as BookmarkItem,
+} from "../utils/chromiumProfiles";
 
 function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   const bookmarks = [];
@@ -60,44 +36,6 @@ function getBookmarksWithSearchFolder(root: BookmarkFolder | undefined) {
   return root
     ? getBookmarks(root).map((bookmark) => ({ ...bookmark, searchFolder: getSearchFolder(root.name, bookmark.folder) }))
     : [];
-}
-
-function getBookmarkCount(bookmarksRoot: BookmarksRoot) {
-  return Object.values(bookmarksRoot.roots).reduce((count, root) => count + (root ? getBookmarks(root).length : 0), 0);
-}
-
-async function readChromiumBookmarks(path: string, profile: string) {
-  const accountBookmarksPath = join(path, profile, "AccountBookmarks");
-
-  try {
-    const accountBookmarksFile = await readOptionalChromiumFile(accountBookmarksPath);
-    if (accountBookmarksFile) {
-      const accountBookmarks = JSON.parse(accountBookmarksFile.toString()) as BookmarksRoot;
-      if (getBookmarkCount(accountBookmarks) > 0) {
-        return accountBookmarks;
-      }
-    }
-  } catch (error) {
-    if (isFileAccessPermissionError(error)) {
-      throw error;
-    }
-    // Fall back to the legacy Bookmarks file if the account file is missing or invalid.
-  }
-
-  const bookmarksPath = join(path, profile, "Bookmarks");
-  const bookmarksFile = await readOptionalChromiumFile(bookmarksPath);
-  return bookmarksFile ? (JSON.parse(bookmarksFile.toString()) as BookmarksRoot) : undefined;
-}
-
-async function readOptionalChromiumFile(filePath: string) {
-  try {
-    return await read(filePath);
-  } catch (error) {
-    if (isFileNotFoundError(error)) {
-      return;
-    }
-    throw error;
-  }
 }
 
 type Folder = {
