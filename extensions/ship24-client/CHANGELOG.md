@@ -1,6 +1,6 @@
 # Ship24 Package Tracker Changelog
 
-## [1.1.3] - {PR_MERGE_DATE}
+## [1.1.3] - 2026-11-15
 
 ### Added
 - Windows support (ref: [Issue #33167](https://github.com/raycast/extensions/issues/33167))
