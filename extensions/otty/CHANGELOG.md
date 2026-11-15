@@ -1,5 +1,13 @@
 # Otty Changelog
 
+## [Otty 1.6.5: Saved Recipes, Settings, and Theme Previews] - {PR_MERGE_DATE}
+
+- The extension now needs Otty 1.6.5 or later. With an older Otty, Otty Settings and Open Otty Recipe say "Update Otty" instead of failing.
+- Open Otty Recipe lists the recipes you've saved in Otty (⌘S), with no folder to set up. Open Saved Recipes directly in Otty to restore windows, tabs, and run commands. With no recipes yet, Open Starter Recipe opens one tab split in two, ready to save as your own.
+- Otty Settings uses the names, groups, order and icons from Otty's own Settings window. Pick a pane to see all its settings, or Customized for the ones you've changed. Fixed-choice settings get a picker, numbers are range-checked, and text settings keep their spaces.
+- Change Otty Theme shows a preview for every built-in theme. Colors set in your Otty config take priority over every theme, so when you pick a theme, it asks before resetting any it finds. Otty Settings' Theme and Dark Theme rows ask too.
+- SSH opens in a new Otty tab.
+
 ## [Clearer Loading State and Fixes] - 2026-11-10
 
 - Search Otty Tabs now says it is loading on first open, and when Otty doesn't answer it shows "Waiting for Otty" and keeps checking every few seconds instead of reading as a dead end.

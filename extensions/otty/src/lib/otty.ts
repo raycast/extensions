@@ -8,6 +8,7 @@ import {
   getFrontmostApplication,
   getPreferenceValues,
   getSelectedFinderItems,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
@@ -25,6 +26,8 @@ import {
   buildSshCommandArgs,
   buildViewFileArgs,
   errorMessage,
+  isTooOldOutput,
+  MINIMUM_OTTY_VERSION,
   parseOttyJson,
   rankByRecentVisits,
   type JumpEntry,
@@ -56,12 +59,15 @@ export class OttyCliMissingError extends Error {}
 /** Otty exits 3 when no running app answers on its control socket. */
 export class OttyNotRunningError extends Error {}
 
+/** Otty predates a verb this extension needs (before 1.6.5). */
+export class OttyTooOldError extends Error {}
+
 export async function assertExecutable(path: string): Promise<void> {
   try {
     await access(path, constants.F_OK | constants.X_OK);
   } catch {
     throw new OttyCliMissingError(
-      `Otty CLI not found or not executable at ${path}. Install Otty or update the Otty CLI Path preference.`,
+      `Otty CLI not found or not executable at “${path}”. Install Otty or update the Otty CLI Path preference.`,
     );
   }
 }
@@ -90,6 +96,7 @@ export async function readOtty(args: string[]): Promise<string> {
     if (reason) throw new Error(reason);
     // Otty explains most failures on stderr ("error: parse error: …").
     const stderr = String((error as { stderr?: unknown }).stderr ?? "").trim();
+    if (isTooOldOutput(code, stderr)) throw new OttyTooOldError(`This needs Otty ${MINIMUM_OTTY_VERSION} or later.`);
     throw stderr ? new Error(stderr.replace(/^error:\s*/, "")) : error;
   }
 }
@@ -132,6 +139,17 @@ export async function loadJumpEntries(): Promise<JumpEntry[]> {
 
 export async function showFailure(title: string, error: unknown) {
   const message = errorMessage(error);
+  if (error instanceof OttyCliMissingError) {
+    // The full path made this toast four lines long; the preference shows it.
+    await showToast({
+      style: Toast.Style.Failure,
+      title,
+      message: "Otty CLI not found. Check the Otty CLI Path preference.",
+      primaryAction: { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() },
+      secondaryAction: { title: "Copy Error", onAction: () => Clipboard.copy(message) },
+    });
+    return;
+  }
   await showToast({
     style: Toast.Style.Failure,
     title,
