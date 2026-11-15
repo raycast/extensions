@@ -1,6 +1,6 @@
 # Pixtuoid Changelog
 
-## [Failures Say Why] - {PR_MERGE_DATE}
+## [Failures Say Why] - 2026-11-15
 
 - **Manage Sources** — a failed connect or disconnect shows its reason, not a bare "failed".
 - **Manage Sources** — output this version can't read is an error, never a wrong list.
