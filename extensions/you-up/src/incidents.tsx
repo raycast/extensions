@@ -207,6 +207,10 @@ export default function IncidentsCommand() {
                       />
                     }
                   />
+                  <Action.OpenInBrowser
+                    title="Open in Dashboard"
+                    url={incidentDashboardUrl(project.id, incident.monitorId, incident.id)}
+                  />
                   {isOpen && !isAcked && (
                     <Action
                       title="Acknowledge Incident"
@@ -215,10 +219,6 @@ export default function IncidentsCommand() {
                       onAction={() => handleAcknowledge(project.id, incident.id)}
                     />
                   )}
-                  <Action.OpenInBrowser
-                    title="Open in Dashboard"
-                    url={incidentDashboardUrl(project.id, incident.monitorId, incident.id)}
-                  />
                   {isOpen && (
                     <ActionPanel.Submenu
                       title="Snooze Check"
@@ -229,6 +229,7 @@ export default function IncidentsCommand() {
                         <Action
                           key={preset.minutes}
                           title={preset.label}
+                          icon={Icon.Clock}
                           onAction={() => handleSnooze(project.id, incident.checkId, preset.minutes, preset.label)}
                         />
                       ))}

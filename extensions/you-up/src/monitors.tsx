@@ -289,6 +289,7 @@ export default function MonitorsCommand() {
                                 <Action
                                   key={preset.minutes}
                                   title={preset.label}
+                                  icon={Icon.Clock}
                                   onAction={() =>
                                     handleSnooze(project.id, primaryCheck.id, preset.minutes, preset.label)
                                   }

@@ -154,6 +154,7 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Dashboard" url={monitorDashboardUrl(monitor.projectId, monitor.id)} />
+          <Action.CopyToClipboard title="Copy Target" content={monitor.target} />
           {unackedIncidents.length === 1 ? (
             <Action
               title={`Acknowledge ${checkTypeLabel(unackedIncidents[0].check.type)} Incident`}
@@ -187,6 +188,7 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
                 <Action
                   key={preset.minutes}
                   title={preset.label}
+                  icon={Icon.Clock}
                   onAction={() => handleSnooze(primaryCheck.id, preset.minutes, preset.label)}
                 />
               ))}
@@ -200,7 +202,6 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
               onAction={() => handleEndSnooze(check.id)}
             />
           ))}
-          <Action.CopyToClipboard title="Copy Target" content={monitor.target} />
           <Action.CopyToClipboard title="Copy Monitor ID" content={monitor.id} />
         </ActionPanel>
       }

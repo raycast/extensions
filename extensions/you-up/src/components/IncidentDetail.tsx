@@ -166,6 +166,7 @@ export function IncidentDetail({
             title="Open in Dashboard"
             url={incidentDashboardUrl(projectId, incident.monitorId, incident.id)}
           />
+          <Action.CopyToClipboard title="Copy Incident ID" content={incident.id} />
           {isOpen && !isAcked && (
             <Action
               title="Acknowledge Incident"
@@ -184,6 +185,7 @@ export function IncidentDetail({
                 <Action
                   key={preset.minutes}
                   title={preset.label}
+                  icon={Icon.Clock}
                   onAction={() => handleSnooze(preset.minutes, preset.label)}
                 />
               ))}
@@ -198,7 +200,6 @@ export function IncidentDetail({
               onAction={handleResolve}
             />
           )}
-          <Action.CopyToClipboard title="Copy Incident ID" content={incident.id} />
         </ActionPanel>
       }
     />

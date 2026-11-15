@@ -8,6 +8,7 @@ import {
   launchCommand,
   open,
   openCommandPreferences,
+  openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
@@ -109,7 +110,7 @@ export default function StatusMenuBarCommand() {
     <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={menuBarTitle} tooltip={tooltip}>
       {error ? (
         <MenuBarExtra.Section title="Connection Error">
-          <MenuBarExtra.Item title={error.message} icon={Icon.ExclamationMark} onAction={openCommandPreferences} />
+          <MenuBarExtra.Item title={error.message} icon={Icon.ExclamationMark} onAction={openExtensionPreferences} />
         </MenuBarExtra.Section>
       ) : (
         <>
