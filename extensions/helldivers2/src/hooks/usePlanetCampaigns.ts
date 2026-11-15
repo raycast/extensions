@@ -9,24 +9,28 @@ export const usePlanetCampaigns = () => {
   const { isLoading: isStatsLoading, stats } = useSummaryStats();
   const { isLoading: isStatusLoading, status } = useWarStatus();
 
-  if (stats == undefined || info == undefined) return { isLoading: true, campaigns: [] };
+  if (!stats || !info) return { isLoading: true, campaigns: [] };
 
   const campaigns = status?.campaigns
-    .map((planet) => {
-      const planetStatus = status.planetStatus.find((status) => status.index == planet.planetIndex)!;
-      const planetInfo = info.planetInfos.find((info) => info.index == planet.planetIndex)!;
-      const planetStats = stats.planets_stats.find((stats) => stats.planetIndex == planet.planetIndex)!;
+    .flatMap((planet) => {
+      const planetData = planets[planet.planetIndex.toString()];
+      const planetStatus = status.planetStatus.find((status) => status.index === planet.planetIndex);
+      const planetInfo = info.planetInfos.find((info) => info.index === planet.planetIndex);
+      const planetStats = stats.planets_stats.find((stats) => stats.planetIndex === planet.planetIndex);
+
+      if (!planetData || !planetStatus || !planetInfo || !planetStats) return [];
 
       return {
         ...planet,
-        planet: planets[planet.planetIndex.toString()],
+        planet: planetData,
         status: planetStatus,
         info: planetInfo,
         stats: planetStats,
         campaignType: campaignTypes[planet.type.toString()],
       };
     })
-    .toSorted((a, b) => a.status.players - b.status.players);
+    .toSorted((a, b) => a.status.players - b.status.players)
+    .reverse();
 
   return { isLoading: isStatusLoading || isStatsLoading || isInfoLoading, campaigns };
 };

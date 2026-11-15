@@ -3,6 +3,11 @@ import { useFetch } from "./useFetch";
 import { useWarInfo } from "./useWarInfo";
 import { useWarStatus } from "./useWarStatus";
 
+const GOAL_VALUE_TYPE = 3;
+const LOCATION_TYPE_VALUE_TYPE = 11;
+const LOCATION_INDEX_VALUE_TYPE = 12;
+const PLANET_LOCATION_TYPE = 1;
+
 interface AssignmentReward {
   type: number;
   amount: number;
@@ -34,7 +39,7 @@ export const useAssignments = () => {
   const { isLoading: isStatusLoading, status } = useWarStatus();
 
   const { isLoading, data } = useFetch(
-    isInfoLoading ? undefined : `https://api.live.prod.thehelldiversgame.com/api/v2/Assignment/War/${info?.warId}`,
+    info && status ? `https://api.live.prod.thehelldiversgame.com/api/v2/Assignment/War/${info.warId}` : undefined,
     {
       headers: {
         cache: "no-cache",
@@ -45,14 +50,17 @@ export const useAssignments = () => {
 
   const assignments = (data as Assignment[] | undefined)?.map((assignment) => {
     const tasks = assignment.setting.tasks.map((task) => {
-      const planetStatus = status!.planetStatus.find((status) => status.index == task.values[2])!;
-      const planetInfo = info!.planetInfos.find((info) => info.index == task.values[2])!;
+      const valueOf = (valueType: number) => task.values.find((_, i) => task.valueTypes[i] === valueType);
+      // Super Earth is index 0, and so is every task with no single planet; only location type 1 tells them apart.
+      const planetIndex =
+        valueOf(LOCATION_TYPE_VALUE_TYPE) === PLANET_LOCATION_TYPE ? valueOf(LOCATION_INDEX_VALUE_TYPE) : undefined;
 
       return {
         ...task,
-        planet: planets[task.values[2]],
-        status: planetStatus,
-        info: planetInfo,
+        goal: valueOf(GOAL_VALUE_TYPE),
+        planet: planetIndex === undefined ? undefined : planets[planetIndex],
+        status: status?.planetStatus.find((status) => status.index === planetIndex),
+        info: info?.planetInfos.find((info) => info.index === planetIndex),
       };
     });
 

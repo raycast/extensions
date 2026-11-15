@@ -14,15 +14,13 @@ export default function Command() {
   return (
     <List isLoading={isLoading} isShowingDetail={showingDetail}>
       {campaigns &&
-        campaigns.reverse().map((planet) => {
+        campaigns.map((planet) => {
           const progress = (planet.info.maxHealth - planet.status.health) / planet.info.maxHealth;
-
-          if (!planet.planet) return null;
 
           return (
             <List.Item
               icon={getProgressIcon(progress, Color.Blue, {
-                background: [Color.Blue, Color.Yellow, Color.Red][planet.status.owner - 1],
+                background: [Color.Blue, Color.Yellow, Color.Red, Color.Purple][planet.status.owner - 1],
               })}
               key={planet.planetIndex}
               id={planet.planetIndex.toString()}
@@ -116,7 +114,6 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  {/* <Action.OpenInBrowser url={`https://www.pokemon.com/us/pokedex/${pokemon.name}`} /> */}
                   <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
                 </ActionPanel>
               }

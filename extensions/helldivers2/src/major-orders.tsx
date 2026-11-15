@@ -2,32 +2,17 @@ import { Color, Detail, List } from "@raycast/api";
 
 import { useAssignments } from "./hooks/useAssignments";
 import { getProgressIcon } from "@raycast/utils";
+import { taskTypes } from "./data/taskTypes";
 
-const expireFormat = (seconds: number) => {
-  const fm = [
-    Math.floor(seconds / (3600 * 24)),
-    Math.floor((seconds % (3600 * 24)) / 3600),
-    Math.floor((seconds % 3600) / 60),
-  ];
-
-  // map over array
-  return fm
-    .map((v, i) => {
-      if (v) {
-        if (i === 0) {
-          return `${v}D`;
-        } else if (i === 1) {
-          return `${v}H`;
-        } else if (i === 2) {
-          return `${v}M`;
-        }
-
-        return undefined;
-      }
-    })
-    .filter(Boolean)
+const expireFormat = (seconds: number) =>
+  [
+    [Math.floor(seconds / (3600 * 24)), "D"],
+    [Math.floor((seconds % (3600 * 24)) / 3600), "H"],
+    [Math.floor((seconds % 3600) / 60), "M"],
+  ]
+    .filter(([value]) => value)
+    .map(([value, unit]) => `${value}${unit}`)
     .join(" ");
-};
 
 export default function Command() {
   const { isLoading, assignments } = useAssignments();
@@ -47,16 +32,31 @@ export default function Command() {
               <Detail.Metadata.Label title="Task" text={assignments[0].setting.taskDescription} />
             ) : null}
             {assignments[0].setting.tasks.map((task, index) => {
+              if (!task.planet || !task.status || !task.info) {
+                const count = assignments[0].progress[index] ?? 0;
+
+                return (
+                  <Detail.Metadata.Label
+                    key={`task-${index}`}
+                    icon={task.goal ? getProgressIcon(Math.min(count / task.goal, 1), Color.Blue) : undefined}
+                    title={taskTypes[task.type.toString()] ?? "Task"}
+                    text={
+                      task.goal ? `${count.toLocaleString()} / ${task.goal.toLocaleString()}` : count.toLocaleString()
+                    }
+                  />
+                );
+              }
+
               const progress = Math.max(
                 (task.info.maxHealth - task.status.health) / task.info.maxHealth,
-                assignments[0].progress[index],
+                assignments[0].progress[index] ?? 0,
               );
 
               return (
                 <Detail.Metadata.Label
                   key={`task-${index}`}
                   icon={getProgressIcon(progress, Color.Blue, {
-                    background: [Color.Blue, Color.Yellow, Color.Red][task.status.owner - 1],
+                    background: [Color.Blue, Color.Yellow, Color.Red, Color.Purple][task.status.owner - 1],
                   })}
                   title={task.planet.sector}
                   text={task.planet.name}
