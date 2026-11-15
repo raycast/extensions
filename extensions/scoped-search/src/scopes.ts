@@ -13,6 +13,7 @@ const STORAGE_KEY = "scoped-search:scopes:v1";
 
 /** Turns "~/Desktop/projects", "~", or a relative path into an absolute path. */
 export function expandPath(input: string): string {
+  if (/^\/+$/.test(input.trim())) return "/";
   const trimmed = input.trim().replace(/\/+$/, "");
   if (trimmed === "" || trimmed === "~") return homedir();
   if (trimmed.startsWith("~/"))

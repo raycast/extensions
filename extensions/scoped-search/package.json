@@ -5,6 +5,9 @@
   "description": "Search only inside the folders you choose, with a configurable depth limit. No whole-disk scanning.",
   "icon": "command-icon.png",
   "author": "kervanaslan",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "System"
@@ -97,7 +100,8 @@
       "description": "Comma-separated folder/file names to skip entirely (also stops descending into them).",
       "type": "textfield",
       "required": false,
-      "default": "node_modules, .git, .next, dist, build, .venv, venv, __pycache__, .DS_Store, Pods, target, .cache"
+      "default": "node_modules, .git, .next, dist, build, .venv, venv, __pycache__, .DS_Store, Pods, target, .cache",
+      "placeholder": "node_modules, .git"
     },
     {
       "name": "terminalApp",
@@ -119,7 +123,8 @@
       "description": "Safety cap on how many entries are loaded into the list.",
       "type": "textfield",
       "required": false,
-      "default": "5000"
+      "default": "5000",
+      "placeholder": "5000"
     }
   ],
   "dependencies": {

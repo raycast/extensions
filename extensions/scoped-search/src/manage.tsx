@@ -103,6 +103,7 @@ function AddScopeForm(props: { onDone: () => void }) {
 export default function ManageSearchFolders() {
   const {
     data: scopes,
+    error,
     isLoading,
     revalidate,
   } = useCachedPromise(loadScopes, [], { initialData: [] });
@@ -131,12 +132,29 @@ export default function ManageSearchFolders() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter search folders...">
-      <List.EmptyView
-        icon={Icon.Folder}
-        title="No search folders yet"
-        description="Add a folder and Scoped Search will only ever look inside it."
-        actions={<ActionPanel>{addAction}</ActionPanel>}
-      />
+      {error ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Couldn't load search folders"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Folder}
+          title="No search folders yet"
+          description="Add a folder and Scoped Search will only ever look inside it."
+          actions={<ActionPanel>{addAction}</ActionPanel>}
+        />
+      )}
       {(scopes ?? []).map((scope, index) => (
         <List.Item
           key={scope.path}
@@ -164,7 +182,7 @@ export default function ManageSearchFolders() {
                     revalidate();
                   }}
                 />
-                {addAction}
+                <Action.ShowInFinder path={scope.path} />
                 <Action
                   title="Remove Folder"
                   icon={Icon.Trash}
@@ -172,9 +190,9 @@ export default function ManageSearchFolders() {
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleRemove(scope.path)}
                 />
+                {addAction}
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <Action.ShowInFinder path={scope.path} />
                 <Action.CopyToClipboard
                   title="Copy Path"
                   content={scope.path}

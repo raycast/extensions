@@ -1,16 +1,6 @@
 import { Application, getPreferenceValues } from "@raycast/api";
 
-export type ItemType = "folders" | "files" | "both";
-
-type RawPreferences = {
-  maxDepth?: string;
-  itemType?: ItemType;
-  showHidden?: boolean;
-  excludeNames?: string;
-  terminalApp?: Application;
-  editorApp?: Application;
-  maxResults?: string;
-};
+export type ItemType = Preferences["itemType"];
 
 export type ResolvedPreferences = {
   /** 0 means unlimited. */
@@ -34,7 +24,7 @@ function toInt(
 }
 
 export function getPreferences(): ResolvedPreferences {
-  const raw = getPreferenceValues<RawPreferences>();
+  const raw = getPreferenceValues<Preferences>();
 
   const excludeNames = new Set(
     (raw.excludeNames ?? "")

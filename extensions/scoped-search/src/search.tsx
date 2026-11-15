@@ -36,7 +36,7 @@ export default function ScopedSearch() {
   const prefs = useMemo(getPreferences, []);
   const [selectedScope, setSelectedScope] = useState<string>(ALL_SCOPES);
 
-  const { data, isLoading, revalidate } =
+  const { data, error, isLoading, revalidate } =
     usePromise(async (): Promise<LoadedData> => {
       const scopes = await loadScopes();
       const result = await walkScopes(scopes, prefs);
@@ -51,8 +51,8 @@ export default function ScopedSearch() {
         style: Toast.Style.Failure,
         title:
           missingScopes.length === 1
-            ? "A search folder is missing"
-            : "Some search folders are missing",
+            ? "A search folder is missing or unreadable"
+            : "Some search folders are missing or unreadable",
         message: missingScopes.map(prettyPath).join(", "),
       });
     } else if (truncated) {
@@ -64,12 +64,17 @@ export default function ScopedSearch() {
     }
   }, [missingScopes.join("|"), truncated]);
 
+  // Fall back to all folders when the selected one was removed in Manage Search Folders.
+  const activeScope = scopes.some((scope) => scope.path === selectedScope)
+    ? selectedScope
+    : ALL_SCOPES;
+
   const visibleEntries = useMemo(
     () =>
-      selectedScope === ALL_SCOPES
+      activeScope === ALL_SCOPES
         ? entries
-        : entries.filter((entry) => entry.scopePath === selectedScope),
-    [entries, selectedScope],
+        : entries.filter((entry) => entry.scopePath === activeScope),
+    [entries, activeScope],
   );
 
   const manageAction = (
@@ -109,7 +114,7 @@ export default function ScopedSearch() {
         scopes.length > 1 ? (
           <List.Dropdown
             tooltip="Limit to one folder"
-            value={selectedScope}
+            value={activeScope}
             onChange={setSelectedScope}
           >
             <List.Dropdown.Item
@@ -131,28 +136,43 @@ export default function ScopedSearch() {
         ) : undefined
       }
     >
-      <List.EmptyView
-        icon={scopes.length === 0 ? Icon.Folder : Icon.MagnifyingGlass}
-        title={
-          scopes.length === 0 ? "No search folders yet" : "Nothing matched"
-        }
-        description={
-          scopes.length === 0
-            ? "Add the folders you want to search. Everything outside them is ignored."
-            : "Try a shorter query, or raise the search depth in this command's preferences."
-        }
-        actions={
-          <ActionPanel>
-            {manageAction}
-            {refreshAction}
-          </ActionPanel>
-        }
-      />
+      {error ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Couldn't load search results"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              {refreshAction}
+              {manageAction}
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={scopes.length === 0 ? Icon.Folder : Icon.MagnifyingGlass}
+          title={
+            scopes.length === 0 ? "No search folders yet" : "Nothing matched"
+          }
+          description={
+            scopes.length === 0
+              ? "Add the folders you want to search. Everything outside them is ignored."
+              : "Try a shorter query, or raise the search depth in this command's preferences."
+          }
+          actions={
+            <ActionPanel>
+              {manageAction}
+              {refreshAction}
+            </ActionPanel>
+          }
+        />
+      )}
 
       {visibleEntries.map((entry) => (
         <List.Item
-          key={entry.path}
+          key={JSON.stringify([entry.scopePath, entry.path])}
           icon={{ fileIcon: entry.path }}
+          quickLook={{ path: entry.path }}
           title={entry.name}
           subtitle={
             entry.relativePath === entry.name
@@ -175,7 +195,6 @@ export default function ScopedSearch() {
                 <Action.Open
                   title="Open in Terminal"
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
                   target={containingDirectory(entry)}
                   application={prefs.terminalApp ?? "Terminal"}
                 />

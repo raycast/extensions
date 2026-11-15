@@ -64,7 +64,9 @@ export async function walkScopes(
       try {
         dirents = await fs.readdir(directory, { withFileTypes: true });
       } catch {
-        return; // unreadable folder: skip quietly rather than failing the whole search
+        // An unreadable search folder itself is reported; unreadable subfolders are skipped.
+        if (depth === 1) missingScopes.push(scope.path);
+        return;
       }
 
       for (const dirent of dirents) {
