@@ -155,7 +155,7 @@ describe("fresh authorization", () => {
       access_token: "central-access",
       refresh_token: "central-refresh",
       expires_in: 3600,
-      scope: "flights:upcoming:read",
+      scope: "flights:upcoming:read flights:past:read",
     });
     expect(mocks.setItem).toHaveBeenCalledWith(
       "jumpseat-auth-protocol",
@@ -398,6 +398,11 @@ describe.each(["central", "legacy"])("%s refresh failures", (protocol) => {
   );
 
   it("can retry a transient failure and persist rotated tokens", async () => {
+    // A grant made before past flights keeps its upcoming-only scope.
+    mocks.getTokens.mockResolvedValue({
+      refreshToken: "stored-refresh",
+      scope: "flights:upcoming:read",
+    });
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response("Unavailable", { status: 503 }))

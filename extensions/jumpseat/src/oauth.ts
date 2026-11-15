@@ -16,9 +16,9 @@ import {
   isCentralOAuthAuthorizationServer,
   isDefinitiveOAuthTokenFailure,
   JUMPSEAT_OAUTH_CLIENT_ID,
-  JUMPSEAT_OAUTH_SCOPE,
   oauthEndpoint,
   oauthForm,
+  oauthScope,
   resolveStoredAuthProtocol,
   type JumpseatAuthProtocol,
 } from "./oauth-protocol";
@@ -85,7 +85,7 @@ async function exchangeAuthorizationCode(
 
   const tokens = parseOAuthTokenResponse(
     await response.json(),
-    JUMPSEAT_OAUTH_SCOPE,
+    oauthScope(protocol),
   );
   if (!tokens) {
     throw new JumpseatAuthenticationError(
@@ -405,7 +405,8 @@ async function refreshStoredAccessToken(
     accessToken: refreshed.accessToken,
     refreshToken: refreshed.refreshToken,
     expiresIn: refreshed.expiresIn,
-    scope: JUMPSEAT_OAUTH_SCOPE,
+    // A refresh keeps the grant's scopes, so an older grant stays upcoming-only.
+    scope: tokens.scope || oauthScope(protocol),
   });
   return refreshed.accessToken;
 }
@@ -440,4 +441,12 @@ export async function getJumpseatAccessToken(
 
 export async function clearJumpseatAuthorization(): Promise<void> {
   await clearStoredAuthorization(getJumpseatConfiguration(), { revoke: true });
+}
+
+// Replaces the current grant with a fresh one, e.g. to pick up a scope the
+// existing grant predates.
+export async function reconnectJumpseat(): Promise<void> {
+  const configuration = getJumpseatConfiguration();
+  await clearStoredAuthorization(configuration, { revoke: true });
+  await authorize(configuration);
 }
