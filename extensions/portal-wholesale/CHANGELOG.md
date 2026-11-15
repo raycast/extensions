@@ -1,6 +1,6 @@
 # Changelog
 
-## [Brand Search Update] - {PR_MERGE_DATE}
+## [Brand Search Update] - 2026-11-15
 
 - Search brands through the new brand search API
 - Trim whitespace from search queries
