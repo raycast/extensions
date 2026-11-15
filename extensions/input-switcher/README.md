@@ -5,4 +5,4 @@ On **macOS** it uses [keyboardSwitcher](https://github.com/Lutzifer/keyboardSwit
 
 On **Windows** it uses a native Rust helper to enumerate the installed keyboard layouts and switches the input language of the focused application.
 
-**Tip (Windows):** Assign `Alt` `Shift` to **Toggle Next Layout** in Raycast to switch layouts and see confirmation in the HUD. If Windows already uses this shortcut, disable its built-in input-language shortcut in **Settings → Time & Language → Typing → Advanced keyboard settings → Input language hot keys → Between input languages → Change Key Sequence…**, then set both options to **Not Assigned**.
+**Tip (Windows):** Assign `Alt` `Shift` to **Toggle Next Layout** to switch layouts and see confirmation in the HUD. If Windows already uses this shortcut, disable its built-in input-language shortcut in **Settings → Time & Language → Typing → Advanced keyboard settings → Input language hot keys → Between input languages → Change Key Sequence…**, then set both options to **Not Assigned**.
