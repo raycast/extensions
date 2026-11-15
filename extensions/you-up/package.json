@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "you-up",
   "title": "You Up?",
-  "description": "Monitor your websites, APIs, servers, and cron jobs from Raycast: macOS menu bar status, Monitors, Incidents, Acknowledge, Snooze, and AI tools",
+  "description": "Monitor your websites, APIs, servers, and cron jobs from Raycast: macOS menu bar status, Monitors, Incidents, Acknowledge, Snooze, and AI tools. Requires a You Up? account and API token.",
   "icon": "icon.png",
   "author": "frenzyfunky",
   "categories": [
@@ -82,15 +82,152 @@
     "evals": [
       {
         "input": "@you-up is everything up right now?",
-        "usedAsExample": true
+        "usedAsExample": true,
+        "mocks": {
+          "get-status": {
+            "allUp": true,
+            "projects": [
+              {
+                "projectId": "prj_01hxyz",
+                "name": "Production",
+                "openIncidents": [],
+                "nonOkMonitors": [],
+                "regionalOutages": []
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-status"
+          }
+        ]
       },
       {
         "input": "@you-up show open incidents and where they stopped",
-        "usedAsExample": true
+        "usedAsExample": true,
+        "mocks": {
+          "list-incidents": [
+            {
+              "projectId": "prj_01hxyz",
+              "projectName": "Production",
+              "incidents": [
+                {
+                  "incidentId": "inc_01hxyz",
+                  "projectId": "prj_01hxyz",
+                  "projectName": "Production",
+                  "monitorId": "mon_01hxyz",
+                  "monitorName": "Public API",
+                  "target": "https://api.example.com",
+                  "checkId": "chk_01hxyz",
+                  "checkType": "Uptime",
+                  "reason": "Connection refused",
+                  "openedAt": "2026-11-15T19:45:00.000Z",
+                  "acknowledgedAt": null,
+                  "resolvedAt": null,
+                  "stoppingPoint": {
+                    "phase": "tcp",
+                    "sentence": "Stopped while opening the TCP connection.",
+                    "detail": "Frankfurt, Ashburn, and Singapore all saw connection refused on port 443.",
+                    "nextStep": "Check that your web server or load balancer is listening on port 443."
+                  },
+                  "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz/events#inc_01hxyz"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-incidents"
+          }
+        ]
       },
       {
         "input": "@you-up list my monitors and their 30-day uptime",
-        "usedAsExample": true
+        "usedAsExample": true,
+        "mocks": {
+          "list-monitors": [
+            {
+              "projectId": "prj_01hxyz",
+              "projectName": "Production",
+              "monitors": [
+                {
+                  "monitorId": "mon_01hxyz",
+                  "name": "Public API",
+                  "type": "http",
+                  "target": "https://api.example.com",
+                  "state": "active",
+                  "status": "ok",
+                  "uptime30d": "99.995%",
+                  "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz",
+                  "checks": [
+                    {
+                      "checkId": "chk_01hxyz",
+                      "type": "uptime",
+                      "status": "ok",
+                      "snoozedUntil": null,
+                      "heartbeatDeadline": null,
+                      "openIncidentId": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-monitors"
+          }
+        ]
+      },
+      {
+        "input": "@you-up acknowledge incident inc_01hxyz in project prj_01hxyz",
+        "usedAsExample": false,
+        "mocks": {
+          "acknowledge-incident": {
+            "incidentId": "inc_01hxyz",
+            "acknowledgedAt": "2026-11-15T20:00:00.000Z",
+            "acknowledgedBy": "Ada Lovelace",
+            "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz/events#inc_01hxyz"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "acknowledge-incident",
+              "arguments": {
+                "projectId": "prj_01hxyz",
+                "incidentId": "inc_01hxyz"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@you-up snooze check chk_01hxyz in project prj_01hxyz for 60 minutes",
+        "usedAsExample": false,
+        "mocks": {
+          "snooze-check": {
+            "monitorId": "mon_01hxyz",
+            "monitorName": "Public API",
+            "snoozedUntil": "2026-11-15T21:00:00.000Z",
+            "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "snooze-check",
+              "arguments": {
+                "projectId": "prj_01hxyz",
+                "checkId": "chk_01hxyz",
+                "minutes": 60
+              }
+            }
+          }
+        ]
       }
     ]
   },

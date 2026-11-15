@@ -2,7 +2,7 @@
 
 You Up? is an uptime monitoring service that checks your websites, APIs, servers and cron jobs from several locations and alerts you by email, Slack, WhatsApp, SMS and more, only when an outage is confirmed.
 
-This Raycast extension connects to the [You Up? HTTP API](https://docs.uup.dev/api/) (`https://api.uup.dev/v1`) with your API token. It includes zero third-party analytics SDKs.
+This Raycast extension connects to the [You Up? HTTP API](https://docs.uup.dev/api/) (`https://api.uup.dev/v1`). Requires a [You Up?](https://uup.dev/) account and API token. It includes zero third-party analytics SDKs.
 
 ## Features
 

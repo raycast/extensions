@@ -6,7 +6,6 @@ import type {
   Monitor,
   MonitorUptime,
   Paginated,
-  Preferences,
   Project,
   ProjectMonitorUptime,
   Run,

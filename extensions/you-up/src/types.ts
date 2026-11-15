@@ -1,7 +1,3 @@
-export interface Preferences {
-  apiToken: string;
-}
-
 export interface ApiErrorPayload {
   error: {
     code: string;

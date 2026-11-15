@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Detail, Icon, Toast, showToast, Keyboard } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Detail, Icon, Toast, showToast } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { acknowledgeIncident, endSnooze, getMonitorUptime, listRuns, snoozeCheck } from "../api";
 import {
   SNOOZE_PRESETS,
@@ -36,6 +36,7 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
 
   const statusBadge = monitorStatusLabel(monitor);
   const openIncidents = openIncidentsOnMonitor(monitor);
+  const unackedIncidents = openIncidents.filter((inc) => !inc.acknowledged);
   const snoozed = activeSnoozedChecks(monitor);
   const primaryCheck = primaryCheckOf(monitor);
 
@@ -91,9 +92,7 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
       toast.title = "Incident Acknowledged";
       onRefresh();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Acknowledge Incident";
-      toast.message = error instanceof Error ? error.message : String(error);
+      await showFailureToast(error, { title: "Could Not Acknowledge Incident" });
     }
   }
 
@@ -105,9 +104,7 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
       toast.title = `Snoozed for ${label}`;
       onRefresh();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Snooze Check";
-      toast.message = error instanceof Error ? error.message : String(error);
+      await showFailureToast(error, { title: "Could Not Snooze Check" });
     }
   }
 
@@ -119,9 +116,7 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
       toast.title = "Snooze Ended";
       onRefresh();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not End Snooze";
-      toast.message = error instanceof Error ? error.message : String(error);
+      await showFailureToast(error, { title: "Could Not End Snooze" });
     }
   }
 
@@ -159,27 +154,39 @@ export function MonitorDetail({ monitor, projectName, onRefresh }: MonitorDetail
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Dashboard" url={monitorDashboardUrl(monitor.projectId, monitor.id)} />
-          {openIncidents
-            .filter((inc) => !inc.acknowledged)
-            .map((inc) => (
-              <Action
-                key={inc.incidentId}
-                title={`Acknowledge ${checkTypeLabel(inc.check.type)} Incident`}
-                icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                onAction={() => handleAcknowledge(inc.incidentId)}
-              />
-            ))}
+          {unackedIncidents.length === 1 ? (
+            <Action
+              title={`Acknowledge ${checkTypeLabel(unackedIncidents[0].check.type)} Incident`}
+              icon={Icon.Check}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              onAction={() => handleAcknowledge(unackedIncidents[0].incidentId)}
+            />
+          ) : unackedIncidents.length > 1 ? (
+            <ActionPanel.Submenu
+              title="Acknowledge Incident"
+              icon={Icon.Check}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            >
+              {unackedIncidents.map((inc) => (
+                <Action
+                  key={inc.incidentId}
+                  title={checkTypeLabel(inc.check.type)}
+                  icon={Icon.Check}
+                  onAction={() => handleAcknowledge(inc.incidentId)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
           {primaryCheck && (
             <ActionPanel.Submenu
               title="Snooze Alerts"
               icon={Icon.BellDisabled}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
             >
               {SNOOZE_PRESETS.map((preset) => (
                 <Action
                   key={preset.minutes}
-                  title={`Snooze for ${preset.label}`}
+                  title={preset.label}
                   onAction={() => handleSnooze(primaryCheck.id, preset.minutes, preset.label)}
                 />
               ))}

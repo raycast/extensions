@@ -1,6 +1,7 @@
 import {
   Color,
   Icon,
+  Keyboard,
   LaunchType,
   MenuBarExtra,
   Toast,
@@ -8,9 +9,8 @@ import {
   open,
   openCommandPreferences,
   showToast,
-  Keyboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { acknowledgeIncident, getStatus } from "./api";
 import {
   DASHBOARD_ORIGIN,
@@ -64,7 +64,9 @@ export default function StatusMenuBarCommand() {
       ? String(totalIncidents)
       : degradedMonitors.length > 0
         ? String(degradedMonitors.length)
-        : undefined;
+        : regionalOutages.length > 0
+          ? String(regionalOutages.length)
+          : undefined;
 
   const tooltip = error
     ? `You Up?: ${error.message}`
@@ -72,7 +74,9 @@ export default function StatusMenuBarCommand() {
       ? `You Up?: ${totalIncidents} open ${totalIncidents === 1 ? "Incident" : "Incidents"}`
       : degradedMonitors.length > 0
         ? `You Up?: ${degradedMonitors.length} degraded ${degradedMonitors.length === 1 ? "Monitor" : "Monitors"}`
-        : "You Up?: Everything is up";
+        : regionalOutages.length > 0
+          ? `You Up?: ${regionalOutages.length} Regional ${regionalOutages.length === 1 ? "Outage" : "Outages"}`
+          : "You Up?: Everything is up";
 
   async function handleQuickAcknowledge(projectId: string, incidentId: string) {
     try {
@@ -80,13 +84,26 @@ export default function StatusMenuBarCommand() {
       await revalidate();
       await showToast({ style: Toast.Style.Success, title: "Incident Acknowledged" });
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Acknowledge Incident",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      await showFailureToast(err, { title: "Could Not Acknowledge Incident" });
     }
   }
+
+  async function handleOpenCommand(name: "monitors" | "incidents") {
+    try {
+      await launchCommand({ name, type: LaunchType.UserInitiated });
+    } catch (err) {
+      await showFailureToast(err, { title: "Could Not Open Command" });
+    }
+  }
+
+  const summaryTitle =
+    totalIncidents > 0
+      ? `${totalIncidents} Open ${totalIncidents === 1 ? "Incident" : "Incidents"}`
+      : degradedMonitors.length > 0
+        ? `${degradedMonitors.length} Degraded ${degradedMonitors.length === 1 ? "Monitor" : "Monitors"}`
+        : regionalOutages.length > 0
+          ? `${regionalOutages.length} Regional ${regionalOutages.length === 1 ? "Outage" : "Outages"}`
+          : `All ${projects.length} ${projects.length === 1 ? "Project" : "Projects"} Operational`;
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={menuBarTitle} tooltip={tooltip}>
@@ -97,14 +114,7 @@ export default function StatusMenuBarCommand() {
       ) : (
         <>
           <MenuBarExtra.Section title="Summary">
-            <MenuBarExtra.Item
-              title={
-                totalIncidents === 0 && degradedMonitors.length === 0
-                  ? `All ${projects.length} ${projects.length === 1 ? "Project" : "Projects"} Operational`
-                  : `${totalIncidents} Open ${totalIncidents === 1 ? "Incident" : "Incidents"}`
-              }
-              icon={menuBarIcon}
-            />
+            <MenuBarExtra.Item title={summaryTitle} icon={menuBarIcon} />
           </MenuBarExtra.Section>
 
           {openIncidents.length > 0 && (
@@ -182,13 +192,13 @@ export default function StatusMenuBarCommand() {
           title="Open Monitors"
           icon={Icon.List}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
-          onAction={() => launchCommand({ name: "monitors", type: LaunchType.UserInitiated })}
+          onAction={() => handleOpenCommand("monitors")}
         />
         <MenuBarExtra.Item
           title="Open Incidents"
           icon={Icon.Bell}
           shortcut={{ modifiers: ["cmd"], key: "i" }}
-          onAction={() => launchCommand({ name: "incidents", type: LaunchType.UserInitiated })}
+          onAction={() => handleOpenCommand("incidents")}
         />
         <MenuBarExtra.Item
           title="Open You Up? Dashboard"

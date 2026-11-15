@@ -11,7 +11,7 @@ import {
   showToast,
   Keyboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import {
   acknowledgeIncident,
@@ -87,9 +87,7 @@ export default function MonitorsCommand() {
       toast.title = "Incident Acknowledged";
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Acknowledge Incident";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not Acknowledge Incident" });
     }
   }
 
@@ -101,9 +99,7 @@ export default function MonitorsCommand() {
       toast.title = `Snoozed for ${label}`;
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Snooze Check";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not Snooze Check" });
     }
   }
 
@@ -115,9 +111,7 @@ export default function MonitorsCommand() {
       toast.title = "Snooze Ended";
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not End Snooze";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not End Snooze" });
     }
   }
 
@@ -130,9 +124,7 @@ export default function MonitorsCommand() {
         toast.title = "Monitor Resumed";
         await revalidate();
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Could Not Resume Monitor";
-        toast.message = err instanceof Error ? err.message : String(err);
+        await showFailureToast(err, { title: "Could Not Resume Monitor" });
       }
       return;
     }
@@ -151,9 +143,7 @@ export default function MonitorsCommand() {
       toast.title = "Monitor Paused";
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Pause Monitor";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not Pause Monitor" });
     }
   }
 
@@ -212,6 +202,7 @@ export default function MonitorsCommand() {
               >
                 {projectEntries.map(({ monitor, uptime30d }) => {
                   const openIncidents = openIncidentsOnMonitor(monitor);
+                  const unackedIncidents = openIncidents.filter((inc) => !inc.acknowledged);
                   const snoozed = activeSnoozedChecks(monitor);
                   const primaryCheck = primaryCheckOf(monitor);
                   const accessories: List.Item.Accessory[] = [];
@@ -265,27 +256,39 @@ export default function MonitorsCommand() {
                             title="Open in Dashboard"
                             url={monitorDashboardUrl(project.id, monitor.id)}
                           />
-                          {openIncidents
-                            .filter((inc) => !inc.acknowledged)
-                            .map((inc) => (
-                              <Action
-                                key={inc.incidentId}
-                                title={`Acknowledge ${checkTypeLabel(inc.check.type)} Incident`}
-                                icon={Icon.Check}
-                                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                                onAction={() => handleAcknowledge(project.id, inc.incidentId)}
-                              />
-                            ))}
+                          {unackedIncidents.length === 1 ? (
+                            <Action
+                              title={`Acknowledge ${checkTypeLabel(unackedIncidents[0].check.type)} Incident`}
+                              icon={Icon.Check}
+                              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                              onAction={() => handleAcknowledge(project.id, unackedIncidents[0].incidentId)}
+                            />
+                          ) : unackedIncidents.length > 1 ? (
+                            <ActionPanel.Submenu
+                              title="Acknowledge Incident"
+                              icon={Icon.Check}
+                              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                            >
+                              {unackedIncidents.map((inc) => (
+                                <Action
+                                  key={inc.incidentId}
+                                  title={checkTypeLabel(inc.check.type)}
+                                  icon={Icon.Check}
+                                  onAction={() => handleAcknowledge(project.id, inc.incidentId)}
+                                />
+                              ))}
+                            </ActionPanel.Submenu>
+                          ) : null}
                           {primaryCheck && (
                             <ActionPanel.Submenu
                               title="Snooze Alerts"
                               icon={Icon.BellDisabled}
-                              shortcut={Keyboard.Shortcut.Common.Duplicate}
+                              shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
                             >
                               {SNOOZE_PRESETS.map((preset) => (
                                 <Action
                                   key={preset.minutes}
-                                  title={`Snooze for ${preset.label}`}
+                                  title={preset.label}
                                   onAction={() =>
                                     handleSnooze(project.id, primaryCheck.id, preset.minutes, preset.label)
                                   }
@@ -305,6 +308,7 @@ export default function MonitorsCommand() {
                             <Action
                               title={monitor.state === "paused" ? "Resume Monitor" : "Pause Monitor"}
                               icon={monitor.state === "paused" ? Icon.Play : Icon.Pause}
+                              style={monitor.state === "paused" ? Action.Style.Regular : Action.Style.Destructive}
                               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                               onAction={() => handlePauseResume(monitor)}
                             />

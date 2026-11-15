@@ -11,7 +11,7 @@ import {
   showToast,
   Keyboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { acknowledgeIncident, listIncidents, listMonitors, listProjects, resolveIncident, snoozeCheck } from "./api";
 import { IncidentDetail } from "./components/IncidentDetail";
@@ -77,9 +77,7 @@ export default function IncidentsCommand() {
       toast.title = "Incident Acknowledged";
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Acknowledge Incident";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not Acknowledge Incident" });
     }
   }
 
@@ -91,9 +89,7 @@ export default function IncidentsCommand() {
       toast.title = `Snoozed Check for ${label}`;
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Snooze Check";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not Snooze Check" });
     }
   }
 
@@ -112,9 +108,7 @@ export default function IncidentsCommand() {
       toast.title = "Incident Resolved";
       await revalidate();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Resolve Incident";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Could Not Resolve Incident" });
     }
   }
 
@@ -229,12 +223,12 @@ export default function IncidentsCommand() {
                     <ActionPanel.Submenu
                       title="Snooze Check"
                       icon={Icon.BellDisabled}
-                      shortcut={Keyboard.Shortcut.Common.Duplicate}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
                     >
                       {SNOOZE_PRESETS.map((preset) => (
                         <Action
                           key={preset.minutes}
-                          title={`Snooze for ${preset.label}`}
+                          title={preset.label}
                           onAction={() => handleSnooze(project.id, incident.checkId, preset.minutes, preset.label)}
                         />
                       ))}
