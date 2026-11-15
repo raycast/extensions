@@ -1,6 +1,6 @@
 # Otty Changelog
 
-## [Otty 1.6.5: Saved Recipes, Settings, and Theme Previews] - {PR_MERGE_DATE}
+## [Otty 1.6.5: Saved Recipes, Settings, and Theme Previews] - 2026-11-15
 
 - The extension now needs Otty 1.6.5 or later. With an older Otty, Otty Settings and Open Otty Recipe say "Update Otty" instead of failing.
 - Open Otty Recipe lists the recipes you've saved in Otty (⌘S), with no folder to set up. Open Saved Recipes directly in Otty to restore windows, tabs, and run commands. With no recipes yet, Open Starter Recipe opens one tab split in two, ready to save as your own.
