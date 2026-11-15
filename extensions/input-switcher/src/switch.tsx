@@ -3,71 +3,93 @@ import {
   Action,
   Icon,
   List,
-  showToast,
-  Toast,
   Color,
-  showHUD,
-  popToRoot,
   closeMainWindow,
+  getPreferenceValues,
   open,
-  Clipboard,
+  showHUD,
+  showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { Help } from "./Help";
 import { LayoutManager } from "./model/LayoutManager";
 import { ILayout } from "./model/interfaces";
+import { getWindowsForegroundProcessId } from "./model/win32";
 
-function toastErrorOptions(message: string, error: string): Toast.Options {
-  return {
-    title: "An Error Occured",
-    message,
-    style: Toast.Style.Failure,
-    primaryAction: {
-      title: "Copy Error",
-      onAction: () => Clipboard.copy(`${error}`),
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-    },
-  };
-}
-
-async function handleLayoutSwitch(source: ILayout) {
+async function handleLayoutSwitch(source: ILayout, closeRaycast: boolean, revalidate: () => Promise<unknown>) {
   try {
-    await source.activate();
-    await Promise.all([showHUD(`⌨️ Activated '${source.title}' Layout`), popToRoot(), closeMainWindow()]);
-  } catch (e) {
-    await showToast(toastErrorOptions("Couldn't Activate Layout", `${e}`));
+    const isWindows = process.platform === "win32";
+    const foregroundPid = closeRaycast && isWindows ? await getWindowsForegroundProcessId() : 0;
+
+    if (closeRaycast && isWindows) {
+      await closeMainWindow();
+    }
+
+    await source.activate(foregroundPid);
+
+    if (closeRaycast && !isWindows) {
+      await closeMainWindow();
+    }
+
+    if (closeRaycast) {
+      await showHUD(`⌨️ Activated '${source.title}' Layout`);
+    } else {
+      await showToast({ title: `⌨️ Activated '${source.title}' Layout` });
+      try {
+        await revalidate();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        showFailureToast(message, { title: "Could not refresh layouts" });
+      }
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await showFailureToast(message, { title: "Could not switch layout" });
   }
 }
 
 export default function Command() {
-  const [layouts, setLayouts] = useState<ILayout[]>([]);
+  const { closeRaycast } = getPreferenceValues<{ closeRaycast: boolean }>();
+  const {
+    data: layouts,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(async () => {
+    return await LayoutManager.getAll();
+  });
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLayouts(await LayoutManager.getAll());
-      } catch (e) {
-        await showToast(toastErrorOptions("Couldn't Get Layouts", `${e}`));
-      }
-    })();
-  }, []);
+  if (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    showFailureToast(message, { title: "Could not get layouts" });
+  }
 
   return (
-    <List isLoading={layouts.length === 0} searchBarPlaceholder="Search available layout...">
-      {layouts.map((source) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search available layouts...">
+      {layouts?.map((source) => (
         <List.Item
           key={source.id}
-          icon={source.active ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+          icon={source.active ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Globe}
           title={source.title}
-          accessoryTitle={source.active ? "Current Layout" : ""}
           keywords={[source.id]}
+          accessories={source.active ? [{ text: "Current Layout" }] : []}
           actions={
             <ActionPanel>
-              <Action icon={Icon.Checkmark} title="Activate" onAction={() => handleLayoutSwitch(source)} />
+              <Action
+                icon={Icon.Checkmark}
+                title="Activate"
+                onAction={() => handleLayoutSwitch(source, closeRaycast, revalidate)}
+              />
               <Action
                 icon={Icon.Gear}
                 title="Keyboard Preferences"
-                onAction={() => open("/System/Library/PreferencePanes/Keyboard.prefPane")}
+                onAction={() =>
+                  open(
+                    process.platform === "win32"
+                      ? "ms-settings:keyboard"
+                      : "/System/Library/PreferencePanes/Keyboard.prefPane",
+                  )
+                }
               />
               <Action.Push icon={Icon.QuestionMark} title="Get More Layouts" target={<Help />} />
             </ActionPanel>
