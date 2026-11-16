@@ -12,15 +12,15 @@ Requires a [SaaSFlow](https://saasflow.com) account.
 
 ## Ask SaaSFlow (AI)
 
-The extension registers 31 read-only AI tools so Raycast AI can answer natural-language questions about your data. A few examples:
+The extension registers 38 read-only AI tools so Raycast AI can answer natural-language questions about your data. A few examples:
 
-- _"What's my MRR today?"_ → `data-mrr-at-date`
-- _"Show me last quarter's P&L"_ → `data-profit-loss-data`
-- _"Which customers churned in March?"_ → `data-customer-changes`
-- _"Find the transaction from Stripe on Jan 12"_ → `search`, then `get-transaction`
-- _"Top 10 expense vendors this year"_ → `data-top-expense-vendors`
+- *"What's my MRR today?"* → `data-mrr-at-date`
+- *"Show me last quarter's P&L"* → `data-profit-loss-data`
+- *"Which customers churned in March?"* → `data-customer-changes`
+- *"Find the transaction from Stripe on Jan 12"* → `search`, then `get-transaction`
+- *"Top 10 expense vendors this year"* → `data-top-expense-vendors`
 
-The 23 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR, cohorts, cash flow, P&L, balances, retention). Eight hand-tuned tools cover company / customer / transaction lookups and free-text search.
+The 30 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR, cohorts, cash flow and balance forecasts, P&L, balances, retention, benchmarks, valuation). Eight hand-tuned tools cover company, customer and transaction lookups and free-text search.
 
 ## Setup
 
@@ -28,7 +28,7 @@ The 23 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR,
 2. Open any SaaSFlow command (or @-mention the extension in Quick AI). Raycast pops a browser to `api.saasflow.com` for sign-in and consent.
 3. Pick the company you want active via **Switch Company**.
 
-That's it. The menu bar starts populating on the next refresh.
+The menu bar fills in as soon as you pick a company. Until you sign in, it offers a **Sign in to SaaSFlow…** item that opens Switch Company.
 
 ### Using an API key instead of OAuth
 
@@ -49,6 +49,17 @@ yarn install
 yarn workspace saasflow-raycast dev
 ```
 
-`yarn dev` runs `ray develop`, which sideloads the extension into Raycast and reloads on save. The 31 AI tool wrappers under `src/tools/` are auto-generated from `@saasflow/slices` + the API's OpenAPI spec — run `yarn workspace saasflow-raycast generate-tools` to refresh them by hand, or let `yarn dev` / `yarn build` do it.
+`yarn dev` runs `ray develop`, which sideloads the extension into Raycast and reloads on save. The 38 AI tool wrappers under `src/tools/` are auto-generated from `@saasflow/slices` + the API's OpenAPI spec — run `yarn workspace saasflow-raycast generate-tools` to refresh them by hand, or let `yarn dev` / `yarn build` do it.
 
 To publish under the SaaSFlow Raycast org: `yarn workspace saasflow-raycast publish`. The wrapper script swaps `package.json#name` to `saasflow` for the duration of the upload (the monorepo workspace stays `saasflow-raycast` to avoid colliding with the published CLI package).
+
+### Publishing an update
+
+The store copy lives in the public [`raycast/extensions`](https://github.com/raycast/extensions/tree/main/extensions/saasflow) monorepo. Every update, like the first release, is a pull request there that Raycast reviews; users get it automatically once it merges. Before running `publish`:
+
+1. `yarn workspace saasflow-raycast build` must end with `built extension successfully` (check-all does not run `ray build`).
+2. Add a `## [Title] - {PR_MERGE_DATE}` entry at the top of `CHANGELOG.md`. Raycast fills in the date on merge.
+3. Compare `extensions/saasflow` there with this folder. Raycast and reviewers edit it directly (dependency patches, review fixes), and `publish` refuses until those edits are merged back with `npx @raycast/api@latest pull-contributions`. Since `publish` runs from a staged copy outside this repo, port any code change from there into this folder by hand, or the next publish undoes it. The June 2026 review's OAuth fixes were ported back on 2026-11-16.
+4. Smoke-test in Raycast: OAuth sign-in and refresh, switching company, one AI tool, the menu-bar item. Run `yarn workspace saasflow-raycast dev` from this branch. It loads the extension as a development copy (`@saasflow-raycast`, its own sign-in) next to the store one; disable the store copy in Raycast Settings → Extensions while testing. If the store copy was enabled when the dev copy loaded, Raycast imports the dev copy's commands disabled (greyed out, empty checkbox): tick them there.
+
+Fixes requested in the Raycast review go into this folder first, then `publish` again; it pushes more commits to the same pull request.

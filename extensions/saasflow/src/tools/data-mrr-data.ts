@@ -14,10 +14,12 @@ type Input = {
     timeZone?: string;
     /** Comma-separated list. */
     filterCustomerIds?: string;
+    /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
+    productIds?: string;
 };
 
 export default async function dataMrrData(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, mrrType, startDate, endDate, timeZone, filterCustomerIds } = input;
+    const { companyId, mrrType, startDate, endDate, timeZone, filterCustomerIds, productIds } = input;
 
     return runEndpoint({
         method: "POST",
@@ -32,6 +34,13 @@ export default async function dataMrrData(input: Input): Promise<Record<string, 
                 filterCustomerIds === undefined
                     ? undefined
                     : filterCustomerIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+            productIds:
+                productIds === undefined
+                    ? undefined
+                    : productIds
                           .split(",")
                           .map((s) => s.trim())
                           .filter(Boolean),

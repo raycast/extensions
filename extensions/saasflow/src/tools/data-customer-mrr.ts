@@ -13,15 +13,30 @@ type Input = {
     offset?: number;
     /** IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
     timeZone?: string;
+    /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
+    productIds?: string;
 };
 
 export default async function dataCustomerMrr(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, mrrType, date, limit, offset, timeZone } = input;
+    const { companyId, mrrType, date, limit, offset, timeZone, productIds } = input;
 
     return runEndpoint({
         method: "POST",
         pathTemplate: "/companies/{companyId}/data/customerMrr",
         companyId,
-        body: { mrrType, date, limit, offset, timeZone },
+        body: {
+            mrrType,
+            date,
+            limit,
+            offset,
+            timeZone,
+            productIds:
+                productIds === undefined
+                    ? undefined
+                    : productIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+        },
     });
 }
