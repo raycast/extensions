@@ -86,14 +86,16 @@ async function mergeBtAudioDevices(devices: AudioDevice[]): Promise<AudioDevice[
   const bt = await getBtAudioDevices();
   const phantoms = bt
     .filter((b) => b.connected && !devices.some((d) => isBtDevicePresent(d, b)))
-    .map((b): AudioDevice => ({
-      name: b.name,
-      id: `${BT_ID_PREFIX}${b.address}`,
-      uid: `${BT_ID_PREFIX}${b.address}`,
-      isInput: b.hasMic,
-      isOutput: true,
-      transportType: TransportType.Bluetooth,
-    }));
+    .map(
+      (b): AudioDevice => ({
+        name: b.name,
+        id: `${BT_ID_PREFIX}${b.address}`,
+        uid: `${BT_ID_PREFIX}${b.address}`,
+        isInput: b.hasMic,
+        isOutput: true,
+        transportType: TransportType.Bluetooth,
+      }),
+    );
   return [...devices, ...phantoms];
 }
 
