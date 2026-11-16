@@ -29,18 +29,18 @@ const ORDINALS = [
 ];
 
 // Creates a task, or edits `task` when given. `link` prefills a new task from a web page, with
-// the page as the task's link. `parentId` is the project or checklist an edited item is in.
+// the page as the task's link. `parent` is the project or checklist an edited item is in.
 // `addTo` adds a new item to that project or checklist; checklist items have no dates.
 export function TaskForm({
   task,
   link,
-  parentId,
+  parent,
   addTo,
   onSaved,
 }: {
   task?: Task;
   link?: PageInfo & { url: string };
-  parentId?: string;
+  parent?: Task;
   addTo?: Task;
   onSaved?: () => void;
 }) {
@@ -50,7 +50,7 @@ export function TaskForm({
 
   const { handleSubmit, itemProps, values, setValue } = useForm<TaskValues>({
     initialValues: task
-      ? { ...taskToValues(task), parent_id: parentId ?? "", new_tags: "" }
+      ? { ...taskToValues(task), parent_id: parent?.task_id ?? "", new_tags: "" }
       : {
           new_tags: "",
           action_type: link ? "url" : "none",
@@ -76,7 +76,9 @@ export function TaskForm({
         // Compare with the task as it is now, not as the list loaded it: an action or list changed in
         // 2Do since still counts as changed when the form sets it back.
         const current = task && (await twoDo<{ task: Task }>("get_task", { task_id: task.task_id })).task;
-        await saveTask({ ...v, ...(addTo && { parent_id: addTo.task_id }) }, current, parentId);
+        // Checklist items have no dates, so a task put in a checklist loses its dates and repeat.
+        const undated = !dated && { start: null, due: null, is_repeating: false };
+        await saveTask({ ...v, ...(addTo && { parent_id: addTo.task_id }), ...undated }, current, parent?.task_id);
         if (task || addTo) {
           await showToast({ style: Toast.Style.Success, title: task ? "Task updated" : "Item added" });
           onSaved?.();
@@ -90,15 +92,17 @@ export function TaskForm({
     },
   });
 
-  // Checklist items have no dates, so they can't repeat either.
-  const dated = addTo?.task_type !== "checklist";
-  const repeats = dated && !!values.is_repeating && values.repeat !== undefined;
-
   // A project or checklist put in another becomes a normal task in 2Do, so they aren't offered one.
   const canNest = !task || task.task_type === "normal";
   const parents = useCachedPromise(listParents, [values.list_id ?? ""], {
     execute: canNest && !addTo && !!values.list_id,
   });
+
+  // The project or checklist the task is going into, if any. Checklist items have no dates, so they
+  // can't repeat either.
+  const target = addTo ?? [parent, ...(parents.data ?? [])].find((p) => p && p.task_id === values.parent_id);
+  const dated = target?.task_type !== "checklist";
+  const repeats = dated && !!values.is_repeating && values.repeat !== undefined;
 
   return (
     <Form

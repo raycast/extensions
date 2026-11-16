@@ -1,33 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  confirmAlert,
-  environment,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { getProgressIcon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { actionURL, repeatRule, Task, taskLinks, twoDo } from "./2do";
 import { ItemsView } from "./items-view";
 import { TaskForm } from "./task-form";
-
-// A progress ring like getProgressIcon's, for a project's or checklist's items.
-function ringIcon(done: number, total: number) {
-  const share = Math.max(0, Math.min(1, done / total));
-  const r = 40;
-  const c = 2 * Math.PI * r;
-  const arc =
-    share > 0
-      ? `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${Color.Green}" stroke-width="10" stroke-dasharray="${share * c} ${c}" transform="rotate(-90 50 50)" />`
-      : "";
-  const track = environment.appearance === "light" ? "black" : "white";
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100px" height="100px"><circle cx="50" cy="50" r="${r}" fill="none" stroke="${track}" stroke-width="10" opacity="0.1" />${arc}</svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
 
 const PRIORITY_TAGS = {
   high: { value: "High", color: Color.Red },
@@ -48,14 +23,14 @@ const RUN_ACTION: Record<string, { title: string; icon: Icon }> = {
 };
 
 // A task row with its actions. `onChange` reloads the list after an action changes the task.
-// `parentId` is set for a project's or checklist's items.
+// `parent` is set for a project's or checklist's items.
 export function TaskItem({
   task: t,
-  parentId,
+  parent,
   onChange: reloadList,
 }: {
   task: Task;
-  parentId?: string;
+  parent?: Task;
   onChange: () => void;
 }) {
   const isParent = t.task_type !== "normal";
@@ -86,16 +61,19 @@ export function TaskItem({
     }
   }
 
-  // 2Do completes a project's or checklist's open items along with it, so this asks first.
+  // 2Do completes a project's or checklist's open items along with it, so this asks first when the
+  // items, read fresh from 2Do rather than from the cached ring, include open ones.
   async function completeWithItems() {
     try {
       const { tasks } = await twoDo<{ tasks: Task[] }>("list_subtasks", { task_id: t.task_id });
       const open = tasks.filter((i) => !i.completed).length;
-      const ok = await confirmAlert({
-        title: `Complete "${t.title}" and ${open === 1 ? "its open item" : `its ${open} open items`}?`,
-        primaryAction: { title: "Complete All" },
-        dismissAction: { title: "Not Now" },
-      });
+      const ok =
+        open === 0 ||
+        (await confirmAlert({
+          title: `Complete "${t.title}" and ${open === 1 ? "its open item" : `its ${open} open items`}?`,
+          primaryAction: { title: "Complete All" },
+          dismissAction: { title: "Not Now" },
+        }));
       if (!ok) return;
       await twoDo("complete_task", { task_id: t.task_id });
       await showToast({ style: Toast.Style.Success, title: "Completed" });
@@ -113,7 +91,7 @@ export function TaskItem({
       icon={
         t.completed
           ? { source: Icon.CheckCircle, tintColor: Color.Green }
-          : isParent
+          : t.task_type !== "normal"
             ? { source: PARENT_ICONS[t.task_type], tooltip: t.task_type === "project" ? "Project" : "Checklist" }
             : Icon.Circle
       }
@@ -121,7 +99,7 @@ export function TaskItem({
         ...(isParent && !t.completed && items.data?.length
           ? [
               {
-                icon: ringIcon(itemsDone, items.data.length),
+                icon: getProgressIcon(itemsDone / items.data.length, Color.Green),
                 text: `${itemsDone}/${items.data.length}`,
                 tooltip: `${itemsDone} of ${items.data.length} items done`,
               },
@@ -148,24 +126,8 @@ export function TaskItem({
           <Action.Push
             title="Edit Task"
             icon={Icon.Pencil}
-            target={<TaskForm task={t} parentId={parentId} onSaved={onChange} />}
+            target={<TaskForm task={t} parent={parent} onSaved={onChange} />}
           />
-          {isParent && !t.completed && (
-            <Action.Push
-              title="Add Item"
-              icon={Icon.Plus}
-              shortcut={Keyboard.Shortcut.Common.New}
-              target={<TaskForm addTo={t} onSaved={onChange} />}
-            />
-          )}
-          {isParent && (
-            <Action.Push
-              title="Show Items"
-              icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
-              target={<ItemsView parent={t} onChange={onChange} />}
-            />
-          )}
           {primary && (
             <Action.Open
               title={primary.title}
@@ -185,7 +147,7 @@ export function TaskItem({
               ))}
             </ActionPanel.Submenu>
           )}
-          {isParent && !t.completed && itemsDone < (items.data?.length ?? 0) ? (
+          {isParent && !t.completed ? (
             <Action
               title="Complete Task"
               icon={Icon.CheckCircle}
@@ -202,6 +164,23 @@ export function TaskItem({
                   task_id: t.task_id,
                 })
               }
+            />
+          )}
+          {/* Below the first two actions, where Raycast shows custom shortcuts. */}
+          {isParent && !t.completed && (
+            <Action.Push
+              title="Add Item"
+              icon={Icon.Plus}
+              shortcut={Keyboard.Shortcut.Common.New}
+              target={<TaskForm addTo={t} onSaved={onChange} />}
+            />
+          )}
+          {isParent && (
+            <Action.Push
+              title="Show Items"
+              icon={Icon.List}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              target={<ItemsView parent={t} onChange={onChange} />}
             />
           )}
           <Action

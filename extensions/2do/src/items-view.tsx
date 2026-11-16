@@ -26,11 +26,26 @@ export function ItemsView({ parent, onChange }: { parent: Task; onChange: () => 
 
   return (
     <List navigationTitle={parent.title} isLoading={items.isLoading} searchBarPlaceholder="Filter items">
-      {!items.isLoading && <List.EmptyView icon={Icon.List} title="No Items" actions={addItem} />}
-      {!parent.completed && <List.Item title="Add Item" icon={Icon.Plus} actions={addItem} />}
+      {items.error && !items.data ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load items"
+          description={items.error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={items.revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <>
+          {!items.isLoading && <List.EmptyView icon={Icon.List} title="No Items" actions={addItem} />}
+          {!parent.completed && <List.Item title="Add Item" icon={Icon.Plus} actions={addItem} />}
+        </>
+      )}
       <List.Section title={items.data ? `${done} of ${items.data.length} done` : undefined}>
         {items.data?.map((t) => (
-          <TaskItem key={t.task_id} task={t} parentId={parent.task_id} onChange={reload} />
+          <TaskItem key={t.task_id} task={t} parent={parent} onChange={reload} />
         ))}
       </List.Section>
     </List>
