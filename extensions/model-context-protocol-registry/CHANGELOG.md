@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AgentX MCP Server] - {PR_MERGE_DATE}
+
+- Add AgentX to the official registry: check on your AI coding agents, send them messages and start chats from your AI assistant. Hosted Streamable HTTP server at https://www.agentxhq.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An AgentX account is required.
+
 ## [Add DocSpring MCP Server] - 2026-11-16
 
 - Add DocSpring to the official registry: fill PDF and Word templates, generate PDFs and Word documents, and collect e-signatures from an AI agent. 57 tools. Hosted Streamable HTTP server at https://mcp.docspring.com/mcp (EU accounts: https://mcp-eu.docspring.com/mcp) with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a DocSpring account (free plan available).
