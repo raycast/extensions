@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveArtifact } from "./artifact";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { PASS_CLI_VERSION, resolveArtifact } from "./artifact";
 import { PassCliError } from "../types";
 
 test("resolves pinned pass-cli 2.5.1 artifacts", () => {
@@ -38,4 +40,16 @@ test("rejects unsupported platform and architecture pairs", () => {
     },
   );
   assert.throws(() => resolveArtifact("linux", "x64"), /Unsupported platform: linux-x64/);
+});
+
+test("the CLI Path preference and the README name the pass-cli version the extension downloads", () => {
+  const versionsIn = (text: string) => [...text.matchAll(/pass-cli (\d+\.\d+\.\d+)/g)].map(([, version]) => version);
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+    preferences: { name: string; description: string }[];
+  };
+  const preference = manifest.preferences.find(({ name }) => name === "cliPath");
+  assert.deepEqual(versionsIn(preference?.description ?? ""), [PASS_CLI_VERSION]);
+  const readme = readFileSync(join(process.cwd(), "README.md"), "utf8");
+  const readmeLine = readme.split("\n").find((line) => line.startsWith("- **CLI Path**")) ?? "";
+  assert.deepEqual(versionsIn(readmeLine), [PASS_CLI_VERSION]);
 });
