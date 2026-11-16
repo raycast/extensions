@@ -1,5 +1,12 @@
 # 2Do Changelog
 
+## [Projects and Checklists] - {PR_MERGE_DATE}
+
+- Put a task inside a project or checklist from Add Task or Edit Task
+- Show Items lists a project's or checklist's items, and the parent shows their progress as a ring
+- Add Item adds an item to a project or checklist, and Add Task can create projects and checklists
+- Completing a project or checklist with open items asks first, since they're completed too
+
 ## [Repeats and New Tags] - 2026-11-09
 
 - Set how a task repeats in Add Task and Edit Task, and see the rule on repeating tasks in View Tasks
