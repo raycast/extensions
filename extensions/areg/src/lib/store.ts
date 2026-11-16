@@ -4,9 +4,9 @@ import type { CompanySummary } from "./types";
 
 const MAX_RECENTS = 15;
 
-type State = { favourites: CompanySummary[]; recents: CompanySummary[]; loaded: boolean };
+type State = { favorites: CompanySummary[]; recents: CompanySummary[]; loaded: boolean };
 
-let state: State = { favourites: [], recents: [], loaded: false };
+let state: State = { favorites: [], recents: [], loaded: false };
 const listeners = new Set<() => void>();
 let loading: Promise<void> | undefined;
 
@@ -25,16 +25,19 @@ async function read(key: string): Promise<CompanySummary[]> {
   }
 }
 
+// The favorites key predates the switch to US spelling; renaming it would drop saved favorites.
+const STORAGE_KEYS = { favorites: "favourites", recents: "recents" } as const;
+
 function load() {
-  loading ??= Promise.all([read("favourites"), read("recents")]).then(([favourites, recents]) =>
-    setState({ favourites, recents, loaded: true }),
+  loading ??= Promise.all([read(STORAGE_KEYS.favorites), read(STORAGE_KEYS.recents)]).then(([favorites, recents]) =>
+    setState({ favorites, recents, loaded: true }),
   );
   return loading;
 }
 
-function persist(key: "favourites" | "recents", value: CompanySummary[]) {
+function persist(key: keyof typeof STORAGE_KEYS, value: CompanySummary[]) {
   setState({ [key]: value });
-  void LocalStorage.setItem(key, JSON.stringify(value));
+  void LocalStorage.setItem(STORAGE_KEYS[key], JSON.stringify(value));
 }
 
 function slim(company: CompanySummary): CompanySummary {
@@ -59,24 +62,24 @@ export async function clearRecents() {
   persist("recents", []);
 }
 
-export async function toggleFavourite(company: CompanySummary): Promise<boolean> {
+export async function toggleFavorite(company: CompanySummary): Promise<boolean> {
   await load();
-  const isFavourite = state.favourites.some((c) => c.orgnr === company.orgnr);
+  const isFavorite = state.favorites.some((c) => c.orgnr === company.orgnr);
   persist(
-    "favourites",
-    isFavourite ? state.favourites.filter((c) => c.orgnr !== company.orgnr) : [...state.favourites, slim(company)],
+    "favorites",
+    isFavorite ? state.favorites.filter((c) => c.orgnr !== company.orgnr) : [...state.favorites, slim(company)],
   );
-  return !isFavourite;
+  return !isFavorite;
 }
 
-export async function moveFavourite(orgnr: string, direction: -1 | 1) {
+export async function moveFavorite(orgnr: string, direction: -1 | 1) {
   await load();
-  const list = [...state.favourites];
+  const list = [...state.favorites];
   const index = list.findIndex((c) => c.orgnr === orgnr);
   const target = index + direction;
   if (index < 0 || target < 0 || target >= list.length) return;
   [list[index], list[target]] = [list[target], list[index]];
-  persist("favourites", list);
+  persist("favorites", list);
 }
 
 export function useStore(): State {

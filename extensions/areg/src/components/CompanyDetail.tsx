@@ -2,8 +2,8 @@ import { Detail, Icon, List } from "@raycast/api";
 import { isNotFound } from "../lib/api";
 import { companyAvatar } from "../lib/brand";
 import { companyStatus, keyPeople, useCompanyOverview } from "../lib/company";
-import { formatAddress, formatDate, formatMoney, formatNumber, websiteUrl, type Locale } from "../lib/format";
-import { getLanguage, getStrings, type Strings } from "../lib/i18n";
+import { formatAddress, formatDate, formatMoney, formatNumber, websiteUrl } from "../lib/format";
+import { getStrings, type Strings } from "../lib/strings";
 import { formatOrgnr } from "../lib/orgnr";
 import type { CompanyResponse, CompanySummary, FinancialsResponse, RolesResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
@@ -16,11 +16,11 @@ type Overview = {
 
 const escape = (text: string) => text.replace(/([\\`*_[\]|<>#])/g, "\\$1");
 
-function keyFiguresTable(financials: FinancialsResponse | undefined, t: Strings, locale: Locale, years = 3) {
+function keyFiguresTable(financials: FinancialsResponse | undefined, t: Strings, years = 3) {
   const rows = [...(financials?.years ?? [])].sort((a, b) => b.year - a.year).slice(0, years);
   if (!rows.length) return "";
   const currency = rows[0].currency ?? "NOK";
-  const n = (value: unknown) => formatNumber(typeof value === "number" ? value : null, locale);
+  const n = (value: unknown) => formatNumber(typeof value === "number" ? value : null);
   // Metrics as rows and years as columns, so the table stays readable in Raycast's narrow markdown pane.
   const metrics: [string, string][] = [
     [t.revenue, "operatingRevenue"],
@@ -40,7 +40,7 @@ function keyFiguresTable(financials: FinancialsResponse | undefined, t: Strings,
   ].join("\n");
 }
 
-export function companyMarkdown(summary: CompanySummary, overview: Overview, t: Strings, locale: Locale) {
+export function companyMarkdown(summary: CompanySummary, overview: Overview, t: Strings) {
   const data = overview.company?.data;
   const people = keyPeople(overview.roles);
   const parts = [`# ${escape(overview.company?.name ?? summary.name)}`];
@@ -48,7 +48,7 @@ export function companyMarkdown(summary: CompanySummary, overview: Overview, t: 
   const activity = (data?.aktivitet ?? []).join(" ").trim();
   if (activity) parts.push(escape(activity));
 
-  const figures = keyFiguresTable(overview.financials, t, locale);
+  const figures = keyFiguresTable(overview.financials, t);
   if (figures) parts.push(figures);
 
   if (people.board.length || people.ceo) {
@@ -68,7 +68,7 @@ export function companyMarkdown(summary: CompanySummary, overview: Overview, t: 
   if (formerNames.length) {
     parts.push(
       `## ${t.formerNames}\n\n${formerNames
-        .map((n) => `- ${escape(n.navn)}${n.tilDato ? ` (${formatDate(n.tilDato, locale)})` : ""}`)
+        .map((n) => `- ${escape(n.navn)}${n.tilDato ? ` (${formatDate(n.tilDato)})` : ""}`)
         .join("\n")}`,
     );
   }
@@ -82,7 +82,6 @@ export function CompanyMetadata({ summary, overview, variant = "detail" }: Metad
   // List.Item.Detail.Metadata has the same parts as Detail.Metadata, so one layout serves both.
   const M = (variant === "list" ? List.Item.Detail.Metadata : Detail.Metadata) as typeof Detail.Metadata;
   const t = getStrings();
-  const locale = getLanguage();
   const company = overview.company;
   const data = company?.data;
   const people = keyPeople(overview.roles);
@@ -91,7 +90,7 @@ export function CompanyMetadata({ summary, overview, variant = "detail" }: Metad
   const site = websiteUrl(data?.hjemmeside);
   const latest = [...(overview.financials?.years ?? [])].sort((a, b) => b.year - a.year)[0];
   const thousands = (value: unknown) =>
-    typeof value === "number" ? formatMoney(value * 1000, latest?.currency, locale) : undefined;
+    typeof value === "number" ? formatMoney(value * 1000, latest?.currency) : undefined;
 
   return (
     <M>
@@ -113,10 +112,8 @@ export function CompanyMetadata({ summary, overview, variant = "detail" }: Metad
         </M.TagList>
       )}
       {data?.naeringskode1 && <M.Label title={t.industry} text={data.naeringskode1.beskrivelse} />}
-      {data?.antallAnsatte !== undefined && (
-        <M.Label title={t.employees} text={formatNumber(data.antallAnsatte, locale)} />
-      )}
-      {data?.stiftelsesdato && <M.Label title={t.founded} text={formatDate(data.stiftelsesdato, locale)} />}
+      {data?.antallAnsatte !== undefined && <M.Label title={t.employees} text={formatNumber(data.antallAnsatte)} />}
+      {data?.stiftelsesdato && <M.Label title={t.founded} text={formatDate(data.stiftelsesdato)} />}
       {address && <M.Label title={t.address} text={address} />}
       {postal && postal !== address && <M.Label title={t.postalAddress} text={postal} />}
       {site && <M.Link title={t.website} text={data?.hjemmeside ?? site} target={site} />}
@@ -133,7 +130,7 @@ export function CompanyMetadata({ summary, overview, variant = "detail" }: Metad
       {latest && <M.Label title={`${t.revenue} ${latest.year}`} text={thousands(latest.operatingRevenue)} />}
       {latest && <M.Label title={`${t.netResult} ${latest.year}`} text={thousands(latest.netIncome)} />}
       {data?.kapital?.belop !== undefined && (
-        <M.Label title={t.capital} text={formatMoney(data.kapital.belop, data.kapital.valuta, locale)} />
+        <M.Label title={t.capital} text={formatMoney(data.kapital.belop, data.kapital.valuta)} />
       )}
       {data && <M.Label title={t.vatRegistered} text={data.registrertIMvaregisteret ? t.yes : t.no} />}
       {data?.erIKonsern && <M.Label title={t.inGroup} text={t.yes} />}
@@ -141,16 +138,16 @@ export function CompanyMetadata({ summary, overview, variant = "detail" }: Metad
   );
 }
 
-export function CompanyDetail({ company: summary }: { company: CompanySummary }) {
+/** `isRoot` is set when the view opens as a command's first screen, where Raycast shows the command name instead. */
+export function CompanyDetail({ company: summary, isRoot = false }: { company: CompanySummary; isRoot?: boolean }) {
   const t = getStrings();
-  const locale = getLanguage();
   const overview = useCompanyOverview(summary.orgnr);
   const data = overview.company.data;
 
   if (overview.company.error && isNotFound(overview.company.error)) {
     return (
       <Detail
-        navigationTitle={summary.name}
+        navigationTitle={isRoot ? undefined : summary.name}
         markdown={`# ${t.notFound}\n\n${t.notFoundHint(formatOrgnr(summary.orgnr))}`}
         actions={<CompanyActions company={summary} context="detail" />}
       />
@@ -167,9 +164,9 @@ export function CompanyDetail({ company: summary }: { company: CompanySummary })
 
   return (
     <Detail
-      navigationTitle={resolved.name}
+      navigationTitle={isRoot ? undefined : resolved.name}
       isLoading={overview.isLoading}
-      markdown={companyMarkdown(resolved, overviewData, t, locale)}
+      markdown={companyMarkdown(resolved, overviewData, t)}
       metadata={<CompanyMetadata summary={resolved} overview={overviewData} />}
       actions={
         <CompanyActions

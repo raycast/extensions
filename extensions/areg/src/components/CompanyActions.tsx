@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import type { ReactNode } from "react";
-import { getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import { formatOrgnr } from "../lib/orgnr";
 import { Shortcuts } from "../lib/shortcuts";
-import { clearRecents, moveFavourite, removeRecent, toggleFavourite, trackRecent, useStore } from "../lib/store";
+import { clearRecents, moveFavorite, removeRecent, toggleFavorite, trackRecent, useStore } from "../lib/store";
 import type { CompanySummary } from "../lib/types";
 import { brregUrl, companyUrl } from "../lib/urls";
 import { AnnouncementsView } from "./AnnouncementsView";
 import { CompanyDetail } from "./CompanyDetail";
-import { FinancialLicencesView } from "./FinancialLicencesView";
+import { FinancialLicensesView } from "./FinancialLicensesView";
 import { FinancialsView } from "./FinancialsView";
 import { GrantsView } from "./GrantsView";
 import { GroupView } from "./GroupView";
@@ -18,7 +18,7 @@ import { IpRightsView } from "./IpRightsView";
 import { RolesView } from "./RolesView";
 import { ShareholdersView } from "./ShareholdersView";
 import { TendersView } from "./TendersView";
-import { TransportLicencesView } from "./TransportLicencesView";
+import { TransportLicensesView } from "./TransportLicensesView";
 
 type Props = {
   company: CompanySummary;
@@ -33,15 +33,15 @@ type Props = {
   onToggleDetail?: () => void;
   onRefresh?: () => void;
   recent?: boolean;
-  favouriteIndex?: number;
-  favouriteCount?: number;
+  favoriteIndex?: number;
+  favoriteCount?: number;
 };
 
 export function CompanyActions(props: Props) {
   const { company, context = "list" } = props;
   const t = getStrings();
-  const { favourites } = useStore();
-  const isFavourite = favourites.some((c) => c.orgnr === company.orgnr);
+  const { favorites } = useStore();
+  const isFavorite = favorites.some((c) => c.orgnr === company.orgnr);
   const { primaryAction } = getPreferenceValues<Preferences>();
   const track = () => void trackRecent(company);
 
@@ -119,8 +119,8 @@ export function CompanyActions(props: Props) {
         {explore(t.grants, Icon.BankNote, Shortcuts.grants, <GrantsView company={company} />)}
         {explore(t.tenders, Icon.Hammer, Shortcuts.tenders, <TendersView company={company} />)}
         {explore(t.ipRights, Icon.Trophy, Shortcuts.ipRights, <IpRightsView company={company} />)}
-        {explore(t.transportLicences, Icon.Car, Shortcuts.licences, <TransportLicencesView company={company} />)}
-        {explore(t.financialLicences, Icon.Shield, undefined, <FinancialLicencesView company={company} />)}
+        {explore(t.transportLicenses, Icon.Car, Shortcuts.licenses, <TransportLicensesView company={company} />)}
+        {explore(t.financialLicenses, Icon.Shield, undefined, <FinancialLicensesView company={company} />)}
       </ActionPanel.Section>
 
       <ActionPanel.Section title={t.sectionOpen}>
@@ -143,30 +143,30 @@ export function CompanyActions(props: Props) {
 
       <ActionPanel.Section title={t.sectionManage}>
         <Action
-          title={isFavourite ? t.removeFavourite : t.addFavourite}
-          icon={isFavourite ? Icon.StarDisabled : Icon.Star}
-          shortcut={Shortcuts.favourite}
+          title={isFavorite ? t.removeFavorite : t.addFavorite}
+          icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+          shortcut={Shortcuts.favorite}
           onAction={async () => {
-            const added = await toggleFavourite(company);
-            await showToast({ style: Toast.Style.Success, title: added ? t.addedFavourite : t.removedFavourite });
+            const added = await toggleFavorite(company);
+            await showToast({ style: Toast.Style.Success, title: added ? t.addedFavorite : t.removedFavorite });
           }}
         />
-        {props.favouriteIndex !== undefined && props.favouriteIndex > 0 && (
+        {props.favoriteIndex !== undefined && props.favoriteIndex > 0 && (
           <Action
             title={t.moveUp}
             icon={Icon.ArrowUp}
             shortcut={Shortcuts.moveUp}
-            onAction={() => moveFavourite(company.orgnr, -1)}
+            onAction={() => moveFavorite(company.orgnr, -1)}
           />
         )}
-        {props.favouriteIndex !== undefined &&
-          props.favouriteCount !== undefined &&
-          props.favouriteIndex < props.favouriteCount - 1 && (
+        {props.favoriteIndex !== undefined &&
+          props.favoriteCount !== undefined &&
+          props.favoriteIndex < props.favoriteCount - 1 && (
             <Action
               title={t.moveDown}
               icon={Icon.ArrowDown}
               shortcut={Shortcuts.moveDown}
-              onAction={() => moveFavourite(company.orgnr, 1)}
+              onAction={() => moveFavorite(company.orgnr, 1)}
             />
           )}
         {props.recent && (

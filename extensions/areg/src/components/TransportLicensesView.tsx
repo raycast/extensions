@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useAreg } from "../lib/api";
-import { getStrings } from "../lib/i18n";
-import type { CompanySummary, TransportLicencesResponse } from "../lib/types";
+import { getStrings } from "../lib/strings";
+import type { CompanySummary, TransportLicensesResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, PersonActions, ResourceEmptyView } from "./common";
 
-export function TransportLicencesView({ company }: { company: CompanySummary }) {
+export function TransportLicensesView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const { data, isLoading, error, revalidate } = useAreg<TransportLicencesResponse>(`/${company.orgnr}/loyver`);
+  const { data, isLoading, error, revalidate } = useAreg<TransportLicensesResponse>(`/${company.orgnr}/loyver`);
   const pageActions = (
     <>
       {data?.sourceUrl && (
@@ -15,24 +15,24 @@ export function TransportLicencesView({ company }: { company: CompanySummary }) 
           <Action.OpenInBrowser title={t.source} icon={Icon.Globe} url={data.sourceUrl} />
         </ActionPanel.Section>
       )}
-      <PageActions company={company} page="loyver" title={t.transportLicences} onRefresh={revalidate} />
+      <PageActions company={company} page="loyver" title={t.transportLicenses} onRefresh={revalidate} />
     </>
   );
-  const licences = data?.licences ?? [];
+  const licenses = data?.licences ?? [];
 
   return (
-    <List navigationTitle={`${t.transportLicences} · ${company.name}`} isLoading={isLoading}>
-      {licences.length === 0 && (
-        <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noTransportLicences} icon={Icon.Car} />
+    <List navigationTitle={`${t.transportLicenses} · ${company.name}`} isLoading={isLoading}>
+      {licenses.length === 0 && (
+        <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noTransportLicenses} icon={Icon.Car} />
       )}
-      <List.Section title={t.transportLicences}>
-        {licences.map((licence) => (
+      <List.Section title={t.transportLicenses}>
+        {licenses.map((license) => (
           <List.Item
-            key={licence.licenceNumber}
+            key={license.licenseNumber}
             icon={Icon.Car}
-            title={licence.typeLabel}
-            subtitle={licence.licenceNumber}
-            accessories={licence.copies ? [{ text: `${licence.copies}`, icon: Icon.Car, tooltip: t.copies }] : []}
+            title={license.typeLabel}
+            subtitle={license.licenseNumber}
+            accessories={license.copies ? [{ text: `${license.copies}`, icon: Icon.Car, tooltip: t.copies }] : []}
             actions={<ActionPanel>{pageActions}</ActionPanel>}
           />
         ))}

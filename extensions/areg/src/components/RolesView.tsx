@@ -1,14 +1,13 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useAreg } from "../lib/api";
 import { formatDate } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, RolesResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, PersonActions, ResourceEmptyView } from "./common";
 
 export function RolesView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<RolesResponse>(`/${company.orgnr}/roles`);
   const pageActions = <PageActions company={company} page="roles" title={t.roles} onRefresh={revalidate} />;
 
@@ -55,9 +54,7 @@ export function RolesView({ company }: { company: CompanySummary }) {
               icon={Icon.Calendar}
               title={period.holder?.name ?? "–"}
               subtitle={period.label}
-              accessories={[
-                { text: `${formatDate(period.from, locale)} – ${period.to ? formatDate(period.to, locale) : ""}` },
-              ]}
+              accessories={[{ text: `${formatDate(period.from)} – ${period.to ? formatDate(period.to) : ""}` }]}
               actions={
                 period.holder ? (
                   <CompanyActions company={{ orgnr: period.holder.orgnr, name: period.holder.name }}>

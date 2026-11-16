@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { useAreg } from "../lib/api";
 import { formatNumber, formatPercent } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, HoldingsResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";
@@ -10,7 +10,6 @@ import { YearDropdown } from "./ShareholdersView";
 
 export function HoldingsView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const [year, setYear] = useState<number>();
   const { data, isLoading, error, revalidate } = useAreg<HoldingsResponse>(
     `/${company.orgnr}/holdings${year ? `?year=${year}` : ""}`,
@@ -36,8 +35,8 @@ export function HoldingsView({ company }: { company: CompanySummary }) {
             subtitle={holding.shareClass ?? undefined}
             keywords={[holding.companyOrgnr]}
             accessories={[
-              { text: formatNumber(holding.shares, locale), tooltip: t.shares },
-              { tag: formatPercent(holding.pct, locale), tooltip: t.ownership },
+              { text: formatNumber(holding.shares), tooltip: t.shares },
+              { tag: formatPercent(holding.pct), tooltip: t.ownership },
             ]}
             actions={
               <CompanyActions company={{ orgnr: holding.companyOrgnr, name: holding.companyName }}>

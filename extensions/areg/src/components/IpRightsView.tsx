@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useAreg } from "../lib/api";
 import { formatDate } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, IpRight, IpRightsResponse } from "../lib/types";
 import { PageActions, ResourceEmptyView } from "./common";
 
 export function IpRightsView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<IpRightsResponse>(`/${company.orgnr}/rettigheter`);
   const kindLabel = { trademark: t.trademark, patent: t.patent, design: t.design };
   const kindIcon = { trademark: Icon.Tag, patent: Icon.LightBulb, design: Icon.Brush };
@@ -27,7 +26,7 @@ export function IpRightsView({ company }: { company: CompanySummary }) {
           tag: { value: right.statusLabel, color: right.alive ? Color.PrimaryText : Color.SecondaryText },
           tooltip: right.alive ? t.inForce : t.expired,
         },
-        { text: formatDate(right.filedOn, locale), tooltip: t.filed },
+        { text: formatDate(right.filedOn), tooltip: t.filed },
       ]}
       actions={
         <ActionPanel title={right.title ?? right.applicationNumber}>

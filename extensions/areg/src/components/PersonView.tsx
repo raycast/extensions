@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { useAreg } from "../lib/api";
 import { formatNumber, formatPercent } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import { Shortcuts } from "../lib/shortcuts";
 import type { PersonResponse } from "../lib/types";
 import { personPath, personUrl } from "../lib/urls";
@@ -12,7 +12,6 @@ import { YearDropdown } from "./ShareholdersView";
 
 export function PersonView({ name, born }: { name: string; born: number }) {
   const t = getStrings();
-  const locale = getLanguage();
   const [year, setYear] = useState<number>();
   const path = `${personPath(name, born)}${year ? `&year=${year}` : ""}`;
   const { data, isLoading, error, revalidate } = useAreg<PersonResponse>(path);
@@ -64,8 +63,8 @@ export function PersonView({ name, born }: { name: string; born: number }) {
             title={position.companyName}
             subtitle={position.shareClass ?? undefined}
             accessories={[
-              { text: formatNumber(position.shares, locale), tooltip: t.shares },
-              { tag: formatPercent(position.pct, locale), tooltip: t.ownership },
+              { text: formatNumber(position.shares), tooltip: t.shares },
+              { tag: formatPercent(position.pct), tooltip: t.ownership },
             ]}
             actions={
               <CompanyActions company={{ orgnr: position.companyOrgnr, name: position.companyName }}>

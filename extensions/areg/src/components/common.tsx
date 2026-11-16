@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { isNotFound } from "../lib/api";
-import { getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import { Shortcuts } from "../lib/shortcuts";
 import type { CompanySummary } from "../lib/types";
 import { companyUrl, personUrl, type CompanyPage } from "../lib/urls";

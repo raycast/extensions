@@ -3,32 +3,32 @@ import { Brand } from "../lib/brand";
 import { Fragment } from "react";
 import { useAreg } from "../lib/api";
 import { FINANCIAL_GROUPS } from "../lib/financials";
-import { formatChange, formatCompactNumber, formatDate, formatNumber, type Locale } from "../lib/format";
-import { getLanguage, getStrings, type Strings } from "../lib/i18n";
+import { formatChange, formatCompactNumber, formatDate, formatNumber } from "../lib/format";
+import { getStrings, type Strings } from "../lib/strings";
 import type { CompanySummary, FinancialsResponse, FinancialYear } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";
 
-function statementMarkdown(year: FinancialYear, previous: FinancialYear | undefined, t: Strings, locale: Locale) {
-  const n = (value: unknown) => (typeof value === "number" ? formatNumber(value, locale) : "–");
+function statementMarkdown(year: FinancialYear, previous: FinancialYear | undefined, t: Strings) {
+  const n = (value: unknown) => (typeof value === "number" ? formatNumber(value) : "–");
   const parts = [
     `## ${t.financials} ${year.year}`,
-    `${formatDate(year.periodStart, locale)} – ${formatDate(year.periodEnd, locale)} · _${t.amountsInThousands(year.currency ?? "NOK")}_`,
+    `${formatDate(year.periodStart)} – ${formatDate(year.periodEnd)} · _${t.amountsInThousands(year.currency ?? "NOK")}_`,
   ];
   for (const group of FINANCIAL_GROUPS) {
     const lines = group.lines.filter((line) => typeof year[line.key] === "number");
     if (!lines.length) continue;
     parts.push(
       [
-        `### ${group[locale]}`,
+        `### ${group.label}`,
         "",
         // One figure column plus the change keeps exact amounts from wrapping in the narrow detail pane.
         `| | ${year.year} | ${previous ? t.changeFrom(previous.year) : ""} |`,
         "| --- | ---: | ---: |",
         ...lines.map((line) => {
-          const label = line.total ? `**${line[locale]}**` : line[locale];
+          const label = line.total ? `**${line.label}**` : line.label;
           const value = line.total ? `**${n(year[line.key])}**` : n(year[line.key]);
-          const change = previous ? (formatChange(year[line.key], previous[line.key], locale) ?? "") : "";
+          const change = previous ? (formatChange(year[line.key], previous[line.key]) ?? "") : "";
           return `| ${label} | ${value} | ${change} |`;
         }),
       ].join("\n"),
@@ -40,7 +40,6 @@ function statementMarkdown(year: FinancialYear, previous: FinancialYear | undefi
 // Metadata rows keep long labels and exact amounts readable; a markdown table wraps both in the narrow pane.
 function StatementDetail({ year, previous }: { year: FinancialYear; previous: FinancialYear | undefined }) {
   const t = getStrings();
-  const locale = getLanguage();
   const M = List.Item.Detail.Metadata;
   const groups = FINANCIAL_GROUPS.map((group) => ({
     group,
@@ -53,20 +52,20 @@ function StatementDetail({ year, previous }: { year: FinancialYear; previous: Fi
         <M>
           <M.Label
             title={`${t.financials} ${year.year}`}
-            text={`${formatDate(year.periodStart, locale)} – ${formatDate(year.periodEnd, locale)}`}
+            text={`${formatDate(year.periodStart)} – ${formatDate(year.periodEnd)}`}
           />
           <M.Label title={t.amountsInThousands(year.currency ?? "NOK")} text="" />
           {groups.map(({ group, lines }) => (
             <Fragment key={group.key}>
               <M.Separator />
-              <M.Label title={group[locale].toUpperCase()} text="" />
+              <M.Label title={group.label.toUpperCase()} text="" />
               {lines.map((line) => {
-                const change = previous ? formatChange(year[line.key], previous[line.key], locale) : undefined;
-                const value = formatNumber(year[line.key] as number, locale);
+                const change = previous ? formatChange(year[line.key], previous[line.key]) : undefined;
+                const value = formatNumber(year[line.key] as number);
                 return (
                   <M.Label
                     key={line.key}
-                    title={line[locale]}
+                    title={line.label}
                     text={{
                       value: change ? `${value} (${change})` : value,
                       color: line.total ? Color.PrimaryText : Color.SecondaryText,
@@ -84,7 +83,6 @@ function StatementDetail({ year, previous }: { year: FinancialYear; previous: Fi
 
 export function FinancialsView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<FinancialsResponse>(`/${company.orgnr}/financials`);
   const years = [...(data?.years ?? [])].sort((a, b) => b.year - a.year);
 
@@ -106,9 +104,7 @@ export function FinancialsView({ company }: { company: CompanySummary }) {
             icon={Icon.BarChart}
             title={String(year.year)}
             subtitle={
-              typeof year.operatingRevenue === "number"
-                ? formatCompactNumber(year.operatingRevenue * 1000, locale)
-                : undefined
+              typeof year.operatingRevenue === "number" ? formatCompactNumber(year.operatingRevenue * 1000) : undefined
             }
             accessories={
               result === null
@@ -116,7 +112,7 @@ export function FinancialsView({ company }: { company: CompanySummary }) {
                 : [
                     {
                       tag: {
-                        value: formatCompactNumber(result * 1000, locale),
+                        value: formatCompactNumber(result * 1000),
                         color: result >= 0 ? Brand.up : Brand.down,
                       },
                       tooltip: t.netResult,
@@ -132,10 +128,7 @@ export function FinancialsView({ company }: { company: CompanySummary }) {
                   <>
                     <ActionPanel.Section title={`${t.financials} ${year.year}`}>
                       {pdf && <Action.OpenInBrowser title={t.openReport} icon={Icon.Document} url={pdf.url} />}
-                      <Action.CopyToClipboard
-                        title={t.copyText}
-                        content={statementMarkdown(year, previous, t, locale)}
-                      />
+                      <Action.CopyToClipboard title={t.copyText} content={statementMarkdown(year, previous, t)} />
                     </ActionPanel.Section>
                   </>
                 }

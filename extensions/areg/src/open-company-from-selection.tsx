@@ -1,5 +1,5 @@
 import { Clipboard, getSelectedText, launchCommand, LaunchType, showHUD } from "@raycast/api";
-import { getStrings } from "./lib/i18n";
+import { getStrings } from "./lib/strings";
 import { extractOrgnr } from "./lib/orgnr";
 
 async function selectedText(): Promise<string> {

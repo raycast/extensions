@@ -1,14 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useAreg } from "../lib/api";
 import { formatCompactMoney, formatDate, formatMoney } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, GrantsResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";
 
 export function GrantsView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<GrantsResponse>(`/${company.orgnr}/grants`);
   const grants = [...(data?.grants ?? [])].sort((a, b) => (b.decidedOn ?? "").localeCompare(a.decidedOn ?? ""));
 
@@ -22,7 +21,7 @@ export function GrantsView({ company }: { company: CompanySummary }) {
       <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noGrants} icon={Icon.BankNote} />
       <List.Section
         title={t.grants}
-        subtitle={data?.total.amountNok ? formatCompactMoney(data.total.amountNok, "NOK", locale) : undefined}
+        subtitle={data?.total.amountNok ? formatCompactMoney(data.total.amountNok, "NOK") : undefined}
       >
         {grants.map((grant, index) => (
           <List.Item
@@ -40,10 +39,7 @@ export function GrantsView({ company }: { company: CompanySummary }) {
                     <List.Item.Detail.Metadata.Label title={t.source} text={grant.sourceLabel} />
                     <List.Item.Detail.Metadata.Label title={t.status} text={grant.statusLabel} />
                     {grant.amountNok !== null && (
-                      <List.Item.Detail.Metadata.Label
-                        title={t.value}
-                        text={formatMoney(grant.amountNok, "NOK", locale)}
-                      />
+                      <List.Item.Detail.Metadata.Label title={t.value} text={formatMoney(grant.amountNok, "NOK")} />
                     )}
                     {grant.instrument && (
                       <List.Item.Detail.Metadata.Label title={t.instrument} text={grant.instrument} />
@@ -55,10 +51,7 @@ export function GrantsView({ company }: { company: CompanySummary }) {
                       />
                     )}
                     {grant.decidedOn && (
-                      <List.Item.Detail.Metadata.Label
-                        title={t.registered}
-                        text={formatDate(grant.decidedOn, locale)}
-                      />
+                      <List.Item.Detail.Metadata.Label title={t.registered} text={formatDate(grant.decidedOn)} />
                     )}
                     {grant.region && <List.Item.Detail.Metadata.Label title={t.region} text={grant.region} />}
                   </List.Item.Detail.Metadata>

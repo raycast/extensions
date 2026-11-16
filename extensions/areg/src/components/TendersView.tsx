@@ -2,14 +2,13 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Brand } from "../lib/brand";
 import { useAreg } from "../lib/api";
 import { formatCompactMoney, formatDate } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, TendersResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";
 
 export function TendersView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<TendersResponse>(`/${company.orgnr}/tenders`);
   const pageActions = <PageActions company={company} page="tenders" title={t.tenders} onRefresh={revalidate} />;
   const doffin = (url: string) => (
@@ -27,7 +26,7 @@ export function TendersView({ company }: { company: CompanySummary }) {
       )}
       <List.Section
         title={t.won}
-        subtitle={data?.summary.wonValueNok ? formatCompactMoney(data.summary.wonValueNok, "NOK", locale) : undefined}
+        subtitle={data?.summary.wonValueNok ? formatCompactMoney(data.summary.wonValueNok, "NOK") : undefined}
       >
         {won.map((tender, index) => (
           <List.Item
@@ -37,8 +36,8 @@ export function TendersView({ company }: { company: CompanySummary }) {
             subtitle={tender.buyer?.name}
             keywords={[tender.id, tender.title]}
             accessories={[
-              ...(tender.value ? [{ tag: formatCompactMoney(tender.value, tender.currency, locale) }] : []),
-              { text: formatDate(tender.awardedOn ?? tender.publishedOn, locale) },
+              ...(tender.value ? [{ tag: formatCompactMoney(tender.value, tender.currency) }] : []),
+              { text: formatDate(tender.awardedOn ?? tender.publishedOn) },
             ]}
             actions={
               tender.buyer?.orgnr ? (
@@ -66,10 +65,8 @@ export function TendersView({ company }: { company: CompanySummary }) {
             keywords={[tender.id]}
             accessories={[
               ...(tender.open ? [{ tag: { value: t.openTender, color: Brand.accent } }] : []),
-              ...(tender.estimatedValue
-                ? [{ tag: formatCompactMoney(tender.estimatedValue, tender.currency, locale) }]
-                : []),
-              { text: formatDate(tender.publishedOn, locale) },
+              ...(tender.estimatedValue ? [{ tag: formatCompactMoney(tender.estimatedValue, tender.currency) }] : []),
+              { text: formatDate(tender.publishedOn) },
             ]}
             actions={
               <ActionPanel>

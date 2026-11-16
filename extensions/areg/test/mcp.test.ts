@@ -10,7 +10,7 @@ function stubFetch(body: unknown) {
 }
 
 describe("callAregTool", () => {
-  it("sends a tools/call request with normalised org number and no empty arguments", async () => {
+  it("sends a tools/call request with normalized org number and no empty arguments", async () => {
     const fetch = stubFetch({ result: { content: [{ type: "text", text: "# Roller" }] } });
     await expect(callAregTool("roles", { orgnr: "NO 923 609 016 MVA", year: undefined })).resolves.toBe("# Roller");
     const request = JSON.parse(fetch.mock.calls[0][1].body);
@@ -21,7 +21,7 @@ describe("callAregTool", () => {
 
   it("throws the tool's error text", async () => {
     stubFetch({
-      result: { content: [{ type: "text", text: "organisation number must be nine digits" }], isError: true },
+      result: { content: [{ type: "text", text: "organization number must be nine digits" }], isError: true },
     });
     await expect(callAregTool("roles", { orgnr: "1" })).rejects.toThrow("nine digits");
   });

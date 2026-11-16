@@ -311,27 +311,27 @@ export type IpRightsResponse = {
   represented: IpRight[];
 };
 
-export type TransportLicence = {
-  licenceNumber: string;
-  licenceType: string;
+export type TransportLicense = {
+  licenseNumber: string;
+  licenseType: string;
   typeLabel: string;
   copies: number | null;
   firstSeen: string;
 };
 
-export type TransportLicencesResponse = {
+export type TransportLicensesResponse = {
   orgnr: string;
   companyName: string;
   registered: boolean;
   managers: string[];
   guarantors: TenderParty[];
-  licences: TransportLicence[];
+  licences: TransportLicense[];
   sourceUrl: string | null;
 };
 
-export type FinancialLicence = {
-  licenceCode: string;
-  licenceName: string;
+export type FinancialLicense = {
+  licenseCode: string;
+  licenseName: string;
   detail: string | null;
   providerType: string | null;
   ownerOrgnr: string | null;
@@ -339,12 +339,12 @@ export type FinancialLicence = {
   registeredOn: string | null;
 };
 
-export type FinancialLicencesResponse = {
+export type FinancialLicensesResponse = {
   orgnr: string;
   companyName: string;
   registered: boolean;
   finanstilsynetUrl: string | null;
-  licences: FinancialLicence[];
+  licences: FinancialLicense[];
   agents: { orgnr: string | null; name: string; providerType: string | null; licences: string[] }[];
 };
 

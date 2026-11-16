@@ -3,7 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { searchCompanies } from "./lib/api";
 import { useCompanyOverview } from "./lib/company";
-import { getLanguage, getStrings } from "./lib/i18n";
+import { getStrings } from "./lib/strings";
 import { formatAddress, formatCompactMoney, websiteUrl } from "./lib/format";
 import { formatOrgnr } from "./lib/orgnr";
 import { useStore } from "./lib/store";
@@ -18,7 +18,9 @@ export default function Command(
 ) {
   const context = props.launchContext;
   if (context?.orgnr) {
-    return <CompanyDetail company={{ orgnr: context.orgnr, name: context.name ?? formatOrgnr(context.orgnr) }} />;
+    return (
+      <CompanyDetail isRoot company={{ orgnr: context.orgnr, name: context.name ?? formatOrgnr(context.orgnr) }} />
+    );
   }
   return <SearchCompanies initialQuery={props.arguments.query ?? props.fallbackText ?? ""} />;
 }
@@ -28,7 +30,7 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
   const [searchText, setSearchText] = useState(initialQuery);
   const [showDetail, setShowDetail] = useCachedState("show-detail", true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { favourites, recents } = useStore();
+  const { favorites, recents } = useStore();
   const query = searchText.trim();
 
   const { data: results = [], isLoading } = useCachedPromise(searchCompanies, [query], {
@@ -37,12 +39,12 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
     failureToastOptions: { title: t.error },
   });
 
-  const favouriteIds = new Set(favourites.map((c) => c.orgnr));
-  const recentList = recents.filter((c) => !favouriteIds.has(c.orgnr));
+  const favoriteIds = new Set(favorites.map((c) => c.orgnr));
+  const recentList = recents.filter((c) => !favoriteIds.has(c.orgnr));
   const sections: { key: string; title: string; items: CompanySummary[] }[] = query
     ? [{ key: "results", title: t.results, items: results }]
     : [
-        { key: "favourites", title: t.favourites, items: favourites },
+        { key: "favorites", title: t.favorites, items: favorites },
         { key: "recents", title: t.recents, items: recentList },
       ];
   const firstId = sections.flatMap((s) => s.items.map((c) => `${s.key}-${c.orgnr}`))[0];
@@ -76,7 +78,7 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
         >
           {section.items.map((company, index) => {
             const id = `${section.key}-${company.orgnr}`;
-            const isFavourite = favouriteIds.has(company.orgnr);
+            const isFavorite = favoriteIds.has(company.orgnr);
             return (
               <List.Item
                 key={id}
@@ -88,7 +90,7 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
                   showDetail
                     ? undefined
                     : [
-                        ...(isFavourite && section.key === "results" ? [{ icon: Icon.Star }] : []),
+                        ...(isFavorite && section.key === "results" ? [{ icon: Icon.Star }] : []),
                         ...(company.form ? [{ tag: company.form }] : []),
                         ...(company.city ? [{ text: company.city, icon: Icon.Pin }] : []),
                       ]
@@ -100,8 +102,8 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
                     active={id === activeId}
                     onToggleDetail={toggleDetail}
                     recent={section.key === "recents"}
-                    favouriteIndex={section.key === "favourites" ? index : undefined}
-                    favouriteCount={section.key === "favourites" ? section.items.length : undefined}
+                    favoriteIndex={section.key === "favorites" ? index : undefined}
+                    favoriteCount={section.key === "favorites" ? section.items.length : undefined}
                   />
                 }
               />
@@ -118,8 +120,8 @@ type SearchItemActionsProps = {
   active: boolean;
   onToggleDetail: () => void;
   recent: boolean;
-  favouriteIndex?: number;
-  favouriteCount?: number;
+  favoriteIndex?: number;
+  favoriteCount?: number;
 };
 
 function SearchItemActions(props: SearchItemActionsProps) {
@@ -133,24 +135,21 @@ function SearchItemActions(props: SearchItemActionsProps) {
       address={formatAddress(data?.forretningsadresse)}
       onToggleDetail={props.onToggleDetail}
       recent={props.recent}
-      favouriteIndex={props.favouriteIndex}
-      favouriteCount={props.favouriteCount}
+      favoriteIndex={props.favoriteIndex}
+      favoriteCount={props.favoriteCount}
     />
   );
 }
 
 function CompanyListDetail({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const overview = useCompanyOverview(company.orgnr);
   const data = overview.company.data;
   const activity = (data?.data.aktivitet ?? []).join(" ").trim();
   // The panel's markdown area is short and a table gets clipped, so key figures go on one line.
   const latest = [...(overview.financials.data?.years ?? [])].sort((a, b) => b.year - a.year)[0];
   const figure = (title: string, value: unknown) =>
-    typeof value === "number"
-      ? `**${title}** ${formatCompactMoney(value * 1000, latest?.currency, locale)}`
-      : undefined;
+    typeof value === "number" ? `**${title}** ${formatCompactMoney(value * 1000, latest?.currency)}` : undefined;
   const figures = latest
     ? [
         `**${latest.year}**`,

@@ -2,7 +2,7 @@ import { callAregTool } from "../lib/mcp";
 
 type Input = {
   /**
-   * Search words, a name or an organisation number.
+   * Search words, a name or an organization number.
    */
   query?: string;
   /**

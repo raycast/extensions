@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { useAreg } from "../lib/api";
-import { getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, GroupResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";

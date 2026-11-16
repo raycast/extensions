@@ -19,8 +19,8 @@ describe("formatAddress", () => {
 
 describe("formatPercent", () => {
   it("uses more decimals for small stakes", () => {
-    expect(formatPercent(67, "en")).toBe("67 %");
-    expect(formatPercent(0.00288, "en")).toBe("0.003 %");
+    expect(formatPercent(67)).toBe("67%");
+    expect(formatPercent(0.00288)).toBe("0.003%");
   });
 });
 
@@ -31,14 +31,14 @@ describe("websiteUrl", () => {
 
 describe("formatChange", () => {
   it("shows growth and decline with a sign", () => {
-    expect(formatChange(110, 100, "en")).toBe("+10 %");
-    expect(formatChange(90, 100, "en")).toBe("−10 %");
+    expect(formatChange(110, 100)).toBe("+10%");
+    expect(formatChange(90, 100)).toBe("−10%");
   });
 
-  it("measures change from a negative base by its size", () => expect(formatChange(50, -100, "en")).toBe("+150 %"));
+  it("measures change from a negative base by its size", () => expect(formatChange(50, -100)).toBe("+150%"));
 
   it("skips a missing or zero base", () => {
-    expect(formatChange(10, 0, "en")).toBeUndefined();
-    expect(formatChange(10, null, "en")).toBeUndefined();
+    expect(formatChange(10, 0)).toBeUndefined();
+    expect(formatChange(10, null)).toBeUndefined();
   });
 });

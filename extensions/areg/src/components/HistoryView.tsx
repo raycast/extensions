@@ -2,7 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { Brand } from "../lib/brand";
 import { useAreg } from "../lib/api";
 import { formatPercent } from "../lib/format";
-import { getLanguage, getStrings, type Strings } from "../lib/i18n";
+import { getStrings, type Strings } from "../lib/strings";
 import type { CompanySummary, HistoryEvent, HistoryResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, PersonActions, ResourceEmptyView } from "./common";
@@ -28,12 +28,11 @@ function eventTag(kind: string, t: Strings): { value: string; color: Color.Color
 
 export function HistoryView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<HistoryResponse>(`/${company.orgnr}/history`);
   const transitions = [...(data?.transitions ?? [])].sort((a, b) => b.toYear - a.toYear);
   const pageActions = <PageActions company={company} page="history" title={t.history} onRefresh={revalidate} />;
   const pct = (event: HistoryEvent) =>
-    `${event.fromPct === null ? "–" : formatPercent(event.fromPct, locale)} → ${event.toPct === null ? "–" : formatPercent(event.toPct, locale)}`;
+    `${event.fromPct === null ? "–" : formatPercent(event.fromPct)} → ${event.toPct === null ? "–" : formatPercent(event.toPct)}`;
 
   return (
     <List navigationTitle={`${t.history} · ${company.name}`} isLoading={isLoading} searchBarPlaceholder={t.history}>

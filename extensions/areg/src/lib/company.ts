@@ -1,7 +1,7 @@
 import { Color } from "@raycast/api";
 import { useAreg } from "./api";
 import { Brand } from "./brand";
-import type { Strings } from "./i18n";
+import type { Strings } from "./strings";
 import type { CompanyResponse, FinancialsResponse, RolesResponse } from "./types";
 
 export type StatusTag = { label: string; color: Color.ColorLike };

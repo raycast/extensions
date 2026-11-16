@@ -1,15 +1,14 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useAreg } from "../lib/api";
 import { formatDate } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
-import type { CompanySummary, FinancialLicencesResponse } from "../lib/types";
+import { getStrings } from "../lib/strings";
+import type { CompanySummary, FinancialLicensesResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";
 
-export function FinancialLicencesView({ company }: { company: CompanySummary }) {
+export function FinancialLicensesView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
-  const { data, isLoading, error, revalidate } = useAreg<FinancialLicencesResponse>(`/${company.orgnr}/konsesjoner`);
+  const { data, isLoading, error, revalidate } = useAreg<FinancialLicensesResponse>(`/${company.orgnr}/konsesjoner`);
   const pageActions = (
     <>
       {data?.finanstilsynetUrl && (
@@ -17,36 +16,36 @@ export function FinancialLicencesView({ company }: { company: CompanySummary }) 
           <Action.OpenInBrowser title={t.openFinanstilsynet} icon={Icon.Globe} url={data.finanstilsynetUrl} />
         </ActionPanel.Section>
       )}
-      <PageActions company={company} page="konsesjoner" title={t.financialLicences} onRefresh={revalidate} />
+      <PageActions company={company} page="konsesjoner" title={t.financialLicenses} onRefresh={revalidate} />
     </>
   );
-  const licences = data?.licences ?? [];
-  const byName = licences.reduce<Record<string, typeof licences>>((groups, licence) => {
-    (groups[licence.licenceName] ??= []).push(licence);
+  const licenses = data?.licences ?? [];
+  const byName = licenses.reduce<Record<string, typeof licenses>>((groups, license) => {
+    (groups[license.licenseName] ??= []).push(license);
     return groups;
   }, {});
 
   return (
-    <List navigationTitle={`${t.financialLicences} · ${company.name}`} isLoading={isLoading}>
-      {licences.length === 0 && (data?.agents ?? []).length === 0 && (
-        <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noFinancialLicences} icon={Icon.Shield} />
+    <List navigationTitle={`${t.financialLicenses} · ${company.name}`} isLoading={isLoading}>
+      {licenses.length === 0 && (data?.agents ?? []).length === 0 && (
+        <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noFinancialLicenses} icon={Icon.Shield} />
       )}
       {Object.entries(byName).map(([name, group]) => (
         <List.Section key={name} title={name} subtitle={String(group.length)}>
-          {group.map((licence, index) => (
+          {group.map((license, index) => (
             <List.Item
-              key={`${licence.licenceCode}-${index}`}
+              key={`${license.licenseCode}-${index}`}
               icon={Icon.Shield}
-              title={licence.detail ?? licence.licenceName}
-              subtitle={licence.ownerName ?? undefined}
+              title={license.detail ?? license.licenseName}
+              subtitle={license.ownerName ?? undefined}
               accessories={[
-                ...(licence.providerType ? [{ tag: licence.providerType }] : []),
-                { text: formatDate(licence.registeredOn, locale) },
+                ...(license.providerType ? [{ tag: license.providerType }] : []),
+                { text: formatDate(license.registeredOn) },
               ]}
               actions={
-                licence.ownerOrgnr ? (
+                license.ownerOrgnr ? (
                   <CompanyActions
-                    company={{ orgnr: licence.ownerOrgnr, name: licence.ownerName ?? licence.ownerOrgnr }}
+                    company={{ orgnr: license.ownerOrgnr, name: license.ownerName ?? license.ownerOrgnr }}
                   >
                     {pageActions}
                   </CompanyActions>

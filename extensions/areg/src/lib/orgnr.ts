@@ -9,7 +9,7 @@ export function isValidOrgnr(orgnr: string): boolean {
 }
 
 /**
- * Returns the organisation number when the whole query is one, in any common spelling:
+ * Returns the organization number when the whole query is one, in any common spelling:
  * `923609016`, `923 609 016`, `923.609.016`, `NO923609016MVA`, `NO 923 609 016 MVA`.
  */
 export function parseOrgnr(query: string): string | undefined {
@@ -22,7 +22,7 @@ export function parseOrgnr(query: string): string | undefined {
   return /^\d{9}$/.test(compact) ? compact : undefined;
 }
 
-/** Finds an organisation number anywhere in a piece of text, preferring one with a valid checksum. */
+/** Finds an organization number anywhere in a piece of text, preferring one with a valid checksum. */
 export function extractOrgnr(text: string): string | undefined {
   const candidates = [...text.matchAll(/(?<!\d)(\d{3})[\s.]?(\d{3})[\s.]?(\d{3})(?!\d)/g)].map(
     (m) => `${m[1]}${m[2]}${m[3]}`,

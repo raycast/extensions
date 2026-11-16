@@ -1,6 +1,6 @@
-# Areg
+# Areg Company Search
 
-Search Norwegian companies from Raycast and explore open register data from [areg.no](https://areg.no): shareholders, holdings, roles, financials, group structure, announcements, public funding, tenders, patents and trademarks, and transport and financial licences.
+Search Norwegian companies from Raycast and explore open register data from [areg.no](https://areg.no): shareholders, holdings, roles, financials, group structure, announcements, public funding, tenders, patents and trademarks, and transport and financial licenses.
 
 No account or API key is needed.
 
@@ -8,7 +8,7 @@ No account or API key is needed.
 
 | Command | What it does |
 | --- | --- |
-| **Search Companies** | Search by name or organisation number. Leave the search empty to see favourites and recent companies. |
+| **Search Companies** | Search by name or organization number. Leave the search empty to see favorites and recent companies. |
 | **Open Company from Selection** | Opens the company whose org number is in the selected text, or on the clipboard. Good to bind to a hotkey. |
 
 The search accepts an org number in any spelling: `923609016`, `923 609 016` or `NO923609016MVA`.
@@ -38,11 +38,11 @@ Every action is in the action panel (`⌘K`) with its shortcut. The same shortcu
 | Grants | `⌘⇧N` |
 | Tenders | `⌘⇧T` |
 | Patents and trademarks | `⌘⇧I` |
-| Transport licences | `⌘⇧L` |
+| Transport licenses | `⌘⇧L` |
 | Open in Brønnøysundregistrene | `⌘⇧B` |
 | Open website | `⌘O` |
-| Add to or remove from favourites | `⌘.` |
-| Move favourite up or down | `⌥⌘↑` / `⌥⌘↓` |
+| Add to or remove from favorites | `⌘.` |
+| Move favorite up or down | `⌥⌘↑` / `⌥⌘↓` |
 | Remove from recent | `⌃X` |
 | Clear recent companies | `⌃⇧X` |
 | Toggle details | `⌘D` |
@@ -55,9 +55,8 @@ Mention `@areg` in Raycast AI to ask about companies, for example "@areg who own
 
 ## Preferences
 
-- **Language**: English or Norwegian (bokmål) labels and actions. Register data such as industry names and announcement texts is always in Norwegian.
 - **Primary Action**: whether `↵` shows the company in Raycast or opens it on areg.no.
 
 ## Data
 
-All data comes from areg.no, which collects open data from Brønnøysundregistrene, Aksjonærregisteret, Innovasjon Norge, SkatteFUNN, Støtteregisteret, Doffin, Patentstyret, Statens vegvesen and Finanstilsynet. Figures in financials are in thousands of the reporting currency.
+All data comes from areg.no, which collects open data from Brønnøysundregistrene, Aksjonærregisteret, Innovasjon Norge, SkatteFUNN, Støtteregisteret, Doffin, Patentstyret, Statens vegvesen and Finanstilsynet. Figures in financials are in thousands of the reporting currency. Register text such as industry names and announcements is in Norwegian, as the registers publish it.

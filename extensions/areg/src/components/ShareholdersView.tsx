@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { useAreg } from "../lib/api";
 import { formatNumber, formatPercent } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { CompanySummary, ShareholdersResponse } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, PersonActions, ResourceEmptyView } from "./common";
@@ -25,7 +25,6 @@ export function YearDropdown(props: { years: number[]; value?: number; onChange:
 
 export function ShareholdersView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const [year, setYear] = useState<number>();
   const query = new URLSearchParams({ limit: "1000", ...(year ? { year: String(year) } : {}) });
   const { data, isLoading, error, revalidate } = useAreg<ShareholdersResponse>(
@@ -53,8 +52,8 @@ export function ShareholdersView({ company }: { company: CompanySummary }) {
         {rows.map((holder, index) => {
           const isCompany = Boolean(holder.orgnr);
           const accessories: List.Item.Accessory[] = [
-            { text: formatNumber(holder.shares, locale), tooltip: t.shares },
-            { tag: formatPercent(holder.pct, locale), tooltip: t.ownership },
+            { text: formatNumber(holder.shares), tooltip: t.shares },
+            { tag: formatPercent(holder.pct), tooltip: t.ownership },
           ];
           return (
             <List.Item

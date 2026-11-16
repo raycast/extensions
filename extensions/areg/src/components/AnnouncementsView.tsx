@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { Brand } from "../lib/brand";
 import { useAreg } from "../lib/api";
 import { formatDate } from "../lib/format";
-import { getLanguage, getStrings } from "../lib/i18n";
+import { getStrings } from "../lib/strings";
 import type { AnnouncementsResponse, CompanySummary } from "../lib/types";
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, ResourceEmptyView } from "./common";
@@ -25,7 +25,6 @@ function eventIcon(event: string | null): Image.ImageLike {
 
 export function AnnouncementsView({ company }: { company: CompanySummary }) {
   const t = getStrings();
-  const locale = getLanguage();
   const { data, isLoading, error, revalidate } = useAreg<AnnouncementsResponse>(`/${company.orgnr}/announcements`);
   const items = [...(data?.announcements ?? [])].sort((a, b) => b.announcedOn.localeCompare(a.announcedOn));
 
@@ -43,10 +42,10 @@ export function AnnouncementsView({ company }: { company: CompanySummary }) {
           icon={eventIcon(item.event)}
           title={item.type}
           keywords={[item.body.slice(0, 500), item.register]}
-          accessories={[{ text: formatDate(item.announcedOn, locale) }]}
+          accessories={[{ text: formatDate(item.announcedOn) }]}
           detail={
             <List.Item.Detail
-              markdown={`### ${item.type}\n\n${formatDate(item.announcedOn, locale)} · ${item.register}\n\n\`\`\`\n${item.body}\n\`\`\``}
+              markdown={`### ${item.type}\n\n${formatDate(item.announcedOn)} · ${item.register}\n\n\`\`\`\n${item.body}\n\`\`\``}
             />
           }
           actions={

@@ -15,7 +15,7 @@ export const Shortcuts = {
   pasteOrgnr: cmdShift("v"),
   openBrreg: cmdShift("b"),
   openWebsite: Keyboard.Shortcut.Common.Open,
-  favourite: Keyboard.Shortcut.Common.Pin,
+  favorite: Keyboard.Shortcut.Common.Pin,
   removeRecent: Keyboard.Shortcut.Common.Remove,
   clearRecents: Keyboard.Shortcut.Common.RemoveAll,
   moveUp: Keyboard.Shortcut.Common.MoveUp,
@@ -33,5 +33,5 @@ export const Shortcuts = {
   grants: cmdShift("n"),
   tenders: cmdShift("t"),
   ipRights: cmdShift("i"),
-  licences: cmdShift("l"),
+  licenses: cmdShift("l"),
 } satisfies Record<string, Keyboard.Shortcut>;
