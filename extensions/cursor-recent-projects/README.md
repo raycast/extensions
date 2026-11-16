@@ -16,6 +16,13 @@ Control Cursor directly from Raycast
 - Search & Install Extension from VSCode Marketplace
 - Reach and search the Cursor Documentation in an instant right from Raycast without any hassle.
 
+## Windows
+
+All commands work on Windows with Cursor's default (per-user or system-wide) installation.
+
+- `Open with Cursor` uses the File Explorer window you were in before opening Raycast: it opens the selected items, or the current folder when nothing is selected.
+- Some File Explorer and window features are provided by a small PowerShell helper (`assets/windows-helper.ps1`). On first use it compiles its C# source, included in the script, into the extension's support folder, which takes a second or two.
+
 ## API
 
 This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].

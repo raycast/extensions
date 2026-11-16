@@ -12,7 +12,8 @@
     "michalzuch",
     "NirRosh",
     "alexi.build",
-    "iloveitaly"
+    "iloveitaly",
+    "tahashariff"
   ],
   "categories": [
     "Applications",
@@ -41,7 +42,7 @@
       "name": "open-with-cursor",
       "title": "Open with Cursor",
       "subtitle": "Cursor",
-      "description": "Opens the currently selected Finder item with Cursor.",
+      "description": "Opens the currently selected Finder or File Explorer item with Cursor.",
       "mode": "no-view"
     },
     {
@@ -111,7 +112,10 @@
     {
       "name": "terminalApp",
       "type": "appPicker",
-      "default": "com.apple.Terminal",
+      "default": {
+        "macOS": "com.apple.Terminal",
+        "Windows": "Terminal"
+      },
       "required": false,
       "title": "Terminal App",
       "description": "Select which Terminal App to use when opening with a terminal"
@@ -136,8 +140,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
     "lodash.get": "^4.4.2",
     "raycast-cross-extension": "^0.2.3",
     "run-applescript": "^6.1.0",
@@ -146,8 +150,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/lodash.get": "^4.4.9",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
     "@types/sql.js": "^1.4.9",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.36.1",
@@ -162,6 +166,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
