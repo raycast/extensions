@@ -29,7 +29,8 @@
   "license": "MIT",
   "name": "equation-solver",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "scripts": {
     "build": "ray build",
