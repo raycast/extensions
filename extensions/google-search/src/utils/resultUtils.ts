@@ -135,12 +135,12 @@ export interface ActionDescriptor {
 export interface SearchModeActions {
   primaryAction: ActionDescriptor;
   secondaryAction: ActionDescriptor;
-  alternateSearchAction: ActionDescriptor;
+  alternateSearchAction?: ActionDescriptor;
   copyUrlAction: ActionDescriptor;
   copySuggestionAction: ActionDescriptor;
   setSearchTextAction: ActionDescriptor;
   actionOrder: ActionDescriptor[];
-  accessory: {
+  accessory?: {
     icon: Icon;
     tooltip: string;
   };
@@ -157,21 +157,13 @@ export function getSearchModeActions(mode: SearchMode, item: SearchResult): Sear
     title: "Open in Browser",
     url: normalUrl,
     icon: Icon.ArrowRight,
-    shortcut: isAi ? { modifiers: ["shift"], key: "return" } : undefined,
-  };
-
-  const openAiAction: ActionDescriptor = {
-    id: "open-ai",
-    title: "Search in AI Mode",
-    url: aiUrl,
-    icon: Icon.Stars,
-    shortcut: !isAi ? { modifiers: ["shift"], key: "return" } : undefined,
+    shortcut: isAi && !item.isNavigation ? { modifiers: ["shift"], key: "return" } : undefined,
   };
 
   const copyUrlAction: ActionDescriptor = {
     id: "copy-url",
     title: "Copy URL to Clipboard",
-    content: copyUrl,
+    content: item.isNavigation ? normalUrl : copyUrl,
     shortcut: COPY_URL_SHORTCUT,
   };
 
@@ -187,6 +179,28 @@ export function getSearchModeActions(mode: SearchMode, item: SearchResult): Sear
     title: "Set as Search Text",
     shortcut: { modifiers: ["shift"], key: "tab" },
     icon: Icon.MagnifyingGlass,
+  };
+
+  if (item.isNavigation) {
+    const primaryAction = openNormalAction;
+    const actionOrder = [primaryAction, copyUrlAction, copySuggestionAction, setSearchTextAction];
+
+    return {
+      primaryAction,
+      secondaryAction: copyUrlAction,
+      copyUrlAction,
+      copySuggestionAction,
+      setSearchTextAction,
+      actionOrder,
+    };
+  }
+
+  const openAiAction: ActionDescriptor = {
+    id: "open-ai",
+    title: "Search in AI Mode",
+    url: aiUrl,
+    icon: Icon.Stars,
+    shortcut: !isAi ? { modifiers: ["shift"], key: "return" } : undefined,
   };
 
   const primaryAction = isAi ? openAiAction : openNormalAction;

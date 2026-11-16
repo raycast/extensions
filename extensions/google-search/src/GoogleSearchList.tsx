@@ -38,7 +38,7 @@ export function GoogleSearchList({ initialMode = "default", initialQuery = "" }:
               title={item.query}
               subtitle={item.description}
               icon={getIcon(item)}
-              accessories={[actions.accessory]}
+              accessories={actions.accessory ? [actions.accessory] : []}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Result">
@@ -56,14 +56,16 @@ export function GoogleSearchList({ initialMode = "default", initialQuery = "" }:
                       shortcut={actions.copyUrlAction.shortcut}
                     />
 
-                    <Action
-                      title={actions.alternateSearchAction.title}
-                      onAction={() =>
-                        actions.alternateSearchAction.id === "open-ai" ? handleOpenAi(item) : handleOpenNormal(item)
-                      }
-                      icon={{ source: actions.alternateSearchAction.icon ?? Icon.Stars }}
-                      shortcut={actions.alternateSearchAction.shortcut}
-                    />
+                    {actions.alternateSearchAction && (
+                      <Action
+                        title={actions.alternateSearchAction.title}
+                        onAction={() =>
+                          actions.alternateSearchAction?.id === "open-ai" ? handleOpenAi(item) : handleOpenNormal(item)
+                        }
+                        icon={{ source: actions.alternateSearchAction.icon ?? Icon.Stars }}
+                        shortcut={actions.alternateSearchAction.shortcut}
+                      />
+                    )}
 
                     <Action.CopyToClipboard
                       title={actions.copySuggestionAction.title}

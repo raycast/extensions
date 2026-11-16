@@ -87,8 +87,7 @@
     "eslint": "^9.39.5",
     "prettier": "^3.9.10",
     "react": "^19.3.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "brace-expansion@1": "1.1.21",
@@ -99,9 +98,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "publish": "ray publish"
   },
   "platforms": [
     "macOS",
