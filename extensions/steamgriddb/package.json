@@ -3,7 +3,7 @@
   "name": "steamgriddb",
   "title": "SteamGridDB",
   "type": "module",
-  "description": "Download and share custom video game assets and personalize your gaming library.",
+  "description": "Search SteamGridDB for custom video game artwork like grids, heroes, logos and icons, and download images or copy their URLs.",
   "icon": "steamgriddb-icon.png",
   "author": "litomore",
   "contributors": [

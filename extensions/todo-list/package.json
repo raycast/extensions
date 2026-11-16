@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todo-list",
-  "description": "Manage your todo list quickly by adding items and marking items as completed.",
+  "description": "Create, search and organize a local todo list with pins, tags, priorities and due dates, see todos in the menu bar, and back them up, on Mac and Windows.",
   "categories": [
     "Applications",
     "Productivity"
