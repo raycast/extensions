@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "akkoma",
   "title": "Akkoma",
-  "description": "Publish status from Raycast to Akkoma or Pleroma, and view your bookmarked status",
+  "description": "Post statuses to Akkoma or Pleroma with attachments, scheduling and drafts, and view your own statuses and bookmarks.",
   "icon": "akkoma-icon.png",
   "author": "SevicheCC",
   "contributors": [
