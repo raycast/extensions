@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "filament",
   "title": "Filament",
-  "description": "Documentation Search",
+  "description": "Search the Filament documentation for the Laravel admin panel, form and table builder framework.",
   "icon": "command-icon2.png",
   "author": "aurawindsurfing",
   "license": "MIT",
