@@ -1,13 +1,12 @@
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
-import { FSearchError } from "./fsearch";
+import { FSearchError, type GrepResult, type SearchResult } from "./fsearch";
 
 /**
  * Runs one fsearch request per change of `args`, cancelling the one before.
- * While the first crawl is still running, it retries every second instead
- * of failing, so results appear the moment the index is ready.
+ * Retries after indexing errors and partial content-index results.
  */
-export function useFSearch<A extends unknown[], T>(
+export function useFSearch<A extends unknown[], T extends SearchResult | GrepResult>(
   fetch: (signal: AbortSignal, ...args: A) => Promise<T>,
   args: A,
   execute: boolean,
@@ -19,12 +18,17 @@ export function useFSearch<A extends unknown[], T>(
     onError: () => {},
   });
 
-  const indexing = result.error instanceof FSearchError && result.error.reason === "indexing";
+  const { data, error, isLoading, revalidate } = result;
+  const indexing =
+    execute &&
+    (error
+      ? error instanceof FSearchError && error.reason === "indexing"
+      : data !== undefined && "indexing" in data && data.indexing);
   useEffect(() => {
-    if (!indexing) return;
-    const timer = setTimeout(result.revalidate, 1000);
+    if (!indexing || isLoading) return;
+    const timer = setTimeout(revalidate, 1000);
     return () => clearTimeout(timer);
-  }, [indexing, result.error]);
+  }, [indexing, isLoading, data, error, revalidate]);
 
   return { ...result, indexing };
 }

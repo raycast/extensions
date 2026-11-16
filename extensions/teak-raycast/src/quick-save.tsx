@@ -8,7 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
 import { SetApiKeyAction } from "./components/SetApiKeyAction";
 import { SignOutAction } from "./components/SignOutAction";
@@ -56,6 +56,8 @@ export default function QuickSaveCommand() {
   const [tags, setTags] = useState("");
   const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  // Set before the first await, so a second ⌘↵ can't save the card twice.
+  const savingRef = useRef<boolean>(false);
 
   const {
     isAuthenticated,
@@ -68,7 +70,9 @@ export default function QuickSaveCommand() {
     let isMounted = true;
 
     const loadClipboardText = async () => {
-      const clipboardText = await Clipboard.readText().catch(() => undefined);
+      const clipboard = await Clipboard.read().catch(() => undefined);
+      // A copied file reads back as its name; Save Clipboard uploads the file.
+      const clipboardText = clipboard?.file ? undefined : clipboard?.text;
       if (isMounted && clipboardText?.trim()) {
         setContent((current) => (current.trim() ? current : clipboardText));
       }
@@ -82,6 +86,9 @@ export default function QuickSaveCommand() {
   }, []);
 
   const handleSubmit = async (values: FormValues) => {
+    if (savingRef.current) {
+      return;
+    }
     if (!values.content.trim()) {
       await showToast({
         message: "Enter text or a URL before saving.",
@@ -91,6 +98,7 @@ export default function QuickSaveCommand() {
       return;
     }
 
+    savingRef.current = true;
     setIsSaving(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -123,6 +131,7 @@ export default function QuickSaveCommand() {
         ? `${getUserFacingErrorMessage(error)} ${hint}`
         : getUserFacingErrorMessage(error);
     } finally {
+      savingRef.current = false;
       setIsSaving(false);
     }
   };
@@ -148,6 +157,7 @@ export default function QuickSaveCommand() {
           <SignOutAction onSignedOut={refreshAuth} />
         </ActionPanel>
       }
+      isLoading={isSaving}
       navigationTitle="Quick Save to Teak"
     >
       <Form.TextArea

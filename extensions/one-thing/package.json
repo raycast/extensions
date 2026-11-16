@@ -7,8 +7,7 @@
   "author": "pernielsentikaer",
   "contributors": [
     "Ek217",
-    "mathieudutour",
-    "CreazioN"
+    "mathieudutour"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -128,5 +127,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

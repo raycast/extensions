@@ -83,11 +83,8 @@ export async function deleteArg(argName: string) {
 }
 
 export async function importArgConfigs(map: Map<string, string[]>) {
-  const allArgNames: string[] = [];
-  map.forEach((argValueList, argName) => {
-    allArgNames.push(argName);
-    importArgValueList(argName, argValueList);
-  });
+  const allArgNames = Array.from(map.keys());
+  await Promise.all(Array.from(map, ([argName, argValueList]) => importArgValueList(argName, argValueList)));
 
   await LocalStorage.setItem(ArgNameListConfigKey, JSON.stringify(allArgNames));
 }

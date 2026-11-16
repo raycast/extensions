@@ -1,0 +1,237 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tonecue-audio-scenes",
+  "title": "ToneCue - Audio Scenes",
+  "description": "Switch your ToneCue audio scenes, microphone and speakers from Raycast. Requires the ToneCue menu bar app.",
+  "icon": "tonecue-icon.png",
+  "author": "IngoJ",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-scene",
+      "title": "Switch Scene",
+      "subtitle": "ToneCue",
+      "description": "Pick a ToneCue scene, and mute or pause automation from the same list.",
+      "mode": "view"
+    },
+    {
+      "name": "apply-scene",
+      "title": "Apply Scene",
+      "subtitle": "ToneCue",
+      "description": "Apply a scene by name without opening a list. Handy for aliases and hotkeys.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "scene",
+          "type": "text",
+          "placeholder": "Scene name",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Microphone Mute",
+      "subtitle": "ToneCue",
+      "description": "Mute or unmute the current microphone.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeAfterApply",
+      "type": "checkbox",
+      "title": "Window",
+      "label": "Close Raycast after applying a scene or device",
+      "description": "Off keeps the list open so you can keep adjusting.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "tools": [
+    {
+      "name": "get-status",
+      "title": "Get Status",
+      "description": "Read ToneCue's scenes (when each applies and which devices it would use), the active scene and why, the current microphone and speakers, mute state and automation state."
+    },
+    {
+      "name": "get-history",
+      "title": "Get Switch History",
+      "description": "List ToneCue's recent device switches: when, which scene or hand choice caused it, and which devices were used. Use it to explain or analyse switching behaviour."
+    },
+    {
+      "name": "apply-scene",
+      "title": "Apply Scene",
+      "description": "Apply a ToneCue scene by name. This switches the microphone and speakers and pauses automation until the scene changes."
+    },
+    {
+      "name": "set-mute",
+      "title": "Set Microphone Mute",
+      "description": "Mute or unmute the current microphone."
+    }
+  ],
+  "ai": {
+    "instructions": "ToneCue switches the Mac's microphone and speakers by scene. Use get-status to learn scene names before apply-scene. Use get-history to explain why devices changed (source rule = a scene decided, hand = the user picked, system = macOS reacted). Never apply a scene or change mute unless the user asks for it.",
+    "evals": [
+      {
+        "input": "@tonecue-audio-scenes which scene is active and why?",
+        "mocks": {
+          "get-status": {
+            "activeScene": "Meeting",
+            "reason": "because a meeting is on",
+            "automation": "on",
+            "microphoneMuted": false,
+            "microphone": "AirPods Pro",
+            "speakers": "AirPods Pro",
+            "volumePercent": 55,
+            "scenes": [
+              {
+                "name": "Desk",
+                "when": "Studio Display is connected",
+                "wouldUseMicrophone": "Studio Mic",
+                "wouldUseSpeakers": "Studio Display Speakers"
+              },
+              {
+                "name": "Meeting",
+                "when": "A meeting is on",
+                "wouldUseMicrophone": "AirPods Pro",
+                "wouldUseSpeakers": "AirPods Pro"
+              },
+              {
+                "name": "Default",
+                "when": "Otherwise",
+                "wouldUseMicrophone": "MacBook Microphone",
+                "wouldUseSpeakers": "MacBook Speakers"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-status"
+          },
+          {
+            "includes": "Meeting"
+          }
+        ]
+      },
+      {
+        "input": "@tonecue-audio-scenes switch to my Desk scene",
+        "mocks": {
+          "get-status": {
+            "activeScene": "Meeting",
+            "reason": "because a meeting is on",
+            "automation": "on",
+            "microphoneMuted": false,
+            "microphone": "AirPods Pro",
+            "speakers": "AirPods Pro",
+            "volumePercent": 55,
+            "scenes": [
+              {
+                "name": "Desk",
+                "when": "Studio Display is connected",
+                "wouldUseMicrophone": "Studio Mic",
+                "wouldUseSpeakers": "Studio Display Speakers"
+              },
+              {
+                "name": "Meeting",
+                "when": "A meeting is on",
+                "wouldUseMicrophone": "AirPods Pro",
+                "wouldUseSpeakers": "AirPods Pro"
+              },
+              {
+                "name": "Default",
+                "when": "Otherwise",
+                "wouldUseMicrophone": "MacBook Microphone",
+                "wouldUseSpeakers": "MacBook Speakers"
+              }
+            ]
+          },
+          "apply-scene": "Applied scene Desk."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "apply-scene",
+              "arguments": {
+                "scene": {
+                  "includes": "Desk"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@tonecue-audio-scenes mute my microphone",
+        "mocks": {
+          "set-mute": "Microphone muted."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "set-mute",
+              "arguments": {
+                "muted": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@tonecue-audio-scenes why did my audio devices switch earlier?",
+        "mocks": {
+          "get-history": [
+            {
+              "time": "2026-10-11T09:02:11Z",
+              "source": "rule",
+              "what": "Meeting, because a meeting is on",
+              "microphone": "AirPods Pro",
+              "speakers": "AirPods Pro"
+            },
+            {
+              "time": "2026-10-11T08:30:00Z",
+              "source": "hand",
+              "what": "You chose Studio Mic",
+              "microphone": "Studio Mic",
+              "speakers": null
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-history"
+          },
+          {
+            "includes": "AirPods"
+          }
+        ]
+      }
+    ]
+  }
+}

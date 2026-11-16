@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zemtu",
+  "title": "Zemtu",
+  "description": "Find and book vehicles with your Zemtu account",
+  "icon": "extension-icon.png",
+  "author": "Roland",
+  "owner": "zemtu",
+  "access": "public",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "vehicle-list",
+      "title": "List Vehicles",
+      "subtitle": "Zemtu",
+      "description": "List available vehicles",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "time-based-search",
+      "title": "Find Vehicles in Time Range",
+      "subtitle": "Zemtu",
+      "description": "Search for vehicles available in a specific time range",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "reservation-list",
+      "title": "My Reservations",
+      "subtitle": "Zemtu",
+      "description": "List my future reservations",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "menu-bar-reservations",
+      "title": "Menu Bar Reservations",
+      "subtitle": "Zemtu",
+      "description": "Show current and upcoming vehicle reservations in menu bar",
+      "mode": "menu-bar",
+      "icon": "extension-icon.png",
+      "interval": "5m"
+    },
+    {
+      "name": "check-settings",
+      "title": "Check Settings",
+      "subtitle": "Zemtu",
+      "description": "Check that the Zemtu URL, login, location and vehicle access are set up correctly",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "find-available-vehicles",
+      "title": "Find Available Vehicles",
+      "description": "Find Zemtu vehicles that are free for a whole time range, sorted by distance to the user. Returns vehicle ids needed for booking."
+    },
+    {
+      "name": "get-my-reservations",
+      "title": "Get My Reservations",
+      "description": "List the user's current and upcoming Zemtu reservations with vehicle, start, end and status."
+    },
+    {
+      "name": "create-reservation",
+      "title": "Create Reservation",
+      "description": "Book a Zemtu vehicle for a time range. The user always has to confirm the booking before it is made."
+    }
+  ],
+  "ai": {
+    "instructions": "You help the user find and book Zemtu carsharing vehicles. Interpret all times in the user's local timezone and pass ISO 8601 with offset. Before booking, always call find-available-vehicles for the exact time range and only use a vehicle id from its result; never guess ids. If the vehicle, the date or the start or end time is ambiguous, ask the user instead of assuming (e.g. \"tomorrow morning\" needs concrete times). Book with create-reservation only when the user asked to book; the user confirms every booking. Use purpose BUSINESS only if the user says it is a business trip. Reply in the user's language.",
+    "evals": [
+      {
+        "input": "@zemtu Which cars are free tomorrow from 9 to 12?"
+      },
+      {
+        "input": "@zemtu Buch mir morgen von 9 bis 12 Uhr das nächste freie Auto"
+      },
+      {
+        "input": "@zemtu What are my upcoming reservations?"
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Zemtu URL",
+      "description": "The web address of your carsharing provider's Zemtu, e.g. https://yourcompany.zemtu.com. Default: https://demo.zemtu.com (demo system).",
+      "default": "https://demo.zemtu.com",
+      "placeholder": "https://yourcompany.zemtu.com"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "The username you use to log in to Zemtu",
+      "placeholder": "your.name"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your Zemtu password (stored encrypted by Raycast)",
+      "placeholder": "Your Zemtu password"
+    },
+    {
+      "name": "enableMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Menu Bar",
+      "description": "Show reservations in the menu bar (macOS only)",
+      "default": true,
+      "label": "Display current and upcoming reservations in menu bar"
+    },
+    {
+      "name": "location",
+      "type": "textfield",
+      "required": false,
+      "title": "Your Location",
+      "description": "Used to sort vehicles by distance. Enter an address (e.g. Marktplatz 1, Dornbirn) or coordinates (e.g. 47.4486, 9.7621 – right-click a place in Google Maps to copy them). Addresses are looked up once via OpenStreetMap.",
+      "placeholder": "Marktplatz 1, Dornbirn"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

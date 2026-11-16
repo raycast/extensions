@@ -36,6 +36,34 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "resize-from-dimensions",
+      "title": "Resize From Dimensions",
+      "description": "Get the aspect ratio of an original size and resize it to a new width or height.",
+      "keywords": [
+        "aspect",
+        "ratio",
+        "resize",
+        "scale",
+        "dimensions",
+        "width",
+        "height"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "original",
+          "placeholder": "1000x800",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "newSize",
+          "placeholder": "New Size",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -56,5 +84,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

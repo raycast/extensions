@@ -260,15 +260,11 @@
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.19.1",
-    "better-sqlite3": "12.1.1",
-    "bindings": "^1.5.0",
     "dayjs": "^1.11.13",
-    "open": "^8.4.0",
-    "sqlite3": "^5.1.7"
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20.17.22",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.1",

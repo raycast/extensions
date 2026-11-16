@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ghosthand",
+  "title": "Ghosthand",
+  "description": "Control connected iPhones using an installed Ghosthand daemon and signed-in Ghosthand account.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-task",
+      "title": "Run iPhone Task",
+      "description": "Give a connected iPhone an instruction using Ghosthand's hosted AI agent",
+      "mode": "view"
+    },
+    {
+      "name": "list-iphones",
+      "title": "List iPhones",
+      "description": "View connected iPhones, setup requirements, and active leases",
+      "mode": "view"
+    },
+    {
+      "name": "view-screen",
+      "title": "View iPhone Screen",
+      "description": "Preview, copy, or save an iPhone screenshot without taking control",
+      "mode": "view"
+    },
+    {
+      "name": "read-screen",
+      "title": "Read Screen Text",
+      "description": "Read and copy visible iPhone text using local OCR",
+      "mode": "view"
+    },
+    {
+      "name": "quick-actions",
+      "title": "iPhone Quick Actions",
+      "description": "Go home, scroll, lock, mute, type text, or tap a visible label",
+      "mode": "view"
+    },
+    {
+      "name": "open-setup",
+      "title": "Open Setup Instructions",
+      "description": "Open Ghosthand installation and iPhone setup instructions",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-iphones",
+      "title": "List iPhones",
+      "description": "List local iPhones, exact phone IDs, readiness, and active lease holders. Use this before selecting a device."
+    },
+    {
+      "name": "run-iphone-task",
+      "title": "Run iPhone Task",
+      "description": "Run a user-confirmed natural-language instruction through Ghosthand's hosted agent. Use for multi-step tasks in iPhone apps."
+    },
+    {
+      "name": "read-screen-text",
+      "title": "Read iPhone Screen Text",
+      "description": "Read visible text using local OCR and share it with the AI conversation after confirmation."
+    },
+    {
+      "name": "iphone-quick-action",
+      "title": "Perform iPhone Quick Action",
+      "description": "Perform one confirmed Home, scroll, lock, mute, type, OCR tap, or separate Enter action. Never automatically retries."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "taskResponseMode",
+      "title": "Task Progress",
+      "description": "Stream progress, or request a single JSON response if streaming is unavailable. Changing this never retries a task.",
+      "type": "dropdown",
+      "required": false,
+      "default": "stream",
+      "data": [
+        {
+          "title": "Stream Progress",
+          "value": "stream"
+        },
+        {
+          "title": "Final Response Only (JSON)",
+          "value": "json"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "generate:api": "openapi-typescript api/ghosthand.openapi.json -o src/lib/api.generated.ts && prettier --write src/lib/api.generated.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

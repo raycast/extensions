@@ -1,14 +1,15 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "gradient-generator",
   "title": "Gradient Generator",
-  "description": "Create, preview, randomize, save and export gradients, using them in your next project.",
+  "description": "Create, preview and save gradients locally; copy CSS, Tailwind and SwiftUI, or export PNG and SVG files.",
   "icon": "icon.png",
   "author": "smcnab1",
   "contributors": [],
   "categories": [
-    "Productivity"
+    "Design Tools",
+    "Developer Tools"
   ],
   "license": "MIT",
   "platforms": [
@@ -74,25 +75,35 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.102.4",
-    "@raycast/utils": "2.2.0",
-    "pngjs": "^7.0.0"
+    "@raycast/api": "2.10.1",
+    "@raycast/utils": "2.3.3",
+    "pngjs": "7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.6.2",
-    "typescript": "^4.9.0"
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/pngjs": "6.0.5",
+    "@types/react": "19.3.0",
+    "@types/react-test-renderer": "19.3.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.13.0",
+    "prettier": "3.9.10",
+    "react-test-renderer": "19.3.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "lint": "ray lint && eslint tests scripts && prettier --check tests scripts",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
+    "test:swiftui": "tsx scripts/verify-swiftui.ts"
+  },
+  "engines": {
+    "node": ">=26.12.1"
   }
 }

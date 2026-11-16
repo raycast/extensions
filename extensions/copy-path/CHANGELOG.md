@@ -1,5 +1,13 @@
 # Copy Path Changelog
 
+## [Improve picker copying and copy feedback] - 2026-10-28
+
+- Copy selected item paths from focused native Open panels, preserving the existing fallback when no readable selection exists.
+- Show an additional-item count in multi-path copy tips and shorten long display paths while retaining filename endings.
+- Add a Show emoji preference for copy tips.
+- Prefer QSpace’s unified selection interface when available and apply home-directory shortening to every copied path.
+- Correct the contributor username to arjan.flac.
+
 ## [Support Little Arc and Peek] - 2026-09-19
 
 - Fix Arc: copy the URL of a focused Little Arc window or Peek preview instead of the underlying tab of the main window (#12677)

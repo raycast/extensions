@@ -1,32 +1,9 @@
-import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { isAbsolute, join, relative, sep } from "node:path";
 import { getGithubToken } from "../preferences";
-import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
+import type { InstalledSkill, SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
 import { withSkillsCliLock } from "./skills-cli-runner";
-
-const LOCK_FILE = ".skill-lock.json";
-const AGENTS_DIR = ".agents";
-
-function getSkillLockPath(): string {
-  const xdgStateHome = process.env.XDG_STATE_HOME;
-  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
-  return join(homedir(), AGENTS_DIR, LOCK_FILE);
-}
-
-async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
-  try {
-    const raw = await readFile(getSkillLockPath(), "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
-      return parsed.skills as Record<string, SkillLockEntry>;
-    }
-    return {};
-  } catch {
-    return {};
-  }
-}
+import { readSkillLock, skillLockMetadata } from "./skill-lock";
+import { isVerifiedCliSkill, safeMutableAgents } from "./skill-ownership";
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
   return (await getInstalledSkillsSnapshot()).skills;
@@ -39,33 +16,27 @@ async function getInstalledSkillsSnapshot(): Promise<{
   return withSkillsCliLock(async (runLocked) => {
     const skills = await listInstalledSkills(runLocked);
     const lockEntries = await readSkillLock();
-    return { skills: mergeLockEntries(skills, lockEntries), lockEntries };
+    return { skills: await mergeLockEntries(skills, lockEntries), lockEntries };
   });
 }
 
-function tildifyPath(path: string): string {
-  const fromHome = relative(homedir(), path);
-  if (fromHome === "") return "~";
-  if (fromHome === ".." || fromHome.startsWith(`..${sep}`) || isAbsolute(fromHome)) return path;
-  return join("~", fromHome);
-}
-
-function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, SkillLockEntry>): InstalledSkill[] {
-  return skills.map((skill) => {
-    const lock = lockEntries[skill.name];
-    if (!lock) return skill;
-    // Local installs record the absolute directory path as both source and sourceUrl.
-    const isLocal = lock.sourceType === "local";
-    return {
-      ...skill,
-      source: isLocal ? tildifyPath(lock.source) : lock.source,
-      sourceType: lock.sourceType,
-      sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
-      ref: lock.ref,
-      installedAt: lock.installedAt,
-      updatedAt: lock.updatedAt,
-    };
-  });
+async function mergeLockEntries(
+  skills: InstalledSkill[],
+  lockEntries: Record<string, SkillLockEntry>,
+): Promise<InstalledSkill[]> {
+  return Promise.all(
+    skills.map(async (skill) => {
+      const lock = lockEntries[skill.name];
+      const verified = lock ? await isVerifiedCliSkill(skill, lock) : false;
+      if (!lock || (!verified && lock.sourceType !== "local")) return { ...skill, managedBySkillsCli: false };
+      return {
+        ...skill,
+        ...skillLockMetadata(lock),
+        managedBySkillsCli: verified,
+        mutableAgents: verified ? await safeMutableAgents(skill.name, skill.agents) : [],
+      };
+    }),
+  );
 }
 
 interface GitHubTreeResponse {
@@ -137,5 +108,5 @@ export async function getInstalledSkillsWithUpdateStatus(): Promise<InstalledSki
   const { skills, lockEntries } = await getInstalledSkillsSnapshot();
   const updatable = await checkForUpdates(lockEntries).catch((): string[] => []);
   const updatableSet = new Set(updatable);
-  return skills.map((skill) => ({ ...skill, hasUpdate: updatableSet.has(skill.name) }));
+  return skills.map((skill) => ({ ...skill, hasUpdate: skill.managedBySkillsCli && updatableSet.has(skill.name) }));
 }

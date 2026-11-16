@@ -1,0 +1,567 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ninety",
+  "title": "Ninety",
+  "description": "Manage your Ninety.io To-Dos, Issues, Rocks, Headlines, Scorecard and Meetings from Raycast. Requires a Ninety Thrive or Legacy plan.",
+  "icon": "extension-icon.png",
+  "author": "parterburn",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "ninety",
+    "eos",
+    "rocks",
+    "scorecard",
+    "level 10",
+    "l10"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-todos",
+      "title": "My To-Dos",
+      "subtitle": "Ninety",
+      "description": "View, complete and edit your To-Dos, or browse a Team's To-Dos.",
+      "mode": "view"
+    },
+    {
+      "name": "issues",
+      "title": "Issues",
+      "subtitle": "Ninety",
+      "description": "Browse a Team's Short-Term and Long-Term Issues and solve them.",
+      "mode": "view"
+    },
+    {
+      "name": "rocks",
+      "title": "Rocks",
+      "subtitle": "Ninety",
+      "description": "View your Rocks or a Team's Rocks, update their status and manage Milestones.",
+      "mode": "view"
+    },
+    {
+      "name": "headlines",
+      "title": "Headlines",
+      "subtitle": "Ninety",
+      "description": "Read a Team's Headlines and Cascading Messages.",
+      "mode": "view"
+    },
+    {
+      "name": "scorecard",
+      "title": "Scorecard",
+      "subtitle": "Ninety",
+      "description": "View a Team's Scorecard and enter Measurable scores.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showAverage",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Details",
+          "label": "Show Average",
+          "description": "Show each Measurable's average, compared with its goal, at the top of its score table."
+        },
+        {
+          "name": "showTotal",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "",
+          "label": "Show Total",
+          "description": "Show each Measurable's total at the top of its score table."
+        }
+      ]
+    },
+    {
+      "name": "meetings",
+      "title": "Meetings",
+      "subtitle": "Ninety",
+      "description": "See each Team's Meeting happening now, the next one coming up, and past Meetings with their notes.",
+      "mode": "view"
+    },
+    {
+      "name": "create-todo",
+      "title": "Create To-Do",
+      "subtitle": "Ninety",
+      "description": "Create a personal or Team To-Do.",
+      "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "subtitle": "Ninety",
+      "description": "Add an Issue to a Team's Issues List.",
+      "mode": "view"
+    },
+    {
+      "name": "create-headline",
+      "title": "Create Headline",
+      "subtitle": "Ninety",
+      "description": "Share a Headline or Cascading Message with a Team.",
+      "mode": "view"
+    },
+    {
+      "name": "create-rock",
+      "title": "Create Rock",
+      "subtitle": "Ninety",
+      "description": "Create a Rock owned by you.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "List the Ninety Teams the user can read and create work for, with their Ids."
+    },
+    {
+      "name": "get-my-todos",
+      "title": "Get My To-Dos",
+      "description": "List the user's open To-Dos (personal and team), or a Team's To-Dos."
+    },
+    {
+      "name": "create-todo",
+      "title": "Create To-Do",
+      "description": "Create a personal To-Do or a To-Do on a Team."
+    },
+    {
+      "name": "complete-todo",
+      "title": "Complete To-Do",
+      "description": "Mark a To-Do as complete (or reopen it)."
+    },
+    {
+      "name": "get-issues",
+      "title": "Get Issues",
+      "description": "List a Team's open Issues (Short-Term and Long-Term)."
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Add an Issue to a Team's Issues List."
+    },
+    {
+      "name": "get-rocks",
+      "title": "Get Rocks",
+      "description": "List the user's Rocks or a Team's Rocks, with status and Milestones."
+    },
+    {
+      "name": "update-rock-status",
+      "title": "Update Rock Status",
+      "description": "Set a Rock's status to On Track, Off Track, Done or Canceled."
+    },
+    {
+      "name": "get-headlines",
+      "title": "Get Headlines",
+      "description": "List a Team's Headlines or Cascading Messages."
+    },
+    {
+      "name": "create-headline",
+      "title": "Create Headline",
+      "description": "Create a Headline or Cascading Message on a Team."
+    },
+    {
+      "name": "get-next-meeting",
+      "title": "Get Next Meeting",
+      "description": "Get a Team's next scheduled Meeting with its agenda and attendees."
+    },
+    {
+      "name": "get-scorecard",
+      "title": "Get Scorecard",
+      "description": "Read a Team's Scorecard: its Measurables with recent scores and goals."
+    }
+  ],
+  "ai": {
+    "instructions": "Ninety is an EOS (Entrepreneurial Operating System) platform. Terms: Rocks are 90-day priorities (quarterly goals) with Milestones; Issues are items on a Team's Issues List to be solved with IDS (Identify, Discuss, Solve), split into Short-Term and Long-Term; To-Dos are 7-day action items; Headlines are short good/bad news updates for a Team's meeting; Cascading Messages are Headlines sent down from leadership; the Scorecard tracks weekly Measurables (also called KPIs). Most tools need a Team Id: when the user names a Team, call get-teams first and match the name. If the Team is ambiguous, ask the user. Items created through the API are always owned by the user. When listing items, keep answers short and include due dates and status. Items include a `url` to open them in Ninety; when you mention a specific item, link its title with that url.",
+    "evals": [
+      {
+        "input": "@ninety what are my open to-dos?",
+        "mocks": {
+          "get-my-todos": [
+            {
+              "id": "t1",
+              "title": "Send proposal to Acme",
+              "dueDate": "2026-11-05T00:00:00.000Z",
+              "completed": false,
+              "isPersonal": false,
+              "teamName": "Leadership"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-my-todos"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety add an issue to the Leadership team: hiring plan for Q1",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "create-issue": {
+            "id": "i1",
+            "title": "Hiring plan for Q1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-issue",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety add a personal to-do to send the board deck by 2026-11-06",
+        "mocks": {
+          "create-todo": {
+            "id": "t2",
+            "title": "Send the board deck",
+            "dueDate": "2026-11-07T06:59:59.999Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-todo",
+              "arguments": {
+                "dueDate": "2026-11-06"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety mark my to-do 'Send proposal to Acme' as done",
+        "mocks": {
+          "get-my-todos": [
+            {
+              "id": "t1",
+              "title": "Send proposal to Acme",
+              "dueDate": "2026-11-05T06:59:59.999Z",
+              "completed": false,
+              "isPersonal": false,
+              "teamName": "Leadership"
+            }
+          ],
+          "complete-todo": {
+            "id": "t1",
+            "title": "Send proposal to Acme",
+            "completed": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-my-todos"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "complete-todo",
+              "arguments": {
+                "todoId": "t1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety what's on the Leadership team's issues list?",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "get-issues": [
+            {
+              "id": "i1",
+              "title": "Customer onboarding takes too long",
+              "list": "SHORT_TERM",
+              "priority": 5
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-issues",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety how are my rocks tracking this quarter?",
+        "mocks": {
+          "get-rocks": [
+            {
+              "id": "r1",
+              "title": "Launch onboarding flow",
+              "status": "ON_TRACK",
+              "dueDate": "2027-01-01T06:59:59.999Z",
+              "quarter": "Q4"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-rocks"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety mark my rock 'Launch onboarding flow' as off track",
+        "mocks": {
+          "get-rocks": [
+            {
+              "id": "r1",
+              "title": "Launch onboarding flow",
+              "status": "ON_TRACK",
+              "dueDate": "2027-01-01T06:59:59.999Z",
+              "quarter": "Q4"
+            }
+          ],
+          "update-rock-status": {
+            "id": "r1",
+            "title": "Launch onboarding flow",
+            "status": "OFF_TRACK"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-rocks"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "update-rock-status",
+              "arguments": {
+                "rockId": "r1",
+                "status": "OFF_TRACK"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety any headlines for the Leadership team?",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "get-headlines": [
+            {
+              "id": "h1",
+              "title": "Northwind signed a 3-year renewal",
+              "owner": "Sofia Alvarez"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-headlines",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety share a headline with Leadership: Northwind renewed for 3 years",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "create-headline": {
+            "id": "h2",
+            "title": "Northwind renewed for 3 years",
+            "isCascadedMessage": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-headline",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety when is the Leadership team's next meeting?",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "get-next-meeting": {
+            "teamName": "Leadership",
+            "meetingType": "level10",
+            "scheduledDate": "2026-11-03T16:00:00.000Z",
+            "agenda": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-next-meeting",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety how is the Leadership scorecard looking this week?",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "get-scorecard": [
+            {
+              "group": "Sales",
+              "measurables": [
+                {
+                  "id": "k1",
+                  "title": "New qualified leads",
+                  "latest": "49",
+                  "goal": "≥ 40"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-scorecard",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "Personal Access Token",
+      "required": true,
+      "placeholder": "From app.ninety.io/settings/user/developer-settings",
+      "description": "Generate one at https://app.ninety.io/settings/user/developer-settings (User Settings → Developer Settings → Generate New Token). Requires a Thrive or Legacy plan."
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "title": "Your Ninety Email",
+      "required": false,
+      "placeholder": "you@company.com",
+      "description": "Optional, but needed for My Rocks and your avatar. Ninety's API has no way to look up the signed-in user, so the extension finds you by this email."
+    },
+    {
+      "name": "avatarUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Your Avatar URL",
+      "description": "Optional. Ninety's API doesn't share profile photos, so people show as initials. Paste the link to your Ninety photo (right-click your avatar in Ninety, then Copy Image Address) to show it on items you own.",
+      "placeholder": "https://s3.amazonaws.com/ninety-avatars-prod/people/…"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

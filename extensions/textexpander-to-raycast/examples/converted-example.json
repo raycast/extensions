@@ -1,0 +1,12 @@
+[
+  {
+    "name": "[Email] Greeting",
+    "text": "Hello!\n\nThanks for getting in touch.",
+    "keyword": ";hello"
+  },
+  {
+    "name": "[Email] Signature",
+    "text": "Best,\nAlex",
+    "keyword": ";sig"
+  }
+]

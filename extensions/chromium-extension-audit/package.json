@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chromium-extension-audit",
+  "title": "Chromium Extensions Audit",
+  "description": "Audit Chromium browser extensions, understand their permissions, and monitor security-relevant changes locally.",
+  "icon": "extension_icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browser-extensions",
+      "title": "Browser Extensions",
+      "subtitle": "Chromium Extensions Audit",
+      "description": "Inspect Chromium browser extensions across browsers and profiles, review capabilities and changes, and manage your local baseline",
+      "mode": "view"
+    },
+    {
+      "name": "extension-changes",
+      "title": "Extension Changes",
+      "subtitle": "Chromium Extensions Audit",
+      "description": "Monitor unreviewed extension changes in the menu bar with best-effort hourly scans",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "analyzeCode",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Code Analysis",
+      "label": "Scan extension code locally",
+      "description": "Read each extension's installed JavaScript and HTML to detect remote code loading, obfuscation, dynamic code, referenced hosts, and code changed without a version update. Files are never executed or uploaded. Scans take longer."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "proper-lockfile": "^4.1.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.cjs"
+  }
+}

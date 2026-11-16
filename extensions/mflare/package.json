@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mflare",
+  "title": "MFlare",
+  "description": "Check Cloudflare Usage, Workers and Builds from the MFlare app (MFlare Pro required)",
+  "icon": "extension-icon.png",
+  "author": "yuyinws",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "usage",
+      "title": "Cloudflare Usage",
+      "subtitle": "MFlare",
+      "description": "Usage against Quota for a Cloudflare Account",
+      "mode": "view"
+    },
+    {
+      "name": "workers",
+      "title": "Cloudflare Workers",
+      "subtitle": "MFlare",
+      "description": "Workers with their latest Deployments, Builds and Build Logs",
+      "keywords": [
+        "deployments",
+        "builds",
+        "build logs"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

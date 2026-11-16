@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figa",
   "title": "Figa",
-  "description": "Access your Figa workspace from Raycast.",
+  "description": "Track bills and expenses, check monthly forecasts, and mark confirmed bills paid from Raycast.",
   "icon": "icon.png",
   "author": "figa",
   "platforms": [
@@ -14,14 +14,15 @@
     "Productivity"
   ],
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
     "lint": "eslint . && prettier --check .",
     "lint:store": "ray lint",
     "fix-lint": "eslint . --fix && prettier --write .",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.mjs"
   },
   "preferences": [
     {
@@ -49,7 +50,7 @@
     {
       "name": "show-monthly-summary",
       "title": "Show Monthly Summary",
-      "description": "Review recent monthly expense totals for the current workspace.",
+      "description": "Review monthly totals and forecasts, then copy a month summary with a Figa link.",
       "mode": "view"
     },
     {
@@ -89,19 +90,25 @@
       "title": "Search Recipients",
       "description": "Search Figa recipients for the current workspace.",
       "mode": "view"
+    },
+    {
+      "name": "search-tags",
+      "title": "Search Tags",
+      "description": "Find workspace tags, copy their names and open them in Figa.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.6",
-    "react": "19.2.7"
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
+    "react": "19.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.9.3",
-    "@types/react": "19.2.17",
-    "eslint": "^10.4.1",
-    "prettier": "^3.8.4",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
     "typescript": "^6.0.3"
   },
   "overrides": {

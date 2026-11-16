@@ -78,6 +78,7 @@ test("normalizes full login data to exactly the cache-safe Item keys", () => {
   );
 
   assert.deepEqual(Object.keys(item).sort(), [
+    "createdAt",
     "email",
     "hasNote",
     "hasPassword",

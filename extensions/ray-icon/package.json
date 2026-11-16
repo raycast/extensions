@@ -1,0 +1,793 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ray-icon",
+  "title": "Ray Icon",
+  "description": "Create extension and app icons like ray.so/icon, from Raycast or with AI.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-icon",
+      "title": "Create Icon",
+      "subtitle": "Ray Icon",
+      "description": "Browse icons, history, favorites, and templates; customize and export an icon.",
+      "mode": "view"
+    },
+    {
+      "name": "icon-from-svg",
+      "title": "Create Icon from SVG",
+      "subtitle": "Ray Icon",
+      "description": "Wrap your own SVG (from the clipboard or a file) in a ray.so-style icon.",
+      "mode": "view"
+    },
+    {
+      "name": "icon-history",
+      "title": "Icon History",
+      "subtitle": "Ray Icon",
+      "description": "Find, edit, and export your recent icons, including AI-generated designs.",
+      "mode": "view"
+    },
+    {
+      "name": "icon-favorites",
+      "title": "Favorite Icons",
+      "subtitle": "Ray Icon",
+      "description": "Open your favorite icon designs for editing or quick export.",
+      "mode": "view"
+    },
+    {
+      "name": "icon-templates",
+      "title": "Icon Templates",
+      "subtitle": "Ray Icon",
+      "description": "Start from a saved style or a built-in template and reuse it with any icon.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "description": "Search the Raycast icon set (the glyphs available on ray.so/icon) by keyword. Returns matching icon names to pass to Create Icon."
+    },
+    {
+      "name": "list-presets",
+      "title": "List Presets",
+      "description": "List the ray.so/icon background presets (index, fill type, colors, angle/position, icon color)."
+    },
+    {
+      "name": "create-icon",
+      "title": "Create Icon",
+      "description": "Render local PNG and SVG icons. Pass appearance light, dark, or both when requested; both creates a matching pair with separate files. Returns preview Markdown, file links, and ray.so editing links for built-in glyphs."
+    },
+    {
+      "name": "list-library",
+      "title": "List Library",
+      "description": "Find saved icons in history, favorites, or templates. Returns IDs to reuse with Create Icon or manage with Save Library Item. History is ordered most recent first."
+    },
+    {
+      "name": "save-library-item",
+      "title": "Save Library Item",
+      "description": "Add or remove a favorite, or save a named template, using a saved design ID. Does not regenerate icons or delete exported files."
+    }
+  ],
+  "ai": {
+    "instructions": "Create app and extension icons in the style of ray.so/icon. Call Search Icons to find a real icon name unless the user already supplied one or requested a custom SVG; never invent icon names.\n\nRespect the requested appearance. For light or light mode, pass appearance=\"light\" to Create Icon. For dark or dark mode, pass appearance=\"dark\". For both light and dark (in either order), pass appearance=\"both\" in ONE Create Icon call: the tool creates two matching variants with the same glyph and geometry. Never generate an unrequested second variant. When no appearance is specified, omit appearance and use the requested palette or a suitable preset. If a user explicitly specifies exact colors, do not invent different colors; the tool only adjusts them as needed for an explicitly requested appearance.\n\nUse List Presets or explicit colors to match the requested hue and mood. Only draw customSvg when requested or no Raycast icon fits; use a simple single-color glyph with fill=\"currentColor\" or stroke=\"currentColor\" and a square viewBox.\n\nAfter Create Icon, display EVERY item in variants, labeling Light and Dark when applicable. Copy each variant.preview verbatim as Markdown image syntax, outside code fences, then include its downloads Markdown so the local PNG and SVG can be opened even when the chat client cannot display local images. Do not replace the image with a plain path. Use only returned paths and URLs. Local image embedding depends on the Raycast client; do not claim a preview is visible or upload images to a hosting service.\n\nInclude each returned raySoUrl for further editing. Custom SVG results have no ray.so editing link; do not invent one.\n\nEvery successful Create Icon result is saved to History and returns historyId. If historyWarning is present, explain that the files were exported but history could not be saved. For requests to reuse an old icon, favorite, or template, call List Library with the correct collection first. Pass the returned id and collection as sourceId and sourceCollection to Create Icon. Supply icon to apply the saved style to a different glyph; omit icon and customSvg to reuse the saved glyph. Do not pass preset or colors unless the user asks to change that style. Never invent saved IDs. For favorites or named templates, use Save Library Item with a returned ID and the requested action; use the Create Icon historyId with collection history for a newly generated icon. Saving a favorite or template must not regenerate an existing icon. Only change favorites or save templates when requested. If nothing matches, say so and ask the user to choose another saved item.",
+    "evals": [
+      {
+        "input": "@ray-icon make me an icon for a weather extension",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "cloud-sun",
+              "title": "cloud sun"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 7,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#00B4DB",
+              "backgroundEndColor": "#003357",
+              "backgroundAngle": 45,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "default",
+            "pngPath": "/tmp/cloud-sun_icon.png",
+            "svgPath": "/tmp/cloud-sun_icon.svg",
+            "preview": "![Icon](file:///tmp/cloud-sun_icon.png)",
+            "downloads": "[Open Icon PNG](file:///tmp/cloud-sun_icon.png) \u00b7 [Open Icon SVG](file:///tmp/cloud-sun_icon.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=cloud-sun&backgroundStartColor=%23222222",
+            "variants": [
+              {
+                "appearance": "default",
+                "pngPath": "/tmp/cloud-sun_icon.png",
+                "svgPath": "/tmp/cloud-sun_icon.svg",
+                "preview": "![Icon](file:///tmp/cloud-sun_icon.png)",
+                "downloads": "[Open Icon PNG](file:///tmp/cloud-sun_icon.png) \u00b7 [Open Icon SVG](file:///tmp/cloud-sun_icon.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=cloud-sun&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [],
+            "total": 0,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-icons"
+          },
+          {
+            "callsTool": {
+              "name": "create-icon",
+              "arguments": {
+                "icon": "cloud-sun"
+              }
+            }
+          },
+          {
+            "includes": "![Icon](file:///tmp/cloud-sun_icon.png)"
+          },
+          {
+            "includes": "[Open Icon PNG](file:///tmp/cloud-sun_icon.png)"
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon create a rocket icon with a dark red gradient",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "rocket",
+              "title": "rocket"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 9,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#DD1818",
+              "backgroundEndColor": "#380202",
+              "backgroundAngle": 135,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "dark",
+            "pngPath": "/tmp/rocket_icon_dark.png",
+            "svgPath": "/tmp/rocket_icon_dark.svg",
+            "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+            "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+            "variants": [
+              {
+                "appearance": "dark",
+                "pngPath": "/tmp/rocket_icon_dark.png",
+                "svgPath": "/tmp/rocket_icon_dark.svg",
+                "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+                "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [],
+            "total": 0,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-icon",
+              "arguments": {
+                "icon": "rocket",
+                "appearance": "dark"
+              }
+            }
+          },
+          {
+            "includes": "![Dark Icon](file:///tmp/rocket_icon_dark.png)"
+          },
+          {
+            "includes": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png)"
+          },
+          {
+            "not": {
+              "callsTool": {
+                "name": "create-icon",
+                "arguments": {
+                  "appearance": {
+                    "or": [
+                      "light",
+                      "both"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon create only a light version of a rocket icon",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "rocket",
+              "title": "rocket"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 0,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#8E2DE2",
+              "backgroundEndColor": "#4A00E0",
+              "backgroundAngle": 45,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "light",
+            "pngPath": "/tmp/rocket_icon_light.png",
+            "svgPath": "/tmp/rocket_icon_light.svg",
+            "preview": "![Light Icon](file:///tmp/rocket_icon_light.png)",
+            "downloads": "[Open Light Icon PNG](file:///tmp/rocket_icon_light.png) \u00b7 [Open Light Icon SVG](file:///tmp/rocket_icon_light.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23eeeeee",
+            "variants": [
+              {
+                "appearance": "light",
+                "pngPath": "/tmp/rocket_icon_light.png",
+                "svgPath": "/tmp/rocket_icon_light.svg",
+                "preview": "![Light Icon](file:///tmp/rocket_icon_light.png)",
+                "downloads": "[Open Light Icon PNG](file:///tmp/rocket_icon_light.png) \u00b7 [Open Light Icon SVG](file:///tmp/rocket_icon_light.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23eeeeee",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [],
+            "total": 0,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-icon",
+              "arguments": {
+                "icon": "rocket",
+                "appearance": "light"
+              }
+            }
+          },
+          {
+            "includes": "![Light Icon](file:///tmp/rocket_icon_light.png)"
+          },
+          {
+            "includes": "[Open Light Icon PNG](file:///tmp/rocket_icon_light.png)"
+          },
+          {
+            "not": {
+              "callsTool": {
+                "name": "create-icon",
+                "arguments": {
+                  "appearance": {
+                    "or": [
+                      "dark",
+                      "both"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon generate light and dark versions of a rocket icon",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "rocket",
+              "title": "rocket"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 0,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#8E2DE2",
+              "backgroundEndColor": "#4A00E0",
+              "backgroundAngle": 45,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "light",
+            "pngPath": "/tmp/rocket_icon_light.png",
+            "svgPath": "/tmp/rocket_icon_light.svg",
+            "preview": "![Light Icon](file:///tmp/rocket_icon_light.png)\n\n![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+            "downloads": "[Open Light Icon PNG](file:///tmp/rocket_icon_light.png) \u00b7 [Open Light Icon SVG](file:///tmp/rocket_icon_light.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23eeeeee",
+            "variants": [
+              {
+                "appearance": "light",
+                "pngPath": "/tmp/rocket_icon_light.png",
+                "svgPath": "/tmp/rocket_icon_light.svg",
+                "preview": "![Light Icon](file:///tmp/rocket_icon_light.png)",
+                "downloads": "[Open Light Icon PNG](file:///tmp/rocket_icon_light.png) \u00b7 [Open Light Icon SVG](file:///tmp/rocket_icon_light.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23eeeeee",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              {
+                "appearance": "dark",
+                "pngPath": "/tmp/rocket_icon_dark.png",
+                "svgPath": "/tmp/rocket_icon_dark.svg",
+                "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+                "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [],
+            "total": 0,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-icon",
+              "arguments": {
+                "icon": "rocket",
+                "appearance": "both"
+              }
+            }
+          },
+          {
+            "includes": "![Light Icon](file:///tmp/rocket_icon_light.png)"
+          },
+          {
+            "includes": "![Dark Icon](file:///tmp/rocket_icon_dark.png)"
+          },
+          {
+            "includes": "[Open Light Icon PNG](file:///tmp/rocket_icon_light.png)"
+          },
+          {
+            "includes": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png)"
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon generate dark and light versions of a moon icon",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "moon",
+              "title": "moon"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 0,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#8E2DE2",
+              "backgroundEndColor": "#4A00E0",
+              "backgroundAngle": 45,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "light",
+            "pngPath": "/tmp/moon_icon_light.png",
+            "svgPath": "/tmp/moon_icon_light.svg",
+            "preview": "![Light Icon](file:///tmp/moon_icon_light.png)\n\n![Dark Icon](file:///tmp/moon_icon_dark.png)",
+            "downloads": "[Open Light Icon PNG](file:///tmp/moon_icon_light.png) \u00b7 [Open Light Icon SVG](file:///tmp/moon_icon_light.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=moon&backgroundStartColor=%23eeeeee",
+            "variants": [
+              {
+                "appearance": "light",
+                "pngPath": "/tmp/moon_icon_light.png",
+                "svgPath": "/tmp/moon_icon_light.svg",
+                "preview": "![Light Icon](file:///tmp/moon_icon_light.png)",
+                "downloads": "[Open Light Icon PNG](file:///tmp/moon_icon_light.png) \u00b7 [Open Light Icon SVG](file:///tmp/moon_icon_light.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=moon&backgroundStartColor=%23eeeeee",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              {
+                "appearance": "dark",
+                "pngPath": "/tmp/moon_icon_dark.png",
+                "svgPath": "/tmp/moon_icon_dark.svg",
+                "preview": "![Dark Icon](file:///tmp/moon_icon_dark.png)",
+                "downloads": "[Open Dark Icon PNG](file:///tmp/moon_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/moon_icon_dark.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=moon&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [],
+            "total": 0,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-icon",
+              "arguments": {
+                "icon": "moon",
+                "appearance": "both"
+              }
+            }
+          },
+          {
+            "includes": "![Light Icon](file:///tmp/moon_icon_light.png)"
+          },
+          {
+            "includes": "![Dark Icon](file:///tmp/moon_icon_dark.png)"
+          },
+          {
+            "includes": "[Open Light Icon PNG](file:///tmp/moon_icon_light.png)"
+          },
+          {
+            "includes": "[Open Dark Icon PNG](file:///tmp/moon_icon_dark.png)"
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon add my most recent icon to favorites without generating it again",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "rocket",
+              "title": "rocket"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 9,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#DD1818",
+              "backgroundEndColor": "#380202",
+              "backgroundAngle": 135,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "dark",
+            "pngPath": "/tmp/rocket_icon_dark.png",
+            "svgPath": "/tmp/rocket_icon_dark.svg",
+            "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+            "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+            "variants": [
+              {
+                "appearance": "dark",
+                "pngPath": "/tmp/rocket_icon_dark.png",
+                "svgPath": "/tmp/rocket_icon_dark.svg",
+                "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+                "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [
+              {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "collection": "history",
+                "name": "rocket_icon_dark",
+                "icon": "rocket",
+                "fill": "Linear",
+                "colors": [
+                  "#222222",
+                  "#111111"
+                ],
+                "builtIn": false,
+                "updatedAt": 1
+              }
+            ],
+            "total": 1,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-library",
+              "arguments": {
+                "collection": "history"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "save-library-item",
+              "arguments": {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "collection": "history",
+                "action": "favorite"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "create-icon"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon use the Dark App template for a moon icon",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "moon",
+              "title": "Moon"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 9,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#DD1818",
+              "backgroundEndColor": "#380202",
+              "backgroundAngle": 135,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "dark",
+            "pngPath": "/tmp/moon_icon_dark.png",
+            "svgPath": "/tmp/moon_icon_dark.svg",
+            "preview": "![Dark Icon](file:///tmp/moon_icon_dark.png)",
+            "downloads": "[Open Dark Icon PNG](file:///tmp/moon_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/moon_icon_dark.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=moon&backgroundStartColor=%23222222",
+            "variants": [
+              {
+                "appearance": "dark",
+                "pngPath": "/tmp/moon_icon_dark.png",
+                "svgPath": "/tmp/moon_icon_dark.svg",
+                "preview": "![Dark Icon](file:///tmp/moon_icon_dark.png)",
+                "downloads": "[Open Dark Icon PNG](file:///tmp/moon_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/moon_icon_dark.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=moon&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [
+              {
+                "id": "builtin-dark",
+                "collection": "templates",
+                "name": "Dark App",
+                "icon": "rocket",
+                "fill": "Linear",
+                "colors": [
+                  "#222222",
+                  "#111111"
+                ],
+                "builtIn": true,
+                "updatedAt": 1
+              }
+            ],
+            "total": 1,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "favorite",
+            "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "rocket_icon_dark",
+            "collection": "favorites"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-library",
+              "arguments": {
+                "collection": "templates"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-icon",
+              "arguments": {
+                "sourceId": "builtin-dark",
+                "sourceCollection": "templates",
+                "icon": "moon"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ray-icon save my latest icon as a template named Ocean Brand without regenerating it",
+        "mocks": {
+          "search-icons": [
+            {
+              "name": "rocket",
+              "title": "rocket"
+            }
+          ],
+          "list-presets": [
+            {
+              "index": 9,
+              "backgroundFillType": "Linear",
+              "backgroundStartColor": "#DD1818",
+              "backgroundEndColor": "#380202",
+              "backgroundAngle": 135,
+              "iconColor": "#FFFFFF"
+            }
+          ],
+          "create-icon": {
+            "appearance": "dark",
+            "pngPath": "/tmp/rocket_icon_dark.png",
+            "svgPath": "/tmp/rocket_icon_dark.svg",
+            "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+            "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+            "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+            "variants": [
+              {
+                "appearance": "dark",
+                "pngPath": "/tmp/rocket_icon_dark.png",
+                "svgPath": "/tmp/rocket_icon_dark.svg",
+                "preview": "![Dark Icon](file:///tmp/rocket_icon_dark.png)",
+                "downloads": "[Open Dark Icon PNG](file:///tmp/rocket_icon_dark.png) \u00b7 [Open Dark Icon SVG](file:///tmp/rocket_icon_dark.svg)",
+                "raySoUrl": "https://ray.so/icon?icon=rocket&backgroundStartColor=%23222222",
+                "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "historyId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "list-library": {
+            "items": [
+              {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "collection": "history",
+                "name": "rocket_icon_dark",
+                "icon": "rocket",
+                "fill": "Linear",
+                "colors": [
+                  "#222222",
+                  "#111111"
+                ],
+                "builtIn": false,
+                "updatedAt": 1
+              }
+            ],
+            "total": 1,
+            "warnings": []
+          },
+          "save-library-item": {
+            "action": "template",
+            "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "name": "Ocean Brand",
+            "collection": "templates"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-library",
+              "arguments": {
+                "collection": "history"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "save-library-item",
+              "arguments": {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "collection": "history",
+                "action": "template",
+                "name": "Ocean Brand"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "create-icon"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "exportDirectory",
+      "title": "Export Folder",
+      "description": "Where exported icons are saved. Defaults to ~/Downloads.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3",
+    "@resvg/resvg-wasm": "^2.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@raycast/icons": "^0.4.7",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "19.0.0",
+    "react-test-renderer": "19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "test": "node --test tests/*.test.cjs"
+  }
+}

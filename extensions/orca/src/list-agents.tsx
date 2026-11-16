@@ -23,6 +23,7 @@ import {
   Section,
   StatusFilter,
   buildSections,
+  execOrca,
   filterRows,
   isUnseen,
   loadAgents,
@@ -159,7 +160,7 @@ export default function Command(
   );
 
   const { isLoading, data, revalidate } = useCachedPromise(
-    (path: string) => loadAgents(path, execFileAsync),
+    (path: string) => loadAgents(path, execOrca),
     [orcaPath],
     {
       initialData: [] as AgentRow[],
@@ -205,7 +206,7 @@ export default function Command(
 
   async function switchToTerminal(row: AgentRow) {
     try {
-      await execFileAsync(orcaPath, [
+      await execOrca(orcaPath, [
         "terminal",
         "switch",
         "--terminal",
@@ -224,7 +225,7 @@ export default function Command(
   // Orca keeps the unread dot per worktree, so this clears it for every pane there.
   async function markAsRead(row: AgentRow) {
     try {
-      await execFileAsync(orcaPath, [
+      await execOrca(orcaPath, [
         "worktree",
         "set",
         "--worktree",

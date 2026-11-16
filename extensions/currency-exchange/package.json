@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "currency-exchange",
   "title": "Currency Exchange",
-  "description": "Simple Currency Exchange with a selectable rate provider (ExchangeRate-API or UniRateAPI)",
+  "description": "Simple Currency Exchange with a selectable rate provider (ExchangeRate-API, UniRateAPI or keyless ECB rates via AllRatesToday)",
   "icon": "currency.png",
   "author": "xeric",
   "contributors": [
@@ -24,7 +24,7 @@
       "type": "dropdown",
       "required": true,
       "title": "Rate Provider",
-      "description": "Which exchange rate API to query. Switch this if you prefer UniRateAPI's pricing or coverage.",
+      "description": "Which exchange rate API to query. AllRatesToday needs no API key but covers only the ~30 currencies in the ECB daily reference table and has no historical rates.",
       "default": "exchangerate-api",
       "data": [
         {
@@ -34,15 +34,19 @@
         {
           "title": "UniRateAPI",
           "value": "unirate"
+        },
+        {
+          "title": "AllRatesToday (ECB Reference Rates, No Key)",
+          "value": "allratestoday"
         }
       ]
     },
     {
       "name": "api_key",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "API Key",
-      "description": "Key for the selected provider. ExchangeRate-API: https://app.exchangerate-api.com/dashboard — UniRateAPI: https://unirateapi.com/dashboard",
+      "description": "Key for the selected provider. ExchangeRate-API: https://app.exchangerate-api.com/dashboard — UniRateAPI: https://unirateapi.com/dashboard — not needed for AllRatesToday",
       "placeholder": "API key for the selected provider"
     }
   ],

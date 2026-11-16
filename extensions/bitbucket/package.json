@@ -4,7 +4,9 @@
   "title": "Bitbucket Search",
   "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
   "icon": "bitbucket-logo.png",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "author": "Francois",
   "contributors": [
     "earmstrong42",
@@ -14,7 +16,8 @@
     "litomore",
     "AaronMoat",
     "0xdhrv",
-    "siuhinnn"
+    "siuhinnn",
+    "baukeposthuma"
   ],
   "license": "MIT",
   "commands": [
@@ -60,6 +63,41 @@
           "placeholder": "0 = no limit"
         }
       ]
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "Bitbucket",
+      "description": "Shows Bitbucket notifications in the menu bar: review requests, approvals and requested changes, comments and mentions on pull requests, merged or declined pull requests, and failed pipelines.",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "alwaysShow",
+          "type": "checkbox",
+          "label": "Always Show",
+          "description": "Show the menu bar item even when you have no notifications.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCount",
+          "type": "checkbox",
+          "label": "Show Notification Count",
+          "description": "Show the notification count in the menu bar.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "30",
+          "description": "Skips repositories not updated within this many days to keep background refreshes fast. Set to 0 for no limit.",
+          "placeholder": "0 = no limit"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -84,12 +122,13 @@
       "type": "password",
       "title": "API Token",
       "required": true,
-      "description": "Generate an API token at https://id.atlassian.com/manage-profile/security/api-tokens with read:* scopes, plus write:pullrequest:bitbucket for review actions (or see README for specific scopes)",
+      "description": "Create an API token at https://id.atlassian.com/manage-profile/security/api-tokens. Required scopes: read:user:bitbucket, read:workspace:bitbucket, read:repository:bitbucket, read:pullrequest:bitbucket, read:pipeline:bitbucket (or simply read:*), plus write:pullrequest:bitbucket for review actions.",
       "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.3.2",
     "bitbucket": "^2.12.0",
     "dot-object": "^2.1.5",
     "node-fetch": "^3.3.2",

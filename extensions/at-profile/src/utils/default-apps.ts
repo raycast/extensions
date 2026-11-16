@@ -17,6 +17,8 @@ export const defaultApps: App[] = [
     value: "bluesky",
     urlTemplate: "https://bsky.app/profile/{profile}",
     placeholder: "username.bsky.social",
+    platform: "atproto",
+    handleDomain: "bsky.social",
   },
   {
     name: "Raycast",
@@ -85,3 +87,9 @@ export const defaultApps: App[] = [
     placeholder: "username",
   },
 ];
+
+const defaultAppValues = new Set(defaultApps.map((app) => app.value));
+
+export function isDefaultApp(value: string): boolean {
+  return defaultAppValues.has(value);
+}

@@ -129,6 +129,9 @@ describe("caskAppdir", () => {
 
   it("expands ~ like Pathname#expand_path", () => {
     expect(caskAppdir({ HOMEBREW_CASK_OPTS: "--appdir=~/Applications" })).toBe(path.join(os.homedir(), "Applications"));
+    expect(caskAppdir({ HOMEBREW_CASK_OPTS: "--appdir=~//Applications/" })).toBe(
+      path.join(os.homedir(), "Applications"),
+    );
   });
 
   it("ignores the spaced form, because Homebrew does", () => {
@@ -148,11 +151,8 @@ describe("isAdoptableLocation", () => {
     expect(isAdoptableLocation("/Applications/Transmit.app", "/Applications")).toBe(true);
   });
 
-  it("refuses ~/Applications when brew will adopt into /Applications", () => {
-    // `brew install --adopt` targets <appdir>/<Name>.app only. An app matched in
-    // ~/Applications is evidence about the wrong file: brew would install a
-    // fresh copy beside it, or adopt a different /Applications app of that name.
-    expect(isAdoptableLocation(path.join(os.homedir(), "Applications/Transmit.app"), "/Applications")).toBe(false);
+  it("refuses an app in another folder", () => {
+    expect(isAdoptableLocation("/Volumes/Other/Transmit.app", "/Applications")).toBe(false);
   });
 
   it("follows a custom appdir", () => {
@@ -394,6 +394,27 @@ describe("scanForAdoptableApps", () => {
     expect(found).toHaveLength(1);
     expect(found[0].candidates.map((c) => c.token)).toEqual(["keka", "keka@beta"]);
     expect(found[0].candidates[0].tier).toBe("mismatched");
+  });
+
+  it("also looks in /Applications and ~/Applications, skipping Safari web apps", async () => {
+    const keka = (dir: string) => ({ name: "Keka", path: path.join(dir, "Keka.app"), bundleId: "com.aone.keka" });
+    const home = path.join(os.homedir(), "Applications");
+    const found = await scanForAdoptableApps({
+      ...base,
+      appdir: "/Volumes/Apps",
+      apps: [
+        keka("/Volumes/Apps"),
+        keka("/Applications"),
+        keka(home),
+        keka("/Volumes/Other"),
+        { name: "Keka", path: path.join(home, "Keka.app"), bundleId: "com.apple.Safari.WebApp.1234" },
+      ],
+    });
+    expect(found.map((f) => f.path)).toEqual([
+      "/Volumes/Apps/Keka.app",
+      "/Applications/Keka.app",
+      path.join(home, "Keka.app"),
+    ]);
   });
 
   it("does not offer an app Homebrew already manages under a sibling cask", async () => {

@@ -1,5 +1,19 @@
 # ScreenOCR Changelog
 
+## [New Preferences] - 2026-11-16
+
+- Added `Close Raycast before selection` preference for `Recognize Text` and `Detect Barcode/QR Code` commands: Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.
+- Added `Include Raycast window in full-screen capture` preference for `Recognize Text on Entire Screen` command.
+
+## [Clipboard Image OCR on macOS] - 2026-10-31
+
+- Added macOS support for **Recognize Text in Clipboard Image**, including copied image files, using Apple Vision with your recognition preferences.
+- Added an **After Recognition (macOS)** option for that command: copy the text (replaces the clipboard image) or paste it into the active app and restore the original clipboard contents.
+- Fixed macOS failures being copied as recognized text with a success toast. Errors now show a failure toast and nothing is copied.
+- Fixed cancelling a region selection: it is now silent and leaves the clipboard unchanged, including with **Keep image in clipboard** enabled, where a stale clipboard image could previously be recognized.
+- Added a "Recognizing…" progress notification while clipboard recognition runs.
+- Clarified that **Keep image in clipboard** and **Play sounds** apply to screen-capture commands only.
+
 ## [Windows Support] - 2026-09-20
 
 - Added Windows support for region, full-desktop and clipboard-image recognition using the local Windows OCR engine.

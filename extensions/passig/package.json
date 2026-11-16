@@ -1,0 +1,151 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "passig",
+  "title": "Passig",
+  "description": "Search, copy, paste and save passwords from your zero-knowledge Passig vault, right from Raycast.",
+  "icon": "icon.png",
+  "author": "igsolutions",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "private": true,
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Passwords",
+      "subtitle": "Passig",
+      "description": "Search your vault and copy or paste a username, password or TOTP code.",
+      "mode": "view",
+      "keywords": [
+        "password",
+        "vault",
+        "login",
+        "passig"
+      ]
+    },
+    {
+      "name": "create",
+      "title": "Save Password",
+      "subtitle": "Passig",
+      "description": "Create a new login item in one of your vaults.",
+      "mode": "view"
+    },
+    {
+      "name": "import",
+      "title": "Import Passwords",
+      "subtitle": "Passig",
+      "description": "Import passwords from Bitwarden, 1Password, LastPass, Chrome, Firefox, Safari, KeePass, Dashlane, Keeper, NordPass, Proton Pass, Enpass, RoboForm or a CSV file.",
+      "mode": "view",
+      "keywords": [
+        "import",
+        "bitwarden",
+        "1password",
+        "lastpass",
+        "keepass",
+        "csv"
+      ]
+    },
+    {
+      "name": "generate",
+      "title": "Generate Password",
+      "subtitle": "Passig",
+      "description": "Generate a strong password and copy it to the clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "lock",
+      "title": "Lock Passig",
+      "subtitle": "Passig",
+      "description": "Clear the unlocked keys and the local session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-clipboard",
+      "title": "Clear Passig Clipboard",
+      "subtitle": "Passig",
+      "description": "Background command: clears the clipboard 30 seconds after a copy if it still contains the secret.",
+      "mode": "no-view",
+      "interval": "1m",
+      "disabledByDefault": false
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Email address of your Passig account",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "name@example.com"
+    },
+    {
+      "name": "autoLockMinutes",
+      "title": "Auto-Lock (Minutes)",
+      "description": "How many minutes after the last unlock the master password is required again",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        {
+          "title": "1 Minute",
+          "value": "1"
+        },
+        {
+          "title": "5 Minutes",
+          "value": "5"
+        },
+        {
+          "title": "15 Minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 Minutes",
+          "value": "30"
+        },
+        {
+          "title": "1 Hour",
+          "value": "60"
+        },
+        {
+          "title": "4 Hours",
+          "value": "240"
+        }
+      ]
+    },
+    {
+      "name": "deviceName",
+      "title": "Device Name",
+      "description": "Name shown in the sessions list (e.g. 'Raycast MacBook')",
+      "type": "textfield",
+      "required": false,
+      "default": "Raycast"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0",
+    "fflate": "^0.8.3",
+    "libsodium-wrappers-sumo": "^0.8.4",
+    "tldts": "^6.1.60",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.6.3"
+  }
+}

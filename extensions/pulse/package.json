@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pulse",
+  "title": "Pulse",
+  "description": "Search stocks, indices and crypto across US, Hong Kong, China, Japan, Korea and Taiwan in five languages, with live prices and today's chart.",
+  "icon": "extension-icon.png",
+  "author": "fatwang266",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-symbol",
+      "title": "Search Symbol",
+      "subtitle": "Pulse",
+      "description": "Find a stock, index or crypto pair by ticker or by name in English, Chinese, Japanese or Korean, and see its price and today's chart.",
+      "mode": "view",
+      "keywords": [
+        "stock",
+        "quote",
+        "ticker",
+        "crypto",
+        "market",
+        "股票",
+        "行情",
+        "株価",
+        "주식"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "nameLanguage",
+      "title": "Name Language",
+      "description": "The language company names are shown in. Search always matches every language.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Match System",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "简体中文",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "繁體中文",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "日本語",
+          "value": "ja"
+        },
+        {
+          "title": "한국어",
+          "value": "ko"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "opencc-js": "^1.4.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,12 @@
 # Vercast Changelog
 
+## [2.21] - 2026-11-11
+
+- Added `Service Status` command to check Vercel's service status, active incidents, scheduled maintenance and recently resolved incidents
+- Renamed `Menu Bar Deployments` to `Deploy & Status`: below the deployments it now shows Vercel's service status, active incidents and affected components, and flags an ongoing issue next to the menu bar icon
+- Added a `Get Service Status` AI tool, so you can ask whether Vercel is having an incident
+- `Deploy & Status` shows each deployment's short commit, with the commit message as tooltip, so deployments of the same branch can be told apart (two identical rows were also drawn indented)
+
 ## [2.20] - 2026-08-03
 
 - Added AI Gateway leaderboards for popular models and creators

@@ -15,7 +15,7 @@ export default async function JoinPersonalRoom() {
       return;
     }
 
-    await joinRoom(room.slug);
+    if (!(await joinRoom(room.slug))) return;
     await showHUD("Joining your personal room");
   } catch (error) {
     await showFailureToast(error, { title: "Could Not Join Personal Room" });

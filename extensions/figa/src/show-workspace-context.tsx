@@ -1,9 +1,9 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Color, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getWorkspaceContext } from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL, getFigaApiKeySettingsUrl, getFigaWorkspaceSettingsUrl } from "./api/links";
-import type { FigaPlanTier, FigaWorkspaceContext, FigaWorkspaceContextCapabilities } from "./api/types";
+import type { FigaPlanTier, FigaWorkspaceContext } from "./api/types";
 import { FigaCommandErrorDetail } from "./error-state";
 import { escapeMarkdown } from "./format";
 
@@ -47,29 +47,17 @@ function WorkspaceContextDetail({
 function WorkspaceActions({ context, onRefresh }: { context: FigaWorkspaceContext; onRefresh: () => void }) {
   return (
     <ActionPanel>
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={onRefresh}
-      />
-      <Action.CopyToClipboard
-        title="Copy Workspace ID"
-        icon={Icon.CopyClipboard}
-        content={context.workspace.id}
-        shortcut={Keyboard.Shortcut.Common.Copy}
-      />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+      <Action.CopyToClipboard title="Copy Workspace ID" icon={Icon.CopyClipboard} content={context.workspace.id} />
       <Action.OpenInBrowser
         title="Open API Key Settings"
         icon={Icon.Key}
         url={getFigaApiKeySettingsUrl(context.workspace.id)}
-        shortcut={Keyboard.Shortcut.Common.Open}
       />
       <Action.OpenInBrowser
         title="Open Workspace Settings"
         icon={Icon.Gear}
         url={getFigaWorkspaceSettingsUrl(context.workspace.id)}
-        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
       <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
       <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
@@ -95,7 +83,7 @@ function WorkspaceMetadata({ context }: { context: FigaWorkspaceContext }) {
       </Detail.Metadata.TagList>
       <Detail.Metadata.Label title="Schema Version" text={String(context.schemaVersion)} />
       <Detail.Metadata.Label title="Generated" icon={Icon.Clock} text={formatUnixTime(context.generatedAt)} />
-      {context.schemaVersion === 2 ? <CapabilityMetadata capabilities={context.capabilities} /> : null}
+      {context.schemaVersion !== 1 ? <CapabilityMetadata context={context} /> : null}
       <Detail.Metadata.Separator />
       <Detail.Metadata.Link
         title="API Key Settings"
@@ -107,7 +95,8 @@ function WorkspaceMetadata({ context }: { context: FigaWorkspaceContext }) {
   );
 }
 
-function CapabilityMetadata({ capabilities }: { capabilities: FigaWorkspaceContextCapabilities }) {
+function CapabilityMetadata({ context }: { context: Exclude<FigaWorkspaceContext, { schemaVersion: 1 }> }) {
+  const capabilities = context.capabilities;
   return (
     <>
       <Detail.Metadata.Separator />
@@ -127,6 +116,13 @@ function CapabilityMetadata({ capabilities }: { capabilities: FigaWorkspaceConte
         <Detail.Metadata.TagList.Item text="Write" color={getCapabilityColor(capabilities.recipients.write)} />
         <Detail.Metadata.TagList.Item text="Delete" color={getCapabilityColor(capabilities.recipients.delete)} />
       </Detail.Metadata.TagList>
+      {context.schemaVersion === 3 ? (
+        <Detail.Metadata.TagList title="Tags">
+          <Detail.Metadata.TagList.Item text="Read" color={getCapabilityColor(context.capabilities.tags.read)} />
+          <Detail.Metadata.TagList.Item text="Write" color={getCapabilityColor(context.capabilities.tags.write)} />
+          <Detail.Metadata.TagList.Item text="Delete" color={getCapabilityColor(context.capabilities.tags.delete)} />
+        </Detail.Metadata.TagList>
+      ) : null}
     </>
   );
 }
@@ -145,8 +141,6 @@ function buildSuccessMarkdown(context: FigaWorkspaceContext): string {
     "| --- | --- |",
     `| API keys per workspace | ${formatLimit(limits.apiKeysPerWorkspace)} |`,
     `| Monthly expenses | ${formatLimit(limits.maxExpensesPerMonth)} |`,
-    `| Monthly AI chat requests | ${formatLimit(limits.maxAiChatRequests)} |`,
-    `| Monthly AI vision requests | ${formatLimit(limits.maxAiVisionRequests)} |`,
     "",
     "## Defaults",
     "",
@@ -159,14 +153,22 @@ function buildSuccessMarkdown(context: FigaWorkspaceContext): string {
 }
 
 function buildCapabilitiesMarkdown(context: FigaWorkspaceContext): string {
-  if (context.schemaVersion !== 2) {
-    return ["## Capabilities", "", "Capability discovery is not available from this API response."].join("\n");
+  if (context.schemaVersion === 1) {
+    return [
+      "## API Key Permissions",
+      "",
+      "Permissions reported by Figa for this key, not a list of Raycast commands. Manage key permissions in Figa settings.",
+      "",
+      "Capability discovery is not available from this API response.",
+    ].join("\n");
   }
 
   const capabilities = context.capabilities;
 
   return [
-    "## Capabilities",
+    "## API Key Permissions",
+    "",
+    "Permissions reported by Figa for this key, not a list of Raycast commands. Manage key permissions in Figa settings.",
     "",
     "| Capability | State |",
     "| --- | --- |",
@@ -180,6 +182,13 @@ function buildCapabilitiesMarkdown(context: FigaWorkspaceContext): string {
     `| recipients.read | ${formatCapability(capabilities.recipients.read)} |`,
     `| recipients.write | ${formatCapability(capabilities.recipients.write)} |`,
     `| recipients.delete | ${formatCapability(capabilities.recipients.delete)} |`,
+    ...(context.schemaVersion === 3
+      ? [
+          `| tags.read | ${formatCapability(context.capabilities.tags.read)} |`,
+          `| tags.write | ${formatCapability(context.capabilities.tags.write)} |`,
+          `| tags.delete | ${formatCapability(context.capabilities.tags.delete)} |`,
+        ]
+      : []),
     `| workspaces.read | ${formatCapability(capabilities.workspaces.read)} |`,
   ].join("\n");
 }
@@ -205,7 +214,7 @@ function getCapabilityColor(value: boolean): Color {
 }
 
 function getDefaultBaseCurrency(context: FigaWorkspaceContext): string {
-  return context.schemaVersion === 2 ? context.defaults.baseCurrency : context.workspace.baseCurrency;
+  return context.schemaVersion !== 1 ? context.defaults.baseCurrency : context.workspace.baseCurrency;
 }
 
 function formatCapability(value: boolean): string {

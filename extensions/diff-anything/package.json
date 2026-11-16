@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "diff-anything",
+  "type": "module",
+  "title": "Diff Anything",
+  "description": "Compare two files, two folders, or two texts in the Diff Anything app on your Mac.",
+  "icon": "icon.png",
+  "author": "martingruner",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "compare-files",
+      "title": "Compare Files or Folders",
+      "description": "Open two files or two folders, including a Finder selection, side by side in Diff Anything.",
+      "mode": "view",
+      "subtitle": "Diff Anything"
+    },
+    {
+      "name": "compare-text",
+      "title": "Compare Text",
+      "description": "Open two texts, typed or loaded from the clipboard, side by side in Diff Anything.",
+      "mode": "view",
+      "subtitle": "Diff Anything"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.19",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  }
+}

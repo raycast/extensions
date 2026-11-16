@@ -15,6 +15,7 @@ const requests: Array<{
 }> = [];
 const authorizeUrls: URL[] = [];
 let browserCount = 0;
+let discoveryRequests = 0;
 let workosIssuer = "https://scholarly-hay-77.authkit.app";
 let primary = "workos";
 let tokenFailure = false;
@@ -101,7 +102,10 @@ const transport = ((input: RequestInfo | URL, init?: RequestInit) => {
       }),
     );
   }
+  // The pinned teak-sdk reads all three documents; the workspace copy reads
+  // only this one.
   if (url.includes("teak-oauth-clients")) {
+    discoveryRequests += 1;
     return Promise.resolve(
       json({
         issuer,
@@ -112,6 +116,10 @@ const transport = ((input: RequestInfo | URL, init?: RequestInit) => {
             client,
           ]),
         ),
+        resource: "https://teakvault.com/mcp",
+        authorization_endpoint: `${issuer}/authorize`,
+        token_endpoint: `${issuer}/oauth2/token`,
+        code_challenge_methods_supported: ["S256"],
       }),
     );
   }
@@ -166,6 +174,7 @@ beforeEach(async () => {
   toasts.length = 0;
   posts.length = 0;
   browserCount = 0;
+  discoveryRequests = 0;
   workosIssuer = "https://scholarly-hay-77.authkit.app";
   primary = "workos";
   tokenFailure = false;
@@ -213,6 +222,55 @@ test("WorkOS binds PKCE and token exchange to the REST resource and dynamic clie
     "https://raycast.com/redirect?package=teak-raycast",
   );
   expect(posts[0].redirect).toBe("error");
+});
+
+test("a fresh saved token is used after a restart without discovery", async () => {
+  await oauth.authorizeTeak();
+  // A new transport has an empty discovery cache, like a new process.
+  globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
+  const restarted = await import(`../lib/oauth?fresh=${crypto.randomUUID()}`);
+  discoveryRequests = 0;
+  posts.length = 0;
+  expect(await restarted.hasStoredTeakSession()).toBe(true);
+  expect(await restarted.getStoredTeakAccessToken()).toBe("access-new");
+  expect(await restarted.authorizeTeak()).toBe("access-new");
+  expect(discoveryRequests).toBe(0);
+  expect(posts).toHaveLength(0);
+  expect(browserCount).toBe(1);
+});
+
+test("a provider change is found once the saved token needs a refresh", async () => {
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  workosIssuer = replacementIssuer;
+  globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
+  const restarted = await import(`../lib/oauth?change=${crypto.randomUUID()}`);
+  discoveryRequests = 0;
+  posts.length = 0;
+  expect(await restarted.getStoredTeakAccessToken()).toBe("access-new");
+  expect(discoveryRequests).toBe(0);
+  stores.set(key, {
+    accessToken: "expired",
+    refreshToken: "old-provider-refresh",
+    isExpired: () => true,
+  });
+  expect(await restarted.getStoredTeakAccessToken()).toBeNull();
+  expect(discoveryRequests).toBe(1);
+  expect(posts).toHaveLength(0);
+  expect(stores.get(key)?.refreshToken).toBe("old-provider-refresh");
+});
+
+test("two saved connections are left to discovery", async () => {
+  await oauth.authorizeTeak();
+  workosIssuer = replacementIssuer;
+  globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
+  expect(await oauth.reauthorizeTeak()).toBe("access-new");
+  expect(stores.size).toBe(2);
+  globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
+  const restarted = await import(`../lib/oauth?two=${crypto.randomUUID()}`);
+  discoveryRequests = 0;
+  expect(await restarted.hasStoredTeakSession()).toBe(true);
+  expect(discoveryRequests).toBe(1);
 });
 
 test("concurrent commands rotate a refresh token once without opening the browser", async () => {

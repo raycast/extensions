@@ -1,5 +1,13 @@
 # GIF Search Changelog
 
+## [Add stickers, clips, memes and All Sources] - 2026-10-31
+
+- Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
+- Add Klipy Stickers, Klipy Clips and Klipy Memes. All Klipy content works out of the box.
+- Add an All Sources option that mixes GIPHY GIFs with Klipy GIFs, Stickers, Clips and Memes into one grid that keeps loading as you scroll.
+- Remove the outdated note that Klipy needs a personal API key.
+- Fix Copy GIF Square and Paste GIF Square on GIPHY Clips, which failed because they read the MP4 instead of the GIF.
+
 ## [Fix search pagination with invalid preferences] - 2026-09-30
 
 - Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.

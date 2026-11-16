@@ -1,13 +1,19 @@
-import { Action, ActionPanel, Detail, environment, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  environment,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchContributionData, fetchUserProfile, fetchUserRepositories } from "./api/github";
-import { ActivityRepo, ContributionHeatmap } from "./components/ContributionHeatmap";
+import { ContributionHeatmap } from "./components/ContributionHeatmap";
+import { formatOSSInsight } from "./components/OSSInsight";
 import { formatRepositories } from "./components/RepositoryList";
+import { RepositoryBrowser } from "./components/RepositoryBrowser";
 import { formatUserProfile } from "./components/UserProfile";
-
-interface Preferences {
-  username: string;
-}
 
 export default function Command() {
   const { username } = getPreferenceValues<Preferences>();
@@ -16,45 +22,67 @@ export default function Command() {
     data: profile,
     isLoading: isProfileLoading,
     error: profileError,
-  } = useCachedPromise(() => fetchUserProfile(username));
+    revalidate: revalidateProfile,
+  } = useCachedPromise(fetchUserProfile, [username], { execute: Boolean(username) });
 
-  const { data: repositories, isLoading: isReposLoading, error: reposError } = useCachedPromise(fetchUserRepositories);
+  const {
+    data: repositories,
+    isLoading: isReposLoading,
+    error: reposError,
+    revalidate: revalidateRepositories,
+  } = useCachedPromise(fetchUserRepositories, [username], { execute: Boolean(username) });
 
   const {
     data: contributions,
     isLoading: isContributionsLoading,
     error: contributionsError,
-  } = useCachedPromise(() => fetchContributionData(username));
+    revalidate: revalidateContributions,
+  } = useCachedPromise(fetchContributionData, [username], { execute: Boolean(username) });
 
   const isLoading = isProfileLoading || isReposLoading || isContributionsLoading;
-  const error = profileError || reposError || contributionsError;
 
   const getMarkdown = () => {
     if (!username) {
       return "# ⚠️ GitHub Username Not Set\n\nPlease set your GitHub username in the extension preferences.";
     }
 
-    if (error) {
-      return `# Error\n\n${error.message}`;
+    const sections: string[] = [];
+    if (contributions?.contributionCalendar.weeks.length) {
+      sections.push(
+        ContributionHeatmap({
+          weeks: contributions.contributionCalendar.weeks,
+          totalContributions: contributions.contributionCalendar.totalContributions,
+        }),
+      );
+    } else if (!contributionsError) {
+      sections.push(
+        `## Contribution Activity\n\n${
+          isContributionsLoading
+            ? "The contribution calendar is loading…"
+            : "The contribution calendar is currently unavailable."
+        }`,
+      );
     }
+    if (contributionsError)
+      sections.push(`The contribution calendar could not be refreshed. ${contributionsError.message}`);
 
-    if (isLoading || !profile || !repositories || !contributions) {
-      return "# Loading GitHub Profile...";
+    if (profile) {
+      sections.push(formatUserProfile(profile));
+    } else if (!profileError) {
+      sections.push(isProfileLoading ? "The profile details are loading…" : "The profile details are unavailable.");
     }
+    if (profileError) sections.push(`The profile could not be refreshed. ${profileError.message}`);
 
-    const userProfileSection = formatUserProfile(profile);
-    const contributionHeatmapSection = `
-**Contribution Activity: total ${contributions.contributionCalendar.totalContributions} in last year**
-${ContributionHeatmap({ weeks: contributions.contributionCalendar.weeks })}
-`;
-    const repositoriesSection = formatRepositories(repositories);
+    if (repositories) {
+      sections.push(formatRepositories(repositories));
+    } else if (!reposError) {
+      sections.push(
+        `## Recently Updated Repositories\n\n${isReposLoading ? "The repositories are loading…" : "The repositories are unavailable."}`,
+      );
+    }
+    if (reposError) sections.push(`The repositories could not be refreshed. ${reposError.message}`);
 
-    // Use the dynamically fetched user ID from the profile
-    const userId = profile.id;
-    console.log(`User ID: ${userId}`);
-    const ossInsights = `[![Dashboard stats of @${username}](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=${userId}&image_size=auto&color_scheme=${environment.appearance})](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats?user_id=${userId})`;
-
-    return `# GitHub Profile: ${profile.login}\n${contributionHeatmapSection}\n${userProfileSection}\n${ossInsights}\n${repositoriesSection}\n${ActivityRepo(userId)}`;
+    return sections.join("\n\n");
   };
 
   return (
@@ -65,6 +93,48 @@ ${ContributionHeatmap({ weeks: contributions.contributionCalendar.weeks })}
         <ActionPanel>
           {profile && <Action.OpenInBrowser url={profile.html_url} title="Open GitHub Profile" />}
           <Action.CopyToClipboard title="Copy Username" content={username} />
+          {repositories && repositories.length > 0 && (
+            <Action.Push
+              title="Browse Repositories"
+              icon={Icon.Code}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              target={<RepositoryBrowser repositories={repositories} />}
+            />
+          )}
+          {profile && (
+            <Action.Push
+              title="Show Public Activity Charts"
+              icon={Icon.BarChart}
+              target={
+                <Detail
+                  navigationTitle={`${profile.login}'s Public Activity`}
+                  markdown={formatOSSInsight(profile.id, profile.login, environment.appearance)}
+                />
+              }
+            />
+          )}
+          <Action
+            title="Refresh Profile"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={async () => {
+              await Promise.all([revalidateProfile(), revalidateRepositories(), revalidateContributions()]);
+            }}
+          />
+          {profile && <Action.OpenInBrowser title="Open Starred Repositories" url={`${profile.html_url}?tab=stars`} />}
+          {profile && (
+            <Action.OpenInBrowser
+              title="Open Authored Pull Requests"
+              url={`https://github.com/search?q=${encodeURIComponent(`is:pr author:${profile.login}`)}&type=pullrequests`}
+            />
+          )}
+          {profile && (
+            <Action.OpenInBrowser
+              title="Open Authored Issues"
+              url={`https://github.com/search?q=${encodeURIComponent(`is:issue author:${profile.login}`)}&type=issues`}
+            />
+          )}
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

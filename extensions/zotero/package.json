@@ -13,7 +13,8 @@
     "joshuahhh",
     "faridrashidi",
     "ridemountainpig",
-    "kszenes"
+    "kszenes",
+    "yzy"
   ],
   "version": "1.0.0",
   "license": "MIT",
@@ -69,6 +70,24 @@
       "title": "Better Bibtex CSL JSON File",
       "description": "Path to Better Bibtex CSL JSON File",
       "placeholder": "~/Zotero/lib.json"
+    },
+    {
+      "name": "csl_source",
+      "type": "dropdown",
+      "required": false,
+      "default": "installed",
+      "title": "CSL Source",
+      "description": "Use a style installed in Zotero or a custom CSL file",
+      "data": [
+        {
+          "title": "Installed Style",
+          "value": "installed"
+        },
+        {
+          "title": "Custom File",
+          "value": "custom"
+        }
+      ]
     },
     {
       "name": "csl_style",
@@ -181,6 +200,32 @@
         {
           "title": "Vancouver",
           "value": "vancouver"
+        }
+      ]
+    },
+    {
+      "name": "custom_csl_path",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom CSL File",
+      "description": "Path to an independent .csl style file. Used only when CSL Source is Custom File.",
+      "placeholder": "~/Zotero/styles/my-style.csl"
+    },
+    {
+      "name": "reference_output",
+      "type": "dropdown",
+      "required": false,
+      "default": "bibliography",
+      "title": "Reference Output",
+      "description": "Output used by Copy/Paste Reference. Note requires a note-based style and copies standalone note text.",
+      "data": [
+        {
+          "title": "Bibliography",
+          "value": "bibliography"
+        },
+        {
+          "title": "Note",
+          "value": "note"
         }
       ]
     },

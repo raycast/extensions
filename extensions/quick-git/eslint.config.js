@@ -1,5 +1,12 @@
-import { defineConfig } from "eslint/config";
-import raycastConfig from "@raycast/eslint-config";
+import { resolve } from "node:path"
+import { defineConfig, includeIgnoreFile } from "eslint/config";
 import reactHooks from "eslint-plugin-react-hooks";
+import raycastConfig from "@raycast/eslint-config";
 
-export default defineConfig([...raycastConfig, reactHooks.configs.flat.recommended]);
+const gitignorePath = resolve(import.meta.dirname, '.gitignore')
+
+export default defineConfig(
+  includeIgnoreFile(gitignorePath),
+  ...raycastConfig,
+  reactHooks.configs.flat.recommended,
+);

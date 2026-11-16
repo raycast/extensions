@@ -376,7 +376,7 @@
   ],
   "dependencies": {
     "@mcdays/cloudflare-images-core": "^0.1.0",
-    "@raycast/api": "^1.104.0"
+    "@raycast/api": "^2.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -393,7 +393,8 @@
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"Use 'npm run publish' to publish to the Raycast Store.\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "postinstall": "node scripts/prepare-sharp.mjs"
   },
   "overrides": {
     "brace-expansion": "5.0.9",
