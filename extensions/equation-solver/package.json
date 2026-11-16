@@ -9,6 +9,7 @@
       "description": "Type an equation like x+15=20 and get x = 5, with steps",
       "mode": "view",
       "name": "equation-solver",
+      "subtitle": "Linear & quadratic, one unknown",
       "title": "Equation Solver"
     }
   ],

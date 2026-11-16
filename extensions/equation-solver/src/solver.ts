@@ -114,6 +114,16 @@ export function formatDecimal(n: number): string {
   return String(parseFloat(precise));
 }
 
+/**
+ * A value used as a factor in a written-out calculation, parenthesised
+ * when negative so the algebra reads correctly: (-5)² and 4·1·(-6),
+ * not -5² and 4·1·-6 (which would mean −25 and a dangling minus).
+ */
+export function formatFactor(n: number): string {
+  const s = formatDecimal(n);
+  return n < 0 ? `(${s})` : s;
+}
+
 /** Fraction if there is a tidy one, else a plain decimal: "15/4", "0.3333333333". */
 export function formatFractionOrDecimal(n: number): string {
   if (!Number.isFinite(n)) return String(n);
@@ -896,7 +906,7 @@ function solvePolynomialCore(p: Poly, variable: string): PolyCore {
   const discScale = b * b + 4 * Math.abs(a * c);
   const steps = [
     `Here a = ${formatDecimal(a)}, b = ${formatDecimal(b)}, c = ${formatDecimal(c)}`,
-    `Discriminant: b² − 4ac = ${formatDecimal(b)}² − 4·${formatDecimal(a)}·${formatDecimal(c)} = ${formatDecimal(discriminant)}`,
+    `Discriminant: b² − 4ac = ${formatFactor(b)}² − 4·${formatFactor(a)}·${formatFactor(c)} = ${formatDecimal(discriminant)}`,
   ];
 
   if (discriminant > DISC_REL_EPS * discScale) {
