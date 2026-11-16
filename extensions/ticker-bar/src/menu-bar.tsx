@@ -15,18 +15,22 @@ import {
   Quote,
   QuoteStatus,
   LogoDisplay,
+  MenuBarMetric,
   MenuBarStyle,
   assetFromId,
   formatMenuTitle,
   formatPercent,
   getCachedQuotes,
   getLogoDisplay,
+  getMenuBarMetric,
   getMenuBarStyle,
   getPrimaryAssetId,
   getQuoteStatuses,
   getWatchlist,
+  orderedMultiTickerQuotes,
   refreshQuotes,
   setLogoDisplay,
+  setMenuBarMetric,
   setMenuBarStyle,
 } from "./market";
 import { formatAge, quoteFreshness, truncateText } from "./market-format";
@@ -38,10 +42,11 @@ type MenuBarState = {
   primary?: string;
   menuBarStyle: MenuBarStyle;
   logoDisplay: LogoDisplay;
+  metric: MenuBarMetric;
 };
 
 async function loadMenuBarState(): Promise<MenuBarState> {
-  const [ids, quotes, primary, statuses, menuBarStyle, logoDisplay] =
+  const [ids, quotes, primary, statuses, menuBarStyle, logoDisplay, metric] =
     await Promise.all([
       getWatchlist(),
       getCachedQuotes(),
@@ -49,8 +54,9 @@ async function loadMenuBarState(): Promise<MenuBarState> {
       getQuoteStatuses(),
       getMenuBarStyle(),
       getLogoDisplay(),
+      getMenuBarMetric(),
     ]);
-  return { ids, quotes, primary, statuses, menuBarStyle, logoDisplay };
+  return { ids, quotes, primary, statuses, menuBarStyle, logoDisplay, metric };
 }
 
 export default function Command(
@@ -92,6 +98,7 @@ export default function Command(
   const primaryAssetId = data?.primary;
   const menuBarStyle = data?.menuBarStyle ?? "primary";
   const logoDisplay = data?.logoDisplay ?? "menu-bar";
+  const metric = data?.metric ?? "price";
 
   const requestRefresh = async () => {
     try {
@@ -107,10 +114,18 @@ export default function Command(
   const resolvedPrimaryId = primaryAssetId ?? watchlist[0];
   const primaryQuote = quotes[resolvedPrimaryId] ?? quotes[watchlist[0]];
   const secondaryWatchlist = watchlist.filter((id) => id !== resolvedPrimaryId);
-  const title = useMemo(
-    () => formatMenuTitle(primaryQuote, menuBarStyle),
-    [menuBarStyle, primaryQuote],
-  );
+
+  const topOrderedQuotes = useMemo(() => {
+    return orderedMultiTickerQuotes(watchlist, quotes, resolvedPrimaryId);
+  }, [watchlist, quotes, resolvedPrimaryId]);
+
+  const title = useMemo(() => {
+    if (menuBarStyle === "multi-ticker") {
+      return formatMenuTitle(topOrderedQuotes, menuBarStyle, metric);
+    }
+    return formatMenuTitle(primaryQuote, menuBarStyle, metric);
+  }, [menuBarStyle, metric, primaryQuote, topOrderedQuotes]);
+
   const menuBarIcon =
     logoDisplay === "menu-bar"
       ? (marketLogo(primaryQuote, title ? undefined : Icon.LineChart) ??
@@ -231,6 +246,16 @@ export default function Command(
               )
             }
           />
+          <MenuBarExtra.Item
+            title={`Display: ${metric === "market-cap" ? "Market Cap" : "Price"}`}
+            icon={Icon.Coins}
+            onAction={() =>
+              updateMetric(
+                metric === "market-cap" ? "price" : "market-cap",
+                mutate,
+              )
+            }
+          />
         </MenuBarExtra.Submenu>
       </MenuBarExtra.Section>
     </MenuBarExtra>
@@ -238,6 +263,7 @@ export default function Command(
 }
 
 const MENU_BAR_STYLES: { value: MenuBarStyle; label: string }[] = [
+  { value: "multi-ticker", label: "Multi-Ticker (Top 3)" },
   { value: "primary", label: "Primary Ticker" },
   { value: "primary-change", label: "Primary Ticker and Change" },
 ];
@@ -274,6 +300,13 @@ async function updateLogoDisplay(
   mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
 ) {
   await mutate(setLogoDisplay(display).then(() => loadMenuBarState()));
+}
+
+async function updateMetric(
+  metric: MenuBarMetric,
+  mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
+) {
+  await mutate(setMenuBarMetric(metric).then(() => loadMenuBarState()));
 }
 
 function titleFor(quote: Quote) {

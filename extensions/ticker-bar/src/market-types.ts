@@ -6,8 +6,9 @@ export type AssetKind =
   | "binance"
   | "binanceperp";
 
-export type MenuBarStyle = "primary" | "primary-change";
+export type MenuBarStyle = "primary" | "primary-change" | "multi-ticker";
 export type LogoDisplay = "off" | "menu-bar";
+export type MenuBarMetric = "price" | "market-cap";
 
 export type Asset = {
   id: string;

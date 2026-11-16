@@ -1,7 +1,13 @@
 import { LocalStorage } from "@raycast/api";
 import { normalizeAssetId, parseWatchlist } from "./market-ids";
 import { withMarketStateLock } from "./market-lock";
-import { LogoDisplay, MenuBarStyle, Quote, QuoteStatus } from "./market-types";
+import {
+  LogoDisplay,
+  MenuBarMetric,
+  MenuBarStyle,
+  Quote,
+  QuoteStatus,
+} from "./market-types";
 
 const WATCHLIST_KEY = "watchlist.v1";
 const QUOTES_KEY = "quotes.v1";
@@ -9,6 +15,7 @@ const QUOTE_STATUS_KEY = "quote-status.v1";
 const PRIMARY_ASSET_KEY = "primary-asset.v1";
 const MENU_BAR_STYLE_KEY = "menu-bar-style.v1";
 const LOGO_DISPLAY_KEY = "logo-display.v1";
+const MENU_BAR_METRIC_KEY = "menu-bar-metric.v1";
 
 export const DEFAULT_WATCHLIST = ["stock:SPY", "crypto:bitcoin"];
 export const MAX_WATCHLIST_SIZE = 50;
@@ -124,7 +131,14 @@ export async function setPrimaryAssetId(id: string) {
 
 export async function getMenuBarStyle(): Promise<MenuBarStyle> {
   const stored = await LocalStorage.getItem<string>(MENU_BAR_STYLE_KEY);
-  return stored === "primary-change" ? stored : "primary";
+  if (
+    stored === "primary" ||
+    stored === "primary-change" ||
+    stored === "multi-ticker"
+  ) {
+    return stored;
+  }
+  return "primary";
 }
 
 export async function setMenuBarStyle(style: MenuBarStyle) {
@@ -141,6 +155,15 @@ export async function getLogoDisplay(): Promise<LogoDisplay> {
 
 export async function setLogoDisplay(display: LogoDisplay) {
   await LocalStorage.setItem(LOGO_DISPLAY_KEY, display);
+}
+
+export async function getMenuBarMetric(): Promise<MenuBarMetric> {
+  const stored = await LocalStorage.getItem<string>(MENU_BAR_METRIC_KEY);
+  return stored === "market-cap" ? "market-cap" : "price";
+}
+
+export async function setMenuBarMetric(metric: MenuBarMetric) {
+  await LocalStorage.setItem(MENU_BAR_METRIC_KEY, metric);
 }
 
 export async function getCachedQuotes(): Promise<Record<string, Quote>> {

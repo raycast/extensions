@@ -1,5 +1,11 @@
 # Ticker Bar Changelog
 
+## [Multi-Ticker & Market Cap Support] - {PR_MERGE_DATE}
+
+- Added **Multi-Ticker (Top 3)** menu bar mode to display the primary token alongside up to two additional watchlist tokens
+- Added subscript-zero compression for sub-cent token prices (e.g., `$0.0₅8981`)
+- Added a **Display: Price / Market Cap** toggle in the Menu Bar submenu
+
 ## [Initial Version] - 2026-08-18
 
 - Track stocks, crypto, Binance Spot pairs, Binance perpetual futures, on-chain tokens, and Polymarket outcomes from the macOS menu bar.
