@@ -12,7 +12,3 @@ Start a new Google Meet from anywhere. The link is copied to your clipboard, so 
 ## Setup
 
 In the preferences, **Open Meetings In** sets whether meetings open in your browser or in the Google Meet web app. If you've added Google Meet to your Dock as a Safari web app, it creates the meeting there directly.
-
-## Tips
-
-- Give **Create Meet and Refocus** a hotkey for "let's jump on a call" moments in Slack.

@@ -11,7 +11,3 @@ Encode and decode Base64 straight from your clipboard.
 ## Use it with Raycast AI
 
 Mention `@base64` in Raycast AI to encode or decode text in a conversation.
-
-## Tips
-
-- Give **Base64 Decode** a hotkey. Copy an encoded string, press the hotkey and paste the result.

@@ -17,8 +17,3 @@ Mention `@kill-process` in Raycast AI and ask in plain language, for example "wh
 - Kill all processes with a given name
 
 Force killing from Raycast AI on macOS needs sudo. The easiest way is to enable Touch ID for sudo.
-
-## Tips
-
-- Give Kill Process a hotkey in Raycast Settings → Extensions, so you can reach it even when your Mac is struggling.
-- To free up a port (for example a dev server stuck on port 3000), search for the process by name and kill it.

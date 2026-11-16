@@ -12,7 +12,3 @@ Pick paragraphs, sentences or words, or get a full Markdown or HTML document for
 - **Generate Markdown**: A placeholder Markdown document with headings, lists and more.
 - **Generate HTML**: A placeholder HTML document.
 - **Generate with AI**: Placeholder text written by AI, for when "lorem ipsum" doesn't look real enough.
-
-## Tips
-
-- Give **Generate Paragraphs** an alias like `lp` to drop filler text into any design tool or editor in a second.

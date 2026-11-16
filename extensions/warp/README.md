@@ -9,7 +9,3 @@ Open [Warp](https://www.warp.dev) tabs, windows and Tab Configs from anywhere, s
 - **New Tab**: Opens a new Warp tab.
 - **New Window**: Opens a new Warp window.
 - **Open in Warp**: Opens the items selected in Finder in Warp.
-
-## Tips
-
-- Save the terminal layout for each project as a Tab Config in Warp, then give **Open Tab Config** an alias to restore it.

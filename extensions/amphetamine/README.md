@@ -13,7 +13,3 @@ Keep your Mac awake from the keyboard with [Amphetamine](https://apps.apple.com/
 ## Setup
 
 Install Amphetamine from the Mac App Store first. This extension controls it.
-
-## Tips
-
-- Give **Quick Start Session** an alias like `awake`, then type `awake 2h` before a long download or presentation.

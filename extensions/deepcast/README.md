@@ -15,6 +15,4 @@ Deepcast needs a DeepL API key. The free plan works.
 2. Open your [account summary](https://www.deepl.com/pro-account/summary) and copy your API key.
 3. Paste it into the extension's preferences, and choose a default target language.
 
-## Tips
-
-- Set **On Translation Action** to **Paste in Frontmost App**, select text in any app and press the hotkey for a **Translate into** command. The translation is pasted in place, without switching apps.
+To translate in place, set **On Translation Action** to **Paste in Frontmost App**. Then select text in any app and run a **Translate into** command: the translation replaces your selection.

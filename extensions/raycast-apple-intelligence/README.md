@@ -20,7 +20,3 @@ Use Apple Intelligence Writing Tools on selected text from Raycast, with a hotke
 ## Setup
 
 Apple Intelligence needs to be turned on in System Settings, on a Mac that supports it.
-
-## Tips
-
-- Give **Proofread** a hotkey to fix the text you've just written in any app.

@@ -12,7 +12,3 @@ Format JSON indents JSON with the indentation you choose. It also handles JSON t
 - **Format JSON**: Paste JSON in and get it formatted.
 - **Format Array of JSON to JSONLines**: Turns an array of objects into JSON Lines, one object per line.
 - **Format Text into Valid JSON Value**: Wraps text in double quotes and escapes it, so it's a valid JSON string.
-
-## Tips
-
-- Give **Format Clipboard JSON** a hotkey. Copy a messy API response, press the hotkey and paste it back formatted.
