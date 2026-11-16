@@ -26,7 +26,11 @@ export function FinancialLicensesView({ company }: { company: CompanySummary }) 
   }, {});
 
   return (
-    <List navigationTitle={`${t.financialLicenses} · ${company.name}`} isLoading={isLoading}>
+    <List
+      navigationTitle={`${t.financialLicenses} · ${company.name}`}
+      isLoading={isLoading}
+      searchBarPlaceholder={t.filterLicenses}
+    >
       {licenses.length === 0 && (data?.agents ?? []).length === 0 && (
         <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noFinancialLicenses} icon={Icon.Shield} />
       )}

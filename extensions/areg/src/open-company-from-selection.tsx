@@ -17,5 +17,9 @@ export default async function Command() {
     await showHUD(getStrings().lookupNoOrgnr);
     return;
   }
-  await launchCommand({ name: "search-companies", type: LaunchType.UserInitiated, context: { orgnr } });
+  try {
+    await launchCommand({ name: "search-companies", type: LaunchType.UserInitiated, context: { orgnr } });
+  } catch (error) {
+    await showHUD(error instanceof Error ? error.message : getStrings().openFailed);
+  }
 }

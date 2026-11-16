@@ -33,6 +33,7 @@ export function PersonView({ name, born }: { name: string; born: number }) {
     <List
       navigationTitle={`${name} (${born})`}
       isLoading={isLoading}
+      searchBarPlaceholder={t.filterCompanies}
       searchBarAccessory={
         <YearDropdown years={data?.years ?? []} value={year ?? data?.year ?? undefined} onChange={setYear} />
       }

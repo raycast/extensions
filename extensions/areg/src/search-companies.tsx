@@ -1,4 +1,4 @@
-import { Icon, List, type LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, type LaunchProps } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { searchCompanies } from "./lib/api";
@@ -33,7 +33,12 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
   const { favorites, recents } = useStore();
   const query = searchText.trim();
 
-  const { data: results = [], isLoading } = useCachedPromise(searchCompanies, [query], {
+  const {
+    data: results = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(searchCompanies, [query], {
     execute: query.length > 0,
     keepPreviousData: true,
     failureToastOptions: { title: t.error },
@@ -61,7 +66,18 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
       onSelectionChange={setSelectedId}
       throttle
     >
-      {query ? (
+      {query && error && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title={t.error}
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title={t.retry} icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : query ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title={isLoading ? t.searching : t.noResults}

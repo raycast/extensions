@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { ReactNode } from "react";
 import { getStrings } from "../lib/strings";
 import { formatOrgnr } from "../lib/orgnr";
@@ -43,7 +55,8 @@ export function CompanyActions(props: Props) {
   const { favorites } = useStore();
   const isFavorite = favorites.some((c) => c.orgnr === company.orgnr);
   const { primaryAction } = getPreferenceValues<Preferences>();
-  const track = () => void trackRecent(company);
+  // Recents are a convenience, so a failed save is not worth interrupting the user for.
+  const track = () => void trackRecent(company).catch(() => undefined);
 
   const show = (
     <Action.Push
@@ -147,8 +160,12 @@ export function CompanyActions(props: Props) {
           icon={isFavorite ? Icon.StarDisabled : Icon.Star}
           shortcut={Shortcuts.favorite}
           onAction={async () => {
-            const added = await toggleFavorite(company);
-            await showToast({ style: Toast.Style.Success, title: added ? t.addedFavorite : t.removedFavorite });
+            try {
+              const added = await toggleFavorite(company);
+              await showToast({ style: Toast.Style.Success, title: added ? t.addedFavorite : t.removedFavorite });
+            } catch (error) {
+              await showFailureToast(error, { title: t.saveFailed });
+            }
           }}
         />
         {props.favoriteIndex !== undefined && props.favoriteIndex > 0 && (
@@ -156,7 +173,9 @@ export function CompanyActions(props: Props) {
             title={t.moveUp}
             icon={Icon.ArrowUp}
             shortcut={Shortcuts.moveUp}
-            onAction={() => moveFavorite(company.orgnr, -1)}
+            onAction={() =>
+              moveFavorite(company.orgnr, -1).catch((error) => showFailureToast(error, { title: t.saveFailed }))
+            }
           />
         )}
         {props.favoriteIndex !== undefined &&
@@ -166,7 +185,9 @@ export function CompanyActions(props: Props) {
               title={t.moveDown}
               icon={Icon.ArrowDown}
               shortcut={Shortcuts.moveDown}
-              onAction={() => moveFavorite(company.orgnr, 1)}
+              onAction={() =>
+                moveFavorite(company.orgnr, 1).catch((error) => showFailureToast(error, { title: t.saveFailed }))
+              }
             />
           )}
         {props.recent && (
@@ -176,14 +197,22 @@ export function CompanyActions(props: Props) {
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
               shortcut={Shortcuts.removeRecent}
-              onAction={() => removeRecent(company.orgnr)}
+              onAction={() => removeRecent(company.orgnr).catch((error) => showFailureToast(error))}
             />
             <Action
               title={t.clearRecents}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={Shortcuts.clearRecents}
-              onAction={() => clearRecents()}
+              onAction={async () => {
+                const confirmed = await confirmAlert({
+                  title: t.clearRecentsTitle,
+                  message: t.clearRecentsMessage,
+                  icon: Icon.Trash,
+                  primaryAction: { title: t.clear, style: Alert.ActionStyle.Destructive },
+                });
+                if (confirmed) await clearRecents().catch((error) => showFailureToast(error));
+              }}
             />
           </>
         )}

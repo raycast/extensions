@@ -5,6 +5,9 @@
   "description": "Search Norwegian companies and explore shareholders, roles, financials and more from areg.no",
   "icon": "extension-icon.png",
   "author": "simenandre",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Finance",
     "Productivity",
@@ -33,7 +36,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Name or org number",
+          "placeholder": "Name or Org Number",
           "type": "text",
           "required": false
         }
@@ -186,6 +189,184 @@
                 "orgnr": "923609016"
               }
             }
+          }
+        ]
+      },
+      {
+        "input": "@areg give me an overview of 923609016",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "company",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which companies does 923609016 own shares in?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "holdings",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg how has the ownership of 923609016 changed over the years?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "ownership-history",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg has 923609016 had any bankruptcy or merger announcements?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "announcements",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg how much public funding has 923609016 received?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "grants",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which public tenders has 923609016 won?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "tenders",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg what is Doffin notice 2026-116508 about?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "tender",
+              "arguments": {
+                "id": "2026-116508"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which licenses does 984851006 have from Finanstilsynet?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "financial-licenses",
+              "arguments": {
+                "orgnr": "984851006"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which trademarks and patents does 923609016 hold?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "ip-rights",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg does 984054564 have any transport licenses?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transport-licenses",
+              "arguments": {
+                "orgnr": "984054564"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which corporate group is 923609016 part of?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "group",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which companies is ANDERS OPEDAL, born 1968, involved in?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "person",
+              "arguments": {
+                "name": "ANDERS OPEDAL",
+                "born": 1968
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg which Norwegian companies had the highest operating revenue?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-companies",
+              "arguments": {
+                "metric": "operating_revenue"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg how many companies are registered in each county? Use SQL.",
+        "expected": [
+          {
+            "callsTool": "query"
           }
         ]
       }

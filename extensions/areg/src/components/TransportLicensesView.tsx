@@ -21,7 +21,11 @@ export function TransportLicensesView({ company }: { company: CompanySummary }) 
   const licenses = data?.licences ?? [];
 
   return (
-    <List navigationTitle={`${t.transportLicenses} · ${company.name}`} isLoading={isLoading}>
+    <List
+      navigationTitle={`${t.transportLicenses} · ${company.name}`}
+      isLoading={isLoading}
+      searchBarPlaceholder={t.filterLicenses}
+    >
       {licenses.length === 0 && (
         <ResourceEmptyView isLoading={isLoading} error={error} emptyTitle={t.noTransportLicenses} icon={Icon.Car} />
       )}

@@ -21,8 +21,8 @@ Every action is in the action panel (`⌘K`) with its shortcut. The same shortcu
 
 | Action | Shortcut |
 | --- | --- |
-| Show company | `↵` |
-| Open on areg.no | `⌘↵` |
+| Show company in Raycast, or open it on areg.no (see **Primary Action** below) | `↵` |
+| The other of the two | `⌘↵` |
 | Copy org number | `⌘⇧C` |
 | Copy name | `⌥⌘C` |
 | Copy name and org number | `⌃⌘C` |
@@ -48,6 +48,8 @@ Every action is in the action panel (`⌘K`) with its shortcut. The same shortcu
 | Toggle details | `⌘D` |
 | Refresh | `⌘R` |
 | Open the current list on areg.no | `⌘⇧O` |
+
+In the company view itself, `↵` opens areg.no and `⌘↵` copies the org number.
 
 ## AI
 

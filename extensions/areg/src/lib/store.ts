@@ -35,9 +35,10 @@ function load() {
   return loading;
 }
 
-function persist(key: keyof typeof STORAGE_KEYS, value: CompanySummary[]) {
+/** Saves first and updates the views only once the write succeeded, so the UI never shows unsaved state. */
+async function persist(key: keyof typeof STORAGE_KEYS, value: CompanySummary[]) {
+  await LocalStorage.setItem(STORAGE_KEYS[key], JSON.stringify(value));
   setState({ [key]: value });
-  void LocalStorage.setItem(STORAGE_KEYS[key], JSON.stringify(value));
 }
 
 function slim(company: CompanySummary): CompanySummary {
@@ -46,12 +47,15 @@ function slim(company: CompanySummary): CompanySummary {
 
 export async function trackRecent(company: CompanySummary) {
   await load();
-  persist("recents", [slim(company), ...state.recents.filter((c) => c.orgnr !== company.orgnr)].slice(0, MAX_RECENTS));
+  await persist(
+    "recents",
+    [slim(company), ...state.recents.filter((c) => c.orgnr !== company.orgnr)].slice(0, MAX_RECENTS),
+  );
 }
 
 export async function removeRecent(orgnr: string) {
   await load();
-  persist(
+  await persist(
     "recents",
     state.recents.filter((c) => c.orgnr !== orgnr),
   );
@@ -59,13 +63,13 @@ export async function removeRecent(orgnr: string) {
 
 export async function clearRecents() {
   await load();
-  persist("recents", []);
+  await persist("recents", []);
 }
 
 export async function toggleFavorite(company: CompanySummary): Promise<boolean> {
   await load();
   const isFavorite = state.favorites.some((c) => c.orgnr === company.orgnr);
-  persist(
+  await persist(
     "favorites",
     isFavorite ? state.favorites.filter((c) => c.orgnr !== company.orgnr) : [...state.favorites, slim(company)],
   );
@@ -79,7 +83,7 @@ export async function moveFavorite(orgnr: string, direction: -1 | 1) {
   const target = index + direction;
   if (index < 0 || target < 0 || target >= list.length) return;
   [list[index], list[target]] = [list[target], list[index]];
-  persist("favorites", list);
+  await persist("favorites", list);
 }
 
 export function useStore(): State {
