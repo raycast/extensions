@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Filters and combined list in My Merge Requests] - {PR_MERGE_DATE}
+## [Filters and combined list in My Merge Requests] - 2026-11-16
 
 - Show authored, assigned, and review-requested merge requests together in My Merge Requests
 - Add Filter submenu for scope and status, and remember the last selection unless the command is launched with an explicit scope
