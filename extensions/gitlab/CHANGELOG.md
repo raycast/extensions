@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [Filters and combined list in My Merge Requests] - {PR_MERGE_DATE}
+
+- Show authored, assigned, and review-requested merge requests together in My Merge Requests
+- Add Filter submenu for scope and status, and remember the last selection
+- Apply the project filter on the server instead of after fetching
+
 ## [Fix punycode deprecation warning] - 2026-11-10
 
 - Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` module `exports` error
