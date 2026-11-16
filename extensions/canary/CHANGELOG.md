@@ -4,6 +4,7 @@
 
 - Show each pull request's latest commit instead of its number (the number still works in the filter)
 - Color the canary tag yellow when the canary doesn't run the latest commit, read from the canary's `/build-info.json`
+- Show the pull requests right away; canary checks fill in afterwards and skip local and private-network addresses
 - Show a repeated GitHub error once instead of once per pull request
 - Make the icon's corners transparent
 

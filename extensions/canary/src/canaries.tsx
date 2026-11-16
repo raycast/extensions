@@ -1,5 +1,8 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
 import { getAccessToken, OAuthService, useCachedPromise, withAccessToken } from "@raycast/utils";
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+import { useMemo } from "react";
 
 const github = OAuthService.github({
   scope: "repo read:org",
@@ -30,10 +33,15 @@ interface PullRequest {
   isDraft: boolean;
   headRefName: string;
   updatedAt: string;
-  headCommit: string;
+  headRefOid: string;
   canaryUrl?: string;
   extraUrl?: string;
-  canaryCommit?: CanaryCommit;
+}
+
+interface CanaryTarget {
+  number: number;
+  canaryUrl: string;
+  headRefOid: string;
 }
 
 // What the canary reports about the commit it runs, compared with the PR's latest commit.
@@ -107,11 +115,32 @@ function Command() {
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchPrs, [
     repo,
     { urlPrefix, extraUrlPrefix, commentAuthor },
-    checkCanaryCommit ? versionPath.trim() || DEFAULT_VERSION_PATH : null,
   ]);
 
+  // Checked after the list is shown, so a slow or sleeping canary doesn't hold back the pull requests.
+  const targets = useMemo(
+    () =>
+      (data ?? []).flatMap((pr) =>
+        pr.canaryUrl ? [{ number: pr.number, canaryUrl: pr.canaryUrl, headRefOid: pr.headRefOid }] : [],
+      ),
+    [data],
+  );
+  const commitPath = checkCanaryCommit ? versionPath.trim() || DEFAULT_VERSION_PATH : "";
+  const {
+    data: commits,
+    isLoading: commitsLoading,
+    revalidate: revalidateCommits,
+  } = useCachedPromise(fetchCanaryCommits, [targets, commitPath], {
+    execute: Boolean(commitPath) && targets.length > 0,
+    keepPreviousData: true,
+  });
+  const refresh = () => {
+    revalidate();
+    if (commitPath) revalidateCommits();
+  };
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter my PRs…">
+    <List isLoading={isLoading || commitsLoading} searchBarPlaceholder="Filter my PRs…">
       {error ? (
         <List.EmptyView icon={Icon.ExclamationMark} title="Couldn't load pull requests" description={error.message} />
       ) : (
@@ -125,10 +154,13 @@ function Command() {
         <List.Item
           key={pr.number}
           title={pr.title}
-          subtitle={pr.headCommit}
+          subtitle={pr.headRefOid.slice(0, 7)}
           keywords={[pr.headRefName, String(pr.number), `#${pr.number}`]}
           icon={pr.isDraft ? { source: Icon.Circle, tintColor: Color.SecondaryText } : Icon.CircleProgress100}
-          accessories={[canaryAccessory(pr), { date: new Date(pr.updatedAt) }]}
+          accessories={[
+            canaryAccessory(pr, commitPath ? commits?.[pr.number] : undefined),
+            { date: new Date(pr.updatedAt) },
+          ]}
           actions={
             <ActionPanel>
               {pr.canaryUrl && <Action.OpenInBrowser title="Open Canary" icon={Icon.Globe} url={pr.canaryUrl} />}
@@ -158,7 +190,7 @@ function Command() {
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={revalidate}
+                onAction={refresh}
               />
             </ActionPanel>
           }
@@ -168,7 +200,7 @@ function Command() {
   );
 }
 
-async function fetchPrs(repo: string, matchers: Matchers, versionPath: string | null): Promise<PullRequest[]> {
+async function fetchPrs(repo: string, matchers: Matchers): Promise<PullRequest[]> {
   const viewer = await checkRepositoryAccess(repo);
   const q = `is:pr is:open author:${viewer} repo:${repo} sort:updated-desc`;
   const isTrusted = trustedBy(matchers.commentAuthor);
@@ -183,22 +215,29 @@ async function fetchPrs(repo: string, matchers: Matchers, versionPath: string | 
     after = search.pageInfo.endCursor;
   }
 
-  const pullRequests = await Promise.all(prs.map((pr) => toPullRequest(pr, matchers, isTrusted)));
-  if (!versionPath) return pullRequests;
-  return Promise.all(
-    pullRequests.map(async (pr, i) =>
-      pr.canaryUrl
-        ? { ...pr, canaryCommit: await fetchCanaryCommit(pr.canaryUrl, versionPath, prs[i].headRefOid) }
-        : pr,
-    ),
+  return Promise.all(prs.map((pr) => toPullRequest(pr, matchers, isTrusted)));
+}
+
+async function fetchCanaryCommits(targets: CanaryTarget[], versionPath: string): Promise<Record<number, CanaryCommit>> {
+  const results = await Promise.all(
+    targets.map(async (t) => [t.number, await fetchCanaryCommit(t.canaryUrl, versionPath, t.headRefOid)] as const),
   );
+  return Object.fromEntries(results);
 }
 
 // Asks the canary itself which commit it runs, e.g. /build-info.json → {"version":"d2e2463"}.
 async function fetchCanaryCommit(canaryUrl: string, versionPath: string, headRefOid: string): Promise<CanaryCommit> {
   const head = headRefOid.slice(0, 7);
   try {
-    const url = new URL(versionPath, new URL(canaryUrl).origin);
+    const canary = new URL(canaryUrl);
+    const url = new URL(versionPath, canary.origin);
+    if (url.origin !== canary.origin || !/^https?:$/.test(url.protocol)) {
+      return { head, error: "Canary Version Path must be a path on the canary's own host" };
+    }
+    // The link comes from a PR comment, so never let it point these automatic requests at this computer or its network.
+    if (await isPrivateHost(url.hostname)) {
+      return { head, error: `Not checked: ${url.hostname} is a local or private-network address` };
+    }
     const response = await fetch(url, { signal: AbortSignal.timeout(VERSION_TIMEOUT_MS) });
     if (!response.ok) return { head, error: `${url} responded ${response.status}` };
     const version = findCommit(await response.text());
@@ -207,6 +246,38 @@ async function fetchCanaryCommit(canaryUrl: string, versionPath: string, headRef
   } catch (e) {
     return { head, error: e instanceof Error ? e.message : String(e) };
   }
+}
+
+async function isPrivateHost(hostname: string): Promise<boolean> {
+  const host = hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  const addresses = isIP(host) ? [host] : (await lookup(host, { all: true })).map((a) => a.address);
+  return addresses.some(isPrivateAddress);
+}
+
+function isPrivateAddress(address: string): boolean {
+  const ip = address.toLowerCase();
+  if (isIP(ip) === 6) {
+    // IPv4-mapped addresses, e.g. ::ffff:127.0.0.1, which URL parsing turns into ::ffff:7f00:1.
+    const mapped = ip.match(/^::ffff:(?:(\d+\.\d+\.\d+\.\d+)|([0-9a-f]{1,4}):([0-9a-f]{1,4}))$/);
+    if (mapped) {
+      if (mapped[1]) return isPrivateAddress(mapped[1]);
+      const hi = parseInt(mapped[2], 16);
+      const lo = parseInt(mapped[3], 16);
+      return isPrivateAddress(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
+    }
+    return ip === "::" || ip === "::1" || /^f[cd]/.test(ip) || /^fe[89ab]/.test(ip);
+  }
+  const [a, b] = ip.split(".").map(Number);
+  return (
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168)
+  );
 }
 
 // Accepts a JSON object with the commit under a common key, or a plain-text file that holds only the commit.
@@ -224,9 +295,10 @@ function findCommit(body: string): string | undefined {
 }
 
 // Green when the canary runs the latest commit (or its commit is unknown), yellow when it runs an older one.
-function canaryAccessory({ canaryUrl, canaryCommit: commit }: PullRequest): List.Item.Accessory {
+function canaryAccessory({ canaryUrl, headRefOid }: PullRequest, commit?: CanaryCommit): List.Item.Accessory {
   if (!canaryUrl) return { tag: { value: "no canary", color: Color.SecondaryText } };
-  if (!commit) return { tag: { value: "canary", color: Color.Green } };
+  // A result for an earlier commit of this PR is stale until the check reruns.
+  if (!commit || commit.head !== headRefOid.slice(0, 7)) return { tag: { value: "canary", color: Color.Green } };
   if ("error" in commit) {
     return {
       tag: { value: "canary", color: Color.Green },
@@ -314,7 +386,7 @@ async function toPullRequest(
     isDraft: pr.isDraft,
     headRefName: pr.headRefName,
     updatedAt: pr.updatedAt,
-    headCommit: pr.headRefOid.slice(0, 7),
+    headRefOid: pr.headRefOid,
     canaryUrl,
     extraUrl,
   };
