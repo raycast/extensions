@@ -8,6 +8,8 @@ const makeRequest = async <T>(endpoint: string, options?: RequestInit) => {
   const response = await fetch(API_URL + endpoint, {
     headers: {
       Authorization: `Bearer ${api_key}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
     ...options,
   });

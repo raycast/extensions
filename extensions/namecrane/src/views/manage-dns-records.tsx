@@ -15,58 +15,14 @@ import { namecrane } from "../namecrane";
 import { Record } from "../types";
 
 export default function ManageDNSRecords({ domain }: { domain: string }) {
-  const { isLoading, data: records, mutate } = useCachedPromise(namecrane.dns.list, [domain]);
+  const { isLoading, data: records, mutate } = useCachedPromise(namecrane.dns.list, [domain], { initialData: [] });
 
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {records?.map((record) => (
-        <List.Item
-          key={record.id}
-          title={record.name}
-          accessories={[{ tag: record.type }]}
-          detail={
-            <List.Item.Detail
-              markdown={record.content}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="TTL" text={record.ttl.toString()} />
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
+      {!isLoading && !records.length ? (
+        <List.EmptyView
           actions={
             <ActionPanel>
-              <Action
-                icon={Icon.Trash}
-                title="Delete Record"
-                style={Action.Style.Destructive}
-                onAction={() =>
-                  confirmAlert({
-                    title: "Delete?",
-                    primaryAction: {
-                      style: Alert.ActionStyle.Destructive,
-                      title: "Delete",
-                      async onAction() {
-                        const toast = await showToast(Toast.Style.Animated, "Deleting", record.id);
-                        try {
-                          await mutate(namecrane.dns.remove(domain, record.id), {
-                            optimisticUpdate(data) {
-                              return data?.filter((r) => r.id !== record.id);
-                            },
-                            shouldRevalidateAfter: false,
-                          });
-                          toast.style = Toast.Style.Success;
-                          toast.title = "Deleted";
-                        } catch (error) {
-                          toast.style = Toast.Style.Failure;
-                          toast.title = "Failed";
-                          toast.message = `${error}`;
-                        }
-                      },
-                    },
-                  })
-                }
-              />
               <Action.Push
                 icon={Icon.Plus}
                 title="Create Record"
@@ -76,7 +32,66 @@ export default function ManageDNSRecords({ domain }: { domain: string }) {
             </ActionPanel>
           }
         />
-      ))}
+      ) : (
+        records.map((record) => (
+          <List.Item
+            key={record.id}
+            title={record.name}
+            accessories={[{ tag: record.type }]}
+            detail={
+              <List.Item.Detail
+                markdown={record.content}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="TTL" text={record.ttl.toString()} />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete Record"
+                  style={Action.Style.Destructive}
+                  onAction={() =>
+                    confirmAlert({
+                      title: "Delete?",
+                      primaryAction: {
+                        style: Alert.ActionStyle.Destructive,
+                        title: "Delete",
+                        async onAction() {
+                          const toast = await showToast(Toast.Style.Animated, "Deleting", record.id);
+                          try {
+                            await mutate(namecrane.dns.remove(domain, record.id), {
+                              optimisticUpdate(data) {
+                                return data?.filter((r) => r.id !== record.id);
+                              },
+                              shouldRevalidateAfter: false,
+                            });
+                            toast.style = Toast.Style.Success;
+                            toast.title = "Deleted";
+                          } catch (error) {
+                            toast.style = Toast.Style.Failure;
+                            toast.title = "Failed";
+                            toast.message = `${error}`;
+                          }
+                        },
+                      },
+                    })
+                  }
+                />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Create Record"
+                  target={<CreateDNSRecord domain={domain} />}
+                  onPop={mutate}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
