@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "semantic-file-search",
   "title": "Semantic File Search",
-  "description": "Find local documents, photos, video scenes and sounds by meaning. Requires the Semantic Search Engine.",
+  "description": "Find local documents, photos, video scenes and sounds on your Mac by describing them in plain language, with private on-device AI indexing.",
   "icon": "icon.png",
   "author": "nik_ustinovich",
   "license": "MIT",

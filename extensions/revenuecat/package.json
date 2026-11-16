@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "revenuecat",
   "title": "RevenueCat",
-  "description": "Explore RevenueCat revenue, customers, subscriptions, and products, and use its official MCP tools with Raycast AI.",
+  "description": "View RevenueCat revenue and subscription metrics, search customers and their subscription history, browse products, and track a metric in the menu bar.",
   "icon": "revenuecat-icon.png",
   "author": "samuelkraft",
   "license": "MIT",
