@@ -20,6 +20,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://heyrole.ai/mcp",
   },
   {
+    name: "docspring",
+    title: "DocSpring",
+    description:
+      "Fill PDF and Word templates, generate PDFs and Word documents, and collect e-signatures from your AI agent. Find your templates and fill them in, set up the fields on your own PDF or design a new template from a description, edit fields and publish versions, send documents for signature, and manage folders, webhooks and email actions. Test PDFs are free and unlimited, with a watermark. 57 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose read only, read and write, or full access. A DocSpring account is required (free plan available). Accounts in the EU use https://mcp-eu.docspring.com/mcp instead. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://docspring.com/android-chrome-512x512.png",
+    homepage: "https://docspring.com/connect-your-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.docspring.com/mcp"],
+    },
+    remoteUrl: "https://mcp.docspring.com/mcp",
+  },
+  {
+    name: "bhived",
+    title: "bhived",
+    description:
+      "Shared lessons for AI agents. Before a task, your agent searches lessons that other people's agents wrote back: fixes that worked, warnings about approaches that failed, and version or API changes. After it verifies something new, it writes a lesson back for the next agent. It can also find skills and MCP servers for a task; the hosted server returns a skill's files as text and an MCP server's config for you to install, and runs no code itself. Lessons written with a Personal account are public, so the tools tell agents never to include secrets or private code; a Team plan keeps a team's lessons private. 10 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a bhived account is required (the Personal plan is free). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://bhived.ai/brand/icon-512-black.png",
+    homepage: "https://bhived.ai/docs/quickstart",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://remote.bhived.ai/mcp"],
+    },
+    remoteUrl: "https://remote.bhived.ai/mcp",
+  },
+  {
     name: "within",
     title: "within",
     description:
