@@ -9,7 +9,7 @@ import {
   confirmAlert,
   showToast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   coolUntil,
@@ -26,15 +26,34 @@ const SPEEDS = [100, 85, 70, 55, 40];
 const TEMPERATURES = [60, 55, 50, 45, 40];
 const CONFIRM_BELOW = 50;
 
+// Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
+// calmer cadence than the fans themselves change.
+const REFRESH_INTERVAL_MS = 5000;
+
 const speedLabel = (percent: number) =>
   percent === 100 ? "Maximum" : `${percent}%`;
 
 export default function Command() {
   const [percent, setPercent] = useState(String(SPEEDS[0]));
-  const { data, isLoading, revalidate } = useCachedPromise(readStatus, [false]);
+  // The failure is shown in the view; without this a missing core would toast on
+  // every poll tick.
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    readStatus,
+    [false],
+    {
+      onError: () => {
+        // Shown in the view instead.
+      },
+    },
+  );
   const fans = data?.fans ?? [];
   const selected = Number(percent);
   const cooling = data?.cooling;
+
+  useEffect(() => {
+    const timer = setInterval(revalidate, REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [revalidate]);
 
   async function apply(action: () => Promise<string>, title: string) {
     const toast = await showToast({ style: Toast.Style.Animated, title });
@@ -87,6 +106,15 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {error ? (
+        <List.Section title="Fan Control Unavailable">
+          <List.Item
+            icon={Icon.ExclamationMark}
+            title={error.message}
+            subtitle="Retrying automatically."
+          />
+        </List.Section>
+      ) : null}
       {cooling ? (
         <List.Section title="Active cooldown">
           <List.Item
