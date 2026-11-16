@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Edworking MCP Server] - {PR_MERGE_DATE}
+
+- Add Edworking to the official registry: search and update Edworking projects, tasks, Docs and conversations, with task and Doc edits, messages and file imports. 24 tools. Hosted Streamable HTTP server at https://mcp.edworking.com/mcp with OAuth sign-in (PKCE, with dynamic client registration or client ID metadata documents), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs an Edworking account.
+
 ## [Add GetYouTubeTranscript MCP Server] - 2026-11-16
 
 - Add GetYouTubeTranscript to the official registry: YouTube transcripts (optional timestamps or translation), caption languages, video and channel search, channel uploads, playlists and community posts, playlist videos, related videos and estimated dislikes. 13 read-only tools. Hosted Streamable HTTP server at https://getyoutubetranscript.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GetYouTubeTranscript account (100 free credits for new accounts).
