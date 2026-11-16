@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vibelet-search",
   "title": "Vibelet Search",
-  "description": "Search and resume Claude Code and Codex sessions (CLI + Desktop apps) by title or content.",
+  "description": "Search and resume Claude Code and Codex sessions from the CLI and desktop apps by title or content.",
   "icon": "command-icon.png",
   "author": "leyang",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "u2l",
   "title": "U2L Link Shortener",
-  "description": "Shorten links with U2L AI. Create short links from an argument, selection, or clipboard, search your links, and check click stats.",
+  "description": "Shorten links with U2L AI from a URL, selection or clipboard, search your short links and check click stats.",
   "icon": "icon.png",
   "author": "u2l",
   "categories": [

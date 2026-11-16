@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whitebit",
   "title": "WhiteBIT Exchange",
-  "description": "WhiteBIT exchange Raycast extension",
+  "description": "Check your WhiteBIT crypto exchange balance, deposit and withdrawal history and markets, transfer between balances and create or apply codes.",
   "categories": ["Applications", "Finance"],
   "version": "1.0.0",
   "icon": "command-icon.png",
