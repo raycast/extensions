@@ -15,4 +15,4 @@ In the preferences you can set:
 - Show dotfiles, file permissions and file sizes.
 - Show iCloud Drive at the top of the start folder.
 - Hide files listed in `.gitignore` or `.rayignore`.
-- Turn delete actions on or off, and use `⌃X` for Move to Trash and `⌃⇧X` for Delete.
+- Turn delete actions on or off. Turn on **Standard Action Shortcuts** to use `⌃X` for Move to Trash and `⌃⇧X` for Delete.

@@ -6,8 +6,8 @@ Start a new Google Meet from anywhere. The link is copied to your clipboard, so 
 
 - **Create Meet**: Creates a new meeting in your browser and copies the link.
 - **Create Meet and Refocus**: Creates a meeting, copies the link and returns you to the app you were in.
-- **Create Meet with Specified Profile**: The same, using a browser profile you choose.
-- **Create Meet and Refocus with Specified Profile**: Uses a profile you choose and returns you to the app you were in.
+- **Create Meet with Specified Profile**: The same, using one of your saved Google accounts. The account needs to be signed in to the browser where the meeting opens.
+- **Create Meet and Refocus with Specified Profile**: Uses a saved Google account and returns you to the app you were in.
 
 ## Preferences
 

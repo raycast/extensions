@@ -25,4 +25,4 @@ Search your [Arc](https://arc.net) tabs, spaces, history and downloads, and open
 
 ## Use it with Raycast AI
 
-Mention `@arc` in Raycast AI to ask about your tabs and history. For example, "which tab has the Linear issue I was reading?" It can also open and close tabs, windows and spaces.
+Mention `@arc` in Raycast AI to ask about your tabs and history. For example, "which tab has the Linear issue I was reading?" It can also open windows, open and close tabs, and switch spaces.

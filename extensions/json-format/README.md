@@ -7,7 +7,7 @@ Format JSON indents JSON with the indentation you choose. It also handles JSON t
 ## Commands
 
 - **Format Clipboard JSON**: Formats the JSON in your clipboard, then copies or pastes the result.
-- **Format Selected JSON**: Formats the JSON selected in your editor and replaces it.
+- **Format Selected JSON**: Formats the JSON selected in your editor, then copies or pastes the result.
 - **Format Selected JSON and Show**: Formats the selected JSON and shows it in a viewer.
 - **Format JSON**: Paste JSON in and get it formatted.
 - **Format Array of JSON to JSONLines**: Turns an array of objects into JSON Lines, one object per line.

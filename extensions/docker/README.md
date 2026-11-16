@@ -10,4 +10,4 @@ Manage your Docker containers, images and Compose projects without opening Docke
 
 ## Setup
 
-Docker needs to be running. If your Docker socket isn't at the default location (for example with Colima or OrbStack), set **Socket path** in the extension's preferences.
+Docker needs to be running. The extension uses your current Docker CLI context, so Colima and OrbStack work too. Set **Socket path** in the preferences only to override that.
