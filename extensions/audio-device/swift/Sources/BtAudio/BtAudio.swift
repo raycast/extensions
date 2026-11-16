@@ -132,15 +132,20 @@ func findBtDevice(_ query: String) -> IOBluetoothDevice? {
   }
 }
 
+func macFromUid(_ uid: String) -> String? {
+  guard let range = uid.range(of: #"(?:[0-9a-fA-F]{2}[-:]){5}[0-9a-fA-F]{2}"#, options: .regularExpression)
+  else { return nil }
+  return normalizeAddress(String(uid[range]))
+}
+
 func halMatch(_ hal: HalAudioDevice, btAddress: String, btName: String?, direction: String) -> Bool {
   // Bluetooth devices register as separate ":input" and ":output" HAL objects
   guard direction == "input" ? hal.isInput : hal.isOutput else { return false }
-  let uid = normalizeAddress(hal.uid)
-  if !uid.isEmpty && uid.contains(btAddress) { return true }
-  if let name = btName, hal.name.caseInsensitiveCompare(name) == .orderedSame {
-    return true
-  }
-  return false
+  // A HAL uid carrying a Bluetooth MAC belongs to that specific radio — a
+  // different MAC means a different physical device, even with the same name.
+  if let mac = macFromUid(hal.uid) { return mac == btAddress }
+  guard let name = btName else { return false }
+  return hal.name.caseInsensitiveCompare(name) == .orderedSame
 }
 
 // MARK: - Raycast bridge
