@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "emoji-append",
+  "title": "Emoji Append",
+  "description": "Append contextual emojis to selected text with your own API",
+  "icon": "icon.png",
+  "author": "dofy",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "emoji",
+    "writing",
+    "text",
+    "ai",
+    "context"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "commands": [
+    {
+      "name": "append-emoji",
+      "title": "Append Contextual Emoji",
+      "description": "Append 1–3 contextual emojis to your selection and paste it back",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "OpenAI-compatible version root or full chat/completions endpoint. Use HTTPS for remote services.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.openai.com/v1"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "API key for your configured provider",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "A model supporting Chat Completions",
+      "type": "textfield",
+      "required": true,
+      "default": "gpt-4o-mini"
+    },
+    {
+      "name": "maxEmojis",
+      "title": "Maximum Emojis",
+      "description": "Choose between one and this many emojis",
+      "type": "dropdown",
+      "required": true,
+      "default": "3",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  }
+}
