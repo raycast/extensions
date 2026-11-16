@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, environment, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, environment, Keyboard } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import {
@@ -177,13 +177,7 @@ export default function Command() {
           id={String(display.id)}
           title={display.name}
           icon={display.isMain ? Icon.Monitor : Icon.Desktop}
-          accessories={[
-            display.isMain
-              ? { tag: { value: "Main", color: Color.SecondaryText } }
-              : main
-                ? { tag: { value: `${offsetFrom(display, main, axis)} pt`, color: Color.Blue } }
-                : {},
-          ]}
+          subtitle={display.isMain || !main ? "Main" : `${offsetFrom(display, main, axis)} pt`}
           detail={<Detail display={display} main={main} axis={axis} />}
           actions={actions(display)}
         />
