@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, getSelectedFinderItems, Icon, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useForm, usePromise } from "@raycast/utils";
 import { Property, Tool, Values } from "../lib/toolbox";
 import { RunView } from "./RunView";
 
@@ -20,6 +19,8 @@ function choiceTitle(key: string, value: string) {
     .replace(/\bH264\b/, "H.264");
 }
 
+type FormValues = Record<string, string | boolean | string[]>;
+
 /** A form built from the tool's option schema, so it always matches the installed Toolbox. */
 /** `title` is only set when the form is pushed (from Search Toolbox Tools); a command's root view keeps Raycast's title. */
 export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
@@ -27,46 +28,47 @@ export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
   const props = tool.inputSchema.properties;
   const takesFiles = "files" in props;
   const takesUrls = "urls" in props;
-  const [files, setFiles] = useState<string[]>([]);
-  const [urls, setUrls] = useState("");
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  const clearError = (key: string) => setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
+
+  const initialValues: FormValues = {};
+  const validation: Record<string, (value: FormValues[string] | undefined) => string | undefined> = {};
+  for (const [key, prop] of Object.entries(props)) {
+    if (key === "files") {
+      initialValues.files = [];
+      validation.files = (v) => ((v as string[] | undefined)?.length ? undefined : "Choose at least one file");
+    } else if (key === "urls") {
+      initialValues.urls = "";
+      validation.urls = (v) => (String(v ?? "").trim() ? undefined : "Paste at least one link");
+    } else if (key === "output_folder") {
+      initialValues.output_folder = [];
+    } else if (prop.enum) {
+      initialValues[key] = String(prop.default ?? prop.enum[0]);
+    } else if (prop.type === "boolean") {
+      initialValues[key] = prop.default === true;
+    } else {
+      initialValues[key] = prop.default !== undefined ? String(prop.default) : "";
+      if (prop.type === "integer" || prop.type === "number") validation[key] = (v) => numberProblem(prop, v);
+    }
+  }
+
+  const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
+    initialValues,
+    validation,
+    onSubmit: (raw) => push(<RunView tool={tool} values={toToolValues(props, raw)} />),
+  });
 
   // Start with what's selected in Finder and, for links, a URL on the clipboard. Both are optional, so errors are ignored.
   usePromise(async () => (takesFiles ? (await getSelectedFinderItems()).map((i) => i.path) : []), [], {
-    onData: (paths) => setFiles((current) => (current.length ? current : paths)),
+    onData: (paths) => {
+      if (paths.length && !(values.files as string[] | undefined)?.length) setValue("files", paths);
+    },
     onError: () => undefined,
   });
   usePromise(async () => (takesUrls ? ((await Clipboard.readText()) ?? "").trim() : ""), [], {
     onData: (text) => {
-      if (/^https?:\/\/\S+$/m.test(text)) setUrls((current) => current || text);
+      if (/^https?:\/\/\S+$/m.test(text) && !values.urls) setValue("urls", text);
     },
     onError: () => undefined,
   });
-
-  function submit(raw: Form.Values) {
-    const values: Values = {};
-    const problems: Record<string, string> = {};
-    for (const [key, prop] of Object.entries(props)) {
-      const value = raw[key];
-      if (key === "files") values.files = files;
-      else if (key === "urls") values.urls = urls.split(/\s+/).filter(Boolean);
-      else if (key === "output_folder") values.output_folder = (value as string[] | undefined)?.[0];
-      else if (prop.type === "integer" || prop.type === "number") {
-        if (value === "" || value === undefined) continue;
-        const n = Number(value);
-        if (Number.isNaN(n) || (prop.type === "integer" && !Number.isInteger(n))) problems[key] = "Enter a number";
-        else if (prop.minimum !== undefined && n < prop.minimum) problems[key] = `At least ${prop.minimum}`;
-        else if (prop.maximum !== undefined && n > prop.maximum) problems[key] = `At most ${prop.maximum}`;
-        else values[key] = n;
-      } else values[key] = value as string | boolean;
-    }
-    if (takesFiles && files.length === 0) problems.files = "Choose at least one file";
-    if (takesUrls && (values.urls as string[]).length === 0) problems.urls = "Paste at least one link";
-    setErrors(problems);
-    if (Object.keys(problems).length) return;
-    push(<RunView tool={tool} values={values} />);
-  }
 
   // Main choices first (quality, format, mode), then other choices, then numbers and text, then on/off switches.
   const rank = ([key, prop]: [string, Property]) =>
@@ -80,46 +82,34 @@ export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
       navigationTitle={title}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`Run ${tool.title}`} icon={Icon.Play} onSubmit={submit} />
+          <Action.SubmitForm title={`Run ${tool.title}`} icon={Icon.Play} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description text={tool.description} />
       {takesFiles && (
         <Form.FilePicker
-          id="files"
+          {...(itemProps.files as Form.ItemProps<string[]>)}
           title="Files"
           info="Defaults to what's selected in Finder."
           allowMultipleSelection
           canChooseDirectories
-          value={files}
-          onChange={(value) => {
-            setFiles(value);
-            clearError("files");
-          }}
-          error={errors.files}
         />
       )}
       {takesUrls && (
         <Form.TextArea
-          id="urls"
+          {...(itemProps.urls as Form.ItemProps<string>)}
           title="Links"
           placeholder="One link per line"
-          value={urls}
-          onChange={(value) => {
-            setUrls(value);
-            clearError("urls");
-          }}
-          error={errors.urls}
           info="Only download videos you own or have permission to save."
         />
       )}
       {fields.map(([key, prop]) => (
-        <Field key={key} id={key} prop={prop} error={errors[key]} onEdit={() => clearError(key)} />
+        <Field key={key} id={key} prop={prop} item={itemProps[key]} />
       ))}
       {"output_folder" in props && (
         <Form.FilePicker
-          id="output_folder"
+          {...(itemProps.output_folder as Form.ItemProps<string[]>)}
           title="Save To"
           info="Leave empty to use Toolbox's results folder (Downloads by default)."
           canChooseDirectories
@@ -131,11 +121,39 @@ export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
   );
 }
 
-function Field({ id, prop, error, onEdit }: { id: string; prop: Property; error?: string; onEdit: () => void }) {
+function numberProblem(prop: Property, value: FormValues[string] | undefined): string | undefined {
+  const text = String(value ?? "").trim();
+  if (!text) return undefined;
+  const n = Number(text);
+  if (Number.isNaN(n) || (prop.type === "integer" && !Number.isInteger(n))) return "Enter a number";
+  if (prop.minimum !== undefined && n < prop.minimum) return `At least ${prop.minimum}`;
+  if (prop.maximum !== undefined && n > prop.maximum) return `At most ${prop.maximum}`;
+  return undefined;
+}
+
+/** Form values → what `buildArgs` expects: link lists split, numbers parsed, one output folder. */
+function toToolValues(props: Record<string, Property>, raw: FormValues): Values {
+  const values: Values = {};
+  for (const [key, prop] of Object.entries(props)) {
+    const value = raw[key];
+    if (key === "urls")
+      values.urls = String(value ?? "")
+        .split(/\s+/)
+        .filter(Boolean);
+    else if (key === "output_folder") values.output_folder = (value as string[] | undefined)?.[0];
+    else if (prop.type === "integer" || prop.type === "number") {
+      const text = String(value ?? "").trim();
+      if (text) values[key] = Number(text);
+    } else values[key] = value;
+  }
+  return values;
+}
+
+function Field({ id, prop, item }: { id: string; prop: Property; item: Form.ItemProps<FormValues[string]> }) {
   const title = humanize(id);
   if (prop.enum) {
     return (
-      <Form.Dropdown id={id} title={title} info={prop.description} defaultValue={String(prop.default ?? prop.enum[0])}>
+      <Form.Dropdown {...(item as Form.ItemProps<string>)} title={title} info={prop.description}>
         {prop.enum.map((value) => (
           <Form.Dropdown.Item key={value} value={value} title={choiceTitle(id, value)} />
         ))}
@@ -143,29 +161,24 @@ function Field({ id, prop, error, onEdit }: { id: string; prop: Property; error?
     );
   }
   if (prop.type === "boolean") {
-    return <Form.Checkbox id={id} label={title} info={prop.description} defaultValue={prop.default === true} />;
+    return <Form.Checkbox {...(item as Form.ItemProps<boolean>)} label={title} info={prop.description} />;
   }
   if (/password/.test(id)) {
     return (
       <Form.PasswordField
-        id={id}
+        {...(item as Form.ItemProps<string>)}
         title={title}
         info={prop.description}
         placeholder={prop.description ?? title}
-        error={error}
-        onChange={onEdit}
       />
     );
   }
   return (
     <Form.TextField
-      id={id}
+      {...(item as Form.ItemProps<string>)}
       title={title}
       info={prop.description}
-      placeholder={prop.description}
-      defaultValue={prop.default !== undefined ? String(prop.default) : undefined}
-      error={error}
-      onChange={onEdit}
+      placeholder={prop.description ?? title}
     />
   );
 }
