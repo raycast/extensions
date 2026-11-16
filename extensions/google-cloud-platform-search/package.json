@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gcp-search",
   "title": "Google Cloud Platform Search",
-  "description": "Browse GCP Products and open them in the browser in the Google Cloud Console, or view the documentation.",
+  "description": "Search Google Cloud (GCP) projects and products, open them in the Cloud Console, and browse product documentation.",
   "icon": "command-icon.png",
   "author": "klaa97",
   "contributors": [

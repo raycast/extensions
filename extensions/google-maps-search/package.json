@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-maps-search",
   "title": "Google Maps Search",
-  "description": "Quickly search Google Maps or get directions.",
+  "description": "Search places on Google Maps, get directions home or anywhere by car, transit, walking or bike, and search selected text.",
   "icon": "google-maps-icon.png",
   "author": "ratoru",
   "categories": [

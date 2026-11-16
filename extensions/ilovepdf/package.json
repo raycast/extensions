@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ilovepdf",
   "title": "iLovePDF",
-  "description": "Set of commands to interact with iLovePDF",
+  "description": "Compress, merge, split, rotate, unlock, protect, watermark and convert PDFs to and from images, Word and HTML using the iLovePDF API.",
   "icon": "command-icon.png",
   "author": "mohamedk1",
   "contributors": [
