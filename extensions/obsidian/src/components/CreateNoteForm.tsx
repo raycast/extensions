@@ -41,7 +41,10 @@ export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean
               title={"Create in " + folder}
               onSubmit={(props: CreateNoteParams) => createNewNote(props, folder)}
               key={index}
-              shortcut={{ modifiers: ["shift", "cmd"], key: index.toString() as Keyboard.KeyEquivalent }}
+              shortcut={{
+                modifiers: ["shift", "cmd"],
+                key: index.toString() as Keyboard.KeyEquivalent,
+              }}
             ></Action.SubmitForm>
           ))}
         </ActionPanel>
