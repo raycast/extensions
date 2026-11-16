@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Windows Support] - 2026-11-16
+## [Windows Support] - {PR_MERGE_DATE}
 
 - Added Windows support for searching history, bookmarks, and installed extensions, and opening URLs in Dia.
 - Added experimental Windows tab and space controls: search tabs in each window's active space, focus and close tabs, read page text, and list and switch spaces. Dia must be open with its sidebar visible.
