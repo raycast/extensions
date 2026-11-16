@@ -2,12 +2,8 @@
 // fields it is about. A per-field accuracy table is printed so regressions are visible.
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import {
-  normalizePhone,
-  selectSignatureBlock,
-  type ContactDraft,
-} from "../src/core/parse";
-import { draft, vcard } from "./support";
+import { normalizePhone, selectSignatureBlock, type ContactDraft } from "../src/core/parse";
+import { draft, samePhone, vcard } from "./support";
 
 type Want = Partial<{
   namePrefix: string;
@@ -131,48 +127,48 @@ james@northbank.co.uk`,
     name: "US card with Inc. and middle initial",
     text: `Robert J. Alvarez
 Chief Technology Officer
-Clearpath Robotics Inc.
+Fernhill Robotics Inc.
 1200 Market St, San Francisco, CA 94103
 (415) 555-0199
-ralvarez@clearpathrobotics.com`,
+ralvarez@fernhill-robotics.example`,
     want: {
       givenName: "Robert J.",
       familyName: "Alvarez",
       jobTitle: "Chief Technology Officer",
-      organization: "Clearpath Robotics Inc.",
-      emails: ["ralvarez@clearpathrobotics.com"],
+      organization: "Fernhill Robotics Inc.",
+      emails: ["ralvarez@fernhill-robotics.example"],
     },
   },
   {
     name: "thread: newest signature wins, quoted header ignored",
-    text: `Hallo Julian,
+    text: `Hallo Sabine,
 
 danke für das Gespräch gestern. Anbei wie besprochen die Unterlagen.
 Lass uns nächste Woche telefonieren, Dienstag oder Mittwoch passt mir gut.
 Ich bringe auch die Zahlen aus dem letzten Quartal mit.
 
 Beste Grüße
-Michael Resch
+Stefan Kogler
 General Manager
-BIMEXPERTS GmbH
+Kogler Baumeister GmbH
 M +43 664 222 33 44
-michael.resch@bimexperts.com
+stefan.kogler@baumeister-kogler.example
 
-Von: Christian Daimer <c.daimer@loboscapital.cc>
+Von: Petra Lang <p.lang@lang-invest.example>
 Gesendet: Dienstag, 10. November 2026 12:29
-An: Michael Resch <michael.resch@bimexperts.com>
+An: Stefan Kogler <stefan.kogler@baumeister-kogler.example>
 Betreff: Intro
 
-Hi Michael, darf ich vorstellen …
-Christian Daimer
-Lobos Capital
+Hi Stefan, darf ich vorstellen …
+Petra Lang
+Lang Invest
 +43 699 111 22 33`,
     want: {
-      givenName: "Michael",
-      familyName: "Resch",
+      givenName: "Stefan",
+      familyName: "Kogler",
       jobTitle: "General Manager",
-      organization: "BIMEXPERTS GmbH",
-      emails: ["michael.resch@bimexperts.com"],
+      organization: "Kogler Baumeister GmbH",
+      emails: ["stefan.kogler@baumeister-kogler.example"],
       phones: ["mobile +43 664 222 33 44"],
     },
   },
@@ -304,12 +300,12 @@ koller@koller-law.at`,
     text: `Tobias Hartl
 Sales Director DACH
 Nordlicht Software GmbH
-tobias.hartl@nordlicht.de
-linkedin.com/in/tobiashartl`,
+tobias.hartl@nordlicht.example
+linkedin.com/in/example-tobias-hartl`,
     want: {
       givenName: "Tobias",
       familyName: "Hartl",
-      urls: ["linkedin.com/in/tobiashartl"],
+      urls: ["linkedin.com/in/example-tobias-hartl"],
     },
   },
   {
@@ -335,9 +331,7 @@ function check(field: string, got: unknown, want: unknown, failures: string[]) {
     assert.deepEqual(got, want);
     stats[field].ok++;
   } catch {
-    failures.push(
-      `${field}: got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`,
-    );
+    failures.push(`${field}: got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
   }
 }
 
@@ -362,16 +356,13 @@ for (const c of CASES) {
   test(c.name, () => {
     const d = draft(c.text);
     const failures: string[] = [];
-    for (const [field, want] of Object.entries(c.want))
-      check(field, project(d, field as keyof Want), want, failures);
+    for (const [field, want] of Object.entries(c.want)) check(field, project(d, field as keyof Want), want, failures);
     assert.equal(failures.length, 0, failures.join("\n"));
   });
 }
 
 after(() => {
-  const rows = Object.entries(stats).map(
-    ([f, s]) => `${f.padEnd(13)} ${s.ok}/${s.total}`,
-  );
+  const rows = Object.entries(stats).map(([f, s]) => `${f.padEnd(13)} ${s.ok}/${s.total}`);
   console.log("\nfield accuracy\n" + rows.join("\n"));
 });
 
@@ -427,9 +418,7 @@ test("street-only address keeps name and title", () => {
 });
 
 test("CRLF text keeps phone labels", () => {
-  const d = draft(
-    "Anna Huber\r\nT: +43 1 234 56 78\r\nF: +43 1 234 56 79\r\nanna@huber.at",
-  );
+  const d = draft("Anna Huber\r\nT: +43 1 234 56 78\r\nF: +43 1 234 56 79\r\nanna@huber.at");
   assert.deepEqual(
     d.phones.map((p) => p.label),
     ["work", "fax"],
@@ -438,19 +427,12 @@ test("CRLF text keeps phone labels", () => {
 
 test("long unbroken token parses fast", () => {
   const started = Date.now();
-  draft(
-    "Anna Huber\nanna@huber.at\n" +
-      "a.".repeat(40000) +
-      "\n" +
-      "-".repeat(20000),
-  );
+  draft("Anna Huber\nanna@huber.at\n" + "a.".repeat(40000) + "\n" + "-".repeat(20000));
   assert.ok(Date.now() - started < 1500, `took ${Date.now() - started} ms`);
 });
 
 test("same number written two ways appears once", () => {
-  const d = draft(
-    "Anna Huber\nT 0664 1234567\nM +43 664 1234567\nanna@huber.at",
-  );
+  const d = draft("Anna Huber\nT 0664 1234567\nM +43 664 1234567\nanna@huber.at");
   assert.equal(d.phones.length, 1);
 });
 
@@ -468,18 +450,64 @@ test("company with 'Partner' and a legal form is the company, not the job title"
 });
 
 test("'<role> at <company with Partner>' still splits", () => {
-  const d = draft(
-    "Lukas Brandl\nCEO at Brandl & Partner GmbH\nlukas@brandl-partner.at",
-  );
+  const d = draft("Lukas Brandl\nCEO at Brandl & Partner GmbH\nlukas@brandl-partner.at");
   assert.equal(d.jobTitle, "CEO");
   assert.equal(d.organization, "Brandl & Partner GmbH");
 });
 
 test("unrecognized title line does not swallow the company", () => {
   // A title the keyword list does not know, directly under the name.
-  const d = draft(
-    "Anna Huber\nKuratorin\nHuber & Partner Consulting GmbH\nanna@huber-partner.at",
-  );
+  const d = draft("Anna Huber\nKuratorin\nHuber & Partner Consulting GmbH\nanna@huber-partner.at");
   assert.equal(d.jobTitle, "Kuratorin");
   assert.equal(d.organization, "Huber & Partner Consulting GmbH");
+});
+
+// ---- second review round ----
+
+test("'On … wrote:' cuts the quoted older sender, even in short text", () => {
+  const d = draft(
+    "Thanks, see you Tuesday.\n\nLena Gruber\nlena.gruber@gruber-design.at\n+43 676 111 22 33\n\nOn Tue, 10 Nov 2026 at 12:29, Peter Wallner <peter@wallnerbau.at> wrote:\n> Hi Lena,\n> Peter Wallner\n> Bauleiter\n> +43 732 77 88 99",
+  );
+  assert.equal(d.givenName, "Lena");
+  assert.deepEqual(
+    d.emails.map((e) => e.value),
+    ["lena.gruber@gruber-design.at"],
+  );
+  assert.equal(d.phones.length, 1);
+});
+
+test("'Am … schrieb:' cuts the quoted reply", () => {
+  const d = draft(
+    "Passt, danke!\n\nMarkus Eder\nmarkus@eder.at\n\nAm 10.11.2026 um 12:29 schrieb Anna Huber <anna@huber.at>:\n\nHallo Markus,\nAnna Huber\n+43 664 123 45 67",
+  );
+  assert.equal(d.familyName, "Eder");
+  assert.deepEqual(
+    d.emails.map((e) => e.value),
+    ["markus@eder.at"],
+  );
+  assert.equal(d.phones.length, 0);
+});
+
+test("countries without a trunk zero get their code", () => {
+  assert.equal(normalizePhone("415 555 0199", "1"), "+1 415 555 0199");
+  assert.equal(normalizePhone("(415) 555-0199", "1"), "+1 415 555-0199");
+  assert.equal(normalizePhone("1 415 555 0199", "1"), "+1 415 555 0199");
+  assert.equal(normalizePhone("612 345 678", "34"), "+34 612 345 678");
+  assert.equal(normalizePhone("612 34", "34"), "612 34");
+  assert.equal(normalizePhone("+44 20 7946 0123", "1"), "+44 20 7946 0123");
+});
+
+test("phone matching for merges", () => {
+  assert.equal(samePhone("+43 664 1234567", "0664 1234567"), true);
+  assert.equal(samePhone("+1 202 555 0123", "+44 1202 5550123"), false);
+  assert.equal(samePhone("+39 06 1234 5678", "06 1234 5678"), true);
+  assert.equal(samePhone("0664 1234567", "0664 7654321"), false);
+});
+
+test("quote intro wrapped onto two lines is cut too", () => {
+  const d = draft(
+    "Sounds good.\n\nLena Gruber\nlena.gruber@gruber-design.example\n\nOn Tue, 10 Nov 2026 at 12:29, Peter Wallner <peter@wallnerbau.example>\nwrote:\n\nHi Lena,\nPeter Wallner\n+43 732 77 88 99",
+  );
+  assert.equal(d.givenName, "Lena");
+  assert.equal(d.phones.length, 0);
 });

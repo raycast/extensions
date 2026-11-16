@@ -1,76 +1,41 @@
-// Accounts and duplicate matches from Apple Contacts, loaded in the background.
-import { LocalStorage } from "@raycast/api";
-import { useRef, useState } from "react";
-import { contactsInfo, type Account, type ExistingContact } from "../native";
-import {
-  CACHE_ACCOUNTS,
-  LAST_ACCOUNT,
-  readCache,
-  showContactsAccessToast,
-} from "./contact";
-import { log, logPrivate } from "./log";
+// Accounts and duplicate matches from Apple Contacts, loaded in the background and cached
+// between launches. The account to save to is the user's choice, else the last one used,
+// else the Contacts default.
+import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
+import { contactsInfo, type Account } from "../native";
+import { LAST_ACCOUNT, showContactsAccessToast } from "./contact";
+import { logPrivate } from "./log";
 
-export function useContactsInfo(initialAccountId = "") {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [existing, setExisting] = useState<ExistingContact[]>([]);
-  const [accountId, setAccountId] = useState(initialAccountId);
-  const [checking, setChecking] = useState(false);
-  // Each check gets a number; a slower, older check can never overwrite a newer one.
-  const request = useRef(0);
-  const warnedAccess = useRef(false);
+export function useContactsInfo(emails: string[], phones: string[], initialAccountId?: string) {
+  const { value: lastAccount } = useLocalStorage<string>(LAST_ACCOUNT);
+  const [chosen, setChosen] = useState<string | undefined>(initialAccountId || undefined);
+  const warned = useRef(false);
 
-  // Picks the account to save to: the current choice, else the last one used, else the default.
-  async function resolveAccount(list: Account[]) {
-    const last = await LocalStorage.getItem<string>(LAST_ACCOUNT);
-    setAccountId(
-      (current) =>
-        (list.some((a) => a.id === current) && current) ||
-        list.find((a) => a.id === last)?.id ||
-        list.find((a) => a.isDefault)?.id ||
-        list[0]?.id ||
-        "",
-    );
-  }
+  const { data, isLoading } = useCachedPromise(contactsInfo, [emails, phones], {
+    keepPreviousData: true,
+    failureToastOptions: { title: "Could not read your Contacts" },
+    onData: (info) => logPrivate("contacts", "accounts and matches", info),
+  });
 
-  async function loadCached() {
-    const cached = await readCache<Account[]>(CACHE_ACCOUNTS);
-    if (cached?.length) {
-      setAccounts(cached);
-      await resolveAccount(cached);
+  const authorized = data?.contactsAccess === "authorized";
+  useEffect(() => {
+    if (data && !authorized && !warned.current) {
+      warned.current = true;
+      void showContactsAccessToast();
     }
-  }
+  }, [data, authorized]);
 
-  async function check(emails: string[], phones: string[]) {
-    const id = ++request.current;
-    setChecking(true);
-    setExisting([]);
-    try {
-      const info = await contactsInfo(emails, phones);
-      if (id !== request.current) return;
-      if (info.contactsAccess !== "authorized") {
-        if (!warnedAccess.current) await showContactsAccessToast();
-        warnedAccess.current = true;
-        return;
-      }
-      setAccounts(info.accounts);
-      setExisting(info.existing);
-      logPrivate("contacts", "accounts and matches", info);
-      await LocalStorage.setItem(CACHE_ACCOUNTS, JSON.stringify(info.accounts));
-      await resolveAccount(info.accounts);
-    } catch (err) {
-      log("contacts", "check failed", err);
-    } finally {
-      if (id === request.current) setChecking(false);
-    }
-  }
+  const accounts: Account[] = authorized ? data.accounts : [];
+  const pick = (id?: string) => (id && accounts.some((a) => a.id === id) ? id : undefined);
+  const accountId = pick(chosen) ?? pick(lastAccount) ?? accounts.find((a) => a.isDefault)?.id ?? accounts[0]?.id ?? "";
 
   return {
     accounts,
-    existing,
+    // Matches for the previous email/phone (or from the cache) must not be offered while checking.
+    existing: authorized && !isLoading ? data.existing : [],
     accountId,
-    setAccountId,
-    checking,
-    check,
-    loadCached,
+    setAccountId: setChosen,
+    checking: isLoading,
   };
 }

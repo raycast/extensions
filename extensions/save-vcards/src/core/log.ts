@@ -6,12 +6,7 @@ import { appendFileSync, mkdirSync, renameSync, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-export const LOG_FILE = path.join(
-  os.homedir(),
-  "Library",
-  "Logs",
-  "SaveVCards.log",
-);
+export const LOG_FILE = path.join(os.homedir(), "Library", "Logs", "SaveVCards.log");
 const MAX_BYTES = 1_000_000;
 
 function debugEnabled(): boolean {
@@ -27,8 +22,7 @@ function write(line: string) {
   try {
     mkdirSync(path.dirname(LOG_FILE), { recursive: true });
     try {
-      if (statSync(LOG_FILE).size > MAX_BYTES)
-        renameSync(LOG_FILE, LOG_FILE + ".1");
+      if (statSync(LOG_FILE).size > MAX_BYTES) renameSync(LOG_FILE, LOG_FILE + ".1");
     } catch {
       // no log yet
     }
@@ -50,9 +44,7 @@ function stringify(data: unknown): string {
 
 /** Step, timing or error. `data` must not contain contact details. */
 export function log(scope: string, message: string, data?: unknown) {
-  write(
-    `${new Date().toISOString()} [${scope}] ${message}${data === undefined ? "" : " " + stringify(data)}`,
-  );
+  write(`${new Date().toISOString()} [${scope}] ${message}${data === undefined ? "" : " " + stringify(data)}`);
 }
 
 /** Contact details (names, emails, account names). Written only with Debug Logging on. */
@@ -61,11 +53,7 @@ export function logPrivate(scope: string, message: string, data: unknown) {
 }
 
 /** Wraps an async call and logs how long it took. */
-export async function timed<T>(
-  scope: string,
-  name: string,
-  fn: () => Promise<T>,
-): Promise<T> {
+export async function timed<T>(scope: string, name: string, fn: () => Promise<T>): Promise<T> {
   const started = Date.now();
   try {
     const result = await fn();

@@ -395,15 +395,26 @@ private func urlKey(_ s: String) -> String {
     return k
 }
 
-/// Same number if the digits match after dropping country/trunk prefixes: the shorter one
-/// (at least 7 digits) must be the tail of the longer one, and they may differ by at most
-/// 4 leading digits (country code plus trunk 0), so "+43 664 123 4567" == "0664 123 4567"
-/// but two different numbers that merely end alike do not collide.
-private func samePhone(_ a: String, _ b: String) -> Bool {
-    let x = digits(a)
-    let y = digits(b)
-    let (short, long) = x.count <= y.count ? (x, y) : (y, x)
-    return short.count >= 7 && long.hasSuffix(short) && long.count - short.count <= 4
+/// Whether two written phone numbers are the same line.
+/// International forms ("+43 …", "0043 …") compare all their digits; national forms
+/// ("0664 …") drop the trunk 0. A national number matches an international one when it is the
+/// international number minus a 1 to 3 digit country code (and Italy's kept 0), so
+/// "+43 664 1234567" == "0664 1234567", while "+1 202 555 0123" != "+44 1202 5550123".
+func samePhone(_ a: String, _ b: String) -> Bool {
+    func parts(_ s: String) -> (international: Bool, digits: String) {
+        let t = s.trimmingCharacters(in: .whitespaces)
+        let d = digits(t)
+        if t.hasPrefix("+") { return (true, d) }
+        if d.hasPrefix("00") { return (true, String(d.dropFirst(2))) }
+        return (false, d.hasPrefix("0") ? String(d.dropFirst()) : d)
+    }
+    let x = parts(a)
+    let y = parts(b)
+    if x.digits.count < 6 || y.digits.count < 6 { return false }
+    if x.international == y.international { return x.digits == y.digits }
+    let (intl, national) = x.international ? (x.digits, y.digits) : (y.digits, x.digits)
+    let prefix = intl.count - national.count
+    return intl.hasSuffix(national) && (1...3).contains(prefix)
 }
 
 /// Adds what the draft has and the existing card lacks. Never overwrites or deletes.

@@ -1,14 +1,7 @@
-// Full editor for a contact. Opened from the results view, after a failed save,
-// or directly when there is nothing to read yet.
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Keyboard,
-  Toast,
-  showToast,
-} from "@raycast/api";
+// Full editor for a contact. Opened from the results view, or directly when there is
+// nothing to read yet.
+import { Action, ActionPanel, Form, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import {
   PHONE_LABELS,
@@ -27,9 +20,11 @@ import { useContactsInfo } from "../core/useContactsInfo";
 type Props = {
   initial: FormState;
   text: string;
-  /** Shown once on open: why the previous save failed, or why reading failed. */
+  /** Shown once on open, e.g. why reading the clipboard failed. */
   error?: { title: string; message: string };
 };
+
+type Lookup = { emails: string[]; phones: string[] };
 
 export function ContactForm(props: Props) {
   const [text, setText] = useState(props.text);
@@ -39,8 +34,21 @@ export function ContactForm(props: Props) {
   const [note, setNote] = useState(props.initial.note);
   const [photo, setPhoto] = useState<string[]>([]);
   const [reading, setReading] = useState(false);
-  const contacts = useContactsInfo(props.initial.accountId);
-  const started = useRef(false);
+  // Duplicate lookup runs for the details as last read or edited, not on every keystroke.
+  const [lookup, setLookup] = useState<Lookup>(() => {
+    const n = toNative(props.initial);
+    return {
+      emails: n.emails.map((e) => e.value),
+      phones: n.phones.map((p) => p.value),
+    };
+  });
+  const contacts = useContactsInfo(lookup.emails, lookup.phones, props.initial.accountId);
+  // Each read gets a number; a slower, older read can never overwrite a newer one.
+  const readRequest = useRef(0);
+
+  useEffect(() => {
+    if (props.error) void showToast({ style: Toast.Style.Failure, ...props.error });
+  }, []);
 
   const state = (): FormState => ({
     draft,
@@ -52,52 +60,45 @@ export function ContactForm(props: Props) {
 
   const recheckExisting = () => {
     const n = toNative(state());
-    void contacts.check(
-      n.emails.map((e) => e.value),
-      n.phones.map((p) => p.value),
-    );
+    setLookup({
+      emails: n.emails.map((e) => e.value),
+      phones: n.phones.map((p) => p.value),
+    });
   };
 
-  useEffect(() => {
-    // React runs effects twice in development; the Contacts check must run once.
-    if (started.current) return;
-    started.current = true;
-    if (props.error)
-      void showToast({ style: Toast.Style.Failure, ...props.error });
-    void contacts.loadCached();
-    recheckExisting();
-  }, []);
+  function apply(d: ContactDraft) {
+    const next = stateFromDraft(d);
+    setDraft(d);
+    setEmails(next.emails);
+    setUrls(next.urls);
+    setLookup({
+      emails: d.emails.map((e) => e.value),
+      phones: d.phones.map((p) => p.value),
+    });
+  }
 
   async function read(input: string) {
+    const id = ++readRequest.current;
     setReading(true);
     try {
       const d = await readContact(input);
-      const next = stateFromDraft(d);
-      setDraft(d);
-      setEmails(next.emails);
-      setUrls(next.urls);
-      void contacts.check(
-        d.emails.map((e) => e.value),
-        d.phones.map((p) => p.value),
-      );
+      if (id === readRequest.current) apply(d);
     } catch (err) {
       log("form", "could not read text", err);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not read the text",
-        message: String(err),
-      });
+      if (id === readRequest.current) await showFailureToast(err, { title: "Could not read the text" });
     } finally {
-      setReading(false);
+      if (id === readRequest.current) setReading(false);
     }
   }
 
   async function readPhoto(files: string[]) {
     setPhoto(files);
     if (!files[0]) return;
+    const id = ++readRequest.current;
     setReading(true);
     try {
       const recognized = await readImage(files[0]);
+      if (id !== readRequest.current) return;
       if (!recognized.trim()) {
         await showToast({
           style: Toast.Style.Failure,
@@ -106,16 +107,13 @@ export function ContactForm(props: Props) {
         return;
       }
       setText(recognized);
-      await read(recognized);
+      const d = await readContact(recognized);
+      if (id === readRequest.current) apply(d);
     } catch (err) {
       log("form", "could not read photo", err);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not read the photo",
-        message: String(err),
-      });
+      if (id === readRequest.current) await showFailureToast(err, { title: "Could not read the photo" });
     } finally {
-      setReading(false);
+      if (id === readRequest.current) setReading(false);
     }
   }
 
@@ -123,19 +121,18 @@ export function ContactForm(props: Props) {
     <K extends keyof ContactDraft>(key: K) =>
     (value: ContactDraft[K]) =>
       setDraft((d) => ({ ...d, [key]: value }));
-  const setAddr =
-    (key: "street" | "postalCode" | "city" | "country") => (value: string) =>
-      setDraft((d) => ({
-        ...d,
-        address: {
-          street: "",
-          postalCode: "",
-          city: "",
-          country: "",
-          ...d.address,
-          [key]: value,
-        },
-      }));
+  const setAddr = (key: "street" | "postalCode" | "city" | "country") => (value: string) =>
+    setDraft((d) => ({
+      ...d,
+      address: {
+        street: "",
+        postalCode: "",
+        city: "",
+        country: "",
+        ...d.address,
+        [key]: value,
+      },
+    }));
   const setPhone = (i: number, patch: Partial<Labeled>) =>
     setDraft((d) => ({
       ...d,
@@ -160,30 +157,22 @@ export function ContactForm(props: Props) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm
-              title="Save to Contacts"
-              icon={Icon.AddPerson}
-              onSubmit={() => saveState(state(), {}, text)}
-            />
-            <Action.SubmitForm
-              title="Save and Open in Contacts"
-              icon={Icon.AppWindow}
-              shortcut={Keyboard.Shortcut.Common.Open}
-              onSubmit={() => saveState(state(), { openAfter: true }, text)}
-            />
-            {contacts.existing.map((e, i) => (
+            <Action.SubmitForm title="Save to Contacts" icon={Icon.AddPerson} onSubmit={() => saveState(state(), {})} />
+            {/* Second in a form, so Raycast gives the first match ⌘⇧↵. */}
+            {contacts.existing.map((e) => (
               <Action.SubmitForm
                 key={e.id}
                 title={`Add to Existing Contact: ${e.name}`}
                 icon={Icon.PersonCircle}
-                shortcut={
-                  i === 0
-                    ? { modifiers: ["cmd", "shift"], key: "return" }
-                    : undefined
-                }
-                onSubmit={() => saveState(state(), { updateId: e.id }, text)}
+                onSubmit={() => saveState(state(), { updateId: e.id })}
               />
             ))}
+            <Action.SubmitForm
+              title="Save and Open in Contacts"
+              icon={Icon.AppWindow}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onSubmit={() => saveState(state(), { openAfter: true })}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
@@ -290,17 +279,9 @@ export function ContactForm(props: Props) {
         onBlur={recheckExisting}
       />
       {draft.phones.map((p, i) => (
-        <PhoneRow
-          key={i}
-          index={i}
-          phone={p}
-          onChange={(patch) => setPhone(i, patch)}
-          onBlur={recheckExisting}
-        />
+        <PhoneRow key={i} index={i} phone={p} onChange={(patch) => setPhone(i, patch)} onBlur={recheckExisting} />
       ))}
-      {draft.phones.length === 0 && (
-        <Form.Description title="Phone" text="None found. ⌘N adds one." />
-      )}
+      {draft.phones.length === 0 && <Form.Description title="Phone" text="None found. ⌘N adds one." />}
       <Form.TextField
         id="urls"
         title="Website"
@@ -324,13 +305,7 @@ export function ContactForm(props: Props) {
         value={a.postalCode}
         onChange={setAddr("postalCode")}
       />
-      <Form.TextField
-        id="city"
-        title="City"
-        placeholder="Vienna"
-        value={a.city}
-        onChange={setAddr("city")}
-      />
+      <Form.TextField id="city" title="City" placeholder="Vienna" value={a.city} onChange={setAddr("city")} />
       <Form.TextField
         id="country"
         title="Country"
@@ -340,12 +315,7 @@ export function ContactForm(props: Props) {
       />
       <Form.Separator />
       {contacts.accounts.length > 1 && (
-        <Form.Dropdown
-          id="account"
-          title="Save To"
-          value={contacts.accountId}
-          onChange={contacts.setAccountId}
-        >
+        <Form.Dropdown id="account" title="Save To" value={contacts.accountId} onChange={contacts.setAccountId}>
           {contacts.accounts.map((acc) => (
             <Form.Dropdown.Item
               key={acc.id}
@@ -355,13 +325,7 @@ export function ContactForm(props: Props) {
           ))}
         </Form.Dropdown>
       )}
-      <Form.TextField
-        id="note"
-        title="Note"
-        placeholder="Where you met, context"
-        value={note}
-        onChange={setNote}
-      />
+      <Form.TextField id="note" title="Note" placeholder="Where you met, context" value={note} onChange={setNote} />
       <Form.Separator />
       <Form.FilePicker
         id="photo"
@@ -401,12 +365,7 @@ function PhoneRow(props: {
         onChange={(value) => onChange({ value })}
         onBlur={onBlur}
       />
-      <Form.Dropdown
-        id={`phone-label-${index}`}
-        title=""
-        value={phone.label}
-        onChange={(label) => onChange({ label })}
-      >
+      <Form.Dropdown id={`phone-label-${index}`} title="" value={phone.label} onChange={(label) => onChange({ label })}>
         {PHONE_LABELS.map((l) => (
           <Form.Dropdown.Item key={l.value} value={l.value} title={l.title} />
         ))}

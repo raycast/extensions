@@ -12,16 +12,16 @@ Everything runs on your Mac. Text recognition and field detection use Apple's bu
 
 Every command shows what it captured next to the contact it found. Press ↵ to save it, or ⌘E to edit it first.
 
-| Shortcut | In the results                                                                                     | In the edit form             |
-| -------- | -------------------------------------------------------------------------------------------------- | ---------------------------- |
-| ↵ / ⌘↵   | Save to Contacts (↵)                                                                               | Save to Contacts (⌘↵)        |
-| ⌘E       | Edit before saving                                                                                 |                              |
-| ⌘O       | Save and open it in Contacts                                                                       | Save and open it in Contacts |
-| ⌘⇧↵      | Add the new details to the existing contact (shown when the email or phone is already in Contacts) | Same                         |
-| ⌘S       | Export the contact as a vCard (.vcf) file to Downloads                                             | Same                         |
-| ⌘⇧C      | Copy the contact as vCard text                                                                     | Same                         |
-| ⌘N       |                                                                                                    | Add a phone number           |
-| ⌘R       |                                                                                                    | Read the captured text again |
+| Shortcut | In the results                                                                                                 | In the edit form                     |
+| -------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| ↵ / ⌘↵   | Save to Contacts (↵)                                                                                           | Save to Contacts (⌘↵)                |
+| ⌘E       | Edit before saving                                                                                             |                                      |
+| ⌘O       | Save and open it in Contacts                                                                                   | Save and open it in Contacts         |
+| ⌘⇧↵      | Add the new details to the existing contact and open it (shown when the email or phone is already in Contacts) | Same; without a match, Save and Open |
+| ⌘S       | Export the contact as a vCard (.vcf) file to Downloads                                                         | Same                                 |
+| ⌘⇧C      | Copy the contact as vCard text                                                                                 | Same                                 |
+| ⌘N       |                                                                                                                | Add a phone number                   |
+| ⌘R       |                                                                                                                | Read the captured text again         |
 
 The edit form also has a **Card Photo** field: pick a photo or scan of a business card and its text fills the fields.
 

@@ -3,6 +3,7 @@
 //   test-helper detect < text   -> Detection JSON
 //   test-helper ocr <image>     -> {"text": …}
 //   test-helper vcard < draft   -> {"vcard": …}
+//   test-helper samephone A B   -> {"same": true|false}
 
 import Foundation
 
@@ -16,6 +17,8 @@ case "detect":
     out(detectCore(text: String(decoding: input.readDataToEndOfFile(), as: UTF8.self)))
 case "ocr":
     out(["text": try recognizeTextCore(imagePath: CommandLine.arguments[2])])
+case "samephone":
+    out(["same": samePhone(CommandLine.arguments[2], CommandLine.arguments[3])])
 case "vcard":
     let draft = try JSONDecoder().decode(ContactDraft.self, from: input.readDataToEndOfFile())
     out(["vcard": try vcardCore(draft)])

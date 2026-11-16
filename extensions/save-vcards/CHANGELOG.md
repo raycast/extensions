@@ -6,4 +6,4 @@
 - Results view: what was captured next to what was found, ↵ to save
 - On-device recognition with Apple Vision, Data Detectors and Natural Language
 - Add new details to an existing contact, save as .vcf, copy as vCard
-- Phone numbers saved in international format, signature detection in long email threads
+- Optional country code for phone numbers written without one, signature detection in long email threads

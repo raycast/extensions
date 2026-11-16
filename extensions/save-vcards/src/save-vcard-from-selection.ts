@@ -1,9 +1,4 @@
-import {
-  LaunchType,
-  getSelectedText,
-  launchCommand,
-  showHUD,
-} from "@raycast/api";
+import { LaunchType, getSelectedText, launchCommand, showHUD } from "@raycast/api";
 import { log } from "./core/log";
 
 // Highlighted text opens the results. With nothing highlighted, the results screen reads the
@@ -20,9 +15,7 @@ export default async function Command() {
     await launchCommand({
       name: "save-vcard",
       type: LaunchType.UserInitiated,
-      context: text.trim()
-        ? { text, source: "selection" }
-        : { source: "clipboard" },
+      context: text.trim() ? { text, source: "selection" } : { source: "clipboard" },
     });
   } catch (err) {
     log("selection", "could not open the results", err);

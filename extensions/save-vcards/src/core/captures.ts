@@ -2,13 +2,7 @@
 // They live in the extension's private support folder and are deleted after a day;
 // only the five newest are kept.
 import { environment } from "@raycast/api";
-import {
-  copyFileSync,
-  mkdirSync,
-  readdirSync,
-  rmSync,
-  statSync,
-} from "node:fs";
+import { copyFileSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -36,10 +30,7 @@ export function newCapturePath(): string {
 export function keepCopy(source: string): string {
   mkdirSync(DIR, { recursive: true });
   pruneCaptures();
-  const target = path.join(
-    DIR,
-    `capture-${Date.now()}${path.extname(source).toLowerCase() || ".png"}`,
-  );
+  const target = path.join(DIR, `capture-${Date.now()}${path.extname(source).toLowerCase() || ".png"}`);
   copyFileSync(source, target);
   return target;
 }
@@ -52,8 +43,7 @@ export function pruneCaptures() {
       .map((file) => ({ file, time: statSync(file).mtimeMs }))
       .sort((a, b) => b.time - a.time);
     files.forEach(({ file, time }, i) => {
-      if (i >= KEEP || Date.now() - time > MAX_AGE_MS)
-        rmSync(file, { force: true });
+      if (i >= KEEP || Date.now() - time > MAX_AGE_MS) rmSync(file, { force: true });
     });
   } catch {
     // nothing to clean

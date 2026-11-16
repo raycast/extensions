@@ -6,8 +6,7 @@ import { buildDraft, selectSignatureBlock, type ContactDraft } from "./parse";
 
 export async function readContact(input: string): Promise<ContactDraft> {
   const block = selectSignatureBlock(input);
-  if (block.length !== input.length)
-    log("read", `signature block: ${block.length} of ${input.length} chars`);
+  if (block.length !== input.length) log("read", `signature block: ${block.length} of ${input.length} chars`);
   const draft = buildDraft(block, await detect(block), {
     defaultCallingCode: getPreferenceValues<Preferences>().defaultCountry,
   });

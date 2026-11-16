@@ -7,16 +7,9 @@ import { draft as draftSync, ocr } from "./support";
 
 const draft = async (text: string) => draftSync(text);
 
-function expectFields(
-  d: ContactDraft,
-  want: Partial<Record<keyof ContactDraft, unknown>>,
-) {
+function expectFields(d: ContactDraft, want: Partial<Record<keyof ContactDraft, unknown>>) {
   for (const [k, v] of Object.entries(want)) {
-    assert.deepEqual(
-      d[k as keyof ContactDraft],
-      v,
-      `${k}: got ${JSON.stringify(d[k as keyof ContactDraft])}`,
-    );
+    assert.deepEqual(d[k as keyof ContactDraft], v, `${k}: got ${JSON.stringify(d[k as keyof ContactDraft])}`);
   }
 }
 
@@ -41,9 +34,7 @@ www.huber-partner.at`,
     jobTitle: "Geschäftsführerin",
     organization: "Huber & Partner Consulting GmbH",
   });
-  assert.deepEqual(d.emails, [
-    { value: "anna.huber@huber-partner.at", label: "work" },
-  ]);
+  assert.deepEqual(d.emails, [{ value: "anna.huber@huber-partner.at", label: "work" }]);
   assert.deepEqual(
     d.phones.map((p) => p.label),
     ["work", "mobile"],
@@ -134,9 +125,7 @@ test("freemail: no company guessed from gmail", async () => {
 });
 
 test("middle initial survives, labels on their own lines are dropped", async () => {
-  const d = await draft(
-    "Anna M. Huber\nTel.\n+43 1 555 1234\nE-Mail:\nanna@huber.at",
-  );
+  const d = await draft("Anna M. Huber\nTel.\n+43 1 555 1234\nE-Mail:\nanna@huber.at");
   expectFields(d, { givenName: "Anna M.", familyName: "Huber" });
 });
 

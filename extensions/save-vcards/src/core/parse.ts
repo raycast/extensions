@@ -60,20 +60,7 @@ const PREFIX_TITLES = [
   "ing.",
   "bakk.",
 ];
-const SUFFIX_TITLES = [
-  "mba",
-  "msc",
-  "bsc",
-  "ba",
-  "ma",
-  "phd",
-  "ll.m.",
-  "llm",
-  "mas",
-  "mes",
-  "cpa",
-  "cfa",
-];
+const SUFFIX_TITLES = ["mba", "msc", "bsc", "ba", "ma", "phd", "ll.m.", "llm", "mas", "mes", "cpa", "cfa"];
 
 const ROLE_WORDS = [
   "ceo",
@@ -210,11 +197,9 @@ const GENERIC_LOCAL = new Set([
 
 // ---------- helpers ----------
 
-const fold = (s: string) =>
-  s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ß/g, "ss").toLowerCase();
+const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ß/g, "ss").toLowerCase();
 
-const titleCase = (s: string) =>
-  s.replace(/(^|[\s-])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+const titleCase = (s: string) => s.replace(/(^|[\s-])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
 
 // LinkedIn and email-signature noise that sits on the same line as a name.
 function cleanLine(line: string): string {
@@ -230,9 +215,7 @@ function cleanLine(line: string): string {
 
 function hasRoleWord(line: string): boolean {
   const l = fold(line);
-  return ROLE_WORDS.some((w) =>
-    new RegExp(`(^|[^\\p{L}])${fold(w)}([^\\p{L}]|$)`, "u").test(l),
-  );
+  return ROLE_WORDS.some((w) => new RegExp(`(^|[^\\p{L}])${fold(w)}([^\\p{L}]|$)`, "u").test(l));
 }
 
 function looksLikeName(line: string): boolean {
@@ -242,21 +225,8 @@ function looksLikeName(line: string): boolean {
   if (LEGAL_FORM.test(core) || hasRoleWord(core)) return false;
   const words = core.replace(",", " ").split(/\s+/).filter(Boolean);
   if (words.length < 2 || words.length > 4) return false;
-  const particles = new Set([
-    "von",
-    "van",
-    "der",
-    "de",
-    "zu",
-    "di",
-    "da",
-    "del",
-    "la",
-    "le",
-  ]);
-  return words.every(
-    (w) => particles.has(w.toLowerCase()) || /^\p{Lu}[\p{L}'’.-]*$/u.test(w),
-  );
+  const particles = new Set(["von", "van", "der", "de", "zu", "di", "da", "del", "la", "le"]);
+  return words.every((w) => particles.has(w.toLowerCase()) || /^\p{Lu}[\p{L}'’.-]*$/u.test(w));
 }
 
 // "Mag. Dr. Anna Maria Huber, MBA" -> prefix "Mag. Dr.", core "Anna Maria Huber", suffix "MBA"
@@ -272,9 +242,7 @@ function splitTitles(line: string): {
   for (let changed = true; changed;) {
     changed = false;
     for (const t of PREFIX_TITLES) {
-      const m = rest.match(
-        new RegExp(`^${t.replace(/[.-]/g, (c) => "\\" + c)}(\\s+|$)`, "i"),
-      );
+      const m = rest.match(new RegExp(`^${t.replace(/[.-]/g, (c) => "\\" + c)}(\\s+|$)`, "i"));
       if (m) {
         prefixes.push(rest.slice(0, t.length));
         rest = rest.slice(m[0].length);
@@ -309,18 +277,7 @@ function splitName(core: string): { given: string; family: string } {
   const words = core.split(/\s+/);
   if (words.length === 1) return { given: words[0], family: "" };
   // Family name keeps its particles: "Ursula von der Leyen" -> given "Ursula", family "von der Leyen"
-  const particles = new Set([
-    "von",
-    "van",
-    "der",
-    "de",
-    "zu",
-    "di",
-    "da",
-    "del",
-    "la",
-    "le",
-  ]);
+  const particles = new Set(["von", "van", "der", "de", "zu", "di", "da", "del", "la", "le"]);
   let i = words.length - 1;
   while (i > 1 && particles.has(words[i - 1].toLowerCase())) i--;
   return {
@@ -334,14 +291,8 @@ function splitName(core: string): { given: string; family: string } {
 function phoneLabel(beforeOnLine: string, number: string): string {
   const before = fold(beforeOnLine).replace(/^.*\d/, "");
   if (/\b(fax|f)\b\.?/.test(before)) return "fax";
-  if (/\b(m|mob|mobil|mobile|handy|cell|cel)\b\.?/.test(before))
-    return "mobile";
-  if (
-    /\b(t|tel|telefon|phone|fon|office|festnetz|direct|direkt|dw)\b\.?/.test(
-      before,
-    )
-  )
-    return "work";
+  if (/\b(m|mob|mobil|mobile|handy|cell|cel)\b\.?/.test(before)) return "mobile";
+  if (/\b(t|tel|telefon|phone|fon|office|festnetz|direct|direkt|dw)\b\.?/.test(before)) return "work";
   const digits = number.replace(/[^\d+]/g, "").replace(/^00/, "+");
   if (/^(\+436|06)\d/.test(digits)) return "mobile"; // Austria
   if (/^(\+491[5-7]|01[5-7])\d/.test(digits)) return "mobile"; // Germany
@@ -351,22 +302,16 @@ function phoneLabel(beforeOnLine: string, number: string): string {
 
 function fallbackAddress(lines: string[]): Address | null {
   for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(
-      /(?:^|,\s*|\s)(?:(A|D|CH)-)?(\d{4,5})\s+(\p{Lu}[\p{L} .-]+?)(?:,\s*(.+))?$/u,
-    );
+    const m = lines[i].match(/(?:^|,\s*|\s)(?:(A|D|CH)-)?(\d{4,5})\s+(\p{Lu}[\p{L} .-]+?)(?:,\s*(.+))?$/u);
     if (!m) continue;
     const before = lines[i].slice(0, m.index).replace(/,\s*$/, "").trim();
     // "4020 Linz, Hauptplatz 5": what follows the city is the street when it has a number.
     const after = m[4]?.trim() ?? "";
     const afterIsStreet = /\d/.test(after);
     const street =
-      before ||
-      (afterIsStreet ? after : "") ||
-      (i > 0 && /\d/.test(lines[i - 1]) ? lines[i - 1].trim() : "");
+      before || (afterIsStreet ? after : "") || (i > 0 && /\d/.test(lines[i - 1]) ? lines[i - 1].trim() : "");
     const country =
-      (afterIsStreet ? "" : after) ||
-      { A: "Österreich", D: "Deutschland", CH: "Schweiz" }[m[1] ?? ""] ||
-      "";
+      (afterIsStreet ? "" : after) || { A: "Österreich", D: "Deutschland", CH: "Schweiz" }[m[1] ?? ""] || "";
     return { street, postalCode: m[2], city: m[3].trim(), country };
   }
   return null;
@@ -379,6 +324,8 @@ function fallbackAddress(lines: string[]): Address | null {
  * "+43 (0) 1 234" -> "+43 1 234". Numbers that already carry a country code keep it.
  * Stored internationally so the iPhone matches incoming calls from any country.
  */
+const NO_TRUNK_DIGITS: Record<string, number> = { "1": 10, "34": 9 };
+
 export function normalizePhone(raw: string, callingCode: string): string {
   let n = raw
     .trim()
@@ -389,7 +336,21 @@ export function normalizePhone(raw: string, callingCode: string): string {
   n = n.replace(/[/.]/g, " ").replace(/\s+/g, " ").trim();
   if (n.startsWith("00")) return "+" + n.slice(2).replace(/^\s+/, "");
   if (n.startsWith("+")) return n;
-  if (callingCode && /^0[1-9]/.test(n)) {
+  if (!callingCode) return n;
+  // Countries without a trunk 0 write national numbers with a fixed number of digits:
+  // US/Canada "415 555 0199" (10, or 11 with a leading 1), Spain "612 345 678" (9).
+  const national = NO_TRUNK_DIGITS[callingCode];
+  if (national) {
+    const d = n.replace(/\D/g, "");
+    if (d.length === national) return `+${callingCode} ${n.replace(/[()]/g, "").trim()}`.replace(/\s+/g, " ");
+    if (callingCode === "1" && d.length === 11 && d.startsWith("1"))
+      return `+1 ${n
+        .replace(/[()]/g, "")
+        .replace(/^1[\s-]*/, "")
+        .trim()}`.replace(/\s+/g, " ");
+    return n;
+  }
+  if (/^0[1-9]/.test(n)) {
     // Italy, San Marino and Vatican City keep the leading 0 after the country code.
     const keepZero = ["39", "378", "379"].includes(callingCode);
     return `+${callingCode} ${keepZero ? n : n.slice(1)}`.replace(/\s+/g, " ");
@@ -399,8 +360,9 @@ export function normalizePhone(raw: string, callingCode: string): string {
 
 // ---------- signature block ----------
 
-const HEADER_LINE =
-  /^\s*(von|from|an|to|cc|bcc|gesendet|sent|betreff|subject|datum|date|antworten an|reply-to)\s*:/i;
+// "On Tue, 10 Nov 2026 at 12:29, Anna <a@b.at> wrote:" / "Am 10.11.2026 um 12:29 schrieb Anna:"
+const QUOTE_INTRO = /^\s*(on\b.{4,200}\bwrote|am\b.{4,200}\bschrieb\b.{0,120}):\s*$/i;
+const HEADER_LINE = /^\s*(von|from|an|to|cc|bcc|gesendet|sent|betreff|subject|datum|date|antworten an|reply-to)\s*:/i;
 const CLOSING_LINE =
   /^\s*(mit freundlichen grüßen|mit freundlichen gruessen|freundliche grüße|beste grüße|viele grüße|liebe grüße|lg|mfg|best( regards)?|kind regards|regards|cheers|thanks|thank you|danke|herzliche grüße|schöne grüße)\b[,!.]?\s*$/i;
 const CONTACT_LINE = /@[\w-]+\.|\+?\d[\d\s()/.-]{6,}\d|www\.|https?:\/\//i;
@@ -412,28 +374,31 @@ const CONTACT_LINE = /@[\w-]+\.|\+?\d[\d\s()/.-]{6,}\d|www\.|https?:\/\//i;
  */
 export function selectSignatureBlock(rawText: string): string {
   // Always returns LF line endings: the Swift detector's offsets must match buildDraft's text.
-  const normalized = rawText.replace(/\r\n?/g, "\n");
-  const lines = normalized.split("\n");
+  // Quoted replies go first, whatever the length: "On … wrote:", "Am … schrieb:" and "> " lines
+  // belong to an older sender.
+  const all = rawText.replace(/\r\n?/g, "\n").split("\n");
+  // Mail apps often wrap a long intro: "On Tue, 10 Nov 2026 at 12:29, Anna <a@b.at>" / "wrote:".
+  const quoteStart = all.findIndex(
+    (l, i) =>
+      i > 0 &&
+      (QUOTE_INTRO.test(l) || /^\s*>/.test(l) || (i + 1 < all.length && QUOTE_INTRO.test(`${l} ${all[i + 1].trim()}`))),
+  );
+  const lines = quoteStart > 0 ? all.slice(0, quoteStart) : all;
+  const normalized = lines.join("\n").trimEnd();
   if (lines.filter((l) => l.trim()).length <= 14) return normalized;
 
   // Quoted thread starts at the first header block; the newest message is above it.
   const firstHeader = lines.findIndex(
-    (l, i) =>
-      HEADER_LINE.test(l) &&
-      i > 0 &&
-      lines.slice(i, i + 4).some((x) => HEADER_LINE.test(x) && x !== l),
+    (l, i) => HEADER_LINE.test(l) && i > 0 && lines.slice(i, i + 4).some((x) => HEADER_LINE.test(x) && x !== l),
   );
   const scope = firstHeader > 0 ? lines.slice(0, firstHeader) : lines;
-  const contactIdx = scope
-    .map((l, i) => (CONTACT_LINE.test(l) && !HEADER_LINE.test(l) ? i : -1))
-    .filter((i) => i >= 0);
+  const contactIdx = scope.map((l, i) => (CONTACT_LINE.test(l) && !HEADER_LINE.test(l) ? i : -1)).filter((i) => i >= 0);
   if (!contactIdx.length) return normalized;
 
   const last = contactIdx[contactIdx.length - 1];
   // Signature lines sit together; walk back over the cluster of contact lines.
   let first = last;
-  for (let k = contactIdx.length - 2; k >= 0 && first - contactIdx[k] <= 4; k--)
-    first = contactIdx[k];
+  for (let k = contactIdx.length - 2; k >= 0 && first - contactIdx[k] <= 4; k--) first = contactIdx[k];
   let start = Math.max(0, first - 6);
   for (let i = first; i >= Math.max(0, first - 10); i--) {
     if (CLOSING_LINE.test(scope[i])) {
@@ -447,11 +412,7 @@ export function selectSignatureBlock(rawText: string): string {
 
 // ---------- main ----------
 
-export function buildDraft(
-  rawText: string,
-  a: Detection,
-  options: ParseOptions = {},
-): ContactDraft {
+export function buildDraft(rawText: string, a: Detection, options: ParseOptions = {}): ContactDraft {
   // Offsets in `a` refer to rawText exactly; pass text through selectSignatureBlock first so it
   // is already LF-only. Normalising here would shift every offset after a CRLF.
   const text = rawText;
@@ -462,10 +423,7 @@ export function buildDraft(
   const consume = (needle: string) => {
     // An empty or whitespace needle would become /\s*/ and erase every line.
     if (!needle || !needle.trim()) return;
-    const re = new RegExp(
-      needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s*"),
-      "gi",
-    );
+    const re = new RegExp(needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s*"), "gi");
     residue.forEach((l, i) => (residue[i] = l.replace(re, " ")));
   };
 
@@ -474,9 +432,7 @@ export function buildDraft(
   for (const e of [
     ...a.emails,
     // Bounded and anchored so a long token (base64, JWT) cannot trigger quadratic rescans.
-    ...(text.match(
-      /(?<![\w.+-])[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,6}/g,
-    ) ?? []),
+    ...(text.match(/(?<![\w.+-])[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,6}/g) ?? []),
   ]) {
     emailSet.set(e.toLowerCase(), e);
   }
@@ -508,13 +464,7 @@ export function buildDraft(
     ) ?? [];
   const urls: Labeled[] = [];
   for (const u of [...new Set([...a.urls, ...bare])]) {
-    if (
-      urls.some(
-        (x) =>
-          fold(x.value).includes(fold(u)) || fold(u).includes(fold(x.value)),
-      )
-    )
-      continue;
+    if (urls.some((x) => fold(x.value).includes(fold(u)) || fold(u).includes(fold(x.value)))) continue;
     if (u.includes("@")) continue;
     consume(u);
     urls.push({
@@ -539,9 +489,7 @@ export function buildDraft(
     if (detected) detected.raw.split("\n").forEach(consume);
     [
       address.street,
-      address.postalCode && address.city
-        ? `${address.postalCode} ${address.city}`
-        : "",
+      address.postalCode && address.city ? `${address.postalCode} ${address.city}` : "",
       address.city,
     ].forEach(consume);
   }
@@ -557,8 +505,7 @@ export function buildDraft(
           " ",
         ),
       );
-      if (t.length >= 2 && /\p{L}{2}/u.test(t))
-        segments.push({ text: t, line: i });
+      if (t.length >= 2 && /\p{L}{2}/u.test(t)) segments.push({ text: t, line: i });
     }
   });
 
@@ -577,26 +524,12 @@ export function buildDraft(
     if (parts.length) {
       // a segment that contains the surname (last part) or the first name, and reads like a name
       nameSeg =
-        segments.find(
-          (s) =>
-            looksLikeName(s.text) &&
-            parts.every((p) => fold(s.text).includes(p)),
-        ) ??
-        segments.find(
-          (s) =>
-            looksLikeName(s.text) &&
-            fold(s.text).includes(parts[parts.length - 1]),
-        ) ??
-        segments.find(
-          (s) =>
-            looksLikeName(s.text) &&
-            parts.some((p) => fold(s.text).includes(p)),
-        );
+        segments.find((s) => looksLikeName(s.text) && parts.every((p) => fold(s.text).includes(p))) ??
+        segments.find((s) => looksLikeName(s.text) && fold(s.text).includes(parts[parts.length - 1])) ??
+        segments.find((s) => looksLikeName(s.text) && parts.some((p) => fold(s.text).includes(p)));
     }
   }
-  nameSeg ??= segments.find(
-    (s) => looksLikeName(s.text) && a.people.some((p) => s.text.includes(p)),
-  );
+  nameSeg ??= segments.find((s) => looksLikeName(s.text) && a.people.some((p) => s.text.includes(p)));
   nameSeg ??= segments.find((s) => looksLikeName(s.text));
 
   let namePrefix = "";
@@ -623,9 +556,7 @@ export function buildDraft(
   }
 
   // ---- title and company ----
-  const rest = segments.filter(
-    (s) => s !== nameSeg && s.text !== nameSeg?.text,
-  );
+  const rest = segments.filter((s) => s !== nameSeg && s.text !== nameSeg?.text);
   let jobTitle = "";
   let organization = "";
 
@@ -641,11 +572,7 @@ export function buildDraft(
   if (roleSeg) {
     // "CEO at Huber GmbH" / "Geschäftsführer bei Huber GmbH" / "CEO @ Huber"
     const m = roleSeg.text.match(ROLE_SPLIT);
-    if (
-      m &&
-      hasRoleWord(m[1]) &&
-      (!hasRoleWord(m[2]) || LEGAL_FORM.test(m[2]))
-    ) {
+    if (m && hasRoleWord(m[1]) && (!hasRoleWord(m[2]) || LEGAL_FORM.test(m[2]))) {
       jobTitle = m[1].trim();
       organization = m[2].split(/\s+[|•·]\s+/)[0].trim();
     } else {
@@ -653,14 +580,10 @@ export function buildDraft(
     }
   }
 
-  const legalSeg = rest.find(
-    (s) => s !== roleSeg && LEGAL_FORM.test(s.text) && s.text.length <= 80,
-  );
+  const legalSeg = rest.find((s) => s !== roleSeg && LEGAL_FORM.test(s.text) && s.text.length <= 80);
   if (legalSeg) organization = legalSeg.text;
   if (!organization) {
-    const orgSeg = rest.find(
-      (s) => s !== roleSeg && a.orgs.some((o) => s.text.includes(o)),
-    );
+    const orgSeg = rest.find((s) => s !== roleSeg && a.orgs.some((o) => s.text.includes(o)));
     if (orgSeg) organization = orgSeg.text;
   }
   if (!organization && emails.length) {
@@ -670,17 +593,12 @@ export function buildDraft(
       const parts = domain.split(".");
       const sld = /^(co|com|or|ac|gv|gov|org|net|ltd|plc)$/;
       const label =
-        (parts.length > 2 && sld.test(parts[parts.length - 2])
-          ? parts[parts.length - 3]
-          : parts[parts.length - 2]) ?? "";
+        (parts.length > 2 && sld.test(parts[parts.length - 2]) ? parts[parts.length - 3] : parts[parts.length - 2]) ??
+        "";
       // prefer a segment that spells out the domain ("huber-partner" -> "Huber & Partner Consulting")
       const words = label.split("-").filter((w) => w.length > 2);
       const seg = rest.find(
-        (s) =>
-          s !== roleSeg &&
-          words.length > 0 &&
-          words.every((w) => fold(s.text).includes(w)) &&
-          s.text.length <= 60,
+        (s) => s !== roleSeg && words.length > 0 && words.every((w) => fold(s.text).includes(w)) && s.text.length <= 60,
       );
       organization = seg ? seg.text : titleCase(label.replace(/-/g, " "));
     }
@@ -690,9 +608,7 @@ export function buildDraft(
   // ("Bauleiter", "Kundenbetreuung", "Kurator").
   if (!jobTitle && nameSeg) {
     const next = rest.find(
-      (s) =>
-        s.line === nameSeg!.line + 1 ||
-        (s.line === nameSeg!.line + 2 && !lines[nameSeg!.line + 1]?.trim()),
+      (s) => s.line === nameSeg!.line + 1 || (s.line === nameSeg!.line + 2 && !lines[nameSeg!.line + 1]?.trim()),
     );
     if (
       next &&

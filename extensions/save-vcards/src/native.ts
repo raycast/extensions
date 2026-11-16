@@ -38,26 +38,15 @@ export type NativeDraft = Omit<ContactDraft, "address"> & {
 export class ContactsAccessError extends Error {}
 
 // CoreError.contactsAccessDenied reaches JavaScript as its description.
-const isAccessError = (err: unknown) =>
-  String(err).includes("contacts-access-denied");
+const isAccessError = (err: unknown) => String(err).includes("contacts-access-denied");
 
 export const recognizeText = (imagePath: string) =>
-  timed(
-    "swift",
-    "recognizeText",
-    () => swiftRecognizeText(imagePath) as Promise<string>,
-  );
+  timed("swift", "recognizeText", () => swiftRecognizeText(imagePath) as Promise<string>);
 
-export const detect = (text: string) =>
-  timed("swift", "detect", () => swiftDetect(text) as Promise<Detection>);
+export const detect = (text: string) => timed("swift", "detect", () => swiftDetect(text) as Promise<Detection>);
 
-export async function contactsInfo(
-  emails: string[],
-  phones: string[],
-): Promise<ContactsInfo> {
-  const info = (await timed("swift", "contactsInfo", () =>
-    swiftContactsInfo(emails, phones),
-  )) as ContactsInfo;
+export async function contactsInfo(emails: string[], phones: string[]): Promise<ContactsInfo> {
+  const info = (await timed("swift", "contactsInfo", () => swiftContactsInfo(emails, phones))) as ContactsInfo;
   log(
     "swift",
     `contactsInfo: access ${info.contactsAccess}, ${info.accounts.length} accounts, ${info.existing.length} matches`,
@@ -75,11 +64,7 @@ export async function saveContact(
     const result = (await timed("swift", "saveContact", () =>
       swiftSaveContact(draft, accountId, updateId),
     )) as SaveResult;
-    log(
-      "swift",
-      `saved (updated: ${result.updated}, noteDropped: ${result.noteDropped})`,
-      result.timings,
-    );
+    log("swift", `saved (updated: ${result.updated}, noteDropped: ${result.noteDropped})`, result.timings);
     return result;
   } catch (err) {
     if (isAccessError(err)) throw new ContactsAccessError(String(err));
@@ -87,20 +72,11 @@ export async function saveContact(
   }
 }
 
-export const vcard = (draft: NativeDraft) =>
-  timed("swift", "vcard", () => swiftVcard(draft) as Promise<string>);
+export const vcard = (draft: NativeDraft) => timed("swift", "vcard", () => swiftVcard(draft) as Promise<string>);
 
 export const requestScreenAccess = () =>
-  timed(
-    "swift",
-    "requestScreenAccess",
-    () => swiftRequestScreenAccess() as Promise<boolean>,
-  );
+  timed("swift", "requestScreenAccess", () => swiftRequestScreenAccess() as Promise<boolean>);
 
 /** Writes the clipboard's image to `destination` as PNG; false if there is none. */
 export const clipboardImage = (destination: string) =>
-  timed(
-    "swift",
-    "clipboardImage",
-    () => swiftClipboardImage(destination) as Promise<boolean>,
-  );
+  timed("swift", "clipboardImage", () => swiftClipboardImage(destination) as Promise<boolean>);

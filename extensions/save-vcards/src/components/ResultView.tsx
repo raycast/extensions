@@ -1,22 +1,8 @@
 // What was captured (image or text) beside what was detected. ↵ saves straight away;
 // Edit Before Saving opens the full form.
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  Keyboard,
-} from "@raycast/api";
-import { useEffect, useRef } from "react";
-import {
-  copyState,
-  exportState,
-  phoneLabelTitle,
-  saveState,
-  stateFromDraft,
-  type FormState,
-} from "../core/contact";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
+import { useMemo } from "react";
+import { copyState, exportState, phoneLabelTitle, saveState, stateFromDraft, type FormState } from "../core/contact";
 import { LOG_FILE } from "../core/log";
 import type { ContactDraft } from "../core/parse";
 import { useContactsInfo } from "../core/useContactsInfo";
@@ -26,54 +12,24 @@ const fence = (text: string) => "```\n" + text.replace(/```/g, "ˋˋˋ") + "\n``
 
 function markdown(text: string, image?: string): string {
   const parts: string[] = [];
-  if (image)
-    parts.push(
-      `![Captured image](${encodeURI(`file://${image}`)}?raycast-height=320)`,
-    );
+  if (image) parts.push(`![Captured image](${encodeURI(`file://${image}`)}?raycast-height=320)`);
   parts.push(image ? "**Recognized text**" : "**Captured text**");
   parts.push(text.trim() ? fence(text.trim()) : "_No text found._");
   return parts.join("\n\n");
 }
 
-export function ResultView(props: {
-  text: string;
-  image?: string;
-  draft: ContactDraft;
-}) {
+export function ResultView(props: { text: string; image?: string; draft: ContactDraft }) {
   const { text, image, draft } = props;
-  const contacts = useContactsInfo();
-  const started = useRef(false);
-
-  useEffect(() => {
-    // React runs effects twice in development; the Contacts check must run once.
-    if (started.current) return;
-    started.current = true;
-    void contacts.loadCached();
-    void contacts.check(
-      draft.emails.map((e) => e.value),
-      draft.phones.map((p) => p.value),
-    );
-  }, []);
+  const emails = useMemo(() => draft.emails.map((e) => e.value), [draft]);
+  const phones = useMemo(() => draft.phones.map((p) => p.value), [draft]);
+  const contacts = useContactsInfo(emails, phones);
 
   const state = (): FormState => stateFromDraft(draft, contacts.accountId);
-  const name = [draft.namePrefix, draft.givenName, draft.familyName]
-    .filter(Boolean)
-    .join(" ");
+  const name = [draft.namePrefix, draft.givenName, draft.familyName].filter(Boolean).join(" ");
   const fullName = [name, draft.nameSuffix].filter(Boolean).join(", ");
   const a = draft.address;
-  const address = a
-    ? [
-        a.street,
-        [a.postalCode, a.city].filter(Boolean).join(" "),
-        a.country,
-      ].filter(Boolean)
-    : [];
-  const found = !!(
-    fullName ||
-    draft.organization ||
-    draft.emails.length ||
-    draft.phones.length
-  );
+  const address = a ? [a.street, [a.postalCode, a.city].filter(Boolean).join(" "), a.country].filter(Boolean) : [];
+  const found = !!(fullName || draft.organization || draft.emails.length || draft.phones.length);
   const account = contacts.accounts.find((x) => x.id === contacts.accountId);
 
   const edit = (
@@ -91,74 +47,28 @@ export function ResultView(props: {
       markdown={markdown(text, image)}
       metadata={
         <Detail.Metadata>
-          {!found && (
-            <Detail.Metadata.Label
-              title="Detected"
-              text="No contact details. Edit to add them."
-            />
-          )}
-          {fullName && (
-            <Detail.Metadata.Label
-              title="Name"
-              text={fullName}
-              icon={Icon.Person}
-            />
-          )}
-          {draft.jobTitle && (
-            <Detail.Metadata.Label title="Job Title" text={draft.jobTitle} />
-          )}
+          {!found && <Detail.Metadata.Label title="Detected" text="No contact details. Edit to add them." />}
+          {fullName && <Detail.Metadata.Label title="Name" text={fullName} icon={Icon.Person} />}
+          {draft.jobTitle && <Detail.Metadata.Label title="Job Title" text={draft.jobTitle} />}
           {draft.organization && (
-            <Detail.Metadata.Label
-              title="Company"
-              text={draft.organization}
-              icon={Icon.Building}
-            />
+            <Detail.Metadata.Label title="Company" text={draft.organization} icon={Icon.Building} />
           )}
           {draft.emails.map((e) => (
-            <Detail.Metadata.Label
-              key={e.value}
-              title="Email"
-              text={e.value}
-              icon={Icon.Envelope}
-            />
+            <Detail.Metadata.Label key={e.value} title="Email" text={e.value} icon={Icon.Envelope} />
           ))}
           {draft.phones.map((p) => (
-            <Detail.Metadata.Label
-              key={p.value}
-              title={phoneLabelTitle(p.label)}
-              text={p.value}
-              icon={Icon.Phone}
-            />
+            <Detail.Metadata.Label key={p.value} title={phoneLabelTitle(p.label)} text={p.value} icon={Icon.Phone} />
           ))}
           {draft.urls.map((u) => (
-            <Detail.Metadata.Label
-              key={u.value}
-              title="Website"
-              text={u.value}
-              icon={Icon.Globe}
-            />
+            <Detail.Metadata.Label key={u.value} title="Website" text={u.value} icon={Icon.Globe} />
           ))}
-          {address.length > 0 && (
-            <Detail.Metadata.Label
-              title="Address"
-              text={address.join(", ")}
-              icon={Icon.Pin}
-            />
-          )}
-          {(account || contacts.existing.length > 0) && (
-            <Detail.Metadata.Separator />
-          )}
-          {account && (
-            <Detail.Metadata.Label title="Save To" text={account.name} />
-          )}
+          {address.length > 0 && <Detail.Metadata.Label title="Address" text={address.join(", ")} icon={Icon.Pin} />}
+          {(account || contacts.existing.length > 0) && <Detail.Metadata.Separator />}
+          {account && <Detail.Metadata.Label title="Save To" text={account.name} />}
           {contacts.existing.length > 0 && (
             <Detail.Metadata.TagList title="Already in Contacts">
               {contacts.existing.map((e) => (
-                <Detail.Metadata.TagList.Item
-                  key={e.id}
-                  text={e.name}
-                  color={Color.Orange}
-                />
+                <Detail.Metadata.TagList.Item key={e.id} text={e.name} color={Color.Orange} />
               ))}
             </Detail.Metadata.TagList>
           )}
@@ -168,11 +78,7 @@ export function ResultView(props: {
         <ActionPanel>
           <ActionPanel.Section>
             {found ? (
-              <Action
-                title="Save to Contacts"
-                icon={Icon.AddPerson}
-                onAction={() => saveState(state(), {}, text)}
-              />
+              <Action title="Save to Contacts" icon={Icon.AddPerson} onAction={() => saveState(state(), {})} />
             ) : (
               edit
             )}
@@ -183,12 +89,8 @@ export function ResultView(props: {
                   key={e.id}
                   title={`Add to Existing Contact: ${e.name}`}
                   icon={Icon.PersonCircle}
-                  shortcut={
-                    i === 0
-                      ? { modifiers: ["cmd", "shift"], key: "return" }
-                      : undefined
-                  }
-                  onAction={() => saveState(state(), { updateId: e.id }, text)}
+                  shortcut={i === 0 ? { modifiers: ["cmd", "shift"], key: "return" } : undefined}
+                  onAction={() => saveState(state(), { updateId: e.id })}
                 />
               ))}
             {found && (
@@ -196,20 +98,16 @@ export function ResultView(props: {
                 title="Save and Open in Contacts"
                 icon={Icon.AppWindow}
                 shortcut={Keyboard.Shortcut.Common.Open}
-                onAction={() => saveState(state(), { openAfter: true }, text)}
+                onAction={() => saveState(state(), { openAfter: true })}
               />
             )}
             {contacts.accounts.length > 1 && (
-              <ActionPanel.Submenu title="Choose Account…" icon={Icon.Tray}>
+              <ActionPanel.Submenu title="Choose Account" icon={Icon.Tray}>
                 {contacts.accounts.map((acc) => (
                   <Action
                     key={acc.id}
                     title={acc.isDefault ? `${acc.name} (Default)` : acc.name}
-                    icon={
-                      acc.id === contacts.accountId
-                        ? Icon.CheckCircle
-                        : Icon.Circle
-                    }
+                    icon={acc.id === contacts.accountId ? Icon.CheckCircle : Icon.Circle}
                     onAction={() => contacts.setAccountId(acc.id)}
                   />
                 ))}
