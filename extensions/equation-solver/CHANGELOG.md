@@ -1,6 +1,6 @@
 # Equation Solver Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-16
 
 - Solve linear and quadratic equations in one unknown as you type, with the algebra steps shown in the detail pane
 - The unknown can be a single letter or a multi-letter name (`Va`, `Vout`, `x1`), matched case-insensitively
