@@ -1,5 +1,8 @@
-import { execFileSync } from "child_process";
+import { execFile } from "child_process";
 import { readFileSync } from "fs";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 /**
  * Which Keysi this extension is talking to.
@@ -22,11 +25,14 @@ export const FREE_SHOW_SINCE = "1.0.21";
  * With two copies of Keysi installed, the one Launch Services picks for the
  * scheme is the one every command here actually talks to, and it need not
  * be the one the sheet directories point at. Asked through JXA because that
- * is the only route to `NSWorkspace` from a Raycast extension; ~0.2s.
+ * is the only route to `NSWorkspace` from a Raycast extension. This stays
+ * asynchronous: the answer only controls whether an optional action is
+ * shown, so blocking the extension's first render for an `osascript` launch
+ * makes the command feel slow for no user benefit.
  */
-export function keysiURLHandler(): string | undefined {
+export async function keysiURLHandler(): Promise<string | undefined> {
   try {
-    const path = execFileSync(
+    const { stdout } = await execFileAsync(
       "/usr/bin/osascript",
       [
         "-l",
@@ -35,7 +41,8 @@ export function keysiURLHandler(): string | undefined {
         "ObjC.import('AppKit'); var u = $.NSWorkspace.sharedWorkspace.URLForApplicationToOpenURL($.NSURL.URLWithString('keysi://show')); u.isNil() ? '' : u.path.js",
       ],
       { encoding: "utf8", timeout: 2000 },
-    ).trim();
+    );
+    const path = stdout.trim();
     return path.length > 0 ? path : undefined;
   } catch {
     return undefined;

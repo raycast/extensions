@@ -60,7 +60,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   // out after the first render: asking macOS for the URL handler takes ~0.2s.
   const [canShowSheet, setCanShowSheet] = useState(false);
   useEffect(() => {
-    setCanShowSheet(atLeast(installedVersion(builtinSheetDirs(), keysiURLHandler()), SHEET_URL_SINCE));
+    void keysiURLHandler().then((handler) => {
+      setCanShowSheet(atLeast(installedVersion(builtinSheetDirs(), handler), SHEET_URL_SINCE));
+    });
   }, []);
 
   useEffect(() => {

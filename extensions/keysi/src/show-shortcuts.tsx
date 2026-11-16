@@ -21,7 +21,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   const query = (props.fallbackText ?? props.arguments?.query ?? "").trim();
   // Opened first, so the ~0.2s version lookup never delays the panel.
   await showShortcuts(query.length > 0 ? query : undefined);
-  const version = installedVersion(builtinSheetDirs(), keysiURLHandler());
+  const version = installedVersion(builtinSheetDirs(), await keysiURLHandler());
   if (version && !atLeast(version, FREE_SHOW_SINCE)) {
     await showHUD(`Show Shortcuts is free from Keysi ${FREE_SHOW_SINCE} — use Check for Updates… in Keysi's menu`);
   }
