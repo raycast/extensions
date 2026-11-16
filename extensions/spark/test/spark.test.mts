@@ -73,6 +73,49 @@ test("query: splits topic from Gmail-style operators", async () => {
   assert.deepEqual(splitQuery("in:SENT is:unread"), { topic: "", filter: "is:unread", folder: "Sent" });
 });
 
+test("query: search arguments for topic and filter-only searches", async () => {
+  const { searchArgs, splitQuery } = await import("../src/lib/query.ts");
+  // A topic search returns the CLI's top matches; it has no page size.
+  assert.deepEqual(searchArgs(splitQuery("budget is:unread")), ["search", "budget", "--filter", "is:unread"]);
+  // `in:` narrows a topic search too, not only filter-only listings.
+  assert.deepEqual(searchArgs(splitQuery("budget in:sent")), ["search", "budget", "--in", "Sent"]);
+  assert.deepEqual(searchArgs(splitQuery("in:archive budget from:alice@co.com")), [
+    "search",
+    "budget",
+    "--in",
+    "Archive",
+    "--filter",
+    "from:alice@co.com",
+  ]);
+  assert.deepEqual(searchArgs(splitQuery("is:unread")), ["search", "--filter", "is:unread", "--page-size", "50"]);
+  assert.deepEqual(searchArgs(splitQuery("in:sent is:unread")), [
+    "emails",
+    "Sent",
+    "--filter",
+    "is:unread",
+    "--page-size",
+    "50",
+  ]);
+});
+
+test("query: results title says when results stop at the limit", async () => {
+  const { resultsTitle } = await import("../src/lib/query.ts");
+  assert.equal(resultsTitle({ topic: true, semantic: true, hasMore: false }), undefined);
+  assert.equal(resultsTitle({ topic: true, semantic: true, hasMore: true }), "Top 20 matches");
+  assert.equal(
+    resultsTitle({ topic: true, semantic: false, hasMore: true }),
+    "Top 20 keyword matches (semantic search unavailable) — refine your search to see others",
+  );
+  assert.equal(
+    resultsTitle({ topic: true, semantic: false, hasMore: false }),
+    "Keyword matches (semantic search unavailable)",
+  );
+  assert.equal(
+    resultsTitle({ topic: false, semantic: true, hasMore: true }),
+    "First 50 matches — narrow your filters to see more",
+  );
+});
+
 test("args: list, cliDate, rangeArgs", async () => {
   const { cliDate, list, rangeArgs } = await import("../src/lib/args.ts");
   assert.deepEqual(list(" a@x.io, b@y.io;c@z.io\n"), ["a@x.io", "b@y.io", "c@z.io"]);

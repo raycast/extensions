@@ -6,14 +6,21 @@ import { emailAccessories, rowIcon, senderTitle, subjectLine } from "./component
 import { rowColor, useAccountColors } from "./lib/accounts";
 import { avatarIcon, contactFor, useContacts } from "./lib/contacts";
 import ErrorView from "./components/ErrorView";
-import { positional } from "./lib/args";
-import { splitQuery } from "./lib/query";
+import { resultsTitle, searchArgs, splitQuery, TOPIC_LIMIT } from "./lib/query";
 import { sparkIcon, sparkIconSVG } from "./lib/sparkIcons";
 import { TIP_ICON_FILES, TipIcons, tipsSVG } from "./lib/tips";
 import { sparkJSON } from "./lib/spark";
 import { Address, EmailFlag, EmailsResult, SearchResult } from "./lib/types";
 import { useRefreshNotice } from "./lib/ui";
 import { withSparkCLI } from "./components/SparkSetup";
+
+interface SearchOutcome {
+  hits: Hit[];
+  topic: boolean;
+  semantic: boolean;
+  /// The results stop at the CLI's limit; there may be more matches.
+  hasMore: boolean;
+}
 
 interface Hit {
   id: string;
@@ -27,19 +34,16 @@ interface Hit {
   isComment?: boolean;
 }
 
-async function search(
-  text: string,
-  signal?: AbortSignal,
-): Promise<{ hits: Hit[]; semantic: boolean; hasMore: boolean }> {
-  const { topic, filter, folder } = splitQuery(text);
-  if (topic) {
-    // A topic search spans every folder; `in:` only narrows filter listings.
-    const args = ["search", positional(topic)];
-    if (filter) args.push("--filter", filter);
+async function search(text: string, signal?: AbortSignal): Promise<SearchOutcome> {
+  const query = splitQuery(text);
+  const args = searchArgs(query);
+  if (query.topic) {
     const result = await sparkJSON<SearchResult>(args, { signal });
     return {
+      topic: true,
       semantic: result.semantic_available,
-      hasMore: false,
+      // The CLI stops at its limit without saying whether there were more.
+      hasMore: result.matches.length >= TOPIC_LIMIT,
       hits: result.matches
         .filter((m) => !m.outside_plan_range && m.id !== undefined)
         .map((m) => ({
@@ -53,10 +57,9 @@ async function search(
     };
   }
   // Operators only: list the first page in the folder, or across all folders.
-  const args = folder ? ["emails", folder] : ["search"];
-  if (filter) args.push("--filter", filter);
-  const result = await sparkJSON<EmailsResult>([...args, "--page-size", "50"], { signal });
+  const result = await sparkJSON<EmailsResult>(args, { signal });
   return {
+    topic: false,
     semantic: true,
     hasMore: result.page.total_pages > 1,
     hits: result.emails.map((e) => ({
@@ -111,17 +114,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.SearchMail }>) {
           title={ready ? "No matching emails" : query ? "Keep typing" : undefined}
         />
       )}
-      <List.Section
-        title={
-          ready && data
-            ? data.hasMore
-              ? "First 50 matches — narrow your filters to see more"
-              : !data.semantic
-                ? "Keyword matches (semantic search unavailable)"
-                : undefined
-            : undefined
-        }
-      >
+      <List.Section title={ready && data ? resultsTitle(data) : undefined}>
         {hits.map((hit) => (
           <List.Item
             key={hit.id}

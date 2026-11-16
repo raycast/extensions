@@ -1,3 +1,5 @@
+import { positional } from "./args.ts";
+
 const OPERATOR_NAMES =
   "from|to|cc|subject|before|after|newer_than|older_than|has|is|category|assigned_to|assigned_by|filename";
 const OPERATOR = new RegExp(`^(${OPERATOR_NAMES}):\\S`);
@@ -27,4 +29,38 @@ export function splitQuery(text: string): Query {
     filter: rest.filter((t) => OPERATOR.test(t)).join(" "),
     folder: folderName && folderName[0].toUpperCase() + folderName.slice(1).toLowerCase(),
   };
+}
+
+/// `search <topic>` returns at most this many matches and has no paging.
+export const TOPIC_LIMIT = 20;
+/// Filter-only searches list one page of this size.
+export const LIST_PAGE_SIZE = 50;
+
+/// The CLI arguments for a parsed search. Without `in:`, both kinds span
+/// every folder in every account.
+export function searchArgs({ topic, filter, folder }: Query): string[] {
+  if (topic) {
+    const args = ["search", positional(topic)];
+    if (folder) args.push("--in", folder);
+    if (filter) args.push("--filter", filter);
+    return args;
+  }
+  const args = folder ? ["emails", folder] : ["search"];
+  if (filter) args.push("--filter", filter);
+  return [...args, "--page-size", String(LIST_PAGE_SIZE)];
+}
+
+/// The heading above the results. It says when they stop at the CLI's limit,
+/// so an email that's missing isn't taken for one that doesn't exist, and when
+/// matching fell back to keywords. Semantic search always fills its 20 slots
+/// with the nearest matches, so there a full list only ranks them; a full
+/// keyword list means more emails matched than fit.
+export function resultsTitle(result: { topic: boolean; semantic: boolean; hasMore: boolean }): string | undefined {
+  const fallback = result.semantic ? "" : " (semantic search unavailable)";
+  if (!result.hasMore) return fallback ? "Keyword matches" + fallback : undefined;
+  return result.topic
+    ? fallback
+      ? `Top ${TOPIC_LIMIT} keyword matches${fallback} — refine your search to see others`
+      : `Top ${TOPIC_LIMIT} matches`
+    : `First ${LIST_PAGE_SIZE} matches — narrow your filters to see more`;
 }
