@@ -128,25 +128,6 @@ export function TaskItem({
             icon={Icon.Pencil}
             target={<TaskForm task={t} parent={parent} onSaved={onChange} />}
           />
-          {primary && (
-            <Action.Open
-              title={primary.title}
-              icon={primary.icon}
-              target={primary.target}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
-            />
-          )}
-          {links.length > 1 && (
-            <ActionPanel.Submenu
-              title="Choose Link"
-              icon={Icon.Link}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-            >
-              {links.map((url) => (
-                <Action.OpenInBrowser key={url} title={url} url={url} />
-              ))}
-            </ActionPanel.Submenu>
-          )}
           {isParent && !t.completed ? (
             <Action
               title="Complete Task"
@@ -166,7 +147,26 @@ export function TaskItem({
               }
             />
           )}
-          {/* Below the first two actions, where Raycast shows custom shortcuts. */}
+          {primary && (
+            <Action.Open
+              title={primary.title}
+              icon={primary.icon}
+              target={primary.target}
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+            />
+          )}
+          {links.length > 1 && (
+            <ActionPanel.Submenu
+              title="Choose Link"
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            >
+              {links.map((url) => (
+                <Action.OpenInBrowser key={url} title={url} url={url} />
+              ))}
+            </ActionPanel.Submenu>
+          )}
+          {/* Below Edit Task and Complete Task, as released, where Raycast shows custom shortcuts. */}
           {isParent && !t.completed && (
             <Action.Push
               title="Add Item"
