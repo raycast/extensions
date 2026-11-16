@@ -1,4 +1,4 @@
-import { Application, Cache, getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { execFile, execFileSync, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
@@ -55,7 +55,7 @@ export class ToolboxError extends Error {
 
 /** Where Toolbox.app is: the app chosen in the preferences, else /Applications. */
 export function appPath(): string {
-  const { toolboxApp } = getPreferenceValues<{ toolboxApp?: Application }>();
+  const { toolboxApp } = getPreferenceValues<Preferences>();
   return (toolboxApp?.path || "/Applications/Toolbox.app").replace(/\/$/, "");
 }
 
@@ -113,12 +113,25 @@ const cache = new Cache();
 
 /** Every tool with its options, read from the installed Toolbox (cached per Toolbox build). */
 export async function listTools(): Promise<Tool[]> {
-  const key = `tools-${appPath()}-${await appVersion()}-${await disabledTools()}`;
+  const key = `tools-v2-${appPath()}-${await appVersion()}-${await disabledTools()}`;
   const cached = cache.get(key);
   if (cached) return JSON.parse(cached) as Tool[];
-  const tools = (await mcpToolsList()).filter((t) => t.name !== "toolbox_status");
+  const tools = (await mcpToolsList())
+    .filter((t) => t.name !== "toolbox_status")
+    .map((t) => ({ ...t, description: forPeople(t.description) }));
   cache.set(key, JSON.stringify(tools));
   return tools;
+}
+
+/** Drops the hints meant for AI apps, like "Needs FFmpeg (see toolbox_status)." */
+function forPeople(description: string): string {
+  return description
+    .split(/(?<=\.)\s+/)
+    .filter((sentence) => !/toolbox_status|the agent/i.test(sentence))
+    .join(" ")
+    .replace(/\bthe user has\b/gi, "you have")
+    .replace(/\bthe user's\b/gi, "your")
+    .replace(/\bthe user\b/gi, "you");
 }
 
 /** Asks `Toolbox mcp` for its tool list over stdio (JSON-RPC, one message per line). */

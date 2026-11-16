@@ -38,41 +38,44 @@ export default function SearchTools() {
     );
   }
 
-  const grouped = new Map<string, { icon: Icon; tools: Tool[] }>();
+  const grouped = new Map<string, { icon: Icon; tools: Tool[] }>(
+    [...SECTIONS, { title: "More", icon: Icon.Hammer }].map((s) => [s.title, { icon: s.icon, tools: [] as Tool[] }]),
+  );
   for (const tool of data ?? []) {
     const section = sectionOf(tool);
-    if (!grouped.has(section.title)) grouped.set(section.title, { icon: section.icon, tools: [] });
     grouped.get(section.title)!.tools.push(tool);
   }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tools: compress, PDF, background, transcribe…">
-      {[...grouped].map(([title, { icon, tools }]) => (
-        <List.Section key={title} title={title}>
-          {tools.map((tool) => (
-            <List.Item
-              key={tool.name}
-              icon={icon}
-              title={tool.title}
-              subtitle={tool.description.split(". ")[0]}
-              keywords={[tool.name.replace(/_/g, " "), ...tool.description.toLowerCase().split(/\W+/).slice(0, 25)]}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Choose Files and Options"
-                    icon={Icon.Play}
-                    target={<ToolForm tool={tool} title={tool.title} />}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Command-Line Name"
-                    content={`toolbox ${tool.name.replace(/_/g, "-")}`}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+      {[...grouped]
+        .filter(([, g]) => g.tools.length)
+        .map(([title, { icon, tools }]) => (
+          <List.Section key={title} title={title}>
+            {tools.map((tool) => (
+              <List.Item
+                key={tool.name}
+                icon={icon}
+                title={tool.title}
+                subtitle={tool.description.split(". ")[0].replace(/\.$/, "")}
+                keywords={[tool.name.replace(/_/g, " "), ...tool.description.toLowerCase().split(/\W+/).slice(0, 25)]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="Choose Files and Options"
+                      icon={Icon.Play}
+                      target={<ToolForm tool={tool} title={tool.title} />}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Command-Line Name"
+                      content={`toolbox ${tool.name.replace(/_/g, "-")}`}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))}
     </List>
   );
 }

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { basename } from "node:path";
-import { useEffect, useState } from "react";
+import { useMemo, useRef } from "react";
 import {
   appPath,
   buildArgs,
@@ -16,32 +17,43 @@ import {
 
 type State = { status: "running" } | { status: "done"; result: RunResult } | { status: "failed"; error: ToolboxError };
 
-/** Runs the tool once and shows what it made. Leaving the view stops Toolbox. */
+/** Runs the tool once and shows what it made. Leaving the view aborts the run, which stops Toolbox. */
 export function RunView({ tool, values }: { tool: Tool; values: Values }) {
-  const [state, setState] = useState<State>({ status: "running" });
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const toast = showToast({ style: Toast.Style.Animated, title: `${tool.title}…` });
-    run(tool.name, buildArgs(tool, values), controller.signal)
-      .then(async (result) => {
-        setState({ status: "done", result });
-        const t = await toast;
+  const abortable = useRef<AbortController>(null);
+  const toast = useRef<Promise<Toast>>(null);
+  const args = useMemo(() => buildArgs(tool, values), [tool, values]);
+  const { data, error, isLoading } = usePromise(
+    (name: string, toolArgs: string[]) => run(name, toolArgs, abortable.current?.signal),
+    [tool.name, args],
+    {
+      abortable,
+      onWillExecute: () => {
+        toast.current = showToast({ style: Toast.Style.Animated, title: `${tool.title}…` });
+      },
+      onData: async (result) => {
+        const t = await toast.current;
+        if (!t) return;
         t.style = Toast.Style.Success;
         t.title = `${tool.title} done`;
         t.message = summarize(result);
-      })
-      .catch(async (error: unknown) => {
-        if (controller.signal.aborted) return;
-        const e = error instanceof ToolboxError ? error : new ToolboxError(String(error));
-        setState({ status: "failed", error: e });
-        const t = await toast;
+      },
+      onError: async (e) => {
+        if (abortable.current?.signal.aborted) return;
+        const t = await toast.current;
+        if (!t) return;
         t.style = Toast.Style.Failure;
         t.title = `${tool.title} failed`;
         t.message = e.message;
-      });
-    return () => controller.abort();
-  }, []);
+      },
+    },
+  );
+  const state: State = isLoading
+    ? { status: "running" }
+    : error
+      ? { status: "failed", error: error instanceof ToolboxError ? error : new ToolboxError(String(error)) }
+      : data
+        ? { status: "done", result: data }
+        : { status: "running" };
 
   if (state.status === "running") {
     const items = (values.files ?? values.urls ?? []) as string[];

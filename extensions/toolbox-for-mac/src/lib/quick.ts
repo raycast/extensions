@@ -87,7 +87,7 @@ export async function runOnFinderSelection(options: QuickOptions) {
       return;
     }
     await showHUD(`✓ ${options.done} ${summarize(result)}${note}`);
-    const { afterRun } = getPreferenceValues<{ afterRun?: string }>();
+    const { afterRun } = getPreferenceValues<Preferences>();
     if (afterRun === "reveal" && result.outputs[0]) await showInFinder(result.outputs[0].path);
   } catch (error) {
     await reportError(error);

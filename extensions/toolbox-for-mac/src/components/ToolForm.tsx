@@ -1,10 +1,14 @@
 import { Action, ActionPanel, Clipboard, Form, getSelectedFinderItems, Icon, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { Property, Tool, Values } from "../lib/toolbox";
 import { RunView } from "./RunView";
 
 const humanize = (key: string) => {
-  const text = key.replace(/_/g, " ");
+  const text = key
+    .replace(/_/g, " ")
+    .replace(/\bh264\b/i, "H.264")
+    .replace(/\bhevc\b/i, "HEVC");
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
 
@@ -28,20 +32,17 @@ export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const clearError = (key: string) => setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
 
-  useEffect(() => {
-    if (takesFiles) {
-      getSelectedFinderItems()
-        .then((items) => setFiles(items.map((i) => i.path)))
-        .catch(() => undefined);
-    }
-    if (takesUrls) {
-      Clipboard.readText()
-        .then((text) => {
-          if (text && /^https?:\/\/\S+$/m.test(text.trim())) setUrls(text.trim());
-        })
-        .catch(() => undefined);
-    }
-  }, []);
+  // Start with what's selected in Finder and, for links, a URL on the clipboard. Both are optional, so errors are ignored.
+  usePromise(async () => (takesFiles ? (await getSelectedFinderItems()).map((i) => i.path) : []), [], {
+    onData: (paths) => setFiles((current) => (current.length ? current : paths)),
+    onError: () => undefined,
+  });
+  usePromise(async () => (takesUrls ? ((await Clipboard.readText()) ?? "").trim() : ""), [], {
+    onData: (text) => {
+      if (/^https?:\/\/\S+$/m.test(text)) setUrls((current) => current || text);
+    },
+    onError: () => undefined,
+  });
 
   function submit(raw: Form.Values) {
     const values: Values = {};
@@ -67,7 +68,12 @@ export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
     push(<RunView tool={tool} values={values} />);
   }
 
-  const fields = Object.entries(props).filter(([key]) => !["files", "urls", "output_folder"].includes(key));
+  // Main choices first (quality, format, mode), then other choices, then numbers and text, then on/off switches.
+  const rank = ([key, prop]: [string, Property]) =>
+    /^(quality|format|mode|to)$/.test(key) ? 0 : prop.enum ? 1 : prop.type === "boolean" ? 3 : 2;
+  const fields = Object.entries(props)
+    .filter(([key]) => !["files", "urls", "output_folder"].includes(key))
+    .sort((a, b) => rank(a) - rank(b));
 
   return (
     <Form
@@ -140,7 +146,16 @@ function Field({ id, prop, error, onEdit }: { id: string; prop: Property; error?
     return <Form.Checkbox id={id} label={title} info={prop.description} defaultValue={prop.default === true} />;
   }
   if (/password/.test(id)) {
-    return <Form.PasswordField id={id} title={title} info={prop.description} error={error} onChange={onEdit} />;
+    return (
+      <Form.PasswordField
+        id={id}
+        title={title}
+        info={prop.description}
+        placeholder={prop.description ?? title}
+        error={error}
+        onChange={onEdit}
+      />
+    );
   }
   return (
     <Form.TextField
