@@ -1,0 +1,24 @@
+# Kill Process
+
+Find the app or background process that's slowing your Mac down and stop it, without opening Activity Monitor.
+
+Kill Process lists everything that's running, sorted by CPU or memory usage, so the heaviest processes are at the top. Pick one and kill it, or force kill it if it won't quit.
+
+## Commands
+
+- **Kill Process**: Lists all running processes by CPU or memory usage. Kill or force kill the selected one.
+
+## Use it with Raycast AI
+
+Mention `@kill-process` in Raycast AI and ask in plain language, for example "what's using the most memory?" or "kill everything called node". It can:
+
+- List running processes with their CPU and memory usage
+- Kill a process by name or PID
+- Kill all processes with a given name
+
+Force killing from Raycast AI on macOS needs sudo. The easiest way is to enable Touch ID for sudo.
+
+## Tips
+
+- Give Kill Process a hotkey in Raycast Settings → Extensions, so you can reach it even when your Mac is struggling.
+- To free up a port (for example a dev server stuck on port 3000), search for the process by name and kill it.

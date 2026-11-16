@@ -4,11 +4,15 @@
 
 # Tailwind CSS
 
-Use this extension to 10x your Tailwind productivity!
+Look up Tailwind CSS classes, colors, components and docs without switching to a browser tab.
 
-## Features
+## Commands
 
-- `Search` **Classes**
-- `Search` **Colors**
-- `Search` **Components**
-- `Search` **Documentation** (V0, V1, V2, V3, V4)
+- **Search Classes**: Find a utility class and see the CSS it produces.
+- **Search Colors**: Search the default color palette and copy a color.
+- **Search Components**: Search Tailwind UI components.
+- **Search Documentation**: Search the docs for Tailwind v0 to v4 and open a page in your browser.
+
+## Tips
+
+- Give **Search Classes** an alias like `tw` to look up the class you need while you write markup.
