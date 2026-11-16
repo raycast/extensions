@@ -7,4 +7,4 @@
 - Create Quicklinks to open frequently used dashboards directly from Raycast search.
 - Display dashboard icons and disabled states, with manual refresh using `⌘R`.
 - Connect through the local API, with guidance for connection errors, authentication failures, and empty lists.
-- Release under the [MIT License](LICENSE).
+- Release under the [MIT License](https://github.com/agili-app/metrix-bar-raycast/blob/main/LICENSE).

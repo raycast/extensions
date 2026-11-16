@@ -2,21 +2,9 @@
 
 Search your installed [Metrix.Bar](https://metrix.bar/) dashboards in [Raycast](https://www.raycast.com/) on macOS. Open dashboard panels or settings, and create Quicklinks to open frequently used dashboards directly from Raycast's root search.
 
-## Installation
+## Requirements
 
-Install from source using the Raycast CLI. Before you start, install and launch [Raycast](https://www.raycast.com/) and [Metrix.Bar](https://metrix.bar/) on your Mac.
-
-1. Download and extract the [project source code](https://github.com/agili-app/metrix-bar-raycast/archive/refs/heads/main.zip).
-2. Open Terminal and navigate to the project directory.
-3. Install Node.js 24.22.2 and npm 11.19.1 for importing and developing the extension. Raycast manages the extension runtime.
-4. Run the following commands to install dependencies and import the extension:
-
-```sh
-npm ci
-npm run dev
-```
-
-`npm run dev` calls the Raycast CLI to import the extension into your local Raycast and watches for source code changes. Once imported, you can find and run the **Search Dashboards** command in Raycast.
+Install and launch [Raycast](https://www.raycast.com/) and [Metrix.Bar](https://metrix.bar/) on your Mac.
 
 ## Connect to Metrix.Bar
 
@@ -80,29 +68,8 @@ When an error message appears or the list is empty, open the action menu (`⌘K`
 
 Quicklinks and connection error messages never contain the API token. The dashboard list is retrieved from the local API; when a dashboard uses a named icon or remote image, Raycast also requests the icon from Iconify or the corresponding image URL.
 
-## Development
-
-Development uses Node.js 24.22.2, npm 11.19.1, and [Vite+](https://viteplus.dev/). The extension is built with the Raycast CLI, while Vite+ handles environment management, task execution, general checks, and testing. Run `npm ci` to install dependencies according to `package-lock.json`.
-
-The project includes local Vite+, so you can use equivalent `npm` scripts directly without installing `vp` globally:
-
-| Global `vp` command | Equivalent `npm` script | Description                                                 |
-| :------------------ | :---------------------- | :---------------------------------------------------------- |
-| `vp run dev`        | `npm run dev`           | Start Raycast development mode and watch for source changes |
-| `vp run build`      | `npm run build`         | Run Raycast production build, outputting to `dist/`         |
-| `vp check`          | `npm run check`         | Run OxFmt, Oxlint, and type-aware checks                    |
-| `vp run lint`       | `npm run lint`          | Run Raycast manifest, icon, ESLint, and Prettier checks     |
-| `vp run typecheck`  | `npm run typecheck`     | Run independent TypeScript type checking (`tsc`)            |
-| `vp test --run`     | `npm test`              | Run full behavioral test suite                              |
-| `vp fmt`            | `npm run format`        | Format code                                                 |
-
-Notes:
-
-- `vp run dev` and `vp run build` call the Raycast CLI; `vp dev` and `vp build` are Vite+'s built-in web commands.
-- Passing terminal builds and tests does not replace interactive verification in Raycast. Opening panels and creating Quicklinks must be verified in the desktop app.
-
 ## License
 
-[MIT License](LICENSE)
+[MIT License](https://github.com/agili-app/metrix-bar-raycast/blob/main/LICENSE)
 
 Copyright 2026 Agili

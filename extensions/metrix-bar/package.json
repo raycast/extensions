@@ -1,7 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "metrix-bar",
-  "version": "0.1.0",
   "description": "Search your local Metrix.Bar dashboards and open their panels or settings.",
   "categories": [
     "Developer Tools",
@@ -58,6 +57,7 @@
       "name": "apiUrl",
       "type": "textfield",
       "title": "Local API URL",
+      "placeholder": "http://127.0.0.1:6387",
       "description": "Copy the local API base URL from Metrix.Bar → Settings → Agent (for example, http://127.0.0.1:6387).",
       "required": true
     },
@@ -65,6 +65,7 @@
       "name": "apiToken",
       "type": "password",
       "title": "API Token",
+      "placeholder": "Paste API Token",
       "description": "Copy the Bearer token from Metrix.Bar → Settings → Agent.",
       "required": true
     }

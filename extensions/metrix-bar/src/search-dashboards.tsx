@@ -13,7 +13,7 @@ import { useRef } from "react";
 import { AGENT_SETTINGS_URL, APP_URL, dashboardSettingsURL, dashboardURL } from "./lib/deeplinks";
 import { getEmptyView } from "./lib/dashboard-state";
 import { dashboardIconSource } from "./lib/dashboard-icons";
-import { type ConnectionPreferences, type Dashboard, fetchDashboards } from "./lib/metrix";
+import { type Dashboard, fetchDashboards } from "./lib/metrix";
 
 function CommonActions({ refresh }: { refresh: () => void }) {
   return (
@@ -51,13 +51,13 @@ function DashboardActions({
         />
         {dashboard.enabled && (
           <>
+            <Action.Open title="Open Dashboard Settings" icon={Icon.Gear} target={dashboardSettingsURL(dashboard.id)} />
             <Action.CreateQuicklink
               title="Add to Raycast Search"
               icon={icon}
               shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
               quicklink={{ name: dashboard.title || dashboard.id, link: url, icon: Icon.AppWindow }}
             />
-            <Action.Open title="Open Dashboard Settings" icon={Icon.Gear} target={dashboardSettingsURL(dashboard.id)} />
           </>
         )}
       </ActionPanel.Section>
@@ -67,7 +67,7 @@ function DashboardActions({
 }
 
 export default function SearchDashboards() {
-  const { apiUrl, apiToken } = getPreferenceValues<ConnectionPreferences>();
+  const { apiUrl, apiToken } = getPreferenceValues<Preferences>();
   const abortable = useRef<AbortController | null>(null);
   const state = usePromise(
     (url: string, token: string) => fetchDashboards({ apiUrl: url, apiToken: token }, abortable.current?.signal),
