@@ -15,7 +15,13 @@ const shellEnvCacheSchema = z.object({
   hasSecrets: z.boolean().optional(),
 });
 // Secrets from the login shell live only in memory for the current command run, never in Raycast's on-disk cache.
-const SECRET_ENV_NAMES = new Set(["GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"]);
+const SECRET_ENV_NAMES = new Set([
+  "GH_TOKEN",
+  "GITHUB_TOKEN",
+  "GH_ENTERPRISE_TOKEN",
+  "GITHUB_ENTERPRISE_TOKEN",
+  "GRAPHITE_AUTH_TOKEN",
+]);
 let memoryEnv: Record<string, string> | undefined;
 let inFlight: Promise<Record<string, string>> | undefined;
 let environmentGeneration = 0;
@@ -76,6 +82,8 @@ const SHELL_ENV_NAMES = new Set([
   "GH_ENTERPRISE_TOKEN",
   "GITHUB_ENTERPRISE_TOKEN",
   "XDG_CONFIG_HOME",
+  "GRAPHITE_AUTH_TOKEN",
+  "GRAPHITE_PROFILE",
 ]);
 
 /** Extracts only supported environment variables from a complete login-shell probe. */

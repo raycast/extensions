@@ -126,15 +126,18 @@ export function classifyRequestError(error: unknown): InboxError {
  * Raycast doesn't inherit `XDG_CONFIG_HOME` from the user's shell. Only when the config isn't in the usual places,
  * ask the login shell where it lives, so the common case never pays for a shell probe.
  */
+/** Raycast doesn't inherit the login shell's variables, so Graphite's are read from the shell too. */
 async function readGraphiteConfigWithShellFallback(): Promise<GraphiteConfig> {
-  try {
-    return await readGraphiteConfig();
-  } catch (error) {
-    if (!(error instanceof GraphiteConfigMissingError)) throw error;
-    const shellConfigHome = await shellVariable("XDG_CONFIG_HOME").catch(() => undefined);
-    if (!shellConfigHome || shellConfigHome === process.env.XDG_CONFIG_HOME) throw error;
-    return readGraphiteConfig(shellConfigHome);
-  }
+  const [configHome, authToken, profile] = await Promise.all(
+    ["XDG_CONFIG_HOME", "GRAPHITE_AUTH_TOKEN", "GRAPHITE_PROFILE"].map((name) =>
+      shellVariable(name).catch(() => undefined),
+    ),
+  );
+  return readGraphiteConfig({
+    XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME || configHome,
+    GRAPHITE_AUTH_TOKEN: process.env.GRAPHITE_AUTH_TOKEN || authToken,
+    GRAPHITE_PROFILE: process.env.GRAPHITE_PROFILE || profile,
+  });
 }
 
 async function loadConfig(): Promise<GraphiteConfig & { authToken: string }> {
