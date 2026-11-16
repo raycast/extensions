@@ -424,6 +424,8 @@ final class Booster {
     private func reassert() {
         guard !isPaused else { return }
         let before = targets.map(\.effective)
+        // A display switched off whose plain-table write was rejected still holds the boosted table: retry.
+        for target in targets where target.status == .off && target.writtenLast != nil { writePlain(target) }
         for target in targets where target.status == .boosted || target.status == .limited {
             guard let written = target.writtenLast else { continue }
             let readBack = Self.lastEntry(target.id)
@@ -445,7 +447,13 @@ final class Booster {
         let k = Float(factor)
         var r = target.base.r.map { $0 * k }, g = target.base.g.map { $0 * k }, b = target.base.b.map { $0 * k }
         let result = CGSetDisplayTransferByTable(target.id, UInt32(r.count), &r, &g, &b)
-        boosterLog.debug("write \(target.id, privacy: .public) × \(factor, privacy: .public): \(result.rawValue, privacy: .public)")
+        // A rejected write changed nothing on screen: keep the previous output, so the status stays true and
+        // the next tick or re-assert tries again.
+        guard result == .success else {
+            boosterLog.error("write \(target.id, privacy: .public) × \(factor, privacy: .public) rejected: \(result.rawValue, privacy: .public)")
+            return
+        }
+        boosterLog.debug("write \(target.id, privacy: .public) × \(factor, privacy: .public)")
         target.effective = factor
         target.writtenLast = max(r.last ?? 0, g.last ?? 0, b.last ?? 0)
     }
@@ -453,7 +461,12 @@ final class Booster {
     private func writePlain(_ target: Target) {
         guard target.writtenLast != nil else { target.effective = 1.0; return }
         var r = target.base.r, g = target.base.g, b = target.base.b
-        CGSetDisplayTransferByTable(target.id, UInt32(r.count), &r, &g, &b)
+        let result = CGSetDisplayTransferByTable(target.id, UInt32(r.count), &r, &g, &b)
+        // Keep tracking the boosted table when restoring it failed: tearDown still restores ColorSync for it.
+        guard result == .success else {
+            boosterLog.error("plain \(target.id, privacy: .public) rejected: \(result.rawValue, privacy: .public)")
+            return
+        }
         boosterLog.debug("plain \(target.id, privacy: .public)")
         target.effective = 1.0
         target.writtenLast = nil

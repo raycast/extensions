@@ -33,7 +33,7 @@ enum Notifications {
 /// and it may not understand the new messages or apply the current build's limits (the headroom cap, the
 /// external ceiling). A matching version proves which contract is running, not that its limits are sufficient.
 /// src/lib/__tests__/protocol.test.ts pins a hash of all the helper's code to this number, so any code change forces a bump.
-let helperProtocol = 8
+let helperProtocol = 9
 
 enum Levels {
     static let range: ClosedRange<Double> = 1.0...1.75

@@ -1,11 +1,12 @@
 import { redactSecrets } from "@chrismessina/raycast-kit/errors";
 import { showError } from "@chrismessina/raycast-kit/toast";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Clipboard, environment, getPreferenceValues, Icon, Keyboard, LaunchType, MenuBarExtra } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { applyOperation, continuityMessage, getWanted, tuning } from "./lib/control";
 import { allState, GAMMA_UNSUPPORTED, highestLevel, pauseLabel, shortLabel } from "./lib/displays";
 import * as helper from "./lib/helper";
-import { HelperDisplay, HelperStatus, isStale } from "./lib/helper";
+import { HelperDisplay, isStale } from "./lib/helper";
 import { dialIcon, menuBarIcon } from "./lib/icons";
 import { matchesTuning, type Operation } from "./lib/intent";
 import { shouldRestart } from "./lib/keepalive";
@@ -20,9 +21,8 @@ const STATUS_SUFFIX: Partial<Record<HelperDisplay["status"], string>> = {
 };
 
 export default function Command() {
-  const [status, setStatus] = useState<HelperStatus>();
   const [error, setError] = useState<string>();
-  const [busy, setBusy] = useState(true);
+  const [busy, setBusy] = useState(false);
 
   async function report(err: unknown, title: string) {
     setError(redactSecrets(err instanceof Error ? err.message : String(err)));
@@ -30,34 +30,35 @@ export default function Command() {
     if (environment.launchType !== LaunchType.Background) await showError(err, { title });
   }
 
-  useEffect(() => {
-    (async () => {
+  // Each load also re-applies the saved intent when it has to: that replaces an older build's helper, restarts
+  // after a restart, and hands a running helper changed preferences.
+  const {
+    data: status,
+    isLoading,
+    mutate,
+  } = usePromise(
+    async () => {
       const [live, saved] = await Promise.all([helper.status(), getWanted()]);
       const { restoreAfterRestart } = getPreferenceValues<Preferences>();
       const restart = shouldRestart({ restoreAfterRestart, running: live.running, wanted: saved });
       const stale = isStale(live);
       log("tick", { running: live.running, stale, saved, restart });
       const tuningChanged = live.running && !stale && !matchesTuning(live, tuning());
-      let current = live;
-      // Re-applying the saved intent replaces an older build's helper, restarts after a restart, and hands a
-      // running helper changed preferences.
-      if (stale || restart || tuningChanged) {
-        const applied = await applyOperation({ kind: "restore" });
-        current = applied.after;
-        const lost = continuityMessage(applied);
-        if (lost) setError(lost);
-      }
-      setStatus(current);
-    })()
-      .catch((err) => report(err, "Couldn't Read XDR Boost"))
-      .finally(() => setBusy(false));
-  }, []);
+      if (!(stale || restart || tuningChanged)) return live;
+      const applied = await applyOperation({ kind: "restore" });
+      const lost = continuityMessage(applied);
+      if (lost) setError(lost);
+      return applied.after;
+    },
+    [],
+    { onError: (err) => report(err, "Couldn't Read XDR Boost") },
+  );
 
   async function choose(op: Operation) {
     setBusy(true);
     try {
-      const applied = await applyOperation(op);
-      setStatus(applied.after);
+      // mutate re-reads the helper once the change settles.
+      const applied = await mutate(applyOperation(op));
       setError(continuityMessage(applied));
     } catch (err) {
       await report(err, "Couldn't Change XDR Boost");
@@ -74,7 +75,7 @@ export default function Command() {
     <MenuBarExtra
       icon={menuBarIcon(highest)}
       tooltip={`XDR Boost: ${shortLabel(highestLevel(displays))}`}
-      isLoading={busy}
+      isLoading={isLoading || busy}
     >
       {error && (
         <MenuBarExtra.Section>

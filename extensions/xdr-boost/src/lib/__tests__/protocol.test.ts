@@ -67,11 +67,11 @@ describe("helper protocol", () => {
       hash.update(`${Buffer.byteLength(file)}:${file}${bytes.length}:`).update(bytes);
     }
     expect({ protocol: HELPER_PROTOCOL, sha256: hash.digest("hex") }).toEqual({
-      protocol: 8,
-      sha256: "e49c15362124bdbedba521aa61b1193fdb0213079ec205a871cb0a1275fe250c",
+      protocol: 9,
+      sha256: "f654a36a4e4459995567ad1407f43f6133fe9473d4eb196a9ad1edf86c8efd57",
     });
     expect(fingerprint).toEqual({
-      protocol: 8,
+      protocol: 9,
       encodingGamma: "2.2",
       builtInMaxGain: "pow(1.75, encodingGamma)",
       headroomShare: "0.6",

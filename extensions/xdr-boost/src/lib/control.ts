@@ -101,8 +101,8 @@ export function continuityMessage(applied: Pick<Applied, "loss">): string | unde
 }
 
 /**
- * The one way intent changes. Inside a cross-process lock, the complete next snapshot is saved, sent to the
- * helper, and accepted only when the helper reports back exactly that snapshot. The notification (and, when
+ * The one way intent changes. Inside a cross-process lock, the complete next snapshot is sent to the helper,
+ * and saved only when the helper reports back exactly that snapshot. The notification (and, when
  * asked, the menu bar refresh) runs after the lock is released.
  */
 export async function applyOperation(op: Operation, options: { refreshMenuBar?: boolean } = {}): Promise<Applied> {
@@ -126,15 +126,21 @@ export async function applyOperation(op: Operation, options: { refreshMenuBar?: 
     const { intent, saturated } = computeNext(resolved, saved, connected);
     if (loss !== "none") log("stale helper replaced without saved levels: started from no boost", { op: resolved });
     log("apply", { op: resolved, saved, intent, running: current.running });
-    await LocalStorage.setItem(WANTED_KEY, JSON.stringify(intent));
     const ceiling = tuning();
     if (current.running) await helper.setLevels(intent, ceiling);
     else if (boostsAnything(intent)) await helper.start(intent, ceiling);
     const after = await poll((s) => !isStale(s) && acknowledged(s, intent, ceiling));
     if (isStale(after) || !acknowledged(after, intent, ceiling)) {
       log("not acknowledged", { intent, after: { running: after.running, all: after.allLevel, levels: after.levels } });
+      // Keep the saved intent equal to what a current helper reports, so the next change starts from what is
+      // actually applied. Never sooner: a change that did not take must not be saved.
+      if (after.running && !isStale(after))
+        await LocalStorage.setItem(WANTED_KEY, JSON.stringify({ all: after.allLevel, levels: after.levels ?? {} }));
       throw new Error("The helper did not confirm the new levels within 3 seconds.");
     }
+    // Saved only once the helper confirmed it. After a failure the old intent stays, and the next change
+    // sends a complete snapshot that replaces whatever the helper holds.
+    await LocalStorage.setItem(WANTED_KEY, JSON.stringify(intent));
     return { after, saturated, loss };
   });
   log("settled", { displays: result.after.displays.map((d) => [d.name, d.level, d.status]) });

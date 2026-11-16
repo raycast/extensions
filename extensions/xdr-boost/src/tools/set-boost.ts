@@ -1,8 +1,9 @@
+import { Tool } from "@raycast/api";
 import { applyOperation, continuityMessage } from "../lib/control";
 import { hud, matchDisplay, pauseLabel, toolDisplays } from "../lib/displays";
 import { status } from "../lib/helper";
 import type { Operation } from "../lib/intent";
-import { MAX, OFF } from "../lib/levels";
+import { levelLabel, MAX, OFF } from "../lib/levels";
 import { log } from "../lib/log";
 
 type Input = {
@@ -17,6 +18,13 @@ type Input = {
    * Use the id when two displays share a name. Leave it out to change every XDR display.
    */
   display?: string;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const target = input.display?.trim() || "All XDR Displays";
+  const level =
+    typeof input.level === "number" && Number.isFinite(input.level) ? levelLabel(input.level) : String(input.level);
+  return { message: `Set ${target} to ${level}?` };
 };
 
 export default async function tool(input: Input) {

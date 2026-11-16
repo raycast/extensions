@@ -1,9 +1,10 @@
-import { failToast, showError } from "@chrismessina/raycast-kit/toast";
-import { useEffect, useState } from "react";
+import { failToast, onErrorToast } from "@chrismessina/raycast-kit/toast";
+import { useState } from "react";
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { applyOperation, continuityMessage, defaultLevel, getWanted } from "./lib/control";
 import { allLabel, allState, highestLevel, hud, shortLabel } from "./lib/displays";
-import { HelperDisplay, HelperStatus, isStale, status } from "./lib/helper";
+import { HelperDisplay, isStale, status } from "./lib/helper";
 import { dialIcon } from "./lib/icons";
 import type { Operation } from "./lib/intent";
 import { indexOfLevel, LEVELS, OFF, presetAt } from "./lib/levels";
@@ -16,35 +17,24 @@ const STATUS_TAG: Partial<Record<HelperDisplay["status"], string>> = {
 };
 
 export default function Command() {
-  const [state, setState] = useState<HelperStatus>();
-  const [busy, setBusy] = useState(true);
-  const [hasSaved, setHasSaved] = useState(false);
-  const [loadError, setLoadError] = useState<string>();
-
-  async function load() {
-    try {
+  const [busy, setBusy] = useState(false);
+  const { data, isLoading, error, revalidate, mutate } = usePromise(
+    async () => {
       const [now, saved] = await Promise.all([status(), getWanted()]);
-      setState(now);
-      setHasSaved(saved !== undefined);
-      setLoadError(undefined);
-    } catch (error) {
-      setLoadError(error instanceof Error ? error.message : String(error));
-      await showError(error, { title: "Couldn't Read XDR Boost" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
+      return { state: now, hasSaved: saved !== undefined };
+    },
+    [],
+    { onError: onErrorToast({ title: "Couldn't Read XDR Boost" }) },
+  );
+  const state = data?.state;
+  const hasSaved = data?.hasSaved ?? false;
 
   async function change(op: Operation, title: string) {
     setBusy(true);
     const toast = await showToast({ style: Toast.Style.Animated, title });
     try {
-      const applied = await applyOperation(op, { refreshMenuBar: true });
-      setState(applied.after);
+      // mutate re-reads the helper once the change settles.
+      const applied = await mutate(applyOperation(op, { refreshMenuBar: true }));
       toast.style = Toast.Style.Success;
       toast.title = hud(applied.after);
       toast.message = continuityMessage(applied);
@@ -74,7 +64,7 @@ export default function Command() {
     return (
       <ActionPanel title={name}>
         <Action
-          title={isOn ? "Turn Off" : `Turn On at ${shortLabel(toggleTo)}`}
+          title={isOn ? "Turn off" : `Turn On at ${shortLabel(toggleTo)}`}
           icon={dialIcon(indexOfLevel(toggleTo))}
           onAction={() => change(toggle, isOn ? `Turning Off ${name}` : `Boosting ${name}`)}
         />
@@ -89,22 +79,22 @@ export default function Command() {
           ))}
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
         </ActionPanel.Section>
       </ActionPanel>
     );
   }
 
   return (
-    <List isLoading={busy} searchBarPlaceholder="Search displays…">
-      {!state && loadError ? (
+    <List isLoading={isLoading || busy} searchBarPlaceholder="Search displays…">
+      {!state && error ? (
         <List.EmptyView
           icon={Icon.Warning}
           title="Couldn't Read XDR Boost"
-          description={loadError}
+          description={error.message}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />

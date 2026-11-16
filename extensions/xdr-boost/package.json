@@ -115,8 +115,14 @@
       "required": false,
       "default": "adaptive",
       "data": [
-        { "title": "Follow Brightness (Recommended)", "value": "adaptive" },
-        { "title": "Fixed Maximum", "value": "fixed" }
+        {
+          "title": "Follow Brightness (Recommended)",
+          "value": "adaptive"
+        },
+        {
+          "title": "Fixed Maximum",
+          "value": "fixed"
+        }
       ]
     },
     {
@@ -127,11 +133,26 @@
       "required": false,
       "default": "2",
       "data": [
-        { "title": "1.5×", "value": "1.5" },
-        { "title": "2× (Recommended)", "value": "2" },
-        { "title": "2.5×", "value": "2.5" },
-        { "title": "3×", "value": "3" },
-        { "title": "3.4× (Full, may blank a Pro Display XDR)", "value": "3.42" }
+        {
+          "title": "1.5×",
+          "value": "1.5"
+        },
+        {
+          "title": "2× (Recommended)",
+          "value": "2"
+        },
+        {
+          "title": "2.5×",
+          "value": "2.5"
+        },
+        {
+          "title": "3×",
+          "value": "3"
+        },
+        {
+          "title": "3.4× (Full, may blank a Pro Display XDR)",
+          "value": "3.42"
+        }
       ]
     },
     {
@@ -142,11 +163,26 @@
       "required": false,
       "default": "20",
       "data": [
-        { "title": "Never", "value": "0" },
-        { "title": "10%", "value": "10" },
-        { "title": "20%", "value": "20" },
-        { "title": "30%", "value": "30" },
-        { "title": "50%", "value": "50" }
+        {
+          "title": "Never",
+          "value": "0"
+        },
+        {
+          "title": "10%",
+          "value": "10"
+        },
+        {
+          "title": "20%",
+          "value": "20"
+        },
+        {
+          "title": "30%",
+          "value": "30"
+        },
+        {
+          "title": "50%",
+          "value": "50"
+        }
       ]
     },
     {
@@ -161,7 +197,8 @@
   ],
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.3.0",
-    "@raycast/api": "^2.12.1"
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",

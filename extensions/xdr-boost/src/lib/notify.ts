@@ -1,10 +1,9 @@
-import { execFile } from "node:child_process";
 import { getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { log } from "./log";
 
 // The text travels as argv to the AppleScript `run` handler, never interpolated into the script,
-// so display names or any other text cannot inject AppleScript. Same mechanism as the Fetch
-// extension's download notifications (@chrismessina/raycast-downloader).
+// so display names or any other text cannot inject AppleScript.
 const SCRIPT = "on run {t, m}\ndisplay notification m with title t\nend run";
 
 /**
@@ -13,10 +12,9 @@ const SCRIPT = "on run {t, m}\ndisplay notification m with title t\nend run";
  */
 export async function notify(message: string): Promise<void> {
   if (!getPreferenceValues<Preferences>().notifyOnChange) return;
-  await new Promise<void>((resolve) => {
-    execFile("/usr/bin/osascript", ["-e", SCRIPT, "XDR Boost", message], { timeout: 5000 }, (error) => {
-      if (error) log("notification failed", { message: error.message });
-      resolve();
-    });
-  });
+  try {
+    await runAppleScript(SCRIPT, ["XDR Boost", message], { timeout: 5000 });
+  } catch (error) {
+    log("notification failed", { message: error instanceof Error ? error.message : String(error) });
+  }
 }
