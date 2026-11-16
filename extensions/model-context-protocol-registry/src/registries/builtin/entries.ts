@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "imageat",
+    title: "imageat",
+    description:
+      "Generate and edit images and videos, and produce narrated explainers and voiceovers, from any MCP client. Image and video generation, 20+ editing tools (background removal, inpainting, object eraser, relight, virtual try-on and more), plus game-asset tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an imageat account is required. Clients that cannot use OAuth can send an imageat API key as a Bearer token. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js. A local stdio server is also published as `@imageat/mcp` (MIT).",
+    icon: "https://imageat.com/imageat-logo-green-transparent.svg",
+    homepage: "https://imageat.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.imageat.com/mcp"],
+    },
+    remoteUrl: "https://mcp.imageat.com/mcp",
+  },
+  {
     name: "within",
     title: "within",
     description:
