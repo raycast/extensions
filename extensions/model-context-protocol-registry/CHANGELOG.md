@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add DocSpring MCP Server] - {PR_MERGE_DATE}
+## [Add DocSpring MCP Server] - 2026-11-16
 
 - Add DocSpring to the official registry: fill PDF and Word templates, generate PDFs and Word documents, and collect e-signatures from an AI agent. 57 tools. Hosted Streamable HTTP server at https://mcp.docspring.com/mcp (EU accounts: https://mcp-eu.docspring.com/mcp) with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a DocSpring account (free plan available).
 
