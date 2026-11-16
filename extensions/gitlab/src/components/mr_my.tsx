@@ -144,14 +144,16 @@ function MyMRList(props: {
 }
 
 export function MyMergeRequests(props: {
-  scope: MRScope;
+  scope?: MRScope;
   state: MRState;
   searchText?: string | undefined;
   onSearchTextChange?: (text: string) => void;
 }) {
   const [project, setProject] = useState<Project>();
   const [mrState, setMrState] = useCachedState<MRState>("mr-my-state", props.state);
-  const [scope, setScope] = useCachedState<MRScope>("mr-my-scope", props.scope);
+  const [cachedScope, setCachedScope] = useCachedState<MRScope>("mr-my-scope", MRScope.all);
+  const [sessionScope, setSessionScope] = useState<MRScope>();
+  const scope = sessionScope ?? props.scope ?? cachedScope;
   const includeAuthored = scope === MRScope.all || scope === MRScope.created_by_me;
   const includeAssigned = scope === MRScope.all || scope === MRScope.assigned_to_me;
   const includeReviews = scope === MRScope.all || scope === MRScope.reviews_for_me;
@@ -209,7 +211,10 @@ export function MyMergeRequests(props: {
       searchText={props.searchText}
       onSearchTextChange={props.onSearchTextChange}
       scope={scope}
-      onSelectScope={setScope}
+      onSelectScope={(nextScope) => {
+        setSessionScope(nextScope);
+        setCachedScope(nextScope);
+      }}
       mrState={mrState}
       onSelectState={setMrState}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}

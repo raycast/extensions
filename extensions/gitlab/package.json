@@ -41,7 +41,6 @@
      "type": "dropdown",
      "placeholder": "Merge request scope",
      "required": false,
-     "default": "all",
      "data": [
       {
        "title": "All",
