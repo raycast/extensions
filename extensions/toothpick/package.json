@@ -7,7 +7,6 @@
   "contributors": [
     "briankosw",
     "oranja",
-    "sxn",
     "pernielsentikaer",
     "rspeicher",
     "roele",
@@ -16,6 +15,9 @@
     "merchako",
     "alexi.build",
     "sansaxena789"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "repository": {
     "type": "git",

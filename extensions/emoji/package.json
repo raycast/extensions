@@ -6,10 +6,12 @@
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "contributors": [
-    "sxn",
     "maxdavid",
     "sinasab",
     "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "license": "MIT",
   "categories": [

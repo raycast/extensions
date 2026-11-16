@@ -11,7 +11,6 @@
   ],
   "contributors": [
     "peduarte",
-    "sxn",
     "dillionverma",
     "andreaselia",
     "stuart",
@@ -52,7 +51,8 @@
   "pastContributors": [
     "bkeys818",
     "jonasengelmann",
-    "thomaslombart"
+    "thomaslombart",
+    "sxn"
   ],
   "debug": {
     "reloadShortcut": {
