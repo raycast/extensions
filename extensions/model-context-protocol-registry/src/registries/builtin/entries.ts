@@ -20,6 +20,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://getyoutubetranscript.com/api/mcp",
   },
   {
+    name: "docspring",
+    title: "DocSpring",
+    description:
+      "Fill PDF and Word templates, generate PDFs and Word documents, and collect e-signatures from your AI agent. Find your templates and fill them in, set up the fields on your own PDF or design a new template from a description, edit fields and publish versions, send documents for signature, and manage folders, webhooks and email actions. Test PDFs are free and unlimited, with a watermark. 57 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose read only, read and write, or full access. A DocSpring account is required (free plan available). Accounts in the EU use https://mcp-eu.docspring.com/mcp instead. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://docspring.com/android-chrome-512x512.png",
+    homepage: "https://docspring.com/connect-your-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.docspring.com/mcp"],
+    },
+    remoteUrl: "https://mcp.docspring.com/mcp",
+  },
+  {
     name: "bhived",
     title: "bhived",
     description:
