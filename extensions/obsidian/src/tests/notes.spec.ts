@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { appendText, createProperties, writeMarkdown, deleteNote, isNote, Note } from "../obsidian/internal/notes";
+import {
+  appendText,
+  createProperties,
+  writeMarkdown,
+  deleteNote,
+  isNote,
+  Note,
+} from "../obsidian/internal/notes";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -81,8 +88,14 @@ describe("notes", () => {
     });
 
     it("should handle tags with special characters", () => {
-      const result = createProperties(["my-tag", "tag_with_underscore", "tag/with/slash"]);
-      expect(result).toBe('---\ntags: ["my-tag","tag_with_underscore","tag/with/slash"]\n---\n');
+      const result = createProperties([
+        "my-tag",
+        "tag_with_underscore",
+        "tag/with/slash",
+      ]);
+      expect(result).toBe(
+        '---\ntags: ["my-tag","tag_with_underscore","tag/with/slash"]\n---\n'
+      );
     });
 
     it("should handle tags with spaces", () => {
@@ -107,7 +120,10 @@ describe("notes", () => {
       expect(fs.existsSync(filePath)).toBe(true);
       const content = fs.readFileSync(filePath, "utf-8");
       expect(content).toBe("# Test Content");
-      expect(showToast).toHaveBeenCalledWith({ title: "Note created", style: "success" });
+      expect(showToast).toHaveBeenCalledWith({
+        title: "Note created",
+        style: "success",
+      });
     });
 
     it("should create directory if it doesn't exist", () => {

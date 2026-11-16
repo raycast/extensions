@@ -31,7 +31,9 @@ describe("obsidian", () => {
 
   describe("getVaultNameFromPath", () => {
     it("should extract vault name from path", () => {
-      expect(getVaultNameFromPath("/Users/test/Documents/MyVault")).toBe("MyVault");
+      expect(getVaultNameFromPath("/Users/test/Documents/MyVault")).toBe(
+        "MyVault"
+      );
     });
 
     it("should extract vault name from nested path", () => {
@@ -39,11 +41,15 @@ describe("obsidian", () => {
     });
 
     it("should handle vault name with spaces", () => {
-      expect(getVaultNameFromPath("/path/to/My Vault Name")).toBe("My Vault Name");
+      expect(getVaultNameFromPath("/path/to/My Vault Name")).toBe(
+        "My Vault Name"
+      );
     });
 
     it("should handle vault name with special characters", () => {
-      expect(getVaultNameFromPath("/path/to/My-Vault_2023")).toBe("My-Vault_2023");
+      expect(getVaultNameFromPath("/path/to/My-Vault_2023")).toBe(
+        "My-Vault_2023"
+      );
     });
 
     it("should return undefined for empty path", () => {
@@ -79,7 +85,9 @@ describe("obsidian", () => {
       fs.mkdirSync(vault1, { recursive: true });
       fs.mkdirSync(vault2, { recursive: true });
 
-      vi.mocked(getPreferenceValues).mockReturnValue({ vaultPath: `${vault1},${vault2}` });
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: `${vault1},${vault2}`,
+      });
 
       const vaults = getVaultsFromPreferences();
 
@@ -116,7 +124,9 @@ describe("obsidian", () => {
       fs.mkdirSync(vault, { recursive: true });
 
       // The code trims paths before checking existence
-      vi.mocked(getPreferenceValues).mockReturnValue({ vaultPath: `  ${vault}  ` });
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: `  ${vault}  `,
+      });
 
       const vaults = getVaultsFromPreferences();
 
@@ -131,7 +141,9 @@ describe("obsidian", () => {
       fs.mkdirSync(vault2, { recursive: true });
 
       // The code trims each path after splitting
-      vi.mocked(getPreferenceValues).mockReturnValue({ vaultPath: `${vault1} , ${vault2}` });
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: `${vault1} , ${vault2}`,
+      });
 
       const vaults = getVaultsFromPreferences();
 
@@ -210,7 +222,9 @@ describe("obsidian", () => {
         workspace: "Writing Workspace",
       });
 
-      expect(url).toBe("obsidian://adv-uri?vault=Test%20Vault&workspace=Writing%20Workspace");
+      expect(url).toBe(
+        "obsidian://adv-uri?vault=Test%20Vault&workspace=Writing%20Workspace"
+      );
     });
 
     it("should generate OpenWorkspace URL with special characters", () => {

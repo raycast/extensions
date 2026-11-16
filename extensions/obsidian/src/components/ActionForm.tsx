@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { CustomAction } from "../api/custom-actions/custom-actions.types";
@@ -16,12 +23,20 @@ export function ActionForm({ action, onSave }: ActionFormProps) {
 
   const [title, setTitle] = useState(action?.title ?? "");
   const [description, setDescription] = useState(action?.description ?? "");
-  const [vaultName, setVaultName] = useState(action?.vaultName ?? (vaults.length > 0 ? vaults[0].name : ""));
+  const [vaultName, setVaultName] = useState(
+    action?.vaultName ?? (vaults.length > 0 ? vaults[0].name : "")
+  );
   const [path, setPath] = useState(action?.path ?? "");
-  const [type, setType] = useState<CustomAction["type"]>(action?.type ?? "capture");
+  const [type, setType] = useState<CustomAction["type"]>(
+    action?.type ?? "capture"
+  );
   // Default template for capture mode is {content} if not specified, otherwise empty
-  const [template, setTemplate] = useState(action?.template ?? (action ? "" : "{content}"));
-  const [mode, setMode] = useState<CustomAction["mode"]>(action?.mode ?? "append");
+  const [template, setTemplate] = useState(
+    action?.template ?? (action ? "" : "{content}")
+  );
+  const [mode, setMode] = useState<CustomAction["mode"]>(
+    action?.mode ?? "append"
+  );
   const [heading, setHeading] = useState(action?.heading ?? "");
   const [silent, setSilent] = useState(action?.silent ?? false);
 
@@ -58,7 +73,10 @@ export function ActionForm({ action, onSave }: ActionFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={action ? "Update Action" : "Create Action"} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={action ? "Update Action" : "Create Action"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
@@ -78,9 +96,18 @@ export function ActionForm({ action, onSave }: ActionFormProps) {
         onChange={setDescription}
       />
 
-      <Form.Dropdown id="vault" title="Vault" value={vaultName} onChange={setVaultName}>
+      <Form.Dropdown
+        id="vault"
+        title="Vault"
+        value={vaultName}
+        onChange={setVaultName}
+      >
         {vaults.map((vault) => (
-          <Form.Dropdown.Item key={vault.key} value={vault.name} title={vault.name} />
+          <Form.Dropdown.Item
+            key={vault.key}
+            value={vault.name}
+            title={vault.name}
+          />
         ))}
       </Form.Dropdown>
 
@@ -123,7 +150,12 @@ export function ActionForm({ action, onSave }: ActionFormProps) {
         info="Supports {clipboard}, {time}..."
       />
 
-      <Form.Dropdown id="mode" title="Mode" value={mode} onChange={(val) => setMode(val as CustomAction["mode"])}>
+      <Form.Dropdown
+        id="mode"
+        title="Mode"
+        value={mode}
+        onChange={(val) => setMode(val as CustomAction["mode"])}
+      >
         <Form.Dropdown.Item value="append" title="Append" />
         <Form.Dropdown.Item value="prepend" title="Prepend" />
       </Form.Dropdown>
@@ -136,7 +168,12 @@ export function ActionForm({ action, onSave }: ActionFormProps) {
         onChange={setHeading}
       />
 
-      <Form.Checkbox id="silent" label="Open in background" value={silent} onChange={setSilent} />
+      <Form.Checkbox
+        id="silent"
+        label="Open in background"
+        value={silent}
+        onChange={setSilent}
+      />
     </Form>
   );
 }

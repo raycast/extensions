@@ -6,7 +6,10 @@ import { NoteListDropdown } from "./NoteListDropdown";
 import { SearchNotePreferences } from "../../utils/preferences";
 import { CreateNoteView } from "./CreateNoteView";
 import { filterNotesFuzzy } from "../../api/search/search.service";
-import { NoteSearchResult, searchNotesWithMatches } from "../../api/search/content-match.service";
+import {
+  NoteSearchResult,
+  searchNotesWithMatches,
+} from "../../api/search/content-match.service";
 import { runSearchRequest } from "../../api/search/search-request.service";
 import { SearchArguments } from "../../utils/interfaces";
 import { sortNotes, SortOrder } from "../../utils/sorting";
@@ -30,21 +33,37 @@ function resultsForNotes(notes: Note[]): NoteSearchResult[] {
   return notes.map((note) => ({ id: note.path, note }));
 }
 
-function sortSearchResults(results: NoteSearchResult[], sortOrder: SortOrder): NoteSearchResult[] {
+function sortSearchResults(
+  results: NoteSearchResult[],
+  sortOrder: SortOrder
+): NoteSearchResult[] {
   if (sortOrder === "relevance") return results;
 
-  const uniqueNotes = Array.from(new Map(results.map((result) => [result.note.path, result.note])).values());
-  const noteOrder = new Map(sortNotes(uniqueNotes, sortOrder).map((note, index) => [note.path, index]));
+  const uniqueNotes = Array.from(
+    new Map(results.map((result) => [result.note.path, result.note])).values()
+  );
+  const noteOrder = new Map(
+    sortNotes(uniqueNotes, sortOrder).map((note, index) => [note.path, index])
+  );
 
   return [...results].sort((a, b) => {
-    const noteComparison = (noteOrder.get(a.note.path) ?? 0) - (noteOrder.get(b.note.path) ?? 0);
+    const noteComparison =
+      (noteOrder.get(a.note.path) ?? 0) - (noteOrder.get(b.note.path) ?? 0);
     if (noteComparison !== 0) return noteComparison;
     return (a.match?.line ?? 0) - (b.match?.line ?? 0);
   });
 }
 
 export function NoteList(props: NoteListProps) {
-  const { notes, vault, title, searchArguments, isLoading, onNoteUpdated, onDelete } = props;
+  const {
+    notes,
+    vault,
+    title,
+    searchArguments,
+    isLoading,
+    onNoteUpdated,
+    onDelete,
+  } = props;
 
   const pref = getPreferenceValues<SearchNotePreferences>();
 
@@ -62,7 +81,9 @@ export function NoteList(props: NoteListProps) {
 
   const [inputText, setInputText] = useState(initialSearchText);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [filteredResults, setFilteredResults] = useState<NoteSearchResult[]>([]);
+  const [filteredResults, setFilteredResults] = useState<NoteSearchResult[]>(
+    []
+  );
   const [isSearching, setIsSearching] = useState(!!initialSearchText);
   const [sortOrder, setSortOrder] = useState<SortOrder>("relevance");
 
@@ -106,8 +127,20 @@ export function NoteList(props: NoteListProps) {
     };
   }, [notes, inputText, pref.searchContent, sortOrder]);
 
-  if (filteredResults.length === 0 && inputText.trim() !== "" && !isSearching && !isLoading) {
-    return <CreateNoteView title={title || ""} searchText={inputText} onSearchChange={setInputText} vault={vault} />;
+  if (
+    filteredResults.length === 0 &&
+    inputText.trim() !== "" &&
+    !isSearching &&
+    !isLoading
+  ) {
+    return (
+      <CreateNoteView
+        title={title || ""}
+        searchText={inputText}
+        onSearchChange={setInputText}
+        vault={vault}
+      />
+    );
   }
 
   return (
@@ -119,7 +152,9 @@ export function NoteList(props: NoteListProps) {
       onSearchTextChange={setInputText}
       onSelectionChange={setSelectedItemId}
       navigationTitle={title}
-      searchBarAccessory={<NoteListDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />}
+      searchBarAccessory={
+        <NoteListDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
+      }
     >
       {filteredResults.map((result, idx) => (
         <MemoizedNoteListItem
@@ -127,13 +162,17 @@ export function NoteList(props: NoteListProps) {
           vault={vault}
           key={result.id}
           pref={pref}
-          selectedItemId={!selectedItemId ? (idx === 0 ? result.id : null) : selectedItemId}
+          selectedItemId={
+            !selectedItemId ? (idx === 0 ? result.id : null) : selectedItemId
+          }
           onNoteUpdated={onNoteUpdated}
           onDelete={(deletedNote) => {
             // Remove from the original notes list via the hook
             onDelete?.(deletedNote);
             // Also remove from the filtered list for immediate UI update
-            setFilteredResults((prev) => prev.filter((item) => item.note.path !== deletedNote.path));
+            setFilteredResults((prev) =>
+              prev.filter((item) => item.note.path !== deletedNote.path)
+            );
           }}
         />
       ))}

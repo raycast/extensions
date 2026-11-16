@@ -65,7 +65,9 @@ describe("Callouts - Two Phase Approach", () => {
       });
 
       it("should trim whitespace from type and title", () => {
-        const result = parseCalloutHeader(">   [!  note  ]   Title with spaces  ");
+        const result = parseCalloutHeader(
+          ">   [!  note  ]   Title with spaces  "
+        );
         expect(result).toEqual({
           type: "note",
           title: "Title with spaces",
@@ -79,7 +81,9 @@ describe("Callouts - Two Phase Approach", () => {
       });
 
       it("should handle special characters in title", () => {
-        const result = parseCalloutHeader("> [!note] Title with \"quotes\" and 'apostrophes'");
+        const result = parseCalloutHeader(
+          "> [!note] Title with \"quotes\" and 'apostrophes'"
+        );
         expect(result?.title).toBe("Title with \"quotes\" and 'apostrophes'");
       });
     });
@@ -94,7 +98,9 @@ describe("Callouts - Two Phase Approach", () => {
       });
 
       it("should preserve extra whitespace after prefix", () => {
-        expect(removeBlockquotePrefix(">   Content with spaces")).toBe("  Content with spaces");
+        expect(removeBlockquotePrefix(">   Content with spaces")).toBe(
+          "  Content with spaces"
+        );
       });
 
       it("should handle empty blockquote", () => {
@@ -113,7 +119,11 @@ describe("Callouts - Two Phase Approach", () => {
   describe("Phase 1: Parsing (parseBlocks)", () => {
     describe("basic parsing", () => {
       it("should parse a simple callout", () => {
-        const lines = ["> [!note] Title", "> Content line 1", "> Content line 2"];
+        const lines = [
+          "> [!note] Title",
+          "> Content line 1",
+          "> Content line 2",
+        ];
         const blocks = parseBlocks(lines);
 
         expect(blocks).toHaveLength(1);
@@ -194,7 +204,12 @@ describe("Callouts - Two Phase Approach", () => {
 
     describe("mixed content", () => {
       it("should parse mixed text and callouts", () => {
-        const lines = ["Text before", "> [!note] Callout", "> Content", "Text after"];
+        const lines = [
+          "Text before",
+          "> [!note] Callout",
+          "> Content",
+          "Text after",
+        ];
         const blocks = parseBlocks(lines);
 
         expect(blocks).toHaveLength(3);
@@ -204,7 +219,12 @@ describe("Callouts - Two Phase Approach", () => {
       });
 
       it("should parse consecutive callouts", () => {
-        const lines = ["> [!note] First", "> First content", "> [!warning] Second", "> Second content"];
+        const lines = [
+          "> [!note] First",
+          "> First content",
+          "> [!warning] Second",
+          "> Second content",
+        ];
         const blocks = parseBlocks(lines);
 
         expect(blocks).toHaveLength(2);
@@ -236,7 +256,10 @@ describe("Callouts - Two Phase Approach", () => {
         expect(blocks[0].type).toBe("callout");
         expect((blocks[0] as CalloutBlock).content).toEqual(["Content 1"]);
         expect(blocks[1]).toEqual({ type: "text", line: "" });
-        expect(blocks[2]).toEqual({ type: "text", line: "> Regular blockquote" });
+        expect(blocks[2]).toEqual({
+          type: "text",
+          line: "> Regular blockquote",
+        });
         expect(blocks[3]).toEqual({ type: "text", line: "Normal text" });
         expect(blocks[4].type).toBe("callout");
       });
@@ -260,19 +283,35 @@ describe("Callouts - Two Phase Approach", () => {
       });
 
       it("should preserve whitespace in content", () => {
-        const lines = ["> [!note] Title", ">   Indented content", ">     More indented"];
+        const lines = [
+          "> [!note] Title",
+          ">   Indented content",
+          ">     More indented",
+        ];
         const blocks = parseBlocks(lines);
 
         const callout = blocks[0] as CalloutBlock;
-        expect(callout.content).toEqual(["  Indented content", "    More indented"]);
+        expect(callout.content).toEqual([
+          "  Indented content",
+          "    More indented",
+        ]);
       });
 
       it("should handle markdown in content", () => {
-        const lines = ["> [!note] Title", "> **Bold** and *italic*", "> - List item", "> `code`"];
+        const lines = [
+          "> [!note] Title",
+          "> **Bold** and *italic*",
+          "> - List item",
+          "> `code`",
+        ];
         const blocks = parseBlocks(lines);
 
         const callout = blocks[0] as CalloutBlock;
-        expect(callout.content).toEqual(["**Bold** and *italic*", "- List item", "`code`"]);
+        expect(callout.content).toEqual([
+          "**Bold** and *italic*",
+          "- List item",
+          "`code`",
+        ]);
       });
     });
 
@@ -308,7 +347,12 @@ describe("Callouts - Two Phase Approach", () => {
 
         const result = renderCalloutBlock(callout);
 
-        expect(result).toEqual(["> 📝 **Important**", ">", "> Line 1", "> Line 2"]);
+        expect(result).toEqual([
+          "> 📝 **Important**",
+          ">",
+          "> Line 1",
+          "> Line 2",
+        ]);
       });
 
       it("should render callout without title", () => {
@@ -350,7 +394,13 @@ describe("Callouts - Two Phase Approach", () => {
 
         const result = renderCalloutBlock(callout);
 
-        expect(result).toEqual(["> 📝 **Test**", ">", "> Line 1", ">", "> Line 3"]);
+        expect(result).toEqual([
+          "> 📝 **Test**",
+          ">",
+          "> Line 1",
+          ">",
+          "> Line 3",
+        ]);
       });
 
       it("should preserve content whitespace", () => {
@@ -364,7 +414,12 @@ describe("Callouts - Two Phase Approach", () => {
 
         const result = renderCalloutBlock(callout);
 
-        expect(result).toEqual(["> 📝 **Test**", ">", ">   Indented", ">     More indented"]);
+        expect(result).toEqual([
+          "> 📝 **Test**",
+          ">",
+          ">   Indented",
+          ">     More indented",
+        ]);
       });
     });
 

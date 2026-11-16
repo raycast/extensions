@@ -1,5 +1,14 @@
 import { Note, NoteWithContent, ObsidianVault } from "@/obsidian";
-import { Action, ActionPanel, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import fs from "fs";
 import { updateNoteInCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
@@ -25,7 +34,8 @@ export function EditNote(props: {
 
     const options = {
       title: "Override note",
-      message: 'Are you sure you want to override the note: "' + note.title + '"?',
+      message:
+        'Are you sure you want to override the note: "' + note.title + '"?',
       icon: Icon.ExclamationMark,
     };
     if (await confirmAlert(options)) {
@@ -34,7 +44,11 @@ export function EditNote(props: {
 
       // Update cache and notify parent
       const stats = fs.statSync(note.path);
-      const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
+      const updates = {
+        lastModified: stats.mtime,
+        createdAt: stats.birthtime,
+        fileSize: stats.size,
+      };
       logger.info(`Updating cache and notifying parent for: ${note.path}`);
       updateNoteInCache(vault.path, note.path, updates);
       onNoteUpdated?.(note.path, updates);

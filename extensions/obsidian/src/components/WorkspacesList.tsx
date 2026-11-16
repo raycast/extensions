@@ -1,5 +1,12 @@
 import { ObsidianVault, Vault, Obsidian, ObsidianTargetType } from "@/obsidian";
-import { Action, ActionPanel, getPreferenceValues, Icon, List, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  open,
+} from "@raycast/api";
 import { useState } from "react";
 
 interface WorkspacesListProps {
@@ -9,12 +16,17 @@ interface WorkspacesListProps {
 export default function WorkspacesList({ vault }: WorkspacesListProps) {
   const { configFileName } = getPreferenceValues();
   const workspacesJson = Vault.getWorkspaces(vault.path, configFileName);
-  const [activeWorkspace, setActiveWorkspace] = useState<string | undefined>(workspacesJson?.active);
+  const [activeWorkspace, setActiveWorkspace] = useState<string | undefined>(
+    workspacesJson?.active
+  );
 
   if (!workspacesJson || !workspacesJson.workspaces) {
     return (
       <List>
-        <List.EmptyView title="No Workspaces Found" description="No workspaces.json file found in this vault." />
+        <List.EmptyView
+          title="No Workspaces Found"
+          description="No workspaces.json file found in this vault."
+        />
       </List>
     );
   }
@@ -42,7 +54,11 @@ export default function WorkspacesList({ vault }: WorkspacesListProps) {
             key={workspaceName}
             title={workspaceName}
             icon={Icon.Desktop}
-            accessories={isActive ? [{ icon: Icon.CheckCircle, tooltip: "Active Workspace" }] : []}
+            accessories={
+              isActive
+                ? [{ icon: Icon.CheckCircle, tooltip: "Active Workspace" }]
+                : []
+            }
             actions={
               <ActionPanel>
                 <Action

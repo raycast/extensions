@@ -1,11 +1,25 @@
 import { ObsidianVault } from "@/obsidian";
-import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, Keyboard, popToRoot } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  getPreferenceValues,
+  Keyboard,
+  popToRoot,
+} from "@raycast/api";
 import { invalidateNotesCache } from "../api/cache/cache.service";
 import { createNote, CreateNoteParams } from "../api/create-note";
-import { parseFolderActionsPreferences, parseTagsPreferences } from "../api/preferences/preferences.service";
+import {
+  parseFolderActionsPreferences,
+  parseTagsPreferences,
+} from "../api/preferences/preferences.service";
 import { NoteFormPreferences } from "../utils/preferences";
 
-export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean }) {
+export function CreateNoteForm(props: {
+  vault: ObsidianVault;
+  showTitle: boolean;
+}) {
   const { vault, showTitle } = props;
 
   const pref = getPreferenceValues<NoteFormPreferences>();
@@ -39,9 +53,14 @@ export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean
           {folderActions.map((folder, index) => (
             <Action.SubmitForm
               title={"Create in " + folder}
-              onSubmit={(props: CreateNoteParams) => createNewNote(props, folder)}
+              onSubmit={(props: CreateNoteParams) =>
+                createNewNote(props, folder)
+              }
               key={index}
-              shortcut={{ modifiers: ["shift", "cmd"], key: index.toString() as Keyboard.KeyEquivalent }}
+              shortcut={{
+                modifiers: ["shift", "cmd"],
+                key: index.toString() as Keyboard.KeyEquivalent,
+              }}
             ></Action.SubmitForm>
           ))}
         </ActionPanel>
@@ -59,7 +78,11 @@ export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean
         defaultValue={prefPath ? prefPath : ""}
         placeholder="path/to/note (optional)"
       />
-      <Form.TagPicker id="tags" title="Tags" defaultValue={prefTag ? [prefTag] : []}>
+      <Form.TagPicker
+        id="tags"
+        title="Tags"
+        defaultValue={prefTag ? [prefTag] : []}
+      >
         {tags.map((tag, index) => (
           <Form.TagPicker.Item value={tag} title={tag} key={index} />
         ))}
@@ -68,7 +91,9 @@ export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean
         title="Content:"
         id="content"
         placeholder={"Text"}
-        defaultValue={pref.fillFormWithDefaults ? pref.prefNoteContent ?? "" : ""}
+        defaultValue={
+          pref.fillFormWithDefaults ? pref.prefNoteContent ?? "" : ""
+        }
         autoFocus={pref.focusContentArea}
       />
     </Form>

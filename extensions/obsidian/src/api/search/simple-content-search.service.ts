@@ -15,14 +15,18 @@ export type SearchableNoteContentResult =
   | { status: "oversized" }
   | { status: "unavailable" };
 
-export async function readNoteContentForSearch(note: Note): Promise<SearchableNoteContentResult> {
+export async function readNoteContentForSearch(
+  note: Note
+): Promise<SearchableNoteContentResult> {
   const file = await fs.promises.open(note.path, "r");
 
   try {
     const stats = await file.stat();
     if (!stats.isFile()) return { status: "unavailable" };
     if (stats.size > MAX_SEARCH_FILE_SIZE_BYTES) {
-      logger.debug(`Skipping content search for oversized note ${note.path} (${stats.size} bytes)`);
+      logger.debug(
+        `Skipping content search for oversized note ${note.path} (${stats.size} bytes)`
+      );
       return { status: "oversized" };
     }
 
@@ -31,23 +35,37 @@ export async function readNoteContentForSearch(note: Note): Promise<SearchableNo
     let totalBytesRead = 0;
 
     while (totalBytesRead < bytesToRead) {
-      const { bytesRead } = await file.read(buffer, totalBytesRead, bytesToRead - totalBytesRead, totalBytesRead);
+      const { bytesRead } = await file.read(
+        buffer,
+        totalBytesRead,
+        bytesToRead - totalBytesRead,
+        totalBytesRead
+      );
       if (bytesRead === 0) break;
       totalBytesRead += bytesRead;
     }
 
-    return { status: "available", content: buffer.subarray(0, totalBytesRead).toString("utf-8") };
+    return {
+      status: "available",
+      content: buffer.subarray(0, totalBytesRead).toString("utf-8"),
+    };
   } finally {
     await file.close();
   }
 }
 
-export async function readSearchableNoteContent(note: Note): Promise<string | undefined> {
+export async function readSearchableNoteContent(
+  note: Note
+): Promise<string | undefined> {
   const result = await readNoteContentForSearch(note);
   return result.status === "available" ? result.content : undefined;
 }
 
-export function findTitleOrPathMatches(notes: Note[], query: string, limit = MAX_CONTENT_SEARCH_RESULTS): Note[] {
+export function findTitleOrPathMatches(
+  notes: Note[],
+  query: string,
+  limit = MAX_CONTENT_SEARCH_RESULTS
+): Note[] {
   if (limit <= 0) return [];
 
   const titleFuse = new Fuse(notes, {
@@ -78,7 +96,10 @@ const MAX_TAG_SEARCH_BYTES = 64 * BYTES_PER_KILOBYTE;
  * - "tag:abc" - searches for notes with tag #abc only
  * - "tag:abc hello world" - searches for "hello world" in notes with tag #abc
  */
-export async function searchNotesWithContent(notes: Note[], query: string): Promise<Note[]> {
+export async function searchNotesWithContent(
+  notes: Note[],
+  query: string
+): Promise<Note[]> {
   if (!query.trim()) {
     return notes;
   }
@@ -104,7 +125,9 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
     }
   }
 
-  logger.info(`Searching ${filteredNotes.length} notes with content for "${remainingQuery}"`);
+  logger.info(
+    `Searching ${filteredNotes.length} notes with content for "${remainingQuery}"`
+  );
 
   const queryLower = remainingQuery.toLowerCase();
 
@@ -119,7 +142,9 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
 
   // Early exit if we already have enough matches from title/path
   if (titleMatches.length >= MAX_CONTENT_SEARCH_RESULTS) {
-    logger.info(`Already have ${titleMatches.length} title/path matches, skipping content search`);
+    logger.info(
+      `Already have ${titleMatches.length} title/path matches, skipping content search`
+    );
     return titleMatches;
   }
 
@@ -130,8 +155,13 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
     }
 
     // Stop if we have enough total results
-    if (titleMatches.length + contentMatches.length >= MAX_CONTENT_SEARCH_RESULTS) {
-      logger.info(`Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`);
+    if (
+      titleMatches.length + contentMatches.length >=
+      MAX_CONTENT_SEARCH_RESULTS
+    ) {
+      logger.info(
+        `Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`
+      );
       break;
     }
 
@@ -145,7 +175,9 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
 
       if (stat.size > MAX_CONTENT_SEARCH_BYTES) {
         skippedLargeFiles++;
-        logger.debug(`Skipping oversized note during content search (${stat.size} bytes): ${note.path}`);
+        logger.debug(
+          `Skipping oversized note during content search (${stat.size} bytes): ${note.path}`
+        );
         continue;
       }
 
@@ -163,7 +195,9 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   }
 
   logger.info(
-    `Found ${contentMatches.length} content matches in ${filesChecked} files (total: ${
+    `Found ${
+      contentMatches.length
+    } content matches in ${filesChecked} files (total: ${
       titleMatches.length + contentMatches.length
     }, skipped ${skippedLargeFiles} oversized)`
   );
@@ -176,7 +210,10 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
  * Memory-efficient tag search
  * Reads files one at a time and checks for tags
  */
-async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]> {
+async function searchNotesByTag(
+  notes: Note[],
+  tagQuery: string
+): Promise<Note[]> {
   logger.info(`Searching ${notes.length} notes for tag "${tagQuery}"`);
 
   const matches: Note[] = [];
@@ -184,12 +221,16 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
   let prefixOnlyFiles = 0;
 
   // Normalize tag query (remove # if present, for comparison)
-  const normalizedQuery = tagQuery.startsWith("#") ? tagQuery.slice(1).toLowerCase() : tagQuery.toLowerCase();
+  const normalizedQuery = tagQuery.startsWith("#")
+    ? tagQuery.slice(1).toLowerCase()
+    : tagQuery.toLowerCase();
 
   for (const note of notes) {
     // Stop if we have enough results
     if (matches.length >= MAX_CONTENT_SEARCH_RESULTS) {
-      logger.info(`Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`);
+      logger.info(
+        `Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`
+      );
       break;
     }
 
@@ -214,7 +255,9 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
       const tags = ObsidianUtils.getAllTags(content);
 
       // Check if any tag matches the query (case-insensitive)
-      const hasMatchingTag = tags.some((tag) => tag.toLowerCase() === normalizedQuery);
+      const hasMatchingTag = tags.some(
+        (tag) => tag.toLowerCase() === normalizedQuery
+      );
 
       if (hasMatchingTag) {
         matches.push(note);
@@ -231,7 +274,10 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
   return matches;
 }
 
-async function readFilePrefix(filePath: string, byteCount: number): Promise<string> {
+async function readFilePrefix(
+  filePath: string,
+  byteCount: number
+): Promise<string> {
   const handle = await fs.promises.open(filePath, "r");
   try {
     const buffer = Buffer.alloc(byteCount);
@@ -255,7 +301,10 @@ function hasClosedFrontmatter(content: string): boolean {
  * closer is found or the 1 MiB content-search cap is hit. If the closer is still
  * missing, synthesize a parseable block so tags already read are not discarded.
  */
-async function readTagSearchContent(filePath: string, fileSize: number): Promise<string> {
+async function readTagSearchContent(
+  filePath: string,
+  fileSize: number
+): Promise<string> {
   if (fileSize <= MAX_CONTENT_SEARCH_BYTES) {
     return readFilePrefix(filePath, fileSize);
   }
@@ -269,7 +318,11 @@ async function readTagSearchContent(filePath: string, fileSize: number): Promise
     !hasClosedFrontmatter(content) &&
     bytesToRead < Math.min(fileSize, MAX_CONTENT_SEARCH_BYTES)
   ) {
-    bytesToRead = Math.min(fileSize, MAX_CONTENT_SEARCH_BYTES, bytesToRead + MAX_TAG_SEARCH_BYTES);
+    bytesToRead = Math.min(
+      fileSize,
+      MAX_CONTENT_SEARCH_BYTES,
+      bytesToRead + MAX_TAG_SEARCH_BYTES
+    );
     content = await readFilePrefix(filePath, bytesToRead);
   }
 
@@ -289,7 +342,11 @@ async function readTagSearchContent(filePath: string, fileSize: number): Promise
 function withSyntheticFrontmatterCloser(content: string): string {
   const trimmed = content.replace(/\s*$/, "");
   const flowClosers = unmatchedFlowCollectionClosers(trimmed);
-  const candidates = [`${trimmed}\n---\n`, `${trimmed}"\n---\n`, `${trimmed}'\n---\n`];
+  const candidates = [
+    `${trimmed}\n---\n`,
+    `${trimmed}"\n---\n`,
+    `${trimmed}'\n---\n`,
+  ];
   if (flowClosers) {
     candidates.push(
       `${trimmed}${flowClosers}\n---\n`,

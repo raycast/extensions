@@ -1,7 +1,10 @@
 import * as fs from "fs";
 import * as fsAsync from "fs/promises";
 import path from "path";
-import { AUDIO_FILE_EXTENSIONS, VIDEO_FILE_EXTENSIONS } from "../../utils/constants";
+import {
+  AUDIO_FILE_EXTENSIONS,
+  VIDEO_FILE_EXTENSIONS,
+} from "../../utils/constants";
 import { Media } from "../../utils/interfaces";
 import { getFilePaths } from "../../api/file/file.service";
 import { Logger } from "../../api/logger/logger.service";
@@ -17,8 +20,15 @@ export interface ObsidianVault {
 }
 
 /** Gets a list of folders that are ignored by the user inside of Obsidian */
-export function getExcludedFolders(vaultPath: string, configFileName: string): string[] {
-  const appJSONPath = path.join(vaultPath, configFileName || ".obsidian", "app.json");
+export function getExcludedFolders(
+  vaultPath: string,
+  configFileName: string
+): string[] {
+  const appJSONPath = path.join(
+    vaultPath,
+    configFileName || ".obsidian",
+    "app.json"
+  );
   if (!fs.existsSync(appJSONPath)) {
     return [];
   } else {
@@ -61,14 +71,23 @@ export async function getCanvasFilePaths(
   return files;
 }
 
-export async function getNoteFileContent(path: string, filter?: (input: string) => string) {
+export async function getNoteFileContent(
+  path: string,
+  filter?: (input: string) => string
+) {
   const content = await fsAsync.readFile(path, { encoding: "utf-8" });
-  logger.debug(`Load file content for ${path}${filter ? " and filtering content." : ""}`);
+  logger.debug(
+    `Load file content for ${path}${filter ? " and filtering content." : ""}`
+  );
   return filter ? filter(content) : content;
 }
 
 /** Gets a list of file paths for all media. */
-async function getMediaFilePaths(vaultPath: string, configFileName: string, excludedFolders: string[]) {
+async function getMediaFilePaths(
+  vaultPath: string,
+  configFileName: string,
+  excludedFolders: string[]
+) {
   const userIgnoredFolders = getExcludedFolders(vaultPath, configFileName);
   excludedFolders.push(...userIgnoredFolders, configFileName);
 
@@ -89,10 +108,18 @@ async function getMediaFilePaths(vaultPath: string, configFileName: string, excl
 }
 
 /** Gets media (images, pdfs, video, audio, etc.) for a given vault from disk. utils.useMedia() is the preferred way of loading media. */
-export async function getMedia(vaultPath: string, configFileName: string, excludedFolders: string[]): Promise<Media[]> {
+export async function getMedia(
+  vaultPath: string,
+  configFileName: string,
+  excludedFolders: string[]
+): Promise<Media[]> {
   logger.info("Loading Media Files");
   const medias: Media[] = [];
-  const filePaths = await getMediaFilePaths(vaultPath, configFileName, excludedFolders);
+  const filePaths = await getMediaFilePaths(
+    vaultPath,
+    configFileName,
+    excludedFolders
+  );
 
   for (const filePath of filePaths) {
     const title = path.basename(filePath);
@@ -111,7 +138,11 @@ export async function getNotes(
   configFileName: string = ".obsidian",
   excludedFolders: string[] = []
 ): Promise<Note[]> {
-  const filePaths = await getMarkdownFilePaths(vaultPath, configFileName, excludedFolders);
+  const filePaths = await getMarkdownFilePaths(
+    vaultPath,
+    configFileName,
+    excludedFolders
+  );
   const bookmarkedFilePaths = getBookmarkedNotePaths(vaultPath);
   const notes: Note[] = [];
 
@@ -131,7 +162,11 @@ export async function getNotes(
   }
 
   // Add canvas files in a second pass. Canvas specific changes can be made here
-  const canvasFilePaths = await getCanvasFilePaths(vaultPath, configFileName, excludedFolders);
+  const canvasFilePaths = await getCanvasFilePaths(
+    vaultPath,
+    configFileName,
+    excludedFolders
+  );
   for (const canvasFilePath of canvasFilePaths) {
     const title = path.basename(canvasFilePath, path.extname(canvasFilePath));
     const relativePath = path.relative(vaultPath, canvasFilePath);

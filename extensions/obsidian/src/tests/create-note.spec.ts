@@ -31,7 +31,9 @@ vi.mock("@raycast/api", () => ({
   getSelectedText: vi.fn(() => Promise.resolve("")),
   Clipboard: { readText: vi.fn(() => Promise.resolve("")) },
   showToast: vi.fn(() => Promise.resolve()),
-  Toast: { Style: { Success: "SUCCESS", Failure: "FAILURE", Animated: "ANIMATED" } },
+  Toast: {
+    Style: { Success: "SUCCESS", Failure: "FAILURE", Animated: "ANIMATED" },
+  },
   Icon: { ExclamationMark: "exclamation-mark" },
 }));
 
@@ -52,9 +54,16 @@ describe("createNote", () => {
 
   it("opens the created note immediately when openOnCreate is enabled", async () => {
     mockPreferences.openOnCreate = true;
-    const saved = await createNote(tempVault.vault, { name: "New Note", path: "", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "New Note",
+      path: "",
+      content: "body",
+      tags: [],
+    });
     expect(saved).toBe(true);
-    expect(fs.readFileSync(path.join(tempVault.vault.path, "New Note.md"), "utf-8")).toBe("body");
+    expect(
+      fs.readFileSync(path.join(tempVault.vault.path, "New Note.md"), "utf-8")
+    ).toBe("body");
     expect(open).toHaveBeenCalledTimes(1);
     const url = (open as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
     expect(url).toContain("obsidian://open?path=");
@@ -63,24 +72,43 @@ describe("createNote", () => {
 
   it("does not open the note when openOnCreate is disabled", async () => {
     mockPreferences.openOnCreate = false;
-    const saved = await createNote(tempVault.vault, { name: "Another Note", path: "", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "Another Note",
+      path: "",
+      content: "body",
+      tags: [],
+    });
     expect(saved).toBe(true);
     expect(open).not.toHaveBeenCalled();
   });
 
   it("still reports success when opening the note fails", async () => {
     mockPreferences.openOnCreate = true;
-    vi.mocked(open).mockRejectedValueOnce(new Error("No application available to open URL"));
-    const saved = await createNote(tempVault.vault, { name: "Saved Note", path: "", content: "body", tags: [] });
+    vi.mocked(open).mockRejectedValueOnce(
+      new Error("No application available to open URL")
+    );
+    const saved = await createNote(tempVault.vault, {
+      name: "Saved Note",
+      path: "",
+      content: "body",
+      tags: [],
+    });
     expect(saved).toBe(true);
     expect(open).toHaveBeenCalledTimes(1);
   });
 
   it("reports directory creation failure without opening a note", async () => {
-    const saved = await createNote(tempVault.vault, { name: "New Note", path: "note1.md", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "New Note",
+      path: "note1.md",
+      content: "body",
+      tags: [],
+    });
 
     expect(saved).toBe(false);
-    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("# Note 1\nSome text.");
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe(
+      "# Note 1\nSome text."
+    );
     expect(open).not.toHaveBeenCalled();
     expect(showToast).toHaveBeenCalledExactlyOnceWith({
       title: "Couldn't create directories for the given path:",
@@ -93,7 +121,12 @@ describe("createNote", () => {
     const target = path.join(tempVault.vault.path, "Blocked.md");
     fs.mkdirSync(target);
 
-    const saved = await createNote(tempVault.vault, { name: "Blocked", path: "", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "Blocked",
+      path: "",
+      content: "body",
+      tags: [],
+    });
 
     expect(saved).toBe(false);
     expect(confirmAlert).toHaveBeenCalledTimes(1);
@@ -109,39 +142,72 @@ describe("createNote", () => {
   it("leaves an existing note unchanged when overwrite is canceled", async () => {
     vi.mocked(confirmAlert).mockResolvedValueOnce(false);
 
-    const saved = await createNote(tempVault.vault, { name: "note1", path: "", content: "replacement", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "note1",
+      path: "",
+      content: "replacement",
+      tags: [],
+    });
 
     expect(saved).toBe(false);
-    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("# Note 1\nSome text.");
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe(
+      "# Note 1\nSome text."
+    );
     expect(open).not.toHaveBeenCalled();
     expect(showToast).not.toHaveBeenCalled();
   });
 
   it("saves an existing note after overwrite confirmation", async () => {
-    const saved = await createNote(tempVault.vault, { name: "note1", path: "", content: "replacement", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "note1",
+      path: "",
+      content: "replacement",
+      tags: [],
+    });
 
     expect(saved).toBe(true);
     expect(confirmAlert).toHaveBeenCalledTimes(1);
-    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("replacement");
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe(
+      "replacement"
+    );
     expect(open).toHaveBeenCalledTimes(1);
   });
 
   it.each([
     ["...", "Note names can't start with a dot. Obsidian hides those files."],
-    ["Folder/Task", "Note names can't contain / or \\. Use the Path field for folders."],
+    [
+      "Folder/Task",
+      "Note names can't contain / or \\. Use the Path field for folders.",
+    ],
   ])("rejects the note name %s without writing", async (name, message) => {
     const before = fs.readdirSync(tempVault.vault.path, { recursive: true });
 
-    const saved = await createNote(tempVault.vault, { name, path: "", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name,
+      path: "",
+      content: "body",
+      tags: [],
+    });
 
     expect(saved).toBe(false);
-    expect(fs.readdirSync(tempVault.vault.path, { recursive: true })).toEqual(before);
+    expect(fs.readdirSync(tempVault.vault.path, { recursive: true })).toEqual(
+      before
+    );
     expect(open).not.toHaveBeenCalled();
-    expect(showToast).toHaveBeenCalledExactlyOnceWith({ title: "Couldn't create note", message, style: "FAILURE" });
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      title: "Couldn't create note",
+      message,
+      style: "FAILURE",
+    });
   });
 
   it("rejects an empty name when the default name is empty", async () => {
-    const saved = await createNote(tempVault.vault, { name: "", path: "", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "",
+      path: "",
+      content: "body",
+      tags: [],
+    });
 
     expect(saved).toBe(false);
     expect(showToast).toHaveBeenCalledExactlyOnceWith({
@@ -154,7 +220,12 @@ describe("createNote", () => {
   it("rejects a path outside the vault without writing", async () => {
     const outside = path.join(path.dirname(tempVault.vault.path), "outside");
 
-    const saved = await createNote(tempVault.vault, { name: "Task", path: "../outside", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "Task",
+      path: "../outside",
+      content: "body",
+      tags: [],
+    });
 
     expect(saved).toBe(false);
     expect(fs.existsSync(outside)).toBe(false);
@@ -166,10 +237,19 @@ describe("createNote", () => {
   });
 
   it("drops a trailing .md from the note name", async () => {
-    const saved = await createNote(tempVault.vault, { name: "Task.md", path: "", content: "body", tags: [] });
+    const saved = await createNote(tempVault.vault, {
+      name: "Task.md",
+      path: "",
+      content: "body",
+      tags: [],
+    });
 
     expect(saved).toBe(true);
-    expect(fs.readFileSync(path.join(tempVault.vault.path, "Task.md"), "utf-8")).toBe("body");
-    expect(fs.existsSync(path.join(tempVault.vault.path, "Task.md.md"))).toBe(false);
+    expect(
+      fs.readFileSync(path.join(tempVault.vault.path, "Task.md"), "utf-8")
+    ).toBe("body");
+    expect(fs.existsSync(path.join(tempVault.vault.path, "Task.md.md"))).toBe(
+      false
+    );
   });
 });

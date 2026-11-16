@@ -11,7 +11,10 @@ export const NoteListObsidian = function NoteListObsidian(props: {
 }) {
   const { showTitle, vault, searchArguments, bookmarked } = props;
 
-  const { notes, loading, updateNote, deleteNote } = useNotes(vault, bookmarked);
+  const { notes, loading, updateNote, deleteNote } = useNotes(
+    vault,
+    bookmarked
+  );
 
   return (
     <NoteList

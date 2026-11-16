@@ -4,7 +4,10 @@ import { useMemo } from "react";
 import { useNotes } from "../utils/hooks";
 import { NoteQuickLook } from "./NoteQuickLook";
 
-export function RandomNote(props: { vault: ObsidianVault; showTitle: boolean }) {
+export function RandomNote(props: {
+  vault: ObsidianVault;
+  showTitle: boolean;
+}) {
   const { vault, showTitle } = props;
   const { notes, loading: notesLoading } = useNotes(vault);
 
@@ -19,5 +22,7 @@ export function RandomNote(props: { vault: ObsidianVault; showTitle: boolean }) 
     return <Detail isLoading={true} />;
   }
 
-  return <NoteQuickLook note={randomNote} vault={vault} showTitle={showTitle} />;
+  return (
+    <NoteQuickLook note={randomNote} vault={vault} showTitle={showTitle} />
+  );
 }

@@ -205,7 +205,9 @@ describe("utils", () => {
 
       const relativePath = normalizeRelativePath(notePath, vaultPath);
       expect(() => trimPathToMaxLength(relativePath, 55)).not.toThrow();
-      expect(trimPathToMaxLength(relativePath, 55)).toBe("C:/Users/user/vault/notes/my note.md");
+      expect(trimPathToMaxLength(relativePath, 55)).toBe(
+        "C:/Users/user/vault/notes/my note.md"
+      );
     });
   });
 

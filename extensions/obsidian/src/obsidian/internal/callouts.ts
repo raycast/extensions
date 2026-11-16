@@ -76,7 +76,9 @@ export function isCalloutStart(line: string): boolean {
 /**
  * Parse a callout header line to extract type and title
  */
-export function parseCalloutHeader(line: string): { type: string; title: string } | null {
+export function parseCalloutHeader(
+  line: string
+): { type: string; title: string } | null {
   const match = line.match(CALLOUT_START_PATTERN);
   if (!match) return null;
 
@@ -120,7 +122,11 @@ export function parseBlocks(lines: string[]): Block[] {
       i++;
 
       // Collect continuation lines (blockquotes that aren't new callouts)
-      while (i < lines.length && lines[i].startsWith(">") && !isCalloutStart(lines[i])) {
+      while (
+        i < lines.length &&
+        lines[i].startsWith(">") &&
+        !isCalloutStart(lines[i])
+      ) {
         content.push(removeBlockquotePrefix(lines[i]));
         i++;
       }
@@ -148,7 +154,9 @@ export function renderCalloutBlock(callout: CalloutBlock): string[] {
   const lines: string[] = [];
 
   // Header line with emoji and optional title
-  const headerLine = `> ${callout.emoji}${callout.title ? ` **${callout.title}**` : ""}`;
+  const headerLine = `> ${callout.emoji}${
+    callout.title ? ` **${callout.title}**` : ""
+  }`;
   lines.push(headerLine);
 
   // Empty separator line
@@ -169,7 +177,10 @@ export function renderCalloutBlock(callout: CalloutBlock): string[] {
 /**
  * Determine if we need spacing between two blocks
  */
-function needsSpacingBefore(currentBlock: Block, previousBlock: Block | null): boolean {
+function needsSpacingBefore(
+  currentBlock: Block,
+  previousBlock: Block | null
+): boolean {
   // Don't add spacing before text blocks - they manage their own spacing
   if (currentBlock.type === "text") {
     return false;
@@ -184,7 +195,10 @@ function needsSpacingBefore(currentBlock: Block, previousBlock: Block | null): b
   return true;
 }
 
-function needsSpacingAfter(currentBlock: Block, nextBlock: Block | null): boolean {
+function needsSpacingAfter(
+  currentBlock: Block,
+  nextBlock: Block | null
+): boolean {
   // Always add spacing after callouts, unless next block is also a callout
   if (currentBlock.type === "callout") {
     return nextBlock?.type !== "callout";

@@ -15,15 +15,28 @@ describe("parseCommaSeparatedValues", () => {
   it("should return correct values for comma-separated strings", () => {
     expect(parseCommaSeparatedValues("test,test2")).toEqual(["test", "test2"]);
     expect(parseCommaSeparatedValues("test, test2")).toEqual(["test", "test2"]);
-    expect(parseCommaSeparatedValues("test , test2")).toEqual(["test", "test2"]);
-    expect(parseCommaSeparatedValues("test , test2,")).toEqual(["test", "test2"]);
-    expect(parseCommaSeparatedValues("test , test2,test3")).toEqual(["test", "test2", "test3"]);
+    expect(parseCommaSeparatedValues("test , test2")).toEqual([
+      "test",
+      "test2",
+    ]);
+    expect(parseCommaSeparatedValues("test , test2,")).toEqual([
+      "test",
+      "test2",
+    ]);
+    expect(parseCommaSeparatedValues("test , test2,test3")).toEqual([
+      "test",
+      "test2",
+      "test3",
+    ]);
   });
 
   it("should handle edge cases", () => {
     expect(parseCommaSeparatedValues(",")).toEqual([]);
     expect(parseCommaSeparatedValues(",,")).toEqual([]);
     expect(parseCommaSeparatedValues("test,,test2")).toEqual(["test", "test2"]);
-    expect(parseCommaSeparatedValues(" , test , , test2 , ")).toEqual(["test", "test2"]);
+    expect(parseCommaSeparatedValues(" , test , , test2 , ")).toEqual([
+      "test",
+      "test2",
+    ]);
   });
 });

@@ -34,10 +34,15 @@ export default async function tool(input: Input) {
   try {
     // Validate that the path is within a configured vault
     const allVaults = await Obsidian.getVaultsFromPreferencesOrObsidianJson();
-    const isValidPath = Obsidian.validateNotePath(input.fullNotePath, allVaults);
+    const isValidPath = Obsidian.validateNotePath(
+      input.fullNotePath,
+      allVaults
+    );
 
     if (!isValidPath) {
-      const vaultInfo = allVaults.map((v) => `${v.name} (${v.path})`).join(", ");
+      const vaultInfo = allVaults
+        .map((v) => `${v.name} (${v.path})`)
+        .join(", ");
       return `Invalid path: The fullNotePath "${
         input.fullNotePath
       }" is not within any configured vault. Please use the FULL ABSOLUTE path to the note file (e.g., ${
@@ -57,7 +62,10 @@ export default async function tool(input: Input) {
     }
 
     // Replace the old content with the new content
-    const updatedContent = currentContent.replace(input.oldContent, processedNewContent);
+    const updatedContent = currentContent.replace(
+      input.oldContent,
+      processedNewContent
+    );
 
     // Write the updated content back to the file
     fs.writeFileSync(input.fullNotePath, updatedContent, "utf8");

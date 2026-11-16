@@ -147,4 +147,6 @@ export const templates = [
   })),
 ];
 
-export const templateMap = new Map(templates.map((t) => [t.placeholder, t.replacement]));
+export const templateMap = new Map(
+  templates.map((t) => [t.placeholder, t.replacement])
+);

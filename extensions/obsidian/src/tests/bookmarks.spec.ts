@@ -147,7 +147,9 @@ describe("bookmarks", () => {
       bookmarkNote(tempVault.path, newNote);
 
       // Verify a new bookmarks.json was created with the note
-      expect(fs.existsSync(path.join(tempVault.path, ".obsidian", "bookmarks.json"))).toBeTruthy();
+      expect(
+        fs.existsSync(path.join(tempVault.path, ".obsidian", "bookmarks.json"))
+      ).toBeTruthy();
 
       const bookmarks = getBookmarksJson(tempVault.path);
       expect(bookmarks?.items).toHaveLength(1);
@@ -235,7 +237,9 @@ describe("bookmarks", () => {
       unbookmarkNote(tempVault.path, note);
 
       // Verify bookmarks.json still doesn't exist
-      expect(fs.existsSync(path.join(tempVault.path, ".obsidian", "bookmarks.json"))).toBeFalsy();
+      expect(
+        fs.existsSync(path.join(tempVault.path, ".obsidian", "bookmarks.json"))
+      ).toBeFalsy();
     });
   });
 });

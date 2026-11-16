@@ -24,7 +24,9 @@ export interface NoteFormPreferences extends GlobalPreferences {
   focusContentArea: boolean;
 }
 
-export interface SearchNotePreferences extends GlobalPreferences, AppendNotePreferences {
+export interface SearchNotePreferences
+  extends GlobalPreferences,
+    AppendNotePreferences {
   primaryAction: string;
   showDetail: boolean;
   showMetadata: boolean;
@@ -32,7 +34,9 @@ export interface SearchNotePreferences extends GlobalPreferences, AppendNotePref
   fuzzySearch: boolean;
 }
 
-export interface RandomNotePreferences extends GlobalPreferences, AppendNotePreferences {}
+export interface RandomNotePreferences
+  extends GlobalPreferences,
+    AppendNotePreferences {}
 
 export interface SearchMediaPreferences extends GlobalPreferences {
   imageSize: string;

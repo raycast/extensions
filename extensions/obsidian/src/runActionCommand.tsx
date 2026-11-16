@@ -51,7 +51,11 @@ function ActionInput({ action }: ComponentProps) {
   async function handleSubmit() {
     const vault = vaults.find((v) => v.name === action.vaultName) || vaults[0];
     if (!vault) {
-      showToast(Toast.Style.Failure, "Vault not found", `Vault '${action.vaultName}' is not available.`);
+      showToast(
+        Toast.Style.Failure,
+        "Vault not found",
+        `Vault '${action.vaultName}' is not available.`
+      );
       return;
     }
 
@@ -103,7 +107,11 @@ function ActionInput({ action }: ComponentProps) {
       navigationTitle={"Append to: " + action.title}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Run Action" onSubmit={handleSubmit} icon={Icon.Check} />
+          <Action.SubmitForm
+            title="Run Action"
+            onSubmit={handleSubmit}
+            icon={Icon.Check}
+          />
         </ActionPanel>
       }
     >
@@ -121,7 +129,9 @@ function ActionInput({ action }: ComponentProps) {
   );
 }
 
-export default function RunActionCommand(props: LaunchProps<{ launchContext?: { actionId?: string } }>) {
+export default function RunActionCommand(
+  props: LaunchProps<{ launchContext?: { actionId?: string } }>
+) {
   const { launchContext } = props;
   const [action, setAction] = useState<CustomAction | null>(null);
   const [actions, setActions] = useState<CustomAction[]>([]);
@@ -152,7 +162,10 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
       await confirmAlert({
         title: "Delete Action",
         message: "Are you sure? This cannot be undone.",
-        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
       })
     ) {
       await deleteCustomAction(action.id);
@@ -164,7 +177,11 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
   async function handleExport() {
     const json = JSON.stringify(actions, null, 2);
     await Clipboard.copy(json);
-    showToast(Toast.Style.Success, "Actions Exported", "Required JSON copied to clipboard");
+    showToast(
+      Toast.Style.Success,
+      "Actions Exported",
+      "Required JSON copied to clipboard"
+    );
   }
 
   async function handleImport() {
@@ -195,7 +212,11 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
         showToast(Toast.Style.Success, "Actions Imported");
       }
     } catch {
-      showToast(Toast.Style.Failure, "Invalid JSON", "Clipboard content is not a valid actions export.");
+      showToast(
+        Toast.Style.Failure,
+        "Invalid JSON",
+        "Clipboard content is not a valid actions export."
+      );
     }
   }
 
@@ -219,7 +240,11 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
           accessories={[{ text: a.vaultName }]}
           actions={
             <ActionPanel>
-              <Action.Push title="Run Action" target={<ActionInput action={a} />} icon={Icon.Play} />
+              <Action.Push
+                title="Run Action"
+                target={<ActionInput action={a} />}
+                icon={Icon.Play}
+              />
               <Action.CopyToClipboard
                 title="Copy Quicklink URL"
                 content={`${
@@ -284,7 +309,11 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
         description="Create your first custom action to append/prepend text to specific notes."
         actions={
           <ActionPanel>
-            <Action.Push title="Create New Action" target={<ActionForm onSave={loadActions} />} icon={Icon.Plus} />
+            <Action.Push
+              title="Create New Action"
+              target={<ActionForm onSave={loadActions} />}
+              icon={Icon.Plus}
+            />
             <Action
               title="Import Actions"
               onAction={handleImport}

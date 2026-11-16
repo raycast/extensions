@@ -9,7 +9,8 @@ import { showToast, Toast } from "@raycast/api";
 export function noVaultPathsToast() {
   showToast({
     title: "Path Error",
-    message: "Something went wrong with your vault path. There are no paths to select from.",
+    message:
+      "Something went wrong with your vault path. There are no paths to select from.",
     style: Toast.Style.Failure,
   });
 }
@@ -38,10 +39,14 @@ export function invalidNoteNameToast(message: string) {
   });
 }
 
-export function vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin: ObsidianVault[]) {
+export function vaultsWithoutAdvancedURIToast(
+  vaultsWithoutPlugin: ObsidianVault[]
+) {
   showToast({
     title: "Vaults without Advanced URI plugin:",
-    message: vaultsWithoutPlugin.map((vault: ObsidianVault) => vault.name).join(", "),
+    message: vaultsWithoutPlugin
+      .map((vault: ObsidianVault) => vault.name)
+      .join(", "),
     style: Toast.Style.Failure,
   });
 }

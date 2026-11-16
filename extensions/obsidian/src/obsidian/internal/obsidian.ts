@@ -9,11 +9,25 @@ import { ObsidianVault } from "./vault";
 function obsidianJsonPath(): string {
   switch (platform()) {
     case "win32":
-      return path.join(process.env.APPDATA ?? path.join(homedir(), "AppData", "Roaming"), "obsidian", "obsidian.json");
+      return path.join(
+        process.env.APPDATA ?? path.join(homedir(), "AppData", "Roaming"),
+        "obsidian",
+        "obsidian.json"
+      );
     case "linux":
-      return path.join(process.env.XDG_CONFIG_HOME ?? path.join(homedir(), ".config"), "obsidian", "obsidian.json");
+      return path.join(
+        process.env.XDG_CONFIG_HOME ?? path.join(homedir(), ".config"),
+        "obsidian",
+        "obsidian.json"
+      );
     default:
-      return path.join(homedir(), "Library", "Application Support", "obsidian", "obsidian.json");
+      return path.join(
+        homedir(),
+        "Library",
+        "Application Support",
+        "obsidian",
+        "obsidian.json"
+      );
   }
 }
 
@@ -55,7 +69,9 @@ export async function getVaultsFromObsidianJson(): Promise<ObsidianVault[]> {
   const jsonPath = path.resolve(obsidianJsonPath());
 
   try {
-    const obsidianJson = JSON.parse(await fsAsync.readFile(jsonPath, "utf8")) as ObsidianJSON;
+    const obsidianJson = JSON.parse(
+      await fsAsync.readFile(jsonPath, "utf8")
+    ) as ObsidianJSON;
     return Object.values(obsidianJson.vaults).map(({ path }) => ({
       name: getVaultNameFromPath(path) ?? "invalid vault name",
       key: path,
@@ -66,7 +82,9 @@ export async function getVaultsFromObsidianJson(): Promise<ObsidianVault[]> {
   }
 }
 
-export async function getVaultsFromPreferencesOrObsidianJson(): Promise<ObsidianVault[]> {
+export async function getVaultsFromPreferencesOrObsidianJson(): Promise<
+  ObsidianVault[]
+> {
   let vaults = getVaultsFromPreferences();
   if (vaults.length === 0) {
     vaults = await getVaultsFromObsidianJson();
@@ -78,7 +96,10 @@ export async function getVaultsFromPreferencesOrObsidianJson(): Promise<Obsidian
  * Validates that a note path is within a configured vault.
  * Returns true if the path starts with any vault path, false otherwise.
  */
-export function validateNotePath(notePath: string, vaults: ObsidianVault[]): boolean {
+export function validateNotePath(
+  notePath: string,
+  vaults: ObsidianVault[]
+): boolean {
   return vaults.some((vault) => notePath.startsWith(vault.path));
 }
 
@@ -96,7 +117,11 @@ export enum ObsidianTargetType {
 export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenVault; vault: ObsidianVault }
   | { type: ObsidianTargetType.OpenPath; path: string }
-  | { type: ObsidianTargetType.OpenWorkspace; vault: ObsidianVault; workspace: string }
+  | {
+      type: ObsidianTargetType.OpenWorkspace;
+      vault: ObsidianVault;
+      workspace: string;
+    }
   | { type: ObsidianTargetType.DailyNote; vault: ObsidianVault }
   | {
       type: ObsidianTargetType.DailyNoteAppend;
@@ -106,7 +131,12 @@ export type ObsidianTarget =
       prepend?: boolean;
       silent?: boolean;
     }
-  | { type: ObsidianTargetType.NewNote; vault: ObsidianVault; name: string; content?: string }
+  | {
+      type: ObsidianTargetType.NewNote;
+      vault: ObsidianVault;
+      name: string;
+      content?: string;
+    }
   | {
       type: ObsidianTargetType.AppendTask;
       vault: ObsidianVault;
@@ -128,7 +158,9 @@ export type ObsidianTarget =
 export function getObsidianTarget(target: ObsidianTarget) {
   switch (target.type) {
     case ObsidianTargetType.OpenVault: {
-      return ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name);
+      return (
+        ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name)
+      );
     }
     case ObsidianTargetType.OpenPath: {
       return ObsidianTargetType.OpenPath + encodeURIComponent(target.path);
@@ -143,10 +175,14 @@ export function getObsidianTarget(target: ObsidianTarget) {
       );
     }
     case ObsidianTargetType.DailyNote: {
-      return ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name);
+      return (
+        ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name)
+      );
     }
     case ObsidianTargetType.DailyNoteAppend: {
-      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      const headingParam = target.heading
+        ? "&heading=" + encodeURIComponent(target.heading)
+        : "";
       return (
         ObsidianTargetType.DailyNoteAppend +
         (target.prepend ? "&mode=prepend" : "&mode=append") +
@@ -169,7 +205,9 @@ export function getObsidianTarget(target: ObsidianTarget) {
       );
     }
     case ObsidianTargetType.AppendTask: {
-      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      const headingParam = target.heading
+        ? "&heading=" + encodeURIComponent(target.heading)
+        : "";
       return (
         ObsidianTargetType.AppendTask +
         encodeURIComponent(target.path) +
@@ -182,7 +220,9 @@ export function getObsidianTarget(target: ObsidianTarget) {
       );
     }
     case ObsidianTargetType.AppendToNote: {
-      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      const headingParam = target.heading
+        ? "&heading=" + encodeURIComponent(target.heading)
+        : "";
       return (
         ObsidianTargetType.AppendToNote +
         encodeURIComponent(target.path) +

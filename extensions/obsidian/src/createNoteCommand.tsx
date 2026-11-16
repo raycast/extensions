@@ -15,7 +15,12 @@ export default function Command() {
   const hasExecutedRef = useRef(false);
 
   useEffect(() => {
-    if (ready && vaults.length === 1 && pref.blankNote && !hasExecutedRef.current) {
+    if (
+      ready &&
+      vaults.length === 1 &&
+      pref.blankNote &&
+      !hasExecutedRef.current
+    ) {
       hasExecutedRef.current = true;
       const target = Obsidian.getTarget({
         type: ObsidianTargetType.NewNote,
@@ -36,7 +41,9 @@ export default function Command() {
     return (
       <VaultSelection
         vaults={vaults}
-        target={(vault: ObsidianVault) => <CreateNoteForm vault={vault} showTitle={true} />}
+        target={(vault: ObsidianVault) => (
+          <CreateNoteForm vault={vault} showTitle={true} />
+        )}
       />
     );
   } else if (vaults.length === 1) {

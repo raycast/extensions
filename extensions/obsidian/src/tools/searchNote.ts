@@ -37,16 +37,24 @@ export default async function tool(input: Input) {
     return "No vaults found. Please configure vault paths in Raycast preferences.";
   }
 
-  const targetVaults = input.vaultName ? vaults.filter((v) => v.name === input.vaultName) : vaults;
+  const targetVaults = input.vaultName
+    ? vaults.filter((v) => v.name === input.vaultName)
+    : vaults;
 
   if (targetVaults.length === 0) {
     logger.warning(`Could not find vault ${input.vaultName}`);
-    return `Vault "${input.vaultName}" not found. Available vaults: ${vaults.map((v) => v.name).join(", ")}`;
+    return `Vault "${input.vaultName}" not found. Available vaults: ${vaults
+      .map((v) => v.name)
+      .join(", ")}`;
   }
 
   const useContentSearch = input.searchContent === true;
 
-  logger.info(`Searching with ${useContentSearch ? "content search" : "title/path only"} for "${input.searchTerm}"`);
+  logger.info(
+    `Searching with ${
+      useContentSearch ? "content search" : "title/path only"
+    } for "${input.searchTerm}"`
+  );
 
   // Search across all target vaults
   const allFilteredNotes: { note: Note; vault: ObsidianVault }[] = [];
@@ -59,7 +67,9 @@ export default async function tool(input: Input) {
       : filterNotesFuzzy(notes, input.searchTerm);
 
     logger.info(
-      `${useContentSearch ? "Content" : "Title/path"} search found ${filtered.length} notes in ${vault.name}`
+      `${useContentSearch ? "Content" : "Title/path"} search found ${
+        filtered.length
+      } notes in ${vault.name}`
     );
 
     allFilteredNotes.push(...filtered.map((note) => ({ note, vault })));
@@ -77,8 +87,12 @@ export default async function tool(input: Input) {
   const hasMore = allFilteredNotes.length > MAX_RESULTS;
 
   // Return list of all matching notes
-  const searchTypeLabel = useContentSearch ? "content search" : "title/path search";
-  let result = `Found ${allFilteredNotes.length} note(s) matching "${input.searchTerm}" (${searchTypeLabel})${
+  const searchTypeLabel = useContentSearch
+    ? "content search"
+    : "title/path search";
+  let result = `Found ${allFilteredNotes.length} note(s) matching "${
+    input.searchTerm
+  }" (${searchTypeLabel})${
     hasMore ? `, showing first ${MAX_RESULTS}` : ""
   }:\n\n`;
 

@@ -28,7 +28,10 @@ export function getObsidianCliExecutable(): string {
   return "obsidian";
 }
 
-export function buildObsidianCursorScript(match: ContentMatch, notePath: string): string {
+export function buildObsidianCursorScript(
+  match: ContentMatch,
+  notePath: string
+): string {
   const from = { line: match.line - 1, ch: match.column - 1 };
   const to = { line: match.endLine - 1, ch: match.endColumn - 1 };
 
@@ -51,17 +54,25 @@ export function buildObsidianCursorScript(match: ContentMatch, notePath: string)
   })()`;
 }
 
-function runObsidianCli(args: string[], timeout = CLI_TIMEOUT_MS): Promise<string> {
+function runObsidianCli(
+  args: string[],
+  timeout = CLI_TIMEOUT_MS
+): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(getObsidianCliExecutable(), args, { timeout }, (error, stdout, stderr) => {
-      if (!error) {
-        resolve(stdout);
-        return;
-      }
+    execFile(
+      getObsidianCliExecutable(),
+      args,
+      { timeout },
+      (error, stdout, stderr) => {
+        if (!error) {
+          resolve(stdout);
+          return;
+        }
 
-      const details = stderr?.trim() || error.message;
-      reject(new ObsidianCliError(details));
-    });
+        const details = stderr?.trim() || error.message;
+        reject(new ObsidianCliError(details));
+      }
+    );
   });
 }
 
@@ -71,21 +82,32 @@ function delay(milliseconds: number): Promise<void> {
 
 function isPermanentCliError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /ENOENT|not found|not enabled|command line interface|unknown command|invalid vault/i.test(message);
+  return /ENOENT|not found|not enabled|command line interface|unknown command|invalid vault/i.test(
+    message
+  );
 }
 
 function remainingTime(deadline: number): number {
   return Math.max(1, deadline - Date.now());
 }
 
-async function waitForLayoutReady(vaultArgument: string, deadline: number): Promise<void> {
+async function waitForLayoutReady(
+  vaultArgument: string,
+  deadline: number
+): Promise<void> {
   let lastError: unknown;
   let attempt = 0;
 
   while (Date.now() < deadline) {
     try {
       const output = await runObsidianCli(
-        [vaultArgument, "eval", `code=app.workspace.layoutReady ? ${JSON.stringify(LAYOUT_READY_RESULT)} : "waiting"`],
+        [
+          vaultArgument,
+          "eval",
+          `code=app.workspace.layoutReady ? ${JSON.stringify(
+            LAYOUT_READY_RESULT
+          )} : "waiting"`,
+        ],
         Math.min(CLI_TIMEOUT_MS, remainingTime(deadline))
       );
       if (output.includes(LAYOUT_READY_RESULT)) return;
@@ -94,13 +116,18 @@ async function waitForLayoutReady(vaultArgument: string, deadline: number): Prom
       lastError = error;
     }
 
-    const retryDelay = MATCH_RETRY_DELAYS_MS[Math.min(attempt, MATCH_RETRY_DELAYS_MS.length - 1)];
+    const retryDelay =
+      MATCH_RETRY_DELAYS_MS[
+        Math.min(attempt, MATCH_RETRY_DELAYS_MS.length - 1)
+      ];
     attempt += 1;
     await delay(Math.min(retryDelay, Math.max(0, deadline - Date.now())));
   }
 
   if (lastError) throw lastError;
-  throw new ObsidianCliError("Timed out waiting for Obsidian to restore its workspace");
+  throw new ObsidianCliError(
+    "Timed out waiting for Obsidian to restore its workspace"
+  );
 }
 
 async function applyMatch(
@@ -110,10 +137,17 @@ async function applyMatch(
   timeout: number
 ): Promise<boolean> {
   const output = await runObsidianCli(
-    [vaultArgument, "eval", `code=${buildObsidianCursorScript(match, notePath)}`],
+    [
+      vaultArgument,
+      "eval",
+      `code=${buildObsidianCursorScript(match, notePath)}`,
+    ],
     Math.min(CLI_TIMEOUT_MS, timeout)
   );
-  return output.includes(MATCH_APPLIED_RESULT) || output.includes(MATCH_ALREADY_APPLIED_RESULT);
+  return (
+    output.includes(MATCH_APPLIED_RESULT) ||
+    output.includes(MATCH_ALREADY_APPLIED_RESULT)
+  );
 }
 
 async function waitForMatchActivation(
@@ -127,10 +161,30 @@ async function waitForMatchActivation(
 
   while (Date.now() < deadline) {
     try {
-      if (await applyMatch(vaultArgument, notePath, match, remainingTime(deadline))) {
+      if (
+        await applyMatch(
+          vaultArgument,
+          notePath,
+          match,
+          remainingTime(deadline)
+        )
+      ) {
         // Verify once after positioning. An unchanged selection is a no-op in the cursor script.
-        await delay(Math.min(MATCH_VERIFICATION_DELAY_MS, Math.max(0, deadline - Date.now())));
-        if (Date.now() >= deadline || (await applyMatch(vaultArgument, notePath, match, remainingTime(deadline))))
+        await delay(
+          Math.min(
+            MATCH_VERIFICATION_DELAY_MS,
+            Math.max(0, deadline - Date.now())
+          )
+        );
+        if (
+          Date.now() >= deadline ||
+          (await applyMatch(
+            vaultArgument,
+            notePath,
+            match,
+            remainingTime(deadline)
+          ))
+        )
           return;
       }
     } catch (error) {
@@ -138,22 +192,34 @@ async function waitForMatchActivation(
       lastError = error;
     }
 
-    const retryDelay = MATCH_RETRY_DELAYS_MS[Math.min(attempt, MATCH_RETRY_DELAYS_MS.length - 1)];
+    const retryDelay =
+      MATCH_RETRY_DELAYS_MS[
+        Math.min(attempt, MATCH_RETRY_DELAYS_MS.length - 1)
+      ];
     attempt += 1;
     await delay(Math.min(retryDelay, Math.max(0, deadline - Date.now())));
   }
 
   if (lastError) throw lastError;
-  throw new ObsidianCliError("Timed out waiting for Obsidian to activate the note");
+  throw new ObsidianCliError(
+    "Timed out waiting for Obsidian to activate the note"
+  );
 }
 
-export async function openObsidianAtMatch(note: Note, vault: ObsidianVault, match: ContentMatch): Promise<void> {
+export async function openObsidianAtMatch(
+  note: Note,
+  vault: ObsidianVault,
+  match: ContentMatch
+): Promise<void> {
   const notePath = normalizeRelativePath(note.path, vault.path);
   const vaultArgument = `vault=${vault.name}`;
   const deadline = Date.now() + MATCH_ACTIVATION_TIMEOUT_MS;
 
   try {
-    await runObsidianCli([vaultArgument, "open", `path=${notePath}`], Math.min(CLI_TIMEOUT_MS, deadline - Date.now()));
+    await runObsidianCli(
+      [vaultArgument, "open", `path=${notePath}`],
+      Math.min(CLI_TIMEOUT_MS, deadline - Date.now())
+    );
   } catch (error) {
     // A timed-out open command may still have launched Obsidian successfully.
     if (isPermanentCliError(error)) throw error;
@@ -162,7 +228,10 @@ export async function openObsidianAtMatch(note: Note, vault: ObsidianVault, matc
   await waitForLayoutReady(vaultArgument, deadline);
 
   // A cold-start workspace restore can supersede the first open request.
-  await runObsidianCli([vaultArgument, "open", `path=${notePath}`], Math.min(CLI_TIMEOUT_MS, remainingTime(deadline)));
+  await runObsidianCli(
+    [vaultArgument, "open", `path=${notePath}`],
+    Math.min(CLI_TIMEOUT_MS, remainingTime(deadline))
+  );
   await waitForMatchActivation(vaultArgument, notePath, match, deadline);
 }
 

@@ -15,14 +15,19 @@ vi.mock("@raycast/api", () => ({
 describe("file", () => {
   describe("getFilePaths", () => {
     // Create a temporary test directory
-    const testDir = path.join(os.tmpdir(), "walkfiles-test-" + Math.random().toString(36).substring(2));
+    const testDir = path.join(
+      os.tmpdir(),
+      "walkfiles-test-" + Math.random().toString(36).substring(2)
+    );
 
     beforeEach(() => {
       // Create test directory structure
       fs.mkdirSync(testDir, { recursive: true });
       fs.mkdirSync(path.join(testDir, "subdir1"), { recursive: true });
       fs.mkdirSync(path.join(testDir, "subdir2"), { recursive: true });
-      fs.mkdirSync(path.join(testDir, "subdir2", "subdir3"), { recursive: true });
+      fs.mkdirSync(path.join(testDir, "subdir2", "subdir3"), {
+        recursive: true,
+      });
       fs.mkdirSync(path.join(testDir, ".obsidian"), { recursive: true });
 
       // Create test files
@@ -33,7 +38,10 @@ describe("file", () => {
       fs.writeFileSync(path.join(testDir, "subdir1", "file3.txt"), "content");
       fs.writeFileSync(path.join(testDir, "subdir1", "file4.js"), "content");
       fs.writeFileSync(path.join(testDir, "subdir2", "file5.txt"), "content");
-      fs.writeFileSync(path.join(testDir, "subdir2", "subdir3", "file6.js"), "content");
+      fs.writeFileSync(
+        path.join(testDir, "subdir2", "subdir3", "file6.js"),
+        "content"
+      );
       fs.writeFileSync(path.join(testDir, ".obsidian", "file7.txt"), "content");
     });
 
@@ -55,8 +63,12 @@ describe("file", () => {
       expect(resultFiles.map((f) => path.basename(f))).toContain("file5.txt");
       expect(resultFiles.map((f) => path.basename(f))).toContain("file6.js");
       expect(resultFiles.map((f) => path.basename(f))).not.toContain("file.md");
-      expect(resultFiles.map((f) => path.basename(f))).not.toContain("file.excalidraw.md");
-      expect(resultFiles.map((f) => path.basename(f))).not.toContain("file7.txt"); // In .obsidian folder
+      expect(resultFiles.map((f) => path.basename(f))).not.toContain(
+        "file.excalidraw.md"
+      );
+      expect(resultFiles.map((f) => path.basename(f))).not.toContain(
+        "file7.txt"
+      ); // In .obsidian folder
     });
 
     it("should respect excluded folders", async () => {
@@ -69,21 +81,33 @@ describe("file", () => {
       expect(resultFiles.map((f) => path.basename(f))).toContain("file2.js");
       expect(resultFiles.map((f) => path.basename(f))).toContain("file3.txt");
       expect(resultFiles.map((f) => path.basename(f))).toContain("file4.js");
-      expect(resultFiles.map((f) => path.basename(f))).not.toContain("file5.txt");
-      expect(resultFiles.map((f) => path.basename(f))).not.toContain("file6.js");
+      expect(resultFiles.map((f) => path.basename(f))).not.toContain(
+        "file5.txt"
+      );
+      expect(resultFiles.map((f) => path.basename(f))).not.toContain(
+        "file6.js"
+      );
     });
 
     // A literal backslash can't be part of a file name on Windows, where it separates path segments.
-    it.skipIf(process.platform === "win32")("should keep backslashes in file names", async () => {
-      fs.writeFileSync(path.join(testDir, "subdir1", "Bad\\ note.md"), "content");
+    it.skipIf(process.platform === "win32")(
+      "should keep backslashes in file names",
+      async () => {
+        fs.writeFileSync(
+          path.join(testDir, "subdir1", "Bad\\ note.md"),
+          "content"
+        );
 
-      const resultFiles = await getFilePaths({
-        path: testDir,
-        includedFileExtensions: [".md"],
-      });
+        const resultFiles = await getFilePaths({
+          path: testDir,
+          includedFileExtensions: [".md"],
+        });
 
-      expect(resultFiles).toContain(path.join(testDir, "subdir1", "Bad\\ note.md"));
-      resultFiles.forEach((f) => expect(fs.existsSync(f)).toBe(true));
-    });
+        expect(resultFiles).toContain(
+          path.join(testDir, "subdir1", "Bad\\ note.md")
+        );
+        resultFiles.forEach((f) => expect(fs.existsSync(f)).toBe(true));
+      }
+    );
   });
 });

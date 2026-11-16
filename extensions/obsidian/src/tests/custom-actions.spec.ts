@@ -56,7 +56,10 @@ describe("custom-actions.service", () => {
     const actions = await getCustomActions();
     expect(actions).toHaveLength(1);
     expect(actions[0]).toEqual(mockAction);
-    expect(LocalStorage.setItem).toHaveBeenCalledWith("obsidian_custom_actions", expect.anything());
+    expect(LocalStorage.setItem).toHaveBeenCalledWith(
+      "obsidian_custom_actions",
+      expect.anything()
+    );
   });
 
   it("should update an existing action", async () => {

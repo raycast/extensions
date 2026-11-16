@@ -37,7 +37,10 @@ describe("content search large files", () => {
     const largeBody = `${"x".repeat(1024 * 1024 + 64)}uniquetoken123`;
     fs.writeFileSync(largePath, largeBody);
 
-    const notes = [noteFor(tempDir, "small.md", "Small"), noteFor(tempDir, "large.md", "Large")];
+    const notes = [
+      noteFor(tempDir, "small.md", "Small"),
+      noteFor(tempDir, "large.md", "Large"),
+    ];
     const results = await searchNotesWithContent(notes, "uniquetoken123");
 
     expect(results.some((n) => n.title === "Small")).toBe(true);
@@ -46,7 +49,10 @@ describe("content search large files", () => {
 
   it("does not throw when a missing file sits next to an oversized file", async () => {
     const largePath = path.join(tempDir, "large.md");
-    fs.writeFileSync(largePath, `${"y".repeat(1024 * 1024 + 64)}missing-neighbor`);
+    fs.writeFileSync(
+      largePath,
+      `${"y".repeat(1024 * 1024 + 64)}missing-neighbor`
+    );
 
     const notes = [
       noteFor(tempDir, "large.md", "Large"),
@@ -64,7 +70,10 @@ describe("content search large files", () => {
 
   it("still finds YAML tags in the prefix of an oversized file", async () => {
     const largePath = path.join(tempDir, "tagged-large.md");
-    fs.writeFileSync(largePath, `---\ntags:\n  - hugeclip\n---\n${"z".repeat(1024 * 1024 + 64)}`);
+    fs.writeFileSync(
+      largePath,
+      `---\ntags:\n  - hugeclip\n---\n${"z".repeat(1024 * 1024 + 64)}`
+    );
 
     const notes = [noteFor(tempDir, "tagged-large.md", "Tagged Large")];
     const results = await searchNotesWithContent(notes, "tag:hugeclip");
@@ -78,10 +87,14 @@ describe("content search large files", () => {
     const padding = "x".repeat(70 * 1024);
     fs.writeFileSync(
       largePath,
-      `---\ndescription: |\n  ${padding}\ntags:\n  - widetags\n---\n${"z".repeat(1024 * 1024 + 64)}`
+      `---\ndescription: |\n  ${padding}\ntags:\n  - widetags\n---\n${"z".repeat(
+        1024 * 1024 + 64
+      )}`
     );
 
-    const notes = [noteFor(tempDir, "tagged-wide-frontmatter.md", "Wide Frontmatter")];
+    const notes = [
+      noteFor(tempDir, "tagged-wide-frontmatter.md", "Wide Frontmatter"),
+    ];
     const results = await searchNotesWithContent(notes, "tag:widetags");
 
     expect(results.length).toBe(1);
@@ -90,9 +103,14 @@ describe("content search large files", () => {
 
   it("still finds YAML tags when a flow collection stays open past the 1 MiB cap", async () => {
     const largePath = path.join(tempDir, "tagged-open-flow.md");
-    fs.writeFileSync(largePath, `---\ntags: [existing, ${"x".repeat(1024 * 1024 + 64)}]\n---\nbody`);
+    fs.writeFileSync(
+      largePath,
+      `---\ntags: [existing, ${"x".repeat(1024 * 1024 + 64)}]\n---\nbody`
+    );
 
-    const notes = [noteFor(tempDir, "tagged-open-flow.md", "Open Flow Collection")];
+    const notes = [
+      noteFor(tempDir, "tagged-open-flow.md", "Open Flow Collection"),
+    ];
     const results = await searchNotesWithContent(notes, "tag:existing");
 
     expect(results.length).toBe(1);
@@ -103,10 +121,14 @@ describe("content search large files", () => {
     const largePath = path.join(tempDir, "tagged-quoted-open-scalar.md");
     fs.writeFileSync(
       largePath,
-      `---\ntags:\n  - quotedclip\ndescription: "${"x".repeat(1024 * 1024 + 64)}"\n---\nbody`
+      `---\ntags:\n  - quotedclip\ndescription: "${"x".repeat(
+        1024 * 1024 + 64
+      )}"\n---\nbody`
     );
 
-    const notes = [noteFor(tempDir, "tagged-quoted-open-scalar.md", "Quoted Open Scalar")];
+    const notes = [
+      noteFor(tempDir, "tagged-quoted-open-scalar.md", "Quoted Open Scalar"),
+    ];
     const results = await searchNotesWithContent(notes, "tag:quotedclip");
 
     expect(results.length).toBe(1);
@@ -117,10 +139,18 @@ describe("content search large files", () => {
     const largePath = path.join(tempDir, "tagged-unclosed-frontmatter.md");
     fs.writeFileSync(
       largePath,
-      `---\ntags:\n  - unclosedclip\ndescription: |\n  ${"y".repeat(1024 * 1024 + 64)}\n---\nbody`
+      `---\ntags:\n  - unclosedclip\ndescription: |\n  ${"y".repeat(
+        1024 * 1024 + 64
+      )}\n---\nbody`
     );
 
-    const notes = [noteFor(tempDir, "tagged-unclosed-frontmatter.md", "Unclosed Frontmatter")];
+    const notes = [
+      noteFor(
+        tempDir,
+        "tagged-unclosed-frontmatter.md",
+        "Unclosed Frontmatter"
+      ),
+    ];
     const results = await searchNotesWithContent(notes, "tag:unclosedclip");
 
     expect(results.length).toBe(1);

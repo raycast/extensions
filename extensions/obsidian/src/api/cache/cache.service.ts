@@ -77,14 +77,20 @@ export function invalidateNotesCache(cacheKey: string): void {
 /**
  * Updates a single note in the cache.
  */
-export function updateNoteInCache(cacheKey: string, notePath: string, updates: Partial<Note>): void {
+export function updateNoteInCache(
+  cacheKey: string,
+  notePath: string,
+  updates: Partial<Note>
+): void {
   const cached = getNotesFromCache(cacheKey);
   if (!cached) {
     logger.info(`No cache to update for ${cacheKey}`);
     return;
   }
 
-  const updatedNotes = cached.map((note) => (note.path === notePath ? { ...note, ...updates } : note));
+  const updatedNotes = cached.map((note) =>
+    note.path === notePath ? { ...note, ...updates } : note
+  );
 
   setNotesInCache(cacheKey, updatedNotes);
   logger.info(`Updated note ${notePath} in cache`);

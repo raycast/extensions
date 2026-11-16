@@ -20,14 +20,27 @@ import { EditNote } from "../components/EditNote";
 import { NoteQuickLook } from "../components/NoteQuickLook";
 import { ObsidianIcon, PrimaryAction } from "./constants";
 import { SearchNotePreferences } from "./preferences";
-import { updateNoteInCache, deleteNoteFromCache } from "../api/cache/cache.service";
+import {
+  updateNoteInCache,
+  deleteNoteFromCache,
+} from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
-import { Note, NoteWithContent, Obsidian, ObsidianTargetType, ObsidianVault, Vault } from "@/obsidian";
+import {
+  Note,
+  NoteWithContent,
+  Obsidian,
+  ObsidianTargetType,
+  ObsidianVault,
+  Vault,
+} from "@/obsidian";
 import { getCodeBlocks, normalizeRelativePath } from "./utils";
 import { useVaultPluginCheck } from "./hooks";
 import { appendSelectedTextTo } from "@/api/append-note";
 import { ContentMatch } from "@/api/search/content-match.service";
-import { getObsidianCliErrorMessage, openObsidianAtMatch } from "@/api/open-match/open-match.service";
+import {
+  getObsidianCliErrorMessage,
+  openObsidianAtMatch,
+} from "@/api/open-match/open-match.service";
 
 const logger = new Logger("Actions");
 
@@ -68,7 +81,9 @@ export function EditNoteAction(props: {
   return (
     <Action.Push
       title="Edit Note"
-      target={<EditNote note={note} vault={vault} onNoteUpdated={onNoteUpdated} />}
+      target={
+        <EditNote note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      }
       shortcut={{ modifiers: ["opt"], key: "e" }}
       icon={Icon.Pencil}
     />
@@ -85,7 +100,13 @@ export function AppendToNoteAction(props: {
   return (
     <Action.Push
       title="Append to Note"
-      target={<AppendNoteForm note={note} vault={vault} onNoteUpdated={onNoteUpdated} />}
+      target={
+        <AppendNoteForm
+          note={note}
+          vault={vault}
+          onNoteUpdated={onNoteUpdated}
+        />
+      }
       shortcut={{ modifiers: ["opt"], key: "a" }}
       icon={Icon.Pencil}
     />
@@ -107,7 +128,11 @@ export function AppendSelectedTextToNoteAction(props: {
         if (done) {
           // Update cache with new metadata
           const stats = fs.statSync(note.path);
-          const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
+          const updates = {
+            lastModified: stats.mtime,
+            createdAt: stats.birthtime,
+            fileSize: stats.size,
+          };
           updateNoteInCache(vault.path, note.path, updates);
           onNoteUpdated?.(note.path, updates);
         }
@@ -131,7 +156,11 @@ export function CopyNoteAction(props: { note: NoteWithContent }) {
 export function CopyNoteTitleAction(props: { note: Note }) {
   const { note } = props;
   return (
-    <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+    <Action.CopyToClipboard
+      title="Copy Note Title"
+      content={note.title}
+      shortcut={{ modifiers: ["opt"], key: "t" }}
+    />
   );
 }
 
@@ -178,12 +207,21 @@ export function PasteWikilinkAction(props: { note: Note }) {
 
 export function PasteNoteAction(props: { note: NoteWithContent }) {
   const { note } = props;
-  return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
+  return (
+    <Action.Paste
+      title="Paste Note Content"
+      content={note.content}
+      shortcut={{ modifiers: ["opt"], key: "v" }}
+    />
+  );
 }
 
 export function CopyMarkdownLinkAction(props: { note: Note }) {
   const { note } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action.CopyToClipboard
@@ -197,7 +235,10 @@ export function CopyMarkdownLinkAction(props: { note: Note }) {
 
 export function CopyObsidianURIAction(props: { note: Note }) {
   const { note } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action.CopyToClipboard
@@ -223,7 +264,8 @@ export function DeleteNoteAction(props: {
       onAction={async () => {
         const options = {
           title: "Delete Note",
-          message: 'Are you sure you want to delete the note: "' + note.title + '"?',
+          message:
+            'Are you sure you want to delete the note: "' + note.title + '"?',
           icon: Icon.ExclamationMark,
         };
         if (await confirmAlert(options)) {
@@ -255,7 +297,10 @@ export function QuickLookAction(props: { note: Note; vault: ObsidianVault }) {
   );
 }
 
-export function OpenInDefaultAppAction(props: { note: Note; vault: ObsidianVault }) {
+export function OpenInDefaultAppAction(props: {
+  note: Note;
+  vault: ObsidianVault;
+}) {
   const { note } = props;
   const [defaultApp, setDefaultApp] = useState<string>("Default App");
   useEffect(() => {
@@ -278,7 +323,11 @@ export function OpenInDefaultAppAction(props: { note: Note; vault: ObsidianVault
   );
 }
 
-export function BookmarkNoteAction(props: { note: Note; vault: ObsidianVault; onBookmark?: () => void }) {
+export function BookmarkNoteAction(props: {
+  note: Note;
+  vault: ObsidianVault;
+  onBookmark?: () => void;
+}) {
   const { note, vault, onBookmark } = props;
   const { configFileName } = getPreferenceValues();
 
@@ -295,7 +344,11 @@ export function BookmarkNoteAction(props: { note: Note; vault: ObsidianVault; on
   );
 }
 
-export function UnbookmarkNoteAction(props: { note: Note; vault: ObsidianVault; onUnbookmark?: () => void }) {
+export function UnbookmarkNoteAction(props: {
+  note: Note;
+  vault: ObsidianVault;
+  onUnbookmark?: () => void;
+}) {
   const { note, vault, onUnbookmark } = props;
   const { configFileName } = getPreferenceValues();
 
@@ -314,13 +367,25 @@ export function UnbookmarkNoteAction(props: { note: Note; vault: ObsidianVault; 
 
 export function OpenPathInObsidianAction(props: { path: string }) {
   const { path } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: path });
-  return <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />;
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: path,
+  });
+  return (
+    <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />
+  );
 }
 
-export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVault; match: ContentMatch }) {
+export function OpenMatchInObsidianAction(props: {
+  note: Note;
+  vault: ObsidianVault;
+  match: ContentMatch;
+}) {
   const { note, vault, match } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action
@@ -328,7 +393,9 @@ export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVa
       icon={ObsidianIcon}
       onAction={async () => {
         try {
-          const openMatch = open(target).then(() => openObsidianAtMatch(note, vault, match));
+          const openMatch = open(target).then(() =>
+            openObsidianAtMatch(note, vault, match)
+          );
           await Promise.all([openMatch, closeMainWindow()]);
         } catch (error) {
           await showToast({
@@ -342,7 +409,10 @@ export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVa
   );
 }
 
-export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
+export function OpenNoteInObsidianNewPaneAction(props: {
+  note: Note;
+  vault: ObsidianVault;
+}) {
   const { note, vault } = props;
 
   const relativePath = normalizeRelativePath(note.path, vault.path);
@@ -365,7 +435,13 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
 
 export function ShowVaultInFinderAction(props: { vault: ObsidianVault }) {
   const { vault } = props;
-  return <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />;
+  return (
+    <Action.ShowInFinder
+      title="Show in Finder"
+      icon={Icon.Finder}
+      path={vault.path}
+    />
+  );
 }
 
 export function CopyVaultPathAction(props: { vault: ObsidianVault }) {
@@ -415,8 +491,16 @@ export function CopyCodeAction(props: { note: NoteWithContent }) {
     const codeBlock = codeBlocks[0];
     return (
       <React.Fragment>
-        <Action.Paste title="Paste Code" icon={Icon.Code} content={codeBlock.code} />
-        <Action.CopyToClipboard title="Copy Code" icon={Icon.Code} content={codeBlock.code} />
+        <Action.Paste
+          title="Paste Code"
+          icon={Icon.Code}
+          content={codeBlock.code}
+        />
+        <Action.CopyToClipboard
+          title="Copy Code"
+          icon={Icon.Code}
+          content={codeBlock.code}
+        />
       </React.Fragment>
     );
   } else if (codeBlocks.length > 1) {
@@ -429,13 +513,25 @@ export function CopyCodeAction(props: { note: NoteWithContent }) {
             {codeBlocks?.map((codeBlock) => (
               <List.Item
                 title={codeBlock.code}
-                detail={<List.Item.Detail markdown={"```\n" + codeBlock.code + "```"} />}
+                detail={
+                  <List.Item.Detail
+                    markdown={"```\n" + codeBlock.code + "```"}
+                  />
+                }
                 subtitle={codeBlock.language}
                 key={codeBlock.code}
                 actions={
                   <ActionPanel>
-                    <Action.Paste title="Paste Code" icon={Icon.Code} content={codeBlock.code} />
-                    <Action.CopyToClipboard title="Copy Code" icon={Icon.Code} content={codeBlock.code} />
+                    <Action.Paste
+                      title="Paste Code"
+                      icon={Icon.Code}
+                      content={codeBlock.code}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Code"
+                      icon={Icon.Code}
+                      content={codeBlock.code}
+                    />
                   </ActionPanel>
                 }
               />
@@ -449,7 +545,12 @@ export function CopyCodeAction(props: { note: NoteWithContent }) {
   }
 }
 
-type NoteActionType = "bookmark" | "unbookmark" | "edit" | "append" | "appendSelected";
+type NoteActionType =
+  | "bookmark"
+  | "unbookmark"
+  | "edit"
+  | "append"
+  | "appendSelected";
 
 export function NoteActions(props: {
   note: Note | NoteWithContent;
@@ -466,14 +567,36 @@ export function NoteActions(props: {
       <ShowPathInFinderAction path={note.path} />
       {/* <ShowMentioningNotesAction vault={vault} str={note.title} notes={notes} /> */}
       {note.bookmarked ? (
-        <UnbookmarkNoteAction note={note} vault={vault} onUnbookmark={() => onNoteAction?.("unbookmark")} />
+        <UnbookmarkNoteAction
+          note={note}
+          vault={vault}
+          onUnbookmark={() => onNoteAction?.("unbookmark")}
+        />
       ) : (
-        <BookmarkNoteAction note={note} vault={vault} onBookmark={() => onNoteAction?.("bookmark")} />
+        <BookmarkNoteAction
+          note={note}
+          vault={vault}
+          onBookmark={() => onNoteAction?.("bookmark")}
+        />
       )}
       {noteWithContent && <CopyCodeAction note={noteWithContent} />}
-      {noteWithContent && <EditNoteAction note={noteWithContent} vault={vault} onNoteUpdated={onNoteUpdated} />}
-      <AppendToNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
-      <AppendSelectedTextToNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      {noteWithContent && (
+        <EditNoteAction
+          note={noteWithContent}
+          vault={vault}
+          onNoteUpdated={onNoteUpdated}
+        />
+      )}
+      <AppendToNoteAction
+        note={note}
+        vault={vault}
+        onNoteUpdated={onNoteUpdated}
+      />
+      <AppendSelectedTextToNoteAction
+        note={note}
+        vault={vault}
+        onNoteUpdated={onNoteUpdated}
+      />
       {noteWithContent && <CopyNoteAction note={noteWithContent} />}
       <CopyNoteTitleAction note={note} />
       <CopyNotePathAction note={note} />
@@ -481,7 +604,11 @@ export function NoteActions(props: {
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} onDelete={onDelete} />
-      <AppendTaskAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      <AppendTaskAction
+        note={note}
+        vault={vault}
+        onNoteUpdated={onNoteUpdated}
+      />
       <CopyWikilinkAction note={note} />
       <PasteWikilinkAction note={note} />
     </>
@@ -497,7 +624,10 @@ export function OpenNoteActions(props: {
   const { note, vault, match, showQuickLook = true } = props;
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
-  const { vaultsWithPlugin } = useVaultPluginCheck({ vaults: [vault], communityPlugins: ["obsidian-advanced-uri"] });
+  const { vaultsWithPlugin } = useVaultPluginCheck({
+    vaults: [vault],
+    communityPlugins: ["obsidian-advanced-uri"],
+  });
 
   const quicklook = <QuickLookAction note={note} vault={vault} />;
   const openInDefaultApp = <OpenInDefaultAppAction note={note} vault={vault} />;
@@ -568,7 +698,13 @@ export function AppendTaskAction(props: {
   return (
     <Action.Push
       title="Append Task"
-      target={<AppendNoteForm note={note} vault={vault} onNoteUpdated={onNoteUpdated} />}
+      target={
+        <AppendNoteForm
+          note={note}
+          vault={vault}
+          onNoteUpdated={onNoteUpdated}
+        />
+      }
       shortcut={{ modifiers: ["opt"], key: "a" }}
       icon={Icon.Pencil}
     />

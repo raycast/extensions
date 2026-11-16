@@ -55,7 +55,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   }
 
   if (input.useDailyNote) {
-    const targetVault = input.vaultName ? vaults.find((v) => v.name === input.vaultName) : vaults[0];
+    const targetVault = input.vaultName
+      ? vaults.find((v) => v.name === input.vaultName)
+      : vaults[0];
 
     if (!targetVault) {
       return {
@@ -64,7 +66,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     }
 
     return {
-      message: `${input.prepend ? "Prepend" : "Append"} content to daily note in vault "${targetVault.name}"${
+      message: `${
+        input.prepend ? "Prepend" : "Append"
+      } content to daily note in vault "${targetVault.name}"${
         input.heading ? ` under heading "${input.heading}"` : ""
       }?`,
     };
@@ -77,9 +81,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   }
 
   return {
-    message: `${input.prepend ? "Prepend" : "Append"} content to note "${input.fullNotePath}"${
-      input.heading ? ` under heading "${input.heading}"` : ""
-    }?`,
+    message: `${input.prepend ? "Prepend" : "Append"} content to note "${
+      input.fullNotePath
+    }"${input.heading ? ` under heading "${input.heading}"` : ""}?`,
   };
 };
 
@@ -97,10 +101,14 @@ export default async function tool(input: Input) {
       return "No vaults found. Please configure vault paths in Raycast preferences.";
     }
 
-    const targetVault = input.vaultName ? vaults.find((v) => v.name === input.vaultName) : vaults[0];
+    const targetVault = input.vaultName
+      ? vaults.find((v) => v.name === input.vaultName)
+      : vaults[0];
 
     if (!targetVault) {
-      return `Vault "${input.vaultName}" not found. Available vaults: ${vaults.map((v) => v.name).join(", ")}`;
+      return `Vault "${input.vaultName}" not found. Available vaults: ${vaults
+        .map((v) => v.name)
+        .join(", ")}`;
     }
 
     // Append to daily note using Advanced URI
@@ -117,9 +125,11 @@ export default async function tool(input: Input) {
 
     await openUrl(target, { background: input.silent ?? true });
 
-    return `Successfully ${input.prepend ? "prepended" : "appended"} content to daily note in vault "${
-      targetVault.name
-    }"${input.heading ? ` under heading "${input.heading}"` : ""} (Note: Requires Advanced URI plugin in Obsidian)`;
+    return `Successfully ${
+      input.prepend ? "prepended" : "appended"
+    } content to daily note in vault "${targetVault.name}"${
+      input.heading ? ` under heading "${input.heading}"` : ""
+    } (Note: Requires Advanced URI plugin in Obsidian)`;
   }
 
   // Handle regular note append (direct file system)
@@ -143,10 +153,15 @@ export default async function tool(input: Input) {
   // Append or prepend the content
   if (input.prepend) {
     const existingContent = fs.readFileSync(input.fullNotePath, "utf8");
-    fs.writeFileSync(input.fullNotePath, processedContent + "\n" + existingContent);
+    fs.writeFileSync(
+      input.fullNotePath,
+      processedContent + "\n" + existingContent
+    );
   } else {
     fs.appendFileSync(input.fullNotePath, "\n" + processedContent);
   }
 
-  return `Successfully ${input.prepend ? "prepended" : "appended"} content to note "${input.fullNotePath}"`;
+  return `Successfully ${
+    input.prepend ? "prepended" : "appended"
+  } content to note "${input.fullNotePath}"`;
 }

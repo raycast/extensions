@@ -29,7 +29,10 @@ export default function Command() {
 
   if (vaultsWithPlugin.length > 1) {
     return (
-      <VaultSelection vaults={vaultsWithPlugin} target={(vault: ObsidianVault) => <WorkspacesList vault={vault} />} />
+      <VaultSelection
+        vaults={vaultsWithPlugin}
+        target={(vault: ObsidianVault) => <WorkspacesList vault={vault} />}
+      />
     );
   } else if (vaultsWithPlugin.length === 1) {
     return <WorkspacesList vault={vaultsWithPlugin[0]} />;

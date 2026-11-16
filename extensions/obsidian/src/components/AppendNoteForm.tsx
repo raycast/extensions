@@ -1,5 +1,13 @@
 import { Note, ObsidianVault } from "@/obsidian";
-import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import fs from "fs";
 import { updateNoteInCache } from "../api/cache/cache.service";
 import { applyTemplates } from "../api/templating/templating.service";
@@ -25,7 +33,11 @@ export function AppendNoteForm(props: {
 
     // Update cache and notify parent
     const stats = fs.statSync(note.path);
-    const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
+    const updates = {
+      lastModified: stats.mtime,
+      createdAt: stats.birthtime,
+      fileSize: stats.size,
+    };
     updateNoteInCache(vault.path, note.path, updates);
     onNoteUpdated?.(note.path, updates);
 
