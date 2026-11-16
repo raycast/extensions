@@ -1,6 +1,6 @@
 # PR Canary Changelog
 
-## [Latest Commit Check] - {PR_MERGE_DATE}
+## [Latest Commit Check] - 2026-11-16
 
 - Show each pull request's latest commit instead of its number (the number still works in the filter)
 - Color the canary tag yellow when the canary doesn't run the latest commit, read from the canary's `/build-info.json`
