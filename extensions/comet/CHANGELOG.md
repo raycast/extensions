@@ -1,6 +1,6 @@
 # Comet Browser Changelog
 
-## [Fix History Search With Underscores] - {PR_MERGE_DATE}
+## [Fix History Search With Underscores] - 2026-11-16
 
 - Fixed Search History returning nothing for terms with `_`, `%` or `\` (common in URLs), and for terms in double quotes
 - The history tool now passes its query to `sqlite3` without a shell, so search terms with quotes, backslashes or `$` reach SQLite unchanged
