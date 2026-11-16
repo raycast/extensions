@@ -6,12 +6,14 @@ import { listRecent } from "./sponge";
 
 export default function Command() {
   const abortable = useRef<AbortController>(null);
-  const { data, isLoading, error } = usePromise(() => listRecent(abortable.current?.signal), [], { abortable });
+  const { data, isLoading, error, revalidate } = usePromise(() => listRecent(abortable.current?.signal), [], {
+    abortable,
+  });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter recent items">
       {error ? (
-        <ErrorView error={error} />
+        <ErrorView error={error} onRetry={revalidate} />
       ) : !isLoading && data?.length === 0 ? (
         <List.EmptyView icon={Icon.Tray} title="Your Library Is Empty" description="Save a URL to get started." />
       ) : (

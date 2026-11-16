@@ -8,7 +8,7 @@ export default function Command() {
   const [query, setQuery] = useState("");
   const abortable = useRef<AbortController>(null);
   const trimmed = query.trim();
-  const { data, isLoading, error } = usePromise(
+  const { data, isLoading, error, revalidate } = usePromise(
     async (text: string) => (text ? searchLibrary(text, abortable.current?.signal) : []),
     [trimmed],
     { abortable },
@@ -17,7 +17,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} onSearchTextChange={setQuery} searchBarPlaceholder="Search saved text" throttle>
       {error ? (
-        <ErrorView error={error} />
+        <ErrorView error={error} onRetry={revalidate} />
       ) : !trimmed ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="Search Your Sponge Library" />
       ) : !isLoading && data?.length === 0 ? (

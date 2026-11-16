@@ -1,5 +1,16 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard, List, Toast, open, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  open,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   INSTALL_COMMAND,
   Item,
@@ -27,8 +38,7 @@ export function errorText(error: unknown): { title: string; description?: string
 
 export function showError(error: unknown) {
   const { title, description } = errorText(error);
-  return showToast({
-    style: Toast.Style.Failure,
+  return showFailureToast(error, {
     title,
     message: description,
     primaryAction:
@@ -36,7 +46,7 @@ export function showError(error: unknown) {
   });
 }
 
-export function ErrorView({ error }: { error: unknown }) {
+export function ErrorView({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const { title, description } = errorText(error);
   return (
     <List.EmptyView
@@ -45,6 +55,8 @@ export function ErrorView({ error }: { error: unknown }) {
       description={description}
       actions={
         <ActionPanel>
+          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.OpenInBrowser title="Open Setup Guide" url={SETUP_URL} />
           <Action.CopyToClipboard title="Copy Install Command" content={INSTALL_COMMAND} />
         </ActionPanel>

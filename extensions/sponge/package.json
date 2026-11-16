@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sponge",
   "title": "Sponge",
-  "description": "Save links to your Sponge reading library and search what you have saved.",
+  "description": "Save links to your Sponge reading library and search what you have saved. Requires the Sponge CLI on your Mac.",
   "icon": "icon.png",
   "author": "0thernet",
   "categories": [
