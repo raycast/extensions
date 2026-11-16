@@ -10,15 +10,31 @@ type Input = {
     mrrType: "cmrr" | "mrr";
     startDate: string;
     endDate: string;
+    /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
+    productIds?: string;
+    /** IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
+    timeZone?: string;
 };
 
 export default async function dataCustomerChanges(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, mrrType, startDate, endDate } = input;
+    const { companyId, mrrType, startDate, endDate, productIds, timeZone } = input;
 
     return runEndpoint({
         method: "POST",
         pathTemplate: "/companies/{companyId}/data/customerChanges",
         companyId,
-        body: { mrrType, startDate, endDate },
+        body: {
+            mrrType,
+            startDate,
+            endDate,
+            productIds:
+                productIds === undefined
+                    ? undefined
+                    : productIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+            timeZone,
+        },
     });
 }

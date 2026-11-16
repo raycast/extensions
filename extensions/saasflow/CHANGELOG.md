@@ -1,5 +1,13 @@
 # SaaSFlow Changelog
 
+## [Raycast 2 and Seven New AI Tools] - {PR_MERGE_DATE}
+
+- Runs on Raycast 2 (`@raycast/api` 2.12).
+- Seven more AI tools for Ask SaaSFlow: metric definitions, metric explanations, cash flow and balance forecasts, the customers behind a cohort, SaaS benchmarks, and a valuation estimate.
+- The menu bar updates as soon as you switch company, sign in or sign out, and loads faster.
+- Before you sign in, the menu bar shows a Sign in item instead of an empty menu.
+- The List Transactions tool now tells the AI the one value its `status` filter accepts (`uncategorized`).
+
 ## [Initial Version] - 2026-06-19
 
 - **MRR & Cash** menu-bar command — current CMRR (or MRR — switchable in preferences) and cash balance, refreshed every 15 minutes.

@@ -1,12 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface ResolvedPreferences {
+interface RawPreferences {
+    apiBaseUrl?: string;
+    apiKey?: string;
+}
+
+export interface Preferences {
     apiBaseUrl: string;
     apiKey: string | null;
 }
 
-export function preferences(): ResolvedPreferences {
-    const raw = getPreferenceValues<Preferences>();
+export function preferences(): Preferences {
+    const raw = getPreferenceValues<RawPreferences>();
     const trimmedBase = raw.apiBaseUrl?.trim();
     const trimmedKey = raw.apiKey?.trim();
     return {

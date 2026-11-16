@@ -10,15 +10,16 @@ type Input = {
     endDate: string;
     dateDefinition: "distributed" | "cash";
     splitBy: "account" | "counterparty";
+    includePlanned?: boolean;
 };
 
 export default async function dataPeriodDetails(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, startDate, endDate, dateDefinition, splitBy } = input;
+    const { companyId, startDate, endDate, dateDefinition, splitBy, includePlanned } = input;
 
     return runEndpoint({
         method: "POST",
         pathTemplate: "/companies/{companyId}/data/periodDetails",
         companyId,
-        body: { startDate, endDate, dateDefinition, splitBy },
+        body: { startDate, endDate, dateDefinition, splitBy, includePlanned },
     });
 }

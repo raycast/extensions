@@ -84,19 +84,18 @@ async function authorize(): Promise<string> {
     const { apiBaseUrl } = preferences();
     const existing = await oauthClient.getTokens();
     if (existing?.accessToken) {
-        if (existing.isExpired()) {
-            if (existing.refreshToken) {
-                const refreshed = await refreshAccessToken({
-                    baseUrl: apiBaseUrl,
-                    refreshToken: existing.refreshToken,
-                });
-                await oauthClient.setTokens(refreshed);
-                return refreshed.access_token;
-            }
-            // No refresh token — fall through to a new authorization flow.
-        } else {
+        if (!existing.isExpired()) {
             return existing.accessToken;
         }
+        if (existing.refreshToken) {
+            const refreshed = await refreshAccessToken({
+                baseUrl: apiBaseUrl,
+                refreshToken: existing.refreshToken,
+            });
+            await oauthClient.setTokens(refreshed);
+            return refreshed.access_token;
+        }
+        // Expired without a refresh token: fall through to a new authorization flow.
     }
     const authRequest = await oauthClient.authorizationRequest({
         endpoint: `${apiBaseUrl}/auth/oauth2/authorize`,
@@ -118,6 +117,18 @@ async function authorize(): Promise<string> {
 /** Wipe stored OAuth tokens — exposed for a future "sign out" command. */
 export async function signOut(): Promise<void> {
     await oauthClient.removeTokens();
+}
+
+/**
+ * Whether a request can be made without a browser round-trip: an API key is
+ * configured, or OAuth tokens are stored (an expired token is refreshed on
+ * use). Background launches check this first, because they cannot show the
+ * OAuth sign-in.
+ */
+export async function hasStoredCredentials(): Promise<boolean> {
+    if (preferences().apiKey) return true;
+    const tokens = await oauthClient.getTokens();
+    return Boolean(tokens?.accessToken);
 }
 
 /**
