@@ -7,6 +7,7 @@
 - Vaults have a box icon instead of a folder, now that folders have it
 - The folders come from one more pass-cli command per vault, run along with the vault's items, and are saved with them so that they show at once next time
 - The extension installs Proton Pass CLI 2.5.1 instead of 2.3.3, which brings folders, proxy fixes and network updates. The copy of the previous version is deleted once the new one is installed
+- The CLI Path preference says which pass-cli version the extension downloads
 - The README no longer suggests `pass-cli login --interactive`: pass-cli 2.5.0 removed logging in with a password in the terminal, leaving the browser login and personal access tokens
 
 ## [Shared with Me, Sorting and TOTP] - 2026-11-09
