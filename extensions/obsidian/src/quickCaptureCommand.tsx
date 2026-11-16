@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Form,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { CaptureValues, saveQuickCapture } from "./api/quickCapture.service";
 import { Obsidian } from "@/obsidian";
@@ -37,10 +29,7 @@ export default function QuickCaptureCommand() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't save capture",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Please check the capture file paths.",
+        message: error instanceof Error ? error.message : "Please check the capture file paths.",
       });
     }
   }
@@ -54,12 +43,7 @@ export default function QuickCaptureCommand() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="type"
-        title="Type"
-        value={type}
-        onChange={(value) => setType(value as CaptureValues["type"])}
-      >
+      <Form.Dropdown id="type" title="Type" value={type} onChange={(value) => setType(value as CaptureValues["type"])}>
         <Form.Dropdown.Item value="daily" title="Daily Note" />
         <Form.Dropdown.Item value="todo" title="To Do" />
         <Form.Dropdown.Item value="shopping" title="Shopping" />

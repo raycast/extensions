@@ -1,14 +1,6 @@
 import { ObsidianVault } from "@/obsidian";
-import {
-  getVaultNameFromPath,
-  getVaultsFromPreferences,
-} from "@/obsidian/internal/obsidian";
-import {
-  getNotes,
-  getExcludedFolders,
-  getNoteFileContent,
-  getMedia,
-} from "@/obsidian/internal/vault";
+import { getVaultNameFromPath, getVaultsFromPreferences } from "@/obsidian/internal/obsidian";
+import { getNotes, getExcludedFolders, getNoteFileContent, getMedia } from "@/obsidian/internal/vault";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getPreferenceValues } from "@raycast/api";
 import { createTempVault } from "./helpers/createTemporaryVault";
@@ -89,11 +81,7 @@ describe("vault", () => {
 
     it("should include canvas files in note entries", async () => {
       const canvas1Path = path.join(tempVaultData.vault.path, "canvas1.canvas");
-      const canvas2Path = path.join(
-        tempVaultData.vault.path,
-        "Folder1",
-        "canvas2.canvas"
-      );
+      const canvas2Path = path.join(tempVaultData.vault.path, "Folder1", "canvas2.canvas");
 
       fs.writeFileSync(canvas1Path, JSON.stringify({ nodes: [], edges: [] }));
       fs.writeFileSync(canvas2Path, JSON.stringify({ nodes: [], edges: [] }));
@@ -103,20 +91,14 @@ describe("vault", () => {
       // Should have 2 markdown files + 2 canvas files = 4 total
       expect(noteMetadataEntries.length).toBe(4);
 
-      const canvasNotes = noteMetadataEntries.filter((note) =>
-        note.path.endsWith(".canvas")
-      );
+      const canvasNotes = noteMetadataEntries.filter((note) => note.path.endsWith(".canvas"));
       expect(canvasNotes.length).toBe(2);
 
-      const canvas1Note = noteMetadataEntries.find(
-        (note) => note.title === "canvas1"
-      );
+      const canvas1Note = noteMetadataEntries.find((note) => note.title === "canvas1");
       expect(canvas1Note).toBeDefined();
       expect(canvas1Note?.path).toBe(canvas1Path);
 
-      const canvas2Note = noteMetadataEntries.find(
-        (note) => note.title === "canvas2"
-      );
+      const canvas2Note = noteMetadataEntries.find((note) => note.title === "canvas2");
       expect(canvas2Note).toBeDefined();
       expect(canvas2Note?.path).toBe(canvas2Path);
     });
@@ -125,28 +107,15 @@ describe("vault", () => {
       const excludedFolder = path.join(tempVaultData.vault.path, "excluded");
       fs.mkdirSync(excludedFolder, { recursive: true });
 
-      const normalCanvasPath = path.join(
-        tempVaultData.vault.path,
-        "normal.canvas"
-      );
+      const normalCanvasPath = path.join(tempVaultData.vault.path, "normal.canvas");
       const excludedCanvasPath = path.join(excludedFolder, "excluded.canvas");
       const normalMdPath = path.join(tempVaultData.vault.path, "normal.md");
 
-      fs.writeFileSync(
-        normalCanvasPath,
-        JSON.stringify({ nodes: [], edges: [] })
-      );
-      fs.writeFileSync(
-        excludedCanvasPath,
-        JSON.stringify({ nodes: [], edges: [] })
-      );
+      fs.writeFileSync(normalCanvasPath, JSON.stringify({ nodes: [], edges: [] }));
+      fs.writeFileSync(excludedCanvasPath, JSON.stringify({ nodes: [], edges: [] }));
       fs.writeFileSync(normalMdPath, "# Normal note");
 
-      const noteMetadataEntries = await getNotes(
-        tempVaultData.vault.path,
-        ".obsidian",
-        ["excluded"]
-      );
+      const noteMetadataEntries = await getNotes(tempVaultData.vault.path, ".obsidian", ["excluded"]);
 
       const noteTitles = noteMetadataEntries.map((note) => note.title);
       expect(noteTitles).toContain("normal");
@@ -157,18 +126,11 @@ describe("vault", () => {
     });
 
     it("should set bookmarked status for canvas files", async () => {
-      const canvasPath = path.join(
-        tempVaultData.vault.path,
-        "bookmarked.canvas"
-      );
+      const canvasPath = path.join(tempVaultData.vault.path, "bookmarked.canvas");
       fs.writeFileSync(canvasPath, JSON.stringify({ nodes: [], edges: [] }));
 
       // Create bookmarks.json with canvas file
-      const bookmarksJsonPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "bookmarks.json"
-      );
+      const bookmarksJsonPath = path.join(tempVaultData.vault.path, ".obsidian", "bookmarks.json");
       const bookmarksData = {
         items: [
           {
@@ -178,16 +140,11 @@ describe("vault", () => {
           },
         ],
       };
-      fs.writeFileSync(
-        bookmarksJsonPath,
-        JSON.stringify(bookmarksData, null, 2)
-      );
+      fs.writeFileSync(bookmarksJsonPath, JSON.stringify(bookmarksData, null, 2));
 
       const noteMetadataEntries = await getNotes(tempVaultData.vault.path);
 
-      const canvasNote = noteMetadataEntries.find(
-        (note) => note.title === "bookmarked"
-      );
+      const canvasNote = noteMetadataEntries.find((note) => note.title === "bookmarked");
       expect(canvasNote).toBeDefined();
       expect(canvasNote?.bookmarked).toBe(true);
     });
@@ -221,46 +178,29 @@ describe("vault", () => {
 
   describe("getExcludedFolders", () => {
     it("should return empty array when app.json does not exist", () => {
-      const excludedFolders = getExcludedFolders(
-        tempVaultData.vault.path,
-        ".obsidian"
-      );
+      const excludedFolders = getExcludedFolders(tempVaultData.vault.path, ".obsidian");
       expect(excludedFolders).toEqual([]);
     });
 
     it("should return excluded folders when app.json exists with userIgnoreFilters", () => {
-      const appJsonPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "app.json"
-      );
+      const appJsonPath = path.join(tempVaultData.vault.path, ".obsidian", "app.json");
       const appConfig = {
         userIgnoreFilters: ["Archive", "Templates", "Private"],
       };
       fs.writeFileSync(appJsonPath, JSON.stringify(appConfig, null, 2));
 
-      const excludedFolders = getExcludedFolders(
-        tempVaultData.vault.path,
-        ".obsidian"
-      );
+      const excludedFolders = getExcludedFolders(tempVaultData.vault.path, ".obsidian");
       expect(excludedFolders).toEqual(["Archive", "Templates", "Private"]);
     });
 
     it("should return empty array when app.json exists but userIgnoreFilters is missing", () => {
-      const appJsonPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "app.json"
-      );
+      const appJsonPath = path.join(tempVaultData.vault.path, ".obsidian", "app.json");
       const appConfig = {
         someOtherSetting: "value",
       };
       fs.writeFileSync(appJsonPath, JSON.stringify(appConfig, null, 2));
 
-      const excludedFolders = getExcludedFolders(
-        tempVaultData.vault.path,
-        ".obsidian"
-      );
+      const excludedFolders = getExcludedFolders(tempVaultData.vault.path, ".obsidian");
       expect(excludedFolders).toEqual([]);
     });
 
@@ -270,38 +210,24 @@ describe("vault", () => {
         recursive: true,
       });
 
-      const appJsonPath = path.join(
-        tempVaultData.vault.path,
-        customConfigDir,
-        "app.json"
-      );
+      const appJsonPath = path.join(tempVaultData.vault.path, customConfigDir, "app.json");
       const appConfig = {
         userIgnoreFilters: ["CustomFolder"],
       };
       fs.writeFileSync(appJsonPath, JSON.stringify(appConfig, null, 2));
 
-      const excludedFolders = getExcludedFolders(
-        tempVaultData.vault.path,
-        customConfigDir
-      );
+      const excludedFolders = getExcludedFolders(tempVaultData.vault.path, customConfigDir);
       expect(excludedFolders).toEqual(["CustomFolder"]);
     });
 
     it("should handle empty userIgnoreFilters array", () => {
-      const appJsonPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "app.json"
-      );
+      const appJsonPath = path.join(tempVaultData.vault.path, ".obsidian", "app.json");
       const appConfig = {
         userIgnoreFilters: [],
       };
       fs.writeFileSync(appJsonPath, JSON.stringify(appConfig, null, 2));
 
-      const excludedFolders = getExcludedFolders(
-        tempVaultData.vault.path,
-        ".obsidian"
-      );
+      const excludedFolders = getExcludedFolders(tempVaultData.vault.path, ".obsidian");
       expect(excludedFolders).toEqual([]);
     });
   });
@@ -317,12 +243,8 @@ describe("vault", () => {
     });
 
     it("should read file content with filter function", async () => {
-      const testFilePath = path.join(
-        tempVaultData.vault.path,
-        "test-note-with-filter.md"
-      );
-      const testContent =
-        "# Test Note\n\nThis is test content with some words.";
+      const testFilePath = path.join(tempVaultData.vault.path, "test-note-with-filter.md");
+      const testContent = "# Test Note\n\nThis is test content with some words.";
       fs.writeFileSync(testFilePath, testContent);
 
       const filterFunc = (input: string) => input.toUpperCase();
@@ -339,12 +261,8 @@ describe("vault", () => {
     });
 
     it("should handle file with special characters", async () => {
-      const testFilePath = path.join(
-        tempVaultData.vault.path,
-        "special-chars.md"
-      );
-      const testContent =
-        "# Test\n\nSpecial chars: émoji 🎉, symbols ©®™, quotes 'test'";
+      const testFilePath = path.join(tempVaultData.vault.path, "special-chars.md");
+      const testContent = "# Test\n\nSpecial chars: émoji 🎉, symbols ©®™, quotes 'test'";
       fs.writeFileSync(testFilePath, testContent);
 
       const content = await getNoteFileContent(testFilePath);
@@ -352,10 +270,7 @@ describe("vault", () => {
     });
 
     it("should throw error for non-existent file", async () => {
-      const nonExistentPath = path.join(
-        tempVaultData.vault.path,
-        "non-existent.md"
-      );
+      const nonExistentPath = path.join(tempVaultData.vault.path, "non-existent.md");
 
       await expect(getNoteFileContent(nonExistentPath)).rejects.toThrow();
     });
@@ -409,9 +324,7 @@ describe("vault", () => {
       fs.writeFileSync(normalImagePath, "normal image");
       fs.writeFileSync(excludedImagePath, "excluded image");
 
-      const media = await getMedia(tempVaultData.vault.path, ".obsidian", [
-        "excluded",
-      ]);
+      const media = await getMedia(tempVaultData.vault.path, ".obsidian", ["excluded"]);
 
       const mediaTitles = media.map((m) => m.title);
       expect(mediaTitles).toContain("normal.jpg");
@@ -419,11 +332,7 @@ describe("vault", () => {
     });
 
     it("should exclude media from .obsidian folder", async () => {
-      const obsidianImagePath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "config-image.png"
-      );
+      const obsidianImagePath = path.join(tempVaultData.vault.path, ".obsidian", "config-image.png");
       fs.writeFileSync(obsidianImagePath, "config image");
 
       const normalImagePath = path.join(tempVaultData.vault.path, "normal.png");
@@ -438,11 +347,7 @@ describe("vault", () => {
 
     it("should respect userIgnoreFilters from app.json", async () => {
       // Create app.json with userIgnoreFilters
-      const appJsonPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "app.json"
-      );
+      const appJsonPath = path.join(tempVaultData.vault.path, ".obsidian", "app.json");
       const appConfig = {
         userIgnoreFilters: ["Archive"],
       };

@@ -2,11 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import {
-  getWorkspacesJson,
-  getWorkspaces,
-  WorkspacesJson,
-} from "@/obsidian/internal/workspaces";
+import { getWorkspacesJson, getWorkspaces, WorkspacesJson } from "@/obsidian/internal/workspaces";
 
 vi.mock("@raycast/api", () => ({
   getPreferenceValues: () => ({
@@ -19,9 +15,7 @@ describe("workspaces", () => {
   let vaultPath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "obsidian-workspaces-test-")
-    );
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "obsidian-workspaces-test-"));
     vaultPath = path.join(tempDir, "test-vault");
     fs.mkdirSync(vaultPath, { recursive: true });
     fs.mkdirSync(path.join(vaultPath, ".obsidian"), { recursive: true });
@@ -57,11 +51,7 @@ describe("workspaces", () => {
         active: "Main Workspace",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        ".obsidian",
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, ".obsidian", "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const result = getWorkspacesJson(vaultPath, ".obsidian");
@@ -96,11 +86,7 @@ describe("workspaces", () => {
         active: "Test Workspace",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        customConfigDir,
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, customConfigDir, "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const result = getWorkspacesJson(vaultPath, customConfigDir);
@@ -124,11 +110,7 @@ describe("workspaces", () => {
         active: "Work",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        ".obsidian",
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, ".obsidian", "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const result = getWorkspacesJson(vaultPath, ".obsidian");
@@ -143,11 +125,7 @@ describe("workspaces", () => {
         active: "",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        ".obsidian",
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, ".obsidian", "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const result = getWorkspacesJson(vaultPath, ".obsidian");
@@ -180,11 +158,7 @@ describe("workspaces", () => {
         active: "My Workspace (2024)",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        ".obsidian",
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, ".obsidian", "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const result = getWorkspacesJson(vaultPath, ".obsidian");
@@ -211,11 +185,7 @@ describe("workspaces", () => {
         active: "Default",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        ".obsidian",
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, ".obsidian", "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const result = getWorkspaces(vaultPath, ".obsidian");
@@ -246,11 +216,7 @@ describe("workspaces", () => {
         active: "Workspace A",
       };
 
-      const workspacesPath = path.join(
-        vaultPath,
-        ".obsidian",
-        "workspaces.json"
-      );
+      const workspacesPath = path.join(vaultPath, ".obsidian", "workspaces.json");
       fs.writeFileSync(workspacesPath, JSON.stringify(workspacesData, null, 2));
 
       const directResult = getWorkspacesJson(vaultPath, ".obsidian");

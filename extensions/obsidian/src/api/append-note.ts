@@ -1,19 +1,12 @@
 import { Note, Vault } from "@/obsidian";
 import { SearchNotePreferences } from "@/utils/preferences";
-import {
-  getPreferenceValues,
-  getSelectedText,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
 import { applyTemplates } from "./templating/templating.service";
 
 export async function appendSelectedTextTo(note: Note) {
   let { appendSelectedTemplate } = getPreferenceValues<SearchNotePreferences>();
 
-  appendSelectedTemplate = appendSelectedTemplate
-    ? appendSelectedTemplate
-    : "{content}";
+  appendSelectedTemplate = appendSelectedTemplate ? appendSelectedTemplate : "{content}";
 
   try {
     const selectedText = await getSelectedText();
@@ -24,10 +17,7 @@ export async function appendSelectedTextTo(note: Note) {
         style: Toast.Style.Failure,
       });
     } else {
-      let content = appendSelectedTemplate.replaceAll(
-        "{content}",
-        selectedText
-      );
+      let content = appendSelectedTemplate.replaceAll("{content}", selectedText);
       content = await applyTemplates(content);
       Vault.appendToNote(note, content);
       showToast({

@@ -1,13 +1,5 @@
 import { Note, ObsidianVault } from "@/obsidian";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 import fs from "fs";
 import { updateNoteInCache } from "../api/cache/cache.service";
 import { applyTemplates } from "../api/templating/templating.service";

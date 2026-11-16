@@ -47,10 +47,7 @@ export function filterMedia(mediaList: Media[], input?: string) {
   // notes = notes.filter((note) => note.title.toLowerCase().includes(input));
 
   return mediaList.filter((media) => {
-    return (
-      media.title.toLowerCase().includes(query) ||
-      media.path.toLowerCase().includes(query)
-    );
+    return media.title.toLowerCase().includes(query) || media.path.toLowerCase().includes(query);
     // Filter media that is mentioned in a note which has the searched title
     // TODO: add information about where the media is linked during indexing
     // notes.some((note) => note.content.includes(media.title))

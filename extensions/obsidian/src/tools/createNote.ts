@@ -39,9 +39,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     };
   }
 
-  const targetVault = input.vaultName
-    ? vaults.find((v) => v.name === input.vaultName)
-    : vaults[0];
+  const targetVault = input.vaultName ? vaults.find((v) => v.name === input.vaultName) : vaults[0];
 
   if (!targetVault) {
     logger.warning(`Vault ${input.vaultName} not found`);
@@ -73,14 +71,10 @@ export default async function tool(input: Input) {
     return "No vaults found. Please configure vault paths in Raycast preferences.";
   }
 
-  const targetVault = input.vaultName
-    ? vaults.find((v) => v.name === input.vaultName)
-    : vaults[0];
+  const targetVault = input.vaultName ? vaults.find((v) => v.name === input.vaultName) : vaults[0];
 
   if (!targetVault) {
-    return `Vault "${input.vaultName}" not found. Available vaults: ${vaults
-      .map((v) => v.name)
-      .join(", ")}`;
+    return `Vault "${input.vaultName}" not found. Available vaults: ${vaults.map((v) => v.name).join(", ")}`;
   }
 
   if (!input.name) {
@@ -101,9 +95,9 @@ export default async function tool(input: Input) {
 
   if (saved) {
     invalidateNotesCache(targetVault.path);
-    return `Successfully created note "${input.name}" in vault "${
-      targetVault.name
-    }"${notePath ? ` at path "${notePath}"` : " at vault root"}`;
+    return `Successfully created note "${input.name}" in vault "${targetVault.name}"${
+      notePath ? ` at path "${notePath}"` : " at vault root"
+    }`;
   } else {
     return `Failed to create note "${input.name}" in vault "${targetVault.name}"`;
   }

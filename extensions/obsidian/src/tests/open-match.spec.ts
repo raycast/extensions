@@ -1,9 +1,6 @@
 import { execFile } from "child_process";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  buildObsidianCursorScript,
-  openObsidianAtMatch,
-} from "../api/open-match/open-match.service";
+import { buildObsidianCursorScript, openObsidianAtMatch } from "../api/open-match/open-match.service";
 import { ContentMatch } from "../api/search/content-match.service";
 
 vi.mock("child_process", () => ({ execFile: vi.fn() }));
@@ -26,9 +23,7 @@ describe("Obsidian match navigation", () => {
     const script = buildObsidianCursorScript(match, "folder/note.md");
 
     expect(script).toContain('"folder/note.md"');
-    expect(script).toContain(
-      "app.workspace.getActiveFile()?.path !== targetPath"
-    );
+    expect(script).toContain("app.workspace.getActiveFile()?.path !== targetPath");
     expect(script).toContain('return "waiting"');
     expect(script).toContain('return "raycast-match-applied"');
     expect(script).toContain('return "raycast-match-already-applied"');
@@ -52,12 +47,10 @@ describe("Obsidian match navigation", () => {
       "raycast-match-applied",
       "raycast-match-already-applied",
     ];
-    vi.mocked(execFile).mockImplementation(
-      (_file, _args, _options, callback) => {
-        if (callback) callback(null, outputs.shift() ?? "", "");
-        return undefined as never;
-      }
-    );
+    vi.mocked(execFile).mockImplementation((_file, _args, _options, callback) => {
+      if (callback) callback(null, outputs.shift() ?? "", "");
+      return undefined as never;
+    });
 
     const opening = openObsidianAtMatch(
       { path: "/vault/folder/note.md" } as never,
@@ -68,15 +61,7 @@ describe("Obsidian match navigation", () => {
     await opening;
 
     expect(execFile).toHaveBeenCalledTimes(7);
-    expect(vi.mocked(execFile).mock.calls[0]?.[1]).toEqual([
-      "vault=vault",
-      "open",
-      "path=folder/note.md",
-    ]);
-    expect(vi.mocked(execFile).mock.calls[3]?.[1]).toEqual([
-      "vault=vault",
-      "open",
-      "path=folder/note.md",
-    ]);
+    expect(vi.mocked(execFile).mock.calls[0]?.[1]).toEqual(["vault=vault", "open", "path=folder/note.md"]);
+    expect(vi.mocked(execFile).mock.calls[3]?.[1]).toEqual(["vault=vault", "open", "path=folder/note.md"]);
   });
 });

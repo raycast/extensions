@@ -4,18 +4,11 @@ import { NoteActions, OpenNoteActions } from "../utils/actions";
 import { useNoteContent } from "../utils/hooks";
 import { filterContent } from "../utils/utils";
 
-export function NoteQuickLook(props: {
-  showTitle: boolean;
-  note: Note;
-  vault: ObsidianVault;
-}) {
+export function NoteQuickLook(props: { showTitle: boolean; note: Note; vault: ObsidianVault }) {
   const { note, showTitle, vault } = props;
   const { noteContent, isLoading } = useNoteContent(note);
 
-  const markdownContent =
-    noteContent === null
-      ? "Failed to load note content."
-      : filterContent(noteContent);
+  const markdownContent = noteContent === null ? "Failed to load note content." : filterContent(noteContent);
 
   return (
     <Detail
@@ -26,10 +19,7 @@ export function NoteQuickLook(props: {
         noteContent !== null ? (
           <ActionPanel>
             <OpenNoteActions note={note} vault={vault} showQuickLook={false} />
-            <NoteActions
-              note={{ content: noteContent, ...note }}
-              vault={vault}
-            />
+            <NoteActions note={{ content: noteContent, ...note }} vault={vault} />
           </ActionPanel>
         ) : null
       }

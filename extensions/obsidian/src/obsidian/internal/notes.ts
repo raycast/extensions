@@ -58,9 +58,7 @@ export function writeMarkdown(
     onFileWriteFailed?.(filePath, fileName);
     return false;
   }
-  logger.success(
-    `Note created at "${filePath}/${fileName}" with content "${text}"`
-  );
+  logger.success(`Note created at "${filePath}/${fileName}" with content "${text}"`);
   showToast({ title: "Note created", style: Toast.Style.Success });
   return true;
 }
@@ -71,9 +69,7 @@ export function isNote(note: Note | undefined): note is Note {
 
 export function deleteNote(note: Note) {
   if (!fs.existsSync(note.path)) {
-    logger.warning(
-      `Could not delete note ${note.path}. This path does not exist`
-    );
+    logger.warning(`Could not delete note ${note.path}. This path does not exist`);
     return false;
   }
   fs.unlinkSync(note.path);

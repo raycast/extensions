@@ -17,13 +17,8 @@ export interface WorkspacesJson {
   active: string;
 }
 
-export function getWorkspacesJson(
-  vaultPath: string,
-  configFileName: string
-): WorkspacesJson | undefined {
-  const bookmarksJsonPath = `${vaultPath}/${
-    configFileName || ".obsidian"
-  }/workspaces.json`;
+export function getWorkspacesJson(vaultPath: string, configFileName: string): WorkspacesJson | undefined {
+  const bookmarksJsonPath = `${vaultPath}/${configFileName || ".obsidian"}/workspaces.json`;
   if (!fs.existsSync(bookmarksJsonPath)) {
     logger.warning("No workspaces JSON found");
     return;

@@ -1,12 +1,6 @@
 import { bookmarkNote, unbookmarkNote } from "./internal/bookmarks";
 import { renderCallouts } from "./internal/callouts";
-import {
-  appendText,
-  createProperties,
-  deleteNote,
-  Note,
-  writeMarkdown,
-} from "./internal/notes";
+import { appendText, createProperties, deleteNote, Note, writeMarkdown } from "./internal/notes";
 import {
   getVaultsFromPreferences,
   getVaultsFromObsidianJson,
@@ -15,12 +9,7 @@ import {
   getObsidianTarget,
   validateNotePath,
 } from "./internal/obsidian";
-import {
-  readCommunityPlugins,
-  readCorePlugins,
-  VaultPluginCheckParams,
-  vaultPluginCheck,
-} from "./internal/plugins";
+import { readCommunityPlugins, readCorePlugins, VaultPluginCheckParams, vaultPluginCheck } from "./internal/plugins";
 import {
   getNoteFileContent,
   getNotes,
@@ -31,12 +20,7 @@ import {
   ObsidianVault,
 } from "./internal/vault";
 import { getWorkspaces } from "./internal/workspaces";
-import {
-  inlineTagsForString,
-  tagsForString,
-  yamlPropertyForString,
-  yamlTagsForString,
-} from "./internal/yaml";
+import { inlineTagsForString, tagsForString, yamlPropertyForString, yamlTagsForString } from "./internal/yaml";
 
 export type { Note, NoteWithContent } from "./internal/notes";
 export type { ObsidianVault } from "./internal/vault";
@@ -55,13 +39,7 @@ export const Vault = {
     onDirectoryCreationFailed?: (filePath: string) => void,
     onFileWriteFailed?: (filePath: string, fileName: string) => void
   ): boolean {
-    return writeMarkdown(
-      path,
-      name,
-      text,
-      onDirectoryCreationFailed,
-      onFileWriteFailed
-    );
+    return writeMarkdown(path, name, text, onDirectoryCreationFailed, onFileWriteFailed);
   },
 
   readCommunityPlugins(path: string) {
@@ -80,19 +58,11 @@ export const Vault = {
     return getExcludedFolders(path, configFileName);
   },
 
-  getMarkdownFilePaths(
-    path: string,
-    configFileName: string,
-    excludedFolders: string[]
-  ) {
+  getMarkdownFilePaths(path: string, configFileName: string, excludedFolders: string[]) {
     return getMarkdownFilePaths(path, configFileName, excludedFolders);
   },
 
-  getCanvasFilePaths(
-    path: string,
-    configFileName: string,
-    excludedFolders: string[]
-  ) {
+  getCanvasFilePaths(path: string, configFileName: string, excludedFolders: string[]) {
     return getCanvasFilePaths(path, configFileName, excludedFolders);
   },
 

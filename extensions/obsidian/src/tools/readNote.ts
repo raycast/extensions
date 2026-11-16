@@ -18,15 +18,10 @@ export default async function tool(input: Input) {
   try {
     // Validate that the path is within a configured vault
     const allVaults = await Obsidian.getVaultsFromPreferencesOrObsidianJson();
-    const isValidPath = Obsidian.validateNotePath(
-      input.fullNotePath,
-      allVaults
-    );
+    const isValidPath = Obsidian.validateNotePath(input.fullNotePath, allVaults);
 
     if (!isValidPath) {
-      const vaultInfo = allVaults
-        .map((v) => `${v.name} (${v.path})`)
-        .join(", ");
+      const vaultInfo = allVaults.map((v) => `${v.name} (${v.path})`).join(", ");
       logger.warning(`Invalid path provided: ${input.fullNotePath}`);
       return `Invalid path: The fullNotePath "${
         input.fullNotePath
@@ -40,10 +35,7 @@ export default async function tool(input: Input) {
     context += `# ${input.fullNotePath
       .split("/")
       .pop()
-      ?.replace(
-        ".md",
-        ""
-      )}\n\n${content}\n\n######## END NOTE CONTENT ########`;
+      ?.replace(".md", "")}\n\n${content}\n\n######## END NOTE CONTENT ########`;
 
     logger.debug(context);
     return context;

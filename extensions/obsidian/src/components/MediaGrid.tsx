@@ -1,28 +1,15 @@
 import { ObsidianVault } from "@/obsidian";
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Grid,
-  Image,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Image } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { filterMedia } from "../api/search/search.service";
-import {
-  OpenPathInObsidianAction,
-  ShowPathInFinderAction,
-  CopyPathAction,
-} from "../utils/actions";
+import { OpenPathInObsidianAction, ShowPathInFinderAction, CopyPathAction } from "../utils/actions";
 import { IMAGE_SIZE_MAPPING } from "../utils/constants";
 import { useMedia } from "../utils/hooks";
 import { Media, MediaSearchArguments } from "../utils/interfaces";
 import { SearchMediaPreferences } from "../utils/preferences";
 import { getIconFor, getListOfMediaFileExtensions } from "../utils/utils";
 
-export function MediaGrid(props: {
-  vault: ObsidianVault;
-  searchArguments: MediaSearchArguments;
-}) {
+export function MediaGrid(props: { vault: ObsidianVault; searchArguments: MediaSearchArguments }) {
   const { vault, searchArguments } = props;
 
   const { ready, media } = useMedia(vault);
@@ -39,18 +26,13 @@ export function MediaGrid(props: {
   const extensions = getListOfMediaFileExtensions(allMedia);
   const { imageSize } = getPreferenceValues<SearchMediaPreferences>();
 
-  const [searchText, setSearchText] = useState(
-    searchArguments.searchArgument ?? ""
-  );
+  const [searchText, setSearchText] = useState(searchArguments.searchArgument ?? "");
   let mediaType = searchArguments.typeArgument;
   if (!mediaType) mediaType = "all";
   else if (!mediaType.startsWith(".")) {
     mediaType = `.${mediaType}`;
   }
-  const list = useMemo(
-    () => filterMedia(mediaList, searchText),
-    [mediaList, searchText]
-  );
+  const list = useMemo(() => filterMedia(mediaList, searchText), [mediaList, searchText]);
 
   return (
     <Grid
@@ -66,9 +48,7 @@ export function MediaGrid(props: {
           defaultValue={mediaType}
           onChange={(value) => {
             if (value != "all") {
-              setMediaList(
-                allMedia.filter((media) => media.path.endsWith(value))
-              );
+              setMediaList(allMedia.filter((media) => media.path.endsWith(value)));
             } else {
               setMediaList(allMedia);
             }
@@ -76,11 +56,7 @@ export function MediaGrid(props: {
         >
           <Grid.Dropdown.Item title="All" value="all" />
           {extensions.map((extension) => (
-            <Grid.Dropdown.Item
-              title={extension}
-              key={extension}
-              value={extension}
-            />
+            <Grid.Dropdown.Item title={extension} key={extension} value={extension} />
           ))}
         </Grid.Dropdown>
       }

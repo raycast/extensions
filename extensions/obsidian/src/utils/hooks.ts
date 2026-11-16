@@ -4,11 +4,7 @@ import { MediaState } from "./interfaces";
 import { filterContent, sortByAlphabet } from "./utils";
 import fs from "fs";
 import { Logger } from "../api/logger/logger.service";
-import {
-  getNotesFromCache,
-  invalidateNotesCache,
-  setNotesInCache,
-} from "../api/cache/cache.service";
+import { getNotesFromCache, invalidateNotesCache, setNotesInCache } from "../api/cache/cache.service";
 import { parseExcludedFoldersPreferences } from "../api/preferences/preferences.service";
 import { SearchNotePreferences } from "./preferences";
 import { Vault, Obsidian, Note, ObsidianVault } from "../obsidian";
@@ -31,11 +27,7 @@ export async function getNotesWithCache(vaultPath: string): Promise<Note[]> {
   const pref = getPreferenceValues<SearchNotePreferences>();
   const excludedFolders = parseExcludedFoldersPreferences(pref.excludedFolders);
 
-  const notes = await Vault.getNotes(
-    vaultPath,
-    configFileName,
-    excludedFolders
-  );
+  const notes = await Vault.getNotes(vaultPath, configFileName, excludedFolders);
 
   // Store in cache for next time
   setNotesInCache(vaultPath, notes);
@@ -79,11 +71,7 @@ export function useNotes(vault: ObsidianVault, bookmarked = false) {
   // Update a single note in the list
   const updateNote = useCallback((notePath: string, updates: Partial<Note>) => {
     logger.info(`Updating note in list: ${notePath}`);
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.path === notePath ? { ...note, ...updates } : note
-      )
-    );
+    setNotes((prev) => prev.map((note) => (note.path === notePath ? { ...note, ...updates } : note)));
   }, []);
 
   // Delete a note from the list
@@ -91,10 +79,7 @@ export function useNotes(vault: ObsidianVault, bookmarked = false) {
     setNotes((prev) => prev.filter((note) => note.path !== notePath));
   }, []);
 
-  const filtered = useMemo(
-    () => (bookmarked ? notes.filter((n) => n.bookmarked) : notes),
-    [notes, bookmarked]
-  );
+  const filtered = useMemo(() => (bookmarked ? notes.filter((n) => n.bookmarked) : notes), [notes, bookmarked]);
 
   return { notes: filtered, loading, refresh, updateNote, deleteNote } as const;
 }
@@ -113,12 +98,10 @@ export function useMedia(vault: ObsidianVault) {
 
           const { configFileName } = getPreferenceValues();
           const pref = getPreferenceValues<SearchNotePreferences>();
-          const excludedFolders = parseExcludedFoldersPreferences(
-            pref.excludedFolders
+          const excludedFolders = parseExcludedFoldersPreferences(pref.excludedFolders);
+          const media = (await Vault.getMedia(vault.path, configFileName, excludedFolders)).sort((m1, m2) =>
+            sortByAlphabet(m1.title, m2.title)
           );
-          const media = (
-            await Vault.getMedia(vault.path, configFileName, excludedFolders)
-          ).sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
 
           setMedia({ ready: true, media });
         } catch {
@@ -242,9 +225,5 @@ export function useVaultPluginCheck(params: {
     }
 
     return resultObject;
-  }, [
-    params.vaults.map((v) => v.path).join(","),
-    params.communityPlugins?.join(","),
-    params.corePlugins?.join(","),
-  ]);
+  }, [params.vaults.map((v) => v.path).join(","), params.communityPlugins?.join(","), params.corePlugins?.join(",")]);
 }

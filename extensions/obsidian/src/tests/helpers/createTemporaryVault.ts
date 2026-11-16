@@ -11,10 +11,7 @@ export function createTempVault(options?: { withBookmarks?: boolean }): {
   cleanup: () => void;
   paths: Record<string, string>;
 } {
-  const vaultRoot = path.join(
-    os.tmpdir(),
-    `obsidian-vault-${Date.now()}-${Math.random().toString(36).slice(2)}`
-  );
+  const vaultRoot = path.join(os.tmpdir(), `obsidian-vault-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
   // Basic vault structure
   fs.mkdirSync(vaultRoot, { recursive: true });
@@ -55,10 +52,7 @@ export function createTempVault(options?: { withBookmarks?: boolean }): {
       ],
     };
 
-    fs.writeFileSync(
-      path.join(vaultRoot, ".obsidian", "bookmarks.json"),
-      JSON.stringify(initialBookmarks, null, 2)
-    );
+    fs.writeFileSync(path.join(vaultRoot, ".obsidian", "bookmarks.json"), JSON.stringify(initialBookmarks, null, 2));
   }
 
   const vault: ObsidianVault = {

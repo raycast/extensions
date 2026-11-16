@@ -13,14 +13,9 @@ interface CapturePreferences {
   shoppingNotePath?: string;
 }
 
-async function resolveNotePath(
-  vaultPath: string,
-  relativePath: string
-): Promise<string> {
+async function resolveNotePath(vaultPath: string, relativePath: string): Promise<string> {
   if (path.isAbsolute(relativePath)) {
-    throw new Error(
-      "The capture file path must be relative to the selected vault."
-    );
+    throw new Error("The capture file path must be relative to the selected vault.");
   }
 
   if (path.extname(relativePath).toLowerCase() !== ".md") {
@@ -31,32 +26,18 @@ async function resolveNotePath(
   const note = await fs.realpath(path.resolve(vault, relativePath));
   const relative = path.relative(vault, note);
 
-  if (
-    relative === "" ||
-    relative === ".." ||
-    relative.startsWith(`..${path.sep}`) ||
-    path.isAbsolute(relative)
-  ) {
+  if (relative === "" || relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
     throw new Error("The capture file must stay inside the selected vault.");
   }
 
-  if (
-    path.extname(note).toLowerCase() !== ".md" ||
-    !(await fs.stat(note)).isFile()
-  ) {
-    throw new Error(
-      "The capture file must be an existing regular Markdown (.md) file."
-    );
+  if (path.extname(note).toLowerCase() !== ".md" || !(await fs.stat(note)).isFile()) {
+    throw new Error("The capture file must be an existing regular Markdown (.md) file.");
   }
 
   return note;
 }
 
-export async function saveQuickCapture(
-  vaultPath: string,
-  values: CaptureValues,
-  preferences: CapturePreferences
-) {
+export async function saveQuickCapture(vaultPath: string, values: CaptureValues, preferences: CapturePreferences) {
   const routes = {
     daily: { path: preferences.dailyNotePath, title: "Daily Note" },
     todo: { path: preferences.todoNotePath, title: "To Do" },

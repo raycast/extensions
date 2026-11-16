@@ -35,9 +35,7 @@ export async function deleteCustomAction(actionId: string): Promise<void> {
   await LocalStorage.setItem(ACTIONS_KEY, JSON.stringify(newActions));
 }
 
-export async function getCustomAction(
-  actionId: string
-): Promise<CustomAction | undefined> {
+export async function getCustomAction(actionId: string): Promise<CustomAction | undefined> {
   const actions = await getCustomActions();
   return actions.find((a) => a.id === actionId);
 }

@@ -61,9 +61,7 @@ describe("createNote", () => {
       tags: [],
     });
     expect(saved).toBe(true);
-    expect(
-      fs.readFileSync(path.join(tempVault.vault.path, "New Note.md"), "utf-8")
-    ).toBe("body");
+    expect(fs.readFileSync(path.join(tempVault.vault.path, "New Note.md"), "utf-8")).toBe("body");
     expect(open).toHaveBeenCalledTimes(1);
     const url = (open as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
     expect(url).toContain("obsidian://open?path=");
@@ -84,9 +82,7 @@ describe("createNote", () => {
 
   it("still reports success when opening the note fails", async () => {
     mockPreferences.openOnCreate = true;
-    vi.mocked(open).mockRejectedValueOnce(
-      new Error("No application available to open URL")
-    );
+    vi.mocked(open).mockRejectedValueOnce(new Error("No application available to open URL"));
     const saved = await createNote(tempVault.vault, {
       name: "Saved Note",
       path: "",
@@ -106,9 +102,7 @@ describe("createNote", () => {
     });
 
     expect(saved).toBe(false);
-    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe(
-      "# Note 1\nSome text."
-    );
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("# Note 1\nSome text.");
     expect(open).not.toHaveBeenCalled();
     expect(showToast).toHaveBeenCalledExactlyOnceWith({
       title: "Couldn't create directories for the given path:",
@@ -150,9 +144,7 @@ describe("createNote", () => {
     });
 
     expect(saved).toBe(false);
-    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe(
-      "# Note 1\nSome text."
-    );
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("# Note 1\nSome text.");
     expect(open).not.toHaveBeenCalled();
     expect(showToast).not.toHaveBeenCalled();
   });
@@ -167,18 +159,13 @@ describe("createNote", () => {
 
     expect(saved).toBe(true);
     expect(confirmAlert).toHaveBeenCalledTimes(1);
-    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe(
-      "replacement"
-    );
+    expect(fs.readFileSync(tempVault.paths.note1Path, "utf-8")).toBe("replacement");
     expect(open).toHaveBeenCalledTimes(1);
   });
 
   it.each([
     ["...", "Note names can't start with a dot. Obsidian hides those files."],
-    [
-      "Folder/Task",
-      "Note names can't contain / or \\. Use the Path field for folders.",
-    ],
+    ["Folder/Task", "Note names can't contain / or \\. Use the Path field for folders."],
   ])("rejects the note name %s without writing", async (name, message) => {
     const before = fs.readdirSync(tempVault.vault.path, { recursive: true });
 
@@ -190,9 +177,7 @@ describe("createNote", () => {
     });
 
     expect(saved).toBe(false);
-    expect(fs.readdirSync(tempVault.vault.path, { recursive: true })).toEqual(
-      before
-    );
+    expect(fs.readdirSync(tempVault.vault.path, { recursive: true })).toEqual(before);
     expect(open).not.toHaveBeenCalled();
     expect(showToast).toHaveBeenCalledExactlyOnceWith({
       title: "Couldn't create note",
@@ -245,11 +230,7 @@ describe("createNote", () => {
     });
 
     expect(saved).toBe(true);
-    expect(
-      fs.readFileSync(path.join(tempVault.vault.path, "Task.md"), "utf-8")
-    ).toBe("body");
-    expect(fs.existsSync(path.join(tempVault.vault.path, "Task.md.md"))).toBe(
-      false
-    );
+    expect(fs.readFileSync(path.join(tempVault.vault.path, "Task.md"), "utf-8")).toBe("body");
+    expect(fs.existsSync(path.join(tempVault.vault.path, "Task.md.md"))).toBe(false);
   });
 });

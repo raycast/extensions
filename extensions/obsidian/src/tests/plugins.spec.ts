@@ -42,11 +42,7 @@ describe("plugins", () => {
 
     it("should read community plugins from community-plugins.json", () => {
       const communityPlugins = ["plugin1", "plugin2", "plugin3"];
-      const pluginsPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "community-plugins.json"
-      );
+      const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
 
       fs.writeFileSync(pluginsPath, JSON.stringify(communityPlugins));
 
@@ -56,11 +52,7 @@ describe("plugins", () => {
 
     it("should handle empty community plugins array", () => {
       const communityPlugins: string[] = [];
-      const pluginsPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "community-plugins.json"
-      );
+      const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
 
       fs.writeFileSync(pluginsPath, JSON.stringify(communityPlugins));
 
@@ -82,11 +74,7 @@ describe("plugins", () => {
         "quick-switcher": true,
         graph: false,
       };
-      const pluginsPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "core-plugins.json"
-      );
+      const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
 
       fs.writeFileSync(pluginsPath, JSON.stringify(corePlugins));
 
@@ -96,11 +84,7 @@ describe("plugins", () => {
 
     it("should handle empty core plugins object", () => {
       const corePlugins = {};
-      const pluginsPath = path.join(
-        tempVaultData.vault.path,
-        ".obsidian",
-        "core-plugins.json"
-      );
+      const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
 
       fs.writeFileSync(pluginsPath, JSON.stringify(corePlugins));
 
@@ -130,20 +114,12 @@ describe("plugins", () => {
       it("should return vaults that have all required community plugins", () => {
         // Setup vault 1 with required plugins
         const vault1Plugins = ["plugin1", "plugin2", "plugin3"];
-        const vault1PluginsPath = path.join(
-          tempVaultData.vault.path,
-          ".obsidian",
-          "community-plugins.json"
-        );
+        const vault1PluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
         fs.writeFileSync(vault1PluginsPath, JSON.stringify(vault1Plugins));
 
         // Setup vault 2 without required plugins
         const vault2Plugins = ["plugin1", "other-plugin"];
-        const vault2PluginsPath = path.join(
-          vault2Data.vault.path,
-          ".obsidian",
-          "community-plugins.json"
-        );
+        const vault2PluginsPath = path.join(vault2Data.vault.path, ".obsidian", "community-plugins.json");
         fs.writeFileSync(vault2PluginsPath, JSON.stringify(vault2Plugins));
 
         const params: VaultPluginCheckParams = {
@@ -151,8 +127,7 @@ describe("plugins", () => {
           communityPlugins: ["plugin1", "plugin2"],
         };
 
-        const { vaultsWithPlugin, vaultsWithoutPlugin } =
-          vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(1);
         expect(vaultsWithPlugin[0]).toBe(tempVaultData.vault);
@@ -162,11 +137,7 @@ describe("plugins", () => {
 
       it("should return empty arrays when no vaults have required community plugins", () => {
         const vault1Plugins = ["other-plugin"];
-        const vault1PluginsPath = path.join(
-          tempVaultData.vault.path,
-          ".obsidian",
-          "community-plugins.json"
-        );
+        const vault1PluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
         fs.writeFileSync(vault1PluginsPath, JSON.stringify(vault1Plugins));
 
         const params: VaultPluginCheckParams = {
@@ -174,8 +145,7 @@ describe("plugins", () => {
           communityPlugins: ["required-plugin"],
         };
 
-        const { vaultsWithPlugin, vaultsWithoutPlugin } =
-          vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
@@ -187,19 +157,14 @@ describe("plugins", () => {
           communityPlugins: ["plugin1"],
         };
 
-        const { vaultsWithPlugin, vaultsWithoutPlugin } =
-          vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
       });
 
       it("should not cache a failed community plugin configuration read", () => {
-        const pluginsPath = path.join(
-          tempVaultData.vault.path,
-          ".obsidian",
-          "community-plugins.json"
-        );
+        const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
         fs.writeFileSync(pluginsPath, JSON.stringify(["plugin1"]));
         vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
           throw Object.assign(new Error("operation not permitted"), {
@@ -226,11 +191,7 @@ describe("plugins", () => {
           search: true,
           "quick-switcher": false,
         };
-        const vault1PluginsPath = path.join(
-          tempVaultData.vault.path,
-          ".obsidian",
-          "core-plugins.json"
-        );
+        const vault1PluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
         fs.writeFileSync(vault1PluginsPath, JSON.stringify(vault1Plugins));
 
         // Setup vault 2 with required plugin disabled
@@ -238,11 +199,7 @@ describe("plugins", () => {
           "file-explorer": true,
           search: false,
         };
-        const vault2PluginsPath = path.join(
-          vault2Data.vault.path,
-          ".obsidian",
-          "core-plugins.json"
-        );
+        const vault2PluginsPath = path.join(vault2Data.vault.path, ".obsidian", "core-plugins.json");
         fs.writeFileSync(vault2PluginsPath, JSON.stringify(vault2Plugins));
 
         const params: VaultPluginCheckParams = {
@@ -250,8 +207,7 @@ describe("plugins", () => {
           corePlugins: ["file-explorer", "search"],
         };
 
-        const { vaultsWithPlugin, vaultsWithoutPlugin } =
-          vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(1);
         expect(vaultsWithPlugin[0]).toBe(tempVaultData.vault);
@@ -265,8 +221,7 @@ describe("plugins", () => {
           corePlugins: ["file-explorer"],
         };
 
-        const { vaultsWithPlugin, vaultsWithoutPlugin } =
-          vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
@@ -276,11 +231,7 @@ describe("plugins", () => {
         const vault1Plugins = {
           "file-explorer": true,
         };
-        const vault1PluginsPath = path.join(
-          tempVaultData.vault.path,
-          ".obsidian",
-          "core-plugins.json"
-        );
+        const vault1PluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
         fs.writeFileSync(vault1PluginsPath, JSON.stringify(vault1Plugins));
 
         const params: VaultPluginCheckParams = {
@@ -288,19 +239,14 @@ describe("plugins", () => {
           corePlugins: ["file-explorer", "missing-plugin"],
         };
 
-        const { vaultsWithPlugin, vaultsWithoutPlugin } =
-          vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
       });
 
       it("should not cache a failed core plugin configuration read", () => {
-        const pluginsPath = path.join(
-          tempVaultData.vault.path,
-          ".obsidian",
-          "core-plugins.json"
-        );
+        const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
         fs.writeFileSync(pluginsPath, JSON.stringify({ "daily-notes": true }));
         vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
           throw Object.assign(new Error("operation not permitted"), {
@@ -324,8 +270,7 @@ describe("plugins", () => {
         vaults: [tempVaultData.vault],
       };
 
-      const { vaultsWithPlugin, vaultsWithoutPlugin, cacheable } =
-        vaultPluginCheck(params);
+      const { vaultsWithPlugin, vaultsWithoutPlugin, cacheable } = vaultPluginCheck(params);
 
       expect(vaultsWithPlugin).toEqual([tempVaultData.vault]);
       expect(vaultsWithoutPlugin).toEqual([]);

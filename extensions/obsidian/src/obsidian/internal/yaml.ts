@@ -1,11 +1,7 @@
 import YAML from "yaml";
 import { NoteWithContent } from "./notes";
 
-import {
-  CODE_BLOCK_REGEX,
-  INLINE_TAGS_REGEX,
-  YAML_FRONTMATTER_REGEX,
-} from "../../utils/constants";
+import { CODE_BLOCK_REGEX, INLINE_TAGS_REGEX, YAML_FRONTMATTER_REGEX } from "../../utils/constants";
 import { sortByAlphabet } from "../../utils/utils";
 
 export function parsedYAMLFrontmatter(str: string) {
@@ -35,10 +31,7 @@ function yamlHas(yaml: any, property: string) {
 // Get certain properties from YAML frontmatter
 //--------------------------------------------------------------------------------
 
-export function yamlPropertyForString(
-  str: string,
-  property: string
-): string | undefined {
+export function yamlPropertyForString(str: string, property: string): string | undefined {
   const parsedYAML = parsedYAMLFrontmatter(str);
   if (parsedYAML) {
     if (yamlHas(parsedYAML, property)) {
@@ -120,17 +113,13 @@ export function yamlTagsForString(str: string) {
     if (Array.isArray(parsedYAML.tag)) {
       foundTags = [...parsedYAML.tag];
     } else if (typeof parsedYAML.tag === "string") {
-      foundTags = [
-        ...parsedYAML.tag.split(",").map((tag: string) => tag.trim()),
-      ];
+      foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
     }
   } else if (yamlHas(parsedYAML, "tags")) {
     if (Array.isArray(parsedYAML.tags)) {
       foundTags = [...parsedYAML.tags];
     } else if (typeof parsedYAML.tags === "string") {
-      foundTags = [
-        ...parsedYAML.tags.split(",").map((tag: string) => tag.trim()),
-      ];
+      foundTags = [...parsedYAML.tags.split(",").map((tag: string) => tag.trim())];
     }
   }
 

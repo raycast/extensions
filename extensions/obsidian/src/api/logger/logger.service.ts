@@ -43,18 +43,12 @@ export class Logger {
   }
 
   private log(level: string, color: string, message: unknown): void {
-    const formattedTimestamp = `${
-      Logger.COLORS.timestamp
-    }[${this.timestamp()}]${Logger.COLORS.reset}`;
+    const formattedTimestamp = `${Logger.COLORS.timestamp}[${this.timestamp()}]${Logger.COLORS.reset}`;
     const formattedName = `${Logger.COLORS.name}[${this.name}]${Logger.COLORS.reset}`;
-    const formattedLevel = `${color}[${level.toUpperCase()}]${
-      Logger.COLORS.reset
-    }`;
+    const formattedLevel = `${color}[${level.toUpperCase()}]${Logger.COLORS.reset}`;
     const formattedMessage = this.formatMessage(message);
 
-    console.log(
-      `${formattedTimestamp} ${formattedName} ${formattedLevel} ${formattedMessage}`
-    );
+    console.log(`${formattedTimestamp} ${formattedName} ${formattedLevel} ${formattedMessage}`);
     // console.log(`${color}${formattedTimestamp} ${formattedName} ${formattedLevel} ${formattedMessage}${Logger.COLORS.reset}`);
   }
 

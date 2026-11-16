@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  getPreferenceValues,
-  List,
-  popToRoot,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, popToRoot } from "@raycast/api";
 import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
@@ -20,13 +13,10 @@ interface DailyNoteAppendArgs {
   text: string;
 }
 
-export default function DailyNoteAppend(props: {
-  arguments: DailyNoteAppendArgs;
-}) {
+export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs }) {
   const { vaults, ready } = useObsidianVaults();
   const { text } = props.arguments;
-  const { appendTemplate, heading, vaultName, prepend, silent } =
-    getPreferenceValues<DailyNoteAppendPreferences>();
+  const { appendTemplate, heading, vaultName, prepend, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
   const { vaultsWithPlugin } = useVaultPluginCheck({
     vaults: vaults,
     communityPlugins: ["obsidian-advanced-uri"],
@@ -48,8 +38,7 @@ export default function DailyNoteAppend(props: {
     if (!ready || !content || isAppending) return;
     if (vaults.length === 0 || vaultsWithPlugin.length === 0) return;
 
-    const selectedVault =
-      vaultName && vaults.find((vault) => vault.name === vaultName);
+    const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
 
     // If there's a configured vault, or only one vault, use that
     if (selectedVault || vaultsWithPlugin.length === 1) {
@@ -85,12 +74,7 @@ export default function DailyNoteAppend(props: {
     return <AdvancedURIPluginNotInstalled corePlugins={["daily-notes"]} />;
   }
   if (vaultName && !vaultsWithPlugin.some((v) => v.name === vaultName)) {
-    return (
-      <AdvancedURIPluginNotInstalled
-        vaultName={vaultName}
-        corePlugins={["daily-notes"]}
-      />
-    );
+    return <AdvancedURIPluginNotInstalled vaultName={vaultName} corePlugins={["daily-notes"]} />;
   }
 
   // Only show the vault selection list if we have multiple vaults and no specific vault configured

@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  List,
-  open,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } from "@raycast/api";
 
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { Obsidian, ObsidianTargetType } from "@/obsidian";

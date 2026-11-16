@@ -14,22 +14,10 @@ describe("content search", () => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "content-search-test-"));
 
     // Create test files
-    fs.writeFileSync(
-      path.join(tempDir, "note1.md"),
-      "This is a note about programming"
-    );
-    fs.writeFileSync(
-      path.join(tempDir, "note2.md"),
-      "Another note about cooking recipes"
-    );
-    fs.writeFileSync(
-      path.join(tempDir, "javascript.md"),
-      "Content about typescript and javascript"
-    );
-    fs.writeFileSync(
-      path.join(tempDir, "hidden.md"),
-      "This file has secret information inside"
-    );
+    fs.writeFileSync(path.join(tempDir, "note1.md"), "This is a note about programming");
+    fs.writeFileSync(path.join(tempDir, "note2.md"), "Another note about cooking recipes");
+    fs.writeFileSync(path.join(tempDir, "javascript.md"), "Content about typescript and javascript");
+    fs.writeFileSync(path.join(tempDir, "hidden.md"), "This file has secret information inside");
 
     testNotes = [
       {
@@ -94,9 +82,7 @@ describe("content search", () => {
     it("should return title/path matches first, then content matches", async () => {
       const results = await searchNotesWithContent(testNotes, "javascript");
       // JavaScript Guide should come before notes that only match in content
-      const titleMatchIndex = results.findIndex(
-        (n) => n.title === "JavaScript Guide"
-      );
+      const titleMatchIndex = results.findIndex((n) => n.title === "JavaScript Guide");
       expect(titleMatchIndex).toBe(0); // Should be first since it matches title
     });
 
@@ -127,10 +113,7 @@ describe("content search", () => {
         },
       ];
 
-      const results = await searchNotesWithContent(
-        notesWithMissing,
-        "programming"
-      );
+      const results = await searchNotesWithContent(notesWithMissing, "programming");
       expect(results.length).toBeGreaterThan(0);
       // Should still find other notes despite missing file
       expect(results.some((n) => n.title === "Note 1")).toBe(true);
@@ -146,18 +129,9 @@ describe("content search", () => {
     describe("exact title matches", () => {
       beforeEach(() => {
         // Add notes with similar titles
-        fs.writeFileSync(
-          path.join(tempDir, "linear-regression.md"),
-          "Content about ML"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "linear-regression-advanced.md"),
-          "Advanced linear regression techniques"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "logistic-regression.md"),
-          "Linear regression mentioned in content"
-        );
+        fs.writeFileSync(path.join(tempDir, "linear-regression.md"), "Content about ML");
+        fs.writeFileSync(path.join(tempDir, "linear-regression-advanced.md"), "Advanced linear regression techniques");
+        fs.writeFileSync(path.join(tempDir, "logistic-regression.md"), "Linear regression mentioned in content");
 
         testNotes = [
           {
@@ -182,52 +156,30 @@ describe("content search", () => {
       });
 
       it("should rank exact title match first", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "Linear Regression"
-        );
+        const results = await searchNotesWithContent(testNotes, "Linear Regression");
         expect(results.length).toBeGreaterThan(0);
         expect(results[0].title).toBe("Linear Regression");
       });
 
       it("should rank exact title match first (case insensitive)", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "linear regression"
-        );
+        const results = await searchNotesWithContent(testNotes, "linear regression");
         expect(results.length).toBeGreaterThan(0);
         expect(results[0].title).toBe("Linear Regression");
       });
 
       it("should rank exact match before prefix match", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "Linear Regression"
-        );
-        const exactIndex = results.findIndex(
-          (n) => n.title === "Linear Regression"
-        );
-        const prefixIndex = results.findIndex(
-          (n) => n.title === "Linear Regression Advanced"
-        );
+        const results = await searchNotesWithContent(testNotes, "Linear Regression");
+        const exactIndex = results.findIndex((n) => n.title === "Linear Regression");
+        const prefixIndex = results.findIndex((n) => n.title === "Linear Regression Advanced");
         expect(exactIndex).toBeLessThan(prefixIndex);
       });
     });
 
     describe("multi-word search queries", () => {
       beforeEach(() => {
-        fs.writeFileSync(
-          path.join(tempDir, "machine-learning.md"),
-          "Content about AI"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "deep-learning.md"),
-          "Machine learning is mentioned here"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "ml-basics.md"),
-          "Machine learning basics"
-        );
+        fs.writeFileSync(path.join(tempDir, "machine-learning.md"), "Content about AI");
+        fs.writeFileSync(path.join(tempDir, "deep-learning.md"), "Machine learning is mentioned here");
+        fs.writeFileSync(path.join(tempDir, "ml-basics.md"), "Machine learning basics");
 
         testNotes = [
           {
@@ -252,34 +204,21 @@ describe("content search", () => {
       });
 
       it("should find exact match with multi-word query", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "Machine Learning"
-        );
+        const results = await searchNotesWithContent(testNotes, "Machine Learning");
         expect(results.length).toBeGreaterThan(0);
         expect(results[0].title).toBe("Machine Learning");
       });
 
       it("should handle multi-word query with space", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "machine learning"
-        );
+        const results = await searchNotesWithContent(testNotes, "machine learning");
         expect(results.length).toBeGreaterThan(0);
         expect(results.some((n) => n.title === "Machine Learning")).toBe(true);
       });
 
       it("should prioritize title match over content match for multi-word query", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "machine learning"
-        );
-        const titleMatchIndex = results.findIndex(
-          (n) => n.title === "Machine Learning"
-        );
-        const contentMatchIndex = results.findIndex(
-          (n) => n.title === "Deep Learning"
-        );
+        const results = await searchNotesWithContent(testNotes, "machine learning");
+        const titleMatchIndex = results.findIndex((n) => n.title === "Machine Learning");
+        const contentMatchIndex = results.findIndex((n) => n.title === "Deep Learning");
         expect(titleMatchIndex).toBeLessThan(contentMatchIndex);
       });
     });
@@ -287,22 +226,13 @@ describe("content search", () => {
     describe("tag search syntax", () => {
       beforeEach(() => {
         // Create notes with tags
-        fs.writeFileSync(
-          path.join(tempDir, "todo1.md"),
-          "---\ntags:\n  - todo\n  - important\n---\nTask to complete"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "todo2.md"),
-          "Some content #todo about tasks"
-        );
+        fs.writeFileSync(path.join(tempDir, "todo1.md"), "---\ntags:\n  - todo\n  - important\n---\nTask to complete");
+        fs.writeFileSync(path.join(tempDir, "todo2.md"), "Some content #todo about tasks");
         fs.writeFileSync(
           path.join(tempDir, "done.md"),
           "---\ntags:\n  - completed\n---\nCompleted task with #todo mentioned"
         );
-        fs.writeFileSync(
-          path.join(tempDir, "encoding.md"),
-          "---\ntags:\n  - todo\n---\nContent about encoding"
-        );
+        fs.writeFileSync(path.join(tempDir, "encoding.md"), "---\ntags:\n  - todo\n---\nContent about encoding");
 
         testNotes = [
           {
@@ -340,10 +270,7 @@ describe("content search", () => {
       });
 
       it("should combine tag filter with search query", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "tag:todo encoding"
-        );
+        const results = await searchNotesWithContent(testNotes, "tag:todo encoding");
         expect(results.length).toBe(1); // Only "Encoding" matches both tag:todo AND "encoding"
         expect(results[0].title).toBe("Encoding");
       });
@@ -354,10 +281,7 @@ describe("content search", () => {
       });
 
       it("should return only tag-filtered notes when no additional search term", async () => {
-        const results = await searchNotesWithContent(
-          testNotes,
-          "tag:completed"
-        );
+        const results = await searchNotesWithContent(testNotes, "tag:completed");
         expect(results.length).toBe(1);
         expect(results[0].title).toBe("Done");
       });
@@ -365,18 +289,9 @@ describe("content search", () => {
 
     describe("content vs title matching priority", () => {
       beforeEach(() => {
-        fs.writeFileSync(
-          path.join(tempDir, "python-guide.md"),
-          "A comprehensive guide to Python programming"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "javascript-intro.md"),
-          "Introduction to JavaScript and Python basics"
-        );
-        fs.writeFileSync(
-          path.join(tempDir, "random.md"),
-          "Python is mentioned deep in this content somewhere"
-        );
+        fs.writeFileSync(path.join(tempDir, "python-guide.md"), "A comprehensive guide to Python programming");
+        fs.writeFileSync(path.join(tempDir, "javascript-intro.md"), "Introduction to JavaScript and Python basics");
+        fs.writeFileSync(path.join(tempDir, "random.md"), "Python is mentioned deep in this content somewhere");
 
         testNotes = [
           {
@@ -404,12 +319,8 @@ describe("content search", () => {
         const results = await searchNotesWithContent(testNotes, "Python");
         expect(results.length).toBeGreaterThanOrEqual(2);
         // Python Guide (title match) should come before Random (content match)
-        const titleMatchIndex = results.findIndex(
-          (n) => n.title === "Python Guide"
-        );
-        const contentMatchIndex = results.findIndex(
-          (n) => n.title === "Random"
-        );
+        const titleMatchIndex = results.findIndex((n) => n.title === "Python Guide");
+        const contentMatchIndex = results.findIndex((n) => n.title === "Random");
         expect(titleMatchIndex).toBeLessThan(contentMatchIndex);
       });
 
@@ -433,10 +344,7 @@ describe("content search", () => {
       });
 
       it("should handle special characters in query", async () => {
-        fs.writeFileSync(
-          path.join(tempDir, "special.md"),
-          "Content with @#$% special chars"
-        );
+        fs.writeFileSync(path.join(tempDir, "special.md"), "Content with @#$% special chars");
         testNotes.push({
           title: "Special Chars",
           path: path.join(tempDir, "special.md"),
@@ -456,10 +364,7 @@ describe("content search", () => {
       });
 
       it("should handle unicode characters", async () => {
-        fs.writeFileSync(
-          path.join(tempDir, "unicode.md"),
-          "Content with 你好 and émojis 🎉"
-        );
+        fs.writeFileSync(path.join(tempDir, "unicode.md"), "Content with 你好 and émojis 🎉");
         testNotes.push({
           title: "Unicode Note",
           path: path.join(tempDir, "unicode.md"),

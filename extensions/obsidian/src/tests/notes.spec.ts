@@ -1,12 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  appendText,
-  createProperties,
-  writeMarkdown,
-  deleteNote,
-  isNote,
-  Note,
-} from "../obsidian/internal/notes";
+import { appendText, createProperties, writeMarkdown, deleteNote, isNote, Note } from "../obsidian/internal/notes";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -88,14 +81,8 @@ describe("notes", () => {
     });
 
     it("should handle tags with special characters", () => {
-      const result = createProperties([
-        "my-tag",
-        "tag_with_underscore",
-        "tag/with/slash",
-      ]);
-      expect(result).toBe(
-        '---\ntags: ["my-tag","tag_with_underscore","tag/with/slash"]\n---\n'
-      );
+      const result = createProperties(["my-tag", "tag_with_underscore", "tag/with/slash"]);
+      expect(result).toBe('---\ntags: ["my-tag","tag_with_underscore","tag/with/slash"]\n---\n');
     });
 
     it("should handle tags with spaces", () => {

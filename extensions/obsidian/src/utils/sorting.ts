@@ -41,12 +41,8 @@ export function sortNotes(notes: Note[], sortOrder: SortOrder): Note[] {
       return sorted.sort((a, b) => {
         // if a file has been moved we don't want to throw an error here
         try {
-          const timeA = fs.existsSync(a.path)
-            ? fs.statSync(a.path).birthtime.getTime()
-            : 0;
-          const timeB = fs.existsSync(b.path)
-            ? fs.statSync(b.path).birthtime.getTime()
-            : 0;
+          const timeA = fs.existsSync(a.path) ? fs.statSync(a.path).birthtime.getTime() : 0;
+          const timeB = fs.existsSync(b.path) ? fs.statSync(b.path).birthtime.getTime() : 0;
           return timeB - timeA;
         } catch {
           return 0;
@@ -57,12 +53,8 @@ export function sortNotes(notes: Note[], sortOrder: SortOrder): Note[] {
       return sorted.sort((a, b) => {
         // if a file has been moved we don't want to throw an error here
         try {
-          const timeA = fs.existsSync(a.path)
-            ? fs.statSync(a.path).birthtime.getTime()
-            : 0;
-          const timeB = fs.existsSync(b.path)
-            ? fs.statSync(b.path).birthtime.getTime()
-            : 0;
+          const timeA = fs.existsSync(a.path) ? fs.statSync(a.path).birthtime.getTime() : 0;
+          const timeB = fs.existsSync(b.path) ? fs.statSync(b.path).birthtime.getTime() : 0;
           return timeA - timeB;
         } catch {
           return 0;

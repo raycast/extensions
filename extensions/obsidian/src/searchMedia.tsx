@@ -19,9 +19,7 @@ export default function Command(props: { arguments: MediaSearchArguments }) {
     return (
       <VaultSelection
         vaults={vaults}
-        target={(vault: ObsidianVault) => (
-          <MediaGrid vault={vault} searchArguments={props.arguments} />
-        )}
+        target={(vault: ObsidianVault) => <MediaGrid vault={vault} searchArguments={props.arguments} />}
       />
     );
   } else if (vaults.length == 1) {

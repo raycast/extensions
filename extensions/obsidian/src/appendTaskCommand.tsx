@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  getPreferenceValues,
-  List,
-  popToRoot,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, popToRoot } from "@raycast/api";
 import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
@@ -29,15 +22,8 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
   const { dueDate } = props.arguments;
   const dateContent = dueDate ? " 📅 " + dueDate : "";
 
-  const {
-    appendTemplate,
-    heading,
-    notePath,
-    noteTag,
-    vaultName,
-    silent,
-    creationDate,
-  } = getPreferenceValues<AppendTaskPreferences>();
+  const { appendTemplate, heading, notePath, noteTag, vaultName, silent, creationDate } =
+    getPreferenceValues<AppendTaskPreferences>();
   const { vaultsWithPlugin, vaultsWithoutPlugin } = useVaultPluginCheck({
     vaults: vaults,
     communityPlugins: ["obsidian-advanced-uri"],
@@ -60,13 +46,10 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
     }
 
     const openObsidian = async () => {
-      const selectedVault =
-        vaultName && vaults.find((vault) => vault.name === vaultName);
+      const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
       const vaultToUse = selectedVault || vaultsWithPlugin[0];
       const tag = noteTag ? noteTag + " " : "";
-      const creationDateString = creationDate
-        ? " ➕ " + new Date().toLocaleDateString("en-CA")
-        : "";
+      const creationDateString = creationDate ? " ➕ " + new Date().toLocaleDateString("en-CA") : "";
 
       const notePathExpanded = await applyTemplates(notePath);
       const target = Obsidian.getTarget({
@@ -128,13 +111,10 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
   }
 
   // en-CA uses the same format as the iso string without the time ex: 2025-09-25
-  const creationDateString = creationDate
-    ? " ➕ " + new Date().toLocaleDateString("en-CA")
-    : "";
+  const creationDateString = creationDate ? " ➕ " + new Date().toLocaleDateString("en-CA") : "";
   const tag = noteTag ? noteTag + " " : "";
 
-  const selectedVault =
-    vaultName && vaults.find((vault) => vault.name === vaultName);
+  const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
   // If there's a configured vault or only one vault, use that
   if (selectedVault || vaultsWithPlugin.length === 1) {
     // Render a loading state while the user selects a vault
@@ -166,12 +146,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
                     type: ObsidianTargetType.AppendTask,
                     path: notePath,
                     vault: vault,
-                    text:
-                      "- [ ] " +
-                      tag +
-                      content +
-                      dateContent +
-                      creationDateString,
+                    text: "- [ ] " + tag + content + dateContent + creationDateString,
                     heading: heading,
                     silent: silent,
                   });

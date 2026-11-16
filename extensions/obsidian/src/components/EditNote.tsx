@@ -1,14 +1,5 @@
 import { Note, NoteWithContent, ObsidianVault } from "@/obsidian";
-import {
-  Action,
-  ActionPanel,
-  confirmAlert,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import fs from "fs";
 import { updateNoteInCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
@@ -34,8 +25,7 @@ export function EditNote(props: {
 
     const options = {
       title: "Override note",
-      message:
-        'Are you sure you want to override the note: "' + note.title + '"?',
+      message: 'Are you sure you want to override the note: "' + note.title + '"?',
       icon: Icon.ExclamationMark,
     };
     if (await confirmAlert(options)) {

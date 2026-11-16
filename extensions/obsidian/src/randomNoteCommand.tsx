@@ -18,9 +18,7 @@ export default function Command() {
     return (
       <VaultSelection
         vaults={vaults}
-        target={(vault: ObsidianVault) => (
-          <RandomNote vault={vault} showTitle={true} />
-        )}
+        target={(vault: ObsidianVault) => <RandomNote vault={vault} showTitle={true} />}
       />
     );
   } else if (vaults.length === 1) {
