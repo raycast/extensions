@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { canModifyEvent } from "./lib/event-permissions";
 import { RequestSequence } from "./lib/request-sequence";
-import { eventStartDate, formatEventTime } from "./lib/dates";
+import { eventStartDate, formatEventTime, calendarDayRange } from "./lib/dates";
 import { deleteEvent, invalidateCache, listCalendars, listEvents, updateEvent } from "./lib/morgen";
 import { showFailure, showSuccess } from "./lib/ui";
 import type { Calendar, Event } from "./types";
@@ -40,8 +40,10 @@ function EventDetails({ event, calendar }: { event: Event; calendar?: Calendar }
 function EditEvent({ event, calendar, onSaved }: { event: Event; calendar?: Calendar; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const { pop } = useNavigation();
+  const submitting = useRef(false);
 
   async function submit(values: { title: string; description: string }) {
+    if (submitting.current) return;
     if (!canModifyEvent(calendar, event)) {
       await showFailure(new Error("You do not have permission to edit this event."));
       return;
@@ -50,11 +52,12 @@ function EditEvent({ event, calendar, onSaved }: { event: Event; calendar?: Cale
       await showFailure(new Error("Enter an event title."));
       return;
     }
+    submitting.current = true;
     setSaving(true);
     try {
       await updateEvent(event, {
         title: values.title.trim(),
-        description: values.description.trim(),
+        description: values.description,
       });
       await showSuccess("Event updated");
       onSaved();
@@ -62,6 +65,7 @@ function EditEvent({ event, calendar, onSaved }: { event: Event; calendar?: Cale
     } catch (error) {
       await showFailure(error);
     } finally {
+      submitting.current = false;
       setSaving(false);
     }
   }
@@ -77,7 +81,7 @@ function EditEvent({ event, calendar, onSaved }: { event: Event; calendar?: Cale
     >
       <Form.TextField id="title" title="Title" defaultValue={event.title} />
       <Form.TextArea id="description" title="Description" defaultValue={event.description || ""} />
-      <Form.Description text="Edits apply to this event or this recurring occurrence." />
+      <Form.Description text="Edits change only the selected event ID or occurrence. Title and description only." />
     </Form>
   );
 }
@@ -86,6 +90,9 @@ export default function Events() {
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [partialError, setPartialError] = useState("");
+  const mutating = useRef(false);
   const [days, setDays] = useState(14);
   const selectedDays = useRef(14);
   const requests = useRef(new RequestSequence());
@@ -95,6 +102,8 @@ export default function Events() {
     const requestedDays = selectedDays.current;
     setLoading(true);
     setEvents([]);
+    setHasError(false);
+    setPartialError("");
     try {
       if (force) invalidateCache();
       const available = (await listCalendars()).filter((calendar) => calendar.myRights?.mayReadItems !== false);
@@ -104,23 +113,27 @@ export default function Events() {
         setEvents([]);
         return;
       }
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(start);
-      end.setDate(end.getDate() + requestedDays);
-      const fetched = await listEvents(available, start, end);
+      const { start, end } = calendarDayRange(requestedDays);
+      const fetched = await listEvents(available, start, end, (failures) => {
+        if (!isCurrent()) return;
+        setHasError(true);
+        setPartialError(
+          `${failures.length} calendar account(s) could not be loaded. Availability is unknown for those accounts.`,
+        );
+      });
       if (!isCurrent()) return;
-      setEvents(fetched.events.filter((event) => !event["morgen.so:metadata"]?.taskId));
-      if (fetched.failures.length) {
-        const firstError = fetched.failures[0].error;
-        const detail = firstError instanceof Error ? firstError.message : "Please check your calendar connections.";
-        const message = fetched.events.length
-          ? `Showing available events; ${fetched.failures.length} calendar account(s) could not be loaded. ${detail}`
-          : `Could not load events from ${fetched.failures.length} calendar account(s). ${detail}`;
-        await showFailure(new Error(message));
-      }
+      setEvents(
+        fetched
+          .filter((event) => !event["morgen.so:metadata"]?.taskId)
+          .map((event) => ({ event, instant: eventStartDate(event).getTime() }))
+          .sort((a, b) => a.instant - b.instant)
+          .map(({ event }) => event),
+      );
     } catch (error) {
-      if (isCurrent()) await showFailure(error);
+      if (isCurrent()) {
+        setHasError(true);
+        await showFailure(error).catch(() => {});
+      }
     } finally {
       if (isCurrent()) setLoading(false);
     }
@@ -132,40 +145,44 @@ export default function Events() {
     return () => sequence.invalidate();
   }, [days, load]);
 
-  const sorted = useMemo(
-    () => [...events].sort((a, b) => eventStartDate(a).getTime() - eventStartDate(b).getTime()),
-    [events],
-  );
-
   async function remove(event: Event) {
     const calendar = calendars.find((item) => item.id === event.calendarId && item.accountId === event.accountId);
     if (!canModifyEvent(calendar, event)) {
       await showFailure(new Error("You do not have permission to delete this event."));
       return;
     }
-    const confirmed = await confirmAlert({
-      title: `Delete “${event.title}”?`,
-      message: event.masterEventId
-        ? "Only this occurrence will be deleted."
-        : "This event will be removed from its connected calendar.",
-      primaryAction: {
-        title: "Delete Event",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (!confirmed) return;
+    if (mutating.current) return;
+    mutating.current = true;
     try {
+      const confirmed = await confirmAlert({
+        title: `Delete “${event.title}”?`,
+        message: event.masterEventId
+          ? "Delete the selected recurring occurrence using its event ID. No series-wide action is offered."
+          : "This event will be removed from its connected calendar.",
+        primaryAction: {
+          title: "Delete Event",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+      if (!confirmed) return;
       await deleteEvent(event);
       await showSuccess("Event deleted");
       await load(true);
     } catch (error) {
       await showFailure(error);
+    } finally {
+      mutating.current = false;
     }
   }
 
   return (
     <List
       isLoading={loading}
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load(true)} />
+        </ActionPanel>
+      }
       searchBarPlaceholder="Search upcoming events"
       searchBarAccessory={
         <List.Dropdown
@@ -185,15 +202,31 @@ export default function Events() {
       }
     >
       <List.EmptyView
-        title="No Upcoming Events"
-        description="Check your connected calendars or choose a longer time range."
+        title={hasError ? "Unable to Load Events" : "No Upcoming Events"}
+        description={
+          hasError
+            ? "Calendar availability is unknown. Refresh to try again."
+            : "Check your connected calendars or choose a longer time range."
+        }
       />
-      {sorted.map((event) => {
+      {partialError && events.length > 0 && (
+        <List.Item
+          title="Some Calendars Could Not Be Loaded"
+          subtitle={partialError}
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={() => void load(true)} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {events.map((event) => {
         const calendar = calendars.find((item) => item.id === event.calendarId && item.accountId === event.accountId);
         const canModify = canModifyEvent(calendar, event);
         return (
           <List.Item
-            key={`${event.accountId}:${event.id}`}
+            key={JSON.stringify([event.accountId, event.calendarId, event.id, event.start])}
             title={event.title}
             subtitle={calendar?.["morgen.so:metadata"]?.overrideName || calendar?.name}
             accessories={[{ text: formatEventTime(event) }]}

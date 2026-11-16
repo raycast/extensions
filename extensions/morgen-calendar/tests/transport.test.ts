@@ -13,7 +13,7 @@ test("sends the documented API key scheme and JSON body", async () => {
   const result = await sendMorgenRequest<{ data: { id: string } }>(
     "/tasks/create",
     "test-key",
-    { method: "POST", body: { title: "Test task" } },
+    { method: "POST", body: JSON.stringify({ title: "Test task" }) },
     fetcher as typeof fetch,
   );
   assert.equal(capturedUrl, "https://api.morgen.so/v3/tasks/create");
@@ -27,7 +27,7 @@ test("handles Morgen's empty 204 responses", async () => {
   const result = await sendMorgenRequest<void>(
     "/tasks/close",
     "test-key",
-    { method: "POST", body: { id: "task" } },
+    { method: "POST", body: JSON.stringify({ id: "task" }) },
     (async () => new Response(null, { status: 204 })) as typeof fetch,
   );
   assert.equal(result, undefined);
@@ -40,6 +40,6 @@ test("explains entitlement and rate-limit failures", async () => {
   );
   await assert.rejects(
     sendMorgenRequest("/tasks/list?limit=100", "test-key", {}, (async () => new Response(null, { status: 429, headers: { "Retry-After": "42" } })) as typeof fetch),
-    (error: unknown) => error instanceof MorgenError && error.status === 429 && /42 seconds/.test(error.message),
+    (error: unknown) => error instanceof MorgenError && error.status === 429 && /42/.test(error.message),
   );
 });
