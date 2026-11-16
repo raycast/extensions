@@ -60,7 +60,7 @@ export function PersonView({ name, born }: { name: string; born: number }) {
         {positions.map((position, index) => (
           <List.Item
             key={`position-${position.companyOrgnr}-${position.shareClass ?? ""}-${index}`}
-            icon={Icon.PieChart}
+            icon={Icon.Building}
             title={position.companyName}
             subtitle={position.shareClass ?? undefined}
             accessories={[

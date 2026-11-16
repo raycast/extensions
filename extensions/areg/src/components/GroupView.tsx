@@ -17,7 +17,7 @@ export function GroupView({ company }: { company: CompanySummary }) {
       {data?.root && (
         <List.Section title={t.ultimateParent}>
           <List.Item
-            icon={{ source: Icon.Building, tintColor: data.root.orgnr === company.orgnr ? "raycast-blue" : undefined }}
+            icon={Icon.Building}
             title={data.root.name}
             subtitle={data.root.orgForm ?? undefined}
             accessories={[{ text: t.members(data.members) }]}
@@ -34,7 +34,7 @@ export function GroupView({ company }: { company: CompanySummary }) {
           {links.map((link) => (
             <List.Item
               key={`${link.parentOrgnr}-${link.orgnr}`}
-              icon={{ source: Icon.Building, tintColor: link.orgnr === company.orgnr ? "raycast-blue" : undefined }}
+              icon={Icon.Building}
               title={`${"   ".repeat(Math.max(0, link.depth - 1))}${link.name}`}
               subtitle={`${t.parent}: ${link.parentName}`}
               keywords={[link.orgnr, link.parentName]}

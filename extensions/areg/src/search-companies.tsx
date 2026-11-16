@@ -81,7 +81,6 @@ function SearchCompanies({ initialQuery }: { initialQuery: string }) {
               <List.Item
                 key={id}
                 id={id}
-                icon={section.key === "recents" ? Icon.Clock : isFavourite ? Icon.Star : Icon.Building}
                 title={company.name}
                 subtitle={showDetail ? undefined : formatOrgnr(company.orgnr)}
                 keywords={[company.orgnr, formatOrgnr(company.orgnr), company.city ?? ""]}

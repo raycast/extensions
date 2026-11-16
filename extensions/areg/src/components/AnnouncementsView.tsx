@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Brand } from "../lib/brand";
 import { useAreg } from "../lib/api";
 import { formatDate } from "../lib/format";
 import { getLanguage, getStrings } from "../lib/i18n";
@@ -9,8 +10,9 @@ import { PageActions, ResourceEmptyView } from "./common";
 function eventIcon(event: string | null): Image.ImageLike {
   const e = event ?? "";
   if (e.startsWith("bankruptcy") || e.startsWith("forced"))
-    return { source: Icon.ExclamationMark, tintColor: Color.Red };
-  if (e.startsWith("deleted") || e.startsWith("dissolution")) return { source: Icon.XMarkCircle, tintColor: Color.Red };
+    return { source: Icon.ExclamationMark, tintColor: Brand.down };
+  if (e.startsWith("deleted") || e.startsWith("dissolution"))
+    return { source: Icon.XMarkCircle, tintColor: Brand.down };
   if (e.includes("merger")) return Icon.Shuffle;
   if (e.startsWith("board") || e.startsWith("ceo") || e.startsWith("auditor") || e.startsWith("signature"))
     return Icon.TwoPeople;

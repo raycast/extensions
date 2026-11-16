@@ -24,7 +24,7 @@ export function IpRightsView({ company }: { company: CompanySummary }) {
       accessories={[
         ...(right.classes.length ? [{ text: right.classes.join(", "), tooltip: t.classes }] : []),
         {
-          tag: { value: right.statusLabel, color: right.alive ? Color.Green : Color.SecondaryText },
+          tag: { value: right.statusLabel, color: right.alive ? Color.PrimaryText : Color.SecondaryText },
           tooltip: right.alive ? t.inForce : t.expired,
         },
         { text: formatDate(right.filedOn, locale), tooltip: t.filed },

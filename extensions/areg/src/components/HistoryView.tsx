@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import { Brand } from "../lib/brand";
 import { useAreg } from "../lib/api";
 import { formatPercent } from "../lib/format";
 import { getLanguage, getStrings, type Strings } from "../lib/i18n";
@@ -6,20 +7,20 @@ import type { CompanySummary, HistoryEvent, HistoryResponse } from "../lib/types
 import { CompanyActions } from "./CompanyActions";
 import { PageActions, PersonActions, ResourceEmptyView } from "./common";
 
-function eventTag(kind: string, t: Strings): { value: string; color: Color } {
+function eventTag(kind: string, t: Strings): { value: string; color: Color.ColorLike } {
   switch (kind) {
     case "entered":
-      return { value: t.joined, color: Color.Green };
+      return { value: t.joined, color: Brand.up };
     case "exited":
-      return { value: t.left, color: Color.Red };
+      return { value: t.left, color: Brand.down };
     case "increased":
-      return { value: t.increased, color: Color.Blue };
+      return { value: t.increased, color: Brand.up };
     case "decreased":
-      return { value: t.decreased, color: Color.Orange };
+      return { value: t.decreased, color: Brand.down };
     case "diluted":
-      return { value: t.diluted, color: Color.Yellow };
+      return { value: t.diluted, color: Color.SecondaryText };
     case "concentrated":
-      return { value: t.concentrated, color: Color.Purple };
+      return { value: t.concentrated, color: Color.SecondaryText };
     default:
       return { value: kind, color: Color.SecondaryText };
   }

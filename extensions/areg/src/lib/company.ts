@@ -1,19 +1,20 @@
 import { Color } from "@raycast/api";
 import { useAreg } from "./api";
+import { Brand } from "./brand";
 import type { Strings } from "./i18n";
 import type { CompanyResponse, FinancialsResponse, RolesResponse } from "./types";
 
-export type StatusTag = { label: string; color: Color };
+export type StatusTag = { label: string; color: Color.ColorLike };
 
 export function companyStatus(company: CompanyResponse | undefined, t: Strings): StatusTag[] {
   const data = company?.data;
   if (!data) return [];
   const tags: StatusTag[] = [];
   if (data.slettedato) tags.push({ label: t.deleted, color: Color.SecondaryText });
-  if (data.konkurs) tags.push({ label: t.bankrupt, color: Color.Red });
-  if (data.underTvangsavviklingEllerTvangsopplosning) tags.push({ label: t.forcedDissolution, color: Color.Red });
-  if (data.underAvvikling) tags.push({ label: t.dissolving, color: Color.Orange });
-  return tags.length ? tags : [{ label: t.active, color: Color.Green }];
+  if (data.konkurs) tags.push({ label: t.bankrupt, color: Brand.down });
+  if (data.underTvangsavviklingEllerTvangsopplosning) tags.push({ label: t.forcedDissolution, color: Brand.down });
+  if (data.underAvvikling) tags.push({ label: t.dissolving, color: Brand.down });
+  return tags.length ? tags : [{ label: t.active, color: Color.SecondaryText }];
 }
 
 export function keyPeople(roles: RolesResponse | undefined) {

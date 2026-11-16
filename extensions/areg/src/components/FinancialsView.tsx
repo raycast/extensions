@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Brand } from "../lib/brand";
 import { Fragment } from "react";
 import { useAreg } from "../lib/api";
 import { FINANCIAL_GROUPS } from "../lib/financials";
@@ -116,7 +117,7 @@ export function FinancialsView({ company }: { company: CompanySummary }) {
                     {
                       tag: {
                         value: formatCompactNumber(result * 1000, locale),
-                        color: result >= 0 ? Color.Green : Color.Red,
+                        color: result >= 0 ? Brand.up : Brand.down,
                       },
                       tooltip: t.netResult,
                     },

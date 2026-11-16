@@ -1,5 +1,6 @@
 import { Detail, Icon, List } from "@raycast/api";
 import { isNotFound } from "../lib/api";
+import { companyAvatar } from "../lib/brand";
 import { companyStatus, keyPeople, useCompanyOverview } from "../lib/company";
 import { formatAddress, formatDate, formatMoney, formatNumber, websiteUrl, type Locale } from "../lib/format";
 import { getLanguage, getStrings, type Strings } from "../lib/i18n";
@@ -94,7 +95,12 @@ export function CompanyMetadata({ summary, overview, variant = "detail" }: Metad
 
   return (
     <M>
-      <M.Label title={t.orgnr} text={formatOrgnr(summary.orgnr)} />
+      <M.Label
+        title={t.orgnr}
+        text={formatOrgnr(summary.orgnr)}
+        // The avatar's dot sizes follow the org number, so it belongs next to it, and only once a company is open.
+        icon={variant === "detail" ? companyAvatar(summary.orgnr) : undefined}
+      />
       <M.Label
         title={t.form}
         text={data?.organisasjonsform?.beskrivelse ?? company?.orgForm ?? summary.form ?? undefined}

@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Brand } from "../lib/brand";
 import { useAreg } from "../lib/api";
 import { formatCompactMoney, formatDate } from "../lib/format";
 import { getLanguage, getStrings } from "../lib/i18n";
@@ -31,7 +32,7 @@ export function TendersView({ company }: { company: CompanySummary }) {
         {won.map((tender, index) => (
           <List.Item
             key={`won-${tender.id}-${index}`}
-            icon={{ source: Icon.Trophy, tintColor: Color.Green }}
+            icon={Icon.Trophy}
             title={tender.lotTitle ?? tender.title}
             subtitle={tender.buyer?.name}
             keywords={[tender.id, tender.title]}
@@ -64,7 +65,7 @@ export function TendersView({ company }: { company: CompanySummary }) {
             subtitle={tender.kindLabel}
             keywords={[tender.id]}
             accessories={[
-              ...(tender.open ? [{ tag: { value: t.openTender, color: Color.Green } }] : []),
+              ...(tender.open ? [{ tag: { value: t.openTender, color: Brand.accent } }] : []),
               ...(tender.estimatedValue
                 ? [{ tag: formatCompactMoney(tender.estimatedValue, tender.currency, locale) }]
                 : []),
