@@ -67,7 +67,7 @@ function didl(url: string): string {
     "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_TS_HD_NA_ISO;DLNA.ORG_OP=00;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000";
   return (
     `<DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/">` +
-    `<item id="0" parentID="-1" restricted="1"><dc:title>RameCast Screen</dc:title><upnp:class>object.item.videoItem</upnp:class>` +
+    `<item id="0" parentID="-1" restricted="1"><dc:title>Screen Casting</dc:title><upnp:class>object.item.videoItem</upnp:class>` +
     `<res protocolInfo="${protocolInfo}">${escapeXml(url)}</res></item></DIDL-Lite>`
   );
 }

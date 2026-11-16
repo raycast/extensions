@@ -159,7 +159,7 @@ function withStateLock<T>(fn: (current: ActiveCast | undefined) => T): T {
       } catch {
         // released meanwhile
       }
-      if (waited > 5000) throw new Error("Timed out waiting for another RameCast command");
+      if (waited > 5000) throw new Error("Timed out waiting for another Screen Casting command");
       Atomics.wait(pause, 0, 0, 5);
     }
   }

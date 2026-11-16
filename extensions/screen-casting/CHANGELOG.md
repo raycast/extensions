@@ -1,4 +1,4 @@
-# RameCast Changelog
+# Screen Casting Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
@@ -8,6 +8,6 @@
 - AirPlay (macOS) and Miracast (Windows) displays listed with a handoff to system mirroring
 - Stop Casting: stop the stream and close the receiver app
 - No external dependencies: the screen encoder is downloaded and verified automatically on first use
-- Works on macOS and Windows
+- Works on macOS (Windows support is untested and not yet listed)
 - Stream is only reachable by the chosen Cast device (interface-bound, random port, per-session token)
 - Updated all dependencies (Raycast API 2.x)

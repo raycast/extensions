@@ -1,13 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "ramecast",
-  "title": "RameCast",
+  "name": "screen-casting",
+  "title": "Screen Casting",
   "description": "Cast your screen to Chromecast, smart TVs (DLNA), Roku, AirPlay and Miracast displays from Raycast",
   "icon": "extension-icon.png",
   "author": "michaelhazan",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Media",
@@ -18,7 +17,7 @@
     {
       "name": "cast-screen",
       "title": "Cast Screen",
-      "subtitle": "RameCast",
+      "subtitle": "Screen Casting",
       "description": "Find Chromecast, Google TV, DLNA smart TVs, Roku, AirPlay and Miracast displays on your network and cast your screen to one",
       "mode": "view",
       "keywords": [
@@ -35,7 +34,7 @@
     {
       "name": "stop-casting",
       "title": "Stop Casting",
-      "subtitle": "RameCast",
+      "subtitle": "Screen Casting",
       "description": "Stop the current screen cast and close the player on the device",
       "mode": "no-view",
       "keywords": [
@@ -98,7 +97,7 @@
       "type": "textfield",
       "required": false,
       "title": "Custom ffmpeg Path",
-      "description": "Optional: use your own ffmpeg binary instead of the one RameCast downloads automatically on first use.",
+      "description": "Optional: use your own ffmpeg binary instead of the one this extension downloads automatically on first use.",
       "placeholder": "/opt/homebrew/bin/ffmpeg"
     }
   ]

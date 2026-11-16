@@ -101,7 +101,14 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select a device to cast your screen to">
-      {error && nothingFound ? (
+      {isLoading && !found.devices.length && !found.system.length ? (
+        // Raycast hides an EmptyView while loading, so show the search progress as a row instead.
+        <List.Item
+          icon={Icon.Wifi}
+          title="Searching for devices…"
+          subtitle="Make sure your computer and the device are on the same network."
+        />
+      ) : error && nothingFound ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           title="Could not search for devices"
@@ -111,12 +118,12 @@ export default function Command() {
       ) : (
         <List.EmptyView
           icon={Icon.Wifi}
-          title={isLoading ? "Searching for devices…" : "No devices found"}
+          title="No devices found"
           description="Make sure your computer and the device are on the same network."
           actions={<ActionPanel>{refresh}</ActionPanel>}
         />
       )}
-      <List.Section title="Cast Devices" subtitle="Streamed by RameCast">
+      <List.Section title="Cast Devices" subtitle="Streamed by this extension">
         {found.devices.map((d) => (
           <List.Item
             key={`${d.protocol}:${d.id}`}

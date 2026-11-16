@@ -42,7 +42,7 @@ export const roku: Adapter = {
   async play(device, urls) {
     const log = protocolLog("roku");
     // 15985 is Roku's built-in "Play on Roku" media input.
-    const params = new URLSearchParams({ t: "v", u: urls.hls, videoName: "RameCast Screen", videoFormat: "hls" });
+    const params = new URLSearchParams({ t: "v", u: urls.hls, videoName: "Screen Casting", videoFormat: "hls" });
     const endpoint = ecp(device, `/input/15985?${params}`);
     log(`>> POST ${endpoint}`);
     const res = await fetchDevice(endpoint, { method: "POST" }, 10000);

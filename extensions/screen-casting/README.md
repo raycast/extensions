@@ -1,4 +1,4 @@
-# RameCast
+# Screen Casting
 
 Cast your screen to Chromecast, smart TVs, Roku and AirPlay or Miracast displays straight from Raycast.
 
@@ -12,15 +12,15 @@ Cast your screen to Chromecast, smart TVs, Roku and AirPlay or Miracast displays
 | Type        | Devices                                                         | How                                                                     |
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Google Cast | Chromecast, Google TV, Android TV, TVs with Chromecast built in | Screen mirroring like Chrome (Cast Streaming); HLS stream as a fallback |
-| Roku        | Roku players and Roku TVs                                       | Streamed by RameCast (HLS)                                              |
-| DLNA / UPnP | Most Samsung, LG, Sony and Philips smart TVs                    | Streamed by RameCast (MPEG-TS)                                          |
+| Roku        | Roku players and Roku TVs                                       | Streamed by this extension (HLS)                                        |
+| DLNA / UPnP | Most Samsung, LG, Sony and Philips smart TVs                    | Streamed by this extension (MPEG-TS)                                    |
 | AirPlay     | Apple TV, AirPlay 2 TVs (macOS)                                 | Opens macOS screen mirroring                                            |
 | Miracast    | Wireless displays, Fire TV, many TVs (Windows)                  | Opens the Windows Cast panel                                            |
 
-AirPlay mirroring uses a closed, encrypted protocol, and Miracast is built into Windows, so for those RameCast hands
+AirPlay mirroring uses a closed, encrypted protocol, and Miracast is built into Windows, so for those the extension hands
 off to the operating system, which also gives lower latency.
 
-If a TV answers on more than one of the types RameCast streams to itself, it's listed once under **Cast Devices**,
+If a TV answers on more than one of the types the extension streams to itself, it's listed once under **Cast Devices**,
 preferring Google Cast, then Roku, then DLNA. AirPlay receivers are listed separately under **System Mirroring**, so a
 TV that supports both Google Cast and AirPlay appears in both sections.
 
@@ -28,14 +28,14 @@ TV that supports both Google Cast and AirPlay appears in both sections.
 
 ## Requirements
 
-There is nothing to install. RameCast runs on macOS (Apple silicon and Intel) and Windows.
+There is nothing to install. It runs on macOS (Apple silicon and Intel). Windows code paths exist but are untested, so the Store listing is macOS-only for now.
 
 - On macOS, grant Raycast **Screen Recording** permission (System Settings → Privacy & Security).
 - Your computer and the Cast device must be on the same network.
 
 ## Screen encoder (ffmpeg)
 
-The first time you cast, RameCast downloads a pinned ffmpeg 9.0.2 build (~30–35 MB on macOS, ~65 MB on Windows) for
+The first time you cast, the extension downloads a pinned ffmpeg 9.0.2 build (~30–35 MB on macOS, ~65 MB on Windows) for
 your platform and stores it in the extension's support folder. It is not downloaded again.
 
 - **Source:**
@@ -45,15 +45,15 @@ your platform and stores it in the extension's support folder. It is not downloa
     [`autobuild-2026-10-31-12-59`](https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/tag/autobuild-2026-10-31-12-59),
     `ffmpeg-n9.0.2-39-g7adfbe40dc-win64-gpl-9.0.zip` (the 9.0.2 release plus later fixes from the 9.0 branch).
 
-  Both are zip files. RameCast reads only the `ffmpeg` binary out of the zip (using HTTP range requests), so ffprobe,
+  Both are zip files. The extension reads only the `ffmpeg` binary out of the zip (using HTTP range requests), so ffprobe,
   ffplay and the docs are not downloaded.
 
 - **Integrity:** the extracted binary is checked against a SHA-256 hash hard-coded in `src/lib/ffmpeg.ts`. If the
   hash does not match, the file is discarded and casting stops.
 - **License:** these ffmpeg builds include libx264 and are built with `--enable-version3`, so they are licensed under
-  the [GNU GPL v3](https://www.ffmpeg.org/legal.html). RameCast downloads and runs it as a separate program; it
+  the [GNU GPL v3](https://www.ffmpeg.org/legal.html). The extension downloads and runs it as a separate program; it
   is not bundled with or linked into the extension.
-- **Using your own ffmpeg:** set **Custom ffmpeg Path** in the extension preferences, and RameCast will skip the
+- **Using your own ffmpeg:** set **Custom ffmpeg Path** in the extension preferences, and the extension will skip the
   download.
 
 ## Privacy and security
@@ -68,18 +68,18 @@ Your screen is streamed only on your local network, and only to the device you p
 - Nothing is sent to the internet, apart from the one-time encoder download (from ffmpeg.martin-riedl.de on macOS and
   GitHub on Windows; see [Screen encoder](#screen-encoder-ffmpeg)).
 - **Stop Casting** stops the encoder and the server, deletes the temporary stream files, and closes the player on the
-  device. It only stops what RameCast started: if you've since opened another app on the TV, it's left alone.
+  device. It only stops what the extension started: if you've since opened another app on the TV, it's left alone.
 
 ## How it works
 
 Devices are found through mDNS (Google Cast, AirPlay) and SSDP (DLNA, Roku). ffmpeg captures the screen (AVFoundation
 on macOS, GDI on Windows) and encodes it.
 
-**Google Cast – screen mirroring.** RameCast uses Cast Streaming, the protocol Chrome uses for tab and screen casting:
+**Google Cast – screen mirroring.** It uses Cast Streaming, the protocol Chrome uses for tab and screen casting:
 
 1. It launches the device's mirroring receiver and negotiates a stream (H.264 or VP8).
 2. Each encoded frame is encrypted with AES-128 using a per-session key, split into RTP packets and sent over UDP.
-3. The device reports lost packets and RameCast re-sends them, so Wi-Fi drops don't corrupt the picture.
+3. The device reports lost packets and the extension re-sends them, so Wi-Fi drops don't corrupt the picture.
 
 The device shows your screen full-screen. On macOS, frames are encoded with the hardware H.264 encoder (falling back to
 software if it isn't available) and sent the moment each one is encoded.
@@ -100,7 +100,7 @@ adaptive playout delay mechanism Chrome uses, so the cast never restarts. Each c
 
 For the lowest delay, also turn on your TV's **Game mode**. TVs often add 50–100 ms of picture processing otherwise.
 
-If a device can't mirror, RameCast falls back to the video stream below.
+If a device can't mirror, the extension falls back to the video stream below.
 
 **DLNA, Roku, and Google Cast fallback – video stream.** The screen is encoded as a live HLS stream (and continuous
 MPEG-TS for DLNA TVs), served by a small local HTTP server, and the device plays it like a video. Expect a few seconds
