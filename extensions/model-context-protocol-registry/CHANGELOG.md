@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add GetYouTubeTranscript MCP Server] - 2026-11-16
+
+- Add GetYouTubeTranscript to the official registry: YouTube transcripts (optional timestamps or translation), caption languages, video and channel search, channel uploads, playlists and community posts, playlist videos, related videos and estimated dislikes. 13 read-only tools. Hosted Streamable HTTP server at https://getyoutubetranscript.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GetYouTubeTranscript account (100 free credits for new accounts).
+
 ## [Add GitRanks Contribute MCP Server] - 2026-11-16
 
 - Add GitRanks Contribute to the official registry: find open-source GitHub issues to contribute to, matched to your skills; your agent fixes one on a fresh clone and you approve the pull request on gitranks.com. 11 tools. Hosted Streamable HTTP server at https://mcp.gitranks.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
