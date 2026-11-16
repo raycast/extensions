@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitg",
+  "title": "bitg",
+  "description": "Convert Uzbek text from old Latin and Cyrillic to the 2026 Latin alphabet (ö ğ ş ç), offline.",
+  "icon": "icon.png",
+  "author": "nosirbek_xakimov",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "uzbek",
+    "o'zbek",
+    "latin",
+    "cyrillic",
+    "transliteration",
+    "alphabet"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-selected-text",
+      "title": "Convert Selected Text",
+      "subtitle": "bitg",
+      "description": "Replace the selected text with the same text in the 2026 Uzbek Latin alphabet.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-clipboard",
+      "title": "Convert Clipboard Text",
+      "subtitle": "bitg",
+      "description": "Convert the text on the clipboard to the 2026 Uzbek Latin alphabet and copy the result.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-text",
+      "title": "Convert Text",
+      "subtitle": "bitg",
+      "description": "Type or paste Uzbek text and see it in the new Latin, old Latin and Cyrillic alphabets.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keepEnglish",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Words",
+      "label": "Keep English words",
+      "description": "Leave English words such as push or meeting unchanged."
+    },
+    {
+      "name": "convertCyrillic",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Convert Cyrillic",
+      "description": "Convert Uzbek Cyrillic text as well as old Latin."
+    },
+    {
+      "name": "asciiApostrophe",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use ASCII apostrophe",
+      "description": "Write the glottal stop as ' instead of ʼ (U+02BC)."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test \"test/*.test.ts\"",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\n\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
