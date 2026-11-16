@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kill-process",
   "title": "Kill Process",
-  "description": "Terminate processes sorted by CPU or memory usage",
+  "description": "Find and kill processes sorted by CPU or memory usage, force quit apps and background processes, with AI tools to list and end processes.",
   "icon": "icon.png",
   "author": "rolandleth",
   "contributors": [

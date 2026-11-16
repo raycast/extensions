@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kaleidoscope",
   "title": "Kaleidoscope",
-  "description": "Compare or open content from Raycast in Kaleidoscope.",
+  "description": "Compare files, folders or clipboard entries in Kaleidoscope, and open git changesets or file history on Mac.",
   "icon": "icon.png",
   "owner": "leitmotif",
   "access": "public",

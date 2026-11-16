@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "klack",
   "title": "Klack",
-  "description": "Control Klack for macOS with Raycast",
+  "description": "Control Klack mechanical keyboard typing sounds on Mac: toggle it, pick a switch sound set, set the volume and view keystroke stats.",
   "icon": "icon.png",
   "author": "henrikruscon",
   "contributors": [
