@@ -71,7 +71,11 @@ export function BookmarkListItem({
             <Action title="Open in Dia" icon={Icon.Globe} onAction={() => openInDia(url)} />
             <Action.OpenInBrowser url={url} shortcut={Keyboard.Shortcut.Common.Open} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
-            <Action.CopyToClipboard title="Copy Title" content={item.name} shortcut={Keyboard.Shortcut.Common.Copy} />
+            <Action.CopyToClipboard
+              title="Copy Title"
+              content={item.name}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
           </ActionPanel>
         }
       />

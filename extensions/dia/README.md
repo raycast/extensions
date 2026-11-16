@@ -37,24 +37,3 @@ Windows limitations:
 - Dia UI changes can require updating the helper. Ambiguous controls and unsupported layouts return errors instead of guessing.
 
 Search Extensions reads installed extensions from all discovered profiles. On Windows, opening an extension uses its popup URL (or settings page) in Dia's current profile; selecting a specific profile or invoking its toolbar popup is not supported.
-
-### Local development on Windows
-
-Run `npm ci`, then `npm run dev` from this folder with Raycast installed. Use the development commands in Raycast to try searching history and bookmarks and opening a result in Dia. Run `npm run build`, `npx tsc --noEmit`, and `node --test tests/*.test.cjs` to validate changes.
-
-To run the read-only PowerShell spike against your installed Dia:
-
-```powershell
-$request = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('{"operation":"spaces"}'))
-powershell.exe -NoProfile -NonInteractive -Sta -File assets/windows-automation.ps1 -RequestBase64 $request
-```
-
-Other read-only operations are `tabs` and `focused-tab`. Output can contain tab/space names; review it before sharing. The development-only control inspection operation has been removed from the shipped helper. Live smoke tests verified tab/space listing, stable IDs across consecutive helper calls, page-text reading, space switching and restoration, regular/incognito window creation, and opening/closing a disposable test tab. This is not a guarantee across all Dia versions or layouts.
-
-If Raycast still reports "AppleScript is only supported on macOS", check which extension copy it is loading. The CLI can build into `%USERPROFILE%\.config\raycast-x\extensions\dia` while an existing installation loads `%USERPROFILE%\.config\raycast\extensions\dia`. Building successfully does not update both copies. Back up the installed extension before targeting that directory explicitly:
-
-```powershell
-npx ray build --output "$env:USERPROFILE\.config\raycast\extensions\dia"
-```
-
-Close and reopen the command after rebuilding. If it still uses the previous bundle, restart Raycast to clear the loaded extension.
