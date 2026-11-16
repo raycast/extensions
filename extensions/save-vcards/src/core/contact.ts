@@ -10,7 +10,19 @@ import { log } from "./log";
 import type { ContactDraft } from "./parse";
 
 export const PRIVACY_CONTACTS = "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts";
-export const LAST_ACCOUNT = "lastAccountId";
+// Stored JSON-encoded, the format useLocalStorage from @raycast/utils reads back.
+// (The earlier key "lastAccountId" held a plain string and is ignored.)
+export const LAST_ACCOUNT = "lastAccount";
+
+async function readLastAccount(): Promise<string | undefined> {
+  try {
+    const raw = await LocalStorage.getItem<string>(LAST_ACCOUNT);
+    const id = raw === undefined ? undefined : JSON.parse(raw);
+    return typeof id === "string" ? id : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export type FormState = {
   draft: ContactDraft;
@@ -117,7 +129,7 @@ async function save(snapshot: FormState, mode: { openAfter?: boolean; updateId?:
     return;
   }
   // Saved before the account list loaded: the account used last time, which the list would show.
-  const accountId = snapshot.accountId || (await LocalStorage.getItem<string>(LAST_ACCOUNT)) || "";
+  const accountId = snapshot.accountId || (await readLastAccount()) || "";
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: mode.updateId ? "Updating contact…" : "Saving contact…",
@@ -134,7 +146,7 @@ async function save(snapshot: FormState, mode: { openAfter?: boolean; updateId?:
   }
 
   // The contact is saved from here on. Nothing below may report it as unsaved.
-  if (accountId) await LocalStorage.setItem(LAST_ACCOUNT, accountId);
+  if (accountId) await LocalStorage.setItem(LAST_ACCOUNT, JSON.stringify(accountId));
   let openFailed = false;
   if (mode.openAfter || mode.updateId) {
     try {
