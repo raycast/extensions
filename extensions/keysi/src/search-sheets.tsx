@@ -58,11 +58,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   // Offered only when the installed Keysi knows `keysi://sheet` — an older
   // one ignores it, and an action that does nothing reads as broken. Worked
   // out after the first render: asking macOS for the URL handler takes ~0.2s.
+  // It must not make this view's first render wait for that round trip.
   const [canShowSheet, setCanShowSheet] = useState(false);
   useEffect(() => {
+    let cancelled = false;
     void keysiURLHandler().then((handler) => {
-      setCanShowSheet(atLeast(installedVersion(builtinSheetDirs(), handler), SHEET_URL_SINCE));
+      if (!cancelled) setCanShowSheet(atLeast(installedVersion(builtinSheetDirs(), handler), SHEET_URL_SINCE));
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
