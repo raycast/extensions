@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "getyoutubetranscript",
+    title: "GetYouTubeTranscript",
+    description:
+      "YouTube transcripts and YouTube data for your AI agent: get a video's transcript with optional timestamps or a machine translation, list its caption languages, search YouTube videos and channels, search within one channel, list a channel's uploads, playlists and community posts, list every video in a playlist, and get related videos and a video's estimated dislikes. 13 read-only tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a GetYouTubeTranscript account is required. New accounts get 100 free credits; each successful call uses 1 credit. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://getyoutubetranscript.com/images/logo.png",
+    homepage: "https://getyoutubetranscript.com/youtube-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://getyoutubetranscript.com/api/mcp"],
+    },
+    remoteUrl: "https://getyoutubetranscript.com/api/mcp",
+  },
+  {
     name: "bhived",
     title: "bhived",
     description:
