@@ -1,4 +1,6 @@
-## [Initial Version] - {PR_MERGE_DATE}
+# Xeet Changelog
+
+## [Initial Version] - 2026-11-16
 
 - Create local post previews with author images, verification badges, engagement counts, and weighted character counts.
 - Render public X post URLs, text, or structured Post JSON and copy or save PNGs.
