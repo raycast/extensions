@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [New Preferences] - {PR_MERGE_DATE}
+## [New Preferences] - 2026-11-16
 
 - Added `Close Raycast before selection` preference for `Recognize Text` and `Detect Barcode/QR Code` commands: Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.
 - Added `Include Raycast window in full-screen capture` preference for `Recognize Text on Entire Screen` command.
