@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "analog-film-library",
   "title": "Analog Film Library",
-  "description": "Browse analog films by name, brand, ISO, process, and more",
+  "description": "Search analog photography films by name, brand, ISO and process, and view details like color type and formats (35mm, 120).",
   "icon": "icon.png",
   "author": "samuelkraft",
   "license": "MIT",

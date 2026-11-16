@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-jump",
   "title": "Quick Jump",
-  "description": "Quick access to your team's Git repositories, dashboards, databases, and internal tools.",
+  "description": "Search and open your team's Git repositories, dashboards, databases and internal tools from a shared config file of links.",
   "icon": "icon.png",
   "author": "akadir",
   "license": "MIT",

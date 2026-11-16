@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typeform",
   "title": "Typeform Navigator",
-  "description": "Manage your Typeform account",
+  "description": "Browse your Typeform workspaces and forms, see form insights like completion rate, and view form responses.",
   "icon": "tf.png",
   "author": "jdvr",
   "contributors": [

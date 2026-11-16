@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "move-cursor-next-display",
   "title": "Move Cursor Displays",
-  "description": "Move the macOS mouse cursor between displays with relative-position and center modes.",
+  "description": "Move your mouse cursor to the next or previous display on your Mac, keeping its relative position or jumping to the screen center.",
   "icon": "icon.png",
   "author": "johnwick",
   "license": "MIT",

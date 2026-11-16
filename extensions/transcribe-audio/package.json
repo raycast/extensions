@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transcribe-audio",
   "title": "Transcribe Audio",
-  "description": "Transcribe audio and video files with OpenAI, Deepgram, or ElevenLabs. Export to Markdown, plain text, or SRT. FFmpeg is used for format conversion when needed.",
+  "description": "Transcribe audio and video files from Finder with OpenAI, Deepgram or ElevenLabs, and copy or save the transcript as Markdown, text or SRT subtitles.",
   "version": "1.0.0",
   "license": "MIT",
   "author": "mouxy",

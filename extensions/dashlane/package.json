@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dashlane",
   "title": "Dashlane",
-  "description": "Access your Dashlane vault directly from Raycast",
+  "description": "Open your Dashlane password vault in the web app (app.dashlane.com).",
   "icon": "command-icon.png",
   "author": "dpnick",
   "categories": [

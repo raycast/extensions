@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raynab",
   "title": "Raynab — Manage Your Budgets",
-  "description": "View and manage your YNAB Budgets directly from Raycast",
+  "description": "Manage YNAB (You Need A Budget) budgets: list and create transactions, schedule payments, view accounts and track unreviewed transactions in the menu bar.",
   "icon": "command-icon.png",
   "author": "CodetaroMiura",
   "license": "MIT",

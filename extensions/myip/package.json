@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myip",
   "title": "MyIP",
-  "description": "My IP information",
+  "description": "Show your public IPv4 and IPv6 and local IP addresses, look up IP location details, and display your IP in the menu bar, on Mac and Windows.",
   "icon": "icon.png",
   "author": "Kang",
   "contributors": [

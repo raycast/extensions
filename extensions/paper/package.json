@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paper",
   "title": "Paper",
-  "description": "Create and organize your ideas, work, etc., in Markdown files by category.",
+  "description": "Write and organize Markdown notes (\"papers\") by category, and create, edit and delete papers and categories.",
   "icon": "command-icon.png",
   "author": "luctst",
   "categories": [

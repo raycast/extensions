@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inpost-parcel-lockers",
   "title": "InPost Parcel Lockers",
-  "description": "Find and check availability of InPost parcel lockers in the UK",
+  "description": "Find InPost parcel lockers near a UK postcode, check locker availability and save your favorite lockers.",
   "icon": "command-icon.png",
   "author": "timrogers",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tmux-sessioner",
   "title": "Tmux Sessioner",
-  "description": "Quick Tmux Session Switcher",
+  "description": "Switch, create and kill tmux sessions and windows, search output across all sessions and save sessions with tmux-resurrect.",
   "icon": "command-icon.png",
   "author": "louishuyng",
   "contributors": [

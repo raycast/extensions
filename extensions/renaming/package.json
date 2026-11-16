@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "renaming",
   "title": "Renaming",
-  "description": "Renaming is a simple tool to rename files and folders in a batch.",
+  "description": "Batch rename files and folders selected in Finder, find and replace in names, use rule-based renaming and undo recent renames.",
   "version": "1.0.1",
   "keywords": [
     "rename",

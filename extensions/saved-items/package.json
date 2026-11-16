@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "saved-items",
   "title": "Saved Items",
-  "description": "Save some items (eg. quick replies) and insert or copy them.",
+  "description": "Save reusable text such as quick replies, then insert or copy it into any app.",
   "icon": "saved-items.png",
   "author": "guoxudong",
   "categories": [

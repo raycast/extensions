@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yourls",
   "title": "YOURLS Link Shortener",
-  "description": "Create and view shortened links using YOURLS",
+  "description": "Create short links with your self-hosted YOURLS shortener and list your links with click stats.",
   "icon": "yourls.png",
   "author": "firhan_ramadhan",
   "contributors": [

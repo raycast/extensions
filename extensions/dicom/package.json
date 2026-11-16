@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dicom",
   "title": "DICOM",
-  "description": "DICOM tag lookup",
+  "description": "Look up DICOM tags by tag number or name, with their value representation (VR), for medical imaging work.",
   "icon": "dicom.png",
   "author": "sedghi",
   "contributors": [

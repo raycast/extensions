@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kinopio-inbox",
   "title": "Kinopio Inbox",
-  "description": "Add cards to your Kinopio inbox",
+  "description": "Add cards to your Kinopio inbox and open your inbox.",
   "icon": "kinopio-icon.png",
   "author": "pirijan",
   "categories": [

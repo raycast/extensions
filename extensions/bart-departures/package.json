@@ -3,7 +3,7 @@
   "name": "bart-departures",
   "version": "1.0.0",
   "title": "BART Departures",
-  "description": "View real-time BART departures for a selected station",
+  "description": "View real-time BART train departures for any Bay Area station.",
   "icon": "bart.png",
   "author": "drewkiimon",
   "access": "public",

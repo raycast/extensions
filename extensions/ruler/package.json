@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ruler",
   "title": "Ruler",
-  "description": "Measure Distance Between Two Points",
+  "description": "Measure the distance between two points on your screen in pixels, with a magnifier for precision, and copy the result.",
   "icon": "icon.png",
   "author": "anwarulislam",
   "contributors": [

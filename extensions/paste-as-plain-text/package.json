@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paste-as-plain-text",
   "title": "Paste as Plain Text",
-  "description": "Paste text from the clipboard as any format.",
+  "description": "Paste clipboard text as plain text without formatting, or as a URL, file, JSON, number, or Markdown link or image.",
   "icon": "paste-icon.png",
   "author": "koinzhang",
   "contributors": [
