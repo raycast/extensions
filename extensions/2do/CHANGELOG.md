@@ -8,7 +8,7 @@
   - Create new projects and checklists
 - Show Items in Project or Checklist:
   - List a parent's items with Show Items on each parent
-  - Add item to project or checklist with Add Item in Show Items (`cmd + i`)
+  - Add item to project or checklist with Add Item in Show Items
 - View Tasks: show project or checklist completion progress as a ring calculated by percentage from `completed child tasks / total child tasks`
 - If you complete a parent (project or checklist) with open tasks, it will ask if you want to complete the remaining open todos in the parent. You have a choice between "Not Now" and "Complete All".
 

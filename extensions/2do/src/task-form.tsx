@@ -100,7 +100,12 @@ export function TaskForm({
 
   // The project or checklist the task is going into, if any. Checklist items have no dates, so they
   // can't repeat either.
-  const target = addTo ?? [parent, ...(parents.data ?? [])].find((p) => p && p.task_id === values.parent_id);
+  // A new project or checklist ignores the parent field, since it always goes in the list.
+  const target =
+    addTo ??
+    ((values.task_type ?? "normal") === "normal"
+      ? [parent, ...(parents.data ?? [])].find((p) => p && p.task_id === values.parent_id)
+      : undefined);
   const dated = target?.task_type !== "checklist";
   const repeats = dated && !!values.is_repeating && values.repeat !== undefined;
 
@@ -146,7 +151,9 @@ export function TaskForm({
           {...itemProps.list_id}
           onChange={(listId) => {
             itemProps.list_id.onChange?.(listId);
-            if (listId !== values.list_id) setValue("parent_id", "");
+            // Only a real change of list leaves the parent behind, not the dropdown reporting an
+            // empty or unchanged value while it loads.
+            if (listId && values.list_id && listId !== values.list_id) setValue("parent_id", "");
           }}
         >
           {lists.data?.map((l) => (
@@ -154,19 +161,22 @@ export function TaskForm({
           ))}
         </Form.Dropdown>
       )}
-      {(parents.data?.length ?? 0) > 0 && (values.task_type ?? "normal") === "normal" && (
-        <Form.Dropdown title="Project or Checklist" {...itemProps.parent_id}>
-          <Form.Dropdown.Item value="" title="None" icon={Icon.Minus} />
-          {parents.data?.map((p) => (
-            <Form.Dropdown.Item
-              key={p.task_id}
-              value={p.task_id}
-              title={p.title}
-              icon={p.task_type === "project" ? Icon.Folder : Icon.CheckList}
-            />
-          ))}
-        </Form.Dropdown>
-      )}
+      {/* Shown once its options include the current parent, so Raycast doesn't swap in None. */}
+      {(parents.data?.length ?? 0) > 0 &&
+        (!values.parent_id || parents.data?.some((p) => p.task_id === values.parent_id)) &&
+        (values.task_type ?? "normal") === "normal" && (
+          <Form.Dropdown title="Project or Checklist" {...itemProps.parent_id}>
+            <Form.Dropdown.Item value="" title="None" icon={Icon.Minus} />
+            {parents.data?.map((p) => (
+              <Form.Dropdown.Item
+                key={p.task_id}
+                value={p.task_id}
+                title={p.title}
+                icon={p.task_type === "project" ? Icon.Folder : Icon.CheckList}
+              />
+            ))}
+          </Form.Dropdown>
+        )}
       {dated && (
         <>
           <Form.Separator />
