@@ -6,7 +6,7 @@
 
 Xeet is a Raycast extension that renders custom text, structured JSON, and public X posts as PNG previews. You can compare layouts, save drafts, and copy or export the images. Custom text and JSON render entirely on your computer.
 
-This extension uses **open Noto and STIX fonts**. It does not ship Chirp, Arial, Apple Color Emoji, or Hiragino Sans. Typography, emoji artwork, line wrapping, and truncation can differ from X and from the upstream Xeet playground. Previews are mockups, not evidence of an authentic published post.
+Previews use Xeet's bundled fonts and emoji. They are mockups, not evidence of an authentic published post.
 
 ## Commands
 
@@ -89,6 +89,10 @@ The upstream Post schema supports media, nested quotes, polls, and link cards. I
 
 ## Renderer, fonts, and attribution
 
-Built on [rauchg/xeet](https://github.com/rauchg/xeet), licensed under Apache-2.0. The bundled renderer uses open Noto and STIX fonts. **Xeet Preview Emoji** is derived from Noto Color Emoji and retains its original artwork.
+Built on [rauchg/xeet](https://github.com/rauchg/xeet), installed through the pinned `@xeet/core` npm dependency. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution. This extension is MIT licensed and is not affiliated with X.
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `assets/xeet/licenses/` for attribution and license texts. This extension is MIT licensed and is not affiliated with X.
+## Development
+
+Run `npm ci`, then `npm run dev`. Installation prepares the npm renderer's WASM and font packs in the ignored `assets/xeet-runtime/` directory so Raycast can include them in the extension. `npm run build` and `npm run dev` refresh these generated files automatically; no custom Rust build or checked-in renderer binaries are needed.
+
+Run `npm test`, `npm run build`, and `npm run test:bundle` to check rendering and the relocated production distribution.

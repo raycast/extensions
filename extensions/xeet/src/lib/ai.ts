@@ -96,7 +96,7 @@ export function previewResult(preview: Preview) {
     report: reportResult(preview.report),
     warnings: [...preview.warnings],
     source: preview.source ?? null,
-    typography: "Open Noto / STIX fonts; layout and emoji can differ from X.",
+    typography: "Xeet's bundled fonts and emoji.",
   };
 }
 

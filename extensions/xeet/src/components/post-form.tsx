@@ -281,10 +281,6 @@ export default function PostForm({
           setOptions(value);
         }}
       />
-      <Form.Description
-        title="Typography"
-        text="Uses open Noto and STIX fonts. Letter shapes, line breaks, and emoji differ from X."
-      />
       <Form.Separator />
       {countKeys.map((key) => (
         <Form.TextField

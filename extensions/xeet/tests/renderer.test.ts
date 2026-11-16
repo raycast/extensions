@@ -4,6 +4,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve, join } from "node:path";
 import { test } from "node:test";
+import { loadXeetSync } from "@xeet/core/node";
 import { loadEngine } from "../src/lib/engine";
 import { resolveInput } from "../src/lib/resolver";
 
@@ -15,6 +16,12 @@ const post = {
   now: "2026-01-01T13:00:00Z",
 };
 const options = { width: 390, dpr: 2, theme: "dark" as const, surface: "web-timeline" as const };
+
+test("staged renderer matches the installed npm renderer, including all font packs", () => {
+  const upstream = loadXeetSync();
+  assert.deepEqual(engine.loadedPacks(), upstream.fontPacks());
+  assert.deepEqual(engine.render(post, options), upstream.render(post, options));
+});
 
 test("renders deterministically without network, with correct PNG dimensions and weighted counts", async () => {
   const originalFetch = globalThis.fetch;

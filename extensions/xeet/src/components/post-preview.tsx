@@ -73,7 +73,6 @@ export default function PostPreview({ preview: initial, draftId }: { preview: Pr
             title="Appearance"
             text={`${options.theme === "light" ? "Light" : "Dark"} · ${options.width} px · ${options.dpr}×`}
           />
-          <Detail.Metadata.Label title="Typography" text="Noto / STIX (open-font preview)" />
           {preview.source && <Detail.Metadata.Link title="Source" text="View Public Post" target={preview.source} />}
           {preview.warnings.length > 0 && <Detail.Metadata.Separator />}
           {preview.warnings.map((warning, index) => (
