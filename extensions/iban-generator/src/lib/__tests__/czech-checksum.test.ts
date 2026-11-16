@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  computeCzechPrefixCheck,
-  computeCzechSuffixCheck,
-  isValidCzechSlovakBban,
-} from "../checksum";
+import { computeCzechPrefixCheck, computeCzechSuffixCheck, isValidCzechSlovakBban } from "../checksum";
 import { accountNumberFromBban, generateBban, BBAN_LAYOUTS } from "../bban-spec";
 import { generateIban } from "../generate";
 import { extractBbanParts } from "../bban-parts";

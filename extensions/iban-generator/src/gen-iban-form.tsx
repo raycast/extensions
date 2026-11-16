@@ -19,7 +19,7 @@ import { saveFormPrefs, type FormPrefs } from "./form-prefs";
 import { IbanDetail } from "./iban-detail";
 import { COUNTRIES, getCountry, INVALID_KINDS } from "./lib";
 import { savedIbanSummary } from "./saved-iban-display";
-import { ibanText, type IbanFormat, type SavedIban } from "./storage";
+import { ibanText, saveIban, type IbanFormat, type SavedIban } from "./storage";
 import { VALIDITY_VALID, validityDropdownInfo, type ValidityChoice } from "./validity";
 
 interface FormValues {
@@ -76,7 +76,7 @@ export function generationSettingsFromSaved(
 
 interface GenIbanFormProps {
   savedIban?: SavedIban;
-  onSavedIbanChange: (record: SavedIban | undefined) => void;
+  onSavedIbanChange: (record: SavedIban | undefined) => void | Promise<void>;
   initialCountryCode?: string;
   isLoading?: boolean;
 }
@@ -88,7 +88,11 @@ export function GenIbanForm({
   isLoading: isLoadingProp,
 }: GenIbanFormProps) {
   const { push } = useNavigation();
-  const { value: savedRaw, isLoading: savedStorageLoading, setValue: setSavedValue } = useLocalStorage<unknown>(SAVED_IBAN_KEY);
+  const {
+    value: savedRaw,
+    isLoading: savedStorageLoading,
+    setValue: setSavedValue,
+  } = useLocalStorage<unknown>(SAVED_IBAN_KEY);
   const { value: prefsRaw, isLoading: prefsStorageLoading } = useLocalStorage<unknown>(FORM_PREFS_KEY);
 
   const storedSaved = useMemo(() => storedSavedIban(savedRaw), [savedRaw]);
@@ -105,11 +109,11 @@ export function GenIbanForm({
   const isLoading = (isLoadingProp ?? false) || storageLoading;
 
   const updateSaved = useCallback(
-    (record: SavedIban | undefined) => {
+    async (record: SavedIban | undefined) => {
       if (record) {
-        void setSavedValue(record);
+        await setSavedValue(record);
       }
-      onSavedIbanChange(record);
+      await onSavedIbanChange(record);
     },
     [onSavedIbanChange, setSavedValue],
   );
@@ -181,7 +185,8 @@ export function GenIbanForm({
         const record = toSavedIban(generated, values.format);
         const prefs = await persistPrefs(values);
 
-        updateSaved(record);
+        await saveIban(record);
+        await updateSaved(record);
 
         const text = ibanText(record);
 
@@ -205,7 +210,7 @@ export function GenIbanForm({
         await showFailureToast(error, { title: "Generation failed" });
       }
     },
-    [persistPrefs, push, setSavedValue, updateSaved],
+    [persistPrefs, push, updateSaved],
   );
 
   const onCountryChange = useCallback((newCode: string) => {

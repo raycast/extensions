@@ -56,9 +56,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GenIba
   const [view, setView] = useState<RootView>({ mode: "loading" });
 
   const onSavedIbanChange = useCallback(
-    (record: SavedIban | undefined) => {
+    async (record: SavedIban | undefined) => {
       if (record) {
-        void setSavedValue(record);
+        await setSavedValue(record);
       }
     },
     [setSavedValue],

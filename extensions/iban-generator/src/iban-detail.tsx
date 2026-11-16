@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Color, Detail, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import { generateRecord, toSavedIban } from "./generate-record";
