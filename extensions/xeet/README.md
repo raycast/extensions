@@ -89,7 +89,7 @@ The upstream Post schema supports media, nested quotes, polls, and link cards. I
 
 ## Renderer, fonts, and attribution
 
-Built on [rauchg/xeet](https://github.com/rauchg/xeet), installed through the pinned `@xeet/core` npm dependency. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution. This extension is MIT licensed and is not affiliated with X.
+Built on [rauchg/xeet](https://github.com/rauchg/xeet), installed through the pinned `@xeet/core` npm dependency. This extension is not affiliated with X.
 
 ## Development
 

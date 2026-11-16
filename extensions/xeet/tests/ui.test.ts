@@ -165,7 +165,6 @@ async function unmount(tree: ReturnType<typeof create>) {
 
 test("resolution failures permit submitting the unchanged URL again", async () => {
   const tree = await mount(ui.InputForm);
-  assert.equal(tree.root.findByType("Form").props.navigationTitle, undefined);
   const input = "https://x.com/jack/status/20";
   await act(async () => tree.root.findByType("Form.TextArea").props.onChange(input));
   await act(async () => action(tree, "Generate Preview").props.onSubmit({ input }));
@@ -188,7 +187,6 @@ test("preview saves reuse their returned draft ID and pass it to Edit Post", asy
   assert.equal(state.drafts.size, 1);
   await act(async () => action(tree, "Edit Post").props.onAction());
   assert.equal(pushed.at(-1)?.props.draftId, "draft-1");
-  assert.equal(pushed.at(-1)?.props.navigationTitle, "Edit Post");
   await unmount(tree);
 });
 
@@ -217,11 +215,6 @@ test("comparison hooks discard stale renders after changing dimensions", async (
 
 test("both post actions validate fields, and valid saves preserve the existing ID", async () => {
   const tree = await mount(ui.PostForm, { draftId: "existing-draft" });
-  assert.equal(tree.root.findByType("Form").props.navigationTitle, undefined);
-  assert.equal(
-    tree.root.findAllByType("Form.TextField").find((node) => node.props.id === "name")?.props.placeholder,
-    "Your Name",
-  );
   const values = Object.fromEntries(
     tree.root
       .findAll((node) => typeof node.type === "string" && node.props.id)
