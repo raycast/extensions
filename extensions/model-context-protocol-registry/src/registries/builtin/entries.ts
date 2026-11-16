@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sprout",
+    title: "Sprout",
+    description:
+      "Read-only cash flow, spending, subscriptions and transaction search from your own US and Canadian bank and credit card accounts, connected through Plaid. Ask where your money went last month, which subscriptions keep renewing, or how this month compares with the last. Tools return exact posted amounts, keep USD and CAD separate, and exclude transfers between your own accounts. Sprout cannot move money, pay bills or cancel anything. 12 tools, all read-only except one that saves your default reporting period. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration), no API key. A Sprout Plus subscription is required (US$9.99/week or US$99.99/year, 3-day free trial if eligible). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/MindCraftersGroup/sprout-claude-plugin/main/assets/logo.png",
+    homepage: "https://sprout.mindcrafters.group/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api-sprout.mindcrafters.group/mcp"],
+    },
+    remoteUrl: "https://api-sprout.mindcrafters.group/mcp",
+  },
+  {
     name: "getyoutubetranscript",
     title: "GetYouTubeTranscript",
     description:
