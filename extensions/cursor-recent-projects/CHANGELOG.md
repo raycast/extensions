@@ -5,7 +5,6 @@
 - Add Windows support for all commands
 - `Open with Cursor` opens the items selected in File Explorer, or the current folder when nothing is selected
 - `Show Active Workspaces` lists and focuses Cursor windows on Windows
-- Read and update recent projects without the `sqlite3` command on Windows
 - Use cross-platform keyboard shortcuts
 - Stop showing a "Git Error" toast when the Git branch of a recent project can't be resolved (e.g. a deleted folder or no Git installed); the branch is hidden instead
 - Fix project paths containing encoded characters (e.g. spaces) being passed to the Cursor Directory integration and cross-extension callbacks
