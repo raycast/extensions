@@ -1,0 +1,13 @@
+# Raycast
+node_modules
+dist
+.DS_Store
+*.log
+raycast-env.d.ts
+.config
+.test-build
+.raycast-swift-build
+compiled_raycast_swift
+swift/.build
+swift/.swiftpm
+swift/Package.resolved

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "save-vcards",
+  "title": "Save vCards",
+  "description": "Save a contact from highlighted text, a screenshot or a business-card photo to Apple Contacts, read entirely on your Mac.",
+  "icon": "command-icon.png",
+  "author": "julianpaul",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "save-vcard-from-selection",
+      "title": "Save vCard from Selection",
+      "description": "Reads the highlighted text and shows the contact it found. With nothing highlighted, it reads the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-vcard-from-screenshot",
+      "title": "Save vCard from Screenshot",
+      "description": "Drag a box around a signature, business card or profile; the contact in it is read on your Mac.",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-vcard",
+      "title": "Save vCard from Clipboard",
+      "description": "Reads the clipboard: copied text, or a copied image such as a business-card photo from your iPhone.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "test": "sh scripts/build-test-helper.sh && tsx --test test/*.test.ts",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "keywords": [
+    "vcard",
+    "contact",
+    "contacts",
+    "business card",
+    "signature",
+    "visitenkarte",
+    "kontakt"
+  ],
+  "preferences": [
+    {
+      "name": "defaultCountry",
+      "title": "Your Country",
+      "description": "Adds your country code to phone numbers written without one (0664 … becomes +43 664 …), so your iPhone matches incoming calls. Off by default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "",
+      "data": [
+        {
+          "title": "Leave as Written",
+          "value": ""
+        },
+        {
+          "title": "Austria (+43)",
+          "value": "43"
+        },
+        {
+          "title": "Germany (+49)",
+          "value": "49"
+        },
+        {
+          "title": "Switzerland (+41)",
+          "value": "41"
+        },
+        {
+          "title": "United Kingdom (+44)",
+          "value": "44"
+        },
+        {
+          "title": "United States / Canada (+1)",
+          "value": "1"
+        },
+        {
+          "title": "Netherlands (+31)",
+          "value": "31"
+        },
+        {
+          "title": "France (+33)",
+          "value": "33"
+        },
+        {
+          "title": "Italy (+39)",
+          "value": "39"
+        },
+        {
+          "title": "Spain (+34)",
+          "value": "34"
+        }
+      ]
+    },
+    {
+      "name": "debugLogging",
+      "title": "Debug Logging",
+      "label": "Include contact details in the debug log",
+      "description": "Steps, timings and errors are always logged to ~/Library/Logs/SaveVCards.log. Turn this on to also log names, emails and accounts while troubleshooting.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ]
+}
