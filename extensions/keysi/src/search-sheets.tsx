@@ -94,12 +94,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           description="Keysi ships sheets for Vim, tmux, Figma, Slack and more. If it's installed somewhere other than Applications, point this extension at it in the extension's settings."
           actions={
             <ActionPanel>
-              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               <Action.OpenInBrowser title="Open Keysi.io" url="https://keysi.io" icon={Icon.Globe} />
               {/* Only once Keysi has made it: Finder can't show a folder that isn't there. */}
               {existsSync(USER_SHEETS_DIR) ? (
                 <Action.ShowInFinder title="Open Your Sheets Folder" path={USER_SHEETS_DIR} />
               ) : null}
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
