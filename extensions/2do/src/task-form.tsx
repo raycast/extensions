@@ -98,6 +98,14 @@ export function TaskForm({
   const parents = useCachedPromise(listParents, [values.list_id ?? ""], {
     execute: canNest && !addTo && !!values.list_id,
   });
+  // listParents leaves out completed parents, so an edited item's own parent is added back while its
+  // list is chosen, letting the picker show it.
+  const parentOptions = [
+    ...(parent && parent.list_id === values.list_id && !parents.data?.some((p) => p.task_id === parent.task_id)
+      ? [parent]
+      : []),
+    ...(parents.data ?? []),
+  ];
 
   // A checklist's child tasks have no dates, so they can't repeat either: no date fields when editing
   // one, or for a task going into a checklist. The checklist itself keeps its date fields.
@@ -105,7 +113,7 @@ export function TaskForm({
   const target =
     addTo ??
     ((values.task_type ?? "normal") === "normal"
-      ? [parent, ...(parents.data ?? [])].find((p) => p && p.task_id === values.parent_id)
+      ? [parent, ...parentOptions].find((p) => p && p.task_id === values.parent_id)
       : undefined);
   const dated = parent?.task_type !== "checklist" && target?.task_type !== "checklist";
   const repeats = dated && !!values.is_repeating && values.repeat !== undefined;
@@ -161,10 +169,10 @@ export function TaskForm({
           ))}
         </Form.Dropdown>
       )}
-      {(parents.data?.length ?? 0) > 0 && (values.task_type ?? "normal") === "normal" && (
+      {parentOptions.length > 0 && (values.task_type ?? "normal") === "normal" && (
         <Form.Dropdown title="Project or Checklist" {...itemProps.parent_id}>
           <Form.Dropdown.Item value="" title="None" icon={Icon.Minus} />
-          {parents.data?.map((p) => (
+          {parentOptions.map((p) => (
             <Form.Dropdown.Item
               key={p.task_id}
               value={p.task_id}
