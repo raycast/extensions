@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chinese-lookup",
+  "title": "Chinese Lookup",
+  "description": "Type pinyin, English or Chinese and get characters, words, meanings, translations and pronunciation.",
+  "icon": "icon.png",
+  "author": "nick_tomic",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "chinese",
+    "mandarin",
+    "pinyin",
+    "hanzi",
+    "characters",
+    "dictionary",
+    "translate",
+    "traditional",
+    "simplified",
+    "hsk",
+    "learn chinese"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "chinese-lookup",
+      "title": "Chinese Lookup",
+      "description": "Type pinyin for characters and phrases, English for Chinese words, or paste Chinese for its translation, pinyin and word-by-word meaning.",
+      "keywords": [
+        "pinyin",
+        "hanzi",
+        "mandarin",
+        "dictionary",
+        "translate",
+        "english",
+        "characters",
+        "traditional",
+        "simplified"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "cjk-conv": "^1.2.153",
+    "pinyin-pro": "^3.29.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.3.0",
+    "eslint": "^9",
+    "prettier": "^3",
+    "typescript": "^5.8"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
