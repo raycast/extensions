@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt-search",
   "title": "ChatGPT Search",
-  "description": "Initiate ChatGPT Search (aka SearchGPT) from within Raycast. \nhttps://openai.com/index/introducing-chatgpt-search/",
+  "description": "Search the web with ChatGPT Search (SearchGPT) by opening your query on chatgpt.com, with an optional temporary chat.",
   "icon": "chatgpt-logo.png",
   "author": "kopach",
   "license": "MIT",

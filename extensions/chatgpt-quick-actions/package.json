@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt-quick-actions",
   "title": "ChatGPT Quick Actions",
-  "description": "Performs one-shot actions with ChatGPT",
+  "description": "Summarize, rewrite or refine selected text with ChatGPT, run custom prompts, and replace selected text with the output using your OpenAI API key.",
   "icon": "openai-logo.png",
   "author": "alanzchen",
   "contributors": [

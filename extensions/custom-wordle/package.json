@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "custom-wordle",
   "title": "Custom Wordle",
-  "description": "Get a link to play wordle with your own word",
+  "description": "Create a custom Wordle game with your own word of any length and get a link to share with friends.",
   "icon": "custom-wordle-icon.png",
   "author": "pallav_agarwal",
   "categories": [
