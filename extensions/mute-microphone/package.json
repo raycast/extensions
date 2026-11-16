@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mute-microphone",
   "title": "Toggle Audio Input (Microphone)",
-  "description": "Extension to mute/unmute audio input (Microphone)",
+  "description": "Mute or unmute your microphone with a hotkey, set the input level and see the mic status in the menu bar, on Mac and Windows.",
   "icon": "mute-command-icon.png",
   "author": "Quentin23Soleil",
   "contributors": [
