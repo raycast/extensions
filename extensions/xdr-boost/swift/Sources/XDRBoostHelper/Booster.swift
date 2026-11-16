@@ -97,6 +97,8 @@ final class Booster {
     private var tickTimer: Timer?
     private var reassertTimer: Timer?
     private var batteryTimer: Timer?
+    /// Runs only while a rejected plain-table write still needs retrying, paused or not.
+    private var restoreTimer: Timer?
     private var started = false
     private var builtSignature = ""
     private var pendingRebuild: DispatchWorkItem?
@@ -252,6 +254,7 @@ final class Booster {
                 target.lowSince = nil
                 target.retryAt = nil
             }
+            scheduleRestoreRetry()
             onChange?()
         } else if wasPaused && !isPaused {
             for target in targets {
@@ -309,6 +312,7 @@ final class Booster {
                 target.trigger = nil
                 writePlain(target)
                 target.status = .paused
+                scheduleRestoreRetry()
             }
             return
         }
@@ -320,6 +324,7 @@ final class Booster {
             target.status = .off
             target.lowSince = nil
             target.retryAt = nil
+            scheduleRestoreRetry()
             return
         }
         switch target.status {
@@ -421,11 +426,27 @@ final class Booster {
 
     // MARK: - Tables
 
+    /// Displays that should show no boost (switched off, or everything paused) but whose plain-table write was
+    /// rejected, so they still hold the boosted table.
+    private var unrestored: [Target] {
+        targets.filter { ($0.status == .off || $0.status == .paused) && $0.writtenLast != nil }
+    }
+
+    private func scheduleRestoreRetry() {
+        guard restoreTimer == nil, !unrestored.isEmpty else { return }
+        restoreTimer = Self.timer(every: 1.0, tolerance: 0.2) { [weak self] in self?.retryRestores() }
+    }
+
+    private func retryRestores() {
+        let pending = unrestored
+        for target in pending { writePlain(target) }
+        if pending.contains(where: { $0.writtenLast == nil }) { onChange?() } // a restore landed: report it
+        if unrestored.isEmpty { restoreTimer?.invalidate(); restoreTimer = nil }
+    }
+
     private func reassert() {
         guard !isPaused else { return }
         let before = targets.map(\.effective)
-        // A display switched off whose plain-table write was rejected still holds the boosted table: retry.
-        for target in targets where target.status == .off && target.writtenLast != nil { writePlain(target) }
         for target in targets where target.status == .boosted || target.status == .limited {
             guard let written = target.writtenLast else { continue }
             let readBack = Self.lastEntry(target.id)
@@ -555,6 +576,7 @@ final class Booster {
     private func tearDown() {
         started = false
         updateTimers()
+        restoreTimer?.invalidate(); restoreTimer = nil
         batteryTimer?.invalidate(); batteryTimer = nil
         let hadTable = targets.contains { $0.writtenLast != nil }
         targets.forEach { $0.trigger?.orderOut(nil) }
