@@ -12,7 +12,8 @@
     "chrismessina",
     "huzef_ansari",
     "duck69",
-    "salman-ar-sar"
+    "salman-ar-sar",
+    "muhammadrizo"
   ],
   "categories": [
     "Productivity"
@@ -252,13 +253,33 @@
       "name": "recognize-text",
       "title": "Recognize Text",
       "description": "Detect all text from the captured screen area",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "label": "Close Raycast before selection",
+          "name": "closeRaycast",
+          "description": "Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "recognize-text-fullscreen",
       "title": "Recognize Text on Entire Screen",
       "description": "Recognize text on the current display on macOS or across all monitors on Windows",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "label": "Include Raycast window in full-screen capture",
+          "name": "includeRaycast",
+          "description": "Raycast is captured, then closed before the OCR result is handled.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "recognize-clipboard",
@@ -290,24 +311,34 @@
       "name": "detect-barcode",
       "title": "Detect Barcode/QR Code",
       "description": "Detect barcodes and QR codes from the captured screen area (macOS only)",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "label": "Close Raycast before selection",
+          "name": "closeRaycast",
+          "description": "Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7",
-    "raycast-cross-extension": "^0.2.3"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "raycast-cross-extension": "^0.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
