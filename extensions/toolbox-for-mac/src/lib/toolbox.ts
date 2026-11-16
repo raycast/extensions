@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Application, Cache, getPreferenceValues } from "@raycast/api";
 import { execFile, execFileSync, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
@@ -53,9 +53,10 @@ export class ToolboxError extends Error {
   }
 }
 
-function appPath(): string {
-  const { toolboxPath } = getPreferenceValues<{ toolboxPath?: string }>();
-  return (toolboxPath || "/Applications/Toolbox.app").replace(/\/$/, "");
+/** Where Toolbox.app is: the app chosen in the preferences, else /Applications. */
+export function appPath(): string {
+  const { toolboxApp } = getPreferenceValues<{ toolboxApp?: Application }>();
+  return (toolboxApp?.path || "/Applications/Toolbox.app").replace(/\/$/, "");
 }
 
 /** The Toolbox executable, or a "missing" error that tells the user where to get it. */
@@ -121,7 +122,7 @@ export async function listTools(): Promise<Tool[]> {
 }
 
 /** Asks `Toolbox mcp` for its tool list over stdio (JSON-RPC, one message per line). */
-function mcpToolsList(): Promise<Tool[]> {
+async function mcpToolsList(): Promise<Tool[]> {
   const bin = binary();
   return new Promise((resolve, reject) => {
     const child = spawn(bin, ["mcp"], { stdio: ["pipe", "pipe", "ignore"] });
@@ -196,8 +197,8 @@ export function buildArgs(tool: Tool, values: Values): string[] {
 }
 
 /** Runs `toolbox <tool> …args --json` and returns its parsed result. Stops Toolbox if `signal` aborts. */
-export function run(tool: string, args: string[], signal?: AbortSignal): Promise<RunResult> {
-  const bin = binary();
+export async function run(tool: string, args: string[], signal?: AbortSignal): Promise<RunResult> {
+  const bin = binary(); // async, so a missing or outdated Toolbox rejects instead of throwing
   return new Promise((resolve, reject) => {
     const child = spawn(bin, ["cli", cliName(tool), ...args, "--json"], { stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";

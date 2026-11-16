@@ -4,7 +4,7 @@ Run [Toolbox](https://mactoolbox.app) tools from Raycast: compress videos, remov
 
 ## Requirements
 
-- [Toolbox for Mac](https://mactoolbox.app) 2.0 or later, in /Applications (or set its location in the extension's preferences).
+- [Toolbox for Mac](https://mactoolbox.app) 2.0 or later. It's a **paid app** (one-time purchase). If it isn't in /Applications, pick it in the extension's preferences.
 - Video and audio tools need FFmpeg, and Download Video needs yt-dlp. Toolbox can install both.
 
 ## Commands

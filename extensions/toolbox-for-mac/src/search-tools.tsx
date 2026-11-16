@@ -58,7 +58,11 @@ export default function SearchTools() {
               keywords={[tool.name.replace(/_/g, " "), ...tool.description.toLowerCase().split(/\W+/).slice(0, 25)]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Choose Files and Options" icon={Icon.Play} target={<ToolForm tool={tool} />} />
+                  <Action.Push
+                    title="Choose Files and Options"
+                    icon={Icon.Play}
+                    target={<ToolForm tool={tool} title={tool.title} />}
+                  />
                   <Action.CopyToClipboard
                     title="Copy Command-Line Name"
                     content={`toolbox ${tool.name.replace(/_/g, "-")}`}

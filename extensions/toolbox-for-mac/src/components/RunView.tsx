@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@
 import { basename } from "node:path";
 import { useEffect, useState } from "react";
 import {
+  appPath,
   buildArgs,
   formatBytes,
   run,
@@ -64,7 +65,7 @@ export function RunView({ tool, values }: { tool: Tool; values: Values }) {
             {error.kind === "missing" || error.kind === "license" ? (
               <Action.OpenInBrowser title="Get Toolbox" url={STORE_URL} />
             ) : (
-              <Action.Open title="Open Toolbox" target="/Applications/Toolbox.app" icon={Icon.AppWindow} />
+              <Action.Open title="Open Toolbox" target={appPath()} icon={Icon.AppWindow} />
             )}
             <Action.CopyToClipboard title="Copy Error" content={error.message} />
           </ActionPanel>

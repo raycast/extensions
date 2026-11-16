@@ -17,7 +17,8 @@ function choiceTitle(key: string, value: string) {
 }
 
 /** A form built from the tool's option schema, so it always matches the installed Toolbox. */
-export function ToolForm({ tool }: { tool: Tool }) {
+/** `title` is only set when the form is pushed (from Search Toolbox Tools); a command's root view keeps Raycast's title. */
+export function ToolForm({ tool, title }: { tool: Tool; title?: string }) {
   const { push } = useNavigation();
   const props = tool.inputSchema.properties;
   const takesFiles = "files" in props;
@@ -25,6 +26,7 @@ export function ToolForm({ tool }: { tool: Tool }) {
   const [files, setFiles] = useState<string[]>([]);
   const [urls, setUrls] = useState("");
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const clearError = (key: string) => setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
 
   useEffect(() => {
     if (takesFiles) {
@@ -69,7 +71,7 @@ export function ToolForm({ tool }: { tool: Tool }) {
 
   return (
     <Form
-      navigationTitle={tool.title}
+      navigationTitle={title}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={`Run ${tool.title}`} icon={Icon.Play} onSubmit={submit} />
@@ -85,7 +87,10 @@ export function ToolForm({ tool }: { tool: Tool }) {
           allowMultipleSelection
           canChooseDirectories
           value={files}
-          onChange={setFiles}
+          onChange={(value) => {
+            setFiles(value);
+            clearError("files");
+          }}
           error={errors.files}
         />
       )}
@@ -95,13 +100,16 @@ export function ToolForm({ tool }: { tool: Tool }) {
           title="Links"
           placeholder="One link per line"
           value={urls}
-          onChange={setUrls}
+          onChange={(value) => {
+            setUrls(value);
+            clearError("urls");
+          }}
           error={errors.urls}
           info="Only download videos you own or have permission to save."
         />
       )}
       {fields.map(([key, prop]) => (
-        <Field key={key} id={key} prop={prop} error={errors[key]} />
+        <Field key={key} id={key} prop={prop} error={errors[key]} onEdit={() => clearError(key)} />
       ))}
       {"output_folder" in props && (
         <Form.FilePicker
@@ -117,7 +125,7 @@ export function ToolForm({ tool }: { tool: Tool }) {
   );
 }
 
-function Field({ id, prop, error }: { id: string; prop: Property; error?: string }) {
+function Field({ id, prop, error, onEdit }: { id: string; prop: Property; error?: string; onEdit: () => void }) {
   const title = humanize(id);
   if (prop.enum) {
     return (
@@ -132,7 +140,7 @@ function Field({ id, prop, error }: { id: string; prop: Property; error?: string
     return <Form.Checkbox id={id} label={title} info={prop.description} defaultValue={prop.default === true} />;
   }
   if (/password/.test(id)) {
-    return <Form.PasswordField id={id} title={title} info={prop.description} error={error} />;
+    return <Form.PasswordField id={id} title={title} info={prop.description} error={error} onChange={onEdit} />;
   }
   return (
     <Form.TextField
@@ -142,6 +150,7 @@ function Field({ id, prop, error }: { id: string; prop: Property; error?: string
       placeholder={prop.description}
       defaultValue={prop.default !== undefined ? String(prop.default) : undefined}
       error={error}
+      onChange={onEdit}
     />
   );
 }

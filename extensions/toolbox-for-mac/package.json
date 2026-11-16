@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toolbox-for-mac",
   "title": "Toolbox for Mac",
-  "description": "Compress videos, remove backgrounds, merge PDFs, extract text, download videos and 30+ more file tools, right from Raycast. Everything runs on your Mac with the Toolbox app.",
+  "description": "Compress videos, remove backgrounds, merge PDFs, extract text, download videos and 30+ more file tools, right from Raycast. Requires the paid Toolbox for Mac app (2.0 or later); everything runs on your Mac.",
   "icon": "icon.png",
   "author": "nikhil_barik",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Media",
@@ -85,12 +88,12 @@
   ],
   "preferences": [
     {
-      "name": "toolboxPath",
+      "name": "toolboxApp",
       "title": "Toolbox App",
-      "description": "Where Toolbox.app is installed. Leave as is unless you moved it.",
-      "type": "textfield",
+      "description": "Pick Toolbox if it isn't in /Applications.",
+      "type": "appPicker",
       "required": false,
-      "default": "/Applications/Toolbox.app"
+      "default": "com.nklm.Toolbox"
     },
     {
       "name": "afterRun",
@@ -100,8 +103,14 @@
       "required": false,
       "default": "toast",
       "data": [
-        { "title": "Show a notification", "value": "toast" },
-        { "title": "Reveal the results in Finder", "value": "reveal" }
+        {
+          "title": "Show a notification",
+          "value": "toast"
+        },
+        {
+          "title": "Reveal the results in Finder",
+          "value": "reveal"
+        }
       ]
     }
   ],
