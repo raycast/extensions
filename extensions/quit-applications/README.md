@@ -6,6 +6,11 @@ Quit or restart apps from the keyboard. Search for an app, press Enter, and it q
 
 - **Quit Applications**: Lists your running apps. Quit or restart the selected one. The window stays open, so you can quit several apps in a row.
 
+## Preferences
+
+- **Show Quit All Applications Option**: adds an action to quit every app at once.
+- **Exclude Applications**: apps that Quit All leaves running, for example `Finder,Music`.
+
 <p align="center">If you enjoy using Quit Applications and/or want to support me to develop, you can buy me a coffee ☕!</p>
 <p align="center">
   <a title="Buy Me A Coffee" href="https://www.buymeacoffee.com/mackopes">

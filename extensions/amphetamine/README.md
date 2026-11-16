@@ -13,3 +13,7 @@ Keep your Mac awake from the keyboard with [Amphetamine](https://apps.apple.com/
 ## Setup
 
 Install Amphetamine from the Mac App Store first. This extension controls it.
+
+## Preferences
+
+- **Allow the display to sleep during the session** (Quick Start Session): keeps your Mac awake but lets the screen turn off.

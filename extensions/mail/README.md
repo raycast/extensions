@@ -26,3 +26,8 @@ Check, read and write email in Apple Mail without switching to it. Paste one-tim
 ## Use it with Raycast AI
 
 Mention `@mail` in Raycast AI to search, read, reply to, forward, move and send email in plain language. For example, "summarize the unread emails from today" or "reply to Anna and say Thursday works". It can also list and save attachments.
+
+## Preferences
+
+- **Save Attachments To**: where attachments are saved, `~/Downloads` by default.
+- **Only show unread messages** (See Recent Mail).

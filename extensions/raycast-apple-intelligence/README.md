@@ -20,3 +20,7 @@ Use Apple Intelligence Writing Tools on selected text from Raycast, with a hotke
 ## Setup
 
 Apple Intelligence needs to be turned on in System Settings, on a Mac that supports it.
+
+## Preferences
+
+- **Edit Menu Localization** and **Writing Tools Localization**: if your Mac isn't in English, enter the names of the Edit menu and the Writing Tools item in your language, so the commands can find them.

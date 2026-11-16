@@ -11,4 +11,7 @@ Start a new Google Meet from anywhere. The link is copied to your clipboard, so 
 
 ## Setup
 
-In the preferences, **Open Meetings In** sets whether meetings open in your browser or in the Google Meet web app. If you've added Google Meet to your Dock as a Safari web app, it creates the meeting there directly.
+## Preferences
+
+- **Open Meetings In**: your browser or the Google Meet web app. If you've added Google Meet to your Dock as a Safari web app, meetings are created there directly.
+- **Set preferred browser**: create meetings in a specific browser instead of your default one, for example the one signed in to your work account.

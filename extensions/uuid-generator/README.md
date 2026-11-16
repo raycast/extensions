@@ -13,3 +13,8 @@ Generate UUIDs, ULIDs and TypeIDs and copy them to your clipboard, without openi
 - **Pack TypeID**: Turns a UUID into a TypeID with a prefix.
 - **Format UUID**: Adds dashes to a UUID that has none.
 - **View History**: Every ID you've generated.
+
+## Preferences
+
+- **Uppercase Letters**: generate UUIDs in uppercase.
+- **Namespace** (Generate V5 UUIDs): the namespace UUID for v5 IDs.

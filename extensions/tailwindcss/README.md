@@ -12,3 +12,7 @@ Look up Tailwind CSS classes, colors, components and docs without switching to a
 - **Search Colors**: Search the default color palette and copy a color.
 - **Search Components**: Search Tailwind UI components.
 - **Search Documentation**: Search the docs for Tailwind v0 to v4 and open a page in your browser.
+
+## Preferences
+
+- **Measuring Unit** (Search Classes): show spacing values in REM (default) or pixels.

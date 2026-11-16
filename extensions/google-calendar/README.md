@@ -22,3 +22,9 @@ Mention `@google-calendar` in Raycast AI to manage your schedule in plain langua
 ## Setup
 
 The first time you run a command, sign in with your Google account.
+
+## Preferences
+
+- **Default Event Duration**: 30 minutes by default.
+- **Send Invitations**: email invites to all guests (default), external guests only, or nobody.
+- **Join meeting** (List Events): open an event's meeting link directly instead of the event.

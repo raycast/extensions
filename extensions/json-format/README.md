@@ -12,3 +12,8 @@ Format JSON indents JSON with the indentation you choose. It also handles JSON t
 - **Format JSON**: Paste JSON in and get it formatted.
 - **Format Array of JSON to JSONLines**: Turns an array of objects into JSON Lines, one object per line.
 - **Format Text into Valid JSON Value**: Wraps text in double quotes and escapes it, so it's a valid JSON string.
+
+## Preferences
+
+- **Indentation**: a tab (default), or 2, 4 or 8 spaces.
+- **Automatically paste the formatted JSON**: paste the result into the active app instead of only copying it.

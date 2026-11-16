@@ -25,3 +25,8 @@ Search your Safari tabs, bookmarks, history and Reading List from anywhere, and 
 ## Use it with Raycast AI
 
 Mention `@safari` in Raycast AI to ask about your tabs, bookmarks, history or Reading List. For example, "summarize the article in my current tab" or "find the recipe I bookmarked last week". It can also open, select and close tabs.
+
+## Preferences
+
+- **Local Safari Browser**: use Safari or Safari Technology Preview.
+- **iCloud** (Search Tabs): include tabs from your other devices. On by default.

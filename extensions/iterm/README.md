@@ -17,3 +17,8 @@ Control [iTerm2](https://iterm2.com) from anywhere. Open windows, tabs and split
 ## Use it with Raycast AI
 
 Mention `@iterm` in Raycast AI to read what's in your terminal, or to type into it. For example, "what does this error in iTerm mean?"
+
+## Preferences
+
+- **Open Behavior** (Open iTerm Here, Edit in iTerm): new window (default) or new tab.
+- **Projects Directory** (Search Projects in iTerm): where your projects live, `~/Projects` by default.

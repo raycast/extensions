@@ -12,3 +12,7 @@ Pick paragraphs, sentences or words, or get a full Markdown or HTML document for
 - **Generate Markdown**: A placeholder Markdown document with headings, lists and more.
 - **Generate HTML**: A placeholder HTML document.
 - **Generate with AI**: Placeholder text written by AI, for when "lorem ipsum" doesn't look real enough.
+
+## Preferences
+
+- **Default Action**: copy the text (default), paste it into the active app, or both.

@@ -17,3 +17,8 @@ Mention `@kill-process` in Raycast AI and ask in plain language, for example "wh
 - Kill all processes with a given name
 
 Force killing from Raycast AI on macOS needs sudo. The easiest way is to enable Touch ID for sudo.
+
+## Preferences
+
+- **Prioritize Apps**: list apps before background processes.
+- **Never Ask for Confirmation**: skip the confirmation before killing a process.
