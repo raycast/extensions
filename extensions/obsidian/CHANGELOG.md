@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Obsidian AI Skills] - {PR_MERGE_DATE}
+## [Obsidian AI Skills] - 2026-11-16
 
 - Use Obsidian Markdown, Obsidian Bases, and JSON Canvas skills in Raycast AI to write notes and draft Bases and Canvas files.
 
