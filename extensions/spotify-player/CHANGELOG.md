@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Fix Now Playing Play/Pause] - {PR_MERGE_DATE}
+
+- Play/Pause in Now Playing switches as soon as it's pressed, so pressing it again works instead of doing nothing. Quick presses reach Spotify in the order you made them. If playback was already in that state, for example after a change on another device, the button just updates.
+- Play, Pause, Next, Previous and Start Radio now clear the cached playback state, so Now Playing no longer shows the previous state or song for up to 10 seconds afterwards.
+- Refresh in Now Playing fetches the current playback instead of reusing the cached state.
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Reduce Library and Playlist Memory Usage] - 2026-09-26

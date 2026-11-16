@@ -23,7 +23,8 @@ const tool = async ({ trackId }: Input) => {
     }
 
     return {
-      queue: response || [],
+      // Typed as `unknown` on purpose: Ray CLI 2.11.0 crashes extracting this tool's schema from the inferred `{}`.
+      queue: (response || []) as unknown,
       status: "success",
       message: trackId ? "Track added to queue successfully" : "Current queue retrieved",
     };
