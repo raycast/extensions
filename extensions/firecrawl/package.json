@@ -60,10 +60,18 @@
       "type": "password",
       "required": false,
       "description": "Your custom Firecrawl API key."
+    },
+    {
+      "name": "maxCredits",
+      "title": "Max Credits - Deep Research",
+      "type": "textfield",
+      "description": "The maximum number of credits a deep research run can spend.",
+      "default": "100",
+      "required": false
     }
   ],
   "dependencies": {
-    "@mendable/firecrawl-js": "^4.9.0",
+    "@mendable/firecrawl-js": "^4.54.0",
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0"
   },

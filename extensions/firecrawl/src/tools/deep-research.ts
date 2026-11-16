@@ -1,9 +1,15 @@
+import { getPreferenceValues } from "@raycast/api";
 import firecrawl from "../firecrawl";
 
 export type Input = {
   /** The search query string to research */
   query: string;
 };
+
+function parseMaxCredits(value: unknown): number {
+  const parsed = parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 100;
+}
 
 export default async function (input: Input) {
   const { query } = input;
@@ -21,6 +27,7 @@ export default async function (input: Input) {
       },
       required: ["report"],
     },
+    maxCredits: parseMaxCredits(getPreferenceValues().maxCredits),
     integration: "raycast",
   });
 

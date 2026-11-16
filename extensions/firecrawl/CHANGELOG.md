@@ -5,7 +5,10 @@
 ### Changed
 - `deep-research` tool now runs on Firecrawl's Agent API (`/v2/agent`), because the Deep Research API (`/v1/deep-research`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-deep-research))
 - `Generate LLMs.txt` now builds llms.txt and llms-full.txt from Firecrawl's map and batch scrape APIs (`/v2/map`, `/v2/batch/scrape`), because the LLMs.txt API (`/v1/llmstxt`) shuts down the same day ([migration guide](https://docs.firecrawl.dev/migrating-from-llmstxt))
-- Updated `@mendable/firecrawl-js` from `^4.3.4` to `^4.9.0`
+- Updated `@mendable/firecrawl-js` from `^4.3.4` to `^4.54.0`
+
+### Added
+- `Max Credits - Deep Research` preference (default 100), which caps credits spent by an Agent run so a Raycast AI call cannot hit the 2,500 default
 
 ### Removed
 - `Max Depth` and `Time Limit` preferences, which the Agent API has no equivalent for
