@@ -1,6 +1,10 @@
 # Say - Text to Speech Changelog
 
-## [Fix Stop Command] - 2026-10-08
+### [Improvement] - {PR_MERGE_DATE}
+
+- Update native-say to support dialect voices
+
+## [Bugfix] - 2026-10-08
 
 - Update native-say to fix Stop not stopping speech on Windows
 
