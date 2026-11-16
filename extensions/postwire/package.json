@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postwire",
   "title": "PostWire",
-  "description": "Write one post and publish it to all your social accounts at once.",
+  "description": "Write one post and publish it to all your social accounts at once. Requires a PostWire account (free plan available) and its API key.",
   "icon": "icon.png",
   "author": "perufitlife",
   "categories": [

@@ -1,6 +1,6 @@
 # PostWire
 
-Write one post and publish it to all your social accounts at once, without leaving Raycast.
+Write one post and publish it to all your social accounts at once, without leaving Raycast. It needs a PostWire account and its API key; a free account works.
 
 ## Commands
 
