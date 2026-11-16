@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "purpleair",
   "title": "PurpleAir",
-  "description": "Reads Air Quality Data from a PurpleAir Sensor",
+  "description": "Check air quality readings like AQI and PM2.5 from your PurpleAir sensor.",
   "icon": "command-icon.png",
   "author": "omarshahine",
   "categories": [

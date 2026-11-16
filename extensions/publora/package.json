@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "publora",
   "title": "Publora",
-  "description": "Manage your social media with Publora",
+  "description": "Create and schedule social media posts to X (Twitter), Bluesky, Mastodon, LinkedIn and other networks with Publora.",
   "categories": ["Communication", "Web", "Fun"],
   "icon": "publora_512x512.png",
   "author": "anton_shvein",
