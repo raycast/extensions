@@ -158,6 +158,7 @@
 /extensions/area-code-search                                        @mjking
 /extensions/argo                                                    @MatrixA
 /extensions/argocd                                                  @PixiBixi
+/extensions/aria2-download                                          @darkings
 /extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
 /extensions/artificial-analysis-rankings                            @NarenTheNumpkin
@@ -382,6 +383,7 @@
 /extensions/cc0-lib                                                 @0xN1
 /extensions/ccf-what                                                @CrackedPoly
 /extensions/ccfddl                                                  @ViGeng
+/extensions/ccswap                                                  @errhythm
 /extensions/ccusage                                                 @nyatinte @zhuravel @nyatinte @GarrickZ2 @pernielsentikaer @raulgg @ridemountainpig @bendrucker @dzg @Astatine-213-Tian
 /extensions/cdnjs                                                   @xmok
 /extensions/center                                                  @enesozturk
@@ -1473,6 +1475,7 @@
 /extensions/just-focus                                              @koinzhang @jiengup
 /extensions/justcolorpicker-raycast                                 @ZooHero500
 /extensions/justwatch-search                                        @RishabSwift @j3lte @xmok
+/extensions/jw-library-linker                                       @msakowski
 /extensions/jwt-decoder                                             @gdsmith @zhhanging @JoaoGFdev @YourMCGeek @pernielsentikaer @ridemountainpig @0xdhrv @Im-Tae
 /extensions/kaalam                                                  @heertheeswaran @ridemountainpig
 /extensions/kafka                                                   @fonimus
@@ -2042,7 +2045,7 @@
 /extensions/obscurify-ai                                            @tonydavis629
 /extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort @MuuNU @marcjulianschwarz @theherk @yokuraki8 @vicampuzano @ErBlack @byheaven @tofrankie @alexibuild @RLuf @SWHL @raulkolaric @Just-Me-22 @kirill-markin
 /extensions/obsidian-bookmarks                                      @Dru89 @moeyua @iwex @qfettes @Victor-Cz
-/extensions/obsidian-link-opener                                    @osteele
+/extensions/obsidian-link-opener                                    @osteele @karma-git
 /extensions/obsidian-smart-capture                                  @trillhause @Jimmy-b36
 /extensions/obsidian-tasks                                          @ozencb @ElFitaFlores @xmok @gg-amzn @itstongy
 /extensions/oci                                                     @xmok
@@ -2762,7 +2765,7 @@
 /extensions/shiftplus                                               @nghialuong
 /extensions/shiori                                                  @namiwang
 /extensions/shiori-sh                                               @0xdhrv @AlexIsMaking @brianlovin
-/extensions/ship24-client                                           @tsyganov-ivan
+/extensions/ship24-client                                           @tsyganov-ivan @xmok
 /extensions/shlink                                                  @Xeretis
 /extensions/shodan                                                  @Owanesh
 /extensions/shopify-dev-docs-search                                 @d-beck

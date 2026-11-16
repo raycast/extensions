@@ -19,7 +19,7 @@
     {
       "name": "upcoming-flights",
       "title": "Upcoming Flights",
-      "description": "See your upcoming flights and travel details",
+      "description": "See your upcoming and past flights and travel details",
       "mode": "view"
     },
     {

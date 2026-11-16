@@ -20,6 +20,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://remote.bhived.ai/mcp",
   },
   {
+    name: "within",
+    title: "within",
+    description:
+      "Find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://shopwithin.co/icons/icon-512.png",
+    homepage: "https://shopwithin.co/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://shopwithin.co/mcp"],
+    },
+    remoteUrl: "https://shopwithin.co/mcp",
+  },
+  {
     name: "tesseract",
     title: "Tesseract",
     description:
@@ -3712,6 +3725,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
+    },
+  },
+  {
+    name: "10ml-fragrance-index",
+    title: "10ML Fragrance Index",
+    description:
+      "Perfume knowledge from 10ML's fragrance editors: notes, accords, families, similar scents and alternatives, houses and expert guides, with links to 10ML's in-depth fragrance guides. Read-only. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://10ml.com/brand/icons/icon-512.png",
+    homepage: "https://github.com/10ml-com/perfume-finder-mcp",
+    remoteUrl: "https://mcp.10ml.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.10ml.com/mcp"],
     },
   },
   {
