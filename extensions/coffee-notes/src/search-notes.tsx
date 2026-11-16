@@ -1,22 +1,56 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, Keyboard, List, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { listNotes, Note, notesFolder, openInCoffee, readNote } from "./coffee";
+import { listNotes, Note, notesFolder, openInCoffee, previewNote, readNote } from "./coffee";
+
+/** The notes, or why they couldn't be listed. */
+function loadNotes(): { root?: string; notes: Note[]; problem?: string; fixInPreferences?: boolean } {
+  const folder = notesFolder();
+  if ("problem" in folder) return { notes: [], problem: folder.problem, fixInPreferences: folder.fixInPreferences };
+  try {
+    return { root: folder.path, notes: listNotes(folder.path) };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    return {
+      root: folder.path,
+      notes: [],
+      problem: `Raycast can't read ${folder.path}: ${reason}`,
+      fixInPreferences: true,
+    };
+  }
+}
 
 export default function SearchNotes() {
-  const root = useMemo(() => notesFolder(), []);
-  const notes = useMemo(() => (root ? listNotes(root) : []), [root]);
+  const [attempt, setAttempt] = useState(0);
+  const loaded = useMemo(() => loadNotes(), [attempt]);
   const [showingDetail, setShowingDetail] = useState(true);
   // Only the note being looked at is read from disk.
   const [selected, setSelected] = useState<string | null>(null);
-  const preview = useMemo(() => (selected && showingDetail ? readNote(selected) : ""), [selected, showingDetail]);
+  const preview = useMemo(() => (selected && showingDetail ? previewNote(selected) : ""), [selected, showingDetail]);
 
-  if (!root) {
+  if (loaded.problem) {
     return (
       <List>
         <List.EmptyView
-          icon={Icon.Folder}
-          title="No notes folder found"
-          description="Open Coffee once to choose a folder, or choose it in this extension's preferences."
+          icon={Icon.Warning}
+          title="Can't Read Your Notes"
+          description={loaded.problem}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => setAttempt((n) => n + 1)} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       </List>
     );
@@ -28,8 +62,8 @@ export default function SearchNotes() {
       searchBarPlaceholder="Search notes by title or folder"
       onSelectionChange={(id) => setSelected(id)}
     >
-      <List.EmptyView icon={Icon.Document} title="No notes yet" description={`Nothing in ${root}`} />
-      {notes.map((note) => (
+      <List.EmptyView icon={Icon.Document} title="No Notes Yet" description={`Nothing in ${loaded.root}`} />
+      {loaded.notes.map((note) => (
         <NoteItem
           key={note.path}
           note={note}
@@ -40,6 +74,19 @@ export default function SearchNotes() {
       ))}
     </List>
   );
+}
+
+/** The whole note on the clipboard, or an error and the clipboard left as it was. */
+async function copyNote(note: Note) {
+  let text: string;
+  try {
+    text = readNote(note.path);
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Read the Note" });
+    return;
+  }
+  await Clipboard.copy(text);
+  await showHUD("Copied");
 }
 
 function NoteItem({
@@ -81,10 +128,7 @@ function NoteItem({
             title="Copy Text"
             icon={Icon.Clipboard}
             shortcut={Keyboard.Shortcut.Common.Copy}
-            onAction={async () => {
-              await Clipboard.copy(readNote(note.path));
-              await showHUD("Copied");
-            }}
+            onAction={() => copyNote(note)}
           />
           <Action.ShowInFinder path={note.path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
         </ActionPanel>
@@ -94,6 +138,6 @@ function NoteItem({
 }
 
 function NoteDetail({ note }: { note: Note }) {
-  const text = useMemo(() => readNote(note.path), [note.path]);
+  const text = useMemo(() => previewNote(note.path), [note.path]);
   return <Detail markdown={text} navigationTitle={note.title} />;
 }

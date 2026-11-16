@@ -1,4 +1,5 @@
-import { getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -12,37 +13,59 @@ export interface Note {
   modified: Date;
 }
 
+/** Where the notes are, or why there's no folder to read. */
+export type NotesFolder = { path: string } | { problem: string; fixInPreferences: boolean };
+
 const SKIPPED = new Set([".git", ".obsidian", ".trash", ".coffee", "node_modules", "attachments"]);
 const LIMIT = 5000;
+/** How much of a note the preview shows. Copying always takes the whole note. */
+export const PREVIEW_LIMIT = 20000;
 
-/** The folder of notes: the one chosen in the extension, or else the one Coffee is set to. */
-export function notesFolder(): string | undefined {
-  const chosen = getPreferenceValues<{ notesFolder?: string }>().notesFolder;
-  if (chosen && existsSync(chosen)) return chosen;
+/**
+ * The folder of notes: the one chosen in the extension's preferences, or else the one Coffee is set to.
+ * A chosen folder that isn't there is reported, never swapped for another library.
+ */
+export function notesFolder(): NotesFolder {
+  const chosen = getPreferenceValues<Preferences>().notesFolder;
+  if (chosen) {
+    return existsSync(chosen)
+      ? { path: chosen }
+      : { problem: `The folder chosen in preferences isn't there: ${chosen}`, fixInPreferences: true };
+  }
   try {
     const path = execFileSync("/usr/bin/defaults", ["read", "app.coffee.mac", "libraryPath"], {
       encoding: "utf8",
     }).trim();
-    if (path && existsSync(path)) return path;
+    if (path) {
+      return existsSync(path)
+        ? { path }
+        : {
+            problem: `Coffee's notes folder isn't there: ${path}. Open Coffee to choose it again.`,
+            fixInPreferences: false,
+          };
+    }
   } catch {
-    // Coffee hasn't been set up yet, or isn't installed.
+    // Coffee hasn't been set up yet, or isn't installed: its first folder is the usual one.
   }
-  const fallback = join(homedir(), "Documents", "Coffee");
-  return existsSync(fallback) ? fallback : undefined;
+  const usual = join(homedir(), "Documents", "Coffee");
+  if (existsSync(usual)) return { path: usual };
+  return {
+    problem:
+      "No notes folder found. Open Coffee once to choose a folder, or choose one in this extension's preferences.",
+    fixInPreferences: true,
+  };
 }
 
-/** Every .md, .markdown and .txt note under the folder, the most recently changed first. */
+/**
+ * Every .md, .markdown and .txt note under the folder, the most recently changed first.
+ * Throws when the folder itself can't be read, so that shows as an error and not as an empty library.
+ * A subfolder that can't be read is left out.
+ */
 export function listNotes(root: string): Note[] {
   const notes: Note[] = [];
-  const walk = (dir: string) => {
-    if (notes.length >= LIMIT) return;
-    let entries: string[];
-    try {
-      entries = readdirSync(dir);
-    } catch {
-      return;
-    }
+  const walk = (dir: string, entries: string[]) => {
     for (const name of entries) {
+      if (notes.length >= LIMIT) return;
       if (name.startsWith(".") || SKIPPED.has(name)) continue;
       const path = join(dir, name);
       let info;
@@ -51,24 +74,40 @@ export function listNotes(root: string): Note[] {
       } catch {
         continue;
       }
-      if (info.isDirectory()) walk(path);
-      else if (/\.(md|markdown|txt)$/i.test(name)) {
-        const folder = relative(root, dir);
-        notes.push({ title: name.replace(/\.(md|markdown|txt)$/i, ""), path, folder, modified: info.mtime });
+      if (info.isDirectory()) {
+        let inside: string[];
+        try {
+          inside = readdirSync(path);
+        } catch {
+          continue;
+        }
+        walk(path, inside);
+      } else if (/\.(md|markdown|txt)$/i.test(name)) {
+        notes.push({
+          title: name.replace(/\.(md|markdown|txt)$/i, ""),
+          path,
+          folder: relative(root, dir),
+          modified: info.mtime,
+        });
       }
     }
   };
-  walk(root);
+  walk(root, readdirSync(root));
   return notes.sort((a, b) => b.modified.getTime() - a.modified.getTime());
 }
 
-/** The note's text, for reading in Raycast, without its front matter. */
+/** The note's whole text, as it is in the file. Throws if the file can't be read. */
 export function readNote(path: string): string {
+  return readFileSync(path, "utf8");
+}
+
+/** The note for reading in Raycast: without its front matter, cut to the preview length, or why it can't be read. */
+export function previewNote(path: string): string {
   try {
-    const text = readFileSync(path, "utf8");
-    return text.replace(/^---\n[\s\S]*?\n---\n/, "").slice(0, 20000);
-  } catch {
-    return "";
+    const text = readNote(path).replace(/^---\n[\s\S]*?\n---\n/, "");
+    return text.length > PREVIEW_LIMIT ? `${text.slice(0, PREVIEW_LIMIT)}\n\n…` : text;
+  } catch (error) {
+    return `**This note can't be read.**\n\n${error instanceof Error ? error.message : String(error)}`;
   }
 }
 
@@ -78,12 +117,8 @@ export async function runCoffee(action: string, values: Record<string, string> =
   try {
     await open(`coffee://${action}${query ? `?${query}` : ""}`);
     return true;
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Coffee isn't installed",
-      message: "Get it at coffeetext.app",
-    });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Coffee" });
     return false;
   }
 }
@@ -91,7 +126,7 @@ export async function runCoffee(action: string, values: Record<string, string> =
 export async function openInCoffee(path: string) {
   try {
     await open(path, "app.coffee.mac");
-  } catch {
-    await showHUD("Coffee couldn't open that note");
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open the Note in Coffee" });
   }
 }

@@ -37,7 +37,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "What to remember",
+          "placeholder": "What to Remember",
           "type": "text",
           "required": true
         }
