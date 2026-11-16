@@ -8,7 +8,7 @@
 - Updated `@mendable/firecrawl-js` from `^4.3.4` to `^4.54.0`
 
 ### Added
-- `Max Credits - Deep Research` preference (default 100), which caps credits spent by an Agent run so a Raycast AI call cannot hit the 2,500 default
+- `Max Credits` preference (default 100), which caps Firecrawl agent credits per Deep Research run
 
 ### Removed
 - `Max Depth` and `Time Limit` preferences, which the Agent API has no equivalent for

@@ -43,15 +43,23 @@ export async function generateLlmsTxt(url: string, options: { maxUrls: number; s
 }
 
 async function scrapePages(urls: string[], showFullText: boolean): Promise<Document[]> {
-  const job = await firecrawl.batchScrape(urls, {
+  const { id } = await firecrawl.startBatchScrape(urls, {
     options: { formats: showFullText ? ["markdown", pageSummaryFormat] : [pageSummaryFormat] },
     integration: "raycast",
   });
+
+  // Poll without following `next`: a running job's cursor can point back at itself. Follow pagination only
+  // once the job has completed so we don't fetch unfinished result pages.
+  let job = await firecrawl.getBatchScrapeStatus(id, { autoPaginate: false });
+  while (job.status === "scraping") {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    job = await firecrawl.getBatchScrapeStatus(id, { autoPaginate: false });
+  }
   if (job.status !== "completed") {
     throw new Error(`Batch scrape ${job.status}`);
   }
 
-  return job.data;
+  return (await firecrawl.getBatchScrapeStatus(id)).data;
 }
 
 // Page metadata can hold a string or a list of strings.

@@ -63,10 +63,11 @@
     },
     {
       "name": "maxCredits",
-      "title": "Max Credits - Deep Research",
+      "title": "Max Credits",
       "type": "textfield",
-      "description": "The maximum number of credits a deep research run can spend.",
+      "description": "Maximum Firecrawl agent credits per Deep Research run. The run stops with an error if it reaches this cap.",
       "default": "100",
+      "placeholder": "100",
       "required": false
     }
   ],

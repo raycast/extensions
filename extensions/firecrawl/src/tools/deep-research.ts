@@ -27,7 +27,7 @@ export default async function (input: Input) {
       },
       required: ["report"],
     },
-    maxCredits: parseMaxCredits(getPreferenceValues().maxCredits),
+    maxCredits: parseMaxCredits(getPreferenceValues<Preferences>().maxCredits),
     integration: "raycast",
   });
 
