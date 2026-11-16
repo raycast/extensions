@@ -1,15 +1,20 @@
 # SaaSFlow Changelog
 
-## [Raycast 2 and Seven New AI Tools] - {PR_MERGE_DATE}
+## [What-If Valuations and Suggested Prompts] - {PR_MERGE_DATE}
+
+- The valuation tool takes what-if values for growth, net revenue retention, gross margin and burn multiple, and shows the estimate next to the measured one.
+- Date and month inputs tell the AI the format they expect (`YYYY-MM-DD`, `YYYY-MM`).
+- Suggested prompts for the new AI tools.
+- When your sign-in has expired and can't be renewed, the menu bar shows its Sign in item instead of opening the browser on its own.
+- The menu bar's Sign in item shows an error if Switch Company can't be opened.
+
+## [Raycast 2 and Seven New AI Tools] - 2026-11-16
 
 - Runs on Raycast 2 (`@raycast/api` 2.12).
 - Seven more AI tools for Ask SaaSFlow: metric definitions, metric explanations, cash flow and balance forecasts, the customers behind a cohort, SaaS benchmarks, and a valuation estimate.
 - The menu bar updates as soon as you switch company, sign in or sign out, and loads faster.
 - Before you sign in, the menu bar shows a Sign in item instead of an empty menu.
 - The List Transactions tool now tells the AI the one value its `status` filter accepts (`uncategorized`).
-- The valuation tool takes what-if values for growth, net revenue retention, gross margin and burn multiple, and shows the estimate next to the measured one.
-- Date and month inputs tell the AI the format they expect (`YYYY-MM-DD`, `YYYY-MM`).
-- Suggested prompts for the new tools.
 
 ## [Initial Version] - 2026-06-19
 
