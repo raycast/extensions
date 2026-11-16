@@ -1,6 +1,6 @@
 # Say - Text to Speech
 
-This extension uses the system built-in text-to-speech engine on macOS and Windows to say the text you provide. No network connection is needed.
+This extension uses the system built-in text-to-speech engine on macOS (including Siri voices) and Windows to say the text you provide. No network connection is needed.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
@@ -20,7 +20,7 @@ You can go to macOS System Settings or Windows Settings to download new voices a
 On macOS, see https://support.apple.com/en-us/guide/mac-help/spch638/mac.
 On Windows, open `Windows Settings -> Time & language -> Speech`.
 
-## Recommended Voices on macOS
+## Siri Voices on macOS
 
 Installed Siri voices and other system voices can be selected directly in **Configure Say → Speaking Voice**. Download additional voices in `System Settings → Accessibility → Read & Speak` (called Spoken Content or Live Speech on some macOS versions), then reopen Configure Say.
 
