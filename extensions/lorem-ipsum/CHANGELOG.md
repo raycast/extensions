@@ -1,5 +1,9 @@
 # Lorem Ipsum Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [New Commands] - 2026-11-15
 
 - New `Generate Markdown` command that generates placeholder content as a Markdown document (headings, paragraphs, lists, blockquotes).

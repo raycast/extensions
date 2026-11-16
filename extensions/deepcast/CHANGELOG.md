@@ -1,5 +1,9 @@
 # Deepcast Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Add Thai] - 2026-09-21
 
 - Add Thai (`TH`) as a source and target language, including a `Translate into Thai` command
