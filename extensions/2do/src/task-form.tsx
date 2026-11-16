@@ -30,7 +30,8 @@ const ORDINALS = [
 
 // Creates a task, or edits `task` when given. `link` prefills a new task from a web page, with
 // the page as the task's link. `parent` is the project or checklist an edited item is in.
-// `addTo` adds a new item to that project or checklist; checklist items have no dates.
+// `addTo` adds a new item to that project or checklist. A checklist's child tasks have no dates; the
+// checklist itself, and a project and its children, do.
 export function TaskForm({
   task,
   link,
@@ -76,7 +77,7 @@ export function TaskForm({
         // Compare with the task as it is now, not as the list loaded it: an action or list changed in
         // 2Do since still counts as changed when the form sets it back.
         const current = task && (await twoDo<{ task: Task }>("get_task", { task_id: task.task_id })).task;
-        // Checklist items have no dates, so a task put in a checklist loses its dates and repeat.
+        // A checklist's child tasks have no dates, so a task put in a checklist loses its dates and repeat.
         const undated = !dated && { start: null, due: null, is_repeating: false };
         await saveTask({ ...v, ...(addTo && { parent_id: addTo.task_id }), ...undated }, current, parent?.task_id);
         if (task || addTo) {
@@ -98,15 +99,15 @@ export function TaskForm({
     execute: canNest && !addTo && !!values.list_id,
   });
 
-  // The project or checklist the task is going into, if any. Checklist items have no dates, so they
-  // can't repeat either.
+  // A checklist's child tasks have no dates, so they can't repeat either: no date fields when editing
+  // one, or for a task going into a checklist. The checklist itself keeps its date fields.
   // A new project or checklist ignores the parent field, since it always goes in the list.
   const target =
     addTo ??
     ((values.task_type ?? "normal") === "normal"
       ? [parent, ...(parents.data ?? [])].find((p) => p && p.task_id === values.parent_id)
       : undefined);
-  const dated = target?.task_type !== "checklist";
+  const dated = parent?.task_type !== "checklist" && target?.task_type !== "checklist";
   const repeats = dated && !!values.is_repeating && values.repeat !== undefined;
 
   return (
@@ -143,7 +144,8 @@ export function TaskForm({
           {...itemProps.action_value}
         />
       )}
-      <Form.Separator />
+      {/* Add Item hides List and Project or Checklist, so their divider would double up. */}
+      {!addTo && <Form.Separator />}
       {!addTo && (
         <Form.Dropdown
           title="List"
@@ -151,9 +153,7 @@ export function TaskForm({
           {...itemProps.list_id}
           onChange={(listId) => {
             itemProps.list_id.onChange?.(listId);
-            // Only a real change of list leaves the parent behind, not the dropdown reporting an
-            // empty or unchanged value while it loads.
-            if (listId && values.list_id && listId !== values.list_id) setValue("parent_id", "");
+            if (listId !== values.list_id) setValue("parent_id", "");
           }}
         >
           {lists.data?.map((l) => (
@@ -161,22 +161,19 @@ export function TaskForm({
           ))}
         </Form.Dropdown>
       )}
-      {/* Shown once its options include the current parent, so Raycast doesn't swap in None. */}
-      {(parents.data?.length ?? 0) > 0 &&
-        (!values.parent_id || parents.data?.some((p) => p.task_id === values.parent_id)) &&
-        (values.task_type ?? "normal") === "normal" && (
-          <Form.Dropdown title="Project or Checklist" {...itemProps.parent_id}>
-            <Form.Dropdown.Item value="" title="None" icon={Icon.Minus} />
-            {parents.data?.map((p) => (
-              <Form.Dropdown.Item
-                key={p.task_id}
-                value={p.task_id}
-                title={p.title}
-                icon={p.task_type === "project" ? Icon.Folder : Icon.CheckList}
-              />
-            ))}
-          </Form.Dropdown>
-        )}
+      {(parents.data?.length ?? 0) > 0 && (values.task_type ?? "normal") === "normal" && (
+        <Form.Dropdown title="Project or Checklist" {...itemProps.parent_id}>
+          <Form.Dropdown.Item value="" title="None" icon={Icon.Minus} />
+          {parents.data?.map((p) => (
+            <Form.Dropdown.Item
+              key={p.task_id}
+              value={p.task_id}
+              title={p.title}
+              icon={p.task_type === "project" ? Icon.Folder : Icon.CheckList}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
       {dated && (
         <>
           <Form.Separator />
