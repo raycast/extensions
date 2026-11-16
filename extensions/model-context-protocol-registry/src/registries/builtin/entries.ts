@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "weeklane",
+    title: "Weeklane",
+    description:
+      "Plan your week in Weeklane, the weekly to-do planner for iPhone, iPad, Mac and Android: show the week, list, search, add, edit, move, complete and delete tasks (in bulk too), work with the backlog, add, edit, skip or stop repeating tasks, check and set Task Lock (the iPhone and iPad app blocker), and undo the last change. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) with your Weeklane account; the tools require Weeklane Pro (7-day free trial). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://mcp.weeklane.app/icon.png",
+    homepage: "https://weeklane.app/ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.weeklane.app/mcp"],
+    },
+    remoteUrl: "https://mcp.weeklane.app/mcp",
+  },
+  {
     name: "getyoutubetranscript",
     title: "GetYouTubeTranscript",
     description:
