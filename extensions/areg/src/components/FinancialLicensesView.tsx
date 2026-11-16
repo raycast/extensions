@@ -21,7 +21,7 @@ export function FinancialLicensesView({ company }: { company: CompanySummary }) 
   );
   const licenses = data?.licences ?? [];
   const byName = licenses.reduce<Record<string, typeof licenses>>((groups, license) => {
-    (groups[license.licenseName] ??= []).push(license);
+    (groups[license.licenceName] ??= []).push(license);
     return groups;
   }, {});
 
@@ -38,9 +38,9 @@ export function FinancialLicensesView({ company }: { company: CompanySummary }) 
         <List.Section key={name} title={name} subtitle={String(group.length)}>
           {group.map((license, index) => (
             <List.Item
-              key={`${license.licenseCode}-${index}`}
+              key={`${license.licenceCode}-${index}`}
               icon={Icon.Shield}
-              title={license.detail ?? license.licenseName}
+              title={license.detail ?? license.licenceName}
               subtitle={license.ownerName ?? undefined}
               accessories={[
                 ...(license.providerType ? [{ tag: license.providerType }] : []),

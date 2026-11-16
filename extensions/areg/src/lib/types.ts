@@ -312,8 +312,8 @@ export type IpRightsResponse = {
 };
 
 export type TransportLicense = {
-  licenseNumber: string;
-  licenseType: string;
+  licenceNumber: string;
+  licenceType: string;
   typeLabel: string;
   copies: number | null;
   firstSeen: string;
@@ -330,8 +330,8 @@ export type TransportLicensesResponse = {
 };
 
 export type FinancialLicense = {
-  licenseCode: string;
-  licenseName: string;
+  licenceCode: string;
+  licenceName: string;
   detail: string | null;
   providerType: string | null;
   ownerOrgnr: string | null;

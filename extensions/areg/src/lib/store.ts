@@ -45,45 +45,63 @@ function slim(company: CompanySummary): CompanySummary {
   return { orgnr: company.orgnr, name: company.name, form: company.form ?? null, city: company.city ?? null };
 }
 
-export async function trackRecent(company: CompanySummary) {
-  await load();
-  await persist(
-    "recents",
-    [slim(company), ...state.recents.filter((c) => c.orgnr !== company.orgnr)].slice(0, MAX_RECENTS),
+let queue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Runs read-change-save operations one at a time. Each one reads `state` and only updates it after its save
+ * succeeds, so two overlapping changes would otherwise both start from the same list and one would be lost.
+ */
+function serialized<T>(operation: () => Promise<T>): Promise<T> {
+  const run = queue.then(async () => {
+    await load();
+    return operation();
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
+
+export function trackRecent(company: CompanySummary) {
+  return serialized(() =>
+    persist(
+      "recents",
+      [slim(company), ...state.recents.filter((c) => c.orgnr !== company.orgnr)].slice(0, MAX_RECENTS),
+    ),
   );
 }
 
-export async function removeRecent(orgnr: string) {
-  await load();
-  await persist(
-    "recents",
-    state.recents.filter((c) => c.orgnr !== orgnr),
+export function removeRecent(orgnr: string) {
+  return serialized(() =>
+    persist(
+      "recents",
+      state.recents.filter((c) => c.orgnr !== orgnr),
+    ),
   );
 }
 
-export async function clearRecents() {
-  await load();
-  await persist("recents", []);
+export function clearRecents() {
+  return serialized(() => persist("recents", []));
 }
 
-export async function toggleFavorite(company: CompanySummary): Promise<boolean> {
-  await load();
-  const isFavorite = state.favorites.some((c) => c.orgnr === company.orgnr);
-  await persist(
-    "favorites",
-    isFavorite ? state.favorites.filter((c) => c.orgnr !== company.orgnr) : [...state.favorites, slim(company)],
-  );
-  return !isFavorite;
+export function toggleFavorite(company: CompanySummary): Promise<boolean> {
+  return serialized(async () => {
+    const isFavorite = state.favorites.some((c) => c.orgnr === company.orgnr);
+    await persist(
+      "favorites",
+      isFavorite ? state.favorites.filter((c) => c.orgnr !== company.orgnr) : [...state.favorites, slim(company)],
+    );
+    return !isFavorite;
+  });
 }
 
-export async function moveFavorite(orgnr: string, direction: -1 | 1) {
-  await load();
-  const list = [...state.favorites];
-  const index = list.findIndex((c) => c.orgnr === orgnr);
-  const target = index + direction;
-  if (index < 0 || target < 0 || target >= list.length) return;
-  [list[index], list[target]] = [list[target], list[index]];
-  await persist("favorites", list);
+export function moveFavorite(orgnr: string, direction: -1 | 1) {
+  return serialized(async () => {
+    const list = [...state.favorites];
+    const index = list.findIndex((c) => c.orgnr === orgnr);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= list.length) return;
+    [list[index], list[target]] = [list[target], list[index]];
+    await persist("favorites", list);
+  });
 }
 
 export function useStore(): State {

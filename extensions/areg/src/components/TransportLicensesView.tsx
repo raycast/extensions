@@ -32,10 +32,10 @@ export function TransportLicensesView({ company }: { company: CompanySummary }) 
       <List.Section title={t.transportLicenses}>
         {licenses.map((license) => (
           <List.Item
-            key={license.licenseNumber}
+            key={license.licenceNumber}
             icon={Icon.Car}
             title={license.typeLabel}
-            subtitle={license.licenseNumber}
+            subtitle={license.licenceNumber}
             accessories={license.copies ? [{ text: `${license.copies}`, icon: Icon.Car, tooltip: t.copies }] : []}
             actions={<ActionPanel>{pageActions}</ActionPanel>}
           />
