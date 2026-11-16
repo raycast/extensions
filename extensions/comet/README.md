@@ -26,6 +26,7 @@ A powerful Raycast extension for seamless integration with Comet browser, featur
 ### ⚙️ **Advanced Features**
 
 - **Multi-Profile Support**: Works with multiple Comet browser profiles
+- **Profile Switcher**: Open any Comet profile, or focus its window if one is already open. Give a profile its own alias or hotkey with Open Profile 1–5
 - **Favicon Display**: Visual tab identification with website icons
 - **AppleScript Automation**: Native macOS integration for seamless control
 - **Real-time Updates**: Live tab and history synchronization
@@ -44,3 +45,12 @@ A powerful Raycast extension for seamless integration with Comet browser, featur
 - `Search All` - Unified search across tabs, history, and bookmarks
 - `Create New Window` - Create new browser window
 - `Create New Incognito Window` - Open private browsing session
+- `Switch Comet Profile` - Pick a profile and open it, or focus its open window
+- `Open Profile 1`–`Open Profile 5` - Open the profile you assign in each command's preferences. Optional URL argument. Profiles 3–5 are disabled by default; enable them in Raycast Settings → Extensions → Comet
+
+### Profile hotkeys
+
+1. In Raycast Settings → Extensions → Comet, select **Open Profile 1** and set **Comet Profile** to a profile name as shown in Comet (e.g. `Work`) or its folder name (e.g. `Profile 2`).
+2. Give the command an alias or hotkey.
+
+Focusing an already-open profile window needs Raycast to have Accessibility access (System Settings → Privacy & Security → Accessibility). Without it, the commands open a new window instead.
