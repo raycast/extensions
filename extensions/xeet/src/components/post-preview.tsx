@@ -1,7 +1,7 @@
 import { shortcuts } from "../lib/shortcuts";
 import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { pathToFileURL } from "node:url";
 import { renderPost, type Preview } from "../lib/renderer";
 import { saveDraft } from "../lib/storage";
@@ -12,6 +12,8 @@ import VariantGrid from "./variant-grid";
 
 export default function PostPreview({ preview: initial, draftId }: { preview: Preview; draftId?: string }) {
   const [preview, setPreview] = useState(initial);
+  const [savedId, setSavedId] = useState(draftId);
+  const saving = useRef(false);
   const [busy, setBusy] = useState(false);
   const { push } = useNavigation();
   async function changeAppearance(change: Partial<Preview["options"]>) {
@@ -26,11 +28,16 @@ export default function PostPreview({ preview: initial, draftId }: { preview: Pr
     }
   }
   async function save() {
+    if (saving.current) return;
+    saving.current = true;
     try {
-      await saveDraft(preview.post, preview.options, draftId);
+      const draft = await saveDraft(preview.post, preview.options, savedId);
+      setSavedId(draft.id);
       await showToast({ style: Toast.Style.Success, title: "Draft Saved" });
     } catch (error) {
       await showFailureToast(error, { title: "Could Not Save Draft" });
+    } finally {
+      saving.current = false;
     }
   }
   const { report, options } = preview;
@@ -84,7 +91,16 @@ export default function PostPreview({ preview: initial, draftId }: { preview: Pr
               title="Edit Post"
               icon={Icon.Pencil}
               shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() => push(<PostForm initialPost={preview.post} initialOptions={options} draftId={draftId} />)}
+              onAction={() =>
+                push(
+                  <PostForm
+                    navigationTitle="Edit Post"
+                    initialPost={preview.post}
+                    initialOptions={options}
+                    draftId={savedId}
+                  />,
+                )
+              }
             />
             <Action
               title="Switch Theme"

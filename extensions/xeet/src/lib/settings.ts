@@ -1,19 +1,7 @@
 import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
-import type { RenderOptions, Surface, Theme } from "@xeet/core";
+import type { RenderOptions } from "@xeet/core";
 import { homedir } from "node:os";
 import { join } from "node:path";
-
-interface Settings {
-  theme: "system" | Theme;
-  surface: Surface;
-  width: string;
-  dpr: string;
-  authorName?: string;
-  authorHandle?: string;
-  autoClipboard: boolean;
-  saveHistory: boolean;
-  exportDirectory?: string;
-}
 
 export type Options = Required<Pick<RenderOptions, "surface" | "theme" | "width" | "dpr" | "expanded">>;
 export const surfaces = {
@@ -22,7 +10,7 @@ export const surfaces = {
   "ios-timeline": "iOS Timeline",
   "ios-detail": "iOS Detail",
 } as const;
-export const settings = () => getPreferenceValues<Settings>();
+export const settings = () => getPreferenceValues<Preferences>();
 export const previewDirectory = () => join(environment.supportPath, "previews");
 export const cacheDirectory = () => join(environment.supportPath, "resolved");
 export const exportDirectory = () => settings().exportDirectory || join(homedir(), "Downloads");

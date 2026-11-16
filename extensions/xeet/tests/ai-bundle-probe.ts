@@ -25,6 +25,12 @@ export async function runAITools(root: string, clipboard: TestClipboard) {
   const remove = requireTool("./tools/delete-draft.js") as typeof import("../src/tools/delete-draft");
   const exportImage = (requireTool("./tools/export-preview.js") as typeof import("../src/tools/export-preview"))
     .default;
+  const confirmCreate = (
+    requireTool("./tools/create-post-preview.js") as typeof import("../src/tools/create-post-preview")
+  ).confirmation;
+  const confirmSave = (requireTool("./tools/save-draft.js") as typeof import("../src/tools/save-draft")).confirmation;
+  const confirmExport = (requireTool("./tools/export-preview.js") as typeof import("../src/tools/export-preview"))
+    .confirmation;
   function json<T>(result: T): T {
     assert.deepEqual(structuredClone(result), result);
     assert.deepEqual(JSON.parse(JSON.stringify(result)), result);
@@ -32,6 +38,14 @@ export async function runAITools(root: string, clipboard: TestClipboard) {
   }
 
   const before = await list({});
+  assert.equal(await confirmCreate({ text: "Preview only" }), undefined);
+  const createConfirmation = await confirmCreate({ text: "Named post", saveDraft: true });
+  assert.match(createConfirmation?.message ?? "", /save.*Saved Drafts/);
+  assert.ok(createConfirmation?.info?.some(({ value }) => value === "Named post"));
+  const newSaveConfirmation = await confirmSave({ source: { input: "New draft text" } });
+  assert.match(newSaveConfirmation?.message ?? "", /Save.*Saved Drafts/);
+  assert.ok(newSaveConfirmation?.info?.some(({ value }) => value === "New draft text"));
+  assert.deepEqual(await list({}), before, "Confirmations must not write drafts");
   const custom = json(
     await create({
       text: "AI preview 👋",
@@ -43,6 +57,15 @@ export async function runAITools(root: string, clipboard: TestClipboard) {
   assert.equal(custom.pixelWidth, 320);
   assert.equal(fileURLToPath(custom.fileUrl), custom.pngPath);
   assert.ok(custom.pngPath.startsWith(root));
+  for (const action of ["copy", "save"] as const) {
+    const confirmation = await confirmExport({ previewId: custom.previewId, action });
+    assert.match(confirmation?.message ?? "", action === "copy" ? /Copy.*clipboard/ : /Save.*export directory/);
+    assert.ok(confirmation?.info?.some(({ value }) => value === custom.pngPath));
+    assert.ok(
+      confirmation?.info?.some(({ value }) => value === (action === "copy" ? "Clipboard" : join(root, "exports"))),
+    );
+  }
+  assert.equal(clipboard.copied, undefined, "Export confirmations must not copy the image");
   assert.equal(Buffer.from(await readFile(custom.pngPath)).readUInt32BE(16), 320);
   assert.deepEqual(await list({}), before, "Previewing must not save a draft automatically");
   assert.equal(clipboard.reads, 0);
@@ -108,6 +131,14 @@ export async function runAITools(root: string, clipboard: TestClipboard) {
     await save({ source: { input: JSON.stringify(post) }, options: { theme: "light", width: 600 } }),
   );
   assert.equal(saved.draft.id, repeated.draft.id, "Retries must not duplicate a saved draft");
+  for (const input of [
+    { source: { draftId: saved.draft.id, replacementText: "Changed text" } },
+    { source: { input: "Replacement post" }, replaceDraftId: saved.draft.id },
+  ]) {
+    const confirmation = await confirmSave(input);
+    assert.match(confirmation?.message ?? "", /Replace saved draft.*AI draft with media/);
+    assert.ok(confirmation?.info?.some(({ value }) => value === saved.draft.id));
+  }
   assert.equal((await list({ query: "ai draft with", limit: 5 })).totalCount, 1);
   await assert.rejects(list({ limit: 0 }), /integer/);
   const edited = json(
@@ -148,6 +179,7 @@ export async function runAITools(root: string, clipboard: TestClipboard) {
   await assert.rejects(exportImage({ previewId: custom.previewId, action: "save" }), /no longer available/);
 
   const confirmation = await remove.confirmation({ id: saved.draft.id });
+  assert.equal(confirmation?.style, "destructive");
   assert.ok(confirmation && confirmation.info?.some((item) => item.value === "AI edited draft"));
   assert.deepEqual(json(await remove.default({ id: saved.draft.id })), { deleted: true, id: saved.draft.id });
   assert.equal((await list({ query: "AI edited draft" })).totalCount, 0);

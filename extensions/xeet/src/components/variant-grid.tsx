@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, Grid, Icon, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import type { Post } from "@xeet/core";
-import { useEffect, useState } from "react";
-import { renderContactSheet, renderVariants, type Preview } from "../lib/renderer";
+import { useState } from "react";
+import { renderContactSheet, renderVariants } from "../lib/renderer";
 import { surfaces, type Options } from "../lib/settings";
 import { variantOptions, type Dimension } from "../lib/variants";
 import AppearanceFields from "./appearance-fields";
@@ -26,6 +26,7 @@ function OptionsForm({ options, onSave }: { options: Options; onSave: (value: Op
         <ActionPanel>
           <Action.SubmitForm
             title="Update Comparison"
+            icon={Icon.Checkmark}
             onSubmit={() => {
               onSave(value);
               pop();
@@ -52,46 +53,32 @@ export default function VariantGrid({
 }) {
   const [options, setOptions] = useState(initialOptions);
   const [dimension, setDimension] = useState<Dimension>("theme");
-  const [previews, setPreviews] = useState<Preview[]>([]);
-  const [busy, setBusy] = useState(true);
-  const [error, setError] = useState<string>();
-  const [retry, setRetry] = useState(0);
+  const [exporting, setExporting] = useState(false);
   const { push } = useNavigation();
-  useEffect(() => {
-    let active = true;
-    setBusy(true);
-    setPreviews([]);
-    setError(undefined);
-    void renderVariants(post, variantOptions(options, dimension))
-      .then((results) => {
-        if (active)
-          setPreviews(
-            results.map((result) => ({ ...result, source, warnings: [...new Set([...warnings, ...result.warnings])] })),
-          );
-      })
-      .catch((error) => {
-        if (active) {
-          setError(error instanceof Error ? error.message : String(error));
-          void showFailureToast(error, { title: "Could Not Compare Layouts" });
-        }
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [post, options, dimension, retry, source]);
+  const { data, isLoading, error, revalidate } = usePromise(
+    renderVariants,
+    [post, variantOptions(options, dimension)],
+    { failureToastOptions: { title: "Could Not Compare Layouts" } },
+  );
+  const busy = isLoading || exporting;
+  const previews =
+    isLoading || error
+      ? []
+      : (data ?? []).map((result) => ({
+          ...result,
+          source,
+          warnings: [...new Set([...warnings, ...result.warnings])],
+        }));
 
   async function exportSheet() {
     if (busy) return;
-    setBusy(true);
+    setExporting(true);
     try {
       await saveImage(await renderContactSheet(post, options.dpr));
     } catch (error) {
       await showFailureToast(error, { title: "Could Not Export Contact Sheet" });
     } finally {
-      setBusy(false);
+      setExporting(false);
     }
   }
   const commonActions = (
@@ -102,7 +89,7 @@ export default function VariantGrid({
         onAction={() => push(<OptionsForm options={options} onSave={setOptions} />)}
       />
       <Action title="Export Web Timeline Theme and Width Sheet" icon={Icon.Download} onAction={exportSheet} />
-      <Action title="Regenerate Variants" icon={Icon.ArrowClockwise} onAction={() => setRetry((value) => value + 1)} />
+      <Action title="Regenerate Variants" icon={Icon.ArrowClockwise} onAction={revalidate} />
     </>
   );
   return (
@@ -121,7 +108,7 @@ export default function VariantGrid({
     >
       <Grid.EmptyView
         title={busy ? "Rendering Variants…" : "Could Not Render Variants"}
-        description={error}
+        description={error?.message}
         actions={<ActionPanel>{commonActions}</ActionPanel>}
       />
       {previews.map((preview) => {

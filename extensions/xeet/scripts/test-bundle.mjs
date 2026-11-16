@@ -27,6 +27,7 @@ const items = {};
 const clipboard = { text: undefined, reads: 0, copied: undefined, failCopy: false };
 Module._load = function(name, ...args) {
   if (name === '@raycast/api') return {
+    Action: { Style: { Destructive: 'destructive' } },
     environment: { assetsPath: path.join(__dirname, 'assets'), supportPath: path.join(__dirname, 'support'), appearance: 'dark' },
     getPreferenceValues: () => ({ theme: 'system', surface: 'web-timeline', width: '390', dpr: '2', authorName: 'Test User', authorHandle: 'testuser', saveHistory: true, exportDirectory: path.join(__dirname, 'exports') }),
     Clipboard: { readText: async () => { clipboard.reads++; return clipboard.text; }, copy: async value => { if (clipboard.failCopy) throw new Error('Clipboard unavailable'); clipboard.copied = value; } },

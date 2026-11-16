@@ -1,5 +1,4 @@
-import { shortcuts } from "../lib/shortcuts";
-import { Action, Clipboard, Icon, showInFinder, showToast, Toast, Keyboard } from "@raycast/api";
+import { Action, Clipboard, Icon, showInFinder, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exportPng } from "../lib/files";
 import { exportDirectory } from "../lib/settings";
@@ -29,13 +28,8 @@ export async function saveImage(path: string) {
 export default function ImageActions({ path }: { path: string }) {
   return (
     <>
-      <Action title="Copy PNG" icon={Icon.Clipboard} shortcut={shortcuts.copyImage} onAction={() => copyImage(path)} />
-      <Action
-        title="Save PNG"
-        icon={Icon.Download}
-        shortcut={Keyboard.Shortcut.Common.Save}
-        onAction={() => saveImage(path)}
-      />
+      <Action title="Copy PNG" icon={Icon.Clipboard} onAction={() => copyImage(path)} />
+      <Action title="Save PNG" icon={Icon.Download} onAction={() => saveImage(path)} />
       <Action.ShowInFinder path={path} />
     </>
   );

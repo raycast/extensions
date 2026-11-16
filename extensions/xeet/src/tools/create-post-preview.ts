@@ -1,3 +1,4 @@
+import type { Tool } from "@raycast/api";
 import type { Post } from "@xeet/core";
 import { previewResult, renderingOptions, saveToolDraft, type RenderingOptions } from "../lib/ai";
 import { readAvatar } from "../lib/files";
@@ -23,6 +24,14 @@ type Input = {
   options?: RenderingOptions;
   /** Save to Saved Drafts as well, only when the user asks to save a draft. */
   saveDraft?: boolean;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async ({ text, saveDraft }) => {
+  if (!saveDraft) return undefined;
+  return {
+    message: "Create this preview and save it to Saved Drafts?",
+    info: [{ name: "Post", value: text.slice(0, 200) }],
+  };
 };
 
 /** Create an offline custom post PNG with author details, verification, counts, and appearance. */

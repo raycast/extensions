@@ -56,12 +56,12 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@resvg/resvg-js": "2.6.2",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "esbuild": "0.25.12",
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
+    "react-test-renderer": "^19.3.1",
     "tsx": "4.23.15",
     "typescript": "^6.0.3"
   },
@@ -73,9 +73,7 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "test": "node scripts/test.mjs",
-    "build:renderer": "node scripts/build-renderer.mjs",
     "test:bundle": "node scripts/test-bundle.mjs",
-    "build:icon": "node scripts/build-icon.mjs",
     "evals": "ray evals -I --exit-on-error"
   },
   "preferences": [
@@ -157,15 +155,15 @@
       "default": "2",
       "data": [
         {
-          "title": "1\u00d7",
+          "title": "1×",
           "value": "1"
         },
         {
-          "title": "2\u00d7",
+          "title": "2×",
           "value": "2"
         },
         {
-          "title": "3\u00d7",
+          "title": "3×",
           "value": "3"
         }
       ],
@@ -177,7 +175,8 @@
       "type": "textfield",
       "required": false,
       "description": "Display name for custom previews.",
-      "default": "Your Name"
+      "default": "Your Name",
+      "placeholder": "Your Name"
     },
     {
       "name": "authorHandle",
@@ -185,7 +184,8 @@
       "type": "textfield",
       "required": false,
       "description": "Handle for custom previews, without @.",
-      "default": "yourhandle"
+      "default": "yourhandle",
+      "placeholder": "yourhandle"
     },
     {
       "name": "autoClipboard",

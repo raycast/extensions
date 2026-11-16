@@ -10,7 +10,7 @@ The extension's own source and original card icon are MIT licensed. The renderer
 | Xeet Preview Emoji, derived from Noto Color Emoji v2.051 | https://github.com/googlefonts/noto-emoji | SIL OFL 1.1, `assets/xeet/licenses/NotoColorEmoji-OFL.txt` |
 | STIX Two Math                                            | https://github.com/stipub/stixfonts       | SIL OFL 1.1, `assets/xeet/licenses/STIX-OFL.txt`           |
 
-Noto and STIX font bytes are unchanged except for the explicitly renamed emoji derivative. That derivative converts CBDT PNG strike data to `sbix` using `scripts/convert-emoji.py`; it does not change the emoji artwork. All original font copyright and license name records are retained. The font files are not offered for sale separately.
+Noto and STIX font bytes are unchanged except for the explicitly renamed emoji derivative. That derivative converts CBDT PNG strike data to `sbix` using the author’s font conversion script; it does not change the emoji artwork. All original font copyright and license name records are retained. The font files are not offered for sale separately.
 
 This build uses Noto Sans regular for the primary 400/500 weight slots and Noto Sans bold for 700/800. Xeet's internal family aliases and enum names are retained for engine compatibility; they do not mean the proprietary fonts are present. No Chirp, Arial, Apple Color Emoji, Hiragino Sans, or upstream default-avatar image is shipped by the extension.
 

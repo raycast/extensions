@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { detectInput, MAX_INPUT_BYTES } from "../lib/input";
 import { getEngine, renderPost } from "../lib/renderer";
@@ -10,7 +10,6 @@ import PostPreview from "./post-preview";
 import VariantGrid from "./variant-grid";
 
 export default function InputForm({ compare = false, quick = false }: { compare?: boolean; quick?: boolean }) {
-  const [input, setInput] = useState("");
   const [options, setOptions] = useState(defaultOptions);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
@@ -19,7 +18,45 @@ export default function InputForm({ compare = false, quick = false }: { compare?
   const controller = useRef<AbortController | null>(null);
   const { push } = useNavigation();
 
-  async function generate(text = input, renderOptions = options) {
+  const { handleSubmit, itemProps, setValue, setValidationError, values } = useForm<{ input: string }>({
+    initialValues: { input: "" },
+    validation: {
+      input: (value) => {
+        try {
+          detectInput(value ?? "");
+        } catch (error) {
+          return error instanceof Error ? error.message : String(error);
+        }
+      },
+    },
+    onSubmit: async ({ input }) => {
+      edited.current = true;
+      await generate(input);
+    },
+  });
+  const { isLoading: initializing } = usePromise(
+    async () => ({
+      options: await lastOptions(),
+      text: quick || settings().autoClipboard ? await Clipboard.readText() : undefined,
+    }),
+    [],
+    {
+      onData: ({ options, text }) => {
+        if (edited.current) return;
+        setOptions(options);
+        if (text?.trim() && Buffer.byteLength(text) <= MAX_INPUT_BYTES) {
+          setValue("input", text);
+          setValidationError("input", undefined);
+          if (quick) void generate(text, options);
+        } else if (quick) {
+          setError("The clipboard has no supported text. Copy post text, an X URL, or Xeet Post JSON, then retry.");
+        }
+      },
+      onError: (error) => setError(error.message),
+    },
+  );
+
+  async function generate(text = values.input, renderOptions = options) {
     if (controller.current) return;
     const abort = new AbortController();
     controller.current = abort;
@@ -58,35 +95,18 @@ export default function InputForm({ compare = false, quick = false }: { compare?
 
   useEffect(() => {
     active.current = true;
-    void (async () => {
-      try {
-        const saved = await lastOptions();
-        if (active.current && !edited.current) setOptions(saved);
-        if (quick || settings().autoClipboard) {
-          const text = await Clipboard.readText();
-          if (!active.current || edited.current) return;
-          if (text?.trim() && Buffer.byteLength(text) <= MAX_INPUT_BYTES) {
-            setInput(text);
-            if (quick) await generate(text, saved);
-          } else if (quick)
-            setError("The clipboard has no supported text. Copy post text, an X URL, or Xeet Post JSON, then retry.");
-        }
-      } catch (error) {
-        if (active.current) setError(error instanceof Error ? error.message : "Could not read the clipboard.");
-      }
-    })();
     return () => {
       active.current = false;
       controller.current?.abort();
     };
-    // Initialization runs once: subsequent edits must never trigger clipboard reads.
   }, []);
 
   async function readClipboard() {
     try {
       const text = await Clipboard.readText();
       edited.current = true;
-      setInput(text || "");
+      setValue("input", text || "");
+      setValidationError("input", undefined);
       setError(undefined);
     } catch (error) {
       await showFailureToast(error, { title: "Could Not Read Clipboard" });
@@ -95,8 +115,7 @@ export default function InputForm({ compare = false, quick = false }: { compare?
 
   return (
     <Form
-      navigationTitle={compare ? "Compare Post Layouts" : quick ? "Quick Render Clipboard" : "Render X Post"}
-      isLoading={busy}
+      isLoading={busy || initializing}
       actions={
         <ActionPanel>
           {busy ? (
@@ -105,7 +124,7 @@ export default function InputForm({ compare = false, quick = false }: { compare?
             <Action.SubmitForm
               title={compare ? "Compare Layouts" : "Generate Preview"}
               icon={Icon.Image}
-              onSubmit={() => generate()}
+              onSubmit={handleSubmit}
             />
           )}
           <Action title="Read Clipboard" icon={Icon.Clipboard} onAction={readClipboard} />
@@ -125,17 +144,16 @@ export default function InputForm({ compare = false, quick = false }: { compare?
       }
     >
       <Form.TextArea
-        id="input"
+        {...itemProps.input}
         title="Post"
         placeholder="https://x.com/handle/status/123, post text, or Xeet Post JSON"
-        value={input}
         onChange={(value) => {
           edited.current = true;
-          setInput(value);
+          itemProps.input.onChange?.(value);
           setError(undefined);
         }}
-        error={error}
       />
+      {error && <Form.Description title="Could Not Generate Preview" text={error} />}
       <Form.Description text="Text and JSON render locally. Public X URLs fetch from X and its media hosts only; unavailable posts show an error. No account or cookies required." />
       <Form.Separator />
       <AppearanceFields
