@@ -2,7 +2,7 @@
     <img src="./assets/namecrane.png" width="150" height="150" />
 </p>
 
-# Atom
+# NameCrane
 
 This is a **Raycast** extension for [NameCrane](https://namecrane.com/) - _Domains, Email & Web Hosting_.
 
