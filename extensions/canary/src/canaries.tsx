@@ -12,6 +12,10 @@ const COMMENT_PAGE_SIZE = 100;
 const MAX_COMMENT_PAGES = 5;
 const TRUSTED_ASSOCIATIONS = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
 const LABELLED_URL = /canary[^:\n]*:\s*(https?:\/\/[^\s)>\]]+)/i;
+const VERSION_TIMEOUT_MS = 10_000;
+const DEFAULT_VERSION_PATH = "/build-info.json";
+const COMMIT = /^[0-9a-f]{7,40}$/i;
+const COMMIT_KEYS = ["commit", "sha", "gitCommit", "revision", "version"];
 
 interface Matchers {
   urlPrefix: string;
@@ -26,9 +30,14 @@ interface PullRequest {
   isDraft: boolean;
   headRefName: string;
   updatedAt: string;
+  headCommit: string;
   canaryUrl?: string;
   extraUrl?: string;
+  canaryCommit?: CanaryCommit;
 }
+
+// What the canary reports about the commit it runs, compared with the PR's latest commit.
+type CanaryCommit = { head: string } & ({ version: string; isLatest: boolean } | { error: string });
 
 interface GqlComment {
   author: { login: string; __typename: string } | null;
@@ -49,6 +58,7 @@ interface GqlPr {
   isDraft: boolean;
   headRefName: string;
   updatedAt: string;
+  headRefOid: string;
   comments: GqlComments;
 }
 
@@ -61,7 +71,7 @@ query($q: String!, $after: String) {
     pageInfo { hasNextPage endCursor }
     nodes {
       ... on PullRequest {
-        id number title url isDraft headRefName updatedAt
+        id number title url isDraft headRefName updatedAt headRefOid
         comments(last: ${COMMENT_PAGE_SIZE}) {
           pageInfo { hasPreviousPage startCursor }
           nodes { ...CommentFields }
@@ -86,10 +96,18 @@ query($id: ID!, $before: String) {
 export default withAccessToken(github)(Command);
 
 function Command() {
-  const { repo, urlPrefix = "", extraUrlPrefix = "", commentAuthor = "" } = getPreferenceValues<Preferences.Canaries>();
+  const {
+    repo,
+    urlPrefix = "",
+    extraUrlPrefix = "",
+    commentAuthor = "",
+    checkCanaryCommit = true,
+    versionPath = "",
+  } = getPreferenceValues<Preferences.Canaries>();
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchPrs, [
     repo,
     { urlPrefix, extraUrlPrefix, commentAuthor },
+    checkCanaryCommit ? versionPath.trim() || DEFAULT_VERSION_PATH : null,
   ]);
 
   return (
@@ -107,15 +125,10 @@ function Command() {
         <List.Item
           key={pr.number}
           title={pr.title}
-          subtitle={`#${pr.number}`}
-          keywords={[pr.headRefName]}
+          subtitle={pr.headCommit}
+          keywords={[pr.headRefName, String(pr.number), `#${pr.number}`]}
           icon={pr.isDraft ? { source: Icon.Circle, tintColor: Color.SecondaryText } : Icon.CircleProgress100}
-          accessories={[
-            pr.canaryUrl
-              ? { tag: { value: "canary", color: Color.Green } }
-              : { tag: { value: "no canary", color: Color.SecondaryText } },
-            { date: new Date(pr.updatedAt) },
-          ]}
+          accessories={[canaryAccessory(pr), { date: new Date(pr.updatedAt) }]}
           actions={
             <ActionPanel>
               {pr.canaryUrl && <Action.OpenInBrowser title="Open Canary" icon={Icon.Globe} url={pr.canaryUrl} />}
@@ -155,7 +168,7 @@ function Command() {
   );
 }
 
-async function fetchPrs(repo: string, matchers: Matchers): Promise<PullRequest[]> {
+async function fetchPrs(repo: string, matchers: Matchers, versionPath: string | null): Promise<PullRequest[]> {
   const viewer = await checkRepositoryAccess(repo);
   const q = `is:pr is:open author:${viewer} repo:${repo} sort:updated-desc`;
   const isTrusted = trustedBy(matchers.commentAuthor);
@@ -170,7 +183,62 @@ async function fetchPrs(repo: string, matchers: Matchers): Promise<PullRequest[]
     after = search.pageInfo.endCursor;
   }
 
-  return Promise.all(prs.map((pr) => toPullRequest(pr, matchers, isTrusted)));
+  const pullRequests = await Promise.all(prs.map((pr) => toPullRequest(pr, matchers, isTrusted)));
+  if (!versionPath) return pullRequests;
+  return Promise.all(
+    pullRequests.map(async (pr, i) =>
+      pr.canaryUrl
+        ? { ...pr, canaryCommit: await fetchCanaryCommit(pr.canaryUrl, versionPath, prs[i].headRefOid) }
+        : pr,
+    ),
+  );
+}
+
+// Asks the canary itself which commit it runs, e.g. /build-info.json → {"version":"d2e2463"}.
+async function fetchCanaryCommit(canaryUrl: string, versionPath: string, headRefOid: string): Promise<CanaryCommit> {
+  const head = headRefOid.slice(0, 7);
+  try {
+    const url = new URL(versionPath, new URL(canaryUrl).origin);
+    const response = await fetch(url, { signal: AbortSignal.timeout(VERSION_TIMEOUT_MS) });
+    if (!response.ok) return { head, error: `${url} responded ${response.status}` };
+    const version = findCommit(await response.text());
+    if (!version) return { head, error: `No commit found in ${url}` };
+    return { head, version, isLatest: headRefOid.toLowerCase().startsWith(version.toLowerCase()) };
+  } catch (e) {
+    return { head, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+// Accepts a JSON object with the commit under a common key, or a plain-text file that holds only the commit.
+function findCommit(body: string): string | undefined {
+  const text = body.trim();
+  if (COMMIT.test(text)) return text;
+  try {
+    const json = JSON.parse(text) as Record<string, unknown>;
+    return COMMIT_KEYS.map((key) => json?.[key])
+      .find((v): v is string => typeof v === "string" && COMMIT.test(v.trim()))
+      ?.trim();
+  } catch {
+    return undefined;
+  }
+}
+
+// Green when the canary runs the latest commit (or its commit is unknown), yellow when it runs an older one.
+function canaryAccessory({ canaryUrl, canaryCommit: commit }: PullRequest): List.Item.Accessory {
+  if (!canaryUrl) return { tag: { value: "no canary", color: Color.SecondaryText } };
+  if (!commit) return { tag: { value: "canary", color: Color.Green } };
+  if ("error" in commit) {
+    return {
+      tag: { value: "canary", color: Color.Green },
+      tooltip: `Couldn't read the canary's commit: ${commit.error}`,
+    };
+  }
+  return commit.isLatest
+    ? { tag: { value: "canary", color: Color.Green }, tooltip: `Canary runs ${commit.version}, the latest commit` }
+    : {
+        tag: { value: "canary", color: Color.Yellow },
+        tooltip: `Canary runs ${commit.version}, but the latest commit is ${commit.head}`,
+      };
 }
 
 // Handles GraphQL errors itself so a hidden repository (SAML enforcement, missing OAuth approval) gets an actionable message.
@@ -203,7 +271,8 @@ async function graphqlRaw<T>(
   });
   if (!response.ok) throw new Error(`GitHub API responded ${response.status}`);
   const json = (await response.json()) as { data?: T; errors?: { message: string }[] };
-  const errors = json.errors?.map((e) => e.message) ?? [];
+  // GitHub repeats the same error once per affected node, e.g. per pull request.
+  const errors = [...new Set(json.errors?.map((e) => e.message))];
   if (!json.data) throw new Error(errors.join("; ") || "GitHub API returned no data");
   return { data: json.data, errors };
 }
@@ -245,6 +314,7 @@ async function toPullRequest(
     isDraft: pr.isDraft,
     headRefName: pr.headRefName,
     updatedAt: pr.updatedAt,
+    headCommit: pr.headRefOid.slice(0, 7),
     canaryUrl,
     extraUrl,
   };

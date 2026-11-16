@@ -80,6 +80,24 @@
       "type": "password",
       "required": false,
       "placeholder": "ghp_\u2026 or github_pat_\u2026"
+    },
+    {
+      "name": "checkCanaryCommit",
+      "title": "Latest Commit Check",
+      "label": "Show whether the canary runs the latest commit",
+      "description": "Asks each canary which commit it runs (see Canary Version Path) and compares it with the pull request's latest commit.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "versionPath",
+      "title": "Canary Version Path",
+      "description": "Optional. Path on the canary that returns the commit it runs. Empty = /build-info.json. It can return JSON with a commit, sha, revision or version field, or plain text holding only the commit.",
+      "type": "textfield",
+      "required": false,
+      "default": "/build-info.json",
+      "placeholder": "/build-info.json"
     }
   ]
 }

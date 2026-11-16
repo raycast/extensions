@@ -20,6 +20,21 @@ The extension reads your pull requests and their comments through the GitHub API
 | **Extra Link URL Prefix** | Optional. A second link to pull from the same comments, e.g. your deploy dashboard.                                                                                                                                                                                                          |
 | **CI Comment Author**     | Optional. The GitHub login of the account that posts the preview URL, e.g. your CI bot (`platform-handler`). Only comments from this account are used, so nobody else can plant a link. If empty, comments from bot accounts and from repository owners, members and collaborators are used. |
 | **Personal Access Token** | Optional. Used instead of the GitHub sign-in. Needs read access to pull requests (classic tokens: `repo`). Stored in Raycast's preferences.                                                                                                                                                  |
+| **Latest Commit Check**   | On by default. Colors the **canary** tag yellow when the canary doesn't run the pull request's latest commit (see below).                                                                                                                                                                    |
+| **Canary Version Path**   | The path on the canary that returns the commit it runs. Empty means `/build-info.json`.                                                                                                                                                                                                      |
+
+## Is the canary on my latest commit?
+
+Each pull request shows its latest commit next to the title. With **Latest Commit Check** on (the default), the **canary** tag also shows whether the canary runs that commit:
+
+| Canary tag | Meaning                                              |
+| ---------- | ---------------------------------------------------- |
+| green      | The canary runs the pull request's latest commit.    |
+| yellow     | The canary runs an older commit. Hover to see which. |
+
+If the canary doesn't say which commit it runs, the tag stays green; hover it to see why.
+
+The extension asks the canary itself: it requests **Canary Version Path** on the canary's host and compares the commit there with the pull request's latest commit. The file can be JSON with a `commit`, `sha`, `revision` or `version` field, such as `{"version":"d2e2463"}`, or plain text holding only the commit. A short commit like `d2e2463` is enough.
 
 ## Actions
 
