@@ -5,7 +5,7 @@
 - The valuation tool takes what-if values for growth, net revenue retention, gross margin and burn multiple, and shows the estimate next to the measured one.
 - Date and month inputs tell the AI the format they expect (`YYYY-MM-DD`, `YYYY-MM`).
 - Suggested prompts for the new AI tools.
-- When your sign-in has expired and can't be renewed, the menu bar shows its Sign in item instead of opening the browser on its own.
+- When your sign-in has expired or was revoked, the menu bar shows its Sign in item instead of opening the browser on its own or keeping old numbers, and Switch Company signs you in again.
 - The menu bar's Sign in item shows an error if Switch Company can't be opened.
 
 ## [Raycast 2 and Seven New AI Tools] - 2026-11-16
