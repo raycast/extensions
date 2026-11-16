@@ -1,0 +1,255 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "areg",
+  "title": "Areg",
+  "description": "Search Norwegian companies and explore shareholders, roles, financials and more from areg.no",
+  "icon": "extension-icon.png",
+  "author": "simenandre",
+  "categories": [
+    "Finance",
+    "Productivity",
+    "Data"
+  ],
+  "keywords": [
+    "brreg",
+    "brønnøysund",
+    "enhetsregisteret",
+    "aksjonærregisteret",
+    "norway",
+    "norge",
+    "company",
+    "selskap",
+    "org nr",
+    "organisasjonsnummer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "subtitle": "Areg",
+      "description": "Search Norwegian companies by name or organisation number",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Name or org number",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-company-from-selection",
+      "title": "Open Company from Selection",
+      "subtitle": "Areg",
+      "description": "Open the company for the organisation number in your selected text or clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search Norwegian companies, people and industries by name or organisation number, optionally limited to a business address (municipality, postcode, county or street)."
+    },
+    {
+      "name": "company",
+      "title": "Company",
+      "description": "Overview and key figures for one Norwegian company: name, form, address, industry, capital, employees and recent financials."
+    },
+    {
+      "name": "financials",
+      "title": "Financials",
+      "description": "Income statement and balance sheet for one company, one year or all years. Amounts are in thousands of the reporting currency."
+    },
+    {
+      "name": "shareholders",
+      "title": "Shareholders",
+      "description": "The shareholders of one company in a given register year, largest stake first."
+    },
+    {
+      "name": "holdings",
+      "title": "Holdings",
+      "description": "The companies one company owns shares in, in a given register year."
+    },
+    {
+      "name": "ownership-history",
+      "title": "Ownership History",
+      "description": "Changes in a company's ownership between register years: who came in, left, bought or was diluted."
+    },
+    {
+      "name": "roles",
+      "title": "Roles",
+      "description": "Board, CEO, auditor and other roles in one company, and the periods it has had accountants, auditors and business managers."
+    },
+    {
+      "name": "announcements",
+      "title": "Announcements",
+      "description": "Official announcements for one company (bankruptcy, merger, capital changes, annual accounts and more), with the facts each announcement states."
+    },
+    {
+      "name": "grants",
+      "title": "Grants",
+      "description": "Public funding to one company, grouped by grantor: Innovation Norway grants, SkatteFUNN applications and the state aid register."
+    },
+    {
+      "name": "tenders",
+      "title": "Tenders",
+      "description": "Public tenders from Doffin for one company since 2023: contracts won as supplier and notices published as buyer."
+    },
+    {
+      "name": "tender",
+      "title": "Tender",
+      "description": "One Doffin notice: buyer, lots, who won each lot and the contract value where stated."
+    },
+    {
+      "name": "financial-licences",
+      "title": "Financial Licences",
+      "description": "Licences and registrations from the Financial Supervisory Authority of Norway (Finanstilsynet) for one company."
+    },
+    {
+      "name": "ip-rights",
+      "title": "IP Rights",
+      "description": "Patents, trademarks and designs at the Norwegian Industrial Property Office (Patentstyret) for one company."
+    },
+    {
+      "name": "transport-licences",
+      "title": "Transport Licences",
+      "description": "Transport licences for one company from the Norwegian Public Roads Administration: goods, van and coach licences."
+    },
+    {
+      "name": "group",
+      "title": "Group",
+      "description": "The corporate group a company belongs to: the ultimate parent and all subsidiaries, with the registered ownership share."
+    },
+    {
+      "name": "person",
+      "title": "Person",
+      "description": "A person's shareholdings and roles in Norwegian companies, looked up by name and birth year."
+    },
+    {
+      "name": "find-companies",
+      "title": "Find Companies",
+      "description": "Rank Norwegian companies by a financial figure, such as highest operating revenue, or all companies with net income above a threshold. Amounts are in thousands."
+    },
+    {
+      "name": "query",
+      "title": "SQL Query",
+      "description": "Run read-only SQL (DuckDB dialect) against the full open areg dataset, for rankings, aggregates and joins the other tools do not cover."
+    }
+  ],
+  "ai": {
+    "instructions": "You answer questions about Norwegian companies using areg, which serves open Norwegian register data. Start with the search tool to find an organisation number when you only have a name, then use the per-company tools. Tool responses are Markdown in Norwegian; answer in the user's language. Amounts from financials and find-companies are in thousands of the reporting currency, which is usually NOK. Link to https://areg.no/{orgnr} when you mention a company.",
+    "evals": [
+      {
+        "input": "@areg who owns Sokkel AS?",
+        "mocks": {
+          "search": "- **SOKKEL AS** (935108500) · AS · OSLO",
+          "shareholders": "# Aksjonærer i SOKKEL AS (2025)\n\n| Aksjonær | Andel |\n| --- | ---: |\n| SIMEN A. W. OLSEN | 100 % |"
+        },
+        "expected": [
+          {
+            "callsTool": "search"
+          },
+          {
+            "callsTool": "shareholders"
+          }
+        ]
+      },
+      {
+        "input": "@areg what was Equinor's revenue last year?",
+        "mocks": {
+          "search": "- **EQUINOR ASA** (923609016) · ASA · STAVANGER"
+        },
+        "expected": [
+          {
+            "callsTool": "search"
+          },
+          {
+            "callsTool": {
+              "name": "financials",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@areg who is on the board of 923609016?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "roles",
+              "arguments": {
+                "orgnr": "923609016"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language used for labels and actions",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Norsk (bokmål)",
+          "value": "nb"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What happens when you press Enter on a company",
+      "type": "dropdown",
+      "required": false,
+      "default": "details",
+      "data": [
+        {
+          "title": "Show Company in Raycast",
+          "value": "details"
+        },
+        {
+          "title": "Open on areg.no",
+          "value": "browser"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
