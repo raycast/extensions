@@ -3,6 +3,10 @@
 ### [Improvement] - {PR_MERGE_DATE}
 
 - Update native-say to support dialect voices
+- Add installed Siri and other AVFoundation voices on macOS, including voice previews, output device selection, and stopping speech
+- Fix duplicate voice options while preserving standard and enhanced voice variants
+- Reduce Siri playback startup time by avoiding repeated voice enumeration
+- Cache Configure Say data for faster opening and refresh it in the background
 
 ## [Bugfix] - 2026-10-08
 

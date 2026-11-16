@@ -76,7 +76,7 @@ export const languageCodeToLanguageName = (languageCode: string) => {
 
 export const voiceNameToEmojiFlag = (voices: Voice[], voiceName?: string) => {
   if (!voiceName) return undefined;
-  const foundVoice = voices.find((v) => v.name === voiceName);
+  const foundVoice = voices.find((v) => v.identifier === voiceName || v.name === voiceName);
   if (!foundVoice) return undefined;
   return languageCodeToEmojiFlag(foundVoice.languageCode);
 };

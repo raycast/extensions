@@ -22,7 +22,9 @@ On Windows, open `Windows Settings -> Time & language -> Speech`.
 
 ## Recommended Voices on macOS
 
-Siri is the closest thing to a real human voice. You can go to `System Settings -> Accessibility -> Live Speech (Read & Speak)`. Pick your favorite Siri voice for the best experience.
+Installed Siri voices and other system voices can be selected directly in **Configure Say → Speaking Voice**. Download additional voices in `System Settings → Accessibility → Read & Speak` (called Spoken Content or Live Speech on some macOS versions), then reopen Configure Say.
+
+Speaking rate and output device selection also work with these voices.
 
 ## API
 
@@ -88,6 +90,10 @@ Get it from https://www.npmjs.com/package/native-say.
 
 It provides JavaScript interfaces for the built-in text-to-speech engines on macOS and Windows. You can use it if you want some advanced API usage.
 
+### Siri voices in cross-extension calls
+
+For Siri voices, pass the `identifier` returned by the **Get Voices** AI tool as `sayOptions.voice`. Existing voice names such as `Cellos` continue to work.
+
 ## FAQ
 
 ### 1. How to stop a speaking agent?
@@ -96,7 +102,7 @@ You could type a space or any other new contents to the `Type to Say` command to
 
 ### 2. Some voices can be found in system settings but not listed in the Configure Say command
 
-Yes. Not all voices are listed in the Configure Say command, because it's limited by the OS. But you can choose those voices from system settings.
+Download the voice in System Settings, then reopen Configure Say. Installed Siri voices are supported; availability varies by macOS version and language.
 
 ## License
 
