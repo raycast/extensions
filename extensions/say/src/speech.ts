@@ -80,15 +80,6 @@ export const say = async (text: string, options?: SayOptions) => {
       await sayMacVoice(text, options.voice, options);
       return;
     }
-    if (options?.voice) {
-      const voice = (await getVoices()).find((voice) =>
-        voice.identifier ? voice.identifier === options.voice || voice.name === options.voice : false,
-      );
-      if (voice?.identifier) {
-        await sayMacVoice(text, voice.identifier, options);
-        return;
-      }
-    }
     await nativeSay(text, { ...options, skipRunningCheck: true });
     return;
   }

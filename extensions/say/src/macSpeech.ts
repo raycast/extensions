@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import { environment } from "@raycast/api";
 import { getDeviceUID } from "swift:../swift";
 import type { SayOptions } from "native-say";
+import { getSystemSpeakingRate } from "./systemSpeech.js";
 
 const execFileAsync = promisify(execFile);
 const script = path.join(environment.assetsPath, "mac-speech.js");
@@ -40,6 +41,9 @@ export const sayMacVoice = async (text: string, identifier: string, options: Say
   }
   const content = options.inputFile ? await readFile(options.inputFile, "utf8") : text;
   if (!content.trim()) return;
+  // Resolve the live system rate here so previews, commands, and AI tools all
+  // inherit it without depending on the configuration screen's cached data.
+  const rate = options.rate ?? (await getSystemSpeakingRate());
   const audioDeviceUID = options.audioDevice ? await getDeviceUID(options.audioDevice) : undefined;
   if (options.audioDevice && !audioDeviceUID) throw new Error(`Audio device not found: ${options.audioDevice}`);
   const temporaryFile =
@@ -62,7 +66,7 @@ export const sayMacVoice = async (text: string, identifier: string, options: Say
         JSON.stringify({
           text: content,
           identifier,
-          rate: options.rate,
+          rate,
           volume: options.volume,
           audioDeviceUID,
           outputFile: options.outputFile || undefined,
