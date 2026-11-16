@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { listNotes, Note, notesFolder, openInCoffee, previewNote, readNote } from "./coffee";
+import { COFFEE, listNotes, Note, notesFolder, openInCoffee, previewNote, readNote } from "./coffee";
 
 /** The notes, or why they couldn't be listed. */
 function loadNotes(): { root?: string; notes: Note[]; problem?: string; fixInPreferences?: boolean } {
@@ -62,7 +62,7 @@ export default function SearchNotes() {
       searchBarPlaceholder="Search notes by title or folder"
       onSelectionChange={(id) => setSelected(id)}
     >
-      <List.EmptyView icon={Icon.Document} title="No Notes Yet" description={`Nothing in ${loaded.root}`} />
+      <List.EmptyView icon="extension-icon.png" title="No Notes Yet" description={`Nothing in ${loaded.root}`} />
       {loaded.notes.map((note) => (
         <NoteItem
           key={note.path}
@@ -111,7 +111,7 @@ function NoteItem({
       detail={showingDetail ? <List.Item.Detail markdown={preview} /> : undefined}
       actions={
         <ActionPanel>
-          <Action title="Open in Coffee" icon={Icon.ArrowRight} onAction={() => openInCoffee(note.path)} />
+          <Action title="Open in Coffee" icon={COFFEE} onAction={() => openInCoffee(note.path)} />
           <Action.Push title="Read Here" icon={Icon.Eye} target={<NoteDetail note={note} />} />
           <Action
             title={showingDetail ? "Hide Preview" : "Show Preview"}

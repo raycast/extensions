@@ -19,6 +19,7 @@
       "title": "Search Notes",
       "subtitle": "Coffee",
       "description": "Find a note by its title or folder, read it, and open it in Coffee.",
+      "icon": "extension-icon.png",
       "mode": "view"
     },
     {
@@ -26,6 +27,7 @@
       "title": "New Note",
       "subtitle": "Coffee",
       "description": "Write a note with a title and open it in Coffee.",
+      "icon": "extension-icon.png",
       "mode": "view"
     },
     {
@@ -33,6 +35,7 @@
       "title": "Add to Inbox",
       "subtitle": "Coffee",
       "description": "Add a line to Inbox.md without switching to Coffee.",
+      "icon": "extension-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -48,6 +51,7 @@
       "title": "Open Today's Note",
       "subtitle": "Coffee",
       "description": "Open today's daily note, made from your Daily note template if it isn't there yet.",
+      "icon": "extension-icon.png",
       "mode": "no-view"
     },
     {
@@ -55,6 +59,7 @@
       "title": "Search in Coffee",
       "subtitle": "Coffee",
       "description": "Open Coffee's own search with these words.",
+      "icon": "extension-icon.png",
       "mode": "no-view",
       "arguments": [
         {

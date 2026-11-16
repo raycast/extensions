@@ -16,6 +16,11 @@ export interface Note {
 /** Where the notes are, or why there's no folder to read. */
 export type NotesFolder = { path: string } | { problem: string; fixInPreferences: boolean };
 
+/** Coffee's own icon: the app's, or the extension's copy of it when the app isn't in /Applications. */
+export const COFFEE = existsSync("/Applications/Coffee.app")
+  ? { fileIcon: "/Applications/Coffee.app" }
+  : "extension-icon.png";
+
 const SKIPPED = new Set([".git", ".obsidian", ".trash", ".coffee", "node_modules", "attachments"]);
 const LIMIT = 5000;
 /** How much of a note the preview shows. Copying always takes the whole note. */

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
-import { runCoffee } from "./coffee";
+import { COFFEE, runCoffee } from "./coffee";
 
 export default function NewNote() {
   async function submit(values: { title: string; text: string }) {
@@ -10,7 +10,7 @@ export default function NewNote() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create in Coffee" onSubmit={submit} />
+          <Action.SubmitForm title="Create in Coffee" icon={COFFEE} onSubmit={submit} />
         </ActionPanel>
       }
     >
