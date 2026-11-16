@@ -1,43 +1,86 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Clipboard, LaunchProps, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { RANDOM_BANK } from "./constants";
 import type { FormPrefs } from "./form-prefs";
 import { toSavedIban } from "./generate-record";
 import { GenIbanForm } from "./gen-iban-form";
 import { IbanDetail } from "./iban-detail";
 import { generateIban } from "./lib";
-import { loadFormPrefs } from "./form-prefs";
 import { resolveCountryInput } from "./resolve-country";
-import { loadIban, saveIban, type SavedIban } from "./storage";
+import { ibanText, type SavedIban } from "./storage";
 import { VALIDITY_VALID } from "./validity";
+
+const SAVED_IBAN_KEY = "saved-iban";
+const FORM_PREFS_KEY = "gen-iban-prefs";
 
 type RootView =
   | { mode: "loading" }
   | { mode: "form"; prefillCountry?: string }
   | { mode: "quick-detail"; record: SavedIban; prefs: FormPrefs };
 
-export default function Command(props: LaunchProps<{ arguments: { country?: string } }>) {
+function storedSavedIban(value: unknown): SavedIban | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.iban !== "string" || typeof record.format !== "string" || typeof record.savedAt !== "string") {
+    return undefined;
+  }
+  return value as SavedIban;
+}
+
+function storedFormPrefs(value: unknown): FormPrefs | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const prefs = value as FormPrefs;
+  if (!prefs.countryCode || !prefs.bankSelection || !prefs.format) {
+    return undefined;
+  }
+  return prefs;
+}
+
+export default function Command(props: LaunchProps<{ arguments: Arguments.GenIban }>) {
+  const { push } = useNavigation();
+  const {
+    value: savedRaw,
+    isLoading: savedLoading,
+    setValue: setSavedValue,
+  } = useLocalStorage<unknown>(SAVED_IBAN_KEY);
+  const { value: prefsRaw, isLoading: prefsLoading } = useLocalStorage<unknown>(FORM_PREFS_KEY);
+
+  const savedIban = useMemo(() => storedSavedIban(savedRaw), [savedRaw]);
+  const storageLoading = savedLoading || prefsLoading;
+
   const [view, setView] = useState<RootView>({ mode: "loading" });
-  const [savedIban, setSavedIban] = useState<SavedIban | undefined>();
+
+  const onSavedIbanChange = useCallback(
+    (record: SavedIban | undefined) => {
+      if (record) {
+        void setSavedValue(record);
+      }
+    },
+    [setSavedValue],
+  );
 
   useEffect(() => {
+    if (storageLoading) {
+      return;
+    }
+
     let cancelled = false;
 
     async function init() {
-      const saved = await loadIban();
-      if (!cancelled) {
-        setSavedIban(saved);
-      }
-
-      const arg = props.arguments.country?.trim() ?? "";
-      if (!arg) {
+      const countryArg = props.arguments.country?.trim() ?? "";
+      if (!countryArg) {
         if (!cancelled) {
           setView({ mode: "form" });
         }
         return;
       }
 
-      const resolved = resolveCountryInput(arg);
+      const resolved = resolveCountryInput(countryArg);
       if (!resolved.ok) {
         if (!cancelled) {
           setView({ mode: "form" });
@@ -50,7 +93,7 @@ export default function Command(props: LaunchProps<{ arguments: { country?: stri
         return;
       }
 
-      const storedPrefs = await loadFormPrefs();
+      const storedPrefs = storedFormPrefs(prefsRaw);
       const prefs: FormPrefs = {
         countryCode: resolved.code,
         bankSelection: RANDOM_BANK,
@@ -61,20 +104,18 @@ export default function Command(props: LaunchProps<{ arguments: { country?: stri
       try {
         const generated = generateIban({ countryCode: resolved.code });
         const record = toSavedIban(generated, prefs.format);
-        await saveIban(record);
+        await setSavedValue(record);
+        if (prefs.copyToClipboard) {
+          await Clipboard.copy(ibanText(record));
+        }
         if (!cancelled) {
-          setSavedIban(record);
           setView({ mode: "quick-detail", record, prefs });
         }
       } catch (error) {
         if (!cancelled) {
           setView({ mode: "form", prefillCountry: resolved.code });
         }
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Generation failed",
-          message: error instanceof Error ? error.message : "Could not generate IBAN",
-        });
+        await showFailureToast(error, { title: "Generation failed" });
       }
     }
 
@@ -83,10 +124,10 @@ export default function Command(props: LaunchProps<{ arguments: { country?: stri
     return () => {
       cancelled = true;
     };
-  }, [props.arguments.country]);
+  }, [props.arguments.country, prefsRaw, setSavedValue, storageLoading]);
 
-  if (view.mode === "loading") {
-    return <GenIbanForm isLoading savedIban={savedIban} onSavedIbanChange={setSavedIban} />;
+  if (view.mode === "loading" || storageLoading) {
+    return <GenIbanForm isLoading savedIban={savedIban} onSavedIbanChange={onSavedIbanChange} />;
   }
 
   if (view.mode === "quick-detail") {
@@ -95,13 +136,21 @@ export default function Command(props: LaunchProps<{ arguments: { country?: stri
         record={view.record}
         prefs={view.prefs}
         validity={VALIDITY_VALID}
-        onSaved={setSavedIban}
-        onBackToSettings={() => setView({ mode: "form", prefillCountry: view.prefs.countryCode })}
+        onSaved={onSavedIbanChange}
+        onBackToSettings={() =>
+          push(
+            <GenIbanForm
+              savedIban={savedIban}
+              onSavedIbanChange={onSavedIbanChange}
+              initialCountryCode={view.prefs.countryCode}
+            />,
+          )
+        }
       />
     );
   }
 
   return (
-    <GenIbanForm savedIban={savedIban} onSavedIbanChange={setSavedIban} initialCountryCode={view.prefillCountry} />
+    <GenIbanForm savedIban={savedIban} onSavedIbanChange={onSavedIbanChange} initialCountryCode={view.prefillCountry} />
   );
 }

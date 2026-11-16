@@ -68,13 +68,36 @@ function esControlDigit(digits: string, weights: number[]): number {
   return remainder === 0 ? 0 : remainder === 1 ? 1 : 11 - remainder;
 }
 
+/** Czech/Slovak mod-11 check digit; throws when remainder is 1 (would require digit 10). */
 function czControlDigit(digits: string, weights: number[]): number {
   let sum = 0;
   for (let i = 0; i < digits.length; i++) {
     sum += parseInt(digits.charAt(i), 10) * weights[i]!;
   }
   const remainder = sum % 11;
-  return remainder === 0 ? 0 : remainder === 1 ? 1 : 11 - remainder;
+  if (remainder === 0) {
+    return 0;
+  }
+  if (remainder === 1) {
+    throw new Error("Czech/Slovak check digit cannot represent remainder 1");
+  }
+  return 11 - remainder;
+}
+
+function czechSuffixWeightedSumMod11(suffixWithCheck10: string): number {
+  let sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(suffixWithCheck10.charAt(i), 10) * CZ_WEIGHTS_SUFFIX[i]!;
+  }
+  return sum % 11;
+}
+
+function czechPrefixWeightedSumMod11(prefixWithCheck6: string): number {
+  let sum = 0;
+  for (let i = 0; i < 6; i++) {
+    sum += parseInt(prefixWithCheck6.charAt(i), 10) * CZ_WEIGHTS_PREFIX[i]!;
+  }
+  return sum % 11;
 }
 
 function weightedMod10Control(digits: string, weights: number[]): number {
@@ -227,9 +250,24 @@ export function isValidCroatianBban(bban: string): boolean {
 }
 
 export function isValidCzechSlovakBban(bban: string): boolean {
-  const p = computeCzechPrefixCheck(bban.substring(4, 9));
-  const s = computeCzechSuffixCheck(bban.substring(10, 19));
-  return p === bban.charAt(9) && s === bban.charAt(19);
+  if (bban.length !== 20) {
+    return false;
+  }
+  let p: string;
+  let s: string;
+  try {
+    p = computeCzechPrefixCheck(bban.substring(4, 9));
+    s = computeCzechSuffixCheck(bban.substring(10, 19));
+  } catch {
+    return false;
+  }
+  if (p !== bban.charAt(9) || s !== bban.charAt(19)) {
+    return false;
+  }
+  return (
+    czechPrefixWeightedSumMod11(bban.substring(4, 10)) === 0 &&
+    czechSuffixWeightedSumMod11(bban.substring(10, 20)) === 0
+  );
 }
 
 export function isValidEstonianBban(bban: string): boolean {

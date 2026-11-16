@@ -11,15 +11,15 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { RANDOM_BANK } from "./constants";
 import { generateRecord, toSavedIban } from "./generate-record";
-import { loadFormPrefs, saveFormPrefs, type FormPrefs } from "./form-prefs";
+import { saveFormPrefs, type FormPrefs } from "./form-prefs";
 import { IbanDetail } from "./iban-detail";
 import { COUNTRIES, getCountry, INVALID_KINDS } from "./lib";
 import { savedIbanSummary } from "./saved-iban-display";
-import { generateAndPasteShortcut } from "./shortcuts";
-import { ibanText, loadIban, saveIban, type IbanFormat, type SavedIban } from "./storage";
+import { ibanText, type IbanFormat, type SavedIban } from "./storage";
 import { VALIDITY_VALID, validityDropdownInfo, type ValidityChoice } from "./validity";
 
 interface FormValues {
@@ -31,6 +31,48 @@ interface FormValues {
 }
 
 const defaultCountryCode = COUNTRIES.find((c) => c.code === "DE")?.code ?? COUNTRIES[0]?.code ?? "DE";
+
+const SAVED_IBAN_KEY = "saved-iban";
+const FORM_PREFS_KEY = "gen-iban-prefs";
+
+function storedSavedIban(value: unknown): SavedIban | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.iban !== "string" || typeof record.format !== "string" || typeof record.savedAt !== "string") {
+    return undefined;
+  }
+  return value as SavedIban;
+}
+
+function storedFormPrefs(value: unknown): FormPrefs | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const prefs = value as FormPrefs;
+  if (!prefs.countryCode || !prefs.bankSelection || !prefs.format) {
+    return undefined;
+  }
+  return prefs;
+}
+
+export function generationSettingsFromSaved(
+  record: SavedIban,
+  copyToClipboard: boolean,
+): { prefs: FormPrefs; validity: ValidityChoice } {
+  const country = getCountry(record.countryCode);
+  const bankKnown = country?.banks.some((bank) => bank.bankCode === record.bankCode);
+  return {
+    prefs: {
+      countryCode: record.countryCode,
+      bankSelection: bankKnown ? record.bankCode : RANDOM_BANK,
+      format: record.format,
+      copyToClipboard,
+    },
+    validity: record.invalidKind ?? VALIDITY_VALID,
+  };
+}
 
 interface GenIbanFormProps {
   savedIban?: SavedIban;
@@ -46,25 +88,31 @@ export function GenIbanForm({
   isLoading: isLoadingProp,
 }: GenIbanFormProps) {
   const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(isLoadingProp ?? true);
-  const [savedIban, setSavedIban] = useState(savedIbanProp);
+  const { value: savedRaw, isLoading: savedStorageLoading, setValue: setSavedValue } = useLocalStorage<unknown>(SAVED_IBAN_KEY);
+  const { value: prefsRaw, isLoading: prefsStorageLoading } = useLocalStorage<unknown>(FORM_PREFS_KEY);
+
+  const storedSaved = useMemo(() => storedSavedIban(savedRaw), [savedRaw]);
+  const savedIban = storedSaved ?? savedIbanProp;
+
   const [countryCode, setCountryCode] = useState(initialCountryCode ?? defaultCountryCode);
   const [bankSelection, setBankSelection] = useState(RANDOM_BANK);
   const [format, setFormat] = useState<IbanFormat>("grouped");
   const [copyToClipboard, setCopyToClipboard] = useState(false);
   const [validity, setValidity] = useState<ValidityChoice>(VALIDITY_VALID);
+  const [prefsHydrated, setPrefsHydrated] = useState(false);
+
+  const storageLoading = savedStorageLoading || prefsStorageLoading;
+  const isLoading = (isLoadingProp ?? false) || storageLoading;
 
   const updateSaved = useCallback(
     (record: SavedIban | undefined) => {
-      setSavedIban(record);
+      if (record) {
+        void setSavedValue(record);
+      }
       onSavedIbanChange(record);
     },
-    [onSavedIbanChange],
+    [onSavedIbanChange, setSavedValue],
   );
-
-  useEffect(() => {
-    setSavedIban(savedIbanProp);
-  }, [savedIbanProp]);
 
   useEffect(() => {
     if (initialCountryCode) {
@@ -73,50 +121,36 @@ export function GenIbanForm({
   }, [initialCountryCode]);
 
   useEffect(() => {
-    let cancelled = false;
+    if (prefsStorageLoading || prefsHydrated) {
+      return;
+    }
 
-    async function load() {
-      const [saved, prefs] = await Promise.all([loadIban(), loadFormPrefs()]);
-      if (cancelled) {
-        return;
-      }
-
-      updateSaved(saved);
-
-      if (prefs) {
-        const country = getCountry(prefs.countryCode);
-        if (country && !initialCountryCode) {
-          setCountryCode(prefs.countryCode);
+    const prefs = storedFormPrefs(prefsRaw);
+    if (prefs) {
+      const country = getCountry(prefs.countryCode);
+      if (country && !initialCountryCode) {
+        setCountryCode(prefs.countryCode);
+        const bankValid =
+          prefs.bankSelection === RANDOM_BANK || country.banks.some((b) => b.bankCode === prefs.bankSelection);
+        setBankSelection(bankValid ? prefs.bankSelection : RANDOM_BANK);
+      } else if (initialCountryCode) {
+        const country = getCountry(initialCountryCode);
+        if (country) {
           const bankValid =
             prefs.bankSelection === RANDOM_BANK || country.banks.some((b) => b.bankCode === prefs.bankSelection);
           setBankSelection(bankValid ? prefs.bankSelection : RANDOM_BANK);
-        } else if (initialCountryCode) {
-          const country = getCountry(initialCountryCode);
-          if (country) {
-            const bankValid =
-              prefs.bankSelection === RANDOM_BANK || country.banks.some((b) => b.bankCode === prefs.bankSelection);
-            setBankSelection(bankValid ? prefs.bankSelection : RANDOM_BANK);
-          }
         }
-        setFormat(prefs.format);
-        setCopyToClipboard(prefs.copyToClipboard);
       }
-
-      if (initialCountryCode) {
-        setCountryCode(initialCountryCode);
-      }
-
-      setIsLoading(false);
+      setFormat(prefs.format);
+      setCopyToClipboard(prefs.copyToClipboard);
     }
 
-    if (!isLoadingProp) {
-      void load();
+    if (initialCountryCode) {
+      setCountryCode(initialCountryCode);
     }
 
-    return () => {
-      cancelled = true;
-    };
-  }, [initialCountryCode, isLoadingProp, updateSaved]);
+    setPrefsHydrated(true);
+  }, [initialCountryCode, prefsHydrated, prefsRaw, prefsStorageLoading]);
 
   const selectedCountry = getCountry(countryCode);
   const sepaCountries = COUNTRIES.filter((c) => c.sepa);
@@ -147,7 +181,6 @@ export function GenIbanForm({
         const record = toSavedIban(generated, values.format);
         const prefs = await persistPrefs(values);
 
-        await saveIban(record);
         updateSaved(record);
 
         const text = ibanText(record);
@@ -169,11 +202,10 @@ export function GenIbanForm({
 
         push(<IbanDetail record={record} prefs={prefs} validity={values.validity} onSaved={updateSaved} />);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Could not generate IBAN";
-        await showToast({ style: Toast.Style.Failure, title: "Generation failed", message });
+        await showFailureToast(error, { title: "Generation failed" });
       }
     },
-    [persistPrefs, push, updateSaved],
+    [persistPrefs, push, setSavedValue, updateSaved],
   );
 
   const onCountryChange = useCallback((newCode: string) => {
@@ -185,7 +217,7 @@ export function GenIbanForm({
     });
   }, []);
 
-  if (isLoading || isLoadingProp) {
+  if (isLoading) {
     return <Form isLoading />;
   }
 
@@ -201,7 +233,6 @@ export function GenIbanForm({
           <Action.SubmitForm
             title="Generate and Paste"
             icon={Icon.Clipboard}
-            shortcut={generateAndPasteShortcut}
             onSubmit={(values: FormValues) => handleGenerate(values, true)}
           />
           {savedIban ? (
@@ -210,15 +241,12 @@ export function GenIbanForm({
               icon={Icon.Eye}
               shortcut={Keyboard.Shortcut.Common.Open}
               onAction={() => {
-                void (async () => {
-                  const prefs = (await loadFormPrefs()) ?? {
-                    countryCode,
-                    bankSelection,
-                    format,
-                    copyToClipboard,
-                  };
-                  push(<IbanDetail record={savedIban} prefs={prefs} validity={validity} onSaved={updateSaved} />);
-                })();
+                const storedPrefs = storedFormPrefs(prefsRaw);
+                const { prefs, validity: savedValidity } = generationSettingsFromSaved(
+                  savedIban,
+                  storedPrefs?.copyToClipboard ?? copyToClipboard,
+                );
+                push(<IbanDetail record={savedIban} prefs={prefs} validity={savedValidity} onSaved={updateSaved} />);
               }}
             />
           ) : null}

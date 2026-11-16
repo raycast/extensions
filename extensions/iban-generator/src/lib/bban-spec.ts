@@ -229,12 +229,30 @@ export function generateBban(input: GenerateBbanInput): {
     }
     case "czech": {
       const bank4 = bankCode.padStart(4, "0").substring(0, 4);
-      const prefix5 = randomDigits(5);
-      const pCheck = computeCzechPrefixCheck(prefix5);
-      const suffix9 = randomDigits(9);
-      const sCheck = computeCzechSuffixCheck(suffix9);
-      bban = bank4 + prefix5 + pCheck + suffix9 + sCheck;
-      accountNumber = suffix9;
+      let built: string | undefined;
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const prefix5 = randomDigits(5);
+        let pCheck: string;
+        try {
+          pCheck = computeCzechPrefixCheck(prefix5);
+        } catch {
+          continue;
+        }
+        const suffix9 = randomDigits(9);
+        let sCheck: string;
+        try {
+          sCheck = computeCzechSuffixCheck(suffix9);
+        } catch {
+          continue;
+        }
+        built = bank4 + prefix5 + pCheck + suffix9 + sCheck;
+        break;
+      }
+      if (!built) {
+        throw new Error("Failed to generate Czech/Slovak BBAN");
+      }
+      bban = built;
+      accountNumber = bban.substring(10, 20);
       break;
     }
     case "estonia": {
@@ -369,7 +387,7 @@ export function accountNumberFromBban(countryCode: string, bban: string): string
     case "croatia":
       return bban.substring(7, 16);
     case "czech":
-      return bban.substring(10, 19);
+      return bban.substring(10, 20);
     case "estonia":
       return bban.substring(2, 16);
     case "hungary":

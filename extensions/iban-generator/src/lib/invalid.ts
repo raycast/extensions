@@ -1,4 +1,5 @@
 import { BBAN_LAYOUTS, digitRequiredPositions, upperRequiredPositions } from "./bban-spec";
+import { extractBbanParts } from "./bban-parts";
 import { computeIbanCheckDigits, expandIbanChars, mod9710 } from "./checksum";
 import { generateIban } from "./generate";
 import type { GenerateOptions, GeneratedIban, InvalidKind } from "./types";
@@ -53,6 +54,34 @@ function mutateBbanStructure(countryCode: string, bban: string): string {
   throw new Error(`Cannot corrupt BBAN structure for ${countryCode}`);
 }
 
+function formatValidReferencePart(value: string): string {
+  return `— (valid: ${value})`;
+}
+
+function breakdownForInvalidIban(
+  valid: GeneratedIban,
+  brokenCountryCode: string,
+  brokenBban: string,
+): Pick<GeneratedIban, "bankCode" | "branchCode" | "accountNumber"> {
+  const partsCountry = brokenCountryCode === "XX" ? valid.countryCode : brokenCountryCode;
+  const layout = BBAN_LAYOUTS[partsCountry];
+
+  if (layout && brokenBban.length === layout.bbanLength) {
+    const parts = extractBbanParts(partsCountry, brokenBban);
+    return {
+      bankCode: parts.bankCode,
+      branchCode: parts.branchCode,
+      accountNumber: parts.accountNumber,
+    };
+  }
+
+  return {
+    bankCode: formatValidReferencePart(valid.bankCode),
+    branchCode: valid.branchCode ? formatValidReferencePart(valid.branchCode) : undefined,
+    accountNumber: formatValidReferencePart(valid.accountNumber),
+  };
+}
+
 export function generateInvalidIban(options: GenerateOptions, kind: InvalidKind): GeneratedIban {
   const valid = generateIban(options);
 
@@ -96,6 +125,8 @@ export function generateInvalidIban(options: GenerateOptions, kind: InvalidKind)
       throw new Error(`Unknown invalid kind: ${String(kind)}`);
   }
 
+  const breakdown = breakdownForInvalidIban(valid, brokenCountryCode, brokenBban);
+
   return {
     ...valid,
     iban: brokenIban,
@@ -103,6 +134,9 @@ export function generateInvalidIban(options: GenerateOptions, kind: InvalidKind)
     countryCode: brokenCountryCode,
     checkDigits: brokenCheckDigits,
     bban: brokenBban,
+    bankCode: breakdown.bankCode,
+    branchCode: breakdown.branchCode,
+    accountNumber: breakdown.accountNumber,
     invalidKind: kind,
   };
 }

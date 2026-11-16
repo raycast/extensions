@@ -1,15 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Detail,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import { generateRecord, toSavedIban } from "./generate-record";
 import { type FormPrefs } from "./form-prefs";
@@ -64,7 +54,7 @@ function buildMarkdown(record: SavedIban): string {
 
   lines.push(
     "",
-    "> Generated test data for development and testing — not linked to a real bank account.",
+    "> Randomly generated test data — may match real accounts. Use only in test environments.",
     "",
     "## Breakdown",
     "",
@@ -130,8 +120,7 @@ export function IbanDetail({
       }
       await showToast({ style: Toast.Style.Success, title: "IBAN generated" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not generate IBAN";
-      await showToast({ style: Toast.Style.Failure, title: "Generation failed", message });
+      await showFailureToast(error, { title: "Generation failed" });
     }
   }, [onSaved, prefs, validity]);
 

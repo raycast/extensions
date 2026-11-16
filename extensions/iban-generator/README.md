@@ -1,6 +1,6 @@
 # IBAN Generator
 
-Generate test IBANs, BICs, and bank details for development. Every value is synthetic and is not linked to a real bank account.
+Generate test IBANs, BICs, and bank details for development. Values are randomly generated using real bank codes and BICs where available; they may coincide with real accounts and must only be used in test environments.
 
 ## Commands
 
