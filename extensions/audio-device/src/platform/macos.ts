@@ -3,6 +3,7 @@ import { execa } from "execa";
 import { environment } from "@raycast/api";
 import fs from "fs";
 import { TransportType, type PlatformAudioAPI, type AudioDevice, type IOType } from "./index";
+import { btAddressFromUid, normalizeAddress } from "../utils";
 
 const binaryAsset = path.join(environment.assetsPath, "audio-devices");
 const binary = path.join(environment.supportPath, "audio-devices");
@@ -10,8 +11,10 @@ const binary = path.join(environment.supportPath, "audio-devices");
 const soundControlAsset = path.join(environment.assetsPath, "sound-control");
 const soundControlBinary = path.join(environment.supportPath, "sound-control");
 
-const btAudioAsset = path.join(environment.assetsPath, "bt-audio");
-const btAudioBinary = path.join(environment.supportPath, "bt-audio");
+// macOS only registers a Bluetooth audio device with CoreAudio once an audio
+// profile is connected, so paired BT headphones are invisible to audio-devices
+// until selected. The BtAudio Swift package lists them via IOBluetooth; such
+// devices get a synthetic "bt:<address>" id resolved to a HAL id on selection.
 
 function needsCopy(source: string, target: string): boolean {
   if (!fs.existsSync(target)) return true;
@@ -47,39 +50,26 @@ function parseStdout({ stdout, stderr }: { stderr: string; stdout: string }) {
   return JSON.parse(stdout);
 }
 
-// macOS only registers a Bluetooth audio device with CoreAudio once an audio
-// profile is connected, so paired BT headphones are invisible to audio-devices
-// until selected. bt-audio lists them from IOBluetooth; such devices get a
-// synthetic "bt:<address>" id which is resolved to a HAL id on selection.
-
 const BT_ID_PREFIX = "bt:";
 
 type BtDevice = { name: string; address: string; connected: boolean; hasMic: boolean };
 
-async function ensureBtAudio() {
-  if (needsCopy(btAudioAsset, btAudioBinary)) {
-    fs.copyFileSync(btAudioAsset, btAudioBinary);
-    await execa("chmod", ["+x", btAudioBinary]);
-  }
-}
-
 async function getBtAudioDevices(): Promise<BtDevice[]> {
   try {
-    await ensureBtAudio();
-    return JSON.parse((await execa(btAudioBinary, ["list"], { timeout: 5_000 })).stdout);
+    const { listBluetoothAudioDevices } = await import("swift:../../swift");
+    return (await listBluetoothAudioDevices()) as BtDevice[];
   } catch {
     return [];
   }
 }
 
-function normalizeAddress(s: string): string {
-  return s.replace(/[^0-9a-f]/gi, "").toLowerCase();
-}
-
 function isBtDevicePresent(hal: AudioDevice, bt: BtDevice): boolean {
-  const uid = normalizeAddress(hal.uid);
-  const addr = normalizeAddress(bt.address);
-  return (uid.length > 0 && uid.includes(addr)) || hal.name === bt.name;
+  const halAddr = btAddressFromUid(hal.uid);
+  if (halAddr != null && halAddr === normalizeAddress(bt.address)) return true;
+  if (hal.name !== bt.name) return false;
+  // Same display name only dedupes when the HAL device carries no different
+  // Bluetooth MAC — otherwise it is an unrelated device sharing the name.
+  return halAddr == null;
 }
 
 async function mergeBtAudioDevices(devices: AudioDevice[]): Promise<AudioDevice[]> {
@@ -105,19 +95,11 @@ async function resolveDeviceId(deviceId: string, type: IOType): Promise<string> 
   const addr = normalizeAddress(deviceId.slice(BT_ID_PREFIX.length));
   const all = parseStdout(await execa(binary, ["list", "--json"])) as AudioDevice[];
   // Bluetooth devices register as separate ":input" and ":output" HAL objects.
-  const existing = all.find(
-    (d) => normalizeAddress(d.uid).includes(addr) && (type === "input" ? d.isInput : d.isOutput),
-  );
+  const existing = all.find((d) => btAddressFromUid(d.uid) === addr && (type === "input" ? d.isInput : d.isOutput));
   if (existing) return existing.id;
 
-  await ensureBtAudio();
-  const device = JSON.parse(
-    (
-      await execa(btAudioBinary, ["connect", deviceId.slice(BT_ID_PREFIX.length), `--${type}`], {
-        timeout: 45_000,
-      })
-    ).stdout,
-  ) as AudioDevice;
+  const { connectBluetoothAudioDevice } = await import("swift:../../swift");
+  const device = (await connectBluetoothAudioDevice(deviceId.slice(BT_ID_PREFIX.length), type)) as AudioDevice;
   return String(device.id);
 }
 
@@ -173,6 +155,7 @@ export const macosAudioAPI: PlatformAudioAPI = {
   },
 
   async getOutputDeviceVolume(deviceId: string) {
+    if (deviceId.startsWith(BT_ID_PREFIX)) return undefined;
     await ensureSoundControl();
     try {
       const { stdout } = await execa(soundControlBinary, ["get", deviceId]);
@@ -184,12 +167,14 @@ export const macosAudioAPI: PlatformAudioAPI = {
   },
 
   async setOutputDeviceVolume(deviceId: string, volume: number) {
+    const id = await resolveDeviceId(deviceId, "output");
     await ensureSoundControl();
     const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
-    await execa(soundControlBinary, ["set", `${level}`, deviceId]);
+    await execa(soundControlBinary, ["set", `${level}`, id]);
   },
 
   async getOutputDeviceMute(deviceId: string) {
+    if (deviceId.startsWith(BT_ID_PREFIX)) return undefined;
     await ensureSoundControl();
     try {
       const { stdout } = await execa(soundControlBinary, ["mute", "get", deviceId]);
@@ -200,17 +185,20 @@ export const macosAudioAPI: PlatformAudioAPI = {
   },
 
   async setOutputDeviceMute(deviceId: string, muted: boolean) {
+    const id = await resolveDeviceId(deviceId, "output");
     await ensureSoundControl();
-    await execa(soundControlBinary, ["mute", muted ? "on" : "off", deviceId]);
+    await execa(soundControlBinary, ["mute", muted ? "on" : "off", id]);
   },
 
   async toggleOutputDeviceMute(deviceId: string) {
+    const id = await resolveDeviceId(deviceId, "output");
     await ensureSoundControl();
-    const { stdout } = await execa(soundControlBinary, ["mute", "toggle", deviceId]);
+    const { stdout } = await execa(soundControlBinary, ["mute", "toggle", id]);
     return stdout.trim() === "true";
   },
 
   async getInputDeviceVolume(deviceId: string) {
+    if (deviceId.startsWith(BT_ID_PREFIX)) return undefined;
     await ensureSoundControl();
     try {
       const { stdout } = await execa(soundControlBinary, ["get-input", deviceId]);
@@ -222,12 +210,14 @@ export const macosAudioAPI: PlatformAudioAPI = {
   },
 
   async setInputDeviceVolume(deviceId: string, volume: number) {
+    const id = await resolveDeviceId(deviceId, "input");
     await ensureSoundControl();
     const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
-    await execa(soundControlBinary, ["set-input", `${level}`, deviceId]);
+    await execa(soundControlBinary, ["set-input", `${level}`, id]);
   },
 
   async getInputDeviceMute(deviceId: string) {
+    if (deviceId.startsWith(BT_ID_PREFIX)) return undefined;
     await ensureSoundControl();
     try {
       const { stdout } = await execa(soundControlBinary, ["mute-input", "get", deviceId]);
@@ -238,13 +228,15 @@ export const macosAudioAPI: PlatformAudioAPI = {
   },
 
   async setInputDeviceMute(deviceId: string, muted: boolean) {
+    const id = await resolveDeviceId(deviceId, "input");
     await ensureSoundControl();
-    await execa(soundControlBinary, ["mute-input", muted ? "on" : "off", deviceId]);
+    await execa(soundControlBinary, ["mute-input", muted ? "on" : "off", id]);
   },
 
   async toggleInputDeviceMute(deviceId: string) {
+    const id = await resolveDeviceId(deviceId, "input");
     await ensureSoundControl();
-    const { stdout } = await execa(soundControlBinary, ["mute-input", "toggle", deviceId]);
+    const { stdout } = await execa(soundControlBinary, ["mute-input", "toggle", id]);
     return stdout.trim() === "true";
   },
 

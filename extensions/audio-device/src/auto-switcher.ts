@@ -11,6 +11,7 @@ import {
   setInputDeviceVolume,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
+import { btAddressFromUid } from "./utils";
 import {
   getDefaultDeviceUid,
   getDefaultDeviceName,
@@ -27,10 +28,13 @@ async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
   if (!defaultUid) return false;
 
   const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
-  // A Bluetooth device saved while unconnected has a synthetic "bt:" uid;
-  // once connected its uid changes, so fall back to the stored name.
-  const defaultName = await getDefaultDeviceName(type);
-  const target = devices.find((d) => d.uid === defaultUid || (defaultName != null && d.name === defaultName));
+  // A Bluetooth device saved while unconnected has a synthetic "bt:" uid; once
+  // connected its uid changes but carries the same MAC, so match on that.
+  const target =
+    devices.find((d) => d.uid === defaultUid) ??
+    (defaultUid.startsWith("bt:")
+      ? devices.find((d) => btAddressFromUid(d.uid) === btAddressFromUid(defaultUid))
+      : undefined);
   if (!target) return false;
 
   const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
