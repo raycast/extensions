@@ -7,3 +7,11 @@ Access your Google Drive files effortlessly.
 - ⭐ Browse starred files and access them from the menu bar
 - 📝 Create documents, forms, presentations, and spreadsheets using fast commands
 - 🔗 Quickly Open Google Drive home in your browser
+
+## Search Google Directory
+
+The `Search Google Directory` command is disabled by default. Enable it in Raycast's extension settings to use it.
+
+- Requires a Google Workspace account whose admin has enabled directory sharing
+- Asks for a separate Google sign-in with read-only access to your directory (`directory.readonly`)
+- Press `Enter` to paste a person's primary email, and pin the people you contact most
