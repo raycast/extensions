@@ -90,13 +90,23 @@ function parseAuthFile(raw: string | undefined): ConfigFile | undefined {
   }
 }
 
-/** A profile's own token wins; the top-level token belongs to the default profile. */
-function tokenFor(file: ConfigFile | undefined, profileName: string | undefined): string | undefined {
-  if (!file) return undefined;
-  const profileToken = profileName
-    ? file.alternativeProfiles?.find((profile) => profile.name === profileName)?.authToken
-    : undefined;
-  return profileToken || file.authToken || undefined;
+function profileTokenIn(file: ConfigFile | undefined, profileName: string | undefined): string | undefined {
+  if (!profileName) return undefined;
+  return file?.alternativeProfiles?.find((profile) => profile.name === profileName)?.authToken || undefined;
+}
+
+/** A profile's own token, from either file, wins; the top-level token belongs to the default profile. */
+function tokenFor(
+  auth: ConfigFile | undefined,
+  userConfig: ConfigFile,
+  profileName: string | undefined,
+): string | undefined {
+  return (
+    profileTokenIn(auth, profileName) ??
+    profileTokenIn(userConfig, profileName) ??
+    (auth?.authToken || undefined) ??
+    (userConfig.authToken || undefined)
+  );
 }
 
 export async function readGraphiteConfig(env: GraphiteEnvironment = process.env): Promise<GraphiteConfig> {
@@ -136,7 +146,7 @@ export async function readGraphiteConfig(env: GraphiteEnvironment = process.env)
       : "https://app.graphite.com";
 
   return {
-    authToken: envToken ?? tokenFor(auth, profileName) ?? tokenFor(userConfig, profileName),
+    authToken: envToken ?? tokenFor(auth, userConfig, profileName),
     apiUrl,
     appUrl,
   };
