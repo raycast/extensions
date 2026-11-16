@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-16
 
 - Scan for development dependencies, build artifacts, and caches on macOS with npkill profiles and saved scan settings.
 - Search, filter, and sort results as they arrive, including matching paths that start with `~/`. See the active scan root and reset filters when changing directories. Inspect directories in Finder or stop a scan and keep its partial results.
