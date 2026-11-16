@@ -1,6 +1,6 @@
 # SaaSFlow Changelog
 
-## [Raycast 2 and Seven New AI Tools] - {PR_MERGE_DATE}
+## [Raycast 2 and Seven New AI Tools] - 2026-11-16
 
 - Runs on Raycast 2 (`@raycast/api` 2.12).
 - Seven more AI tools for Ask SaaSFlow: metric definitions, metric explanations, cash flow and balance forecasts, the customers behind a cohort, SaaS benchmarks, and a valuation estimate.
