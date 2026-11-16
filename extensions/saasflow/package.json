@@ -276,7 +276,312 @@
         }
     ],
     "ai": {
-        "instructions": "You help the user inspect their SaaSFlow data. Prefer the most specific tool: list-companies to discover companies, get-company for a single company's metadata. If the user references a company by name, look it up with list-companies first to get its id. Format currency values with the company's reporting currency when present."
+        "instructions": "You help the user inspect their SaaSFlow data. Prefer the most specific tool: list-companies to discover companies, get-company for a single company's metadata. If the user references a company by name, look it up with list-companies first to get its id. Format currency values with the company's reporting currency when present.",
+        "evals": [
+            {
+                "input": "@saasflow What's our MRR today?",
+                "mocks": {
+                    "data-mrr-at-date": {
+                        "mrr": 48250,
+                        "customerCount": 212
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-mrr-at-date"
+                    },
+                    {
+                        "includes": "48"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow How do you calculate the CAC payback period?",
+                "mocks": {
+                    "data-metric-definitions": {
+                        "cacPaybackPeriod": {
+                            "title": "CAC payback period",
+                            "format": "months",
+                            "description": "Months of gross profit from new customers needed to earn back what it cost to acquire them.",
+                            "formula": "cacPerNewCustomer / (mrrPerNewCustomer * grossProfitMargin)"
+                        }
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-metric-definitions"
+                    },
+                    {
+                        "includes": "gross profit"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow Why was our net revenue retention what it was in March 2026?",
+                "mocks": {
+                    "data-metric-explanation": {
+                        "metric": {
+                            "metricName": "netRevenueRetention",
+                            "month": "2026-03",
+                            "value": 1.08,
+                            "formulaValue": 1.08,
+                            "diverges": false,
+                            "definition": {
+                                "title": "Net revenue retention",
+                                "description": "MRR today from customers who were paying 12 months ago, divided by their MRR back then."
+                            }
+                        },
+                        "referencedMetrics": {
+                            "mrrTwelveMonthsAgo": 31000,
+                            "mrrFromThoseCustomersToday": 33480
+                        }
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-metric-explanation",
+                            "arguments": {
+                                "metricName": "netRevenueRetention",
+                                "month": "2026-03"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What cash flow do we expect until the end of 2026?",
+                "mocks": {
+                    "data-forecast-cash-flow-time-series": {
+                        "inflow": [
+                            {
+                                "date": "2026-11-01",
+                                "value": 51000
+                            }
+                        ],
+                        "outflow": [
+                            {
+                                "date": "2026-11-01",
+                                "value": -43000
+                            }
+                        ],
+                        "plannedInflow": [
+                            {
+                                "date": "2026-12-01",
+                                "value": 53500
+                            }
+                        ],
+                        "plannedOutflow": [
+                            {
+                                "date": "2026-12-01",
+                                "value": -44800
+                            }
+                        ]
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-forecast-cash-flow-time-series",
+                            "arguments": {
+                                "endDate": {
+                                    "matches": "^2026-12-31"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What will our bank balance be at the end of 2026?",
+                "mocks": {
+                    "data-forecast-balance-time-series": {
+                        "actual": [
+                            {
+                                "date": "2026-11-16",
+                                "value": 412000
+                            }
+                        ],
+                        "forecast": [
+                            {
+                                "date": "2026-12-31",
+                                "value": 398500
+                            }
+                        ]
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-forecast-balance-time-series"
+                    },
+                    {
+                        "includes": "398"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow Which customers from the January 2026 cohort were still paying in June 2026?",
+                "mocks": {
+                    "data-cohort-customers": [
+                        {
+                            "customerId": "cus_1",
+                            "customerName": "Muster GmbH",
+                            "mrr": 890
+                        },
+                        {
+                            "customerId": "cus_2",
+                            "customerName": "Demo Studios Inc",
+                            "mrr": 450
+                        }
+                    ],
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-cohort-customers",
+                            "arguments": {
+                                "cohortMonth": "2026-01",
+                                "targetMonth": "2026-06"
+                            }
+                        }
+                    },
+                    {
+                        "includes": "Muster GmbH"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow How does our growth compare to similar SaaS companies?",
+                "mocks": {
+                    "data-benchmarks": {
+                        "asOfMonth": "2026-10",
+                        "peerCell": {
+                            "arrStage": "from1to3m",
+                            "acvSegment": "rabbits"
+                        },
+                        "metrics": [
+                            {
+                                "metric": "mrrGrowthRateAnnual",
+                                "value": 0.52,
+                                "valueMonth": "2026-10",
+                                "bands": {
+                                    "lower": 0.25,
+                                    "median": 0.4,
+                                    "upper": 0.7,
+                                    "direction": "higherIsBetter",
+                                    "peerLabel": "$1M to $3M ARR"
+                                },
+                                "zone": "aboveMedian",
+                                "covered": true,
+                                "note": ""
+                            }
+                        ]
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-benchmarks"
+                    },
+                    {
+                        "includes": "52"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What could the company be worth if we grew 60% a year?",
+                "mocks": {
+                    "data-valuation": {
+                        "asOfMonth": "2026-10",
+                        "lens": "fundraising",
+                        "category": "traditional",
+                        "estimate": {
+                            "arrEur": 2100000,
+                            "multipleLow": 4.2,
+                            "multipleMid": 5.6,
+                            "multipleHigh": 7.1,
+                            "low": 8820000,
+                            "mid": 11760000,
+                            "high": 14910000
+                        },
+                        "scenarioEstimate": {
+                            "arrEur": 2100000,
+                            "multipleLow": 5,
+                            "multipleMid": 6.6,
+                            "multipleHigh": 8.3,
+                            "low": 10500000,
+                            "mid": 13860000,
+                            "high": 17430000
+                        }
+                    },
+                    "list-companies": [
+                        {
+                            "id": "00000000-0000-4000-8000-000000000001",
+                            "name": "Muster GmbH",
+                            "baseCurrency": "EUR"
+                        }
+                    ]
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-valuation",
+                            "arguments": {
+                                "scenarioMrrGrowthRateAnnual": 0.6
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
     },
     "type": "module",
     "scripts": {

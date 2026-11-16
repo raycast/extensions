@@ -121,14 +121,14 @@ export async function signOut(): Promise<void> {
 
 /**
  * Whether a request can be made without a browser round-trip: an API key is
- * configured, or OAuth tokens are stored (an expired token is refreshed on
- * use). Background launches check this first, because they cannot show the
+ * configured, or a stored OAuth token is still valid or can be refreshed. Background launches check this first, because they cannot show the
  * OAuth sign-in.
  */
 export async function hasStoredCredentials(): Promise<boolean> {
     if (preferences().apiKey) return true;
     const tokens = await oauthClient.getTokens();
-    return Boolean(tokens?.accessToken);
+    // An expired token without a refresh token would need the browser again.
+    return Boolean(tokens?.accessToken && (!tokens.isExpired() || tokens.refreshToken));
 }
 
 /**
