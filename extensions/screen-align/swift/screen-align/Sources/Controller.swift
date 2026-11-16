@@ -19,6 +19,10 @@ final class Overlay {
     /// drawing immediately, and get written once the user stops.
     private var pendingDelta = 0
     private var commitTimer: Timer?
+    /// Shown in the read-out when macOS refuses a change, so a rejected move explains
+    /// itself instead of the preview just disappearing.
+    private var notice: String?
+    private var noticeTimer: Timer?
 
     /// Whichever axis macOS leaves free for the current arrangement.
     private var axis: Axis {
@@ -117,7 +121,8 @@ final class Overlay {
             view.cgBounds = CGRect(x: info.x, y: info.y, width: info.width, height: info.height)
             view.axis = currentAxis
             let density = info.ptPerMM(currentAxis)
-            view.ptPerMM = CGFloat(density > 0 ? density : info.ptPerMMY)
+            let fallback = info.ptPerMMY > 0 ? info.ptPerMMY : info.ptPerMMX
+            view.ptPerMM = CGFloat(density > 0 ? density : fallback)
             view.edges = edges(for: info, among: displays, axis: currentAxis)
             view.matchPos = matchPos
             view.isTarget = info.id == targetID
@@ -157,12 +162,14 @@ final class Overlay {
         }
         let offset = target.position(axis) - main.position(axis) + pendingDelta
         let density = target.ptPerMM(axis)
-        let mm = density > 0 ? Double(offset) / density : 0
+        let measurement = density > 0
+            ? String(format: "%+d pt   %+.1f mm", offset, Double(offset) / density)
+            : String(format: "%+d pt   (no physical size reported)", offset)
         let snaps = axis == .vertical ? "T C B snap" : "L C R snap"
-        return [
-            String(format: "%@   %+d pt   %+.1f mm", target.name, offset, mm),
-            "\(arrows) align \(target.name)   ⌥\(arrows) move line   ⇧ ×10   \(snaps)   U undo   esc",
-        ]
+        var lines = ["\(target.name)   \(measurement)"]
+        if let notice { lines.append(notice) }
+        lines.append("\(arrows) align \(target.name)   ⌥\(arrows) move line   ⇧ ×10   \(snaps)   U undo   esc")
+        return lines
     }
 
     // MARK: Keys
@@ -215,7 +222,22 @@ final class Overlay {
         let delta = pendingDelta
         pendingDelta = 0
         guard delta != 0 else { return }
-        _ = try? nudgeDisplay(targetID, by: delta, along: axis)
+        attempt { _ = try nudgeDisplay(targetID, by: delta, along: axis) }
+    }
+
+    /// Run a change to the arrangement, reporting a refusal in the read-out.
+    private func attempt(_ body: () throws -> Void) {
+        do {
+            try body()
+            notice = nil
+        } catch {
+            notice = error.localizedDescription
+            noticeTimer?.invalidate()
+            noticeTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { [weak self] _ in
+                self?.notice = nil
+                self?.apply()
+            }
+        }
         apply()
     }
 
@@ -229,16 +251,14 @@ final class Overlay {
         commit()
         guard let main = mainDisplay(), let target = try? display(targetID), !target.isMain else { return }
         let origin = alignedOrigin(target: target, to: main, mode: mode, axis: axis)
-        _ = try? moveDisplay(target.id, toX: Int(origin.x), y: Int(origin.y))
-        apply()
+        attempt { _ = try moveDisplay(target.id, toX: Int(origin.x), y: Int(origin.y)) }
     }
 
     private func undo() {
         commitTimer?.invalidate()
         commitTimer = nil
         pendingDelta = 0
-        try? setOrigins(initialLayout)
-        apply()
+        attempt { try setOrigins(initialLayout) }
     }
 
     // MARK: Persistence

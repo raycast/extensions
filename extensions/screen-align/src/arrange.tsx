@@ -1,15 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  Toast,
-  environment,
-  showToast,
-  Keyboard,
-} from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Color, Icon, List, environment, Keyboard } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import {
   align,
   applyLayout,
@@ -23,6 +14,7 @@ import {
   Arrangement,
   Axis,
   Display,
+  SIDES,
   driftPercent,
   extentOf,
   formatOffset,
@@ -36,59 +28,58 @@ import {
 } from "./displays";
 
 export default function Command() {
-  const [displays, setDisplays] = useState<Display[]>([]);
-  const [axis, setAxis] = useState<Axis>("vertical");
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, error, revalidate } = usePromise(
+    async () => (await listDisplays()) as unknown as Arrangement,
+  );
   // Captured once, so undo always returns to where the arrangement started.
   const original = useRef<Display[] | null>(null);
-
-  const receive = (result: Arrangement) => {
-    if (!result?.displays) return;
-    setDisplays(result.displays);
-    setAxis(result.axis);
-  };
-
-  const run = async (action: () => Promise<unknown>) => {
-    setIsLoading(true);
-    try {
-      receive((await action()) as unknown as Arrangement);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not change the arrangement",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    (async () => {
-      const result = (await listDisplays()) as unknown as Arrangement;
-      original.current = result.displays;
-      receive(result);
-      setIsLoading(false);
-    })();
-  }, []);
+    if (data && !original.current) original.current = data.displays;
+  }, [data]);
 
+  const displays = data?.displays ?? [];
+  const axis: Axis = data?.axis ?? "vertical";
   const main = mainOf(displays);
   const secondary = secondaryOf(displays);
   const words = wording(axis);
+
+  const run = async (action: () => Promise<unknown>) => {
+    try {
+      await action();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not change the arrangement" });
+    } finally {
+      revalidate();
+    }
+  };
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not read the displays"
+          description={error instanceof Error ? error.message : String(error)}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   const actions = (display: Display) => {
     const movable = main && !display.isMain;
     const step = pointsPerMM(display, axis);
     return (
       <ActionPanel>
-        <ActionPanel.Section title="Rulers">
-          <Action
-            title="Toggle Screen Rulers"
-            icon={Icon.Ruler}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={() => run(() => toggleRulers(environment.supportPath))}
-          />
-        </ActionPanel.Section>
+        <Action
+          title="Toggle Screen Rulers"
+          icon={Icon.Ruler}
+          onAction={() => run(() => toggleRulers(environment.supportPath))}
+        />
         {movable && (
           <ActionPanel.Section title={`Move ${display.name}`}>
             {[
@@ -130,7 +121,7 @@ export default function Command() {
             <Action
               title="Align Centers"
               icon={Icon.Center}
-              shortcut={Keyboard.Shortcut.Common.Copy}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
               onAction={() => run(() => align(display.id, "center"))}
             />
             <Action
@@ -139,21 +130,16 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd", "shift"], key: words.end.key }}
               onAction={() => run(() => align(display.id, "end"))}
             />
-            <Action
-              title="Flush with Main"
-              icon={Icon.Maximize}
-              onAction={() => run(() => setOffset(display.id, 0))}
-            />
+            <Action title="Flush with Main" icon={Icon.Maximize} onAction={() => run(() => setOffset(display.id, 0))} />
           </ActionPanel.Section>
         )}
         {movable && (
           <ActionPanel.Section title="Rearrange">
-            {words.sides.map(({ label, side, key }) => (
+            {SIDES.map(({ label, side }) => (
               <Action
                 key={side}
                 title={label}
                 icon={Icon.AppWindowGrid2x2}
-                shortcut={{ modifiers: ["cmd", "shift"], key }}
                 onAction={() => run(() => placeBeside(display.id, side))}
               />
             ))}
@@ -164,15 +150,13 @@ export default function Command() {
             title="Undo Changes"
             icon={Icon.ArrowCounterClockwise}
             shortcut={{ modifiers: ["cmd"], key: "z" }}
-            onAction={() =>
-              run(() => applyLayout((original.current ?? []).map(({ uuid, x, y }) => ({ uuid, x, y }))))
-            }
+            onAction={() => run(() => applyLayout((original.current ?? []).map(({ uuid, x, y }) => ({ uuid, x, y }))))}
           />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Pin}
-            onAction={() => run(() => listDisplays())}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={() => revalidate()}
           />
         </ActionPanel.Section>
       </ActionPanel>
@@ -183,12 +167,10 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail
-      navigationTitle={words.arrangement}
+      searchBarPlaceholder="Search Displays"
       selectedItemId={secondary ? String(secondary.id) : undefined}
     >
-      {displays.length === 0 && !isLoading && (
-        <List.EmptyView title="No displays found" icon={Icon.Monitor} />
-      )}
+      {displays.length === 0 && !isLoading && <List.EmptyView title="No displays found" icon={Icon.Monitor} />}
       {displays.map((display) => (
         <List.Item
           key={display.id}
@@ -213,6 +195,7 @@ export default function Command() {
 function Detail({ display, main, axis }: { display: Display; main?: Display; axis: Axis }) {
   const drift = main ? driftPercent(display, main, axis) : 0;
   const words = wording(axis);
+  const density = axis === "vertical" ? display.ptPerMMY : display.ptPerMMX;
   return (
     <List.Item.Detail
       metadata={
@@ -221,22 +204,25 @@ function Detail({ display, main, axis }: { display: Display; main?: Display; axi
           <List.Item.Detail.Metadata.Label title="Size" text={`${display.width} × ${display.height} pt`} />
           <List.Item.Detail.Metadata.Label
             title="Panel"
-            text={`${display.widthMM.toFixed(0)} × ${display.heightMM.toFixed(0)} mm`}
+            text={
+              display.widthMM > 0
+                ? `${display.widthMM.toFixed(0)} × ${display.heightMM.toFixed(0)} mm`
+                : "No physical size reported"
+            }
           />
           <List.Item.Detail.Metadata.Label
             title="Density"
-            text={`${(axis === "vertical" ? display.ptPerMMY : display.ptPerMMX).toFixed(3)} pt/mm ${
-              axis === "vertical" ? "vertically" : "horizontally"
-            }`}
+            text={
+              density > 0
+                ? `${density.toFixed(3)} pt/mm ${axis === "vertical" ? "vertically" : "horizontally"}`
+                : "Unknown — rulers show no scale"
+            }
           />
           <List.Item.Detail.Metadata.Separator />
           {main && !display.isMain ? (
             <>
               <List.Item.Detail.Metadata.Label title="Arrangement" text={words.arrangement} />
-              <List.Item.Detail.Metadata.Label
-                title={words.offset}
-                text={formatOffset(display, main, axis)}
-              />
+              <List.Item.Detail.Metadata.Label title={words.offset} text={formatOffset(display, main, axis)} />
               <List.Item.Detail.Metadata.Label title="Pinned by macOS" text={words.pinned} />
               <List.Item.Detail.Metadata.Label
                 title="Drift away from the match line"
@@ -269,5 +255,7 @@ function overlapText(display: Display, main: Display, axis: Axis) {
   const points = end - start;
   if (points <= 0) return "None — the pointer cannot cross between them";
   const mm = toMM(display, points, axis);
-  return `${points} pt (${mm.toFixed(0)} mm) where the pointer can cross`;
+  return mm > 0
+    ? `${points} pt (${mm.toFixed(0)} mm) where the pointer can cross`
+    : `${points} pt where the pointer can cross`;
 }

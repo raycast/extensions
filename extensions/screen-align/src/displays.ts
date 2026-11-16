@@ -21,11 +21,9 @@ export type Arrangement = { axis: Axis; displays: Display[] };
 
 export const positionOf = (display: Display, axis: Axis) => (axis === "vertical" ? display.y : display.x);
 
-export const extentOf = (display: Display, axis: Axis) =>
-  axis === "vertical" ? display.height : display.width;
+export const extentOf = (display: Display, axis: Axis) => (axis === "vertical" ? display.height : display.width);
 
-export const densityOf = (display: Display, axis: Axis) =>
-  axis === "vertical" ? display.ptPerMMY : display.ptPerMMX;
+export const densityOf = (display: Display, axis: Axis) => (axis === "vertical" ? display.ptPerMMY : display.ptPerMMX);
 
 export const toMM = (display: Display, points: number, axis: Axis) => {
   const density = densityOf(display, axis);
@@ -33,8 +31,7 @@ export const toMM = (display: Display, points: number, axis: Axis) => {
 };
 
 /// How many points make up a millimeter on this display, never less than one.
-export const pointsPerMM = (display: Display, axis: Axis) =>
-  Math.max(1, Math.round(densityOf(display, axis)));
+export const pointsPerMM = (display: Display, axis: Axis) => Math.max(1, Math.round(densityOf(display, axis)));
 
 export const mainOf = (displays: Display[]) => displays.find((d) => d.isMain);
 
@@ -60,6 +57,18 @@ export const driftPercent = (display: Display, main: Display, axis: Axis) => {
   return (there / here - 1) * 100;
 };
 
+/// Every side a display can be moved to. All four are always offered: moving between
+/// side by side and stacked is how you change which axis is adjustable, so restricting
+/// the list to the current axis would make the other arrangement unreachable.
+/// No shortcuts: cmd-shift with the arrow keys is Raycast's MoveUp/MoveDown, and these
+/// are occasional actions that do not need one.
+export const SIDES = [
+  { label: "Put on the Left", side: "left" },
+  { label: "Put on the Right", side: "right" },
+  { label: "Put Above", side: "above" },
+  { label: "Put Below", side: "below" },
+];
+
 /// Everything whose wording depends on which way the displays can move.
 ///
 /// `decrease` and `increase` describe what happens to the display itself, which is what
@@ -74,10 +83,6 @@ export const wording = (axis: Axis) =>
         increase: { label: "Down", key: "arrowDown" as const },
         start: { label: "Align Tops", key: "t" as const },
         end: { label: "Align Bottoms", key: "b" as const },
-        sides: [
-          { label: "Put on the Left", side: "left", key: "arrowLeft" as const },
-          { label: "Put on the Right", side: "right", key: "arrowRight" as const },
-        ],
         offset: "Offset from aligned tops",
       }
     : {
@@ -87,9 +92,5 @@ export const wording = (axis: Axis) =>
         increase: { label: "Right", key: "arrowRight" as const },
         start: { label: "Align Left Edges", key: "l" as const },
         end: { label: "Align Right Edges", key: "r" as const },
-        sides: [
-          { label: "Put Above", side: "above", key: "arrowUp" as const },
-          { label: "Put Below", side: "below", key: "arrowDown" as const },
-        ],
         offset: "Offset from aligned left edges",
       };

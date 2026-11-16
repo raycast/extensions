@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-align",
   "title": "Screen Align",
-  "description": "Align two displays precisely with on-screen rulers. Nudge the arrangement offset in points or millimeters, snap to tops, bottoms, centers or true physical continuity, and save layouts per display set.",
+  "description": "Align two displays precisely with on-screen rulers. Nudge the arrangement offset in points or millimeters, snap to aligned tops, bottoms or centers, and save layouts per display set.",
   "icon": "command-icon.png",
   "author": "vitbashy",
   "platforms": [

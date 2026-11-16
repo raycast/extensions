@@ -123,6 +123,14 @@ final class ScreenOverlayView: NSView {
         border.lineWidth = 1
         border.stroke()
 
+        // A display with no EDID physical size reports zero millimeters, which would
+        // leave every tick at the same place and loop forever. Draw the line without a
+        // scale rather than hang.
+        guard ptPerMM.isFinite, ptPerMM > 0 else {
+            drawLabel("no scale", along: line, base: base, inward: inward, color: accent)
+            return
+        }
+
         // Ticks every millimeter, counted from the match line so the numbers on both
         // screens read the same at the same real-world position.
         var mm = 0

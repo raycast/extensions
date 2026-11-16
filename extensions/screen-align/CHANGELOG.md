@@ -1,6 +1,6 @@
 # Screen Align Changelog
 
-## [Initial Version] - 2026-11-11
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Works along whichever axis macOS leaves free: vertical rulers and ↑↓ when the displays
   sit side by side, horizontal rulers and ←→ when they are stacked
