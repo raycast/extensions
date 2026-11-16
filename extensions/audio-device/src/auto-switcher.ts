@@ -27,7 +27,10 @@ async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
   if (!defaultUid) return false;
 
   const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
-  const target = devices.find((d) => d.uid === defaultUid);
+  // A Bluetooth device saved while unconnected has a synthetic "bt:" uid;
+  // once connected its uid changes, so fall back to the stored name.
+  const defaultName = await getDefaultDeviceName(type);
+  const target = devices.find((d) => d.uid === defaultUid || (defaultName != null && d.name === defaultName));
   if (!target) return false;
 
   const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
