@@ -160,10 +160,47 @@ export function formatAge(iso: string, now = Date.now()) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+export function isDexTokenQuote(quote: Quote): boolean {
+  return (
+    quote.kind === "token" ||
+    quote.id.startsWith("token:") ||
+    quote.provider?.toLowerCase().includes("dex")
+  );
+}
+
+export function quoteCurrency(quote: Quote): string {
+  if (quote.currency && quote.currency.toLowerCase() !== "probability") {
+    return quote.currency.toLowerCase();
+  }
+  if (quote.priceLabel) {
+    if (quote.priceLabel.includes("€")) return "eur";
+    if (quote.priceLabel.includes("£")) return "gbp";
+    if (quote.priceLabel.startsWith("CA$")) return "cad";
+  }
+  return "usd";
+}
+
+function formatQuoteValue(
+  quote: Quote,
+  metric: MenuBarMetric,
+  marketCapDexOnly: boolean,
+): string {
+  const showMarketCap =
+    metric === "market-cap" && (!marketCapDexOnly || isDexTokenQuote(quote));
+  if (showMarketCap) {
+    return formatMarketCap(quote.marketCap, quoteCurrency(quote));
+  }
+  if (quote.priceLabel) {
+    return compressSubscriptZeros(quote.priceLabel);
+  }
+  return formatSubscriptPrice(quote.price, quoteCurrency(quote));
+}
+
 export function formatMenuTitle(
   quote: Quote | Quote[] | undefined,
   style: MenuBarStyle,
   metric: MenuBarMetric = "price",
+  marketCapDexOnly = false,
 ): string | undefined {
   if (!quote) return undefined;
   switch (style) {
@@ -171,20 +208,14 @@ export function formatMenuTitle(
       const target = Array.isArray(quote) ? quote[0] : quote;
       if (!target) return undefined;
       const staleMarker = quoteFreshness(target) === "stale" ? " ⚠" : "";
-      const displayValue =
-        metric === "market-cap"
-          ? formatMarketCap(target.marketCap)
-          : target.priceLabel;
+      const displayValue = formatQuoteValue(target, metric, marketCapDexOnly);
       return `${target.symbol} ${displayValue}${staleMarker}`;
     }
     case "primary-change": {
       const target = Array.isArray(quote) ? quote[0] : quote;
       if (!target) return undefined;
       const staleMarker = quoteFreshness(target) === "stale" ? " ⚠" : "";
-      const displayValue =
-        metric === "market-cap"
-          ? formatMarketCap(target.marketCap)
-          : target.priceLabel;
+      const displayValue = formatQuoteValue(target, metric, marketCapDexOnly);
       const change =
         typeof target.changePercent === "number"
           ? ` ${formatPercent(target.changePercent)}`
@@ -199,16 +230,11 @@ export function formatMenuTitle(
       return targets
         .map((target) => {
           const staleMarker = quoteFreshness(target) === "stale" ? " ⚠" : "";
-          const displayValue =
-            metric === "market-cap"
-              ? formatMarketCap(target.marketCap)
-              : typeof target.price === "number" &&
-                  target.price > 0 &&
-                  target.price < 0.01
-                ? formatSubscriptPrice(target.price)
-                : target.priceLabel
-                  ? formatSubscriptPrice(target.priceLabel)
-                  : formatSubscriptPrice(target.price);
+          const displayValue = formatQuoteValue(
+            target,
+            metric,
+            marketCapDexOnly,
+          );
           return `${target.symbol} ${displayValue}${staleMarker}`;
         })
         .join(" | ");

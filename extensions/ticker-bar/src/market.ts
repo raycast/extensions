@@ -8,8 +8,10 @@ export {
   formatPrice,
   formatSubscriptPrice,
   formatSubscriptZeroPrice,
+  isDexTokenQuote,
   orderedMultiTickerIds,
   orderedMultiTickerQuotes,
+  quoteCurrency,
 } from "./market-format";
 export { assetFromId, normalizeAssetId, parseWatchlist } from "./market-ids";
 export { refreshMenuBar, refreshQuotes } from "./market-refresh";
@@ -18,6 +20,7 @@ export {
   DEFAULT_WATCHLIST,
   getCachedQuotes,
   getLogoDisplay,
+  getMarketCapDexOnly,
   getMenuBarMetric,
   getMenuBarStyle,
   getPrimaryAssetId,
@@ -29,6 +32,7 @@ export {
   resetWatchlistToDefaults,
   setPrimaryAssetId,
   setLogoDisplay,
+  setMarketCapDexOnly,
   setMenuBarMetric,
   setMenuBarStyle,
   setWatchlist,

@@ -7,6 +7,7 @@ import {
   formatPercent,
   formatPrice,
   formatSubscriptPrice,
+  isDexTokenQuote,
   orderedMultiTickerIds,
   orderedMultiTickerQuotes,
   quoteFreshness,
@@ -65,6 +66,10 @@ test("subscript-zero price formatter compresses leading zeros for sub-cent token
   assert.equal(formatSubscriptPrice(0.05), "$0.05");
   assert.equal(formatSubscriptPrice(150), "$150");
   assert.equal(formatSubscriptPrice("$0.000008981"), "$0.0₅8981");
+  assert.equal(formatSubscriptPrice("€0.000042"), "€0.0₄42");
+  assert.equal(formatSubscriptPrice("0.0000123 BTC"), "0.0₄123 BTC");
+  assert.equal(formatSubscriptPrice("CA$0.00008981"), "CA$0.0₄8981");
+  assert.equal(formatSubscriptPrice("£0.0000124"), "£0.0₄124");
 });
 
 test("multi-ticker title rendering formats top 3 tokens separated by pipe", () => {
@@ -104,9 +109,75 @@ test("compact market cap formatter formats numbers and falls back to --", () => 
   assert.equal(formatMarketCap(85_400), "$85.4K");
   assert.equal(formatMarketCap(1_420_000), "$1.42M");
   assert.equal(formatMarketCap(12_500_000), "$12.5M");
+  assert.equal(formatMarketCap(12_500_000, "eur"), "€12.5M");
+  assert.equal(formatMarketCap(12_500_000, "gbp"), "£12.5M");
+  assert.equal(formatMarketCap(12_500_000, "cad"), "CA$12.5M");
   assert.equal(formatMarketCap(undefined), "--");
   assert.equal(formatMarketCap(0), "--");
   assert.equal(formatMarketCap(-100), "--");
+});
+
+test("preserves non-USD currency and units on subscript prices and market caps", () => {
+  const eurQuote: Quote = {
+    ...quote("eurcoin", 1),
+    symbol: "EURC",
+    price: 0.000042,
+    priceLabel: "€0.000042",
+    currency: "eur",
+    marketCap: 12_500_000,
+  };
+  const btcPairQuote: Quote = {
+    ...quote("btcpair", 2),
+    symbol: "ALT",
+    price: 0.0000123,
+    priceLabel: "0.0000123 BTC",
+    currency: "btc",
+  };
+  const gbpQuote: Quote = {
+    ...quote("gbpcoin", 1),
+    symbol: "GBPC",
+    price: 0.0000124,
+    priceLabel: "£0.0000124",
+    currency: "gbp",
+    marketCap: 50_000_000,
+  };
+  const cadQuote: Quote = {
+    ...quote("cadcoin", 1),
+    symbol: "CADC",
+    price: 0.00008981,
+    priceLabel: "CA$0.00008981",
+    currency: "cad",
+    marketCap: 85_400_000,
+  };
+
+  // Preserves unit prefix/suffix on prices:
+  assert.equal(formatMenuTitle(eurQuote, "primary", "price"), "EURC €0.0₄42");
+  assert.equal(
+    formatMenuTitle(btcPairQuote, "primary", "price"),
+    "ALT 0.0₄123 BTC",
+  );
+  assert.equal(
+    formatMenuTitle([eurQuote, btcPairQuote], "multi-ticker", "price"),
+    "EURC €0.0₄42 | ALT 0.0₄123 BTC",
+  );
+
+  // Formats market caps in the quote's currency:
+  assert.equal(
+    formatMenuTitle(eurQuote, "primary", "market-cap"),
+    "EURC €12.5M",
+  );
+  assert.equal(
+    formatMenuTitle(gbpQuote, "primary", "market-cap"),
+    "GBPC £50M",
+  );
+  assert.equal(
+    formatMenuTitle(cadQuote, "primary", "market-cap"),
+    "CADC CA$85.4M",
+  );
+  assert.equal(
+    formatMenuTitle([eurQuote, gbpQuote], "multi-ticker", "market-cap"),
+    "EURC €12.5M | GBPC £50M",
+  );
 });
 
 test("menu title metric toggle displays market cap across single and multi-ticker styles", () => {
@@ -129,7 +200,7 @@ test("menu title metric toggle displays market cap across single and multi-ticke
     priceLabel: "$10.00",
   };
 
-  assert.equal(formatMenuTitle(q1, "primary", "price"), "S42 $0.000008981");
+  assert.equal(formatMenuTitle(q1, "primary", "price"), "S42 $0.0₅8981");
   assert.equal(formatMenuTitle(q1, "primary", "market-cap"), "S42 $85.4K");
   assert.equal(formatMenuTitle(qNoCap, "primary", "market-cap"), "NOMCAP --");
 
@@ -145,6 +216,105 @@ test("menu title metric toggle displays market cap across single and multi-ticke
   assert.equal(
     formatMenuTitle([q1, qNoCap], "multi-ticker", "market-cap"),
     "S42 $85.4K | NOMCAP --",
+  );
+});
+
+test("isDexTokenQuote identifies DEX token assets correctly", () => {
+  const dexQuote1: Quote = {
+    ...quote("token:solana:abc", 0),
+    kind: "token",
+    provider: "DexScreener",
+  };
+  const dexQuote2: Quote = {
+    ...quote("custom", 0),
+    id: "token:bsc:xyz",
+    provider: "Unknown",
+  };
+  const btcQuote: Quote = {
+    ...quote("crypto:bitcoin", 0),
+    kind: "crypto",
+    provider: "CoinGecko",
+  };
+  const stockQuote: Quote = {
+    ...quote("stock:SPY", 0),
+    kind: "stock",
+    provider: "Yahoo Finance",
+  };
+
+  assert.equal(isDexTokenQuote(dexQuote1), true);
+  assert.equal(isDexTokenQuote(dexQuote2), true);
+  assert.equal(isDexTokenQuote(btcQuote), false);
+  assert.equal(isDexTokenQuote(stockQuote), false);
+});
+
+test("marketCapDexOnly renders market cap for DEX tokens and price for others", () => {
+  const dexToken: Quote = {
+    ...quote("s42", 1),
+    id: "token:solana:s42",
+    kind: "token",
+    symbol: "S42",
+    price: 0.000008981,
+    priceLabel: "$0.000008981",
+    marketCap: 85_400,
+    provider: "DexScreener",
+  };
+  const btcToken: Quote = {
+    ...quote("btc", 2),
+    id: "crypto:bitcoin",
+    kind: "crypto",
+    symbol: "BTC",
+    price: 95_000,
+    priceLabel: "$95,000",
+    marketCap: 1_850_000_000_000,
+    provider: "CoinGecko",
+  };
+  const stockToken: Quote = {
+    ...quote("spy", 0.5),
+    id: "stock:SPY",
+    kind: "stock",
+    symbol: "SPY",
+    price: 550,
+    priceLabel: "$550.00",
+    provider: "Yahoo Finance",
+  };
+
+  // With marketCapDexOnly = true:
+  // DEX token shows market cap
+  assert.equal(
+    formatMenuTitle(dexToken, "primary", "market-cap", true),
+    "S42 $85.4K",
+  );
+  // Non-DEX tokens show regular price instead of market cap
+  assert.equal(
+    formatMenuTitle(btcToken, "primary", "market-cap", true),
+    "BTC $95,000",
+  );
+  assert.equal(
+    formatMenuTitle(stockToken, "primary", "market-cap", true),
+    "SPY $550.00",
+  );
+
+  // In multi-ticker:
+  assert.equal(
+    formatMenuTitle(
+      [dexToken, btcToken, stockToken],
+      "multi-ticker",
+      "market-cap",
+      true,
+    ),
+    "S42 $85.4K | BTC $95,000 | SPY $550.00",
+  );
+
+  // With marketCapDexOnly = false:
+  // All tokens show market cap (or -- if unavailable)
+  assert.equal(
+    formatMenuTitle(
+      [dexToken, btcToken, stockToken],
+      "multi-ticker",
+      "market-cap",
+      false,
+    ),
+    "S42 $85.4K | BTC $1.85T | SPY --",
   );
 });
 

@@ -29,6 +29,7 @@ export type Quote = {
   name: string;
   price: number;
   priceLabel: string;
+  currency?: string;
   changePercent?: number;
   provider: string;
   asOf: string;

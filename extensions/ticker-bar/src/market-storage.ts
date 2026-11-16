@@ -16,6 +16,7 @@ const PRIMARY_ASSET_KEY = "primary-asset.v1";
 const MENU_BAR_STYLE_KEY = "menu-bar-style.v1";
 const LOGO_DISPLAY_KEY = "logo-display.v1";
 const MENU_BAR_METRIC_KEY = "menu-bar-metric.v1";
+const MARKET_CAP_DEX_ONLY_KEY = "market-cap-dex-only.v1";
 
 export const DEFAULT_WATCHLIST = ["stock:SPY", "crypto:bitcoin"];
 export const MAX_WATCHLIST_SIZE = 50;
@@ -164,6 +165,15 @@ export async function getMenuBarMetric(): Promise<MenuBarMetric> {
 
 export async function setMenuBarMetric(metric: MenuBarMetric) {
   await LocalStorage.setItem(MENU_BAR_METRIC_KEY, metric);
+}
+
+export async function getMarketCapDexOnly(): Promise<boolean> {
+  const stored = await LocalStorage.getItem<boolean>(MARKET_CAP_DEX_ONLY_KEY);
+  return stored === true;
+}
+
+export async function setMarketCapDexOnly(dexOnly: boolean) {
+  await LocalStorage.setItem(MARKET_CAP_DEX_ONLY_KEY, dexOnly);
 }
 
 export async function getCachedQuotes(): Promise<Record<string, Quote>> {
