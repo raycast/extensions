@@ -908,9 +908,7 @@ export default function SearchPasswords() {
       "",
       "## External adapters",
       "",
-      externalDirectory
-        ? `Scanning \`${externalDirectory}\` for subfolders with \`pwm-adapter.json\`.`
-        : "Set extension preference **External Adapters Directory** (e.g. `~/.config/vaultcast/adapters`).",
+      `Scanning \`${externalDirectory}\` for subfolders with \`pwm-adapter.json\`. Change it with the extension preference **External Adapters Directory**.`,
       "",
       "See `examples/external-adapter/protonpass` for a reference implementation.",
       "",

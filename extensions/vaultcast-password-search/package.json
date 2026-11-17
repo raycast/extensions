@@ -139,12 +139,10 @@
     },
     {
       "name": "externalAdaptersDirectory",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
       "title": "External Adapters Directory",
-      "description": "Folder containing third-party adapter subfolders (each with pwm-adapter.json). Defaults to ~/.config/vaultcast/adapters (%USERPROFILE%\\.config\\vaultcast\\adapters on Windows).",
-      "placeholder": "~/.config/vaultcast/adapters",
-      "default": "~/.config/vaultcast/adapters"
+      "description": "Folder containing third-party adapter subfolders (each with pwm-adapter.json). Defaults to ~/.config/vaultcast/adapters (%USERPROFILE%\\.config\\vaultcast\\adapters on Windows)."
     },
     {
       "name": "defaultManagerOverride",

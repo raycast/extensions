@@ -129,18 +129,16 @@ function loadExternalAdapterFromDirectory(directoryPath: string): PasswordManage
   return createExternalScriptAdapter(manifest);
 }
 
-function getExternalAdaptersDirectory(): string | undefined {
-  const preferences = getPreferenceValues<Preferences>();
-  const expanded = expandHomePath(preferences.externalAdaptersDirectory ?? "");
-  return expanded || undefined;
+// The directory picker can't preselect a home-relative default, so an empty preference falls back here.
+const DEFAULT_EXTERNAL_ADAPTERS_DIRECTORY = "~/.config/vaultcast/adapters";
+
+function getExternalAdaptersDirectory(): string {
+  const { externalAdaptersDirectory } = getPreferenceValues<Preferences>();
+  return expandHomePath(externalAdaptersDirectory?.trim() || DEFAULT_EXTERNAL_ADAPTERS_DIRECTORY);
 }
 
 export async function loadExternalAdapters(): Promise<PasswordManagerAdapter[]> {
   const directory = getExternalAdaptersDirectory();
-  if (!directory) {
-    return [];
-  }
-
   if (!existsSync(directory)) {
     console.warn(`External adapters directory not found: ${directory}`);
     return [];
@@ -187,7 +185,7 @@ export async function loadExternalAdapters(): Promise<PasswordManagerAdapter[]> 
   return adapters;
 }
 
-export function getExternalAdaptersDirectoryForDisplay(): string | undefined {
+export function getExternalAdaptersDirectoryForDisplay(): string {
   return getExternalAdaptersDirectory();
 }
 
