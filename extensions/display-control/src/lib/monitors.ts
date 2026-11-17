@@ -14,7 +14,8 @@ function unavailable(message: string): DisplayState {
 
 export class MonitorService {
   private ddc?: M1ddc;
-  private pendingNative: Promise<unknown> = Promise.resolve();
+  private pending: Promise<unknown> = Promise.resolve();
+  private states = new Map<string, DisplayState>();
 
   constructor(
     private readonly native: Execute,
@@ -26,21 +27,27 @@ export class MonitorService {
     },
   ) {}
 
-  private runNative(args: string[], signal?: AbortSignal): Promise<string> {
-    const result = this.pendingNative.then(() => {
-      signal?.throwIfAborted();
-      return this.native(args, signal);
-    });
-    this.pendingNative = result.catch(() => undefined);
+  private enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    // Keep a complete read or write together, including when the selected display changes.
+    const result = this.pending.then(operation);
+    this.pending = result.catch(() => undefined);
     return result;
   }
 
-  async discover(): Promise<Discovery> {
+  getState(id: string): DisplayState | undefined {
+    return this.states.get(id.toLowerCase());
+  }
+
+  discover(): Promise<Discovery> {
+    return this.enqueue(() => this.discoverDisplays());
+  }
+
+  private async discoverDisplays(): Promise<Discovery> {
     await this.ddc?.waitForIdle();
     let nativeDisplays: Omit<Monitor, "ddc">[] = [];
     const warnings: string[] = [];
     try {
-      nativeDisplays = JSON.parse(await this.runNative(["list"]));
+      nativeDisplays = JSON.parse(await this.native(["list"]));
     } catch (error) {
       warnings.push(errorMessage(error));
     }
@@ -63,11 +70,15 @@ export class MonitorService {
         monitors.push({ ...display, builtIn: false, ddc: true });
       }
     }
+    const connected = new Set(monitors.map((monitor) => monitor.id.toLowerCase()));
+    for (const id of this.states.keys()) {
+      if (!connected.has(id)) this.states.delete(id);
+    }
     return { monitors, m1ddcMissing, warning: warnings.length ? warnings.join("\n\n") : undefined };
   }
 
   private async nativeReading(args: string[], signal?: AbortSignal): Promise<Reading> {
-    const reading: Reading = JSON.parse(await this.runNative(args, signal));
+    const reading: Reading = JSON.parse(await this.native(args, signal));
     if (
       !Number.isFinite(reading.current) ||
       reading.maximum !== 100 ||
@@ -79,7 +90,23 @@ export class MonitorService {
     return reading;
   }
 
-  async readControls(monitor: Monitor, signal?: AbortSignal): Promise<DisplayState> {
+  readControls(monitor: Monitor, signal?: AbortSignal): Promise<DisplayState> {
+    return this.enqueue(async () => {
+      signal?.throwIfAborted();
+      const state = await this.readMonitor(monitor, signal);
+      signal?.throwIfAborted();
+      const previous = this.getState(monitor.id);
+      for (const control of controls) {
+        if (!state[control].reading && previous?.[control].reading) {
+          state[control] = { ...state[control], reading: previous[control].reading };
+        }
+      }
+      this.states.set(monitor.id.toLowerCase(), state);
+      return state;
+    });
+  }
+
+  private async readMonitor(monitor: Monitor, signal?: AbortSignal): Promise<DisplayState> {
     if (!monitor.builtIn) {
       return monitor.ddc && this.ddc
         ? this.ddc.readControls(monitor.id, signal)
@@ -100,22 +127,43 @@ export class MonitorService {
     return state;
   }
 
-  async adjust(monitor: Monitor, control: Control, direction: -1 | 1, step: number): Promise<Reading> {
-    if (monitor.builtIn) {
-      if (control === "contrast") throw new Error("The built-in display does not support contrast control.");
-      return this.nativeReading(["adjust", monitor.id, control, String(direction * step)]);
-    }
-    if (!monitor.ddc || !this.ddc) throw new Error("This display is unavailable through m1ddc.");
-    return this.ddc.adjust(monitor.id, control, direction, step);
+  private update(monitor: Monitor, control: Control, operation: () => Promise<Reading>): Promise<Reading> {
+    return this.enqueue(async () => {
+      const state = this.getState(monitor.id) ?? unavailable("This control has not been read yet.");
+      try {
+        const reading = await operation();
+        this.states.set(monitor.id.toLowerCase(), { ...state, [control]: { reading } });
+        return reading;
+      } catch (error) {
+        this.states.set(monitor.id.toLowerCase(), {
+          ...state,
+          [control]: { ...state[control], error: errorMessage(error) },
+        });
+        throw error;
+      }
+    });
+  }
+
+  adjust(monitor: Monitor, control: Control, direction: -1 | 1, step: number): Promise<Reading> {
+    return this.update(monitor, control, async () => {
+      if (monitor.builtIn) {
+        if (control === "contrast") throw new Error("The built-in display does not support contrast control.");
+        return this.nativeReading(["adjust", monitor.id, control, String(direction * step)]);
+      }
+      if (!monitor.ddc || !this.ddc) throw new Error("This display is unavailable through m1ddc.");
+      return this.ddc.adjust(monitor.id, control, direction, step);
+    });
   }
 
   async set(monitor: Monitor, control: Control, percent: number): Promise<Reading> {
     valueAtPercentage(percent, 100);
-    if (monitor.builtIn) {
-      if (control === "contrast") throw new Error("The built-in display does not support contrast control.");
-      return this.nativeReading(["set", monitor.id, control, String(percent)]);
-    }
-    if (!monitor.ddc || !this.ddc) throw new Error("This display is unavailable through m1ddc.");
-    return this.ddc.set(monitor.id, control, percent);
+    return this.update(monitor, control, async () => {
+      if (monitor.builtIn) {
+        if (control === "contrast") throw new Error("The built-in display does not support contrast control.");
+        return this.nativeReading(["set", monitor.id, control, String(percent)]);
+      }
+      if (!monitor.ddc || !this.ddc) throw new Error("This display is unavailable through m1ddc.");
+      return this.ddc.set(monitor.id, control, percent);
+    });
   }
 }

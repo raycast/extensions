@@ -10,6 +10,8 @@ Raycast builds the native source in `swift/DisplayHelper` through its official S
 
 The automated tests simulate DDC responses and native helper requests. Native layout, shortcut handling, and actual DDC/CI behavior require manual testing in Raycast with a compatible monitor.
 
+Discovery and selected-display reads use Raycast's `usePromise` hook. `MonitorService` serializes complete hardware operations and retains control states for displays that remain connected across rediscovery. Writes update those states without cancelling the selected display's read.
+
 Run `npm ci` and `npm test` from `scripts/display-control` to run the automated tests. Run `python3 scripts/check_metadata_images.py extensions/display-control` from the repository root to validate Store screenshots. The screenshot validator requires Pillow and NumPy.
 
 The Store screenshots in `extensions/display-control/metadata` show the external display, built-in display, and shortcut actions. Native layout and hardware behavior should be checked in Raycast after relevant changes.

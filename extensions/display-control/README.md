@@ -41,6 +41,8 @@ You can set **Default Volume**, **Default Brightness**, and **Default Contrast**
 
 If m1ddc reports a successful write but the display cannot return a valid reading, the affected percentage is labeled **requested**. A temporary failure preserves the last known level and keeps the adjustment shortcuts available.
 
+Refreshing the list keeps the last known levels for displays that are still connected. A failed read labels those levels as **last known** until the next successful read. You can switch displays while a reset runs without interrupting the newly selected display's readings.
+
 ## Compatibility
 
 m1ddc supports external displays on Apple Silicon Macs through USB-C/DisplayPort Alt Mode and supported built-in HDMI ports. Support depends on the monitor, connection, adapter, and firmware. Each monitor may support a different subset of controls. The extension shows a control as unavailable when it cannot read a valid value and range.

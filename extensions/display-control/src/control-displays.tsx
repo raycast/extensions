@@ -11,17 +11,16 @@ import {
   List,
   open,
   openExtensionPreferences,
-  showToast,
-  Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CoalescedAdjustments, PressAcceleration } from "./lib/adjustment-input";
 import { controlPanelMarkdown } from "./lib/control-panel";
 import type { ResetDefaults } from "./lib/controls";
 import { initialDefaults, controlLabels as labels, parseResetDefault } from "./lib/controls";
 import type { Control, DisplayState, Reading } from "./lib/m1ddc";
 import { controls } from "./lib/m1ddc";
-import type { Discovery, Monitor } from "./lib/monitors";
+import type { Monitor } from "./lib/monitors";
 import { MonitorService } from "./lib/monitors";
 import { executeNative } from "./native";
 
@@ -42,107 +41,99 @@ export default function Command() {
     contrast: parseResetDefault(preferences.defaultContrast, initialDefaults.contrast),
   };
   const service = useMemo(() => new MonitorService(executeNative, preferences.m1ddcPath), [preferences.m1ddcPath]);
-  const [discovery, setDiscovery] = useState<Discovery>();
-  const [failure, setFailure] = useState<string>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, DisplayState>>({});
-  const [isDiscovering, setIsDiscovering] = useState(true);
-  const [isReading, setIsReading] = useState(false);
   const [writeCount, setWriteCount] = useState(0);
   const [setupDismissed, setSetupDismissed] = useState(false);
   const reading = useRef<AbortController | null>(null);
   const refreshing = useRef(false);
+  const discoveryRun = useRef(0);
   const writes = useRef(new Set<Promise<unknown>>());
   const acceleration = useRef(new PressAcceleration());
   const adjustmentQueue = useRef(new CoalescedAdjustments());
+  const {
+    data: discovery,
+    error: failure,
+    isLoading: isDiscovering,
+    revalidate,
+  } = usePromise(
+    async (currentService: MonitorService) => {
+      const run = ++discoveryRun.current;
+      refreshing.current = true;
+      acceleration.current.reset();
+      adjustmentQueue.current.clear();
+      reading.current?.abort();
+      try {
+        await Promise.allSettled([...writes.current]);
+        return await currentService.discover();
+      } finally {
+        if (run === discoveryRun.current) refreshing.current = false;
+      }
+    },
+    [service],
+    {
+      onData(result) {
+        setValues(
+          Object.fromEntries(
+            result.monitors.flatMap((monitor) => {
+              const state = service.getState(monitor.id);
+              return state ? [[monitor.id, state]] : [];
+            }),
+          ),
+        );
+        setSelectedId((previous) =>
+          result.monitors.some((monitor) => monitor.id === previous) ? previous : (result.monitors[0]?.id ?? null),
+        );
+      },
+      failureToastOptions: { title: "Could Not Load Displays" },
+    },
+  );
   const needsSetup = discovery?.m1ddcMissing && !setupDismissed;
   const selected =
     isDiscovering || needsSetup ? undefined : discovery?.monitors.find((monitor) => monitor.id === selectedId);
+  const { isLoading: isReading } = usePromise(
+    async (currentService: MonitorService, monitor: Monitor | undefined) => {
+      if (!monitor) return;
+      const state = await currentService.readControls(monitor, reading.current?.signal);
+      return { id: monitor.id, state };
+    },
+    [service, selected],
+    {
+      abortable: reading,
+      execute: !!selected,
+      onData(result) {
+        if (result) {
+          const state = service.getState(result.id) ?? result.state;
+          setValues((previous) => ({ ...previous, [result.id]: state }));
+        }
+      },
+      failureToastOptions: { title: "Could Not Read Display" },
+    },
+  );
 
-  const refresh = useCallback(async () => {
-    if (refreshing.current) return;
-    acceleration.current.reset();
-    adjustmentQueue.current.clear();
-    refreshing.current = true;
-    reading.current?.abort();
-    setIsDiscovering(true);
-    setDiscovery((previous) => (previous?.m1ddcMissing ? previous : undefined));
-    setFailure(undefined);
-    try {
-      await Promise.allSettled([...writes.current]);
-      const result = await service.discover();
-      setValues({});
-      setDiscovery(result);
-      setSelectedId((previous) =>
-        result.monitors.some((monitor) => monitor.id === previous) ? previous : (result.monitors[0]?.id ?? null),
-      );
-    } catch (error) {
-      setFailure(error instanceof Error ? error.message : "macOS could not list displays.");
-    } finally {
-      refreshing.current = false;
-      setIsDiscovering(false);
-    }
-  }, [service]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  async function refresh() {
+    if (!refreshing.current) await revalidate();
+  }
 
   useEffect(() => {
     const queue = adjustmentQueue.current;
     return () => queue.clear();
   }, []);
 
-  useEffect(() => {
-    if (!selected) {
-      setIsReading(false);
-      return;
-    }
-    const controller = new AbortController();
-    reading.current = controller;
-    setIsReading(true);
-    service
-      .readControls(selected, controller.signal)
-      .then((state) => {
-        if (!controller.signal.aborted) setValues((previous) => ({ ...previous, [selected.id]: state }));
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted) {
-          void showToast({ style: Toast.Style.Failure, title: "Could Not Read Display", message: String(error) });
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsReading(false);
-      });
-    return () => controller.abort();
-  }, [service, selected]);
-
   async function updateControl(monitor: Monitor, control: Control, update: () => Promise<Reading>) {
     if (refreshing.current) return false;
-    reading.current?.abort();
-    setIsReading(false);
     setWriteCount((count) => count + 1);
     const operation = update();
     writes.current.add(operation);
     try {
-      const value = await operation;
-      setValues((previous) => ({
-        ...previous,
-        [monitor.id]: { ...previous[monitor.id], [control]: { reading: value } },
-      }));
+      await operation;
       return true;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "The display did not accept the adjustment.";
-      setValues((previous) => ({
-        ...previous,
-        [monitor.id]: {
-          ...previous[monitor.id],
-          [control]: { ...previous[monitor.id]?.[control], error: message },
-        },
-      }));
-      await showToast({ style: Toast.Style.Failure, title: `Could Not Adjust ${labels[control]}`, message });
+      await showFailureToast(error, { title: `Could Not Adjust ${labels[control]}` });
       return false;
     } finally {
+      const state = service.getState(monitor.id);
+      if (state) setValues((previous) => ({ ...previous, [monitor.id]: state }));
       writes.current.delete(operation);
       setWriteCount((count) => count - 1);
     }
@@ -164,7 +155,7 @@ export default function Command() {
       })
       .catch((error) => {
         acceleration.current.reset();
-        void showToast({ style: Toast.Style.Failure, title: "Could Not Adjust Display", message: String(error) });
+        void showFailureToast(error, { title: "Could Not Adjust Display" });
       });
   }
 
@@ -173,10 +164,8 @@ export default function Command() {
     adjustmentQueue.current.clear();
     const invalid = selectedControls.find((control) => defaults[control] === undefined);
     if (invalid) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error("Enter a whole percentage from 0 to 100 in extension preferences."), {
         title: `Invalid Default ${labels[invalid]}`,
-        message: "Enter a whole percentage from 0 to 100 in extension preferences.",
         primaryAction: { title: "Open Preferences", onAction: openExtensionPreferences },
       });
       return;
@@ -195,9 +184,8 @@ export default function Command() {
         type: LaunchType.UserInitiated,
         arguments: { search: "m1ddc" },
       });
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
+    } catch (error) {
+      await showFailureToast(error, {
         title: "Could Not Open Brew",
         message: "Install and enable the Brew extension, and allow Raycast to open its Search command.",
         primaryAction: { title: "Get Brew Extension", onAction: () => open(brewStoreUrl) },
@@ -271,7 +259,7 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.Desktop}
         title={isDiscovering ? "Finding Displays" : failure ? "Could Not Load Displays" : "No Displays Found"}
-        description={failure ?? discovery?.warning ?? "Connect a display, then press Command-R to refresh."}
+        description={failure?.message ?? discovery?.warning ?? "Connect a display, then press Command-R to refresh."}
         actions={<ActionPanel>{utilityActions}</ActionPanel>}
       />
       {discovery?.monitors.map((monitor) => (

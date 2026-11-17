@@ -39,3 +39,11 @@ The validation completed on 2026-11-17 at 23:39 CET. All 41 tests, Raycast lint,
 ## The Store screenshots have been refreshed.
 
 The update completed on 2026-11-17 at 23:45 CET. The plan replaces the three earlier captures with the supplied Display Control screenshots and updates the PR image links. All three images show the Control Displays command and passed the official Store metadata validator. Visual inspection and decoded metadata checks found no private information. Raycast lint passed. The runtime source did not change, so its previously validated distribution build remains applicable.
+
+## Review fixes are in progress.
+
+The review work started on 2026-11-17 at 23:51 CET. The plan addresses all five review findings by replacing manual read effects with Raycast data hooks, preserving known levels across rediscovery, and isolating reads from reset actions on other displays. It also adopts the shared failure toast helper and names m1ddc in the Store description. Regression tests will cover display switching during a reset and recovery through a newly created DDC client.
+
+## All five review findings have been addressed.
+
+Validation completed on 2026-11-18 at 00:02 CET. All 45 tests, TypeScript, Raycast lint, formatting, and the distribution build passed. Four new regression tests cover refresh recovery through a fresh DDC client, disconnected-display cleanup, native cache recovery, and switching displays during a reset. Disabling cache retention or complete-operation ordering in isolated copies caused the associated regression tests to fail as expected. The view now uses `usePromise` and `showFailureToast`, and the Store description names m1ddc and its Apple Silicon requirement for external displays. The source and dependency-source privacy checks passed. Native hardware verification of the refreshed command remains manual.

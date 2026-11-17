@@ -225,3 +225,166 @@ test("external resets target the selected monitor and setting without discovery 
   assert.equal((await service.set(external, "contrast", 50)).current, 50);
   assert.deepEqual(targets, [["display", external.id, "set", "contrast", "50"]]);
 });
+
+test("a fresh DDC client retains last known levels after a failed refresh and uses fresh hardware values for recovery", async () => {
+  let clients = 0;
+  let failVolume = false;
+  let volume = 42;
+  let brightness = 60;
+  const targets: string[][] = [];
+  const service = new MonitorService(
+    async () => JSON.stringify([external]),
+    undefined,
+    async () => {
+      clients++;
+      return createClient(async (args) => {
+        if (args[1] === "list") return `[1] DELL U2723QE (${external.id})`;
+        if (args[3] === "volume" && failVolume) throw new Error("DDC communication failure.");
+        if (args[2] === "max") return "100";
+        if (args[2] === "set") {
+          targets.push(args);
+          volume = Number(args[4]);
+          return `Writing ${volume}`;
+        }
+        return String(args[3] === "volume" ? volume : args[3] === "luminance" ? brightness : 75);
+      });
+    },
+  );
+  await service.discover();
+  await service.readControls(external);
+  volume = 70;
+  brightness = 80;
+  await service.discover();
+  assert.equal(clients, 2);
+  assert.equal(service.getState(external.id)?.volume.reading?.current, 42);
+  failVolume = true;
+  const refreshed = await service.readControls(external);
+  assert.equal(refreshed.volume.reading?.current, 42);
+  assert.match(refreshed.volume.error ?? "", /DDC communication failure/);
+  assert.equal(refreshed.luminance.reading?.current, 80);
+  assert.equal(refreshed.luminance.error, undefined);
+  assert.deepEqual(service.getState(external.id.toLowerCase()), refreshed);
+  failVolume = false;
+  assert.equal((await service.adjust(external, "volume", 1, 1)).current, 71);
+  assert.deepEqual(targets, [["display", external.id, "set", "volume", "71"]]);
+  assert.equal(service.getState(external.id)?.volume.reading?.current, 71);
+  assert.equal(service.getState(external.id)?.volume.error, undefined);
+});
+
+test("rediscovery removes cached levels for a disconnected display", async () => {
+  let connected = true;
+  const service = new MonitorService(
+    async () => JSON.stringify(connected ? [external] : []),
+    undefined,
+    async () =>
+      createClient(async (args) => {
+        if (args[1] === "list") return connected ? `[1] DELL U2723QE (${external.id})` : "";
+        return args[2] === "max" ? "100" : "50";
+      }),
+  );
+  await service.discover();
+  await service.readControls(external);
+  assert.ok(service.getState(external.id)?.volume.reading);
+  connected = false;
+  assert.deepEqual((await service.discover()).monitors, []);
+  assert.equal(service.getState(external.id), undefined);
+});
+
+test("native levels survive rediscovery and failed writes until a successful update replaces them", async () => {
+  let volume = 42;
+  let failing = false;
+  const service = new MonitorService(
+    async (args) => {
+      if (args[0] === "list") return JSON.stringify([builtin]);
+      if (args[2] === "volume") {
+        if (failing) throw new Error("The built-in speakers are unavailable.");
+        if (args[0] === "set") volume = Number(args[3]);
+        if (args[0] === "adjust") volume += Number(args[3]);
+        return JSON.stringify({ current: volume, maximum: 100 });
+      }
+      return JSON.stringify({ current: 60, maximum: 100 });
+    },
+    undefined,
+    async () => createClient(async () => ""),
+  );
+  await service.discover();
+  await service.readControls(builtin);
+  await service.set(builtin, "volume", 20);
+  await service.discover();
+  failing = true;
+  const state = await service.readControls(builtin);
+  assert.equal(state.volume.reading?.current, 20);
+  assert.match(state.volume.error ?? "", /speakers are unavailable/);
+  assert.equal(state.luminance.reading?.current, 60);
+  await assert.rejects(service.adjust(builtin, "volume", 1, 1), /speakers are unavailable/);
+  assert.equal(service.getState(builtin.id)?.volume.reading?.current, 20);
+  failing = false;
+  await service.adjust(builtin, "volume", 1, 1);
+  assert.deepEqual(service.getState(builtin.id)?.volume, { reading: { current: 21, maximum: 100 } });
+});
+
+test("resetting an external display leaves another display's first read intact", async () => {
+  let releaseWrite: () => void;
+  let notifyWrite: () => void;
+  const gate = new Promise<void>((resolve) => {
+    releaseWrite = resolve;
+  });
+  const started = new Promise<void>((resolve) => {
+    notifyWrite = resolve;
+  });
+  const nativeReads: string[] = [];
+  const targets: string[][] = [];
+  const levels = { volume: 50, luminance: 60, contrast: 75 };
+  const client = createClient(async (args) => {
+    if (args[1] === "list") return `[1] DELL U2723QE (${external.id})`;
+    const control = args[3] as keyof typeof levels;
+    if (args[2] === "max") return "100";
+    if (args[2] === "set") {
+      targets.push(args);
+      if (control === "volume") {
+        notifyWrite();
+        await gate;
+      }
+      levels[control] = Number(args[4]);
+      return `Writing ${args[4]}`;
+    }
+    return String(levels[control]);
+  });
+  const service = new MonitorService(
+    async (args, signal) => {
+      if (args[0] === "list") return JSON.stringify([external, builtin]);
+      assert.equal(signal?.aborted, false);
+      nativeReads.push(args[2]);
+      return JSON.stringify({ current: args[2] === "volume" ? 25 : 56, maximum: 100 });
+    },
+    undefined,
+    async () => client,
+  );
+  await service.discover();
+  const resetting = (async () => {
+    await service.set(external, "volume", 20);
+    await service.set(external, "luminance", 50);
+    await service.set(external, "contrast", 50);
+  })();
+  await started;
+  const controller = new AbortController();
+  const reading = service.readControls(builtin, controller.signal);
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.deepEqual(nativeReads, []);
+  releaseWrite!();
+  const state = await reading;
+  await resetting;
+  assert.equal(controller.signal.aborted, false);
+  assert.deepEqual(nativeReads, ["volume", "luminance"]);
+  assert.equal(state.volume.reading?.current, 25);
+  assert.equal(state.luminance.reading?.current, 56);
+  assert.deepEqual(service.getState(builtin.id), state);
+  assert.deepEqual(
+    targets.map((args) => [args[1], args[3], args[4]]),
+    [
+      [external.id, "volume", "20"],
+      [external.id, "luminance", "50"],
+      [external.id, "contrast", "50"],
+    ],
+  );
+});
