@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Shiro MCP Server] - {PR_MERGE_DATE}
+## [Add Shiro MCP Server] - 2026-11-17
 
 - Add Shiro to the official registry: work on a novel or non-fiction book from your agent. Read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB, with every change kept in the project's History. Hosted Streamable HTTP server at https://api.meetshiro.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Shiro account (free).
 
