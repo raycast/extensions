@@ -4,7 +4,13 @@ Use your Mac camera or your iPhone as a barcode scanner. The extension reads a c
 
 It reads QR codes, Data Matrix, Aztec, PDF417, Code 128, Code 39, EAN, UPC, GS1 DataBar and more. Everything runs on your Mac. No code or image leaves your computer.
 
-![The scanner window reading a Code 128 label inside the green scan box](media/scanner-window.png)
+![Demo: a code typed by hand goes wrong, then three parcels are scanned into a spreadsheet](media/demo.gif)
+
+The same demo as a [video with sound](media/demo.mp4).
+
+| Scan into any app | Aim with the scan box | Choose the camera |
+| --- | --- | --- |
+| ![Two parcels scanned into a spreadsheet, one row for each code](media/scan-into-sheet.png) | ![The green scan box pulled tight around a barcode](media/scan-box.png) | ![The camera menu in the scanner window with iPhone Camera selected](media/camera-picker.png) |
 
 ## Setup
 
@@ -23,6 +29,8 @@ Tip: give Toggle Barcode Scanner a hotkey, for example ⌥⌘B. Open Raycast Set
 ## The Scan Box
 
 Only codes inside the green box are read.
+
+![The scanner window reading a Code 128 label inside the green scan box](media/scanner-window.png)
 
 - Drag inside the box to move it.
 - Drag an edge or a corner to resize it.
