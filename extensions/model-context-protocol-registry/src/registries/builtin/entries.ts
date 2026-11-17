@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "builtalist",
+    title: "Builtalist",
+    description:
+      "Find architecture worth visiting anywhere in the world. Search more than 32,000 buildings by city, architect, style or type and get the entry of each one, with who designed it and when, where it is, whether it can be visited and why it matters. It also has stories of places, architecture competitions and the exhibitions on in Madrid. 5 read-only tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://builtalist.com/web-app-manifest-512x512.png",
+    homepage: "https://builtalist.com/en/ia",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://builtalist.com/mcp"],
+    },
+    remoteUrl: "https://builtalist.com/mcp",
+  },
+  {
     name: "agentx",
     title: "AgentX",
     description:
