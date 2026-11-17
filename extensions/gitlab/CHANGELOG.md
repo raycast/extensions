@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Keep repository names visible in project lists] - {PR_MERGE_DATE}
+## [Keep repository names visible in project lists] - 2026-11-17
 
 - Show the repository name first and its parent namespace as a subtitle, with the full project path in a tooltip.
 
