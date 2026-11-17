@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Tapline MCP Server] - {PR_MERGE_DATE}
+
+- Add Tapline to the official registry: structured JSON from YouTube, Airbnb, TikTok, Instagram, Facebook, LinkedIn, Zillow, Google Maps and more. Hosted Streamable HTTP server at https://api.tapline.sh/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Social Post Flow MCP Server] - 2026-11-18
 
 - Add Social Post Flow to the official registry: schedule and publish social media posts to Facebook, X, LinkedIn, Instagram, Threads, Pinterest, TikTok, Bluesky, Mastodon, Telegram, Google Business Profile and VK. 8 tools. Hosted Streamable HTTP server at https://app.socialpostflow.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
