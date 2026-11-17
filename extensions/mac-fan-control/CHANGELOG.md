@@ -1,6 +1,6 @@
 # Mac Fan Control Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Show live fan speed, control mode and CPU/GPU temperature
 - Force every fan to a percentage of its own hardware RPM range
