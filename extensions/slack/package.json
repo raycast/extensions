@@ -126,6 +126,28 @@
   ],
   "preferences": [
     {
+      "name": "openLinksIn",
+      "title": "Open Links In",
+      "description": "Choose Slack App if automatic detection opens channels in your browser despite Slack being installed.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "Slack App",
+          "value": "slack"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ]
+    },
+    {
       "description": "View extension's README for instructions.",
       "name": "accessToken",
       "placeholder": "xoxp-...",

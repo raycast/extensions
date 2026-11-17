@@ -10,6 +10,14 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 - Set your presence status
 - Set your status
 
+## Opening channels and direct messages
+
+The **Open Links In** extension preference defaults to **Automatic**, which uses the Slack app when detected. If channels open in your browser despite Slack being installed, choose **Slack App**. Choose **Browser** to always use the web client. Native links use the system's registered `slack://` handler, so Slack must be installed to use **Slack App**.
+
+## Missing Slack permissions
+
+If Slack returns `missing_scope`, the error toast lists the required permissions when Slack supplies them. For OAuth sign-in, use **Re-authorize Slack** and reopen the command. For a personal access token, add the required **User Token Scopes** to your Slack app, reinstall the app to your workspace, and update the token in the extension preferences. Re-authorizing OAuth does not change a personal token.
+
 ## Set your status from a deep link
 
 The **Set Status** command accepts two optional arguments, `statusText` and `emoji`, so you can build a deep link (or a [Quicklink](https://manual.raycast.com/quicklinks)) that sets your status in one step:
@@ -49,6 +57,7 @@ If you don't want to log in through OAuth, you can use an access token instead. 
        user:
          # Command: Search & Unread Messages & Set Presence
          - users:read
+         - users:read.email
 
          # Command: Search & Unread Messages
          - channels:read

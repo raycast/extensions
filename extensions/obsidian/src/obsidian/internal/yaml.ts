@@ -8,7 +8,9 @@ export function parsedYAMLFrontmatter(str: string) {
   const frontmatter = str.match(YAML_FRONTMATTER_REGEX);
   if (frontmatter) {
     try {
-      return YAML.parse(frontmatter[0].replaceAll("---", ""), { logLevel: "error" });
+      return YAML.parse(frontmatter[0].replaceAll("---", ""), {
+        logLevel: "error",
+      });
     } catch {
       //
     }

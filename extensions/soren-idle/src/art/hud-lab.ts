@@ -4,9 +4,9 @@ import { arm, callout, crystal } from "./hud-scenes";
 import { hash } from "./util";
 
 const rad = (deg: number) => (deg * Math.PI) / 180;
-const BENCH = 312;
+export const BENCH = 312;
 
-function bench(): string {
+export function bench(): string {
   return [
     line([60, BENCH], [580, BENCH], BLUE.pale, 1.8),
     line([84, BENCH + 8], [556, BENCH + 8], BLUE.mid, 1, 'opacity=".6"'),
@@ -32,7 +32,7 @@ function bubbles(cx: number, bottom: number, top: number, half: number, f: numbe
   return out;
 }
 
-function flame(cx: number, by: number, f: number): string {
+export function flame(cx: number, by: number, f: number): string {
   const grow = [0, 5, 2, 7][f];
   const base = poly(
     [
@@ -56,7 +56,7 @@ function flame(cx: number, by: number, f: number): string {
   return base + tongue(1, 34) + tongue(0.55, 20);
 }
 
-function steam(cx: number, y: number, f: number, n = 3): string {
+export function steam(cx: number, y: number, f: number, n = 3): string {
   let out = "";
   for (let i = 0; i < n; i++) {
     const x = cx + (i - (n - 1) / 2) * 22;
@@ -91,7 +91,7 @@ function dial(c: Pt, r: number, v: number): string {
   return out;
 }
 
-function pot(cx: number, f: number, fill: string): string {
+export function pot(cx: number, f: number, fill: string): string {
   const top = 218;
   return [
     poly(

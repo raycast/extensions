@@ -4,6 +4,16 @@
 
 - Every Generate Password checkbox says whether it's for random passwords or passphrases, e.g. "Random: Symbols" or "Passphrase: Numbers", instead of only a small gray heading above the first one of each group. Saved settings are kept
 
+## [Folders and Proton Pass CLI 2.5.1] - 2026-11-17
+
+- Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, with Sort by in its search bar, and Esc goes back up. All Vaults still shows every item
+- The item details have a Folder row under Vault
+- Vaults have a box icon instead of a folder, now that folders have it
+- The folders come from one more pass-cli command per vault, run along with the vault's items, and are saved with them so that they show at once next time
+- The extension installs Proton Pass CLI 2.5.1 instead of 2.3.3, which brings folders, proxy fixes and network updates. The copy of the previous version is deleted once the new one is installed
+- The CLI Path preference says which pass-cli version the extension downloads
+- The README no longer suggests `pass-cli login --interactive`: pass-cli 2.5.0 removed logging in with a password in the terminal, leaving the browser login and personal access tokens
+
 ## [Shared with Me, Sorting and TOTP] - 2026-11-09
 
 - Items shared with you one by one show in Browse Items, under Shared with Me in the vault list and the vault menu, as in Proton Pass. They were missing, since they're in none of your vaults. They're also in All Vaults, the search and Get TOTP Code, and one that's also in one of your vaults shows once, with that vault

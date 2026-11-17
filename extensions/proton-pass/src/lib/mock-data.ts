@@ -1,3 +1,4 @@
+import { VaultFolder } from "./folders";
 import { Item, ItemDetail, Vault } from "./types";
 
 export const MOCK_VAULTS: Vault[] = [
@@ -25,6 +26,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-1",
     itemId: "item-2",
+    folderId: "folder-streaming",
+    folderPath: [{ id: "folder-streaming", name: "Streaming" }],
     title: "Netflix",
     type: "login",
     vaultName: "Personal",
@@ -61,6 +64,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-1",
     itemId: "item-5",
+    folderId: "folder-finance",
+    folderPath: [{ id: "folder-finance", name: "Finance" }],
     title: "Visa •••• 4242",
     type: "credit_card",
     vaultName: "Personal",
@@ -82,6 +87,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-7",
+    folderId: "folder-engineering",
+    folderPath: [{ id: "folder-engineering", name: "Engineering" }],
     title: "Jira",
     type: "login",
     vaultName: "Work",
@@ -91,6 +98,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-8",
+    folderId: "folder-engineering",
+    folderPath: [{ id: "folder-engineering", name: "Engineering" }],
     title: "Linear",
     type: "login",
     vaultName: "Work",
@@ -100,6 +109,11 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-9",
+    folderId: "folder-servers",
+    folderPath: [
+      { id: "folder-engineering", name: "Engineering" },
+      { id: "folder-servers", name: "Servers" },
+    ],
     title: "Server SSH Key",
     type: "ssh_key",
     vaultName: "Work",
@@ -230,3 +244,18 @@ export const MOCK_TOTP_CODES: Record<string, string> = {
 export function useMockData(): boolean {
   return process.env.NODE_ENV === "development";
 }
+
+/** The vaults' folders, Travel being empty: the items' folders and one without items. */
+export const MOCK_FOLDERS: VaultFolder[] = [
+  { shareId: "vault-1", path: [{ id: "folder-finance", name: "Finance" }] },
+  { shareId: "vault-1", path: [{ id: "folder-streaming", name: "Streaming" }] },
+  { shareId: "vault-1", path: [{ id: "folder-travel", name: "Travel" }] },
+  { shareId: "vault-2", path: [{ id: "folder-engineering", name: "Engineering" }] },
+  {
+    shareId: "vault-2",
+    path: [
+      { id: "folder-engineering", name: "Engineering" },
+      { id: "folder-servers", name: "Servers" },
+    ],
+  },
+];

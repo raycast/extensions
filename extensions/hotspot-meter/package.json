@@ -1,0 +1,191 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hotspot-meter",
+  "title": "Hotspot Meter",
+  "description": "Menu bar network meter with per-app data usage from the last 15 minutes to 4 hours, spike detection and hotspot-only counting.",
+  "icon": "extension-icon.png",
+  "author": "yigit",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "meter",
+      "title": "Network Usage",
+      "description": "Shows data usage in the menu bar: totals per window, per-app breakdown, spikes and hotspot diagnosis.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "barMode",
+          "type": "dropdown",
+          "title": "Menu Bar Title",
+          "description": "What the menu bar title shows.",
+          "required": false,
+          "default": "total",
+          "data": [
+            {
+              "title": "Total of the selected window",
+              "value": "total"
+            },
+            {
+              "title": "Total since last reset",
+              "value": "sum"
+            },
+            {
+              "title": "Live speed",
+              "value": "rate"
+            },
+            {
+              "title": "Icon only",
+              "value": "icon"
+            }
+          ]
+        },
+        {
+          "name": "window",
+          "type": "dropdown",
+          "title": "Default Window",
+          "description": "Time window summed in the menu bar title.",
+          "required": false,
+          "default": "60",
+          "data": [
+            {
+              "title": "15 minutes",
+              "value": "15"
+            },
+            {
+              "title": "1 hour",
+              "value": "60"
+            },
+            {
+              "title": "2 hours",
+              "value": "120"
+            },
+            {
+              "title": "4 hours",
+              "value": "240"
+            }
+          ]
+        },
+        {
+          "name": "showUpload",
+          "type": "checkbox",
+          "title": "Upload",
+          "label": "Show upload in the menu bar title",
+          "description": "Adds the upload amount next to the download amount.",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "details",
+      "title": "Network Usage Details",
+      "description": "Browse data usage by app for the last 15 minutes to 4 hours, with traffic history, destinations and spikes.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "network",
+    "bandwidth",
+    "data usage",
+    "hotspot",
+    "tethering",
+    "nettop"
+  ],
+  "preferences": [
+    {
+      "name": "countOn",
+      "type": "dropdown",
+      "title": "Count Traffic On",
+      "description": "Only traffic on these networks is added to windows, spikes and the total. Everything is recorded, so changing this also re-filters the history.",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All networks",
+          "value": "all"
+        },
+        {
+          "title": "Personal hotspot only (auto-detected)",
+          "value": "hotspot"
+        },
+        {
+          "title": "Selected networks (tick them in the Networks menu)",
+          "value": "selected"
+        }
+      ]
+    },
+    {
+      "name": "wifiNames",
+      "type": "textfield",
+      "title": "Wi-Fi Names",
+      "description": "Comma-separated Wi-Fi names to count when Count Traffic On is \"Selected networks\", in addition to the networks you tick. Case-insensitive. The name is read once per network, so it takes a few seconds after you join.",
+      "placeholder": "Home, Office",
+      "required": false
+    },
+    {
+      "name": "spikeMB",
+      "type": "textfield",
+      "title": "Spike Threshold (MB per Minute)",
+      "description": "A minute above this amount, and well above your usual minute, counts as a spike.",
+      "placeholder": "10",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "capture",
+      "type": "dropdown",
+      "title": "Per-App Breakdown",
+      "description": "A continuous stream (about 1% of one CPU core) counts every app, including short-lived connections. Without it you only get 10-second snapshots and an optional 30-second capture.",
+      "required": false,
+      "default": "always",
+      "data": [
+        {
+          "title": "Always stream (recommended)",
+          "value": "always"
+        },
+        {
+          "title": "Stream only on a hotspot",
+          "value": "hotspot"
+        },
+        {
+          "title": "Manual capture only",
+          "value": "manual"
+        }
+      ]
+    },
+    {
+      "name": "hotspotCapMB",
+      "type": "textfield",
+      "title": "Daily Hotspot Limit (MB)",
+      "description": "Optional. The icon turns orange at 50% and red at 90% of this amount used on a hotspot today.",
+      "placeholder": "2048",
+      "required": false
+    }
+  ]
+}

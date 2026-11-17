@@ -1,7 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { ITEMS, SKILLS } from "../engine/data";
 import { levelOf } from "../engine/engine";
-import { formatCredits, formatDate, formatDuration } from "../engine/format";
+import { formatCredits, formatDate, formatDuration, formatNumber } from "../engine/format";
 import { GameState, ItemId } from "../engine/types";
 
 export function Stats({ state }: { state: GameState }) {
@@ -12,11 +12,12 @@ export function Stats({ state }: { state: GameState }) {
   const rows: [string, string][] = [
     ["Stranded since", formatDate(state.createdAt)],
     ["Time stranded", formatDuration(state.lastTick - state.createdAt)],
-    ["Tasks completed", state.stats.cycles.toLocaleString("en-US")],
-    ["Creatures defeated", state.stats.kills.toLocaleString("en-US")],
-    ["Retreats", state.stats.retreats.toLocaleString("en-US")],
+    ["Launches", formatNumber(state.launches)],
+    ["Tasks completed", formatNumber(state.stats.cycles)],
+    ["Creatures defeated", formatNumber(state.stats.kills)],
+    ["Retreats", formatNumber(state.stats.retreats)],
     ["Credits earned", formatCredits(state.stats.creditsEarned)],
-    ["Bounties completed", state.stats.bounties.toLocaleString("en-US")],
+    ["Bounties completed", formatNumber(state.stats.bounties)],
   ];
 
   return (
@@ -32,7 +33,7 @@ export function Stats({ state }: { state: GameState }) {
             key={skill.id}
             title={skill.name}
             accessories={[
-              { text: `${Math.floor(state.xp[skill.id]).toLocaleString("en-US")} XP` },
+              { text: `${formatNumber(Math.floor(state.xp[skill.id]))} XP` },
               { tag: `Lv ${levelOf(state, skill.id)}` },
             ]}
           />
@@ -44,7 +45,7 @@ export function Stats({ state }: { state: GameState }) {
             key={id}
             title={ITEMS[id].name}
             icon={Icon.Box}
-            accessories={[{ text: `×${Math.floor(n).toLocaleString("en-US")}` }]}
+            accessories={[{ text: `×${formatNumber(Math.floor(n))}` }]}
           />
         ))}
         {produced.length === 0 && <List.Item title="Nothing yet" icon={Icon.Box} />}

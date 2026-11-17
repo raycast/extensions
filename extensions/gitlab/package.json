@@ -41,8 +41,11 @@
      "type": "dropdown",
      "placeholder": "Merge request scope",
      "required": false,
-     "default": "created_by_me",
      "data": [
+      {
+       "title": "All",
+       "value": "all"
+      },
       {
        "title": "Created by me",
        "value": "created_by_me"
@@ -50,6 +53,10 @@
       {
        "title": "Assigned to me",
        "value": "assigned_to_me"
+      },
+      {
+       "title": "Reviews for me",
+       "value": "reviews_for_me"
       }
      ]
     }

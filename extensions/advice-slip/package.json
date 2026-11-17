@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "advice-slip",
   "title": "Advice Slip",
-  "description": "Get a random advice slip",
+  "description": "Get a random piece of advice from the Advice Slip API.",
   "icon": "advice.png",
   "author": "pernielsentikaer",
   "contributors": [

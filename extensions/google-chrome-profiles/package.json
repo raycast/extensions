@@ -13,7 +13,8 @@
     "smpeotn",
     "radek_cabaj",
     "0xdhrv",
-    "masamallow"
+    "masamallow",
+    "danlane"
   ],
   "license": "MIT",
   "commands": [
@@ -58,6 +59,14 @@
         {
           "title": "Google Chrome Canary",
           "value": "chrome-canary"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
+        },
+        {
+          "title": "Brave Origin",
+          "value": "brave-origin"
         }
       ]
     },

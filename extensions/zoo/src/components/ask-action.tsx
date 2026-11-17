@@ -13,6 +13,8 @@ export function AskAction(props: {
   tag: GithubGistTag;
   gistMutate: MutatePromise<Gist[]>;
   frontmostApp: Application;
+  selectedText: string;
+  selectionLoading: boolean;
 }) {
   const client = getGitHubClient();
   // frontmostApp is not used for now, but may be used in the future
@@ -21,7 +23,7 @@ export function AskAction(props: {
 
   return (
     <>
-      <AIAction content={gistFileContent} />
+      <AIAction content={gistFileContent} selectedText={props.selectedText} isLoading={props.selectionLoading} />
       <ActionPanel.Section>
         {(() => {
           switch (tag) {
@@ -161,7 +163,7 @@ export function AskAction(props: {
           quicklink={{ name: gistFileName, link: gist.html_url }}
         />
         <Action.OpenInBrowser
-          title={"Open in Ray.so"}
+          title={"Open in ray.so"}
           icon={Icon.RaycastLogoPos}
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           url={raySo(gistFileName, gistFileContent)}

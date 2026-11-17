@@ -31,6 +31,12 @@
           "placeholder": "URL or search",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "profile",
+          "placeholder": "Chrome Profile",
+          "type": "text",
+          "required": false
         }
       ]
     },
@@ -71,6 +77,15 @@
       "required": false,
       "default": "700",
       "placeholder": "700"
+    },
+    {
+      "name": "profile",
+      "title": "Default Chrome Profile",
+      "description": "Chrome profile to open windows in. Leave empty to use the profile you used last in Chrome.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Profile name"
     }
   ],
   "dependencies": {

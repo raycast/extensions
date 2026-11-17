@@ -1,7 +1,8 @@
-import { Color, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
 import { getFileName } from "../lib/utils";
+import RunLaunchAgentAction from "./RunLaunchAgentAction";
 
 const EmptyView = () => <List.EmptyView icon={Icon.Multiply} title="No System Launch Agents found" />;
 
@@ -32,7 +33,16 @@ export default function SystemLaunchAgentList() {
     >
       <EmptyView />
       {launchAgentsFiles.map((file, index) => (
-        <List.Item key={index} title={getFileName(file)} icon={{ source: Icon.Rocket, tintColor: Color.Yellow }} />
+        <List.Item
+          key={index}
+          title={getFileName(file)}
+          icon={{ source: Icon.Rocket, tintColor: Color.Yellow }}
+          actions={
+            <ActionPanel>
+              <RunLaunchAgentAction filePath={file} withShortcut={false} />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );

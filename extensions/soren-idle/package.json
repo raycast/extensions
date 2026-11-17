@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "soren-idle",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Soren Idle",
   "description": "A sci-fi idle game. You crashed on an alien world. Gather, build, fight, survive.",
   "icon": "extension-icon.png",

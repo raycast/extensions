@@ -79,7 +79,18 @@ export interface FigaWorkspaceContextV2 extends Omit<FigaWorkspaceContextV1, "sc
   capabilities: FigaWorkspaceContextCapabilities;
 }
 
-export type FigaWorkspaceContext = FigaWorkspaceContextV1 | FigaWorkspaceContextV2;
+export interface FigaWorkspaceContextV3 extends Omit<FigaWorkspaceContextV2, "schemaVersion" | "plan"> {
+  schemaVersion: 3;
+  plan: {
+    tier: FigaPlanTier;
+    criticalLimits: { apiKeysPerWorkspace: number | null; maxExpensesPerMonth: number | null };
+  };
+  capabilities: FigaWorkspaceContextCapabilities & {
+    tags: { read: boolean; write: boolean; delete: boolean };
+  };
+}
+
+export type FigaWorkspaceContext = FigaWorkspaceContextV1 | FigaWorkspaceContextV2 | FigaWorkspaceContextV3;
 
 export interface FigaPaginationMeta {
   limit: number;
@@ -115,16 +126,33 @@ export interface FigaRecipientListResponse {
 
 export type FigaExpenseInstanceType = "template" | "virtual" | "materialized";
 
+export interface FigaTag {
+  id: string;
+  name: string;
+}
+
+export interface FigaTagListResponse {
+  tags: FigaTag[];
+}
+
 export interface FigaExpense {
+  tagIds?: string[];
   id: string;
   workspaceId: string;
   name: string;
   description: string | null;
-  amount: number;
-  categoryId: string;
+  amount: number | null;
+  categoryId: string | null;
   recipientId: string | null;
   expenseDate: number | null;
   isPaid: boolean;
+  paidAt?: number | null;
+  paymentStatusRevision?: number;
+  editContext?: string;
+  bill?: { state: "unknown" | "estimated" | "confirmed"; revision: number };
+  dueBy?: number;
+  scheduledDate?: number;
+  money?: { amountState: "unknown" | "estimated" | "confirmed"; fxIsEstimated: boolean };
   isRecurring: boolean;
   schedule: unknown | null;
   instanceType: FigaExpenseInstanceType;
@@ -173,14 +201,12 @@ export interface FigaExpenseListResponse {
     totalAmount: number;
     paidAmount: number;
     unpaidAmount: number;
-    planLimit?: {
-      current: number;
-      limit: number | null;
-    };
+    planLimit?: FigaPlanLimit;
   };
 }
 
 export interface FigaExpenseCreatePayload {
+  tagIds?: string[];
   name: string;
   amount: number;
   categoryInput: string;
@@ -199,6 +225,10 @@ export interface FigaExpensePayment {
   expenseInstanceId: string;
   userId: string;
   amount: number;
+  currency: string;
+  baseAmountMinor: number | null;
+  baseCurrency: string;
+  currencySemantics: "explicit" | "legacy_same_currency" | "legacy_base" | "legacy_original" | "legacy_ambiguous";
   paymentDate: number;
   paymentMethod: string | null;
   notes: string | null;
@@ -209,6 +239,11 @@ export interface FigaExpensePaymentListResponse {
   metadata: {
     totalPaid: number;
     remainingAmount: number;
+    currency: string;
+    baseTotalPaid: number | null;
+    baseRemainingAmount: number | null;
+    baseCurrency: string;
+    currencySemantics: FigaExpensePayment["currencySemantics"];
     paymentCount: number;
   };
 }
@@ -231,7 +266,24 @@ export interface FigaMonthlyTotalsQuery {
   months?: number;
 }
 
+export interface FigaPlanLimit {
+  current: number;
+  limit: number | null;
+  restricted?: boolean;
+  blocked?: number;
+}
+
 export interface FigaMonthlyTotalItem {
+  confirmedAmount?: number;
+  estimatedAmount?: number;
+  unknownCount?: number;
+  isComplete?: boolean;
+  planLimit?: FigaPlanLimit;
+  monetary?: {
+    baseCurrency: string;
+    estimatedFxCount: number;
+    paidUnknownCount: number;
+  };
   year: number;
   month: number;
   totalAmount: number;
@@ -240,6 +292,7 @@ export interface FigaMonthlyTotalItem {
 }
 
 export interface FigaMonthlyTotalsResponse {
+  currency: string;
   totals: FigaMonthlyTotalItem[];
 }
 
@@ -250,4 +303,12 @@ export interface FigaFriendlyError {
   action?: string;
   status?: number | null;
   code?: string | null;
+}
+
+export interface FigaExpensePaymentStatusPayload {
+  isPaid: boolean;
+  expectedEditContext: string;
+  expectedPaymentStatusRevision: number;
+  expectedBillRevision?: number;
+  paymentDate?: number;
 }

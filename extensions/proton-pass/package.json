@@ -304,7 +304,7 @@
       "name": "cliPath",
       "type": "textfield",
       "title": "CLI Path",
-      "description": "Path to pass-cli executable",
+      "description": "Leave as pass-cli to use pass-cli 2.5.1, which the extension downloads. Or enter the path to another pass-cli.",
       "default": "pass-cli",
       "required": false
     },

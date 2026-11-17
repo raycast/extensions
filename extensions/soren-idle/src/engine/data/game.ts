@@ -8,4 +8,4 @@ export const CONTACT_DELAY_MS = 10 * 60 * 1000;
 export const MAX_OFFLINE_MS = 12 * 60 * 60 * 1000;
 
 /** Bump when the save shape changes, and add a step to `migrate.ts`. */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 5;
