@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minttr",
   "title": "Minttr",
-  "description": "Quick capture for Minttr - save notes and links instantly",
+  "description": "Quickly save notes, links and the current browser tab to Minttr.",
   "icon": "logo.png",
   "author": "zayn_harris_dev",
   "categories": [
