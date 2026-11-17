@@ -14,6 +14,12 @@ export const MOCK_CONFIG = {
   /** Replaces the 60s client-info TTL. */
   clientInfoTtl: 10_000,
   /**
+   * Stores the whole history of an account on its first read in each command run, as if "Sync Statements" had just
+   * finished, so history-based features (subscriptions, long periods, budgets) work right away and changes to the
+   * mock data show up on the next run.
+   */
+  prefillStatements: true,
+  /**
    * Makes every request fail this way. `network` fails all requests, the others only the personal ones
    * (accounts and statements), like the real API.
    */

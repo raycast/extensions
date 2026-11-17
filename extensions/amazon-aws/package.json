@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aws",
   "title": "Amazon AWS",
-  "description": "The best way to interact with your AWS resources",
+  "description": "Find and manage AWS resources like EC2, S3, Lambda, ECS, DynamoDB, SQS, CloudWatch logs and Secrets Manager, and switch between AWS profiles.",
   "icon": "aws-logo.png",
   "author": "Falcon",
   "contributors": [

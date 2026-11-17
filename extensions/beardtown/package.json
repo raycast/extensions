@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "beardtown",
   "title": "Beardtown",
-  "description": "Challenge stats and info about Beard Meats Food, the UK's hairiest competitive eater.",
+  "description": "Browse food challenge stats, highlights and prizes for Beard Meats Food, the UK competitive eater.",
   "icon": "extension-icon.png",
   "author": "bensomething",
   "platforms": [

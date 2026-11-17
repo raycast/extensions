@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-controls",
   "title": "Spotify Controls",
-  "description": "Control the Spotify app for macOS with your keyboard.",
+  "description": "Control Spotify on your Mac with keyboard shortcuts: play, pause, skip, seek, volume, shuffle, repeat, and see what's playing in the menu bar.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

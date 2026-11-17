@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docklock-plus",
   "title": "DockLock Plus",
-  "description": "Control macOS Dock position and automation",
+  "description": "Move the macOS Dock between displays and screen edges, and choose which monitors the Dock may appear on, using DockLock Plus.",
   "icon": "icon.png",
   "author": "IGHOR",
   "license": "MIT",

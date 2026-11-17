@@ -3,7 +3,7 @@
   "name": "terminal-image-paste",
   "title": "Terminal Image Paste",
   "version": "1.0.0",
-  "description": "Paste clipboard image as a file path — works in any terminal, SSH session, or TUI app",
+  "description": "Paste a clipboard image as a file path in any terminal, SSH session, tmux or TUI app, for sharing screenshots with CLI tools.",
   "icon": "icon.png",
   "type": "module",
   "author": "iisweetheartii",

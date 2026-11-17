@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wishapp",
   "title": "WishApp",
-  "description": "Add products to your WishApp wishlists and browse them from Raycast.",
+  "description": "Add products to your WishApp wishlists from a product URL, with title, price and image, and browse or share your wishlists.",
   "icon": "command-icon.png",
   "author": "bilal_k",
   "categories": [

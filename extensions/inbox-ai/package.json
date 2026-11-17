@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inbox-ai",
   "title": "Inbox AI",
-  "description": "Trigger Inbox AI Actions",
+  "description": "Run Inbox AI actions on your Mac with a screenshot, audio recording, selected text or browser content as input.",
   "icon": "inbox-ai-icon.png",
   "author": "dreetje",
   "license": "MIT",

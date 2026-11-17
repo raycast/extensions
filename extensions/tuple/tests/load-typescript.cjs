@@ -19,7 +19,7 @@ module.exports = function createLoader(binary, mocks = {}) {
     };
     mod._compile(
       ts.transpileModule(fs.readFileSync(filename, "utf8"), {
-        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
       }).outputText,
       filename,
     );

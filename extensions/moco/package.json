@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moco",
   "title": "MOCO",
-  "description": "Track MOCO time, manage bookings, and prefill timers from Jira.",
+  "description": "Track time in MOCO: start and edit timers, manage time bookings and today's activities, and see the running timer in the menu bar. Optionally prefill timers from Jira tickets.",
   "icon": "MocoLogo.png",
   "author": "eviscares",
   "contributors": [

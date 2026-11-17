@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "james-webb-space-telescope",
   "title": "James Webb Space Telescope",
-  "description": "List data from James Webb Space Telescope's observations, including images, csv, jsons and fits files.",
+  "description": "Browse public James Webb Space Telescope (JWST) images and observation data by program or file type, including JPG, CSV, JSON and FITS files.",
   "icon": "ICON.png",
   "author": "Infonautica",
   "categories": [

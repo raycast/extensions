@@ -38,17 +38,6 @@ export async function findRepos(root: string, depth: number): Promise<string[]> 
   return repos.sort();
 }
 
-export async function findFiles(root: string, extension: string, depth: number): Promise<string[]> {
-  const files: string[] = [];
-  await walk(root, depth, (dir, names) => {
-    for (const name of names) {
-      if (name.endsWith(extension)) files.push(join(dir, name));
-    }
-    return "descend";
-  });
-  return files.sort();
-}
-
 export async function classifyPaths(paths: string[]): Promise<{ directories: string[]; files: string[] }> {
   const unique = [...new Set(paths)];
   const kinds = await Promise.all(

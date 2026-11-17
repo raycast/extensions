@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "filezilla",
   "title": "FileZilla",
-  "description": "Connect to the FTP/SFTP server via FileZilla by just using your keyboard!",
+  "description": "Open FileZilla connected to a saved or recent FTP or SFTP server, or open the FileZilla Site Manager.",
   "icon": "icon.png",
   "author": "naqet",
   "contributors": [

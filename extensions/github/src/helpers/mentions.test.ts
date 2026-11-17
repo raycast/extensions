@@ -43,27 +43,29 @@ test("issues, pull requests, and repositories map to mention rows with stable UR
     title: "Crash on launch",
     uri: "github://issues/raycast/extensions/42",
     description: "raycast/extensions#42 · Open · octocat",
-    icon: "issue-open.svg",
+    icon: "mentions/issue-open.svg",
   });
   assert.deepEqual(toIssueMention({ ...issue, closed: true, stateReason: "NOT_PLANNED", author: null }), {
     title: "Crash on launch",
     uri: "github://issues/raycast/extensions/42",
     description: "raycast/extensions#42 · Closed as not planned",
-    icon: "issue-closed.svg",
+    icon: "mentions/issue-closed.svg",
   });
 
   assert.deepEqual(toPullRequestMention(pullRequest), {
     title: "Add mentions",
     uri: "github://pulls/raycast/extensions/7",
     description: "raycast/extensions#7 · Open · octocat",
-    icon: "pull-request-open.svg",
+    icon: "mentions/pull-request-open.svg",
   });
-  assert.equal(toPullRequestMention({ ...pullRequest, isDraft: true }).icon, "pull-request-draft.svg");
-  assert.equal(toPullRequestMention({ ...pullRequest, closed: true, merged: true }).icon, "pull-request-merged.svg");
+  assert.equal(toPullRequestMention({ ...pullRequest, isDraft: true }).icon, "mentions/pull-request-draft.svg");
   assert.equal(
-    toPullRequestMention({ ...pullRequest, closed: true }).description,
-    "raycast/extensions#7 · Closed · octocat",
+    toPullRequestMention({ ...pullRequest, closed: true, merged: true }).icon,
+    "mentions/pull-request-merged.svg",
   );
+  const closedPullRequest = toPullRequestMention({ ...pullRequest, closed: true });
+  assert.equal(closedPullRequest.icon, "mentions/pull-request-closed.svg");
+  assert.equal(closedPullRequest.description, "raycast/extensions#7 · Closed · octocat");
 
   assert.deepEqual(toRepositoryMention(repository), {
     title: "raycast/extensions",

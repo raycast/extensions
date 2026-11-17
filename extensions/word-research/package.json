@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-research",
   "title": "Word Research",
-  "description": "Research words and discover whether they have been searched before on wordresearch.xyz",
+  "description": "Check whether an English word has already been discovered on wordresearch.xyz, and view top words and stats, on Mac and Windows.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

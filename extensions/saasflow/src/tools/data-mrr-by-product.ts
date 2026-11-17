@@ -8,17 +8,32 @@ type Input = {
     companyId?: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
+    /** Format: YYYY-MM. */
     startDate: string;
+    /** Format: YYYY-MM. */
     endDate: string;
+    /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
+    productIds?: string;
 };
 
 export default async function dataMrrByProduct(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, mrrType, startDate, endDate } = input;
+    const { companyId, mrrType, startDate, endDate, productIds } = input;
 
     return runEndpoint({
         method: "POST",
         pathTemplate: "/companies/{companyId}/data/mrrByProduct",
         companyId,
-        body: { mrrType, startDate, endDate },
+        body: {
+            mrrType,
+            startDate,
+            endDate,
+            productIds:
+                productIds === undefined
+                    ? undefined
+                    : productIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+        },
     });
 }

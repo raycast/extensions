@@ -1,6 +1,14 @@
 import { Cache, showToast, Toast } from "@raycast/api";
-import { type Airline, listAirlines } from "soaring-symbols";
-import { airlinesUrl, isAirlineList, isLineRelease, RESOLVE_URL, setDataVersion } from "./airlines";
+import { type Airline, type Alliance, listAirlines, listAlliances } from "soaring-symbols";
+import {
+  airlinesUrl,
+  alliancesUrl,
+  isAirlineList,
+  isAllianceList,
+  isLineRelease,
+  RESOLVE_URL,
+  setDataVersion,
+} from "./airlines";
 
 const cache = new Cache();
 const VERSION_KEY = "data-version";
@@ -9,8 +17,12 @@ const VERSION_KEY = "data-version";
 // useCachedPromise shows at launch points at the right files
 setDataVersion(cache.get(VERSION_KEY));
 
-// The release the line points at now, or undefined when jsDelivr can't say
-const resolveRelease = async (): Promise<string | undefined> => {
+// The release the line points at now, or undefined when jsDelivr can't say.
+// Asked once per launch: both lists load from the same release.
+let resolving: Promise<string | undefined> | undefined;
+const resolveRelease = () => (resolving ??= askRelease());
+
+const askRelease = async (): Promise<string | undefined> => {
   try {
     const res = await fetch(RESOLVE_URL);
     if (!res.ok) return undefined;
@@ -50,6 +62,22 @@ export const fetchAirlines = async (): Promise<Airline[]> => {
     });
 
     return listAirlines();
+  }
+};
+
+// The alliances of the same release, or the bundled list when they can't be
+// loaded. Quietly: the airline list already says when the data is stale.
+export const fetchAlliances = async (): Promise<Alliance[]> => {
+  try {
+    const release = await resolveRelease();
+    const res = await fetch(alliancesUrl(release));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!isAllianceList(data)) throw new Error("Unexpected alliances.json shape");
+
+    return data;
+  } catch {
+    return listAlliances();
   }
 };
 

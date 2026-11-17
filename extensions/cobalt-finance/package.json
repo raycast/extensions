@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cobalt-finance",
-  "description": "Access your Cobalt finances from Raycast.",
+  "description": "View your Cobalt finances: recent transactions, subscriptions and recurring bills, and bank account balances, and ask AI about your spending.",
   "categories": [
     "Finance",
     "Productivity"

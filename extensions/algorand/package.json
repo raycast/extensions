@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "algorand",
   "title": "Algorand",
-  "description": "Perform all of Algorand operations from your toolbar",
+  "description": "Manage an Algorand wallet: send ALGO, create and transfer ASA tokens, view transaction history and asset info, and swap assets on Tinyman.",
   "icon": "icon.png",
   "author": "raihan_khan",
   "platforms": [

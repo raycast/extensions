@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-books",
   "title": "Apple Books",
-  "description": "Search Apple Books from Raycast",
+  "description": "Search books and audiobooks in the Apple Books store by title, with prices and descriptions.",
   "icon": "icon.png",
   "author": "vimtor",
   "categories": [

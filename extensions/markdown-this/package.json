@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-this",
   "title": "Markdown This",
-  "description": "Convert Markdown text in clipboard to HTML",
+  "description": "Convert Markdown on your clipboard into a styled HTML page with GitHub-flavored Markdown, syntax highlighting and dark mode, and copy it.",
   "icon": "command-icon.png",
   "author": "aravindballa",
   "contributors": [

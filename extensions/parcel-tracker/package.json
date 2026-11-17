@@ -3,7 +3,7 @@
   "name": "parcel-tracker",
   "title": "Parcel Tracker",
   "version": "1.0.1",
-  "description": "Track packages (only available in South Korea)",
+  "description": "Track parcels from Korean couriers like CJ Logistics, Korea Post, Hanjin and Lotte by tracking number, and save packages to watch.",
   "icon": "command-icon-parcel.png",
   "author": "junhyukjin",
   "license": "MIT",
