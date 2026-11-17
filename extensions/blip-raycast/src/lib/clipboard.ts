@@ -89,7 +89,8 @@ async function readClipboard(scratchDir: string): Promise<ClipboardContent> {
     stdout = await runAppleScript(MAC_SCRIPT, [imagePath], { language: "JavaScript", timeout: SCRIPT_TIMEOUT_MS });
   } else if (isWindows) {
     const script = WINDOWS_SCRIPT(Buffer.from(imagePath, "utf8").toString("base64"));
-    stdout = await runPowerShellScript(script, { timeout: SCRIPT_TIMEOUT_MS });
+    // The script is read from stdin, where PowerShell only runs a multi-line block once a blank line follows it.
+    stdout = await runPowerShellScript(`${script}\n\n`, { timeout: SCRIPT_TIMEOUT_MS });
   } else {
     throw new Error("Reading the clipboard isn't supported on this platform.");
   }

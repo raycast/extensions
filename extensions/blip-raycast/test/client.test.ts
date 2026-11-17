@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { randomUUID } from "node:crypto";
 import { mkdtempSync } from "node:fs";
 import { createServer, type Server } from "node:net";
 import { tmpdir } from "node:os";
@@ -15,7 +16,11 @@ import { DrpcTimeoutError, encodeFrame, FrameKind, FrameParser } from "../src/li
 import { encode } from "../src/lib/schema";
 
 const signedIn = { version: 1, auth: { user_id: "me", device_id: "mac" } };
-const socketPath = () => join(mkdtempSync(join(tmpdir(), "blip-")), "sock");
+// Node can only serve named pipes on Windows (the real Blip socket there goes through the bridge).
+const socketPath = () =>
+  process.platform === "win32"
+    ? `\\\\.\\pipe\\blip-test-${randomUUID()}`
+    : join(mkdtempSync(join(tmpdir(), "blip-")), "sock");
 
 /** A fake Blip engine on a Unix socket that answers every GetState with `state`. */
 function fakeBlip(path: string, state: Record<string, unknown> = signedIn) {

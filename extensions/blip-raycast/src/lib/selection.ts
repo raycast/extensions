@@ -37,7 +37,8 @@ async function getSelectedPaths(): Promise<string[]> {
       return [];
     }
   }
-  const stdout = await runPowerShellScript(EXPLORER_SELECTION_SCRIPT);
+  // The script is read from stdin, where PowerShell only runs a multi-line block once a blank line follows it.
+  const stdout = await runPowerShellScript(`${EXPLORER_SELECTION_SCRIPT}\n\n`);
   return stdout
     .split(/\r?\n/)
     .map((line) => line.trim())

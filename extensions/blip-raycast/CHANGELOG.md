@@ -12,6 +12,7 @@
 - New **Manage Transfers** command: progress and speed, accept or decline, pause, resume, cancel, open received files and clear history
 - Blip's settings (auto-accept, save to Photos, save folder, speed limits) in the extension preferences
 - Start Blip in the background when it isn't running
+- Windows: talks to the Blip app through a small PowerShell helper, so all of the above works there too
 
 ## [Added Windows support] - 2026-06-04
 

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { contentKind, contentLocation, contentScreenTitle, contentTitle } from "../src/lib/content";
+import { contentKind, contentLocation, contentScreenTitle, contentTitle, tildify } from "../src/lib/content";
 
 const dir = mkdtempSync(join(tmpdir(), "blip-content-"));
 mkdirSync(join(dir, "bu"));
@@ -13,7 +13,7 @@ test("a single Finder item is named and typed", () => {
   const folder = { kind: "files" as const, paths: [join(dir, "bu")], source: "Selected in Finder" };
   assert.equal(contentTitle(folder), "“bu”");
   assert.equal(contentKind(folder), "Folder");
-  assert.equal(contentLocation(folder), dir);
+  assert.equal(contentLocation(folder), tildify(dir));
   const file = { kind: "files" as const, paths: [join(dir, "notes.pdf")], source: "Clipboard" };
   assert.equal(contentKind(file), "File");
 });

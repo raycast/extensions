@@ -31,6 +31,7 @@ Raycast can't show Blip's current values there, so every setting starts as *Keep
 
 - [Blip](https://blip.net) installed and signed in. If Blip isn't running, the extension starts it in the background.
 - No Accessibility permission is needed.
+- On Windows, the extension starts a small PowerShell helper in the background to talk to Blip (Windows' Node.js can't open Blip's local socket directly). It stops when the command does.
 
 ## Compatibility
 

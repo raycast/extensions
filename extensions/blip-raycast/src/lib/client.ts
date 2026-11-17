@@ -4,15 +4,10 @@
  *   Dispatch(Any event)  → performs an action
  */
 import { createConnection } from "node:net";
+import type { Duplex } from "node:stream";
 import { DrpcError, unaryCall } from "./drpc";
-import {
-  forgetEndpoint,
-  isMac,
-  isUnsupportedWindowsSocket,
-  isWindows,
-  launchBlipInBackground,
-  resolveEndpoint,
-} from "./endpoint";
+import { isMac, isWindows, launchBlipInBackground, needsWindowsBridge, resolveEndpoint } from "./endpoint";
+import { connectThroughBridge } from "./windows-bridge";
 import { EXPECTED_STATE_VERSION, decode, encode, encodeEvent } from "./schema";
 import type { BlipState } from "./types";
 
@@ -118,12 +113,10 @@ export class BlipClient {
     } = {},
   ) {}
 
-  private connect = () => {
+  private connect = async (): Promise<Duplex> => {
     const path = resolveEndpoint(this.options.endpoint);
     if (!path) throw new BlipNotRunningError("Blip isn't supported on this platform.");
-    if (isUnsupportedWindowsSocket(path)) {
-      throw new BlipIncompatibleError(`Blip on Windows listens on a socket file (${path}) that isn't supported yet`);
-    }
+    if (needsWindowsBridge(path)) return connectThroughBridge(path);
     return createConnection({ path });
   };
 
@@ -134,7 +127,6 @@ export class BlipClient {
       return response;
     } catch (error) {
       if (!isNotListening(error)) throw asIncompatible(error);
-      forgetEndpoint();
     }
     const canLaunch = Boolean(this.options.launch) || isMac || isWindows;
     if (!canLaunch || this.connectedOnce) {
@@ -163,19 +155,23 @@ export class BlipClient {
     while (Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, LAUNCH_POLL_MS));
       if (await this.isListening()) return;
-      forgetEndpoint();
     }
     throw new BlipNotRunningError("Blip was started but didn't respond.");
   }
 
-  private isListening() {
+  /** Whether Blip accepts a connection right now (through the bridge on Windows). */
+  private async isListening() {
+    let socket: Duplex;
+    try {
+      socket = await this.connect();
+    } catch {
+      return false;
+    }
+    if (needsWindowsBridge(resolveEndpoint(this.options.endpoint) ?? "")) {
+      socket.destroy(); // The bridge only hands over a socket once Blip has accepted it.
+      return true;
+    }
     return new Promise<boolean>((resolve) => {
-      let socket: ReturnType<typeof createConnection>;
-      try {
-        socket = this.connect();
-      } catch {
-        return resolve(false);
-      }
       socket.once("connect", () => {
         socket.destroy();
         resolve(true);
