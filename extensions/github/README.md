@@ -2,7 +2,7 @@
 
 Work with issues, pull requests, manage workflows, search repositories and stay on top of notifications.
 
-The extension icon matches GitHub Stars in light and dark appearances.
+The extension icon matches GitHub Gist in light and dark appearances.
 
 ## Mentions in AI Chat
 

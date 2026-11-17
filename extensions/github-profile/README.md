@@ -2,7 +2,7 @@
 
 GitHub Profile displays a GitHub user's profile, contribution calendar, and recently updated repositories in Raycast.
 
-The extension icon matches GitHub Stars in light and dark appearances.
+The extension icon matches GitHub Gist in light and dark appearances.
 
 ## Setup
 

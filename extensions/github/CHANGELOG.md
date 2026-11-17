@@ -2,7 +2,7 @@
 
 ## [Consistent GitHub Icon Size] - {PR_MERGE_DATE}
 
-- The extension icon now matches GitHub Stars in light and dark appearances.
+- The extension icon now matches GitHub Gist in light and dark appearances.
 
 ## [Fix AI Chat Mention Icons] - 2026-11-12
 

@@ -2,7 +2,7 @@
 
 Search GitHub Users
 
-The extension icon matches GitHub Stars in light and dark appearances.
+The extension icon matches GitHub Gist in light and dark appearances.
 
 ## How it works
 
