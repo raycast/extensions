@@ -1,3 +1,4 @@
+import { KEITO_PURPLE } from "./colors";
 import {
   Action,
   ActionPanel,
@@ -19,6 +20,8 @@ import { OpenKeitoAction } from "./components/OpenKeitoAction";
 import { approvalLabel, enrichEntry, entryEditability } from "./services/keito/normalize";
 import { ResolvedSession } from "./services/keito/session";
 import { TimeEntry } from "./services/keito/types";
+import { entryHours } from "./services/keito/timing";
+import { useTimerClock } from "./services/useTimerClock";
 import { assertTaskOnProject, restartEntry, startTimer, StartResult } from "./services/keito/workflows";
 import { primaryShortcut } from "./shortcuts";
 import {
@@ -72,7 +75,16 @@ function Timesheet({ session }: { session: ResolvedSession }) {
       ),
     [data, date, byId, sortBy],
   );
-  const total = useMemo(() => entries.reduce((sum, e) => sum + e.hours, 0), [entries]);
+  const now = useTimerClock(
+    entries.some((entry) => entry.isRunning),
+    revalidate,
+    (time) =>
+      [
+        ...entries.filter((entry) => entry.isRunning).map((entry) => formatHours(entryHours(entry, time))),
+        formatHours(entries.reduce((sum, entry) => sum + entryHours(entry, time), 0)),
+      ].join("|"),
+  );
+  const total = entries.reduce((sum, entry) => sum + entryHours(entry, now), 0);
 
   async function afterChange() {
     revalidate();
@@ -116,7 +128,7 @@ function Timesheet({ session }: { session: ResolvedSession }) {
   async function remove(entry: TimeEntry) {
     const confirmed = await confirmAlert({
       title: "Delete Time Entry?",
-      message: `${entry.projectName} – ${entry.taskName}, ${formatHours(entry.hours)}. This cannot be undone.`,
+      message: `${entry.projectName} – ${entry.taskName}, ${formatHours(entryHours(entry, now))}. This cannot be undone.`,
       icon: Icon.Trash,
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
@@ -223,8 +235,11 @@ function Timesheet({ session }: { session: ResolvedSession }) {
                   : []),
                 ...(!lock.canEdit ? [{ icon: Icon.Lock, tooltip: lock.reason }] : []),
                 {
-                  icon: entry.isRunning ? { source: Icon.Clock, tintColor: Color.Orange } : undefined,
-                  tag: { value: formatHours(entry.hours), color: entry.isRunning ? Color.Orange : Color.SecondaryText },
+                  icon: entry.isRunning ? { source: Icon.Clock, tintColor: KEITO_PURPLE } : undefined,
+                  tag: {
+                    value: formatHours(entryHours(entry, now)),
+                    color: entry.isRunning ? KEITO_PURPLE : Color.SecondaryText,
+                  },
                 },
               ]}
               actions={

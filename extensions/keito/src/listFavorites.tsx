@@ -1,3 +1,4 @@
+import { KEITO_PURPLE } from "./colors";
 import {
   Action,
   ActionPanel,
@@ -161,14 +162,14 @@ function Favorites({ session }: { session: ResolvedSession }) {
               icon={
                 availability.available
                   ? { source: Icon.Star, tintColor: Color.Yellow }
-                  : { source: Icon.Warning, tintColor: Color.Orange }
+                  : { source: Icon.Warning, tintColor: KEITO_PURPLE }
               }
               accessories={[
                 { text: other, icon: Icon.Tag },
                 ...(favorite.clientName ? [{ text: favorite.clientName, icon: Icon.Building }] : []),
                 ...(hasDuration ? [{ tag: formatHours(Number(favorite.hours)), icon: Icon.Clock }] : []),
                 ...(!availability.available
-                  ? [{ tag: { value: "Unavailable", color: Color.Orange }, tooltip: availability.reason }]
+                  ? [{ tag: { value: "Unavailable", color: KEITO_PURPLE }, tooltip: availability.reason }]
                   : []),
               ]}
               actions={

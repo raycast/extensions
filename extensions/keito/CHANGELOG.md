@@ -1,5 +1,11 @@
 # Keito Changelog
 
+## [Accurate Running Timers] - {PR_MERGE_DATE}
+
+- Show accumulated time plus the active timer segment in the timesheet, menu bar, and daily totals
+- Refresh timers changed in Keito every minute, and redraw only when a displayed duration changes
+- Support Raycast 1.x and use Keito purple for running timer indicators
+
 ## [Initial Version] - 2026-11-01
 
 - Sign in with your Keito account (OAuth), or use a full-access integration key
