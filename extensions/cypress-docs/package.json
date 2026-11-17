@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cypress-docs",
   "title": "Cypress Documentation",
-  "description": "Quickly search the Cypress docs and open them in the browser",
+  "description": "Search the Cypress testing documentation and open pages in your browser.",
   "icon": "icon.png",
   "author": "robertguss",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ceypay",
   "title": "CeyPay",
-  "description": "Search CeyPay documentation and API reference — accept crypto payments, settle in Sri Lankan Rupees.",
+  "description": "Search CeyPay documentation, REST API endpoints, blog posts and changelog for accepting crypto payments settled in Sri Lankan rupees.",
   "icon": "icon.png",
   "author": "kasuncfdo",
   "categories": [

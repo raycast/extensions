@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coast",
   "title": "Coast",
-  "description": "An independently maintained Raycast integration to search, inspect, and revisit Coast screen history",
+  "description": "Search your Coast screen history by OCR text, browse screenshots and timelines, see app and website usage, and show screen time in the menu bar.",
   "version": "0.2.0",
   "license": "MIT",
   "platforms": [

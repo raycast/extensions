@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-session-bookmarks",
   "title": "Claude Session Bookmarks",
-  "description": "Save and quickly open your Claude Code session links without keeping a pile of browser tabs around.",
+  "description": "Save and reopen your Claude Code session links with labels and repos, instead of keeping a pile of claude.ai/code browser tabs open.",
   "icon": "command-icon.png",
   "author": "eaescob",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coingecko",
   "title": "Coingecko",
-  "description": "Get crypto data from Coingecko (price, ticker, ranking)",
+  "description": "Search cryptocurrency prices, historical prices and coin info from CoinGecko, and convert coin amounts to fiat.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [
