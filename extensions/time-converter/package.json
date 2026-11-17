@@ -1,7 +1,7 @@
 {
   "name": "time-converter",
   "title": "Time Zone Converter",
-  "description": "Convert times between different time zones and paste the results",
+  "description": "Convert times and time ranges between time zones for any number of cities, with overnight and day labels, and paste the result into any app.",
   "icon": "icon.png",
   "author": "alex_jones",
   "categories": [

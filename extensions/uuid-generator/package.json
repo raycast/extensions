@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uuid-generator",
   "title": "UUID Generator",
-  "description": "A quick way to generate UUIDs without opening the browser",
+  "description": "Generate UUIDs (v4, v5 and v7), ULIDs and TypeIDs and copy them to your clipboard, format UUIDs and view history.",
   "icon": "command-icon.png",
   "author": "jmaeso",
   "contributors": [

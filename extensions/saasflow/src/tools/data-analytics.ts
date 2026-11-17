@@ -8,16 +8,21 @@ type Input = {
     companyId?: string;
     /** Comma-separated list. */
     metricNames?: string;
+    /** Format: YYYY-MM. */
     startDate: string;
+    /** Format: YYYY-MM. */
     endDate: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
     /** IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
     timeZone?: string;
+    smoothingMonths?: number;
+    /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
+    productIds?: string;
 };
 
 export default async function dataAnalytics(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, metricNames, startDate, endDate, mrrType, timeZone } = input;
+    const { companyId, metricNames, startDate, endDate, mrrType, timeZone, smoothingMonths, productIds } = input;
 
     return runEndpoint({
         method: "POST",
@@ -35,6 +40,14 @@ export default async function dataAnalytics(input: Input): Promise<Record<string
             endDate,
             mrrType,
             timeZone,
+            smoothingMonths,
+            productIds:
+                productIds === undefined
+                    ? undefined
+                    : productIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
         },
     });
 }

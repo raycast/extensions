@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sav",
   "title": "Sav",
-  "description": "Manage Domains in your Sav Account",
+  "description": "View the domains in your Sav account and change their name servers.",
   "icon": "sav.png",
   "author": "xmok",
   "categories": [

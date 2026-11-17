@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wordpress-plugins",
   "title": "WordPress Plugins",
-  "description": "Search and download plugins from the WordPress Plugin Directory.",
+  "description": "Search the WordPress.org plugin directory, view plugin details and versions, download plugins and copy the Composer package name.",
   "icon": "icon.png",
   "author": "edmundcwm",
   "contributors": [

@@ -1,5 +1,10 @@
 # Opera Changelog
 
+## [Fix History Search With Special Characters] - 2026-11-11
+
+- Fix: searching history for text with an apostrophe failed with an SQL error
+- Fix: `%` and `_` in a search now match literally instead of acting as wildcards
+
 ## [Change to Default Profile Path + Modernize] - 2025-09-08
 
 - Fix: would show as not installed due to changed path (see next point)(ref: [Issue #21403](https://github.com/raycast/extensions/issues/21403))

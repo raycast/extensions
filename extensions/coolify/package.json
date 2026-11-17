@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coolify",
   "title": "Coolify",
-  "description": "View Servers, Resources, Teams and more",
+  "description": "Manage your Coolify instance: view servers, projects, teams and private keys, start, stop and redeploy resources, and track deployments in the menu bar.",
   "icon": "coolify.png",
   "author": "xmok",
   "contributors": [

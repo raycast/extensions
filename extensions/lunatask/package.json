@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lunatask",
   "title": "Lunatask",
-  "description": "Unofficial extension for Lunatask. Create tasks from Raycast.",
+  "description": "Create tasks in Lunatask and configure, list and delete the areas they go to, on Mac and Windows.",
   "icon": "lunatask-icon.png",
   "author": "posthardcode",
   "version": "1.1.0",

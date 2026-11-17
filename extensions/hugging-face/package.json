@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hugging-face",
   "title": "Hugging Face",
-  "description": "Search and explore the Hugging Face platform",
+  "description": "Search Hugging Face models and datasets, view model cards, and keep favorites and search history.",
   "subtitle": "Hugging Face",
   "icon": "logo.png",
   "author": "crisboarna",

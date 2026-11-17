@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "network-hogs",
   "title": "Network Hogs",
-  "description": "Find which apps are using your network, see live download and upload rates, and quit bandwidth hogs.",
+  "description": "Find which Mac apps are using your network, see live per-app download and upload rates and traffic charts, and quit bandwidth hogs.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

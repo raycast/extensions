@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sound-search",
   "title": "Sound Search",
-  "description": "Search for sounds across multiple services",
+  "description": "Search for sounds by genre across multiple services. Currently unavailable because the API it used was shut down.",
   "icon": "icon.png",
   "author": "clins1994",
   "owner": "soundraw",

@@ -22,5 +22,6 @@ type Input = {
 
 /** Search flights already saved in the user's Flighty app. This does not search airline schedules, ticket prices, or unsaved flights. */
 export default async function tool(input: Input) {
-    return searchFlights(await loadFlights(), input)
+    const {flights, skippedFlights, warning} = await loadFlights()
+    return {...searchFlights(flights, input), skippedFlights, warning}
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinkerer-club",
   "title": "Tinkerer Club",
-  "description": "Browse and participate in Tinkerer Club from Raycast, with confirmable AI tools.",
+  "description": "Browse the Tinkerer Club community feed, articles and shared prompts, search members and posts, reply, react and publish quick posts.",
   "icon": "tinkerer-club-icon.png",
   "author": "Olli0103",
   "platforms": [

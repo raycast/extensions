@@ -1,7 +1,7 @@
 {
   "name": "canvascast",
   "title": "CanvasCast",
-  "description": "Access the Canvas LMS from Raycast",
+  "description": "View your Canvas LMS courses, modules, assignments, quizzes and announcements, plus a feed of upcoming to-dos and events.",
   "icon": "canvas.png",
   "author": "Yoda",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rewiser",
   "title": "Rewiser",
-  "description": "Track and manage your Rewiser transactions directly from Raycast",
+  "description": "Add Rewiser transactions in natural language, view and manage this month's transactions, and share folders.",
   "icon": "rewiserlogo.png",
   "author": "rewiser_io",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dub",
   "title": "Dub",
-  "description": "Dub is the open-source link management platform for modern marketing teams. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
+  "description": "Shorten links with Dub (dub.co) using workspaces, custom domains and tags, search your short links, and manage them with AI tools.",
   "icon": "command-icon.png",
   "author": "quuu",
   "owner": "dubinc",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "helium",
   "title": "Helium",
-  "description": "Navigate open tabs, bookmarks, and the web in Helium browser",
+  "description": "Search Helium browser tabs, history and bookmarks, search the web, and open new tabs, windows and incognito windows.",
   "icon": "icon.png",
   "author": "islamtayeb",
   "contributors": [

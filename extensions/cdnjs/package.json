@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cdnjs",
   "title": "cdnjs",
-  "description": "Search libraries on cdnjs",
+  "description": "Search JavaScript and CSS libraries on cdnjs and copy their CDN URLs.",
   "icon": "cdnjs.png",
   "author": "xmok",
   "platforms": [
