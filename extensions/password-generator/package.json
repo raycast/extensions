@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "password-generator",
   "title": "Password Generator",
-  "description": "Generates a password from 5–64 characters with options for case, special characters, and more",
+  "description": "Generate strong random passwords from 5 to 64 characters, or memorable word-based passwords, with options for case, numbers and symbols.",
   "icon": "password-generator-icon.png",
   "author": "joshuaiz",
   "contributors": [

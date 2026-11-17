@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "connect-to-vpn",
   "title": "Connect to VPN",
-  "description": "Control your macOS VPN connections from Raycast and the menu bar, with favorites and a hotkey to toggle your last-used VPN.",
+  "description": "Connect and disconnect macOS VPN connections from Raycast or the menu bar, save favorites, and toggle your last-used VPN with a hotkey.",
   "icon": "command-icon.png",
   "author": "rasmusbe",
   "contributors": [

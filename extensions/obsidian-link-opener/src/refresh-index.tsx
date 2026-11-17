@@ -10,6 +10,7 @@ import {
   LaunchType,
 } from "@raycast/api";
 import { scanVaultForUrls } from "./services/fileScanner";
+import { primaryShortcut } from "./utils/shortcuts";
 
 export default function Command(): React.ReactNode {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -35,7 +36,7 @@ export default function Command(): React.ReactNode {
       // Count unique directories
       const directories = new Set<string>();
       notes.forEach((note) => {
-        const parts = note.path.split("/");
+        const parts = note.path.split(/[\\/]/);
         for (let i = 1; i <= parts.length; i++) {
           directories.add(parts.slice(0, i).join("/"));
         }
@@ -113,13 +114,13 @@ export default function Command(): React.ReactNode {
                 type: LaunchType.UserInitiated,
               });
             }}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={primaryShortcut("o")}
           />
           <Action
             title="Refresh Again"
             icon={Icon.ArrowClockwise}
             onAction={() => runScan(true)}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={primaryShortcut("r")}
           />
         </ActionPanel>
       }

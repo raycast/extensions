@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-passwords",
   "title": "Apple Passwords",
-  "description": "Search and manage Apple Passwords from Raycast using the APW CLI.",
+  "description": "Search Apple Passwords (iCloud Keychain) on your Mac to copy usernames, passwords and 2FA codes, and save new logins, via the APW CLI.",
   "icon": "command-icon.png",
   "author": "bendews",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fabric",
   "title": "Fabric",
-  "description": "Quickly search and create in Fabric's intelligent workspace.",
+  "description": "Search your Fabric workspace and create notes and bookmarks in Fabric.",
   "icon": "fabric-icon.png",
   "author": "naktinis",
   "owner": "fbrc",

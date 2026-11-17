@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cloudinary",
   "title": "Cloudinary",
-  "description": "Search assets and upload your clipboard to your Cloudinary account",
+  "description": "Search assets in your Cloudinary media library and upload images from the clipboard or a URL.",
   "icon": "cloudinary-512x512-rounded.png",
   "author": "colbyfayock",
   "contributors": [

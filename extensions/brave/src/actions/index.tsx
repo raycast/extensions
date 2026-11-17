@@ -17,7 +17,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     requireBraveExecutable();
     if (!environment.canAccess(BrowserExtension)) return [];
     return (await BrowserExtension.getTabs()).map(
-      (tab) => new Tab(tab.title || tab.url, tab.url, tab.favicon ?? "", 0, tab.id),
+      (tab) => new Tab(tab.title ?? "", tab.url, tab.favicon ?? "", 0, tab.id),
     );
   }
   const faviconFormula = useOriginalFavicon
@@ -39,7 +39,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
             set _title to get title of t
             set _url to get URL of t
             set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
+            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & (id of t as text) & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
           set _window_index to _window_index + 1
@@ -152,11 +152,21 @@ export async function openNewTab({
         break;
     }
 
-    if (isWindows) {
-      if (!targetUrl && !newWindow && !incognito && openTabInProfile === SettingsProfileOpenBehaviour.Default)
+    if (!targetUrl && !newWindow && !incognito && openTabInProfile === SettingsProfileOpenBehaviour.Default) {
+      if (isWindows) {
         await createNewTab();
-      else await launchBrave(args.length ? args : ["brave://newtab/"]);
-    } else await execFileAsync("open", ["-na", browserOption, "--args", ...args]);
+      } else {
+        await runAppleScript(`tell application "${browserOption}"
+          if (count of windows) is 0 then
+            make new window
+          else
+            tell window 1 to make new tab
+          end if
+          activate
+        end tell`);
+      }
+    } else if (isWindows) await launchBrave(args.length ? args : ["brave://newtab/"]);
+    else await execFileAsync("open", ["-na", browserOption, "--args", ...args]);
     await closeMainWindow({ clearRootSearch: true });
     await popToRoot({ clearSearchBar: true });
     return true;
@@ -172,20 +182,46 @@ export async function openNewTab({
   }
 }
 
-export async function closeTab(tabIndex: number): Promise<void> {
+export async function closeTabs(tabs: Tab[]): Promise<void> {
   if (isWindows) throw new Error("Closing tabs is available on macOS only.");
+  if (!tabs.length) return;
+  const ids = tabs.map(({ nativeId }) => {
+    if (!nativeId || !/^\d+$/.test(nativeId)) throw new Error("Refresh the tab list and try again.");
+    return `"${nativeId}"`;
+  });
   const browserOption = getBrowserName();
   await runAppleScript(`tell application "${browserOption}"
-    tell window 1
-      delete tab ${tabIndex}
-    end tell
+    if not running then return
+    repeat with targetId in {${ids.join(", ")}}
+      set foundTab to false
+      repeat with w in windows
+        repeat with t in tabs of w
+          if (id of t as text) is (contents of targetId) then
+            close t
+            set foundTab to true
+            exit repeat
+          end if
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+    end repeat
   end tell`);
+}
+
+export async function deduplicateTabs(): Promise<void> {
+  const seen = new Set<string>();
+  const duplicates = (await getOpenTabs(false)).filter(({ url }) => {
+    if (seen.has(url)) return true;
+    seen.add(url);
+    return false;
+  });
+  await closeTabs(duplicates);
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
   if (isWindows) {
     await closeMainWindow();
-    await switchToTabByTitle(tab.title);
+    await switchToTabByTitle(tab.title || tab.url);
     return;
   }
   const browserOption = getBrowserName();

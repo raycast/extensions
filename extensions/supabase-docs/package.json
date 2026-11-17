@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "supabase-docs",
   "title": "Supabase Documentation",
-  "description": "Quickly search Supabase documentation and open it in the browser",
+  "description": "Search the Supabase documentation and open results in your browser.",
   "icon": "supabase-logo.png",
   "author": "Isaiah-Hamilton",
   "owner": "supabase",

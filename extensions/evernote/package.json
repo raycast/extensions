@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "evernote",
   "title": "Evernote Instant Search",
-  "description": "Search your Evernote notes instantly using the local database of the official Evernote client.",
+  "description": "Search your Evernote notes and open tasks instantly from the local database of the Evernote app, and open them in Evernote.",
   "icon": "ev-icon.png",
   "author": "artpi",
   "contributors": [

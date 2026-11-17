@@ -1,5 +1,44 @@
 # proton-pass Changelog
 
+## [Clearer Fill Messages] - 2026-11-17
+
+- When macOS doesn't let Raycast fill, Fill Login and the Paste actions open the place in System Settings where Raycast lacks a permission: Accessibility, named Device Control and Data Access in recent macOS versions, or Automation, to control System Events. Their message says to allow Raycast there, and fits on screen. It used to name both permissions, was cut short, and gave no way to get there
+- When filling stops because another app is in front, its message names the app macOS sees in front instead of the app to fill, and cuts a long name so that the message fits on screen
+
+## [Clearer Generate Password Preferences] - 2026-11-17
+
+- Every Generate Password checkbox says whether it's for random passwords or passphrases, e.g. "Random: Symbols" or "Passphrase: Numbers", instead of only a small gray heading above the first one of each group. Saved settings are kept
+
+## [Folders and Proton Pass CLI 2.5.1] - 2026-11-17
+
+- Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, with Sort by in its search bar, and Esc goes back up. All Vaults still shows every item
+- The item details have a Folder row under Vault
+- Vaults have a box icon instead of a folder, now that folders have it
+- The folders come from one more pass-cli command per vault, run along with the vault's items, and are saved with them so that they show at once next time
+- The extension installs Proton Pass CLI 2.5.1 instead of 2.3.3, which brings folders, proxy fixes and network updates. The copy of the previous version is deleted once the new one is installed
+- The CLI Path preference says which pass-cli version the extension downloads
+- The README no longer suggests `pass-cli login --interactive`: pass-cli 2.5.0 removed logging in with a password in the terminal, leaving the browser login and personal access tokens
+
+## [Shared with Me, Sorting and TOTP] - 2026-11-09
+
+- Items shared with you one by one show in Browse Items, under Shared with Me in the vault list and the vault menu, as in Proton Pass. They were missing, since they're in none of your vaults. They're also in All Vaults, the search and Get TOTP Code, and one that's also in one of your vaults shows once, with that vault
+- After half an hour unused, pass-cli first catches up with your account's changes, which can take several seconds. Items opened meanwhile, e.g. to fill a login, waited as long again, since each pass-cli command did it too. They now wait for the session check, which does it once
+- The vaults' items no longer wait for the list of items shared with you, which can take seconds. Overlapping loads, e.g. the vault list and the items it opens, run at most 8 pass-cli commands at once together
+- Get TOTP Code generates its codes on your Mac from the item listing, instead of starting one pass-cli command per item, all at once, every 30 seconds. The TOTP secrets they come from stay in memory only, never in the cache
+- Fill Login and the Paste actions keep Raycast open while the item or its TOTP code loads, with a toast saying so, instead of closing at once with no sign of progress
+- The browser login screens show a spinning toast while waiting for the browser, finishing the login and loading your items
+- Once logged in, the Login command's main action is Logout, which asks for confirmation. Re-Run Browser Login is gone: logging in again is only needed after logging out
+- The TOTP code and its countdown no longer move every second, in the item details and in Get TOTP Code: they're written in fixed-width digits, with the countdown first in the details. A Raycast progress circle empties by quarters as the code's time runs out, in both places. The code and the circle are green for the first half of the period, yellow for the next quarter and red for the last. The code's two halves are set further apart, as in Proton Authenticator. Get TOTP Code says Loading… while a code loads and Unavailable when it couldn't, instead of "---" for both, as in the details. Its "Refreshing in" header is gone, since each code has its countdown
+- Get TOTP Code shows the same icons as Browse Items: each login's initials, or its website's icon with the Website Icons preference, instead of a generic login icon. That preference now says it needs a Favicon Provider set in Raycast's settings: without one, initials showed with no explanation
+- Get TOTP Code can hide its codes behind dots, with its new Codes preference, as Proton Authenticator does. Show Codes (⌘H) shows them while the command stays open, and copying still works
+- Browse Items and Get TOTP Code each have a Sort items by preference: most used, name, last modified or date created. Sort by (⌘⇧S) in the actions changes the order until the window closes. Items never used from Raycast now follow the used ones by name, instead of in pass-cli's order. Get TOTP Code, which wasn't sorted at all, puts the codes you use first too, from the same history as Browse Items
+- Get TOTP Code has Browse Items' vault menu in the search bar: All Vaults, each vault with codes and how many, and Shared with Me. Like Browse Items, it opens on the vault chosen last
+- Browse Items has a Sort vaults by preference for its vault list and vault menu: by name, the default, by item count or by the vaults you open most, instead of pass-cli's order. The menu at the top right of the vault list, or Sort by (⌘⇧S), changes the order until the window closes. Get TOTP Code's vault menu lists vaults by name
+- List Vaults opens Browse Items on the vault list instead of showing its own copy of it, so that Browse Items' preferences apply there too. Its hotkeys and aliases still work
+- TOTP's symbol is a progress circle instead of a clock, which looked like loading: in the item list, where it follows the current period too, with the same colors, on the Copy and Paste TOTP Code actions, and in the details. In the details, rows without a value no longer show an icon next to their dash
+- In the details, Website, Note, Vault, Type and Last Modified are in gray, with their icons, so that the credentials above them stand out: Raycast no longer draws the line that set them apart
+- Generate Password's preferences say which type they apply to, with "Random:" or "Passphrase:" in their titles, since Raycast can't gray out the other type's. Passphrases have their own Include Numbers setting, on by default, instead of sharing Numbers with random passwords
+
 ## [Browse Items] - 2026-11-01
 
 - Search Items and List Vaults become one screen, Browse Items. It opens on the items, and Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens it on the vault list

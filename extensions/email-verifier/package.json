@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "email-verifier",
   "title": "Email Verifier",
-  "description": "A tool for email verification without sending any emails",
+  "description": "Check if an email address exists without sending an email: see if it is reachable, disposable, a role or free account, and has MX records.",
   "icon": "command-icon.png",
   "author": "HerbertLu",
   "contributors": [

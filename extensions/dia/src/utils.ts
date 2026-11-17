@@ -63,6 +63,11 @@ export function getSpaceTint(hex: string | undefined): Color.ColorLike {
 
 const MAX_SPACE_TAG_LENGTH = 14;
 
+/** Cuts a space name with an ellipsis so it fits in a tag. */
+export function truncateSpaceName(name: string): string {
+  return name.length > MAX_SPACE_TAG_LENGTH ? `${name.slice(0, MAX_SPACE_TAG_LENGTH - 1)}…` : name;
+}
+
 export type SpaceLabel = "name" | "dot";
 
 /**
@@ -82,9 +87,7 @@ export function getAccessories(
     if (spaceLabel === "dot") {
       accessories.push({ icon: { source: Icon.CircleFilled, tintColor: spaceTint }, tooltip: tab.space });
     } else {
-      const name =
-        tab.space.length > MAX_SPACE_TAG_LENGTH ? `${tab.space.slice(0, MAX_SPACE_TAG_LENGTH - 1)}…` : tab.space;
-      accessories.push({ tag: { value: name, color: spaceTint }, tooltip: tab.space });
+      accessories.push({ tag: { value: truncateSpaceName(tab.space), color: spaceTint }, tooltip: tab.space });
     }
   }
   return accessories;

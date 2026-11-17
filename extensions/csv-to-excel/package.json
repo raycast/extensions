@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "csv-to-excel",
   "title": "Convert CSV to Excel",
-  "description": "Convert CSV table to Excel compatible table.",
+  "description": "Choose a CSV file and convert it to an Excel spreadsheet (.xlsx).",
   "icon": "command-icon.png",
   "author": "VictoRD11",
   "categories": [

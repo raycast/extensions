@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grok-ai",
   "title": "Grok AI",
-  "description": "Query xAI's Grok directly from Raycast with streaming responses, conversation history, and custom model management",
+  "description": "Chat with xAI's Grok using your API key, with streaming answers, conversation history and custom model settings.",
   "icon": "icon.png",
   "author": "andrei_ciobotar",
   "email": "mail@semi-sacred.ai",

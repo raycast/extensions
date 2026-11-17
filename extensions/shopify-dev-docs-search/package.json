@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shopify-dev-docs-search",
   "title": "Search Shopify Dev Documentation",
-  "description": "Quickly search the Shopify developer and GraphQL documentation.",
+  "description": "Search the Shopify developer and GraphQL API documentation on shopify.dev and open results in your browser.",
   "icon": "shopify-icon.png",
   "author": "daniel_beck",
   "license": "MIT",

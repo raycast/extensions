@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "noteman",
   "title": "Noteman",
-  "description": "Fast, local Markdown note-taking in Raycast",
+  "description": "Take local Markdown notes: quick capture into daily notes, create new notes and browse, search and edit your notes folder.",
   "icon": "noteman-icon.png",
   "author": "samuel_oldmark_se",
   "categories": [

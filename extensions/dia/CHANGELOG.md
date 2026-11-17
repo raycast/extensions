@@ -1,5 +1,27 @@
 # Dia Changelog
 
+## [AI Tools for Spaces and Extensions] - 2026-11-13
+
+- Ask Dia can now see and switch spaces: the new Get Spaces tool lists the spaces in Dia's order and which ones are active, and Switch Space switches a window to another space.
+- Get Tabs now returns the tabs of every space, each with its space name, and can return the tabs of a single space. Select Tab, Close Tab and Get Tab Contents also find tabs in spaces a window isn't showing, and Select Tab switches the window to the tab's space.
+- Added Get Extensions and Open Extension tools, so you can ask which browser extensions are installed in each space and open one like its toolbar button. Opening an extension requires Accessibility access for Raycast.
+- Switch Space and Open Extension ask for confirmation before they change the Dia window.
+- Ask Dia now says right away that it can't create, rename, delete or reorder spaces, because Dia doesn't allow it from other apps. You can do it in Dia.
+- Search Extensions and the extension tools no longer treat Dia's Chromium profile as a space. Extensions that all spaces share are listed as available in all spaces and open in the current space, instead of under an old profile name such as a deleted space, which Dia couldn't open.
+
+## [History and Bookmarks Across Profiles] - 2026-11-11
+
+- Search History, Search Dia and the history and bookmark AI tools now include every Dia profile (space), not only the last used one.
+- With more than one profile, history results show the profile name and bookmarks are grouped under a folder per profile.
+- A profile whose History or Bookmarks file can't be read no longer hides the others.
+
+## [Search Extensions Command] - 2026-11-07
+
+- Added a Search Extensions command that lists the browser extensions installed in every Dia profile, grouped by profile in Dia's order. Each section shows the profile's extension count and which profile is active, and every extension shows its profile in the profile's Dia color.
+- Open Extension switches the front window to the extension's profile and picks the extension from Dia's Extensions menu, which opens it like its toolbar button. Requires Accessibility access for Raycast.
+- When the Extensions menu has no item for the extension, its popup (or, without one, its settings page) opens in a new tab instead.
+- Added actions to open an extension's popup or settings page in a new tab and to copy its ID, and a profile filter (⌘P) that marks the active profile. Built-in extensions are hidden unless enabled in the command preferences.
+
 ## [Search Tabs Across Spaces] - 2026-11-07
 
 - Search Tabs now lists tabs from every Dia space, not only the space active in each window.

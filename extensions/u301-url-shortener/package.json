@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "u301-url-shortener",
   "title": "U301 URL Shortener",
-  "description": "Shorten URL using u301 service",
+  "description": "Shorten URLs with u301.com from the clipboard, selected text or a form, including your own custom domain, and create short links with AI.",
   "icon": "u301.png",
   "author": "shiny",
   "categories": [

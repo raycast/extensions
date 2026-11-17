@@ -6,18 +6,19 @@ interface HeatmapProps {
   weeks: Array<{
     contributionDays: ContributionDay[];
   }>;
+  totalContributions?: number;
 }
 
-export function ContributionHeatmap({ weeks }: HeatmapProps): string {
+export function ContributionHeatmap({ weeks, totalContributions }: HeatmapProps): string {
+  if (weeks.length === 0) {
+    return "The contribution calendar is currently unavailable.";
+  }
+
   const appearance = environment.appearance;
   // Use the SVG generator to create an embeddable image with current appearance
-  const heatmapSvgUrl = generateContributionSVG(weeks, appearance);
+  const heatmapSvgUrl = generateContributionSVG(weeks, appearance, totalContributions);
 
   return `
-![Contribution Heatmap](${heatmapSvgUrl})
+<img alt="Contribution Heatmap" src="${heatmapSvgUrl}" width="650" />
 `;
-}
-
-export function ActivityRepo(user_id: number): string {
-  return `<img alt="Recent Work - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-currently-working-on/thumbnail.png?user_id=${user_id}&activity_type=all&image_size=auto&color_scheme=${environment.appearance}" width="497.5" height="auto">`;
 }

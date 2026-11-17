@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kde-connect",
   "title": "KDE Connect",
-  "description": "An extension to access KDE Connect in Raycast.",
+  "description": "List and pair KDE Connect devices, ping them and send text, files or URLs from your Mac to your phone or other devices.",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
   "categories": [

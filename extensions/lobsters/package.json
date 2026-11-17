@@ -3,7 +3,7 @@
   "name": "lobsters",
   "version": "1.0.3",
   "title": "Lobste.rs Homepage",
-  "description": "Read the latest stories of lobste.rs",
+  "description": "Read the latest stories on the Lobste.rs homepage.",
   "icon": "lobster.png",
   "author": "dev99problems",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-store-connect",
   "title": "App Store Connect",
-  "description": "Perform tasks from App Store Connect",
+  "description": "Check App Store review status, manage TestFlight builds, beta groups and testers, and manage team members in App Store Connect.",
   "icon": "icon.png",
   "author": "johanthorell",
   "contributors": [
