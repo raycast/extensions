@@ -1,6 +1,6 @@
 # Graphite Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Pull Request Inbox with your Graphite sections, which you can hide and reorder
 - At-a-glance review status, unresolved comments, CI checks, and merge readiness
